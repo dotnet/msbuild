@@ -50,7 +50,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
         /// <value>
         /// The properties.
         /// </value>
-        public IDictionary<string, string> Properties { get { return _properties; } }
+        public IDictionary<string, string> Properties => _properties;
 
         /// <summary>
         /// Adds properties to the collection.

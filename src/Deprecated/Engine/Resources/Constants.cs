@@ -83,13 +83,7 @@ namespace Microsoft.Build.BuildEngine
         /// Current version of this MSBuild Engine assembly in the 
         /// form, e.g, "4.0"
         /// </summary>
-        internal static string AssemblyVersion
-        {
-            get
-            {
-                return MSBuildConstants.CurrentToolsVersion;
-            }
-        }
+        internal static string AssemblyVersion => MSBuildConstants.CurrentToolsVersion;
 
         internal const string defaultTargetCacheName = "##DefaultTargets##";
         internal const string initialTargetCacheName = "##InitialTargets##";

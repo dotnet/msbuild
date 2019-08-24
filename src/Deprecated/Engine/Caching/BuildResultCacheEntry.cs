@@ -47,8 +47,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal bool BuildResult
         {
-            get { return buildResult; }
-            set { buildResult = value; }
+            get => buildResult;
+            set => buildResult = value;
         }
 
         #endregion

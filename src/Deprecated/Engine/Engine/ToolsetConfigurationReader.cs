@@ -73,13 +73,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Returns the default tools version, or null if none was specified
         /// </summary>
-        protected override string DefaultToolsVersion
-        {
-            get
-            {
-                return (ConfigurationSection == null ? null : ConfigurationSection.Default);
-            }
-        }
+        protected override string DefaultToolsVersion => (ConfigurationSection == null ? null : ConfigurationSection.Default);
 
         /// <summary>
         /// Provides an enumerator over property definitions for a specified tools version
@@ -204,13 +198,7 @@ namespace Microsoft.Build.BuildEngine
         /// toolsVersion element collection 
         /// </summary>
         [ConfigurationProperty("", IsDefaultCollection = true)]
-        public ToolsetElementCollection Toolsets
-        {
-            get
-            {
-                return (ToolsetElementCollection)base[""];
-            }
-        }
+        public ToolsetElementCollection Toolsets => (ToolsetElementCollection)base[""];
 
         /// <summary>
         /// default attribute on msbuildToolsets element, specifying the default ToolsVersion
@@ -228,10 +216,7 @@ namespace Microsoft.Build.BuildEngine
                 string defaultValue = (string)base["default"];
                 return (String.IsNullOrEmpty(defaultValue) ? null : defaultValue);
             }
-            set
-            {
-                base["default"] = value;
-            }
+            set => base["default"] = value;
         }
     }
 
@@ -315,36 +300,18 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Throw exception if an element with a duplicate key is added to the collection
         /// </summary>
-        protected override bool ThrowOnDuplicate
-        {
-            get
-            {
-                return false;
-            }
-        }
+        protected override bool ThrowOnDuplicate => false;
 
         /// <summary>
         /// Type of the collection
         /// This has to be public as cannot change access modifier when overriding
         /// </summary>
-        public override ConfigurationElementCollectionType CollectionType
-        {
-            get
-            {
-                return ConfigurationElementCollectionType.BasicMap;
-            }
-        }
+        public override ConfigurationElementCollectionType CollectionType => ConfigurationElementCollectionType.BasicMap;
 
         /// <summary>
         /// Name of the element
         /// </summary>
-        protected override string ElementName
-        {
-            get
-            {
-                return "toolset";
-            }
-        }
+        protected override string ElementName => "toolset";
 
         /// <summary>
         /// Gets an element with the specified name
@@ -381,27 +348,15 @@ namespace Microsoft.Build.BuildEngine
         [ConfigurationProperty("toolsVersion", IsKey = true, IsRequired = true)]
         public string toolsVersion
         {
-            get
-            {
-                return (string)base["toolsVersion"];
-            }
-            set
-            {
-                base["toolsVersion"] = value;
-            }
+            get => (string)base["toolsVersion"];
+            set => base["toolsVersion"] = value;
         }
 
         /// <summary>
         /// Property element collection 
         /// </summary>
         [ConfigurationProperty("", IsDefaultCollection = true)]
-        public PropertyElementCollection PropertyElements
-        {
-            get
-            {
-                return (PropertyElementCollection)base[""];
-            }
-        }
+        public PropertyElementCollection PropertyElements => (PropertyElementCollection)base[""];
 
         /// <summary>
         /// Class representing collection of property elements
@@ -481,35 +436,17 @@ namespace Microsoft.Build.BuildEngine
             /// Collection type
             /// This has to be public as cannot change access modifier when overriding  
             /// </summary>
-            public override ConfigurationElementCollectionType CollectionType
-            {
-                get
-                {
-                    return ConfigurationElementCollectionType.BasicMap;
-                }
-            }
+            public override ConfigurationElementCollectionType CollectionType => ConfigurationElementCollectionType.BasicMap;
 
             /// <summary>
             /// Throw exception if an element with a duplicate is added
             /// </summary>
-            protected override bool ThrowOnDuplicate
-            {
-                get
-                {
-                    return false;
-                }
-            }
+            protected override bool ThrowOnDuplicate => false;
 
             /// <summary>
             /// name of the element
             /// </summary>
-            protected override string ElementName
-            {
-                get
-                {
-                    return "property";
-                }
-            }
+            protected override string ElementName => "property";
 
             /// <summary>
             /// Gets an element with the specified name
@@ -543,14 +480,8 @@ namespace Microsoft.Build.BuildEngine
             [ConfigurationProperty("name", IsKey = true, IsRequired = true)]
             public string Name
             {
-                get
-                {
-                    return (string)base["name"];
-                }
-                set
-                {
-                    base["name"] = value;
-                }
+                get => (string)base["name"];
+                set => base["name"] = value;
             }
 
             /// <summary>
@@ -559,14 +490,8 @@ namespace Microsoft.Build.BuildEngine
             [ConfigurationProperty("value", IsRequired = true)]
             public string Value
             {
-                get
-                {
-                    return (string)base["value"];
-                }
-                set
-                {
-                    base["value"] = value;
-                }
+                get => (string)base["value"];
+                set => base["value"] = value;
             }
         }
     }

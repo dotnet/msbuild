@@ -59,10 +59,7 @@ namespace Microsoft.Build.BuildEngine
         /// <value>Item-spec string.</value>
         public string ItemSpec
         {
-            get
-            {
-                return item.FinalItemSpec;
-            }
+            get => item.FinalItemSpec;
 
             set
             {
@@ -76,54 +73,28 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <owner>SumedhK, JomoF</owner>
         /// <value>Collection of name strings.</value>
-        public ICollection MetadataNames
-        {
-            get
-            {
-                // Add all the custom metadata.
-                return item.MetadataNames;
-            }
-        }
+        public ICollection MetadataNames => item.MetadataNames;
 
         /// <summary>
         /// Gets the number of metadata set on the item.
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>Count of metadata.</value>
-        public int MetadataCount
-        {
-            get
-            {
-                return item.MetadataCount;
-            }
-        }
+        public int MetadataCount => item.MetadataCount;
 
 
         /// <summary>
         /// Gets the names of custom metadata on the item
         /// </summary>
         /// <value>Collection of name strings.</value>
-        public ICollection CustomMetadataNames
-        {
-            get
-            {
-                // All the custom metadata.
-                return item.CustomMetadataNames;
-            }
-        }
+        public ICollection CustomMetadataNames => item.CustomMetadataNames;
 
         /// <summary>
         /// Gets the number of custom metadata set on the item.
         /// </summary>
         /// <value>Count of metadata.</value>
-        public int CustomMetadataCount
-        {
-            get
-            {
-                return item.CustomMetadataCount;
-            }
-        }
-        
+        public int CustomMetadataCount => item.CustomMetadataCount;
+
         /// <summary>
         /// Looks up the value of the given custom metadata.
         /// </summary>

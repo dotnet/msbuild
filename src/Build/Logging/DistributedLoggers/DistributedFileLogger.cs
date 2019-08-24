@@ -148,13 +148,7 @@ namespace Microsoft.Build.Logging
         #region Properties
 
         // Need to access this for testing purposes
-        internal FileLogger InternalFilelogger
-        {
-            get
-            {
-                return _nodeFileLogger;
-            }
-        }
+        internal FileLogger InternalFilelogger => _nodeFileLogger;
 
         /// <summary>
         /// Gets or sets the <see cref="IEventRedirector"/> object used to redirect build events.

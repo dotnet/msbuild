@@ -133,13 +133,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the number of available nodes.
         /// </summary>
-        public int AvailableNodes
-        {
-            get
-            {
-                return MaxNodeCount - _nodeContexts.Count;
-            }
-        }
+        public int AvailableNodes => MaxNodeCount - _nodeContexts.Count;
 
         /// <summary>
         /// Returns the name of the CLR2 Task Host executable

@@ -24,10 +24,7 @@ namespace Microsoft.Build.BuildEngine
         /// Returns true if this UsingTask was imported from another project
         /// </summary>
         /// <owner>LukaszG</owner>
-        public bool IsImported
-        {
-            get { return this.importedFromAnotherProject; }
-        }
+        public bool IsImported => this.importedFromAnotherProject;
 
         private XmlAttribute taskNameAttribute = null;
 
@@ -35,18 +32,12 @@ namespace Microsoft.Build.BuildEngine
         /// The task name
         /// </summary>
         /// <owner>LukaszG</owner>
-        public string TaskName
-        {
-            get { return (this.taskNameAttribute != null) ? this.taskNameAttribute.Value : null; }
-        }
+        public string TaskName => (this.taskNameAttribute != null) ? this.taskNameAttribute.Value : null;
 
         /// <summary>
         /// Internal accessor for the task name XML attribute
         /// </summary>
-        internal XmlAttribute TaskNameAttribute
-        {
-            get { return this.taskNameAttribute; }
-        }
+        internal XmlAttribute TaskNameAttribute => this.taskNameAttribute;
 
         private XmlAttribute assemblyNameAttribute = null;
 
@@ -54,18 +45,12 @@ namespace Microsoft.Build.BuildEngine
         /// The name of the assembly containing the task
         /// </summary>
         /// <owner>LukaszG</owner>
-        public string AssemblyName
-        {
-            get { return (this.assemblyNameAttribute != null) ? this.assemblyNameAttribute.Value : null; }
-        }
+        public string AssemblyName => (this.assemblyNameAttribute != null) ? this.assemblyNameAttribute.Value : null;
 
         /// <summary>
         /// Internal accessor for the assembly name XML attribute
         /// </summary>
-        internal XmlAttribute AssemblyNameAttribute
-        {
-            get { return this.assemblyNameAttribute; }
-        }
+        internal XmlAttribute AssemblyNameAttribute => this.assemblyNameAttribute;
 
         private XmlAttribute assemblyFileAttribute = null;
 
@@ -73,18 +58,12 @@ namespace Microsoft.Build.BuildEngine
         /// The assembly file containing the task
         /// </summary>
         /// <owner>LukaszG</owner>
-        public string AssemblyFile
-        {
-            get { return (this.assemblyFileAttribute != null) ? this.assemblyFileAttribute.Value : null; }
-        }
+        public string AssemblyFile => (this.assemblyFileAttribute != null) ? this.assemblyFileAttribute.Value : null;
 
         /// <summary>
         /// Internal accessor for the assembly file XML attribute
         /// </summary>
-        internal XmlAttribute AssemblyFileAttribute
-        {
-            get { return this.assemblyFileAttribute; } 
-        }
+        internal XmlAttribute AssemblyFileAttribute => this.assemblyFileAttribute;
 
         private XmlAttribute conditionAttribute = null;
 
@@ -92,18 +71,12 @@ namespace Microsoft.Build.BuildEngine
         /// The condition string for this UsingTask
         /// </summary>
         /// <owner>LukaszG</owner>
-        public string Condition
-        {
-            get { return (this.conditionAttribute != null) ? this.conditionAttribute.Value : null; }
-        }
+        public string Condition => (this.conditionAttribute != null) ? this.conditionAttribute.Value : null;
 
         /// <summary>
         /// Internal accessor for the condition XML attribute
         /// </summary>
-        internal XmlAttribute ConditionAttribute
-        {
-            get { return this.conditionAttribute; }
-        }
+        internal XmlAttribute ConditionAttribute => this.conditionAttribute;
 
         #endregion
 

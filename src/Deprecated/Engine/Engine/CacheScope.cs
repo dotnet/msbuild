@@ -51,35 +51,18 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Set of cached project file properties
         /// </summary>
-        internal BuildPropertyGroup ScopeProperties
-        {
-            get
-            {
-                return this.scopeProperties;
-            }
-        }
-        
+        internal BuildPropertyGroup ScopeProperties => this.scopeProperties;
+
         /// <summary>
         /// Usually the project file name
         /// </summary>
-        internal string ScopeName
-        {
-            get
-            {
-                return this.scopeName;
-            }
-        }
+        internal string ScopeName => this.scopeName;
 
         /// <summary>
         /// Usually the version of the toolset used
         /// </summary>
-        internal string ScopeToolsVersion
-        {
-            get
-            {
-                return this.scopeToolsVersion;
-            }
-        }
+        internal string ScopeToolsVersion => this.scopeToolsVersion;
+
         #endregion
 
         #region Methods

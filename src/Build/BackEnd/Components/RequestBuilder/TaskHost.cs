@@ -158,37 +158,19 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The line number this task is on
         /// </summary>
-        public int LineNumberOfTaskNode
-        {
-            get
-            {
-                return _taskLocation.Line;
-            }
-        }
+        public int LineNumberOfTaskNode => _taskLocation.Line;
 
         /// <summary>
         /// The column number this task is on
         /// </summary>
-        public int ColumnNumberOfTaskNode
-        {
-            get
-            {
-                return _taskLocation.Column;
-            }
-        }
+        public int ColumnNumberOfTaskNode => _taskLocation.Column;
 
         /// <summary>
         /// The project file this task is in.
         /// Typically this is an imported .targets file.
         /// Unfortunately the interface has shipped with a poor name, so we cannot change it.
         /// </summary>
-        public string ProjectFileOfTaskNode
-        {
-            get
-            {
-                return _taskLocation.File;
-            }
-        }
+        public string ProjectFileOfTaskNode => _taskLocation.File;
 
         /// <summary>
         /// Indicates whether or not errors should be converted to warnings.
@@ -215,25 +197,13 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// For configuring child AppDomains.
         /// </summary>
-        internal AppDomainSetup AppDomainSetup
-        {
-            get
-            {
-                return _host.BuildParameters.AppDomainSetup;
-            }
-        }
+        internal AppDomainSetup AppDomainSetup => _host.BuildParameters.AppDomainSetup;
 #endif
 
         /// <summary>
         /// Whether or not this is out of proc.
         /// </summary>
-        internal bool IsOutOfProc
-        {
-            get
-            {
-                return _host.BuildParameters.IsOutOfProc;
-            }
-        }
+        internal bool IsOutOfProc => _host.BuildParameters.IsOutOfProc;
 
         #region IBuildEngine2 Members
 

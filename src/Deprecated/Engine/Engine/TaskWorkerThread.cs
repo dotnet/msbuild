@@ -119,22 +119,9 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// This event is triggered by the node when a done notice is received
         /// </summary>
-        internal ManualResetEvent LocalDoneNoticeEvent
-        {
-            get
-            {
-                return this.localDoneNoticeEvent;
-            }
-        }
+        internal ManualResetEvent LocalDoneNoticeEvent => this.localDoneNoticeEvent;
 
-        internal int WorkItemCount
-        {
-            get
-            {
-                // UNDONE this access depends on thread safety of workItemQueue.Count
-                return this.workItemQueue.Count;
-            }
-        }
+        internal int WorkItemCount => this.workItemQueue.Count;
 
         #endregion
 

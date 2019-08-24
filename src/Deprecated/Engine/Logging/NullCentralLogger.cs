@@ -23,26 +23,14 @@ namespace Microsoft.Build.BuildEngine
         #region Properties
         public LoggerVerbosity Verbosity
         {
-            get
-            {
-                return verbosity;
-            }
-            set
-            {
-                verbosity = value;
-            }
+            get => verbosity;
+            set => verbosity = value;
         }
 
         public string Parameters
         {
-            get
-            {
-                return parameters;
-            }
-            set
-            {
-                parameters = value;
-            }
+            get => parameters;
+            set => parameters = value;
         }
         #endregion
 

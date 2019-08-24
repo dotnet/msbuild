@@ -106,121 +106,50 @@ namespace Microsoft.Build.BuildEngine
         #endregion
 
         #region Properties
-        internal IDictionary OutputsByTarget
-        {
-            get
-            {
-                return this.outputsByTarget;
-            }
-        }
+        internal IDictionary OutputsByTarget => this.outputsByTarget;
 
-        internal Hashtable ResultByTarget
-        {
-            get
-            {
-                return this.resultByTarget;
-            }
-        }
+        internal Hashtable ResultByTarget => this.resultByTarget;
 
-        internal bool EvaluationResult
-        {
-            get
-            {
-                return ((this.flags & 1) == 0 ? false : true) ;
-            }
-        }
+        internal bool EvaluationResult => ((this.flags & 1) == 0 ? false : true);
 
         internal int HandleId
         {
-            get
-            {
-                return this.handleId;
-            }
-            set
-            {
-                this.handleId = value;
-            }
+            get => this.handleId;
+            set => this.handleId = value;
         }
 
         internal int RequestId
         {
-            get
-            {
-                return this.requestId;
-            }
-            set
-            {
-                this.requestId = value;
-            }
+            get => this.requestId;
+            set => this.requestId = value;
         }
 
-        internal int ProjectId
-        {
-            get
-            {
-                return this.projectId;
-            }
-        }
+        internal int ProjectId => this.projectId;
 
-        internal bool UseResultCache
-        {
-            get
-            {
-                return ((this.flags & 2) == 0 ? false : true);
-            }
-        }
+        internal bool UseResultCache => ((this.flags & 2) == 0 ? false : true);
 
-        internal string DefaultTargets
-        {
-            get
-            {
-                return this.defaultTargets;
-            }
-        }
+        internal string DefaultTargets => this.defaultTargets;
 
-        internal string InitialTargets
-        {
-            get
-            {
-                return this.initialTargets;
-            }
-        }
+        internal string InitialTargets => this.initialTargets;
 
         /// <summary>
         /// Total time spent on the build request measured from the time it is received to the time build
         /// result is created. This number will be 0 if the result was in the cache.
         /// </summary>
-        internal int TotalTime
-        {
-            get
-            {
-                return this.totalTime;
-            }
-        }
+        internal int TotalTime => this.totalTime;
 
         /// <summary>
         /// Total time spent in the engine working on the build request. This number will be 0 if the result
         /// was in the cache.
         /// </summary>
-        internal int EngineTime
-        {
-            get
-            {
-                return this.engineTime;
-            }
-        }
+        internal int EngineTime => this.engineTime;
 
         /// <summary>
         /// Total time spent in the running tasks for the build request. This number will be 0 if the result
         /// was in the cache.
         /// </summary>
-        internal int TaskTime
-        {
-            get
-            {
-                return this.taskTime;
-            }
-        }
+        internal int TaskTime => this.taskTime;
+
         #endregion
 
         #region Methods

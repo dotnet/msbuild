@@ -32,10 +32,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// true if this project configuration should be built as part of its parent solution configuration
         /// </summary>
         /// <owner>LukaszG</owner>
-        internal bool IncludeInBuild
-        {
-            get { return this.includeInBuild; }
-        }
+        internal bool IncludeInBuild => this.includeInBuild;
 
         /// <summary>
         /// This is a hacky method to remove the space in the "Any CPU" platform in project configurations.

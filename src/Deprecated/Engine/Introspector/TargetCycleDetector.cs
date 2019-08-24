@@ -38,21 +38,10 @@ namespace Microsoft.Build.BuildEngine
         #endregion
 
         #region Properties
-        internal TargetInProgessState CycleEdgeParent
-        {
-            get
-            {
-                return this.cycleParent;
-            }
-        }
+        internal TargetInProgessState CycleEdgeParent => this.cycleParent;
 
-        internal TargetInProgessState CycleEdgeChild
-        {
-            get
-            {
-                return this.cycleChild;
-            }
-        }
+        internal TargetInProgessState CycleEdgeChild => this.cycleChild;
+
         #endregion
 
         #region Methods

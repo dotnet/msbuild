@@ -545,10 +545,7 @@ namespace Microsoft.Build.BuildEngine
         /// in the main project.  For virtual items which have no
         /// persistence, this is false.
         /// </summary>
-        public bool IsImported
-        {
-            get { return importedFromAnotherProject; }
-        }
+        public bool IsImported => importedFromAnotherProject;
 
         /// <summary>
         /// Accessor for the item's "type" string.  Note that changing the "Type"
@@ -612,8 +609,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal ItemDefinitionLibrary ItemDefinitionLibrary
         {
-            get { return itemDefinitionLibrary; }
-            set { itemDefinitionLibrary = value; }
+            get => itemDefinitionLibrary;
+            set => itemDefinitionLibrary = value;
         }
 
         /// Accessor for the item's "include" string.
@@ -700,49 +697,27 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>Count of metadata.</value>
-        public int MetadataCount
-        {
-            get
-            {
-                return (GetCustomMetadataCount() + FileUtilities.ItemSpecModifiers.All.Length);
-            }
-        }
+        public int MetadataCount => (GetCustomMetadataCount() + FileUtilities.ItemSpecModifiers.All.Length);
 
         /// <summary>
         /// Gets the names of metadata on the item -- also includes the pre-defined/reserved item-spec modifiers.
         /// </summary>
         /// <owner>SumedhK, JomoF</owner>
         /// <value>Collection of name strings.</value>
-        public ICollection CustomMetadataNames
-        {
-            get
-            {
-                // All the custom metadata.
-                return GetAllCustomMetadataNames();
-            }
-        }
+        public ICollection CustomMetadataNames => GetAllCustomMetadataNames();
 
         /// <summary>
         /// Gets the number of metadata set on the item.
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>Count of metadata.</value>
-        public int CustomMetadataCount
-        {
-            get
-            {
-                return GetCustomMetadataCount();
-            }
-        }
-        
+        public int CustomMetadataCount => GetCustomMetadataCount();
+
         /// <summary>
         /// Read-only accessor for accessing the XML attribute for "Include".  Callers should
         /// never try and modify this.  Go through this.Include to change the include spec.
         /// </summary>
-        internal XmlAttribute IncludeAttribute
-        {
-            get { return (IsBackedByXml ? xml.IncludeAttribute : null); }
-        }
+        internal XmlAttribute IncludeAttribute => (IsBackedByXml ? xml.IncludeAttribute : null);
 
         /// <summary>
         /// Accessor for the item's "exclude" string.
@@ -750,7 +725,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         public string Exclude
         {
-            get { return (IsBackedByXml ? xml.Exclude : String.Empty); }
+            get => (IsBackedByXml ? xml.Exclude : String.Empty);
 
             set
             {
@@ -770,10 +745,7 @@ namespace Microsoft.Build.BuildEngine
         /// never try and modify this.  Go through this.Exclude to change the exclude spec.
         /// </summary>
         /// <owner>RGoel</owner>
-        internal XmlAttribute ExcludeAttribute
-        {
-            get { return (IsBackedByXml ? xml.ExcludeAttribute : null); }
-        }
+        internal XmlAttribute ExcludeAttribute => (IsBackedByXml ? xml.ExcludeAttribute : null);
 
         /// <summary>
         /// Accessor for the item's "condition".
@@ -781,7 +753,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         public string Condition
         {
-            get { return (IsBackedByXml ? xml.Condition : String.Empty); }
+            get => (IsBackedByXml ? xml.Condition : String.Empty);
 
             set
             {
@@ -804,47 +776,32 @@ namespace Microsoft.Build.BuildEngine
         /// never try and modify this.  Go through this.Condition to change the condition.
         /// </summary>
         /// <owner>RGoel</owner>
-        internal XmlAttribute ConditionAttribute
-        {
-            get { return (IsBackedByXml ? xml.ConditionAttribute : null); }
-        }
+        internal XmlAttribute ConditionAttribute => (IsBackedByXml ? xml.ConditionAttribute : null);
 
         /// <summary>
         /// Gets the XmlElement representing this item.
         /// </summary>
         /// <owner>RGoel</owner>
         /// <value>The item XmlElement, or null if item is virtual.</value>
-        internal XmlElement ItemElement
-        {
-            get { return (IsBackedByXml ? xml.Element : null); }
-        }
+        internal XmlElement ItemElement => (IsBackedByXml ? xml.Element : null);
 
         /// <summary>
         /// Accessor for the final evaluated item specification.  This is read-only.
         /// </summary>
         /// <owner>RGoel</owner>
-        internal string FinalItemSpecEscaped
-        {
-            get { return finalItemSpecEscaped; }
-        }
+        internal string FinalItemSpecEscaped => finalItemSpecEscaped;
 
         /// <summary>
         /// Returns the unescaped final value of the item.
         /// </summary>
         /// <owner>RGoel</owner>
-        public string FinalItemSpec
-        {
-            get { return EscapingUtilities.UnescapeAll(FinalItemSpecEscaped); }
-        }
-        
+        public string FinalItemSpec => EscapingUtilities.UnescapeAll(FinalItemSpecEscaped);
+
         /// <summary>
         /// Read-only accessor for the piece of the item's Include that resulted in
         /// this item, with properties expanded.
         /// </summary>
-        internal string EvaluatedItemSpec
-        {
-            get { return evaluatedItemSpecEscaped; }
-        }
+        internal string EvaluatedItemSpec => evaluatedItemSpecEscaped;
 
         /// <summary>
         /// If this item is persisted in the project file, then we need to
@@ -854,7 +811,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         internal BuildItemGroup ParentPersistedItemGroup
         {
-            get { return parentPersistedItemGroup; }
+            get => parentPersistedItemGroup;
 
             set
             {
@@ -878,7 +835,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>rgoel</owner>
         internal BuildItem ParentPersistedItem
         {
-            get { return parentPersistedItem; }
+            get => parentPersistedItem;
 
             set
             {
@@ -908,35 +865,23 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-        internal bool IsUninitializedItem
-        {
-            get { return (this.name == null); }
-        }
+        internal bool IsUninitializedItem => (this.name == null);
 
         /// <summary>
         /// Whether this item is part of the project "manifest", ie., it is defined in XML
         /// outside of a target.
         /// </summary>
-        internal bool IsPartOfProjectManifest
-        {
-            get { return isPartOfProjectManifest; }
-        }
+        internal bool IsPartOfProjectManifest => isPartOfProjectManifest;
 
         /// <summary>
         /// Whether this item has backing XML
         /// </summary>
-        internal bool IsBackedByXml
-        {
-            get { return xml != null; }
-        }
+        internal bool IsBackedByXml => xml != null;
 
         /// <summary>
         /// Whether the metadata lists have been backed up
         /// </summary>
-        internal bool IsBackedUp
-        {
-            get { return (unevaluatedCustomMetadataBackup != null); }
-        }
+        internal bool IsBackedUp => (unevaluatedCustomMetadataBackup != null);
 
         #endregion
 

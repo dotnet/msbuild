@@ -37,34 +37,14 @@ namespace Microsoft.Build.BuildEngine
 
         // For testing
         #region Properties
-        internal int CallNumber
-        {
-            get
-            {
-                return this.callNumber;
-            }
-        }
-        internal LocalCallType CallType
-        {
-            get
-            {
-                return this.callType;
-            }
-        }
-        virtual internal bool NeedsReply
-        {
-            get
-            {
-                return false;
-            }
-        }
-        virtual internal bool IsReply
-        {
-            get
-            {
-                return false;
-            }
-        }
+        internal int CallNumber => this.callNumber;
+
+        internal LocalCallType CallType => this.callType;
+
+        virtual internal bool NeedsReply => false;
+
+        virtual internal bool IsReply => false;
+
         #endregion
 
         #region Methods
@@ -141,29 +121,12 @@ namespace Microsoft.Build.BuildEngine
         #endregion
 
         #region Properties
-        internal override bool IsReply
-        {
-            get
-            {
-                return true;
-            }
-        }
+        internal override bool IsReply => true;
 
-        internal virtual int RequestingCallNumber
-        {
-            get
-            {
-                return requestingCallNumber;
-            }
-        }
+        internal virtual int RequestingCallNumber => requestingCallNumber;
 
-        internal object ReplyData
-        {
-            get
-            {
-                return replyData;
-            }
-        }
+        internal object ReplyData => replyData;
+
         #endregion
 
         #region Methods
@@ -309,13 +272,8 @@ namespace Microsoft.Build.BuildEngine
 
         // For testing
         #region Properties
-        internal BuildRequest[] BuildRequests
-        {
-            get
-            {
-                return buildRequests;
-            }
-        }
+        internal BuildRequest[] BuildRequests => buildRequests;
+
         #endregion 
 
         #region CustomSerializationToStream
@@ -382,13 +340,8 @@ namespace Microsoft.Build.BuildEngine
 
         // For testing
         #region Properties
-        internal BuildResult ResultOfBuild
-        {
-            get
-            {
-                return buildResult;
-            }
-        }
+        internal BuildResult ResultOfBuild => buildResult;
+
         #endregion
 
         #region CustomSerializationToStream
@@ -436,13 +389,8 @@ namespace Microsoft.Build.BuildEngine
 
         // For testing
         #region Properties
-        internal NodeLoggingEvent[] BuildEvents
-        {
-            get
-            {
-                return buildEvents;
-            }
-        }
+        internal NodeLoggingEvent[] BuildEvents => buildEvents;
+
         #endregion
 
         #region CustomSerializationToStream
@@ -534,29 +482,12 @@ namespace Microsoft.Build.BuildEngine
 
         // For testing
         #region Properties
-        internal bool LogOnlyCriticalEvents
-        {
-            get
-            {
-                return logOnlyCriticalEvents;
-            }
-        }
+        internal bool LogOnlyCriticalEvents => logOnlyCriticalEvents;
 
-        internal bool CentralizedLogging
-        {
-            get
-            {
-                return centralizedLogging;
-            }
-        }
+        internal bool CentralizedLogging => centralizedLogging;
 
-        internal bool UseBreadthFirstTraversal
-        {
-            get
-            {
-                return useBreadthFirstTraversal;
-            }
-        }
+        internal bool UseBreadthFirstTraversal => useBreadthFirstTraversal;
+
         #endregion
 
         #region CustomSerializationToStream
@@ -610,21 +541,10 @@ namespace Microsoft.Build.BuildEngine
 
         // For testing
         #region Properties
-        internal bool ExitProcess
-        {
-            get
-            {
-                return exitProcess;
-            }
-        }
+        internal bool ExitProcess => exitProcess;
 
-        internal Node.NodeShutdownLevel ShutdownLevel
-        {
-            get
-            {
-                return shutdownLevel;
-            }
-        }
+        internal Node.NodeShutdownLevel ShutdownLevel => shutdownLevel;
+
         #endregion
 
         #region CustomSerializationToStream
@@ -675,13 +595,8 @@ namespace Microsoft.Build.BuildEngine
 
         // For testing
         #region Properties
-        internal Node.NodeShutdownLevel ShutdownLevel
-        {
-            get
-            {
-                return shutdownLevel;
-            }
-        }
+        internal Node.NodeShutdownLevel ShutdownLevel => shutdownLevel;
+
         #endregion
 
 
@@ -757,48 +672,18 @@ namespace Microsoft.Build.BuildEngine
 
         // For testing
         #region Properties
-        internal Hashtable EnvironmentVariables
-        {
-            get
-            {
-                return environmentVariables;
-            }
-        }
-        internal LoggerDescription[] NodeLoggers
-        {
-            get
-            {
-                    return nodeLoggers;
-            }
-        }
-        internal int NodeId
-        {
-            get
-            {
-                return nodeId;
-            }
-        }
-        internal BuildPropertyGroup ParentGlobalProperties
-        {
-            get
-            {
-                return parentGlobalProperties;
-            }
-        }
-        internal ToolsetDefinitionLocations ToolsetSearchLocations
-        {
-            get
-            {
-                return toolsetSearchLocations;
-            }
-        }
-        internal int ParentProcessId
-        {
-            get
-            {
-                return parentProcessId;
-            }
-        }
+        internal Hashtable EnvironmentVariables => environmentVariables;
+
+        internal LoggerDescription[] NodeLoggers => nodeLoggers;
+
+        internal int NodeId => nodeId;
+
+        internal BuildPropertyGroup ParentGlobalProperties => parentGlobalProperties;
+
+        internal ToolsetDefinitionLocations ToolsetSearchLocations => toolsetSearchLocations;
+
+        internal int ParentProcessId => parentProcessId;
+
         #endregion
 
         #region CustomSerializationToStream
@@ -923,13 +808,8 @@ namespace Microsoft.Build.BuildEngine
 
         //For Testing
         #region Properties
-        internal int ProcessId
-        {
-            get
-            {
-                return processId;
-            }
-        }
+        internal int ProcessId => processId;
+
         #endregion
 
         #region CustomSerializationToStream
@@ -977,13 +857,8 @@ namespace Microsoft.Build.BuildEngine
 
         // For testing
         #region Properties
-        internal int RequestId
-        {
-            get
-            {
-                return requestId;
-            }
-        }
+        internal int RequestId => requestId;
+
         #endregion
 
         #region CustomSerializationToStream
@@ -1030,13 +905,8 @@ namespace Microsoft.Build.BuildEngine
 
         // For testing
         #region Properties
-        internal NodeStatus StatusOfNode
-        {
-            get
-            {
-                return nodeStatus;
-            }
-        }
+        internal NodeStatus StatusOfNode => nodeStatus;
+
         #endregion
 
         #region CustomSerializationToStream
@@ -1136,49 +1006,18 @@ namespace Microsoft.Build.BuildEngine
 
         // For testing
         #region Properties
-        internal override bool NeedsReply
-        {
-            get
-            {
-                return true;
-            }
-        }
+        internal override bool NeedsReply => true;
 
-        internal CacheEntry[] Entries
-        {
-            get
-            {
-                return entries;
-            }
-        }
-        internal string ScopeName
-        {
-            get
-            {
-                return scopeName;
-            }
-        }
-        internal CacheContentType ContentType
-        {
-            get
-            {
-                return cacheContentType;
-            }
-        }
-        internal BuildPropertyGroup ScopeProperties
-        {
-            get
-            {
-                return scopeProperties;
-            }
-        }
-        internal string ScopeToolsVersion
-        {
-            get
-            {
-                return scopeToolsVersion;
-            }
-        }
+        internal CacheEntry[] Entries => entries;
+
+        internal string ScopeName => scopeName;
+
+        internal CacheContentType ContentType => cacheContentType;
+
+        internal BuildPropertyGroup ScopeProperties => scopeProperties;
+
+        internal string ScopeToolsVersion => scopeToolsVersion;
+
         #endregion
 
         #region Methods
@@ -1333,51 +1172,17 @@ namespace Microsoft.Build.BuildEngine
 
         // For testing
         #region Properties
-        internal override bool NeedsReply
-        {
-            get
-            {
-                return true;
-            }
-        }
-        internal string[] Names
-        {
-            get
-            {
-                return names;
-            }
-        }
-        internal string ScopeName
-        {
-            get
-            {
-                return scopeName;
-            }
-        }
+        internal override bool NeedsReply => true;
 
-        internal BuildPropertyGroup ScopeProperties
-        {
-            get
-            {
-                return scopeProperties;
-            }
-        }
+        internal string[] Names => names;
 
-        internal CacheContentType ContentType
-        {
-            get
-            {
-                return cacheContentType;
-            }
-        }
+        internal string ScopeName => scopeName;
 
-        internal string ScopeToolsVersion
-        {
-            get
-            {
-                return scopeToolsVersion;
-            }
-        }
+        internal BuildPropertyGroup ScopeProperties => scopeProperties;
+
+        internal CacheContentType ContentType => cacheContentType;
+
+        internal string ScopeToolsVersion => scopeToolsVersion;
 
         #endregion
 

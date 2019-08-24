@@ -92,18 +92,15 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Gets the string name of the task.
         /// </summary>
-        private string TaskName
-        {
-            get { return taskNode.Name; }
-        }
+        private string TaskName => taskNode.Name;
 
         /// <summary>
         /// Gets the .NET class that defines the task.
         /// </summary>
         internal LoadedType TaskClass
         {
-            get { return taskClass; }
-            set { taskClass = value; }
+            get => taskClass;
+            set => taskClass = value;
         }
 
         #endregion

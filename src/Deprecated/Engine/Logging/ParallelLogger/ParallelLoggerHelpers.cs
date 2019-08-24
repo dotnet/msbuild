@@ -315,103 +315,38 @@ namespace Microsoft.Build.BuildEngine
 
         #region Properties
 
-        internal DateTime TimeStamp
-        {
-            get
-            {
-                return timeStamp;
-            }
-        }
+        internal DateTime TimeStamp => timeStamp;
 
-        internal int ProjectKey
-        {
-            get
-            {
-                return projectFullKey.ProjectKey;
-            }
-        }
+        internal int ProjectKey => projectFullKey.ProjectKey;
 
-        internal int EntryPointKey
-        {
-            get
-            {
-                return projectFullKey.EntryPointKey;
-            }
-        }
+        internal int EntryPointKey => projectFullKey.EntryPointKey;
 
-        internal string FullProjectKey
-        {
-            get
-            {
-                return projectFullKey.ToString();
-            }
-        }
+        internal string FullProjectKey => projectFullKey.ToString();
 
-        internal ProjectStartedEventMinimumFields ParentProjectStartedEvent
-        {
-            get
-            {
-                return parentProjectStartedEvent;
-            }
-        }
+        internal ProjectStartedEventMinimumFields ParentProjectStartedEvent => parentProjectStartedEvent;
 
-        internal string TargetNames
-        {
-            get
-            {
-                return targetNames;
-            }
-        }
+        internal string TargetNames => targetNames;
 
-        internal int ProjectId
-        {
-            get
-            {
-                return projectId;
-            }
-        }
+        internal int ProjectId => projectId;
 
-        internal string ProjectFile
-        {
-            get
-            {
-                return projectFile;
-            }
-        }
+        internal string ProjectFile => projectFile;
 
         internal bool ShowProjectFinishedEvent
         {
-            get
-            {
-                return showProjectFinishedEvent;
-            }
+            get => showProjectFinishedEvent;
 
-            set
-            {
-                showProjectFinishedEvent = value;
-            }
+            set => showProjectFinishedEvent = value;
         }
 
         internal bool ErrorInProject
         {
-            get
-            {
-                return this.errorInProject;
-            }
+            get => this.errorInProject;
 
-            set
-            {
-                this.errorInProject = value;
-            }
+            set => this.errorInProject = value;
         }
 
-        internal BuildEventContext ProjectBuildEventContext
-        {
-            get
-            {
-                return this.buildEventContext;
-            }
-        }
+        internal BuildEventContext ProjectBuildEventContext => this.buildEventContext;
+
         #endregion
 
         #region Constructors
@@ -446,62 +381,27 @@ namespace Microsoft.Build.BuildEngine
         #endregion
 
         #region Properties
-        internal DateTime TimeStamp
-        {
-            get
-            {
-                return timeStamp;
-            }
-        }
+        internal DateTime TimeStamp => timeStamp;
 
-        internal string TargetName
-        {
-            get
-            {
-                return targetName;
-            }
-        }
+        internal string TargetName => targetName;
 
-        internal string TargetFile
-        {
-            get
-            {
-                return targetFile;
-            }
-        }
+        internal string TargetFile => targetFile;
 
         internal bool ShowTargetFinishedEvent
         {
-            get
-            {
-                return showTargetFinishedEvent;
-            }
+            get => showTargetFinishedEvent;
 
-            set
-            {
-                showTargetFinishedEvent = value;
-            }
+            set => showTargetFinishedEvent = value;
         }
 
         internal bool ErrorInTarget
         {
-            get
-            {
-                return this.errorInTarget;
-            }
+            get => this.errorInTarget;
 
-            set
-            {
-                this.errorInTarget = value;
-            }
+            set => this.errorInTarget = value;
         }
-        internal BuildEventContext ProjectBuildEventContext
-        {
-            get
-            {
-                return this.buildEventContext;
-            }
-        }
+        internal BuildEventContext ProjectBuildEventContext => this.buildEventContext;
+
         #endregion
 
         #region Constructors
@@ -539,21 +439,9 @@ namespace Microsoft.Build.BuildEngine
         #endregion
 
         #region Properties
-        internal BuildEventContext EntryPointContext
-        {
-            get
-            {
-                return entryPointContext;
-            }
-        }
+        internal BuildEventContext EntryPointContext => entryPointContext;
 
-        internal string TargetName
-        {
-            get
-            {
-                return targetName;
-            }
-        }
+        internal string TargetName => targetName;
 
         #endregion
 
@@ -590,14 +478,14 @@ namespace Microsoft.Build.BuildEngine
         #region Properties
         internal int ProjectKey
         {
-            get { return projectKey; }
-            set { projectKey = value; }
+            get => projectKey;
+            set => projectKey = value;
         }
 
         internal int EntryPointKey
         {
-            get { return entryPointKey; }
-            set { entryPointKey = value; }
+            get => entryPointKey;
+            set => entryPointKey = value;
         }
         #endregion
 

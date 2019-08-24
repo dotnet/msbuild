@@ -133,25 +133,13 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <value></value>
         /// <owner>RGoel</owner>
-        internal XmlElement TaskXmlElement
-        {
-            get
-            {
-                return this.taskElement;
-            }
-        }
+        internal XmlElement TaskXmlElement => this.taskElement;
 
         /// <summary>
         /// Accessor for the task's "name" element.  
         /// </summary>
         /// <owner>RGoel</owner>
-        public string Name
-        {
-            get
-            {
-                return this.taskName;
-            }
-        }
+        public string Name => this.taskName;
 
         /// <summary>
         /// Accessor for the task's "condition".
@@ -159,10 +147,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         public string Condition
         {
-            get
-            {
-                return (this.conditionAttribute == null) ? String.Empty : this.conditionAttribute.Value;
-            }
+            get => (this.conditionAttribute == null) ? String.Empty : this.conditionAttribute.Value;
 
             set
             {
@@ -279,15 +264,9 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         public ITaskHost HostObject
         {
-            get
-            {
-                return this.hostObject;
-            }
+            get => this.hostObject;
 
-            set
-            {
-                this.hostObject = value;
-            }
+            set => this.hostObject = value;
         }
 
         /// <summary>
@@ -297,15 +276,9 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         internal Target ParentTarget
         {
-            get
-            {
-                return this.parentTarget;
-            }
+            get => this.parentTarget;
 
-            set
-            {
-                this.parentTarget = value;
-            }
+            set => this.parentTarget = value;
         }
 
         #endregion

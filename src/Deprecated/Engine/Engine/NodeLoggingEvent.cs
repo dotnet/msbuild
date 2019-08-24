@@ -56,25 +56,13 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// The BuildEventArgs wrapped by this class
         /// </summary>
-        internal BuildEventArgs BuildEvent
-        {
-            get
-            {
-                return this.e;
-            }
-        }
+        internal BuildEventArgs BuildEvent => this.e;
 
         /// <summary>
         /// The ID of the central logger to which this event should be forwarded. By default 
         /// all regular non-forwarded events are sent to all loggers registered on the parent.
         /// </summary>
-        virtual internal int LoggerId
-        {
-            get
-            {
-                return 0;
-            }
-        }
+        virtual internal int LoggerId => 0;
 
         #endregion
 
@@ -310,13 +298,8 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// The ID of the central logger to which this event should be forwarded
         /// </summary>
-        internal override int LoggerId
-        {
-            get
-            {
-                return loggerId;
-            }
-        }
+        internal override int LoggerId => loggerId;
+
         #endregion
 
         #region CustomSerializationToStream

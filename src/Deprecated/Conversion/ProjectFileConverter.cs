@@ -214,14 +214,8 @@ namespace Microsoft.Build.Conversion
         /// <owner>rgoel</owner>
         public string OldProjectFile
         {
-            get
-            {
-                return oldProjectFile;
-            }
-            set
-            {
-                oldProjectFile = value;
-            }
+            get => oldProjectFile;
+            set => oldProjectFile = value;
         }
 
         /// <summary>
@@ -231,14 +225,8 @@ namespace Microsoft.Build.Conversion
         /// <owner>rgoel</owner>
         public string NewProjectFile
         {
-            get
-            {
-                return newProjectFile;
-            }
-            set
-            {
-                newProjectFile = value;
-            }
+            get => newProjectFile;
+            set => newProjectFile = value;
         }
 
         /// <summary>
@@ -251,14 +239,8 @@ namespace Microsoft.Build.Conversion
         /// <owner>rgoel</owner>
         public bool IsUserFile
         {
-            get
-            {
-                return isUserFile;
-            }
-            set
-            {
-                isUserFile = value;
-            }
+            get => isUserFile;
+            set => isUserFile = value;
         }
 
         /// <summary>
@@ -269,14 +251,8 @@ namespace Microsoft.Build.Conversion
         /// <owner>rgoel</owner>
         public string SolutionFile
         {
-            get
-            {
-                return solutionFile;
-            }
-            set
-            {
-                solutionFile = Path.GetFullPath(value);
-            }
+            get => solutionFile;
+            set => solutionFile = Path.GetFullPath(value);
         }
 
         /// <summary>
@@ -285,13 +261,7 @@ namespace Microsoft.Build.Conversion
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>true, if conversion was skipped</value>
-        public bool ConversionSkippedBecauseProjectAlreadyConverted
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public bool ConversionSkippedBecauseProjectAlreadyConverted => false;
 
         /// <summary>
         /// This property returns the list of warnings that were generated during the conversion
@@ -299,13 +269,7 @@ namespace Microsoft.Build.Conversion
         /// <owner>faisalmo</owner>
         /// <value>true, if conversion was skipped</value>
         [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "Public interface that has shipped previously. ")]
-        public string[] ConversionWarnings
-        {
-            get
-            {
-                return (string[]) conversionWarnings.ToArray(typeof(string));
-            }
-        }
+        public string[] ConversionWarnings => (string[]) conversionWarnings.ToArray(typeof(string));
 
         /// <summary>
         /// Is the conversion a minor upgrade operation?
@@ -313,15 +277,9 @@ namespace Microsoft.Build.Conversion
         /// </summary>
         public bool IsMinorUpgrade
         {
-            get
-            {
-                return this.isMinorUpgrade;
-            }
+            get => this.isMinorUpgrade;
 
-            set
-            {
-                this.isMinorUpgrade = value;
-            }
+            set => this.isMinorUpgrade = value;
         }
 
         /// <summary>

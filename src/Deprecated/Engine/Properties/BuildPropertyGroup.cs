@@ -321,13 +321,7 @@ namespace Microsoft.Build.BuildEngine
         /// persistence, this is false.
         /// </summary>
         /// <owner>RGoel</owner>
-        public bool IsImported
-        {
-            get
-            {
-                return this.importedFromAnotherProject;
-            }
-        }
+        public bool IsImported => this.importedFromAnotherProject;
 
         /// <summary>
         /// Accessor for the condition on the property group.
@@ -335,10 +329,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         public string Condition
         {
-            get
-            {
-                return (this.conditionAttribute == null) ? String.Empty : this.conditionAttribute.Value;
-            }
+            get => (this.conditionAttribute == null) ? String.Empty : this.conditionAttribute.Value;
 
             set
             {
@@ -377,34 +368,22 @@ namespace Microsoft.Build.BuildEngine
         /// never try and modify this.  Go through this.Condition to change the condition.
         /// </summary>
         /// <owner>RGoel</owner>
-        internal XmlAttribute ConditionAttribute
-        {
-            get
-            {
-                return this.conditionAttribute;
-            }
-        }
+        internal XmlAttribute ConditionAttribute => this.conditionAttribute;
 
         /// <summary>
         /// Accessor for the XmlElement representing this property group.  This is 
         /// internal to MSBuild, and is read-only.
         /// </summary>
         /// <owner>RGoel</owner>
-        internal XmlElement PropertyGroupElement
-        {
-            get
-            {
-                return this.propertyGroupElement;
-            }
-        }
+        internal XmlElement PropertyGroupElement => this.propertyGroupElement;
 
         /// <summary>
         /// Accessor for the parent Project object.
         /// </summary>
         internal Project ParentProject
         {
-            get { return parentProject; }
-            set { parentProject = value; }
+            get => parentProject;
+            set => parentProject = value;
         }
 
         /// <summary>
@@ -422,15 +401,9 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>davidle</owner>
         internal GroupingCollection ParentCollection
         {
-            get
-            {
-                return this.parentCollection;
-            }
+            get => this.parentCollection;
 
-            set
-            {
-                this.parentCollection = value;
-            }
+            set => this.parentCollection = value;
         }
 
         /// <summary>
@@ -1428,10 +1401,7 @@ namespace Microsoft.Build.BuildEngine
         /// Returns a boolean that indicates whether this is a virtual property
         /// group.
         /// </summary>
-        private bool IsVirtual
-        {
-            get { return !IsPersisted; }
-        }
+        private bool IsVirtual => !IsPersisted;
 
         /// <summary>
         /// Call this method to verify that this property group is a well-formed
@@ -1463,10 +1433,7 @@ namespace Microsoft.Build.BuildEngine
         /// Returns whether this is a persisted group.
         /// </summary>
         /// <returns></returns>
-        private bool IsPersisted
-        {
-            get { return (this.propertyGroupElement != null); }
-        }
+        private bool IsPersisted => (this.propertyGroupElement != null);
 
         /// <summary>
         /// Verifies group is persisted.

@@ -119,60 +119,30 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <summary>
         /// This property returns the list of warnings that were generated during solution parsing
         /// </summary>
-        internal ArrayList SolutionParserWarnings
-        {
-            get
-            {
-                return solutionParserWarnings;
-            }
-        }
+        internal ArrayList SolutionParserWarnings => solutionParserWarnings;
 
         /// <summary>
         /// This property returns the list of comments that were generated during the solution parsing
         /// </summary>
-        internal ArrayList SolutionParserComments
-        {
-            get
-            {
-                return solutionParserComments;
-            }
-        }
+        internal ArrayList SolutionParserComments => solutionParserComments;
 
         /// <summary>
         /// This property returns the list of error codes for warnings/errors that were generated during solution parsing. 
         /// UNIT TESTING ONLY
         /// </summary>
-        internal ArrayList SolutionParserErrorCodes
-        {
-            get
-            {
-                return solutionParserErrorCodes;
-            }
-        }
+        internal ArrayList SolutionParserErrorCodes => solutionParserErrorCodes;
 
         /// <summary>
         /// Returns the actual major version of the parsed solution file
         /// </summary>
         /// <owner>LukaszG</owner>
-        internal int Version
-        {
-            get
-            {
-                return this.slnFileActualVersion;
-            }
-        }
+        internal int Version => this.slnFileActualVersion;
 
         /// <summary>
         /// Returns true if the solution contains any web projects
         /// </summary>
         /// <owner>LukaszG</owner>
-        internal bool ContainsWebProjects
-        {
-            get
-            {
-                return this.solutionContainsWebProjects;
-            }
-        }
+        internal bool ContainsWebProjects => this.solutionContainsWebProjects;
 
         /// <summary>
         /// All projects in this solution, in the order they appeared in the solution file
@@ -180,15 +150,9 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <owner>LukaszG</owner>
         internal ArrayList ProjectsInOrder
         {
-            get
-            {
-                return this.projectsInOrder;
-            }
+            get => this.projectsInOrder;
             // For unit testing only
-            set
-            {
-                this.projectsInOrder = value;
-            }
+            set => this.projectsInOrder = value;
         }
 
         /// <summary>
@@ -196,15 +160,9 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// </summary>
         internal Hashtable ProjectsByGuid
         {
-            get
-            {
-                return this.projects;
-            }
+            get => this.projects;
             // For unit testing only
-            set
-            {
-                this.projects = value;
-            }
+            set => this.projects = value;
         }
 
         /// <summary>
@@ -214,28 +172,16 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <value></value>
         internal string SolutionFile
         {
-            get
-            {
-                return solutionFile;
-            }
+            get => solutionFile;
 
-            set
-            {
-                solutionFile = value;
-            }
+            set => solutionFile = value;
         }
 
         internal string SolutionFileDirectory
         {
-            get
-            {
-                return solutionFileDirectory;
-            }
+            get => solutionFileDirectory;
             // This setter is only used by the unit tests
-            set
-            {
-                this.solutionFileDirectory = value;
-            }
+            set => this.solutionFileDirectory = value;
         }
 
         /// <summary>
@@ -245,40 +191,22 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <owner>RGoel</owner>
         internal StreamReader SolutionReader
         {
-            get
-            {
-                return reader;
-            }
+            get => reader;
 
-            set
-            {
-                reader = value;
-            }
+            set => reader = value;
         }
 
         /// <summary>
         /// For unit-testing only.
         /// </summary>
         /// <value></value>
-        internal ProjectInSolution[] Projects
-        {
-            get
-            {
-                return (ProjectInSolution[]) this.projectsInOrder.ToArray(typeof(ProjectInSolution));
-            }
-        }
+        internal ProjectInSolution[] Projects => (ProjectInSolution[]) this.projectsInOrder.ToArray(typeof(ProjectInSolution));
 
         /// <summary>
         /// The list of all full solution configurations (configuration + platform) in this solution
         /// </summary>
         /// <owner>LukaszG</owner>
-        internal List<ConfigurationInSolution> SolutionConfigurations
-        {
-            get
-            {
-                return this.solutionConfigurations;
-            }
-        }
+        internal List<ConfigurationInSolution> SolutionConfigurations => this.solutionConfigurations;
 
         #endregion
 

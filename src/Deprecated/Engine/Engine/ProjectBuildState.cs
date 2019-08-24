@@ -41,14 +41,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal BuildContextState CurrentBuildContextState
         {
-            get
-            {
-                return this.buildContextState;
-            }
-            set
-            {
-                this.buildContextState = value;
-            }
+            get => this.buildContextState;
+            set => this.buildContextState = value;
         }
 
         /// <summary>
@@ -56,14 +50,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal bool BuildComplete
         {
-            get
-            {
-                return this.buildRequest.BuildCompleted;
-            }
-            set
-            {
-                this.buildRequest.BuildCompleted = value;
-            }
+            get => this.buildRequest.BuildCompleted;
+            set => this.buildRequest.BuildCompleted = value;
         }
 
         /// <summary>
@@ -71,61 +59,32 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal bool BuildResult
         {
-            get
-            {
-                return this.buildRequest.BuildSucceeded;
-            }
-            set
-            {
-                this.buildRequest.BuildSucceeded = value;
-            }
+            get => this.buildRequest.BuildSucceeded;
+            set => this.buildRequest.BuildSucceeded = value;
         }
 
         /// <summary>
         /// Name of the target that blocks the in progress target. Null there is no target
         /// blocking the inprogress target
         /// </summary>
-        internal string NameOfBlockingTarget
-        {
-            get
-            {
-                return (requiredTargets != null && requiredTargets.Count > 0 ?
-                        this.requiredTargets.Peek() : null);
-            }
-        }
+        internal string NameOfBlockingTarget =>
+            (requiredTargets != null && requiredTargets.Count > 0 ?
+                this.requiredTargets.Peek() : null);
 
         /// <summary>
         /// Name of the target currently in progress
         /// </summary>
-        internal string NameOfTargetInProgress
-        {
-            get
-            {
-                return (string)this.targetNamesToBuild[indexOfTargetInProgress];
-            }
-        }
+        internal string NameOfTargetInProgress => (string)this.targetNamesToBuild[indexOfTargetInProgress];
 
         /// <summary>
         /// List of targets that need to be completed in order to complete the context
         /// </summary>
-        internal ArrayList TargetNamesToBuild
-        {
-            get
-            {
-                return this.targetNamesToBuild;
-            }
-        }
+        internal ArrayList TargetNamesToBuild => this.targetNamesToBuild;
 
         /// <summary>
         /// Build request that caused the context to come into existance (either from the host or generated)
         /// </summary>
-        internal BuildRequest BuildRequest
-        {
-            get
-            {
-                return this.buildRequest;
-            }
-        }
+        internal BuildRequest BuildRequest => this.buildRequest;
 
         #endregion
 
@@ -264,13 +223,8 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Contains the event context for the build context, this is created when the ProjectBuildState is created
         /// </summary>
-        internal BuildEventContext ProjectBuildEventContext
-        {
-            get
-            {
-                return this.projectBuildEventContext;
-            }
-        }
+        internal BuildEventContext ProjectBuildEventContext => this.projectBuildEventContext;
+
         #endregion
 
         #endregion

@@ -64,15 +64,9 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>Target object.</value>
-        internal Target TargetToAnalyze
-        {
-            get
-            {
-                return targetToAnalyze;
-            }
-        }
+        internal Target TargetToAnalyze => targetToAnalyze;
 
-               /// <summary>
+        /// <summary>
         /// Gets the value of the target's "Inputs" attribute.
         /// </summary>
         /// <owner>SumedhK</owner>
@@ -1251,42 +1245,27 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// The reason that we are logging this entry
         /// </summary>
-        internal OutofdateReason Reason
-        {
-            get { return reason; }
-        }
+        internal OutofdateReason Reason => reason;
 
         /// <summary>
         /// The input item name (can be null)
         /// </summary>
-        public string InputItemName
-        {
-            get { return inputItemName; }
-        }
+        public string InputItemName => inputItemName;
 
         /// <summary>
         /// The output item name (can be null)
         /// </summary>
-        public string OutputItemName
-        {
-            get { return outputItemName; }
-        }
+        public string OutputItemName => outputItemName;
 
         /// <summary>
         /// The input file
         /// </summary>
-        public string Input
-        {
-            get { return input; }
-        }
+        public string Input => input;
 
         /// <summary>
         /// The output file
         /// </summary>
-        public string Output
-        {
-            get { return output; }
-        }
+        public string Output => output;
 
         /// <summary>
         /// Construct a log detail element

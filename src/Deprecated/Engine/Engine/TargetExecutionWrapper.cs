@@ -103,22 +103,11 @@ namespace Microsoft.Build.BuildEngine
         #endregion
 
         #region Properties
-        internal ProjectBuildState InitiatingBuildContext
-        {
-            get
-            {
-                return this.initiatingBuildContext;
-            }
-        }
+        internal ProjectBuildState InitiatingBuildContext => this.initiatingBuildContext;
 
-        internal bool BuildingRequiredTargets
-        {
-            get
-            {
-                return (inProgressBuildState == InProgressBuildState.BuildingDependencies ||
-                        inProgressBuildState == InProgressBuildState.BuildingErrorClause);
-            }
-        }
+        internal bool BuildingRequiredTargets =>
+            (inProgressBuildState == InProgressBuildState.BuildingDependencies ||
+             inProgressBuildState == InProgressBuildState.BuildingErrorClause);
 
         #endregion
 

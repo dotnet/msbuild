@@ -917,14 +917,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal bool OnlyLogCriticalEvents
         {
-            get
-            {
-                return this.onlyLogCriticalEvents;
-            }
-            set
-            {
-                this.onlyLogCriticalEvents = value;
-            }
+            get => this.onlyLogCriticalEvents;
+            set => this.onlyLogCriticalEvents = value;
         }
 
         /// <summary>
@@ -933,14 +927,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal EngineLoggingServices ForwardingService
         {
-            get
-            {
-                return this.forwardingService;
-            }
-            set
-            {
-                this.forwardingService = value;
-            }
+            get => this.forwardingService;
+            set => this.forwardingService = value;
         }
 
         /// <summary>
@@ -948,14 +936,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal bool FlushBuildEventsImmediatly
         {
-            get
-            {
-                return this.flushBuildEventsImmediatly;
-            }
-            set
-            {
-                this.flushBuildEventsImmediatly = value;
-            }
+            get => this.flushBuildEventsImmediatly;
+            set => this.flushBuildEventsImmediatly = value;
         }
 
         #endregion

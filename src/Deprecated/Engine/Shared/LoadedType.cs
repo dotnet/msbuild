@@ -163,26 +163,14 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>The loaded type.</value>
-        internal Type Type
-        {
-            get
-            {
-                return type;
-            }
-        }
+        internal Type Type => type;
 
         /// <summary>
         /// Gets the assembly the type was loaded from.
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>The assembly info for the loaded type.</value>
-        internal AssemblyLoadInfo Assembly
-        {
-            get
-            {
-                return assembly;
-            }
-        }
+        internal AssemblyLoadInfo Assembly => assembly;
 
         #endregion
 

@@ -178,15 +178,9 @@ namespace Microsoft.Build.UnitTests
                 set;
             }
 
-            public System.Collections.ICollection MetadataNames
-            {
-                get { throw new NotImplementedException(); }
-            }
+            public System.Collections.ICollection MetadataNames => throw new NotImplementedException();
 
-            public int MetadataCount
-            {
-                get { throw new NotImplementedException(); }
-            }
+            public int MetadataCount => throw new NotImplementedException();
 
             public string GetMetadata(string metadataName)
             {

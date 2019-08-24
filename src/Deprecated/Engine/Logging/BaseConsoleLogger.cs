@@ -25,15 +25,9 @@ namespace Microsoft.Build.BuildEngine
         /// <value>Verbosity level.</value>
         public LoggerVerbosity Verbosity
         {
-            get
-            {
-                return verbosity;
-            }
+            get => verbosity;
 
-            set
-            {
-                verbosity = value;
-            }
+            set => verbosity = value;
         }
 
         /// <summary>
@@ -43,15 +37,9 @@ namespace Microsoft.Build.BuildEngine
         /// <value>null</value>
         public string Parameters
         {
-            get
-            {
-                return loggerParameters;
-            }
+            get => loggerParameters;
 
-            set
-            {
-                loggerParameters = value;
-            }
+            set => loggerParameters = value;
         }
 
         /// <summary>
@@ -61,15 +49,9 @@ namespace Microsoft.Build.BuildEngine
         /// <remarks>This is only needed by the IDE logger.</remarks>
         internal bool SkipProjectStartedText
         {
-            get
-            {
-                return skipProjectStartedText;
-            }
+            get => skipProjectStartedText;
 
-            set
-            {
-                skipProjectStartedText = value;
-            }
+            set => skipProjectStartedText = value;
         }
 
         /// <summary>
@@ -77,15 +59,9 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal bool ShowSummary
         {
-            get
-            {
-                return showSummary ?? false;
-            }
+            get => showSummary ?? false;
 
-            set
-            {
-                showSummary = value;
-            }
+            set => showSummary = value;
         }
 
         /// <summary>
@@ -94,15 +70,9 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         protected WriteHandler WriteHandler
         {
-            get
-            {
-                return write;
-            }
+            get => write;
 
-            set
-            {
-                write = value;
-            }
+            set => write = value;
         }
         #endregion
 
@@ -674,41 +644,29 @@ namespace Microsoft.Build.BuildEngine
             /// <summary>
             /// Name of the scope.
             /// </summary>
-            internal string ScopeName
-            {
-                get { return scopeName; }
-            }
+            internal string ScopeName => scopeName;
 
             /// <summary>
             /// Total number of calls so far.
             /// </summary>
-            internal int Calls
-            {
-                get { return calls; }
-            }
+            internal int Calls => calls;
 
             /// <summary>
             /// Total accumalated time so far.
             /// </summary>
-            internal TimeSpan ElapsedTime
-            {
-                get { return elapsedTime; }
-            }
+            internal TimeSpan ElapsedTime => elapsedTime;
 
             /// <summary>
             /// Whether or not this scope was reentered. Timing information is not recorded in these cases.
             /// </summary>
-            internal bool ReenteredScope
-            {
-                get { return reenteredScope; }
-            }
+            internal bool ReenteredScope => reenteredScope;
 
             /// <summary>
             /// Whether or not this task or target is executing right now.
             /// </summary>
             internal  bool InScope 
             {
-                get { return inScope; }
+                get => inScope;
                 set
                 {
                     if (!reenteredScope)
@@ -770,10 +728,7 @@ namespace Microsoft.Build.BuildEngine
             /// Returns an IComparer that will put erformance counters 
             /// in descending order by elapsed time.
             /// </summary>
-            static internal IComparer DescendingByElapsedTimeComparer
-            {
-                get { return new DescendingByElapsedTime(); }
-            }
+            static internal IComparer DescendingByElapsedTimeComparer => new DescendingByElapsedTime();
 
             /// <summary>
             /// Private IComparer class for sorting performance counters 

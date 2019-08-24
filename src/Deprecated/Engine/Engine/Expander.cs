@@ -48,10 +48,7 @@ namespace Microsoft.Build.BuildEngine
         /// Accessor for the item metadata used for metadata expansion (not counting metadata
         /// referenced inside a transform).
         /// </summary>
-        internal Dictionary<string, string> ItemMetadata
-        {
-            get { return itemMetadata; }
-        }
+        internal Dictionary<string, string> ItemMetadata => itemMetadata;
 
         #region Constructors
 
@@ -999,18 +996,12 @@ namespace Microsoft.Build.BuildEngine
             ///     [System.Diagnostics.Process]::Start
             ///     SomeMSBuildProperty
             /// </summary>
-            public string ExpressionRootName
-            {
-                get { return expressionRootName; }
-            }
+            public string ExpressionRootName => expressionRootName;
 
             /// <summary>
             /// The type of the instance on which this function acts
             /// </summary>
-            public Type ObjectType
-            {
-                get { return objectType; }
-            }
+            public Type ObjectType => objectType;
 
             /// <summary>
             /// Extract the function details from the given property function expression

@@ -78,48 +78,24 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Unique identifier for the target
         /// </summary>
-        internal TargetIdWrapper TargetId
-        {
-            get
-            {
-                return this.targetId;
-            }
-        }
+        internal TargetIdWrapper TargetId => this.targetId;
 
         /// <summary>
         /// List of unique identifiers for the targets that are blocked until the current 
         /// target completes
         /// </summary>
-        internal List<TargetIdWrapper> ParentTargets
-        {
-            get
-            {
-                return this.parentTargets;
-            }
-        }
+        internal List<TargetIdWrapper> ParentTargets => this.parentTargets;
 
         /// <summary>
         /// List of build requests that are blocked until the current 
         /// target completes
         /// </summary>
-        internal List<BuildRequest> ParentBuildRequests
-        {
-            get
-            {
-                return this.parentBuildRequests;
-            }
-        }
+        internal List<BuildRequest> ParentBuildRequests => this.parentBuildRequests;
 
         /// <summary>
         /// Array of build requests that must complete before the current 
         /// target can make forward process
-        internal BuildRequest[] OutstandingBuildRequests
-        {
-            get
-            {
-                return this.outstandingBuildRequests;
-            }
-        }
+        internal BuildRequest[] OutstandingBuildRequests => this.outstandingBuildRequests;
 
         /// <summary>
         /// An array of unique identifiers for the targets that generated the build requests (parentBuildRequests)
@@ -128,14 +104,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal TargetIdWrapper[] ParentTargetsForBuildRequests
         {
-            get
-            {
-                return this.parentTargetsForBuildRequests;
-            }
-            set
-            {
-                this.parentTargetsForBuildRequests = value;
-            }
+            get => this.parentTargetsForBuildRequests;
+            set => this.parentTargetsForBuildRequests = value;
         }
 
         /// <summary>
@@ -157,13 +127,8 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Name of the project containing the target (only used for logging)
         /// </summary>
-        internal string ProjectName
-        {
-            get
-            {
-                return projectName;
-            }
-        }
+        internal string ProjectName => projectName;
+
         #endregion
 
         #region Methods

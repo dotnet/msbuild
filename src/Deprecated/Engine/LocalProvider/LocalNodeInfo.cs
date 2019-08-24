@@ -37,123 +37,57 @@ namespace Microsoft.Build.BuildEngine
 
         internal SharedMemory SharedMemoryToNode
         {
-            get
-            {
-                return this.sharedMemoryToNode;
-            }
-            set
-            {
-                this.sharedMemoryToNode = value;
-            }
+            get => this.sharedMemoryToNode;
+            set => this.sharedMemoryToNode = value;
         }
 
         internal SharedMemory SharedMemoryFromNode
         {
-            get
-            {
-                return this.sharedMemoryFromNode;
-            }
-            set
-            {
-                this.sharedMemoryFromNode = value;
-            }
+            get => this.sharedMemoryFromNode;
+            set => this.sharedMemoryFromNode = value;
         }
 
-        internal DualQueue<LocalCallDescriptor> NodeCommandQueue
-        {
-            get
-            {
-                return this.nodeCommandQueue;
-            }
-        }
+        internal DualQueue<LocalCallDescriptor> NodeCommandQueue => this.nodeCommandQueue;
 
-        internal DualQueue<LocalCallDescriptor> NodeHiPriCommandQueue
-        {
-            get
-            {
-                return this.nodeHiPriCommandQueue;
-            }
-        }
+        internal DualQueue<LocalCallDescriptor> NodeHiPriCommandQueue => this.nodeHiPriCommandQueue;
 
 
         internal LinkedList<BuildRequest> TargetList
         {
-            get
-            {
-                return this.targetList;
-            }
-            set
-            {
-                this.targetList = value;
-            }
+            get => this.targetList;
+            set => this.targetList = value;
         }
 
         internal LocalNodeProvider.NodeState NodeState
         {
-            get
-            {
-                return this.nodeState;
-            }
-            set
-            {
-                this.nodeState = value;
-            }
+            get => this.nodeState;
+            set => this.nodeState = value;
         }
 
-        internal int NodeNumber
-        {
-            get
-            {
-                return this.nodeNumber;
-            }
-        }
+        internal int NodeNumber => this.nodeNumber;
 
         internal int NodeId
         {
-            get
-            {
-                return this.nodeId;
-            }
-            set
-            {
-                this.nodeId = value;
-            }
+            get => this.nodeId;
+            set => this.nodeId = value;
         }
 
         internal int ProcessId
         {
-            get
-            {
-                return this.processId;
-            }
-            set
-            {
-                this.processId = value;
-            }
+            get => this.processId;
+            set => this.processId = value;
         }
 
         internal bool CommunicationFailed
         {
-            get
-            {
-                return this.communicationFailed;
-            }
-            set
-            {
-                this.communicationFailed = value;
-            }
+            get => this.communicationFailed;
+            set => this.communicationFailed = value;
         }
 
         public bool ShutdownResponseReceived
         {
-            get 
-            {
-                return shutdownResponseReceived;
-            }
-            set 
-            { 
-                shutdownResponseReceived = value;
-            }
+            get => shutdownResponseReceived;
+            set => shutdownResponseReceived = value;
         }
         #endregion
 

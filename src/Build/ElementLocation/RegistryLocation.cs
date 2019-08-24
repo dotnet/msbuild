@@ -45,35 +45,23 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Not relevant, returns empty string.
         /// </summary>
-        public string File
-        {
-            get { return String.Empty; }
-        }
+        public string File => String.Empty;
 
         /// <summary>
         /// Not relevant, returns 0.
         /// </summary>
-        public int Line
-        {
-            get { return 0; }
-        }
+        public int Line => 0;
 
         /// <summary>
         /// Not relevant, returns 0.
         /// </summary>
-        public int Column
-        {
-            get { return 0; }
-        }
+        public int Column => 0;
 
         /// <summary>
         /// The location in a form suitable for replacement
         /// into a message.
         /// </summary>
-        public string LocationString
-        {
-            get { return registryPath; }
-        }
+        public string LocationString => registryPath;
 
         #region INodePacketTranslatable Members
 

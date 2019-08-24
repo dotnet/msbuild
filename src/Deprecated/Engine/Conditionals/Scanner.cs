@@ -114,10 +114,7 @@ namespace Microsoft.Build.BuildEngine
             return lookahead.String;
         }
 
-        internal Token CurrentToken
-        {
-            get { return lookahead; }
-        }
+        internal Token CurrentToken => lookahead;
 
         internal int GetErrorPosition()
         {
@@ -127,13 +124,7 @@ namespace Microsoft.Build.BuildEngine
 
         // The string (usually a single character) we found unexpectedly. 
         // We might want to show it in the error message, to help the user spot the error.
-        internal string UnexpectedlyFound
-        {
-            get
-            {
-                return unexpectedlyFound;
-            }
-        }
+        internal string UnexpectedlyFound => unexpectedlyFound;
 
         /// <summary>
         /// Advance

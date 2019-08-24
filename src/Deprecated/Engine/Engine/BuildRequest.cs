@@ -133,80 +133,44 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal Engine ParentEngine
         {
-            get
-            {
-                return this.parentEngine;
-            }
-            set
-            {
-                this.parentEngine = value;
-            }
+            get => this.parentEngine;
+            set => this.parentEngine = value;
         }
         /// <summary>
         /// The outputs of the build request
         /// </summary>
         internal IDictionary OutputsByTarget
         {
-            get
-            {
-                return this.outputsByTarget;
-            }
-            set
-            {
-                this.outputsByTarget = value;
-            }
+            get => this.outputsByTarget;
+            set => this.outputsByTarget = value;
         }
 
         /// <summary>
         /// Build result per target
         /// </summary>
-        internal Hashtable ResultByTarget
-        {
-            get
-            {
-                return this.resultByTarget;
-            }
-        }
+        internal Hashtable ResultByTarget => this.resultByTarget;
 
         /// <summary>
         /// The result of the build request
         /// </summary>
         internal bool BuildSucceeded
         {
-            get
-            {
-                return this.buildSucceeded;
-            }
-            set
-            {
-                this.buildSucceeded = value;
-            }
+            get => this.buildSucceeded;
+            set => this.buildSucceeded = value;
         }
 
         /// <summary>
         /// The list of targets that need to be evaluated
         /// </summary>
-        internal string[] TargetNames
-        {
-            get
-            {
-                return this.targetNames;
-            }
-        }
+        internal string[] TargetNames => this.targetNames;
 
         /// <summary>
         /// The build settings
         /// </summary>
         internal BuildSettings BuildSettings
         {
-            get
-            {
-                return this.buildSettings;
-            }
-            set
-            {
-                this.buildSettings = value;
-            }
+            get => this.buildSettings;
+            set => this.buildSettings = value;
         }
 
         /// <summary>
@@ -214,38 +178,20 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal Project ProjectToBuild
         {
-            get
-            {
-                return this.projectToBuild;
-            }
-            set
-            {
-                this.projectToBuild = value;
-            }
+            get => this.projectToBuild;
+            set => this.projectToBuild = value;
         }
 
         internal bool FireProjectStartedFinishedEvents
         {
-            get
-            {
-                return this.fireProjectStartedFinishedEvents;
-            }
-            set
-            {
-                this.fireProjectStartedFinishedEvents = value;
-            }
+            get => this.fireProjectStartedFinishedEvents;
+            set => this.fireProjectStartedFinishedEvents = value;
         }
 
         internal int NodeIndex
         {
-            get
-            {
-                return this.nodeIndex;
-            }
-            set
-            {
-                this.nodeIndex = value;
-            }
+            get => this.nodeIndex;
+            set => this.nodeIndex = value;
         }
 
         /// <summary>
@@ -254,258 +200,138 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal int HandleId
         {
-            get
-            {
-                return this.handleId;
-            }
-            set
-            {
-                this.handleId = value;
-            }
+            get => this.handleId;
+            set => this.handleId = value;
         }
 
         internal int ParentHandleId
         {
-            get
-            {
-                return parentHandleId;
-            }
-            set
-            {
-                parentHandleId = value;
-            }
+            get => parentHandleId;
+            set => parentHandleId = value;
         }
 
         internal int ProjectId
         {
-            get
-            {
-                return this.projectId;
-            }
-            set
-            {
-                this.projectId = value;
-            }
+            get => this.projectId;
+            set => this.projectId = value;
         }
 
         internal int ParentRequestId
         {
-            get
-            {
-                return this.parentRequestId;
-            }
-            set
-            {
-                this.parentRequestId = value;
-            }
+            get => this.parentRequestId;
+            set => this.parentRequestId = value;
         }
 
         internal string ProjectFileName
         {
-            get
-            {
-                return this.projectFileName;
-            }
-            set
-            {
-                this.projectFileName = value;
-            }
+            get => this.projectFileName;
+            set => this.projectFileName = value;
         }
 
         internal BuildPropertyGroup GlobalProperties
         {
-            get
-            {
-                return this.globalProperties;
-            }
-            set
-            {
-                this.globalProperties = value;
-            }
+            get => this.globalProperties;
+            set => this.globalProperties = value;
         }
 
-        internal IDictionary GlobalPropertiesPassedByTask
-        {
-            get
-            {
-                return this.globalPropertiesPassedByTask;
-            }
-        }
+        internal IDictionary GlobalPropertiesPassedByTask => this.globalPropertiesPassedByTask;
 
         internal bool BuildCompleted
         {
-            get
-            {
-                return this.buildCompleted;
-            }
-            set
-            {
-                this.buildCompleted = value;
-            }
+            get => this.buildCompleted;
+            set => this.buildCompleted = value;
         }
 
         internal int RequestId
         {
-            get
-            {
-                return this.requestId;
-            }
-            set
-            {
-                this.requestId = value;
-            }
+            get => this.requestId;
+            set => this.requestId = value;
         }
 
         /// <summary>
         /// Returns true if this BuildRequest came from a task, rather than
         /// the Host Engine itself.
         /// </summary>
-        internal bool IsGeneratedRequest
-        {
-            get
-            {
-                return (handleId != EngineCallback.invalidEngineHandle);
-            }
-        }
+        internal bool IsGeneratedRequest => (handleId != EngineCallback.invalidEngineHandle);
 
         /// <summary>
         /// This is set to true if the build request was sent from the parent process
         /// </summary>
         internal bool IsExternalRequest
         {
-            get
-            {
-                return isExternalRequest;
-            }
-            set
-            {
-                isExternalRequest = value;
-            }
+            get => isExternalRequest;
+            set => isExternalRequest = value;
         }
 
-        internal bool UnloadProjectsOnCompletion
-        {
-            get
-            {
-                return this.unloadProjectsOnCompletion;
-            }
-        }
+        internal bool UnloadProjectsOnCompletion => this.unloadProjectsOnCompletion;
 
         internal bool UseResultsCache
         {
-            get
-            {
-                return this.useResultsCache;
-            }
-            set
-            {
-                this.useResultsCache = value;
-            }
+            get => this.useResultsCache;
+            set => this.useResultsCache = value;
         }
 
         internal string DefaultTargets
         {
-            get
-            {
-                return this.defaultTargets;
-            }
-            set
-            {
-                this.defaultTargets = value;
-            }
+            get => this.defaultTargets;
+            set => this.defaultTargets = value;
         }
 
         internal string InitialTargets
         {
-            get
-            {
-                return this.initialTargets;
-            }
-            set
-            {
-                this.initialTargets = value;
-            }
+            get => this.initialTargets;
+            set => this.initialTargets = value;
         }
 
         internal BuildEventContext ParentBuildEventContext
         {
-            get
-            {
-                return buildEventContext;
-            }
+            get => buildEventContext;
 
-            set
-            {
-                buildEventContext = value;
-            }
+            set => buildEventContext = value;
         }
 
 
         internal string ToolsetVersion
         {
-            get
-            {
-                return toolsetVersion;
-            }
-            set
-            {
-                this.toolsetVersion = value;
-            }
+            get => toolsetVersion;
+            set => this.toolsetVersion = value;
         }
 
         internal InvalidProjectFileException BuildException
         {
-            get
-            {
-                return buildException;
-            }
-            set
-            {
-                buildException = value;
-            }
+            get => buildException;
+            set => buildException = value;
         }
 
         internal bool ToolsVersionPeekedFromProjectFile
         {
-            get
-            {
-                return toolsVersionPeekedFromProjectFile;
-            }
-            set
-            {
-                toolsVersionPeekedFromProjectFile = value;
-            }
+            get => toolsVersionPeekedFromProjectFile;
+            set => toolsVersionPeekedFromProjectFile = value;
         }
 
         /// <summary>
         /// True if the build results in this requests have been restored from the cache
         /// (in which case there's no point in caching them again)
         /// </summary>
-        internal bool RestoredFromCache
-        {
-            get
-            {
-                return this.restoredFromCache;
-            }
-        }
+        internal bool RestoredFromCache => this.restoredFromCache;
 
         // Temp timing data properties
         internal long StartTime
         {
-            get { return startTime; }
-            set { startTime = value; }
+            get => startTime;
+            set => startTime = value;
         }
         
         internal long ProcessingStartTime
         {
-            get { return processingStartTime; }
-            set { processingStartTime = value; }
+            get => processingStartTime;
+            set => processingStartTime = value;
         }
         
         internal long ProcessingTotalTime
         {
-            get { return processingTotalTime; }
-            set { processingTotalTime = value; }
+            get => processingTotalTime;
+            set => processingTotalTime = value;
         }
 
         #endregion

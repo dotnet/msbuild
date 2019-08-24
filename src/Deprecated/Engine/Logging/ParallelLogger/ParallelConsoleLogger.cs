@@ -1459,8 +1459,8 @@ namespace Microsoft.Build.BuildEngine
 
             internal int MessageIdentLevel
             {
-                get { return messageIdentLevel; }
-                set { messageIdentLevel = value; }
+                get => messageIdentLevel;
+                set => messageIdentLevel = value;
             }
 
             internal MPPerformanceCounter(string scopeName)

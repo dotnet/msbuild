@@ -118,10 +118,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Read-only accessor for the Project instance that this ImportCollection belongs to.
         /// </summary>
-        internal Project ParentProject
-        {
-            get { return parentProject; }
-        }
+        internal Project ParentProject => parentProject;
 
         /// <summary>
         /// Removes all Imports from this collection. Does not alter the parent project's XML.
@@ -146,10 +143,7 @@ namespace Microsoft.Build.BuildEngine
                 ErrorUtilities.VerifyThrow(this.imports != null, "ImportCollection's Hashtable not initialized!");
                 return (Import)this.imports[index];
             }
-            set
-            {
-                this.imports[index] = value;
-            }
+            set => this.imports[index] = value;
         }
 
         /// <summary>

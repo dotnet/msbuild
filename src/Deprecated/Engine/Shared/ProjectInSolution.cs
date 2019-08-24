@@ -118,20 +118,20 @@ namespace Microsoft.Build.BuildEngine.Shared
 
         internal SolutionProjectType ProjectType
         {
-            get { return projectType; }
-            set { projectType = value; }
+            get => projectType;
+            set => projectType = value;
         }
 
         internal string ProjectName
         {
-            get { return projectName; }
-            set { projectName = value; }
+            get => projectName;
+            set => projectName = value;
         }
 
         internal string RelativePath
         {
-            get { return relativePath; }
-            set { relativePath = value; }
+            get => relativePath;
+            set => relativePath = value;
         }
 
         /// <summary>
@@ -139,69 +139,54 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// </summary>
         /// <returns></returns>
         /// <owner>LukaszG</owner>
-        internal string AbsolutePath
-        {
-            get
-            {
-                return Path.Combine(this.ParentSolution.SolutionFileDirectory, this.RelativePath);
-            }
-        }
+        internal string AbsolutePath => Path.Combine(this.ParentSolution.SolutionFileDirectory, this.RelativePath);
 
         internal string ProjectGuid
         {
-            get { return projectGuid; }
-            set { projectGuid = value; }
+            get => projectGuid;
+            set => projectGuid = value;
         }
 
-        internal ArrayList Dependencies
-        {
-            get { return dependencies; }
-        }
+        internal ArrayList Dependencies => dependencies;
 
-        internal ArrayList ProjectReferences
-        {
-            get { return projectReferences; }
-        }
+        internal ArrayList ProjectReferences => projectReferences;
 
         internal string ParentProjectGuid
         {
-            get { return parentProjectGuid; }
-            set { parentProjectGuid = value; }
+            get => parentProjectGuid;
+            set => parentProjectGuid = value;
         }
 
         internal SolutionParser ParentSolution
         {
-            get { return parentSolution; }
-            set { parentSolution = value; }
+            get => parentSolution;
+            set => parentSolution = value;
         }
 
         internal Hashtable AspNetConfigurations
         {
-            get { return aspNetConfigurations; }
-            set { aspNetConfigurations = value; }
+            get => aspNetConfigurations;
+            set => aspNetConfigurations = value;
         }
 
-        internal Dictionary<string, ProjectConfigurationInSolution> ProjectConfigurations
-        {
-            get { return this.projectConfigurations; }
-        }
+        internal Dictionary<string, ProjectConfigurationInSolution> ProjectConfigurations => this.projectConfigurations;
 
         internal int DependencyLevel
         {
-            get { return this.dependencyLevel; }
-            set { this.dependencyLevel = value; }
+            get => this.dependencyLevel;
+            set => this.dependencyLevel = value;
         }
 
         internal bool IsStaticLibrary
         {
-            get { return this.isStaticLibrary; }
-            set { this.isStaticLibrary = value; }
+            get => this.isStaticLibrary;
+            set => this.isStaticLibrary = value;
         }
 
         internal bool ChildReferencesGathered
         {
-            get { return this.childReferencesGathered; }
-            set { this.childReferencesGathered = value; }
+            get => this.childReferencesGathered;
+            set => this.childReferencesGathered = value;
         }
 
         #endregion

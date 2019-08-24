@@ -88,8 +88,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal GenericExpressionNode LeftChild
         {
-            set { this.leftChild = value; }
-            get { return this.leftChild; }
+            set => this.leftChild = value;
+            get => this.leftChild;
         }
 
         /// <summary>
@@ -97,8 +97,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal GenericExpressionNode RightChild
         {
-            set { this.rightChild = value; }
-            get { return this.rightChild; }
+            set => this.rightChild = value;
+            get => this.rightChild;
         }
 
         #region REMOVE_COMPAT_WARNING

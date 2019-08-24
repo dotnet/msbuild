@@ -40,10 +40,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
         /// <value>
         /// The metadata.
         /// </value>
-        public IEnumerable<KeyValuePair<string, string>> Metadata
-        {
-            get { return _metadata; }
-        }
+        public IEnumerable<KeyValuePair<string, string>> Metadata => _metadata;
 
         /// <summary>
         /// Adds the metadata to the item.

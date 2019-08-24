@@ -59,13 +59,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <value></value>
         /// <owner>RGoel</owner>
-        internal Project ParentProject
-        {
-            get
-            {
-                return this.parentProject;
-            }
-        }
+        internal Project ParentProject => this.parentProject;
 
         /// <summary>
         /// Read-only property which returns the number of Targets contained
@@ -86,26 +80,14 @@ namespace Microsoft.Build.BuildEngine
         /// This ICollection property tells whether this object is thread-safe.
         /// </summary>
         /// <owner>RGoel</owner>
-        public bool IsSynchronized
-        {
-            get
-            {
-                return this.targetTable.IsSynchronized;
-            }
-        }
+        public bool IsSynchronized => this.targetTable.IsSynchronized;
 
         /// <summary>
         /// This ICollection property returns the object to be used to synchronize
         /// access to the class.
         /// </summary>
         /// <owner>RGoel</owner>
-        public object SyncRoot
-        {
-            get
-            {
-                return this.targetTable.SyncRoot;
-            }
-        }
+        public object SyncRoot => this.targetTable.SyncRoot;
 
         /// <summary>
         /// Gets the target with the given name, case-insensitively.

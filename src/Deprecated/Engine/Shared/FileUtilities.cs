@@ -698,24 +698,12 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <summary>
         /// Full path to the directory that the current exe (for example, msbuild.exe) is located in
         /// </summary>
-        internal static string CurrentExecutableDirectory
-        {
-            get
-            {
-                return Path.GetDirectoryName(CurrentExecutablePath);
-            }
-        }
+        internal static string CurrentExecutableDirectory => Path.GetDirectoryName(CurrentExecutablePath);
 
         /// <summary>
         /// Full path to the current config file (for example, msbuild.exe.config)
         /// </summary>
-        internal static string CurrentExecutableConfigurationFilePath
-        {
-            get
-            {
-                return String.Concat(CurrentExecutablePath, ".config");
-            }
-        }
+        internal static string CurrentExecutableConfigurationFilePath => String.Concat(CurrentExecutablePath, ".config");
 
         /// <summary>
         /// Gets a file info object for the specified file path. If the file path

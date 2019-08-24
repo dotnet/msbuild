@@ -48,8 +48,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal BuildItem[] BuildItems
         {
-            get { return buildItems; }
-            set { buildItems = value; }
+            get => buildItems;
+            set => buildItems = value;
         }
 
         #endregion

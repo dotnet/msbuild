@@ -164,50 +164,26 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>The build event args, or null.</value>
-        public BuildEventArgs BuildEventArgs
-        {
-            get
-            {
-                return e;
-            }
-        }
+        public BuildEventArgs BuildEventArgs => e;
 
         /// <summary>
         /// Gets the error code associated with this exception's message (not the inner exception).
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>The error code string.</value>
-        public string ErrorCode
-        {
-            get
-            {
-                return errorCode;
-            }
-        }
+        public string ErrorCode => errorCode;
 
         /// <summary>
         /// Gets the F1-help keyword associated with this error, for the host IDE.
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>The keyword string.</value>
-        public string HelpKeyword
-        {
-            get
-            {
-                return helpKeyword;
-            }
-        }
+        public string HelpKeyword => helpKeyword;
 
         /// <summary>
         /// True if the exception occured during logger initialization
         /// </summary>
-        public bool InitializationException
-        {
-            get
-            {
-                return initializationException;
-            }
-        }
+        public bool InitializationException => initializationException;
 
         #endregion
 

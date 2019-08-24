@@ -218,33 +218,19 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// The nodePacket Type, in this case the packet is a Logging Message
         /// </summary>
-        public NodePacketType Type
-        {
-            get { return NodePacketType.LogMessage; }
-        }
+        public NodePacketType Type => NodePacketType.LogMessage;
 
         /// <summary>
         /// The buildEventArg wrapped by this packet
         /// </summary>
-        internal KeyValuePair<int, BuildEventArgs>? NodeBuildEvent
-        {
-            get
-            {
-                return new KeyValuePair<int, BuildEventArgs>(_sinkId, _buildEvent);
-            }
-        }
+        internal KeyValuePair<int, BuildEventArgs>? NodeBuildEvent => new KeyValuePair<int, BuildEventArgs>(_sinkId, _buildEvent);
 
         /// <summary>
         /// The event type of the wrapped buildEventArg 
         /// based on the LoggingEventType enumeration 
         /// </summary>
-        internal LoggingEventType EventType
-        {
-            get
-            {
-                return _eventType;
-            }
-        }
+        internal LoggingEventType EventType => _eventType;
+
         #endregion
 
         #region INodePacket Methods

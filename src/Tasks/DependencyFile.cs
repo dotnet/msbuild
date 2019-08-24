@@ -30,26 +30,17 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The name of the file.
         /// </summary>
-        internal string FileName
-        {
-            get { return filename; }
-        }
+        internal string FileName => filename;
 
         /// <summary>
         /// The last-modified timestamp when the class was instantiated.
         /// </summary>
-        internal DateTime LastModified
-        {
-            get { return lastModified; }
-        }
+        internal DateTime LastModified => lastModified;
 
         /// <summary>
         /// Returns true if the file existed when this class was instantiated.
         /// </summary>
-        internal bool Exists
-        {
-            get { return exists; }
-        }
+        internal bool Exists => exists;
 
         /// <summary>
         /// Construct.

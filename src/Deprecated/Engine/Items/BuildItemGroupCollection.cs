@@ -69,38 +69,20 @@ namespace Microsoft.Build.BuildEngine
         /// <remarks>
         /// </remarks>
         /// <owner>DavidLe</owner>
-        public int Count
-        {
-            get
-            {
-                return this.groupingCollection.ItemGroupCount;
-            }
-        }
+        public int Count => this.groupingCollection.ItemGroupCount;
 
         /// <summary>
         /// This ICollection property tells whether this object is thread-safe.
         /// </summary>
         /// <owner>DavidLe</owner>
-        public bool IsSynchronized
-        {
-            get
-            {
-                return this.groupingCollection.IsSynchronized;
-            }
-        }
+        public bool IsSynchronized => this.groupingCollection.IsSynchronized;
 
         /// <summary>
         /// This ICollection property returns the object to be used to synchronize
         /// access to the class.
         /// </summary>
         /// <owner>DavidLe</owner>
-        public object SyncRoot
-        {
-            get
-            {
-                return this.groupingCollection.SyncRoot;
-            }
-        }
+        public object SyncRoot => this.groupingCollection.SyncRoot;
 
         /// <summary>
         /// This looks through all the local item groups (those in the main

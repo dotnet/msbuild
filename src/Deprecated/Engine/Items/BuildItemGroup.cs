@@ -107,20 +107,14 @@ namespace Microsoft.Build.BuildEngine
         /// in the main project.  For virtual item groups which have no
         /// persistence, this is false.
         /// </summary>
-        public bool IsImported
-        {
-            get { return importedFromAnotherProject; }
-        }
+        public bool IsImported => importedFromAnotherProject;
 
         /// <summary>
         /// Accessor for the condition on the item group.
         /// </summary>
         public string Condition
         {
-            get
-            {
-                return (IsPersisted ? xml.Condition : String.Empty);
-            }
+            get => (IsPersisted ? xml.Condition : String.Empty);
 
             set
             {
@@ -135,18 +129,12 @@ namespace Microsoft.Build.BuildEngine
         /// Accessor for the XmlElement representing this item.  This is internal
         /// to MSBuild, and is read-only.
         /// </summary>
-        internal XmlElement ItemGroupElement
-        {
-            get { return xml.Element; }
-        }
+        internal XmlElement ItemGroupElement => xml.Element;
 
         /// <summary>
         /// Accessor for the parent Project object.
         /// </summary>
-        internal Project ParentProject
-        {
-            get { return this.parentProject; }
-        }
+        internal Project ParentProject => this.parentProject;
 
         /// <summary>
         /// Setter for parent project field that makes explicit that's it's only for clearing it.
@@ -159,44 +147,33 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Number of items in this group.
         /// </summary>
-        public int Count
-        {
-            get { return items.Count; }
-        }
+        public int Count => items.Count;
 
         /// <summary>
         /// Gets the item at the specified index.
         /// </summary>
-        public BuildItem this[int index]
-        {
-            get { return items[index]; }
-        }
+        public BuildItem this[int index] => items[index];
 
         /// <summary>
         /// Gets the actual list of items contained
         /// in this group.
         /// </summary>
-        internal List<BuildItem> Items
-        {
-            get { return items; }
-        }
+        internal List<BuildItem> Items => items;
 
         /// <summary>
         /// Accessor for the ParentCollection that the BuildPropertyGroup belongs to
         /// </summary>
         internal GroupingCollection ParentCollection
         {
-            get { return parentCollection; }
-            set { parentCollection = value; }
+            get => parentCollection;
+            set => parentCollection = value;
         }
 
         /// <summary>
         /// Accessor for the parent XML element
         /// </summary>
-        internal XmlElement ParentElement
-        {
-            get { return xml.ParentElement; }
-        }
+        internal XmlElement ParentElement => xml.ParentElement;
+
         #endregion
 
         #region Methods
@@ -704,19 +681,13 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Returns whether this is a persisted group.
         /// </summary>
-        internal bool IsPersisted
-        {
-            get { return isPersisted; }
-        }
+        internal bool IsPersisted => isPersisted;
 
         /// <summary>
         /// Returns whether the persisted items have been backed up for later
         /// recovery.
         /// </summary>
-        internal bool IsBackedUp
-        {
-            get { return (persistedItemBackup != null); }
-        }
+        internal bool IsBackedUp => (persistedItemBackup != null);
 
         /// <summary>
         /// Verifies this is a persisted group.

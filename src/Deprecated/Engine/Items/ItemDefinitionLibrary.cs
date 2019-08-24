@@ -47,10 +47,7 @@ namespace Microsoft.Build.BuildEngine
 
         #region Properties
 
-        internal bool IsEvaluated
-        {
-            get { return evaluated; }
-        }
+        internal bool IsEvaluated => evaluated;
 
         #endregion
 
@@ -334,10 +331,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Returns the item type for which this library is specific.
         /// </summary>
-        internal string ItemType
-        {
-            get { return itemType; }
-        }
+        internal string ItemType => itemType;
 
         /// <summary>
         /// Get the default if any for the specified metadata name.

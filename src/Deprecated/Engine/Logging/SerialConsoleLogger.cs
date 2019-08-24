@@ -948,13 +948,7 @@ namespace Microsoft.Build.BuildEngine
             /// in the stack.
             /// </summary>
             /// <owner>t-jeffv, sumedhk</owner>
-            internal int Count
-            {
-                get
-                {
-                    return frames.Count;
-                }
-            }
+            internal int Count => frames.Count;
 
             /// <summary>
             /// s.IsEmpty() is true iff s.Count == 0

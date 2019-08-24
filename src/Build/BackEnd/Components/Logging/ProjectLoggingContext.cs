@@ -137,13 +137,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Retrieves the node logging context.
         /// </summary>
-        internal NodeLoggingContext NodeLoggingContext
-        {
-            get
-            {
-                return _nodeLoggingContext;
-            }
-        }
+        internal NodeLoggingContext NodeLoggingContext => _nodeLoggingContext;
 
         /// <summary>
         /// Log that the project has finished

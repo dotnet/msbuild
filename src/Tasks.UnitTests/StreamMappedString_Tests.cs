@@ -278,35 +278,20 @@ namespace Microsoft.Build.UnitTests
             /// <summary>
             /// Returns the number of times this stream was reset.
             /// </summary>
-            public int ResetCount
-            {
-                get { return _resetCount; }
-            }
+            public int ResetCount => _resetCount;
 
-            public override bool CanRead
-            {
-                get { return _stream.CanRead; }
-            }
+            public override bool CanRead => _stream.CanRead;
 
-            public override bool CanSeek
-            {
-                get { throw new Exception("The method or operation is not implemented."); }
-            }
+            public override bool CanSeek => throw new Exception("The method or operation is not implemented.");
 
-            public override bool CanWrite
-            {
-                get { throw new Exception("The method or operation is not implemented."); }
-            }
+            public override bool CanWrite => throw new Exception("The method or operation is not implemented.");
 
             public override void Flush()
             {
                 throw new Exception("The method or operation is not implemented.");
             }
 
-            public override long Length
-            {
-                get { throw new Exception("The method or operation is not implemented."); }
-            }
+            public override long Length => throw new Exception("The method or operation is not implemented.");
 
             public override long Position
             {

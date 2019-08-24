@@ -264,25 +264,13 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Id for the target
         /// </summary>
-        internal int Id
-        {
-            get
-            {
-                return this.id;
-            }
-        }
+        internal int Id => this.id;
 
         /// <summary>
         /// Gets the target's name as specified in the "Name" attribute. The value of this attribute is never evaluated.
         /// </summary>
         /// <value>The target name string.</value>
-        public string Name
-        {
-            get 
-            {
-                return this.targetName;
-            }
-        }
+        public string Name => this.targetName;
 
         /// <summary>
         /// Gets the target's unevaluated "DependsOnTargets" string.
@@ -291,15 +279,9 @@ namespace Microsoft.Build.BuildEngine
         /// <value>The raw "DependsOnTargets" string.</value>
         public string DependsOnTargets
         {
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(this.dependsOnTargetsAttribute);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(this.dependsOnTargetsAttribute);
 
-            set
-            {
-                this.dependsOnTargetsAttribute = SetOrRemoveTargetAttribute(XMakeAttributes.dependsOnTargets, value);
-            }
+            set => this.dependsOnTargetsAttribute = SetOrRemoveTargetAttribute(XMakeAttributes.dependsOnTargets, value);
         }
 
         /// <summary>
@@ -309,10 +291,7 @@ namespace Microsoft.Build.BuildEngine
         /// <value>The raw "Inputs" string.</value>
         public string Inputs
         {
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(this.inputsAttribute);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(this.inputsAttribute);
             set
             {
                 this.inputsAttribute = SetOrRemoveTargetAttribute(XMakeAttributes.inputs, value);
@@ -327,10 +306,7 @@ namespace Microsoft.Build.BuildEngine
         /// <value>The raw "Outputs" string.</value>
         public string Outputs
         {
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(this.outputsAttribute);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(this.outputsAttribute);
             set
             {
                 this.outputsAttribute = SetOrRemoveTargetAttribute(XMakeAttributes.outputs, value);
@@ -345,10 +321,7 @@ namespace Microsoft.Build.BuildEngine
         /// <value>The raw condition string.</value>
         public string Condition
         {
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(this.conditionAttribute);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(this.conditionAttribute);
 
             set
             {
@@ -361,36 +334,18 @@ namespace Microsoft.Build.BuildEngine
         /// Read-only accessor for accessing the XML attribute for "Condition".  Callers should
         /// never try and modify this.  Go through this.Condition to change the condition.
         /// </summary>
-        internal XmlAttribute ConditionAttribute
-        {
-            get
-            {
-                return this.conditionAttribute;
-            }
-        }
+        internal XmlAttribute ConditionAttribute => this.conditionAttribute;
 
         /// <summary>
         /// Gets the XML representing this target.
         /// </summary>
         /// <value>The XmlElement for the target.</value>
-        internal XmlElement TargetElement
-        {
-            get
-            {
-                return this.targetElement;
-            }
-        }
+        internal XmlElement TargetElement => this.targetElement;
 
         /// <summary>
         /// Gets the target's unevaluated "DependsOnTargets" XML element.
         /// </summary>
-        internal XmlAttribute DependsOnTargetsAttribute
-        {
-            get
-            {
-                return this.dependsOnTargetsAttribute;
-            }
-        }
+        internal XmlAttribute DependsOnTargetsAttribute => this.dependsOnTargetsAttribute;
 
         /// <summary>
         /// Gets the filename/path of the project this target was defined in. This file could be different from the file of this
@@ -417,28 +372,16 @@ namespace Microsoft.Build.BuildEngine
         /// <value></value>
         internal Project ParentProject
         {
-            get
-            {
-                return this.parentProject;
-            }
+            get => this.parentProject;
 
-            set
-            {
-                this.parentProject = value;
-            }
+            set => this.parentProject = value;
         }
 
         /// <summary>
         /// Read-only accessor for this target's parent Project object.
         /// </summary>
         /// <value></value>
-        internal Engine ParentEngine
-        {
-            get
-            {
-                return this.parentEngine;
-            }
-        }
+        internal Engine ParentEngine => this.parentEngine;
 
         /// <summary>
         /// Calculates the batchable target parameters, which can be changed if inputs and outputs are
@@ -476,30 +419,12 @@ namespace Microsoft.Build.BuildEngine
         /// in the main project.
         /// </summary>
         /// <value></value>
-        public bool IsImported
-        {
-            get
-            {
-                return this.importedFromAnotherProject;
-            }
-        }
+        public bool IsImported => this.importedFromAnotherProject;
 
-        internal BuildState TargetBuildState
-        {
-            get
-            {
-                return this.buildState;
-            }
-        }
+        internal BuildState TargetBuildState => this.buildState;
 
 
-        internal TargetExecutionWrapper ExecutionState
-        {
-            get
-            {
-                return executionState;
-            }
-        }
+        internal TargetExecutionWrapper ExecutionState => executionState;
 
         #endregion
 

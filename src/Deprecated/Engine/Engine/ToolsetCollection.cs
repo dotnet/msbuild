@@ -49,13 +49,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// The names of the toolsets stored in this collection.
         /// </summary>
-        public IEnumerable<string> ToolsVersions
-        {
-            get
-            {
-                return toolsetMap.Keys;
-            }
-        }
+        public IEnumerable<string> ToolsVersions => toolsetMap.Keys;
 
         /// <summary>
         /// Gets the Toolset with matching toolsVersion.
@@ -94,24 +88,12 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Count of elements in this collection.
         /// </summary>
-        public int Count
-        {
-            get
-            {
-                return toolsetMap.Count;
-            }
-        }
+        public int Count => toolsetMap.Count;
 
         /// <summary>
         /// Always returns false
         /// </summary>
-        public bool IsReadOnly
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public bool IsReadOnly => false;
 
         /// <summary>
         /// Adds the given Toolset to this collection, replacing any previous value

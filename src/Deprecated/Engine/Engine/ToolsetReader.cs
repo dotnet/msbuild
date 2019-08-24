@@ -33,37 +33,19 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// The name of the property
         /// </summary>
-        public string Name
-        {
-            get
-            {
-                return name;
-            }
-        }
+        public string Name => name;
 
         /// <summary>
         /// The value of the property
         /// </summary>
-        public string Value
-        {
-            get
-            {
-                return value;
-            }
-        }
+        public string Value => value;
 
         /// <summary>
         /// A description of the location where the property was defined,
         /// such as a registry key path or a path to a config file and 
         /// line number.
         /// </summary>
-        public string Source
-        {
-            get
-            {
-                return source;
-            }
-        }
+        public string Source => source;
     }
     
     internal abstract class ToolsetReader

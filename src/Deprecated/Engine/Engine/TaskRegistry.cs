@@ -58,13 +58,8 @@ namespace Microsoft.Build.BuildEngine
         /// Gets the collection of task declarations created by parsing the &lt;UsingTask&gt; XML.
         /// Used for unit tests only.
         /// </summary>
-        internal Hashtable AllTaskDeclarations
-        {
-            get
-            {
-                return registeredTasks;
-            }
-        }
+        internal Hashtable AllTaskDeclarations => registeredTasks;
+
         #endregion
 
         #region Methods

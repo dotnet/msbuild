@@ -56,23 +56,14 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Name of this toolset
         /// </summary>
-        public string ToolsVersion
-        {
-            get
-            {
-                return this.toolsVersion;
-            }
-        }
+        public string ToolsVersion => this.toolsVersion;
 
         /// <summary>
         /// Path to this toolset's tasks and targets. Corresponds to $(MSBuildToolsPath) in a project or targets file. 
         /// </summary>
         public string ToolsPath
         {
-            get
-            {
-                return this.toolsPath;
-            }
+            get => this.toolsPath;
             private set
             {
                 // Strip the trailing backslash if it exists.  This way, when somebody
@@ -100,13 +91,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Properties associated with the toolset
         /// </summary>
-        public BuildPropertyGroup BuildProperties
-        {
-            get
-            {
-                return this.properties;
-            }
-        }
+        public BuildPropertyGroup BuildProperties => this.properties;
 
         /// <summary>
         /// Make a deep copy of the Toolset

@@ -490,8 +490,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal static string PerThreadProjectDirectory
         {
-            get { return perThreadProjectDirectory; }
-            set { perThreadProjectDirectory = value; }
+            get => perThreadProjectDirectory;
+            set => perThreadProjectDirectory = value;
         }
 
         /// <summary>
@@ -499,45 +499,27 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal ItemDefinitionLibrary ItemDefinitionLibrary
         {
-            get { return itemDefinitionLibrary; }
-            set { itemDefinitionLibrary = value; }
+            get => itemDefinitionLibrary;
+            set => itemDefinitionLibrary = value;
         }
 
         //Have we used the initial project context Id that was created when the project was instantiated
         internal bool HaveUsedInitialProjectContextId
         {
-            get
-            {
-                return haveUsedInitialProjectContextId;
-            }
+            get => haveUsedInitialProjectContextId;
 
-            set
-            {
-                haveUsedInitialProjectContextId = value;
-            }
+            set => haveUsedInitialProjectContextId = value;
         }
 
         // A unique ID for this project object that can be used to distinguish projects that
         // have the same file path but different global properties
-        internal int Id
-        {
-            get
-            {
-                return projectId;
-            }
-        }
+        internal int Id => projectId;
 
         /// <summary>
         /// Returns the table of evaluated items by type.
         /// </summary>
         /// <owner>DavidLe</owner>
-        internal Hashtable EvaluatedItemsByName
-        {
-            get
-            {
-                return this.evaluatedItemsByName;
-            }
-        }
+        internal Hashtable EvaluatedItemsByName => this.evaluatedItemsByName;
 
         /// <summary>
         /// Gets or sets the fully qualified path + filename of the project file. This could be empty-string if the project
@@ -547,10 +529,7 @@ namespace Microsoft.Build.BuildEngine
         /// <value>The full path of the project file.</value>
         public string FullFileName
         {
-            get
-            {
-                return fullFileName;
-            }
+            get => fullFileName;
 
             set
             {
@@ -574,10 +553,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         public string DefaultTargets
         {
-            get
-            {
-                return String.Join("; ", this.defaultTargetNames);
-            }
+            get => String.Join("; ", this.defaultTargetNames);
 
             set
             {
@@ -630,12 +606,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         public string InitialTargets
         {
-            get
-            {
-                // Return the concatenation of the initial target names from the main project and the ones from 
-                // all the imported projects.  Join target names together with semicolons in between.
-                return String.Join("; ", (string[]) this.CombinedInitialTargetNames.ToArray(typeof(string)));
-            }
+            get => String.Join("; ", (string[]) this.CombinedInitialTargetNames.ToArray(typeof(string)));
 
             set
             {
@@ -700,14 +671,8 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         internal bool IsLoadedByHost
         {
-            get
-            {
-                return this.isLoadedByHost;
-            }
-            set
-            {
-                this.isLoadedByHost = value;
-            }
+            get => this.isLoadedByHost;
+            set => this.isLoadedByHost = value;
         }
 
         /// <summary>
@@ -716,15 +681,9 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>SumedhK</owner>
         public bool IsValidated
         {
-            get
-            {
-                return isValidated;
-            }
+            get => isValidated;
 
-            set
-            {
-                isValidated = value;
-            }
+            set => isValidated = value;
         }
 
 
@@ -732,13 +691,7 @@ namespace Microsoft.Build.BuildEngine
         /// Is this project in the process of building?
         /// </summary>
         /// <owner>JomoF</owner>
-        internal bool IsBuilding
-        {
-            get
-            {
-                return buildingCount>0;
-            }
-        }
+        internal bool IsBuilding => buildingCount>0;
 
         /// <summary>
         /// The schema against which the project (file) and all its imported files are validated.
@@ -746,16 +699,9 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>SumedhK</owner>
         public string SchemaFile
         {
-            get
-            {
-                return schemaFile;
-            }
+            get => schemaFile;
 
-            set
-            {
-                // NOTE: null is ok, in which case we'll validate against the default schema
-                schemaFile = value;
-            }
+            set => schemaFile = value;
         }
 
         /// <summary>
@@ -786,10 +732,7 @@ namespace Microsoft.Build.BuildEngine
                 }
             }
 
-            set
-            {
-                this.buildEnabled = value ? BuildEnabledSetting.BuildEnabled : BuildEnabledSetting.BuildDisabled;
-            }
+            set => this.buildEnabled = value ? BuildEnabledSetting.BuildEnabled : BuildEnabledSetting.BuildDisabled;
         }
 
         /// <summary>
@@ -836,13 +779,7 @@ namespace Microsoft.Build.BuildEngine
         /// Returns true if the ToolsVersion of this project is being overridden; false otherwise.
         /// </summary>
         /// <owner>JeffCal</owner>
-        internal bool OverridingToolsVersion
-        {
-            get
-            {
-                return this.overridingToolsVersion;
-            }
-        }
+        internal bool OverridingToolsVersion => this.overridingToolsVersion;
 
         /// <summary>
         /// Public read-write accessor for the ToolsVersion xml attribute found on the 
@@ -917,13 +854,7 @@ namespace Microsoft.Build.BuildEngine
         /// e.g. &lt;Project ToolsVersion="3.5"/&gt; . This is different to knowing the inherited
         /// value and allows us to spot Whidbey (VS 8.0) projects.
         /// </summary>
-        public bool HasToolsVersionAttribute
-        {
-            get
-            {
-                return ProjectElement.HasAttribute(XMakeAttributes.toolsVersion);
-            }
-        }
+        public bool HasToolsVersionAttribute => ProjectElement.HasAttribute(XMakeAttributes.toolsVersion);
 
         /// <summary>
         /// This private property is here for convenience so that the error checking needn't be duplicated throughout
@@ -948,10 +879,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal ITaskRegistry TaskRegistry
         {
-            get
-            {
-                return taskRegistry;
-            }
+            get => taskRegistry;
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "value");
@@ -963,13 +891,7 @@ namespace Microsoft.Build.BuildEngine
         /// The project directory where the project file is in, this can be empty if the project is constructed in memory and does 
         /// not come from a file location
         /// </summary>
-        internal string ProjectDirectory
-        {
-            get
-            {
-                return projectDirectory;
-            }
-        }
+        internal string ProjectDirectory => projectDirectory;
 
         /// <summary>
         /// Read-write accessor for the project's global properties collection.
@@ -1051,10 +973,7 @@ namespace Microsoft.Build.BuildEngine
                 return this.environmentProperties;
             }
 
-            set
-            {
-                this.environmentProperties = value;
-            }
+            set => this.environmentProperties = value;
         }
 
         /// <summary>
@@ -1105,15 +1024,9 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal BuildEventContext ProjectBuildEventContext
         {
-            get
-            {
-                return projectBuildEventContext;
-            }
+            get => projectBuildEventContext;
 
-            set
-            {
-                projectBuildEventContext = value;
-            }
+            set => projectBuildEventContext = value;
         }
 
         /// <summary>
@@ -1255,26 +1168,14 @@ namespace Microsoft.Build.BuildEngine
         /// Used for verification in unit testing.
         /// </summary>
         /// <owner>RGoel</owner>
-        internal XmlDocument XmlDocument
-        {
-            get
-            {
-                return this.mainProjectEntireContents;
-            }
-        }
+        internal XmlDocument XmlDocument => this.mainProjectEntireContents;
 
         /// <summary>
         /// Read-only accessor for main &lt;Project&gt; element.
         /// </summary>
         /// <value></value>
         /// <owner>RGoel</owner>
-        internal XmlElement ProjectElement
-        {
-            get
-            {
-                return this.mainProjectElement;
-            }
-        }
+        internal XmlElement ProjectElement => this.mainProjectElement;
 
         /// <summary>
         /// Is this project currently in a reset state in terms of the build?  That is,
@@ -1288,15 +1189,9 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         internal bool IsReset
         {
-            get
-            {
-                return this.isReset;
-            }
+            get => this.isReset;
 
-            set
-            {
-                this.isReset = value;
-            }
+            set => this.isReset = value;
         }
 
         /// <summary>
@@ -1304,35 +1199,20 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <value></value>
         /// <owner>DavidLe</owner>
-        internal Hashtable ConditionedProperties
-        {
-            get
-            {
-                return this.conditionedPropertiesTable;
-            }
-        }
+        internal Hashtable ConditionedProperties => this.conditionedPropertiesTable;
 
         /// <summary>
         /// Tells you whether this project file is dirty such that it would need
         /// to get saved to disk.
         /// </summary>
         /// <owner>RGoel</owner>
-        public bool IsDirty
-        {
-            get
-            {
-                return this.dirtyNeedToSaveProjectFile;
-            }
-        }
+        public bool IsDirty => this.dirtyNeedToSaveProjectFile;
 
         /// <summary>
         /// Tells you whether this project file is dirty such that it would need
         /// to get reevaluated.
         /// </summary>
-        internal bool IsDirtyNeedToReevaluate
-        {
-            get { return this.dirtyNeedToReevaluate; }
-        }
+        internal bool IsDirtyNeedToReevaluate => this.dirtyNeedToReevaluate;
 
         /// <summary>
         /// Returns the timestamp of when the project was last touched in a way
@@ -1340,13 +1220,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <value>The DateTime object indicating when project was dirtied.</value>
         /// <owner>RGoel</owner>
-        public DateTime TimeOfLastDirty
-        {
-            get
-            {
-                return this.timeOfLastDirty;
-            }
-        }
+        public DateTime TimeOfLastDirty => this.timeOfLastDirty;
 
         /// <summary>
         /// Returns the project file's ?xml node, or null if it's not present
@@ -1396,13 +1270,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Load settings for this project
         /// </summary>
-        internal ProjectLoadSettings LoadSettings
-        {
-            get
-            {
-                return this.loadSettings;
-            }
-        }
+        internal ProjectLoadSettings LoadSettings => this.loadSettings;
 
         #endregion
 

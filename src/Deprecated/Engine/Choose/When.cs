@@ -96,13 +96,7 @@ namespace Microsoft.Build.BuildEngine
         /// </remarks>
         /// <owner>DavidLe</owner>
         /// <returns>string</returns>
-        internal string Condition
-        {
-            get
-            {
-                return (this.conditionAttribute == null) ? String.Empty : this.conditionAttribute.Value;
-            }
-        }
+        internal string Condition => (this.conditionAttribute == null) ? String.Empty : this.conditionAttribute.Value;
 
         /// <summary>
         /// Property containing the condition for the When clause.
@@ -111,25 +105,14 @@ namespace Microsoft.Build.BuildEngine
         /// </remarks>
         /// <owner>DavidLe</owner>
         /// <returns>string</returns>
-        internal XmlAttribute ConditionAttribute
-        {
-            get
-            {
-                return this.conditionAttribute;
-            }
-        }
+        internal XmlAttribute ConditionAttribute => this.conditionAttribute;
+
         #endregion
 
         /// <summary>
         /// The collection of all sub-groups (item/property groups and chooses) inside this When
         /// </summary>
-        internal GroupingCollection PropertyAndItemLists
-        {
-            get
-            {
-                return this.propertyAndItemLists;
-            }
-        }
+        internal GroupingCollection PropertyAndItemLists => this.propertyAndItemLists;
 
         #region Methods
 

@@ -211,13 +211,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// A special "unnamed" instance of AssemblyNameExtension.
         /// </summary>
         /// <value></value>
-        internal static AssemblyNameExtension UnnamedAssembly
-        {
-            get
-            {
-                return unnamedAssembly;
-            }
-        }
+        internal static AssemblyNameExtension UnnamedAssembly => unnamedAssembly;
 
         /// <summary>
         /// Compare one assembly name to another.
@@ -457,13 +451,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// Only the unnamed assembly has both null assemblyname and null string.
         /// </summary>
         /// <returns></returns>
-        internal bool IsUnnamedAssembly
-        {
-            get
-            {
-                return asAssemblyName == null && asString == null;
-            }
-        }
+        internal bool IsUnnamedAssembly => asAssemblyName == null && asString == null;
 
         /// <summary>
         /// Given a display name, construct an assembly name.

@@ -53,8 +53,8 @@ namespace Microsoft.Build.BuildEngine
         private bool possibleOrCollision = true;
         internal override bool PossibleOrCollision
         {
-            set { this.possibleOrCollision = value; }
-            get { return this.possibleOrCollision; }
+            set => this.possibleOrCollision = value;
+            get => this.possibleOrCollision;
         }
         #endregion
     }

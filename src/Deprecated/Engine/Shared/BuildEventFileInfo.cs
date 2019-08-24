@@ -109,65 +109,35 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>The filename/path string.</value>
-        internal string File
-        {
-            get
-            {
-                return file;
-            }
-        }
+        internal string File => file;
 
         /// <summary>
         /// Gets the line number of interest in the file.
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>Line number, or zero if not available.</value>
-        internal int Line
-        {
-            get
-            {
-                return line;
-            }
-        }
+        internal int Line => line;
 
         /// <summary>
         /// Gets the column number of interest in the file.
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>Column number, or zero if not available.</value>
-        internal int Column
-        {
-            get
-            {
-                return column;
-            }
-        }
+        internal int Column => column;
 
         /// <summary>
         /// Gets the last line number of a range of interesting lines in the file.
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>Last line number, or zero if not available.</value>
-        internal int EndLine
-        {
-            get
-            {
-                return endLine;
-            }
-        }
+        internal int EndLine => endLine;
 
         /// <summary>
         /// Gets the last column number of a range of interesting columns in the file.
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>Last column number, or zero if not available.</value>
-        internal int EndColumn
-        {
-            get
-            {
-                return endColumn;
-            }
-        }
+        internal int EndColumn => endColumn;
 
         #endregion
 

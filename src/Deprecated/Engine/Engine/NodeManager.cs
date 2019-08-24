@@ -294,27 +294,15 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal  TaskExecutionModule TaskExecutionModule
         {
-            get
-            {
-                return taskExecutionModule;
-            }
-            set
-            {
-                taskExecutionModule = value;
-            }
+            get => taskExecutionModule;
+            set => taskExecutionModule = value;
         }
         
         /// <summary>
         /// Number of Nodes being managed by NodeManager
         /// </summary>
-        internal int MaxNodeCount
-        {
-            get
-            {
-                // add 1 for the local node (taskExecutionModule)
-                return nodeList.Count+1;
-            }
-        }
+        internal int MaxNodeCount => nodeList.Count+1;
+
         #endregion
 
         #region Data
@@ -374,43 +362,23 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Node provider for node
         /// </summary>
-        internal INodeProvider NodeProvider
-        {
-            get { return nodeProvider; }
-        }
+        internal INodeProvider NodeProvider => nodeProvider;
 
         /// <summary>
         /// Node description for node
         /// </summary>
-        internal INodeDescription Description
-        {
-            get
-            {
-                return description;
-            }
-        }
+        internal INodeDescription Description => description;
 
         /// <summary>
         /// Node index relative to the node provider to which it is attached
         /// </summary>
-        internal int NodeIndex
-        {
-            get
-            {
-                return nodeIndex;
-            }
-        }
+        internal int NodeIndex => nodeIndex;
 
         /// <summary>
         /// The nodeId issued by the engine to this node
         /// </summary>
-        internal int NodeId
-        {
-            get
-            {
-                return nodeId;
-            }
-        }
+        internal int NodeId => nodeId;
+
         #endregion
 
         #region Data

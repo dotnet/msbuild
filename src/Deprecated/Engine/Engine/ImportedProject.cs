@@ -38,13 +38,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>The parsed XML from the imported project file.</value>
-        internal XmlDocument Xml
-        {
-            get
-            {
-                return projectXml;
-            }
-        }
+        internal XmlDocument Xml => projectXml;
 
         /// <summary>
         /// Checks if the imported project file has changed on disk.

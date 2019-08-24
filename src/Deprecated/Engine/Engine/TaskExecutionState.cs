@@ -62,58 +62,28 @@ namespace Microsoft.Build.BuildEngine
 
         internal int HandleId
         {
-            get
-            {
-                return this.handleId;
-            }
-            set
-            {
-                this.handleId = value;
-            }
+            get => this.handleId;
+            set => this.handleId = value;
         }
 
         internal EngineLoggingServices LoggingService
         {
-            get
-            {
-                return this.loggingService;
-            }
-            set
-            {
-                this.loggingService = value;
-            }
+            get => this.loggingService;
+            set => this.loggingService = value;
         }
 
         internal TaskExecutionModule ParentModule
         {
-            get
-            {
-                return this.parentModule;
-            }
-            set
-            {
-                this.parentModule = value;
-            }
+            get => this.parentModule;
+            set => this.parentModule = value;
         }
 
-        internal string ExecutionDirectory
-        {
-            get
-            {
-                return this.executionDirectory;
-            }
-        }
+        internal string ExecutionDirectory => this.executionDirectory;
 
         internal bool ProfileExecution
         {
-            get
-            {
-                return this.profileExecution;
-            }
-            set
-            {
-                this.profileExecution = value;
-            }
+            get => this.profileExecution;
+            set => this.profileExecution = value;
         }
 
         #endregion

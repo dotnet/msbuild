@@ -49,14 +49,8 @@ namespace Microsoft.Build.BuildEngine
             return tokenType == type;
         }
 
-        internal TokenType Type
-        {
-            get { return tokenType; }
-        }
+        internal TokenType Type => tokenType;
 
-        internal string String
-        {
-            get { return tokenString; }
-        }
+        internal string String => tokenString;
     }
 }

@@ -68,47 +68,22 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Associated Toolset (version name, toolset path, optional associated properties)
         /// </summary>
-        internal Toolset Toolset
-        {
-            get
-            {
-                return this.toolset;
-            }
-        }
+        internal Toolset Toolset => this.toolset;
 
         /// <summary>
         /// Tools version for this toolset
         /// </summary>
-        internal string ToolsVersion
-        {
-            get
-            {
-                return this.toolset.ToolsVersion;
-            }
-        }
+        internal string ToolsVersion => this.toolset.ToolsVersion;
 
         /// <summary>
         /// Tools path for this toolset
         /// </summary>
-        internal string ToolsPath
-        {
-            get
-            {
-                return this.toolset.ToolsPath;
-            }
-        }
+        internal string ToolsPath => this.toolset.ToolsPath;
 
         /// <summary>
         /// Wrapper for the Toolset property group
         /// </summary>
-        internal BuildPropertyGroup BuildProperties
-        {
-            get 
-            {
-                return this.toolset.BuildProperties;
-            }
-        }
-
+        internal BuildPropertyGroup BuildProperties => this.toolset.BuildProperties;
 
         #endregion
 

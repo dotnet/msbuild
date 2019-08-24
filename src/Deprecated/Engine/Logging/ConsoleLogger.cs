@@ -168,10 +168,7 @@ namespace Microsoft.Build.BuildEngine
         /// <value>Verbosity level.</value>
         public LoggerVerbosity Verbosity
         {
-            get
-            {
-                return consoleLogger == null ? verbosity : consoleLogger.Verbosity;
-            }
+            get => consoleLogger == null ? verbosity : consoleLogger.Verbosity;
 
             set
             {
@@ -193,10 +190,7 @@ namespace Microsoft.Build.BuildEngine
         /// <value>null</value>
         public string Parameters
         {
-            get
-            {
-                return consoleLogger == null ? parameters : consoleLogger.Parameters;
-            }
+            get => consoleLogger == null ? parameters : consoleLogger.Parameters;
 
             set
             {
@@ -218,10 +212,7 @@ namespace Microsoft.Build.BuildEngine
         /// <remarks>This is only needed by the IDE logger.</remarks>
         public bool SkipProjectStartedText
         {
-            get
-            {
-                return consoleLogger == null ? skipProjectStartedText : consoleLogger.SkipProjectStartedText;
-            }
+            get => consoleLogger == null ? skipProjectStartedText : consoleLogger.SkipProjectStartedText;
 
             set
             {
@@ -241,10 +232,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public bool ShowSummary
         {
-            get
-            {
-                return (consoleLogger == null ? showSummary : consoleLogger.ShowSummary) ?? false;
-            }
+            get => (consoleLogger == null ? showSummary : consoleLogger.ShowSummary) ?? false;
 
             set
             {
@@ -266,10 +254,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         protected WriteHandler WriteHandler
         {
-            get
-            {
-                return consoleLogger == null ? write : consoleLogger.write;
-            }
+            get => consoleLogger == null ? write : consoleLogger.write;
 
             set
             {

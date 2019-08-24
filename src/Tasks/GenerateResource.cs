@@ -246,13 +246,7 @@ namespace Microsoft.Build.Tasks
         /// that failed to be written due to an error. 
         /// </summary>
         [Output]
-        public ITaskItem[] FilesWritten
-        {
-            get
-            {
-                return (ITaskItem[])_filesWritten.ToArray(typeof(ITaskItem));
-            }
-        }
+        public ITaskItem[] FilesWritten => (ITaskItem[])_filesWritten.ToArray(typeof(ITaskItem));
 
         /// <summary>
         /// The language to use when generating the class source for the strongly typed resource.
@@ -419,25 +413,13 @@ namespace Microsoft.Build.Tasks
         /// Names of the read tracking logs.  
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "TLog", Justification = "Has now shipped as public API; plus it's unclear whether 'Tlog' or 'TLog' is the preferred casing")]
-        public ITaskItem[] TLogReadFiles
-        {
-            get
-            {
-                return Array.Empty<ITaskItem>();
-            }
-        }
+        public ITaskItem[] TLogReadFiles => Array.Empty<ITaskItem>();
 
         /// <summary>
         /// Names of the write tracking logs.
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "TLog", Justification = "Has now shipped as public API; plus it's unclear whether 'Tlog' or 'TLog' is the preferred casing")]
-        public ITaskItem[] TLogWriteFiles
-        {
-            get
-            {
-                return Array.Empty<ITaskItem>();
-            }
-        }
+        public ITaskItem[] TLogWriteFiles => Array.Empty<ITaskItem>();
 
         /// <summary>
         /// Intermediate directory into which the tracking logs from running this task will be placed.  
@@ -2229,13 +2211,8 @@ namespace Microsoft.Build.Tasks
         /// Filename for the strongly typed resources.
         /// Getter provided since the processor may choose a default.
         /// </summary>
-        internal string StronglyTypedFilename
-        {
-            get
-            {
-                return _stronglyTypedFilename;
-            }
-        }
+        internal string StronglyTypedFilename => _stronglyTypedFilename;
+
         private string _stronglyTypedFilename;
 
         /// <summary>
@@ -2252,13 +2229,8 @@ namespace Microsoft.Build.Tasks
         /// Class name for the strongly typed resources.
         /// Getter provided since the processor may choose a default.
         /// </summary>
-        internal string StronglyTypedClassName
-        {
-            get
-            {
-                return _stronglyTypedClassName;
-            }
-        }
+        internal string StronglyTypedClassName => _stronglyTypedClassName;
+
         private string _stronglyTypedClassName;
 
         /// <summary>
@@ -2333,10 +2305,8 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Record all the information about outputs here to avoid future incremental builds.
         /// </summary>
-        internal List<ResGenDependencies.PortableLibraryFile> PortableLibraryCacheInfo
-        {
-            get { return _portableLibraryCacheInfo; }
-        }
+        internal List<ResGenDependencies.PortableLibraryFile> PortableLibraryCacheInfo => _portableLibraryCacheInfo;
+
         private List<ResGenDependencies.PortableLibraryFile> _portableLibraryCacheInfo;
 
         /// <summary>
@@ -2359,13 +2329,8 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Whether we successfully created the STR class 
         /// </summary>
-        internal bool StronglyTypedResourceSuccessfullyCreated
-        {
-            get
-            {
-                return _stronglyTypedResourceSuccessfullyCreated;
-            }
-        }
+        internal bool StronglyTypedResourceSuccessfullyCreated => _stronglyTypedResourceSuccessfullyCreated;
+
         private bool _stronglyTypedResourceSuccessfullyCreated = false;
 
         /// <summary>
@@ -3891,15 +3856,9 @@ namespace Microsoft.Build.Tasks
                 throw new NotImplementedException("NYI");
             }
 
-            internal int LineNumber
-            {
-                get { return _lineNumber; }
-            }
+            internal int LineNumber => _lineNumber;
 
-            internal int LinePosition
-            {
-                get { return _col; }
-            }
+            internal int LinePosition => _col;
         }
 
         /// <summary>
@@ -3929,20 +3888,11 @@ namespace Microsoft.Build.Tasks
                 column = linePosition;
             }
 
-            internal String FileName
-            {
-                get { return fileName; }
-            }
+            internal String FileName => fileName;
 
-            internal int LineNumber
-            {
-                get { return lineNumber; }
-            }
+            internal int LineNumber => lineNumber;
 
-            internal int LinePosition
-            {
-                get { return column; }
-            }
+            internal int LinePosition => column;
         }
 #endregion // Code from ResGen.EXE
     }

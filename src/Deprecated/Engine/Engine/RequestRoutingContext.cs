@@ -48,46 +48,22 @@ namespace Microsoft.Build.BuildEngine
         /// The handle to the parent context which maybe invalidHandle if the request
         /// originated from the host.
         /// </summary>
-        internal int ParentHandleId
-        {
-            get
-            {
-                return this.parentHandleId;
-            }
-        }
+        internal int ParentHandleId => this.parentHandleId;
 
         /// <summary>
         /// The node from the triggering build request (overwritten on the build request during routing)
         /// </summary>
-        internal int ParentNodeIndex
-        {
-            get
-            {
-                return this.parentNodeIndex;
-            }
-        }
+        internal int ParentNodeIndex => this.parentNodeIndex;
 
         /// <summary>
         /// The request Id from the triggering build request (overwritten on the build request during routing)
         /// </summary>
-        internal int ParentRequestId
-        {
-            get
-            {
-                return this.parentRequestId;
-            }
-        }
+        internal int ParentRequestId => this.parentRequestId;
 
         /// <summary>
         /// The cache scope where the result should be stored
         /// </summary>
-        internal CacheScope CacheScope
-        {
-            get
-            {
-                return this.cacheScope;
-            }
-        }
+        internal CacheScope CacheScope => this.cacheScope;
 
         /// <summary>
         /// The build request being routed

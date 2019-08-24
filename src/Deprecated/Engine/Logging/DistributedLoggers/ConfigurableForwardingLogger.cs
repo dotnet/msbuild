@@ -36,8 +36,8 @@ namespace Microsoft.Build.BuildEngine
         /// <value>Verbosity level.</value>
         public LoggerVerbosity Verbosity
         {
-            get { return verbosity; }
-            set { verbosity = value; }
+            get => verbosity;
+            set => verbosity = value;
         }
 
         /// <summary>
@@ -47,8 +47,8 @@ namespace Microsoft.Build.BuildEngine
         /// <value>null</value>
         public string Parameters
         {
-            get { return loggerParameters; }
-            set { loggerParameters = value; }
+            get => loggerParameters;
+            set => loggerParameters = value;
         }
 
         /// <summary>
@@ -57,14 +57,14 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public IEventRedirector BuildEventRedirector
         {
-            get { return this.buildEventRedirector; }
-            set { this.buildEventRedirector = value; }
+            get => this.buildEventRedirector;
+            set => this.buildEventRedirector = value;
         }
 
         public int NodeId
         {
-            get { return nodeId; }
-            set { nodeId = value; }
+            get => nodeId;
+            set => nodeId = value;
         }
         #endregion
 

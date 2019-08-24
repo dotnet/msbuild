@@ -103,13 +103,7 @@ namespace Microsoft.Build.BuildEngine
         /// Single process mode (IsRunningMultipleNodes = false) is where the engine is initialized with the number of cpus = 1 and the engine is not a child engine.
         /// The engine is in multi process mode (IsRunningMultipleNodes = true) when the engine is initialized with a number of cpus > 1 or the engine is a child engine.
         /// </summary>
-        internal bool IsRunningMultipleNodes
-        {
-            get
-            {
-                return isRunningMultipleNodes;
-            }
-        }
+        internal bool IsRunningMultipleNodes => isRunningMultipleNodes;
 
         /// <summary>
         /// Specifies the traversal type for IBuildEngine callbacks. If true multiple build requests will be sent
@@ -117,39 +111,21 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal bool UseBreadthFirstTraversal
         {
-            get
-            {
-                return breadthFirstTraversal;
-            }
-            set
-            {
-                breadthFirstTraversal = value;
-            }
+            get => breadthFirstTraversal;
+            set => breadthFirstTraversal = value;
         }
 
         /// <summary>
         /// Returns true if the TEM doesn't have a thread in user code and there are no pending 
         /// workitems
         /// </summary>
-        internal bool IsIdle
-        {
-            get
-            {
-                return (activeThreadCount == 0 && workerThread.WorkItemCount == 0);
-            }
-        }
+        internal bool IsIdle => (activeThreadCount == 0 && workerThread.WorkItemCount == 0);
 
         /// <summary>
         /// Return total time spent executing the tasks by this TEM. This value is only valid if the TEM is created with 
         /// profileExecution set to true, otherwise this value will be 0
         /// </summary>
-        internal long TaskExecutionTime
-        {
-            get
-            {
-                return totalTaskTime;
-            }
-        }
+        internal long TaskExecutionTime => totalTaskTime;
 
         #endregion
         #region Method used internally inside the TEM boundary (i.e. not called from the engine)

@@ -47,10 +47,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// The configuration part of this, uh, configuration - e.g. "Debug", "Release"
         /// </summary>
         /// <owner>LukaszG</owner>
-        internal string ConfigurationName
-        {
-            get { return this.configurationName; }
-        }
+        internal string ConfigurationName => this.configurationName;
 
         private string platformName;
 
@@ -58,10 +55,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// The platform part of this configuration - e.g. "Any CPU", "Win32"
         /// </summary>
         /// <owner>LukaszG</owner>
-        internal string PlatformName
-        {
-            get { return this.platformName; }
-        }
+        internal string PlatformName => this.platformName;
 
         private string fullName;
 
@@ -69,10 +63,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// The full name of this configuration - e.g. "Debug|Any CPU"
         /// </summary>
         /// <owner>LukaszG</owner>
-        internal string FullName
-        {
-            get { return this.fullName; }
-        }
+        internal string FullName => this.fullName;
 
         private BuildItemGroup projectBuildItems;
 
@@ -81,8 +72,8 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// </summary>
         internal BuildItemGroup ProjectBuildItems
         {
-            get { return this.projectBuildItems; }
-            set { this.projectBuildItems = value; }
+            get => this.projectBuildItems;
+            set => this.projectBuildItems = value;
         }
     }
 }

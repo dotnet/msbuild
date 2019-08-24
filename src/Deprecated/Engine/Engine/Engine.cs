@@ -487,10 +487,7 @@ namespace Microsoft.Build.BuildEngine
         [Obsolete("Avoid setting BinPath. If you were simply passing in the .NET Framework location as the BinPath, no other action is necessary. Otherwise, define Toolsets instead in the registry or config file, or by adding elements to the Engine's ToolsetCollection, in order to use a custom BinPath.")]
         public string BinPath
         {
-            get
-            {
-                return this.ToolsetStateMap[this.defaultToolsVersion].ToolsPath;
-            }
+            get => this.ToolsetStateMap[this.defaultToolsVersion].ToolsPath;
             set
             {
                 error.VerifyThrowArgumentNull(value, "BinPath");
@@ -504,21 +501,12 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Is this engine in the process of building?
         /// </summary>
-        public bool IsBuilding
-        {
-            get
-            {
-                return numberOfProjectsInProgress > 0;
-            }
-        }
-        
+        public bool IsBuilding => numberOfProjectsInProgress > 0;
+
         /// <summary>
         /// The node Id the current engine instance is running on
         /// </summary>
-        internal int NodeId
-        {
-            get { return nodeId; }
-        }
+        internal int NodeId => nodeId;
 
         /// <summary>
         /// Gets the dummy owner document for "virtual" items.
@@ -542,13 +530,8 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// An array of strings which list the properties that should be serialized from the child node to the parent node
         /// </summary>
-        internal string[] PropertyListToSerialize
-        {
-            get
-            {
-                return propertyListToSerialize;
-            }
-        }
+        internal string[] PropertyListToSerialize => propertyListToSerialize;
+
         /// <summary>
         /// Returns an instance of the Engine that is global (shared) for this AppDomain.
         /// Delays creation until necessary.
@@ -618,15 +601,9 @@ namespace Microsoft.Build.BuildEngine
         /// <value>The global property bag.</value>
         public BuildPropertyGroup GlobalProperties
         {
-            get
-            {
-                return this.engineGlobalProperties;
-            }
+            get => this.engineGlobalProperties;
 
-            set
-            {
-                this.engineGlobalProperties = value;
-            }
+            set => this.engineGlobalProperties = value;
         }
 
         /// <summary>
@@ -634,14 +611,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <value>The property bag of environment variables.</value>
         /// <owner>RGoel</owner>
-        internal BuildPropertyGroup EnvironmentProperties
-        {
-            get
-            {
-                return this.environmentProperties;
-            }
-        }
-        
+        internal BuildPropertyGroup EnvironmentProperties => this.environmentProperties;
+
         /// <summary>
         ///  Get a new TaskId
         /// (NOT Thread safe)
@@ -687,15 +658,9 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         public bool BuildEnabled
         {
-            get
-            {
-                return this.buildEnabled;
-            }
+            get => this.buildEnabled;
 
-            set
-            {
-                this.buildEnabled = value;
-            }
+            set => this.buildEnabled = value;
         }
 
         /// <summary>
@@ -723,168 +688,75 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         /// <remarks>Marked "internal" for unit tests only.  To maintain encapsulation, please try not to 
         /// use this accessor in real msbuild code, except from within this class.</remarks>
-        internal Hashtable ProjectsLoadedByHost
-        {
-            get
-            {
-                return this.projectsLoadedByHost;
-            }
-        }
+        internal Hashtable ProjectsLoadedByHost => this.projectsLoadedByHost;
 
         /// <summary>
         /// Dictionary of toolset states
         /// K: tools version
         /// V: matching toolset state
         /// </summary>
-        internal Dictionary<string, ToolsetState> ToolsetStateMap
-        {
-            get
-            {
-                return this.toolsetStateMap;
-            }
-        }
+        internal Dictionary<string, ToolsetState> ToolsetStateMap => this.toolsetStateMap;
 
         /// <summary>
         /// Returns the collection of Toolsets recognized by this Engine instance.
         /// </summary>
-        public ToolsetCollection Toolsets
-        {
-            get
-            {
-                return this.toolsets;
-            }
-        }
+        public ToolsetCollection Toolsets => this.toolsets;
 
         /// <summary>
         /// Returns the service that can be used to log events
         /// </summary>
         internal EngineLoggingServices LoggingServices
         {
-            get
-            {
-                return this.primaryLoggingServices;
-            }
-            set
-            {
-                this.primaryLoggingServices = value;
-            }
+            get => this.primaryLoggingServices;
+            set => this.primaryLoggingServices = value;
         }
 
         /// <summary>
         /// Provide the number of Cpus the engine was started with. This is used to communicate this number with the project for
         /// the reserved property MSBuildBuildNodeCount
         /// </summary>
-        internal int EngineCpuCount
-        {
-            get
-            {
-                return numberOfCpus;
-            }
-        }
+        internal int EngineCpuCount => numberOfCpus;
 
         /// <summary>
         /// The external logging service is used on the child to forward events from child to parent
         /// </summary>
         internal EngineLoggingServices ExternalLoggingServices
         {
-            get
-            {
-                return externalLoggingServices;
-            }
-            set
-            {
-                this.externalLoggingServices = value;
-            }
+            get => externalLoggingServices;
+            set => this.externalLoggingServices = value;
         }
-        internal Scheduler Scheduler
-        {
-            get
-            {
-                return this.scheduler;
-            }
-        }
+        internal Scheduler Scheduler => this.scheduler;
 
-        internal Router Router
-        {
-            get
-            {
-                return this.router;
-            }
-        }
+        internal Router Router => this.router;
 
-        internal NodeManager NodeManager
-        {
-            get
-            {
-                return this.nodeManager;
-            }
-        }
+        internal NodeManager NodeManager => this.nodeManager;
 
-        internal CacheManager CacheManager
-        {
-            get
-            {
-                return this.cacheManager;
-            }
-        }
+        internal CacheManager CacheManager => this.cacheManager;
 
-        internal Introspector Introspector
-        {
-            get
-            {
-                return this.introspector;
-            }
-        }
+        internal Introspector Introspector => this.introspector;
 
-        internal EngineCallback EngineCallback
-        {
-            get
-            {
-                return engineCallback;
-            }
-        }
+        internal EngineCallback EngineCallback => engineCallback;
 
 
-        internal bool EnabledCentralLogging
-        {
-            get
-            {
-                return enabledCentralLogging;
-            }
-        }
+        internal bool EnabledCentralLogging => enabledCentralLogging;
 
         /// <summary>
         /// Return true if the timing data for the build should be collected
         /// </summary>
-        internal bool ProfileBuild
-        {
-            get
-            {
-                return profileBuild;
-            }
-        }
+        internal bool ProfileBuild => profileBuild;
 
         /// <summary>
         /// Returns the event that can be used to trigger a flush of logging services
         /// </summary>
-        internal ManualResetEvent FlushRequestEvent
-        {
-            get
-            {
-                return flushRequestEvent;
-            }
-        }
+        internal ManualResetEvent FlushRequestEvent => flushRequestEvent;
 
         /// <summary>
         /// The current directory at the time the Engine was constructed -- 
         /// if msbuild.exe is hosting, this is the current directory when
         /// msbuild.exe was started
         /// </summary>
-        internal string StartupDirectory
-        {
-            get { return startupDirectory; }
-        }
-        
+        internal string StartupDirectory => startupDirectory;
+
         #endregion
 
         #region Methods
@@ -1520,10 +1392,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public bool OnlyLogCriticalEvents
         {
-            get
-            {
-                return this.primaryLoggingServices.OnlyLogCriticalEvents;
-            }
+            get => this.primaryLoggingServices.OnlyLogCriticalEvents;
             set
             {
                 this.primaryLoggingServices.OnlyLogCriticalEvents = value;

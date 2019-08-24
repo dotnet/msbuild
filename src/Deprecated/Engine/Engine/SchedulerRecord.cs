@@ -56,77 +56,38 @@ namespace Microsoft.Build.BuildEngine
                 }
                 return true;
             }
-            set
-            {
-                blockedFlag = value;
-            }
+            set => blockedFlag = value;
         }
 
         /// <summary>
         /// Returns the node on which the request is being build
         /// </summary>
-        internal int EvaluationNode
-        {
-            get
-            {
-                return evaluationNode;
-            }
-        }
+        internal int EvaluationNode => evaluationNode;
 
         /// <summary>
         /// Key to the parent object
         /// </summary>
-        internal ScheduleRecordKey ParentKey
-        {
-            get
-            {
-                return parentKey;
-            }
-        }
+        internal ScheduleRecordKey ParentKey => parentKey;
 
         /// <summary>
         /// Key to the current object
         /// </summary>
-        internal ScheduleRecordKey RecordKey
-        {
-            get
-            {
-                return recordKey;
-            }
-        }
+        internal ScheduleRecordKey RecordKey => recordKey;
 
         /// <summary>
         /// Name of the project being build
         /// </summary>
-        internal string ProjectName
-        {
-            get
-            {
-                return projectName;
-            }
-        }
+        internal string ProjectName => projectName;
 
         /// <summary>
         /// The version of the project
         /// </summary>
-        internal string ToolsVersion
-        {
-            get
-            {
-                return toolsVersion;
-            }
-        }
+        internal string ToolsVersion => toolsVersion;
 
         /// <summary>
         /// Targets being build in the project
         /// </summary>
-        internal string[] TargetsBuild
-        {
-            get
-            {
-                return targetsBuild;
-            }
-        }
+        internal string[] TargetsBuild => targetsBuild;
 
         #endregion
 
@@ -192,20 +153,10 @@ namespace Microsoft.Build.BuildEngine
         #endregion
 
         #region Properties
-        internal int HandleId
-        {
-            get
-            {
-                return handleId;
-            }
-        }
-        internal int RequestId
-        {
-            get
-            {
-                return requestId;
-            }
-        }
+        internal int HandleId => handleId;
+
+        internal int RequestId => requestId;
+
         #endregion
 
         #region Methods

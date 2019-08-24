@@ -138,13 +138,7 @@ namespace Microsoft.Build.BuildEngine
         /// Returns the object that knows how to handle all kinds of expansion for this bucket.
         /// </summary>
         /// <owner>RGoel</owner>
-        internal Expander Expander
-        {
-            get
-            {
-                return this.expander;
-            }
-        }
+        internal Expander Expander => this.expander;
 
         /// <summary>
         /// When buckets are being created for batching purposes, this indicates which order the 
@@ -154,24 +148,12 @@ namespace Microsoft.Build.BuildEngine
         /// bucketSequenceNumber=1, etc.
         /// </summary>
         /// <owner>RGoel</owner>
-        internal int BucketSequenceNumber
-        {
-            get
-            {
-                return this.bucketSequenceNumber;
-            }
-        }
+        internal int BucketSequenceNumber => this.bucketSequenceNumber;
 
         /// <summary>
         /// The items for this bucket.
         /// </summary>
-        internal Lookup Lookup
-        {
-            get
-            {
-                return this.lookup;
-            }
-        }
+        internal Lookup Lookup => this.lookup;
 
         #endregion
 

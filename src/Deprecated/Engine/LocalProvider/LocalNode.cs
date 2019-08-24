@@ -583,13 +583,8 @@ namespace Microsoft.Build.BuildEngine
 
         #endregion
         #region Properties
-        internal static string DumpFileName
-        {
-            get
-            {
-                return dumpFileName;
-            }
-        }
+        internal static string DumpFileName => dumpFileName;
+
         #endregion
 
         #region Member data

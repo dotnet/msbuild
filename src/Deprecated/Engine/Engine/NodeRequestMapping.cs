@@ -29,21 +29,10 @@ namespace Microsoft.Build.BuildEngine
         #endregion
 
         #region Properties
-        internal int HandleId
-        {
-            get
-            {
-                return this.handleId;
-            }
-        }
+        internal int HandleId => this.handleId;
 
-        internal int RequestId
-        {
-            get
-            {
-                return this.requestId;
-            }
-        }
+        internal int RequestId => this.requestId;
+
         #endregion
 
         #region Methods

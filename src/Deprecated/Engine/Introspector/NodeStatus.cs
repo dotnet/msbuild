@@ -94,136 +94,65 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// The time period for which the node has been idle when the status report was filled out
         /// </summary>
-        internal long TimeSinceLastTaskActivity
-        {
-            get
-            {
-                return (statusTimeStamp - lastTaskActivityTimeStamp);
-            }
-        }
+        internal long TimeSinceLastTaskActivity => (statusTimeStamp - lastTaskActivityTimeStamp);
 
 
         /// <summary>
         /// The time period for which the node has been idle when the status report was filled out
         /// </summary>
-        internal long TimeSinceLastLoopActivity
-        {
-            get
-            {
-                return (statusTimeStamp - lastEngineActivityTimeStamp);
-            }
-        }
+        internal long TimeSinceLastLoopActivity => (statusTimeStamp - lastEngineActivityTimeStamp);
 
         /// <summary>
         /// The time stamp at which the node was last active
         /// </summary>
-        internal long LastTaskActivity
-        {
-            get
-            {
-                return lastTaskActivityTimeStamp;
-            }
-        }
+        internal long LastTaskActivity => lastTaskActivityTimeStamp;
 
         /// <summary>
         /// The time stamp at which there was activity in the node's build loop
         /// </summary>
-        internal long LastLoopActivity
-        {
-            get
-            {
-                return lastEngineActivityTimeStamp;
-            }
-        }
+        internal long LastLoopActivity => lastEngineActivityTimeStamp;
 
         /// <summary>
         /// True if the node is active (i.e. has been launched and can accept commands)
         /// </summary>
-        internal bool IsActive
-        {
-            get
-            {
-                return this.isActive;
-            }
-        }
+        internal bool IsActive => this.isActive;
 
         /// <summary>
         /// True if the node process is no longer alive
         /// </summary>
-        internal bool HasExited
-        {
-            get
-            {
-                return this.hasExited;
-            }
-        }
-        
+        internal bool HasExited => this.hasExited;
+
         /// <summary>
         /// The token of the request to which this is a response (-1 if status is unrequested)
         /// </summary>
-        internal int RequestId
-        {
-            get
-            {
-                return this.requestId;
-            }
-        }
+        internal int RequestId => this.requestId;
 
         /// <summary>
         /// The number of requests that need to be processed
         /// </summary>
-        internal int QueueDepth
-        {
-            get
-            {
-                return this.queueDepth;
-            }
-        }
+        internal int QueueDepth => this.queueDepth;
 
         /// <summary>
         /// The state of the targets which are in progress on the node
         /// </summary>
         internal TargetInProgessState [] StateOfInProgressTargets
         {
-            get
-            {
-                return this.stateOfInProgressTargets;
-            }
-            set
-            {
-                this.stateOfInProgressTargets = value;
-            }
+            get => this.stateOfInProgressTargets;
+            set => this.stateOfInProgressTargets = value;
         }
 
         /// <summary>
         /// True if the node is in the process of being launched, but is not yet active
         /// </summary>
-        internal bool IsLaunchInProgress
-        {
-            get
-            {
-                return isLaunchInProgress;
-            }
-        }
+        internal bool IsLaunchInProgress => isLaunchInProgress;
 
         /// <summary>
         /// Returns the exception that occured on the node
         /// </summary>
-        internal Exception UnhandledException
-        {
-            get
-            {
-                return unhandledException;
-            }
-        }
+        internal Exception UnhandledException => unhandledException;
 
-        internal bool TraversalType
-        {
-            get
-            {
-                return traversalType;
-            }
-        }
+        internal bool TraversalType => traversalType;
+
         #endregion
 
         #region Data

@@ -77,9 +77,6 @@ namespace Microsoft.Build.Shared.LanguageParser
         * 
         * Declare the Current property required by IEnumerator
         */
-        public object Current
-        {
-            get { return current; }
-        }
+        public object Current => current;
     }
 }

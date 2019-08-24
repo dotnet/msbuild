@@ -50,14 +50,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal BuildEventContext LogBuildEventContext
         {
-            get
-            {
-                return logBuildEventContext;
-            }
-            set
-            {
-                logBuildEventContext = value;
-            }
+            get => logBuildEventContext;
+            set => logBuildEventContext = value;
         }
         private EngineLoggingServices loggingServices;
         /// <summary>
@@ -65,15 +59,9 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal EngineLoggingServices LoggingServices
         {
-            set
-            {
-                this.loggingServices = value;
-            }
-            
-            get
-            {
-                return this.loggingServices;
-            }
+            set => this.loggingServices = value;
+
+            get => this.loggingServices;
         }
 #endregion 
 

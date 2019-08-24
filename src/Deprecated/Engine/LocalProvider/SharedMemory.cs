@@ -346,15 +346,10 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         ///  Indicates the shared memory region been created and initialized properly.
         /// </summary>
-        internal bool IsUsable
-        {
-            get
-            {
-                return !pageFileMapping.IsInvalid &&
-                    !pageFileMapping.IsClosed &&
-                    (pageFileView != NativeMethods.NullPtr);
-            }
-        }
+        internal bool IsUsable =>
+            !pageFileMapping.IsInvalid &&
+            !pageFileMapping.IsClosed &&
+            (pageFileView != NativeMethods.NullPtr);
 
         /// <summary>
         /// Returns the readActionCounter as a WaitHandle. This WaitHandle is used
@@ -363,27 +358,13 @@ namespace Microsoft.Build.BuildEngine
         /// the number of times the shared memory has been read is less than the 
         /// number of times writer thread has written to the shared memory.
         /// </summary>
-        internal WaitHandle ReadFlag
-        {
-            get
-            {
-                return readActionCounter;
-            }
-        }
+        internal WaitHandle ReadFlag => readActionCounter;
 
         /// <summary>
         /// Indicates when the SharedMemory is full
         /// </summary>
-        private bool IsFull
-        {
-            get
-            {
-                // If the flag is set true is returned
-                // A timeout of 0 means the WaitOne will time out 
-                // instantly and return false if the flag is not set.
-                return fullFlag.WaitOne(0, false);
-            }
-        }
+        private bool IsFull => fullFlag.WaitOne(0, false);
+
         /// <summary>
         /// The NumberOfUnreadBatches is the number of "batches" written to shared
         /// memory which have not been read yet by the ReaderThread. A batch

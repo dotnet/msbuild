@@ -46,13 +46,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Event indicating that there are items in the queue
         /// </summary>
-        internal WaitHandle QueueReadyEvent
-        {
-            get
-            {
-                return this.queueReadyEvent;
-            }
-        }
+        internal WaitHandle QueueReadyEvent => this.queueReadyEvent;
 
         /// <summary>
         /// Event indicating that the queue is empty
@@ -99,13 +93,7 @@ namespace Microsoft.Build.BuildEngine
         /// The count of items in the writing queue. Used to decide if the queue is backing up
         /// </summary>
         /// <returns></returns>
-        internal int WritingQueueCount
-        {
-            get
-            {
-                return writingQueueCount;
-            }
-        }
+        internal int WritingQueueCount => writingQueueCount;
 
         #endregion
 

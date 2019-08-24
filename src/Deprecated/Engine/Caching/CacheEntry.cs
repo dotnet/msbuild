@@ -42,8 +42,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal string Name
         {
-            get { return name; }
-            set { name = value; }
+            get => name;
+            set => name = value;
         }
 
         #endregion

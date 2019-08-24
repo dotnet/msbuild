@@ -167,68 +167,68 @@ namespace Microsoft.Build.BuildEngine
         // "Secondary" is the next from the top.
         private Hashtable PrimaryTable
         {
-            get { return lookupEntries.First.Value.Items; }
-            set { lookupEntries.First.Value.Items = value; }
+            get => lookupEntries.First.Value.Items;
+            set => lookupEntries.First.Value.Items = value;
         }
 
         private Hashtable PrimaryAddTable
         {
-            get { return lookupEntries.First.Value.Adds; }
-            set { lookupEntries.First.Value.Adds = value; }
+            get => lookupEntries.First.Value.Adds;
+            set => lookupEntries.First.Value.Adds = value;
         }
 
         private Hashtable PrimaryRemoveTable
         {
-            get { return lookupEntries.First.Value.Removes; }
-            set { lookupEntries.First.Value.Removes = value; }
+            get => lookupEntries.First.Value.Removes;
+            set => lookupEntries.First.Value.Removes = value;
         }
 
         private Dictionary<string, Dictionary<BuildItem, Dictionary<string, string>>> PrimaryModifyTable
         {
-            get { return lookupEntries.First.Value.Modifies; }
-            set { lookupEntries.First.Value.Modifies = value; }
+            get => lookupEntries.First.Value.Modifies;
+            set => lookupEntries.First.Value.Modifies = value;
         }
 
         private BuildPropertyGroup PrimaryPropertySets
         {
-            get { return lookupEntries.First.Value.PropertySets; }
-            set { lookupEntries.First.Value.PropertySets = value; }
+            get => lookupEntries.First.Value.PropertySets;
+            set => lookupEntries.First.Value.PropertySets = value;
         }
 
         private Hashtable SecondaryTable
         {
-            get { return lookupEntries.First.Next.Value.Items; }
-            set { lookupEntries.First.Next.Value.Items = value; }
+            get => lookupEntries.First.Next.Value.Items;
+            set => lookupEntries.First.Next.Value.Items = value;
         }
 
         private Hashtable SecondaryAddTable
         {
-            get { return lookupEntries.First.Next.Value.Adds; }
-            set { lookupEntries.First.Next.Value.Adds = value; }
+            get => lookupEntries.First.Next.Value.Adds;
+            set => lookupEntries.First.Next.Value.Adds = value;
         }
 
         private Hashtable SecondaryRemoveTable
         {
-            get { return lookupEntries.First.Next.Value.Removes; }
-            set { lookupEntries.First.Next.Value.Removes = value; }
+            get => lookupEntries.First.Next.Value.Removes;
+            set => lookupEntries.First.Next.Value.Removes = value;
         }
 
         private Dictionary<string, Dictionary<BuildItem, Dictionary<string, string>>> SecondaryModifyTable
         {
-            get { return lookupEntries.First.Next.Value.Modifies; }
-            set { lookupEntries.First.Next.Value.Modifies = value; }
+            get => lookupEntries.First.Next.Value.Modifies;
+            set => lookupEntries.First.Next.Value.Modifies = value;
         }
 
         private BuildPropertyGroup SecondaryProperties
         {
-            get { return lookupEntries.First.Next.Value.Properties; }
-            set { lookupEntries.First.Next.Value.Properties = value; }
+            get => lookupEntries.First.Next.Value.Properties;
+            set => lookupEntries.First.Next.Value.Properties = value;
         }
 
         private BuildPropertyGroup SecondaryPropertySets
         {
-            get { return lookupEntries.First.Next.Value.PropertySets; }
-            set { lookupEntries.First.Next.Value.PropertySets = value; }
+            get => lookupEntries.First.Next.Value.PropertySets;
+            set => lookupEntries.First.Next.Value.PropertySets = value;
         }
 
 #endregion
@@ -1162,32 +1162,32 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal Hashtable Items
         {
-            get { return items; }
-            set { items = value; }
+            get => items;
+            set => items = value;
         }
         /// <summary>
         /// Adds made in this scope or above.
         /// </summary>
         internal Hashtable Adds
         {
-            get { return adds; }
-            set { adds = value; }
+            get => adds;
+            set => adds = value;
         }
         /// <summary>
         /// Removes made in this scope or above.
         /// </summary>
         internal Hashtable Removes
         {
-            get { return removes; }
-            set { removes = value; }
+            get => removes;
+            set => removes = value;
         }
         /// <summary>
         /// Modifications made in this scope or above.
         /// </summary>
         internal Dictionary<string, Dictionary<BuildItem, Dictionary<string, string>>> Modifies
         {
-            get { return modifies; }
-            set { modifies = value; }
+            get => modifies;
+            set => modifies = value;
         }
         /// <summary>
         /// The main property table, populated with properties
@@ -1196,31 +1196,29 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal BuildPropertyGroup Properties
         {
-            get { return properties; }
-            set { properties = value; }
+            get => properties;
+            set => properties = value;
         }
         /// <summary>
         /// Properties set in this scope or above.
         /// </summary>
         internal BuildPropertyGroup PropertySets
         {
-            get { return propertySets; }
-            set { propertySets = value; }
+            get => propertySets;
+            set => propertySets = value;
         }
         /// <summary>
         /// ID of thread owning this scope
         /// </summary>
-        internal int ThreadIdThatEnteredScope
-        {
-            get { return threadIdThatEnteredScope; }
-        }
+        internal int ThreadIdThatEnteredScope => threadIdThatEnteredScope;
+
         /// <summary>
         /// Whether to stop lookups going beyond this scope downwards
         /// </summary>
         internal bool TruncateLookupsAtThisScope
         {
-            get { return truncateLookupsAtThisScope; }
-            set { truncateLookupsAtThisScope = value; }
+            get => truncateLookupsAtThisScope;
+            set => truncateLookupsAtThisScope = value;
         }
     }
 #endregion

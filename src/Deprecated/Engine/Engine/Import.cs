@@ -25,8 +25,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal Project ParentProject
         {
-            get { return this.parentProject; }
-            set { this.parentProject = value; }
+            get => this.parentProject;
+            set => this.parentProject = value;
         }
 
         private XmlElement importElement = null;
@@ -34,10 +34,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Returns the source XmlElement this Import is based on.
         /// </summary>
-        internal XmlElement ImportElement
-        {
-            get { return this.importElement; }
-        }
+        internal XmlElement ImportElement => this.importElement;
 
         private bool importedFromAnotherProject;
 
@@ -45,10 +42,7 @@ namespace Microsoft.Build.BuildEngine
         /// Returns true if this Import came from an imported project
         /// </summary>
         /// <owner>LukaszG</owner>
-        public bool IsImported
-        {
-            get { return this.importedFromAnotherProject; }
-        }
+        public bool IsImported => this.importedFromAnotherProject;
 
         private XmlAttribute projectPathAttribute = null;
 
@@ -58,10 +52,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>LukaszG</owner>
         public string ProjectPath
         {
-            get 
-            { 
-                return (this.projectPathAttribute != null) ? this.projectPathAttribute.Value : null; 
-            }
+            get => (this.projectPathAttribute != null) ? this.projectPathAttribute.Value : null;
             set
             {
                 ImportElement.SetAttribute(XMakeAttributes.project, value);
@@ -73,10 +64,7 @@ namespace Microsoft.Build.BuildEngine
         /// Internal accessor for the project path XML attribute
         /// </summary>
         /// <owner>LukaszG</owner>
-        internal XmlAttribute ProjectPathAttribute
-        {
-            get { return this.projectPathAttribute; }
-        }
+        internal XmlAttribute ProjectPathAttribute => this.projectPathAttribute;
 
         private string evaluatedProjectPath = null;
 
@@ -84,10 +72,7 @@ namespace Microsoft.Build.BuildEngine
         /// Returns the full evaluated import path
         /// </summary>
         /// <owner>LukaszG</owner>
-        public string EvaluatedProjectPath
-        {
-            get { return this.evaluatedProjectPath; }
-        }
+        public string EvaluatedProjectPath => this.evaluatedProjectPath;
 
         private XmlAttribute conditionAttribute = null;
 
@@ -97,10 +82,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>LukaszG</owner>
         public string Condition
         {
-            get 
-            { 
-                return (this.conditionAttribute != null) ? this.conditionAttribute.Value : null; 
-            }
+            get => (this.conditionAttribute != null) ? this.conditionAttribute.Value : null;
             set
             {
                 ImportElement.SetAttribute(XMakeAttributes.condition, value);
@@ -115,10 +97,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Internal accessor for the condition XML attribute
         /// </summary>
-        internal XmlAttribute ConditionAttribute
-        {
-            get { return this.conditionAttribute; }
-        }
+        internal XmlAttribute ConditionAttribute => this.conditionAttribute;
 
         #endregion
 

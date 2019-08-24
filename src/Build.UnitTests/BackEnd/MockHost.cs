@@ -118,36 +118,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Retrieves the name of the host.
         /// </summary>
-        public string Name
-        {
-            get
-            {
-                return "BackEnd.MockHost";
-            }
-        }
+        public string Name => "BackEnd.MockHost";
 
         /// <summary>
         /// Retrieve the build parameters.
         /// </summary>
         /// <returns></returns>
-        public BuildParameters BuildParameters
-        {
-            get
-            {
-                return _buildParameters;
-            }
-        }
+        public BuildParameters BuildParameters => _buildParameters;
 
         /// <summary>
         /// Retrieves the LegacyThreadingData associated with a particular component host
         /// </summary>
-        LegacyThreadingData IBuildComponentHost.LegacyThreadingData
-        {
-            get
-            {
-                return _legacyThreadingData;
-            }
-        }
+        LegacyThreadingData IBuildComponentHost.LegacyThreadingData => _legacyThreadingData;
 
         /// <summary>
         /// Able to modify the request builder this is required for testing

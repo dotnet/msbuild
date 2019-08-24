@@ -150,34 +150,22 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The current state of the request.
         /// </summary>
-        public SchedulableRequestState State
-        {
-            get { return _state; }
-        }
+        public SchedulableRequestState State => _state;
 
         /// <summary>
         /// The underlying BuildRequest.
         /// </summary>
-        public BuildRequest BuildRequest
-        {
-            get { return _request; }
-        }
+        public BuildRequest BuildRequest => _request;
 
         /// <summary>
         /// The request which issued this request.
         /// </summary>
-        public SchedulableRequest Parent
-        {
-            get { return _parent; }
-        }
+        public SchedulableRequest Parent => _parent;
 
         /// <summary>
         /// Returns the node to which this request is assigned.
         /// </summary>
-        public int AssignedNode
-        {
-            get { return _assignedNodeId; }
-        }
+        public int AssignedNode => _assignedNodeId;
 
         /// <summary>
         /// The set of active targets.
@@ -199,46 +187,22 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets a count of the requests we are blocked by.
         /// </summary>
-        public int RequestsWeAreBlockedByCount
-        {
-            get
-            {
-                return _requestsWeAreBlockedBy.Count;
-            }
-        }
+        public int RequestsWeAreBlockedByCount => _requestsWeAreBlockedBy.Count;
 
         /// <summary>
         /// Gets the set of requests for which we require results before we may proceed.
         /// </summary>
-        public IEnumerable<SchedulableRequest> RequestsWeAreBlockedBy
-        {
-            get
-            {
-                return _requestsWeAreBlockedBy.Values;
-            }
-        }
+        public IEnumerable<SchedulableRequest> RequestsWeAreBlockedBy => _requestsWeAreBlockedBy.Values;
 
         /// <summary>
         /// Gets a count of the requests we are blocking.
         /// </summary>
-        public int RequestsWeAreBlockingCount
-        {
-            get
-            {
-                return _requestsWeAreBlocking.Count;
-            }
-        }
+        public int RequestsWeAreBlockingCount => _requestsWeAreBlocking.Count;
 
         /// <summary>
         /// Gets the set of requests which cannot proceed because they are waiting for results from us.
         /// </summary>
-        public IEnumerable<SchedulableRequest> RequestsWeAreBlocking
-        {
-            get
-            {
-                return _requestsWeAreBlocking;
-            }
-        }
+        public IEnumerable<SchedulableRequest> RequestsWeAreBlocking => _requestsWeAreBlocking;
 
         /// <summary>
         /// The time this request was created.

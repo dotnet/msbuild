@@ -59,13 +59,8 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Gets the event context in which the remote exception occured
         /// </summary>
-        internal BuildEventContext BuildEventContext
-        {
-            get
-            {
-                return buildEventContext;
-            }
-        }
+        internal BuildEventContext BuildEventContext => buildEventContext;
+
         #endregion
 
         #region Methods

@@ -77,33 +77,16 @@ namespace Microsoft.Build.BuildEngine
         /// <remarks>
         /// </remarks>
         /// <owner>DavidLe</owner>
-        internal int PropertyGroupCount
-        {
-            get
-            {
-                return this.propertyGroupCount;
-            }
-        }
-        
-        /// <summary>
-        /// </summary>
-        internal object SyncRoot
-        {
-            get
-            {
-                return this.combinedGroupList.SyncRoot;
-            }
-        }
+        internal int PropertyGroupCount => this.propertyGroupCount;
 
         /// <summary>
         /// </summary>
-        internal bool IsSynchronized
-        {
-            get
-            {
-                return this.combinedGroupList.IsSynchronized;
-            }
-        }
+        internal object SyncRoot => this.combinedGroupList.SyncRoot;
+
+        /// <summary>
+        /// </summary>
+        internal bool IsSynchronized => this.combinedGroupList.IsSynchronized;
+
         /// <summary>
         /// This ICollection method copies the contents of this collection to an 
         /// array.
@@ -168,13 +151,7 @@ namespace Microsoft.Build.BuildEngine
         /// <remarks>
         /// </remarks>
         /// <owner>DavidLe</owner>
-        internal int ItemGroupCount
-        {
-            get
-            {
-                return this.itemGroupCount;
-            }
-        }
+        internal int ItemGroupCount => this.itemGroupCount;
 
         /// <summary>
         /// This ICollection method copies the contents of this collection to an 
@@ -219,61 +196,19 @@ namespace Microsoft.Build.BuildEngine
 
         #region Various enumerators for selecting different groups from this collection
 
-        internal GroupEnumeratorHelper PropertyGroupsTopLevelAndChooses
-        {
-            get
-            {
-                return new GroupEnumeratorHelper(this, GroupEnumeratorHelper.ListType.PropertyGroupsTopLevelAndChoose);
-            }
-        }
+        internal GroupEnumeratorHelper PropertyGroupsTopLevelAndChooses => new GroupEnumeratorHelper(this, GroupEnumeratorHelper.ListType.PropertyGroupsTopLevelAndChoose);
 
-        internal GroupEnumeratorHelper ItemGroupsTopLevelAndChooses
-        {
-            get
-            {
-                return new GroupEnumeratorHelper(this, GroupEnumeratorHelper.ListType.ItemGroupsTopLevelAndChoose);
-            }
-        }
+        internal GroupEnumeratorHelper ItemGroupsTopLevelAndChooses => new GroupEnumeratorHelper(this, GroupEnumeratorHelper.ListType.ItemGroupsTopLevelAndChoose);
 
-        internal GroupEnumeratorHelper PropertyGroupsTopLevel
-        {
-            get
-            {
-                return new GroupEnumeratorHelper(this, GroupEnumeratorHelper.ListType.PropertyGroupsTopLevel);
-            }
-        }
+        internal GroupEnumeratorHelper PropertyGroupsTopLevel => new GroupEnumeratorHelper(this, GroupEnumeratorHelper.ListType.PropertyGroupsTopLevel);
 
-        internal GroupEnumeratorHelper ItemGroupsTopLevel
-        {
-            get
-            {
-                return new GroupEnumeratorHelper(this, GroupEnumeratorHelper.ListType.ItemGroupsTopLevel);
-            }
-        }
+        internal GroupEnumeratorHelper ItemGroupsTopLevel => new GroupEnumeratorHelper(this, GroupEnumeratorHelper.ListType.ItemGroupsTopLevel);
 
-        internal GroupEnumeratorHelper PropertyGroupsAll
-        {
-            get
-            {
-                return new GroupEnumeratorHelper(this, GroupEnumeratorHelper.ListType.PropertyGroupsAll);
-            }
-        }
+        internal GroupEnumeratorHelper PropertyGroupsAll => new GroupEnumeratorHelper(this, GroupEnumeratorHelper.ListType.PropertyGroupsAll);
 
-        internal GroupEnumeratorHelper ItemGroupsAll
-        {
-            get
-            {
-                return new GroupEnumeratorHelper(this, GroupEnumeratorHelper.ListType.ItemGroupsAll);
-            }
-        }
+        internal GroupEnumeratorHelper ItemGroupsAll => new GroupEnumeratorHelper(this, GroupEnumeratorHelper.ListType.ItemGroupsAll);
 
-        internal GroupEnumeratorHelper ChoosesTopLevel
-        {
-            get
-            {
-                return new GroupEnumeratorHelper(this, GroupEnumeratorHelper.ListType.ChoosesTopLevel);
-            }
-        }
+        internal GroupEnumeratorHelper ChoosesTopLevel => new GroupEnumeratorHelper(this, GroupEnumeratorHelper.ListType.ChoosesTopLevel);
 
         #endregion
 

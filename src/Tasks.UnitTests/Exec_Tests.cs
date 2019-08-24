@@ -914,21 +914,9 @@ echo line 3"" />
 
     internal class ExecWrapper : Exec
     {
-        public Encoding StdOutputEncoding
-        {
-            get
-            {
-                return StandardOutputEncoding;
-            }
-        }
+        public Encoding StdOutputEncoding => StandardOutputEncoding;
 
-        public Encoding StdErrorEncoding
-        {
-            get
-            {
-                return StandardErrorEncoding;
-            }
-        }
+        public Encoding StdErrorEncoding => StandardErrorEncoding;
     }
 }
 

@@ -135,18 +135,12 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// <summary>
         /// Get the total number of pages allocated.
         /// </summary>
-        public int PagesAllocated
-        {
-            get { return _pagesAllocated; }
-        }
+        public int PagesAllocated => _pagesAllocated;
 
         /// <summary>
         /// The pagesize in characters that will be used if not specified.
         /// </summary>
-        public static int DefaultPageSize
-        {
-            get { return 256; }
-        }
+        public static int DefaultPageSize => 256;
 
         /// <summary>
         /// Return a particular character within the file.

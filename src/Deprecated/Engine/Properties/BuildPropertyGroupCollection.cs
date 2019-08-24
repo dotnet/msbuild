@@ -65,38 +65,20 @@ namespace Microsoft.Build.BuildEngine
         /// in our collection.
         /// </summary>
         /// <owner>RGoel</owner>
-        public int Count
-        {
-            get
-            {
-                return this.groupingCollection.PropertyGroupCount;
-            }
-        }
+        public int Count => this.groupingCollection.PropertyGroupCount;
 
         /// <summary>
         /// This ICollection property tells whether this object is thread-safe.
         /// </summary>
         /// <owner>RGoel</owner>
-        public bool IsSynchronized
-        {
-            get
-            {
-                return this.groupingCollection.IsSynchronized;
-            }
-        }
+        public bool IsSynchronized => this.groupingCollection.IsSynchronized;
 
         /// <summary>
         /// This ICollection property returns the object to be used to synchronize
         /// access to the class.
         /// </summary>
         /// <owner>RGoel</owner>
-        public object SyncRoot
-        {
-            get
-            {
-                return this.groupingCollection.SyncRoot;
-            }
-        }
+        public object SyncRoot => this.groupingCollection.SyncRoot;
 
         /// <summary>
         /// This looks through all the local property groups (those in the main

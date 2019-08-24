@@ -80,59 +80,38 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Name of the item type that the outputs go into
         /// </summary>
-        public string ItemType
-        {
-            get { return _itemType; }
-        }
+        public string ItemType => _itemType;
 
         /// <summary>
         /// Property on the task class to retrieve the outputs from
         /// </summary>
-        public string TaskParameter
-        {
-            get { return _taskParameter; }
-        }
+        public string TaskParameter => _taskParameter;
 
         /// <summary>
         /// Condition on the element.
         /// If there is no condition, returns empty string.
         /// </summary>
-        public override string Condition
-        {
-            get { return _condition; }
-        }
+        public override string Condition => _condition;
 
         /// <summary>
         /// Location of the original element
         /// </summary>
-        public override ElementLocation Location
-        {
-            get { return _location; }
-        }
+        public override ElementLocation Location => _location;
 
         /// <summary>
         /// Location of the condition, if any
         /// </summary>
-        public override ElementLocation ConditionLocation
-        {
-            get { return _conditionLocation; }
-        }
+        public override ElementLocation ConditionLocation => _conditionLocation;
 
         /// <summary>
         /// Location of the TaskParameter attribute
         /// </summary>
-        public override ElementLocation TaskParameterLocation
-        {
-            get { return _taskParameterLocation; }
-        }
+        public override ElementLocation TaskParameterLocation => _taskParameterLocation;
 
         /// <summary>
         /// Location of the ItemType attribute
         /// </summary>
-        public ElementLocation ItemTypeLocation
-        {
-            get { return _itemTypeLocation; }
-        }
+        public ElementLocation ItemTypeLocation => _itemTypeLocation;
 
         void ITranslatable.Translate(ITranslator translator)
         {

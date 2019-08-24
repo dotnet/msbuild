@@ -249,18 +249,12 @@ namespace Microsoft.Build.Construction
             /// <summary>
             /// Key to find it
             /// </summary>
-            public string Key
-            {
-                get { return _cachedString; }
-            }
+            public string Key => _cachedString;
 
             /// <summary>
             /// Number of documents using this string
             /// </summary>
-            internal int RefCount
-            {
-                get { return _refCount; }
-            }
+            internal int RefCount => _refCount;
 
             /// <summary>
             /// Get the cached string.

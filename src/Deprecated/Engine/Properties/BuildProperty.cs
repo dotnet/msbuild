@@ -472,25 +472,13 @@ namespace Microsoft.Build.BuildEngine
         /// To modify the raw value of a property, use BuildProperty.Value.
         /// </summary>
         /// <owner>RGoel</owner>
-        internal string FinalValueEscaped
-        {
-            get
-            {
-                return this.finalValueEscaped;
-            }
-        }
+        internal string FinalValueEscaped => this.finalValueEscaped;
 
         /// <summary>
         /// Returns the unescaped value of the property.
         /// </summary>
         /// <owner>RGoel</owner>
-        public string FinalValue
-        {
-            get
-            {
-                return EscapingUtilities.UnescapeAll(this.FinalValueEscaped);
-            }
-        }
+        public string FinalValue => EscapingUtilities.UnescapeAll(this.FinalValueEscaped);
 
         /// <summary>
         /// Accessor for the property type.  This is internal, so that nobody 
@@ -502,28 +490,16 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         internal PropertyType Type
         {
-            get 
-            {
-                return this.type;
-            }
+            get => this.type;
 
-            set 
-            {
-                this.type = value;
-            }
+            set => this.type = value;
         }
 
         /// <summary>
         /// Did this property originate from an imported project file?
         /// </summary>
         /// <owner>RGoel</owner>
-        public bool IsImported
-        {
-            get
-            {
-                return (this.type == PropertyType.ImportedProperty);
-            }
-        }
+        public bool IsImported => (this.type == PropertyType.ImportedProperty);
 
         /// <summary>
         /// Accessor for the condition on the property.
@@ -531,10 +507,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         public string Condition
         {
-            get
-            {
-                return (this.conditionAttribute == null) ? String.Empty : this.conditionAttribute.Value;
-            }
+            get => (this.conditionAttribute == null) ? String.Empty : this.conditionAttribute.Value;
 
             set
             {
@@ -559,26 +532,14 @@ namespace Microsoft.Build.BuildEngine
         /// never try and modify this.  Go through this.Condition to change the condition.
         /// </summary>
         /// <owner>RGoel</owner>
-        internal XmlAttribute ConditionAttribute
-        {
-            get
-            {
-                return this.conditionAttribute;
-            }
-        }
+        internal XmlAttribute ConditionAttribute => this.conditionAttribute;
 
         /// <summary>
         /// Accessor for the XmlElement representing this property.  This is internal
         /// to MSBuild, and is read-only.
         /// </summary>
         /// <owner>RGoel</owner>
-        internal XmlElement PropertyElement
-        {
-            get
-            {
-                return this.propertyElement;
-            }
-        }
+        internal XmlElement PropertyElement => this.propertyElement;
 
         /// <summary>
         /// We need to store a reference to the parent BuildPropertyGroup, so we can
@@ -587,10 +548,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         internal BuildPropertyGroup ParentPersistedPropertyGroup
         {
-            get
-            {
-                return this.parentPersistedPropertyGroup;
-            }
+            get => this.parentPersistedPropertyGroup;
 
             set
             {

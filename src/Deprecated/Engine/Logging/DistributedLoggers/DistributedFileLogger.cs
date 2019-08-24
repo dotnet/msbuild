@@ -140,36 +140,19 @@ namespace Microsoft.Build.BuildEngine
         #region Properties
 
         // Need to access this for testing purposes
-        internal FileLogger InternalFilelogger
-        {
-            get
-            {
-                return nodeFileLogger;
-            }
-        }
+        internal FileLogger InternalFilelogger => nodeFileLogger;
+
         public IEventRedirector BuildEventRedirector
         {
-            get
-            {
-                return buildEventRedirector;
-            }
-            set
-            {
-                buildEventRedirector = value;
-            }
+            get => buildEventRedirector;
+            set => buildEventRedirector = value;
         }
 
         // Node Id of the node which the forwarding logger is attached to
         public int NodeId
         {
-            get
-            {
-                return nodeId;
-            }
-            set
-            {
-                nodeId = value;
-            }
+            get => nodeId;
+            set => nodeId = value;
         }
 
         // The verbosity for now is set at detailed
@@ -188,14 +171,8 @@ namespace Microsoft.Build.BuildEngine
 
         public string Parameters
         {
-            get
-            {
-                return parameters;
-            }
-            set
-            {
-                parameters = value;
-            }
+            get => parameters;
+            set => parameters = value;
         }
 
         #endregion

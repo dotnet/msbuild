@@ -53,15 +53,9 @@ namespace Microsoft.Build.BuildEngine
 
         internal string Condition
         {
-            get
-            {
-                return (conditionAttribute != null ? conditionAttribute.Value : String.Empty);
-            }
+            get => (conditionAttribute != null ? conditionAttribute.Value : String.Empty);
 
-            set
-            {
-                conditionAttribute = ProjectXmlUtilities.SetOrRemoveAttribute(element, XMakeAttributes.condition, value);
-            }
+            set => conditionAttribute = ProjectXmlUtilities.SetOrRemoveAttribute(element, XMakeAttributes.condition, value);
         }
 
         internal XmlElement ParentElement
@@ -76,20 +70,11 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-        internal XmlElement Element
-        {
-            get { return element; }
-        }
+        internal XmlElement Element => element;
 
-        internal XmlAttribute ConditionAttribute
-        {
-            get { return conditionAttribute; }
-        }
+        internal XmlAttribute ConditionAttribute => conditionAttribute;
 
-        internal XmlDocument OwnerDocument
-        {
-            get { return element.OwnerDocument; }
-        }
+        internal XmlDocument OwnerDocument => element.OwnerDocument;
 
         #endregion
 

@@ -160,35 +160,17 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// The list of When nodes inside this Choose
         /// </summary>
-        internal ArrayList Whens
-        {
-            get
-            {
-                return whenClauseList;
-            }
-        }
+        internal ArrayList Whens => whenClauseList;
 
         /// <summary>
         /// The Otherwise node inside this Choose. May be null.
         /// </summary>
-        internal When Otherwise
-        {
-            get
-            {
-                return otherwiseClause;
-            }
-        }
+        internal When Otherwise => otherwiseClause;
 
         /// <summary>
         /// True if this Choose is located in an imported project.
         /// </summary>
-        internal bool IsImported
-        {
-            get
-            {
-                return importedFromAnotherProject;
-            }
-        }
+        internal bool IsImported => importedFromAnotherProject;
 
         #endregion
 

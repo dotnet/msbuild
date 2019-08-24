@@ -51,14 +51,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal int LoggerId
         {
-            get
-            {
-                return this.loggerId;
-            }
-            set
-            {
-                this.loggerId = value;
-            }
+            get => this.loggerId;
+            set => this.loggerId = value;
         }
 
         /// <summary>
@@ -87,24 +81,12 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Returns the string of logger parameters, null if there are none
         /// </summary>
-        public string LoggerSwitchParameters
-        {
-            get
-            {
-                return loggerSwitchParameters;
-            }
-        }
+        public string LoggerSwitchParameters => loggerSwitchParameters;
 
         /// <summary>
         /// Return the verbosity for this logger (from command line all loggers get same verbosity)
         /// </summary>
-        public LoggerVerbosity Verbosity
-        {
-            get
-            {
-                return this.verbosity;
-            }
-        }
+        public LoggerVerbosity Verbosity => this.verbosity;
 
         #endregion
 

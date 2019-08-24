@@ -74,18 +74,10 @@ namespace Microsoft.Build.BuildEngine
         /// This property returns 0 if profiling is not enabled and otherwise returns the
         /// total time spent inside user task code
         /// </summary>
-        internal int TotalTaskTime
-        {
-            get
-            {
-                return totalTaskTime;
-            }
-        }
+        internal int TotalTaskTime => totalTaskTime;
 
-        internal int NodeId
-        {
-            get { return nodeId; }
-        }
+        internal int NodeId => nodeId;
+
         #endregion
 
         #region Method used to call from local engine to the host (and parent engine)

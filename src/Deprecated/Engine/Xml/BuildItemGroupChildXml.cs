@@ -161,10 +161,7 @@ namespace Microsoft.Build.BuildEngine
 
         internal string Name
         {
-            get
-            { 
-                return element.Name;
-            }
+            get => element.Name;
 
             set
             {
@@ -180,10 +177,7 @@ namespace Microsoft.Build.BuildEngine
 
         internal string Include
         {
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(includeAttribute);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(includeAttribute);
 
             set
             {
@@ -194,68 +188,32 @@ namespace Microsoft.Build.BuildEngine
 
         internal string Exclude
         {
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(excludeAttribute);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(excludeAttribute);
 
-            set
-            {
-                excludeAttribute = ProjectXmlUtilities.SetOrRemoveAttribute(element, XMakeAttributes.exclude, value);
-            }
+            set => excludeAttribute = ProjectXmlUtilities.SetOrRemoveAttribute(element, XMakeAttributes.exclude, value);
         }
 
-        internal string Remove
-        {
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(removeAttribute);
-            }
-        }
+        internal string Remove => ProjectXmlUtilities.GetAttributeValue(removeAttribute);
 
         internal string Condition
         {
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(conditionAttribute);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(conditionAttribute);
 
-            set
-            {
-                conditionAttribute = ProjectXmlUtilities.SetOrRemoveAttribute(element, XMakeAttributes.condition, value);
-            }
+            set => conditionAttribute = ProjectXmlUtilities.SetOrRemoveAttribute(element, XMakeAttributes.condition, value);
         }
 
-        internal XmlElement Element
-        {
-            get { return element; }
-        }
+        internal XmlElement Element => element;
 
-        internal XmlAttribute IncludeAttribute
-        {
-            get { return includeAttribute; }
-        }
+        internal XmlAttribute IncludeAttribute => includeAttribute;
 
-        internal XmlAttribute ExcludeAttribute
-        {
-            get { return excludeAttribute; }
-        }
+        internal XmlAttribute ExcludeAttribute => excludeAttribute;
 
-        internal XmlAttribute RemoveAttribute
-        {
-            get { return removeAttribute; }
-        }
+        internal XmlAttribute RemoveAttribute => removeAttribute;
 
-        internal XmlAttribute ConditionAttribute
-        {
-            get { return conditionAttribute; }
-        }
+        internal XmlAttribute ConditionAttribute => conditionAttribute;
 
-        internal ChildType ChildType
-        {
-            get { return childType; }
-        }
-        
+        internal ChildType ChildType => childType;
+
         #endregion
 
         #region Methods

@@ -90,76 +90,39 @@ namespace Microsoft.Build.BuildEngine
         /// Indicates if the output is an item vector.
         /// </summary>
         /// <owner>SumedhK</owner>
-        internal bool IsItemVector
-        {
-            get
-            {
-                return (this.itemNameAttribute != null);
-            }
-        }
+        internal bool IsItemVector => (this.itemNameAttribute != null);
 
         /// <summary>
         /// Indicates if the output is a property.
         /// </summary>
         /// <owner>SumedhK</owner>
-        internal bool IsProperty
-        {
-            get
-            {
-                return (this.propertyNameAttribute != null);
-            }
-        }
+        internal bool IsProperty => (this.propertyNameAttribute != null);
 
         /// <summary>
         /// The task parameter bound to this output.
         /// </summary>
         /// <owner>SumedhK</owner>
-        internal XmlAttribute TaskParameterAttribute
-        {
-            get
-            {
-                // This will never return null.  The constructor ensures this.
-                return this.taskParameterAttribute;
-            }
-        }
+        internal XmlAttribute TaskParameterAttribute => this.taskParameterAttribute;
 
         /// <summary>
         /// The item type, if the output is an item vector.
         /// </summary>
         /// <remarks>If PropertyName is already set, this property cannot be set.</remarks>
         /// <owner>SumedhK</owner>
-        internal XmlAttribute ItemNameAttribute
-        {
-            get
-            {
-                return this.itemNameAttribute;
-            }
-        }
+        internal XmlAttribute ItemNameAttribute => this.itemNameAttribute;
 
         /// <summary>
         /// The property name, if the output is a property.
         /// </summary>
         /// <remarks>If ItemName is already set, this property cannot be set.</remarks>
         /// <owner>SumedhK</owner>
-        internal XmlAttribute PropertyNameAttribute
-        {
-            get
-            {
-                return this.propertyNameAttribute;
-            }
-        }
+        internal XmlAttribute PropertyNameAttribute => this.propertyNameAttribute;
 
         /// <summary>
         /// The condition on the output.
         /// </summary>
         /// <owner>SumedhK</owner>
-        internal XmlAttribute ConditionAttribute
-        {
-            get
-            {
-                return this.conditionAttribute;
-            }
-        }
+        internal XmlAttribute ConditionAttribute => this.conditionAttribute;
 
         // the task parameter bound to this output
         private XmlAttribute taskParameterAttribute;

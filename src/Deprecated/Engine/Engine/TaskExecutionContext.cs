@@ -49,70 +49,34 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Returns true if the task completed successfully
         /// </summary>
-        internal bool TaskExecutedSuccessfully
-        {
-            get
-            {
-                return this.taskExecutedSuccessfully;
-            }
-        }
+        internal bool TaskExecutedSuccessfully => this.taskExecutedSuccessfully;
 
         /// <summary>
         /// Returns the exception thrown during the task execution. The exception will either be
         /// InvalidProjectException or some unexpected exception that occured in the engine code,
         /// because unexpected task exceptions are converted to logged errors.
         /// </summary>
-        internal Exception ThrownException
-        {
-            get
-            {
-                return this.thrownException;
-            }
-        }
+        internal Exception ThrownException => this.thrownException;
 
         /// <summary>
         /// Project within which this task exists
         /// </summary>
-        internal Project ParentProject
-        {
-            get
-            {
-                return this.parentProject;
-            }
-        }
+        internal Project ParentProject => this.parentProject;
 
         /// <summary>
         /// Target within which this task exists
         /// </summary>
-        internal Target ParentTarget
-        {
-            get
-            {
-                return this.parentTarget;
-            }
-        }
+        internal Target ParentTarget => this.parentTarget;
 
         /// <summary>
         /// Project build context within which this task is executing
         /// </summary>
-        internal ProjectBuildState BuildContext
-        {
-            get
-            {
-                return this.buildContext;
-            }
-        }
+        internal ProjectBuildState BuildContext => this.buildContext;
 
         /// <summary>
         /// XML node for the task
         /// </summary>
-        internal XmlElement TaskNode
-        {
-            get
-            {
-                return this.taskNode;
-            }
-        }
+        internal XmlElement TaskNode => this.taskNode;
 
         /// <summary>
         /// The build request that triggered the execution of this task

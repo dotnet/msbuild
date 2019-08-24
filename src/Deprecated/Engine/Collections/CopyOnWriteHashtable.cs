@@ -135,14 +135,9 @@ namespace Microsoft.Build.BuildEngine
         /// Whether or not this CopyOnWriteHashtable is currently a shallow or deep copy.
         /// This state can change from true->false when this hashtable is written to.
         /// </summary>
-        internal bool IsShallowCopy
-        {
-            get
-            {
-                return this.readonlyData != null;
-            }
-        }
-#endregion
+        internal bool IsShallowCopy => this.readonlyData != null;
+
+        #endregion
 #region Pass-through Hashtable methods.
         public bool Contains(Object key) {return ReadOperation.Contains(key);}
         public void Add(Object key, Object value) {WriteOperation.Add(key, value);}
@@ -160,22 +155,19 @@ namespace Microsoft.Build.BuildEngine
         IEnumerator IEnumerable.GetEnumerator() { return ((IEnumerable)ReadOperation).GetEnumerator(); }
         public IDictionaryEnumerator GetEnumerator() {return ReadOperation.GetEnumerator();}
         public void Remove(Object key) {WriteOperation.Remove(key);}        
-        public bool IsFixedSize { get { return ReadOperation.IsFixedSize; }}
-        public bool IsReadOnly {get {return ReadOperation.IsFixedSize;}}
-        public ICollection Keys {get {return ReadOperation.Keys;}}
-        public ICollection Values {get {return ReadOperation.Values;}}
+        public bool IsFixedSize => ReadOperation.IsFixedSize;
+        public bool IsReadOnly => ReadOperation.IsFixedSize;
+        public ICollection Keys => ReadOperation.Keys;
+        public ICollection Values => ReadOperation.Values;
         public void CopyTo(Array array, int arrayIndex) { ReadOperation.CopyTo(array, arrayIndex); }
-        public int Count{get { return ReadOperation.Count; }}
-        public bool IsSynchronized {get { return ReadOperation.IsSynchronized; }}
-        public Object SyncRoot {get { return ReadOperation.SyncRoot; }}
+        public int Count => ReadOperation.Count;
+        public bool IsSynchronized => ReadOperation.IsSynchronized;
+        public Object SyncRoot => ReadOperation.SyncRoot;
         public bool ContainsKey(Object key)    {return ReadOperation.Contains(key);}
         
         public Object this[Object key] 
         {
-            get 
-            {
-                return ReadOperation[key];
-            }
+            get => ReadOperation[key];
             set 
             {
                 lock (sharedLock)

@@ -642,8 +642,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal BuildEventContext BuildEventContext
         {
-            get { return buildEventContext; }
-            set { buildEventContext = value; }
+            get => buildEventContext;
+            set => buildEventContext = value;
         }
 
         /// <summary>
@@ -651,10 +651,7 @@ namespace Microsoft.Build.BuildEngine
         /// Single process mode is where the engine is initialized with the number of cpus = 1 and the engine is not a child engine.
         /// The engine is in multi process mode when the engine is initialized with a number of cpus > 1 or the engine is a child engine.
         /// </summary>
-        public bool IsRunningMultipleNodes
-        {
-            get { return parentModule.IsRunningMultipleNodes; }
-        }
+        public bool IsRunningMultipleNodes => parentModule.IsRunningMultipleNodes;
 
         /// <summary>
         /// Cached copy of typeof(BuildErrorEventArgs) used during each call to LogError

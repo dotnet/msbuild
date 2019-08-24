@@ -39,25 +39,13 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// Gets the assembly's identity denoted by its strong/weak name.
         /// </summary>
         /// <owner>SumedhK</owner>
-        public string AssemblyName
-        {
-            get
-            {
-                return assemblyName;
-            }
-        }
+        public string AssemblyName => assemblyName;
 
         /// <summary>
         /// Gets the path to the assembly file.
         /// </summary>
         /// <owner>SumedhK</owner>
-        public string AssemblyFile
-        {
-            get
-            {
-                return assemblyFile;
-            }
-        }
+        public string AssemblyFile => assemblyFile;
 
         #endregion
 

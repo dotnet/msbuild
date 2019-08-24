@@ -154,10 +154,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// The item type of the parent item definition or item.
         /// </summary>
-        public string ItemType
-        {
-            get { return _parent.ItemType; }
-        }
+        public string ItemType => _parent.ItemType;
 
         /// <summary>
         /// Any immediately previous metadatum (from item definition or item) that was overridden by this one during evaluation.
@@ -191,18 +188,12 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Location of the element
         /// </summary>
-        public ElementLocation Location
-        {
-            get { return _xml.Location; }
-        }
+        public ElementLocation Location => _xml.Location;
 
         /// <summary>
         /// Location of the condition attribute
         /// </summary>
-        public ElementLocation ConditionLocation
-        {
-            get { return _xml.ConditionLocation; }
-        }
+        public ElementLocation ConditionLocation => _xml.ConditionLocation;
 
         /// <summary>
         /// Implementation of IKeyed exposing the metadata name, so metadata

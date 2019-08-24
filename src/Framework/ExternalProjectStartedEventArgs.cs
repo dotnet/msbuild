@@ -78,13 +78,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Project name
         /// </summary>
-        public string ProjectFile
-        {
-            get
-            {
-                return projectFile;
-            }
-        }
+        public string ProjectFile => projectFile;
 
         private string targetNames;
 
@@ -93,12 +87,6 @@ namespace Microsoft.Build.Framework
         /// our tasks will put something like Rebuild, Clean, etc. here. This may be null if the project is being
         /// built with the default target.
         /// </summary>
-        public string TargetNames
-        {
-            get
-            {
-                return targetNames;
-            }
-        }
+        public string TargetNames => targetNames;
     }
 }

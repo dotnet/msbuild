@@ -50,14 +50,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal bool ChildMode
         {
-            get
-            {
-                return this.childMode;
-            }
-            set
-            {
-                this.childMode = value;
-            }
+            get => this.childMode;
+            set => this.childMode = value;
         }
 
         /// <summary>
@@ -66,14 +60,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal Node ParentNode
         {
-            get
-            {
-                return this.parentNode;
-            }
-            set
-            {
-                this.parentNode = value;
-            }
+            get => this.parentNode;
+            set => this.parentNode = value;
         }
 
         /// <summary>
@@ -81,13 +69,7 @@ namespace Microsoft.Build.BuildEngine
         /// execution. In general the usage should be minimized by using inheretence and
         /// different classes in single proc and multiproc cases
         /// </summary>
-        internal bool SingleThreadedMode
-        {
-            get
-            {
-                return (!childMode && nodeManager.MaxNodeCount == 1);
-            }
-        }
+        internal bool SingleThreadedMode => (!childMode && nodeManager.MaxNodeCount == 1);
 
         #endregion
 

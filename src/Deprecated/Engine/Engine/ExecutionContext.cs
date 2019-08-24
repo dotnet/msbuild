@@ -33,35 +33,17 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// The token id corresponding to this context
         /// </summary>
-        internal int HandleId
-        {
-            get
-            {
-                return this.handleId;
-            }
-        }
+        internal int HandleId => this.handleId;
 
         /// <summary>
         /// The node on which this context is being executed 
         /// </summary>
-        internal int NodeIndex
-        {
-            get
-            {
-                return this.nodeIndex;
-            }
-        }
+        internal int NodeIndex => this.nodeIndex;
 
         /// <summary>
         /// The logging context
         /// </summary>
-        internal BuildEventContext BuildEventContext
-        {
-            get
-            {
-                return this.buildEventContext;
-            }
-        }
+        internal BuildEventContext BuildEventContext => this.buildEventContext;
 
         #endregion
 
