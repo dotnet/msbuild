@@ -1090,14 +1090,26 @@ namespace System.Deployment.Internal.CodeSigning
 
         internal string Description
         {
-            get => _description;
-            set => _description = value;
+            get
+            {
+                return _description;
+            }
+            set
+            {
+                _description = value;
+            }
         }
 
         internal string DescriptionUrl
         {
-            get => _url;
-            set => _url = value;
+            get
+            {
+                return _url;
+            }
+            set
+            {
+                _url = value;
+            }
         }
 
         internal X509Certificate2Collection ExtraStore
@@ -1110,7 +1122,10 @@ namespace System.Deployment.Internal.CodeSigning
 
         internal X509IncludeOption IncludeOption
         {
-            get => _includeOption;
+            get
+            {
+                return _includeOption;
+            }
             set
             {
                 if (value < X509IncludeOption.None || value > X509IncludeOption.WholeChain)
@@ -1123,7 +1138,10 @@ namespace System.Deployment.Internal.CodeSigning
 
         internal CmiManifestSignerFlag Flag
         {
-            get => _signerFlag;
+            get
+            {
+                return _signerFlag;
+            }
             set
             {
                 unchecked
@@ -1154,23 +1172,41 @@ namespace System.Deployment.Internal.CodeSigning
 
         internal int ErrorCode
         {
-            get => _error;
+            get
+            {
+                return _error;
+            }
 
-            set => _error = value;
+            set
+            {
+                _error = value;
+            }
         }
 
         internal string PublicKeyToken
         {
-            get => _publicKeyToken;
+            get
+            {
+                return _publicKeyToken;
+            }
 
-            set => _publicKeyToken = value;
+            set
+            {
+                _publicKeyToken = value;
+            }
         }
 
         internal AsymmetricAlgorithm PublicKey
         {
-            get => _snKey;
+            get
+            {
+                return _snKey;
+            }
 
-            set => _snKey = value;
+            set
+            {
+                _snKey = value;
+            }
         }
     }
 
@@ -1221,32 +1257,62 @@ namespace System.Deployment.Internal.CodeSigning
 
         internal int ErrorCode
         {
-            get => _error;
-            set => _error = value;
+            get
+            {
+                return _error;
+            }
+            set
+            {
+                _error = value;
+            }
         }
 
         internal uint HashAlgId
         {
-            get => _algHash;
-            set => _algHash = value;
+            get
+            {
+                return _algHash;
+            }
+            set
+            {
+                _algHash = value;
+            }
         }
 
         internal string Hash
         {
-            get => _hash;
-            set => _hash = value;
+            get
+            {
+                return _hash;
+            }
+            set
+            {
+                _hash = value;
+            }
         }
 
         internal string Description
         {
-            get => _description;
-            set => _description = value;
+            get
+            {
+                return _description;
+            }
+            set
+            {
+                _description = value;
+            }
         }
 
         internal string DescriptionUrl
         {
-            get => _descriptionUrl;
-            set => _descriptionUrl = value;
+            get
+            {
+                return _descriptionUrl;
+            }
+            set
+            {
+                _descriptionUrl = value;
+            }
         }
 
         internal CmiAuthenticodeTimestamperInfo TimestamperInfo
@@ -1259,8 +1325,14 @@ namespace System.Deployment.Internal.CodeSigning
 
         internal X509Chain SignerChain
         {
-            get => _signerChain;
-            set => _signerChain = value;
+            get
+            {
+                return _signerChain;
+            }
+            set
+            {
+                _signerChain = value;
+            }
         }
     }
 

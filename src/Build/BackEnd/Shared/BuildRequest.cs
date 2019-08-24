@@ -154,7 +154,8 @@ namespace Microsoft.Build.BackEnd
         public bool IsConfigurationResolved
         {
             [DebuggerStepThrough]
-            get => _configurationId > 0;
+            get
+            { return _configurationId > 0; }
         }
 
         /// <summary>
@@ -163,7 +164,8 @@ namespace Microsoft.Build.BackEnd
         public int SubmissionId
         {
             [DebuggerStepThrough]
-            get => _submissionId;
+            get
+            { return _submissionId; }
         }
 
         /// <summary>
@@ -172,7 +174,8 @@ namespace Microsoft.Build.BackEnd
         public int ConfigurationId
         {
             [DebuggerStepThrough]
-            get => _configurationId;
+            get
+            { return _configurationId; }
         }
 
         /// <summary>
@@ -181,7 +184,10 @@ namespace Microsoft.Build.BackEnd
         public int GlobalRequestId
         {
             [DebuggerStepThrough]
-            get => _globalRequestId;
+            get
+            {
+                return _globalRequestId;
+            }
 
             set
             {
@@ -196,7 +202,8 @@ namespace Microsoft.Build.BackEnd
         public int ParentGlobalRequestId
         {
             [DebuggerStepThrough]
-            get => _parentGlobalRequestId;
+            get
+            { return _parentGlobalRequestId; }
         }
 
         /// <summary>
@@ -205,10 +212,12 @@ namespace Microsoft.Build.BackEnd
         public int NodeRequestId
         {
             [DebuggerStepThrough]
-            get => _nodeRequestId;
+            get
+            { return _nodeRequestId; }
 
             [DebuggerStepThrough]
-            set => _nodeRequestId = value;
+            set
+            { _nodeRequestId = value; }
         }
 
         /// <summary>
@@ -217,7 +226,8 @@ namespace Microsoft.Build.BackEnd
         public List<string> Targets
         {
             [DebuggerStepThrough]
-            get => _targets;
+            get
+            { return _targets; }
         }
 
         /// <summary>
@@ -226,7 +236,8 @@ namespace Microsoft.Build.BackEnd
         public NodePacketType Type
         {
             [DebuggerStepThrough]
-            get => NodePacketType.BuildRequest;
+            get
+            { return NodePacketType.BuildRequest; }
         }
 
         /// <summary>
@@ -235,7 +246,8 @@ namespace Microsoft.Build.BackEnd
         public BuildEventContext ParentBuildEventContext
         {
             [DebuggerStepThrough]
-            get => _parentBuildEventContext;
+            get
+            { return _parentBuildEventContext; }
         }
 
         /// <summary>
@@ -244,7 +256,10 @@ namespace Microsoft.Build.BackEnd
         public BuildEventContext BuildEventContext
         {
             [DebuggerStepThrough]
-            get => _buildEventContext;
+            get
+            {
+                return _buildEventContext;
+            }
 
             set
             {
@@ -290,7 +305,8 @@ namespace Microsoft.Build.BackEnd
         internal bool IsRootRequest
         {
             [DebuggerStepThrough]
-            get => _parentGlobalRequestId == InvalidGlobalRequestId;
+            get
+            { return _parentGlobalRequestId == InvalidGlobalRequestId; }
         }
 
         /// <summary>

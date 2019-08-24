@@ -31,8 +31,8 @@ namespace Microsoft.Build.Shared.LanguageParser
          */
         internal string InnerText
         {
-            get => _innerText;
-            set => _innerText = value;
+            get { return _innerText; }
+            set { _innerText = value; }
         }
 
         /*
@@ -42,8 +42,14 @@ namespace Microsoft.Build.Shared.LanguageParser
          */
         internal int Line
         {
-            get => _line;
-            set => _line = value;
+            get
+            {
+                return _line;
+            }
+            set
+            {
+                _line = value;
+            }
         }
 
         /*

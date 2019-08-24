@@ -484,7 +484,7 @@ namespace Microsoft.Build.Tasks
         /// <value>The full path to this assembly.</value>
         internal string FullPath
         {
-            get => _fullPath;
+            get { return _fullPath; }
             set
             {
                 if (_fullPath != value)
@@ -671,8 +671,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal bool IsManagedWinMDFile
         {
-            get => _isManagedWinMDFile;
-            set => _isManagedWinMDFile = value;
+            get { return _isManagedWinMDFile; }
+            set { _isManagedWinMDFile = value; }
         }
 
         /// <summary>
@@ -690,8 +690,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal string ImageRuntime
         {
-            get => _imageRuntimeVersion;
-            set => _imageRuntimeVersion = value;
+            get { return _imageRuntimeVersion; }
+            set { _imageRuntimeVersion = value; }
         }
 
         /// <summary>

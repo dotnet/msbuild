@@ -216,8 +216,14 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         private CopyOnWriteDictionary<string, string> Metadata
         {
-            get => _metadata;
-            set => _metadata = value;
+            get
+            {
+                return _metadata;
+            }
+            set
+            {
+                _metadata = value;
+            }
         }
 
         #endregion

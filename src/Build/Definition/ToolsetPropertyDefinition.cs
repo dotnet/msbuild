@@ -67,7 +67,10 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public string Value
         {
-            get => _value;
+            get
+            {
+                return _value;
+            }
 
             set
             {

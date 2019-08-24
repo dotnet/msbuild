@@ -49,7 +49,10 @@ namespace Microsoft.Build.Construction
         public string Content
         {
             [DebuggerStepThrough]
-            get => XmlElement.InnerXml;
+            get
+            {
+                return XmlElement.InnerXml;
+            }
 
             set
             {

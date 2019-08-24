@@ -103,7 +103,10 @@ namespace Microsoft.Build.Construction
         public string Inputs
         {
             [DebuggerStepThrough]
-            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.inputs);
+            get
+            {
+                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.inputs);
+            }
 
             set
             {
@@ -121,7 +124,10 @@ namespace Microsoft.Build.Construction
         public string Outputs
         {
             [DebuggerStepThrough]
-            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.outputs);
+            get
+            {
+                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.outputs);
+            }
 
             set
             {
@@ -168,7 +174,10 @@ namespace Microsoft.Build.Construction
         public string DependsOnTargets
         {
             [DebuggerStepThrough]
-            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.dependsOnTargets);
+            get
+            {
+                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.dependsOnTargets);
+            }
 
             set
             {
@@ -186,7 +195,10 @@ namespace Microsoft.Build.Construction
         public string BeforeTargets
         {
             [DebuggerStepThrough]
-            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.beforeTargets);
+            get
+            {
+                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.beforeTargets);
+            }
 
             set
             {
@@ -204,7 +216,10 @@ namespace Microsoft.Build.Construction
         public string AfterTargets
         {
             [DebuggerStepThrough]
-            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.afterTargets);
+            get
+            {
+                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.afterTargets);
+            }
 
             set
             {

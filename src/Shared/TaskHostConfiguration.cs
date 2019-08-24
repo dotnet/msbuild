@@ -174,7 +174,8 @@ namespace Microsoft.Build.BackEnd
         public int NodeId
         {
             [DebuggerStepThrough]
-            get => _nodeId;
+            get
+            { return _nodeId; }
         }
 
         /// <summary>
@@ -183,7 +184,8 @@ namespace Microsoft.Build.BackEnd
         public string StartupDirectory
         {
             [DebuggerStepThrough]
-            get => _startupDirectory;
+            get
+            { return _startupDirectory; }
         }
 
         /// <summary>
@@ -192,7 +194,8 @@ namespace Microsoft.Build.BackEnd
         public Dictionary<string, string> BuildProcessEnvironment
         {
             [DebuggerStepThrough]
-            get => _buildProcessEnvironment;
+            get
+            { return _buildProcessEnvironment; }
         }
 
         /// <summary>
@@ -201,7 +204,8 @@ namespace Microsoft.Build.BackEnd
         public CultureInfo Culture
         {
             [DebuggerStepThrough]
-            get => _culture;
+            get
+            { return _culture; }
         }
 
         /// <summary>
@@ -210,7 +214,8 @@ namespace Microsoft.Build.BackEnd
         public CultureInfo UICulture
         {
             [DebuggerStepThrough]
-            get => _uiCulture;
+            get
+            { return _uiCulture; }
         }
 
 #if FEATURE_APPDOMAIN
@@ -221,7 +226,8 @@ namespace Microsoft.Build.BackEnd
         public AppDomainSetup AppDomainSetup
         {
             [DebuggerStepThrough]
-            get => _appDomainSetup;
+            get
+            { return _appDomainSetup; }
         }
 #endif
 
@@ -231,7 +237,8 @@ namespace Microsoft.Build.BackEnd
         public int LineNumberOfTask
         {
             [DebuggerStepThrough]
-            get => _lineNumberOfTask;
+            get
+            { return _lineNumberOfTask; }
         }
 
         /// <summary>
@@ -240,7 +247,8 @@ namespace Microsoft.Build.BackEnd
         public int ColumnNumberOfTask
         {
             [DebuggerStepThrough]
-            get => _columnNumberOfTask;
+            get
+            { return _columnNumberOfTask; }
         }
 
         /// <summary>
@@ -249,7 +257,8 @@ namespace Microsoft.Build.BackEnd
         public bool ContinueOnError
         {
             [DebuggerStepThrough]
-            get => _continueOnError;
+            get
+            { return _continueOnError; }
         }
 
         /// <summary>
@@ -258,7 +267,8 @@ namespace Microsoft.Build.BackEnd
         public string ProjectFileOfTask
         {
             [DebuggerStepThrough]
-            get => _projectFileOfTask;
+            get
+            { return _projectFileOfTask; }
         }
 
         /// <summary>
@@ -267,7 +277,8 @@ namespace Microsoft.Build.BackEnd
         public string TaskName
         {
             [DebuggerStepThrough]
-            get => _taskName;
+            get
+            { return _taskName; }
         }
 
         /// <summary>
@@ -276,7 +287,8 @@ namespace Microsoft.Build.BackEnd
         public string TaskLocation
         {
             [DebuggerStepThrough]
-            get => _taskLocation;
+            get
+            { return _taskLocation; }
         }
 
         /// <summary>
@@ -285,7 +297,8 @@ namespace Microsoft.Build.BackEnd
         public Dictionary<string, TaskParameter> TaskParameters
         {
             [DebuggerStepThrough]
-            get => _taskParameters;
+            get
+            { return _taskParameters; }
         }
 
         /// <summary>
@@ -294,7 +307,8 @@ namespace Microsoft.Build.BackEnd
         public NodePacketType Type
         {
             [DebuggerStepThrough]
-            get => NodePacketType.TaskHostConfiguration;
+            get
+            { return NodePacketType.TaskHostConfiguration; }
         }
 
         /// <summary>

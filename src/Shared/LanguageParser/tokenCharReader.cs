@@ -66,13 +66,13 @@ namespace Microsoft.Build.Shared.LanguageParser
          */
         internal int Position
         {
-            get => _position;
+            get { return _position; }
             // Having a set operator makes this class not forward-only.
             // If this becomes necessary later, then implement a push-pop
             // scheme for saving current positions and get rid of this.
             // This will force the caller to declare ahead of time whether
             // they may want to return here.
-            set => _position = value;
+            set { _position = value; }
         }
 
         /*

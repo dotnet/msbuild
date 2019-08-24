@@ -160,9 +160,15 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public IBuildEngine BuildEngine
         {
-            get => _buildEngine;
+            get
+            {
+                return _buildEngine;
+            }
 
-            set => _buildEngine = value;
+            set
+            {
+                _buildEngine = value;
+            }
         }
 
         /// <summary>
@@ -170,9 +176,15 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public ITaskHost HostObject
         {
-            get => _hostObject;
+            get
+            {
+                return _hostObject;
+            }
 
-            set => _hostObject = value;
+            set
+            {
+                _hostObject = value;
+            }
         }
 
         /// <summary>

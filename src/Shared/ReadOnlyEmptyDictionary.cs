@@ -130,9 +130,15 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public object this[object key]
         {
-            get => ((IDictionary<K, V>)this)[(K)key];
+            get
+            {
+                return ((IDictionary<K, V>)this)[(K)key];
+            }
 
-            set => ((IDictionary<K, V>)this)[(K)key] = (V)value;
+            set
+            {
+                ((IDictionary<K, V>)this)[(K)key] = (V)value;
+            }
         }
 
         /// <summary>
@@ -147,7 +153,10 @@ namespace Microsoft.Build.Collections
                 return (new Dictionary<K, V>()[key]);
             }
 
-            set => ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
+            set
+            {
+                ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
+            }
         }
 
         /// <summary>

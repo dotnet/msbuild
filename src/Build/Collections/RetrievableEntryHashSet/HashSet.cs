@@ -234,7 +234,10 @@ namespace Microsoft.Build.Collections
         // Convenience to minimise change to callers used to dictionaries
         internal T this[string name]
         {
-            get => Get(name);
+            get
+            {
+                return Get(name);
+            }
 
             set
             {
@@ -298,8 +301,8 @@ namespace Microsoft.Build.Collections
 
         T IDictionary<string, T>.this[string name]
         {
-            get => Get(name);
-            set => Add(value);
+            get { return Get(name); }
+            set { Add(value); }
         }
 
         /// <summary>

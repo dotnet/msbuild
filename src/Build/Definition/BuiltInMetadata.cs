@@ -24,7 +24,8 @@ namespace Microsoft.Build.Evaluation
         static internal int MetadataCount
         {
             [DebuggerStepThrough]
-            get => FileUtilities.ItemSpecModifiers.All.Length;
+            get
+            { return FileUtilities.ItemSpecModifiers.All.Length; }
         }
 
         /// <summary>
@@ -33,7 +34,8 @@ namespace Microsoft.Build.Evaluation
         static internal ICollection<string> MetadataNames
         {
             [DebuggerStepThrough]
-            get => FileUtilities.ItemSpecModifiers.All;
+            get
+            { return FileUtilities.ItemSpecModifiers.All; }
         }
 
         /// <summary>
