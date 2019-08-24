@@ -1000,12 +1000,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="requests">The requests to be fulfilled.</param>
         private void RaiseOnNewBuildRequests(FullyQualifiedBuildRequest[] requests)
         {
-            NewBuildRequestsDelegate newRequestDelegate = OnNewBuildRequests;
-
-            if (null != newRequestDelegate)
-            {
-                newRequestDelegate(_requestEntry, requests);
-            }
+            OnNewBuildRequests?.Invoke(_requestEntry, requests);
         }
 
         /// <summary>
@@ -1013,12 +1008,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void RaiseBuildRequestCompleted(BuildRequestEntry entryToComplete)
         {
-            BuildRequestCompletedDelegate completeRequestDelegate = OnBuildRequestCompleted;
-
-            if (null != completeRequestDelegate)
-            {
-                completeRequestDelegate(entryToComplete);
-            }
+            OnBuildRequestCompleted?.Invoke(entryToComplete);
         }
 
         /// <summary>
@@ -1026,12 +1016,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void RaiseOnBlockedRequest(int blockingGlobalRequestId, string blockingTarget, BuildResult partialBuildResult = null)
         {
-            BuildRequestBlockedDelegate blockedRequestDelegate = OnBuildRequestBlocked;
-
-            if (null != blockedRequestDelegate)
-            {
-                blockedRequestDelegate(_requestEntry, blockingGlobalRequestId, blockingTarget, partialBuildResult);
-            }
+            OnBuildRequestBlocked?.Invoke(_requestEntry, blockingGlobalRequestId, blockingTarget, partialBuildResult);
         }
 
         /// <summary>
