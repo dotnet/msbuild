@@ -567,7 +567,13 @@ namespace Microsoft.Build.CommandLine
         /// </remarks>
         /// <param name="parameterlessSwitch"></param>
         /// <returns>true if on, false if off</returns>
-        internal bool this[ParameterlessSwitch parameterlessSwitch] => (_parameterlessSwitches[(int)parameterlessSwitch].commandLineArg != null);
+        internal bool this[ParameterlessSwitch parameterlessSwitch]
+        {
+            get
+            {
+                return (_parameterlessSwitches[(int)parameterlessSwitch].commandLineArg != null);
+            }
+        }
 
         /// <summary>
         /// Gets the command line argument (if any) in which the given parameterless switch was detected.
