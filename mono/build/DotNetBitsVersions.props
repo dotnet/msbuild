@@ -6,11 +6,11 @@
 
         <MicrosoftNETSdkRazorPackageVersion>3.0.0-preview9.19422.6</MicrosoftNETSdkRazorPackageVersion>
 
-        <MicrosoftNETSdkWebPackageVersion>3.0.100-preview9.19422.5</MicrosoftNETSdkWebPackageVersion>
+        <MicrosoftNETSdkWebPackageVersion>3.0.100-preview9.19423.3</MicrosoftNETSdkWebPackageVersion>
         <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
         <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
 
-        <NuGetBuildTasksPackageVersion>5.3.0-preview.2.6167</NuGetBuildTasksPackageVersion>
+        <NuGetBuildTasksPackageVersion>5.3.0-rtm.6192</NuGetBuildTasksPackageVersion>
         <NuGetBuildTasksPackPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetBuildTasksPackPackageVersion>
 
         <MicrosoftDotNetMSBuildSdkResolverPackageVersion>3.0.100-preview9.19422.5</MicrosoftDotNetMSBuildSdkResolverPackageVersion>
