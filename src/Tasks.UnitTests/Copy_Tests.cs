@@ -1929,6 +1929,51 @@ namespace Microsoft.Build.UnitTests
             engine.AssertLogContains("MSB3027");
         }
 
+        [Fact(Skip = "Only run if either UseHardlinksIfPossible or UseSymboliclinksIfPossible is true")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public virtual void ErrorIfLinkFailedCheck()
+        {
+            string source = FileUtilities.GetTemporaryFile();
+            string destination = FileUtilities.GetTemporaryFile();
+
+            try
+            {
+                using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
+                {
+                    sw.Write("This is a source file.");
+                }
+
+                using (StreamWriter sw = FileUtilities.OpenWrite(destination, true))
+                {
+                    sw.Write("This is a destination file.");
+                }
+
+                File.SetAttributes(destination, FileAttributes.ReadOnly);
+
+                MockEngine engine = new MockEngine(true);
+                Copy t = new Copy
+                {
+                    RetryDelayMilliseconds = 1,
+                    UseHardlinksIfPossible = UseHardLinks,
+                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    ErrorIfLinkFails = true,
+                    BuildEngine = engine,
+                    SourceFiles = new ITaskItem[] { new TaskItem(source) },
+                    DestinationFiles = new ITaskItem[] { new TaskItem(destination) },
+                };
+
+                Assert.False(t.Execute());
+                engine.AssertLogContains("MSB3893");
+            }
+            finally
+            {
+                File.SetAttributes(destination, FileAttributes.Normal);
+
+                File.Delete(source);
+                File.Delete(destination);
+            }
+        }
+
         /// <summary>
         /// Helper functor for retry tests.
         /// Simulates the File.Copy method without touching the disk.
@@ -2053,6 +2098,30 @@ namespace Microsoft.Build.UnitTests
             {
                 Helpers.DeleteFiles(sourceFile, destFile);
             }
+        }
+
+        /// <summary>
+        /// Verifies that we error when ErrorIfLinkFailed is true when UseHardlinksIfPossible
+        /// and UseSymboliclinksIfPossible are false.
+        /// </summary>
+        [Fact]
+        public void InvalidErrorIfLinkFailed()
+        {
+            var engine = new MockEngine(true);
+            var t = new Copy
+            {
+                BuildEngine = engine,
+                SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
+                DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
+                UseHardlinksIfPossible = false,
+                UseSymboliclinksIfPossible = false,
+                ErrorIfLinkFails = true,
+            };
+
+            bool result = t.Execute();
+
+            Assert.False(result);
+            engine.AssertLogContains("MSB3892");
         }
     }
 
@@ -2320,6 +2389,12 @@ namespace Microsoft.Build.UnitTests
                 FileUtilities.DeleteWithoutTrailingBackslash(destFolder, true);
             }
         }
+
+        [Fact]
+        public override void ErrorIfLinkFailedCheck()
+        {
+            base.ErrorIfLinkFailedCheck();
+        }
     }
 
     public class CopySymbolicLink_Tests : Copy_Tests
@@ -2408,6 +2483,12 @@ namespace Microsoft.Build.UnitTests
                     FileUtilities.DeleteWithoutTrailingBackslash(destFolder, true);
                 }
             }
+        }
+
+        [Fact]
+        public override void ErrorIfLinkFailedCheck()
+        {
+            base.ErrorIfLinkFailedCheck();
         }
     }
 }

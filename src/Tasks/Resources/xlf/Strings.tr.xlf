@@ -161,6 +161,11 @@
         <target state="translated">MSB3021: "{0}" dosyası "{1}" üzerine kopyalanamıyor. {2}</target>
         <note>{StrBegin="MSB3021: "}</note>
       </trans-unit>
+      <trans-unit id="Copy.ErrorIfLinkFailsSetWithoutLinkOption">
+        <source>MSB3892: ErrorIfLinkedFails requires UseHardlinksIfPossible or UseSymbolicLinksIfPossible to be set.</source>
+        <target state="new">MSB3892: ErrorIfLinkedFails requires UseHardlinksIfPossible or UseSymbolicLinksIfPossible to be set.</target>
+        <note>{StrBegin="MSB3892: "}</note>
+      </trans-unit>
       <trans-unit id="Copy.ExactlyOneTypeOfDestination">
         <source>MSB3022: Both "{0}" and "{1}" were specified as input parameters in the project file. Please choose one or the other.</source>
         <target state="translated">MSB3022: Proje dosyasında giriş parametresi olarak hem "{0}" hem de "{1}" belirtilmiş. Lütfen ikisinden birini seçin.</target>
@@ -175,6 +180,11 @@
         <source>Creating hard link to copy "{0}" to "{1}".</source>
         <target state="translated">"{0}" yolunu "{1}" yoluna kopyalamak için sabit bağlantı oluşturuluyor.</target>
         <note>LOCALIZATION: {0} and {1} are paths.</note>
+      </trans-unit>
+      <trans-unit id="Copy.LinkFailed">
+        <source>MSB3893: Could not use a link to copy "{0}" to "{1}".</source>
+        <target state="new">MSB3893: Could not use a link to copy "{0}" to "{1}".</target>
+        <note>{StrBegin="MSB3893: "}</note>
       </trans-unit>
       <trans-unit id="Copy.RetryingAsFileCopy">
         <source>Could not use a link to copy "{0}" to "{1}". Copying the file instead. {2}</source>
