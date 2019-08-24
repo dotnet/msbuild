@@ -78,12 +78,21 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Name of the factory. In this case the name is the assembly name which is wrapped by the factory
         /// </summary>
-        public string FactoryName => _loadedType.Assembly.AssemblyLocation;
+        public string FactoryName
+        {
+            get
+            {
+                return _loadedType.Assembly.AssemblyLocation;
+            }
+        }
 
         /// <summary>
         /// Gets the type of task this factory creates.
         /// </summary>
-        public Type TaskType => _loadedType.Type;
+        public Type TaskType
+        {
+            get { return _loadedType.Type; }
+        }
 
         /// <summary>
         /// Initializes this factory for instantiating tasks with a particular inline task block.

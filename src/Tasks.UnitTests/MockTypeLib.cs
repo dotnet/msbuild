@@ -48,11 +48,23 @@ namespace Microsoft.Build.UnitTests
     {
         private List<MockTypeInfo> _containedTypeInfos;
 
-        public List<MockTypeInfo> ContainedTypeInfos => _containedTypeInfos;
+        public List<MockTypeInfo> ContainedTypeInfos
+        {
+            get
+            {
+                return _containedTypeInfos;
+            }
+        }
 
         private TYPELIBATTR _typeLibAttributes;
 
-        public TYPELIBATTR Attributes => _typeLibAttributes;
+        public TYPELIBATTR Attributes
+        {
+            get
+            {
+                return _typeLibAttributes;
+            }
+        }
 
         private string _exportedFromComPlus;
 

@@ -100,7 +100,10 @@ namespace Microsoft.Build.Evaluation
             return _lookahead.String;
         }
 
-        internal Token CurrentToken => _lookahead;
+        internal Token CurrentToken
+        {
+            get { return _lookahead; }
+        }
 
         internal int GetErrorPosition()
         {
@@ -110,7 +113,13 @@ namespace Microsoft.Build.Evaluation
 
         // The string (usually a single character) we found unexpectedly. 
         // We might want to show it in the error message, to help the user spot the error.
-        internal string UnexpectedlyFound => _unexpectedlyFound;
+        internal string UnexpectedlyFound
+        {
+            get
+            {
+                return _unexpectedlyFound;
+            }
+        }
 
         /// <summary>
         /// Advance

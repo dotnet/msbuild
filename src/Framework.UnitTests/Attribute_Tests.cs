@@ -49,10 +49,22 @@ namespace Microsoft.Build.UnitTests
     internal static class X
     {
         [Required]
-        internal static bool TestValue => true;
+        internal static bool TestValue
+        {
+            get
+            {
+                return true;
+            }
+        }
 
         [Output]
-        internal static bool TestValue2 => true;
+        internal static bool TestValue2
+        {
+            get
+            {
+                return true;
+            }
+        }
     }
 }
 

@@ -130,7 +130,10 @@ namespace Microsoft.Build.UnitTests
                 _addResponseFileCommands = addResponseFileCommands;
                 UseNewLineSeparatorInResponseFile = useNewLineSeparators;
             }
-            protected override string ToolName => "toolname";
+            protected override string ToolName
+            {
+                get { return "toolname"; }
+            }
 
             protected override string GenerateFullPathToTool()
             {

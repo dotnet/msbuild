@@ -102,9 +102,15 @@ namespace Microsoft.Build.Shared
             return resource;
         }
 
-        internal static ResourceManager PrimaryResources => s_resources;
+        internal static ResourceManager PrimaryResources
+        {
+            get { return s_resources; }
+        }
 
-        internal static ResourceManager SharedResources => s_sharedResources;
+        internal static ResourceManager SharedResources
+        {
+            get { return s_sharedResources; }
+        }
 
         // assembly resources
         private static readonly ResourceManager s_resources = new ResourceManager("Microsoft.Build.Strings", typeof(AssemblyResources).GetTypeInfo().Assembly);

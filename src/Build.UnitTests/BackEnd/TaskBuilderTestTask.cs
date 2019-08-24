@@ -512,12 +512,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Name of the factory
             /// </summary>
-            public string FactoryName => typeof(TaskBuilderTestTask).ToString();
+            public string FactoryName
+            {
+                get { return typeof(TaskBuilderTestTask).ToString(); }
+            }
 
             /// <summary>
             /// Gets the type of task generated.
             /// </summary>
-            public Type TaskType => _type;
+            public Type TaskType
+            {
+                get { return _type; }
+            }
 
             /// <summary>
             /// There is nothing to initialize

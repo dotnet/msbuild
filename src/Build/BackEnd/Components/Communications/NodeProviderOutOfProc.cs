@@ -58,7 +58,13 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the number of available nodes.
         /// </summary>
-        public int AvailableNodes => ComponentHost.BuildParameters.MaxNodeCount - _nodeContexts.Count;
+        public int AvailableNodes
+        {
+            get
+            {
+                return ComponentHost.BuildParameters.MaxNodeCount - _nodeContexts.Count;
+            }
+        }
 
         /// <summary>
         /// Magic number sent by the host to the client during the handshake.

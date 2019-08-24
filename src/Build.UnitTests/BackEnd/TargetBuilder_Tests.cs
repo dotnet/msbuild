@@ -1566,22 +1566,46 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// Returns the node logging service.  We don't distinguish here.
             /// </summary>
             /// <returns>The logging service.</returns>
-            public ILoggingService LoggingService => _loggingService;
+            public ILoggingService LoggingService
+            {
+                get
+                {
+                    return _loggingService;
+                }
+            }
 
             /// <summary>
             /// Retrieves the LegacyThreadingData associated with a particular component host
             /// </summary>
-            LegacyThreadingData IBuildComponentHost.LegacyThreadingData => _legacyThreadingData;
+            LegacyThreadingData IBuildComponentHost.LegacyThreadingData
+            {
+                get
+                {
+                    return _legacyThreadingData;
+                }
+            }
 
             /// <summary>
             /// Retrieves the name of the host.
             /// </summary>
-            public string Name => "TargetBuilder_Tests.MockHost";
+            public string Name
+            {
+                get
+                {
+                    return "TargetBuilder_Tests.MockHost";
+                }
+            }
 
             /// <summary>
             /// Returns the build parameters.
             /// </summary>
-            public BuildParameters BuildParameters => _buildParameters;
+            public BuildParameters BuildParameters
+            {
+                get
+                {
+                    return _buildParameters;
+                }
+            }
 
             /// <summary>
             /// Constructs and returns a component of the specified type.

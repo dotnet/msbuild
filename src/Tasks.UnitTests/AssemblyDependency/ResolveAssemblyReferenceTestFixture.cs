@@ -289,7 +289,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Return the default search paths.
         /// </summary>
         /// <value></value>
-        internal string[] DefaultPaths => s_defaultPaths;
+        internal string[] DefaultPaths
+        {
+            get { return s_defaultPaths; }
+        }
 
         /// <summary>
         /// Start monitoring IO calls.

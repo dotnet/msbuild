@@ -208,7 +208,10 @@ namespace Microsoft.Build.UnitTests
         /// ArrayList output parameter.  (This is not supported by MSBuild.)
         /// </summary>
         [Output]
-        public ArrayList MyArrayListOutputParam => null;
+        public ArrayList MyArrayListOutputParam
+        {
+            get { return null; }
+        }
 
         /// <summary>
         /// Null ITaskItem[] output parameter. 
@@ -227,7 +230,13 @@ namespace Microsoft.Build.UnitTests
         /// Empty string output parameter. 
         /// </summary>
         [Output]
-        public string EmptyStringOutputParameter => String.Empty;
+        public string EmptyStringOutputParameter
+        {
+            get
+            {
+                return String.Empty;
+            }
+        }
 
         /// <summary>
         /// Empty string output parameter. 
@@ -259,7 +268,13 @@ namespace Microsoft.Build.UnitTests
         /// string output parameter. 
         /// </summary>
         [Output]
-        public string StringOutputParameter => "foo";
+        public string StringOutputParameter
+        {
+            get
+            {
+                return "foo";
+            }
+        }
 
         /// <summary>
         /// string array output parameter. 
@@ -277,7 +292,13 @@ namespace Microsoft.Build.UnitTests
         /// int output parameter. 
         /// </summary>
         [Output]
-        public int IntOutputParameter => 1;
+        public int IntOutputParameter
+        {
+            get
+            {
+                return 1;
+            }
+        }
 
         /// <summary>
         /// int array output parameter. 
@@ -307,7 +328,13 @@ namespace Microsoft.Build.UnitTests
         /// itaskitem implementation output parameter
         /// </summary>
         [Output]
-        public MyTaskItem MyTaskItemOutputParameter => new MyTaskItem();
+        public MyTaskItem MyTaskItemOutputParameter
+        {
+            get
+            {
+                return new MyTaskItem();
+            }
+        }
 
         /// <summary>
         /// itaskitem implementation array output parameter
@@ -325,7 +352,13 @@ namespace Microsoft.Build.UnitTests
         /// taskitem output parameter
         /// </summary>
         [Output]
-        public TaskItem TaskItemOutputParameter => new TaskItem("foo", String.Empty);
+        public TaskItem TaskItemOutputParameter
+        {
+            get
+            {
+                return new TaskItem("foo", String.Empty);
+            }
+        }
 
         /// <summary>
         /// taskitem array output parameter
@@ -400,9 +433,18 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        public ICollection MetadataNames => new ArrayList();
+        public ICollection MetadataNames
+        {
+            get
+            {
+                return new ArrayList();
+            }
+        }
 
-        public int MetadataCount => 1;
+        public int MetadataCount
+        {
+            get { return 1; }
+        }
 
         public string GetMetadata(string attributeName)
         {

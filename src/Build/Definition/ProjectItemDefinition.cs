@@ -93,13 +93,19 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Count of metadata on the item definition.
         /// </summary>
-        public int MetadataCount => (_metadata == null) ? 0 : _metadata.Count;
+        public int MetadataCount
+        {
+            get { return (_metadata == null) ? 0 : _metadata.Count; }
+        }
 
         /// <summary>
         /// Implementation of IKeyed exposing the item type, so these 
         /// can be put in a dictionary conveniently.
         /// </summary>
-        string IKeyed.Key => ItemType;
+        string IKeyed.Key
+        {
+            get { return ItemType; }
+        }
 
         /// <summary>
         /// Get any metadata in the item that has the specified name,

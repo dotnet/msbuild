@@ -26,7 +26,10 @@ namespace Microsoft.Build.Execution
         /// If it originated in a project that was not loaded and has never been 
         /// given a path, returns an empty string.
         /// </summary>
-        public string FullPath => Location.File;
+        public string FullPath
+        {
+            get { return Location.File; }
+        }
 
         /// <summary>
         /// Location of the original element

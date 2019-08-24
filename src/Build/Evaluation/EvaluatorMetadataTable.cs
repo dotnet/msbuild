@@ -127,7 +127,13 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Gets or sets the evaluated value, unescaped
             /// </summary>
-            public string EvaluatedValue => EscapingUtilities.UnescapeAll(EvaluatedValueEscaped);
+            public string EvaluatedValue
+            {
+                get
+                {
+                    return EscapingUtilities.UnescapeAll(EvaluatedValueEscaped);
+                }
+            }
 
             /// <summary>
             /// Gets or sets the evaluated value, escaped as necessary

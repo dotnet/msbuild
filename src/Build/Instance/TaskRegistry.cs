@@ -739,12 +739,18 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// The name of the task
             /// </summary>
-            public string Name => _name;
+            public string Name
+            {
+                get { return _name; }
+            }
 
             /// <summary>
             /// The identity parameters
             /// </summary>
-            public IDictionary<string, string> TaskIdentityParameters => _taskIdentityParameters;
+            public IDictionary<string, string> TaskIdentityParameters
+            {
+                get { return _taskIdentityParameters; }
+            }
 
             /// <summary>
             /// Comparer used to figure out whether two RegisteredTaskIdentities are equal or not. 
@@ -778,12 +784,18 @@ namespace Microsoft.Build.Execution
                 /// <summary>
                 /// The singleton comparer to use for when an exact match is desired 
                 /// </summary>
-                public static RegisteredTaskIdentityComparer Exact => s_exact;
+                public static RegisteredTaskIdentityComparer Exact
+                {
+                    get { return s_exact; }
+                }
 
                 /// <summary>
                 /// The singleton comparer to use for when a fuzzy match is desired 
                 /// </summary>
-                public static RegisteredTaskIdentityComparer Fuzzy => s_fuzzy;
+                public static RegisteredTaskIdentityComparer Fuzzy
+                {
+                    get { return s_fuzzy; }
+                }
 
                 /// <summary>
                 /// Returns true if these two identities match "fuzzily" -- if the names pass a partial type name 
@@ -1495,17 +1507,26 @@ namespace Microsoft.Build.Execution
                 /// <summary>
                 /// The parameters from the ParameterGroup from the using task element which will be passed to the task factory.
                 /// </summary>
-                internal IDictionary<string, TaskPropertyInfo> UsingTaskParameters => _usingTaskParameters ?? ReadOnlyEmptyDictionary<string, TaskPropertyInfo>.Instance;
+                internal IDictionary<string, TaskPropertyInfo> UsingTaskParameters
+                {
+                    get { return _usingTaskParameters ?? ReadOnlyEmptyDictionary<string, TaskPropertyInfo>.Instance; }
+                }
 
                 /// <summary>
                 /// The body of the task element which will be passed to the task factory.
                 /// </summary>
-                internal string InlineTaskXmlBody => _inlineTaskXmlBody;
+                internal string InlineTaskXmlBody
+                {
+                    get { return _inlineTaskXmlBody; }
+                }
 
                 /// <summary>
                 /// Has the task body been passed to the expander to be expanded
                 /// </summary>
-                internal bool TaskBodyEvaluated => _taskBodyEvaluated;
+                internal bool TaskBodyEvaluated
+                {
+                    get { return _taskBodyEvaluated; }
+                }
 
                 /// <summary>
                 /// Keep track of the xml which will be sent to the inline task factory and the parameters if any which will also be passed in

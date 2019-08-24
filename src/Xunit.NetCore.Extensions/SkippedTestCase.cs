@@ -24,25 +24,28 @@ namespace Xunit.NetCore.Extensions
             _skippedReason = skippedReason;
         }
 
-        public string DisplayName => _testCase.DisplayName;
+        public string DisplayName { get { return _testCase.DisplayName; } }
 
-        public IMethodInfo Method => _testCase.Method;
+        public IMethodInfo Method { get { return _testCase.Method; } }
 
-        public string SkipReason => _skippedReason;
+        public string SkipReason { get { return _skippedReason; } }
 
         public ISourceInformation SourceInformation { get => _testCase.SourceInformation; set => _testCase.SourceInformation = value; }
 
-        public ITestMethod TestMethod => _testCase.TestMethod;
+        public ITestMethod TestMethod { get { return _testCase.TestMethod; } }
 
-        public object[] TestMethodArguments => _testCase.TestMethodArguments;
+        public object[] TestMethodArguments { get { return _testCase.TestMethodArguments; } }
 
-        public Dictionary<string, List<string>> Traits => _testCase.Traits;
+        public Dictionary<string, List<string>> Traits { get { return _testCase.Traits; } }
 
-        public string UniqueID => _testCase.UniqueID;
+        public string UniqueID { get { return _testCase.UniqueID; } }
 
-        public int Timeout => _testCase.Timeout;
+        public int Timeout { get { return _testCase.Timeout; } }
 
-        public Exception InitializationException => _testCase.InitializationException;
+        public Exception InitializationException
+        {
+            get { return _testCase.InitializationException; }
+        }
 
         public void Deserialize(IXunitSerializationInfo info) { _testCase.Deserialize(info); }
 

@@ -1609,7 +1609,13 @@ namespace Microsoft.Build.Utilities
         /// Gets the fully qualified path to the system directory i.e. %SystemRoot%\System32
         /// </summary>
         /// <returns>The system path.</returns>
-        public static string PathToSystem => Environment.GetFolderPath(Environment.SpecialFolder.System);
+        public static string PathToSystem
+        {
+            get
+            {
+                return Environment.GetFolderPath(Environment.SpecialFolder.System);
+            }
+        }
 
         /// <summary>
         /// Returns the prefix of the .NET Framework version folder (e.g. "v2.0")
