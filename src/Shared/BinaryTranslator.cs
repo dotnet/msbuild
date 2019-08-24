@@ -75,7 +75,10 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Gets the reader, if any.
             /// </summary>
-            public BinaryReader Reader => _reader;
+            public BinaryReader Reader
+            {
+                get { return _reader; }
+            }
 
             /// <summary>
             /// Gets the writer, if any.
@@ -703,7 +706,10 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Gets the writer, if any.
             /// </summary>
-            public BinaryWriter Writer => _writer;
+            public BinaryWriter Writer
+            {
+                get { return _writer; }
+            }
 
             /// <summary>
             /// Returns the current serialization mode.

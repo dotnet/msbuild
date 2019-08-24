@@ -2788,12 +2788,18 @@ namespace Microsoft.Build.Evaluation
                 /// <summary>
                 /// Arguments to pass to the transform function as parsed out of the project file
                 /// </summary>
-                public string[] Arguments => _arguments;
+                public string[] Arguments
+                {
+                    get { return _arguments; }
+                }
 
                 /// <summary>
                 /// The element location of the transform expression
                 /// </summary>
-                public IElementLocation ElementLocation => _elementLocation;
+                public IElementLocation ElementLocation
+                {
+                    get { return _elementLocation; }
+                }
 
                 /// <summary>
                 /// Execute this transform function with the arguments contained within this TransformFunction instance
@@ -3096,7 +3102,10 @@ namespace Microsoft.Build.Evaluation
             ///     [System.Diagnostics.Process]::Start
             ///     SomeMSBuildProperty
             /// </summary>
-            internal string Receiver => _receiver;
+            internal string Receiver
+            {
+                get { return _receiver; }
+            }
 
             /// <summary>
             /// Extract the function details from the given property function expression

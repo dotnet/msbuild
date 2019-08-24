@@ -29,6 +29,12 @@ namespace Microsoft.Build.Framework
         /// Returns the runtime version the attribute was constructed with,
         /// e.g., "v2.0"
         /// </summary>
-        public string RuntimeVersion => _runtimeVersion;
+        public string RuntimeVersion
+        {
+            get
+            {
+                return _runtimeVersion;
+            }
+        }
     }
 }

@@ -49,6 +49,9 @@ namespace Microsoft.Build.Evaluation
         /// Gets the reason for the change.
         /// </summary>
         /// <value>May be null.</value>
-        public string Reason => _unformattedReason != null ? String.Format(CultureInfo.CurrentCulture, _unformattedReason, _formattingParameter) : null;
+        public string Reason
+        {
+            get { return _unformattedReason != null ? String.Format(CultureInfo.CurrentCulture, _unformattedReason, _formattingParameter) : null; }
+        }
     }
 }

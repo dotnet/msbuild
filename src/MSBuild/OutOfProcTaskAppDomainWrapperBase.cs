@@ -66,7 +66,10 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// This is the actual user task whose instance we will create and invoke Execute
         /// </summary>
-        public ITask WrappedTask => wrappedTask;
+        public ITask WrappedTask
+        {
+            get { return wrappedTask; }
+        }
 
         /// <summary>
         /// We have a cancel already requested

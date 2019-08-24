@@ -186,7 +186,10 @@ namespace Microsoft.Build.Evaluation
         /// The directory of the project being built
         /// Never null: If there is no project filename yet, it will use the current directory
         /// </summary>
-        string IItem.ProjectDirectory => _project.DirectoryPath;
+        string IItem.ProjectDirectory
+        {
+            get { return _project.DirectoryPath; }
+        }
 
         /// <summary>
         /// Project that this item lives in.
@@ -219,7 +222,10 @@ namespace Microsoft.Build.Evaluation
         /// Does not include built-in metadata.
         /// Never returns null.
         /// </summary>
-        public IEnumerable<ProjectMetadata> DirectMetadata => (IEnumerable<ProjectMetadata>)_directMetadata ?? (IEnumerable<ProjectMetadata>)ReadOnlyEmptyCollection<ProjectMetadata>.Instance;
+        public IEnumerable<ProjectMetadata> DirectMetadata
+        {
+            get { return (IEnumerable<ProjectMetadata>)_directMetadata ?? (IEnumerable<ProjectMetadata>)ReadOnlyEmptyCollection<ProjectMetadata>.Instance; }
+        }
 
         /// <summary>
         /// Count of direct metadata on this item, if any.

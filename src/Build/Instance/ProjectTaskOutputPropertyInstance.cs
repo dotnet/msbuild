@@ -77,38 +77,59 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Name of the property to put the output in
         /// </summary>
-        public string PropertyName => _propertyName;
+        public string PropertyName
+        {
+            get { return _propertyName; }
+        }
 
         /// <summary>
         /// Property on the task class to retrieve the output from
         /// </summary>
-        public string TaskParameter => _taskParameter;
+        public string TaskParameter
+        {
+            get { return _taskParameter; }
+        }
 
         /// <summary>
         /// Condition on the output element.
         /// If there is no condition, returns empty string.
         /// </summary>
-        public override string Condition => _condition;
+        public override string Condition
+        {
+            get { return _condition; }
+        }
 
         /// <summary>
         /// Location of the original PropertyName attribute
         /// </summary>
-        public ElementLocation PropertyNameLocation => _propertyNameLocation;
+        public ElementLocation PropertyNameLocation
+        {
+            get { return _propertyNameLocation; }
+        }
 
         /// <summary>
         /// Location of the original element
         /// </summary>
-        public override ElementLocation Location => _location;
+        public override ElementLocation Location
+        {
+            get { return _location; }
+        }
 
         /// <summary>
         /// Location of the condition, if any
         /// </summary>
-        public override ElementLocation ConditionLocation => _conditionLocation;
+        public override ElementLocation ConditionLocation
+        {
+            get { return _conditionLocation; }
+        }
 
         /// <summary>
         /// Location of the TaskParameter attribute
         /// </summary>
-        public override ElementLocation TaskParameterLocation => _taskParameterLocation;
+        public override ElementLocation TaskParameterLocation
+        {
+            get { return _taskParameterLocation; }
+        }
 
         void ITranslatable.Translate(ITranslator translator)
         {

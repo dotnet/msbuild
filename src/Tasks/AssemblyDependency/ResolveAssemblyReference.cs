@@ -746,7 +746,10 @@ namespace Microsoft.Build.Tasks
         ///     string Redist - The name (if any) of the redist that contains this assembly.
         /// </summary>
         [Output]
-        public ITaskItem[] ResolvedFiles => _resolvedFiles;
+        public ITaskItem[] ResolvedFiles
+        {
+            get { return _resolvedFiles; }
+        }
 
         /// <summary>
         /// A list of all n-th order paths-to-dependencies with the following attributes:
@@ -762,7 +765,10 @@ namespace Microsoft.Build.Tasks
         /// Does not include first order primary references--this list is in ResolvedFiles.
         /// </summary>
         [Output]
-        public ITaskItem[] ResolvedDependencyFiles => _resolvedDependencyFiles;
+        public ITaskItem[] ResolvedDependencyFiles
+        {
+            get { return _resolvedDependencyFiles; }
+        }
 
         /// <summary>
         /// Related files are files like intellidoc (.XML) and symbols (.PDB) that have the same base
@@ -771,7 +777,10 @@ namespace Microsoft.Build.Tasks
         ///     bool CopyLocal - whether the given reference should be copied to the output directory.
         /// </summary>
         [Output]
-        public ITaskItem[] RelatedFiles => _relatedFiles;
+        public ITaskItem[] RelatedFiles
+        {
+            get { return _relatedFiles; }
+        }
 
         /// <summary>
         /// Any satellite files found. These will be CopyLocal=true iff the reference or dependency 
@@ -781,7 +790,10 @@ namespace Microsoft.Build.Tasks
         ///       should be copied to. This is mainly for satellites.
         /// </summary>
         [Output]
-        public ITaskItem[] SatelliteFiles => _satelliteFiles;
+        public ITaskItem[] SatelliteFiles
+        {
+            get { return _satelliteFiles; }
+        }
 
         /// <summary>
         /// Any XML serialization assemblies found. These will be CopyLocal=true iff the reference or dependency 
@@ -789,14 +801,20 @@ namespace Microsoft.Build.Tasks
         ///     bool CopyLocal - whether the given reference should be copied to the output directory.
         /// </summary>
         [Output]
-        public ITaskItem[] SerializationAssemblyFiles => _serializationAssemblyFiles;
+        public ITaskItem[] SerializationAssemblyFiles
+        {
+            get { return _serializationAssemblyFiles; }
+        }
 
         /// <summary>
         /// Scatter files associated with one of the given assemblies.
         ///     bool CopyLocal - whether the given reference should be copied to the output directory.
         /// </summary>
         [Output]
-        public ITaskItem[] ScatterFiles => _scatterFiles;
+        public ITaskItem[] ScatterFiles
+        {
+            get { return _scatterFiles; }
+        }
 
         /// <summary>
         /// Returns every file in ResolvedFiles+ResolvedDependencyFiles+RelatedFiles+SatelliteFiles+ScatterFiles+SatelliteAssemblyFiles
@@ -804,7 +822,10 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <value></value>
         [Output]
-        public ITaskItem[] CopyLocalFiles => _copyLocalFiles;
+        public ITaskItem[] CopyLocalFiles
+        {
+            get { return _copyLocalFiles; }
+        }
 
         /// <summary>
         /// Regardless of the value of AutoUnify, returns one item for every distinct conflicting assembly 
@@ -816,7 +837,10 @@ namespace Microsoft.Build.Tasks
         ///  MaxVersion - the maximum version number.
         /// </summary>
         [Output]
-        public ITaskItem[] SuggestedRedirects => _suggestedRedirects;
+        public ITaskItem[] SuggestedRedirects
+        {
+            get { return _suggestedRedirects; }
+        }
 
         /// <summary>
         /// Storage for names of all files writen to disk.

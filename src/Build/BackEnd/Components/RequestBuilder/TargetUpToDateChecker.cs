@@ -72,7 +72,13 @@ namespace Microsoft.Build.BackEnd
         /// Gets the target to perform dependency analysis on.
         /// </summary>
         /// <value>Target object.</value>
-        internal ProjectTargetInstance TargetToAnalyze => _targetToAnalyze;
+        internal ProjectTargetInstance TargetToAnalyze
+        {
+            get
+            {
+                return _targetToAnalyze;
+            }
+        }
 
         /// <summary>
         /// Gets the value of the target's "Inputs" attribute.
@@ -1288,27 +1294,42 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The reason that we are logging this entry
         /// </summary>
-        internal OutofdateReason Reason => _reason;
+        internal OutofdateReason Reason
+        {
+            get { return _reason; }
+        }
 
         /// <summary>
         /// The input item name (can be null)
         /// </summary>
-        public string InputItemName => _inputItemName;
+        public string InputItemName
+        {
+            get { return _inputItemName; }
+        }
 
         /// <summary>
         /// The output item name (can be null)
         /// </summary>
-        public string OutputItemName => _outputItemName;
+        public string OutputItemName
+        {
+            get { return _outputItemName; }
+        }
 
         /// <summary>
         /// The input file
         /// </summary>
-        public string Input => _input;
+        public string Input
+        {
+            get { return _input; }
+        }
 
         /// <summary>
         /// The output file
         /// </summary>
-        public string Output => _output;
+        public string Output
+        {
+            get { return _output; }
+        }
 
         /// <summary>
         /// Construct a log detail element

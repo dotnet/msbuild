@@ -1042,7 +1042,7 @@ namespace Microsoft.Build.Tasks
                     referencesByDirectory.TryAdd(group.Key, group.ToList());
                 }
 
-                Parallel.ForEach(sdkManifestReferences, reference => references.TryAdd(reference, GetSDKReferenceInfo(reference)));
+                Parallel.ForEach(sdkManifestReferences, reference => { references.TryAdd(reference, GetSDKReferenceInfo(reference)); });
             }
 
             /// <summary>
@@ -1058,7 +1058,7 @@ namespace Microsoft.Build.Tasks
                     List<string> files = Directory.GetFiles(path, "*", SearchOption.TopDirectoryOnly).ToList();
                     referencesByDirectory.TryAdd(path, files);
 
-                    Parallel.ForEach(files, filePath => references.TryAdd(filePath, GetSDKReferenceInfo(filePath)));
+                    Parallel.ForEach(files, filePath => { references.TryAdd(filePath, GetSDKReferenceInfo(filePath)); });
                 });
             }
 

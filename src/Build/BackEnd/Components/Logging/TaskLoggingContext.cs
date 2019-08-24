@@ -90,17 +90,35 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Retrieves the target logging context.
         /// </summary>
-        internal TargetLoggingContext TargetLoggingContext => _targetLoggingContext;
+        internal TargetLoggingContext TargetLoggingContext
+        {
+            get
+            {
+                return _targetLoggingContext;
+            }
+        }
 
         /// <summary>
         /// Retrieves the task node.
         /// </summary>
-        internal ProjectTargetInstanceChild Task => _task;
+        internal ProjectTargetInstanceChild Task
+        {
+            get
+            {
+                return _task;
+            }
+        }
 
         /// <summary>
         /// Retrieves the task node.
         /// </summary>
-        internal string TaskName => _taskName;
+        internal string TaskName
+        {
+            get
+            {
+                return _taskName;
+            }
+        }
 
         /// <summary>
         /// Log that a task has just completed

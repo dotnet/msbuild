@@ -548,19 +548,39 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Gets a flag indicating if we are running under a Unix-like system (Mac, Linux, etc.)
         /// </summary>
-        internal static bool IsUnixLike => s_isUnixLike;
+        internal static bool IsUnixLike
+        {
+            get { return s_isUnixLike; }
+        }
 
         /// <summary>
         /// Gets a flag indicating if we are running under Linux
         /// </summary>
-        internal static bool IsLinux => RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+        internal static bool IsLinux
+        {
+#if CLR2COMPATIBILITY
+            get { return false; }
+#else
+            get { return RuntimeInformation.IsOSPlatform(OSPlatform.Linux); }
+#endif
+        }
 
         /// <summary>
         /// Gets a flag indicating if we are running under flavor of BSD (NetBSD, OpenBSD, FreeBSD)
         /// </summary>
-        internal static bool IsBSD => RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD")) ||
+        internal static bool IsBSD
+        {
+#if CLR2COMPATIBILITY
+            get { return false; }
+#else
+            get
+            {
+                return RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD")) ||
                        RuntimeInformation.IsOSPlatform(OSPlatform.Create("NETBSD")) ||
                        RuntimeInformation.IsOSPlatform(OSPlatform.Create("OPENBSD"));
+            }
+#endif
+        }
 
         private static readonly object IsMonoLock = new object();
 
@@ -618,13 +638,33 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Gets a flag indicating if we are running under Mac OSX
         /// </summary>
-        internal static bool IsOSX => RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+        internal static bool IsOSX
+        {
+#if MONO
+            get
+            {
+                if (!_isOSX.HasValue)
+                {
+                    _isOSX = File.Exists("/usr/lib/libc.dylib");
+                }
+
+                return _isOSX.Value;
+            }
+#elif CLR2COMPATIBILITY
+            get { return false; }
+#else
+            get { return RuntimeInformation.IsOSPlatform(OSPlatform.OSX); }
+#endif
+        }
 
         /// <summary>
         /// Gets a string for the current OS. This matches the OS env variable
         /// for Windows (Windows_NT).
         /// </summary>
-        internal static string OSName => IsWindows ? "Windows_NT" : "Unix";
+        internal static string OSName
+        {
+            get { return IsWindows ? "Windows_NT" : "Unix"; }
+        }
 
         /// <summary>
         /// OS name that can be used for the msbuildExtensionsPathSearchPaths element

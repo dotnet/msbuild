@@ -54,7 +54,13 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// The name of the property
         /// </summary>
-        public string Name => _name;
+        public string Name
+        {
+            get
+            {
+                return _name;
+            }
+        }
 
         /// <summary>
         /// The value of the property
@@ -75,6 +81,12 @@ namespace Microsoft.Build.Evaluation
         /// such as a registry key path or a path to a config file and 
         /// line number.
         /// </summary>
-        public IElementLocation Source => _source;
+        public IElementLocation Source
+        {
+            get
+            {
+                return _source;
+            }
+        }
     }
 }

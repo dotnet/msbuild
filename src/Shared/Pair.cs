@@ -45,11 +45,17 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Key
         /// </summary>
-        internal TKey Key => _key;
+        internal TKey Key
+        {
+            get { return _key; }
+        }
 
         /// <summary>
         /// Value
         /// </summary>
-        internal TValue Value => _value;
+        internal TValue Value
+        {
+            get { return _value; }
+        }
     }
 }

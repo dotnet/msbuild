@@ -620,7 +620,10 @@ namespace Microsoft.Build.BackEnd
                 if (Environment.GetEnvironmentVariable("MSBUILDFORCESTA") == "1")
                 {
                     _requestTask = Task.Factory.StartNew(
-                        () => this.RequestThreadProc(setThreadParameters: true),
+                        () =>
+                        {
+                            return this.RequestThreadProc(setThreadParameters: true);
+                        },
                         _cancellationTokenSource.Token,
                         TaskCreationOptions.None,
                         AwaitExtensions.OneSTAThreadPerTaskSchedulerInstance).Unwrap();
@@ -629,7 +632,10 @@ namespace Microsoft.Build.BackEnd
                 {
                     // Start up the request thread.  When it starts it will begin building our current entry.
                     _requestTask = Task.Factory.StartNew(
-                        () => this.RequestThreadProc(setThreadParameters: true),
+                        () =>
+                        {
+                            return this.RequestThreadProc(setThreadParameters: true);
+                        },
                         _cancellationTokenSource.Token,
                         TaskCreationOptions.None,
                         s_dedicatedScheduler).Unwrap();

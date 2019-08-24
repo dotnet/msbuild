@@ -115,22 +115,25 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public event LinkStatusChangedDelegate OnLinkStatusChanged;
 
-        #endregion
+#endregion
 
-        #region INodeEndpoint Properties
+#region INodeEndpoint Properties
 
         /// <summary>
         /// Returns the link status of this node.
         /// </summary>
-        public LinkStatus LinkStatus => _status;
+        public LinkStatus LinkStatus
+        {
+            get { return _status; }
+        }
 
-        #endregion
+#endregion
 
-        #region Properties
+#region Properties
 
-        #endregion
+#endregion
 
-        #region INodeEndpoint Methods
+#region INodeEndpoint Methods
 
         /// <summary>
         /// Causes this endpoint to wait for the remote endpoint to connect

@@ -150,7 +150,10 @@ namespace Microsoft.Build.Execution
         /// Owning project
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public ProjectInstance Project => _project;
+        public ProjectInstance Project
+        {
+            get { return _project; }
+        }
 
         /// <summary>
         /// Item type, for example "Compile"
@@ -223,18 +226,27 @@ namespace Microsoft.Build.Execution
         /// Computed, not necessarily fast.
         /// </comment>
         [SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods", Justification = "This is a reasonable choice. API review approved")]
-        public IEnumerable<ProjectMetadataInstance> Metadata => _taskItem.MetadataCollection;
+        public IEnumerable<ProjectMetadataInstance> Metadata
+        {
+            get { return _taskItem.MetadataCollection; }
+        }
 
         /// <summary>
         /// Number of pieces of metadata on this item
         /// </summary>
-        public int DirectMetadataCount => _taskItem.DirectMetadataCount;
+        public int DirectMetadataCount
+        {
+            get { return _taskItem.DirectMetadataCount; }
+        }
 
         /// <summary>
         /// Implementation of IKeyed exposing the item type
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        string IKeyed.Key => ItemType;
+        string IKeyed.Key
+        {
+            get { return ItemType; }
+        }
 
         /// <summary>
         /// Returns all the metadata names on this item.
@@ -244,7 +256,10 @@ namespace Microsoft.Build.Execution
         /// <comment>
         /// Computed, not necessarily fast.
         /// </comment>
-        public ICollection<string> MetadataNames => new ReadOnlyCollection<string>(_taskItem.MetadataNames.Cast<string>());
+        public ICollection<string> MetadataNames
+        {
+            get { return new ReadOnlyCollection<string>(_taskItem.MetadataNames.Cast<string>()); }
+        }
 
         /// <summary>
         /// ITaskItem implementation
@@ -267,7 +282,10 @@ namespace Microsoft.Build.Execution
         /// <comment>
         /// Computed, not necessarily fast.
         /// </comment>
-        ICollection ITaskItem.MetadataNames => new List<string>(MetadataNames);
+        ICollection ITaskItem.MetadataNames
+        {
+            get { return new List<string>(MetadataNames); }
+        }
 
         /// <summary>
         /// Returns the number of metadata entries.
@@ -277,24 +295,36 @@ namespace Microsoft.Build.Execution
         /// <comment>
         /// Computed, not necessarily fast.
         /// </comment>
-        public int MetadataCount => _taskItem.MetadataCount;
+        public int MetadataCount
+        {
+            get { return _taskItem.MetadataCount; }
+        }
 
         /// <summary>
         /// The directory of the project being built
         /// Never null: If there is no project filename yet, it will use the current directory
         /// </summary>
-        string IItem.ProjectDirectory => _project.Directory;
+        string IItem.ProjectDirectory
+        {
+            get { return _project.Directory; }
+        }
 
         /// <summary>
         /// Retrieves the comparer used for determining equality between ProjectItemInstances.
         /// </summary>
-        internal static IEqualityComparer<ProjectItemInstance> EqualityComparer => ProjectItemInstanceEqualityComparer.Default;
+        internal static IEqualityComparer<ProjectItemInstance> EqualityComparer
+        {
+            get { return ProjectItemInstanceEqualityComparer.Default; }
+        }
 
         /// <summary>
         /// The full path to the project file being built
         /// Can be null: if the project hasn't been saved yet it will be null
         /// </summary>
-        internal string ProjectFullPath => _project.FullPath;
+        internal string ProjectFullPath
+        {
+            get { return _project.FullPath; }
+        }
 
         /// <summary>
         /// Get any metadata in the item that has the specified name,
@@ -886,7 +916,10 @@ namespace Microsoft.Build.Execution
             /// Gets the number of metadata set on the item.
             /// Computed, not necessarily fast.
             /// </summary>
-            public int MetadataCount => MetadataNames.Count;
+            public int MetadataCount
+            {
+                get { return MetadataNames.Count; }
+            }
 
             /// <summary>
             /// Gets the names of custom metadata on the item.
@@ -914,25 +947,37 @@ namespace Microsoft.Build.Execution
             /// Does not include built-in metadata.
             /// Computed, not necessarily fast.
             /// </summary>
-            public int CustomMetadataCount => CustomMetadataNames.Count;
+            public int CustomMetadataCount
+            {
+                get { return CustomMetadataNames.Count; }
+            }
 
             /// <summary>
             /// Gets the evaluated include for this item, unescaped.
             /// </summary>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            string IItem.EvaluatedInclude => EscapingUtilities.UnescapeAll(_includeEscaped);
+            string IItem.EvaluatedInclude
+            {
+                get { return EscapingUtilities.UnescapeAll(_includeEscaped); }
+            }
 
             /// <summary>
             /// Gets the evaluated include for this item, escaped.
             /// </summary>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            string IItem.EvaluatedIncludeEscaped => _includeEscaped;
+            string IItem.EvaluatedIncludeEscaped
+            {
+                get { return _includeEscaped; }
+            }
 
             /// <summary>
             /// The directory of the project owning this TaskItem.
             /// May be null if this is not well defined.
             /// </summary>
-            string IItem.ProjectDirectory => _projectDirectory;
+            string IItem.ProjectDirectory
+            {
+                get { return _projectDirectory; }
+            }
 
             #region IKeyed Members
 
@@ -940,7 +985,10 @@ namespace Microsoft.Build.Execution
             /// Returns some value useful for a key in a dictionary
             /// </summary>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            string Microsoft.Build.Collections.IKeyed.Key => _includeEscaped;
+            string Microsoft.Build.Collections.IKeyed.Key
+            {
+                get { return _includeEscaped; }
+            }
 
             #endregion
 
@@ -965,12 +1013,18 @@ namespace Microsoft.Build.Execution
             /// The value of the include after evaluation but before wildcard expansion.
             /// Used to determine %(RecursiveDir)
             /// </summary>
-            internal string IncludeBeforeWildcardExpansionEscaped => _includeBeforeWildcardExpansionEscaped;
+            internal string IncludeBeforeWildcardExpansionEscaped
+            {
+                get { return _includeBeforeWildcardExpansionEscaped; }
+            }
 
             /// <summary>
             /// Number of pieces of metadata directly on this item
             /// </summary>
-            internal int DirectMetadataCount => (_directMetadata == null) ? 0 : _directMetadata.Count;
+            internal int DirectMetadataCount
+            {
+                get { return (_directMetadata == null) ? 0 : _directMetadata.Count; }
+            }
 
             /// <summary>
             /// Unordered collection of evaluated metadata on the item.
@@ -1879,7 +1933,10 @@ namespace Microsoft.Build.Execution
                 /// <summary>
                 /// The singleton instance. Can be cast to the interface required.
                 /// </summary>
-                internal static TaskItemFactory Instance => s_instance;
+                internal static TaskItemFactory Instance
+                {
+                    get { return s_instance; }
+                }
 
                 /// <summary>
                 /// Creates a taskitem.
@@ -2049,7 +2106,10 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Returns the default comparer instance.
             /// </summary>
-            public static IEqualityComparer<ProjectItemInstance> Default => s_comparer;
+            public static IEqualityComparer<ProjectItemInstance> Default
+            {
+                get { return s_comparer; }
+            }
 
             /// <summary>
             /// Implemtnation of IEqualityComparer.Equals.

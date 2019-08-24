@@ -88,7 +88,13 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Reflects the value of the ContinueOnError attribute.
         /// </summary>
-        public bool ContinueOnError => throw new NotImplementedException();
+        public bool ContinueOnError
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         /// <summary>
         /// The line number this task is on

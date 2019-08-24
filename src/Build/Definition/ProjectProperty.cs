@@ -544,7 +544,10 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Whether the property originated from the environment (or the toolset)
             /// </summary>
-            public override bool IsEnvironmentProperty => (!IsGlobalProperty && !IsReservedProperty);
+            public override bool IsEnvironmentProperty
+            {
+                get { return (!IsGlobalProperty && !IsReservedProperty); }
+            }
 
             /// <summary>
             /// Whether the property is a global property
@@ -590,7 +593,10 @@ namespace Microsoft.Build.Evaluation
             /// Whether the property originated in an imported file.
             /// Because these properties did not originate in an XML file, this always returns null.
             /// </summary>
-            public override bool IsImported => false;
+            public override bool IsImported
+            {
+                get { return false; }
+            }
         }
     }
 }

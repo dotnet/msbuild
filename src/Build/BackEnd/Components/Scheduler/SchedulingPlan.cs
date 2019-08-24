@@ -623,12 +623,18 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Gets the configuration id.
             /// </summary>
-            public int ConfigId => _configId;
+            public int ConfigId
+            {
+                get { return _configId; }
+            }
 
             /// <summary>
             /// Gets the configuration's full path.
             /// </summary>
-            public string ConfigFullPath => _configFullPath;
+            public string ConfigFullPath
+            {
+                get { return _configFullPath; }
+            }
 
             /// <summary>
             /// Gets the configuration's accumulated time.
@@ -642,32 +648,52 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Gets the configuration's accumulated time for all of its references.
             /// </summary>
-            public double AccumulatedTimeOfReferences => _accumulatedTimeOfReferences;
+            public double AccumulatedTimeOfReferences
+            {
+                get { return _accumulatedTimeOfReferences; }
+            }
 
             /// <summary>
             /// Retrieves the total time for this configuration, which includes the time spent on its references.
             /// </summary>
-            public double TotalPlanTime => (AccumulatedTime + AccumulatedTimeOfReferences);
+            public double TotalPlanTime
+            {
+                // Count our time, plus the amount of time all of our children take.  Multiply this by the total number
+                // of referrers to weight us higher the more configurations depend on us.
+                get { return (AccumulatedTime + AccumulatedTimeOfReferences); }
+            }
 
             /// <summary>
             /// Retrieves the number of references this configuration has.
             /// </summary>
-            public int ReferencesCount => _references.Count;
+            public int ReferencesCount
+            {
+                get { return _references.Count; }
+            }
 
             /// <summary>
             /// Retrieves the references from this configuration.
             /// </summary>
-            public IEnumerable<PlanConfigData> References => _references;
+            public IEnumerable<PlanConfigData> References
+            {
+                get { return _references; }
+            }
 
             /// <summary>
             /// Retrieves the number of configurations which refer to this one.
             /// </summary>
-            public int ReferrerCount => _referrers.Count;
+            public int ReferrerCount
+            {
+                get { return _referrers.Count; }
+            }
 
             /// <summary>
             /// Retrieves the configurations which refer to this one.
             /// </summary>
-            public IEnumerable<PlanConfigData> Referrers => _referrers;
+            public IEnumerable<PlanConfigData> Referrers
+            {
+                get { return _referrers; }
+            }
 
             /// <summary>
             /// Adds the specified configuration as a reference.

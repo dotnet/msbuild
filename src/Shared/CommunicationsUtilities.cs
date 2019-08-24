@@ -96,7 +96,10 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Gets or sets the node connection timeout.
         /// </summary>
-        static internal int NodeConnectionTimeout => GetIntegerVariableOrDefault("MSBUILDNODECONNECTIONTIMEOUT", DefaultNodeConnectionTimeout);
+        static internal int NodeConnectionTimeout
+        {
+            get { return GetIntegerVariableOrDefault("MSBUILDNODECONNECTIONTIMEOUT", DefaultNodeConnectionTimeout); }
+        }
 
         /// <summary>
         /// Looks up the file version and caches the hashcode

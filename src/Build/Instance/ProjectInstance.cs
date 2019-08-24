@@ -641,7 +641,10 @@ namespace Microsoft.Build.Execution
         /// Not necessarily the same as the tools version on the Project tag, if any;
         /// it may have been externally specified, for example with a /tv switch.
         /// </summary>
-        public string ToolsVersion => Toolset.ToolsVersion;
+        public string ToolsVersion
+        {
+            get { return Toolset.ToolsVersion; }
+        }
 
         /// <summary>
         /// Enumerator over item types of the items in this project
@@ -806,7 +809,10 @@ namespace Microsoft.Build.Execution
         /// Whether the instance is immutable.
         /// This is set permanently when the instance is created.
         /// </summary>
-        public bool IsImmutable => _isImmutable;
+        public bool IsImmutable
+        {
+            get { return _isImmutable; }
+        }
 
         /// <summary>
         /// Task classes and locations known to this project. 
@@ -862,7 +868,10 @@ namespace Microsoft.Build.Execution
             get => _globalProperties;
         }
 
-        PropertyDictionary<ProjectPropertyInstance> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.EnvironmentVariablePropertiesDictionary => _environmentVariableProperties;
+        PropertyDictionary<ProjectPropertyInstance> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.EnvironmentVariablePropertiesDictionary
+        {
+            get => _environmentVariableProperties;
+        }
 
         /// <summary>
         /// List of names of the properties that, while global, are still treated as overridable 
@@ -970,13 +979,19 @@ namespace Microsoft.Build.Execution
         /// as well as items respecting condition; and collect
         /// conditioned properties, as well as regular properties
         /// </summary>
-        bool IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.ShouldEvaluateForDesignTime => false;
+        bool IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.ShouldEvaluateForDesignTime
+        {
+            get { return false; }
+        }
 
         /// <summary>
         /// Location of the originating file itself, not any specific content within it.
         /// Never returns null, even if the file has not got a path yet.
         /// </summary>
-        public ElementLocation ProjectFileLocation => _projectFileLocation;
+        public ElementLocation ProjectFileLocation
+        {
+            get { return _projectFileLocation; }
+        }
 
         /// <summary>
         /// Gets the global properties this project was evaluated with, if any.
@@ -1000,12 +1015,18 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// If we are treating a missing toolset as the current ToolsVersion
         /// </summary>
-        internal bool UsingDifferentToolsVersionFromProjectFile => _usingDifferentToolsVersionFromProjectFile;
+        internal bool UsingDifferentToolsVersionFromProjectFile
+        {
+            get { return _usingDifferentToolsVersionFromProjectFile; }
+        }
 
         /// <summary>
         /// The toolsversion that was originally specified on the project's root element
         /// </summary>
-        internal string OriginalProjectToolsVersion => _originalProjectToolsVersion;
+        internal string OriginalProjectToolsVersion
+        {
+            get { return _originalProjectToolsVersion; }
+        }
 
         /// <summary>
         /// The externally specified tools version, if any.
@@ -1014,13 +1035,19 @@ namespace Microsoft.Build.Execution
         /// May be null.
         /// Flows through to called projects.
         /// </summary>
-        internal string ExplicitToolsVersion => _explicitToolsVersionSpecified ? Toolset.ToolsVersion : null;
+        internal string ExplicitToolsVersion
+        {
+            get { return _explicitToolsVersionSpecified ? Toolset.ToolsVersion : null; }
+        }
 
         /// <summary>
         /// Whether the tools version used originated from an explicit specification,
         /// for example from an MSBuild task or /tv switch.
         /// </summary>
-        internal bool ExplicitToolsVersionSpecified => _explicitToolsVersionSpecified;
+        internal bool ExplicitToolsVersionSpecified
+        {
+            get { return _explicitToolsVersionSpecified; }
+        }
 
         /// <summary>
         /// The sub-toolset version we should use during the build, used to determine which set of sub-toolset
@@ -1071,7 +1098,10 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Number of targets in the project. 
         /// </summary>
-        internal int TargetsCount => _targets.Count;
+        internal int TargetsCount
+        {
+            get { return _targets.Count; }
+        }
 
         /// <summary>
         /// The project root element cache from the project collection
