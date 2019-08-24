@@ -71,42 +71,27 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Unused.
         /// </summary>
-        public bool IsRunningMultipleNodes
-        {
-            get { return false; }
-        }
+        public bool IsRunningMultipleNodes => false;
 
         /// <summary>
         /// Unused.
         /// </summary>
-        public bool ContinueOnError
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public bool ContinueOnError => throw new NotImplementedException();
 
         /// <summary>
         /// Unused.
         /// </summary>
-        public int LineNumberOfTaskNode
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public int LineNumberOfTaskNode => throw new NotImplementedException();
 
         /// <summary>
         /// Unused.
         /// </summary>
-        public int ColumnNumberOfTaskNode
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public int ColumnNumberOfTaskNode => throw new NotImplementedException();
 
         /// <summary>
         /// Unused.
         /// </summary>
-        public string ProjectFileOfTaskNode
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public string ProjectFileOfTaskNode => throw new NotImplementedException();
 
         /// <summary>
         /// Prepares the environment for the test.

@@ -75,23 +75,11 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Gets the task command line associated with this event.
         /// </summary>
-        public string CommandLine
-        {
-            get
-            {
-                return Message;
-            }
-        }
+        public string CommandLine => Message;
 
         /// <summary>
         /// Gets the name of the task that raised this event.
         /// </summary>
-        public string TaskName
-        {
-            get
-            {
-                return SenderName;
-            }
-        }
+        public string TaskName => SenderName;
     }
 }

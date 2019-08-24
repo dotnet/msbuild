@@ -224,10 +224,7 @@ namespace Microsoft.Build.Collections
         }
 
         // Convenience to minimise change to callers used to dictionaries
-        public ICollection<T> Values
-        {
-            get { return this; }
-        }
+        public ICollection<T> Values => this;
 
         #region ICollection<T> methods
 
@@ -456,18 +453,12 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Number of elements in this hashset
         /// </summary>
-        public int Count
-        {
-            get { return _count; }
-        }
+        public int Count => _count;
 
         /// <summary>
         /// Whether this is readonly
         /// </summary>
-        public bool IsReadOnly
-        {
-            get { return _readOnly; }
-        }
+        public bool IsReadOnly => _readOnly;
 
         /// <summary>
         /// Permanently prevent changes to the set.
@@ -1782,13 +1773,7 @@ namespace Microsoft.Build.Collections
                 return false;
             }
 
-            public T Current
-            {
-                get
-                {
-                    return _current;
-                }
-            }
+            public T Current => _current;
 
             Object System.Collections.IEnumerator.Current
             {

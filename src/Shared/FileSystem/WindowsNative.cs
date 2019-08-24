@@ -139,10 +139,7 @@ namespace Microsoft.Build.Shared.FileSystem
             /// <summary>
             /// Indicates if enumeration succeeded.
             /// </summary>
-            public bool Succeeded
-            {
-                get { return Status == EnumerateDirectoryStatus.Success; }
-            }
+            public bool Succeeded => Status == EnumerateDirectoryStatus.Success;
 
             /// <summary>
             /// Throws an exception if the native error code could not be canonicalized (a fairly exceptional circumstance).

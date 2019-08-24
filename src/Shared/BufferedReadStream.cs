@@ -26,13 +26,13 @@ namespace Microsoft.Build.BackEnd
             _currentlyBufferedByteCount = 0;
         }
 
-        public override bool CanRead { get { return _innerStream.CanRead; } }
+        public override bool CanRead => _innerStream.CanRead;
 
-        public override bool CanSeek { get { return false; } }
+        public override bool CanSeek => false;
 
-        public override bool CanWrite { get { return _innerStream.CanWrite; } }
+        public override bool CanWrite => _innerStream.CanWrite;
 
-        public override long Length { get { return _innerStream.Length; } }
+        public override long Length => _innerStream.Length;
 
         public override long Position
         {

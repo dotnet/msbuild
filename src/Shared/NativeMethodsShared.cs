@@ -548,10 +548,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Gets a flag indicating if we are running under a Unix-like system (Mac, Linux, etc.)
         /// </summary>
-        internal static bool IsUnixLike
-        {
-            get { return s_isUnixLike; }
-        }
+        internal static bool IsUnixLike => s_isUnixLike;
 
         /// <summary>
         /// Gets a flag indicating if we are running under Linux
@@ -658,10 +655,7 @@ namespace Microsoft.Build.Shared
         /// Gets a string for the current OS. This matches the OS env variable
         /// for Windows (Windows_NT).
         /// </summary>
-        internal static string OSName
-        {
-            get { return IsWindows ? "Windows_NT" : "Unix"; }
-        }
+        internal static string OSName => IsWindows ? "Windows_NT" : "Unix";
 
         /// <summary>
         /// OS name that can be used for the msbuildExtensionsPathSearchPaths element

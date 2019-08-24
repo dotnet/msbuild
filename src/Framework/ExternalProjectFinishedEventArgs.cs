@@ -78,25 +78,13 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Project name
         /// </summary>
-        public string ProjectFile
-        {
-            get
-            {
-                return projectFile;
-            }
-        }
+        public string ProjectFile => projectFile;
 
         private bool succeeded;
 
         /// <summary>
         /// True if project built successfully, false otherwise
         /// </summary>
-        public bool Succeeded
-        {
-            get
-            {
-                return succeeded;
-            }
-        }
+        public bool Succeeded => succeeded;
     }
 }

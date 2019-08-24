@@ -135,26 +135,17 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// Gets the assembly's identity denoted by its strong/weak name.
             /// </summary>
-            public override string AssemblyName
-            {
-                get { return _assemblyName; }
-            }
+            public override string AssemblyName => _assemblyName;
 
             /// <summary>
             /// Gets the path to the assembly file.
             /// </summary>
-            public override string AssemblyFile
-            {
-                get { return null; }
-            }
+            public override string AssemblyFile => null;
 
             /// <summary>
             /// Get the assembly location
             /// </summary>
-            internal override string AssemblyLocation
-            {
-                get { return _assemblyName; }
-            }
+            internal override string AssemblyLocation => _assemblyName;
         }
 
         /// <summary>
@@ -180,26 +171,17 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// Gets the assembly's identity denoted by its strong/weak name.
             /// </summary>
-            public override string AssemblyName
-            {
-                get { return null; }
-            }
+            public override string AssemblyName => null;
 
             /// <summary>
             /// Gets the path to the assembly file.
             /// </summary>
-            public override string AssemblyFile
-            {
-                get { return _assemblyFile; }
-            }
+            public override string AssemblyFile => _assemblyFile;
 
             /// <summary>
             /// Get the assembly location
             /// </summary>
-            internal override string AssemblyLocation
-            {
-                get { return _assemblyFile; }
-            }
+            internal override string AssemblyLocation => _assemblyFile;
         }
     }
 }

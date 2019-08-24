@@ -195,13 +195,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Gets the identifier of the project.
         /// </summary>
-        public int ProjectId
-        {
-            get
-            {
-                return projectId;
-            }
-        }
+        public int ProjectId => projectId;
 
         [OptionalField(VersionAdded = 2)]
         private BuildEventContext parentProjectBuildEventContext;
@@ -209,13 +203,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Event context information, where the event was fired from in terms of the build location
         /// </summary>
-        public BuildEventContext ParentProjectBuildEventContext
-        {
-            get
-            {
-                return parentProjectBuildEventContext;
-            }
-        }
+        public BuildEventContext ParentProjectBuildEventContext => parentProjectBuildEventContext;
 
         /// <summary>
         /// The name of the project file
@@ -225,13 +213,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Project name
         /// </summary>
-        public string ProjectFile
-        {
-            get
-            {
-                return projectFile;
-            }
-        }
+        public string ProjectFile => projectFile;
 
         /// <summary>
         /// Targets that we will build in the project
@@ -241,13 +223,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Targets that we will build in the project
         /// </summary>
-        public string TargetNames
-        {
-            get
-            {
-                return targetNames;
-            }
-        }
+        public string TargetNames => targetNames;
 
         /// <summary>
         /// Gets the set of global properties used to evaluate this project.
@@ -287,21 +263,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// List of properties in this project. This is a live, read-only list.
         /// </summary>
-        public IEnumerable Properties
-        {
-            get
-            {
-                // UNDONE: (Serialization.) Rather than storing the properties directly in this class, we could
-                // grab them from the BuildRequestConfiguration associated with this projectId (which is now poorly
-                // named because it is actually the BuildRequestConfigurationId.)  For central loggers in the
-                // multi-proc case, this could pull up just the global properties used to start the project.  For
-                // distributed loggers in the multi-proc case and all loggers in the single-proc case, this could pull
-                // up the live list of properties from the loaded project, which is stored in the configuration as well.
-                // By doing this, we no longer need to transmit properties using this message because they've already
-                // been transmitted as part of the BuildRequestConfiguration.
-                return properties;
-            }
-        }
+        public IEnumerable Properties => properties;
 
         // IEnumerable is not a serializable type. That is okay because
         // (a) this event will not be thrown by tasks, so it should not generally cross AppDomain boundaries
@@ -312,20 +274,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// List of items in this project. This is a live, read-only list.
         /// </summary>
-        public IEnumerable Items
-        {
-            get
-            {
-                // UNDONE: (Serialization.) Currently there is a "bug" in the old OM in that items are not transported to
-                // the central logger in the multi-proc case.  No one uses this though, so it's probably no big deal.  In
-                // the new OM, this list of items could come directly from the BuildRequestConfiguration, which has access
-                // to the loaded project.  For distributed loggers in the multi-proc case and all loggers in the single-proc
-                // case, this access is to the live list.  For the central logger in the multi-proc case, the main node 
-                // has likely not loaded this project, and therefore the live items would not be available to them, which is 
-                // the same as the current functionality.
-                return items;
-            }
-        }
+        public IEnumerable Items => items;
 
         #region CustomSerializationToStream
 

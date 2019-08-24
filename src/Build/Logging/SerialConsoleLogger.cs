@@ -958,13 +958,7 @@ namespace Microsoft.Build.BackEnd.Logging
             /// Constant property that indicates the number of elements
             /// in the stack.
             /// </summary>
-            internal int Count
-            {
-                get
-                {
-                    return _frames.Count;
-                }
-            }
+            internal int Count => _frames.Count;
 
             /// <summary>
             /// s.IsEmpty() is true iff s.Count == 0

@@ -623,18 +623,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Gets a comparer.
             /// </summary>
-            static public IComparer<BaseClass> Comparer
-            {
-                get { return new BaseClassComparer(); }
-            }
+            static public IComparer<BaseClass> Comparer => new BaseClassComparer();
 
             /// <summary>
             /// Gets the value.
             /// </summary>
-            public int BaseValue
-            {
-                get { return _baseValue; }
-            }
+            public int BaseValue => _baseValue;
 
             #region INodePacketTranslatable Members
 
@@ -717,18 +711,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Gets a comparer.
             /// </summary>
-            static new public IComparer<DerivedClass> Comparer
-            {
-                get { return new DerivedClassComparer(); }
-            }
+            static new public IComparer<DerivedClass> Comparer => new DerivedClassComparer();
 
             /// <summary>
             /// Returns the value.
             /// </summary>
-            public int DerivedValue
-            {
-                get { return _derivedValue; }
-            }
+            public int DerivedValue => _derivedValue;
 
             #region INodePacketTranslatable Members
 

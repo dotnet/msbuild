@@ -101,18 +101,12 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Location of the original element
         /// </summary>
-        public override ElementLocation Location
-        {
-            get { return _location; }
-        }
+        public override ElementLocation Location => _location;
 
         /// <summary>
         /// Location of the condition, if any
         /// </summary>
-        public override ElementLocation ConditionLocation
-        {
-            get { return _conditionLocation; }
-        }
+        public override ElementLocation ConditionLocation => _conditionLocation;
 
         /// <summary>
         /// Deep clone

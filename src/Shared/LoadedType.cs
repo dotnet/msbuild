@@ -108,37 +108,19 @@ namespace Microsoft.Build.Shared
         /// Gets the type that was loaded from an assembly.
         /// </summary>
         /// <value>The loaded type.</value>
-        internal Type Type
-        {
-            get
-            {
-                return _type;
-            }
-        }
+        internal Type Type => _type;
 
         /// <summary>
         /// If we loaded an assembly for this type.
         /// We use this information to help created AppDomains to resolve types that it could not load successfully
         /// </summary>
-        internal Assembly LoadedAssembly
-        {
-            get
-            {
-                return _loadedAssembly;
-            }
-        }
+        internal Assembly LoadedAssembly => _loadedAssembly;
 
         /// <summary>
         /// Gets the assembly the type was loaded from.
         /// </summary>
         /// <value>The assembly info for the loaded type.</value>
-        internal AssemblyLoadInfo Assembly
-        {
-            get
-            {
-                return _assembly;
-            }
-        }
+        internal AssemblyLoadInfo Assembly => _assembly;
 
         #endregion
 

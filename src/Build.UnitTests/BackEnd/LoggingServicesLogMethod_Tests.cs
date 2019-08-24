@@ -1737,13 +1737,8 @@ namespace Microsoft.Build.UnitTests.Logging
             /// <summary>
             /// Accessor for the event processed by ProcessLoggingEvent
             /// </summary>
-            public BuildEventArgs ProcessedBuildEvent
-            {
-                get
-                {
-                    return _processedBuildEvent;
-                }
-            }
+            public BuildEventArgs ProcessedBuildEvent => _processedBuildEvent;
+
             #endregion
 
             #region Methods

@@ -1255,46 +1255,22 @@ namespace ClassLibrary2
             /// <summary>
             /// Returns the node logging service.  We don't distinguish here.
             /// </summary>
-            public ILoggingService LoggingService
-            {
-                get
-                {
-                    return _loggingService;
-                }
-            }
+            public ILoggingService LoggingService => _loggingService;
 
             /// <summary>
             /// Retrieves the name of the host.
             /// </summary>
-            public string Name
-            {
-                get
-                {
-                    return "TaskBuilder_Tests.MockHost";
-                }
-            }
+            public string Name => "TaskBuilder_Tests.MockHost";
 
             /// <summary>
             /// Returns the build parameters.
             /// </summary>
-            public BuildParameters BuildParameters
-            {
-                get
-                {
-                    return _buildParameters;
-                }
-            }
+            public BuildParameters BuildParameters => _buildParameters;
 
             /// <summary>
             /// Retrieves the LegacyThreadingData associated with a particular component host
             /// </summary>
-            LegacyThreadingData IBuildComponentHost.LegacyThreadingData
-            {
-                get
-                {
-                    return _legacyThreadingData;
-                }
-            }
+            LegacyThreadingData IBuildComponentHost.LegacyThreadingData => _legacyThreadingData;
 
             /// <summary>
             /// Constructs and returns a component of the specified type.

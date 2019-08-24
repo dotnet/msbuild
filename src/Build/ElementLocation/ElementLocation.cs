@@ -68,10 +68,7 @@ namespace Microsoft.Build.Construction
         /// PREFER TO PUT THE LOCATION INFORMATION AT THE START OF THE MESSAGE INSTEAD.
         /// Only in rare cases should the location go within the message itself.
         /// </summary>
-        public string LocationString
-        {
-            get { return GetLocationString(File, Line, Column); }
-        }
+        public string LocationString => GetLocationString(File, Line, Column);
 
         /// <summary>
         /// Gets the empty element location.
@@ -79,10 +76,7 @@ namespace Microsoft.Build.Construction
         /// It is to be used for the project location when the project has not been given a name.
         /// In that case, it exists, but can't have a specific location.
         /// </summary>
-        internal static ElementLocation EmptyLocation
-        {
-            get { return s_emptyElementLocation; }
-        }
+        internal static ElementLocation EmptyLocation => s_emptyElementLocation;
 
         /// <summary>
         /// Get reasonable hash code.
@@ -268,10 +262,7 @@ namespace Microsoft.Build.Construction
             /// If not known, returns empty string.
             /// </summary>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            public override string File
-            {
-                get { return file; }
-            }
+            public override string File => file;
 
             /// <summary>
             /// The line number where this element exists in its file.
@@ -279,10 +270,7 @@ namespace Microsoft.Build.Construction
             /// Zero indicates "unknown location".
             /// </summary>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            public override int Line
-            {
-                get { return line; }
-            }
+            public override int Line => line;
 
             /// <summary>
             /// The column number where this element exists in its file.
@@ -290,10 +278,7 @@ namespace Microsoft.Build.Construction
             /// Zero indicates "unknown location".
             /// </summary>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            public override int Column
-            {
-                get { return column; }
-            }
+            public override int Column => column;
         }
 
         /// <summary>
@@ -344,10 +329,7 @@ namespace Microsoft.Build.Construction
             /// If not known, returns empty string.
             /// </summary>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            public override string File
-            {
-                get { return file; }
-            }
+            public override string File => file;
 
             /// <summary>
             /// The line number where this element exists in its file.
@@ -355,10 +337,7 @@ namespace Microsoft.Build.Construction
             /// Zero indicates "unknown location".
             /// </summary>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            public override int Line
-            {
-                get { return (int)line; }
-            }
+            public override int Line => (int)line;
 
             /// <summary>
             /// The column number where this element exists in its file.
@@ -366,10 +345,7 @@ namespace Microsoft.Build.Construction
             /// Zero indicates "unknown location".
             /// </summary>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            public override int Column
-            {
-                get { return (int)column; }
-            }
+            public override int Column => (int)column;
         }
     }
 }

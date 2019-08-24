@@ -317,23 +317,14 @@ namespace Microsoft.Build.Execution
         /// Just the tasks below this target, if any.
         /// Other kinds of children are not included.
         /// </summary>
-        public ICollection<ProjectTaskInstance> Tasks
-        {
-            get
-            {
-                return new ReadOnlyCollection<ProjectTaskInstance>(Children.OfType<ProjectTaskInstance>());
-            }
-        }
+        public ICollection<ProjectTaskInstance> Tasks => new ReadOnlyCollection<ProjectTaskInstance>(Children.OfType<ProjectTaskInstance>());
 
         /// <summary>
         /// Full path to the file from which this target originated.
         /// If it originated in a project that was not loaded and has never been 
         /// given a path, returns an empty string.
         /// </summary>
-        public string FullPath
-        {
-            get { return _location.File; }
-        }
+        public string FullPath => _location.File;
 
         /// <summary>
         /// Location of the original element

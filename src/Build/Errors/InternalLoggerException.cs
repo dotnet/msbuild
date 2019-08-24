@@ -163,48 +163,24 @@ namespace Microsoft.Build.Exceptions
         /// Gets the details of the build event (if any) that was being logged.
         /// </summary>
         /// <value>The build event args, or null.</value>
-        public BuildEventArgs BuildEventArgs
-        {
-            get
-            {
-                return e;
-            }
-        }
+        public BuildEventArgs BuildEventArgs => e;
 
         /// <summary>
         /// Gets the error code associated with this exception's message (not the inner exception).
         /// </summary>
         /// <value>The error code string.</value>
-        public string ErrorCode
-        {
-            get
-            {
-                return errorCode;
-            }
-        }
+        public string ErrorCode => errorCode;
 
         /// <summary>
         /// Gets the F1-help keyword associated with this error, for the host IDE.
         /// </summary>
         /// <value>The keyword string.</value>
-        public string HelpKeyword
-        {
-            get
-            {
-                return helpKeyword;
-            }
-        }
+        public string HelpKeyword => helpKeyword;
 
         /// <summary>
         /// True if the exception occurred during logger initialization
         /// </summary>
-        public bool InitializationException
-        {
-            get
-            {
-                return initializationException;
-            }
-        }
+        public bool InitializationException => initializationException;
 
         #endregion
 

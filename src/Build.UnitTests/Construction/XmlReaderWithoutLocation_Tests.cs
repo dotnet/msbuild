@@ -29,30 +29,18 @@ namespace Microsoft.Build.UnitTests.Construction
                 _wrappedReader = wrappedReader;
             }
 
-            public override int AttributeCount
-            {
-                get { return _wrappedReader.AttributeCount; }
-            }
+            public override int AttributeCount => _wrappedReader.AttributeCount;
 
-            public override string BaseURI
-            {
-                get { return _wrappedReader.BaseURI; }
-            }
+            public override string BaseURI => _wrappedReader.BaseURI;
 
             protected override void Dispose(bool disposing)
             {
                 _wrappedReader.Dispose();
             }
 
-            public override int Depth
-            {
-                get { return _wrappedReader.Depth; }
-            }
+            public override int Depth => _wrappedReader.Depth;
 
-            public override bool EOF
-            {
-                get { return _wrappedReader.EOF; }
-            }
+            public override bool EOF => _wrappedReader.EOF;
 
             public override string GetAttribute(int i)
             {
@@ -69,20 +57,11 @@ namespace Microsoft.Build.UnitTests.Construction
                 return _wrappedReader.GetAttribute(name);
             }
 
-            public override bool HasValue
-            {
-                get { return _wrappedReader.HasValue; }
-            }
+            public override bool HasValue => _wrappedReader.HasValue;
 
-            public override bool IsEmptyElement
-            {
-                get { return _wrappedReader.IsEmptyElement; }
-            }
+            public override bool IsEmptyElement => _wrappedReader.IsEmptyElement;
 
-            public override string LocalName
-            {
-                get { return _wrappedReader.LocalName; }
-            }
+            public override string LocalName => _wrappedReader.LocalName;
 
             public override string LookupNamespace(string prefix)
             {
@@ -114,25 +93,13 @@ namespace Microsoft.Build.UnitTests.Construction
                 return _wrappedReader.MoveToNextAttribute();
             }
 
-            public override XmlNameTable NameTable
-            {
-                get { return _wrappedReader.NameTable; }
-            }
+            public override XmlNameTable NameTable => _wrappedReader.NameTable;
 
-            public override string NamespaceURI
-            {
-                get { return _wrappedReader.NamespaceURI; }
-            }
+            public override string NamespaceURI => _wrappedReader.NamespaceURI;
 
-            public override XmlNodeType NodeType
-            {
-                get { return _wrappedReader.NodeType; }
-            }
+            public override XmlNodeType NodeType => _wrappedReader.NodeType;
 
-            public override string Prefix
-            {
-                get { return _wrappedReader.Prefix; }
-            }
+            public override string Prefix => _wrappedReader.Prefix;
 
             public override bool Read()
             {
@@ -144,20 +111,14 @@ namespace Microsoft.Build.UnitTests.Construction
                 return _wrappedReader.ReadAttributeValue();
             }
 
-            public override ReadState ReadState
-            {
-                get { return _wrappedReader.ReadState; }
-            }
+            public override ReadState ReadState => _wrappedReader.ReadState;
 
             public override void ResolveEntity()
             {
                 _wrappedReader.ResolveEntity();
             }
 
-            public override string Value
-            {
-                get { return _wrappedReader.Value; }
-            }
+            public override string Value => _wrappedReader.Value;
         }
 
         [Fact]

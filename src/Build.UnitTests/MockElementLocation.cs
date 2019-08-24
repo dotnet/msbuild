@@ -41,33 +41,21 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// File of element, eg a targets file
         /// </summary>
-        public override string File
-        {
-            get { return _file; }
-        }
+        public override string File => _file;
 
         /// <summary>
         /// Line number
         /// </summary>
-        public override int Line
-        {
-            get { return 0; }
-        }
+        public override int Line => 0;
 
         /// <summary>
         /// Column number
         /// </summary>
-        public override int Column
-        {
-            get { return 1; }
-        }
+        public override int Column => 1;
 
         /// <summary>
         /// Get single instance
         /// </summary>
-        internal static MockElementLocation Instance
-        {
-            get { return s_instance; }
-        }
+        internal static MockElementLocation Instance => s_instance;
     }
 }
