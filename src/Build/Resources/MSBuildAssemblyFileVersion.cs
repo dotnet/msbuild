@@ -21,10 +21,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Gets a singleton instance of <see cref="MSBuildAssemblyFileVersion"/>.
         /// </summary>
-        public static MSBuildAssemblyFileVersion Instance
-        {
-            get { return MSBuildAssemblyFileVersionLazy.Value; }
-        }
+        public static MSBuildAssemblyFileVersion Instance => MSBuildAssemblyFileVersionLazy.Value;
 
         /// <summary>
         /// Gets the assembly file version in the format major.minor.

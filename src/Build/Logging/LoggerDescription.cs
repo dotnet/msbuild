@@ -112,32 +112,14 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Returns the string of logger parameters, null if there are none
         /// </summary>
-        public string LoggerSwitchParameters
-        {
-            get
-            {
-                return _loggerSwitchParameters;
-            }
-        }
+        public string LoggerSwitchParameters => _loggerSwitchParameters;
 
-        public bool IsOptional
-        {
-            get
-            {
-                return _isOptional;
-            }
-        }
+        public bool IsOptional => _isOptional;
 
         /// <summary>
         /// Return the verbosity for this logger (from command line all loggers get same verbosity)
         /// </summary>
-        public LoggerVerbosity Verbosity
-        {
-            get
-            {
-                return _verbosity;
-            }
-        }
+        public LoggerVerbosity Verbosity => _verbosity;
 
         #endregion
 

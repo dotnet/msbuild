@@ -147,10 +147,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the link status of this node.
         /// </summary>
-        public LinkStatus LinkStatus
-        {
-            get { return _status; }
-        }
+        public LinkStatus LinkStatus => _status;
 
         #endregion
 

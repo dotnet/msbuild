@@ -41,40 +41,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _legacyThreadingData = new LegacyThreadingData();
             }
 
-            public ILoggingService LoggingService
-            {
-                get
-                {
-                    throw new NotImplementedException();
-                }
-            }
+            public ILoggingService LoggingService => throw new NotImplementedException();
 
             /// <summary>
             /// Retrieves the LegacyThreadingData associated with a particular component host
             /// </summary>
-            LegacyThreadingData IBuildComponentHost.LegacyThreadingData
-            {
-                get
-                {
-                    return _legacyThreadingData;
-                }
-            }
+            LegacyThreadingData IBuildComponentHost.LegacyThreadingData => _legacyThreadingData;
 
-            public string Name
-            {
-                get
-                {
-                    return "NodeEndpointInProc_Tests.MockHost";
-                }
-            }
+            public string Name => "NodeEndpointInProc_Tests.MockHost";
 
-            public BuildParameters BuildParameters
-            {
-                get
-                {
-                    return _buildParameters;
-                }
-            }
+            public BuildParameters BuildParameters => _buildParameters;
 
             #region IBuildComponentHost Members
 
@@ -112,15 +88,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _dataReceivedEvent.Set();
             }
 
-            public DataReceivedContext DataReceivedContext
-            {
-                get { return _dataReceivedContext; }
-            }
+            public DataReceivedContext DataReceivedContext => _dataReceivedContext;
 
-            public WaitHandle DataReceivedEvent
-            {
-                get { return _dataReceivedEvent; }
-            }
+            public WaitHandle DataReceivedEvent => _dataReceivedEvent;
 
             #endregion
         }
@@ -128,10 +98,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             #region INodePacket Members
 
-            public NodePacketType Type
-            {
-                get { throw new NotImplementedException(); }
-            }
+            public NodePacketType Type => throw new NotImplementedException();
 
             public void Translate(ITranslator translator)
             {

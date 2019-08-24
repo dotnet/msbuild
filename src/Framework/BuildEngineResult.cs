@@ -42,23 +42,11 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Did the build pass or fail. True means the build succeeded, False means the build failed.
         /// </summary>
-        public bool Result
-        {
-            get
-            {
-                return buildResult;
-            }
-        }
+        public bool Result => buildResult;
 
         /// <summary>
         /// Outputs of the targets per project.
         /// </summary>
-        public IList<IDictionary<string, ITaskItem[]>> TargetOutputsPerProject
-        {
-            get
-            {
-                return targetOutputsPerProject;
-            }
-        }
+        public IList<IDictionary<string, ITaskItem[]>> TargetOutputsPerProject => targetOutputsPerProject;
     }
 }

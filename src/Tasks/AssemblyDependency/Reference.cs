@@ -343,13 +343,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// True if the assembly was resolved through the GAC. Otherwise, false.
         /// </summary>
-        internal bool ResolvedFromGac
-        {
-            get
-            {
-                return string.Equals(ResolvedSearchPath, AssemblyResolutionConstants.gacSentinel, StringComparison.OrdinalIgnoreCase);
-            }
-        }
+        internal bool ResolvedFromGac => string.Equals(ResolvedSearchPath, AssemblyResolutionConstants.gacSentinel, StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Set of properties for this reference used to log why this reference could not be resolved.
@@ -627,13 +621,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         ///  If true, then this item conflicted with another item and lost.
         /// </summary>
-        internal bool IsConflictVictim
-        {
-            get
-            {
-                return ConflictVictorName != null;
-            }
-        }
+        internal bool IsConflictVictim => ConflictVictorName != null;
 
         /// <summary>
         /// Add a conflict victim to this reference
@@ -742,10 +730,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         ///  Whether or not this reference is unified from a different version or versions.
         /// </summary>
-        internal bool IsUnified
-        {
-            get { return _preUnificationVersions.Count != 0; }
-        }
+        internal bool IsUnified => _preUnificationVersions.Count != 0;
 
         /// <summary>
         /// Whether this reference should be copied to the local 'bin' dir or not and the reason this flag
@@ -758,37 +743,21 @@ namespace Microsoft.Build.Tasks
         /// Whether the reference should be CopyLocal. For the reason, see CopyLocalState.
         /// </summary>
         /// <value>'true' if this reference should be copied.</value>
-        internal bool IsCopyLocal
-        {
-            get
-            {
-                return CopyLocalStateUtility.IsCopyLocal(CopyLocal);
-            }
-        }
+        internal bool IsCopyLocal => CopyLocalStateUtility.IsCopyLocal(CopyLocal);
 
         /// <summary>
         /// Whether this reference has already been resolved.
         /// Resolved means that the actual filename of the assembly has been found.
         /// </summary>
         /// <value>'true' if this reference has been resolved.</value>
-        internal bool IsResolved
-        {
-            get { return _fullPath.Length > 0; }
-        }
+        internal bool IsResolved => _fullPath.Length > 0;
 
         /// <summary>
         /// Whether this reference can't be resolve.
         /// References are usually unresolvable because they weren't found anywhere in the defined search paths.
         /// </summary>
         /// <value>'true' if this reference is unresolvable.</value>
-        internal bool IsUnresolvable
-        {
-            // If there are any resolution errors then this reference is unresolvable.
-            get
-            {
-                return !IsResolved && _errors.Count > 0;
-            }
-        }
+        internal bool IsUnresolvable => !IsResolved && _errors.Count > 0;
 
         /// <summary>
         /// Whether or not we still need to find dependencies for this reference.

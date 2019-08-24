@@ -69,24 +69,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Retrieves the project logging context.
         /// </summary>
-        internal ProjectLoggingContext ProjectLoggingContext
-        {
-            get
-            {
-                return _projectLoggingContext;
-            }
-        }
+        internal ProjectLoggingContext ProjectLoggingContext => _projectLoggingContext;
 
         /// <summary>
         /// Retrieves the target.
         /// </summary>
-        internal ProjectTargetInstance Target
-        {
-            get
-            {
-                return _target;
-            }
-        }
+        internal ProjectTargetInstance Target => _target;
 
         /// <summary>
         /// Log that a target has finished

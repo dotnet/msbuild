@@ -524,10 +524,7 @@ namespace Microsoft.Build.Evaluation
         /// <comments>
         /// Internal so that unit tests can use it too. 
         /// </comments>
-        internal static bool Dev10IsInstalled
-        {
-            get
-            {
+        internal static bool Dev10IsInstalled =>
 #if FEATURE_WIN32_REGISTRY
                 if (!NativeMethodsShared.IsWindows)
                 {
@@ -583,10 +580,9 @@ namespace Microsoft.Build.Evaluation
 
                 return s_dev10IsInstalled.Value;
 #else
-                return false;
+                false;
 #endif
-            }
-        }
+
 
         /// <summary>
         /// Path to look for msbuild override task files.

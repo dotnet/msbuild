@@ -102,25 +102,13 @@ namespace Microsoft.Build.Evaluation
         /// Property element collection 
         /// </summary>
         [ConfigurationProperty("", IsDefaultCollection = true)]
-        public PropertyElementCollection PropertyElements
-        {
-            get
-            {
-                return (PropertyElementCollection)base[""];
-            }
-        }
+        public PropertyElementCollection PropertyElements => (PropertyElementCollection) base[""];
 
         /// <summary>
         /// Collection of all the search paths for project imports, per OS
         /// </summary>
         [ConfigurationProperty("projectImportSearchPaths")]
-        public ExtensionsPathsElementCollection AllProjectImportSearchPaths
-        {
-            get
-            {
-                return (ExtensionsPathsElementCollection)base["projectImportSearchPaths"];
-            }
-        }
+        public ExtensionsPathsElementCollection AllProjectImportSearchPaths => (ExtensionsPathsElementCollection) base["projectImportSearchPaths"];
 
         /// <summary>
         /// Class representing all the per-OS search paths for MSBuildExtensionsPath*
@@ -138,35 +126,17 @@ namespace Microsoft.Build.Evaluation
             /// Type of the collection
             /// This has to be public as cannot change access modifier when overriding
             /// </summary>
-            public override ConfigurationElementCollectionType CollectionType
-            {
-                get
-                {
-                    return ConfigurationElementCollectionType.BasicMap;
-                }
-            }
+            public override ConfigurationElementCollectionType CollectionType => ConfigurationElementCollectionType.BasicMap;
 
             /// <summary>
             /// Throw exception if an element with a duplicate key is added to the collection
             /// </summary>
-            protected override bool ThrowOnDuplicate
-            {
-                get
-                {
-                    return false;
-                }
-            }
+            protected override bool ThrowOnDuplicate => false;
 
             /// <summary>
             /// Name of the element
             /// </summary>
-            protected override string ElementName
-            {
-                get
-                {
-                    return "searchPaths";
-                }
-            }
+            protected override string ElementName => "searchPaths";
 
             /// <summary>
             /// Gets an element with the specified name
@@ -280,13 +250,7 @@ namespace Microsoft.Build.Evaluation
             /// Property element collection
             /// </summary>
             [ConfigurationProperty("", IsDefaultCollection = true)]
-            public PropertyElementCollection PropertyElements
-            {
-                get
-                {
-                    return (PropertyElementCollection)base[""];
-                }
-            }
+            public PropertyElementCollection PropertyElements => (PropertyElementCollection) base[""];
         }
 
         /// <summary>
@@ -311,35 +275,17 @@ namespace Microsoft.Build.Evaluation
             /// Collection type
             /// This has to be public as cannot change access modifier when overriding  
             /// </summary>
-            public override ConfigurationElementCollectionType CollectionType
-            {
-                get
-                {
-                    return ConfigurationElementCollectionType.BasicMap;
-                }
-            }
+            public override ConfigurationElementCollectionType CollectionType => ConfigurationElementCollectionType.BasicMap;
 
             /// <summary>
             /// Throw exception if an element with a duplicate is added
             /// </summary>
-            protected override bool ThrowOnDuplicate
-            {
-                get
-                {
-                    return false;
-                }
-            }
+            protected override bool ThrowOnDuplicate => false;
 
             /// <summary>
             /// name of the element
             /// </summary>
-            protected override string ElementName
-            {
-                get
-                {
-                    return "property";
-                }
-            }
+            protected override string ElementName => "property";
 
             #endregion
 
@@ -474,35 +420,17 @@ namespace Microsoft.Build.Evaluation
         /// Type of the collection
         /// This has to be public as cannot change access modifier when overriding
         /// </summary>
-        public override ConfigurationElementCollectionType CollectionType
-        {
-            get
-            {
-                return ConfigurationElementCollectionType.BasicMap;
-            }
-        }
+        public override ConfigurationElementCollectionType CollectionType => ConfigurationElementCollectionType.BasicMap;
 
         /// <summary>
         /// Throw exception if an element with a duplicate key is added to the collection
         /// </summary>
-        protected override bool ThrowOnDuplicate
-        {
-            get
-            {
-                return false;
-            }
-        }
+        protected override bool ThrowOnDuplicate => false;
 
         /// <summary>
         /// Name of the element
         /// </summary>
-        protected override string ElementName
-        {
-            get
-            {
-                return "toolset";
-            }
-        }
+        protected override string ElementName => "toolset";
 
         /// <summary>
         /// Gets an element with the specified name
@@ -609,13 +537,7 @@ namespace Microsoft.Build.Evaluation
         /// toolsVersion element collection 
         /// </summary>
         [ConfigurationProperty("", IsDefaultCollection = true)]
-        public ToolsetElementCollection Toolsets
-        {
-            get
-            {
-                return (ToolsetElementCollection)base[""];
-            }
-        }
+        public ToolsetElementCollection Toolsets => (ToolsetElementCollection) base[""];
 
         /// <summary>
         /// default attribute on msbuildToolsets element, specifying the default ToolsVersion

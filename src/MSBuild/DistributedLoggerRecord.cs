@@ -27,24 +27,12 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Fully initialized central logger
         /// </summary>
-        internal ILogger CentralLogger
-        {
-            get
-            {
-                return _centralLogger;
-            }
-        }
+        internal ILogger CentralLogger => _centralLogger;
 
         /// <summary>
         /// Description of the forwarding class
         /// </summary>
-        internal LoggerDescription ForwardingLoggerDescription
-        {
-            get
-            {
-                return _forwardingLoggerDescription;
-            }
-        }
+        internal LoggerDescription ForwardingLoggerDescription => _forwardingLoggerDescription;
         #endregion
 
         #region Data

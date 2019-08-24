@@ -188,46 +188,31 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Name of the task, possibly qualified, as it appears in the project
         /// </summary>
-        public string Name
-        {
-            get { return _name; }
-        }
+        public string Name => _name;
 
         /// <summary>
         /// Unevaluated condition on the task
         /// May be empty string.
         /// </summary>
-        public override string Condition
-        {
-            get { return _condition; }
-        }
+        public override string Condition => _condition;
 
         /// <summary>
         /// Unevaluated ContinueOnError on the task.
         /// May be empty string.
         /// </summary>
-        public string ContinueOnError
-        {
-            get { return _continueOnError; }
-        }
+        public string ContinueOnError => _continueOnError;
 
         /// <summary>
         /// Unevaluated MSBuildRuntime on the task.
         /// May be empty string.
         /// </summary>
-        public string MSBuildRuntime
-        {
-            get { return _msbuildRuntime; }
-        }
+        public string MSBuildRuntime => _msbuildRuntime;
 
         /// <summary>
         /// Unevaluated MSBuildArchitecture on the task.
         /// May be empty string.
         /// </summary>
-        public string MSBuildArchitecture
-        {
-            get { return _msbuildArchitecture; }
-        }
+        public string MSBuildArchitecture => _msbuildArchitecture;
 
         /// <summary>
         /// Read-only dead unordered set of task parameter names and unevaluated values.
@@ -253,58 +238,37 @@ namespace Microsoft.Build.Execution
         /// Ordered set of output property and item objects.
         /// This is a read-only dead collection.
         /// </summary>
-        public IList<ProjectTaskInstanceChild> Outputs
-        {
-            get { return _outputs; }
-        }
+        public IList<ProjectTaskInstanceChild> Outputs => _outputs;
 
         /// <summary>
         /// Location of the ContinueOnError attribute, if any
         /// </summary>
-        public ElementLocation ContinueOnErrorLocation
-        {
-            get { return _continueOnErrorLocation; }
-        }
+        public ElementLocation ContinueOnErrorLocation => _continueOnErrorLocation;
 
         /// <summary>
         /// Location of the MSBuildRuntime attribute, if any
         /// </summary>
-        public ElementLocation MSBuildRuntimeLocation
-        {
-            get { return _msbuildRuntimeLocation; }
-        }
+        public ElementLocation MSBuildRuntimeLocation => _msbuildRuntimeLocation;
 
         /// <summary>
         /// Location of the MSBuildArchitecture attribute, if any
         /// </summary>
-        public ElementLocation MSBuildArchitectureLocation
-        {
-            get { return _msbuildArchitectureLocation; }
-        }
+        public ElementLocation MSBuildArchitectureLocation => _msbuildArchitectureLocation;
 
         /// <summary>
         /// Location of the original element
         /// </summary>
-        public override ElementLocation Location
-        {
-            get { return _location; }
-        }
+        public override ElementLocation Location => _location;
 
         /// <summary>
         /// Location of the condition, if any
         /// </summary>
-        public override ElementLocation ConditionLocation
-        {
-            get { return _conditionLocation; }
-        }
+        public override ElementLocation ConditionLocation => _conditionLocation;
 
         /// <summary>
         /// Retrieves the parameters dictionary as used during the build.
         /// </summary>
-        internal IDictionary<string, Tuple<string, ElementLocation>> ParametersForBuild
-        {
-            get { return _parameters; }
-        }
+        internal IDictionary<string, Tuple<string, ElementLocation>> ParametersForBuild => _parameters;
 
         /// <summary>
         /// Returns the value of a named parameter, or null if there is no such parameter.

@@ -208,10 +208,7 @@ namespace Microsoft.Build.UnitTests
         /// ArrayList output parameter.  (This is not supported by MSBuild.)
         /// </summary>
         [Output]
-        public ArrayList MyArrayListOutputParam
-        {
-            get { return null; }
-        }
+        public ArrayList MyArrayListOutputParam => null;
 
         /// <summary>
         /// Null ITaskItem[] output parameter. 
@@ -230,13 +227,7 @@ namespace Microsoft.Build.UnitTests
         /// Empty string output parameter. 
         /// </summary>
         [Output]
-        public string EmptyStringOutputParameter
-        {
-            get
-            {
-                return String.Empty;
-            }
-        }
+        public string EmptyStringOutputParameter => String.Empty;
 
         /// <summary>
         /// Empty string output parameter. 
@@ -268,109 +259,55 @@ namespace Microsoft.Build.UnitTests
         /// string output parameter. 
         /// </summary>
         [Output]
-        public string StringOutputParameter
-        {
-            get
-            {
-                return "foo";
-            }
-        }
+        public string StringOutputParameter => "foo";
 
         /// <summary>
         /// string array output parameter. 
         /// </summary>
         [Output]
-        public string[] StringArrayOutputParameter
-        {
-            get
-            {
-                return new string[] { "foo", "bar" };
-            }
-        }
+        public string[] StringArrayOutputParameter => new string[] { "foo", "bar" };
 
         /// <summary>
         /// int output parameter. 
         /// </summary>
         [Output]
-        public int IntOutputParameter
-        {
-            get
-            {
-                return 1;
-            }
-        }
+        public int IntOutputParameter => 1;
 
         /// <summary>
         /// int array output parameter. 
         /// </summary>
         [Output]
-        public int[] IntArrayOutputParameter
-        {
-            get
-            {
-                return new int[] { 1, 2 };
-            }
-        }
+        public int[] IntArrayOutputParameter => new int[] { 1, 2 };
 
         /// <summary>
         /// object array output parameter. 
         /// </summary>
         [Output]
-        public object[] ObjectArrayOutputParameter
-        {
-            get
-            {
-                return new object[] { new Object() };
-            }
-        }
+        public object[] ObjectArrayOutputParameter => new object[] { new Object() };
 
         /// <summary>
         /// itaskitem implementation output parameter
         /// </summary>
         [Output]
-        public MyTaskItem MyTaskItemOutputParameter
-        {
-            get
-            {
-                return new MyTaskItem();
-            }
-        }
+        public MyTaskItem MyTaskItemOutputParameter => new MyTaskItem();
 
         /// <summary>
         /// itaskitem implementation array output parameter
         /// </summary>
         [Output]
-        public MyTaskItem[] MyTaskItemArrayOutputParameter
-        {
-            get
-            {
-                return new MyTaskItem[] { new MyTaskItem() };
-            }
-        }
+        public MyTaskItem[] MyTaskItemArrayOutputParameter => new MyTaskItem[] { new MyTaskItem() };
 
         /// <summary>
         /// taskitem output parameter
         /// </summary>
         [Output]
-        public TaskItem TaskItemOutputParameter
-        {
-            get
-            {
-                return new TaskItem("foo", String.Empty);
-            }
-        }
+        public TaskItem TaskItemOutputParameter => new TaskItem("foo", String.Empty);
 
         /// <summary>
         /// taskitem array output parameter
         /// </summary>
         [Output]
-        public TaskItem[] TaskItemArrayOutputParameter
-        {
-            get
-            {
-                return new TaskItem[] { new TaskItem("foo", String.Empty) };
-            }
-        }
+        public TaskItem[] TaskItemArrayOutputParameter => new TaskItem[] { new TaskItem("foo", String.Empty) };
     }
 
     /// <summary>
@@ -433,18 +370,9 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        public ICollection MetadataNames
-        {
-            get
-            {
-                return new ArrayList();
-            }
-        }
+        public ICollection MetadataNames => new ArrayList();
 
-        public int MetadataCount
-        {
-            get { return 1; }
-        }
+        public int MetadataCount => 1;
 
         public string GetMetadata(string attributeName)
         {

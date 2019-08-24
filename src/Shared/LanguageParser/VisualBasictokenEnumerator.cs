@@ -324,12 +324,6 @@ namespace Microsoft.Build.Shared.LanguageParser
         * 
         * Return the token char reader.
         */
-        override internal TokenCharReader Reader
-        {
-            get
-            {
-                return _reader;
-            }
-        }
+        override internal TokenCharReader Reader => _reader;
     }
 }

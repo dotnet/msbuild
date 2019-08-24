@@ -228,13 +228,7 @@ namespace Microsoft.Build.Exceptions
         /// Gets the exception message not including the project file.
         /// </summary>
         /// <value>The error message string only.</value>
-        public string BaseMessage
-        {
-            get
-            {
-                return base.Message;
-            }
-        }
+        public string BaseMessage => base.Message;
 
         /// <summary>
         /// Gets the file (if any) associated with this exception.
@@ -245,97 +239,49 @@ namespace Microsoft.Build.Exceptions
         /// but the name has shipped now.
         /// </remarks>
         /// <value>Project filename/path string, or null.</value>
-        public string ProjectFile
-        {
-            get
-            {
-                return file;
-            }
-        }
+        public string ProjectFile => file;
 
         /// <summary>
         /// Gets the invalid line number (if any) in the project.
         /// </summary>
         /// <value>The invalid line number, or zero.</value>
-        public int LineNumber
-        {
-            get
-            {
-                return lineNumber;
-            }
-        }
+        public int LineNumber => lineNumber;
 
         /// <summary>
         /// Gets the invalid column number (if any) in the project.
         /// </summary>
         /// <value>The invalid column number, or zero.</value>
-        public int ColumnNumber
-        {
-            get
-            {
-                return columnNumber;
-            }
-        }
+        public int ColumnNumber => columnNumber;
 
         /// <summary>
         /// Gets the last line number (if any) of a range of invalid lines in the project.
         /// </summary>
         /// <value>The last invalid line number, or zero.</value>
-        public int EndLineNumber
-        {
-            get
-            {
-                return endLineNumber;
-            }
-        }
+        public int EndLineNumber => endLineNumber;
 
         /// <summary>
         /// Gets the last column number (if any) of a range of invalid columns in the project.
         /// </summary>
         /// <value>The last invalid column number, or zero.</value>
-        public int EndColumnNumber
-        {
-            get
-            {
-                return endColumnNumber;
-            }
-        }
+        public int EndColumnNumber => endColumnNumber;
 
         /// <summary>
         /// Gets the error sub-category (if any) that describes the type of this error.
         /// </summary>
         /// <value>The sub-category string, or null.</value>
-        public string ErrorSubcategory
-        {
-            get
-            {
-                return errorSubcategory;
-            }
-        }
+        public string ErrorSubcategory => errorSubcategory;
 
         /// <summary>
         /// Gets the error code (if any) associated with the exception message.
         /// </summary>
         /// <value>Error code string, or null.</value>
-        public string ErrorCode
-        {
-            get
-            {
-                return errorCode;
-            }
-        }
+        public string ErrorCode => errorCode;
 
         /// <summary>
         /// Gets the F1-help keyword (if any) associated with this error, for the host IDE.
         /// </summary>
         /// <value>The keyword string, or null.</value>
-        public string HelpKeyword
-        {
-            get
-            {
-                return helpKeyword;
-            }
-        }
+        public string HelpKeyword => helpKeyword;
 
         /// <summary>
         /// Whether the exception has already been logged. Allows the exception to be logged at the 

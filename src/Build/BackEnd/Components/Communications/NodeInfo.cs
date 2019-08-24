@@ -44,18 +44,12 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The ID of the node.
         /// </summary>
-        public int NodeId
-        {
-            get { return _nodeId; }
-        }
+        public int NodeId => _nodeId;
 
         /// <summary>
         /// The type of provider which manages this node.
         /// </summary>
-        public NodeProviderType ProviderType
-        {
-            get { return _providerType; }
-        }
+        public NodeProviderType ProviderType => _providerType;
 
         /// <summary>
         /// Assigns the specific configuration ID to the node.

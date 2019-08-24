@@ -439,67 +439,34 @@ namespace Microsoft.Build.UnitTests.Logging
             /// <summary>
             /// Was an event handler entered into
             /// </summary>
-            public bool EnteredEventHandler
-            {
-                get { return _enteredEventHandler; }
-            }
+            public bool EnteredEventHandler => _enteredEventHandler;
 
             /// <summary>
             /// Was  the Any event handler
             /// </summary>
-            public bool EnteredAnyEventHandler
-            {
-                get
-                {
-                    return _enteredAnyEventHandler;
-                }
-            }
+            public bool EnteredAnyEventHandler => _enteredAnyEventHandler;
 
             /// <summary>
             /// Was  the Status event handler
             /// </summary>
-            public bool EnteredStatusEventHandler
-            {
-                get
-                {
-                    return _enteredStatusEventHandler;
-                }
-            }
+            public bool EnteredStatusEventHandler => _enteredStatusEventHandler;
 
             /// <summary>
             /// Which event was raised on the event source, this can be asserted upon
             /// to verify the event passed to the event source is the same one which was
             /// received by the event handlers
             /// </summary>
-            public BuildEventArgs RaisedEvent
-            {
-                get
-                {
-                    return _raisedEvent;
-                }
-            }
+            public BuildEventArgs RaisedEvent => _raisedEvent;
 
             /// <summary>
             /// Check the event raised by the AnyEventHandler
             /// </summary>
-            public BuildEventArgs RaisedAnyEvent
-            {
-                get
-                {
-                    return _raisedAnyEvent;
-                }
-            }
+            public BuildEventArgs RaisedAnyEvent => _raisedAnyEvent;
 
             /// <summary>
             /// Check the event raised by the StatusEventHandler
             /// </summary>
-            public BuildEventArgs RaisedStatusEvent
-            {
-                get
-                {
-                    return _raisedStatusEvent;
-                }
-            }
+            public BuildEventArgs RaisedStatusEvent => _raisedStatusEvent;
             #endregion
 
             #region Public Methods
@@ -801,167 +768,77 @@ namespace Microsoft.Build.UnitTests.Logging
             /// <summary>
             /// Event which can be raised in multiple tests.
             /// </summary>
-            internal static BuildStartedEventArgs BuildStarted
-            {
-                get
-                {
-                    return s_buildStarted;
-                }
-            }
+            internal static BuildStartedEventArgs BuildStarted => s_buildStarted;
 
             /// <summary>
             /// Event which can be raised in multiple tests.
             /// </summary>
-            internal static GenericBuildEventArgs GenericBuildEvent
-            {
-                get
-                {
-                    return s_genericBuild;
-                }
-            }
+            internal static GenericBuildEventArgs GenericBuildEvent => s_genericBuild;
 
             /// <summary>
             /// Event which can be raised in multiple tests.
             /// </summary>
-            internal static GenericBuildStatusEventArgs GenericStatusEvent
-            {
-                get
-                {
-                    return s_genericBuildStatus;
-                }
-            }
+            internal static GenericBuildStatusEventArgs GenericStatusEvent => s_genericBuildStatus;
 
             /// <summary>
             /// Event which can be raised in multiple tests.
             /// </summary>
-            internal static BuildFinishedEventArgs BuildFinished
-            {
-                get
-                {
-                    return s_buildFinished;
-                }
-            }
+            internal static BuildFinishedEventArgs BuildFinished => s_buildFinished;
 
             /// <summary>
             /// Event which can be raised in multiple tests.
             /// </summary>
-            internal static BuildMessageEventArgs NormalMessage
-            {
-                get
-                {
-                    return s_buildMessage;
-                }
-            }
+            internal static BuildMessageEventArgs NormalMessage => s_buildMessage;
 
             /// <summary>
             /// Event which can be raised in multiple tests.
             /// </summary>
-            internal static TaskStartedEventArgs TaskStarted
-            {
-                get
-                {
-                    return s_taskStarted;
-                }
-            }
+            internal static TaskStartedEventArgs TaskStarted => s_taskStarted;
 
             /// <summary>
             /// Event which can be raised in multiple tests.
             /// </summary>
-            internal static TaskFinishedEventArgs TaskFinished
-            {
-                get
-                {
-                    return s_taskFinished;
-                }
-            }
+            internal static TaskFinishedEventArgs TaskFinished => s_taskFinished;
 
             /// <summary>
             /// Event which can be raised in multiple tests.
             /// </summary>
-            internal static TaskCommandLineEventArgs CommandLine
-            {
-                get
-                {
-                    return s_taskCommandLine;
-                }
-            }
+            internal static TaskCommandLineEventArgs CommandLine => s_taskCommandLine;
 
             /// <summary>
             /// Event which can be raised in multiple tests.
             /// </summary>
-            internal static BuildWarningEventArgs Warning
-            {
-                get
-                {
-                    return s_buildWarning;
-                }
-            }
+            internal static BuildWarningEventArgs Warning => s_buildWarning;
 
             /// <summary>
             /// Event which can be raised in multiple tests.
             /// </summary>
-            internal static BuildErrorEventArgs Error
-            {
-                get
-                {
-                    return s_buildError;
-                }
-            }
+            internal static BuildErrorEventArgs Error => s_buildError;
 
             /// <summary>
             /// Event which can be raised in multiple tests.
             /// </summary>
-            internal static TargetStartedEventArgs TargetStarted
-            {
-                get
-                {
-                    return s_targetStarted;
-                }
-            }
+            internal static TargetStartedEventArgs TargetStarted => s_targetStarted;
 
             /// <summary>
             /// Event which can be raised in multiple tests.
             /// </summary>
-            internal static TargetFinishedEventArgs TargetFinished
-            {
-                get
-                {
-                    return s_targetFinished;
-                }
-            }
+            internal static TargetFinishedEventArgs TargetFinished => s_targetFinished;
 
             /// <summary>
             /// Event which can be raised in multiple tests.
             /// </summary>
-            internal static ProjectStartedEventArgs ProjectStarted
-            {
-                get
-                {
-                    return s_projectStarted;
-                }
-            }
+            internal static ProjectStartedEventArgs ProjectStarted => s_projectStarted;
 
             /// <summary>
             /// Event which can be raised in multiple tests.
             /// </summary>
-            internal static ProjectFinishedEventArgs ProjectFinished
-            {
-                get
-                {
-                    return s_projectFinished;
-                }
-            }
+            internal static ProjectFinishedEventArgs ProjectFinished => s_projectFinished;
 
             /// <summary>
             /// Event which can be raised in multiple tests.
             /// </summary>
-            internal static ExternalProjectStartedEventArgs ExternalStartedEvent
-            {
-                get
-                {
-                    return s_externalProjectStarted;
-                }
-            }
+            internal static ExternalProjectStartedEventArgs ExternalStartedEvent => s_externalProjectStarted;
             #endregion
 
             /// <summary>

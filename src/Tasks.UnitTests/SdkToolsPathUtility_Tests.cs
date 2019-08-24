@@ -257,57 +257,27 @@ namespace Microsoft.Build.UnitTests
             /// <summary>
             /// A file exists object that will only return true if path passed in is the sdkToolsPath
             /// </summary>
-            public FileExists MockFileExistsOnlyInX86
-            {
-                get
-                {
-                    return new FileExists(ExistsOnlyInX86);
-                }
-            }
+            public FileExists MockFileExistsOnlyInX86 => new FileExists(ExistsOnlyInX86);
 
             /// <summary>
             /// A file exists object that will only return true if path passed in is the sdkToolsPath\X64
             /// </summary>
-            public FileExists MockFileExistsOnlyInX64
-            {
-                get
-                {
-                    return new FileExists(ExistsOnlyInX64);
-                }
-            }
+            public FileExists MockFileExistsOnlyInX64 => new FileExists(ExistsOnlyInX64);
 
             /// <summary>
             /// A file exists object that will only return true if path passed in is the sdkToolsPath\Ia64
             /// </summary>
-            public FileExists MockFileExistsOnlyInIa64
-            {
-                get
-                {
-                    return new FileExists(ExistsOnlyInIa64);
-                }
-            }
+            public FileExists MockFileExistsOnlyInIa64 => new FileExists(ExistsOnlyInIa64);
 
             /// <summary>
             /// File exists delegate which will always return true
             /// </summary>
-            public FileExists MockFileExistsInAll
-            {
-                get
-                {
-                    return new FileExists(ExistsInAll);
-                }
-            }
+            public FileExists MockFileExistsInAll => new FileExists(ExistsInAll);
 
             /// <summary>
             /// File Exists delegate which will always return false
             /// </summary>
-            public FileExists MockFileDoesNotExist
-            {
-                get
-                {
-                    return new FileExists(DoesNotExist);
-                }
-            }
+            public FileExists MockFileDoesNotExist => new FileExists(DoesNotExist);
             #endregion
 
             #region FileExists Methods

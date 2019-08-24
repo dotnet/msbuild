@@ -39,13 +39,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the internal cache for testing purposes.
         /// </summary>
-        internal IDictionary<int, BuildResult> ResultsDictionary
-        {
-            get
-            {
-                return _resultsByConfiguration;
-            }
-        }
+        internal IDictionary<int, BuildResult> ResultsDictionary => _resultsByConfiguration;
 
         #region IResultsCache Members
 

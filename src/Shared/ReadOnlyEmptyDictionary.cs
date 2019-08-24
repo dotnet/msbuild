@@ -52,18 +52,12 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Empty returns zero
         /// </summary>
-        public int Count
-        {
-            get { return 0; }
-        }
+        public int Count => 0;
 
         /// <summary>
         /// Returns true
         /// </summary>
-        public bool IsReadOnly
-        {
-            get { return true; }
-        }
+        public bool IsReadOnly => true;
 
         /// <summary>
         /// Gets empty collection
@@ -88,42 +82,27 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Is it fixed size
         /// </summary>
-        public bool IsFixedSize
-        {
-            get { return true; }
-        }
+        public bool IsFixedSize => true;
 
         /// <summary>
         /// Not synchronized
         /// </summary>
-        public bool IsSynchronized
-        {
-            get { return false; }
-        }
+        public bool IsSynchronized => false;
 
         /// <summary>
         /// No sync root
         /// </summary>
-        public object SyncRoot
-        {
-            get { return null; }
-        }
+        public object SyncRoot => null;
 
         /// <summary>
         /// Keys
         /// </summary>
-        ICollection IDictionary.Keys
-        {
-            get { return (ICollection)((IDictionary<K, V>)this).Keys; }
-        }
+        ICollection IDictionary.Keys => (ICollection) ((IDictionary<K, V>) this).Keys;
 
         /// <summary>
         /// Values
         /// </summary>
-        ICollection IDictionary.Values
-        {
-            get { return (ICollection)((IDictionary<K, V>)this).Values; }
-        }
+        ICollection IDictionary.Values => (ICollection) ((IDictionary<K, V>) this).Values;
 
         /// <summary>
         /// Indexer

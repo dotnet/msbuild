@@ -102,10 +102,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Number of pieces of metadata on this item definition.
         /// </summary>
-        public int MetadataCount
-        {
-            get { return (_metadata == null) ? 0 : _metadata.Count; }
-        }
+        public int MetadataCount => (_metadata == null) ? 0 : _metadata.Count;
 
         /// <summary>
         /// Names of all metadata on this item definition
@@ -131,10 +128,7 @@ namespace Microsoft.Build.Execution
         /// can be put in a dictionary conveniently.
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        string IKeyed.Key
-        {
-            get { return ItemType; }
-        }
+        string IKeyed.Key => ItemType;
 
         /// <summary>
         /// Get any metadata in the item that has the specified name,

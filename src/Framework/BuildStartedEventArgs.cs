@@ -105,9 +105,6 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// The environment which is used at the start of the build
         /// </summary>
-        public IDictionary<string, string> BuildEnvironment
-        {
-            get { return environmentOnBuildStart; }
-        }
+        public IDictionary<string, string> BuildEnvironment => environmentOnBuildStart;
     }
 }
