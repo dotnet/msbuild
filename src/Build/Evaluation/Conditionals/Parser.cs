@@ -56,8 +56,14 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal BuildEventContext LogBuildEventContext
         {
-            get => _logBuildEventContext;
-            set => _logBuildEventContext = value;
+            get
+            {
+                return _logBuildEventContext;
+            }
+            set
+            {
+                _logBuildEventContext = value;
+            }
         }
         private ILoggingService _loggingServices;
         /// <summary>
@@ -65,9 +71,15 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal ILoggingService LoggingServices
         {
-            set => _loggingServices = value;
+            set
+            {
+                _loggingServices = value;
+            }
 
-            get => _loggingServices;
+            get
+            {
+                return _loggingServices;
+            }
         }
         #endregion
 

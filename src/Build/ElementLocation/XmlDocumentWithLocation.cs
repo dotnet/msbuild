@@ -110,8 +110,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal string FullPath
         {
-            get => _fullPath;
-            set => _fullPath = value;
+            get { return _fullPath; }
+            set { _fullPath = value; }
         }
 
         /// <summary>
@@ -123,8 +123,8 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal ProjectStringCache StringCache
         {
-            get => _stringCache ?? s_globalStringCache;
-            set => _stringCache = value;
+            get { return _stringCache ?? s_globalStringCache; }
+            set { _stringCache = value; }
         }
 
         /// <summary>

@@ -237,8 +237,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public DateTime EventTime
         {
-            get => _currentEventTime;
-            set => _currentEventTime = value;
+            get { return _currentEventTime; }
+            set { _currentEventTime = value; }
         }
 
         /// <summary>

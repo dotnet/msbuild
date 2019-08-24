@@ -245,7 +245,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public DateTime CreationTime
         {
-            get => _creationTime;
+            get
+            {
+                return _creationTime;
+            }
 
             set
             {
@@ -259,7 +262,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public DateTime StartTime
         {
-            get => _startTime;
+            get
+            {
+                return _startTime;
+            }
 
             set
             {
@@ -273,7 +279,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public DateTime EndTime
         {
-            get => _endTime;
+            get
+            {
+                return _endTime;
+            }
 
             set
             {

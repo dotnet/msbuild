@@ -98,7 +98,8 @@ namespace Microsoft.Build.BackEnd
             public TranslationDirection Mode
             {
                 [DebuggerStepThrough]
-                get => TranslationDirection.ReadFromStream;
+                get
+                { return TranslationDirection.ReadFromStream; }
             }
 
             /// <summary>
@@ -717,7 +718,8 @@ namespace Microsoft.Build.BackEnd
             public TranslationDirection Mode
             {
                 [DebuggerStepThrough]
-                get => TranslationDirection.WriteToStream;
+                get
+                { return TranslationDirection.WriteToStream; }
             }
 
             /// <summary>

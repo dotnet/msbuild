@@ -152,7 +152,10 @@ namespace Microsoft.Build.BackEnd
                 return _continueOnError;
             }
 
-            internal set => _continueOnError = value;
+            internal set
+            {
+                _continueOnError = value;
+            }
         }
 
         /// <summary>
@@ -195,8 +198,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool ConvertErrorsToWarnings
         {
-            get => _convertErrorsToWarnings;
-            set => _convertErrorsToWarnings = value;
+            get { return _convertErrorsToWarnings; }
+            set { _convertErrorsToWarnings = value; }
         }
 
         /// <summary>
@@ -205,10 +208,12 @@ namespace Microsoft.Build.BackEnd
         internal TaskLoggingContext LoggingContext
         {
             [DebuggerStepThrough]
-            get => _taskLoggingContext;
+            get
+            { return _taskLoggingContext; }
 
             [DebuggerStepThrough]
-            set => _taskLoggingContext = value;
+            set
+            { _taskLoggingContext = value; }
         }
 
 #if FEATURE_APPDOMAIN

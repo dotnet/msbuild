@@ -62,7 +62,8 @@ namespace Microsoft.Build.BackEnd.Logging
         public ILoggingService LoggingService
         {
             [DebuggerStepThrough]
-            get => _loggingService;
+            get
+            { return _loggingService; }
         }
 
         /// <summary>
@@ -74,7 +75,10 @@ namespace Microsoft.Build.BackEnd.Logging
         public BuildEventContext BuildEventContext
         {
             [DebuggerStepThrough]
-            get => _eventContext;
+            get
+            {
+                return _eventContext;
+            }
 
             protected set
             {
@@ -90,10 +94,16 @@ namespace Microsoft.Build.BackEnd.Logging
         public bool IsValid
         {
             [DebuggerStepThrough]
-            get => _isValid;
+            get
+            {
+                return _isValid;
+            }
 
             [DebuggerStepThrough]
-            protected set => _isValid = value;
+            protected set
+            {
+                _isValid = value;
+            }
         }
 
         /// <summary>

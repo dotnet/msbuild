@@ -121,68 +121,68 @@ namespace Microsoft.Build.BackEnd
         // "Secondary" is the next from the top.
         private ItemDictionary<ProjectItemInstance> PrimaryTable
         {
-            get => _lookupScopes.First.Value.Items;
-            set => _lookupScopes.First.Value.Items = value;
+            get { return _lookupScopes.First.Value.Items; }
+            set { _lookupScopes.First.Value.Items = value; }
         }
 
         private ItemDictionary<ProjectItemInstance> PrimaryAddTable
         {
-            get => _lookupScopes.First.Value.Adds;
-            set => _lookupScopes.First.Value.Adds = value;
+            get { return _lookupScopes.First.Value.Adds; }
+            set { _lookupScopes.First.Value.Adds = value; }
         }
 
         private ItemDictionary<ProjectItemInstance> PrimaryRemoveTable
         {
-            get => _lookupScopes.First.Value.Removes;
-            set => _lookupScopes.First.Value.Removes = value;
+            get { return _lookupScopes.First.Value.Removes; }
+            set { _lookupScopes.First.Value.Removes = value; }
         }
 
         private ItemTypeToItemsMetadataUpdateDictionary PrimaryModifyTable
         {
-            get => _lookupScopes.First.Value.Modifies;
-            set => _lookupScopes.First.Value.Modifies = value;
+            get { return _lookupScopes.First.Value.Modifies; }
+            set { _lookupScopes.First.Value.Modifies = value; }
         }
 
         private PropertyDictionary<ProjectPropertyInstance> PrimaryPropertySets
         {
-            get => _lookupScopes.First.Value.PropertySets;
-            set => _lookupScopes.First.Value.PropertySets = value;
+            get { return _lookupScopes.First.Value.PropertySets; }
+            set { _lookupScopes.First.Value.PropertySets = value; }
         }
 
         private ItemDictionary<ProjectItemInstance> SecondaryTable
         {
-            get => _lookupScopes.First.Next.Value.Items;
-            set => _lookupScopes.First.Next.Value.Items = value;
+            get { return _lookupScopes.First.Next.Value.Items; }
+            set { _lookupScopes.First.Next.Value.Items = value; }
         }
 
         private ItemDictionary<ProjectItemInstance> SecondaryAddTable
         {
-            get => _lookupScopes.First.Next.Value.Adds;
-            set => _lookupScopes.First.Next.Value.Adds = value;
+            get { return _lookupScopes.First.Next.Value.Adds; }
+            set { _lookupScopes.First.Next.Value.Adds = value; }
         }
 
         private ItemDictionary<ProjectItemInstance> SecondaryRemoveTable
         {
-            get => _lookupScopes.First.Next.Value.Removes;
-            set => _lookupScopes.First.Next.Value.Removes = value;
+            get { return _lookupScopes.First.Next.Value.Removes; }
+            set { _lookupScopes.First.Next.Value.Removes = value; }
         }
 
         private ItemTypeToItemsMetadataUpdateDictionary SecondaryModifyTable
         {
-            get => _lookupScopes.First.Next.Value.Modifies;
-            set => _lookupScopes.First.Next.Value.Modifies = value;
+            get { return _lookupScopes.First.Next.Value.Modifies; }
+            set { _lookupScopes.First.Next.Value.Modifies = value; }
         }
 
         private PropertyDictionary<ProjectPropertyInstance> SecondaryProperties
         {
-            get => _lookupScopes.First.Next.Value.Properties;
-            set => _lookupScopes.First.Next.Value.Properties = value;
+            get { return _lookupScopes.First.Next.Value.Properties; }
+            set { _lookupScopes.First.Next.Value.Properties = value; }
         }
 
         private PropertyDictionary<ProjectPropertyInstance> SecondaryPropertySets
         {
-            get => _lookupScopes.First.Next.Value.PropertySets;
-            set => _lookupScopes.First.Next.Value.PropertySets = value;
+            get { return _lookupScopes.First.Next.Value.PropertySets; }
+            set { _lookupScopes.First.Next.Value.PropertySets = value; }
         }
 
         #endregion
@@ -1363,32 +1363,32 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             internal ItemDictionary<ProjectItemInstance> Items
             {
-                get => _items;
-                set => _items = value;
+                get { return _items; }
+                set { _items = value; }
             }
             /// <summary>
             /// Adds made in this scope or above.
             /// </summary>
             internal ItemDictionary<ProjectItemInstance> Adds
             {
-                get => _adds;
-                set => _adds = value;
+                get { return _adds; }
+                set { _adds = value; }
             }
             /// <summary>
             /// Removes made in this scope or above.
             /// </summary>
             internal ItemDictionary<ProjectItemInstance> Removes
             {
-                get => _removes;
-                set => _removes = value;
+                get { return _removes; }
+                set { _removes = value; }
             }
             /// <summary>
             /// Modifications made in this scope or above.
             /// </summary>
             internal ItemTypeToItemsMetadataUpdateDictionary Modifies
             {
-                get => _modifies;
-                set => _modifies = value;
+                get { return _modifies; }
+                set { _modifies = value; }
             }
             /// <summary>
             /// The main property table, populated with properties
@@ -1397,16 +1397,16 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             internal PropertyDictionary<ProjectPropertyInstance> Properties
             {
-                get => _properties;
-                set => _properties = value;
+                get { return _properties; }
+                set { _properties = value; }
             }
             /// <summary>
             /// Properties set in this scope or above.
             /// </summary>
             internal PropertyDictionary<ProjectPropertyInstance> PropertySets
             {
-                get => _propertySets;
-                set => _propertySets = value;
+                get { return _propertySets; }
+                set { _propertySets = value; }
             }
             /// <summary>
             /// ID of thread owning this scope

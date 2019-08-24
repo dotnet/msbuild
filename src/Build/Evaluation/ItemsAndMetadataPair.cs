@@ -42,9 +42,15 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal HashSet<string> Items
         {
-            get => _items;
+            get
+            {
+                return _items;
+            }
 
-            set => _items = value;
+            set
+            {
+                _items = value;
+            }
         }
 
         /// <summary>
@@ -54,9 +60,15 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal Dictionary<string, MetadataReference> Metadata
         {
-            get => _metadata;
+            get
+            {
+                return _metadata;
+            }
 
-            set => _metadata = value;
+            set
+            {
+                _metadata = value;
+            }
         }
     }
 }

@@ -62,8 +62,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal static bool EnableTargetOutputLogging
         {
-            get => s_enableTargetOutputLogging;
-            set => s_enableTargetOutputLogging = value;
+            get { return s_enableTargetOutputLogging; }
+            set { s_enableTargetOutputLogging = value; }
         }
 
         /// <summary>

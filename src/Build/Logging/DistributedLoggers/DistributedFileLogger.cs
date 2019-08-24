@@ -161,8 +161,14 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public IEventRedirector BuildEventRedirector
         {
-            get => _buildEventRedirector;
-            set => _buildEventRedirector = value;
+            get
+            {
+                return _buildEventRedirector;
+            }
+            set
+            {
+                _buildEventRedirector = value;
+            }
         }
 
         /// <summary>
@@ -170,8 +176,14 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public int NodeId
         {
-            get => _nodeId;
-            set => _nodeId = value;
+            get
+            {
+                return _nodeId;
+            }
+            set
+            {
+                _nodeId = value;
+            }
         }
 
         /// <summary>
@@ -195,8 +207,14 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public string Parameters
         {
-            get => _parameters;
-            set => _parameters = value;
+            get
+            {
+                return _parameters;
+            }
+            set
+            {
+                _parameters = value;
+            }
         }
 
         #endregion

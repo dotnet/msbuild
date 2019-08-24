@@ -72,7 +72,8 @@ namespace Microsoft.Build.Evaluation
         public string Name
         {
             [DebuggerStepThrough]
-            get => _xml.Name;
+            get
+            { return _xml.Name; }
         }
 
         /// <summary>
@@ -83,7 +84,8 @@ namespace Microsoft.Build.Evaluation
         public string EvaluatedValue
         {
             [DebuggerStepThrough]
-            get => EscapingUtilities.UnescapeAll(_evaluatedValueEscaped);
+            get
+            { return EscapingUtilities.UnescapeAll(_evaluatedValueEscaped); }
         }
 
         /// <summary>
@@ -105,7 +107,10 @@ namespace Microsoft.Build.Evaluation
         public string UnevaluatedValue
         {
             [DebuggerStepThrough]
-            get => _xml.Value;
+            get
+            {
+                return _xml.Value;
+            }
 
             [DebuggerStepThrough]
             set
@@ -138,7 +143,8 @@ namespace Microsoft.Build.Evaluation
         public ProjectMetadataElement Xml
         {
             [DebuggerStepThrough]
-            get => _xml;
+            get
+            { return _xml; }
         }
 
         /// <summary>
@@ -148,7 +154,8 @@ namespace Microsoft.Build.Evaluation
         public Project Project
         {
             [DebuggerStepThrough]
-            get => _parent.Project;
+            get
+            { return _parent.Project; }
         }
 
         /// <summary>
@@ -171,7 +178,8 @@ namespace Microsoft.Build.Evaluation
         public ProjectMetadata Predecessor
         {
             [DebuggerStepThrough]
-            get => _predecessor;
+            get
+            { return _predecessor; }
         }
 
         /// <summary>
@@ -212,7 +220,8 @@ namespace Microsoft.Build.Evaluation
         string IKeyed.Key
         {
             [DebuggerStepThrough]
-            get => Name;
+            get
+            { return Name; }
         }
 
         /// <summary>
@@ -222,7 +231,8 @@ namespace Microsoft.Build.Evaluation
         string IValued.EscapedValue
         {
             [DebuggerStepThrough]
-            get => EvaluatedValueEscaped;
+            get
+            { return EvaluatedValueEscaped; }
         }
 
         /// <summary>
@@ -234,7 +244,8 @@ namespace Microsoft.Build.Evaluation
         internal string EvaluatedValueEscaped
         {
             [DebuggerStepThrough]
-            get => _evaluatedValueEscaped;
+            get
+            { return _evaluatedValueEscaped; }
         }
 
         #region IEquatable<ProjectMetadata> Members

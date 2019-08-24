@@ -51,8 +51,8 @@ namespace Microsoft.Build.Evaluation
         private bool _possibleOrCollision = true;
         internal override bool PossibleOrCollision
         {
-            set => _possibleOrCollision = value;
-            get => _possibleOrCollision;
+            set { _possibleOrCollision = value; }
+            get { return _possibleOrCollision; }
         }
         #endregion
     }

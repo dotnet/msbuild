@@ -100,10 +100,12 @@ namespace Microsoft.Build.BackEnd
         public int NodeId
         {
             [DebuggerStepThrough]
-            get => _nodeId;
+            get
+            { return _nodeId; }
 
             [DebuggerStepThrough]
-            set => _nodeId = value;
+            set
+            { _nodeId = value; }
         }
 
         /// <summary>
@@ -112,7 +114,8 @@ namespace Microsoft.Build.BackEnd
         public BuildParameters BuildParameters
         {
             [DebuggerStepThrough]
-            get => _buildParameters;
+            get
+            { return _buildParameters; }
         }
 
         /// <summary>
@@ -121,7 +124,8 @@ namespace Microsoft.Build.BackEnd
         public LoggerDescription[] LoggerDescriptions
         {
             [DebuggerStepThrough]
-            get => _forwardingLoggers;
+            get
+            { return _forwardingLoggers; }
         }
 
 #if FEATURE_APPDOMAIN
@@ -131,7 +135,8 @@ namespace Microsoft.Build.BackEnd
         public AppDomainSetup AppDomainSetup
         {
             [DebuggerStepThrough]
-            get => _appDomainSetup;
+            get
+            { return _appDomainSetup; }
         }
 #endif
 
@@ -141,10 +146,11 @@ namespace Microsoft.Build.BackEnd
         public LoggingNodeConfiguration LoggingNodeConfiguration
         {
             [DebuggerStepThrough]
-            get => _loggingNodeConfiguration;
+            get
+            { return _loggingNodeConfiguration; }
         }
 
-        #region INodePacket Members
+#region INodePacket Members
 
         /// <summary>
         /// Retrieves the packet type.
@@ -152,12 +158,13 @@ namespace Microsoft.Build.BackEnd
         public NodePacketType Type
         {
             [DebuggerStepThrough]
-            get => NodePacketType.NodeConfiguration;
+            get
+            { return NodePacketType.NodeConfiguration; }
         }
 
-        #endregion
+#endregion
 
-        #region INodePacketTranslatable Members
+#region INodePacketTranslatable Members
 
         /// <summary>
         /// Translates the packet to/from binary form.

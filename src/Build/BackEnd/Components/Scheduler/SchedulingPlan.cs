@@ -641,8 +641,8 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public double AccumulatedTime
             {
-                get => _accumulatedTime;
-                set => _accumulatedTime = value;
+                get { return _accumulatedTime; }
+                set { _accumulatedTime = value; }
             }
 
             /// <summary>

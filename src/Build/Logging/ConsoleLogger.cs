@@ -185,7 +185,10 @@ namespace Microsoft.Build.Logging
         /// <value>Verbosity level.</value>
         public LoggerVerbosity Verbosity
         {
-            get => _consoleLogger?.Verbosity ?? _verbosity;
+            get
+            {
+                return _consoleLogger?.Verbosity ?? _verbosity;
+            }
 
             set
             {
@@ -206,7 +209,10 @@ namespace Microsoft.Build.Logging
         /// <value>null</value>
         public string Parameters
         {
-            get => _consoleLogger == null ? _parameters : _consoleLogger.Parameters;
+            get
+            {
+                return _consoleLogger == null ? _parameters : _consoleLogger.Parameters;
+            }
 
             set
             {
@@ -228,7 +234,10 @@ namespace Microsoft.Build.Logging
         /// <remarks>This is only needed by the IDE logger.</remarks>
         public bool SkipProjectStartedText
         {
-            get => _consoleLogger?.SkipProjectStartedText ?? _skipProjectStartedText;
+            get
+            {
+                return _consoleLogger?.SkipProjectStartedText ?? _skipProjectStartedText;
+            }
 
             set
             {
@@ -276,7 +285,10 @@ namespace Microsoft.Build.Logging
         /// </summary>
         protected WriteHandler WriteHandler
         {
-            get => _consoleLogger == null ? _write : _consoleLogger.WriteHandler;
+            get
+            {
+                return _consoleLogger == null ? _write : _consoleLogger.WriteHandler;
+            }
 
             set
             {

@@ -65,8 +65,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         protected IBuildComponentHost ComponentHost
         {
-            get => _componentHost;
-            set => _componentHost = value;
+            get { return _componentHost; }
+            set { _componentHost = value; }
         }
 
         /// <summary>

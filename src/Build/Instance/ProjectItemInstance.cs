@@ -166,7 +166,8 @@ namespace Microsoft.Build.Execution
         public string ItemType
         {
             [DebuggerStepThrough]
-            get => _itemType;
+            get
+            { return _itemType; }
         }
 
         /// <summary>
@@ -176,7 +177,10 @@ namespace Microsoft.Build.Execution
         public string EvaluatedInclude
         {
             [DebuggerStepThrough]
-            get => _taskItem.ItemSpec;
+            get
+            {
+                return _taskItem.ItemSpec;
+            }
 
             [DebuggerStepThrough]
             set
@@ -195,7 +199,8 @@ namespace Microsoft.Build.Execution
         string IItem.EvaluatedIncludeEscaped
         {
             [DebuggerStepThrough]
-            get => _taskItem.IncludeEscaped;
+            get
+            { return _taskItem.IncludeEscaped; }
         }
 
         /// <summary>
@@ -205,7 +210,10 @@ namespace Microsoft.Build.Execution
         string ITaskItem2.EvaluatedIncludeEscaped
         {
             [DebuggerStepThrough]
-            get => _taskItem.IncludeEscaped;
+            get
+            {
+                return _taskItem.IncludeEscaped;
+            }
 
             set
             {
@@ -266,7 +274,10 @@ namespace Microsoft.Build.Execution
         /// </summary>
         string ITaskItem.ItemSpec
         {
-            get => EvaluatedInclude;
+            get
+            {
+                return EvaluatedInclude;
+            }
 
             set
             {
@@ -858,7 +869,10 @@ namespace Microsoft.Build.Execution
             /// </comments>
             public string ItemSpec
             {
-                get => EscapingUtilities.UnescapeAll(_includeEscaped);
+                get
+                {
+                    return EscapingUtilities.UnescapeAll(_includeEscaped);
+                }
 
                 set
                 {
@@ -881,7 +895,10 @@ namespace Microsoft.Build.Execution
             /// </remarks>
             string ITaskItem2.EvaluatedIncludeEscaped
             {
-                get => _includeEscaped;
+                get
+                {
+                    return _includeEscaped;
+                }
 
                 set
                 {
@@ -997,7 +1014,10 @@ namespace Microsoft.Build.Execution
             /// </summary>
             internal string IncludeEscaped
             {
-                get => _includeEscaped;
+                get
+                {
+                    return _includeEscaped;
+                }
 
                 set
                 {
@@ -1793,7 +1813,7 @@ namespace Microsoft.Build.Execution
                 /// </summary>
                 public ProjectItemElement ItemElement
                 {
-                    set => ItemType = value.ItemType;
+                    set { ItemType = value.ItemType; }
                 }
 
                 /// <summary>
@@ -1918,7 +1938,7 @@ namespace Microsoft.Build.Execution
                 /// </summary>
                 public string ItemType
                 {
-                    get => null;
+                    get { return null; }
                     set { /* ignore */ }
                 }
 

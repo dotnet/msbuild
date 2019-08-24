@@ -23,14 +23,26 @@ namespace Microsoft.Build.BackEnd.Logging
         #region Properties
         public LoggerVerbosity Verbosity
         {
-            get => _verbosity;
-            set => _verbosity = value;
+            get
+            {
+                return _verbosity;
+            }
+            set
+            {
+                _verbosity = value;
+            }
         }
 
         public string Parameters
         {
-            get => _parameters;
-            set => _parameters = value;
+            get
+            {
+                return _parameters;
+            }
+            set
+            {
+                _parameters = value;
+            }
         }
         #endregion
 

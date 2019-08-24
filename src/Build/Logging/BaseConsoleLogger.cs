@@ -783,7 +783,7 @@ namespace Microsoft.Build.BackEnd.Logging
             /// </summary>
             internal bool InScope
             {
-                get => inScope;
+                get { return inScope; }
                 set
                 {
                     if (!reenteredScope)

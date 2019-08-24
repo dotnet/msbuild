@@ -53,9 +53,15 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ResourceManager TaskSharedResources
         {
-            get => _taskSharedResources;
+            get
+            {
+                return _taskSharedResources;
+            }
 
-            set => _taskSharedResources = value;
+            set
+            {
+                _taskSharedResources = value;
+            }
         }
 
         // UI shared resources (including strings) used by the logging methods

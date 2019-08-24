@@ -74,7 +74,8 @@ namespace Microsoft.Build.BackEnd
         public NodePacketType Type
         {
             [DebuggerStepThrough]
-            get => NodePacketType.BuildRequestUnblocker;
+            get
+            { return NodePacketType.BuildRequestUnblocker; }
         }
 
         /// <summary>
@@ -83,7 +84,10 @@ namespace Microsoft.Build.BackEnd
         public int BlockedRequestId
         {
             [DebuggerStepThrough]
-            get => _blockedGlobalRequestId;
+            get
+            {
+                return _blockedGlobalRequestId;
+            }
         }
 
         /// <summary>
@@ -92,7 +96,10 @@ namespace Microsoft.Build.BackEnd
         public BuildResult Result
         {
             [DebuggerStepThrough]
-            get => _buildResult;
+            get
+            {
+                return _buildResult;
+            }
         }
 
         #region INodePacketTranslatable Members
