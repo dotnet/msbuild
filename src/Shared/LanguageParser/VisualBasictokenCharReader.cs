@@ -18,7 +18,7 @@ namespace Microsoft.Build.Shared.LanguageParser
      * Provides utility functions for dealing with VB-specific tokens.
      *
      */
-    sealed internal class VisualBasicTokenCharReader : TokenCharReader
+    internal sealed class VisualBasicTokenCharReader : TokenCharReader
     {
         /*
          * Method:  VisualBasicTokenCharReader

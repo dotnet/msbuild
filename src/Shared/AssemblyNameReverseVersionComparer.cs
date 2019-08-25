@@ -8,7 +8,7 @@ namespace Microsoft.Build.Shared
     /// <summary>
     /// Compare the version numbers only for an AssemblyNameExtension and make sure they are in reverse order. This assumes the names are the same.
     /// </summary>
-    sealed internal class AssemblyNameReverseVersionComparer : IComparer<AssemblyNameExtension>
+    internal sealed class AssemblyNameReverseVersionComparer : IComparer<AssemblyNameExtension>
     {
         /// <summary>
         /// A static instance of the comparer for use in a sort method

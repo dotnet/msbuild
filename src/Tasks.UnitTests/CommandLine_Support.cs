@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests
      * Test the Csc task in various ways.
      *
      */
-    sealed internal class CommandLine
+    internal sealed class CommandLine
     {
         /// <summary>
         /// Invokes the ValidateParameters on the given ToolTask instance. We need to use reflection since

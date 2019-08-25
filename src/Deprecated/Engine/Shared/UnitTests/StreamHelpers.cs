@@ -9,7 +9,7 @@ using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed internal class StreamHelpers
+    internal sealed class StreamHelpers
     {
         /// <summary>
         /// Take a string and convert it to a StreamReader.

@@ -17,7 +17,7 @@ namespace Microsoft.Build.Shared.LanguageParser
      * Given vb sources, return an enumerator that will provide tokens one at a time.
      *
      */
-    sealed internal class VisualBasicTokenizer : IEnumerable
+    internal sealed class VisualBasicTokenizer : IEnumerable
     {
         /*
             These are the tokens that are specific to the VB tokenizer.

@@ -18,7 +18,7 @@ namespace Microsoft.Build.Shared.LanguageParser
      * Provides utility functions for dealing with C#-specific tokens.
      *
      */
-    sealed internal class CSharpTokenCharReader : TokenCharReader
+    internal sealed class CSharpTokenCharReader : TokenCharReader
     {
         /*
          * Method:  CSharpTokenCharReader

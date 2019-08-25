@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed internal class StreamHelpers
+    internal sealed class StreamHelpers
     {
         /*
          * Method:  StringToStream (overload)

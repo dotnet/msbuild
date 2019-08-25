@@ -98,7 +98,7 @@ namespace Microsoft.Build.Shared
         }
     }
 
-    sealed internal class ReverseStringGenericComparer : IComparer<string>
+    internal sealed class ReverseStringGenericComparer : IComparer<string>
     {
         /// <summary>
         /// Static accessor for a ReverseVersionGenericComparer
@@ -115,7 +115,7 @@ namespace Microsoft.Build.Shared
         }
     }
 
-    sealed internal class ReverseVersionGenericComparer : IComparer<Version>
+    internal sealed class ReverseVersionGenericComparer : IComparer<Version>
     {
         /// <summary>
         /// Static accessor for a ReverseVersionGenericComparer

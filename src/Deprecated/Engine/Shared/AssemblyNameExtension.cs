@@ -16,7 +16,7 @@ namespace Microsoft.Build.BuildEngine.Shared
     /// between the two is done lazily on demand.
     /// </summary>
     [Serializable]
-    sealed internal class AssemblyNameExtension
+    internal sealed class AssemblyNameExtension
     {
         private AssemblyName asAssemblyName = null;
         private string asString = null;

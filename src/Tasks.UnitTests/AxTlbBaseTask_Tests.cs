@@ -320,7 +320,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         }
     }
 
-    sealed internal class Utilities
+    internal sealed class Utilities
     {
         /// <summary>
         /// Given an instance of an AxImp task, executes that task (assuming all necessary parameters

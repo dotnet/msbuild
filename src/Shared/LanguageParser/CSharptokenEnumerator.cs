@@ -18,7 +18,7 @@ namespace Microsoft.Build.Shared.LanguageParser
     * Given C# sources, enumerate over all tokens.
     *
     */
-    sealed internal class CSharpTokenEnumerator : TokenEnumerator
+    internal sealed class CSharpTokenEnumerator : TokenEnumerator
     {
         // Reader over the sources.
         private CSharpTokenCharReader _reader = null;

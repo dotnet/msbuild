@@ -17,7 +17,7 @@ namespace Microsoft.Build.Shared.LanguageParser
     * Given vb sources, enumerate over all tokens.
     *
     */
-    sealed internal class VisualBasicTokenEnumerator : TokenEnumerator
+    internal sealed class VisualBasicTokenEnumerator : TokenEnumerator
     {
         // Reader over the sources.
         private VisualBasicTokenCharReader _reader = null;

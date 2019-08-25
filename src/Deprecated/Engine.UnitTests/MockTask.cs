@@ -404,7 +404,7 @@ namespace Microsoft.Build.UnitTests
     /// A simple mock task for use with Unit Testing.
     /// </summary>
     /// <owner>JomoF</owner>
-    sealed internal class MockTask : MockTaskBase,ITask
+    internal sealed class MockTask : MockTaskBase,ITask
     {
         private IBuildEngine e = null;
 

@@ -15,7 +15,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// A reference to an assembly along with information about resolution.
     /// </summary>
-    sealed internal class Reference
+    internal sealed class Reference
     {
         /// <summary>
         /// dictionary where ITaskItem.ItemSpec (a string) is the key and ITaskItem is the value.

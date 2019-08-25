@@ -18,7 +18,7 @@ namespace Microsoft.Build.Shared.LanguageParser
      * Given C# sources, return an enumerator that will provide tokens one at a time.
      *
      */
-    sealed internal class CSharpTokenizer : IEnumerable
+    internal sealed class CSharpTokenizer : IEnumerable
     {
         /*
             These are the tokens that are specific to the C# tokenizer.

@@ -15,7 +15,7 @@ namespace Microsoft.Build.Shared.LanguageParser
     /// <summary>
     /// A class with string-like semantics mapped over a Stream.
     /// </summary>
-    sealed internal class StreamMappedString
+    internal sealed class StreamMappedString
     {
         /// <summary>
         /// The raw binary stream that's being read.

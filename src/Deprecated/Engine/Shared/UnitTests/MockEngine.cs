@@ -28,7 +28,7 @@ namespace Microsoft.Build.UnitTests
      * is somewhat of a no-no for task assemblies.
      * 
      **************************************************************************/
-    sealed internal class MockEngine : IBuildEngine2
+    internal sealed class MockEngine : IBuildEngine2
     {
         private bool isRunningMultipleNodes;
         private int messages = 0;
