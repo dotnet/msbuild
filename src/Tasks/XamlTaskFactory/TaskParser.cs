@@ -433,11 +433,11 @@ namespace Microsoft.Build.Tasks.Xaml
             {
                 parameter.Type = PropertyType.Boolean;
             }
-            else if (baseProperty is XamlTypes.EnumPropertyenumProperty)
+            else if (baseProperty is XamlTypes.EnumProperty enumProperty)
             {
                 parameter.Type = PropertyType.String;
             }
-            else if (baseProperty is XamlTypes.DynamicEnumPropertydynamicEnumProperty)
+            else if (baseProperty is XamlTypes.DynamicEnumProperty dynamicEnumProperty)
             {
                 parameter.Type = PropertyType.String;
             }
@@ -445,7 +445,7 @@ namespace Microsoft.Build.Tasks.Xaml
             {
                 parameter.Type = PropertyType.Integer;
             }
-            else if (baseProperty is XamlTypes.StringPropertystringProperty)
+            else if (baseProperty is XamlTypes.StringProperty stringProperty)
             {
                 parameter.Type = PropertyType.String;
             }
