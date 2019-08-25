@@ -2463,10 +2463,8 @@ namespace Microsoft.Build.Execution
             {
                 return ReadOnlyEmptyDictionary<string, TValue>.Instance;
             }
-            else
-            {
-                return new RetrievableEntryHashSet<TValue>(dictionary, StringComparer.OrdinalIgnoreCase, readOnly: true);
-            }
+
+            return new RetrievableEntryHashSet<TValue>(dictionary, StringComparer.OrdinalIgnoreCase, readOnly: true);
         }
 
         /// <summary>
