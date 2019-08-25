@@ -214,8 +214,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public override bool Equals(object obj)
         {
-            ScheduleRecordKey other = obj as ScheduleRecordKey;
-            if (other != null)
+            if (obj is ScheduleRecordKey other)
             {
                 if (other.handleId == handleId && other.requestId == requestId)
                 {

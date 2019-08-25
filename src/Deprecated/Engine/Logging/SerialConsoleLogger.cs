@@ -529,7 +529,7 @@ namespace Microsoft.Build.BuildEngine
                 }
 
                 // null messages are ok -- treat as blank line
-                string nonNullMessage = (e.Message == null) ? String.Empty : e.Message;
+                string nonNullMessage = e.Message ?? String.Empty;
 
                 WriteLinePretty(nonNullMessage);
 

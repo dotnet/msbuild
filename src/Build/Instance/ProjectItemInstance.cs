@@ -708,7 +708,7 @@ namespace Microsoft.Build.Execution
             _taskItem = new TaskItem(
                                         includeEscaped,
                                         includeBeforeWildcardExpansionEscaped,
-                                        (directMetadata == null) ? null : directMetadata.DeepClone(), // copy on write!
+                                        directMetadata?.DeepClone(), // copy on write!
                                         inheritedItemDefinitions,
                                         _project.Directory,
                                         _project.IsImmutable,

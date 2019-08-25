@@ -237,7 +237,7 @@ namespace Microsoft.Build.Tasks
                 commandLine.AppendFileNameIfNotNull(TypeLibName);
 
                 // options
-                commandLine.AppendSwitchIfNotNull("/asmversion:", (AssemblyVersion != null) ? AssemblyVersion.ToString() : null);
+                commandLine.AppendSwitchIfNotNull("/asmversion:", AssemblyVersion?.ToString());
                 commandLine.AppendSwitchIfNotNull("/namespace:", AssemblyNamespace);
                 commandLine.AppendSwitchIfNotNull("/machine:", Machine);
                 commandLine.AppendWhenTrue("/noclassmembers", Bag, "PreventClassMembers");

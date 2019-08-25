@@ -70,8 +70,7 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                var itemExpressionFragment = itemSpec.Fragments[0] as ItemExpressionFragment<P, I>;
-                if (itemExpressionFragment == null)
+                if (!(itemSpec.Fragments[0] is ItemExpressionFragment<P, I> itemExpressionFragment))
                 {
                     return false;
                 }

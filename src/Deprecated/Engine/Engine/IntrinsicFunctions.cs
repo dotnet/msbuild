@@ -180,9 +180,7 @@ namespace Microsoft.Build.BuildEngine
 
             foreach (object viewObject in views)
             {
-                string viewAsString = viewObject as string;
-
-                if (viewAsString != null)
+                if (viewObject is string viewAsString)
                 {
                     string typeLeafName = typeof(RegistryView).Name + ".";
                     string typeFullName = typeof(RegistryView).FullName + ".";
@@ -192,7 +190,7 @@ namespace Microsoft.Build.BuildEngine
 
                     // This may throw - and that's fine as the user will receive a controlled version
                     // of that error.
-                    RegistryView view = (RegistryView)Enum.Parse(typeof(RegistryView), viewAsString, true);
+                    RegistryView view = (RegistryView) Enum.Parse(typeof(RegistryView), viewAsString, true);
 
                     using (RegistryKey key = GetBaseKeyFromKeyName(keyName, view, out subKeyName))
                     {

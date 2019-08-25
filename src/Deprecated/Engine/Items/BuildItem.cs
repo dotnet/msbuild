@@ -1275,7 +1275,7 @@ namespace Microsoft.Build.BuildEngine
                 metadataValue = GetDefaultMetadataValue(metadataName);
             } 
 
-            return (metadataValue == null) ? String.Empty : metadataValue;
+            return metadataValue ?? String.Empty;
         }
 
         /// <summary>
@@ -1326,7 +1326,7 @@ namespace Microsoft.Build.BuildEngine
                 metadataValue = GetDefaultMetadataValue(metadataName);
             }              
 
-            return (metadataValue == null) ? String.Empty : metadataValue;
+            return metadataValue ?? String.Empty;
         }
 
         /// <summary>

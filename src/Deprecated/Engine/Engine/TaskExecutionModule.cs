@@ -203,8 +203,7 @@ namespace Microsoft.Build.BuildEngine
                 bool remoteNode = false;
                 for (int r = 0; r < projectFileNames.Length; r++)
                 {
-                    string fullProjectName = projectFileNames[r] != null ?
-                       projectFileNames[r] : "null";
+                    string fullProjectName = projectFileNames[r] ?? "null";
                     Console.WriteLine("RemoteNode: " + remoteNode + " Project " + fullProjectName + " T:" + targetName + " NodeProdyId# " + handleId + " Time " + DateTime.Now.ToLongTimeString());
                     if (globalPropertiesPerProject[r] != null)
                     {

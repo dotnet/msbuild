@@ -116,7 +116,7 @@ namespace Microsoft.Build.Evaluation
         [DebuggerStepThrough]
         public ProjectMetadata GetMetadata(string name)
         {
-            return (_metadata == null) ? null : _metadata[name];
+            return _metadata?[name];
         }
 
         /// <summary>

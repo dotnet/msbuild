@@ -2990,7 +2990,7 @@ namespace Microsoft.Build.Utilities
         /// <returns></returns>
         private static string GetTargetPlatformMonikerRegistryRoots(string registryRootLocation)
         {
-            ErrorUtilities.DebugTraceMessage("GetTargetPlatformMonikerRegistryRoots", "RegistryRoot passed in '{0}'", registryRootLocation != null ? registryRootLocation : string.Empty);
+            ErrorUtilities.DebugTraceMessage("GetTargetPlatformMonikerRegistryRoots", "RegistryRoot passed in '{0}'", registryRootLocation ?? string.Empty);
 
             string disableRegistryForSDKLookup = Environment.GetEnvironmentVariable("MSBUILDDISABLEREGISTRYFORSDKLOOKUP");
             // If we are not disabling the registry for platform sdk lookups then lets look in the default location.

@@ -1166,9 +1166,8 @@ namespace Microsoft.Build.BuildEngine
                     for (int n = 0; n < arguments.Length; n++)
                     {
                         object argument = expander.ExpandPropertiesLeaveTypedAndEscaped(this.arguments[n], null);
-                        string argumentValue = argument as string;
 
-                        if (argumentValue != null)
+                        if (argument is string argumentValue)
                         {
                             // remove our 'quotes' from the escaped string, leaving escaped quotes intact
                             args[n] = EscapingUtilities.UnescapeAll(argumentValue.Trim('`', '"', '\''));

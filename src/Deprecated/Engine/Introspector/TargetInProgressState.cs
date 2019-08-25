@@ -578,8 +578,7 @@ namespace Microsoft.Build.BuildEngine
             /// </summary>
             public override bool Equals(object obj)
             {
-                TargetIdWrapper other = obj as TargetIdWrapper;
-                if (other != null)
+                if (obj is TargetIdWrapper other)
                 {
                     if (other.projectId == projectId && other.nodeId == nodeId &&
                         (String.Compare(other.name, name, StringComparison.OrdinalIgnoreCase) == 0))

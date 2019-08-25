@@ -835,8 +835,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             // Since we're creating our own BuildManager, we need to make sure that the default 
             // one has properly relinquished the inproc node
-            NodeProviderInProc nodeProviderInProc = ((IBuildComponentHost)BuildManager.DefaultBuildManager).GetComponent(BuildComponentType.InProcNodeProvider) as NodeProviderInProc;
-            if (nodeProviderInProc != null)
+            if (((IBuildComponentHost) BuildManager.DefaultBuildManager).GetComponent(BuildComponentType.InProcNodeProvider) is NodeProviderInProc nodeProviderInProc)
             {
                 nodeProviderInProc.Dispose();
             }
@@ -895,9 +894,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 // and we should clean up after ourselves, too. 
                 if (manager != null)
                 {
-                    NodeProviderInProc inProcNodeProvider = ((IBuildComponentHost)manager).GetComponent(BuildComponentType.InProcNodeProvider) as NodeProviderInProc;
-
-                    if (inProcNodeProvider != null)
+                    if (((IBuildComponentHost) manager).GetComponent(BuildComponentType.InProcNodeProvider) is NodeProviderInProc inProcNodeProvider)
                     {
                         inProcNodeProvider.Dispose();
                     }

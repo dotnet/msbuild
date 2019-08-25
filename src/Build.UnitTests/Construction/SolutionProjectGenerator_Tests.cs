@@ -1840,8 +1840,7 @@ EndGlobal
             {
                 // Since we're creating our own BuildManager, we need to make sure that the default 
                 // one has properly relinquished the inproc node
-                NodeProviderInProc nodeProviderInProc = ((IBuildComponentHost)BuildManager.DefaultBuildManager).GetComponent(BuildComponentType.InProcNodeProvider) as NodeProviderInProc;
-                if (nodeProviderInProc != null)
+                if (((IBuildComponentHost) BuildManager.DefaultBuildManager).GetComponent(BuildComponentType.InProcNodeProvider) is NodeProviderInProc nodeProviderInProc)
                 {
                     nodeProviderInProc.Dispose();
                 }
@@ -1932,8 +1931,7 @@ EndGlobal
             {
                 // Since we're creating our own BuildManager, we need to make sure that the default 
                 // one has properly relinquished the inproc node
-                NodeProviderInProc nodeProviderInProc = ((IBuildComponentHost)BuildManager.DefaultBuildManager).GetComponent(BuildComponentType.InProcNodeProvider) as NodeProviderInProc;
-                if (nodeProviderInProc != null)
+                if (((IBuildComponentHost) BuildManager.DefaultBuildManager).GetComponent(BuildComponentType.InProcNodeProvider) is NodeProviderInProc nodeProviderInProc)
                 {
                     nodeProviderInProc.Dispose();
                 }

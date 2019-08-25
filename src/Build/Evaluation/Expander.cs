@@ -1102,8 +1102,7 @@ namespace Microsoft.Build.Evaluation
                 // If we have only a single result, then just return it
                 if (results == null && expression.Length == sourceIndex)
                 {
-                    var resultString = lastResult as string;
-                    return resultString != null ? FileUtilities.MaybeAdjustFilePath(resultString) : lastResult;
+                    return lastResult is string resultString ? FileUtilities.MaybeAdjustFilePath(resultString) : lastResult;
                 }
                 else
                 {
@@ -4190,9 +4189,8 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                var value0 = args[0] as string;
                 arg1 = args[1] as string;
-                if (value0 != null &&
+                if (args[0] is string value0 &&
                     arg1 != null &&
                     int.TryParse(value0, out arg0))
                 {
@@ -4212,9 +4210,8 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                var value1 = args[1] as string;
                 arg0 = args[0] as string;
-                if (value1 != null &&
+                if (args[1] is string value1 &&
                     arg0 != null &&
                     int.TryParse(value1, out arg1))
                 {

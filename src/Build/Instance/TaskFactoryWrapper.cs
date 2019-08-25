@@ -185,14 +185,13 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(task, "task");
             ErrorUtilities.VerifyThrowArgumentNull(property, "property");
 
-            IGeneratedTask generatedTask = task as IGeneratedTask;
-            if (generatedTask != null)
+            if (task is IGeneratedTask generatedTask)
             {
                 generatedTask.SetPropertyValue(property, value);
             }
             else
             {
-                ReflectableTaskPropertyInfo propertyInfo = (ReflectableTaskPropertyInfo)property;
+                ReflectableTaskPropertyInfo propertyInfo = (ReflectableTaskPropertyInfo) property;
                 propertyInfo.Reflection.SetValue(task, value, null);
             }
         }
@@ -205,15 +204,13 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(task, "task");
             ErrorUtilities.VerifyThrowArgumentNull(property, "property");
 
-            IGeneratedTask generatedTask = task as IGeneratedTask;
-            if (generatedTask != null)
+            if (task is IGeneratedTask generatedTask)
             {
                 return generatedTask.GetPropertyValue(property);
             }
             else
             {
-                ReflectableTaskPropertyInfo propertyInfo = property as ReflectableTaskPropertyInfo;
-                if (propertyInfo != null)
+                if (property is ReflectableTaskPropertyInfo propertyInfo)
                 {
                     return propertyInfo.Reflection.GetValue(task, null);
                 }

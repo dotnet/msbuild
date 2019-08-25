@@ -77,7 +77,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (ConfigurationSection == null ? null : ConfigurationSection.Default);
+                return (ConfigurationSection?.Default);
             }
         }
 

@@ -108,9 +108,8 @@ namespace Microsoft.Build.BuildEngine.Shared
                 return false;
             }
 
-            AssemblyLoadInfo otherAssemblyInfo = obj as AssemblyLoadInfo;
-            
-            if (otherAssemblyInfo == null)
+
+            if (!(obj is AssemblyLoadInfo otherAssemblyInfo))
             {
                 return false;
             }

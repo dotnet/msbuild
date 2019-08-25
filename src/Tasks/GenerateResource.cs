@@ -1840,7 +1840,7 @@ namespace Microsoft.Build.Tasks
                                             (
                                                 MessageImportance.Low,
                                                 "GenerateResource.SeparateAppDomainBecauseOfType",
-                                                (name == null) ? String.Empty : name,
+name ?? String.Empty,
                                                 typeName,
                                                 source.ItemSpec,
                                                 ((IXmlLineInfo)reader).LineNumber
@@ -1886,7 +1886,7 @@ namespace Microsoft.Build.Tasks
                                             (
                                                 MessageImportance.Low,
                                                 "GenerateResource.SeparateAppDomainBecauseOfMimeType",
-                                                (name == null) ? String.Empty : name,
+name ?? String.Empty,
                                                 mimeType,
                                                 source.ItemSpec,
                                                 ((IXmlLineInfo)reader).LineNumber
@@ -1932,7 +1932,7 @@ namespace Microsoft.Build.Tasks
                                         MessageImportance.Low,
                                         "GenerateResource.SeparateAppDomainBecauseOfErrorDeserializingLineNumber",
                                         source.ItemSpec,
-                                        (name == null) ? String.Empty : name,
+name ?? String.Empty,
                                         ((IXmlLineInfo)reader).LineNumber,
                                         e.Message
                                     );
@@ -2200,7 +2200,7 @@ namespace Microsoft.Build.Tasks
             // just doesn't exist, then this method will return a brand new cache object.
 
             // This method eats IO Exceptions
-            _cache = ResGenDependencies.DeserializeCache((StateFile == null) ? null : StateFile.ItemSpec, UseSourcePath, Log);
+            _cache = ResGenDependencies.DeserializeCache(StateFile?.ItemSpec, UseSourcePath, Log);
             ErrorUtilities.VerifyThrow(_cache != null, "We did not create a cache!");
         }
 
@@ -2212,7 +2212,7 @@ namespace Microsoft.Build.Tasks
             if (_cache.IsDirty)
             {
                 // And now we serialize the cache to save our resgen linked file resolution for later use.
-                _cache.SerializeCache((StateFile == null) ? null : StateFile.ItemSpec, Log);
+                _cache.SerializeCache(StateFile?.ItemSpec, Log);
             }
         }
     }
@@ -3761,8 +3761,7 @@ namespace Microsoft.Build.Tasks
                 {
                     String key = entry.Name;
                     Object v = entry.Value;
-                    String value = v as String;
-                    if (value == null)
+                    if (!(v is String value))
                     {
                         _logger.LogErrorWithCodeFromResources(null, fileName, 0, 0, 0, 0, "GenerateResource.OnlyStringsSupported", key, v.GetType().FullName);
                     }

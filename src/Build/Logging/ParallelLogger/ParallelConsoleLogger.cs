@@ -576,7 +576,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
                         string projectName = string.Empty;
 
-                        projectName = startedEvent.ProjectFile == null ? string.Empty : startedEvent.ProjectFile;
+                        projectName = startedEvent.ProjectFile ?? string.Empty;
                         // Show which targets were built as part of this project
                         if (string.IsNullOrEmpty(targets))
                         {
@@ -1085,9 +1085,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             if (showPerfSummary)
             {
-                ProjectEvaluationStartedEventArgs projectEvaluationStarted = e as ProjectEvaluationStartedEventArgs;
-
-                if (projectEvaluationStarted != null)
+                if (e is ProjectEvaluationStartedEventArgs projectEvaluationStarted)
                 {
                     MPPerformanceCounter counter = GetPerformanceCounter(projectEvaluationStarted.ProjectFile, ref projectEvaluationPerformanceCounters);
                     counter.AddEventStarted(null, e.BuildEventContext, e.Timestamp, s_compareContextNodeId);
@@ -1095,9 +1093,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     return;
                 }
 
-                ProjectEvaluationFinishedEventArgs projectEvaluationFinished = e as ProjectEvaluationFinishedEventArgs;
 
-                if (projectEvaluationFinished != null)
+                if (e is ProjectEvaluationFinishedEventArgs projectEvaluationFinished)
                 {
                     MPPerformanceCounter counter = GetPerformanceCounter(projectEvaluationFinished.ProjectFile, ref projectEvaluationPerformanceCounters);
                     counter.AddEventFinished(null, e.BuildEventContext, e.Timestamp);
@@ -1195,7 +1192,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 string targetName = string.Empty;
 
                 // Does the context (Project, Node, Context, Target, NOT task) of the previous event match the current message
-                bool contextAreEqual = s_compareContextNodeIdTargetId.Equals(currentBuildEventContext, _lastDisplayedBuildEventContext == null ? null : _lastDisplayedBuildEventContext);
+                bool contextAreEqual = s_compareContextNodeIdTargetId.Equals(currentBuildEventContext, _lastDisplayedBuildEventContext ?? null);
 
                 TargetStartedEventMinimumFields targetStartedEvent = null;
                 // If the previous event does not have the same target context information, the target name needs to be printed to the console

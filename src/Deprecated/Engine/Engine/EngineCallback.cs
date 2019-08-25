@@ -90,8 +90,7 @@ namespace Microsoft.Build.BuildEngine
             ErrorUtilities.VerifyThrow(buildRequest.IsGeneratedRequest == true, "Should not be sending a non generated request from the child node to the parent node");
 
             // For buildRequests originating from the TEM  - additional initialization is necessary
-            TaskExecutionContext taskExecutionContext = executionContext as TaskExecutionContext;
-            if (taskExecutionContext != null)
+            if (executionContext is TaskExecutionContext taskExecutionContext)
             {
                 Project parentProject = taskExecutionContext.ParentProject;
                 buildRequest.ParentHandleId = taskExecutionContext.TriggeringBuildRequest.HandleId;
@@ -117,7 +116,7 @@ namespace Microsoft.Build.BuildEngine
                                                                    buildRequest.ProjectFileName,
                                                                    buildRequest.GlobalPropertiesPassedByTask);
                         }
-                        catch (ArgumentException e) 
+                        catch (ArgumentException e)
                         {
                             ConvertToInvalidProjectException(buildRequest, parentProject, e);
                         }

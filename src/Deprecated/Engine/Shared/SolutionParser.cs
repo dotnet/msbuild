@@ -1319,7 +1319,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         internal string GetProjectUniqueNameByGuid(string projectGuid)
         {
             ProjectInSolution proj = (ProjectInSolution) projects[projectGuid];
-            return (proj == null) ? null : proj.GetUniqueProjectName();
+            return proj?.GetUniqueProjectName();
         }
 
         /// <summary>
@@ -1332,7 +1332,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         internal string GetProjectRelativePathByGuid(string projectGuid)
         {
             ProjectInSolution proj = (ProjectInSolution) projects[projectGuid];
-            return (proj == null) ? null : proj.RelativePath;
+            return proj?.RelativePath;
         }
 
         #endregion

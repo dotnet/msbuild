@@ -1160,7 +1160,7 @@ namespace Microsoft.Build.Conversion
             ProjectItemElement newFSharpCoreItem = null;
             string targetFSharpCoreVersionValue = null;
 
-            var hintPathValue = fsharpCoreItem != null ? fsharpCoreItem.Metadata.FirstOrDefault(metadata => metadata.Name == HintPath) : null;
+            var hintPathValue = fsharpCoreItem?.Metadata.FirstOrDefault(metadata => metadata.Name == HintPath);
             if (hintPathValue != null)
             {
                 if (equals(hintPathValue.Value, Dev11PortableFSharpCoreLocation))
@@ -2705,7 +2705,7 @@ namespace Microsoft.Build.Conversion
             // Add a new item to XMake of type "ProjectReference".  If we were able to find
             // the relative path to the project, use it for the "Include", otherwise just use
             // the project name.
-            string value = (pathToReferencedProject != null) ? pathToReferencedProject : referenceName;
+            string value = pathToReferencedProject ?? referenceName;
             newReferenceItem = referencesItemGroup.AddItem(XMakeProjectStrings.projectReference, ProjectCollection.Escape(value));
             return newReferenceItem;
         }

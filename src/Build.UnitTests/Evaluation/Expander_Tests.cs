@@ -3749,7 +3749,7 @@ $(
         {
             string vsInstallRoot = EscapingUtilities.Escape(IntrinsicFunctions.GetVsInstallRoot());
 
-            vsInstallRoot = (vsInstallRoot == null) ? "" : vsInstallRoot;
+            vsInstallRoot = vsInstallRoot ?? "";
 
             TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetVsInstallRoot())", "X", "_", vsInstallRoot);
         }

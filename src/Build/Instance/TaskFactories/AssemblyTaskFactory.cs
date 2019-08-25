@@ -225,20 +225,21 @@ namespace Microsoft.Build.BackEnd
                     Task.Run(() => AppDomain.Unload(appDomain));
                 }
             }
+
 #endif
 
-            TaskHostTask taskAsTaskHostTask = task as TaskHostTask;
-            if (taskAsTaskHostTask != null)
+            if (task is TaskHostTask taskAsTaskHostTask)
             {
                 taskAsTaskHostTask.Cleanup();
             }
+#if FEATURE_APPDOMAIN
             else
             {
-#if FEATURE_APPDOMAIN
+
                 // It's really not necessary to do it for TaskHostTasks
                 TaskLoader.RemoveAssemblyResolver();
-#endif
             }
+#endif
         }
 
         #endregion
@@ -419,14 +420,7 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrowArgumentLength(taskName, "TaskName");
                 taskClass = _typeLoader.ReflectionOnlyLoad(taskName, _loadedType.Assembly);
-                if (taskClass != null)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return taskClass != null;
             }
             catch (TargetInvocationException e)
             {

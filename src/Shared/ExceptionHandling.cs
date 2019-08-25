@@ -90,9 +90,8 @@ namespace Microsoft.Build.Shared
 
 #if !CLR2COMPATIBILITY
             // Check if any critical exceptions
-            var aggregateException = e as AggregateException;
 
-            if (aggregateException != null)
+            if (e is AggregateException aggregateException)
             {
                 // If the aggregate exception contains a critical exception it is considered a critical exception
                 if (aggregateException.InnerExceptions.Any(innerException => IsCriticalException(innerException)))
@@ -160,23 +159,18 @@ namespace Microsoft.Build.Shared
             var line = 0;
             var column = 0;
 
-            var xmlException = e as XmlException;
-            if (xmlException != null)
+            if (e is XmlException xmlException)
             {
                 line = xmlException.LineNumber;
                 column = xmlException.LinePosition;
             }
-            else
-            {
 #if FEATURE_VARIOUS_EXCEPTIONS
-                var schemaException = e as XmlSchemaException;
-                if (schemaException != null)
-                {
-                    line = schemaException.LineNumber;
-                    column = schemaException.LinePosition;
-                }
-#endif
+            else if (e is XmlSchemaException schemaException)
+            {
+                line = schemaException.LineNumber;
+                column = schemaException.LinePosition;
             }
+#endif
 
             return new LineAndColumn
             {
@@ -194,16 +188,7 @@ namespace Microsoft.Build.Shared
         /// <param name="e">The exception to check.</param>
         internal static bool NotExpectedIoOrXmlException(Exception e)
         {
-            if
-            (
-                IsXmlException(e)
-                || !NotExpectedException(e)
-            )
-            {
-                return false;
-            }
-
-            return true;
+            return !IsXmlException(e) && NotExpectedException(e);
         }
 
         /// <summary>
@@ -232,8 +217,9 @@ namespace Microsoft.Build.Shared
                 || e is InvalidFilterCriteriaException  // thrown in FindMembers when the filter criteria is not valid for the type of filter you are using
                 || e is TargetException                 // thrown when an attempt is made to invoke a non-static method on a null object.  This may occur because the caller does not
                                                         //     have access to the member, or because the target does not define the member, and so on.
-#endif
+#else
                 || e is MissingFieldException           // thrown when code in a dependent assembly attempts to access a missing field in an assembly that was modified.
+#endif
                 || !NotExpectedException(e)             // Reflection can throw IO exceptions if the assembly cannot be opened
 
             )
@@ -381,7 +367,7 @@ namespace Microsoft.Build.Shared
         }
 #endif
 
-        /// <summary> Line and column pair. </summary>
+                /// <summary> Line and column pair. </summary>
         internal struct LineAndColumn
         {
             /// <summary> Gets or sets line number. </summary>

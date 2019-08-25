@@ -534,7 +534,7 @@ namespace Microsoft.Build.BuildEngine
         internal ErrorWarningSummaryDictionaryKey(BuildEventContext entryPoint, string targetName)
         {
             this.entryPointContext = entryPoint;
-            this.targetName = targetName == null ? string.Empty : targetName;
+            this.targetName = targetName ?? string.Empty;
         }
         #endregion
 
@@ -561,12 +561,11 @@ namespace Microsoft.Build.BuildEngine
 
         public override bool Equals(object obj)
         {
-            ErrorWarningSummaryDictionaryKey key = obj as ErrorWarningSummaryDictionaryKey;
-            if (key == null)
+            if (!(obj is ErrorWarningSummaryDictionaryKey key))
             {
                 return false;
             }
-           return  eventComparer.Equals(entryPointContext, key.EntryPointContext) && (String.Compare(targetName, key.TargetName, StringComparison.OrdinalIgnoreCase) == 0);
+            return  eventComparer.Equals(entryPointContext, key.EntryPointContext) && (String.Compare(targetName, key.TargetName, StringComparison.OrdinalIgnoreCase) == 0);
         }
 
         public override int GetHashCode()
@@ -654,10 +653,9 @@ namespace Microsoft.Build.BuildEngine
         #region Equality
         public override bool Equals(object obj)
         {
-            ProjectFullKey compareKey = obj as ProjectFullKey;
-            if (compareKey != null)
+            if (obj is ProjectFullKey compareKey)
             {
-                
+
                 return ((compareKey.projectKey == this.projectKey) && (compareKey.entryPointKey == this.entryPointKey));
             }
             else

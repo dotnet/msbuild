@@ -196,7 +196,7 @@ namespace Microsoft.Build.Exceptions
             {
                 string fullPath = FileUtilities.GetFullPathNoThrow(projectFile);
 
-                projectFile = (fullPath == null) ? projectFile : fullPath;
+                projectFile = fullPath ?? projectFile;
             }
 
             file = projectFile;

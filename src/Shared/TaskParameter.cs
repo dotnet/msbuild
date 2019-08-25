@@ -273,13 +273,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private ITaskItem CreateNewTaskItemFrom(ITaskItem copyFrom)
         {
-            ITaskItem2 copyFromAsITaskItem2 = copyFrom as ITaskItem2;
-
             string escapedItemSpec = null;
             string escapedDefiningProject = null;
             Dictionary<string, string> escapedMetadata = null;
 
-            if (copyFromAsITaskItem2 != null)
+            if (copyFrom is ITaskItem2 copyFromAsITaskItem2)
             {
                 escapedItemSpec = copyFromAsITaskItem2.EvaluatedIncludeEscaped;
                 escapedDefiningProject = copyFromAsITaskItem2.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
@@ -395,9 +393,8 @@ namespace Microsoft.Build.BackEnd
             IDictionary wrappedMetadata;
             bool wrappedMetadataIsEscaped;
 
-            ITaskItem2 wrappedItemAsITaskItem2 = wrappedItem as ITaskItem2;
 
-            if (wrappedItemAsITaskItem2 != null)
+            if (wrappedItem is ITaskItem2 wrappedItemAsITaskItem2)
             {
                 escapedItemSpec = wrappedItemAsITaskItem2.EvaluatedIncludeEscaped;
                 escapedDefiningProject = wrappedItemAsITaskItem2.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
@@ -414,22 +411,21 @@ namespace Microsoft.Build.BackEnd
                 wrappedMetadataIsEscaped = false;
             }
 
-            Dictionary<string, string> escapedGenericWrappedMetadata = wrappedMetadata as Dictionary<string, string>;
 
-            if (escapedGenericWrappedMetadata == null)
+            if (!(wrappedMetadata is Dictionary<string, string> escapedGenericWrappedMetadata))
             {
                 escapedGenericWrappedMetadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
                 foreach (object key in wrappedMetadata.Keys)
                 {
-                    string value = (string)wrappedMetadata[key];
+                    string value = (string) wrappedMetadata[key];
 
                     if (!wrappedMetadataIsEscaped)
                     {
                         value = (value == null) ? value : EscapingUtilities.Escape(value);
                     }
 
-                    escapedGenericWrappedMetadata.Add((string)key, value);
+                    escapedGenericWrappedMetadata.Add((string) key, value);
                 }
             }
             else if (!wrappedMetadataIsEscaped)
@@ -736,7 +732,7 @@ namespace Microsoft.Build.BackEnd
                     _customEscapedMetadata.TryGetValue(metadataName, out metadataValue);
                 }
 
-                return (metadataValue == null) ? String.Empty : metadataValue;
+                return metadataValue ?? String.Empty;
             }
 
             /// <summary>

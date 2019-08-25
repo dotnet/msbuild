@@ -204,16 +204,15 @@ namespace Microsoft.Build.BuildEngine
                     if (node.targetState.TargetId.nodeId != 0)
                     {
                         ExecutionContext executionContext = engineCallback.GetExecutionContextFromHandleId(buildRequest.HandleId);
-                        RequestRoutingContext routingContext = executionContext as RequestRoutingContext;
-                        if (routingContext != null && routingContext.ParentHandleId != EngineCallback.invalidEngineHandle)
+                        if (executionContext is RequestRoutingContext routingContext && routingContext.ParentHandleId != EngineCallback.invalidEngineHandle)
                         {
                             ExecutionContext nextExecutionContext = engineCallback.GetExecutionContextFromHandleId(routingContext.ParentHandleId);
 
                             if (nextExecutionContext is RequestRoutingContext)
                             {
-                                nodeIndex   = nextExecutionContext.NodeIndex;
+                                nodeIndex = nextExecutionContext.NodeIndex;
                                 handleId = routingContext.ParentHandleId;
-                                requestId   = routingContext.ParentRequestId;
+                                requestId = routingContext.ParentRequestId;
                             }
                         }
                         else
