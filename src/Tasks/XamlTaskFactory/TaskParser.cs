@@ -423,15 +423,14 @@ namespace Microsoft.Build.Tasks.Xaml
                 parameter.Name = baseProperty.Name;
             }
 
-            if (boolProperty != null && !String.IsNullOrEmpty(boolProperty.ReverseSwitch))
-            {
-                parameter.Reversible = "true";
-            }
-
             // Determine the type for this property.
             if (boolProperty != null)
             {
                 parameter.Type = PropertyType.Boolean;
+                if (!String.IsNullOrEmpty(boolProperty.ReverseSwitch))
+                {
+                    parameter.Reversible = "true";
+                }
             }
             else if (baseProperty is XamlTypes.EnumProperty enumProperty)
             {
