@@ -207,7 +207,7 @@ A very inaccurate but useful way of thinking about how msbuild processes is to s
     - Property and Item Group will set items in the global context
     - UsingTask will load task assemblies and prepare to invoke them
     - Targets will define then and their ordering\inputs\output
-      - **Their contants will not be executed yet**
+      - **Their contents will not be executed yet**
   - This will respect conditions, and be done top to bottom based upon include order
 - Target Eval
   - Starting with the defined “DefaultTargets", which for our purposes is always “Build” determine a list of target to invoke and their ordering
