@@ -26,7 +26,6 @@
   <PropertyGroup>
     <OutputPath>$(BaseOutputPath)</OutputPath>
     <IsPackable>true</IsPackable>
-    <IncludeSymbols>true</IncludeSymbols>
     <PackageLayoutOutputPath>$(ArtifactsBinDir)$(Configuration)\Sdks\$(PackageId)\</PackageLayoutOutputPath>
   </PropertyGroup>
 
