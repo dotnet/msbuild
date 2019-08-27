@@ -1,33 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview9-19421-20">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-rc1-19426-11">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>33c773a5c7602e599053fdbb3a12b7ecfda27e2e</Sha>
+      <Sha>b33b6c20d855e7f9fdda6383ad12d849079f9b21</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.0.100-preview9.19422.5">
+    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.0.100-rc1.19427.4">
       <Uri>https://github.com/dotnet/cli</Uri>
-      <Sha>40acde72a4d02045174281618a60c92f7593d074</Sha>
+      <Sha>d23afb6757bb73014e8c23b3f7c772578827049c</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-preview9.19413.5">
+    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-rc1.19422.1">
       <Uri>https://github.com/dotnet/sdk</Uri>
-      <Sha>21ebcc7ff5b9136ecaaf2b1f362f5588c3cc520a</Sha>
+      <Sha>83dffb6faab234c0c878e92c1679fa47c0cab3dd</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Build" Version="16.3.0-preview-19422-01">
       <Uri>https://github.com/Microsoft/msbuild</Uri>
       <Sha>2c7c632bf5b4e3c0da0cad211b21ec508f49dbb9</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.FSharp.Compiler" Version="10.6.0-beta.19416.4">
+    <Dependency Name="Microsoft.FSharp.Compiler" Version="10.6.0-beta.19422.1">
       <Uri>https://github.com/dotnet/fsharp</Uri>
-      <Sha>650a166ed33f19b6d601cdff0a58d6e18021c893</Sha>
+      <Sha>dc8bc8d71df2789168d4a75e7160b574339125e7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Compilers" Version="3.3.1-beta3-19421-04">
+    <Dependency Name="Microsoft.NETCore.Compilers" Version="3.3.1-beta3-19423-01">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>807f6d9c1f62e66aa907513ccf0fa5b2372748f6</Sha>
+      <Sha>8cf35ae627a2ab41758993875ac987fc3b188f1f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Razor" Version="3.0.0-preview9.19422.6">
+    <Dependency Name="Microsoft.NET.Sdk.Razor" Version="3.0.0-rc1.19426.5">
       <Uri>https://github.com/aspnet/AspNetCore-Tooling</Uri>
-      <Sha>bd1a888d76f809a099ed419e1cd987116c37af9d</Sha>
+      <Sha>f290e8285d888950250a86f8ad55d8cf4cc13994</Sha>
     </Dependency>
     <!-- For coherency purposes, this version should be gated by the version of wpf routed via core setup -->
     <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-preview9.19421.3" CoherentParentDependency="Microsoft.NETCore.App">
@@ -38,35 +38,35 @@
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
       <Sha>4590967639182b183b247355596aedc7d0855a86</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.3.0-preview-20190820-01">
+    <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.3.0-preview-20190822-01">
       <Uri>https://github.com/microsoft/vstest</Uri>
-      <Sha>485de780fd495cdfda52c1bc5b2d677890ebc5e8</Sha>
+      <Sha>e8a07507b66c5e5ebee63ee9ba82e2d643e367e2</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-preview9.19422.5">
+    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-rc1.19427.3">
       <Uri>https://github.com/aspnet/websdk</Uri>
-      <Sha>4e285e532300ebe847317661c215f1a56e5bb34e</Sha>
+      <Sha>0162efb78f266ec4d87405d4667325bcfa11b290</Sha>
     </Dependency>
     <Dependency Name="ILLink.Tasks" Version="0.1.6-prerelease.19380.1">
       <Uri>https://github.com/mono/linker</Uri>
       <Sha>1127689f262d52ea8ff68ef03d706fa62b3b40a1</Sha>
     </Dependency>
-    <Dependency Name="System.CodeDom" Version="4.6.0-preview9.19421.4" CoherentParentDependency="Microsoft.NETCore.App">
+    <Dependency Name="System.CodeDom" Version="4.6.0-rc1.19420.10" CoherentParentDependency="Microsoft.NETCore.App">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>8f95b1e7953e3fbff7f101d0ca6830fd9e37fd99</Sha>
+      <Sha>d341fd37dcb2c22e382adccdc06770cf8f160577</Sha>
     </Dependency>
-    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="4.6.0-preview9.19421.4" CoherentParentDependency="Microsoft.NETCore.App">
+    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="4.6.0-rc1.19420.10" CoherentParentDependency="Microsoft.NETCore.App">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>8f95b1e7953e3fbff7f101d0ca6830fd9e37fd99</Sha>
+      <Sha>d341fd37dcb2c22e382adccdc06770cf8f160577</Sha>
     </Dependency>
-    <Dependency Name="System.Text.Encoding.CodePages" Version="4.6.0-preview9.19421.4" CoherentParentDependency="Microsoft.NETCore.App">
+    <Dependency Name="System.Text.Encoding.CodePages" Version="4.6.0-rc1.19420.10" CoherentParentDependency="Microsoft.NETCore.App">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>8f95b1e7953e3fbff7f101d0ca6830fd9e37fd99</Sha>
+      <Sha>d341fd37dcb2c22e382adccdc06770cf8f160577</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19377.2">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19426.12">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>8b670142ae1b65aa4d834257b0b64d4f69f30eb8</Sha>
+      <Sha>36ce21e795e2e90081300f4cb645dfd8cf6eb2b3</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

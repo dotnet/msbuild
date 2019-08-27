@@ -6,7 +6,10 @@
     <Product>Toolset</Product>
     <BlobStoragePartialRelativePath>$(Product)</BlobStoragePartialRelativePath>
     <BlobStoragePartialRelativePath Condition="'$(IsNotOrchestratedPublish)' == 'false'">assets/$(Product)</BlobStoragePartialRelativePath>
-    <SdkAssetsManifestFilePath>$(ArtifactsLogDir)AssetManifest\$(OS)-$(PlatformName)-SdkAssets.xml</SdkAssetsManifestFilePath>
+    <SdkAssetManifestFileName>$(OS)-$(PlatformName)-SdkAssets.xml</SdkAssetManifestFileName>
+    <SdkAssetsManifestFilePath>$(ArtifactsLogDir)AssetManifest\$(SdkAssetManifestFileName)</SdkAssetsManifestFilePath>
+
+    <TempWorkingDirectory>$(ArtifactsDir)\..\AssetsTmpDir\$([System.Guid]::NewGuid())</TempWorkingDirectory>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,17 +36,26 @@
       </ToolsetAssetsToPushToBlobFeed>
     </ItemGroup>
 
-    <PushToBlobFeed
-      ExpectedFeedUrl="$(DotNetPublishBlobFeedUrl)"
-      AccountKey="$(DotNetPublishBlobFeedKey)"
+    <MakeDir Directories="$(TempWorkingDirectory)"/>
+
+    <PushToAzureDevOpsArtifacts
       ItemsToPush="@(ToolsetAssetsToPushToBlobFeed)"
       ManifestBuildData="Location=$(DotNetPublishBlobFeedUrl)"
       ManifestRepoUri="$(BUILD_REPOSITORY_URI)"
       ManifestBranch="$(BUILD_SOURCEBRANCH)"
       ManifestBuildId="$(BUILD_BUILDNUMBER)"
       ManifestCommit="$(BUILD_SOURCEVERSION)"
+      PublishFlatContainer="true"
       AssetManifestPath="$(SdkAssetsManifestFilePath)"
-      PublishFlatContainer="true" />
+      AssetsTemporaryDirectory="$(TempWorkingDirectory)" />
+
+    <Copy
+      SourceFiles="$(SdkAssetsManifestFilePath)"
+      DestinationFolder="$(TempWorkingDirectory)\$(SdkAssetManifestFileName)" />
+
+    <Message
+      Text="##vso[artifact.upload containerfolder=AssetManifests;artifactname=AssetManifests]$(TempWorkingDirectory)/$(SdkAssetManifestFileName)"
+      Importance="high" />
   </Target>
 
 </Project>
