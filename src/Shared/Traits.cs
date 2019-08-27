@@ -79,11 +79,6 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly bool LogPropertyFunctionsRequiringReflection = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildLogPropertyFunctionsRequiringReflection"));
 
-        /// <summary>
-        /// Log property tracking information.
-        /// </summary>
-        public readonly int LogPropertyTracking = ParseIntFromEnvironmentVariableOrDefault("MsBuildLogPropertyTracking", 1); // Default to logging only property reassignments.
-
         private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
         {
             return int.TryParse(Environment.GetEnvironmentVariable(environmentVariable), out int result)
@@ -104,7 +99,30 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly bool AlwaysUseContentTimestamp = Environment.GetEnvironmentVariable("MSBUILDALWAYSCHECKCONTENTTIMESTAMP") == "1";
 
-        public readonly bool LogProjectImports = Environment.GetEnvironmentVariable("MSBUILDLOGIMPORTS") == "1";
+        /// <summary>
+        /// Emit events for project imports.
+        /// </summary>
+        private bool? _logProjectImports;
+
+        /// <summary>
+        /// Emit events for project imports.
+        /// </summary>
+        public bool LogProjectImports
+        {
+            get
+            {
+                // Cache the first time
+                if (_logProjectImports == null)
+                {
+                    _logProjectImports = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGIMPORTS"));
+                }
+                return _logProjectImports.Value;
+            }
+            set
+            {
+                _logProjectImports = value;
+            }
+        }
 
         /// <summary>
         /// Read information only once per file per ResolveAssemblyReference invocation.
