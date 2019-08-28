@@ -4,8 +4,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
+using Microsoft.Build.ObjectModelRemoting;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Construction
 {
@@ -15,6 +16,14 @@ namespace Microsoft.Build.Construction
     [DebuggerDisplay("#Children={Count}")]
     public class ProjectOtherwiseElement : ProjectElementContainer
     {
+        /// <summary>
+        /// External projects support
+        /// </summary>
+        internal ProjectOtherwiseElement(ProjectOtherwiseElementLink link)
+            : base(link)
+        {
+        }
+
         /// <summary>
         /// Initialize a parented ProjectOtherwiseElement
         /// </summary>

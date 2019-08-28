@@ -25,6 +25,20 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Initializes a new instance of the <see cref="ResolvedImport"/> struct.
         /// </summary>
+        internal ResolvedImport(ProjectImportElement importingElement, ProjectRootElement importedProject, int versionEvaluated, SdkResult sdkResult, bool isImported)
+        {
+            ErrorUtilities.VerifyThrowInternalNull(importedProject, "child");
+
+            ImportingElement = importingElement;
+            ImportedProject = importedProject;
+            SdkResult = sdkResult;
+            VersionEvaluated = versionEvaluated;
+            IsImported = isImported;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ResolvedImport"/> struct.
+        /// </summary>
         internal ResolvedImport(Project project, ProjectImportElement importingElement, ProjectRootElement importedProject, int versionEvaluated, SdkResult sdkResult)
         {
             ErrorUtilities.VerifyThrowInternalNull(importedProject, "child");

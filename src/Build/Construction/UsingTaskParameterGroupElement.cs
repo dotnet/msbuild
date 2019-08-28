@@ -5,8 +5,9 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
+using Microsoft.Build.ObjectModelRemoting;
+using Microsoft.Build.Shared;
 
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 
@@ -18,6 +19,14 @@ namespace Microsoft.Build.Construction
     [DebuggerDisplay("#Parameters={Count}")]
     public class UsingTaskParameterGroupElement : ProjectElementContainer
     {
+        /// <summary>
+        /// External projects support
+        /// </summary>
+        internal UsingTaskParameterGroupElement(UsingTaskParameterGroupElementLink link)
+            : base(link)
+        {
+        }
+
         /// <summary>
         /// Initialize a parented UsingTaskParameterGroupElement
         /// </summary>
@@ -124,6 +133,7 @@ namespace Microsoft.Build.Construction
             // that it is not empty
             if (parentUsingTask.TaskFactory.Length == 0)
             {
+                ErrorUtilities.VerifyThrow(parentUsingTask.Link == null, "TaskFactory");
                 ProjectXmlUtilities.VerifyThrowProjectRequiredAttribute(parent.XmlElement, "TaskFactory");
             }
 
