@@ -10,24 +10,21 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Tasks.ResourceHandling
 {
-    internal class StringResource : IResource
+    internal class StringResource : LiveObjectResource
     {
-        public string Name { get; }
-
         public string OriginatingFile { get; }
 
-        public string Value { get; }
+        public new string TypeFullName => typeof(string).FullName;
 
-        public StringResource(string name, string value, string filename)
+        public StringResource(string name, string value, string filename) :
+            base(name, value)
         {
-            Name = name;
-            Value = value;
             OriginatingFile = filename;
         }
 
-        public void AddTo(IResourceWriter writer)
+        public new void AddTo(IResourceWriter writer)
         {
-            writer.AddResource(Name, Value);
+            writer.AddResource(Name, (string)Value);
         }
 
         public override string ToString()

@@ -17,6 +17,7 @@ using Microsoft.Build.UnitTests;
 using Xunit;
 using Xunit.Abstractions;
 using Shouldly;
+using System.IO.Compression;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -749,8 +750,6 @@ namespace Microsoft.Build.UnitTests
                 //Should pass
                 MSBuildApp.Execute(@"c:\bin\msbuild.exe /logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" " + quotedProjectFileName).ShouldBe(MSBuildApp.ExitType.Success);
 
-                //Should fail as we are not changing existing lines
-                MSBuildApp.Execute(@"c:\bin\msbuild.exe /logger:FileLogger,Microsoft.Build,Version=11111 " + quotedProjectFileName).ShouldBe(MSBuildApp.ExitType.InitializationError);
 #else
                 //Should pass
                 MSBuildApp.Execute(
@@ -760,14 +759,6 @@ namespace Microsoft.Build.UnitTests
                             @"/logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a""",
                             quotedProjectFileName
                         }).ShouldBe(MSBuildApp.ExitType.Success);
-
-                //Should fail as we are not changing existing lines
-                MSBuildApp.Execute(
-                    new[]
-                        {
-                            NativeMethodsShared.IsWindows ? @"c:\bin\msbuild.exe" : "/msbuild.exe",
-                            "/logger:FileLogger,Microsoft.Build,Version=11111", quotedProjectFileName
-                        }).ShouldBe(MSBuildApp.ExitType.InitializationError);
 #endif
             }
             finally
@@ -2043,6 +2034,33 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
+        [InlineData("-logger:,\"nonExistentlogger.dll\",IsOptional;Foo")]
+        [InlineData("-logger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo")]
+        [InlineData("-logger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC")]
+        [InlineData("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional;Foo")]
+        [InlineData("-distributedlogger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo")]
+        [InlineData("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC")]
+        public void MissingOptionalLoggersAreIgnored(string logger)
+        {
+            string projectString =
+                "<Project>" +
+                "<Target Name=\"t\"><Message Text=\"Hello\"/></Target>" +
+                "</Project>";
+            using (var env = UnitTests.TestEnvironment.Create())
+            {
+                var tempDir = env.CreateFolder();
+                var projectFile = tempDir.CreateFile("missingloggertest.proj", projectString);
+
+                var parametersLoggerOptional = $"{logger} -verbosity:diagnostic \"{projectFile.Path}\"";
+
+                var output = RunnerUtilities.ExecMSBuild(parametersLoggerOptional, out bool successfulExit, _output);
+                successfulExit.ShouldBe(true);
+                output.ShouldContain("Hello", output);
+                output.ShouldContain("The specified logger could not be created and will not be used.", output);
+            }
+        }
+
+        [Theory]
         [InlineData("/interactive")]
         [InlineData("/p:NuGetInteractive=true")]
         [InlineData("/interactive /p:NuGetInteractive=true")]
@@ -2059,6 +2077,46 @@ namespace Microsoft.Build.UnitTests
             string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, arguments: arguments);
 
             logContents.ShouldContain("MSBuildInteractive = [true]");
+        }
+
+        /// <summary>
+        /// Regression test for https://github.com/microsoft/msbuild/issues/4631
+        /// </summary>
+        [Fact]
+        public void BinaryLogContainsImportedFiles()
+        {
+            using (TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create())
+            {
+                var testProject = testEnvironment.CreateFile("Importer.proj", ObjectModelHelpers.CleanupFileContents(@"
+                <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                    <Import Project=""TestProject.proj"" />
+
+                    <Target Name=""Build"">
+                    </Target>
+  
+                </Project>"));
+
+                testEnvironment.CreateFile("TestProject.proj", @"
+                <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                  <Target Name=""Build"">
+                    <Message Text=""Hello from TestProject!"" />
+                  </Target>
+                </Project>
+                ");
+
+                string binLogLocation = testEnvironment.DefaultTestDirectory.Path;
+
+                string output = RunnerUtilities.ExecMSBuild($"\"{testProject.Path}\" \"/bl:{binLogLocation}/output.binlog\"", out var success, _output);
+
+                success.ShouldBeTrue(output);
+
+                RunnerUtilities.ExecMSBuild($"\"{binLogLocation}/output.binlog\" \"/bl:{binLogLocation}/replay.binlog;ProjectImports=ZipFile\"", out success, _output);
+
+                using (ZipArchive archive = ZipFile.OpenRead($"{binLogLocation}/replay.ProjectImports.zip"))
+                {
+                     archive.Entries.ShouldContain(e => e.FullName.EndsWith(".proj", StringComparison.OrdinalIgnoreCase), 2);
+                }
+            }
         }
 
         private string CopyMSBuild()

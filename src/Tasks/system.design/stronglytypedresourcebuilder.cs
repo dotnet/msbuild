@@ -31,6 +31,8 @@ using System.CodeDom.Compiler;
 using System.Reflection;
 using System.Globalization;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Build.Tasks.ResourceHandling;
+using Microsoft.Build.Shared;
 
 /*
   Plan for the future:
@@ -83,20 +85,29 @@ namespace Microsoft.Build.Tasks
             internal ResourceData(Type type, String valueAsString)
             {
                 Type = type;
+                TypeAssemblyQualifiedName = type.AssemblyQualifiedName;
+                TypeFullName = type.FullName;
                 ValueAsString = valueAsString;
+            }
+
+            internal ResourceData(string typeName, string typeAssemblyQualifiedName)
+            {
+                Type = null;
+                TypeAssemblyQualifiedName = typeAssemblyQualifiedName;
+                TypeFullName = typeName;
+                ValueAsString = null;
             }
 
             internal Type Type { get; }
 
+            internal string TypeFullName { get; }
+
+            internal string TypeAssemblyQualifiedName { get; }
+
             internal String ValueAsString { get; }
         }
 
-        internal static CodeCompileUnit Create(IDictionary resourceList, String baseName, String generatedCodeNamespace, CodeDomProvider codeProvider, bool internalClass, out String[] unmatchable)
-        {
-            return Create(resourceList, baseName, generatedCodeNamespace, null, codeProvider, internalClass, out unmatchable);
-        }
-
-        internal static CodeCompileUnit Create(IDictionary resourceList, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out String[] unmatchable)
+        internal static CodeCompileUnit Create(Dictionary<string, IResource> resourceList, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out String[] unmatchable)
         {
             if (resourceList == null)
             {
@@ -104,32 +115,12 @@ namespace Microsoft.Build.Tasks
             }
 
             var resourceTypes = new Dictionary<String, ResourceData>(StringComparer.InvariantCultureIgnoreCase);
-            foreach (DictionaryEntry de in resourceList)
+            foreach (KeyValuePair<string, IResource> resource in resourceList)
             {
-                var node = de.Value as ResXDataNode;
-                ResourceData data;
-                if (node != null)
-                {
-                    string keyname = (string)de.Key;
-                    if (keyname != node.Name)
-                    {
-                        throw new ArgumentException(SR.GetString(SR.MismatchedResourceName, keyname, node.Name));
-                    }
-
-                    String typeName = node.GetValueTypeName((AssemblyName[])null);
-                    Type type = Type.GetType(typeName);
-                    String valueAsString = node.GetValue((AssemblyName[])null).ToString();
-                    data = new ResourceData(type, valueAsString);
-                }
-                else
-                {
-                    // If the object is null, we don't have a good way of guessing the
-                    // type.  Use Object.  This will be rare after WinForms gets away
-                    // from their resource pull model in Whidbey M3.
-                    Type type = de.Value?.GetType() ?? typeof(Object);
-                    data = new ResourceData(type, de.Value?.ToString());
-                }
-                resourceTypes.Add((String)de.Key, data);
+                ResourceData data = resource.Value is LiveObjectResource liveObject
+                    ? new ResourceData(liveObject.Value.GetType(), liveObject.Value.ToString())
+                    : new ResourceData(resource.Value.TypeFullName, resource.Value.TypeAssemblyQualifiedName);
+                resourceTypes.Add(resource.Key, data);
             }
 
             // Note we still need to verify the resource names are valid language
@@ -276,6 +267,7 @@ namespace Microsoft.Build.Tasks
                 throw new ArgumentNullException(nameof(resxFile));
             }
 
+#if FEATURE_RESX_RESOURCE_READER
             // Read the resources from a ResX file into a dictionary - name & type name
             Dictionary<String, ResourceData> resourceList = new Dictionary<String, ResourceData>(StringComparer.InvariantCultureIgnoreCase);
             using (ResXResourceReader rr = new ResXResourceReader(resxFile))
@@ -296,6 +288,9 @@ namespace Microsoft.Build.Tasks
             // keywords, etc.  So there's no point to duplicating the code above.
 
             return InternalCreate(resourceList, baseName, generatedCodeNamespace, resourcesNamespace, codeProvider, internalClass, out unmatchable);
+#else
+            throw new PlatformNotSupportedException("Creating strongly-typed resources directly from a resx file is not currently supported on .NET Core");
+#endif
         }
 
         private static void AddGeneratedCodeAttributeforMember(CodeTypeMember typeMember)
@@ -490,6 +485,53 @@ namespace Microsoft.Build.Tasks
         [SuppressMessage("Microsoft.Globalization", "CA1303:DoNotPassLiteralsAsLocalizedParameters")]
         private static bool DefineResourceFetchingProperty(String propertyName, String resourceName, ResourceData data, CodeTypeDeclaration srClass, bool internalClass, bool useStatic)
         {
+            CodeTypeReference valueType;
+            bool isString;
+            bool isStream;
+
+            if (data.Type is Type type)
+            {
+                // We have an actual object on which we can do type comparisons
+
+                if (type == typeof(MemoryStream))
+                {
+                    type = typeof(UnmanagedMemoryStream);
+                }
+
+                // Ensure type is internalally visible.  This is necessary to ensure
+                // users can access classes via a base type.  Imagine a class like
+                // Image or Stream as a internalally available base class, then an 
+                // internal type like MyBitmap or __UnmanagedMemoryStream as an 
+                // internal implementation for that base class.  For internalally 
+                // available strongly typed resource classes, we must return the 
+                // internal type.  For simplicity, we'll do that for internal strongly 
+                // typed resource classes as well.  Ideally we'd also like to check
+                // for interfaces like IList, but I don't know how to do that without
+                // special casing collection interfaces & ignoring serialization 
+                // interfaces or IDisposable.
+                while (!type.IsPublic)
+                {
+                    type = type.BaseType;
+                }
+
+                valueType = new CodeTypeReference(type);
+
+                isString = type == typeof(String);
+                isStream = type == typeof(UnmanagedMemoryStream) || type == typeof(MemoryStream);
+            }
+            else
+            {
+                // We don't have access to a live copy of the object, so
+                // we must do what we can with string information.
+
+                // TODO: can we do the type gymnastics here, too?
+
+                valueType = new CodeTypeReference(data.TypeFullName);
+
+                isString = MSBuildResXReader.IsString(data.TypeAssemblyQualifiedName);
+                isStream = MSBuildResXReader.IsMemoryStream(data.TypeAssemblyQualifiedName);
+            }
+
             var prop = new CodeMemberProperty
             {
                 Name = propertyName,
@@ -497,34 +539,6 @@ namespace Microsoft.Build.Tasks
                 HasSet = false
             };
 
-            Type type = data.Type;
-            if (type == null)
-            {
-                return false;
-            }
-
-            if (type == typeof(MemoryStream))
-            {
-                type = typeof(UnmanagedMemoryStream);
-            }
-
-            // Ensure type is internalally visible.  This is necessary to ensure
-            // users can access classes via a base type.  Imagine a class like
-            // Image or Stream as a internalally available base class, then an 
-            // internal type like MyBitmap or __UnmanagedMemoryStream as an 
-            // internal implementation for that base class.  For internalally 
-            // available strongly typed resource classes, we must return the 
-            // internal type.  For simplicity, we'll do that for internal strongly 
-            // typed resource classes as well.  Ideally we'd also like to check
-            // for interfaces like IList, but I don't know how to do that without
-            // special casing collection interfaces & ignoring serialization 
-            // interfaces or IDisposable.
-            while (!type.IsPublic)
-            {
-                type = type.BaseType;
-            }
-
-            var valueType = new CodeTypeReference(type);
             prop.Type = valueType;
             if (internalClass)
                 prop.Attributes = MemberAttributes.Assembly;
@@ -544,8 +558,6 @@ namespace Microsoft.Build.Tasks
             var resMgr = new CodePropertyReferenceExpression(null, "ResourceManager");
             var resCultureField = new CodeFieldReferenceExpression((useStatic) ? null : new CodeThisReferenceExpression(), CultureInfoFieldName);
 
-            bool isString = type == typeof(String);
-            bool isStream = type == typeof(UnmanagedMemoryStream) || type == typeof(MemoryStream);
             String getMethodName;
             String text;
             String valueAsString = TruncateAndFormatCommentStringForOutput(data.ValueAsString);
@@ -553,7 +565,7 @@ namespace Microsoft.Build.Tasks
 
             if (!isString) // Stream or Object
             {
-                typeName = TruncateAndFormatCommentStringForOutput(type.ToString());
+                typeName = TruncateAndFormatCommentStringForOutput(data.TypeFullName);
             }
 
             if (isString)

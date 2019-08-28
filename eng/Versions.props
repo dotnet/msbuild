@@ -36,7 +36,7 @@
   </PropertyGroup>
   <!-- Product Dependencies -->
   <PropertyGroup>
-    <SystemResourcesExtensionsVersion>4.6.0-preview8.19379.2</SystemResourcesExtensionsVersion>
+    <SystemResourcesExtensionsVersion>4.6.0-preview9.19416.11</SystemResourcesExtensionsVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- MSBuild 16.2.0 didn't exist. It shipped as file version 16.200.19.32702,

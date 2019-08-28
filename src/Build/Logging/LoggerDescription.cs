@@ -38,6 +38,26 @@ namespace Microsoft.Build.Logging
             string loggerAssemblyFile,
             string loggerSwitchParameters,
             LoggerVerbosity verbosity
+        ) : this(loggerClassName,
+            loggerAssemblyName,
+            loggerAssemblyFile,
+            loggerSwitchParameters,
+            verbosity,
+            isOptional: false)
+        {
+        }
+
+        /// <summary>
+        /// Creates a logger description from given data
+        /// </summary>
+        public LoggerDescription
+        (
+            string loggerClassName,
+            string loggerAssemblyName,
+            string loggerAssemblyFile,
+            string loggerSwitchParameters,
+            LoggerVerbosity verbosity,
+            bool isOptional
         )
         {
             _loggerClassName = loggerClassName;
@@ -50,6 +70,7 @@ namespace Microsoft.Build.Logging
             _loggerAssembly = AssemblyLoadInfo.Create(loggerAssemblyName, loggerAssemblyFile);
             _loggerSwitchParameters = loggerSwitchParameters;
             _verbosity = verbosity;
+            _isOptional = isOptional;
         }
 
         #endregion
@@ -102,6 +123,14 @@ namespace Microsoft.Build.Logging
             get
             {
                 return _loggerSwitchParameters;
+            }
+        }
+
+        public bool IsOptional
+        {
+            get
+            {
+                return _isOptional;
             }
         }
 
@@ -296,6 +325,7 @@ namespace Microsoft.Build.Logging
         private AssemblyLoadInfo _loggerAssembly;
         private LoggerVerbosity _verbosity;
         private int _loggerId;
+        private bool _isOptional;
         #endregion
 
         #region CustomSerializationToStream

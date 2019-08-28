@@ -2,13 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
@@ -17,9 +14,7 @@ using ObjectModel = System.Collections.ObjectModel;
 using Microsoft.Build.Collections;
 using Microsoft.Build.BackEnd;
 using System.Globalization;
-using System.Threading;
 using Microsoft.Build.BackEnd.Components.Logging;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Evaluation.Context;
 #if MSBUILDENABLEVSPROFILING 
@@ -201,11 +196,22 @@ namespace Microsoft.Build.Evaluation
             int submissionId,
             EvaluationContext evaluationContext,
             bool profileEvaluation,
-            bool interactive)
+            bool interactive,
+            ILoggingService loggingService,
+            BuildEventContext buildEventContext)
         {
             ErrorUtilities.VerifyThrowInternalNull(data, nameof(data));
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, nameof(projectRootElementCache));
+            ErrorUtilities.VerifyThrowInternalNull(loggingService, nameof(loggingService));
+            ErrorUtilities.VerifyThrowInternalNull(buildEventContext, nameof(buildEventContext));
 
+            _evaluationLoggingContext = new EvaluationLoggingContext(
+                loggingService,
+                buildEventContext,
+                string.IsNullOrEmpty(projectRootElement.ProjectFileLocation.File) ? "(null)" : projectRootElement.ProjectFileLocation.File);
+
+            // Wrap the IEvaluatorData<> object passed in.
+            data = new PropertyTrackingEvaluatorDataWrapper<P, I, M, D>(data, _evaluationLoggingContext, Traits.Instance.LogPropertyTracking);
             _evaluationContext = evaluationContext ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
 
             // Create containers for the evaluation results
@@ -305,9 +311,11 @@ namespace Microsoft.Build.Evaluation
                     submissionId,
                     evaluationContext,
                     profileEvaluation,
-                    interactive);
+                    interactive,
+                    loggingService,
+                    buildEventContext);
 
-                evaluator.Evaluate(loggingService, buildEventContext);
+                evaluator.Evaluate();
 #if MSBUILDENABLEVSPROFILING 
             }
             finally
@@ -604,27 +612,25 @@ namespace Microsoft.Build.Evaluation
         /// Do the evaluation.
         /// Called by the static helper method.
         /// </summary>
-        private void Evaluate(ILoggingService loggingService, BuildEventContext buildEventContext)
+        private void Evaluate()
         {
-            string projectFile;
+            string projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
             using (_evaluationProfiler.TrackPass(EvaluationPass.TotalEvaluation))
             {
                 ErrorUtilities.VerifyThrow(_data.EvaluationId == BuildEventContext.InvalidEvaluationId, "There is no prior evaluation ID. The evaluator data needs to be reset at this point");
+                _data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
 
                 _logProjectImportedEvents = Traits.Instance.EscapeHatches.LogProjectImports;
 
-                ICollection<P> builtInProperties;
-                ICollection<P> environmentProperties;
-                ICollection<P> toolsetProperties;
                 ICollection<P> globalProperties;
 
                 using (_evaluationProfiler.TrackPass(EvaluationPass.InitialProperties))
                 {
                     // Pass0: load initial properties
                     // Follow the order of precedence so that Global properties overwrite Environment properties
-                    builtInProperties = AddBuiltInProperties();
-                    environmentProperties = AddEnvironmentProperties();
-                    toolsetProperties = AddToolsetProperties();
+                    AddBuiltInProperties();
+                    AddEnvironmentProperties();
+                    AddToolsetProperties();
                     globalProperties = AddGlobalProperties();
 
                     if (_interactive)
@@ -636,11 +642,6 @@ namespace Microsoft.Build.Evaluation
 #if (!STANDALONEBUILD)
             CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildProjectEvaluatePass0End);
 #endif
-                projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
-
-                _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, projectFile);
-                _data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
-
                 _evaluationLoggingContext.LogProjectEvaluationStarted();
 
                 ErrorUtilities.VerifyThrow(_data.EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
@@ -1258,7 +1259,7 @@ namespace Microsoft.Build.Evaluation
 
             foreach (ProjectPropertyInstance environmentProperty in _environmentProperties)
             {
-                P property = _data.SetProperty(environmentProperty.Name, ((IProperty)environmentProperty).EvaluatedValueEscaped, false /* NOT global property */, false /* may NOT be a reserved name */);
+                P property = _data.SetProperty(environmentProperty.Name, ((IProperty)environmentProperty).EvaluatedValueEscaped, isGlobalProperty: false, mayBeReserved: false, isEnvironmentVariable: true);
                 environmentPropertiesList.Add(property);
             }
 
@@ -1395,31 +1396,7 @@ namespace Microsoft.Build.Evaluation
 
                 _expander.UsedUninitializedProperties.CurrentlyEvaluatingPropertyElementName = null;
 
-                P predecessor = _data.GetProperty(propertyElement.Name);
-
-                P property = _data.SetProperty(propertyElement, evaluatedValue, predecessor);
-
-                if (predecessor != null)
-                {
-                    LogPropertyReassignment(predecessor, property, propertyElement.Location.LocationString);
-                }
-            }
-        }
-
-        private void LogPropertyReassignment(P predecessor, P property, string location)
-        {
-            string newValue = property.EvaluatedValue;
-            string oldValue = predecessor.EvaluatedValue;
-
-            if (newValue != oldValue)
-            {
-                _evaluationLoggingContext.LogComment(
-                    MessageImportance.Low,
-                    "PropertyReassignment",
-                    property.Name,
-                    newValue,
-                    oldValue,
-                    location);
+                _data.SetProperty(propertyElement, evaluatedValue);
             }
         }
 
@@ -2686,11 +2663,6 @@ namespace Microsoft.Build.Evaluation
                         : $"{_lastModifiedProject.FullPath};{oldValue.EvaluatedValue}",
                     isGlobalProperty: false,
                     mayBeReserved: false);
-
-                if (oldValue != null)
-                {
-                    LogPropertyReassignment(oldValue, newValue, String.Empty);
-                }
             }
         }
     }

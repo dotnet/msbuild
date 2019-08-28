@@ -485,6 +485,8 @@
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryCodeType.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryCompilers.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryTaskInfo.cs" />
+    <Compile Include="System.Design.cs" />
+    <Compile Include="system.design\stronglytypedresourcebuilder.cs" />
     <Compile Include="TaskExtension.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -637,16 +639,12 @@
     <Compile Include="SignFile.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="system.design\stronglytypedresourcebuilder.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="StrongNameException.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="StrongNameUtils.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="System.Design.cs" />
     <Compile Include="TlbImp.cs" />
     <Compile Include="TlbReference.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

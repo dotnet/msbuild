@@ -16,14 +16,16 @@ namespace Microsoft.Build.Tasks.ResourceHandling
     internal class TypeConverterByteArrayResource : IResource
     {
         public string Name { get; }
-        public string TypeName { get; }
+        public string TypeAssemblyQualifiedName { get; }
         public string OriginatingFile { get; }
         public byte[] Bytes { get; }
 
-        public TypeConverterByteArrayResource(string name, string typeName, byte[] bytes, string originatingFile)
+        public string TypeFullName => NameUtilities.FullNameFromAssemblyQualifiedName(TypeAssemblyQualifiedName);
+
+        public TypeConverterByteArrayResource(string name, string assemblyQualifiedTypeName, byte[] bytes, string originatingFile)
         {
             Name = name;
-            TypeName = typeName;
+            TypeAssemblyQualifiedName = assemblyQualifiedTypeName;
             Bytes = bytes;
             OriginatingFile = originatingFile;
         }
@@ -32,7 +34,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         {
             if (writer is PreserializedResourceWriter preserializedResourceWriter)
             {
-                preserializedResourceWriter.AddTypeConverterResource(Name, Bytes, TypeName);
+                preserializedResourceWriter.AddTypeConverterResource(Name, Bytes, TypeAssemblyQualifiedName);
             }
             else
             {
