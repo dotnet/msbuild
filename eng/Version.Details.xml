@@ -5,25 +5,25 @@
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>e8d6da33000a416b2b36b4f04b1756dcc99f671d</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-rc1-19427-13">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-rc1-19428-07">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>1c0f7e38cc371a298353a459c53138f23ba40a2a</Sha>
+      <Sha>843b627147f0948b730eabe6def9ea1e606991da</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.PlatformAbstractions" Version="3.0.0-rc1-19427-13">
+    <Dependency Name="Microsoft.DotNet.PlatformAbstractions" Version="3.0.0-rc1-19428-07">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>1c0f7e38cc371a298353a459c53138f23ba40a2a</Sha>
+      <Sha>843b627147f0948b730eabe6def9ea1e606991da</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.HostModel" Version="3.0.0-rc1-19427-13">
+    <Dependency Name="Microsoft.NET.HostModel" Version="3.0.0-rc1-19428-07">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>1c0f7e38cc371a298353a459c53138f23ba40a2a</Sha>
+      <Sha>843b627147f0948b730eabe6def9ea1e606991da</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="3.0.0-rc1-19427-13">
+    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="3.0.0-rc1-19428-07">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>1c0f7e38cc371a298353a459c53138f23ba40a2a</Sha>
+      <Sha>843b627147f0948b730eabe6def9ea1e606991da</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.DotNetHostResolver" Version="3.0.0-rc1-19427-13">
+    <Dependency Name="Microsoft.NETCore.DotNetHostResolver" Version="3.0.0-rc1-19428-07">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>1c0f7e38cc371a298353a459c53138f23ba40a2a</Sha>
+      <Sha>843b627147f0948b730eabe6def9ea1e606991da</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.0.0-rc1.19428.1">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
