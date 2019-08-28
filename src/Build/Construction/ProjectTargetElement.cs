@@ -5,9 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
+using Microsoft.Build.ObjectModelRemoting;
+using Microsoft.Build.Shared;
 
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 
@@ -19,6 +20,16 @@ namespace Microsoft.Build.Construction
     [DebuggerDisplay("Name={Name} #Children={Count} Condition={Condition}")]
     public class ProjectTargetElement : ProjectElementContainer
     {
+        internal ProjectTargetElementLink TargetLink => (ProjectTargetElementLink)Link;
+
+        /// <summary>
+        /// External projects support
+        /// </summary>
+        internal ProjectTargetElement(ProjectTargetElementLink link)
+            : base(link)
+        {
+        }
+
         /// <summary>
         /// Target name cached for performance
         /// </summary>
@@ -72,14 +83,22 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
+                if (Link != null) { return TargetLink.Name; }
+
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
-                return _name ?? (_name = EscapingUtilities.UnescapeAll(
-                           ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.name)));
+                if (_name != null) return _name;
+                string unescapedValue = EscapingUtilities.UnescapeAll(GetAttributeValue(XMakeAttributes.name));
+                return (_name = unescapedValue);
             }
 
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, nameof(value));
+                if (Link != null)
+                {
+                    TargetLink.Name = value;
+                    return;
+                }
 
                 string unescapedValue = EscapingUtilities.UnescapeAll(value);
 
@@ -89,9 +108,8 @@ namespace Microsoft.Build.Construction
                     ErrorUtilities.ThrowArgument("OM_NameInvalid", unescapedValue, unescapedValue[indexOfSpecialCharacter]);
                 }
 
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.name, unescapedValue);
+                SetOrRemoveAttribute(XMakeAttributes.name, unescapedValue, "Set target Name {0}", value);
                 _name = unescapedValue;
-                MarkDirty("Set target Name {0}", value);
             }
         }
 
@@ -105,14 +123,13 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.inputs);
+                return GetAttributeValue(XMakeAttributes.inputs);
             }
 
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, XMakeAttributes.inputs);
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.inputs, value);
-                MarkDirty("Set target Inputs {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.inputs, value, "Set target Inputs {0}", value);
             }
         }
 
@@ -126,14 +143,13 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.outputs);
+                return GetAttributeValue(XMakeAttributes.outputs);
             }
 
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, XMakeAttributes.outputs);
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.outputs, value);
-                MarkDirty("Set target Outputs {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.outputs, value, "Set target Outputs {0}", value);
             }
         }
 
@@ -147,7 +163,7 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                string value = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.keepDuplicateOutputs);
+                string value = GetAttributeValue(XMakeAttributes.keepDuplicateOutputs);
                 if (String.IsNullOrEmpty(value) && !BuildParameters.KeepDuplicateOutputs)
                 {
                     // In 4.0, by default we do NOT keep duplicate outputs unless they user has either set the attribute
@@ -161,8 +177,7 @@ namespace Microsoft.Build.Construction
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, XMakeAttributes.keepDuplicateOutputs);
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.keepDuplicateOutputs, value);
-                MarkDirty("Set target KeepDuplicateOutputs {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.keepDuplicateOutputs, value, "Set target KeepDuplicateOutputs {0}", value);
             }
         }
 
@@ -176,14 +191,13 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.dependsOnTargets);
+                return GetAttributeValue(XMakeAttributes.dependsOnTargets);
             }
 
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, XMakeAttributes.dependsOnTargets);
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.dependsOnTargets, value);
-                MarkDirty("Set target DependsOnTargets {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.dependsOnTargets, value, "Set target DependsOnTargets {0}", value);
             }
         }
 
@@ -197,14 +211,13 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.beforeTargets);
+                return GetAttributeValue(XMakeAttributes.beforeTargets);
             }
 
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, XMakeAttributes.beforeTargets);
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.beforeTargets, value);
-                MarkDirty("Set target BeforeTargets {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.beforeTargets, value, "Set target BeforeTargets {0}", value);
             }
         }
 
@@ -218,14 +231,13 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.afterTargets);
+                return GetAttributeValue(XMakeAttributes.afterTargets);
             }
 
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, XMakeAttributes.afterTargets);
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.afterTargets, value);
-                MarkDirty("Set target AfterTargets {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.afterTargets, value, "Set target AfterTargets {0}", value);
             }
         }
 
@@ -240,16 +252,17 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return ProjectXmlUtilities.GetAttributeValue
-                    (
-                        XmlElement,
-                        XMakeAttributes.returns,
-                        true /* If the element is not there, return null */
-                    );
+                return GetAttributeValue(XMakeAttributes.returns, true /* If the element is not there, return null */);
             }
 
             set
             {
+                if (Link != null)
+                {
+                    TargetLink.Returns = value;
+                    return;
+                }
+
                 XmlAttributeWithLocation returnsAttribute = ProjectXmlUtilities.SetOrRemoveAttribute
                     (
                         XmlElement,
@@ -275,17 +288,17 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Location of the Name attribute
         /// </summary>
-        public ElementLocation NameLocation => XmlElement.GetAttributeLocation(XMakeAttributes.name);
+        public ElementLocation NameLocation => GetAttributeLocation(XMakeAttributes.name);
 
         /// <summary>
         /// Location of the Inputs attribute
         /// </summary>
-        public ElementLocation InputsLocation => XmlElement.GetAttributeLocation(XMakeAttributes.inputs);
+        public ElementLocation InputsLocation => GetAttributeLocation(XMakeAttributes.inputs);
 
         /// <summary>
         /// Location of the Outputs attribute
         /// </summary>
-        public ElementLocation OutputsLocation => XmlElement.GetAttributeLocation(XMakeAttributes.outputs);
+        public ElementLocation OutputsLocation => GetAttributeLocation(XMakeAttributes.outputs);
 
         /// <summary>
         /// Location of the TrimDuplicateOutputs attribute
@@ -294,7 +307,7 @@ namespace Microsoft.Build.Construction
         {
             get
             {
-                ElementLocation location = XmlElement.GetAttributeLocation(XMakeAttributes.keepDuplicateOutputs);
+                ElementLocation location = GetAttributeLocation(XMakeAttributes.keepDuplicateOutputs);
                 if ((location == null) && !BuildParameters.KeepDuplicateOutputs)
                 {
                     // In 4.0, by default we do NOT keep duplicate outputs unless they user has either set the attribute
@@ -309,22 +322,22 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Location of the DependsOnTargets attribute
         /// </summary>
-        public ElementLocation DependsOnTargetsLocation => XmlElement.GetAttributeLocation(XMakeAttributes.dependsOnTargets);
+        public ElementLocation DependsOnTargetsLocation => GetAttributeLocation(XMakeAttributes.dependsOnTargets);
 
         /// <summary>
         /// Location of the BeforeTargets attribute
         /// </summary>
-        public ElementLocation BeforeTargetsLocation => XmlElement.GetAttributeLocation(XMakeAttributes.beforeTargets);
+        public ElementLocation BeforeTargetsLocation => GetAttributeLocation(XMakeAttributes.beforeTargets);
 
         /// <summary>
         /// Location of the Returns attribute
         /// </summary>
-        public ElementLocation ReturnsLocation => XmlElement.GetAttributeLocation(XMakeAttributes.returns);
+        public ElementLocation ReturnsLocation => GetAttributeLocation(XMakeAttributes.returns);
 
         /// <summary>
         /// Location of the AfterTargets attribute
         /// </summary>
-        public ElementLocation AfterTargetsLocation => XmlElement.GetAttributeLocation(XMakeAttributes.afterTargets);
+        public ElementLocation AfterTargetsLocation => GetAttributeLocation(XMakeAttributes.afterTargets);
 
         /// <summary>
         /// A cache of the last instance which was created from this target.

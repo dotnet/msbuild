@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using System.Diagnostics;
+using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
 
@@ -17,6 +18,20 @@ namespace Microsoft.Build.Construction
     public abstract class ProjectElementContainer : ProjectElement
     {
         private const string DEFAULT_INDENT = "  ";
+
+        private int _count;
+        private ProjectElement _firstChild;
+        private ProjectElement _lastChild;
+
+        internal ProjectElementContainerLink ContainerLink => (ProjectElementContainerLink)Link;
+
+        /// <summary>
+        /// External projects support
+        /// </summary>
+        internal ProjectElementContainer(ProjectElementContainerLink link)
+            :base(link)
+        {
+        }
 
         /// <summary>
         /// Constructor called by ProjectRootElement only.
@@ -80,19 +95,19 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Number of children of any kind
         /// </summary>
-        public int Count { get; private set; }
+        public int Count { get => Link != null ? ContainerLink.Count : _count ; private set => _count = value; }
 
         /// <summary>
         /// First child, if any, otherwise null.
         /// Cannot be set directly; use <see cref="PrependChild">PrependChild()</see>.
         /// </summary>
-        public ProjectElement FirstChild { get; private set; }
+        public ProjectElement FirstChild { get => Link != null ? ContainerLink.FirstChild : _firstChild; private set => _firstChild = value; }
 
         /// <summary>
         /// Last child, if any, otherwise null.
         /// Cannot be set directly; use <see cref="AppendChild">AppendChild()</see>.
         /// </summary>
-        public ProjectElement LastChild { get; private set; }
+        public ProjectElement LastChild { get => Link != null ? ContainerLink.LastChild : _lastChild; private set => _lastChild = value; }
 
         /// <summary>
         /// Insert the child after the reference child.
@@ -109,6 +124,11 @@ namespace Microsoft.Build.Construction
         public void InsertAfterChild(ProjectElement child, ProjectElement reference)
         {
             ErrorUtilities.VerifyThrowArgumentNull(child, nameof(child));
+            if (Link != null)
+            {
+                ContainerLink.InsertAfterChild(child, reference);
+                return;
+            }
 
             if (reference == null)
             {
@@ -159,6 +179,12 @@ namespace Microsoft.Build.Construction
         public void InsertBeforeChild(ProjectElement child, ProjectElement reference)
         {
             ErrorUtilities.VerifyThrowArgumentNull(child, nameof(child));
+
+            if (Link != null)
+            {
+                ContainerLink.InsertBeforeChild(child, reference);
+                return;
+            }
 
             if (reference == null)
             {
@@ -251,6 +277,12 @@ namespace Microsoft.Build.Construction
 
             ErrorUtilities.VerifyThrowArgument(child.Parent == this, "OM_NodeNotAlreadyParentedByThis");
 
+            if (Link != null)
+            {
+                ContainerLink.RemoveChild(child);
+                return;
+            }
+
             child.ClearParent();
 
             if (child.PreviousSibling != null)
@@ -337,6 +369,7 @@ namespace Microsoft.Build.Construction
         {
             ErrorUtilities.VerifyThrow(child.Parent == this, "Expected parent already set");
             ErrorUtilities.VerifyThrow(child.PreviousSibling == null && child.NextSibling == null, "Invalid structure");
+            ErrorUtilities.VerifyThrow(Link == null, "External project");
 
             if (LastChild == null)
             {
@@ -379,8 +412,15 @@ namespace Microsoft.Build.Construction
             return clone;
         }
 
+        internal static ProjectElementContainer DeepClone(ProjectElementContainer xml, ProjectRootElement factory, ProjectElementContainer parent)
+        {
+            return xml.DeepClone(factory, parent);
+        }
+
         private void SetElementAsAttributeValue(ProjectElement child)
         {
+            ErrorUtilities.VerifyThrow(Link == null, "External project");
+
             //  Assumes that child.ExpressedAsAttribute is true
             Debug.Assert(child.ExpressedAsAttribute, nameof(SetElementAsAttributeValue) + " method requires that " +
                 nameof(child.ExpressedAsAttribute) + " property of child is true");
@@ -395,6 +435,8 @@ namespace Microsoft.Build.Construction
         /// <param name="child">A child element which might be represented as an attribute</param>
         internal void UpdateElementValue(ProjectElement child)
         {
+            ErrorUtilities.VerifyThrow(Link == null, "External project");
+
             if (child.ExpressedAsAttribute)
             {
                 SetElementAsAttributeValue(child);
@@ -413,6 +455,8 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void AddToXml(ProjectElement child)
         {
+            ErrorUtilities.VerifyThrow(Link == null, "External project");
+
             if (child.ExpressedAsAttribute)
             {
                 // todo children represented as attributes need to be placed in order too
@@ -519,6 +563,8 @@ namespace Microsoft.Build.Construction
 
         internal void RemoveFromXml(ProjectElement child)
         {
+            ErrorUtilities.VerifyThrow(Link == null, "External project");
+
             if (child.ExpressedAsAttribute)
             {
                 XmlElement.RemoveAttribute(child.XmlElement.Name);
@@ -557,9 +603,15 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Sets the first child in this container
         /// </summary>
-        private void AddInitialChild(ProjectElement child)
+        internal void AddInitialChild(ProjectElement child)
         {
             ErrorUtilities.VerifyThrow(FirstChild == null && LastChild == null, "Expecting no children");
+
+            if (Link != null)
+            {
+                ContainerLink.AddInitialChild(child);
+                return;
+            }
 
             VerifyForInsertBeforeAfterFirst(child, null);
 

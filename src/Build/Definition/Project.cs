@@ -26,11 +26,13 @@ using System.Globalization;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Globbing;
+using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemExpressionFragment<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
+using System.Data.OleDb;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -45,7 +47,7 @@ namespace Microsoft.Build.Evaluation
     /// UNDONE: (Multiple configurations.) Protect against problems when attempting to edit, after edits were made to the same ProjectRootElement either directly or through other projects evaluated from that ProjectRootElement.
     /// </remarks>
     [DebuggerDisplay("{FullPath} EffectiveToolsVersion={ToolsVersion} #GlobalProperties={_data.GlobalPropertiesDictionary.Count} #Properties={_data.Properties.Count} #ItemTypes={_data.ItemTypes.Count} #ItemDefinitions={_data.ItemDefinitions.Count} #Items={_data.Items.Count} #Targets={_data.Targets.Count}")]
-    public class Project
+    public class Project : ILinkableObject
     {
         /// <summary>
         /// Whether to write information about why we evaluate to debug output.
@@ -57,53 +59,12 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static readonly BuildEventContext s_buildEventContext = new BuildEventContext(0 /* node ID */, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
 
-        /// <summary>
-        /// Backing data; stored in a nested class so it can be passed to the Evaluator to fill
-        /// in on re-evaluation, without having to expose property setters for that purpose.
-        /// Also it makes it easy to re-evaluate this project without creating a new project object.
-        /// </summary>
-        private Data _data;
+        private ProjectLink implementation;
+        private IProjectLinkInternal implementationInternal;
 
-        /// <summary>
-        /// The highest version of the backing ProjectRootElements (including imports) that this object was last evaluated from.
-        /// Edits to the ProjectRootElement either by this Project or another Project increment the number.
-        /// If that number is different from this one a reevaluation is necessary at some point.
-        /// </summary>
-        private int _evaluatedVersion;
-
-        /// <summary>
-        /// The version of the tools information in the project collection against we were last evaluated.
-        /// </summary>
-        private int _evaluatedToolsetCollectionVersion;
-
-        /// <summary>
-        /// Whether the project has been explicitly marked as dirty. Generally this is not necessary to set; all edits affecting
-        /// this project will automatically make it dirty. However there are potential corner cases where it is necessary to mark it dirty
-        /// directly. For example, if the project has an import conditioned on a file existing on disk, and the file did not exist at
-        /// evaluation time, then someone subsequently writes the file, the project will not know that reevaluation would be productive,
-        /// and would not dirty itself. In such a case the host should help us by setting the dirty flag explicitly.
-        /// </summary>
-        private bool _explicitlyMarkedDirty;
-
-        /// <summary>
-        /// This controls whether or not the building of targets/tasks is enabled for this
-        /// project.  This is for security purposes in case a host wants to closely
-        /// control which projects it allows to run targets/tasks.
-        /// </summary>
-        private BuildEnabledSetting _isBuildEnabled = BuildEnabledSetting.UseProjectCollectionSetting;
-
-        /// <summary>
-        /// The load settings, such as to ignore missing imports.
-        /// This is retained after construction as it will be needed for reevaluation.
-        /// </summary>
-        private ProjectLoadSettings _loadSettings;
-
-        /// <summary>
-        /// The delegate registered with the ProjectRootElement to be called if the file name
-        /// is changed. Retained so that ultimately it can be unregistered.
-        /// If it has been set to null, the project has been unloaded from its collection.
-        /// </summary>
-        private RenameHandlerDelegate _renameHandler;
+        internal bool IsLinked => implementationInternal.IsLinked;
+        internal ProjectLink Link => implementation;
+        object ILinkableObject.Link => IsLinked ? Link : null;
 
         /// <summary>
         /// Default project template options (include all features).
@@ -128,7 +89,22 @@ namespace Microsoft.Build.Evaluation
         /// When this property is set to true, the previous item operations throw an <exception cref="InvalidOperationException"></exception>
         /// instead of expanding the item element. 
         /// </summary>
-        public bool ThrowInsteadOfSplittingItemElement { get; set; }
+        public bool ThrowInsteadOfSplittingItemElement
+        {
+            [DebuggerStepThrough]
+            get => implementation.ThrowInsteadOfSplittingItemElement;
+            [DebuggerStepThrough]
+            set => implementation.ThrowInsteadOfSplittingItemElement = value;
+        }
+
+        internal Project(ProjectCollection projectCollection, ProjectLink link)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
+            ErrorUtilities.VerifyThrowArgumentNull(link, nameof(link));
+            ProjectCollection = projectCollection;
+            implementationInternal = new ProjectLinkInternalNotImplemented();
+            implementation = link;
+        }
 
         /// <summary>
         /// Construct an empty project, evaluating with the global project collection's
@@ -272,7 +248,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectCollection">The <see cref="ProjectCollection"/> the project is added to.</param>
         /// <param name="loadSettings">The <see cref="ProjectLoadSettings"/> to use for evaluation.</param>
         public Project(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings)
-            : this(xml, globalProperties,toolsVersion, subToolsetVersion, projectCollection, loadSettings, null)
+            : this(xml, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, null)
         {
         }
 
@@ -281,11 +257,12 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
-
-            Xml = xml;
             ProjectCollection = projectCollection;
+            var defailtImplementation = new ProjectImpl(this, xml, globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            implementationInternal = (IProjectLinkInternal)defailtImplementation;
+            implementation = defailtImplementation;
 
-            Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            defailtImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
         }
 
         /// <summary>
@@ -372,21 +349,12 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowArgumentNull(xmlReader, nameof(xmlReader));
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
-
             ProjectCollection = projectCollection;
+            var defailtImplementation = new ProjectImpl(this, xmlReader, globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            implementationInternal = (IProjectLinkInternal)defailtImplementation;
+            implementation = defailtImplementation;
 
-            try
-            {
-                Xml = ProjectRootElement.Create(xmlReader, projectCollection,
-                    preserveFormatting: false);
-            }
-            catch (InvalidProjectFileException ex)
-            {
-                LoggingService.LogInvalidProjectFileError(s_buildEventContext, ex);
-                throw;
-            }
-
-            Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            defailtImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
         }
 
         /// <summary>
@@ -477,29 +445,15 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
 
             ProjectCollection = projectCollection;
+            var defailtImplementation = new ProjectImpl(this, projectFile, globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            implementationInternal = (IProjectLinkInternal)defailtImplementation;
+            implementation = defailtImplementation;
 
-            // We do not control the current directory at this point, but assume that if we were
-            // passed a relative path, the caller assumes we will prepend the current directory.
-            projectFile = FileUtilities.NormalizePath(projectFile);
-
+            // Note: not sure why only this ctor flavor do TryUnloadProject
+            // seems the XmlReader based one should also clean the same way.
             try
             {
-                Xml = ProjectRootElement.OpenProjectOrSolution(
-                    projectFile,
-                    globalProperties,
-                    toolsVersion,
-                    projectCollection.ProjectRootElementCache,
-                    true /*Explicitly loaded*/);
-            }
-            catch (InvalidProjectFileException ex)
-            {
-                LoggingService.LogInvalidProjectFileError(s_buildEventContext, ex);
-                throw;
-            }
-
-            try
-            {
-                Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+                defailtImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
             }
             catch (Exception ex)
             {
@@ -592,7 +546,7 @@ namespace Microsoft.Build.Evaluation
             UseProjectCollectionSetting
         }
 
-        internal Data TestOnlyGetPrivateData => _data;
+        internal Data TestOnlyGetPrivateData => (Data)implementationInternal.TestOnlyGetPrivateData;
 
         /// <summary>
         /// Gets or sets the project collection which contains this project.
@@ -608,7 +562,7 @@ namespace Microsoft.Build.Evaluation
         /// <remarks>
         /// There is no setter here as that doesn't make sense. If you have a new ProjectRootElement, evaluate it into a new Project.
         /// </remarks>
-        public ProjectRootElement Xml { get; }
+        public ProjectRootElement Xml => implementation.Xml;
 
         /// <summary>
         /// Whether this project is dirty such that it needs reevaluation.
@@ -616,64 +570,7 @@ namespace Microsoft.Build.Evaluation
         /// either the XML of the main project or an imported file; 
         /// or because its toolset may have changed.
         /// </summary>
-        public bool IsDirty
-        {
-            get
-            {
-                if (_explicitlyMarkedDirty)
-                {
-                    if (s_debugEvaluation)
-                    {
-                        Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Explicitly marked dirty, eg., because a global property was set, or an import, such as a .user file, was created on disk [{0}] [PC Hash {1}]", FullPath, ProjectCollection.GetHashCode()));
-                    }
-
-                    return true;
-                }
-
-                if (_evaluatedVersion < Xml.Version)
-                {
-                    if (s_debugEvaluation)
-                    {
-                        if (Xml.Count > 0) // don't log empty projects, evaluation is not interesting
-                        {
-                            Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Is dirty because {0} [{1}] [PC Hash {2}]", Xml.LastDirtyReason, FullPath, ProjectCollection.GetHashCode()));
-                        }
-                    }
-
-                    return true;
-                }
-
-                if (_evaluatedToolsetCollectionVersion != ProjectCollection.ToolsetsVersion)
-                {
-                    if (s_debugEvaluation)
-                    {
-                        Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Is dirty because toolsets updated [{0}] [PC Hash {1}]", FullPath, ProjectCollection.GetHashCode()));
-                    }
-
-                    return true;
-                }
-
-                foreach (ResolvedImport import in _data.ImportClosure)
-                {
-                    if (import.ImportedProject.Version != import.VersionEvaluated || _evaluatedVersion < import.VersionEvaluated)
-                    {
-                        if (s_debugEvaluation)
-                        {
-                            string reason = import.ImportedProject.LastDirtyReason;
-
-                            if (reason != null)
-                            {
-                                Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Is dirty because {0} [{1} - {2}] [PC Hash {3}]", reason, FullPath, (import.ImportedProject.FullPath == FullPath ? String.Empty : import.ImportedProject.FullPath), ProjectCollection.GetHashCode()));
-                            }
-                        }
-
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        }
+        public bool IsDirty => implementation.IsDirty;
 
         /// <summary>
         /// Read only dictionary of the global properties used in the evaluation
@@ -685,25 +582,7 @@ namespace Microsoft.Build.Evaluation
         /// In order to easily tell when we're dirtied, setting and removing global properties is done with 
         /// <see cref="SetGlobalProperty">SetGlobalProperty</see> and <see cref="RemoveGlobalProperty">RemoveGlobalProperty</see>.
         /// </remarks>
-        public IDictionary<string, string> GlobalProperties
-        {
-            [DebuggerStepThrough]
-            get
-            {
-                if (_data.GlobalPropertiesDictionary.Count == 0)
-                {
-                    return ReadOnlyEmptyDictionary<string, string>.Instance;
-                }
-
-                var dictionary = new Dictionary<string, string>(_data.GlobalPropertiesDictionary.Count, MSBuildNameIgnoreCaseComparer.Default);
-                foreach (ProjectPropertyInstance property in _data.GlobalPropertiesDictionary)
-                {
-                    dictionary[property.Name] = ((IProperty)property).EvaluatedValueEscaped;
-                }
-
-                return new ObjectModel.ReadOnlyDictionary<string, string>(dictionary);
-            }
-        }
+        public IDictionary<string, string> GlobalProperties => implementation.GlobalProperties;
 
         /// <summary>
         /// Item types in this project.
@@ -713,13 +592,13 @@ namespace Microsoft.Build.Evaluation
         /// data.ItemTypes is a KeyCollection, so it doesn't need any 
         /// additional read-only protection
         /// </comments>
-        public ICollection<string> ItemTypes => _data.ItemTypes;
+        public ICollection<string> ItemTypes => implementation.ItemTypes;
 
         /// <summary>
         /// Properties in this project.
         /// Since evaluation has occurred, this is an unordered collection.
         /// </summary>
-        public ICollection<ProjectProperty> Properties => new ReadOnlyCollection<ProjectProperty>(_data.Properties);
+        public ICollection<ProjectProperty> Properties => implementation.Properties;
 
         /// <summary>
         /// Collection of possible values implied for properties contained in the conditions found on properties,
@@ -737,31 +616,19 @@ namespace Microsoft.Build.Evaluation
         /// 
         /// This is used by Visual Studio to determine the configurations defined in the project.
         /// </summary>
-        public IDictionary<string, List<string>> ConditionedProperties
-        {
-            [DebuggerStepThrough]
-            get
-            {
-                if (_data.ConditionedProperties == null)
-                {
-                    return ReadOnlyEmptyDictionary<string, List<string>>.Instance;
-                }
-
-                return new ObjectModel.ReadOnlyDictionary<string, List<string>>(_data.ConditionedProperties);
-            }
-        }
+        public IDictionary<string, List<string>> ConditionedProperties => implementation.ConditionedProperties;
 
         /// <summary>
         /// Read-only dictionary of item definitions in this project.
         /// Keyed by item type
         /// </summary>
-        public IDictionary<string, ProjectItemDefinition> ItemDefinitions => _data.ItemDefinitions;
+        public IDictionary<string, ProjectItemDefinition> ItemDefinitions => implementation.ItemDefinitions;
 
         /// <summary>
         /// Items in this project, ordered within groups of item types
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods", Justification = "This is a reasonable choice. API review approved")]
-        public ICollection<ProjectItem> Items => new ReadOnlyCollection<ProjectItem>(_data.Items);
+        public ICollection<ProjectItem> Items => implementation.Items;
 
         /// <summary>
         /// Items in this project, ordered within groups of item types,
@@ -771,19 +638,7 @@ namespace Microsoft.Build.Evaluation
         /// of the build in the current configuration.
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods", Justification = "This is a reasonable choice. API review approved")]
-        public ICollection<ProjectItem> ItemsIgnoringCondition
-        {
-            [DebuggerStepThrough]
-            get
-            {
-                if (!(_data.ShouldEvaluateForDesignTime && _data.CanEvaluateElementsWithFalseConditions))
-                {
-                    ErrorUtilities.ThrowInvalidOperation("OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse", nameof(ItemsIgnoringCondition));
-                }
-
-                return new ReadOnlyCollection<ProjectItem>(_data.ItemsIgnoringCondition);
-            }
-        }
+        public ICollection<ProjectItem> ItemsIgnoringCondition => implementation.ItemsIgnoringCondition;
 
         /// <summary>
         /// All the files that during evaluation contributed to this project, as ProjectRootElements,
@@ -795,65 +650,19 @@ namespace Microsoft.Build.Evaluation
         /// This can be used by the host to figure out what projects might be impacted by a change to a particular file.
         /// It could also be used, for example, to find the .user file, and use its ProjectRootElement to modify properties in it.
         /// </remarks>
-        public IList<ResolvedImport> Imports
-        {
-            get
-            {
-                var imports = new List<ResolvedImport>(_data.ImportClosure.Count - 1 /* outer project */);
-
-                foreach (ResolvedImport import in _data.ImportClosure)
-                {
-                    if (import.ImportingElement != null) // Exclude outer project itself
-                    {
-                        imports.Add(import);
-                    }
-                }
-
-                return imports;
-            }
-        }
+        public IList<ResolvedImport> Imports => implementation.Imports;
 
         /// <summary>
         /// This list will contain duplicate imports if an import is imported multiple times. However, only the first import was used in evaluation.
         /// </summary>
-        public IList<ResolvedImport> ImportsIncludingDuplicates
-        {
-            get
-            {
-                ErrorUtilities.VerifyThrowInvalidOperation((_loadSettings & ProjectLoadSettings.RecordDuplicateButNotCircularImports) != 0, "OM_MustSetRecordDuplicateInputs");
-
-                var imports = new List<ResolvedImport>(_data.ImportClosureWithDuplicates.Count - 1 /* outer project */);
-
-                foreach (var import in _data.ImportClosureWithDuplicates)
-                {
-                    if (import.ImportingElement != null) // Exclude outer project itself
-                    {
-                        imports.Add(import);
-                    }
-                }
-
-                return imports;
-            }
-        }
+        public IList<ResolvedImport> ImportsIncludingDuplicates => implementation.ImportsIncludingDuplicates;
 
         /// <summary>
         /// Targets in the project. The key to the dictionary is the target's name.
         /// Overridden targets are not included in this collection.
         /// This collection is read-only.
         /// </summary>
-        public IDictionary<string, ProjectTargetInstance> Targets
-        {
-            [DebuggerStepThrough]
-            get
-            {
-                if (_data.Targets == null)
-                {
-                    return ReadOnlyEmptyDictionary<string, ProjectTargetInstance>.Instance;
-                }
-
-                return new ObjectModel.ReadOnlyDictionary<string, ProjectTargetInstance>(_data.Targets);
-            }
-        }
+        public IDictionary<string, ProjectTargetInstance> Targets => implementation.Targets;
 
         /// <summary>
         /// Properties encountered during evaluation. These are read during the first evaluation pass.
@@ -862,20 +671,7 @@ namespace Microsoft.Build.Evaluation
         /// properties whose conditions did not evaluate to true.
         /// It does not include any properties added since the last evaluation.
         /// </summary>
-        public ICollection<ProjectProperty> AllEvaluatedProperties
-        {
-            get
-            {
-                ICollection<ProjectProperty> allEvaluatedProperties = _data.AllEvaluatedProperties;
-
-                if (allEvaluatedProperties == null)
-                {
-                    return ReadOnlyEmptyCollection<ProjectProperty>.Instance;
-                }
-
-                return new ReadOnlyCollection<ProjectProperty>(allEvaluatedProperties);
-            }
-        }
+        public ICollection<ProjectProperty> AllEvaluatedProperties => implementation.AllEvaluatedProperties;
 
         /// <summary>
         /// Item definition metadata encountered during evaluation. These are read during the second evaluation pass.
@@ -884,20 +680,7 @@ namespace Microsoft.Build.Evaluation
         /// elements whose conditions did not evaluate to true.
         /// It does not include any item definition metadata added since the last evaluation.
         /// </summary>
-        public ICollection<ProjectMetadata> AllEvaluatedItemDefinitionMetadata
-        {
-            get
-            {
-                ICollection<ProjectMetadata> allEvaluatedItemDefinitionMetadata = _data.AllEvaluatedItemDefinitionMetadata;
-
-                if (allEvaluatedItemDefinitionMetadata == null)
-                {
-                    return ReadOnlyEmptyCollection<ProjectMetadata>.Instance;
-                }
-
-                return new ReadOnlyCollection<ProjectMetadata>(allEvaluatedItemDefinitionMetadata);
-            }
-        }
+        public ICollection<ProjectMetadata> AllEvaluatedItemDefinitionMetadata => implementation.AllEvaluatedItemDefinitionMetadata;
 
         /// <summary>
         /// Items encountered during evaluation. These are read during the third evaluation pass.
@@ -908,20 +691,7 @@ namespace Microsoft.Build.Evaluation
         /// It does not include any elements whose conditions did not evaluate to true.
         /// It does not include any items added since the last evaluation.
         /// </summary>
-        public ICollection<ProjectItem> AllEvaluatedItems
-        {
-            get
-            {
-                ICollection<ProjectItem> allEvaluatedItems = _data.AllEvaluatedItems;
-
-                if (allEvaluatedItems == null)
-                {
-                    return ReadOnlyEmptyCollection<ProjectItem>.Instance;
-                }
-
-                return new ReadOnlyCollection<ProjectItem>(allEvaluatedItems);
-            }
-        }
+        public ICollection<ProjectItem> AllEvaluatedItems => implementation.AllEvaluatedItems;
 
         /// <summary>
         /// The tools version this project was evaluated with, if any.
@@ -933,13 +703,13 @@ namespace Microsoft.Build.Evaluation
         /// <remarks>
         /// Set by construction.
         /// </remarks>
-        public string ToolsVersion => _data.Toolset.ToolsVersion;
+        public string ToolsVersion => implementation.ToolsVersion;
 
         /// <summary>
         /// The sub-toolset version that, combined with the ToolsVersion, was used to determine
         /// the toolset properties for this project.  
         /// </summary>
-        public string SubToolsetVersion => _data.SubToolsetVersion;
+        public string SubToolsetVersion => implementation.SubToolsetVersion;
 
         /// <summary>
         /// The root directory for this project.
@@ -965,14 +735,26 @@ namespace Microsoft.Build.Evaluation
         /// This is useful when the host expects to make a number of reads and writes 
         /// to the project, and wants to temporarily sacrifice correctness for performance.
         /// </summary>
-        public bool SkipEvaluation { get; set; }
+        public bool SkipEvaluation
+        {
+            [DebuggerStepThrough]
+            get => implementation.SkipEvaluation;
+            [DebuggerStepThrough]
+            set => implementation.SkipEvaluation = value;
+        }
 
         /// <summary>
         /// Whether <see cref="MarkDirty()">MarkDirty()</see> is temporarily disabled.
         /// This allows, for example, a global property to be set without the project getting
         /// marked dirty for reevaluation as a consequence.
         /// </summary>
-        public bool DisableMarkDirty { get; set; }
+        public bool DisableMarkDirty
+        {
+            [DebuggerStepThrough]
+            get => implementation.DisableMarkDirty;
+            [DebuggerStepThrough]
+            set => implementation.DisableMarkDirty = value;
+        }
 
         /// <summary>
         /// This controls whether or not the building of targets/tasks is enabled for this
@@ -983,28 +765,12 @@ namespace Microsoft.Build.Evaluation
         /// the host has already created a ProjectInstance, it can still build it. (It is 
         /// free to put a similar check around where it does this.)
         /// </summary>
-        public bool IsBuildEnabled
+        public bool IsBuildEnabled 
         {
-            get
-            {
-                switch (_isBuildEnabled)
-                {
-                    case BuildEnabledSetting.BuildEnabled:
-                        return true;
-
-                    case BuildEnabledSetting.BuildDisabled:
-                        return false;
-
-                    case BuildEnabledSetting.UseProjectCollectionSetting:
-                        return ProjectCollection.IsBuildEnabled;
-
-                    default:
-                        ErrorUtilities.ThrowInternalErrorUnreachable();
-                        return false;
-                }
-            }
-
-            set => _isBuildEnabled = value ? BuildEnabledSetting.BuildEnabled : BuildEnabledSetting.BuildDisabled;
+            [DebuggerStepThrough]
+            get => implementation.IsBuildEnabled;
+            [DebuggerStepThrough]
+            set => implementation.IsBuildEnabled = value;
         }
 
         /// <summary>
@@ -1032,12 +798,12 @@ namespace Microsoft.Build.Evaluation
         /// This number corresponds to the <seealso cref="BuildEventContext.EvaluationId"/> and can be used to connect
         /// evaluation logging events back to the Project instance.
         /// </summary>
-        public int LastEvaluationId => _data.EvaluationId;
+        public int LastEvaluationId => implementation.LastEvaluationId;
 
         /// <summary>
         /// List of names of the properties that, while global, are still treated as overridable 
         /// </summary>
-        internal ISet<string> GlobalPropertiesToTreatAsLocal => _data.GlobalPropertiesToTreatAsLocal;
+        internal ISet<string> GlobalPropertiesToTreatAsLocal => implementationInternal.GlobalPropertiesToTreatAsLocal;
 
         /// <summary>
         /// The logging service used for evaluation errors
@@ -1121,7 +887,7 @@ namespace Microsoft.Build.Evaluation
         /// </param>
         public List<GlobResult> GetAllGlobs(EvaluationContext evaluationContext)
         {
-            return GetAllGlobs(GetEvaluatedItemElements(evaluationContext));
+            return implementation.GetAllGlobs(evaluationContext);
         }
 
         /// <summary>
@@ -1130,7 +896,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="itemType">Confine search to item elements of this type</param>
         public List<GlobResult> GetAllGlobs(string itemType)
         {
-            return GetAllGlobs(itemType, null);
+            return implementation.GetAllGlobs(itemType, null);
         }
 
         /// <summary>
@@ -1142,175 +908,7 @@ namespace Microsoft.Build.Evaluation
         /// </param>
         public List<GlobResult> GetAllGlobs(string itemType, EvaluationContext evaluationContext)
         {
-            if (string.IsNullOrEmpty(itemType))
-            {
-                return new List<GlobResult>();
-            }
-
-            return GetAllGlobs(GetItemElementsByType(GetEvaluatedItemElements(evaluationContext), itemType));
-        }
-
-        // represents cumulated remove information for a particular item type
-        private struct CumulativeRemoveElementData
-        {
-            private ImmutableList<IMSBuildGlob>.Builder _globs;
-            private ImmutableHashSet<string>.Builder _fragmentStrings;
-
-            public IEnumerable<IMSBuildGlob> Globs => _globs.ToImmutable();
-            public IEnumerable<string> FragmentStrings => _fragmentStrings.ToImmutable();
-
-            public static CumulativeRemoveElementData Create()
-            {
-                return new CumulativeRemoveElementData
-                {
-                    _globs = ImmutableList.CreateBuilder<IMSBuildGlob>(),
-                    _fragmentStrings = ImmutableHashSet.CreateBuilder<string>()
-                };
-            }
-
-            public void AccumulateInformationFromRemoveItemSpec(EvaluationItemSpec removeSpec)
-            {
-                IEnumerable<string> removeSpecFragmentStrings = removeSpec.FlattenFragmentsAsStrings();
-                var removeGlob = removeSpec.ToMSBuildGlob();
-
-                _globs.Add(removeGlob);
-
-                foreach (var removeFragment in removeSpecFragmentStrings)
-                {
-                    _fragmentStrings.Add(removeFragment);
-                }
-            }
-        }
-
-        private List<GlobResult> GetAllGlobs(List<ProjectItemElement> projectItemElements)
-        {
-            if (projectItemElements.Count == 0)
-            {
-                return new List<GlobResult>();
-            }
-
-            // Scan the project elements in reverse order and build globbing information for each include element.
-            // Based on the fact that relevant removes for a particular include element (xml element A) consist of:
-            // - all the removes seen by the next include statement of A's type (xml element B which appears after A in file order)
-            // - new removes between A and B (removes that apply to A but not to B. Spacially, these are placed between A's element and B's element)
-
-            // Example:
-            // 1. <I Include="A"/>
-            // 2. <I Remove="..."/> // this remove applies to the include at 1
-            // 3. <I Include="B"/>
-            // 4. <I Remove="..."/> // this remove applies to the includes at 1, 3
-            // 5. <I Include="C"/>
-            // 6. <I Remove="..."/> // this remove applies to the includes at 1, 3, 5
-            // So A's applicable removes are composed of:
-            // 
-            // The applicable removes for the element at position 1 (xml element A) are composed of:
-            // - all the removes seen by the next include statement of I's type (xml element B, position 3, which appears after A in file order). In this example that's Removes at positions 4 and 6.
-            // - new removes between A and B. In this example that's Remove 2.
-
-            // use immutable builders because there will be a lot of structural sharing between includes which share increasing subsets of corresponding remove elements
-            // item type -> aggregated information about all removes seen so far for that item type
-            var removeElementCache = new Dictionary<string, CumulativeRemoveElementData>(projectItemElements.Count);
-            var globResults = new List<GlobResult>(projectItemElements.Count);
-
-            for (var i = projectItemElements.Count - 1; i >= 0; i--)
-            {
-                var itemElement = projectItemElements[i];
-
-                if (!string.IsNullOrEmpty(itemElement.Include))
-                {
-                    var globResult = BuildGlobResultFromIncludeItem(itemElement, removeElementCache);
-
-                    if (globResult != null)
-                    {
-                        globResults.Add(globResult);
-                    }
-                }
-                else if (!string.IsNullOrEmpty(itemElement.Remove))
-                {
-                    CacheInformationFromRemoveItem(itemElement, removeElementCache);
-                }
-            }
-
-            globResults.TrimExcess();
-
-            return globResults;
-        }
-
-        private GlobResult BuildGlobResultFromIncludeItem(ProjectItemElement itemElement, IReadOnlyDictionary<string, CumulativeRemoveElementData> removeElementCache)
-        {
-            var includeItemspec = new EvaluationItemSpec(itemElement.Include, _data.Expander, itemElement.IncludeLocation, itemElement.ContainingProject.DirectoryPath);
-
-            ImmutableArray<ItemFragment> includeGlobFragments = includeItemspec.Fragments.Where(f => f is GlobFragment).ToImmutableArray();
-            if (includeGlobFragments.Length == 0)
-            {
-                return null;
-            }
-
-            ImmutableArray<string> includeGlobStrings = includeGlobFragments.Select(f => f.ItemSpecFragment).ToImmutableArray();
-            var includeGlob = new CompositeGlob(includeGlobFragments.Select(f => f.ToMSBuildGlob()));
-
-            IEnumerable<string> excludeFragmentStrings = Enumerable.Empty<string>();
-            IMSBuildGlob excludeGlob = null;
-
-            if (!string.IsNullOrEmpty(itemElement.Exclude))
-            {
-                var excludeItemspec = new EvaluationItemSpec(itemElement.Exclude, _data.Expander, itemElement.ExcludeLocation, itemElement.ContainingProject.DirectoryPath);
-
-                excludeFragmentStrings = excludeItemspec.FlattenFragmentsAsStrings().ToImmutableHashSet();
-                excludeGlob = excludeItemspec.ToMSBuildGlob();
-            }
-
-            IEnumerable<string> removeFragmentStrings = Enumerable.Empty<string>();
-            IMSBuildGlob removeGlob = null;
-
-            if (removeElementCache.ContainsKey(itemElement.ItemType))
-            {
-                removeFragmentStrings = removeElementCache[itemElement.ItemType].FragmentStrings;
-                removeGlob = new CompositeGlob(removeElementCache[itemElement.ItemType].Globs);
-            }
-
-            var includeGlobWithGaps = CreateIncludeGlobWithGaps(includeGlob, excludeGlob, removeGlob);
-
-            return new GlobResult(itemElement, includeGlobStrings, includeGlobWithGaps, excludeFragmentStrings, removeFragmentStrings);
-        }
-
-        private static IMSBuildGlob CreateIncludeGlobWithGaps(IMSBuildGlob includeGlob, IMSBuildGlob excludeGlob, IMSBuildGlob removeGlob)
-        {
-            if (excludeGlob != null && removeGlob != null)
-            {
-                return new MSBuildGlobWithGaps(
-                    includeGlob,
-                    new CompositeGlob(
-                        excludeGlob,
-                        removeGlob
-                    ));
-            }
-
-            if (excludeGlob != null || removeGlob != null)
-            {
-                var gapGlob = excludeGlob ?? removeGlob;
-
-                return new MSBuildGlobWithGaps(
-                    includeGlob,
-                    gapGlob
-                );
-            }
-
-            return includeGlob;
-        }
-
-        private void CacheInformationFromRemoveItem(ProjectItemElement itemElement, Dictionary<string, CumulativeRemoveElementData> removeElementCache)
-        {
-            if (!removeElementCache.TryGetValue(itemElement.ItemType, out CumulativeRemoveElementData cumulativeRemoveElementData))
-            {
-                cumulativeRemoveElementData = CumulativeRemoveElementData.Create();
-
-                removeElementCache[itemElement.ItemType] = cumulativeRemoveElementData;
-            }
-
-            var removeSpec = new EvaluationItemSpec(itemElement.Remove, _data.Expander, itemElement.RemoveLocation, itemElement.ContainingProject.DirectoryPath);
-
-            cumulativeRemoveElementData.AccumulateInformationFromRemoveItemSpec(removeSpec);
+            return implementation.GetAllGlobs(itemType, evaluationContext);
         }
 
         /// <summary>
@@ -1371,7 +969,7 @@ namespace Microsoft.Build.Evaluation
         /// </param>
         public List<ProvenanceResult> GetItemProvenance(string itemToMatch, EvaluationContext evaluationContext)
         {
-            return GetItemProvenance(itemToMatch, GetEvaluatedItemElements(evaluationContext));
+            return implementation.GetItemProvenance(itemToMatch, evaluationContext);
         }
 
         /// <summary>
@@ -1393,7 +991,7 @@ namespace Microsoft.Build.Evaluation
         /// </param>
         public List<ProvenanceResult> GetItemProvenance(string itemToMatch, string itemType, EvaluationContext evaluationContext)
         {
-            return GetItemProvenance(itemToMatch, GetItemElementsByType(GetEvaluatedItemElements(evaluationContext), itemType));
+            return implementation.GetItemProvenance(itemToMatch, itemType, evaluationContext);
         }
 
         /// <summary>
@@ -1406,7 +1004,7 @@ namespace Microsoft.Build.Evaluation
         /// </param>
         public List<ProvenanceResult> GetItemProvenance(ProjectItem item)
         {
-            return GetItemProvenance(item, null);
+            return implementation.GetItemProvenance(item, null);
         }
 
         /// <summary>
@@ -1418,172 +1016,7 @@ namespace Microsoft.Build.Evaluation
         /// </param>
         public List<ProvenanceResult> GetItemProvenance(ProjectItem item, EvaluationContext evaluationContext)
         {
-            if (item == null)
-            {
-                return new List<ProvenanceResult>();
-            }
-
-            IEnumerable<ProjectItemElement> itemElementsAbove = GetItemElementsThatMightAffectItem(GetEvaluatedItemElements(evaluationContext), item);
-
-            return GetItemProvenance(item.EvaluatedInclude, itemElementsAbove);
-        }
-
-        /// <summary>
-        /// Some project APIs need to do analysis that requires the Evaluator to record more data than usual as it evaluates.
-        /// This method checks if the Evaluator was run with the extra required settings and if not, does a re-evaluation.
-        /// If a re-evaluation was necessary, it saves this information so a next call does not re-evaluate.
-        /// 
-        /// Using this method avoids storing extra data in memory when its not needed.
-        /// </summary>
-        /// <param name="evaluationContext"></param>
-        private List<ProjectItemElement> GetEvaluatedItemElements(EvaluationContext evaluationContext)
-        {
-            if (!_loadSettings.HasFlag(ProjectLoadSettings.RecordEvaluatedItemElements))
-            {
-                _loadSettings = _loadSettings | ProjectLoadSettings.RecordEvaluatedItemElements;
-                Reevaluate(LoggingService, _loadSettings, evaluationContext);
-            }
-
-            return _data.EvaluatedItemElements;
-        }
-
-        private static IEnumerable<ProjectItemElement> GetItemElementsThatMightAffectItem(List<ProjectItemElement> evaluatedItemElements, ProjectItem item)
-        {
-            IEnumerable<ProjectItemElement> relevantElementsAfterInclude = evaluatedItemElements
-                // Skip until we encounter the element that produced the item because
-                // there are no item operations that can affect future items
-                .SkipWhile((i => i != item.Xml))
-                .Where(itemElement =>
-                    // items operations of different item types cannot affect each other
-                    itemElement.ItemType.Equals(item.ItemType) &&
-                    // other includes cannot affect the current item
-                    itemElement.IncludeLocation == null &&
-                    // any remove that matches this item will cause the ProjectItem to not be produced in the first place
-                    // all other removes do not apply
-                    itemElement.RemoveLocation == null);
-
-            // add the include operation that created the project item element
-            return new[] { item.Xml }.Concat(relevantElementsAfterInclude);
-        }
-
-        private static List<ProjectItemElement> GetItemElementsByType(IEnumerable<ProjectItemElement> itemElements, string itemType)
-        {
-            return itemElements.Where(i => i.ItemType.Equals(itemType)).ToList();
-        }
-
-        private List<ProvenanceResult> GetItemProvenance(string itemToMatch, IEnumerable<ProjectItemElement> projectItemElements)
-        {
-            if (string.IsNullOrEmpty(itemToMatch))
-            {
-                return new List<ProvenanceResult>();
-            }
-
-            return
-                projectItemElements
-                .AsParallel()
-                .AsOrdered()
-                .Select(i => ComputeProvenanceResult(itemToMatch, i))
-                .Where(r => r != null)
-                .ToList();
-        }
-
-        private ProvenanceResult ComputeProvenanceResult(string itemToMatch, ProjectItemElement itemElement)
-        {
-            ProvenanceResult SingleItemSpecProvenance(string itemSpec, IElementLocation elementLocation, Operation operation)
-            {
-                if (elementLocation == null)
-                {
-                    return null;
-                }
-
-                var matchOccurrences = ItemMatchesInItemSpecString(itemToMatch, itemSpec, elementLocation, itemElement.ContainingProject.DirectoryPath, _data.Expander, out Provenance provenance);
-                Tuple<Provenance, int> result = matchOccurrences > 0 ? Tuple.Create(provenance, matchOccurrences) : null;
-
-                return result?.Item2 > 0
-                    ? new ProvenanceResult(itemElement, operation, result.Item1, result.Item2)
-                    : null;
-            }
-
-            Func<ProvenanceResult>[] provenanceProviders =
-            {
-                // provenance provider for include item elements
-                () =>
-                {
-                    var includeResult = SingleItemSpecProvenance(itemElement.Include, itemElement.IncludeLocation, Operation.Include);
-                    if (includeResult == null)
-                    {
-                        return null;
-                    }
-
-                    var excludeResult = SingleItemSpecProvenance(itemElement.Exclude, itemElement.ExcludeLocation, Operation.Exclude);
-
-                    return excludeResult ?? includeResult;
-                },
-
-                // provenance provider for update item elements
-                () => SingleItemSpecProvenance(itemElement.Update, itemElement.UpdateLocation, Operation.Update),
-                
-                // provenance provider for remove item elements
-                () => SingleItemSpecProvenance(itemElement.Remove, itemElement.RemoveLocation, Operation.Remove)
-            };
-
-            return provenanceProviders.Select(provider => provider()).FirstOrDefault(provenanceResult => provenanceResult != null);
-        }
-
-        /// <summary>
-        /// Since:
-        ///     - we have no proper AST and interpreter for itemspecs that we can do analysis on
-        ///     - GetItemProvenance needs to have correct counts for exclude strings (as correct as it can get while doing it after evaluation)
-        /// 
-        /// The temporary hack is to use the expander to expand the strings, and if any property or item references were encountered, return Provenance.Inconclusive
-        /// </summary>
-        private static int ItemMatchesInItemSpecString(string itemToMatch, string itemSpec, IElementLocation elementLocation, string projectDirectory, Expander<ProjectProperty, ProjectItem> expander, out Provenance provenance)
-        {
-            if (string.IsNullOrEmpty(itemSpec))
-            {
-                provenance = Provenance.Undefined;
-                return 0;
-            }
-
-            // expand the properties
-            var expandedItemSpec = new EvaluationItemSpec(itemSpec, expander, elementLocation, projectDirectory, expandProperties: true);
-            var numberOfMatches = ItemMatchesInItemSpec(itemToMatch, expandedItemSpec, out provenance);
-
-            // Result is inconclusive if properties are present
-            if (itemSpec.Contains("$("))
-            {
-                provenance |= Provenance.Inconclusive;
-            }
-
-            return numberOfMatches;
-        }
-
-        private static int ItemMatchesInItemSpec(string itemToMatch, EvaluationItemSpec itemSpec, out Provenance provenance)
-        {
-            provenance = Provenance.Undefined;
-
-            IEnumerable<ItemFragment> fragmentsMatchingItem = itemSpec.FragmentsMatchingItem(itemToMatch, out int occurrences);
-            foreach (var fragment in fragmentsMatchingItem)
-            {
-                if (fragment is ValueFragment)
-                {
-                    provenance |= Provenance.StringLiteral;
-                }
-                else if (fragment is GlobFragment)
-                {
-                    provenance |= Provenance.Glob;
-                }
-                else if (fragment is EvaluationItemExpressionFragment)
-                {
-                    provenance |= Provenance.Inconclusive;
-                }
-                else
-                {
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
-                }
-            }
-
-            return occurrences;
+            return implementation.GetItemProvenance(item, evaluationContext);
         }
 
         /// <summary>
@@ -1635,30 +1068,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public IEnumerable<ProjectElement> GetLogicalProject()
         {
-            // Implicit imports exist in the import closure but not in the project XML so the ImplicitImportLocation.Top
-            // imports need to be returned before walking the project XML
-            foreach (ProjectRootElement import in _data.ImportClosure.Where(i => i.ImportingElement?.ImplicitImportLocation == ImplicitImportLocation.Top).Select(i => i.ImportedProject))
-            {
-                foreach (ProjectElement child in GetLogicalProject(import.AllChildren))
-                {
-                    yield return child;
-                }
-            }
-
-            foreach (ProjectElement child in GetLogicalProject(Xml.AllChildren))
-            {
-                yield return child;
-            }
-
-            // Implicit imports exist in the import closure but not in the project XML so the ImplicitImportLocation.Bottom
-            // imports need to be returned before walking the project XML
-            foreach (ProjectRootElement import in _data.ImportClosure.Where(i => i.ImportingElement?.ImplicitImportLocation == ImplicitImportLocation.Bottom).Select(i => i.ImportedProject))
-            {
-                foreach (ProjectElement child in GetLogicalProject(import.AllChildren))
-                {
-                    yield return child;
-                }
-            }
+            return implementation.GetLogicalProject();
         }
 
         /// <summary>
@@ -1668,7 +1078,7 @@ namespace Microsoft.Build.Evaluation
         [DebuggerStepThrough]
         public ProjectProperty GetProperty(string name)
         {
-            return _data.Properties[name];
+            return implementation.GetProperty(name);
         }
 
         /// <summary>
@@ -1683,7 +1093,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         public string GetPropertyValue(string name)
         {
-            return _data.GetPropertyValue(name);
+            return implementation.GetPropertyValue(name);
         }
 
         /// <summary>
@@ -1702,34 +1112,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public ProjectProperty SetProperty(string name, string unevaluatedValue)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
-            ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue, nameof(unevaluatedValue));
-
-            ProjectProperty property = _data.Properties[name];
-
-            ErrorUtilities.VerifyThrowInvalidOperation(property == null || !property.IsReservedProperty, "OM_ReservedName", name);
-            ErrorUtilities.VerifyThrowInvalidOperation(property == null || !property.IsGlobalProperty, "OM_GlobalProperty", name);
-
-            // If there's an existing regular property, we can reuse it, unless it's not attached to its XML any more
-            if (property != null &&
-                !property.IsEnvironmentProperty &&
-                property.Xml.Parent?.Parent != null &&
-                ReferenceEquals(property.Xml.ContainingProject, Xml))
-            {
-                property.UnevaluatedValue = unevaluatedValue;
-            }
-            else
-            {
-                ProjectPropertyElement propertyElement = Xml.AddProperty(name, unevaluatedValue);
-
-                property = ProjectProperty.Create(this, propertyElement, unevaluatedValue, null /* predecessor unknown */);
-
-                _data.Properties[name] = property;
-            }
-
-            property.UpdateEvaluatedValue(ExpandPropertyValueBestEffortLeaveEscaped(unevaluatedValue, property.Xml.Location));
-
-            return property;
+            return implementation.SetProperty(name, unevaluatedValue);
         }
 
         /// <summary>
@@ -1739,36 +1122,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public bool SetGlobalProperty(string name, string escapedValue)
         {
-            ProjectPropertyInstance existing = _data.GlobalPropertiesDictionary[name];
-
-            if (existing == null || ((IProperty)existing).EvaluatedValueEscaped != escapedValue)
-            {
-                string originalValue = (existing == null) ? String.Empty : ((IProperty)existing).EvaluatedValueEscaped;
-
-                _data.GlobalPropertiesDictionary.Set(ProjectPropertyInstance.Create(name, escapedValue));
-                _data.Properties.Set(ProjectProperty.Create(this, name, escapedValue, true /* is global */, false /* may not be reserved name */));
-
-                ProjectCollection.AfterUpdateLoadedProjectGlobalProperties(this);
-                MarkDirty();
-
-                if (s_debugEvaluation)
-                {
-                    string displayValue = escapedValue.Substring(0, Math.Min(escapedValue.Length, 75)) + ((escapedValue.Length > 75) ? "..." : String.Empty);
-                    if (existing == null)
-                    {
-                        Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Initially set global property {0} to '{1}' [{2}]", name, displayValue, FullPath));
-                    }
-                    else
-                    {
-                        string displayOriginalValue = originalValue.Substring(0, Math.Min(originalValue.Length, 75)) + ((originalValue.Length > 75) ? "..." : String.Empty);
-                        Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Changed global property {0} from '{1}' to '{2}' [{3}]", name, displayOriginalValue, displayValue, FullPath));
-                    }
-                }
-
-                return true;
-            }
-
-            return false;
+            return implementation.SetGlobalProperty(name, escapedValue);
         }
 
         /// <summary>
@@ -1796,40 +1150,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public IList<ProjectItem> AddItem(string itemType, string unevaluatedInclude, IEnumerable<KeyValuePair<string, string>> metadata)
         {
-            // For perf reasons, this method does several jobs in one.
-            // If it finds a suitable existing item element, it returns that as the out parameter, otherwise the out parameter returns null.
-            // Otherwise, if it finds an item element suitable to be just below our new element, it returns that.
-            // Otherwise, if it finds an item group at least that's suitable to put our element in somewhere, it returns that.
-            // Otherwise, it returns null.
-            ProjectElement element = GetAnySuitableExistingItemXml(itemType, unevaluatedInclude, metadata, out ProjectItemElement itemElement);
-
-            if (itemElement == null)
-            {
-                // Didn't find a suitable existing item; maybe the hunt gave us a hint as
-                // to where to put a new one.
-                if (element is ProjectItemElement itemElementToAddBefore)
-                {
-                    // It told us an item to add before
-                    itemElement = Xml.CreateItemElement(itemType, unevaluatedInclude);
-                    itemElementToAddBefore.Parent.InsertBeforeChild(itemElement, itemElementToAddBefore);
-                }
-                else
-                {
-                    if (element is ProjectItemGroupElement itemGroupElement)
-                    {
-                        // It only told us an item group to add it somewhere within
-                        itemElement = itemGroupElement.AddItem(itemType, unevaluatedInclude);
-                    }
-                    else
-                    {
-                        // It didn't give any hint at all
-                        itemElement = Xml.AddItem(itemType, unevaluatedInclude);
-                    }
-                }
-            }
-
-            // Fix up the evaluated state to match
-            return AddItemHelper(itemElement, unevaluatedInclude, metadata);
+            return implementation.AddItem(itemType, unevaluatedInclude, metadata);
         }
 
         /// <summary>
@@ -1860,46 +1181,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public IList<ProjectItem> AddItemFast(string itemType, string unevaluatedInclude, IEnumerable<KeyValuePair<string, string>> metadata)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(itemType, nameof(itemType));
-            ErrorUtilities.VerifyThrowArgumentLength(unevaluatedInclude, nameof(unevaluatedInclude));
-
-            ProjectItemGroupElement groupToAppendTo = null;
-
-            foreach (ProjectItemGroupElement group in Xml.ItemGroups)
-            {
-                if (group.Condition.Length > 0)
-                {
-                    continue;
-                }
-
-                if (group.Count == 0 || MSBuildNameIgnoreCaseComparer.Default.Equals(itemType, group.Items.First().ItemType))
-                {
-                    groupToAppendTo = group;
-
-                    break;
-                }
-            }
-
-            if (groupToAppendTo == null)
-            {
-                groupToAppendTo = Xml.AddItemGroup();
-            }
-
-            ProjectItemElement itemElement;
-
-            if (groupToAppendTo.Count == 0 ||
-                FileMatcher.HasWildcardsSemicolonItemOrPropertyReferences(unevaluatedInclude) ||
-                !IsSuitableExistingItemXml(groupToAppendTo.Items.First(), unevaluatedInclude, metadata))
-            {
-                itemElement = Xml.CreateItemElement(itemType, unevaluatedInclude);
-                groupToAppendTo.AppendChild(itemElement);
-            }
-            else
-            {
-                itemElement = groupToAppendTo.Items.First();
-            }
-
-            return AddItemHelper(itemElement, unevaluatedInclude, metadata);
+            return implementation.AddItemFast(itemType, unevaluatedInclude, metadata);
         }
 
         /// <summary>
@@ -1913,8 +1195,7 @@ namespace Microsoft.Build.Evaluation
         /// </comments>
         public ICollection<ProjectItem> GetItems(string itemType)
         {
-            ICollection<ProjectItem> items = _data.GetItems(itemType);
-            return items;
+            return implementation.GetItems(itemType);
         }
 
         /// <summary>
@@ -1927,8 +1208,7 @@ namespace Microsoft.Build.Evaluation
         /// </comments>
         public ICollection<ProjectItem> GetItemsIgnoringCondition(string itemType)
         {
-            ICollection<ProjectItem> items = _data.ItemsIgnoringCondition[itemType];
-            return items;
+            return implementation.GetItemsIgnoringCondition(itemType);
         }
 
         /// <summary>
@@ -1944,8 +1224,7 @@ namespace Microsoft.Build.Evaluation
         /// </comments>
         public ICollection<ProjectItem> GetItemsByEvaluatedInclude(string evaluatedInclude)
         {
-            ICollection<ProjectItem> items = _data.GetItemsByEvaluatedInclude(evaluatedInclude);
-            return items;
+            return implementation.GetItemsByEvaluatedInclude(evaluatedInclude);
         }
 
         /// <summary>
@@ -1960,24 +1239,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public bool RemoveProperty(ProjectProperty property)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(property, nameof(property));
-            ErrorUtilities.VerifyThrowInvalidOperation(!property.IsReservedProperty, "OM_ReservedName", property.Name);
-            ErrorUtilities.VerifyThrowInvalidOperation(!property.IsGlobalProperty, "OM_GlobalProperty", property.Name);
-            ErrorUtilities.VerifyThrowArgument(property.Xml.Parent != null, "OM_IncorrectObjectAssociation", "ProjectProperty", "Project");
-            VerifyThrowInvalidOperationNotImported(property.Xml.ContainingProject);
-
-            ProjectElementContainer parent = property.Xml.Parent;
-
-            property.Xml.Parent.RemoveChild(property.Xml);
-
-            if (parent.Count == 0)
-            {
-                parent.Parent.RemoveChild(parent);
-            }
-
-            bool result = _data.Properties.Remove(property.Name);
-
-            return result;
+            return implementation.RemoveProperty(property);
         }
 
         /// <summary>
@@ -1987,22 +1249,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public bool RemoveGlobalProperty(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
-
-            bool result = _data.GlobalPropertiesDictionary.Remove(name);
-
-            if (result)
-            {
-                ProjectCollection.AfterUpdateLoadedProjectGlobalProperties(this);
-                MarkDirty();
-
-                if (s_debugEvaluation)
-                {
-                    Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD:  Remove global property {0}", name));
-                }
-            }
-
-            return result;
+            return implementation.RemoveGlobalProperty(name);
         }
 
         /// <summary>
@@ -2022,12 +1269,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         public bool RemoveItem(ProjectItem item)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(item, nameof(item));
-            ErrorUtilities.VerifyThrowArgument(item.Project == this, "OM_IncorrectObjectAssociation", "ProjectItem", "Project");
-
-            bool result = RemoveItemHelper(item);
-
-            return result;
+            return implementation.RemoveItem(item);
         }
 
         /// <summary>
@@ -2042,18 +1284,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         public void RemoveItems(IEnumerable<ProjectItem> items)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(items, nameof(items));
-
-            // Copying to a list makes it possible to remove
-            // all items of a particular type with 
-            //   RemoveItems(p.GetItems("mytype"))
-            // without modifying the collection during enumeration.
-            var itemsList = new List<ProjectItem>(items);
-
-            foreach (ProjectItem item in itemsList)
-            {
-                RemoveItemHelper(item);
-            }
+            implementation.RemoveItems(items);
         }
 
         /// <summary>
@@ -2065,11 +1296,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public string ExpandString(string unexpandedValue)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(unexpandedValue, nameof(unexpandedValue));
-
-            string result = _data.Expander.ExpandIntoStringAndUnescape(unexpandedValue, ExpanderOptions.ExpandPropertiesAndItems, ProjectFileLocation);
-
-            return result;
+            return implementation.ExpandString(unexpandedValue);
         }
 
         /// <summary>
@@ -2079,7 +1306,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public ProjectInstance CreateProjectInstance()
         {
-            return CreateProjectInstance(LoggingService, ProjectInstanceSettings.None, null);
+            return CreateProjectInstance(ProjectInstanceSettings.None, null);
         }
 
         /// <summary>
@@ -2091,7 +1318,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public ProjectInstance CreateProjectInstance(ProjectInstanceSettings settings)
         {
-            return CreateProjectInstance(LoggingService, settings, null);
+            return CreateProjectInstance(settings, null);
         }
 
         /// <summary>
@@ -2101,7 +1328,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns></returns>
         public ProjectInstance CreateProjectInstance(ProjectInstanceSettings settings, EvaluationContext evaluationContext)
         {
-            return CreateProjectInstance(LoggingService, settings, evaluationContext);
+            return implementation.CreateProjectInstance(settings, evaluationContext);
         }
 
         /// <summary>
@@ -2115,13 +1342,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public void MarkDirty()
         {
-            if (!DisableMarkDirty && !ProjectCollection.DisableMarkDirty)
-            {
-                _explicitlyMarkedDirty = true;
-            }
-
-            // Pass up the MarkDirty call even when DisableMarkDirty is true.
-            Xml.MarkProjectDirty(this);
+            implementation.MarkDirty();
         }
 
         /// <summary>
@@ -2131,7 +1352,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public void ReevaluateIfNecessary()
         {
-            ReevaluateIfNecessary(LoggingService);
+            implementation.ReevaluateIfNecessary(null);
         }
 
         /// <summary>
@@ -2140,7 +1361,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="evaluationContext">The <see cref="EvaluationContext"/> to use. See <see cref="EvaluationContext"/></param>
         public void ReevaluateIfNecessary(EvaluationContext evaluationContext)
         {
-            ReevaluateIfNecessary(LoggingService, evaluationContext);
+            implementation.ReevaluateIfNecessary(evaluationContext);
         }
 
         /// <summary>
@@ -2193,13 +1414,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public void SaveLogicalProject(TextWriter writer)
         {
-            XmlDocument document = Preprocessor.GetPreprocessedDocument(this);
-
-            using (var projectWriter = new ProjectWriter(writer))
-            {
-                projectWriter.Initialize(document);
-                document.Save(projectWriter);
-            }
+            implementation.SaveLogicalProject(writer);
         }
 
         /// <summary>
@@ -2334,22 +1549,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required</param>
         public bool Build(string[] targets, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, EvaluationContext evaluationContext)
         {
-            if (!IsBuildEnabled)
-            {
-                LoggingService.LogError(s_buildEventContext, new BuildEventFileInfo(FullPath), "SecurityProjectBuildDisabled");
-                return false;
-            }
-
-            ProjectInstance instance = CreateProjectInstance(LoggingService, ProjectInstanceSettings.None, evaluationContext);
-
-            if (loggers == null && ProjectCollection.Loggers != null)
-            {
-                loggers = ProjectCollection.Loggers;
-            }
-
-            bool result = instance.Build(targets, loggers, remoteLoggers, null, ProjectCollection.MaxNodeCount, out _);
-
-            return result;
+            return implementation.Build(targets, loggers, remoteLoggers, evaluationContext);
         }
 
         /// <summary>
@@ -2359,17 +1559,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>True if this project is or imports the xml file; false otherwise.</returns>
         internal bool UsesProjectRootElement(ProjectRootElement xmlRootElement)
         {
-            if (ReferenceEquals(Xml, xmlRootElement))
-            {
-                return true;
-            }
-
-            if (_data.ImportClosure.Any(import => ReferenceEquals(import.ImportedProject, xmlRootElement)))
-            {
-                return true;
-            }
-
-            return false;
+            return implementationInternal.UsesProjectRootElement(xmlRootElement);
         }
 
         /// <summary>
@@ -2437,39 +1627,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal bool IsSuitableExistingItemXml(ProjectItemElement candidateExistingItemXml, string unevaluatedInclude, IEnumerable<KeyValuePair<string, string>> metadata)
         {
-            if (candidateExistingItemXml.Condition.Length != 0 || candidateExistingItemXml.Exclude.Length != 0 || !candidateExistingItemXml.IncludeHasWildcards)
-            {
-                return false;
-            }
-
-            if ((metadata != null && metadata.Any()) || candidateExistingItemXml.Count > 0)
-            {
-                // Don't try to make sure the metadata are the same.
-                return false;
-            }
-
-            string evaluatedExistingInclude = _data.Expander.ExpandIntoStringLeaveEscaped(candidateExistingItemXml.Include, ExpanderOptions.ExpandProperties, candidateExistingItemXml.IncludeLocation);
-
-            string[] existingIncludePieces = evaluatedExistingInclude.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
-
-            foreach (string existingIncludePiece in existingIncludePieces)
-            {
-                if (!FileMatcher.HasWildcards(existingIncludePiece))
-                {
-                    continue;
-                }
-
-                FileMatcher.Result match = FileMatcher.Default.FileMatch(existingIncludePiece, unevaluatedInclude);
-
-                if (match.isLegalFileSpec && match.isMatch)
-                {
-                    // The wildcard in the original item spec will match the new item that
-                    // user is trying to add.
-                    return true;
-                }
-            }
-
-            return false;
+            return implementationInternal.IsSuitableExistingItemXml(candidateExistingItemXml, unevaluatedInclude, metadata);
         }
 
         /// <summary>
@@ -2479,7 +1637,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal void RemoveItemBeforeItemTypeChange(ProjectItem item)
         {
-            _data.RemoveItem(item);
+            implementationInternal.RemoveItemBeforeItemTypeChange(item);
         }
 
         /// <summary>
@@ -2489,8 +1647,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal void ReAddExistingItemAfterItemTypeChange(ProjectItem item)
         {
-            _data.AddItem(item);
-            _data.AddItemIgnoringCondition(item);
+            implementationInternal.ReAddExistingItemAfterItemTypeChange(item);
         }
 
         /// <summary>
@@ -2502,9 +1659,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal string ExpandPropertyValueBestEffortLeaveEscaped(string unevaluatedValue, ElementLocation propertyLocation)
         {
-            string evaluatedValueEscaped = _data.Expander.ExpandIntoStringLeaveEscaped(unevaluatedValue, ExpanderOptions.ExpandProperties, propertyLocation);
-
-            return evaluatedValueEscaped;
+            return implementationInternal.ExpandPropertyValueBestEffortLeaveEscaped(unevaluatedValue, propertyLocation);
         }
 
         /// <summary>
@@ -2520,21 +1675,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal string ExpandItemIncludeBestEffortLeaveEscaped(ProjectItemElement renamedItemElement)
         {
-            if (renamedItemElement.Exclude.Length > 0)
-            {
-                return renamedItemElement.Include;
-            }
-
-            var itemFactory = new ProjectItemFactory(this, renamedItemElement);
-
-            List<ProjectItem> items = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.CreateItemsFromInclude(DirectoryPath, renamedItemElement, itemFactory, renamedItemElement.Include, _data.Expander);
-
-            if (items.Count != 1)
-            {
-                return renamedItemElement.Include;
-            }
-
-            return ((IItem)items[0]).EvaluatedIncludeEscaped;
+            return implementationInternal.ExpandItemIncludeBestEffortLeaveEscaped(renamedItemElement);
         }
 
         /// <summary>
@@ -2548,13 +1689,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal string ExpandMetadataValueBestEffortLeaveEscaped(IMetadataTable metadataTable, string unevaluatedValue, ElementLocation metadataLocation)
         {
-            ErrorUtilities.VerifyThrow(_data.Expander.Metadata == null, "Should be null");
-
-            _data.Expander.Metadata = metadataTable;
-            string evaluatedValueEscaped = _data.Expander.ExpandIntoStringLeaveEscaped(unevaluatedValue, ExpanderOptions.ExpandAll, metadataLocation);
-            _data.Expander.Metadata = null;
-
-            return evaluatedValueEscaped;
+            return implementationInternal.ExpandMetadataValueBestEffortLeaveEscaped(metadataTable, unevaluatedValue, metadataLocation);
         }
 
         /// <summary>
@@ -2562,10 +1697,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal void Zombify()
         {
-            Xml.OnAfterProjectRename -= _renameHandler;
-            Xml.OnProjectXmlChanged -= ProjectRootElement_ProjectXmlChangedHandler;
-            Xml.XmlDocument.ClearAnyCachedStrings();
-            _renameHandler = null;
+            implementation.Unload();
+            implementationInternal.IsZombified = true;
         }
 
         /// <summary>
@@ -2574,7 +1707,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal void VerifyThrowInvalidOperationNotZombie()
         {
-            ErrorUtilities.VerifyThrow(_renameHandler != null, "OM_ProjectIsNoLongerActive");
+            ErrorUtilities.VerifyThrow(!implementationInternal.IsZombified, "OM_ProjectIsNoLongerActive");
         }
 
         /// <summary>
@@ -2589,345 +1722,2121 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowInvalidOperation(ReferenceEquals(Xml, otherXml), "OM_CannotModifyEvaluatedObjectInImportedFile", otherXml.Location.File);
         }
 
+
         /// <summary>
-        /// Common code for the AddItem methods.
+        /// Internal project evaluation implementation
         /// </summary>
-        private List<ProjectItem> AddItemHelper(ProjectItemElement itemElement, string unevaluatedInclude, IEnumerable<KeyValuePair<string, string>> metadata)
+        /// <remarks>
+        private class ProjectImpl : ProjectLink, IProjectLinkInternal
         {
-            var itemFactory = new ProjectItemFactory(this, itemElement);
+            /// <summary>
+            /// Backing data; stored in a nested class so it can be passed to the Evaluator to fill
+            /// in on re-evaluation, without having to expose property setters for that purpose.
+            /// Also it makes it easy to re-evaluate this project without creating a new project object.
+            /// </summary>
+            private Data _data;
 
-            List<ProjectItem> items = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.CreateItemsFromInclude(DirectoryPath, itemElement, itemFactory, unevaluatedInclude, _data.Expander);
+            /// <summary>
+            /// The highest version of the backing ProjectRootElements (including imports) that this object was last evaluated from.
+            /// Edits to the ProjectRootElement either by this Project or another Project increment the number.
+            /// If that number is different from this one a reevaluation is necessary at some point.
+            /// </summary>
+            private int _evaluatedVersion;
 
-            foreach (ProjectItem item in items)
+            /// <summary>
+            /// The version of the tools information in the project collection against we were last evaluated.
+            /// </summary>
+            private int _evaluatedToolsetCollectionVersion;
+
+            /// <summary>
+            /// Whether the project has been explicitly marked as dirty. Generally this is not necessary to set; all edits affecting
+            /// this project will automatically make it dirty. However there are potential corner cases where it is necessary to mark it dirty
+            /// directly. For example, if the project has an import conditioned on a file existing on disk, and the file did not exist at
+            /// evaluation time, then someone subsequently writes the file, the project will not know that reevaluation would be productive,
+            /// and would not dirty itself. In such a case the host should help us by setting the dirty flag explicitly.
+            /// </summary>
+            private bool _explicitlyMarkedDirty;
+
+            /// <summary>
+            /// This controls whether or not the building of targets/tasks is enabled for this
+            /// project.  This is for security purposes in case a host wants to closely
+            /// control which projects it allows to run targets/tasks.
+            /// </summary>
+            private BuildEnabledSetting _isBuildEnabled = BuildEnabledSetting.UseProjectCollectionSetting;
+
+            /// <summary>
+            /// The load settings, such as to ignore missing imports.
+            /// This is retained after construction as it will be needed for reevaluation.
+            /// </summary>
+            private ProjectLoadSettings _loadSettings;
+
+            /// <summary>
+            /// The delegate registered with the ProjectRootElement to be called if the file name
+            /// is changed. Retained so that ultimately it can be unregistered.
+            /// If it has been set to null, the project has been unloaded from its collection.
+            /// </summary>
+            private RenameHandlerDelegate _renameHandler;
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="owner">The owning project object</param>
+            /// <param name="xml">ProjectRootElement to use</param>
+            /// <param name="globalProperties">Global properties to evaluate with. May be null in which case the containing project collection's global properties will be used.</param>
+            /// <param name="toolsVersion">Tools version to evaluate with. May be null</param>
+            /// <param name="subToolsetVersion">Sub-toolset version to explicitly evaluate the toolset with.  May be null.</param>
+            /// <param name="projectCollection">The <see cref="ProjectCollection"/> the project is added to.</param>
+            /// <param name="loadSettings">The <see cref="ProjectLoadSettings"/> to use for evaluation.</param>
+            /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required</param>
+            public ProjectImpl(Project owner, ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
+            {
+                ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));
+                ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
+                ErrorUtilities.VerifyThrowArgumentNull(owner, nameof(owner));
+
+                Xml = xml;
+                Owner = owner;
+            }
+
+            /// <summary>
+            /// Construct over a text reader over project xml, evaluating with specified
+            /// global properties and toolset, either or both of which may be null.
+            /// Project will be added to the specified project collection when it is named.
+            /// Throws InvalidProjectFileException if the evaluation fails.
+            /// Throws InvalidOperationException if there is already an equivalent project loaded in the project collection.
+            /// </summary>
+            /// <param name="owner">The owning project object</param>
+            /// <param name="xmlReader">Xml reader to read project from</param>
+            /// <param name="globalProperties">Global properties to evaluate with. May be null in which case the containing project collection's global properties will be used.</param>
+            /// <param name="toolsVersion">Tools version to evaluate with. May be null</param>
+            /// <param name="subToolsetVersion">Sub-toolset version to explicitly evaluate the toolset with.  May be null.</param>
+            /// <param name="projectCollection">The collection with which this project should be associated. May not be null.</param>
+            /// <param name="loadSettings">The load settings for this project.</param>
+            /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required</param>
+            public ProjectImpl(Project owner, XmlReader xmlReader, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
+            {
+                ErrorUtilities.VerifyThrowArgumentNull(xmlReader, nameof(xmlReader));
+                ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
+                ErrorUtilities.VerifyThrowArgumentNull(owner, nameof(owner));
+
+                Owner = owner;
+
+                try
+                {
+                    Xml = ProjectRootElement.Create(xmlReader, ProjectCollection,
+                        preserveFormatting: false);
+                }
+                catch (InvalidProjectFileException ex)
+                {
+                    LoggingService.LogInvalidProjectFileError(s_buildEventContext, ex);
+                    throw;
+                }
+            }
+
+            /// <summary>
+            /// Construct over an existing project file, evaluating with the specified global properties and 
+            /// using the tools version provided, either or both of which may be null.
+            /// Project is added to the global project collection.
+            /// Throws InvalidProjectFileException if the evaluation fails.
+            /// Throws InvalidOperationException if there is already an equivalent project loaded in the project collection.
+            /// May throw IO-related exceptions.
+            /// </summary>
+            /// <param name="owner">The owning project object</param>
+            /// <param name="projectFile">The project file</param>
+            /// <param name="globalProperties">The global properties. May be null.</param>
+            /// <param name="toolsVersion">The tools version. May be null.</param>
+            /// <param name="subToolsetVersion">Sub-toolset version to explicitly evaluate the toolset with.  May be null.</param>
+            /// <param name="projectCollection">The collection with which this project should be associated. May not be null.</param>
+            /// <param name="loadSettings">The load settings for this project.</param>
+            /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required</param>
+            public ProjectImpl(Project owner, string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
+            {
+                ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
+                ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
+                ErrorUtilities.VerifyThrowArgumentNull(owner, nameof(owner));
+
+                Owner = owner;
+
+                // We do not control the current directory at this point, but assume that if we were
+                // passed a relative path, the caller assumes we will prepend the current directory.
+                projectFile = FileUtilities.NormalizePath(projectFile);
+
+                try
+                {
+                    Xml = ProjectRootElement.OpenProjectOrSolution(
+                        projectFile,
+                        globalProperties,
+                        toolsVersion,
+                        ProjectCollection.ProjectRootElementCache,
+                        true /*Explicitly loaded*/);
+                }
+                catch (InvalidProjectFileException ex)
+                {
+                    LoggingService.LogInvalidProjectFileError(s_buildEventContext, ex);
+                    throw;
+                }
+            }
+
+            private Project Owner { get; }
+            /// <summary>
+            /// Gets or sets the project collection which contains this project.
+            /// Can never be null.
+            /// Cannot be modified.
+            /// </summary>
+            private ProjectCollection ProjectCollection => Owner.ProjectCollection;
+
+            /// <summary>
+            /// Certain item operations split the item element in multiple elements if the include
+            /// contains globs, references to items or properties, or multiple item values.
+            ///
+            /// The items operations that may expand item elements are:
+            /// - <see cref="RemoveItem"/>
+            /// - <see cref="RemoveItems"/>
+            /// - <see cref="AddItem(string,string, IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt;)"/>
+            /// - <see cref="AddItemFast(string,string, IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt;)"/>
+            /// - <see cref="ProjectItem.ChangeItemType"/>
+            /// - <see cref="ProjectItem.Rename"/>
+            /// - <see cref="ProjectItem.RemoveMetadata"/>
+            /// - <see cref="ProjectItem.SetMetadataValue(string,string)"/>
+            /// - <see cref="ProjectItem.SetMetadataValue(string,string, bool)"/>
+            /// 
+            /// When this property is set to true, the previous item operations throw an <exception cref="InvalidOperationException"></exception>
+            /// instead of expanding the item element. 
+            /// </summary>
+            public override bool ThrowInsteadOfSplittingItemElement { get; set; }
+
+            /// <summary>
+            /// Whether build is enabled for this project.
+            /// </summary>
+            private enum BuildEnabledSetting
+            {
+                /// <summary>
+                /// Explicitly enabled
+                /// </summary>
+                BuildEnabled,
+
+                /// <summary>
+                /// Explicitly disabled
+                /// </summary>
+                BuildDisabled,
+
+                /// <summary>
+                /// No explicit setting, uses the setting on the
+                /// project collection.
+                /// This is the default.
+                /// </summary>
+                UseProjectCollectionSetting
+            }
+
+            public bool IsLinked => false;
+
+            public bool IsZombified
+            {
+                get => _renameHandler == null;
+                set => _renameHandler = null;
+            }
+
+            public Data TestOnlyGetPrivateData => _data;
+
+            /// <summary>
+            /// The backing Xml project.
+            /// Can never be null
+            /// </summary>
+            /// <remarks>
+            /// There is no setter here as that doesn't make sense. If you have a new ProjectRootElement, evaluate it into a new Project.
+            /// </remarks>
+            public override ProjectRootElement Xml { get; }
+
+            /// <summary>
+            /// Whether this project is dirty such that it needs reevaluation.
+            /// This may be because its underlying XML has changed (either through this project or another)
+            /// either the XML of the main project or an imported file; 
+            /// or because its toolset may have changed.
+            /// </summary>
+            public override bool IsDirty
+            {
+                get
+                {
+                    if (_explicitlyMarkedDirty)
+                    {
+                        if (s_debugEvaluation)
+                        {
+                            Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Explicitly marked dirty, eg., because a global property was set, or an import, such as a .user file, was created on disk [{0}] [PC Hash {1}]", FullPath, ProjectCollection.GetHashCode()));
+                        }
+
+                        return true;
+                    }
+
+                    if (_evaluatedVersion < Xml.Version)
+                    {
+                        if (s_debugEvaluation)
+                        {
+                            if (Xml.Count > 0) // don't log empty projects, evaluation is not interesting
+                            {
+                                Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Is dirty because {0} [{1}] [PC Hash {2}]", Xml.LastDirtyReason, FullPath, ProjectCollection.GetHashCode()));
+                            }
+                        }
+
+                        return true;
+                    }
+
+                    if (_evaluatedToolsetCollectionVersion != ProjectCollection.ToolsetsVersion)
+                    {
+                        if (s_debugEvaluation)
+                        {
+                            Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Is dirty because toolsets updated [{0}] [PC Hash {1}]", FullPath, ProjectCollection.GetHashCode()));
+                        }
+
+                        return true;
+                    }
+
+                    foreach (ResolvedImport import in _data.ImportClosure)
+                    {
+                        if (import.ImportedProject.Version != import.VersionEvaluated || _evaluatedVersion < import.VersionEvaluated)
+                        {
+                            if (s_debugEvaluation)
+                            {
+                                string reason = import.ImportedProject.LastDirtyReason;
+
+                                if (reason != null)
+                                {
+                                    Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Is dirty because {0} [{1} - {2}] [PC Hash {3}]", reason, FullPath, (import.ImportedProject.FullPath == FullPath ? String.Empty : import.ImportedProject.FullPath), ProjectCollection.GetHashCode()));
+                                }
+                            }
+
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+            }
+
+            /// <summary>
+            /// Read only dictionary of the global properties used in the evaluation
+            /// of this project.
+            /// </summary>
+            /// <remarks>
+            /// This is the publicly exposed getter, that translates into a read-only dead IDictionary&lt;string, string&gt;.
+            /// 
+            /// In order to easily tell when we're dirtied, setting and removing global properties is done with 
+            /// <see cref="SetGlobalProperty">SetGlobalProperty</see> and <see cref="RemoveGlobalProperty">RemoveGlobalProperty</see>.
+            /// </remarks>
+            public override IDictionary<string, string> GlobalProperties
+            {
+                [DebuggerStepThrough]
+                get
+                {
+                    if (_data.GlobalPropertiesDictionary.Count == 0)
+                    {
+                        return ReadOnlyEmptyDictionary<string, string>.Instance;
+                    }
+
+                    var dictionary = new Dictionary<string, string>(_data.GlobalPropertiesDictionary.Count, MSBuildNameIgnoreCaseComparer.Default);
+                    foreach (ProjectPropertyInstance property in _data.GlobalPropertiesDictionary)
+                    {
+                        dictionary[property.Name] = ((IProperty)property).EvaluatedValueEscaped;
+                    }
+
+                    return new ObjectModel.ReadOnlyDictionary<string, string>(dictionary);
+                }
+            }
+
+            /// <summary>
+            /// Item types in this project.
+            /// This is an ordered collection.
+            /// </summary>
+            /// <comments>
+            /// data.ItemTypes is a KeyCollection, so it doesn't need any 
+            /// additional read-only protection
+            /// </comments>
+            public override ICollection<string> ItemTypes => _data.ItemTypes;
+
+            /// <summary>
+            /// Properties in this project.
+            /// Since evaluation has occurred, this is an unordered collection.
+            /// </summary>
+            public override ICollection<ProjectProperty> Properties => new ReadOnlyCollection<ProjectProperty>(_data.Properties);
+
+            /// <summary>
+            /// Collection of possible values implied for properties contained in the conditions found on properties,
+            /// property groups, imports, and whens.
+            /// 
+            /// For example, if the following conditions existed on properties in a project:
+            /// 
+            /// Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'"
+            /// Condition="'$(Configuration)' == 'Release'"
+            /// 
+            /// the table would be populated with
+            /// 
+            /// { "Configuration", { "Debug", "Release" }}
+            /// { "Platform", { "x86" }}
+            /// 
+            /// This is used by Visual Studio to determine the configurations defined in the project.
+            /// </summary>
+            public override IDictionary<string, List<string>> ConditionedProperties
+            {
+                [DebuggerStepThrough]
+                get
+                {
+                    if (_data.ConditionedProperties == null)
+                    {
+                        return ReadOnlyEmptyDictionary<string, List<string>>.Instance;
+                    }
+
+                    return new ObjectModel.ReadOnlyDictionary<string, List<string>>(_data.ConditionedProperties);
+                }
+            }
+
+            /// <summary>
+            /// Read-only dictionary of item definitions in this project.
+            /// Keyed by item type
+            /// </summary>
+            public override IDictionary<string, ProjectItemDefinition> ItemDefinitions => _data.ItemDefinitions;
+
+            /// <summary>
+            /// Items in this project, ordered within groups of item types
+            /// </summary>
+            [SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods", Justification = "This is a reasonable choice. API review approved")]
+            public override ICollection<ProjectItem> Items => new ReadOnlyCollection<ProjectItem>(_data.Items);
+
+            /// <summary>
+            /// Items in this project, ordered within groups of item types,
+            /// including items whose conditions evaluated to false, or that were
+            /// contained within item groups who themselves had conditioned evaluated to false.
+            /// This is useful for hosts that wish to display all items, even if they might not be part 
+            /// of the build in the current configuration.
+            /// </summary>
+            [SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods", Justification = "This is a reasonable choice. API review approved")]
+            public override ICollection<ProjectItem> ItemsIgnoringCondition
+            {
+                [DebuggerStepThrough]
+                get
+                {
+                    if (!(_data.ShouldEvaluateForDesignTime && _data.CanEvaluateElementsWithFalseConditions))
+                    {
+                        ErrorUtilities.ThrowInvalidOperation("OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse", nameof(ItemsIgnoringCondition));
+                    }
+
+                    return new ReadOnlyCollection<ProjectItem>(_data.ItemsIgnoringCondition);
+                }
+            }
+
+            /// <summary>
+            /// All the files that during evaluation contributed to this project, as ProjectRootElements,
+            /// with the ProjectImportElement that caused them to be imported.
+            /// This does not include projects that were never imported because a condition on an Import element was false.
+            /// The outer ProjectRootElement that maps to this project itself is not included.
+            /// </summary>
+            /// <remarks>
+            /// This can be used by the host to figure out what projects might be impacted by a change to a particular file.
+            /// It could also be used, for example, to find the .user file, and use its ProjectRootElement to modify properties in it.
+            /// </remarks>
+            public override IList<ResolvedImport> Imports
+            {
+                get
+                {
+                    var imports = new List<ResolvedImport>(_data.ImportClosure.Count - 1 /* outer project */);
+
+                    foreach (ResolvedImport import in _data.ImportClosure)
+                    {
+                        if (import.ImportingElement != null) // Exclude outer project itself
+                        {
+                            imports.Add(import);
+                        }
+                    }
+
+                    return imports;
+                }
+            }
+
+            /// <summary>
+            /// This list will contain duplicate imports if an import is imported multiple times. However, only the first import was used in evaluation.
+            /// </summary>
+            public override IList<ResolvedImport> ImportsIncludingDuplicates
+            {
+                get
+                {
+                    ErrorUtilities.VerifyThrowInvalidOperation((_loadSettings & ProjectLoadSettings.RecordDuplicateButNotCircularImports) != 0, "OM_MustSetRecordDuplicateInputs");
+
+                    var imports = new List<ResolvedImport>(_data.ImportClosureWithDuplicates.Count - 1 /* outer project */);
+
+                    foreach (var import in _data.ImportClosureWithDuplicates)
+                    {
+                        if (import.ImportingElement != null) // Exclude outer project itself
+                        {
+                            imports.Add(import);
+                        }
+                    }
+
+                    return imports;
+                }
+            }
+
+            /// <summary>
+            /// Targets in the project. The key to the dictionary is the target's name.
+            /// Overridden targets are not included in this collection.
+            /// This collection is read-only.
+            /// </summary>
+            public override IDictionary<string, ProjectTargetInstance> Targets
+            {
+                [DebuggerStepThrough]
+                get
+                {
+                    if (_data.Targets == null)
+                    {
+                        return ReadOnlyEmptyDictionary<string, ProjectTargetInstance>.Instance;
+                    }
+
+                    return new ObjectModel.ReadOnlyDictionary<string, ProjectTargetInstance>(_data.Targets);
+                }
+            }
+
+            /// <summary>
+            /// Properties encountered during evaluation. These are read during the first evaluation pass.
+            /// Unlike those returned by the Properties property, these are ordered, and includes any properties that
+            /// were subsequently overridden by others with the same name. It does not include any 
+            /// properties whose conditions did not evaluate to true.
+            /// It does not include any properties added since the last evaluation.
+            /// </summary>
+            public override ICollection<ProjectProperty> AllEvaluatedProperties
+            {
+                get
+                {
+                    ICollection<ProjectProperty> allEvaluatedProperties = _data.AllEvaluatedProperties;
+
+                    if (allEvaluatedProperties == null)
+                    {
+                        return ReadOnlyEmptyCollection<ProjectProperty>.Instance;
+                    }
+
+                    return new ReadOnlyCollection<ProjectProperty>(allEvaluatedProperties);
+                }
+            }
+
+            /// <summary>
+            /// Item definition metadata encountered during evaluation. These are read during the second evaluation pass.
+            /// Unlike those returned by the ItemDefinitions property, these are ordered, and include any metadata that
+            /// were subsequently overridden by others with the same name and item type. It does not include any 
+            /// elements whose conditions did not evaluate to true.
+            /// It does not include any item definition metadata added since the last evaluation.
+            /// </summary>
+            public override ICollection<ProjectMetadata> AllEvaluatedItemDefinitionMetadata
+            {
+                get
+                {
+                    ICollection<ProjectMetadata> allEvaluatedItemDefinitionMetadata = _data.AllEvaluatedItemDefinitionMetadata;
+
+                    if (allEvaluatedItemDefinitionMetadata == null)
+                    {
+                        return ReadOnlyEmptyCollection<ProjectMetadata>.Instance;
+                    }
+
+                    return new ReadOnlyCollection<ProjectMetadata>(allEvaluatedItemDefinitionMetadata);
+                }
+            }
+
+            /// <summary>
+            /// Items encountered during evaluation. These are read during the third evaluation pass.
+            /// Unlike those returned by the Items property, these are ordered with respect to all other items 
+            /// encountered during evaluation, not just ordered with respect to items of the same item type.
+            /// In some applications, like the F# language, this complete mutual ordering is significant, and such hosts
+            /// can use this property.
+            /// It does not include any elements whose conditions did not evaluate to true.
+            /// It does not include any items added since the last evaluation.
+            /// </summary>
+            public override ICollection<ProjectItem> AllEvaluatedItems
+            {
+                get
+                {
+                    ICollection<ProjectItem> allEvaluatedItems = _data.AllEvaluatedItems;
+
+                    if (allEvaluatedItems == null)
+                    {
+                        return ReadOnlyEmptyCollection<ProjectItem>.Instance;
+                    }
+
+                    return new ReadOnlyCollection<ProjectItem>(allEvaluatedItems);
+                }
+            }
+
+            /// <summary>
+            /// The tools version this project was evaluated with, if any.
+            /// Not necessarily the same as the tools version on the Project tag, if any;
+            /// it may have been externally specified, for example with a /tv switch.
+            /// The actual tools version on the Project tag, can be gotten from <see cref="Xml">Xml.ToolsVersion</see>.
+            /// Cannot be changed once the project has been created.
+            /// </summary>
+            /// <remarks>
+            /// Set by construction.
+            /// </remarks>
+            public override string ToolsVersion => _data.Toolset.ToolsVersion;
+
+            /// <summary>
+            /// The sub-toolset version that, combined with the ToolsVersion, was used to determine
+            /// the toolset properties for this project.  
+            /// </summary>
+            public override string SubToolsetVersion => _data.SubToolsetVersion;
+
+            /// <summary>
+            /// The root directory for this project.
+            /// Is never null: in-memory projects use the current directory from the time of load.
+            /// </summary>
+            public string DirectoryPath => Xml.DirectoryPath;
+
+            /// <summary>
+            /// The full path to this project's file.
+            /// May be null, if the project was not loaded from disk.
+            /// Setter renames the project, if it already had a name.
+            /// </summary>
+            public string FullPath
+            {
+                [DebuggerStepThrough]
+                get => Xml.FullPath;
+                [DebuggerStepThrough]
+                set => Xml.FullPath = value;
+            }
+
+            /// <summary>
+            /// Whether ReevaluateIfNecessary is temporarily disabled.
+            /// This is useful when the host expects to make a number of reads and writes 
+            /// to the project, and wants to temporarily sacrifice correctness for performance.
+            /// </summary>
+            public override bool SkipEvaluation { get; set; }
+
+            /// <summary>
+            /// Whether <see cref="MarkDirty()">MarkDirty()</see> is temporarily disabled.
+            /// This allows, for example, a global property to be set without the project getting
+            /// marked dirty for reevaluation as a consequence.
+            /// </summary>
+            public override bool DisableMarkDirty { get; set; }
+
+            /// <summary>
+            /// This controls whether or not the building of targets/tasks is enabled for this
+            /// project.  This is for security purposes in case a host wants to closely
+            /// control which projects it allows to run targets/tasks.  By default, for a newly
+            /// created project, we will use whatever setting is in the parent project collection.
+            /// When build is disabled, the Build method on this class will fail. However if
+            /// the host has already created a ProjectInstance, it can still build it. (It is 
+            /// free to put a similar check around where it does this.)
+            /// </summary>
+            public override bool IsBuildEnabled
+            {
+                get
+                {
+                    switch (_isBuildEnabled)
+                    {
+                        case BuildEnabledSetting.BuildEnabled:
+                            return true;
+
+                        case BuildEnabledSetting.BuildDisabled:
+                            return false;
+
+                        case BuildEnabledSetting.UseProjectCollectionSetting:
+                            return ProjectCollection.IsBuildEnabled;
+
+                        default:
+                            ErrorUtilities.ThrowInternalErrorUnreachable();
+                            return false;
+                    }
+                }
+
+                set => _isBuildEnabled = value ? BuildEnabledSetting.BuildEnabled : BuildEnabledSetting.BuildDisabled;
+            }
+
+            /// <summary>
+            /// Location of the originating file itself, not any specific content within it.
+            /// If the file has not been given a name, returns an empty location.
+            /// </summary>
+            public ElementLocation ProjectFileLocation => Xml.ProjectFileLocation;
+
+            /// <summary>
+            /// Obsolete. Use <see cref="LastEvaluationId"/> instead.
+            /// </summary>
+            // marked as obsolete in 15.3
+            public int EvaluationCounter => LastEvaluationId;
+
+            /// <summary>
+            /// The ID of the last evaluation for this Project.
+            /// A project is always evaluated upon construction and can subsequently get evaluated multiple times via
+            /// <see cref="ProjectLink.ReevaluateIfNecessary" />
+            /// 
+            /// It is an arbitrary number that changes when this project reevaluates.
+            /// Hosts don't know whether an evaluation actually happened in an interval, but they can compare this number to
+            /// their previously stored value to find out, and if so perhaps decide to update their own state.
+            /// Note that the number may not increase monotonically.
+            /// 
+            /// This number corresponds to the <seealso cref="BuildEventContext.EvaluationId"/> and can be used to connect
+            /// evaluation logging events back to the Project instance.
+            /// </summary>
+            public override int LastEvaluationId => _data.EvaluationId;
+
+            /// <summary>
+            /// List of names of the properties that, while global, are still treated as overridable 
+            /// </summary>
+            public ISet<string> GlobalPropertiesToTreatAsLocal => _data.GlobalPropertiesToTreatAsLocal;
+
+            /// <summary>
+            /// The logging service used for evaluation errors
+            /// </summary>
+            internal ILoggingService LoggingService => ProjectCollection.LoggingService;
+
+
+            /// <summary>
+            /// See <see cref="ProjectLink.GetAllGlobs(EvaluationContext)"/>
+            /// </summary>
+            /// <param name="evaluationContext">
+            ///     The evaluation context to use in case reevaluation is required.
+            ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
+            /// </param>
+            public override List<GlobResult> GetAllGlobs(EvaluationContext evaluationContext)
+            {
+                return GetAllGlobs(GetEvaluatedItemElements(evaluationContext));
+            }
+
+            /// <summary>
+            /// See <see cref="ProjectLink.GetAllGlobs(string, EvaluationContext)"/>
+            /// </summary>
+            /// <param name="evaluationContext">
+            ///     The evaluation context to use in case reevaluation is required.
+            ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
+            /// </param>
+            public override List<GlobResult> GetAllGlobs(string itemType, EvaluationContext evaluationContext)
+            {
+                if (string.IsNullOrEmpty(itemType))
+                {
+                    return new List<GlobResult>();
+                }
+
+                return GetAllGlobs(GetItemElementsByType(GetEvaluatedItemElements(evaluationContext), itemType));
+            }
+
+            // represents cumulated remove information for a particular item type
+            private struct CumulativeRemoveElementData
+            {
+                private ImmutableList<IMSBuildGlob>.Builder _globs;
+                private ImmutableHashSet<string>.Builder _fragmentStrings;
+
+                public IEnumerable<IMSBuildGlob> Globs => _globs.ToImmutable();
+                public IEnumerable<string> FragmentStrings => _fragmentStrings.ToImmutable();
+
+                public static CumulativeRemoveElementData Create()
+                {
+                    return new CumulativeRemoveElementData
+                    {
+                        _globs = ImmutableList.CreateBuilder<IMSBuildGlob>(),
+                        _fragmentStrings = ImmutableHashSet.CreateBuilder<string>()
+                    };
+                }
+
+                public void AccumulateInformationFromRemoveItemSpec(EvaluationItemSpec removeSpec)
+                {
+                    IEnumerable<string> removeSpecFragmentStrings = removeSpec.FlattenFragmentsAsStrings();
+                    var removeGlob = removeSpec.ToMSBuildGlob();
+
+                    _globs.Add(removeGlob);
+
+                    foreach (var removeFragment in removeSpecFragmentStrings)
+                    {
+                        _fragmentStrings.Add(removeFragment);
+                    }
+                }
+            }
+
+            private List<GlobResult> GetAllGlobs(List<ProjectItemElement> projectItemElements)
+            {
+                if (projectItemElements.Count == 0)
+                {
+                    return new List<GlobResult>();
+                }
+
+                // Scan the project elements in reverse order and build globbing information for each include element.
+                // Based on the fact that relevant removes for a particular include element (xml element A) consist of:
+                // - all the removes seen by the next include statement of A's type (xml element B which appears after A in file order)
+                // - new removes between A and B (removes that apply to A but not to B. Spacially, these are placed between A's element and B's element)
+
+                // Example:
+                // 1. <I Include="A"/>
+                // 2. <I Remove="..."/> // this remove applies to the include at 1
+                // 3. <I Include="B"/>
+                // 4. <I Remove="..."/> // this remove applies to the includes at 1, 3
+                // 5. <I Include="C"/>
+                // 6. <I Remove="..."/> // this remove applies to the includes at 1, 3, 5
+                // So A's applicable removes are composed of:
+                // 
+                // The applicable removes for the element at position 1 (xml element A) are composed of:
+                // - all the removes seen by the next include statement of I's type (xml element B, position 3, which appears after A in file order). In this example that's Removes at positions 4 and 6.
+                // - new removes between A and B. In this example that's Remove 2.
+
+                // use immutable builders because there will be a lot of structural sharing between includes which share increasing subsets of corresponding remove elements
+                // item type -> aggregated information about all removes seen so far for that item type
+                var removeElementCache = new Dictionary<string, CumulativeRemoveElementData>(projectItemElements.Count);
+                var globResults = new List<GlobResult>(projectItemElements.Count);
+
+                for (var i = projectItemElements.Count - 1; i >= 0; i--)
+                {
+                    var itemElement = projectItemElements[i];
+
+                    if (!string.IsNullOrEmpty(itemElement.Include))
+                    {
+                        var globResult = BuildGlobResultFromIncludeItem(itemElement, removeElementCache);
+
+                        if (globResult != null)
+                        {
+                            globResults.Add(globResult);
+                        }
+                    }
+                    else if (!string.IsNullOrEmpty(itemElement.Remove))
+                    {
+                        CacheInformationFromRemoveItem(itemElement, removeElementCache);
+                    }
+                }
+
+                globResults.TrimExcess();
+
+                return globResults;
+            }
+
+            private GlobResult BuildGlobResultFromIncludeItem(ProjectItemElement itemElement, IReadOnlyDictionary<string, CumulativeRemoveElementData> removeElementCache)
+            {
+                var includeItemspec = new EvaluationItemSpec(itemElement.Include, _data.Expander, itemElement.IncludeLocation, itemElement.ContainingProject.DirectoryPath);
+
+                ImmutableArray<ItemFragment> includeGlobFragments = includeItemspec.Fragments.Where(f => f is GlobFragment).ToImmutableArray();
+                if (includeGlobFragments.Length == 0)
+                {
+                    return null;
+                }
+
+                ImmutableArray<string> includeGlobStrings = includeGlobFragments.Select(f => f.ItemSpecFragment).ToImmutableArray();
+                var includeGlob = new CompositeGlob(includeGlobFragments.Select(f => f.ToMSBuildGlob()));
+
+                IEnumerable<string> excludeFragmentStrings = Enumerable.Empty<string>();
+                IMSBuildGlob excludeGlob = null;
+
+                if (!string.IsNullOrEmpty(itemElement.Exclude))
+                {
+                    var excludeItemspec = new EvaluationItemSpec(itemElement.Exclude, _data.Expander, itemElement.ExcludeLocation, itemElement.ContainingProject.DirectoryPath);
+
+                    excludeFragmentStrings = excludeItemspec.FlattenFragmentsAsStrings().ToImmutableHashSet();
+                    excludeGlob = excludeItemspec.ToMSBuildGlob();
+                }
+
+                IEnumerable<string> removeFragmentStrings = Enumerable.Empty<string>();
+                IMSBuildGlob removeGlob = null;
+
+                if (removeElementCache.ContainsKey(itemElement.ItemType))
+                {
+                    removeFragmentStrings = removeElementCache[itemElement.ItemType].FragmentStrings;
+                    removeGlob = new CompositeGlob(removeElementCache[itemElement.ItemType].Globs);
+                }
+
+                var includeGlobWithGaps = CreateIncludeGlobWithGaps(includeGlob, excludeGlob, removeGlob);
+
+                return new GlobResult(itemElement, includeGlobStrings, includeGlobWithGaps, excludeFragmentStrings, removeFragmentStrings);
+            }
+
+            private static IMSBuildGlob CreateIncludeGlobWithGaps(IMSBuildGlob includeGlob, IMSBuildGlob excludeGlob, IMSBuildGlob removeGlob)
+            {
+                if (excludeGlob != null && removeGlob != null)
+                {
+                    return new MSBuildGlobWithGaps(
+                        includeGlob,
+                        new CompositeGlob(
+                            excludeGlob,
+                            removeGlob
+                        ));
+                }
+
+                if (excludeGlob != null || removeGlob != null)
+                {
+                    var gapGlob = excludeGlob ?? removeGlob;
+
+                    return new MSBuildGlobWithGaps(
+                        includeGlob,
+                        gapGlob
+                    );
+                }
+
+                return includeGlob;
+            }
+
+            private void CacheInformationFromRemoveItem(ProjectItemElement itemElement, Dictionary<string, CumulativeRemoveElementData> removeElementCache)
+            {
+                if (!removeElementCache.TryGetValue(itemElement.ItemType, out CumulativeRemoveElementData cumulativeRemoveElementData))
+                {
+                    cumulativeRemoveElementData = CumulativeRemoveElementData.Create();
+
+                    removeElementCache[itemElement.ItemType] = cumulativeRemoveElementData;
+                }
+
+                var removeSpec = new EvaluationItemSpec(itemElement.Remove, _data.Expander, itemElement.RemoveLocation, itemElement.ContainingProject.DirectoryPath);
+
+                cumulativeRemoveElementData.AccumulateInformationFromRemoveItemSpec(removeSpec);
+            }
+
+            /// <summary>
+            /// See <see cref="ProjectLink.GetItemProvenance(string, EvaluationContext)"/>
+            /// </summary>
+            /// <param name="evaluationContext">
+            ///     The evaluation context to use in case reevaluation is required.
+            ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
+            /// </param>
+            public override List<ProvenanceResult> GetItemProvenance(string itemToMatch, EvaluationContext evaluationContext)
+            {
+                return GetItemProvenance(itemToMatch, GetEvaluatedItemElements(evaluationContext));
+            }
+
+            /// <summary>
+            /// See <see cref="ProjectLink.GetItemProvenance(string, string, EvaluationContext)"/>
+            /// </summary>
+            /// <param name="evaluationContext">
+            ///     The evaluation context to use in case reevaluation is required.
+            ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
+            /// </param>
+            public override List<ProvenanceResult> GetItemProvenance(string itemToMatch, string itemType, EvaluationContext evaluationContext)
+            {
+                return GetItemProvenance(itemToMatch, GetItemElementsByType(GetEvaluatedItemElements(evaluationContext), itemType));
+            }
+
+            /// <summary>
+            /// See <see cref="ProjectLink.GetItemProvenance(ProjectItem, EvaluationContext)"/>
+            /// </summary>
+            /// <param name="evaluationContext">
+            ///     The evaluation context to use in case reevaluation is required.
+            ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
+            /// </param>
+            public override List<ProvenanceResult> GetItemProvenance(ProjectItem item, EvaluationContext evaluationContext)
+            {
+                if (item == null)
+                {
+                    return new List<ProvenanceResult>();
+                }
+
+                IEnumerable<ProjectItemElement> itemElementsAbove = GetItemElementsThatMightAffectItem(GetEvaluatedItemElements(evaluationContext), item);
+
+                return GetItemProvenance(item.EvaluatedInclude, itemElementsAbove);
+            }
+
+            /// <summary>
+            /// Some project APIs need to do analysis that requires the Evaluator to record more data than usual as it evaluates.
+            /// This method checks if the Evaluator was run with the extra required settings and if not, does a re-evaluation.
+            /// If a re-evaluation was necessary, it saves this information so a next call does not re-evaluate.
+            /// 
+            /// Using this method avoids storing extra data in memory when its not needed.
+            /// </summary>
+            /// <param name="evaluationContext"></param>
+            private List<ProjectItemElement> GetEvaluatedItemElements(EvaluationContext evaluationContext)
+            {
+                if (!_loadSettings.HasFlag(ProjectLoadSettings.RecordEvaluatedItemElements))
+                {
+                    _loadSettings = _loadSettings | ProjectLoadSettings.RecordEvaluatedItemElements;
+                    Reevaluate(LoggingService, _loadSettings, evaluationContext);
+                }
+
+                return _data.EvaluatedItemElements;
+            }
+
+            private static IEnumerable<ProjectItemElement> GetItemElementsThatMightAffectItem(List<ProjectItemElement> evaluatedItemElements, ProjectItem item)
+            {
+                IEnumerable<ProjectItemElement> relevantElementsAfterInclude = evaluatedItemElements
+                    // Skip until we encounter the element that produced the item because
+                    // there are no item operations that can affect future items
+                    .SkipWhile((i => i != item.Xml))
+                    .Where(itemElement =>
+                        // items operations of different item types cannot affect each other
+                        itemElement.ItemType.Equals(item.ItemType) &&
+                        // other includes cannot affect the current item
+                        itemElement.IncludeLocation == null &&
+                        // any remove that matches this item will cause the ProjectItem to not be produced in the first place
+                        // all other removes do not apply
+                        itemElement.RemoveLocation == null);
+
+                // add the include operation that created the project item element
+                return new[] { item.Xml }.Concat(relevantElementsAfterInclude);
+            }
+
+            private static List<ProjectItemElement> GetItemElementsByType(IEnumerable<ProjectItemElement> itemElements, string itemType)
+            {
+                return itemElements.Where(i => i.ItemType.Equals(itemType)).ToList();
+            }
+
+            private List<ProvenanceResult> GetItemProvenance(string itemToMatch, IEnumerable<ProjectItemElement> projectItemElements)
+            {
+                if (string.IsNullOrEmpty(itemToMatch))
+                {
+                    return new List<ProvenanceResult>();
+                }
+
+                return
+                    projectItemElements
+                    .AsParallel()
+                    .AsOrdered()
+                    .Select(i => ComputeProvenanceResult(itemToMatch, i))
+                    .Where(r => r != null)
+                    .ToList();
+            }
+
+            private ProvenanceResult ComputeProvenanceResult(string itemToMatch, ProjectItemElement itemElement)
+            {
+                ProvenanceResult SingleItemSpecProvenance(string itemSpec, IElementLocation elementLocation, Operation operation)
+                {
+                    if (elementLocation == null)
+                    {
+                        return null;
+                    }
+
+                    var matchOccurrences = ItemMatchesInItemSpecString(itemToMatch, itemSpec, elementLocation, itemElement.ContainingProject.DirectoryPath, _data.Expander, out Provenance provenance);
+                    Tuple<Provenance, int> result = matchOccurrences > 0 ? Tuple.Create(provenance, matchOccurrences) : null;
+
+                    return result?.Item2 > 0
+                        ? new ProvenanceResult(itemElement, operation, result.Item1, result.Item2)
+                        : null;
+                }
+
+                Func<ProvenanceResult>[] provenanceProviders =
+                {
+                // provenance provider for include item elements
+                () =>
+                {
+                    var includeResult = SingleItemSpecProvenance(itemElement.Include, itemElement.IncludeLocation, Operation.Include);
+                    if (includeResult == null)
+                    {
+                        return null;
+                    }
+
+                    var excludeResult = SingleItemSpecProvenance(itemElement.Exclude, itemElement.ExcludeLocation, Operation.Exclude);
+
+                    return excludeResult ?? includeResult;
+                },
+
+                // provenance provider for update item elements
+                () => SingleItemSpecProvenance(itemElement.Update, itemElement.UpdateLocation, Operation.Update),
+                
+                // provenance provider for remove item elements
+                () => SingleItemSpecProvenance(itemElement.Remove, itemElement.RemoveLocation, Operation.Remove)
+            };
+
+                return provenanceProviders.Select(provider => provider()).FirstOrDefault(provenanceResult => provenanceResult != null);
+            }
+
+            /// <summary>
+            /// Since:
+            ///     - we have no proper AST and interpreter for itemspecs that we can do analysis on
+            ///     - GetItemProvenance needs to have correct counts for exclude strings (as correct as it can get while doing it after evaluation)
+            /// 
+            /// The temporary hack is to use the expander to expand the strings, and if any property or item references were encountered, return Provenance.Inconclusive
+            /// </summary>
+            private static int ItemMatchesInItemSpecString(string itemToMatch, string itemSpec, IElementLocation elementLocation, string projectDirectory, Expander<ProjectProperty, ProjectItem> expander, out Provenance provenance)
+            {
+                if (string.IsNullOrEmpty(itemSpec))
+                {
+                    provenance = Provenance.Undefined;
+                    return 0;
+                }
+
+                // expand the properties
+                var expandedItemSpec = new EvaluationItemSpec(itemSpec, expander, elementLocation, projectDirectory, expandProperties: true);
+                var numberOfMatches = ItemMatchesInItemSpec(itemToMatch, expandedItemSpec, out provenance);
+
+                // Result is inconclusive if properties are present
+                if (itemSpec.Contains("$("))
+                {
+                    provenance |= Provenance.Inconclusive;
+                }
+
+                return numberOfMatches;
+            }
+
+            private static int ItemMatchesInItemSpec(string itemToMatch, EvaluationItemSpec itemSpec, out Provenance provenance)
+            {
+                provenance = Provenance.Undefined;
+
+                IEnumerable<ItemFragment> fragmentsMatchingItem = itemSpec.FragmentsMatchingItem(itemToMatch, out int occurrences);
+                foreach (var fragment in fragmentsMatchingItem)
+                {
+                    if (fragment is ValueFragment)
+                    {
+                        provenance |= Provenance.StringLiteral;
+                    }
+                    else if (fragment is GlobFragment)
+                    {
+                        provenance |= Provenance.Glob;
+                    }
+                    else if (fragment is EvaluationItemExpressionFragment)
+                    {
+                        provenance |= Provenance.Inconclusive;
+                    }
+                    else
+                    {
+                        ErrorUtilities.ThrowInternalErrorUnreachable();
+                    }
+                }
+
+                return occurrences;
+            }
+
+            /// <summary>
+            /// Returns an iterator over the "logical project". The logical project is defined as
+            /// the unevaluated project obtained from the single MSBuild file that is the result 
+            /// of inlining the text of all imports of the original MSBuild project manifest file.
+            /// </summary>
+            public override IEnumerable<ProjectElement> GetLogicalProject()
+            {
+                // Implicit imports exist in the import closure but not in the project XML so the ImplicitImportLocation.Top
+                // imports need to be returned before walking the project XML
+                foreach (ProjectRootElement import in _data.ImportClosure.Where(i => i.ImportingElement?.ImplicitImportLocation == ImplicitImportLocation.Top).Select(i => i.ImportedProject))
+                {
+                    foreach (ProjectElement child in GetLogicalProject(import.AllChildren))
+                    {
+                        yield return child;
+                    }
+                }
+
+                foreach (ProjectElement child in GetLogicalProject(Xml.AllChildren))
+                {
+                    yield return child;
+                }
+
+                // Implicit imports exist in the import closure but not in the project XML so the ImplicitImportLocation.Bottom
+                // imports need to be returned before walking the project XML
+                foreach (ProjectRootElement import in _data.ImportClosure.Where(i => i.ImportingElement?.ImplicitImportLocation == ImplicitImportLocation.Bottom).Select(i => i.ImportedProject))
+                {
+                    foreach (ProjectElement child in GetLogicalProject(import.AllChildren))
+                    {
+                        yield return child;
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Get any property in the project that has the specified name,
+            /// otherwise returns null
+            /// </summary>
+            [DebuggerStepThrough]
+            public override ProjectProperty GetProperty(string name)
+            {
+                return _data.Properties[name];
+            }
+
+            /// <summary>
+            /// Get the unescaped value of a property in this project, or 
+            /// an empty string if it does not exist.
+            /// </summary>
+            /// <remarks>
+            /// A property with a value of empty string and no property
+            /// at all are not distinguished between by this method.
+            /// That makes it easier to use. To find out if a property is set at
+            /// all in the project, use GetProperty(name).
+            /// </remarks>
+            public override string GetPropertyValue(string name)
+            {
+                return _data.GetPropertyValue(name);
+            }
+
+            /// <summary>
+            /// Set or add a property with the specified name and value.
+            /// Overwrites the value of any property with the same name already in the collection if it did not originate in an imported file.
+            /// If there is no such existing property, uses this heuristic:
+            /// Updates the last existing property with the specified name that has no condition on itself or its property group, if any,
+            /// and is in this project file rather than an imported file.
+            /// Otherwise, adds a new property in the first property group without a condition, creating a property group if necessary after
+            /// the last existing property group, else at the start of the project.
+            /// Returns the property set.
+            /// Evaluates on a best-effort basis:
+            ///     -expands with all properties. Properties that are defined in the XML below the new property may be used, even though in a real evaluation they would not be.
+            ///     -only this property is evaluated. Anything else that would depend on its value is not affected.
+            /// This is a convenience that it is understood does not necessarily leave the project in a perfectly self consistent state until reevaluation.
+            /// </summary>
+            public override ProjectProperty SetProperty(string name, string unevaluatedValue)
+            {
+                ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+                ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue, nameof(unevaluatedValue));
+
+                ProjectProperty property = _data.Properties[name];
+
+                ErrorUtilities.VerifyThrowInvalidOperation(property == null || !property.IsReservedProperty, "OM_ReservedName", name);
+                ErrorUtilities.VerifyThrowInvalidOperation(property == null || !property.IsGlobalProperty, "OM_GlobalProperty", name);
+
+                // If there's an existing regular property, we can reuse it, unless it's not attached to its XML any more
+                if (property != null &&
+                    !property.IsEnvironmentProperty &&
+                    property.Xml.Parent?.Parent != null &&
+                    ReferenceEquals(property.Xml.ContainingProject, Xml))
+                {
+                    property.UnevaluatedValue = unevaluatedValue;
+                }
+                else
+                {
+                    ProjectPropertyElement propertyElement = Xml.AddProperty(name, unevaluatedValue);
+
+                    property = ProjectProperty.Create(Owner, propertyElement, unevaluatedValue, null /* predecessor unknown */);
+
+                    _data.Properties[name] = property;
+                }
+
+                property.UpdateEvaluatedValue(ExpandPropertyValueBestEffortLeaveEscaped(unevaluatedValue, property.Xml.Location));
+
+                return property;
+            }
+
+            /// <summary>
+            /// Change a global property after the project has been evaluated.
+            /// If the value changes, this makes the project require reevaluation.
+            /// If the value changes, returns true, otherwise false.
+            /// </summary>
+            public override bool SetGlobalProperty(string name, string escapedValue)
+            {
+                ProjectPropertyInstance existing = _data.GlobalPropertiesDictionary[name];
+
+                if (existing == null || ((IProperty)existing).EvaluatedValueEscaped != escapedValue)
+                {
+                    string originalValue = (existing == null) ? String.Empty : ((IProperty)existing).EvaluatedValueEscaped;
+
+                    _data.GlobalPropertiesDictionary.Set(ProjectPropertyInstance.Create(name, escapedValue));
+                    _data.Properties.Set(ProjectProperty.Create(Owner, name, escapedValue, true /* is global */, false /* may not be reserved name */));
+
+                    ProjectCollection.AfterUpdateLoadedProjectGlobalProperties(Owner);
+                    MarkDirty();
+
+                    if (s_debugEvaluation)
+                    {
+                        string displayValue = escapedValue.Substring(0, Math.Min(escapedValue.Length, 75)) + ((escapedValue.Length > 75) ? "..." : String.Empty);
+                        if (existing == null)
+                        {
+                            Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Initially set global property {0} to '{1}' [{2}]", name, displayValue, FullPath));
+                        }
+                        else
+                        {
+                            string displayOriginalValue = originalValue.Substring(0, Math.Min(originalValue.Length, 75)) + ((originalValue.Length > 75) ? "..." : String.Empty);
+                            Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Changed global property {0} from '{1}' to '{2}' [{3}]", name, displayOriginalValue, displayValue, FullPath));
+                        }
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            /// <summary>
+            /// Adds an item with metadata to the project.
+            /// Metadata may be null, indicating no metadata.
+            /// Does not modify the XML if a wildcard expression would already include the new item.
+            /// Evaluates on a best-effort basis:
+            ///     -expands with all items. Items that are defined in the XML below the new item may be used, even though in a real evaluation they would not be.
+            ///     -only this item is evaluated. Other items that might depend on it is not affected.
+            /// This is a convenience that it is understood does not necessarily leave the project in a perfectly self consistent state until reevaluation.
+            /// </summary>
+            public override IList<ProjectItem> AddItem(string itemType, string unevaluatedInclude, IEnumerable<KeyValuePair<string, string>> metadata)
+            {
+                // For perf reasons, this method does several jobs in one.
+                // If it finds a suitable existing item element, it returns that as the out parameter, otherwise the out parameter returns null.
+                // Otherwise, if it finds an item element suitable to be just below our new element, it returns that.
+                // Otherwise, if it finds an item group at least that's suitable to put our element in somewhere, it returns that.
+                // Otherwise, it returns null.
+                ProjectElement element = GetAnySuitableExistingItemXml(itemType, unevaluatedInclude, metadata, out ProjectItemElement itemElement);
+
+                if (itemElement == null)
+                {
+                    // Didn't find a suitable existing item; maybe the hunt gave us a hint as
+                    // to where to put a new one.
+                    if (element is ProjectItemElement itemElementToAddBefore)
+                    {
+                        // It told us an item to add before
+                        itemElement = Xml.CreateItemElement(itemType, unevaluatedInclude);
+                        itemElementToAddBefore.Parent.InsertBeforeChild(itemElement, itemElementToAddBefore);
+                    }
+                    else
+                    {
+                        if (element is ProjectItemGroupElement itemGroupElement)
+                        {
+                            // It only told us an item group to add it somewhere within
+                            itemElement = itemGroupElement.AddItem(itemType, unevaluatedInclude);
+                        }
+                        else
+                        {
+                            // It didn't give any hint at all
+                            itemElement = Xml.AddItem(itemType, unevaluatedInclude);
+                        }
+                    }
+                }
+
+                // Fix up the evaluated state to match
+                return AddItemHelper(itemElement, unevaluatedInclude, metadata);
+            }
+
+            /// <summary>
+            /// Adds an item with metadata to the project.
+            /// Metadata may be null, indicating no metadata.
+            /// Makes no effort to see if an existing wildcard would already match the new item, unless it is the first item in an item group.
+            /// Makes no effort to locate the new item near similar items.
+            /// Appends the item to the first item group that does not have a condition and has either no children or whose first child is an item of the same type.
+            /// Evaluates on a best-effort basis:
+            ///     -expands with all items. Items that are defined in the XML below the new item may be used, even though in a real evaluation they would not be.
+            ///     -only this item is evaluated. Other items that might depend on it is not affected.
+            /// This is a convenience that it is understood does not necessarily leave the project in a perfectly self consistent state until reevaluation.
+            /// </summary>
+            public override IList<ProjectItem> AddItemFast(string itemType, string unevaluatedInclude, IEnumerable<KeyValuePair<string, string>> metadata)
+            {
+                ErrorUtilities.VerifyThrowArgumentLength(itemType, nameof(itemType));
+                ErrorUtilities.VerifyThrowArgumentLength(unevaluatedInclude, nameof(unevaluatedInclude));
+
+                ProjectItemGroupElement groupToAppendTo = null;
+
+                foreach (ProjectItemGroupElement group in Xml.ItemGroups)
+                {
+                    if (group.Condition.Length > 0)
+                    {
+                        continue;
+                    }
+
+                    if (group.Count == 0 || MSBuildNameIgnoreCaseComparer.Default.Equals(itemType, group.Items.First().ItemType))
+                    {
+                        groupToAppendTo = group;
+
+                        break;
+                    }
+                }
+
+                if (groupToAppendTo == null)
+                {
+                    groupToAppendTo = Xml.AddItemGroup();
+                }
+
+                ProjectItemElement itemElement;
+
+                if (groupToAppendTo.Count == 0 ||
+                    FileMatcher.HasWildcardsSemicolonItemOrPropertyReferences(unevaluatedInclude) ||
+                    !IsSuitableExistingItemXml(groupToAppendTo.Items.First(), unevaluatedInclude, metadata))
+                {
+                    itemElement = Xml.CreateItemElement(itemType, unevaluatedInclude);
+                    groupToAppendTo.AppendChild(itemElement);
+                }
+                else
+                {
+                    itemElement = groupToAppendTo.Items.First();
+                }
+
+                return AddItemHelper(itemElement, unevaluatedInclude, metadata);
+            }
+
+            /// <summary>
+            /// All the items in the project of the specified
+            /// type.
+            /// If there are none, returns an empty list.
+            /// Use AddItem or RemoveItem to modify items in this project.
+            /// </summary>
+            /// <comments>
+            /// data.GetItems returns a read-only collection, so no need to re-wrap it here. 
+            /// </comments>
+            public override ICollection<ProjectItem> GetItems(string itemType)
+            {
+                ICollection<ProjectItem> items = _data.GetItems(itemType);
+                return items;
+            }
+
+            /// <summary>
+            /// All the items in the project of the specified
+            /// type, irrespective of whether the conditions on them evaluated to true.
+            /// This is a read-only list: use AddItem or RemoveItem to modify items in this project.
+            /// </summary>
+            /// <comments>
+            /// ItemDictionary[] returns a read only collection, so no need to wrap it. 
+            /// </comments>
+            public override ICollection<ProjectItem> GetItemsIgnoringCondition(string itemType)
+            {
+                ICollection<ProjectItem> items = _data.ItemsIgnoringCondition[itemType];
+                return items;
+            }
+
+            /// <summary>
+            /// Returns all items that have the specified evaluated include.
+            /// For example, all items that have the evaluated include "bar.cpp".
+            /// Typically there will be zero or one, but sometimes there are two items with the
+            /// same path and different item types, or even the same item types. This will return
+            /// them all.
+            /// </summary>
+            /// <comments>
+            /// data.GetItemsByEvaluatedInclude already returns a read-only collection, so no need
+            /// to wrap it further.
+            /// </comments>
+            public override ICollection<ProjectItem> GetItemsByEvaluatedInclude(string evaluatedInclude)
+            {
+                ICollection<ProjectItem> items = _data.GetItemsByEvaluatedInclude(evaluatedInclude);
+                return items;
+            }
+
+            /// <summary>
+            /// Removes the specified property.
+            /// Property must be associated with this project.
+            /// Property must not originate from an imported file.
+            /// Returns true if the property was in this evaluated project, otherwise false.
+            /// As a convenience, if the parent property group becomes empty, it is also removed.
+            /// Updates the evaluated project, but does not affect anything else in the project until reevaluation. For example,
+            /// if "p" is removed, it will be removed from the evaluated project, but "q" which is evaluated from "$(p)" will not be modified until reevaluation.
+            /// This is a convenience that it is understood does not necessarily leave the project in a perfectly self consistent state.
+            /// </summary>
+            public override bool RemoveProperty(ProjectProperty property)
+            {
+                ErrorUtilities.VerifyThrowArgumentNull(property, nameof(property));
+                ErrorUtilities.VerifyThrowInvalidOperation(!property.IsReservedProperty, "OM_ReservedName", property.Name);
+                ErrorUtilities.VerifyThrowInvalidOperation(!property.IsGlobalProperty, "OM_GlobalProperty", property.Name);
+                ErrorUtilities.VerifyThrowArgument(property.Xml.Parent != null, "OM_IncorrectObjectAssociation", "ProjectProperty", "Project");
+                VerifyThrowInvalidOperationNotImported(property.Xml.ContainingProject);
+
+                ProjectElementContainer parent = property.Xml.Parent;
+
+                property.Xml.Parent.RemoveChild(property.Xml);
+
+                if (parent.Count == 0)
+                {
+                    parent.Parent.RemoveChild(parent);
+                }
+
+                bool result = _data.Properties.Remove(property.Name);
+
+                return result;
+            }
+
+            /// <summary>
+            /// Removes a global property.
+            /// If it was set, returns true, and marks the project
+            /// as requiring reevaluation.
+            /// </summary>
+            public override bool RemoveGlobalProperty(string name)
+            {
+                ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+
+                bool result = _data.GlobalPropertiesDictionary.Remove(name);
+
+                if (result)
+                {
+                    ProjectCollection.AfterUpdateLoadedProjectGlobalProperties(Owner);
+                    MarkDirty();
+
+                    if (s_debugEvaluation)
+                    {
+                        Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD:  Remove global property {0}", name));
+                    }
+                }
+
+                return result;
+            }
+
+            /// <summary>
+            /// Removes an item from the project.
+            /// Item must be associated with this project.
+            /// Item must not originate from an imported file.
+            /// Returns true if the item was in this evaluated project, otherwise false.
+            /// As a convenience, if the parent item group becomes empty, it is also removed.
+            /// If the item originated from a wildcard or semicolon separated expression, expands that expression into multiple items first.
+            /// Updates the evaluated project, but does not affect anything else in the project until reevaluation. For example,
+            /// if an item of type "i" is removed, "j" which is evaluated from "@(i)" will not be modified until reevaluation.
+            /// This is a convenience that it is understood does not necessarily leave the project in a perfectly self consistent state until reevaluation.
+            /// </summary>
+            /// <remarks>
+            /// Normally this will return true, since if the item isn't in the project, it will throw.
+            /// The exception is removing an item that was only in ItemsIgnoringCondition.
+            /// </remarks>
+            public override bool RemoveItem(ProjectItem item)
+            {
+                ErrorUtilities.VerifyThrowArgumentNull(item, nameof(item));
+                ErrorUtilities.VerifyThrowArgument(item.Project == Owner, "OM_IncorrectObjectAssociation", "ProjectItem", "Project");
+
+                bool result = RemoveItemHelper(item);
+
+                return result;
+            }
+
+            /// <summary>
+            /// Removes all the specified items from the project.
+            /// Items that are not associated with this project are skipped.
+            /// </summary>
+            /// <remarks>
+            /// Removing one item could cause the backing XML
+            /// to be expanded, which could zombie (disassociate) the next item.
+            /// To make this case easy for the caller, if an item
+            /// is not associated with this project it is simply skipped.
+            /// </remarks>
+            public override void RemoveItems(IEnumerable<ProjectItem> items)
+            {
+                ErrorUtilities.VerifyThrowArgumentNull(items, nameof(items));
+
+                // Copying to a list makes it possible to remove
+                // all items of a particular type with 
+                //   RemoveItems(p.GetItems("mytype"))
+                // without modifying the collection during enumeration.
+                var itemsList = new List<ProjectItem>(items);
+
+                foreach (ProjectItem item in itemsList)
+                {
+                    RemoveItemHelper(item);
+                }
+            }
+
+            /// <summary>
+            /// Evaluates the provided string by expanding items and properties,
+            /// as if it was found at the very end of the project file.
+            /// This is useful for some hosts for which this kind of best-effort
+            /// evaluation is sufficient.
+            /// Does not expand bare metadata expressions.
+            /// </summary>
+            public override string ExpandString(string unexpandedValue)
+            {
+                ErrorUtilities.VerifyThrowArgumentNull(unexpandedValue, nameof(unexpandedValue));
+
+                string result = _data.Expander.ExpandIntoStringAndUnescape(unexpandedValue, ExpanderOptions.ExpandPropertiesAndItems, ProjectFileLocation);
+
+                return result;
+            }
+
+
+            /// <summary>
+            /// See <see cref="ProjectLink.CreateProjectInstance(ProjectInstanceSettings, EvaluationContext)"/>
+            /// </summary>
+            /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required</param>
+            /// <returns></returns>
+            public override ProjectInstance CreateProjectInstance(ProjectInstanceSettings settings, EvaluationContext evaluationContext)
+            {
+                return CreateProjectInstance(LoggingService, settings, evaluationContext);
+            }
+
+            /// <summary>
+            /// Called to forcibly mark the project as dirty requiring reevaluation. Generally this is not necessary to set; all edits affecting
+            /// this project will automatically make it dirty. However there are potential corner cases where it is necessary to mark the project dirty
+            /// directly. For example, if the project has an import conditioned on a file existing on disk, and the file did not exist at
+            /// evaluation time, then someone subsequently creates that file, the project cannot know that reevaluation would be productive.
+            /// In such a case the host can help us by setting the dirty flag explicitly so that <see cref="ProjectLink.ReevaluateIfNecessary">ReevaluateIfNecessary()</see>
+            /// will recognize an evaluation is indeed necessary.
+            /// Does not mark the underlying project file as requiring saving.
+            /// </summary>
+            public override void MarkDirty()
+            {
+                if (!DisableMarkDirty && !ProjectCollection.DisableMarkDirty)
+                {
+                    _explicitlyMarkedDirty = true;
+                }
+
+                // Pass up the MarkDirty call even when DisableMarkDirty is true.
+                Xml.MarkProjectDirty(Owner);
+            }
+
+            /// <summary>
+            /// See <see cref="ProjectLink.ReevaluateIfNecessary"/>
+            /// </summary>
+            /// <param name="evaluationContext">The <see cref="EvaluationContext"/> to use. See <see cref="EvaluationContext"/></param>
+            public override void ReevaluateIfNecessary(EvaluationContext evaluationContext)
+            {
+                ReevaluateIfNecessary(LoggingService, evaluationContext);
+            }
+
+            /// <summary>
+            /// Saves a "logical" or "preprocessed" project file, that includes all the imported 
+            /// files as if they formed a single file.
+            /// </summary>
+            public override void SaveLogicalProject(TextWriter writer)
+            {
+                XmlDocument document = Preprocessor.GetPreprocessedDocument(Owner);
+
+                using (var projectWriter = new ProjectWriter(writer))
+                {
+                    projectWriter.Initialize(document);
+                    document.Save(projectWriter);
+                }
+            }
+
+            /// <summary>
+            /// See <see cref="ProjectLink.Build"/>
+            /// </summary>
+            /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required</param>
+            public override bool Build(string[] targets, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, EvaluationContext evaluationContext)
+            {
+                if (!IsBuildEnabled)
+                {
+                    LoggingService.LogError(s_buildEventContext, new BuildEventFileInfo(FullPath), "SecurityProjectBuildDisabled");
+                    return false;
+                }
+
+                ProjectInstance instance = CreateProjectInstance(LoggingService, ProjectInstanceSettings.None, evaluationContext);
+
+                if (loggers == null && ProjectCollection.Loggers != null)
+                {
+                    loggers = ProjectCollection.Loggers;
+                }
+
+                bool result = instance.Build(targets, loggers, remoteLoggers, null, ProjectCollection.MaxNodeCount, out _);
+
+                return result;
+            }
+
+            /// <summary>
+            /// Tests whether a given project IS or IMPORTS some given project xml root element.
+            /// </summary>
+            /// <param name="xmlRootElement">The project xml root element in question.</param>
+            /// <returns>True if this project is or imports the xml file; false otherwise.</returns>
+            public bool UsesProjectRootElement(ProjectRootElement xmlRootElement)
+            {
+                if (ReferenceEquals(Xml, xmlRootElement))
+                {
+                    return true;
+                }
+
+                if (_data.ImportClosure.Any(import => ReferenceEquals(import.ImportedProject, xmlRootElement)))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+            /// <summary>
+            /// If the ProjectItemElement evaluated to more than one ProjectItem, replaces it with a new ProjectItemElement for each one of them.
+            /// If the ProjectItemElement did not evaluate into more than one ProjectItem, does nothing.
+            /// Returns true if a split occurred, otherwise false.
+            /// </summary>
+            /// <remarks>
+            /// A ProjectItemElement could have resulted in several items if it contains wildcards or item or property expressions.
+            /// Before any edit to a ProjectItem (remove, rename, set metadata, or remove metadata) this must be called to make
+            /// sure that the edit does not affect any other ProjectItems originating in the same ProjectItemElement.
+            /// 
+            /// For example, an item xml with an include of "@(x)" could evaluate to items "a", "b", and "c". If "b" is removed, then the original
+            /// item xml must be removed and replaced with three, then the one corresponding to "b" can be removed.
+            /// 
+            /// This is an unsophisticated approach; the best that can be said is that the result will likely be correct, if not ideal.
+            /// For example, perhaps the user would rather remove the item from the original list "x" instead of expanding the list.
+            /// Or, perhaps the user would rather the property in "$(p)\a;$(p)\b" not be expanded when "$(p)\b" is removed.
+            /// If that's important, the host can manipulate the ProjectItemElement's directly, instead, and it can be as fastidious as it wishes.
+            /// </remarks>
+            internal bool SplitItemElementIfNecessary(ProjectItemElement itemElement)
+            {
+                if (!ItemElementRequiresSplitting(itemElement))
+                {
+                    return false;
+                }
+
+                ErrorUtilities.VerifyThrowInvalidOperation(!ThrowInsteadOfSplittingItemElement, "OM_CannotSplitItemElementWhenSplittingIsDisabled", itemElement.Location, $"{nameof(Project)}.{nameof(ThrowInsteadOfSplittingItemElement)}");
+
+                var relevantItems = new List<ProjectItem>();
+
+                foreach (ProjectItem item in Items)
+                {
+                    if (item.Xml == itemElement)
+                    {
+                        relevantItems.Add(item);
+                    }
+                }
+
+                foreach (ProjectItem item in relevantItems)
+                {
+                    item.SplitOwnItemElement();
+                }
+
+                itemElement.Parent.RemoveChild(itemElement);
+
+                return true;
+            }
+
+            internal bool ItemElementRequiresSplitting(ProjectItemElement itemElement)
+            {
+                var hasCharactersThatRequireSplitting = FileMatcher.HasWildcardsSemicolonItemOrPropertyReferences(itemElement.Include);
+
+                return hasCharactersThatRequireSplitting;
+            }
+
+            /// <summary>
+            /// Examines the provided ProjectItemElement to see if it has a wildcard that would match the 
+            /// item we wish to add, and does not have a condition or an exclude.
+            /// Works conservatively - if there is anything that might cause doubt, considers the candidate to not be suitable.
+            /// Returns true if it is suitable, otherwise false.
+            /// </summary>
+            /// <remarks>
+            /// Outside this class called ONLY from <see cref="ProjectItem.Rename(string)"/>ProjectItem.Rename(string name).
+            /// </remarks>
+            public bool IsSuitableExistingItemXml(ProjectItemElement candidateExistingItemXml, string unevaluatedInclude, IEnumerable<KeyValuePair<string, string>> metadata)
+            {
+                if (candidateExistingItemXml.Condition.Length != 0 || candidateExistingItemXml.Exclude.Length != 0 || !candidateExistingItemXml.IncludeHasWildcards)
+                {
+                    return false;
+                }
+
+                if ((metadata != null && metadata.Any()) || candidateExistingItemXml.Count > 0)
+                {
+                    // Don't try to make sure the metadata are the same.
+                    return false;
+                }
+
+                string evaluatedExistingInclude = _data.Expander.ExpandIntoStringLeaveEscaped(candidateExistingItemXml.Include, ExpanderOptions.ExpandProperties, candidateExistingItemXml.IncludeLocation);
+
+                string[] existingIncludePieces = evaluatedExistingInclude.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (string existingIncludePiece in existingIncludePieces)
+                {
+                    if (!FileMatcher.HasWildcards(existingIncludePiece))
+                    {
+                        continue;
+                    }
+
+                    FileMatcher.Result match = FileMatcher.Default.FileMatch(existingIncludePiece, unevaluatedInclude);
+
+                    if (match.isLegalFileSpec && match.isMatch)
+                    {
+                        // The wildcard in the original item spec will match the new item that
+                        // user is trying to add.
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            /// <summary>
+            /// Before an item changes its item type, it must be removed from
+            /// our datastructures, which key off item type. 
+            /// This should be called ONLY by ProjectItems, in this situation.
+            /// </summary>
+            public void RemoveItemBeforeItemTypeChange(ProjectItem item)
+            {
+                _data.RemoveItem(item);
+            }
+
+            /// <summary>
+            /// After an item has changed its item type, it needs to be added back again,
+            /// since our data structures key off the item type.
+            /// This should be called ONLY by ProjectItems, in this situation.
+            /// </summary>
+            public void ReAddExistingItemAfterItemTypeChange(ProjectItem item)
             {
                 _data.AddItem(item);
                 _data.AddItemIgnoringCondition(item);
             }
 
-            if (metadata != null)
+            /// <summary>
+            /// Provided a property that is already part of this project, does a best-effort expansion
+            /// of the unevaluated value provided and sets it as the evaluated value.
+            /// </summary>
+            /// <remarks>
+            /// On project in order to keep Project's expander hidden.
+            /// </remarks>
+            public string ExpandPropertyValueBestEffortLeaveEscaped(string unevaluatedValue, ElementLocation propertyLocation)
             {
+                string evaluatedValueEscaped = _data.Expander.ExpandIntoStringLeaveEscaped(unevaluatedValue, ExpanderOptions.ExpandProperties, propertyLocation);
+
+                return evaluatedValueEscaped;
+            }
+
+            /// <summary>
+            /// Provided an item element that has been renamed with a new unevaluated include,
+            /// returns a best effort guess at the evaluated include that results.
+            /// If the best effort expansion produces anything other than one item, it just
+            /// returns the unevaluated include.
+            /// This is not at all generalized, but useful for the majority case where an item is a very
+            /// simple file name with perhaps a property prefix.
+            /// </summary>
+            /// <remarks>
+            /// On project in order to keep Project's expander hidden.
+            /// </remarks>
+            public string ExpandItemIncludeBestEffortLeaveEscaped(ProjectItemElement renamedItemElement)
+            {
+                if (renamedItemElement.Exclude.Length > 0)
+                {
+                    return renamedItemElement.Include;
+                }
+
+                var itemFactory = new ProjectItemFactory(Owner, renamedItemElement);
+
+                List<ProjectItem> items = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.CreateItemsFromInclude(DirectoryPath, renamedItemElement, itemFactory, renamedItemElement.Include, _data.Expander);
+
+                if (items.Count != 1)
+                {
+                    return renamedItemElement.Include;
+                }
+
+                return ((IItem)items[0]).EvaluatedIncludeEscaped;
+            }
+
+            /// <summary>
+            /// Provided a metadatum that is already part of this project, does a best-effort expansion
+            /// of the unevaluated value provided and returns the resulting value.
+            /// This is a interim expansion only: it may not be the value that a full project reevaluation would produce.
+            /// The metadata table passed in is that of the parent item or item definition.
+            /// </summary>
+            /// <remarks>
+            /// On project in order to keep Project's expander hidden.
+            /// </remarks>
+            public string ExpandMetadataValueBestEffortLeaveEscaped(IMetadataTable metadataTable, string unevaluatedValue, ElementLocation metadataLocation)
+            {
+                ErrorUtilities.VerifyThrow(_data.Expander.Metadata == null, "Should be null");
+
+                _data.Expander.Metadata = metadataTable;
+                string evaluatedValueEscaped = _data.Expander.ExpandIntoStringLeaveEscaped(unevaluatedValue, ExpanderOptions.ExpandAll, metadataLocation);
+                _data.Expander.Metadata = null;
+
+                return evaluatedValueEscaped;
+            }
+
+            /// <summary>
+            /// Called by the project collection to indicate to this project that it is no longer loaded.
+            /// </summary>
+            public override void Unload()
+            {
+                Xml.OnAfterProjectRename -= _renameHandler;
+                Xml.OnProjectXmlChanged -= ProjectRootElement_ProjectXmlChangedHandler;
+                Xml.XmlDocument.ClearAnyCachedStrings();
+                _renameHandler = null;
+            }
+
+            /// <summary>
+            /// Verify that the provided object location is in the same file as the project.
+            /// If it is not, throws an InvalidOperationException indicating that imported evaluated objects should not be modified.
+            /// This prevents, for example, accidentally updating something like the OutputPath property, that you want be in the 
+            /// main project, but for some reason was actually read in from an imported targets file.
+            /// </summary>
+            internal void VerifyThrowInvalidOperationNotImported(ProjectRootElement otherXml)
+            {
+                ErrorUtilities.VerifyThrowInternalNull(otherXml, nameof(otherXml));
+                ErrorUtilities.VerifyThrowInvalidOperation(ReferenceEquals(Xml, otherXml), "OM_CannotModifyEvaluatedObjectInImportedFile", otherXml.Location.File);
+            }
+
+            /// <summary>
+            /// Common code for the AddItem methods.
+            /// </summary>
+            private List<ProjectItem> AddItemHelper(ProjectItemElement itemElement, string unevaluatedInclude, IEnumerable<KeyValuePair<string, string>> metadata)
+            {
+                var itemFactory = new ProjectItemFactory(Owner, itemElement);
+
+                List<ProjectItem> items = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.CreateItemsFromInclude(DirectoryPath, itemElement, itemFactory, unevaluatedInclude, _data.Expander);
+
                 foreach (ProjectItem item in items)
                 {
-                    foreach (KeyValuePair<string, string> metadatum in metadata)
+                    _data.AddItem(item);
+                    _data.AddItemIgnoringCondition(item);
+                }
+
+                if (metadata != null)
+                {
+                    foreach (ProjectItem item in items)
                     {
-                        item.SetMetadataValue(metadatum.Key, metadatum.Value);
+                        foreach (KeyValuePair<string, string> metadatum in metadata)
+                        {
+                            item.SetMetadataValue(metadatum.Key, metadatum.Value);
+                        }
+                    }
+                }
+
+                // The old OM attempted to evaluate and return the resulting item, or if several then whatever was the "first" returned.
+                // This was rather arbitrary, and made it impossible for the caller to retrieve the whole set.
+                return items;
+            }
+
+            /// <summary>
+            /// Helper for <see cref="RemoveItem"/> and <see cref="RemoveItems"/>.
+            /// If the item is not associated with a project, returns false.
+            /// If the item is not present in the evaluated project, returns false.
+            /// If the item is associated with another project, throws ArgumentException.
+            /// Otherwise removes the item and returns true.
+            /// </summary>
+            private bool RemoveItemHelper(ProjectItem item)
+            {
+                ErrorUtilities.VerifyThrowArgumentNull(item, nameof(item));
+
+                if (item.Project == null || item.Xml.Parent == null)
+                {
+                    // Return rather than throwing: this is to make it easier
+                    // to enumerate over a list of items to remove.
+                    return false;
+                }
+
+                ErrorUtilities.VerifyThrowArgument(item.Project == Owner, "OM_IncorrectObjectAssociation", "ProjectItem", "Project");
+
+                VerifyThrowInvalidOperationNotImported(item.Xml.ContainingProject);
+
+                SplitItemElementIfNecessary(item.Xml);
+
+                ProjectElementContainer parent = item.Xml.Parent;
+
+                item.Xml.Parent.RemoveChild(item.Xml);
+
+                if (parent.Count == 0)
+                {
+                    parent.Parent.RemoveChild(parent);
+                }
+
+                bool result = _data.RemoveItem(item);
+
+                return result;
+            }
+
+            /// <summary>
+            /// Re-evaluates the project using the specified logging service.
+            /// </summary>
+            private void ReevaluateIfNecessary(ILoggingService loggingServiceForEvaluation, EvaluationContext evaluationContext = null)
+            {
+                ReevaluateIfNecessary(loggingServiceForEvaluation, _loadSettings, evaluationContext);
+            }
+
+            /// <summary>
+            /// Re-evaluates the project using the specified logging service and load settings.
+            /// </summary>
+            private void ReevaluateIfNecessary(
+                ILoggingService loggingServiceForEvaluation,
+                ProjectLoadSettings loadSettings,
+                EvaluationContext evaluationContext = null)
+            {
+                // We will skip the evaluation if the flag is set. This will give us better performance on scenarios
+                // that we know we don't have to reevaluate. One example is project conversion bulk addfiles and set attributes. 
+                if (!SkipEvaluation && !ProjectCollection.SkipEvaluation && IsDirty)
+                {
+                    try
+                    {
+                        Reevaluate(loggingServiceForEvaluation, loadSettings, evaluationContext);
+                    }
+                    catch (InvalidProjectFileException ex)
+                    {
+                        loggingServiceForEvaluation.LogInvalidProjectFileError(s_buildEventContext, ex);
+                        throw;
                     }
                 }
             }
 
-            // The old OM attempted to evaluate and return the resulting item, or if several then whatever was the "first" returned.
-            // This was rather arbitrary, and made it impossible for the caller to retrieve the whole set.
-            return items;
-        }
-
-        /// <summary>
-        /// Helper for <see cref="RemoveItem"/> and <see cref="RemoveItems"/>.
-        /// If the item is not associated with a project, returns false.
-        /// If the item is not present in the evaluated project, returns false.
-        /// If the item is associated with another project, throws ArgumentException.
-        /// Otherwise removes the item and returns true.
-        /// </summary>
-        private bool RemoveItemHelper(ProjectItem item)
-        {
-            ErrorUtilities.VerifyThrowArgumentNull(item, nameof(item));
-
-            if (item.Project == null || item.Xml.Parent == null)
+            /// <summary>
+            /// Creates a project instance based on this project using the specified logging service.
+            /// </summary>  
+            private ProjectInstance CreateProjectInstance(
+                ILoggingService loggingServiceForEvaluation,
+                ProjectInstanceSettings settings,
+                EvaluationContext evaluationContext)
             {
-                // Return rather than throwing: this is to make it easier
-                // to enumerate over a list of items to remove.
-                return false;
+                ReevaluateIfNecessary(loggingServiceForEvaluation, evaluationContext);
+
+                return new ProjectInstance(_data, DirectoryPath, FullPath, ProjectCollection.HostServices, ProjectCollection.EnvironmentProperties, settings);
             }
 
-            ErrorUtilities.VerifyThrowArgument(item.Project == this, "OM_IncorrectObjectAssociation", "ProjectItem", "Project");
-
-            VerifyThrowInvalidOperationNotImported(item.Xml.ContainingProject);
-
-            SplitItemElementIfNecessary(item.Xml);
-
-            ProjectElementContainer parent = item.Xml.Parent;
-
-            item.Xml.Parent.RemoveChild(item.Xml);
-
-            if (parent.Count == 0)
+            private void Reevaluate(
+                ILoggingService loggingServiceForEvaluation,
+                ProjectLoadSettings loadSettings,
+                EvaluationContext evaluationContext = null)
             {
-                parent.Parent.RemoveChild(parent);
-            }
+                evaluationContext = evaluationContext?.ContextForNewProject() ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
 
-            bool result = _data.RemoveItem(item);
+                Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.Evaluate(
+                    _data,
+                    Xml,
+                    loadSettings,
+                    ProjectCollection.MaxNodeCount,
+                    ProjectCollection.EnvironmentProperties,
+                    loggingServiceForEvaluation,
+                    new ProjectItemFactory(Owner),
+                    ProjectCollection,
+                    ProjectCollection.ProjectRootElementCache,
+                    s_buildEventContext,
+                    evaluationContext.SdkResolverService,
+                    BuildEventContext.InvalidSubmissionId,
+                    evaluationContext);
 
-            return result;
-        }
+                ErrorUtilities.VerifyThrow(LastEvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
-        /// <summary>
-        /// Re-evaluates the project using the specified logging service.
-        /// </summary>
-        private void ReevaluateIfNecessary(ILoggingService loggingServiceForEvaluation, EvaluationContext evaluationContext = null)
-        {
-            ReevaluateIfNecessary(loggingServiceForEvaluation, _loadSettings, evaluationContext);
-        }
+                // We have to do this after evaluation, because evaluation might have changed
+                // the imports being pulled in.
+                int highestXmlVersion = Xml.Version;
 
-        /// <summary>
-        /// Re-evaluates the project using the specified logging service and load settings.
-        /// </summary>
-        private void ReevaluateIfNecessary(
-            ILoggingService loggingServiceForEvaluation,
-            ProjectLoadSettings loadSettings,
-            EvaluationContext evaluationContext = null)
-        {
-            // We will skip the evaluation if the flag is set. This will give us better performance on scenarios
-            // that we know we don't have to reevaluate. One example is project conversion bulk addfiles and set attributes. 
-            if (!SkipEvaluation && !ProjectCollection.SkipEvaluation && IsDirty)
-            {
-                try
+                if (_data.ImportClosure != null)
                 {
-                    Reevaluate(loggingServiceForEvaluation, loadSettings, evaluationContext);
-                }
-                catch (InvalidProjectFileException ex)
-                {
-                    loggingServiceForEvaluation.LogInvalidProjectFileError(s_buildEventContext, ex);
-                    throw;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Creates a project instance based on this project using the specified logging service.
-        /// </summary>  
-        private ProjectInstance CreateProjectInstance(
-            ILoggingService loggingServiceForEvaluation,
-            ProjectInstanceSettings settings,
-            EvaluationContext evaluationContext)
-        {
-            ReevaluateIfNecessary(loggingServiceForEvaluation, evaluationContext);
-
-            return new ProjectInstance(_data, DirectoryPath, FullPath, ProjectCollection.HostServices, ProjectCollection.EnvironmentProperties, settings);
-        }
-
-        private void Reevaluate(
-            ILoggingService loggingServiceForEvaluation,
-            ProjectLoadSettings loadSettings,
-            EvaluationContext evaluationContext = null)
-        {
-            evaluationContext = evaluationContext?.ContextForNewProject() ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
-
-            Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.Evaluate(
-                _data,
-                Xml,
-                loadSettings,
-                ProjectCollection.MaxNodeCount,
-                ProjectCollection.EnvironmentProperties,
-                loggingServiceForEvaluation,
-                new ProjectItemFactory(this),
-                ProjectCollection,
-                ProjectCollection.ProjectRootElementCache,
-                s_buildEventContext,
-                evaluationContext.SdkResolverService,
-                BuildEventContext.InvalidSubmissionId,
-                evaluationContext);
-
-            ErrorUtilities.VerifyThrow(LastEvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
-
-            // We have to do this after evaluation, because evaluation might have changed
-            // the imports being pulled in.
-            int highestXmlVersion = Xml.Version;
-
-            if (_data.ImportClosure != null)
-            {
-                foreach (ResolvedImport import in _data.ImportClosure)
-                {
-                    highestXmlVersion = (highestXmlVersion < import.VersionEvaluated)
-                        ? import.VersionEvaluated
-                        : highestXmlVersion;
-                }
-            }
-
-            _explicitlyMarkedDirty = false;
-            _evaluatedVersion = highestXmlVersion;
-            _evaluatedToolsetCollectionVersion = ProjectCollection.ToolsetsVersion;
-            _data.HasUnsavedChanges = false;
-
-            ErrorUtilities.VerifyThrow(!IsDirty, "Should not be dirty now");
-        }
-
-        /// <summary>
-        /// Common code for the constructors.
-        /// Applies global properties that are on the collection.
-        /// Global properties provided for the project overwrite any global properties from the collection that have the same name.
-        /// Global properties may be null.
-        /// Tools version may be null.
-        /// </summary>
-        private void Initialize(IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
-        {
-            Xml.MarkAsExplicitlyLoaded();
-
-            var globalPropertiesCollection = new PropertyDictionary<ProjectPropertyInstance>();
-            foreach (ProjectPropertyInstance property in ProjectCollection.GlobalPropertiesCollection)
-            {
-                ProjectPropertyInstance clone = property.DeepClone();
-                globalPropertiesCollection.Set(clone);
-            }
-
-            if (globalProperties != null)
-            {
-                foreach (KeyValuePair<string, string> pair in globalProperties)
-                {
-                    if (String.Equals(pair.Key, Constants.SubToolsetVersionPropertyName, StringComparison.OrdinalIgnoreCase) && subToolsetVersion != null)
+                    foreach (ResolvedImport import in _data.ImportClosure)
                     {
-                        // if we have a sub-toolset version explicitly provided by the ProjectInstance constructor, AND a sub-toolset version provided as a global property, 
-                        // make sure that the one passed in with the constructor wins.  If there isn't a matching global property, the sub-toolset version will be set at 
-                        // a later point. 
-                        globalPropertiesCollection.Set(ProjectPropertyInstance.Create(pair.Key, subToolsetVersion));
-                    }
-                    else
-                    {
-                        globalPropertiesCollection.Set(ProjectPropertyInstance.Create(pair.Key, pair.Value));
+                        highestXmlVersion = (highestXmlVersion < import.VersionEvaluated)
+                            ? import.VersionEvaluated
+                            : highestXmlVersion;
                     }
                 }
+
+                _explicitlyMarkedDirty = false;
+                _evaluatedVersion = highestXmlVersion;
+                _evaluatedToolsetCollectionVersion = ProjectCollection.ToolsetsVersion;
+                _data.HasUnsavedChanges = false;
+
+                ErrorUtilities.VerifyThrow(!IsDirty, "Should not be dirty now");
             }
 
-            // For back compat Project based evaluations should, by default, evaluate elements with false conditions
-            var canEvaluateElementsWithFalseConditions = Traits.Instance.EscapeHatches.EvaluateElementsWithFalseConditionInProjectEvaluation ?? !loadSettings.HasFlag(ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition);
-
-            _data = new Data(this, globalPropertiesCollection, toolsVersion, subToolsetVersion, canEvaluateElementsWithFalseConditions);
-
-            _loadSettings = loadSettings;
-
-            ErrorUtilities.VerifyThrow(LastEvaluationId == BuildEventContext.InvalidEvaluationId, "This is the first evaluation therefore the last evaluation id is invalid");
-
-            ReevaluateIfNecessary(evaluationContext);
-
-            ErrorUtilities.VerifyThrow(LastEvaluationId != BuildEventContext.InvalidEvaluationId, "Last evaluation ID must be valid after the first evaluation");
-
-            // Cause the project to be actually loaded into the collection, and register for
-            // rename notifications so we can subsequently update the collection.
-            _renameHandler = (string oldFullPath) => ProjectCollection.OnAfterRenameLoadedProject(oldFullPath, this);
-
-            Xml.OnAfterProjectRename += _renameHandler;
-            Xml.OnProjectXmlChanged += ProjectRootElement_ProjectXmlChangedHandler;
-
-            _renameHandler(null /* not previously named */);
-        }
-
-        /// <summary>
-        /// Raised when any XML in the underlying ProjectRootElement has changed.
-        /// </summary>
-        private void ProjectRootElement_ProjectXmlChangedHandler(object sender, ProjectXmlChangedEventArgs args)
-        {
-            Xml.MarkProjectDirty(this);
-        }
-
-        /// <summary>
-        /// Tries to find a ProjectItemElement already in the project file XML that has a wildcard that would match the
-        /// item we wish to add, does not have a condition or an exclude, and is within an itemgroup without a condition.
-        /// 
-        /// For perf reasons, this method does several jobs in one.
-        /// If it finds a suitable existing item element, it returns that as the out parameter, otherwise the out parameter returns null.
-        /// Otherwise, if it finds an item element suitable to be just below our new element, it returns that.
-        /// Otherwise, if it finds an item group at least that's suitable to put our element in somewhere, it returns that.
-        /// 
-        /// Returns null if the include of the item being added itself has wildcards, or semicolons, as the case is too difficult.
-        /// </summary>
-        private ProjectElement GetAnySuitableExistingItemXml(string itemType, string unevaluatedInclude, IEnumerable<KeyValuePair<string, string>> metadata, out ProjectItemElement suitableExistingItemXml)
-        {
-            suitableExistingItemXml = null;
-
-            if (FileMatcher.HasWildcardsSemicolonItemOrPropertyReferences(unevaluatedInclude))
+            /// <summary>
+            /// Common code for the constructors.
+            /// Applies global properties that are on the collection.
+            /// Global properties provided for the project overwrite any global properties from the collection that have the same name.
+            /// Global properties may be null.
+            /// Tools version may be null.
+            /// </summary>
+            internal void Initialize(IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
             {
-                return null;
+                Xml.MarkAsExplicitlyLoaded();
+
+                var globalPropertiesCollection = new PropertyDictionary<ProjectPropertyInstance>();
+                foreach (ProjectPropertyInstance property in ProjectCollection.GlobalPropertiesCollection)
+                {
+                    ProjectPropertyInstance clone = property.DeepClone();
+                    globalPropertiesCollection.Set(clone);
+                }
+
+                if (globalProperties != null)
+                {
+                    foreach (KeyValuePair<string, string> pair in globalProperties)
+                    {
+                        if (String.Equals(pair.Key, Constants.SubToolsetVersionPropertyName, StringComparison.OrdinalIgnoreCase) && subToolsetVersion != null)
+                        {
+                            // if we have a sub-toolset version explicitly provided by the ProjectInstance constructor, AND a sub-toolset version provided as a global property, 
+                            // make sure that the one passed in with the constructor wins.  If there isn't a matching global property, the sub-toolset version will be set at 
+                            // a later point. 
+                            globalPropertiesCollection.Set(ProjectPropertyInstance.Create(pair.Key, subToolsetVersion));
+                        }
+                        else
+                        {
+                            globalPropertiesCollection.Set(ProjectPropertyInstance.Create(pair.Key, pair.Value));
+                        }
+                    }
+                }
+
+                // For back compat Project based evaluations should, by default, evaluate elements with false conditions
+                var canEvaluateElementsWithFalseConditions = Traits.Instance.EscapeHatches.EvaluateElementsWithFalseConditionInProjectEvaluation ?? !loadSettings.HasFlag(ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition);
+
+                _data = new Data(Owner, globalPropertiesCollection, toolsVersion, subToolsetVersion, canEvaluateElementsWithFalseConditions);
+
+                _loadSettings = loadSettings;
+
+                ErrorUtilities.VerifyThrow(LastEvaluationId == BuildEventContext.InvalidEvaluationId, "This is the first evaluation therefore the last evaluation id is invalid");
+
+                ReevaluateIfNecessary(evaluationContext);
+
+                ErrorUtilities.VerifyThrow(LastEvaluationId != BuildEventContext.InvalidEvaluationId, "Last evaluation ID must be valid after the first evaluation");
+
+                // Cause the project to be actually loaded into the collection, and register for
+                // rename notifications so we can subsequently update the collection.
+                _renameHandler = (string oldFullPath) => ProjectCollection.OnAfterRenameLoadedProject(oldFullPath, Owner);
+
+                Xml.OnAfterProjectRename += _renameHandler;
+                Xml.OnProjectXmlChanged += ProjectRootElement_ProjectXmlChangedHandler;
+
+                _renameHandler(null /* not previously named */);
             }
 
-            if (metadata != null && metadata.Any())
+            /// <summary>
+            /// Raised when any XML in the underlying ProjectRootElement has changed.
+            /// </summary>
+            private void ProjectRootElement_ProjectXmlChangedHandler(object sender, ProjectXmlChangedEventArgs args)
             {
-                // Don't bother trying to match up metadata
-                return null;
+                Xml.MarkProjectDirty(Owner);
             }
 
-            // In case we don't find a suitable existing item xml, at least find
-            // a good item group to add to. Either the first item group with at least one
-            // item of the same type, or else the first empty item group without a condition.
-            ProjectItemGroupElement itemGroupToAddTo = null;
-
-            ProjectItemElement itemToAddBefore = null;
-
-            foreach (ProjectItemGroupElement itemGroupXml in Xml.ItemGroups)
+            /// <summary>
+            /// Tries to find a ProjectItemElement already in the project file XML that has a wildcard that would match the
+            /// item we wish to add, does not have a condition or an exclude, and is within an itemgroup without a condition.
+            /// 
+            /// For perf reasons, this method does several jobs in one.
+            /// If it finds a suitable existing item element, it returns that as the out parameter, otherwise the out parameter returns null.
+            /// Otherwise, if it finds an item element suitable to be just below our new element, it returns that.
+            /// Otherwise, if it finds an item group at least that's suitable to put our element in somewhere, it returns that.
+            /// 
+            /// Returns null if the include of the item being added itself has wildcards, or semicolons, as the case is too difficult.
+            /// </summary>
+            private ProjectElement GetAnySuitableExistingItemXml(string itemType, string unevaluatedInclude, IEnumerable<KeyValuePair<string, string>> metadata, out ProjectItemElement suitableExistingItemXml)
             {
-                if (itemGroupXml.Condition.Length > 0)
+                suitableExistingItemXml = null;
+
+                if (FileMatcher.HasWildcardsSemicolonItemOrPropertyReferences(unevaluatedInclude))
                 {
-                    continue;
+                    return null;
                 }
 
-                if (itemGroupXml.DefinitelyAreNoChildrenWithWildcards)
+                if (metadata != null && metadata.Any())
                 {
-                    continue;
+                    // Don't bother trying to match up metadata
+                    return null;
                 }
 
-                if (itemGroupToAddTo == null && itemGroupXml.Count == 0)
-                {
-                    itemGroupToAddTo = itemGroupXml;
-                }
+                // In case we don't find a suitable existing item xml, at least find
+                // a good item group to add to. Either the first item group with at least one
+                // item of the same type, or else the first empty item group without a condition.
+                ProjectItemGroupElement itemGroupToAddTo = null;
 
-                foreach (ProjectItemElement existingItemXml in itemGroupXml.Items)
+                ProjectItemElement itemToAddBefore = null;
+
+                foreach (ProjectItemGroupElement itemGroupXml in Xml.ItemGroups)
                 {
-                    if (!MSBuildNameIgnoreCaseComparer.Default.Equals(itemType, existingItemXml.ItemType))
+                    if (itemGroupXml.Condition.Length > 0)
                     {
                         continue;
                     }
 
-                    if (itemGroupToAddTo == null || itemGroupToAddTo.Count == 0)
+                    if (itemGroupXml.DefinitelyAreNoChildrenWithWildcards)
+                    {
+                        continue;
+                    }
+
+                    if (itemGroupToAddTo == null && itemGroupXml.Count == 0)
                     {
                         itemGroupToAddTo = itemGroupXml;
                     }
 
-                    // if the include sorts after us, store this item, so we can add
-                    // right after it if need be. For example if the item is "b.cs" and we are planning to add "a.cs"
-                    // then we know that we will want to add it just above this item. We can avoid another scan to figure that out.
-                    if (itemToAddBefore == null && String.Compare(unevaluatedInclude, existingItemXml.Include, StringComparison.OrdinalIgnoreCase) < 0)
+                    foreach (ProjectItemElement existingItemXml in itemGroupXml.Items)
                     {
-                        itemToAddBefore = existingItemXml;
-                    }
-
-                    if (IsSuitableExistingItemXml(existingItemXml, unevaluatedInclude, metadata))
-                    {
-                        suitableExistingItemXml = existingItemXml;
-                        return null;
-                    }
-                }
-            }
-
-            if (itemToAddBefore == null)
-            {
-                return itemGroupToAddTo;
-            }
-
-            return itemToAddBefore;
-        }
-
-        /// <summary>
-        /// Recursive helper for <see cref="GetLogicalProject()">GetLogicalProject</see>.
-        /// </summary>
-        private IEnumerable<ProjectElement> GetLogicalProject(IEnumerable<ProjectElement> projectElements)
-        {
-            foreach (ProjectElement element in projectElements)
-            {
-                if (!(element is ProjectImportElement import))
-                {
-                    yield return element;
-                }
-                else
-                {
-                    // Get the project root elements of all the imports resulting from this import statement (there could be multiple if there is a wild card).
-                    IEnumerable<ProjectRootElement> children = _data.ImportClosure.Where(resolvedImport => ReferenceEquals(resolvedImport.ImportingElement, import)).Select(triple => triple.ImportedProject);
-
-                    foreach (ProjectRootElement child in children)
-                    {
-                        if (child != null)
+                        if (!MSBuildNameIgnoreCaseComparer.Default.Equals(itemType, existingItemXml.ItemType))
                         {
-                            // The import's condition must have evaluated to true, to traverse into it
-                            IEnumerable<ProjectElement> childElements = GetLogicalProject(child.AllChildren);
+                            continue;
+                        }
 
-                            foreach (ProjectElement childElement in childElements)
+                        if (itemGroupToAddTo == null || itemGroupToAddTo.Count == 0)
+                        {
+                            itemGroupToAddTo = itemGroupXml;
+                        }
+
+                        // if the include sorts after us, store this item, so we can add
+                        // right after it if need be. For example if the item is "b.cs" and we are planning to add "a.cs"
+                        // then we know that we will want to add it just above this item. We can avoid another scan to figure that out.
+                        if (itemToAddBefore == null && String.Compare(unevaluatedInclude, existingItemXml.Include, StringComparison.OrdinalIgnoreCase) < 0)
+                        {
+                            itemToAddBefore = existingItemXml;
+                        }
+
+                        if (IsSuitableExistingItemXml(existingItemXml, unevaluatedInclude, metadata))
+                        {
+                            suitableExistingItemXml = existingItemXml;
+                            return null;
+                        }
+                    }
+                }
+
+                if (itemToAddBefore == null)
+                {
+                    return itemGroupToAddTo;
+                }
+
+                return itemToAddBefore;
+            }
+
+            /// <summary>
+            /// Recursive helper for <see cref="GetLogicalProject()">GetLogicalProject</see>.
+            /// </summary>
+            private IEnumerable<ProjectElement> GetLogicalProject(IEnumerable<ProjectElement> projectElements)
+            {
+                foreach (ProjectElement element in projectElements)
+                {
+                    if (!(element is ProjectImportElement import))
+                    {
+                        yield return element;
+                    }
+                    else
+                    {
+                        // Get the project root elements of all the imports resulting from this import statement (there could be multiple if there is a wild card).
+                        IEnumerable<ProjectRootElement> children = _data.ImportClosure.Where(resolvedImport => ReferenceEquals(resolvedImport.ImportingElement, import)).Select(triple => triple.ImportedProject);
+
+                        foreach (ProjectRootElement child in children)
+                        {
+                            if (child != null)
                             {
-                                yield return childElement;
+                                // The import's condition must have evaluated to true, to traverse into it
+                                IEnumerable<ProjectElement> childElements = GetLogicalProject(child.AllChildren);
+
+                                foreach (ProjectElement childElement in childElements)
+                                {
+                                    yield return childElement;
+                                }
                             }
                         }
                     }
@@ -2935,6 +3844,60 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
+        /// <summary>
+        /// Internal
+        ///
+        /// Note: For deeper integration of remote project we might need to expose [some] of this functionality via IProjectLink3.
+        /// </summary>
+        private interface IProjectLinkInternal
+        {
+            bool IsLinked { get; }
+
+            bool IsZombified { get; set; }
+
+            Data TestOnlyGetPrivateData { get; }
+
+            ISet<string> GlobalPropertiesToTreatAsLocal { get; }
+
+            bool UsesProjectRootElement(ProjectRootElement xmlRootElement);
+
+            bool IsSuitableExistingItemXml(ProjectItemElement candidateExistingItemXml, string unevaluatedInclude, IEnumerable<KeyValuePair<string, string>> metadata);
+
+            void RemoveItemBeforeItemTypeChange(ProjectItem item);
+
+            void ReAddExistingItemAfterItemTypeChange(ProjectItem item);
+
+            string ExpandPropertyValueBestEffortLeaveEscaped(string unevaluatedValue, ElementLocation propertyLocation);
+
+            string ExpandItemIncludeBestEffortLeaveEscaped(ProjectItemElement renamedItemElement);
+
+            string ExpandMetadataValueBestEffortLeaveEscaped(IMetadataTable metadataTable, string unevaluatedValue, ElementLocation metadataLocation);
+        }
+
+        private class ProjectLinkInternalNotImplemented : IProjectLinkInternal
+        {
+            public Data TestOnlyGetPrivateData { get { throw new NotImplementedException(); } }
+
+            public ISet<string> GlobalPropertiesToTreatAsLocal { get { throw new NotImplementedException(); } }
+
+            public bool IsLinked => true;
+
+            public bool IsZombified { get; set; }
+
+            public bool UsesProjectRootElement(ProjectRootElement xmlRootElement) { throw new NotImplementedException(); }
+
+            public bool IsSuitableExistingItemXml(ProjectItemElement candidateExistingItemXml, string unevaluatedInclude, IEnumerable<KeyValuePair<string, string>> metadata) { throw new NotImplementedException(); }
+
+            public void RemoveItemBeforeItemTypeChange(ProjectItem item) { throw new NotImplementedException(); }
+
+            public void ReAddExistingItemAfterItemTypeChange(ProjectItem item) { throw new NotImplementedException(); }
+
+            public string ExpandPropertyValueBestEffortLeaveEscaped(string unevaluatedValue, ElementLocation propertyLocation) { throw new NotImplementedException(); }
+
+            public string ExpandItemIncludeBestEffortLeaveEscaped(ProjectItemElement renamedItemElement) { throw new NotImplementedException(); }
+
+            public string ExpandMetadataValueBestEffortLeaveEscaped(IMetadataTable metadataTable, string unevaluatedValue, ElementLocation metadataLocation) { throw new NotImplementedException(); }
+        }
 
         /// <summary>
         /// Encapsulates the backing data of a Project, so that it can be passed to the Evaluator to
@@ -3568,6 +4531,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
     }
+
     /// <summary>
     /// Data class representing a result from <see cref="Project.GetAllGlobs()"/> and its overloads.
     /// This represents all globs found in an item include together with the item element it came from,

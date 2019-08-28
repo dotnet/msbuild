@@ -5,8 +5,9 @@ using System.Collections.Generic;
 using System.Xml;
 using System.Diagnostics;
 using System.Linq;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
+using Microsoft.Build.ObjectModelRemoting;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Construction
 {
@@ -16,6 +17,14 @@ namespace Microsoft.Build.Construction
     [DebuggerDisplay("#Children={Count} Condition={Condition}")]
     public class ProjectWhenElement : ProjectElementContainer
     {
+        /// <summary>
+        /// External projects support
+        /// </summary>
+        internal ProjectWhenElement(ProjectWhenElementLink link)
+            : base(link)
+        {
+        }
+
         /// <summary>
         /// Initialize a parented ProjectWhenElement
         /// </summary>

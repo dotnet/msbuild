@@ -5,8 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
+using Microsoft.Build.ObjectModelRemoting;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Construction
 {
@@ -16,6 +17,14 @@ namespace Microsoft.Build.Construction
     [DebuggerDisplay("#Properties={Count} Condition={Condition} Label={Label}")]
     public class ProjectPropertyGroupElement : ProjectElementContainer
     {
+        /// <summary>
+        /// External projects support
+        /// </summary>
+        internal ProjectPropertyGroupElement(ProjectPropertyGroupElementLink link)
+            : base(link)
+        {
+        }
+
         /// <summary>
         /// Initialize a parented ProjectPropertyGroupElement
         /// </summary>

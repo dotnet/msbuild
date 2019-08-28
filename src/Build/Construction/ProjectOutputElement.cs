@@ -4,6 +4,7 @@
 using System;
 using System.Xml;
 using System.Diagnostics;
+using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
@@ -16,6 +17,14 @@ namespace Microsoft.Build.Construction
     [DebuggerDisplay("TaskParameter={TaskParameter} ItemType={ItemType} PropertyName={PropertyName} Condition={Condition}")]
     public class ProjectOutputElement : ProjectElement
     {
+        /// <summary>
+        /// External projects support
+        /// </summary>
+        internal ProjectOutputElement(ProjectOutputElementLink link)
+            : base(link)
+        {
+        }
+
         /// <summary>
         /// Initialize a parented ProjectOutputElement
         /// </summary>
@@ -42,15 +51,14 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.taskParameter);
+                return GetAttributeValue(XMakeAttributes.taskParameter);
             }
 
             [DebuggerStepThrough]
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, nameof(value));
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.taskParameter, value);
-                MarkDirty("Set Output TaskParameter {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.taskParameter, value, "Set Output TaskParameter {0}", value);
             }
         }
 
@@ -77,14 +85,13 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.itemName);
+                return GetAttributeValue(XMakeAttributes.itemName);
             }
 
             set
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(PropertyName), "OM_EitherAttributeButNotBoth", XmlElement.Name, XMakeAttributes.itemName, XMakeAttributes.propertyName);
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.itemName, value);
-                MarkDirty("Set Output ItemType {0}", value);
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(PropertyName), "OM_EitherAttributeButNotBoth", ElementName, XMakeAttributes.itemName, XMakeAttributes.propertyName);
+                SetOrRemoveAttribute(XMakeAttributes.itemName, value, "Set Output ItemType {0}", value);
             }
         }
 
@@ -98,31 +105,30 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.propertyName);
+                return GetAttributeValue(XMakeAttributes.propertyName);
             }
 
             set
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(ItemType), "OM_EitherAttributeButNotBoth", XmlElement.Name, XMakeAttributes.itemName, XMakeAttributes.propertyName);
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.propertyName, value);
-                MarkDirty("Set Output PropertyName {0}", value);
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(ItemType), "OM_EitherAttributeButNotBoth", ElementName, XMakeAttributes.itemName, XMakeAttributes.propertyName);
+                SetOrRemoveAttribute(XMakeAttributes.propertyName, value, "Set Output PropertyName {0}", value);
             }
         }
 
         /// <summary>
         /// Location of the task parameter attribute
         /// </summary>
-        public ElementLocation TaskParameterLocation => XmlElement.GetAttributeLocation(XMakeAttributes.taskParameter);
+        public ElementLocation TaskParameterLocation => GetAttributeLocation(XMakeAttributes.taskParameter);
 
         /// <summary>
         /// Location of the property name attribute, if any
         /// </summary>
-        public ElementLocation PropertyNameLocation => XmlElement.GetAttributeLocation(XMakeAttributes.propertyName);
+        public ElementLocation PropertyNameLocation => GetAttributeLocation(XMakeAttributes.propertyName);
 
         /// <summary>
         /// Location of the item type attribute, if any
         /// </summary>
-        public ElementLocation ItemTypeLocation => XmlElement.GetAttributeLocation(XMakeAttributes.itemName);
+        public ElementLocation ItemTypeLocation => GetAttributeLocation(XMakeAttributes.itemName);
 
         /// <summary>
         /// Creates an unparented ProjectOutputElement, wrapping an unparented XmlElement.

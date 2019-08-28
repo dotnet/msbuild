@@ -6,8 +6,9 @@ using System.Collections.Generic;
 using System.Xml;
 using System.Diagnostics;
 using System.Linq;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
+using Microsoft.Build.ObjectModelRemoting;
+using Microsoft.Build.Shared;
 
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 
@@ -19,6 +20,16 @@ namespace Microsoft.Build.Construction
     [DebuggerDisplay("{ItemType} Include={Include} Exclude={Exclude} #Metadata={Count} Condition={Condition}")]
     public class ProjectItemElement : ProjectElementContainer
     {
+        internal ProjectItemElementLink ItemLink => (ProjectItemElementLink)Link;
+
+        /// <summary>
+        /// External projects support
+        /// </summary>
+        internal ProjectItemElement(ProjectItemElementLink link)
+            : base(link)
+        {
+        }
+
         /// <summary>
         /// Include value cached for performance
         /// </summary>
@@ -68,7 +79,7 @@ namespace Microsoft.Build.Construction
         public string ItemType
         {
             [DebuggerStepThrough]
-            get => XmlElement.Name;
+            get => ElementName;
             set => ChangeItemType(value);
         }
 
@@ -83,18 +94,14 @@ namespace Microsoft.Build.Construction
             get
             {
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
-                return _include ?? (_include = ProjectXmlUtilities.GetAttributeValue(
-                           XmlElement,
-                           XMakeAttributes.include));
+                return GetAttributeValue(XMakeAttributes.include, ref _include);
             }
 
             set
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || (Remove.Length == 0 && Update.Length == 0) , "OM_OneOfAttributeButNotMore", XmlElement.Name, XMakeAttributes.include, XMakeAttributes.remove, XMakeAttributes.update);
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.include, value);
-                _include = value;
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || (Remove.Length == 0 && Update.Length == 0) , "OM_OneOfAttributeButNotMore", ElementName, XMakeAttributes.include, XMakeAttributes.remove, XMakeAttributes.update);
+                SetOrRemoveAttribute(XMakeAttributes.include, value, ref _include, "Set item Include {0}", value);
                 _includeHasWildcards = null;
-                MarkDirty("Set item Include {0}", value);
             }
         }
 
@@ -109,18 +116,14 @@ namespace Microsoft.Build.Construction
             get
             {
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
-                return _exclude ?? (_exclude = ProjectXmlUtilities.GetAttributeValue(
-                           XmlElement,
-                           XMakeAttributes.exclude));
+                return GetAttributeValue(XMakeAttributes.exclude, ref _exclude);
             }
 
             set
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || Remove.Length == 0, "OM_EitherAttributeButNotBoth", XmlElement.Name, XMakeAttributes.exclude, XMakeAttributes.remove);
-                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || Update.Length == 0, "OM_EitherAttributeButNotBoth", XmlElement.Name, XMakeAttributes.exclude, XMakeAttributes.update);
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.exclude, value);
-                _exclude = value;
-                MarkDirty("Set item Exclude {0}", value);
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || Remove.Length == 0, "OM_EitherAttributeButNotBoth", ElementName, XMakeAttributes.exclude, XMakeAttributes.remove);
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || Update.Length == 0, "OM_EitherAttributeButNotBoth", ElementName, XMakeAttributes.exclude, XMakeAttributes.update);
+                SetOrRemoveAttribute(XMakeAttributes.exclude, value, ref _exclude, "Set item Exclude {0}", value);
             }
         }
 
@@ -135,15 +138,13 @@ namespace Microsoft.Build.Construction
             get
             {
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
-                return _remove ?? (_remove = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.remove));
+                return GetAttributeValue(XMakeAttributes.remove, ref _remove);
             }
 
             set
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || (Include.Length == 0 && Update.Length == 0), "OM_OneOfAttributeButNotMore", XmlElement.Name, XMakeAttributes.include, XMakeAttributes.remove, XMakeAttributes.update);
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.remove, value);
-                _remove = value;
-                MarkDirty("Set item Remove {0}", value);
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || (Include.Length == 0 && Update.Length == 0), "OM_OneOfAttributeButNotMore", ElementName, XMakeAttributes.include, XMakeAttributes.remove, XMakeAttributes.update);
+                SetOrRemoveAttribute(XMakeAttributes.remove, value, ref _remove, "Set item Remove {0}", value);
             }
         }
 
@@ -156,15 +157,13 @@ namespace Microsoft.Build.Construction
             get
             {
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
-                return _update ?? (_update = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.update));
+                return GetAttributeValue(XMakeAttributes.update, ref _update);
             }
 
             set
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || (Remove.Length == 0 && Include.Length == 0), "OM_OneOfAttributeButNotMore", XmlElement.Name, XMakeAttributes.include, XMakeAttributes.remove, XMakeAttributes.update);
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.update, value);
-                _update = value;
-                MarkDirty("Set item Update {0}", value);
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || (Remove.Length == 0 && Include.Length == 0), "OM_OneOfAttributeButNotMore", ElementName, XMakeAttributes.include, XMakeAttributes.remove, XMakeAttributes.update);
+                SetOrRemoveAttribute(XMakeAttributes.update, value, ref _update, "Set item Update {0}", value);
             }
         }
 
@@ -178,15 +177,14 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.keepMetadata);
+                return GetAttributeValue(XMakeAttributes.keepMetadata);
             }
 
             set
             {
                 ErrorUtilities.VerifyThrowInvalidOperation(Parent == null || Parent.Parent is ProjectTargetElement, "OM_NoKeepMetadataOutsideTargets");
-                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || RemoveMetadata.Length == 0, "OM_EitherAttributeButNotBoth", XmlElement.Name, XMakeAttributes.removeMetadata, XMakeAttributes.keepMetadata);
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.keepMetadata, value);
-                MarkDirty("Set item KeepMetadata {0}", value);
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || RemoveMetadata.Length == 0, "OM_EitherAttributeButNotBoth", ElementName, XMakeAttributes.removeMetadata, XMakeAttributes.keepMetadata);
+                SetOrRemoveAttribute(XMakeAttributes.keepMetadata, value, "Set item KeepMetadata {0}", value);
             }
         }
 
@@ -200,15 +198,14 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.removeMetadata);
+                return GetAttributeValue(XMakeAttributes.removeMetadata);
             }
 
             set
             {
                 ErrorUtilities.VerifyThrowInvalidOperation(Parent == null || Parent.Parent is ProjectTargetElement, "OM_NoRemoveMetadataOutsideTargets");
-                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || KeepMetadata.Length == 0, "OM_EitherAttributeButNotBoth", XmlElement.Name, XMakeAttributes.keepMetadata, XMakeAttributes.removeMetadata);
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.removeMetadata, value);
-                MarkDirty("Set item RemoveMetadata {0}", value);
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || KeepMetadata.Length == 0, "OM_EitherAttributeButNotBoth", ElementName, XMakeAttributes.keepMetadata, XMakeAttributes.removeMetadata);
+                SetOrRemoveAttribute(XMakeAttributes.removeMetadata, value, "Set item RemoveMetadata {0}", value);
             }
         }
 
@@ -222,14 +219,13 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.keepDuplicates);
+                return GetAttributeValue(XMakeAttributes.keepDuplicates);
             }
 
             set
             {
                 ErrorUtilities.VerifyThrowInvalidOperation(Parent == null || Parent.Parent is ProjectTargetElement, "OM_NoKeepDuplicatesOutsideTargets");
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.keepDuplicates, value);
-                MarkDirty("Set item KeepDuplicates {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.keepDuplicates, value, "Set item KeepDuplicates {0}", value);
             }
         }
 
@@ -246,37 +242,37 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Location of the include attribute
         /// </summary>
-        public ElementLocation IncludeLocation => XmlElement.GetAttributeLocation(XMakeAttributes.include);
+        public ElementLocation IncludeLocation => GetAttributeLocation(XMakeAttributes.include);
 
         /// <summary>
         /// Location of the exclude attribute
         /// </summary>
-        public ElementLocation ExcludeLocation => XmlElement.GetAttributeLocation(XMakeAttributes.exclude);
+        public ElementLocation ExcludeLocation => GetAttributeLocation(XMakeAttributes.exclude);
 
         /// <summary>
         /// Location of the remove attribute
         /// </summary>
-        public ElementLocation RemoveLocation => XmlElement.GetAttributeLocation(XMakeAttributes.remove);
+        public ElementLocation RemoveLocation => GetAttributeLocation(XMakeAttributes.remove);
 
         /// <summary>
         /// Location of the update attribute
         /// </summary>
-        public ElementLocation UpdateLocation => XmlElement.GetAttributeLocation(XMakeAttributes.update);
+        public ElementLocation UpdateLocation => GetAttributeLocation(XMakeAttributes.update);
 
         /// <summary>
         /// Location of the keepMetadata attribute
         /// </summary>
-        public ElementLocation KeepMetadataLocation => XmlElement.GetAttributeLocation(XMakeAttributes.keepMetadata);
+        public ElementLocation KeepMetadataLocation => GetAttributeLocation(XMakeAttributes.keepMetadata);
 
         /// <summary>
         /// Location of the removeMetadata attribute
         /// </summary>
-        public ElementLocation RemoveMetadataLocation => XmlElement.GetAttributeLocation(XMakeAttributes.removeMetadata);
+        public ElementLocation RemoveMetadataLocation => GetAttributeLocation(XMakeAttributes.removeMetadata);
 
         /// <summary>
         /// Location of the keepDuplicates attribute
         /// </summary>
-        public ElementLocation KeepDuplicatesLocation => XmlElement.GetAttributeLocation(XMakeAttributes.keepDuplicates);
+        public ElementLocation KeepDuplicatesLocation => GetAttributeLocation(XMakeAttributes.keepDuplicates);
 
         /// <summary>
         /// Whether the include value has wildcards, 
@@ -360,10 +356,7 @@ namespace Microsoft.Build.Construction
             base.CopyFrom(element);
 
             // clear cached fields
-            _include = null;
-            _exclude = null;
-            _remove = null;
-            _includeHasWildcards = null;
+            this.ClearAttributeCache();
         }
 
         /// <summary>
@@ -393,12 +386,27 @@ namespace Microsoft.Build.Construction
             ErrorUtilities.VerifyThrowArgumentLength(newItemType, nameof(newItemType));
             XmlUtilities.VerifyThrowArgumentValidElementName(newItemType);
             ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(newItemType), "CannotModifyReservedItem", newItemType);
+            if (Link != null)
+            {
+                ItemLink.ChangeItemType(newItemType);
+                return;
+            }
 
             // Because the element was created from our special XmlDocument, we know it's
             // an XmlElementWithLocation.
             XmlElementWithLocation newElement = XmlUtilities.RenameXmlElement(XmlElement, newItemType, XmlElement.NamespaceURI);
 
             ReplaceElement(newElement);
+        }
+
+        internal override void ClearAttributeCache()
+        {
+            base.ClearAttributeCache();
+            _include = null;
+            _exclude = null;
+            _remove = null;
+            _update = null;
+            _includeHasWildcards = null;
         }
 
         /// <summary>
@@ -439,5 +447,7 @@ namespace Microsoft.Build.Construction
         /// Do not clone attributes which can be metadata. The corresponding expressed as attribute project elements are responsible for adding their attribute
         /// </summary>
         protected override bool ShouldCloneXmlAttribute(XmlAttribute attribute) => !ProjectMetadataElement.AttributeNameIsValidMetadataName(attribute.LocalName);
+
+        internal override bool ShouldCloneXmlAttribute(XmlAttributeLink attributeLink) => !ProjectMetadataElement.AttributeNameIsValidMetadataName(attributeLink.LocalName);
     }
 }
