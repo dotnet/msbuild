@@ -142,12 +142,14 @@ Jeśli chcesz utworzyć manifest, użyj polecenia „dotnet new tool-manifest”
 * You mistyped the name of the tool.
 
 For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</source>
-        <target state="needs-review-translation">Zainstalowanie narzędzia „{0}” nie powiodło się. To niepowodzenie może wynikać z następujących powodów:
+        <target state="translated">Zainstalowanie narzędzia „{0}” nie powiodło się. To niepowodzenie może wynikać z następujących przyczyn:
 
 * Próbujesz zainstalować wersję zapoznawczą bez użycia opcji --version do określenia wersji.
 * Znaleziono pakiet o tej nazwie, ale nie było to narzędzie .NET Core.
-* Nie można uzyskać dostępu do wymaganego kanału informacyjnego NuGet, być może ze względu na problemy z połączeniem z Internetem.
-* Błędnie wpisano nazwę narzędzia.</target>
+* Nie można uzyskać dostępu do wymaganego źródła danych NuGet, być może ze względu na problemy z połączeniem z Internetem.
+* Podana nazwa narzędzia została wpisana nieprawidłowo.
+
+Więcej przyczyn, w tym wymuszanie nazw pakietów, można znaleźć na stronie https://aka.ms/failure-installing-tool</target>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionDescription">

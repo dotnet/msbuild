@@ -25,15 +25,15 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using bash, you can add it to your profile by running the following command:
+        <target state="translated">ツール ディレクトリ '{0}' は現在、PATH 環境変数にありません。
+Bash を使用している場合、次のコマンドを実行してプロファイルに追加できます。
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-You can add it to the current session by running the following command:
+次のコマンドを実行して現在のセッションに追加できます。
 
 export PATH="$PATH:{0}"
 </target>
@@ -54,17 +54,17 @@ You can only add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using zsh, you can add it to your profile by running the following command:
+        <target state="translated">ツール ディレクトリ '{0}' は現在、PATH 環境変数にありません。
+zsh を使用している場合、次のコマンドを実行してプロファイルに追加できます:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
-# Add .NET Core SDK tools
+# .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-And run `zsh -l` to make it available for current session.
+`zsh -l` を実行して現在のセッションで利用できるようにします。
 
-You can only add it to the current session by running the following command:
+これは、次のコマンドを実行することによってのみ、現行のセッションに追加できます:
 
 export PATH="$PATH:{0}"
 </target>

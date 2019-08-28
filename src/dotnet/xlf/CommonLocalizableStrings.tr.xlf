@@ -25,15 +25,15 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using bash, you can add it to your profile by running the following command:
+        <target state="translated">'{0}' araçlar dizini şu anda PATH ortam değişkeni üzerinde değil.
+Bash kullanıyorsanız, şu komutu çalıştırarak profilinize ekleyebilirsiniz:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-You can add it to the current session by running the following command:
+Şu komutu çalıştırarak geçerli komuta ekleyebilirsiniz:
 
 export PATH="$PATH:{0}"
 </target>
@@ -54,17 +54,17 @@ You can only add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using zsh, you can add it to your profile by running the following command:
+        <target state="translated">'{0}' araçlar dizini şu anda PATH ortam değişkeninde değil.
+zsh kullanıyorsanız, aşağıdaki komutu çalıştırarak bunu profilinize ekleyebilirsiniz:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
-# Add .NET Core SDK tools
+# .NET Core SDK araçları ekleyin
 export PATH="$PATH:{0}"
 EOF
 
-And run `zsh -l` to make it available for current session.
+Geçerli oturum için kullanılabilir hale getirmek üzere `zsh -l` komutunu çalıştırın.
 
-You can only add it to the current session by running the following command:
+Aşağıdaki komutu çalıştırarak araçlar dizinini yalnızca geçerli oturuma ekleyebilirsiniz:
 
 export PATH="$PATH:{0}"
 </target>

@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="CmdDeprecatedDescription">
         <source>Lists packages that have been deprecated.</source>
-        <target state="new">Lists packages that have been deprecated.</target>
+        <target state="translated">非推奨となったパッケージを一覧表示します。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
@@ -44,22 +44,22 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>The path to the NuGet config file to use. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">使用する NuGet config ファイルのパス。'--outdated' オプションが必要です。</target>
+        <target state="translated">使用する NuGet config ファイルのパス。'--outdated' または '--deprecated' のオプションが必要です。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestMinorDescription">
         <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">新しいパッケージを検索するときにメジャー バージョン番号が一致するパッケージのみを検討します。'--outdated' オプションが必要です。</target>
+        <target state="translated">新しいパッケージを検索するときにメジャー バージョン番号が一致するパッケージのみを検討します。'--outdated' または '--deprecated' のオプションが必要です。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestPatchDescription">
         <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">新しいパッケージを検索するときにメジャーとマイナーのバージョン番号が一致するパッケージのみを検討します。'--outdated' オプションが必要です。</target>
+        <target state="translated">新しいパッケージを検索するときにメジャーとマイナーのバージョン番号が一致するパッケージのみを検討します。'--outdated' または '--deprecated' のオプションが必要です。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPrereleaseDescription">
         <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">新しいパッケージを検索するときにプレリリース バージョンのパッケージを検討します。'--outdated' オプションが必要です。</target>
+        <target state="translated">新しいパッケージを検索するときにプレリリース バージョンのパッケージを検討します。'--outdated' または '--deprecated' のオプションが必要です。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSource">
@@ -69,12 +69,12 @@
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">新しいパッケージを検索するときに使用する NuGet ソース。'--outdated' オプションが必要です。</target>
+        <target state="translated">新しいパッケージを検索するときに使用する NuGet ソース。'--outdated' または '--deprecated' オプションが必要です。</target>
         <note />
       </trans-unit>
       <trans-unit id="OutdatedAndDeprecatedOptionsCannotBeCombined">
         <source>Option '--outdated' and '--deprecated' cannot be combined.</source>
-        <target state="new">Option '--outdated' and '--deprecated' cannot be combined.</target>
+        <target state="translated">オプション '--outdated' と '--deprecated' を組み合わせることはできません。</target>
         <note />
       </trans-unit>
       <trans-unit id="FileNotFound">
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="OutdatedOrDeprecatedOptionOnly">
         <source>Option '{0}' requires the '--outdated' or '--deprecated' option to be specified.</source>
-        <target state="new">Option '{0}' requires the '--outdated' or '--deprecated' option to be specified.</target>
+        <target state="translated">オプション '{0}' では '--outdated' または '--deprecated' オプションを指定する必要があります。</target>
         <note />
       </trans-unit>
     </body>

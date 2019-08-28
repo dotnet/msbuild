@@ -82,7 +82,7 @@ Possíveis motivos para isso incluem:
       </trans-unit>
       <trans-unit id="DotNetRuntimeInfoLabel">
         <source>Runtime Environment:</source>
-        <target state="translated">Ambiente de tempo de execução:</target>
+        <target state="translated">Ambiente de runtime:</target>
         <note />
       </trans-unit>
       <trans-unit id="EmbedAppNameInHostAppHostHasBeenModified">

@@ -25,15 +25,15 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using bash, you can add it to your profile by running the following command:
+        <target state="translated">Katalog narzędzi „{0}” nie znajduje się obecnie w zmiennej środowiskowej PATH.
+Jeśli używasz powłoki Bash, możesz dodać go do swojego profilu, uruchamiając następujące polecenie:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
+# Dodanie narzędzi .NET Core SDK
 export PATH="$PATH:{0}"
 EOF
 
-You can add it to the current session by running the following command:
+Aby dodać go na potrzeby bieżącej sesji, uruchom następujące polecenie:
 
 export PATH="$PATH:{0}"
 </target>
@@ -54,17 +54,17 @@ You can only add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using zsh, you can add it to your profile by running the following command:
+        <target state="translated">Katalog narzędzi „{0}” nie znajduje się obecnie w zmiennej środowiskowej PATH.
+Jeśli używasz powłoki zsh, możesz go dodać do swojego profilu, uruchamiając następujące polecenie:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
-# Add .NET Core SDK tools
+# Dodaj narzędzia zestawu platformy .NET Core
 export PATH="$PATH:{0}"
 EOF
 
-And run `zsh -l` to make it available for current session.
+Aby udostępnić go w bieżącej sesji, uruchom polecenie „zsh -l”.
 
-You can only add it to the current session by running the following command:
+Możesz go dodać tylko do bieżącej sesji, uruchamiając następujące polecenie:
 
 export PATH="$PATH:{0}"
 </target>

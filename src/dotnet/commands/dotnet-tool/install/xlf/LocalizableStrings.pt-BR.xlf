@@ -142,12 +142,14 @@ Se quiser criar um manifesto, use `dotnet new tool-manifest`, normalmente no dir
 * You mistyped the name of the tool.
 
 For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</source>
-        <target state="needs-review-translation">A ferramenta '{0}' falhou ao ser instalada. Essa falha pode ter sido causada pelos seguintes motivos:
+        <target state="translated">A ferramenta '{0}' não pôde ser instalada. A falha pode ter sido causada pelos seguintes motivos:
 
 * Você está tentando instalar uma versão prévia e não usou a opção --version para especificar a versão.
-* Um pacote com esse nome foi encontrado, mas ele não era uma ferramenta do .NET Core.
-* O feed do NuGet necessário não pode ser acessado, talvez devido a um problema de conexão com a Internet.
-* Você digitou errado o nome da ferramenta.</target>
+* Um pacote com esse nome foi localizado, mas ele não era uma ferramenta do .NET Core.
+* O feed do NuGet necessário não pode ser acessado, talvez por um problema de conexão com a Internet.
+* Você digitou errado o nome da ferramenta.
+
+Para ver mais motivos, inclusive a imposição de nome de pacote, visite https://aka.ms/failure-installing-tool</target>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionDescription">
