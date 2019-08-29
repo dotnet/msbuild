@@ -3,17 +3,21 @@
   <ProductDependencies>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19409.5">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19421.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>be7f7f683e57625f0e518be35eb254b06a33a588</Sha>
+      <Sha>7aa107d818fe87e627154c0331d6de5d47f39a45</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.SignTool" Version="1.0.0-beta.19409.5">
+    <Dependency Name="Microsoft.DotNet.SignTool" Version="1.0.0-beta.19421.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>be7f7f683e57625f0e518be35eb254b06a33a588</Sha>
+      <Sha>7aa107d818fe87e627154c0331d6de5d47f39a45</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.HostModel" Version="3.0.0-rc1-19423-11">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>abecfcd748e6b8850e1111184bf34c93e9277f90</Sha>
+    </Dependency>
+    <Dependency Name="NuGet.Build.Tasks" Version="5.3.0-rtm.6192">
+      <Uri>https://github.com/NuGet/NuGet.Client</Uri>
+      <Sha>bb60d6720d24890b8f3e071e70d27ea0f2bef57e</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
