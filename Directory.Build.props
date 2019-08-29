@@ -13,6 +13,9 @@
     <DebugType>embedded</DebugType>
     <DebugSymbols>true</DebugSymbols>
     <IsShippingPackage>false</IsShippingPackage>
+
+    <!-- Workaround for https://github.com/NuGet/NuGet.Client/pull/3016 -->
+    <NoWarn>$(NoWarn);NU5131</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
