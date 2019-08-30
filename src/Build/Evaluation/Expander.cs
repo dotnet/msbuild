@@ -1007,7 +1007,13 @@ namespace Microsoft.Build.Evaluation
                             results = new List<object>(4);
                         }
 
-                        results.Add(expression.Substring(sourceIndex, propertyStartIndex - sourceIndex));
+                        Span s = new Span()
+                        {
+                            ReferencePoint = expression,
+                            start = sourceIndex,
+                            length = propertyStartIndex - sourceIndex,
+                        };
+                        results.Add(s);
                     }
 
                     sourceIndex = propertyStartIndex;
@@ -1024,7 +1030,12 @@ namespace Microsoft.Build.Evaluation
                         // isn't really a well-formed property tag.  Just literally
                         // copy the remainder of the expression (starting with the "$("
                         // that we found) into the result, and quit.
-                        lastResult = expression.Substring(propertyStartIndex, expression.Length - propertyStartIndex);
+                        lastResult = new Span()
+                        {
+                            ReferencePoint = expression,
+                            start = propertyStartIndex,
+                            length = expression.Length - propertyStartIndex,
+                        };
                         sourceIndex = expression.Length;
                     }
                     else
@@ -1035,7 +1046,7 @@ namespace Microsoft.Build.Evaluation
                         // propertyEndIndex points to the ")".  That's why we have to
                         // add 2 for the start of the substring, and subtract 2 for 
                         // the length.
-                        string propertyBody;
+                        Span propertyBody;
 
                         // A property value of null will indicate that we're calling a static function on a type
                         object propertyValue = null;
@@ -1048,7 +1059,12 @@ namespace Microsoft.Build.Evaluation
                         else if ((expression.Length - (propertyStartIndex + 2)) > 9 && tryExtractRegistryFunction && s_invariantCompareInfo.IndexOf(expression, "Registry:", propertyStartIndex + 2, 9, CompareOptions.OrdinalIgnoreCase) == propertyStartIndex + 2)
                         {
                             // if FEATURE_WIN32_REGISTRY is off, treat the property value as if there's no Registry value at that location, rather than fail
-                            propertyBody = expression.Substring(propertyStartIndex + 2, propertyEndIndex - propertyStartIndex - 2);
+                            propertyBody = new Span()
+                            {
+                                ReferencePoint = expression,
+                                start = propertyStartIndex + 2,
+                                length = propertyEndIndex - propertyStartIndex - 2,
+                            };
 
                             // If the property body starts with any of our special objects, then deal with them
                             // This is a registry reference, like $(Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation)
@@ -1072,7 +1088,12 @@ namespace Microsoft.Build.Evaluation
                         }
                         else if (tryExtractPropertyFunction)
                         {
-                            propertyBody = expression.Substring(propertyStartIndex + 2, propertyEndIndex - propertyStartIndex - 2);
+                            propertyBody = new Span()
+                            {
+                                ReferencePoint = expression,
+                                start = propertyStartIndex + 2,
+                                length = propertyEndIndex - propertyStartIndex - 2,
+                            };
 
                             // This is likely to be a function expression
                             propertyValue = ExpandPropertyBody(
@@ -4857,6 +4878,112 @@ namespace Microsoft.Build.Evaluation
         {
             get;
             set;
+        }
+    }
+
+    /// <summary>
+    /// Wrapper for a more efficient string
+    /// </summary>
+    public class Span
+    {
+        internal string ReferencePoint
+        {
+            get;
+            set;
+        }
+
+        internal int start
+        {
+            get;
+            set;
+        }
+
+        internal int length
+        {
+            get;
+            set;
+        }
+
+        public bool StartsWith(string value, StringComparison comparisonType)
+        {
+            if (this.length < value.Length)
+            {
+                return false;
+            }
+
+            for (int x = 0; x < value.Length; x++)
+            {
+                if (ReferencePoint[start + x] != value[x])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool IsNullOrEmpty(Span span)
+        {
+            return span == null || span.length == 0;
+        }
+
+        public bool Equals(Span oth)
+        {
+            if (this.length != oth.length)
+            {
+                return false;
+            }
+
+            for (int x = 0; x < this.length; x++)
+            {
+                if (this.ReferencePoint[x] != oth.ReferencePoint[x])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public int IndexOf(char pattern)
+        {
+            for (int i = 0; i < length; i++)
+            {
+                if (ReferencePoint[start + i] == pattern)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        public string ToUnixString()
+        {
+            if (IndexOf('\\') == -1)
+            {
+                return ToString();
+            }
+            else
+            {
+                StringBuilder unixPath = StringBuilderCache.Acquire(length);
+                for (int i = start; i < start + length; i++)
+                {
+                    if (!FileUtilities.IsAnySlash(ReferencePoint[i]) || i == start || !FileUtilities.IsAnySlash(ReferencePoint[i - 1]))
+                    {
+                        unixPath.Append(ReferencePoint[i] == '\\' ? '/' : ReferencePoint[i]);
+                    }
+                }
+                return StringBuilderCache.GetStringAndRelease(unixPath);
+            }
+        }
+
+        public override string ToString()
+        {
+            if (start == 0 && length == ReferencePoint.Length)
+            {
+                return ReferencePoint;
+            }
+            return ReferencePoint.Substring(start, length);
         }
     }
 }

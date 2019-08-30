@@ -18,6 +18,7 @@ using System.Text;
 using System.Threading;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.Shared
 {
@@ -423,41 +424,128 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string MaybeAdjustFilePath(string value, string baseDirectory = "")
         {
+            Span spanValue = new Span()
+            {
+                ReferencePoint = value,
+                start = 0,
+                length = value.Length,
+            };
+            return MaybeAdjustFilePath(spanValue, baseDirectory).ToString();
+        }
+
+        /// <summary>
+        /// If on Unix, convert backslashes to slashes for strings that resemble paths.
+        /// The heuristic is if something resembles paths (contains slashes) check if the
+        /// first segment exists and is a directory.
+        /// Use a native shared method to massage file path. If the file is adjusted,
+        /// that qualifies is as a path.
+        ///
+        /// @baseDirectory is just passed to LooksLikeUnixFilePath, to help with the check
+        /// </summary>
+        internal static Span MaybeAdjustFilePath(Span value, string baseDirectory = "")
+        {
             var comparisonType = StringComparison.Ordinal;
 
             // Don't bother with arrays or properties or network paths, or those that
             // have no slashes.
-            if (NativeMethodsShared.IsWindows || string.IsNullOrEmpty(value)
+            if (NativeMethodsShared.IsWindows || Span.IsNullOrEmpty(value)
                 || value.StartsWith("$(", comparisonType) || value.StartsWith("@(", comparisonType)
                 || value.StartsWith("\\\\", comparisonType))
             {
                 return value;
             }
 
-            // For Unix-like systems, we may want to convert backslashes to slashes
-#if FEATURE_SPAN
-            Span<char> newValue = ConvertToUnixSlashes(value.ToCharArray());
-#else
-            string newValue = ConvertToUnixSlashes(value);
-#endif
+            if (value.IndexOf('\\') != -1 || value.IndexOf('/') != -1)
+            {
+                bool extraQuotes = value.length > 1 && ((value.ReferencePoint[value.start] == '"' && value.ReferencePoint[value.start + value.length - 1] == '"') ||
+                                                        (value.ReferencePoint[value.start] == '\'' && value.ReferencePoint[value.start + value.length - 1] == '\''));
+                if (extraQuotes)
+                {
+                    value.start++;
+                    value.length -= 2;
+                }
 
-            // Find the part of the name we want to check, that is remove quotes, if present
-            bool shouldAdjust = newValue.IndexOf('/') != -1 && LooksLikeUnixFilePath(RemoveQuotes(newValue), baseDirectory);
-            return shouldAdjust ? newValue.ToString() : value;
+                value.start++;
+                value.length--;
+                int firstBackslash = value.IndexOf('/');
+                int firstForwardslash = value.IndexOf('\\');
+                int firstSlash = firstBackslash == -1 ? firstForwardslash : firstForwardslash == -1 ? firstBackslash : Math.Min(firstBackslash, firstForwardslash) + 1;
+                value.start--;
+                value.length++;
+
+                if (firstSlash == -1)
+                {
+                    string newValue = value.ToUnixString();
+                    if (DefaultFileSystem.DirectoryEntryExists(newValue)) {
+                        if (extraQuotes)
+                        {
+                            value.start--;
+                            value.length += 2;
+                            newValue = value.ReferencePoint[value.start] + newValue + value.ReferencePoint[value.start];
+                        }
+
+                        return new Span()
+                        {
+                            ReferencePoint = newValue,
+                            start = 0,
+                            length = newValue.Length,
+                        };
+                    }
+                    else if (extraQuotes)
+                    {
+                        value.start--;
+                        value.length += 2;
+                    }
+
+                    return value;
+                }
+                else
+                {
+                    if (DefaultFileSystem.DirectoryExists(Path.Combine(baseDirectory, value.ReferencePoint.Substring(0, firstSlash + 1))))
+                    {
+                        if (extraQuotes)
+                        {
+                            value.start--;
+                            value.length += 2;
+                        }
+
+                        string newValue = value.ToUnixString();
+                        return new Span() {
+                            ReferencePoint = newValue,
+                            start = 0,
+                            length = newValue.Length,
+                        };
+                    }
+
+                    if (extraQuotes)
+                    {
+                        value.start--;
+                        value.length += 2;
+                    }
+                    return value;
+                }
+            }
+
+            return value;
         }
 
 #if !FEATURE_SPAN
-        private static string ConvertToUnixSlashes(string path)
+            private static string ConvertToUnixSlashes(string path)
         {
             if (path.IndexOf('\\') == -1)
+
             {
+
                 return path;
+
             }
+
             StringBuilder unixPath = StringBuilderCache.Acquire(path.Length);
+
             CopyAndCollapseSlashes(path, unixPath);
+
             return StringBuilderCache.GetStringAndRelease(unixPath);
         }
-
 #if !CLR2COMPATIBILITY && !FEATURE_SPAN
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
