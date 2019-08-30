@@ -337,20 +337,21 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="needs-review-translation">  -logger:&lt;logger&gt;   このロガーを使用して、MSBuild からのイベントのログを記録します。複数のロガーを
+        <target state="translated">  -logger:&lt;logger&gt;   このロガーを使用して、MSBuild からのイベントのログを記録します。複数のロガーを
                      指定するには、各ロガーを別個に指定します。
                      &lt;logger&gt; の構文:
-                       [&lt;logger class&gt;,]&lt;logger assembly&gt;[;&lt;logger parameters&gt;]
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
                      &lt;logger class&gt; の構文:
                        [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
                      &lt;logger assembly&gt; の構文:
                        {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                     ロガー オプションは、MSBuild がロガーを作成する方法を指定します。
                      &lt;logger parameters&gt; はオプションで、入力したとおりに
                      ロガーに渡されます。(短縮形: -l)
                      例:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
-\</target>
+</target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
@@ -605,17 +606,18 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="needs-review-translation">  -distributedLogger:&lt;central logger&gt;*&lt;forwarding logger&gt;
+        <target state="translated">  -distributedLogger:&lt;central logger&gt;*&lt;forwarding logger&gt;
                      このロガーを使用して MSBuild からのイベントのログを記録し、
                      別のロガー インスタンスを各ノードに追加します。
                      複数のロガーを指定するには、各ロガーを別個に指定します。
                      (短縮形 -dl)
                      &lt;logger&gt; の構文:
-                       [&lt;logger class&gt;,]&lt;logger assembly&gt;[;&lt;logger parameters&gt;]
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
                      &lt;logger class&gt; の構文:
                        [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
                      &lt;logger assembly&gt; の構文:
                        {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                     ロガー オプションは、MSBuild がロガーを作成する方法を指定します。
                      &lt;logger parameters&gt; はオプションで、入力したとおりに
                      ロガーに渡されます。(短縮形: -l)
                      例:
@@ -1129,7 +1131,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
       </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
         <source>The specified logger could not be created and will not be used. {0}</source>
-        <target state="new">The specified logger could not be created and will not be used. {0}</target>
+        <target state="translated">指定されたロガーを作成できなかったため、使用されません。{0}</target>
         <note>
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: {0} contains the exception message explaining why the
