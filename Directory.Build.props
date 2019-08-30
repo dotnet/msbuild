@@ -32,4 +32,6 @@
     <NoWarn>NU1701;NU5104;NU5125;NU5105</NoWarn>
   </PropertyGroup>
 
+  <Import Project="build/GenerateResxSource.targets" />
+
 </Project>
