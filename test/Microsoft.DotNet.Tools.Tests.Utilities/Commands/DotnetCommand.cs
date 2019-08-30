@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
     public class DotnetCommand : TestCommand
     {
         public DotnetCommand()
-            : this(DotnetUnderTest.FullName)
+            : this(RepoDirectoriesProvider.DotnetUnderTest)
         {
         }
 

@@ -204,11 +204,11 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
                 args = newArgs;
 
-                executable = DotnetUnderTest.FullName;
+                executable = RepoDirectoriesProvider.DotnetUnderTest;
             }
             else if ( executable == "dotnet")
             {
-                executable = DotnetUnderTest.FullName;
+                executable = RepoDirectoriesProvider.DotnetUnderTest;
             }
             else if (!Path.IsPathRooted(executable))
             {
@@ -235,7 +235,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             }
 
             //  Flow the TEST_PACKAGES environment variable to the child process
-            psi.Environment["TEST_PACKAGES"] = new RepoDirectoriesProvider().TestPackages;
+            psi.Environment["TEST_PACKAGES"] = RepoDirectoriesProvider.TestPackages;
         }
 
         private void AddDotnetToolPathToAvoidSettingPermanentEnvInBuildMachineOnWindows()

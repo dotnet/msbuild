@@ -18,6 +18,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         public readonly static string TestWorkingFolder;
         public readonly static string DotnetUnderTest;
         public readonly static string DotnetRidUnderTest;
+        public readonly static string TestPackages;
+        public readonly static string TestArtifactsFolder;
 
         static RepoDirectoriesProvider()
         {
@@ -58,6 +60,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 {
                     string configuration = new DirectoryInfo(AppContext.BaseDirectory).Parent.Name;
                     DotnetUnderTest = Path.Combine(RepoRoot, "artifacts", "bin", "redist", configuration, "dotnet", "dotnet" + dotnetExtension);
+                    TestPackages = Path.Combine(RepoRoot, "artifacts", "tmp", configuration, "test", "packages");
+                    TestArtifactsFolder = Path.Combine(RepoRoot, "artifacts", "tmp", configuration, "test", "artifacts");
                 }
             }
 
