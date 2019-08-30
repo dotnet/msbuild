@@ -1,0 +1,167 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="LastArgumentMultiValueError">
+        <source>The last argument '{0}' accepts multiple values. No more argument can be added.</source>
+        <target state="translated">O último argumento '{0}' aceita vários valores. Nenhum outro argumento pode ser adicionado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedValueForOptionError">
+        <source>Unexpected value '{0}' for option '{1}'</source>
+        <target state="translated">Valor '{0}' inesperado para a opção '{1}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedArgumentError">
+        <source>Unrecognized {0} '{1}'</source>
+        <target state="translated">{0} não reconhecido '{1}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResponseFileNotFoundError">
+        <source>Response file '{0}' doesn't exist.</source>
+        <target state="translated">O arquivo de resposta '{0}' não existe.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShowHelpInfo">
+        <source>Show command line help.</source>
+        <target state="translated">Mostrar a ajuda da linha de comando.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShowVersionInfo">
+        <source>Show version information</source>
+        <target state="translated">Mostrar informações de versão</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShowHintInfo">
+        <source>Specify --{0} for a list of available options and commands.</source>
+        <target state="translated">Especifique --{0} para obter uma lista das opções e comandos disponíveis.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageHeader">
+        <source>Usage:</source>
+        <target state="translated">Uso:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageArgumentsToken">
+        <source> [arguments]</source>
+        <target state="translated"> [arguments]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageArgumentsHeader">
+        <source>Arguments:</source>
+        <target state="translated">Argumentos:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageOptionsToken">
+        <source> [options]</source>
+        <target state="translated"> [options]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageOptionsHeader">
+        <source>Options:</source>
+        <target state="translated">Opções:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandToken">
+        <source> [command]</source>
+        <target state="translated"> [command]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandsHeader">
+        <source>Commands:</source>
+        <target state="translated">Comandos:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandsDetailHelp">
+        <source>Use "{0} [command] --help" for more information about a command.</source>
+        <target state="translated">Use "{0} [command] --help" para obter mais informações sobre um comando.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandArgs">
+        <source> [args]</source>
+        <target state="translated"> [args]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandAdditionalArgs">
+        <source> [[--] &lt;additional arguments&gt;...]]</source>
+        <target state="translated"> [[--] &lt;additional arguments&gt;...]]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandsAdditionalArgsHeader">
+        <source>Additional Arguments:</source>
+        <target state="translated">Argumentos adicionais:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidTemplateError">
+        <source>Invalid template pattern '{0}'</source>
+        <target state="translated">Padrão de modelo '{0}' inválido</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildAdditionalArgsHelpText">
+        <source>Any extra options that should be passed to MSBuild. See 'dotnet msbuild -h' for available options.</source>
+        <target state="translated">As opções extras que devem ser passadas para o MSBuild. Consulte 'dotnet msbuild -h' para obter as opções disponíveis.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionRequiresSingleValueWhichIsMissing">
+        <source>Required value for option '{0}' was not provided.</source>
+        <target state="translated">Um valor obrigatório para a opção '{0}' não foi fornecido.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandAcceptsOnlyOneArgument">
+        <source>Command '{0}' only accepts a single argument but {1} were provided.</source>
+        <target state="translated">O comando '{0}' aceita somente um único argumento, mas {1} foram fornecidos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandAcceptsOnlyOneSubcommand">
+        <source>Command '{0}' only accepts a single subcommand but multiple were provided: {1}</source>
+        <target state="translated">O comando '{0}' aceita somente um único subcomando, mas vários foram fornecidos: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileDoesNotExist">
+        <source>File does not exist: {0}</source>
+        <target state="translated">O arquivo não existe: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoArgumentsAllowed">
+        <source>Arguments not allowed for option: {0}</source>
+        <target state="translated">Argumentos não permitidos para a opção: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionAcceptsOnlyOneArgument">
+        <source>Option '{0}' only accepts a single argument but {1} were provided.</source>
+        <target state="translated">A opção '{0}' aceita somente um único argumento, mas {1} foram fornecidos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentMissingForCommand">
+        <source>Required argument missing for command: {0}</source>
+        <target state="translated">Argumento obrigatório ausente para o comando: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentMissingForOption">
+        <source>Required argument missing for option: {0}</source>
+        <target state="translated">Argumento obrigatório ausente para a opção: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredCommandWasNotProvided">
+        <source>Required command was not provided.</source>
+        <target state="translated">O comando necessário não foi fornecido.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedArgument">
+        <source>Argument '{0}' not recognized. Must be one of: {1}</source>
+        <target state="translated">Argumento '{0}' não reconhecido. Ele deve ser um dos seguintes: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedCommandOrArgument">
+        <source>Unrecognized command or argument '{0}'</source>
+        <target state="translated">Comando ou argumento '{0}' não reconhecido</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedOption">
+        <source>Option '{0}' not recognized. Must be one of: {1}</source>
+        <target state="translated">Opção '{0}' não reconhecida. Ela deve ser uma das seguintes: {1}</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CommandDescription">
+        <source>Shuts down build servers that are started from dotnet. By default, all servers are shut down.</source>
+        <target state="translated">dotnet에서 시작한 빌드 서버를 종료합니다. 기본적으로 모든 서버가 종료됩니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildOptionDescription">
+        <source>Shut down the MSBuild build server.</source>
+        <target state="translated">MSBuild 빌드 서버를 종료합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VBCSCompilerOptionDescription">
+        <source>Shut down the VB/C# compiler build server.</source>
+        <target state="translated">VB/C# 컴파일러 빌드 서버를 종료합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RazorOptionDescription">
+        <source>Shut down the Razor build server.</source>
+        <target state="translated">Razor 빌드 서버를 종료합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShuttingDownServer">
+        <source>Shutting down {0}...</source>
+        <target state="translated">{0}을(를) 종료하는 중...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShutDownSucceeded">
+        <source>{0} shut down successfully.</source>
+        <target state="translated">{0}을(를) 종료했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShutDownFailed">
+        <source>{0} failed to shut down: {1}</source>
+        <target state="translated">{0}을(를) 종료하지 못했습니다. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShuttingDownServerWithPid">
+        <source>Shutting down {0} (process {1})...</source>
+        <target state="translated">{0}(프로세스 {1})을(를) 종료하는 중...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShutDownSucceededWithPid">
+        <source>{0} (process {1}) shut down successfully.</source>
+        <target state="translated">{0}(프로세스 {1})을(를) 종료했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShutDownFailedWithPid">
+        <source>{0} (process {1}) failed to shut down: {2}</source>
+        <target state="translated">{0}(프로세스 {1})을(를) 종료하지 못했습니다. {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoServersToShutdown">
+        <source>No build servers are running.</source>
+        <target state="translated">빌드 서버가 실행되지 않습니다.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
