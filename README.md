@@ -1,6 +1,6 @@
 # Microsoft.Build (MSBuild)
 
-The Microsoft Build Engine is a platform for building applications. This engine, also known as MSBuild, provides an XML schema for a project file that controls how the build platform processes and builds software. Visual Studio uses MSBuild, but MSBuild *does not* depend on Visual Studio. By invoking msbuild.exe on your project or solution file, you can orchestrate and build products in environments where Visual Studio isn't installed.
+The Microsoft Build Engine is a platform for building applications. This engine, also known as MSBuild, provides an XML schema for a project file that controls how the build platform processes and builds software. Visual Studio uses MSBuild, but MSBuild can run without Visual Studio. By invoking msbuild.exe on your project or solution file, you can orchestrate and build products in environments where Visual Studio isn't installed.
 
 For more information on MSBuild, see the [MSBuild documentation](https://docs.microsoft.com/visualstudio/msbuild/msbuild) on docs.microsoft.com.
 
@@ -36,12 +36,11 @@ To get started on **Visual Studio 2019**:
 1. [Install Visual Studio 2019](https://www.visualstudio.com/vs/).  Select the following Workloads:
   - .NET desktop development
   - .NET Core cross-platform development
-2. [Install the .NET Core SDK](https://dotnet.microsoft.com/download).
-3. Open a `Developer Command Prompt for VS 2019` prompt.
-4. Clone the source code: `git clone https://github.com/Microsoft/msbuild.git`
+2. Open a `Developer Command Prompt for VS 2019` prompt.
+3. Clone the source code: `git clone https://github.com/Microsoft/msbuild.git`
   - You may have to [download git](https://git-scm.com/downloads) first.
-5. Run `.\build.cmd` from the root of the repo to build the code. This also restores packages needed to open the projects in Visual Studio.
-6. Open `MSBuild.sln` or `MSBuild.Dev.sln` in Visual Studio 2019.
+4. Run `.\build.cmd` from the root of the repo to build the code. This also restores packages needed to open the projects in Visual Studio.
+5. Open `MSBuild.sln` or `MSBuild.Dev.sln` in Visual Studio 2019.
 
 Note: To create a usable MSBuild with your changes, run `.\build.cmd /p:CreateBootstrap=true`.
 
@@ -51,7 +50,7 @@ This newly-built MSBuild will be located at `artifacts\bin\bootstrap\net472\MSBu
 
 MSBuild can be run on Unix systems that support .NET Core. Set-up instructions can be viewed on the wiki: [Building Testing and Debugging on .Net Core MSBuild](documentation/wiki/Building-Testing-and-Debugging-on-.Net-Core-MSBuild.md)
 
-## Localized Builds
+## Localization
 
 You can turn on localized builds via the `/p:LocalizedBuild=true` command line argument. For more information on localized builds and how to make contributions to MSBuild's translations, see our [localization documentation](documentation/wiki/Localization.md)
 
