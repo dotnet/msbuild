@@ -15,7 +15,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// <summary>
     /// Utility helper functions for formatting logger output.
     /// </summary>
-    static internal class LogFormatter
+    internal static class LogFormatter
     {
         /// <summary>
         /// Formats the timestamp in the log as  Hours:Minutes:Seconds.Milliseconds

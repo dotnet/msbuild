@@ -20,7 +20,7 @@ namespace Microsoft.Build.BuildEngine
     /// This class is used to generate an MSBuild wrapper project for a solution file or standalone VC project.
     /// </summary>
     /// <owner>LukaszG, RGoel</owner>
-    static public class SolutionWrapperProject
+    public static class SolutionWrapperProject
     {
         private const string webProjectOverrideFolder = "_PublishedWebsites";
         private const string cacheSolutionConfigurationPropertyName = "_SolutionProjectConfiguration";
@@ -36,7 +36,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="toolsVersionOverride">May be null.  If non-null, contains the ToolsVersion passed in on the command line</param>\
         /// <param name="projectBuildEventContext">An event context for logging purposes.</param>
         /// <returns></returns>
-        static public string Generate(string solutionPath, string toolsVersionOverride, BuildEventContext projectBuildEventContext)
+        public static string Generate(string solutionPath, string toolsVersionOverride, BuildEventContext projectBuildEventContext)
         {
             Project msbuildProject = new Project();
 
@@ -59,7 +59,7 @@ namespace Microsoft.Build.BuildEngine
         /// Any /tv:xxx switch would cause a value here.</param>
         /// <returns></returns>
         /// <owner>RGoel</owner>
-        static internal void Generate(SolutionParser solution, Project msbuildProject, string toolsVersionOverride, BuildEventContext projectBuildEventContext)
+        internal static void Generate(SolutionParser solution, Project msbuildProject, string toolsVersionOverride, BuildEventContext projectBuildEventContext)
         {
             // Validate against our minimum for upgradable projects
             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile((solution.Version >= SolutionParser.slnFileMinVersion),
@@ -502,7 +502,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="platformName"></param>
         /// <returns></returns>
         /// <owner>RGoel, LukaszG</owner>
-        static private BuildTask AddMSBuildTaskElement
+        private static BuildTask AddMSBuildTaskElement
         (
             Target target, 
             string projectPath,
@@ -547,7 +547,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="targetOutputItemName">The name of the item exposing this target's outputs.  May be null.</param>        
         /// <param name="subTargetName"></param>
         /// <owner>RGoel, LukaszG</owner>
-        static private void AddTargetForManagedProject
+        private static void AddTargetForManagedProject
         (
             Project msbuildProject,
             SolutionParser solution,
@@ -656,7 +656,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="fullConfigurationName"></param>
         /// <returns></returns>
         /// <owner>LukaszG</owner>
-        static private BuildTask AddResolveVCProjectOutputTaskElement
+        private static BuildTask AddResolveVCProjectOutputTaskElement
         (
             Target target,
             string solutionPath,
@@ -689,7 +689,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="outputImportLibraryItemName"></param>
         /// <param name="addedReferenceGuids"></param>
         /// <owner>LukaszG</owner>
-        static private void AddResolveProjectReferenceTasks
+        private static void AddResolveProjectReferenceTasks
         (
             SolutionParser solution,
             Project msbuildProject,
@@ -812,7 +812,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="projectConfigurationName"></param>
         /// <returns>The path to the temporary project file</returns>
         /// <owner>LukaszG</owner>
-        static private string AddCreateTemporaryVCProjectTasks
+        private static string AddCreateTemporaryVCProjectTasks
         (
             SolutionParser solution,
             Project msbuildProject,
@@ -893,7 +893,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="proj"></param>
         /// <param name="subTargetName"></param>
         /// <owner>LukaszG, RGoel</owner>
-        static private void AddTargetForVCProject
+        private static void AddTargetForVCProject
         (
             Project msbuildProject,
             SolutionParser solution,
@@ -1001,7 +1001,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="msbuildProject"></param>
         /// <owner>RGoel</owner>
-        static private void AddTargetForGetFrameworkPathAndRedistList
+        private static void AddTargetForGetFrameworkPathAndRedistList
             (
             Project msbuildProject
             )
@@ -1063,7 +1063,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="proj"></param>
         /// <param name="conditionDescribingValidConfigurations"></param>
         /// <owner>RGoel</owner>
-        static private void AddTaskForAspNetCompiler
+        private static void AddTaskForAspNetCompiler
             (
             Target target,
             ProjectInSolution proj,
@@ -1098,7 +1098,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="referenceItemName"></param>
         /// <param name="conditionDescribingValidConfigurations"></param>
         /// <owner>RGoel</owner>
-        static private void AddTasksToCopyAllDependenciesIntoBinDir
+        private static void AddTasksToCopyAllDependenciesIntoBinDir
             (
             Target target, 
             ProjectInSolution proj, 
@@ -1157,7 +1157,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="aspNetCompilerParameters"></param>
         /// <param name="solutionFile"></param>
         /// <owner>RGoel</owner>
-        static private void AddPropertyGroupForAspNetConfiguration
+        private static void AddPropertyGroupForAspNetConfiguration
             (
             Project msbuildProject, 
             ProjectInSolution proj, 
@@ -1240,7 +1240,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="proj"></param>
         /// <param name="referenceItemName"></param>
         /// <owner>RGoel</owner>
-        static private void AddTasksToResolveAutoRefreshFileReferences
+        private static void AddTasksToResolveAutoRefreshFileReferences
             (
             Target target, 
             ProjectInSolution proj, 
@@ -1281,7 +1281,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="proj"></param>
         /// <returns></returns>
         /// <owner>RGoel</owner>
-        static private string ComputeTargetConditionForWebProject
+        private static string ComputeTargetConditionForWebProject
             (
             SolutionParser solution,
             ProjectInSolution proj
@@ -1332,7 +1332,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="proj"></param>
         /// <param name="subTargetName"></param>
         /// <owner>RGoel</owner>
-        static private void AddTargetForWebProject
+        private static void AddTargetForWebProject
         (
             Project msbuildProject,
             SolutionParser solution,
@@ -1455,7 +1455,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="propertyName"></param>
         /// <returns>A safe property name that can be used as an XML element name.</returns>
         /// <owner>RGoel</owner>
-        static private string GenerateSafePropertyName
+        private static string GenerateSafePropertyName
             (
             ProjectInSolution proj,
             string propertyName
@@ -1499,7 +1499,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="textResourceName">Resource string name to use in the tag text</param>
         /// <param name="args">Additional parameters to pass to FormatString</param>
         /// <owner>LukaszG</owner>
-        static internal BuildTask AddErrorWarningMessageElement(Target target, string elementType, 
+        internal static BuildTask AddErrorWarningMessageElement(Target target, string elementType, 
             bool treatAsLiteral, string textResourceName, params object[] args)
         {
             string code = null;
@@ -1531,7 +1531,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="errorMessage">Optional detailed error message to print out in case we already tried accessing the 
         /// project file before and failed.</param>
         /// <owner>RGoel</owner>
-        static private void AddTargetForUnknownProjectType
+        private static void AddTargetForUnknownProjectType
         (
             Project msbuildProject,
             SolutionParser solution,
@@ -1597,7 +1597,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="subTargetName">The target to call within the project that's being added.</param>
         /// <param name="projectsByDependencyLevel"></param>
         /// <owner>RGoel</owner>
-        static private Target AddAllDependencyTarget
+        private static Target AddAllDependencyTarget
         (
             Project msbuildProject, 
             string targetName, 
@@ -1673,7 +1673,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="subTargetName"></param>
         /// <returns></returns>
         /// <owner>RGoel</owner>
-        static private string GetProjectDependencies(SolutionParser solution, ProjectInSolution project, string subTargetName)
+        private static string GetProjectDependencies(SolutionParser solution, ProjectInSolution project, string subTargetName)
         {
             ErrorUtilities.VerifyThrow(project != null, "We should always have a project for this method");
             StringBuilder dependencies = new StringBuilder();
@@ -1710,7 +1710,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="dependencyLevel"></param>
         /// <param name="subTargetName"></param>
         /// <returns></returns>
-        static private string GetAllNonMSBuildProjectDependencies
+        private static string GetAllNonMSBuildProjectDependencies
         (
             Dictionary<int, List<ProjectInSolution>> projectsByDependencyLevel, 
             int dependencyLevel, 
@@ -1758,7 +1758,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="configuration"></param>
         /// <returns></returns>
         /// <owner>LukaszG</owner>
-        static private string GetConditionStringForConfiguration(ConfigurationInSolution configuration)
+        private static string GetConditionStringForConfiguration(ConfigurationInSolution configuration)
         {
             return string.Format(CultureInfo.InvariantCulture, " ('$(Configuration)' == '{0}') and ('$(Platform)' == '{1}') ",
                 EscapingUtilities.Escape(configuration.ConfigurationName), 
@@ -1771,7 +1771,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="msbuildProject"></param>
         /// <param name="solution"></param>
         /// <owner>LukaszG</owner>
-        static private void AddConfigurationPlatformDefaults
+        private static void AddConfigurationPlatformDefaults
         (
             Project msbuildProject,
             SolutionParser solution
@@ -1794,7 +1794,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="solution"></param>
         /// <param name="solutionConfiguration"></param>
         /// <owner>LukaszG</owner>
-        static internal void AddPropertyGroupForSolutionConfiguration
+        internal static void AddPropertyGroupForSolutionConfiguration
         (
             Project msbuildProject, 
             SolutionParser solution,
@@ -1840,7 +1840,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="msbuildProject"></param>
         /// <owner>LukaszG</owner>
-        static private void AddVenusConfigurationDefaults
+        private static void AddVenusConfigurationDefaults
         (
             Project msbuildProject
         )
@@ -1856,7 +1856,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="msbuildProject"></param>
         /// <param name="solution"></param>
         /// <owner>LukaszG</owner>
-        static private void AddGlobalProperties(Project msbuildProject, SolutionParser solution)
+        private static void AddGlobalProperties(Project msbuildProject, SolutionParser solution)
         {
             BuildPropertyGroup propertyGroup = msbuildProject.AddNewPropertyGroup(true /* insertAtEndOfProject = true */);
 
@@ -1897,7 +1897,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="solution"></param>
         /// <owner>LukaszG</owner>
-        static private void AddFakeReleaseSolutionConfigurationIfNecessary(SolutionParser solution)
+        private static void AddFakeReleaseSolutionConfigurationIfNecessary(SolutionParser solution)
         {
             if (solution.ContainsWebProjects)
             {
@@ -1923,7 +1923,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="msbuildProject"></param>
         /// <owner>LukaszG</owner>
-        static private void AddInitialTargets(Project msbuildProject)
+        private static void AddInitialTargets(Project msbuildProject)
         {
             Target initialTarget = msbuildProject.Targets.AddNewTarget("ValidateSolutionConfiguration");
 
@@ -1955,7 +1955,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <returns></returns>
         /// <owner>LukaszG</owner>
-        static internal string PredictActiveSolutionConfigurationName(SolutionParser solution, Engine parentEngine)
+        internal static string PredictActiveSolutionConfigurationName(SolutionParser solution, Engine parentEngine)
         {
             string candidateFullSolutionConfigurationName = DetermineLikelyActiveSolutionConfiguration(solution, parentEngine);
 
@@ -2014,7 +2014,7 @@ namespace Microsoft.Build.BuildEngine
         /// we know what build order we should use when building the solution. 
         /// </summary>
         /// <owner>LukaszG</owner>
-        static private void ScanProjectDependencies(SolutionParser solution, Engine parentEngine, string childProjectToolsVersion, string fullSolutionConfigurationName, BuildEventContext projectBuildEventContext)
+        private static void ScanProjectDependencies(SolutionParser solution, Engine parentEngine, string childProjectToolsVersion, string fullSolutionConfigurationName, BuildEventContext projectBuildEventContext)
         {
             string message = null;
 
@@ -2155,7 +2155,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="parentEngine">The engine handling the conversion</param>
         /// <param name="projectBuildEventContext">The build event context</param>
         /// <param name="dependencyGuid">The guid, in string form, of the dependency project</param>
-        static private void AddDependencyByGuid(SolutionParser solution, ProjectInSolution project, Engine parentEngine, BuildEventContext projectBuildEventContext, string dependencyGuid)
+        private static void AddDependencyByGuid(SolutionParser solution, ProjectInSolution project, Engine parentEngine, BuildEventContext projectBuildEventContext, string dependencyGuid)
         {
             if (!String.IsNullOrEmpty(dependencyGuid))
             {
@@ -2181,7 +2181,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="solution"></param>
         /// <param name="parentEngine"></param>
         /// <owner>LukaszG</owner>
-        static internal void ConvertVcToVcDependenciesToReferences(SolutionParser solution, Engine parentEngine, BuildEventContext projectBuildEventContext)
+        internal static void ConvertVcToVcDependenciesToReferences(SolutionParser solution, Engine parentEngine, BuildEventContext projectBuildEventContext)
         {
             // Go through the list of the projects in solution looking for VC projects
             foreach (ProjectInSolution project in solution.ProjectsInOrder)
@@ -2219,7 +2219,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="project"></param>
         /// <param name="solution"></param>
         /// <param name="projectsByDependencyLevel"></param>
-        static private void AssignDependencyLevel(ProjectInSolution project, SolutionParser solution, Dictionary<int, List<ProjectInSolution>> projectsByDependencyLevel)
+        private static void AssignDependencyLevel(ProjectInSolution project, SolutionParser solution, Dictionary<int, List<ProjectInSolution>> projectsByDependencyLevel)
         {
             // if we ever try to recurse into a project whose dependency level we're calculating above,
             // we have a circular dependency.
@@ -2267,7 +2267,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="solution"></param>
         /// <param name="projectsByDependencyLevel"></param>
-        static private void AssignDependencyLevels(SolutionParser solution, Dictionary<int, List<ProjectInSolution>> projectsByDependencyLevel)
+        private static void AssignDependencyLevels(SolutionParser solution, Dictionary<int, List<ProjectInSolution>> projectsByDependencyLevel)
         {
             foreach (ProjectInSolution project in solution.ProjectsInOrder)
             {

@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class Touch_Tests
+    public sealed class Touch_Tests
     {
         internal static Microsoft.Build.Shared.FileExists fileExists = new Microsoft.Build.Shared.FileExists(FileExists);
         internal static Microsoft.Build.Shared.FileCreate fileCreate = new Microsoft.Build.Shared.FileCreate(FileCreate);

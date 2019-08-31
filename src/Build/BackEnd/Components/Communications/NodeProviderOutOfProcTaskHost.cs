@@ -351,7 +351,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Static factory for component creation.
         /// </summary>
-        static internal IBuildComponent CreateComponent(BuildComponentType componentType)
+        internal static IBuildComponent CreateComponent(BuildComponentType componentType)
         {
             ErrorUtilities.VerifyThrow(componentType == BuildComponentType.OutOfProcTaskHostNodeProvider, "Factory cannot create components of type {0}", componentType);
             return new NodeProviderOutOfProcTaskHost();

@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class RemoveDuplicates_Tests
+    public sealed class RemoveDuplicates_Tests
     {
         /// <summary>
         /// Pass one item in, get the same item back.

@@ -14,7 +14,7 @@ namespace Microsoft.Build.BuildEngine
     /// Utility helper functions for formatting logger output.
     /// </summary>
     /// <owner>JomoF</owner>
-    static internal class LogFormatter 
+    internal static class LogFormatter 
     {
         /// <summary>
         /// Formats the timestamp in the log as  Hours:Minutes:Seconds.Milliseconds

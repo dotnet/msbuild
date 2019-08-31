@@ -27,13 +27,13 @@ namespace Microsoft.Build.BackEnd
     /// Each class implements a Translate method on INodePacket which takes this class
     /// as a parameter, and uses it to store and retrieve fields to the stream.
     /// </summary>
-    static internal class BinaryTranslator
+    internal static class BinaryTranslator
     {
         /// <summary>
         /// Returns a read-only serializer.
         /// </summary>
         /// <returns>The serializer.</returns>
-        static internal ITranslator GetReadTranslator(Stream stream, SharedReadBuffer buffer)
+        internal static ITranslator GetReadTranslator(Stream stream, SharedReadBuffer buffer)
         {
             return new BinaryReadTranslator(stream, buffer);
         }
@@ -43,7 +43,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="stream">The stream containing data to serialize.</param>
         /// <returns>The serializer.</returns>
-        static internal ITranslator GetWriteTranslator(Stream stream)
+        internal static ITranslator GetWriteTranslator(Stream stream)
         {
             return new BinaryWriteTranslator(stream);
         }

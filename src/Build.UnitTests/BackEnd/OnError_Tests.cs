@@ -19,7 +19,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
      *
      * Tests that exercise the <OnError> tag.
      */
-    sealed public class OnError_Tests
+    public sealed class OnError_Tests
     {
         /*
          * Method:  Basic

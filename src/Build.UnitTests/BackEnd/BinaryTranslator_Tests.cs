@@ -623,7 +623,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Gets a comparer.
             /// </summary>
-            static public IComparer<BaseClass> Comparer
+            public static IComparer<BaseClass> Comparer
             {
                 get { return new BaseClassComparer(); }
             }
@@ -717,7 +717,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Gets a comparer.
             /// </summary>
-            static new public IComparer<DerivedClass> Comparer
+            public new static IComparer<DerivedClass> Comparer
             {
                 get { return new DerivedClassComparer(); }
             }

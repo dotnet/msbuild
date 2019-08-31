@@ -13,7 +13,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// A static instance of the comparer for use in a sort method
         /// </summary>
-        internal readonly static IComparer<AssemblyNameExtension> GenericComparer = new AssemblyNameReverseVersionComparer();
+        internal static readonly IComparer<AssemblyNameExtension> GenericComparer = new AssemblyNameReverseVersionComparer();
 
         /// <summary>
         /// Compare x and y by version only.

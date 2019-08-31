@@ -16,7 +16,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class CommandLineBuilderExtensionTest
+    public sealed class CommandLineBuilderExtensionTest
     {
         /*
         * Method:   AppendItemWithInvalidBooleanAttribute

@@ -13,7 +13,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Tests from Orcas
     /// </summary>
-    sealed public class TargetsFile_Test
+    public sealed class TargetsFile_Test
     {
 #if FEATURE_COMPILE_IN_TESTS
         /// <summary>

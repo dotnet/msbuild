@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class AssemblyNameEx_Tests
+    public sealed class AssemblyNameEx_Tests
     {
         /// <summary>
         /// Delegate defines a function that produces an AssemblyNameExtension from a string.

@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class CombinePath_Tests
+    public sealed class CombinePath_Tests
     {
         /// <summary>
         /// Base path is relative.  Paths are relative.

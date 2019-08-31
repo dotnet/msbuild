@@ -21,7 +21,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Tests for the Exec task
     /// </summary>
-    sealed public class Exec_Tests
+    public sealed class Exec_Tests
     {
         private readonly ITestOutputHelper _output;
 

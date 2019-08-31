@@ -55,7 +55,7 @@ namespace Microsoft.Build
         /// Read a string while checking the string precursor for intern opportunities.
         /// Taken from ndp\clr\src\bcl\system\io\binaryreader.cs-ReadString()
         /// </summary>
-        override public String ReadString()
+        public override String ReadString()
         {
             try
             {
@@ -228,7 +228,7 @@ namespace Microsoft.Build
     /// <summary>
     /// Opaque holder of shared buffer.
     /// </summary>
-    abstract internal class SharedReadBuffer
+    internal abstract class SharedReadBuffer
     {
     }
 }

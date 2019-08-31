@@ -37,7 +37,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         * 
         * Find the next token. Return 'true' if one was found. False, otherwise.
         */
-        override internal bool FindNextToken()
+        internal override bool FindNextToken()
         {
             int startPosition = _reader.Position;
 
@@ -324,7 +324,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         * 
         * Return the token char reader.
         */
-        override internal TokenCharReader Reader
+        internal override TokenCharReader Reader
         {
             get
             {

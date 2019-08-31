@@ -88,7 +88,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Factory for serialization.
         /// </summary>
-        static internal RegistryLocation FactoryForDeserialization(ITranslator translator)
+        internal static RegistryLocation FactoryForDeserialization(ITranslator translator)
         {
             return new RegistryLocation(translator);
         }

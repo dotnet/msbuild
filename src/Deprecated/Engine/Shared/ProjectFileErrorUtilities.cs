@@ -11,7 +11,7 @@ namespace Microsoft.Build.BuildEngine.Shared
     /// This class contains methods that are useful for error checking and validation of project files.
     /// </summary>
     /// <owner>SumedhK</owner>
-    static internal class ProjectFileErrorUtilities
+    internal static class ProjectFileErrorUtilities
     {
         /// <summary>
         /// This method is used to flag errors in the project file being processed. Do NOT use this method in place of

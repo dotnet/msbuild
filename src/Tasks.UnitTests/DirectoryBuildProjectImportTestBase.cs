@@ -11,7 +11,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// A base class for testing the directory build project import functionality in Microsoft.Common.props and Microsoft.Common.targets.
     /// </summary>
-    abstract public class DirectoryBuildProjectImportTestBase : IDisposable
+    public abstract class DirectoryBuildProjectImportTestBase : IDisposable
     {
         private const string BasicDirectoryBuildProjectContents = @"
                 <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>

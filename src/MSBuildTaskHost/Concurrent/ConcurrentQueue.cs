@@ -46,7 +46,7 @@ namespace Microsoft.Build.Shared.Concurrent
         /// <summary>The current head segment.</summary>
         private volatile Segment _head;
 
-        static internal object VolatileReader(ref object o) => Thread.VolatileRead(ref o);
+        internal static object VolatileReader(ref object o) => Thread.VolatileRead(ref o);
         /// <summary>
         /// Initializes a new instance of the <see cref="ConcurrentQueue{T}"/> class.
         /// </summary>

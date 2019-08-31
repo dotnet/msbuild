@@ -14,7 +14,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class CreateCSharpManifestResourceName_Tests
+    public sealed class CreateCSharpManifestResourceName_Tests
     {
 
         private readonly ITestOutputHelper _testOutput;

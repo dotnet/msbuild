@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class ConvertToAbsolutePath_Tests
+    public sealed class ConvertToAbsolutePath_Tests
     {
         /// <summary>
         /// Passing in a relative path (expecting an absolute back)

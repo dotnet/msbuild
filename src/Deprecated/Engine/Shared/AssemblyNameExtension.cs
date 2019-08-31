@@ -21,7 +21,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         private AssemblyName asAssemblyName = null;
         private string asString = null;
 
-        static private AssemblyNameExtension unnamedAssembly = new AssemblyNameExtension();
+        private static AssemblyNameExtension unnamedAssembly = new AssemblyNameExtension();
 
         /// <summary>
         /// Construct an unnamed assembly.
@@ -248,7 +248,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// Get a hash code for this assembly name.
         /// </summary>
         /// <returns></returns>
-        new internal int GetHashCode()
+        internal new int GetHashCode()
         {
             // Ok, so this isn't a great hashing algorithm. However, basenames with different 
             // versions or PKTs are relatively uncommon and so collisions should be low.
@@ -501,7 +501,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// Convert to a string for display.
         /// </summary>
         /// <returns></returns>
-        override public string ToString()
+        public override string ToString()
         {
             CreateFullName();
             return this.asString;

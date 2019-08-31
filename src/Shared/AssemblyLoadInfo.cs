@@ -104,7 +104,7 @@ namespace Microsoft.Build.Shared
             translator.Translate(ref assemblyFile);
         }
 
-        static public AssemblyLoadInfo FactoryForTranslation(ITranslator translator)
+        public static AssemblyLoadInfo FactoryForTranslation(ITranslator translator)
         {
             string assemblyName = null;
             string assemblyFile = null;

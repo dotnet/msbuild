@@ -56,7 +56,7 @@ namespace Microsoft.Build.BuildEngine
         /// This function logs out all the messages currently posted to the queue. The active queue is swapped
         /// with the secondary queue to enable posting of messages while this function is running
         /// </summary>
-        override internal bool ProcessPostedLoggingEvents()
+        internal override bool ProcessPostedLoggingEvents()
         {
             bool processedEvents = false;
             lastFlushTime = DateTime.Now.Ticks;
@@ -108,7 +108,7 @@ namespace Microsoft.Build.BuildEngine
         /// be posted to another logger
         /// </summary>
         /// <param name="buildEventArgs"></param>
-        override internal void ProcessBuildEvent(BuildEventArgs buildEventArgs)
+        internal override void ProcessBuildEvent(BuildEventArgs buildEventArgs)
         {
             engineEventSource.RaiseStronglyTypedEvent(buildEventArgs);
 
@@ -143,7 +143,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Shutdown the logging service as appropriate
         /// </summary>
-        override internal void Shutdown()
+        internal override void Shutdown()
         {
             foreach (EventSource eventSource in eventSources.Values)
             {

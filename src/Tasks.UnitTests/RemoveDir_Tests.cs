@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class RemoveDir_Tests
+    public sealed class RemoveDir_Tests
     {
         /*
          * Method:   AttributeForwarding

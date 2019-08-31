@@ -1279,7 +1279,7 @@ namespace Microsoft.Build.Shared
         /// Internal, optimized GetCurrentDirectory implementation that simply delegates to the native method
         /// </summary>
         /// <returns></returns>
-        internal unsafe static string GetCurrentDirectory()
+        internal static unsafe string GetCurrentDirectory()
         {
 #if FEATURE_LEGACY_GETCURRENTDIRECTORY
             if (IsWindows)
@@ -1293,14 +1293,14 @@ namespace Microsoft.Build.Shared
             return Directory.GetCurrentDirectory();
         }
 
-        private unsafe static int GetCurrentDirectoryWin32(int nBufferLength, char* lpBuffer)
+        private static unsafe int GetCurrentDirectoryWin32(int nBufferLength, char* lpBuffer)
         {
             int pathLength = GetCurrentDirectory(nBufferLength, lpBuffer);
             VerifyThrowWin32Result(pathLength);
             return pathLength;
         }
 
-        internal unsafe static string GetFullPath(string path)
+        internal static unsafe string GetFullPath(string path)
         {
             int bufferSize = GetFullPathWin32(path, 0, null, IntPtr.Zero);
             char* buffer = stackalloc char[bufferSize];
@@ -1309,7 +1309,7 @@ namespace Microsoft.Build.Shared
             return AreStringsEqual(buffer, fullPathLength, path) ? path : new string(buffer, startIndex: 0, length: fullPathLength);
         }
 
-        private unsafe static int GetFullPathWin32(string target, int bufferLength, char* buffer, IntPtr mustBeZero)
+        private static unsafe int GetFullPathWin32(string target, int bufferLength, char* buffer, IntPtr mustBeZero)
         {
             int pathLength = GetFullPathName(target, bufferLength, buffer, mustBeZero);
             VerifyThrowWin32Result(pathLength);
@@ -1323,7 +1323,7 @@ namespace Microsoft.Build.Shared
         /// <param name="len">The length of the buffer.</param>
         /// <param name="s">The string.</param>
         /// <returns>True only if the contents of <paramref name="s"/> and the first <paramref name="len"/> characters in <paramref name="buffer"/> are identical.</returns>
-        private unsafe static bool AreStringsEqual(char* buffer, int len, string s)
+        private static unsafe bool AreStringsEqual(char* buffer, int len, string s)
         {
             if (len != s.Length)
             {
@@ -1433,7 +1433,7 @@ namespace Microsoft.Build.Shared
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [SuppressMessage("Microsoft.Usage", "CA2205:UseManagedEquivalentsOfWin32Api", Justification = "Using unmanaged equivalent for performance reasons")]
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        internal unsafe static extern int GetCurrentDirectory(int nBufferLength, char* lpBuffer);
+        internal static extern unsafe int GetCurrentDirectory(int nBufferLength, char* lpBuffer);
 
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [SuppressMessage("Microsoft.Usage", "CA2205:UseManagedEquivalentsOfWin32Api", Justification = "Using unmanaged equivalent for performance reasons")]
@@ -1461,7 +1461,7 @@ namespace Microsoft.Build.Shared
 
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static unsafe extern int GetFullPathName(string target, int bufferLength, char* buffer, IntPtr mustBeZero);
+        internal static extern unsafe int GetFullPathName(string target, int bufferLength, char* buffer, IntPtr mustBeZero);
 
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [DllImport("KERNEL32.DLL")]

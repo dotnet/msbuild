@@ -11,7 +11,7 @@ namespace Microsoft.Build.BuildEngine.Shared
     /// This class provides access to the assembly's resources.
     /// </summary>
     /// <owner>SumedhK</owner>
-    static internal class AssemblyResources
+    internal static class AssemblyResources
     {
         /// <summary>
         /// A slot for msbuild.exe to add a resource manager over its own resources, that can also be consulted.

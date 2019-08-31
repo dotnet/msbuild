@@ -60,7 +60,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Shutdown the logging service as appropriate
         /// </summary>
-        virtual internal void Shutdown()
+        internal virtual void Shutdown()
         {
             ErrorUtilities.VerifyThrow(false, "This method should be defined in a subclass");
         }
@@ -186,14 +186,14 @@ namespace Microsoft.Build.BuildEngine
         /// in-proc implementation, this will actually raise the events. In the out-of-proc
         /// implementation, this will send the events from the node process to the engine.
         /// </summary>
-        abstract internal bool ProcessPostedLoggingEvents();
+        internal abstract bool ProcessPostedLoggingEvents();
         
         /// <summary>
         /// This method is to process a single build event, by default if this method is used
         /// the event should be posted and processed
         /// </summary>
         /// <param name="buildEventArgs"></param>
-        virtual internal void ProcessBuildEvent(BuildEventArgs buildEventArgs)
+        internal virtual void ProcessBuildEvent(BuildEventArgs buildEventArgs)
         {
             PostLoggingEvent(buildEventArgs);
             ProcessPostedLoggingEvents();
@@ -202,7 +202,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Return true if the queue needs to be flushed
         /// </summary>
-        virtual internal bool NeedsFlush(long currentTickCount)
+        internal virtual bool NeedsFlush(long currentTickCount)
         {
             if (this.flushBuildEventsImmediatly)
             {
@@ -312,7 +312,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Logs a low-priority comment with all registered loggers using the specified resource string.
         /// </summary>
-        virtual internal void LogComment(BuildEventContext buildEventContext, string messageResourceName, params object[] messageArgs)
+        internal virtual void LogComment(BuildEventContext buildEventContext, string messageResourceName, params object[] messageArgs)
         {
             if (!OnlyLogCriticalEvents)
             {
@@ -327,7 +327,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="importance"></param>
         /// <param name="messageResourceName"></param>
         /// <param name="messageArgs"></param>
-        virtual internal void LogComment(BuildEventContext buildEventContext, MessageImportance importance, string messageResourceName, params object[] messageArgs)
+        internal virtual void LogComment(BuildEventContext buildEventContext, MessageImportance importance, string messageResourceName, params object[] messageArgs)
         {
             if (!OnlyLogCriticalEvents)
             {
@@ -340,7 +340,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Logs a custom-priority comment with all registered loggers using the given text.
         /// </summary>
-        virtual internal void LogCommentFromText(BuildEventContext buildEventContext,MessageImportance importance, string message)
+        internal virtual void LogCommentFromText(BuildEventContext buildEventContext,MessageImportance importance, string message)
         {
             if (!OnlyLogCriticalEvents)
             {
@@ -376,7 +376,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="file"></param>
         /// <param name="messageResourceName"></param>
         /// <param name="messageArgs"></param>
-        virtual internal void LogError(BuildEventContext location, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
+        internal virtual void LogError(BuildEventContext location, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
             LogError(location, null, file, messageResourceName, messageArgs);
         }
@@ -389,7 +389,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="file"></param>
         /// <param name="messageResourceName"></param>
         /// <param name="messageArgs"></param>
-        virtual internal void LogError(BuildEventContext buildEventContext, string subcategoryResourceName, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
+        internal virtual void LogError(BuildEventContext buildEventContext, string subcategoryResourceName, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
             ErrorUtilities.VerifyThrow(messageResourceName != null, "Need resource string for error message.");
 
@@ -409,7 +409,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="helpKeyword">Can be null.</param>
         /// <param name="file"></param>
         /// <param name="message"></param>
-        virtual internal void LogErrorFromText(BuildEventContext buildEventContext, string subcategoryResourceName, string errorCode, string helpKeyword, BuildEventFileInfo file, string message)
+        internal virtual void LogErrorFromText(BuildEventContext buildEventContext, string subcategoryResourceName, string errorCode, string helpKeyword, BuildEventFileInfo file, string message)
         {
             ErrorUtilities.VerifyThrow(file != null, "Must specify the associated file.");
             ErrorUtilities.VerifyThrow(message != null, "Need error message.");
@@ -444,7 +444,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <param name="invalidProjectFileException"></param>
-        virtual internal void LogInvalidProjectFileError(BuildEventContext buildEventContext, InvalidProjectFileException invalidProjectFileException)
+        internal virtual void LogInvalidProjectFileError(BuildEventContext buildEventContext, InvalidProjectFileException invalidProjectFileException)
         {
             ErrorUtilities.VerifyThrow(invalidProjectFileException != null, "Need exception context.");
 
@@ -479,7 +479,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>SumedhK</owner>
         /// <param name="exception"></param>
         /// <param name="file"></param>
-        virtual internal void LogFatalBuildError(BuildEventContext buildEventContext, Exception exception, BuildEventFileInfo file)
+        internal virtual void LogFatalBuildError(BuildEventContext buildEventContext, Exception exception, BuildEventFileInfo file)
         {
             LogFatalError(buildEventContext, exception, file, "FatalBuildError");
         }
@@ -492,7 +492,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="exception"></param>
         /// <param name="file"></param>
         /// <param name="taskName"></param>
-        virtual internal void LogFatalTaskError(BuildEventContext buildEventContext, Exception exception, BuildEventFileInfo file, string taskName)
+        internal virtual void LogFatalTaskError(BuildEventContext buildEventContext, Exception exception, BuildEventFileInfo file, string taskName)
         {
             ErrorUtilities.VerifyThrow(taskName != null, "Must specify the name of the task that failed.");
 
@@ -508,7 +508,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="file"></param>
         /// <param name="messageResourceName"></param>
         /// <param name="messageArgs"></param>
-        virtual internal void LogFatalError(BuildEventContext buildEventContext, Exception exception, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
+        internal virtual void LogFatalError(BuildEventContext buildEventContext, Exception exception, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
             ErrorUtilities.VerifyThrow(messageResourceName != null, "Need resource string for error message.");
 
@@ -544,7 +544,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="exception"></param>
         /// <param name="file"></param>
         /// <param name="taskName"></param>
-        virtual internal void LogTaskWarningFromException(BuildEventContext buildEventContext, Exception exception, BuildEventFileInfo file, string taskName)
+        internal virtual void LogTaskWarningFromException(BuildEventContext buildEventContext, Exception exception, BuildEventFileInfo file, string taskName)
         {
             ErrorUtilities.VerifyThrow(taskName != null, "Must specify the name of the task that failed.");
             ErrorUtilities.VerifyThrow(file != null, "Must specify the associated file.");
@@ -571,7 +571,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="file"></param>
         /// <param name="messageResourceName"></param>
         /// <param name="messageArgs"></param>
-         virtual internal void LogWarning(BuildEventContext buildEventContext, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
+         internal virtual void LogWarning(BuildEventContext buildEventContext, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
             LogWarning(buildEventContext,null, file, messageResourceName, messageArgs);
         }
@@ -584,7 +584,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="file"></param>
         /// <param name="messageResourceName"></param>
         /// <param name="messageArgs"></param>
-        virtual internal void LogWarning(BuildEventContext buildEventContext, string subcategoryResourceName, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
+        internal virtual void LogWarning(BuildEventContext buildEventContext, string subcategoryResourceName, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
             ErrorUtilities.VerifyThrow(messageResourceName != null, "Need resource string for warning message.");
 
@@ -604,7 +604,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="helpKeyword">Can be null.</param>
         /// <param name="file"></param>
         /// <param name="message"></param>
-        virtual internal void LogWarningFromText(BuildEventContext buildEventContext, string subcategoryResourceName, string warningCode, string helpKeyword, BuildEventFileInfo file, string message)
+        internal virtual void LogWarningFromText(BuildEventContext buildEventContext, string subcategoryResourceName, string warningCode, string helpKeyword, BuildEventFileInfo file, string message)
         {
             ErrorUtilities.VerifyThrow(file != null, "Must specify the associated file.");
             ErrorUtilities.VerifyThrow(message != null, "Need warning message.");
@@ -647,7 +647,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Logs that the build has started with all loggers (only called on the main node)
         /// </summary>
-        virtual internal void LogBuildStarted()
+        internal virtual void LogBuildStarted()
         {
             // If we're only logging critical events, don't risk causing all the resources to load by formatting
             // a string that won't get emitted anyway.
@@ -669,7 +669,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Logs that the build has finished with all loggers, except for forwarding loggers.
         /// </summary>
-        virtual internal void LogBuildStarted(int loggerId)
+        internal virtual void LogBuildStarted(int loggerId)
         {
             // If we're only logging critical events, don't risk causing all the resources to load by formatting
             // a string that won't get emitted anyway.
@@ -692,7 +692,7 @@ namespace Microsoft.Build.BuildEngine
         /// Logs that the build has finished with all registered loggers.
         /// </summary>
         /// <param name="success"></param>
-        virtual internal void LogBuildFinished(bool success)
+        internal virtual void LogBuildFinished(bool success)
         {
             // If we're only logging critical events, don't risk causing all the resources to load by formatting
             // a string that won't get emitted anyway.
@@ -710,7 +710,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Logs that the build has finished to a particular logger Id
         /// </summary>
-        virtual internal void LogBuildFinished(bool success, int loggerId)
+        internal virtual void LogBuildFinished(bool success, int loggerId)
         {
             // If we're only logging critical events, don't risk causing all the resources to load by formatting
             // a string that won't get emitted anyway.
@@ -737,7 +737,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="targetNames">target names</param>
         /// <param name="properties">properties list</param>
         /// <param name="items">items list</param>
-        virtual internal void LogProjectStarted(int projectId, BuildEventContext parentBuildEventContext, BuildEventContext projectBuildEventContext, string projectFile, string targetNames, IEnumerable properties, IEnumerable items)
+        internal virtual void LogProjectStarted(int projectId, BuildEventContext parentBuildEventContext, BuildEventContext projectBuildEventContext, string projectFile, string targetNames, IEnumerable properties, IEnumerable items)
         {
             if (!OnlyLogCriticalEvents)
             {
@@ -785,7 +785,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>SumedhK</owner>
         /// <param name="projectFile"></param>
         /// <param name="success"></param>
-        virtual internal void LogProjectFinished(BuildEventContext buildEventContext, string projectFile, bool success)
+        internal virtual void LogProjectFinished(BuildEventContext buildEventContext, string projectFile, bool success)
         {
             if (!OnlyLogCriticalEvents)
             {
@@ -810,7 +810,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="targetName">Name of target</param>
         /// <param name="projectFile">Main project file</param>
         /// <param name="projectFileOfTargetElement">Project file actually containing the target</param>
-        virtual internal void LogTargetStarted(BuildEventContext buildEventContext, string targetName, string projectFile, string projectFileOfTargetElement)
+        internal virtual void LogTargetStarted(BuildEventContext buildEventContext, string targetName, string projectFile, string projectFileOfTargetElement)
         {
             if (!OnlyLogCriticalEvents)
             {
@@ -835,7 +835,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="projectFile">main project file</param>
         /// <param name="success"></param>
         /// <param name="projectFileOfTargetElement">project file actually containing the target</param>
-        virtual internal void LogTargetFinished(BuildEventContext buildEventContext, string targetName, string projectFile, string projectFileOfTargetElement, bool success)
+        internal virtual void LogTargetFinished(BuildEventContext buildEventContext, string targetName, string projectFile, string projectFileOfTargetElement, bool success)
         {
             if (!OnlyLogCriticalEvents)
             {
@@ -863,7 +863,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="taskName"></param>
         /// <param name="projectFile"></param>
         /// <param name="projectFileOfTaskNode">project file actually containing the task</param>
-        virtual internal void LogTaskStarted(BuildEventContext buildEventContext, string taskName, string projectFile, string projectFileOfTaskNode)
+        internal virtual void LogTaskStarted(BuildEventContext buildEventContext, string taskName, string projectFile, string projectFileOfTaskNode)
         {
             if (!OnlyLogCriticalEvents)
             {
@@ -888,7 +888,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="projectFile"></param>
         /// <param name="success"></param>
         /// <param name="projectFileOfTaskNode">project file actually containing the task</param>
-        virtual internal void LogTaskFinished(BuildEventContext buildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, bool success)
+        internal virtual void LogTaskFinished(BuildEventContext buildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, bool success)
         {
             if (!OnlyLogCriticalEvents)
             {

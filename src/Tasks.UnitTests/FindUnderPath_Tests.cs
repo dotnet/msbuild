@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class FindUnderPath_Tests
+    public sealed class FindUnderPath_Tests
     {
         [Fact]
         public void BasicFilter()

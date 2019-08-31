@@ -68,7 +68,7 @@ namespace Microsoft.Build.BuildEngine
         /// The ID of the central logger to which this event should be forwarded. By default 
         /// all regular non-forwarded events are sent to all loggers registered on the parent.
         /// </summary>
-        virtual internal int LoggerId
+        internal virtual int LoggerId
         {
             get
             {

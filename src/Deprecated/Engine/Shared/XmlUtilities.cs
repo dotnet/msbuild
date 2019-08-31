@@ -11,7 +11,7 @@ namespace Microsoft.Build.BuildEngine.Shared
     /// This class contains utility methods for XML manipulation.
     /// </summary>
     /// <owner>SumedhK</owner>
-    static internal class XmlUtilities
+    internal static class XmlUtilities
     {
         /// <summary>
         /// This method renames an XML element.  Well, actually you can't directly

@@ -16,7 +16,7 @@ namespace Microsoft.Build.BuildEngine
     internal delegate void WriteLinePrettyFromResourceDelegate(int indentLevel, string resourceString, params object[] args);
     #endregion
 
-    abstract internal class BaseConsoleLogger : INodeLogger
+    internal abstract class BaseConsoleLogger : INodeLogger
     {
         #region Properties
         /// <summary>
@@ -770,7 +770,7 @@ namespace Microsoft.Build.BuildEngine
             /// Returns an IComparer that will put erformance counters 
             /// in descending order by elapsed time.
             /// </summary>
-            static internal IComparer DescendingByElapsedTimeComparer
+            internal static IComparer DescendingByElapsedTimeComparer
             {
                 get { return new DescendingByElapsedTime(); }
             }

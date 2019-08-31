@@ -10,7 +10,7 @@ namespace Microsoft.Build.Conversion
     /// Contains strings identifying hint paths that we should remove
     /// </summary>
     /// <owner>AJenner</owner>
-    static internal class LegacyFrameworkPaths
+    internal static class LegacyFrameworkPaths
     {
         internal const string RTMFrameworkPath       = "MICROSOFT.NET\\FRAMEWORK\\V1.0.3705";
         internal const string EverettFrameworkPath   = "MICROSOFT.NET\\FRAMEWORK\\V1.1.4322";
@@ -21,7 +21,7 @@ namespace Microsoft.Build.Conversion
     /// Contains the names of the known elements in the VS.NET project file.
     /// </summary>
     /// <owner>RGoel</owner>
-    static internal class VSProjectElements
+    internal static class VSProjectElements
     {
         internal const string visualStudioProject = "VisualStudioProject";
         internal const string visualJSharp        = "VISUALJSHARP";
@@ -59,7 +59,7 @@ namespace Microsoft.Build.Conversion
     /// Contains the names of the known elements in the VS.NET project file.
     /// </summary>
     /// <owner>RGoel</owner>
-    static internal class VSProjectAttributes
+    internal static class VSProjectAttributes
     {
         internal const string relPath             = "RelPath";
         internal const string name                = "Name";
@@ -103,7 +103,7 @@ namespace Microsoft.Build.Conversion
     /// Contains the names of some of the hard-coded strings we'll be inserting into the newly converted MSBuild project file.
     /// </summary>
     /// <owner>RGoel</owner>
-    static internal class XMakeProjectStrings
+    internal static class XMakeProjectStrings
     {
         internal const string project                     = "Project";
         internal const string defaultTargets              = "Build";

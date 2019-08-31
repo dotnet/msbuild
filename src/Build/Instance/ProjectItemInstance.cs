@@ -608,7 +608,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Factory for deserialization.
         /// </summary>
-        static internal ProjectItemInstance FactoryForDeserialization(ITranslator translator, ProjectInstance projectInstance)
+        internal static ProjectItemInstance FactoryForDeserialization(ITranslator translator, ProjectInstance projectInstance)
         {
             ProjectItemInstance newItem = new ProjectItemInstance(projectInstance);
             ((ITranslatable)newItem).Translate(translator);

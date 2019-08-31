@@ -45,7 +45,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             }
         }
 
-        override public bool Execute()
+        public override bool Execute()
         {
             if (TaskItemParam != null)
             {

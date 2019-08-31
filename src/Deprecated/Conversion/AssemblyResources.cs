@@ -11,7 +11,7 @@ namespace Microsoft.Build.Conversion
     /// This class provides access to the assembly's resources.
     /// </summary>
     /// <owner>SumedhK</owner>
-    static internal class AssemblyResources
+    internal static class AssemblyResources
     {
         /// <summary>
         /// Loads the specified resource string, either from the assembly's primary resources, or its shared resources.

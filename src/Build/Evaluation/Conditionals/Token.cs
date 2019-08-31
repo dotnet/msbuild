@@ -13,19 +13,19 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal sealed class Token
     {
-        internal readonly static Token Comma = new Token(TokenType.Comma);
-        internal readonly static Token LeftParenthesis = new Token(TokenType.LeftParenthesis);
-        internal readonly static Token RightParenthesis = new Token(TokenType.RightParenthesis);
-        internal readonly static Token LessThan = new Token(TokenType.LessThan);
-        internal readonly static Token GreaterThan = new Token(TokenType.GreaterThan);
-        internal readonly static Token LessThanOrEqualTo = new Token(TokenType.LessThanOrEqualTo);
-        internal readonly static Token GreaterThanOrEqualTo = new Token(TokenType.GreaterThanOrEqualTo);
-        internal readonly static Token And = new Token(TokenType.And);
-        internal readonly static Token Or = new Token(TokenType.Or);
-        internal readonly static Token EqualTo = new Token(TokenType.EqualTo);
-        internal readonly static Token NotEqualTo = new Token(TokenType.NotEqualTo);
-        internal readonly static Token Not = new Token(TokenType.Not);
-        internal readonly static Token EndOfInput = new Token(TokenType.EndOfInput);
+        internal static readonly Token Comma = new Token(TokenType.Comma);
+        internal static readonly Token LeftParenthesis = new Token(TokenType.LeftParenthesis);
+        internal static readonly Token RightParenthesis = new Token(TokenType.RightParenthesis);
+        internal static readonly Token LessThan = new Token(TokenType.LessThan);
+        internal static readonly Token GreaterThan = new Token(TokenType.GreaterThan);
+        internal static readonly Token LessThanOrEqualTo = new Token(TokenType.LessThanOrEqualTo);
+        internal static readonly Token GreaterThanOrEqualTo = new Token(TokenType.GreaterThanOrEqualTo);
+        internal static readonly Token And = new Token(TokenType.And);
+        internal static readonly Token Or = new Token(TokenType.Or);
+        internal static readonly Token EqualTo = new Token(TokenType.EqualTo);
+        internal static readonly Token NotEqualTo = new Token(TokenType.NotEqualTo);
+        internal static readonly Token Not = new Token(TokenType.Not);
+        internal static readonly Token EndOfInput = new Token(TokenType.EndOfInput);
 
         /// <summary>
         /// Valid tokens

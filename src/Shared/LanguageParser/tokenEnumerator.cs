@@ -24,10 +24,10 @@ namespace Microsoft.Build.Shared.LanguageParser
         protected Token current = null;
 
         // Return the token char reader.
-        abstract internal TokenCharReader Reader { get; }
+        internal abstract TokenCharReader Reader { get; }
 
         // Implemented by derived class to find the next token.
-        abstract internal bool FindNextToken();
+        internal abstract bool FindNextToken();
 
         /*
         * Method:  MoveNext

@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class MakeDir_Tests
+    public sealed class MakeDir_Tests
     {
         /// <summary>
         /// Make sure that attributes set on input items are forwarded to output items.

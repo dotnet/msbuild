@@ -19,7 +19,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class XmlPoke_Tests
+    public sealed class XmlPoke_Tests
     {
         private const string XmlNamespaceUsedByTests = "http://nsurl";
 

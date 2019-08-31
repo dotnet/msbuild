@@ -8,7 +8,7 @@ using System.Xml;
 
 namespace Microsoft.Build.BuildEngine
 {
-	static internal class VCProjectParser
+	internal static class VCProjectParser
 	{
         /// <summary>
         /// For a given VC project, retrieves the projects it references 
@@ -16,7 +16,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="projectPath"></param>
         /// <returns></returns>
         /// <owner>LukaszG</owner>
-        static internal List<string> GetReferencedProjectGuids(XmlDocument project)
+        internal static List<string> GetReferencedProjectGuids(XmlDocument project)
         {
             List<string> referencedProjectGuids = new List<string>();
 

@@ -56,7 +56,7 @@ namespace Microsoft.Build.Internal
     /// <summary>
     /// This class contains utility methods for the MSBuild engine.
     /// </summary>
-    static internal class CommunicationsUtilities
+    internal static class CommunicationsUtilities
     {
         /// <summary>
         /// The timeout to connect to a node.
@@ -96,7 +96,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Gets or sets the node connection timeout.
         /// </summary>
-        static internal int NodeConnectionTimeout
+        internal static int NodeConnectionTimeout
         {
             get { return GetIntegerVariableOrDefault("MSBUILDNODECONNECTIONTIMEOUT", DefaultNodeConnectionTimeout); }
         }
@@ -147,13 +147,13 @@ namespace Microsoft.Build.Internal
         /// Get environment block
         /// </summary>
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static unsafe extern char* GetEnvironmentStrings();
+        internal static extern unsafe char* GetEnvironmentStrings();
 
         /// <summary>
         /// Free environment block
         /// </summary>
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static unsafe extern bool FreeEnvironmentStrings(char* pStrings);
+        internal static extern unsafe bool FreeEnvironmentStrings(char* pStrings);
 
         /// <summary>
         /// Copied from the BCL implementation to eliminate some expensive security asserts.
@@ -189,8 +189,8 @@ namespace Microsoft.Build.Internal
                         // Copy strings out, parsing into pairs and inserting into the table.
                         // The first few environment variable entries start with an '='!
                         // The current working directory of every drive (except for those drives
-                        // you haven't cd'ed into in your DOS window) are stored in the 
-                        // environment block (as =C:=pwd) and the program's exit code is 
+                        // you haven't cd'ed into in your DOS window) are stored in the
+                        // environment block (as =C:=pwd) and the program's exit code is
                         // as well (=ExitCode=00000000)  Skip all that start with =.
                         // Read docs about Environment Blocks on MSDN's CreateProcess page.
 
@@ -204,8 +204,8 @@ namespace Microsoft.Build.Internal
                             int startKey = i;
 
                             // Skip to key
-                            // On some old OS, the environment block can be corrupted. 
-                            // Some lines will not have '=', so we need to check for '\0'. 
+                            // On some old OS, the environment block can be corrupted.
+                            // Some lines will not have '=', so we need to check for '\0'.
                             while (*(pEnvironmentBlock + i) != '=' && *(pEnvironmentBlock + i) != '\0')
                             {
                                 i++;
@@ -282,7 +282,7 @@ namespace Microsoft.Build.Internal
                     }
                 }
 
-                // Then, make sure the old ones have their old values. 
+                // Then, make sure the old ones have their old values.
                 foreach (KeyValuePair<string, string> entry in newEnvironment)
                 {
                     Environment.SetEnvironmentVariable(entry.Key, entry.Value);
@@ -291,8 +291,8 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
-        /// Given a base handshake, generates the real handshake based on e.g. elevation level.  
-        /// Client handshake required for comparison purposes only.  Returns the update handshake.  
+        /// Given a base handshake, generates the real handshake based on e.g. elevation level.
+        /// Client handshake required for comparison purposes only.  Returns the update handshake.
         /// </summary>
         internal static long GenerateHostHandshakeFromBase(long baseHandshake, long clientHandshake)
         {
@@ -488,7 +488,7 @@ namespace Microsoft.Build.Internal
 #endif
 
         /// <summary>
-        /// Given the appropriate information, return the equivalent TaskHostContext.  
+        /// Given the appropriate information, return the equivalent TaskHostContext.
         /// </summary>
         internal static TaskHostContext GetTaskHostContext(IDictionary<string, string> taskHostParameters)
         {
@@ -532,7 +532,7 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
-        /// Given the appropriate information, return the equivalent TaskHostContext.  
+        /// Given the appropriate information, return the equivalent TaskHostContext.
         /// </summary>
         internal static TaskHostContext GetTaskHostContext(bool is64BitProcess, int clrVersion)
         {
@@ -559,9 +559,9 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static TaskHostContext GetCurrentTaskHostContext()
         {
-            // We know that whichever assembly is executing this code -- whether it's MSBuildTaskHost.exe or 
+            // We know that whichever assembly is executing this code -- whether it's MSBuildTaskHost.exe or
             // Microsoft.Build.dll -- is of the version of the CLR that this process is running.  So grab
-            // the version of mscorlib currently in use and call that good enough.  
+            // the version of mscorlib currently in use and call that good enough.
             Version mscorlibVersion = typeof(bool).GetTypeInfo().Assembly.GetName().Version;
 
             string currentMSBuildArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture();
@@ -646,8 +646,8 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
-        /// Add the task host context to this handshake, to make sure that task hosts with different contexts 
-        /// will have different handshakes. Shift it into the upper 32-bits to avoid running into the 
+        /// Add the task host context to this handshake, to make sure that task hosts with different contexts
+        /// will have different handshakes. Shift it into the upper 32-bits to avoid running into the
         /// session ID. The connection may be salted to allow MSBuild to only connect to nodes that come from the same
         /// test environment.
         /// </summary>

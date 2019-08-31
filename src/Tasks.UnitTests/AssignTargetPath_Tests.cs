@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class AssignTargetPath_Tests
+    public sealed class AssignTargetPath_Tests
     {
         [Fact]
         public void Regress314791()

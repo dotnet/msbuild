@@ -16,7 +16,7 @@ namespace Microsoft.Build.Shared
     /// PERF: since we escape and unescape relatively frequently, it may be worth caching
     /// the last N strings that were (un)escaped
     /// </remarks>
-    static internal class EscapingUtilities
+    internal static class EscapingUtilities
     {
         /// <summary>
         /// Optional cache of escaped strings for use when needing to escape in performance-critical scenarios with significant

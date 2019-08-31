@@ -21,7 +21,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Retrieves the count of built-in metadata.
         /// </summary>
-        static internal int MetadataCount
+        internal static int MetadataCount
         {
             [DebuggerStepThrough]
             get
@@ -31,7 +31,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Retrieves the list of metadata names.
         /// </summary>
-        static internal ICollection<string> MetadataNames
+        internal static ICollection<string> MetadataNames
         {
             [DebuggerStepThrough]
             get

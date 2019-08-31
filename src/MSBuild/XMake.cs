@@ -46,7 +46,7 @@ namespace Microsoft.Build.CommandLine
     /// This class implements the MSBuild.exe command-line application. It processes
     /// command-line arguments and invokes the build engine.
     /// </summary>
-    static public class MSBuildApp
+    public static class MSBuildApp
     {
         /// <summary>
         /// Enumeration of the various ways in which the MSBuild.exe application can exit.
@@ -255,7 +255,7 @@ namespace Microsoft.Build.CommandLine
         /// <comments>
         /// This is a non-supported feature to facilitate timing multiple runs
         /// </comments>
-        static private void AppendOutputFile(string path, Int64 elapsedTime)
+        private static void AppendOutputFile(string path, Int64 elapsedTime)
         {
             if (!FileSystems.Default.FileExists(path))
             {

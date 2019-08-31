@@ -158,7 +158,7 @@ namespace Microsoft.Build.BuildEngine
         /// This method passes the task outputs to the engine, it is virtual for testing purposes to 
         /// create a mock TEM
         /// </summary>
-        virtual internal void PostTaskOutputs
+        internal virtual void PostTaskOutputs
         (
             int handleId,
             bool taskExecutedSuccessfully,
@@ -174,7 +174,7 @@ namespace Microsoft.Build.BuildEngine
         /// This function implements the callback via the IBuildEngine interface
         /// </summary>
         /// <returns>result of call to engine</returns>
-        virtual internal bool BuildProjectFile
+        internal virtual bool BuildProjectFile
         (
             int handleId, 
             string[] projectFileNames, 
@@ -394,7 +394,7 @@ namespace Microsoft.Build.BuildEngine
         /// Call into the engine to figure out the line and column number of the task XML node in the original
         /// project context
         /// </summary>
-        virtual internal void GetLineColumnOfXmlNode(int handleId, out int lineNumber, out int columnNumber)
+        internal virtual void GetLineColumnOfXmlNode(int handleId, out int lineNumber, out int columnNumber)
         {
             engineCallback.GetLineColumnOfXmlNode(handleId, out lineNumber, out columnNumber);
         }

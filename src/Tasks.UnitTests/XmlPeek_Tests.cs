@@ -19,7 +19,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class XmlPeek_Tests
+    public sealed class XmlPeek_Tests
     {
         private string _xmlFileWithNs = @"<?xml version='1.0' encoding='utf-8'?>
 

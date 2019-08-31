@@ -25,12 +25,12 @@ namespace Microsoft.Build.Shared
     /// <comment>
     /// Partial class in order to reduce the amount of sharing into different assemblies
     /// </comment>
-    static internal partial class FileUtilities
+    internal static partial class FileUtilities
     {
         /// <summary>
         /// Encapsulates the definitions of the item-spec modifiers a.k.a. reserved item metadata.
         /// </summary>
-        static internal class ItemSpecModifiers
+        internal static class ItemSpecModifiers
         {
 #if DEBUG
             /// <summary>

@@ -1509,7 +1509,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         }
     }
 
-    sealed public class TransformationErrors
+    public sealed class TransformationErrors
     {
         private readonly ITestOutputHelper _output;
 
@@ -1879,7 +1879,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         }
     }
 
-    sealed public class PropertyHandling
+    public sealed class PropertyHandling
     {
         private readonly ITestOutputHelper _output;
 
@@ -2197,7 +2197,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         }
     }
 
-    sealed public class PropertyErrors
+    public sealed class PropertyErrors
     {
         private readonly ITestOutputHelper _output;
 

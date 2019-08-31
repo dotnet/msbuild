@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class Move_Tests
+    public sealed class Move_Tests
     {
         /// <summary>
         /// Basic case of moving a file

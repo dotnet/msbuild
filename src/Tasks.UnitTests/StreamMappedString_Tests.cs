@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class StreamMappedString_Tests
+    public sealed class StreamMappedString_Tests
     {
         /// <summary>
         /// Test for a string that has ANSI but non-ascii characters.

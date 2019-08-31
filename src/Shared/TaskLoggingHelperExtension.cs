@@ -86,7 +86,7 @@ namespace Microsoft.Build.Tasks
         /// <exception cref="ArgumentNullException">Thrown when <c>resourceName</c> is null.</exception>
         /// <exception cref="ArgumentException">Thrown when the string resource indicated by <c>resourceName</c> does not exist.</exception>
         /// <exception cref="InvalidOperationException">Thrown when the <c>TaskResources</c> property of the owner task is not set.</exception>
-        override public string FormatResourceString(string resourceName, params object[] args)
+        public override string FormatResourceString(string resourceName, params object[] args)
         {
             ErrorUtilities.VerifyThrowArgumentNull(resourceName, "resourceName");
             ErrorUtilities.VerifyThrowInvalidOperation(TaskResources != null, "Shared.TaskResourcesNotRegistered", TaskName);
