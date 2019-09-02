@@ -2683,12 +2683,12 @@
     <value>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</value>
   </data>
   <data name="Copy.ErrorIfLinkFailsSetWithoutLinkOption" xml:space="preserve">
-    <value>MSB3892: ErrorIfLinkedFails requires UseHardlinksIfPossible or UseSymbolicLinksIfPossible to be set.</value>
-    <comment>{StrBegin="MSB3892: "}</comment>
+    <value>MSB3892: ErrorIfLinkFails requires UseHardlinksIfPossible or UseSymbolicLinksIfPossible to be set.</value>
+    <comment>{StrBegin="MSB3892: "} LOCALIZATION: Do not localize "ErrorIfLinkFails", "UseHardLinksIfPossible", or "UseSymbolicLinksIfPossible".</comment>
   </data>
   <data name="Copy.LinkFailed" xml:space="preserve">
     <value>MSB3893: Could not use a link to copy "{0}" to "{1}".</value>
-    <comment>{StrBegin="MSB3893: "}</comment>
+    <comment>{StrBegin="MSB3893: "} LOCALIZATION: {0} and {1} are paths.</comment>
   </data>
 
   <!--

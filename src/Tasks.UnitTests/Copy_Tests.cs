@@ -1929,12 +1929,12 @@ namespace Microsoft.Build.UnitTests
             engine.AssertLogContains("MSB3027");
         }
 
-        [Fact(Skip = "Only run if either UseHardlinksIfPossible or UseSymboliclinksIfPossible is true")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        public virtual void ErrorIfLinkFailedCheck()
+        internal virtual void ErrorIfLinkFailedCheck()
         {
-            string source = FileUtilities.GetTemporaryFile();
-            string destination = FileUtilities.GetTemporaryFile();
+            var workDirectory = FileUtilities.GetTemporaryDirectory();
+            var source = Path.Combine(workDirectory, "source.txt");
+            var existing = Path.Combine(workDirectory, "existing.txt");
 
             try
             {
@@ -1943,12 +1943,12 @@ namespace Microsoft.Build.UnitTests
                     sw.Write("This is a source file.");
                 }
 
-                using (StreamWriter sw = FileUtilities.OpenWrite(destination, true))
+                using (StreamWriter sw = FileUtilities.OpenWrite(existing, true))
                 {
-                    sw.Write("This is a destination file.");
+                    sw.Write("This is an existing file.");
                 }
 
-                File.SetAttributes(destination, FileAttributes.ReadOnly);
+                File.SetAttributes(existing, FileAttributes.ReadOnly);
 
                 MockEngine engine = new MockEngine(true);
                 Copy t = new Copy
@@ -1959,7 +1959,7 @@ namespace Microsoft.Build.UnitTests
                     ErrorIfLinkFails = true,
                     BuildEngine = engine,
                     SourceFiles = new ITaskItem[] { new TaskItem(source) },
-                    DestinationFiles = new ITaskItem[] { new TaskItem(destination) },
+                    DestinationFiles = new ITaskItem[] { new TaskItem(existing) },
                 };
 
                 Assert.False(t.Execute());
@@ -1967,10 +1967,10 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                File.SetAttributes(destination, FileAttributes.Normal);
-
+                File.SetAttributes(existing, FileAttributes.Normal);
                 File.Delete(source);
-                File.Delete(destination);
+                File.Delete(existing);
+                Directory.Delete(workDirectory);
             }
         }
 
@@ -2391,7 +2391,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public override void ErrorIfLinkFailedCheck()
+        internal override void ErrorIfLinkFailedCheck()
         {
             base.ErrorIfLinkFailedCheck();
         }
@@ -2486,7 +2486,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public override void ErrorIfLinkFailedCheck()
+        internal override void ErrorIfLinkFailedCheck()
         {
             base.ErrorIfLinkFailedCheck();
         }
