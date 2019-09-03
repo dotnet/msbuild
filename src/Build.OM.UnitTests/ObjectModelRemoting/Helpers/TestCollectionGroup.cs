@@ -197,7 +197,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public IReadOnlyList<string> StdProjectFiles { get; }
 
         private IReadOnlyDictionary<ProjectCollectionLinker, HashSet<Project>> ImmutableProjects { get; set; }
-        protected void TakeSnaphot()
+
+        protected void TakeSnapshot()
         {
             Assert.Null(this.ImmutableProjects);
             var result = new Dictionary<ProjectCollectionLinker, HashSet<Project>>();

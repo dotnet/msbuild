@@ -402,7 +402,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 if (!object.ReferenceEquals(viewChild.Parent, viewXml))
                 {
                     var lm = LinkedObjectsFactory.GetLink(viewXml) as ILinkMock;
-                    lm.Linker.ValidateNoDuplocates();
+                    lm.Linker.ValidateNoDuplicates();
                 }
 
                 Assert.Same(viewChild.Parent, viewXml);

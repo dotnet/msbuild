@@ -18,7 +18,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using ImportedLinksMap = LinkedObjectsMap<System.UInt32>;
 
     /**************************************************************************************
-    For the ExteranlProjectsProvider mock infrastructure we'll try to use very similar model as in the actual implementation in VS.
+    For the ExternalProjectsProvider mock infrastructure we'll try to use very similar model as in the actual implementation in VS.
 
     Typical flow for "linked object" of type "Foo"
     [ ---  Client Collection                                    ]                           [ Server collection (can be different process) ] 
@@ -28,7 +28,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     it might be completely different interface since some link types would be either inefficient or impossible to serialize for example and pass cross process.
     
     Here we can cheat a little bit, since we run both Client and Server collection in the same process so we can ignore connection mechanism (typically some
-    form or serialization/deserialization) and just give the "client" link implementation the same Remoter object we create on the "server"
+    form of serialization/deserialization) and just give the "client" link implementation the same Remoter object we create on the "server"
 
     So to mock the infrastructure, we will use the pattern bellow.
     - XX - An MSBuild OM object we need to remote
@@ -37,15 +37,15 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     so let say XX object is like this:
         public XX
         {
-            string Simple(sting input)
-            YY Comlex(ZZ imput)
+            string Simple(string input)
+            YY Complex(ZZ input)
         }
 
-    typically we have a XXLink interface in ObjectModel remoting that is similar(usually a minimal subset) to XX
+    typically we have a XXLink interface in ObjectModel remoting that is similar (usually a minimal subset) to XX
         public abstract XXLink
         {
-            public abstract string Simple(sting input);
-            public abstract YY Comlex(ZZ imput);
+            public abstract string Simple(string input);
+            public abstract YY Complex(ZZ input);
         }
 
     And the new LinkedObjectsFactory would allow us to create a view of a instance of XX if we have XXLink for that object.
@@ -66,7 +66,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             // remoter implementation
             string Simple(sting input) { return RealObject.Simple(input); }
-            public MockYYRemoter Comlex(MockZZRemoter input) { Server.Export<MockYYRemoter>(RealObject.Complex(Server.Import(input)); }
+            public MockYYRemoter Complex(MockZZRemoter input) { Server.Export<MockYYRemoter>(RealObject.Complex(Server.Import(input)); }
         }
 
      ("link")
@@ -77,7 +77,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             // XXLink implementation
             public override string Simple(sting input) { return Proxy.Simple(input); }
-            public override YY Comlex(ZZ input) { return Client.Import(Proxy.Complex(Client.Export<MockZZRemoter>(input)); }
+            public override YY Complex(ZZ input) { return Client.Import(Proxy.Complex(Client.Export<MockZZRemoter>(input)); }
         }
 
     Object lifetime management:
@@ -107,11 +107,6 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         object IRemoterSource.RealObject => this.Source;
 
         public ProjectCollectionLinker OwningCollection { get; private set; }
-
-        public RMock Export<PT, RMock>(PT obj)
-            where PT : class
-            where RMock : MockLinkRemoter<PT>, new()
-            => this.OwningCollection.Export<PT, RMock>(obj);
 
         public MockProjectElementLinkRemoter ExportElement(ProjectElement obj)
             => this.OwningCollection.ExportElement(obj);
@@ -224,18 +219,18 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         private static bool dbgValidateDuplicateViews = false;
 
 
-        internal  void ValidateNoDuplocates()
+        internal  void ValidateNoDuplicates()
         {
             foreach (var r in imported)
             {
                 lock (r.Value.ActiveImports.GetLockForDebug)
                 {
-                    ValidateNoDuplocates(r.Value.ActiveImports);
+                    ValidateNoDuplicates(r.Value.ActiveImports);
                 }
             }
         }
 
-        private void ValidateNoDuplocates(ImportedLinksMap map)
+        private void ValidateNoDuplicates(ImportedLinksMap map)
         {
             HashSet<object> views = new HashSet<object>();
             HashSet<object> links = new HashSet<object>();
@@ -300,9 +295,9 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             {
                 lock (perRemoteCollection.ActiveImports.GetLockForDebug)
                 {
-                    ValidateNoDuplocates(perRemoteCollection.ActiveImports);
+                    ValidateNoDuplicates(perRemoteCollection.ActiveImports);
                     perRemoteCollection.ActiveImports.GetOrCreate(remoter.LocalId, remoter, this, out proxy, slow: true);
-                    ValidateNoDuplocates(perRemoteCollection.ActiveImports);
+                    ValidateNoDuplicates(perRemoteCollection.ActiveImports);
                 }
             }
 

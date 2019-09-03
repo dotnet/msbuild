@@ -95,7 +95,6 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
     internal static partial class ViewValidation
     {
-        // public static void Verify(ProjectProperty view, ProjectProperty real) => Verify(view, real, null);
         public static void Verify(ProjectProperty view, ProjectProperty real, ValidationContext context)
         {
             if (view == null && real == null) return;

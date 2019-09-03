@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 this.TargetBig = this.Target.LoadProjectIgnoreMissingImports(this.TargetBigPath);
                 this.GuestBig = this.Guest.LoadProjectIgnoreMissingImports(this.GuestBigPath);
 
-                this.TakeSnaphot();
+                this.TakeSnapshot();
             }
 
             public void ResetBeforeTests()

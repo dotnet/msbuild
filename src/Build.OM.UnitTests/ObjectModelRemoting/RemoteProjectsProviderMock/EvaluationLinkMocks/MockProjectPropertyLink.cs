@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public bool IsEnvironmentProperty => this.Source.IsEnvironmentProperty;
         public bool IsGlobalProperty => this.Source.IsGlobalProperty;
         public bool IsReservedProperty => this.Source.IsReservedProperty;
-        public MockProjectPropertyLinkRemoter Predecessor => this.Export<ProjectProperty, MockProjectPropertyLinkRemoter>(this.Source.Predecessor);
+        public MockProjectPropertyLinkRemoter Predecessor => this.OwningCollection.Export<ProjectProperty, MockProjectPropertyLinkRemoter>(this.Source.Predecessor);
         public bool IsImported => this.Source.IsImported;
     }
 
