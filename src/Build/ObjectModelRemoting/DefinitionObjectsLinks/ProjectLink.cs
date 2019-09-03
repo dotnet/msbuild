@@ -1,18 +1,17 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Collections.Generic;
+using System.IO;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
+
 namespace Microsoft.Build.ObjectModelRemoting
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using Microsoft.Build.Construction;
-    using Microsoft.Build.Evaluation;
-    using Microsoft.Build.Evaluation.Context;
-    using Microsoft.Build.Execution;
-    using Microsoft.Build.Framework;
-    using Microsoft.Build.Globbing;
-    using Microsoft.Build.Logging;
-
     /// <summary>
     /// External projects support.
     /// Allow for creating a local representation to external object of type <see cref="Project"/>

@@ -1,12 +1,13 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
+using System.Collections.Generic;
+
 namespace Microsoft.Build.ObjectModelRemoting
 {
-    using Microsoft.Build.Construction;
-    using Microsoft.Build.Evaluation;
-    using Microsoft.Build.Framework;
-    using System.Collections.Generic;
 
     /// <summary>
     /// implemented by MSBuild objects that support remote linking;

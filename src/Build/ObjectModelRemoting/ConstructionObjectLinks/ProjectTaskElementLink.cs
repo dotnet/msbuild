@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
+using Microsoft.Build.Construction;
+
 namespace Microsoft.Build.ObjectModelRemoting
 {
-    using System.Collections.Generic;
-    using Microsoft.Build.Construction;
-
     /// <summary>
     /// External projects support.
     /// Allow for creating a local representation to external object of type <see cref="ProjectTaskElement"/>

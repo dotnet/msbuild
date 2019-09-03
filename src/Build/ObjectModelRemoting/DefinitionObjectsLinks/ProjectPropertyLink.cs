@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
+
 namespace Microsoft.Build.ObjectModelRemoting
 {
-    using Microsoft.Build.Construction;
-    using Microsoft.Build.Evaluation;
-
     /// <summary>
     /// External projects support.
     /// Allow for creating a local representation to external object of type <see cref="ProjectProperty"/>

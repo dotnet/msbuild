@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
+using System.Xml;
+using Microsoft.Build.Construction;
+
 namespace Microsoft.Build.ObjectModelRemoting
 {
-    using System.Collections.Generic;
-    using System.Xml;
-    using Microsoft.Build.Construction;
-
     /// <summary>
     /// This interface will allow us to share a single field between
     /// <see cref="XmlElementWithLocation"/> and <see cref="ProjectElementLink"/>
