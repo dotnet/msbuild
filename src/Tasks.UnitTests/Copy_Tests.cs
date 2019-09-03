@@ -1932,25 +1932,14 @@ namespace Microsoft.Build.UnitTests
         [PlatformSpecific(TestPlatforms.Windows)]
         internal virtual void ErrorIfLinkFailedCheck()
         {
-            var workDirectory = FileUtilities.GetTemporaryDirectory();
-            var source = Path.Combine(workDirectory, "source.txt");
-            var existing = Path.Combine(workDirectory, "existing.txt");
-
-            try
+            using (var env = TestEnvironment.Create())
             {
-                using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
-                {
-                    sw.Write("This is a source file.");
-                }
-
-                using (StreamWriter sw = FileUtilities.OpenWrite(existing, true))
-                {
-                    sw.Write("This is an existing file.");
-                }
+                var source = env.DefaultTestDirectory.CreateFile("source.txt", "This is a source file").Path;
+                var existing = env.DefaultTestDirectory.CreateFile("destination.txt", "This is an existing file.").Path;
 
                 File.SetAttributes(existing, FileAttributes.ReadOnly);
 
-                MockEngine engine = new MockEngine(true);
+                MockEngine engine = new MockEngine(_testOutputHelper);
                 Copy t = new Copy
                 {
                     RetryDelayMilliseconds = 1,
@@ -1962,15 +1951,8 @@ namespace Microsoft.Build.UnitTests
                     DestinationFiles = new ITaskItem[] { new TaskItem(existing) },
                 };
 
-                Assert.False(t.Execute());
+                t.Execute().ShouldBeFalse();
                 engine.AssertLogContains("MSB3893");
-            }
-            finally
-            {
-                File.SetAttributes(existing, FileAttributes.Normal);
-                File.Delete(source);
-                File.Delete(existing);
-                Directory.Delete(workDirectory);
             }
         }
 
