@@ -192,9 +192,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             // Create the engine.
             MockEngine engine = new MockEngine(_output);
-            TaskItem taskItem = new TaskItem(@"C:\WinMD\SampleWindowsRuntimeOnly.Winmd");
+            TaskItem taskItem = new TaskItem(@"C:\WinMDLib\LibWithWinmdAndNoDll.Winmd");
 
-            taskItem.SetMetadata(ItemMetadataNames.winmdImplmentationFile, "SampleWindowsRuntimeOnly.lib");
+            taskItem.SetMetadata(ItemMetadataNames.winmdImplmentationFile, "LibWithWinmdAndNoDll.lib");
 
             ITaskItem[] assemblyFiles = new TaskItem[]
             {
@@ -208,25 +208,26 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.AssemblyFiles = assemblyFiles;
             t.TargetProcessorArchitecture = "X86";
             t.SearchPaths = new String[] { @"C:\WinMD", @"C:\WinMD\v4\", @"C:\WinMD\v255\" };
+
             Execute(t).ShouldBeTrue();
+
+            engine.Errors.ShouldBe(0);
+            engine.Warnings.ShouldBe(0);
 
             t.ResolvedFiles.ShouldHaveSingleItem();
             t.RelatedFiles.ShouldHaveSingleItem();
 
-            t.RelatedFiles[0].ItemSpec.ShouldEndWith(@"C:\WinMD\SampleWindowsRuntimeOnly.pri",
-                "Expected to find.pri related files but NOT the lib.");
+            t.RelatedFiles[0].ItemSpec.ShouldBe(@"C:\WinMDLib\LibWithWinmdAndNoDll.pri",
+                "Expected to find .pri related files but NOT the lib.");
 
             t.RelatedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime).ShouldBeEmpty();
             t.RelatedFiles[0].GetMetadata(ItemMetadataNames.winMDFile).ShouldBeEmpty();
             t.RelatedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile).ShouldBeEmpty();
 
             t.ResolvedDependencyFiles.ShouldBeEmpty();
-            engine.Errors.ShouldBe(0);
-            engine.Warnings.ShouldBe(0);
             bool.Parse(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFile)).ShouldBeTrue();
             t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFileType).ShouldBe("Native");
-            t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile).ShouldBe("SampleWindowsRuntimeOnly.lib");
-            t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime).ShouldBe("WindowsRuntime 1.0");
+            t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile).ShouldBe("LibWithWinmdAndNoDll.lib");
         }
 
         /// <summary>
