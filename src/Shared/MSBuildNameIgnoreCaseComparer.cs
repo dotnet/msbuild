@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Collections
@@ -51,12 +52,22 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Equals(string compareToString, string constrainedString, int start, int lengthToCompare)
         {
+            return Equals(new Span() { ReferencePoint = compareToString, start = 0, length = compareToString.Length },
+                new Span() { ReferencePoint = constrainedString, start = 0, length = constrainedString.Length },
+                start,
+                lengthToCompare);
+        }
+        /// <summary>
+        /// Performs the "Equals" operation on two MSBuild property, item or metadata names
+        /// </summary>
+        public bool Equals(Span compareToString, Span constrainedString, int start, int lengthToCompare)
+        {
             if (lengthToCompare < 0)
             {
                 ErrorUtilities.ThrowInternalError("Invalid lengthToCompare '{0}' {1} {2}", constrainedString, start, lengthToCompare);
             }
 
-            if (start < 0 || start > (constrainedString?.Length ?? 0) - lengthToCompare)
+            if (start < 0 || start > (constrainedString?.length ?? 0) - lengthToCompare)
             {
                 ErrorUtilities.ThrowInternalError("Invalid start '{0}' {1} {2}", constrainedString, start, lengthToCompare);
             }
@@ -71,7 +82,7 @@ namespace Microsoft.Build.Collections
                 return false;
             }
 
-            if (lengthToCompare != compareToString.Length)
+            if (lengthToCompare != compareToString.length)
             {
                 return false;
             }
@@ -85,11 +96,11 @@ namespace Microsoft.Build.Collections
                 // i.e. they are valid MSBuild property, item and metadata names
                 unsafe
                 {
-                    fixed (char* px = compareToString)
+                    fixed (char* px = compareToString.ReferencePoint + compareToString.start)
                     {
-                        fixed (char* py = constrainedString)
+                        fixed (char* py = constrainedString.ReferencePoint + constrainedString.start)
                         {
-                            for (int i = 0; i < compareToString.Length; i++)
+                            for (int i = 0; i < compareToString.length; i++)
                             {
                                 int chx = px[i];
                                 int chy = py[i + start];
@@ -107,7 +118,15 @@ namespace Microsoft.Build.Collections
             }
             else
             {
-                return String.Compare(compareToString, 0, constrainedString, start, lengthToCompare, StringComparison.OrdinalIgnoreCase) == 0;
+                for (int i = 0; i < lengthToCompare; i++)
+                {
+                    int chx = compareToString.CharAt(i) & 0x00DF;
+                    int chy = constrainedString.CharAt(i + start) & 0x00DF;
+                    if (chx != chy)
+                    {
+                        return false;
+                    }
+                }
             }
 
             return true;

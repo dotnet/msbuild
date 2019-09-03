@@ -97,6 +97,23 @@ namespace Microsoft.Build.Internal
         {
             return ReservedProperties.Contains(property);
         }
+
+        /// <summary>
+        /// Indicates if the given property is a reserved property.
+        /// </summary>
+        /// <returns>true, if specified property is reserved</returns>
+        internal static bool IsReservedProperty(Span property)
+        {
+            foreach (string prop in ReservedProperties)
+            {
+                if (property.EqualsIgnoreCase(prop))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 
     /// <summary>

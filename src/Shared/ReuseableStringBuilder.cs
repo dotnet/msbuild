@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Shared
@@ -161,6 +162,18 @@ namespace Microsoft.Build.Shared
             LazyPrepare();
             _cachedString = null;
             _borrowedBuilder.Append(value);
+            return this;
+        }
+
+        /// <summary>
+        /// Append a Span, one character at a time.
+        /// </summary>
+        internal ReuseableStringBuilder Append(Span value, int startIndex, int count)
+        {
+            for (int i = startIndex; i < count; i++)
+            {
+                Append(value.CharAt(i));
+            }
             return this;
         }
 

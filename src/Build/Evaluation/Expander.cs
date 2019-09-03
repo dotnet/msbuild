@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml.Schema;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
@@ -464,12 +465,33 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Returns true if the supplied Span contains a valid property name
+        /// </summary>
+        private static bool IsValidPropertyName(Span propertyName)
+        {
+            if (propertyName.length == 0 || !XmlUtilities.IsValidInitialElementNameCharacter(propertyName.CharAt(0)))
+            {
+                return false;
+            }
+
+            for (int n = 1; n < propertyName.length; n++)
+            {
+                if (!XmlUtilities.IsValidSubsequentElementNameCharacter(propertyName.CharAt(n)))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Scan for the closing bracket that matches the one we've already skipped;
         /// essentially, pushes and pops on a stack of parentheses to do this.
         /// Takes the expression and the index to start at.
         /// Returns the index of the matching parenthesis, or -1 if it was not found.
         /// </summary>
-        private static int ScanForClosingParenthesis(string expression, int index)
+        private static int ScanForClosingParenthesis(Span expression, int index)
         {
             bool potentialPropertyFunction = false;
             bool potentialRegistryFunction = false;
@@ -484,17 +506,17 @@ namespace Microsoft.Build.Evaluation
         /// Also returns flags to indicate if a propertyfunction or registry property is likely
         /// to be found in the expression
         /// </summary>
-        private static int ScanForClosingParenthesis(string expression, int index, out bool potentialPropertyFunction, out bool potentialRegistryFunction)
+        private static int ScanForClosingParenthesis(Span expression, int index, out bool potentialPropertyFunction, out bool potentialRegistryFunction)
         {
             int nestLevel = 1;
-            int length = expression.Length;
+            int length = expression.length;
 
             potentialPropertyFunction = false;
             potentialRegistryFunction = false;
 
             unsafe
             {
-                fixed (char* pchar = expression)
+                fixed (char* pchar = expression.ReferencePoint + expression.length)
                 {
                     // Scan for our closing ')'
                     while (index < length && nestLevel > 0)
@@ -542,14 +564,14 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Skip all characters until we find the matching quote character
         /// </summary>
-        private static int ScanForClosingQuote(char quoteChar, string expression, int index)
+        private static int ScanForClosingQuote(char quoteChar, Span expression, int index)
         {
             unsafe
             {
-                fixed (char* pchar = expression)
+                fixed (char* pchar = expression.ReferencePoint + expression.length)
                 {
                     // Scan for our closing quoteChar
-                    while (index < expression.Length)
+                    while (index < expression.length)
                     {
                         if (pchar[index] == quoteChar)
                         {
@@ -618,9 +640,9 @@ namespace Microsoft.Build.Evaluation
         /// Returns an array of unexpanded arguments.
         /// If there are no arguments, returns an empty array.
         /// </summary>
-        private static string[] ExtractFunctionArguments(IElementLocation elementLocation, string expressionFunction, string argumentsString)
+        private static string[] ExtractFunctionArguments(IElementLocation elementLocation, Span expressionFunction, Span argumentsString)
         {
-            int argumentsContentLength = argumentsString.Length;
+            int argumentsContentLength = argumentsString.length;
 
             List<string> arguments = new List<string>();
 
@@ -629,7 +651,7 @@ namespace Microsoft.Build.Evaluation
             {
                 unsafe
                 {
-                    fixed (char* argumentsContent = argumentsString)
+                    fixed (char* argumentsContent = argumentsString.ReferencePoint + argumentsString.start)
                     {
                         // Iterate over the contents of the arguments extracting the
                         // the individual arguments as we go
@@ -656,7 +678,7 @@ namespace Microsoft.Build.Evaluation
                                 int quoteStart = n;
                                 n += 1; // skip over the opening quote
 
-                                n = ScanForClosingQuote(argumentsString[quoteStart], argumentsString, n);
+                                n = ScanForClosingQuote(argumentsString.ReferencePoint[argumentsString.start + quoteStart], argumentsString, n);
 
                                 if (n == -1)
                                 {
@@ -1007,12 +1029,7 @@ namespace Microsoft.Build.Evaluation
                             results = new List<object>(4);
                         }
 
-                        Span s = new Span()
-                        {
-                            ReferencePoint = expression,
-                            start = sourceIndex,
-                            length = propertyStartIndex - sourceIndex,
-                        };
+                        Span s = new Span(expression, sourceIndex, propertyStartIndex - sourceIndex);
                         results.Add(s);
                     }
 
@@ -1022,7 +1039,7 @@ namespace Microsoft.Build.Evaluation
                     // Scan for the matching closing bracket, skipping any nested ones
                     // This is a very complete, fast validation of parenthesis matching including for nested
                     // function calls.
-                    propertyEndIndex = ScanForClosingParenthesis(expression, propertyStartIndex + 2, out tryExtractPropertyFunction, out tryExtractRegistryFunction);
+                    propertyEndIndex = ScanForClosingParenthesis(new Span(expression, 0, expression.Length), propertyStartIndex + 2, out tryExtractPropertyFunction, out tryExtractRegistryFunction);
 
                     if (propertyEndIndex == -1)
                     {
@@ -1030,12 +1047,7 @@ namespace Microsoft.Build.Evaluation
                         // isn't really a well-formed property tag.  Just literally
                         // copy the remainder of the expression (starting with the "$("
                         // that we found) into the result, and quit.
-                        lastResult = new Span()
-                        {
-                            ReferencePoint = expression,
-                            start = propertyStartIndex,
-                            length = expression.Length - propertyStartIndex,
-                        };
+                        lastResult = new Span(expression, propertyStartIndex, expression.Length - propertyStartIndex);
                         sourceIndex = expression.Length;
                     }
                     else
@@ -1059,12 +1071,7 @@ namespace Microsoft.Build.Evaluation
                         else if ((expression.Length - (propertyStartIndex + 2)) > 9 && tryExtractRegistryFunction && s_invariantCompareInfo.IndexOf(expression, "Registry:", propertyStartIndex + 2, 9, CompareOptions.OrdinalIgnoreCase) == propertyStartIndex + 2)
                         {
                             // if FEATURE_WIN32_REGISTRY is off, treat the property value as if there's no Registry value at that location, rather than fail
-                            propertyBody = new Span()
-                            {
-                                ReferencePoint = expression,
-                                start = propertyStartIndex + 2,
-                                length = propertyEndIndex - propertyStartIndex - 2,
-                            };
+                            propertyBody = new Span(expression, propertyStartIndex + 2, propertyEndIndex - propertyStartIndex - 2);
 
                             // If the property body starts with any of our special objects, then deal with them
                             // This is a registry reference, like $(Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation)
@@ -1088,12 +1095,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         else if (tryExtractPropertyFunction)
                         {
-                            propertyBody = new Span()
-                            {
-                                ReferencePoint = expression,
-                                start = propertyStartIndex + 2,
-                                length = propertyEndIndex - propertyStartIndex - 2,
-                            };
+                            propertyBody = new Span(expression, propertyStartIndex + 2, propertyEndIndex - propertyStartIndex - 2);
 
                             // This is likely to be a function expression
                             propertyValue = ExpandPropertyBody(
@@ -1107,7 +1109,8 @@ namespace Microsoft.Build.Evaluation
                         }
                         else // This is a regular property
                         {
-                            propertyValue = LookupProperty(properties, expression, propertyStartIndex + 2, propertyEndIndex - 1, elementLocation, usedUninitializedProperties);
+                            Span temp = new Span(expression, propertyStartIndex + 2, propertyEndIndex - propertyStartIndex - 2);
+                            propertyValue = LookupProperty(properties, temp, 0, temp.length, elementLocation, usedUninitializedProperties);
                         }
 
                         // Record our result, and advance
@@ -1175,7 +1178,7 @@ namespace Microsoft.Build.Evaluation
             /// Expand the body of the property, including any functions that it may contain
             /// </summary>
             internal static object ExpandPropertyBody(
-                string propertyBody,
+                Span propertyBody,
                 object propertyValue,
                 IPropertyProvider<T> properties,
                 ExpanderOptions options,
@@ -1183,23 +1186,27 @@ namespace Microsoft.Build.Evaluation
                 UsedUninitializedProperties usedUninitializedProperties,
                 IFileSystem fileSystem)
             {
+                Span propertyName = null;
                 Function<T> function = null;
-                string propertyName = propertyBody;
 
                 // Trim the body for compatibility reasons:
                 // Spaces are not valid property name chars, but $( Foo ) is allowed, and should always expand to BLANK.
                 // Do a very fast check for leading and trailing whitespace, and trim them from the property body if we have any.
                 // But we will do a property name lookup on the propertyName that we held onto.
-                if (Char.IsWhiteSpace(propertyBody[0]) || Char.IsWhiteSpace(propertyBody[propertyBody.Length - 1]))
-                {
-                    propertyBody = propertyBody.Trim();
+                while (Char.IsWhiteSpace(propertyBody.CharAt(0))) {
+                    propertyBody.start++;
+                    propertyBody.length--;
+                }
+
+                while (Char.IsWhiteSpace(propertyBody.CharAt(propertyBody.length - 1))) {
+                    propertyBody.length--;
                 }
 
                 // If we don't have a clean propertybody then we'll do deeper checks to see
                 // if what we have is a function
                 if (!IsValidPropertyName(propertyBody))
                 {
-                    if (propertyBody.Contains(".") || propertyBody[0] == '[')
+                    if (propertyBody.IndexOf('.') != -1 || propertyBody.CharAt(0) == '[')
                     {
                         if (BuildParameters.DebugExpansion)
                         {
@@ -1229,7 +1236,7 @@ namespace Microsoft.Build.Evaluation
                             return null;
                         }
                     }
-                    else if (propertyValue == null && propertyBody.Contains("[")) // a single property indexer
+                    else if (propertyValue == null && propertyBody.IndexOf('[') != -1) // a single property indexer
                     {
                         int indexerStart = propertyBody.IndexOf('[');
                         int indexerEnd = propertyBody.IndexOf(']');
@@ -1241,7 +1248,8 @@ namespace Microsoft.Build.Evaluation
                         else
                         {
                             propertyValue = LookupProperty(properties, propertyBody, 0, indexerStart - 1, elementLocation, usedUninitializedProperties);
-                            propertyBody = propertyBody.Substring(indexerStart);
+                            propertyBody.start += indexerStart;
+                            propertyBody.length -= indexerStart;
 
                             // recurse so that the function representing the indexer can be executed on the property value
                             return ExpandPropertyBody(
@@ -1266,7 +1274,7 @@ namespace Microsoft.Build.Evaluation
                 // Find the property value in our property collection.  This 
                 // will automatically return "" (empty string) if the property
                 // doesn't exist in the collection, and we're not executing a static function
-                if (!String.IsNullOrEmpty(propertyName))
+                if (!Span.IsNullOrEmpty(propertyName))
                 {
                     propertyValue = LookupProperty(properties, propertyName, elementLocation, usedUninitializedProperties);
                 }
@@ -1371,25 +1379,34 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private static object LookupProperty(IPropertyProvider<T> properties, string propertyName, IElementLocation elementLocation, UsedUninitializedProperties usedUninitializedProperties)
             {
-                return LookupProperty(properties, propertyName, 0, propertyName.Length - 1, elementLocation, usedUninitializedProperties);
+                return LookupProperty(properties, new Span(propertyName, 0, propertyName.Length), 0, propertyName.Length - 1, elementLocation, usedUninitializedProperties);
             }
 
             /// <summary>
             /// Look up a simple property reference by the name of the property, e.g. "Foo" when expanding $(Foo)
             /// </summary>
-            private static object LookupProperty(IPropertyProvider<T> properties, string propertyName, int startIndex, int endIndex, IElementLocation elementLocation, UsedUninitializedProperties usedUninitializedProperties)
+            private static object LookupProperty(IPropertyProvider<T> properties, Span propertyName, IElementLocation elementLocation, UsedUninitializedProperties usedUninitializedProperties)
             {
-                T property = properties.GetProperty(propertyName, startIndex, endIndex);
+                return LookupProperty(properties, propertyName, 0, propertyName.length - 1, elementLocation, usedUninitializedProperties);
+            }
+
+            /// <summary>
+            /// Look up a simple property reference by the name of the property, e.g. "Foo" when expanding $(Foo)
+            /// </summary>
+            private static object LookupProperty(IPropertyProvider<T> properties, Span propertyName, int startIndex, int endIndex, IElementLocation elementLocation, UsedUninitializedProperties usedUninitializedProperties)
+            {
+                T property = properties.GetProperty(propertyName.ToString(), startIndex, endIndex);
 
                 object propertyValue;
 
-                if (property == null && ((endIndex - startIndex) >= 7) && MSBuildNameIgnoreCaseComparer.Default.Equals("MSBuild", propertyName, startIndex, 7))
+                if (property == null && ((endIndex - startIndex) >= 7) && MSBuildNameIgnoreCaseComparer.Default.Equals(new Span("MSBuild", 0, "MSBuild".Length), propertyName, startIndex, 7))
                 {
                     // It could be one of the MSBuildThisFileXXXX properties,
                     // whose values vary according to the file they are in.
-                    if (startIndex != 0 || endIndex != propertyName.Length)
+                    if (startIndex != 0 || endIndex != propertyName.length)
                     {
-                        propertyValue = ExpandMSBuildThisFileProperty(propertyName.Substring(startIndex, endIndex - startIndex + 1), elementLocation);
+                        Span temp = new Span(propertyName.ReferencePoint, propertyName.start + startIndex, endIndex - startIndex + 1);
+                        propertyValue = ExpandMSBuildThisFileProperty(temp, elementLocation);
                     }
                     else
                     {
@@ -1407,10 +1424,11 @@ namespace Microsoft.Build.Evaluation
                     // false positives. Therefore we check to see what element we are currently evaluating and if it is the same as our property we do not add the property to the list.
                     if (usedUninitializedProperties.Warn && usedUninitializedProperties.CurrentlyEvaluatingPropertyElementName != null)
                     {
+                        Span temp = new Span(usedUninitializedProperties.CurrentlyEvaluatingPropertyElementName, 0, usedUninitializedProperties.CurrentlyEvaluatingPropertyElementName.Length);
                         // Check to see if the property name does not match the property we are currently evaluating, note the property we are currently evaluating in the element name, this means no $( or )
-                        if (!MSBuildNameIgnoreCaseComparer.Default.Equals(usedUninitializedProperties.CurrentlyEvaluatingPropertyElementName, propertyName, startIndex, endIndex - startIndex + 1))
+                        if (!MSBuildNameIgnoreCaseComparer.Default.Equals(temp, propertyName, startIndex, endIndex - startIndex + 1))
                         {
-                            string propertyTrimed = propertyName.Substring(startIndex, endIndex - startIndex + 1);
+                            string propertyTrimed = propertyName.ReferencePoint.Substring(propertyName.start + startIndex, endIndex - startIndex + 1);
                             if (!usedUninitializedProperties.Properties.ContainsKey(propertyTrimed))
                             {
                                 usedUninitializedProperties.Properties.Add(propertyTrimed, elementLocation);
@@ -1435,7 +1453,7 @@ namespace Microsoft.Build.Evaluation
             /// never been saved) then returns empty string.
             /// If the property name is not one of those properties, returns empty string.
             /// </summary>
-            private static object ExpandMSBuildThisFileProperty(string propertyName, IElementLocation elementLocation)
+            private static object ExpandMSBuildThisFileProperty(Span propertyName, IElementLocation elementLocation)
             {
                 if (!ReservedPropertyNames.IsReservedProperty(propertyName))
                 {
@@ -1451,27 +1469,27 @@ namespace Microsoft.Build.Evaluation
 
                 // Because String.Equals checks the length first, and these strings are almost
                 // all different lengths, this sequence is efficient.
-                if (String.Equals(propertyName, ReservedPropertyNames.thisFile, StringComparison.OrdinalIgnoreCase))
+                if (propertyName.EqualsIgnoreCase(ReservedPropertyNames.thisFile))
                 {
                     value = Path.GetFileName(elementLocation.File);
                 }
-                else if (String.Equals(propertyName, ReservedPropertyNames.thisFileName, StringComparison.OrdinalIgnoreCase))
+                else if (propertyName.EqualsIgnoreCase(ReservedPropertyNames.thisFileName))
                 {
                     value = Path.GetFileNameWithoutExtension(elementLocation.File);
                 }
-                else if (String.Equals(propertyName, ReservedPropertyNames.thisFileFullPath, StringComparison.OrdinalIgnoreCase))
+                else if (propertyName.EqualsIgnoreCase(ReservedPropertyNames.thisFileFullPath))
                 {
                     value = FileUtilities.NormalizePath(elementLocation.File);
                 }
-                else if (String.Equals(propertyName, ReservedPropertyNames.thisFileExtension, StringComparison.OrdinalIgnoreCase))
+                else if (propertyName.EqualsIgnoreCase(ReservedPropertyNames.thisFileExtension))
                 {
                     value = Path.GetExtension(elementLocation.File);
                 }
-                else if (String.Equals(propertyName, ReservedPropertyNames.thisFileDirectory, StringComparison.OrdinalIgnoreCase))
+                else if (propertyName.EqualsIgnoreCase(ReservedPropertyNames.thisFileDirectory))
                 {
                     value = FileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(elementLocation.File));
                 }
-                else if (String.Equals(propertyName, ReservedPropertyNames.thisFileDirectoryNoRoot, StringComparison.OrdinalIgnoreCase))
+                else if (propertyName.EqualsIgnoreCase(ReservedPropertyNames.thisFileDirectoryNoRoot))
                 {
                     string directory = Path.GetDirectoryName(elementLocation.File);
                     int rootLength = Path.GetPathRoot(directory).Length;
@@ -1493,10 +1511,10 @@ namespace Microsoft.Build.Evaluation
             /// "TaskLocation" is the name of the value.  The name of the value and the preceding "@" may be omitted if
             /// the default value is desired.
             /// </summary>
-            private static string ExpandRegistryValue(string registryExpression, IElementLocation elementLocation)
+            private static string ExpandRegistryValue(Span registryExpression, IElementLocation elementLocation)
             {
                 // Remove "Registry:" prefix
-                string registryLocation = registryExpression.Substring(9);
+                Span registryLocation = new Span(registryExpression.ReferencePoint, registryExpression.start + 9, registryExpression.length - 9);
 
                 // Split off the value name -- the part after the "@" sign. If there's no "@" sign, then it's the default value name
                 // we want.
@@ -1505,12 +1523,12 @@ namespace Microsoft.Build.Evaluation
 
                 ProjectErrorUtilities.VerifyThrowInvalidProject(firstAtSignOffset == lastAtSignOffset, elementLocation, "InvalidRegistryPropertyExpression", "$(" + registryExpression + ")", String.Empty);
 
-                string valueName = lastAtSignOffset == -1 || lastAtSignOffset == registryLocation.Length - 1
-                    ? null : registryLocation.Substring(lastAtSignOffset + 1);
+                Span valueName = lastAtSignOffset == -1 || lastAtSignOffset == registryLocation.length - 1
+                    ? null : new Span(registryLocation.ReferencePoint, registryLocation.start + lastAtSignOffset + 1, registryLocation.length - lastAtSignOffset - 1);
 
                 // If there's no '@', or '@' is first, then we'll use null or String.Empty for the location; otherwise
                 // the location is the part before the '@'
-                string registryKeyName = lastAtSignOffset != -1 ? registryLocation.Substring(0, lastAtSignOffset) : registryLocation;
+                Span registryKeyName = lastAtSignOffset != -1 ? new Span(registryLocation.ReferencePoint, registryLocation.start, lastAtSignOffset) : registryLocation;
 
                 string result = String.Empty;
                 if (registryKeyName != null)
@@ -1519,11 +1537,11 @@ namespace Microsoft.Build.Evaluation
                     // allows this character to be used in the names of keys and the names of values.
                     // Hence we use our standard escaping mechanism to allow users to access such keys
                     // and values.
-                    registryKeyName = EscapingUtilities.UnescapeAll(registryKeyName);
+                    registryKeyName = Span.UnescapeAll(registryKeyName);
 
                     if (valueName != null)
                     {
-                        valueName = EscapingUtilities.UnescapeAll(valueName);
+                        valueName = Span.UnescapeAll(valueName);
                     }
 
                     try
@@ -1537,7 +1555,7 @@ namespace Microsoft.Build.Evaluation
                             if (registryKeyName.StartsWith(
                                 @"HKEY_LOCAL_MACHINE\Software\Microsoft\.NETFramework",
                                 StringComparison.OrdinalIgnoreCase) &&
-                                valueName.Equals("InstallRoot", StringComparison.OrdinalIgnoreCase))
+                                valueName.EqualsIgnoreCase("InstallRoot"))
                             {
                                 return NativeMethodsShared.FrameworkBasePath + Path.DirectorySeparatorChar;
                             }
@@ -1545,7 +1563,7 @@ namespace Microsoft.Build.Evaluation
                             return string.Empty;
                         }
 
-                        object valueFromRegistry = Registry.GetValue(registryKeyName, valueName, null /* default if key or value name is not found */);
+                        object valueFromRegistry = Registry.GetValue(registryKeyName.ToString(), valueName.ToString(), null /* default if key or value name is not found */);
 
                         if (null != valueFromRegistry)
                         {
@@ -2007,7 +2025,7 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (argumentsExpression != null)
                     {
-                        arguments = ExtractFunctionArguments(elementLocation, argumentsExpression, argumentsExpression);
+                        arguments = ExtractFunctionArguments(elementLocation, new Span(argumentsExpression, 0, argumentsExpression.Length), new Span(argumentsExpression, 0, argumentsExpression.Length));
                     }
 
                     IntrinsicItemFunctions<S>.ItemTransformFunction transformFunction = IntrinsicItemFunctions<S>.GetItemTransformFunction(elementLocation, functionName, typeof(S));
@@ -2600,14 +2618,15 @@ namespace Microsoft.Build.Evaluation
                     // using the Include from the source items
                     foreach (Pair<string, S> item in itemsOfType)
                     {
+                        Span key = new Span(item.Key, 0, item.Key.Length);
                         Function<P> function = new Function<P>(
                             typeof(string),
-                            item.Key,
-                            item.Key,
+                            key,
+                            key,
                             functionName,
                             arguments,
                             BindingFlags.Public | BindingFlags.InvokeMethod,
-                            string.Empty,
+                            new Span(String.Empty, 0, 0),
                             expander.UsedUninitializedProperties,
                             expander._fileSystem);
 
@@ -2993,12 +3012,12 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// The expression that this function is part of
             /// </summary>
-            public string Expression { get; set; }
+            public Span Expression { get; set; }
 
             /// <summary>
             /// The property name that this function is applied on
             /// </summary>
-            public string Receiver { get; set; }
+            public Span Receiver { get; set; }
 
             /// <summary>
             /// The binding flags that will be used during invocation of this function
@@ -3008,7 +3027,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// The remainder of the body once the function and arguments have been extracted
             /// </summary>
-            public string Remainder { get; set; }
+            public Span Remainder { get; set; }
 
             public IFileSystem FileSystem { get; set; }
 
@@ -3059,12 +3078,12 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// The expression that this function is part of
             /// </summary>
-            private string _expression;
+            private Span _expression;
 
             /// <summary>
             /// The property name that this function is applied on
             /// </summary>
-            private string _receiver;
+            private Span _receiver;
 
             /// <summary>
             /// The binding flags that will be used during invocation of this function
@@ -3074,7 +3093,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// The remainder of the body once the function and arguments have been extracted
             /// </summary>
-            private string _remainder;
+            private Span _remainder;
 
             /// <summary>
             /// List of properties which have been used but have not been initialized yet.
@@ -3088,12 +3107,12 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             internal Function(
                 Type receiverType,
-                string expression,
-                string receiver,
+                Span expression,
+                Span receiver,
                 string methodName,
                 string[] arguments,
                 BindingFlags bindingFlags,
-                string remainder,
+                Span remainder,
                 UsedUninitializedProperties usedUninitializedProperties,
                 IFileSystem fileSystem)
             {
@@ -3123,7 +3142,7 @@ namespace Microsoft.Build.Evaluation
             ///     [System.Diagnostics.Process]::Start
             ///     SomeMSBuildProperty
             /// </summary>
-            internal string Receiver
+            internal Span Receiver
             {
                 get { return _receiver; }
             }
@@ -3132,7 +3151,7 @@ namespace Microsoft.Build.Evaluation
             /// Extract the function details from the given property function expression
             /// </summary>
             internal static Function<T> ExtractPropertyFunction(
-                string expressionFunction,
+                Span expressionFunction,
                 IElementLocation elementLocation,
                 object propertyValue,
                 UsedUninitializedProperties usedUnInitializedProperties,
@@ -3142,7 +3161,7 @@ namespace Microsoft.Build.Evaluation
                 FunctionBuilder<T> functionBuilder = new FunctionBuilder<T> {FileSystem = fileSystem};
 
                 // By default the expression root is the whole function expression
-                ReadOnlySpan<char> expressionRoot = expressionFunction == null ? ReadOnlySpan<char>.Empty : expressionFunction.AsSpan();
+                Span expressionRoot = expressionFunction == null ? new Span(null, 0, 0) : expressionFunction;
 
                 // The arguments for this function start at the first '('
                 // If there are no arguments, then we're a property getter
@@ -3151,18 +3170,18 @@ namespace Microsoft.Build.Evaluation
                 // If we have arguments, then we only want the content up to but not including the '('
                 if (argumentStartIndex > -1)
                 {
-                    expressionRoot = expressionRoot.Slice(0, argumentStartIndex);
+                    expressionRoot.length = argumentStartIndex;
                 }
 
                 // In case we ended up with something we don't understand
-                ProjectErrorUtilities.VerifyThrowInvalidProject(!(expressionRoot.IsEmpty), elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
+                ProjectErrorUtilities.VerifyThrowInvalidProject(!(expressionRoot.length == 0), elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
 
                 functionBuilder.Expression = expressionFunction;
                 functionBuilder.UsedUninitializedProperties = usedUnInitializedProperties;
 
                 // This is a static method call
                 // A static method is the content that follows the last "::", the rest being the type
-                if (propertyValue == null && expressionRoot[0] == '[')
+                if (propertyValue == null && expressionRoot.CharAt(0) == '[')
                 {
                     var typeEndIndex = expressionRoot.IndexOf(']');
 
@@ -3172,10 +3191,10 @@ namespace Microsoft.Build.Evaluation
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionStaticMethodSyntax", expressionFunction, String.Empty);
                     }
 
-                    var typeName = expressionRoot.Slice(1, typeEndIndex - 1).ToString();
+                    var typeName = expressionRoot.ReferencePoint.Substring(expressionRoot.start + 1, typeEndIndex - 1);
                     var methodStartIndex = typeEndIndex + 1;
 
-                    if (expressionRoot.Length > methodStartIndex + 2 && expressionRoot[methodStartIndex] == ':' && expressionRoot[methodStartIndex + 1] == ':')
+                    if (expressionRoot.length > methodStartIndex + 2 && expressionRoot.CharAt(methodStartIndex) == ':' && expressionRoot.CharAt(methodStartIndex + 1) == ':')
                     {
                         // skip over the "::"
                         methodStartIndex += 2;
@@ -3199,9 +3218,9 @@ namespace Microsoft.Build.Evaluation
 
                     functionBuilder.ReceiverType = receiverType;
                 }
-                else if (expressionFunction[0] == '[') // We have an indexer
+                else if (expressionFunction.CharAt(0) == '[') // We have an indexer
                 {
-                    var indexerEndIndex = expressionFunction.IndexOf(']', 1);
+                    var indexerEndIndex = expressionFunction.IndexOf(']', 1, expressionFunction.length - 1);
                     if (indexerEndIndex < 1)
                     {
                         // We ended up with something other than a function expression
@@ -3230,7 +3249,16 @@ namespace Microsoft.Build.Evaluation
                     var rootEndIndex = expressionRoot.IndexOf('.');
 
                     // If this is an instance function rather than a static, then we'll capture the name of the property referenced
-                    var functionReceiver = expressionRoot.Slice(0, rootEndIndex).Trim().ToString();
+                    Span functionReceiver = new Span(expressionRoot.ReferencePoint, expressionRoot.start, rootEndIndex);
+                    while (Char.IsWhiteSpace(functionReceiver.CharAt(0)))
+                    {
+                        functionReceiver.length--;
+                        functionReceiver.start++;
+                    }
+                    while (Char.IsWhiteSpace(functionReceiver.CharAt(functionReceiver.length - 1)))
+                    {
+                        functionReceiver.length--;
+                    }
 
                     // If propertyValue is null (we're not recursing), then we're expecting a valid property name
                     if (propertyValue == null && !IsValidPropertyName(functionReceiver))
@@ -3426,7 +3454,7 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     // We have nothing left to parse, so we'll return what we have
-                    if (String.IsNullOrEmpty(_remainder))
+                    if (Span.IsNullOrEmpty(_remainder))
                     {
                         return functionResult;
                     }
@@ -3466,7 +3494,7 @@ namespace Microsoft.Build.Evaluation
 
                     // If there's a :: in the expression, they were probably trying for a static function
                     // invocation. Give them some more relevant info in that case
-                    if (s_invariantCompareInfo.IndexOf(_expression, "::", CompareOptions.OrdinalIgnoreCase) > -1)
+                    if (s_invariantCompareInfo.IndexOf(_expression.ToString(), "::", CompareOptions.OrdinalIgnoreCase) > -1)
                     {
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionStaticMethodSyntax", _expression, ex.Message.Replace("Microsoft.Build.Evaluation.IntrinsicFunctions.", "[MSBuild]::"));
                     }
@@ -4433,15 +4461,15 @@ namespace Microsoft.Build.Evaluation
             /// Extracts the name, arguments, binding flags, and invocation type for an indexer
             /// Also extracts the remainder of the expression that is not part of this indexer
             /// </summary>
-            private static void ConstructIndexerFunction(string expressionFunction, IElementLocation elementLocation, object propertyValue, int methodStartIndex, int indexerEndIndex, ref FunctionBuilder<T> functionBuilder)
+            private static void ConstructIndexerFunction(Span expressionFunction, IElementLocation elementLocation, object propertyValue, int methodStartIndex, int indexerEndIndex, ref FunctionBuilder<T> functionBuilder)
             {
-                string argumentsContent = expressionFunction.Substring(1, indexerEndIndex - 1);
-                string remainder = expressionFunction.Substring(methodStartIndex);
+                Span argumentsContent = new Span(expressionFunction.ReferencePoint, expressionFunction.start + 1, indexerEndIndex - 1);
+                Span remainder = new Span(expressionFunction.ReferencePoint, methodStartIndex, expressionFunction.length - methodStartIndex);
                 string functionName;
                 string[] functionArguments;
 
                 // If there are no arguments, then just create an empty array
-                if (String.IsNullOrEmpty(argumentsContent))
+                if (Span.IsNullOrEmpty(argumentsContent))
                 {
                     functionArguments = Array.Empty<string>();
                 }
@@ -4476,28 +4504,28 @@ namespace Microsoft.Build.Evaluation
             /// Extracts the name, arguments, binding flags, and invocation type for a static or instance function.
             /// Also extracts the remainder of the expression that is not part of this function
             /// </summary>
-            private static void ConstructFunction(IElementLocation elementLocation, string expressionFunction, int argumentStartIndex, int methodStartIndex, ref FunctionBuilder<T> functionBuilder)
+            private static void ConstructFunction(IElementLocation elementLocation, Span expressionFunction, int argumentStartIndex, int methodStartIndex, ref FunctionBuilder<T> functionBuilder)
             {
                 // The unevaluated and unexpanded arguments for this function
                 string[] functionArguments;
 
                 // The name of the function that will be invoked
-                ReadOnlySpan<char> functionName;
+                Span functionName;
 
                 // What's left of the expression once the function has been constructed
-                ReadOnlySpan<char> remainder = ReadOnlySpan<char>.Empty;
+                Span remainder = new Span(String.Empty, 0, 0);
 
                 // The binding flags that we will use for this function's execution
                 BindingFlags defaultBindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public;
 
-                ReadOnlySpan<char> expressionFunctionAsSpan = expressionFunction.AsSpan();
+                Span expressionFunctionAsSpan = new Span(expressionFunction.ReferencePoint, expressionFunction.start, expressionFunction.length);
                 
-                ReadOnlySpan<char> expressionSubstringAsSpan = argumentStartIndex > -1 ? expressionFunctionAsSpan.Slice(methodStartIndex, argumentStartIndex - methodStartIndex) : ReadOnlySpan<char>.Empty;
+                Span expressionSubstringAsSpan = argumentStartIndex > -1 ? new Span(expressionFunctionAsSpan.ReferencePoint, expressionFunctionAsSpan.start + methodStartIndex, argumentStartIndex - methodStartIndex) : new Span(String.Empty, 0, 0);
 
                 // There are arguments that need to be passed to the function
-                if (argumentStartIndex > -1 && !expressionSubstringAsSpan.Contains(".".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                if (argumentStartIndex > -1 && expressionSubstringAsSpan.IndexOf('.') == -1)
                 {
-                    string argumentsContent;
+                    Span argumentsContent;
 
                     // separate the function and the arguments
                     functionName = expressionSubstringAsSpan.Trim();
@@ -4517,18 +4545,18 @@ namespace Microsoft.Build.Evaluation
                     defaultBindingFlags |= BindingFlags.InvokeMethod;
 
                     // It may be that there are '()' but no actual arguments content
-                    if (argumentStartIndex == expressionFunction.Length - 1)
+                    if (argumentStartIndex == expressionFunction.length - 1)
                     {
-                        argumentsContent = String.Empty;
+                        argumentsContent = new Span(String.Empty, 0, 0);
                         functionArguments = Array.Empty<string>();
                     }
                     else
                     {
                         // we have content within the '()' so let's extract and deal with it
-                        argumentsContent = expressionFunction.Substring(argumentStartIndex, argumentsEndIndex - argumentStartIndex);
+                        argumentsContent = new Span(expressionFunction.ReferencePoint, expressionFunction.start + argumentStartIndex, argumentsEndIndex - argumentStartIndex);
 
                         // If there are no arguments, then just create an empty array
-                        if (String.IsNullOrEmpty(argumentsContent))
+                        if (Span.IsNullOrEmpty(argumentsContent))
                         {
                             functionArguments = Array.Empty<string>();
                         }
@@ -4538,14 +4566,14 @@ namespace Microsoft.Build.Evaluation
                             functionArguments = ExtractFunctionArguments(elementLocation, expressionFunction, argumentsContent);
                         }
 
-                        remainder = expressionFunctionAsSpan.Slice(argumentsEndIndex + 1).Trim();
+                        remainder = new Span(expressionFunctionAsSpan.ReferencePoint, expressionFunctionAsSpan.start + argumentsEndIndex + 1, expressionFunctionAsSpan.length - argumentsEndIndex - 1).Trim();
                     }
                 }
                 else
                 {
-                    int nextMethodIndex = expressionFunction.IndexOf('.', methodStartIndex);
-                    int methodLength = expressionFunction.Length - methodStartIndex;
-                    int indexerIndex = expressionFunction.IndexOf('[', methodStartIndex);
+                    int nextMethodIndex = expressionFunction.IndexOf('.', methodStartIndex, expressionFunction.length);
+                    int methodLength = expressionFunction.length - methodStartIndex;
+                    int indexerIndex = expressionFunction.IndexOf('[', methodStartIndex, expressionFunction.length - methodStartIndex);
 
                     // We don't want to consume the indexer
                     if (indexerIndex >= 0 && indexerIndex < nextMethodIndex)
@@ -4558,12 +4586,12 @@ namespace Microsoft.Build.Evaluation
                     if (nextMethodIndex > 0)
                     {
                         methodLength = nextMethodIndex - methodStartIndex;
-                        remainder = expressionFunctionAsSpan.Slice(nextMethodIndex).Trim();
+                        remainder = new Span(expressionFunctionAsSpan.ReferencePoint, expressionFunctionAsSpan.start + nextMethodIndex, expressionFunctionAsSpan.length - nextMethodIndex).Trim();
                     }
+                    
+                    Span netPropertyName = new Span(expressionFunctionAsSpan.ReferencePoint, expressionFunctionAsSpan.start + methodStartIndex, methodLength).Trim();
 
-                    ReadOnlySpan<char> netPropertyName = expressionFunctionAsSpan.Slice(methodStartIndex, methodLength).Trim();
-
-                    ProjectErrorUtilities.VerifyThrowInvalidProject(netPropertyName.Length > 0, elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(netPropertyName.length > 0, elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
 
                     // We have been asked for a property or a field
                     defaultBindingFlags |= (BindingFlags.GetProperty | BindingFlags.GetField);
@@ -4572,12 +4600,12 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 // either there are no functions left or what we have is another function or an indexer
-                if (remainder.IsEmpty || remainder[0] == '.' || remainder[0] == '[')
+                if (remainder.length == 0 || remainder.CharAt(0) == '.' || remainder.CharAt(0) == '[')
                 {
                     functionBuilder.Name = functionName.ToString();
                     functionBuilder.Arguments = functionArguments;
                     functionBuilder.BindingFlags = defaultBindingFlags;
-                    functionBuilder.Remainder = remainder.ToString();
+                    functionBuilder.Remainder = remainder;
                 }
                 else
                 {
@@ -4655,7 +4683,7 @@ namespace Microsoft.Build.Evaluation
             /// Make an attempt to create a string showing what we were trying to execute when we failed.
             /// This will show any intermediate evaluation which may help the user figure out what happened.
             /// </summary>
-            private string GenerateStringOfMethodExecuted(string expression, object objectInstance, string name, object[] args)
+            private string GenerateStringOfMethodExecuted(Span expression, object objectInstance, string name, object[] args)
             {
                 string parameters = String.Empty;
                 if (args != null)
@@ -4904,6 +4932,13 @@ namespace Microsoft.Build.Evaluation
             set;
         }
 
+        public Span(string refPoint, int s, int l)
+        {
+            ReferencePoint = refPoint;
+            start = s;
+            length = l;
+        }
+
         public bool StartsWith(string value, StringComparison comparisonType)
         {
             if (this.length < value.Length)
@@ -4945,6 +4980,11 @@ namespace Microsoft.Build.Evaluation
             return true;
         }
 
+        public bool Equals(string oth)
+        {
+            return Equals(this, new Span(oth, 0, oth.Length));
+        }
+
         public int IndexOf(char pattern)
         {
             for (int i = 0; i < length; i++)
@@ -4955,6 +4995,29 @@ namespace Microsoft.Build.Evaluation
                 }
             }
             return -1;
+        }
+
+        public int LastIndexOf(char pattern)
+        {
+            for (int i = length - 1; i >= 0; i--)
+            {
+                if (ReferencePoint[start + i] == pattern)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        public int IndexOf(char pattern, int s, int len)
+        {
+            int l = length;
+            length = len;
+            start += s;
+            int ret = IndexOf(pattern);
+            start -= s;
+            length = l;
+            return ret;
         }
 
         public string ToUnixString()
@@ -4984,6 +5047,117 @@ namespace Microsoft.Build.Evaluation
                 return ReferencePoint;
             }
             return ReferencePoint.Substring(start, length);
+        }
+
+        public char CharAt(int ind)
+        {
+            if (ind < 0 || ind >= length)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+            return ReferencePoint[start + ind];
+        }
+
+        public bool EqualsIgnoreCase(string s)
+        {
+            if (s.Length != length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < s.Length; i++)
+            {
+                if ((s[i] & 0x00DF) != (CharAt(i) & 0x00DF))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public Span Trim()
+        {
+            Span ret = new Span(ReferencePoint, start, length);
+            while (Char.IsWhiteSpace(ret.CharAt(0)))
+            {
+                ret.start++;
+                ret.length--;
+            }
+            while (Char.IsWhiteSpace(ret.CharAt(ret.length - 1)))
+            {
+                ret.length--;
+            }
+            return ret;
+        }
+
+        public static Span UnescapeAll(Span escapedSpan)
+        {
+            // If the Span doesn't contain anything, then by definition it doesn't
+            // need unescaping.
+            if (IsNullOrEmpty(escapedSpan))
+            {
+                return escapedSpan;
+            }
+
+            // If there are no percent signs, just return the original string immediately.
+            // Don't even instantiate the StringBuilder.
+            int indexOfPercent = escapedSpan.IndexOf('%');
+            if (indexOfPercent == -1)
+            {
+                return escapedSpan;
+            }
+
+            // This is where we're going to build up the final string to return to the caller.
+            StringBuilder unescapedSpan = StringBuilderCache.Acquire(escapedSpan.length);
+
+            int currentPosition = 0;
+
+            // Loop until there are no more percent signs in the input string.
+            while (indexOfPercent != -1)
+            {
+                // There must be two hex characters following the percent sign
+                // for us to even consider doing anything with this.
+                if (
+                        (indexOfPercent <= (escapedSpan.length - 3)) &&
+                        Span.IsHexDigit(escapedSpan.CharAt(indexOfPercent + 1)) &&
+                        Span.IsHexDigit(escapedSpan.CharAt(indexOfPercent + 2))
+                    )
+                {
+                    // First copy all the characters up to the current percent sign into
+                    // the destination.
+                    unescapedSpan.Append(escapedSpan.ReferencePoint, escapedSpan.start + currentPosition, indexOfPercent - currentPosition);
+
+                    // Convert the %XX to an actual real character.
+                    string hexString = escapedSpan.ReferencePoint.Substring(escapedSpan.start + indexOfPercent + 1, 2);
+                    char unescapedCharacter = (char)int.Parse(hexString, System.Globalization.NumberStyles.HexNumber,
+                        CultureInfo.InvariantCulture);
+
+                    // if the unescaped character is not on the exception list, append it
+                    unescapedSpan.Append(unescapedCharacter);
+
+                    // Advance the current pointer to reflect the fact that the destination string
+                    // is up to date with everything up to and including this escape code we just found.
+                    currentPosition = indexOfPercent + 3;
+                }
+
+                // Find the next percent sign.
+                indexOfPercent = escapedSpan.IndexOf('%', indexOfPercent + 1, escapedSpan.length - indexOfPercent - 1);
+            }
+
+            // Okay, there are no more percent signs in the input string, so just copy the remaining
+            // characters into the destination.
+            unescapedSpan.Append(escapedSpan.ReferencePoint, escapedSpan.start + currentPosition, escapedSpan.length - currentPosition);
+
+            string ret = StringBuilderCache.GetStringAndRelease(unescapedSpan);
+            return new Span(ret, 0, ret.Length);
+        }
+
+        private static bool IsHexDigit(char c)
+        {
+            return ((c >= '0') && (c <= '9'))
+                || ((c >= 'A') && (c <= 'F'))
+                || ((c >= 'a') && (c <= 'f'));
         }
     }
 }
