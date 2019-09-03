@@ -11,7 +11,6 @@ using System.Text;
 using System.Xml;
 
 using Microsoft.Build.Construction;
-using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -19,7 +18,6 @@ using Microsoft.Build.Experimental.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -750,7 +748,7 @@ namespace Microsoft.Build.UnitTests
             Project project = CreateInMemoryProject(projectContents, logger);
 
             bool success = project.Build(logger);
-            Assert.False(success); // "Build succeeded, but shouldn't have.  See Standard Out tab for details"
+            Assert.False(success); // "Build succeeded, but shouldn't have.  See test output (Attachments in Azure Pipelines) for details"
         }
 
         /// <summary>
@@ -910,48 +908,27 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <param name="projectFileRelativePath"></param>
         /// <returns></returns>
-        internal static MockLogger BuildTempProjectFileExpectSuccess(string projectFileRelativePath)
+        internal static void BuildTempProjectFileExpectSuccess(string projectFileRelativePath, MockLogger logger)
         {
-            return BuildTempProjectFileWithTargetsExpectSuccess(projectFileRelativePath, null, null);
+            BuildTempProjectFileWithTargetsExpectSuccess(projectFileRelativePath, null, null, logger);
         }
 
         /// <summary>
         /// Builds a project file from disk, and asserts if the build does not succeed.
         /// </summary>
-        internal static MockLogger BuildTempProjectFileWithTargetsExpectSuccess(string projectFileRelativePath, string[] targets, IDictionary<string, string> additionalProperties)
+        internal static void BuildTempProjectFileWithTargetsExpectSuccess(string projectFileRelativePath, string[] targets, IDictionary<string, string> additionalProperties, MockLogger logger)
         {
-            MockLogger logger = new MockLogger();
-            bool success = BuildTempProjectFileWithTargets(projectFileRelativePath, targets, additionalProperties, logger);
-
-            Assert.True(success); // "Build failed.  See Standard Out tab for details"
-
-            return logger;
+            BuildTempProjectFileWithTargets(projectFileRelativePath, targets, additionalProperties, logger)
+                .ShouldBeTrue("Build failed.  See test output (Attachments in Azure Pipelines) for details");
         }
 
         /// <summary>
         /// Builds a project file from disk, and asserts if the build succeeds.
         /// </summary>
-        internal static MockLogger BuildTempProjectFileExpectFailure(string projectFileRelativePath)
+        internal static void BuildTempProjectFileExpectFailure(string projectFileRelativePath, MockLogger logger)
         {
-            MockLogger logger = new MockLogger();
-            bool success = BuildTempProjectFileWithTargets(projectFileRelativePath, null, null, logger);
-
-            Assert.False(success); // "Build unexpectedly succeeded.  See Standard Out tab for details"
-
-            return logger;
-        }
-
-        /// <summary>
-        /// Builds a project file from disk, and asserts if the build succeeds.
-        /// </summary>
-        internal static MockLogger BuildTempProjectFileWithTargetsExpectFailure(string projectFileRelativePath, string[] targets, IDictionary<string, string> additionalProperties)
-        {
-            MockLogger logger = new MockLogger();
-            bool success = BuildTempProjectFileWithTargets(projectFileRelativePath, targets, additionalProperties, logger);
-
-            Assert.False(success); // "Build unexpectedly succeeded.  See Standard Out tab for details"
-
-            return logger;
+            BuildTempProjectFileWithTargets(projectFileRelativePath, null, null, logger)
+                .ShouldBeFalse("Build unexpectedly succeeded.  See test output (Attachments in Azure Pipelines) for details");
         }
 
         /// <summary>
@@ -1276,19 +1253,21 @@ namespace Microsoft.Build.UnitTests
                 });
         }
 
-        internal static void ShouldBeEquivalentTo<K, V>(this IReadOnlyDictionary<K, V> a, IReadOnlyDictionary<K, V> b)
-        {
-            a.ShouldBeSubsetOf(b);
-            b.ShouldBeSubsetOf(a);
-        }
-
         internal static void ShouldBeEquivalentTo<K, V>(this IDictionary<K, V> a, IReadOnlyDictionary<K, V> b)
         {
             a.ShouldBeSubsetOf(b);
             b.ShouldBeSubsetOf(a);
+            a.Count.ShouldBe(b.Count);
         }
 
-        internal static void ShouldBeEquivalentTo<K>(this IReadOnlyCollection<K> a, IReadOnlyCollection<K> b)
+        internal static void ShouldBeEquivalentTo<K>(this IEnumerable<K> a, IEnumerable<K> b)
+        {
+            a.ShouldBeSubsetOf(b);
+            b.ShouldBeSubsetOf(a);
+            a.Count().ShouldBe(b.Count());
+        }
+
+        internal static void ShouldBeSetEquivalentTo<K>(this IEnumerable<K> a, IEnumerable<K> b)
         {
             a.ShouldBeSubsetOf(b);
             b.ShouldBeSubsetOf(a);
@@ -1599,7 +1578,8 @@ namespace Microsoft.Build.UnitTests
             IDictionary<int, int[]> dependencyEdges,
             IDictionary<string, string> globalProperties = null,
             CreateProjectFileDelegate createProjectFile = null,
-            IEnumerable<int> roots = null)
+            IEnumerable<int> entryPoints = null,
+            ProjectCollection projectCollection = null)
         {
             createProjectFile = createProjectFile ?? CreateProjectFile;
 
@@ -1635,13 +1615,16 @@ namespace Microsoft.Build.UnitTests
                 }
             }
 
-            var entryProjects = roots ?? nodes.Where(nodeEntry => nodeEntry.Value.IsRoot).Select(n => n.Key);
-
-            var entryProjectFiles = nodes.Where(nodeEntry => nodeEntry.Value.IsRoot).Select(nodeEntry => nodeEntry.Value.ProjectPath);
+            var entryProjectFiles = entryPoints != null
+                            ? nodes.Where(n => entryPoints.Contains(n.Key)).Select(n => n.Value.ProjectPath)
+                            : nodes.Where(n => n.Value.IsRoot).Select(n => n.Value.ProjectPath);
 
             return new ProjectGraph(
                 entryProjectFiles,
-                globalProperties ?? new Dictionary<string, string>());
+                globalProperties ?? new Dictionary<string, string>(),
+                projectCollection ?? env.CreateProjectCollection()
+                    .Collection
+                );
 
             bool IsRoot(int node)
             {

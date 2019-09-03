@@ -6,6 +6,7 @@
     <RestoreSources>$(DotNetRestoreSources)</RestoreSources>
     <RestoreSources Condition="'$(DotNetBuildOffline)' != 'true'">
         $(RestoreSources);
+        https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
         https://dotnet.myget.org/F/roslyn/api/v3/index.json;
         https://dotnet.myget.org/F/nuget-build/api/v3/index.json;
         https://dotnet.myget.org/F/roslyn-tools/api/v3/index.json;
@@ -14,9 +15,9 @@
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>16.2.0</VersionPrefix>
+    <VersionPrefix>16.4.0</VersionPrefix>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
-    <PreReleaseVersionLabel /> <!-- Removing the preview label so that we can produce RTM versioning -->
+    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
     <SemanticVersioningV1>true</SemanticVersioningV1>
@@ -30,6 +31,26 @@
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
-    <DotNetCliVersion>3.0.100-preview5-011568</DotNetCliVersion>
+    <DotNetCliVersion>3.0.100-preview6-012264</DotNetCliVersion>
   </PropertyGroup>
+  <!-- Product Dependencies -->
+  <PropertyGroup>
+    <SystemResourcesExtensionsVersion>4.6.0-rc1.19425.2</SystemResourcesExtensionsVersion>
+  </PropertyGroup>
+  <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
+    <!-- See https://github.com/dotnet/arcade/issues/3386
+
+         Arcade doesn't support this directly; AutoGenerateAssemblyVersion
+         set to false means that FileVersion=$(AssemblyVersion), but that's
+         not ok for MSBuild because we have a fixed AssemblyVersion for
+         compat (15.1.0.0), but varied FileVersion, which is user-visible
+         via $(MSBuildVersion) and msbuild -version.
+
+         So: we want this to match the NuGet package version and also the
+         AssemblyInformationalVersion. Jump through hoops to do so.
+         -->
+    <PropertyGroup>
+      <FileVersion>$(VersionPrefix).$(FileVersion.Split('.')[3])</FileVersion>
+    </PropertyGroup>
+  </Target>
 </Project>

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -33,6 +33,7 @@
 
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
+    <PackageReference Include="System.Memory" />
 
     <PackageReference Include="System.Reflection.Metadata" Condition="'$(MonoBuild)' == 'true'" />
   </ItemGroup>
@@ -161,6 +162,7 @@
     <Compile Include="BackEnd\Components\Caching\ConfigCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
     <Compile Include="Graph\GraphBuilder.cs" />
+    <Compile Include="Graph\ParallelWorkSet.cs" />
     <Compile Include="Graph\ProjectInterpretation.cs" />
     <Compile Include="Graph\GraphBuildResult.cs" />
     <Compile Include="Graph\GraphBuildSubmission.cs" />
@@ -520,7 +522,9 @@
     <Compile Include="Evaluation\IPropertyProvider.cs" />
     <Compile Include="Evaluation\Preprocessor.cs" />
     <Compile Include="Evaluation\ProjectParser.cs" />
+    <Compile Include="Evaluation\ProjectRootElementCacheBase.cs" />
     <Compile Include="Evaluation\ProjectRootElementCache.cs" />
+    <Compile Include="Evaluation\SimpleProjectRootElementCache.cs" />
     <Compile Include="Evaluation\ProjectStringCache.cs" />
     <Compile Include="Evaluation\SemiColonTokenizer.cs" />
     <Compile Include="Evaluation\StringMetadataTable.cs" />

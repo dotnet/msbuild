@@ -1267,13 +1267,13 @@ namespace Microsoft.Build.UnitTests
 
             string stdout = ObjectModelHelpers.RunTempProjectBuiltApplication(@"bin\debug\ConsoleApplication37.exe");
 
-            Assert.IsTrue(@"ConsoleApplication37.exe did not emit Usage string.  See Standard Out tab for details.", 
+            Assert.IsTrue(@"ConsoleApplication37.exe did not emit Usage string.  See test output (Attachments in Azure Pipelines) for details.", 
                 stdout.Contains("Hello world!  Isn't it a beautiful day?"));
 
-            Assert.IsTrue(@"ConsoleApplication37.exe did not emit InvalidChildElement string.  See Standard Out tab for details.", 
+            Assert.IsTrue(@"ConsoleApplication37.exe did not emit InvalidChildElement string.  See test output (Attachments in Azure Pipelines) for details.", 
                 stdout.Contains("The element Foo is not allowed here."));
 
-            Assert.IsTrue(@"ConsoleApplication37.exe did not emit CopyrightMessage string.  See Standard Out tab for details.", 
+            Assert.IsTrue(@"ConsoleApplication37.exe did not emit CopyrightMessage string.  See test output (Attachments in Azure Pipelines) for details.", 
                 stdout.Contains("Copyright (C) 2005, The MSBuild Team"));
         }
 
@@ -1401,13 +1401,13 @@ namespace Microsoft.Build.UnitTests
 
             string stdout = ObjectModelHelpers.RunTempProjectBuiltApplication(@"bin\debug\ConsoleApplication38.exe");
 
-            Assert.IsTrue(@"ConsoleApplication38.exe did not emit Usage string.  See Standard Out tab for details.", 
+            Assert.IsTrue(@"ConsoleApplication38.exe did not emit Usage string.  See test output (Attachments in Azure Pipelines) for details.", 
                 stdout.Contains("Hello world!  Isn't it a beautiful day?"));
 
-            Assert.IsTrue(@"ConsoleApplication38.exe did not emit InvalidChildElement string.  See Standard Out tab for details.", 
+            Assert.IsTrue(@"ConsoleApplication38.exe did not emit InvalidChildElement string.  See test output (Attachments in Azure Pipelines) for details.", 
                 stdout.Contains("The element Foo is not allowed here."));
 
-            Assert.IsTrue(@"ConsoleApplication38.exe did not emit CopyrightMessage string.  See Standard Out tab for details.", 
+            Assert.IsTrue(@"ConsoleApplication38.exe did not emit CopyrightMessage string.  See test output (Attachments in Azure Pipelines) for details.", 
                 stdout.Contains("Copyright (C) 2005, The MSBuild Team"));
         }
     }
@@ -1878,8 +1878,8 @@ namespace Microsoft.Build.UnitTests
             string[] configurations = p.GetConditionedProperties("Configuration");
 
             Console.WriteLine("Configurations found = " + String.Join(", ", configurations));
-            Assert.AreEqual("See Standard Out tab for details", 1, configurations.Length);
-            Assert.AreEqual("See Standard Out tab for details", "FooConfig", configurations[0]);
+            Assert.AreEqual("See test output (Attachments in Azure Pipelines) for details", 1, configurations.Length);
+            Assert.AreEqual("See test output (Attachments in Azure Pipelines) for details", "FooConfig", configurations[0]);
         }
 
         /// <summary>
@@ -1969,8 +1969,8 @@ namespace Microsoft.Build.UnitTests
             string[] configurations = p.GetConditionedProperties("Configuration");
 
             Console.WriteLine("Configurations found = " + String.Join(", ", configurations));
-            Assert.AreEqual("See Standard Out tab for details", 1, configurations.Length);
-            Assert.AreEqual("See Standard Out tab for details", "FooConfig", configurations[0]);
+            Assert.AreEqual("See test output (Attachments in Azure Pipelines) for details", 1, configurations.Length);
+            Assert.AreEqual("See test output (Attachments in Azure Pipelines) for details", "FooConfig", configurations[0]);
         }
 
         /// <summary>

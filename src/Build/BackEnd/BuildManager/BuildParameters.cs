@@ -704,7 +704,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The one and only project root element cache to be used for the build.
         /// </summary>
-        internal ProjectRootElementCache ProjectRootElementCache { get; set; }
+        internal ProjectRootElementCacheBase ProjectRootElementCache { get; set; }
 
 #if FEATURE_APPDOMAIN
         /// <summary>
@@ -762,6 +762,11 @@ namespace Microsoft.Build.Execution
             get => _outputResultsCacheFile;
             set => _outputResultsCacheFile = value;
         }
+
+        /// <summary>
+        /// Determines whether MSBuild will save the results of builds after EndBuild to speed up future builds.
+        /// </summary>
+        public bool DiscardBuildResults { get; set; } = false;
 
         /// <summary>
         /// Retrieves a toolset.
@@ -877,7 +882,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Centralization of the common parts of construction.
         /// </summary>
-        private void Initialize(PropertyDictionary<ProjectPropertyInstance> environmentProperties, ProjectRootElementCache projectRootElementCache, ToolsetProvider toolsetProvider)
+        private void Initialize(PropertyDictionary<ProjectPropertyInstance> environmentProperties, ProjectRootElementCacheBase projectRootElementCache, ToolsetProvider toolsetProvider)
         {
             _buildProcessEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
             _environmentProperties = environmentProperties;

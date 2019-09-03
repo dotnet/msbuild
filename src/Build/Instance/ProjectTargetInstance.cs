@@ -19,7 +19,7 @@ namespace Microsoft.Build.Execution
     /// <remarks>
     /// This is an immutable class.
     /// </remarks>
-    [DebuggerDisplay("Name={_name} Count={_children.Count} Condition={_condition} Inputs={_inputs} Outputs={_outputs} DependsOnTargets={_dependsOnTargets}")]
+    [DebuggerDisplay("Name={_name} Count={_children.Count} Condition={_condition} Inputs={_inputs} Outputs={_outputs} DependsOnTargets={_dependsOnTargets} BeforeTargets={_beforeTargets} AfterTargets={_afterTargets}")]
     public sealed class ProjectTargetInstance : IImmutable, IKeyed, ITranslatable
     {
         /// <summary>
@@ -52,6 +52,16 @@ namespace Microsoft.Build.Execution
         /// Semicolon separated list of targets it depends on
         /// </summary>
         private string _dependsOnTargets;
+
+        /// <summary>
+        /// Semicolon separated list of targets it runs before
+        /// </summary>
+        private string _beforeTargets;
+
+        /// <summary>
+        /// Semicolon separated list of targets it runs after
+        /// </summary>
+        private string _afterTargets;
 
         /// <summary>
         /// Condition for whether to trim duplicate outputs
@@ -136,6 +146,8 @@ namespace Microsoft.Build.Execution
             string returns,
             string keepDuplicateOutputs,
             string dependsOnTargets,
+            string beforeTargets,
+            string afterTargets,
             ElementLocation location,
             ElementLocation conditionLocation,
             ElementLocation inputsLocation,
@@ -156,6 +168,8 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowInternalNull(outputs, "outputs");
             ErrorUtilities.VerifyThrowInternalNull(keepDuplicateOutputs, "keepDuplicateOutputs");
             ErrorUtilities.VerifyThrowInternalNull(dependsOnTargets, "dependsOnTargets");
+            ErrorUtilities.VerifyThrowInternalNull(beforeTargets, "beforeTargets");
+            ErrorUtilities.VerifyThrowInternalNull(afterTargets, "afterTargets");
             ErrorUtilities.VerifyThrowInternalNull(location, "location");
             ErrorUtilities.VerifyThrowInternalNull(children, "children");
             ErrorUtilities.VerifyThrowInternalNull(onErrorChildren, "onErrorChildren");
@@ -167,6 +181,8 @@ namespace Microsoft.Build.Execution
             _returns = returns;
             _keepDuplicateOutputs = keepDuplicateOutputs;
             _dependsOnTargets = dependsOnTargets;
+            _beforeTargets = beforeTargets;
+            _afterTargets = afterTargets;
             _location = location;
             _conditionLocation = conditionLocation;
             _inputsLocation = inputsLocation;
@@ -259,6 +275,28 @@ namespace Microsoft.Build.Execution
             [DebuggerStepThrough]
             get
             { return _dependsOnTargets; }
+        }
+
+        /// <summary>
+        /// Unevaluated semicolon separated list of targets it runs before.
+        /// May be empty string.
+        /// </summary>
+        public string BeforeTargets
+        {
+            [DebuggerStepThrough]
+            get
+            { return _beforeTargets; }
+        }
+
+        /// <summary>
+        /// Unevaluated semicolon separated list of targets it runs after.
+        /// May be empty string.
+        /// </summary>
+        public string AfterTargets
+        {
+            [DebuggerStepThrough]
+            get
+            { return _afterTargets; }
         }
 
         /// <summary>
@@ -520,6 +558,8 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _returns);
             translator.Translate(ref _keepDuplicateOutputs);
             translator.Translate(ref _dependsOnTargets);
+            translator.Translate(ref _beforeTargets);
+            translator.Translate(ref _afterTargets);
             translator.Translate(ref _location, ElementLocation.FactoryForDeserialization);
             translator.Translate(ref _conditionLocation, ElementLocation.FactoryForDeserialization);
             translator.Translate(ref _inputsLocation, ElementLocation.FactoryForDeserialization);

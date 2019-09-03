@@ -15,6 +15,7 @@ using System.Linq;
 using System.Reflection;
 using System.Security;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 using Microsoft.Build.Evaluation;
@@ -1768,6 +1769,7 @@ namespace Microsoft.Build.CommandLine
 
                     if (!isRepeatedResponseFile)
                     {
+                        var responseFileDirectory = FileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(responseFile));
                         s_includedResponseFiles.Add(responseFile);
 
                         ArrayList argsFromResponseFile;
@@ -1788,6 +1790,10 @@ namespace Microsoft.Build.CommandLine
                                 // skip comment lines beginning with #
                                 if (!responseFileLine.StartsWith("#", StringComparison.Ordinal))
                                 {
+                                    // Allow special case to support a path relative to the .rsp file being processed.
+                                    responseFileLine = Regex.Replace(responseFileLine, responseFilePathReplacement,
+                                        responseFileDirectory, RegexOptions.IgnoreCase);
+
                                     // treat each line of the response file like a command line i.e. args separated by whitespace
                                     argsFromResponseFile.AddRange(QuotingUtilities.SplitUnquoted(Environment.ExpandEnvironmentVariables(responseFileLine)));
                                 }
@@ -1920,9 +1926,14 @@ namespace Microsoft.Build.CommandLine
         private const string autoResponseFileName = "MSBuild.rsp";
 
         /// <summary>
-        /// THe name of an auto-response file to search for in the project directory and above.
+        /// The name of an auto-response file to search for in the project directory and above.
         /// </summary>
         private const string directoryResponseFileName = "Directory.Build.rsp";
+
+        /// <summary>
+        /// String replacement pattern to support paths in response files.
+        /// </summary>
+        private const string responseFilePathReplacement = "%MSBuildThisFileDirectory%";
 
         /// <summary>
         /// Whether switches from the auto-response file are being used.
@@ -3273,7 +3284,10 @@ namespace Microsoft.Build.CommandLine
 
                 LoggerDescription loggerDescription = ParseLoggingParameter(parameter, unquotedParameter, verbosity);
 
-                loggers.Add(CreateAndConfigureLogger(loggerDescription, verbosity, unquotedParameter));
+                if (CreateAndConfigureLogger(loggerDescription, verbosity, unquotedParameter, out ILogger logger))
+                {
+                    loggers.Add(logger);
+                }
             }
 
             return loggers;
@@ -3300,7 +3314,10 @@ namespace Microsoft.Build.CommandLine
                 LoggerDescription centralLoggerDescription =
                     ParseLoggingParameter((string)loggerSpec[0], unquotedParameter, verbosity);
 
-                ILogger centralLogger = CreateAndConfigureLogger(centralLoggerDescription, verbosity, unquotedParameter);
+                if(!CreateAndConfigureLogger(centralLoggerDescription, verbosity, unquotedParameter, out ILogger centralLogger))
+                {
+                    continue;
+                }
 
                 // By default if no forwarding logger description is specified the same logger is used for both functions
                 LoggerDescription forwardingLoggerDescription = centralLoggerDescription;
@@ -3334,11 +3351,10 @@ namespace Microsoft.Build.CommandLine
             string loggerAssemblyName;
             string loggerAssemblyFile;
             string loggerParameters = null;
-
-            int emptySplits; // ignored
+            bool isOptional = false;
 
             // split each <logger type>;<logger parameters> string into two pieces, breaking on the first ; that is found
-            loggerSpec = QuotingUtilities.SplitUnquoted(parameter, 2, true /* keep empty splits */, false /* keep quotes */, out emptySplits, ';');
+            loggerSpec = QuotingUtilities.SplitUnquoted(parameter, 2, true /* keep empty splits */, false /* keep quotes */, out _, ';');
 
             ErrorUtilities.VerifyThrow((loggerSpec.Count >= 1) && (loggerSpec.Count <= 2),
                 "SplitUnquoted() must return at least one string, and no more than two.");
@@ -3353,17 +3369,15 @@ namespace Microsoft.Build.CommandLine
                 loggerParameters = QuotingUtilities.Unquote((string)loggerSpec[1]);
             }
 
-            // split each <logger class>,<logger assembly> string into two pieces, breaking on the first , that is found
-            ArrayList loggerTypeSpec = QuotingUtilities.SplitUnquoted((string)loggerSpec[0], 2, true /* keep empty splits */, false /* keep quotes */, out emptySplits, ',');
+            // split each <logger class>,<logger assembly>[,<option1>][,option2] parameters string into pieces
+            ArrayList loggerTypeSpec = QuotingUtilities.SplitUnquoted((string)loggerSpec[0], int.MaxValue, true /* keep empty splits */, false /* keep quotes */, out _, ',');
 
-            ErrorUtilities.VerifyThrow((loggerTypeSpec.Count >= 1) && (loggerTypeSpec.Count <= 2),
-                "SplitUnquoted() must return at least one string, and no more than two.");
-
+            ErrorUtilities.VerifyThrow(loggerTypeSpec.Count >= 1, "SplitUnquoted() must return at least one string");
 
             string loggerAssemblySpec;
 
             // if the logger class and assembly are both specified
-            if (loggerTypeSpec.Count == 2)
+            if (loggerTypeSpec.Count >= 2)
             {
                 loggerClassName = QuotingUtilities.Unquote((string)loggerTypeSpec[0]);
                 loggerAssemblySpec = QuotingUtilities.Unquote((string)loggerTypeSpec[1]);
@@ -3372,6 +3386,15 @@ namespace Microsoft.Build.CommandLine
             {
                 loggerClassName = String.Empty;
                 loggerAssemblySpec = QuotingUtilities.Unquote((string)loggerTypeSpec[0]);
+            }
+
+            // Loop through the remaining items as options
+            for (int i = 2; i < loggerTypeSpec.Count; i++)
+            {
+                if (string.Equals(loggerTypeSpec[i] as string, nameof(isOptional), StringComparison.OrdinalIgnoreCase))
+                {
+                    isOptional = true;
+                }
             }
 
             CommandLineSwitchException.VerifyThrow(loggerAssemblySpec.Length > 0,
@@ -3399,21 +3422,22 @@ namespace Microsoft.Build.CommandLine
                 loggerAssemblyName = loggerAssemblySpec;
             }
 
-            return new LoggerDescription(loggerClassName, loggerAssemblyName, loggerAssemblyFile, loggerParameters, verbosity);
+            return new LoggerDescription(loggerClassName, loggerAssemblyName, loggerAssemblyFile, loggerParameters, verbosity, isOptional);
         }
 
         /// <summary>
         /// Loads a logger from its assembly, instantiates it, and handles errors.
         /// </summary>
         /// <returns>Instantiated logger.</returns>
-        private static ILogger CreateAndConfigureLogger
+        private static bool CreateAndConfigureLogger
         (
             LoggerDescription loggerDescription,
             LoggerVerbosity verbosity,
-            string unquotedParameter
+            string unquotedParameter,
+            out ILogger logger
         )
         {
-            ILogger logger = null;
+            logger = null;
 
             try
             {
@@ -3421,29 +3445,34 @@ namespace Microsoft.Build.CommandLine
 
                 InitializationException.VerifyThrow(logger != null, "LoggerNotFoundError", unquotedParameter);
             }
-            catch (IOException e)
+            catch (IOException e) when (!loggerDescription.IsOptional)
             {
                 InitializationException.Throw("LoggerCreationError", unquotedParameter, e, false);
             }
-            catch (BadImageFormatException e)
+            catch (BadImageFormatException e) when (!loggerDescription.IsOptional)
             {
                 InitializationException.Throw("LoggerCreationError", unquotedParameter, e, false);
             }
-            catch (SecurityException e)
+            catch (SecurityException e) when (!loggerDescription.IsOptional)
             {
                 InitializationException.Throw("LoggerCreationError", unquotedParameter, e, false);
             }
-            catch (ReflectionTypeLoadException e)
+            catch (ReflectionTypeLoadException e) when (!loggerDescription.IsOptional)
             {
                 InitializationException.Throw("LoggerCreationError", unquotedParameter, e, false);
             }
-            catch (MemberAccessException e)
+            catch (MemberAccessException e) when (!loggerDescription.IsOptional)
             {
                 InitializationException.Throw("LoggerCreationError", unquotedParameter, e, false);
             }
-            catch (TargetInvocationException e)
+            catch (TargetInvocationException e) when (!loggerDescription.IsOptional)
             {
                 InitializationException.Throw("LoggerFatalError", unquotedParameter, e.InnerException, true);
+            }
+            catch (Exception e) when (loggerDescription.IsOptional)
+            {
+                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OptionalLoggerCreationMessage", e.Message));
+                return false;
             }
 
             // Configure the logger by setting the verbosity level and parameters
@@ -3469,7 +3498,7 @@ namespace Microsoft.Build.CommandLine
                 InitializationException.Throw("LoggerFatalError", unquotedParameter, e, true);
             }
 
-            return logger;
+            return true;
         }
 
         private static void ReplayBinaryLog

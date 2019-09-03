@@ -15,8 +15,10 @@ namespace Microsoft.Build.UnitTests
 {
     sealed public class ResGenDependencies_Tests
     {
-        [Fact]
-        public void DirtyCleanScenario()
+        [Theory]
+        [MemberData(nameof(GenerateResource_Tests.Utilities.UsePreserializedResourceStates), MemberType = typeof(GenerateResource_Tests.Utilities))]
+
+        public void DirtyCleanScenario(bool useMSBuildResXReader)
         {
             ResGenDependencies cache = new ResGenDependencies();
 
@@ -29,7 +31,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.False(cache.IsDirty);
 
                 // Getting a file that wasn't in the cache is a write operation.
-                cache.GetResXFileInfo(resx);
+                cache.GetResXFileInfo(resx, useMSBuildResXReader);
                 Assert.True(cache.IsDirty);
 
                 // Writing the file to disk should make the cache clean.
@@ -41,7 +43,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.False(cache.IsDirty);
 
                 // Asking for a file that's in the cache should not dirty the cache.
-                cache.GetResXFileInfo(resx);
+                cache.GetResXFileInfo(resx, useMSBuildResXReader);
                 Assert.False(cache.IsDirty);
 
                 // Changing UseSourcePath to false should dirty the cache.

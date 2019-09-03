@@ -211,6 +211,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A simple successful graph build.
         /// </summary>
         [Fact]
+        [ActiveIssue("https://github.com/Microsoft/msbuild/issues/4368")]
         public void SimpleGraphBuild()
         {
             string contents = CleanupFileContents(@"
@@ -1495,20 +1496,22 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogDoesntContain("[errormessage]");
         }
 
-#if FEATURE_TASKHOST
+#if FEATURE_TASKHOST && !NO_MSBUILDTASKHOST
+        // Run this test only if we expect MSBuildTaskHost to have been produced, which requires that MSBuildTaskHost.csproj
+        // be built with full-framework MSBuild (so that it can target .NET 3.5).
+
         /// <summary>
         /// A canceled build which waits for the task to get started before canceling.  Because it is a 2.0 task, we should
         /// wait until the task finishes normally (cancellation not supported.)
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CancelledBuildInTaskHostWithDelay20()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null) return;
 
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
- <UsingTask TaskName='Microsoft.Build.Tasks.Exec' AssemblyName='Microsoft.Build.Tasks.v3.5, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a' TaskFactory='TaskHostFactory' />
+ <UsingTask TaskName='Microsoft.Build.Tasks.Exec' AssemblyName='Microsoft.Build.Tasks.v3.5, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a' TaskFactory='TaskHostFactory' Runtime='CLR2' />
  <Target Name='test'>
     <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
     <Message Text='[errormessage]'/>
@@ -1531,6 +1534,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Task host should not have exited prematurely
             _logger.AssertLogDoesntContain("MSB4217");
+
+            // Task host should have been successfully found and run
+            _logger.AssertLogDoesntContain("MSB4216");
         }
 #endif
 
@@ -4022,6 +4028,7 @@ $@"<Project InitialTargets=`Sleep`>
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/Microsoft/msbuild/issues/4368")]
         public void GraphBuildValid()
         {
             string project1 = _env.CreateFile(".proj").Path;
@@ -4062,6 +4069,7 @@ $@"<Project InitialTargets=`Sleep`>
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/Microsoft/msbuild/issues/4368")]
         public void GraphBuildInvalid()
         {
             string project1 = _env.CreateFile(".proj").Path;
@@ -4088,11 +4096,12 @@ $@"<Project InitialTargets=`Sleep`>
 
             GraphBuildResult result = _buildManager.Build(_parameters, data);
             result.OverallResult.ShouldBe(BuildResultCode.Failure);
-            result.Exception.ShouldBeOfType<AggregateException>().InnerExceptions.Count.ShouldBe(1);
-            result.Exception.ShouldBeOfType<AggregateException>().InnerExceptions[0].ShouldBeOfType<InvalidProjectFileException>().ProjectFile.ShouldBe(project2);
+            result.Exception.ShouldBeOfType<InvalidProjectFileException>()
+                .ProjectFile.ShouldBe(project2);
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/Microsoft/msbuild/issues/4368")]
         public void GraphBuildFail()
         {
             string project1 = _env.CreateFile(".proj").Path;
@@ -4135,6 +4144,7 @@ $@"<Project InitialTargets=`Sleep`>
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/Microsoft/msbuild/issues/4368")]
         public void GraphBuildCircular()
         {
             string project1 = _env.CreateFile(".proj").Path;

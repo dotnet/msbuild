@@ -6,11 +6,19 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
     sealed public class CreateItem_Tests
     {
+        private readonly ITestOutputHelper _testOutput;
+
+        public CreateItem_Tests(ITestOutputHelper output)
+        {
+            _testOutput = output;
+        }
+
         /// <summary>
         /// CreateIteming identical lists results in empty list.
         /// </summary>
@@ -141,7 +149,8 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.CreateFileInTempProjectDirectory("Foo.txt", "foo");
             ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine("Subdir", "Bar.txt"), "bar");
 
-            ObjectModelHelpers.BuildTempProjectFileExpectSuccess("Myapp.proj");
+            MockLogger logger = new MockLogger(_testOutput);
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess("Myapp.proj", logger);
 
             ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(Path.Combine("Destination", "Foo.txt"));
             ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(Path.Combine("Destination", "Subdir", "Bar.txt"));

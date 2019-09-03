@@ -10,6 +10,7 @@
  * [MSBuild Resources](MSBuild-Resources.md)
  * [MSBuild Tips & Tricks](MSBuild-Tips-&-Tricks.md)
  * [Binary log](Binary-Log.md)
+ * [Providing Binary Logs for investigation](Providing-Binary-Logs.md)
  * [Contributing Code](Contributing-Code.md)
  * [Target Maps](Target-Maps.md)
  * Tasks

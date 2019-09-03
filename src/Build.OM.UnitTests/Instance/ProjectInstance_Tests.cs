@@ -15,6 +15,7 @@ using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
@@ -23,6 +24,13 @@ namespace Microsoft.Build.UnitTests.OM.Instance
     /// </summary>
     public class ProjectInstance_Tests
     {
+        private readonly ITestOutputHelper _testOutput;
+
+        public ProjectInstance_Tests(ITestOutputHelper output)
+        {
+            _testOutput = output;
+        }
+
         /// <summary>
         /// Verify that a cloned off project instance can see environment variables
         /// </summary>
@@ -588,7 +596,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 File.WriteAllText(includeFileA, "aaaaaaa");
                 File.WriteAllText(includeFileB, "bbbbbbb");
 
-                MockLogger logger = ObjectModelHelpers.BuildTempProjectFileExpectSuccess("a.proj");
+                MockLogger logger = new MockLogger(_testOutput);
+                ObjectModelHelpers.BuildTempProjectFileExpectSuccess("a.proj", logger);
                 logger.AssertNoWarnings();
             }
             finally

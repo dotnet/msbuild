@@ -21,6 +21,7 @@ using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 using TargetDotNetFrameworkVersion = Microsoft.Build.Utilities.TargetDotNetFrameworkVersion;
 using ToolLocationHelper = Microsoft.Build.Utilities.ToolLocationHelper;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -29,6 +30,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// </summary>
     public class TaskBuilder_Tests : ITargetBuilderCallback
     {
+
 #if FEATURE_CODEDOM
         /// <summary>
         /// Task definition for a task that outputs items containing null metadata.
@@ -148,6 +150,8 @@ namespace ItemCreationTask
         /// </summary>
         private MockHost _host;
 
+        private readonly ITestOutputHelper _testOutput;
+
         /// <summary>
         /// The temporary project we use to run the test
         /// </summary>
@@ -156,9 +160,10 @@ namespace ItemCreationTask
         /// <summary>
         /// Prepares the environment for the test.
         /// </summary>
-        public TaskBuilder_Tests()
+        public TaskBuilder_Tests(ITestOutputHelper output)
         {
             _host = new MockHost();
+            _testOutput = output;
             _testProject = CreateTestProject();
         }
 
@@ -933,7 +938,8 @@ namespace ItemCreationTask
                 File.WriteAllText(projectAPath, ObjectModelHelpers.CleanupFileContents(projectAContents));
                 File.WriteAllText(projectBPath, ObjectModelHelpers.CleanupFileContents(projectBContents));
 
-                MockLogger logger = ObjectModelHelpers.BuildTempProjectFileExpectSuccess("a.proj");
+                MockLogger logger = new MockLogger(_testOutput);
+                ObjectModelHelpers.BuildTempProjectFileExpectSuccess("a.proj", logger);
                 logger.AssertNoWarnings();
             }
             finally

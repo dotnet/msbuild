@@ -4,50 +4,8 @@ trigger:
 - vs*
 
 jobs:
-- job: FullOnWindows
-  displayName: "Build and test on Windows using full MSBuild"
-  pool:
-    name: 'Hosted'
-    vmImage: 'windows-2019'
-  steps:
-  - task: BatchScript@1
-    displayName: cibuild.cmd
-    inputs:
-      filename: 'eng/cibuild.cmd'
-      arguments: '-test'
-  - task: PublishTestResults@2
-    displayName: Publish .NET Framework Test Results
-    inputs:
-      testRunTitle: 'Windows-on-full Full Framework'
-      testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_net472*.xml'
-      publishRunAttachments: true
-      mergeTestResults: true
-    condition: always()
-  - task: PublishTestResults@2
-    displayName: Publish .NET Core 2.1 Test Results
-    inputs:
-      testRunTitle: 'Windows-on-full .NET Core 2.1'
-      testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_netcoreapp2.1*.xml'
-      publishRunAttachments: true
-      mergeTestResults: true
-    condition: always()
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: logs'
-    inputs:
-      PathtoPublish: 'artifacts/log/Debug'
-      ArtifactName: 'FullOnWindows build logs'
-    condition: always()
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: TestResults'
-    inputs:
-      PathtoPublish: 'artifacts/TestResults'
-      ArtifactName: 'FullOnWindows test logs'
-    condition: always()
-
 - job: BootstrapMSBuildOnFullFrameworkWindows
-  displayName: "Build and test on Windows using bootstrapped full MSBuild"
+  displayName: "Windows Full"
   pool:
     name: 'Hosted'
     vmImage: 'windows-2019'
@@ -64,6 +22,7 @@ jobs:
       testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_net472*.xml'
       publishRunAttachments: true
       mergeTestResults: true
+    continueOnError: true
     condition: always()
   - task: PublishTestResults@2
     displayName: Publish .NET Core 2.1 Test Results
@@ -73,22 +32,25 @@ jobs:
       testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_netcoreapp2.1*.xml'
       publishRunAttachments: true
       mergeTestResults: true
+    continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
       PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'FullOnWindows build logs'
+    continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'FullOnWindows test logs'
+    continueOnError: true
     condition: always()
 
 - job: BootstrapMSBuildOnCoreWindows
-  displayName: "Build and test on Windows using bootstrapped core MSBuild"
+  displayName: "Windows Core"
   pool:
     name: 'Hosted'
     vmImage: 'windows-2019'
@@ -101,36 +63,40 @@ jobs:
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
-      testRunTitle: 'Windows-on-full Full Framework'
+      testRunTitle: 'Windows-on-Core Full Framework'
       testRunner: XUnit
       testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_net472*.xml'
       publishRunAttachments: true
       mergeTestResults: true
+    continueOnError: true
     condition: always()
   - task: PublishTestResults@2
     displayName: Publish .NET Core 2.1 Test Results
     inputs:
-      testRunTitle: 'Windows-on-full .NET Core 2.1'
+      testRunTitle: 'Windows-on-Core .NET Core 2.1'
       testRunner: XUnit
       testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_netcoreapp2.1*.xml'
       publishRunAttachments: true
       mergeTestResults: true
+    continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
       PathtoPublish: 'artifacts/log/Debug'
-      ArtifactName: 'FullOnWindows build logs'
+      ArtifactName: 'CoreOnWindows build logs'
+    continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
       PathtoPublish: 'artifacts/TestResults'
-      ArtifactName: 'FullOnWindows test logs'
+      ArtifactName: 'CoreOnWindows test logs'
+    continueOnError: true
     condition: always()
 
 - job: FullReleaseOnWindows
-  displayName: "Build and test Release on Windows using full MSBuild"
+  displayName: "Windows Full Release (no bootstrap)"
   pool:
     name: 'Hosted'
     vmImage: 'windows-2019'
@@ -148,6 +114,7 @@ jobs:
       testResultsFiles: 'artifacts/TestResults/Release/*UnitTests_net472*.xml'
       publishRunAttachments: true
       mergeTestResults: true
+    continueOnError: true
     condition: always()
   - task: PublishTestResults@2
     displayName: Publish .NET Core 2.1 Test Results
@@ -157,22 +124,25 @@ jobs:
       testResultsFiles: 'artifacts/TestResults/Release/*UnitTests_netcoreapp2.1*.xml'
       publishRunAttachments: true
       mergeTestResults: true
+    continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
       PathtoPublish: 'artifacts/Log/Release'
       ArtifactName: 'FullOnWindows Release build logs'
+    continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'FullOnWindows Release test logs'
+    continueOnError: true
     condition: always()
 
 - job: CoreBootstrappedOnLinux
-  displayName: "Build and test on Linux using bootstrapped .NET Core MSBuild"
+  displayName: "Linux Core"
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -186,26 +156,29 @@ jobs:
       testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests*.xml'
       publishRunAttachments: true
       mergeTestResults: true
+    continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
       PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'CoreOnLinux build logs'
+    continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'CoreOnLinux test logs'
+    continueOnError: true
     condition: always()
 
 - job: CoreOnMac
-  displayName: "Build and test on macOS using .NET Core MSBuild"
+  displayName: "macOS Core"
   pool:
     vmImage: 'macOS-10.14'
   steps:
-  - bash: . 'eng/common/cibuild.sh'
+  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh'
     displayName: CI Build
   - task: PublishTestResults@2
     displayName: Publish .NET Core 2.1 Test Results
@@ -215,17 +188,20 @@ jobs:
       testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests*.xml'
       publishRunAttachments: true
       mergeTestResults: true
+    continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
       PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'CoreOnMac build logs'
+    continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'CoreOnMac test logs'
+    continueOnError: true
     condition: always()
 

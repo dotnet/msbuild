@@ -219,6 +219,7 @@ namespace Microsoft.Build.Tasks
         [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem[] ResourceFilesWithManifestResourceNames { get { throw null; } set { } }
         public string RootNamespace { get { throw null; } set { } }
+        public bool UseDependentUponConvention { get { throw null; } set { } }
         protected abstract string CreateManifestName(string fileName, string linkFileName, string rootNamespaceName, string dependentUponFileName, System.IO.Stream binaryStream);
         public override bool Execute() { throw null; }
         protected abstract bool IsSourceFile(string fileName);
@@ -547,6 +548,7 @@ namespace Microsoft.Build.Tasks
         public string TrackerLogDirectory { get { throw null; } set { } }
         public string TrackerSdkPath { get { throw null; } set { } }
         public bool TrackFileAccess { get { throw null; } set { } }
+        public bool UsePreserializedResources { get { throw null; } set { } }
         public bool UseSourcePath { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -18,7 +18,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
-
+using Microsoft.Build.Utilities;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
@@ -309,7 +309,15 @@ namespace Microsoft.Build.Evaluation
             _loadedProjects = new LoadedProjectCollection();
             ToolsetLocations = toolsetDefinitionLocations;
             MaxNodeCount = maxNodeCount;
-            ProjectRootElementCache = new ProjectRootElementCache(false /* do not automatically reload changed files from disk */, loadProjectsReadOnly);
+
+            if (Traits.Instance.UseSimpleProjectRootElementCacheConcurrency)
+            {
+                ProjectRootElementCache = new SimpleProjectRootElementCache();
+            }
+            else
+            {
+                ProjectRootElementCache = new ProjectRootElementCache(autoReloadFromDisk: false, loadProjectsReadOnly);
+            }
             OnlyLogCriticalEvents = onlyLogCriticalEvents;
 
             try
@@ -921,7 +929,7 @@ namespace Microsoft.Build.Evaluation
         /// - So that the owner of this project collection can force the XML to be loaded again
         /// from disk, by doing <see cref="UnloadAllProjects"/>.
         /// </summary>
-        internal ProjectRootElementCache ProjectRootElementCache { get; }
+        internal ProjectRootElementCacheBase ProjectRootElementCache { get; }
 
         /// <summary>
         /// Escape a string using MSBuild escaping format. For example, "%3b" for ";".
@@ -1591,7 +1599,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Handler which is called when a project is added to the RootElementCache of this project collection. We then fire an event indicating that a project was added to the collection itself.
         /// </summary>
-        private void ProjectRootElementCache_ProjectRootElementAddedHandler(object sender, ProjectRootElementCache.ProjectRootElementCacheAddEntryEventArgs e)
+        private void ProjectRootElementCache_ProjectRootElementAddedHandler(object sender, ProjectRootElementCacheAddEntryEventArgs e)
         {
             ProjectAdded?.Invoke(this, new ProjectAddedToProjectCollectionEventArgs(e.RootElement));
         }

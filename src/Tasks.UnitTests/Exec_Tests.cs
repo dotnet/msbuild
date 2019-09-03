@@ -120,6 +120,26 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void TimeoutFailsEvenWhenExitCodeIsIgnored()
+        {
+            // On non-Windows the exit code of a killed process is SIGTERM (143)
+            int expectedExitCode = NativeMethodsShared.IsWindows ? -1 : 143;
+
+            Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? ":foo \n goto foo" : "while true; do sleep 1; done");
+            exec.Timeout = 5;
+            exec.IgnoreExitCode = true;
+            bool result = exec.Execute();
+
+            Assert.False(result);
+            Assert.Equal(expectedExitCode, exec.ExitCode);
+            ((MockEngine)exec.BuildEngine).AssertLogContains("MSB5002");
+            Assert.Equal(1, ((MockEngine)exec.BuildEngine).Warnings);
+
+            // ToolTask does not log an error on timeout.
+            Assert.Equal(0, ((MockEngine)exec.BuildEngine).Errors);
+        }
+
+        [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void WindowsNewLineCharactersInCommandOnUnix()
         {

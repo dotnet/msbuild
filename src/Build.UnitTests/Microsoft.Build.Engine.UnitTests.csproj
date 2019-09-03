@@ -8,6 +8,9 @@
     <AssemblyName>Microsoft.Build.Engine.UnitTests</AssemblyName>
 
     <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_ENGINE_UNITTESTS</DefineConstants>
+    
+    <!-- Define a constant so we can skip tests that require MSBuildTaskHost -->
+    <DefineConstants Condition="'$(MSBuildRuntimeType)' == 'Core' or '$(MonoBuild)' == 'true'">$(DefineConstants);NO_MSBUILDTASKHOST</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +21,10 @@
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
+    <ProjectReference Include="..\MSBuildTaskHost\MSBuildTaskHost.csproj"
+                      Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MonoBuild)' != 'true'"
+                      ReferenceOutputAssembly="false"
+                      OutputItemType="Content" />
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
@@ -140,6 +147,12 @@
     </ItemGroup>
     
   </Target>
+
+  <ItemDefinitionGroup>
+    <Content>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemDefinitionGroup>
   
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />

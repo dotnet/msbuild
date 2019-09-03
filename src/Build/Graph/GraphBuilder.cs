@@ -4,13 +4,15 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
@@ -18,7 +20,12 @@ namespace Microsoft.Build.Experimental.Graph
 {
     internal class GraphBuilder
     {
-        private ProjectInterpretation ProjectInterpretation { get; }
+        internal static readonly string SolutionItemReference = "_SolutionReference";
+        
+        /// <summary>
+        /// The thread calling BuildGraph() will act as an implicit worker
+        /// </summary>
+        private const int ImplicitWorkerCount = 1;
 
         public IReadOnlyCollection<ProjectGraphNode> ProjectNodes { get; private set; }
 
@@ -28,60 +35,294 @@ namespace Microsoft.Build.Experimental.Graph
 
         public GraphEdges Edges { get; private set; }
 
-        public GraphBuilder(ProjectInterpretation projectInterpretation)
-        {
-            ProjectInterpretation = projectInterpretation;
-        }
+        private readonly List<ConfigurationMetadata> _entryPointConfigurationMetadata;
 
-        public void BuildGraph(
+        private readonly ParallelWorkSet<ConfigurationMetadata, ParsedProject> _graphWorkSet;
+
+        private readonly ProjectCollection _projectCollection;
+
+        private readonly ProjectInterpretation _projectInterpretation;
+
+        private readonly ProjectGraph.ProjectInstanceFactoryFunc _projectInstanceFactory;
+        private IReadOnlyDictionary<string, IReadOnlyCollection<string>> _solutionDependencies;
+
+        public GraphBuilder(
             IEnumerable<ProjectGraphEntryPoint> entryPoints,
             ProjectCollection projectCollection,
-            ProjectGraph.ProjectInstanceFactoryFunc projectInstanceFactory
-            )
+            ProjectGraph.ProjectInstanceFactoryFunc projectInstanceFactory,
+            ProjectInterpretation projectInterpretation,
+            int degreeOfParallelism,
+            CancellationToken cancellationToken)
         {
-            var entryPointConfigurationMetadata = AddGraphBuildPropertyToEntryPoints(entryPoints);
+            var (actualEntryPoints, solutionDependencies) = ExpandSolutionIfPresent(entryPoints.ToImmutableArray());
 
-            var allParsedProjects = new ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode>();
-            var projectsToEvaluate = new ConcurrentQueue<ConfigurationMetadata>(entryPointConfigurationMetadata);
+            _solutionDependencies = solutionDependencies;
 
-            if (FindGraphNodes(
-                projectsToEvaluate,
-                projectCollection,
-                projectInstanceFactory,
-                ProjectInterpretation,
-                allParsedProjects,
-                out var exceptions))
+            _entryPointConfigurationMetadata = AddGraphBuildPropertyToEntryPoints(actualEntryPoints);
+            
+            IEqualityComparer<ConfigurationMetadata> configComparer = EqualityComparer<ConfigurationMetadata>.Default;
+
+            _graphWorkSet = new ParallelWorkSet<ConfigurationMetadata, ParsedProject>(
+                degreeOfParallelism - ImplicitWorkerCount,
+                configComparer,
+                cancellationToken);
+
+            _projectCollection = projectCollection;
+            _projectInstanceFactory = projectInstanceFactory;
+            _projectInterpretation = projectInterpretation;
+        }
+
+        public void BuildGraph()
+        {
+            if (_graphWorkSet.IsCompleted)
             {
-                Edges = new GraphEdges();
-
-                CreateEdgesAndDetectCycles(entryPointConfigurationMetadata, ProjectInterpretation, allParsedProjects, Edges);
-
-                ProjectInterpretation.PostProcess(allParsedProjects, this);
-
-                EntryPointNodes = entryPointConfigurationMetadata.Select(e => allParsedProjects[e]).ToList();
-                RootNodes = GetGraphRoots(EntryPointNodes);
-                ProjectNodes = allParsedProjects.Values.ToList();
+                return;
             }
-            else
-            {
-                throw new AggregateException(exceptions);
-            }
+            var allParsedProjects = FindGraphNodes();
+            
+            AddEdges(allParsedProjects);
 
-            IReadOnlyCollection<ProjectGraphNode> GetGraphRoots(IReadOnlyCollection<ProjectGraphNode> entryPointNodes)
-            {
-                var graphRoots = new List<ProjectGraphNode>(entryPointNodes.Count);
+            EntryPointNodes = _entryPointConfigurationMetadata.Select(e => allParsedProjects[e].GraphNode).ToList();
 
-                foreach (var entryPointNode in entryPointNodes)
+            DetectCycles(EntryPointNodes, _projectInterpretation, allParsedProjects);
+
+            RootNodes = GetGraphRoots(EntryPointNodes);
+            ProjectNodes = allParsedProjects.Values.Select(p => p.GraphNode).ToList();
+        }
+
+        private static IReadOnlyCollection<ProjectGraphNode> GetGraphRoots(IReadOnlyCollection<ProjectGraphNode> entryPointNodes)
+        {
+            var graphRoots = new List<ProjectGraphNode>(entryPointNodes.Count);
+
+            foreach (var entryPointNode in entryPointNodes)
+            {
+                if (entryPointNode.ReferencingProjects.Count == 0)
                 {
-                    if (entryPointNode.ReferencingProjects.Count == 0)
+                    graphRoots.Add(entryPointNode);
+                }
+            }
+
+            graphRoots.TrimExcess();
+
+            return graphRoots;
+        }
+
+        private void AddEdges(Dictionary<ConfigurationMetadata, ParsedProject> allParsedProjects)
+        {
+            Edges = new GraphEdges();
+            AddEdgesFromProjectFileReferences(allParsedProjects, Edges);
+            _projectInterpretation.PostProcess(allParsedProjects, this);
+            if (_solutionDependencies != null && _solutionDependencies.Count != 0)
+            {
+                AddEdgesFromSolution(allParsedProjects, _solutionDependencies, Edges);
+            }
+        }
+
+        private static void AddEdgesFromProjectFileReferences(Dictionary<ConfigurationMetadata, ParsedProject> allParsedProjects, GraphEdges edges)
+        {
+            foreach (var parsedProject in allParsedProjects)
+            {
+                foreach (var referenceInfo in parsedProject.Value.ReferenceInfos)
+                {
+                    ErrorUtilities.VerifyThrow(
+                        allParsedProjects.ContainsKey(referenceInfo.ReferenceConfiguration),
+                        "all references should have been parsed");
+
+                    parsedProject.Value.GraphNode.AddProjectReference(
+                        allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode,
+                        referenceInfo.ProjectReferenceItem,
+                        edges);
+                }
+            }
+        }
+
+        private static void AddEdgesFromSolution(IReadOnlyDictionary<ConfigurationMetadata, ParsedProject> allParsedProjects, IReadOnlyDictionary<string, IReadOnlyCollection<string>> solutionDependencies, GraphEdges edges)
+        {
+            var projectsByPath = new Dictionary<string, List<ProjectGraphNode>>();
+
+            foreach (var project in allParsedProjects)
+            {
+                var projectPath = project.Value.GraphNode.ProjectInstance.FullPath;
+
+                if (projectsByPath.ContainsKey(projectPath))
+                {
+                    projectsByPath[projectPath].Add(project.Value.GraphNode);
+                }
+                else
+                {
+                    projectsByPath[projectPath] = new List<ProjectGraphNode> {project.Value.GraphNode};
+                }
+            }
+
+            foreach (var solutionDependency in solutionDependencies)
+            {
+                var referencingProjectPath = solutionDependency.Key;
+
+                ErrorUtilities.VerifyThrow(projectsByPath.ContainsKey(referencingProjectPath), "nodes should include solution projects");
+
+                var referencedNodes = solutionDependency.Value.SelectMany(
+                    referencedProjectPath =>
                     {
-                        graphRoots.Add(entryPointNode);
+                        ErrorUtilities.VerifyThrow(projectsByPath.ContainsKey(referencedProjectPath), "nodes should include solution projects");
+
+                        return projectsByPath[referencedProjectPath];
+                    }).ToArray();
+
+                var referencingNodes = projectsByPath[referencingProjectPath];
+
+                foreach (var referencingNode in referencingNodes)
+                {
+                    foreach (var referencedNode in referencedNodes)
+                    {
+                        var stubItem = new ProjectItemInstance(
+                            referencingNode.ProjectInstance,
+                            SolutionItemReference,
+                            referencedNode.ProjectInstance.FullPath,
+                            referencingNode.ProjectInstance.FullPath);
+
+                        referencingNode.AddProjectReference(referencedNode, stubItem, edges);
                     }
                 }
+            }
+        }
 
-                graphRoots.TrimExcess();
+        private (IReadOnlyCollection<ProjectGraphEntryPoint> NewEntryPoints, IReadOnlyDictionary<string, IReadOnlyCollection<string>> SolutionDependencies) ExpandSolutionIfPresent(IReadOnlyCollection<ProjectGraphEntryPoint> entryPoints)
+        {
+            if (entryPoints.Count == 0 || !entryPoints.Any(e => FileUtilities.IsSolutionFilename(e.ProjectFile)))
+            {
+                return (entryPoints, null);
+            }
 
-                return graphRoots;
+            if (entryPoints.Count != 1)
+            {
+                throw new ArgumentException(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "StaticGraphAcceptsSingleSolutionEntryPoint",
+                        string.Join(";", entryPoints.Select(e => e.ProjectFile))));
+            }
+
+            ErrorUtilities.VerifyThrowArgument(entryPoints.Count == 1, "StaticGraphAcceptsSingleSolutionEntryPoint");
+
+            var solutionEntryPoint = entryPoints.Single();
+            var solutionGlobalProperties = ImmutableDictionary.CreateRange(
+                keyComparer: StringComparer.OrdinalIgnoreCase,
+                valueComparer: StringComparer.OrdinalIgnoreCase,
+                items: solutionEntryPoint.GlobalProperties ?? ImmutableDictionary<string, string>.Empty);
+
+            var solution = SolutionFile.Parse(FileUtilities.NormalizePath(solutionEntryPoint.ProjectFile));
+
+            if (solution.SolutionParserWarnings.Count != 0 || solution.SolutionParserErrorCodes.Count != 0)
+            {
+                throw new InvalidProjectFileException(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "StaticGraphSolutionLoaderEncounteredSolutionWarningsAndErrors",
+                        solutionEntryPoint.ProjectFile,
+                        string.Join(";", solution.SolutionParserWarnings),
+                        string.Join(";", solution.SolutionParserErrorCodes)));
+            }
+
+            var projectsInSolution = GetBuildableProjects(solution);
+
+            var currentSolutionConfiguration = SelectSolutionConfiguration(solution, solutionGlobalProperties);
+
+            var newEntryPoints = new List<ProjectGraphEntryPoint>(projectsInSolution.Count);
+
+            foreach (var project in projectsInSolution)
+            {
+                if (project.ProjectConfigurations.Count == 0)
+                {
+                    continue;
+                }
+
+                var projectConfiguration = SelectProjectConfiguration(currentSolutionConfiguration, project.ProjectConfigurations);
+
+                if (projectConfiguration.IncludeInBuild)
+                {
+                    newEntryPoints.Add(
+                        new ProjectGraphEntryPoint(
+                            FileUtilities.NormalizePath(project.AbsolutePath),
+                            solutionGlobalProperties
+                                .SetItem("Configuration", projectConfiguration.ConfigurationName)
+                                .SetItem("Platform", projectConfiguration.PlatformName)
+                            ));
+                }
+            }
+
+            newEntryPoints.TrimExcess();
+
+            return (newEntryPoints, GetSolutionDependencies(solution));
+
+            IReadOnlyCollection<ProjectInSolution> GetBuildableProjects(SolutionFile solutionFile)
+            {
+                return solutionFile.ProjectsInOrder.Where(p => p.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat).ToImmutableArray();
+            }
+
+            SolutionConfigurationInSolution SelectSolutionConfiguration(SolutionFile solutionFile, ImmutableDictionary<string, string> globalProperties)
+            {
+                var solutionConfiguration = globalProperties.ContainsKey("Configuration")
+                    ? globalProperties["Configuration"]
+                    : solutionFile.GetDefaultConfigurationName();
+
+                var solutionPlatform = globalProperties.ContainsKey("Platform")
+                    ? globalProperties["Platform"]
+                    : solutionFile.GetDefaultPlatformName();
+
+                return new SolutionConfigurationInSolution(solutionConfiguration, solutionPlatform);
+            }
+
+            ProjectConfigurationInSolution SelectProjectConfiguration(
+                SolutionConfigurationInSolution solutionConfig,
+                IReadOnlyDictionary<string, ProjectConfigurationInSolution> projectConfigs)
+            {
+                // implements the matching described in https://docs.microsoft.com/en-us/visualstudio/ide/understanding-build-configurations?view=vs-2019#how-visual-studio-assigns-project-configuration
+
+                var solutionConfigFullName = solutionConfig.FullName;
+
+                if (projectConfigs.ContainsKey(solutionConfigFullName))
+                {
+                    return projectConfigs[solutionConfigFullName];
+                }
+
+                var partiallyMarchedConfig = projectConfigs.FirstOrDefault(pc => pc.Value.ConfigurationName.Equals(solutionConfig.ConfigurationName, StringComparison.OrdinalIgnoreCase)).Value;
+                return partiallyMarchedConfig ?? projectConfigs.First().Value;
+            }
+
+            IReadOnlyDictionary<string, IReadOnlyCollection<string>> GetSolutionDependencies(SolutionFile solutionFile)
+            {
+                var solutionDependencies = new Dictionary<string, IReadOnlyCollection<string>>();
+
+                foreach (var projectWithDependencies in solutionFile.ProjectsInOrder.Where(p => p.Dependencies.Count != 0))
+                {
+                    solutionDependencies[FileUtilities.NormalizePath(projectWithDependencies.AbsolutePath)] = projectWithDependencies.Dependencies.Select(
+                        dependencyGuid =>
+                        {
+
+                            // code snippet cloned from SolutionProjectGenerator.AddPropertyGroupForSolutionConfiguration
+
+                            if (!solutionFile.ProjectsByGuid.TryGetValue(dependencyGuid, out var dependencyProject))
+                            {
+                                // If it's not itself part of the solution, that's an invalid solution
+                                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                                    dependencyProject != null,
+                                    "SubCategoryForSolutionParsingErrors",
+                                    new BuildEventFileInfo(solutionFile.FullPath),
+                                    "SolutionParseProjectDepNotFoundError",
+                                    projectWithDependencies.ProjectGuid,
+                                    dependencyGuid);
+                            }
+
+                            // Add it to the list of dependencies, but only if it should build in this solution configuration 
+                            // (If a project is not selected for build in the solution configuration, it won't build even if it's depended on by something that IS selected for build)
+                            // .. and only if it's known to be MSBuild format, as projects can't use the information otherwise 
+                            return dependencyProject?.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat
+                                ? FileUtilities.NormalizePath(dependencyProject.AbsolutePath)
+                                : null;
+                        })
+                        .Where(p => p != null)
+                        .ToArray();
+                }
+
+                return solutionDependencies;
             }
         }
 
@@ -113,25 +354,22 @@ namespace Microsoft.Build.Experimental.Graph
         }
 
         /// <remarks>
-        ///     Traverse the found nodes and add edges.
         ///     Maintain the state of each node (InProcess and Processed) to detect cycles.
+        ///     Assumes edges have been added between nodes.
         ///     Returns false if cycles were detected.
         /// </remarks>
-        private void CreateEdgesAndDetectCycles(
-            List<ConfigurationMetadata> entryPointConfigurationMetadata,
-            ProjectInterpretation sdkInfo,
-            ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode> allParsedProjects,
-            GraphEdges edges)
+        private void DetectCycles(
+            IReadOnlyCollection<ProjectGraphNode> entryPointNodes,
+            ProjectInterpretation projectInterpretation,
+            Dictionary<ConfigurationMetadata, ParsedProject> allParsedProjects)
         {
             var nodeStates = new Dictionary<ProjectGraphNode, NodeVisitationState>();
 
-            foreach (var entrypointConfig in entryPointConfigurationMetadata)
+            foreach (var entryPointNode in entryPointNodes)
             {
-                var entryPointNode = allParsedProjects[entrypointConfig];
-
                 if (!nodeStates.ContainsKey(entryPointNode))
                 {
-                    CreateEdgesAndDetectCyclesForRoot(entryPointNode, entrypointConfig, nodeStates);
+                    VisitNode(entryPointNode, nodeStates);
                 }
                 else
                 {
@@ -143,17 +381,14 @@ namespace Microsoft.Build.Experimental.Graph
 
             return;
 
-            (bool success, List<string> projectsInCycle) CreateEdgesAndDetectCyclesForRoot(
+            (bool success, List<string> projectsInCycle) VisitNode(
                 ProjectGraphNode node,
-                ConfigurationMetadata nodeConfig,
                 IDictionary<ProjectGraphNode, NodeVisitationState> nodeState)
             {
                 nodeState[node] = NodeVisitationState.InProcess;
 
-                foreach (var (referenceConfig, projectReferenceItem) in sdkInfo.GetReferences(node.ProjectInstance))
+                foreach (var referenceNode in node.ProjectReferences)
                 {
-                    var referenceNode = allParsedProjects[referenceConfig];
-
                     if (nodeState.TryGetValue(referenceNode, out var projectReferenceNodeState))
                     {
                         // Because this is a depth-first search, we should only encounter new nodes or nodes whose subgraph has been completely processed.
@@ -170,37 +405,38 @@ namespace Microsoft.Build.Experimental.Graph
                                         ResourceUtilities.GetResourceString("CircularDependencyInProjectGraph"),
                                         selfReferencingProjectString));
                             }
+
                             // the project being evaluated has a circular dependency involving multiple projects
                             // add this project to the list of projects involved in cycle 
-                            var projectsInCycle = new List<string> {referenceConfig.ProjectFullPath};
+                            var projectsInCycle = new List<string> {referenceNode.ProjectInstance.FullPath};
                             return (false, projectsInCycle);
                         }
                     }
                     else
                     {
                         // recursively process newly discovered references
-                        var loadReference = CreateEdgesAndDetectCyclesForRoot(referenceNode, referenceConfig, nodeState);
+                        var loadReference = VisitNode(referenceNode, nodeState);
                         if (!loadReference.success)
                         {
                             if (loadReference.projectsInCycle[0].Equals(node.ProjectInstance.FullPath))
                             {
                                 // we have reached the nth project in the cycle, form error message and throw
-                                loadReference.projectsInCycle.Add(referenceConfig.ProjectFullPath);
+                                loadReference.projectsInCycle.Add(referenceNode.ProjectInstance.FullPath);
                                 loadReference.projectsInCycle.Add(node.ProjectInstance.FullPath);
+
                                 var errorMessage = FormatCircularDependencyError(loadReference.projectsInCycle);
                                 throw new CircularDependencyException(
                                     string.Format(
                                         ResourceUtilities.GetResourceString("CircularDependencyInProjectGraph"),
                                         errorMessage));
                             }
+
                             // this is one of the projects in the circular dependency
                             // update the list of projects in cycle and return the list to the caller
-                            loadReference.projectsInCycle.Add(referenceConfig.ProjectFullPath);
+                            loadReference.projectsInCycle.Add(referenceNode.ProjectInstance.FullPath);
                             return (false, loadReference.projectsInCycle);
                         }
                     }
-
-                    node.AddProjectReference(referenceNode, projectReferenceItem, edges);
                 }
 
                 nodeState[node] = NodeVisitationState.Processed;
@@ -208,28 +444,26 @@ namespace Microsoft.Build.Experimental.Graph
             }
         }
 
-        private ProjectGraphNode CreateNewNode(
-            ConfigurationMetadata configurationMetadata,
-            ProjectCollection projectCollection,
-            ProjectGraph.ProjectInstanceFactoryFunc projectInstanceFactory,
-            ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode> allParsedProjects)
+        private ParsedProject ParseProject(ConfigurationMetadata configurationMetadata)
         {
             // TODO: ProjectInstance just converts the dictionary back to a PropertyDictionary, so find a way to directly provide it.
             var globalProperties = configurationMetadata.GlobalProperties.ToDictionary();
 
-            var projectInstance = projectInstanceFactory(
+            var projectInstance = _projectInstanceFactory(
                 configurationMetadata.ProjectFullPath,
                 globalProperties,
-                projectCollection);
+                _projectCollection);
+
             if (projectInstance == null)
             {
                 throw new InvalidOperationException(ResourceUtilities.GetResourceString("NullReferenceFromProjectInstanceFactory"));
             }
 
-            var graphNode = new ProjectGraphNode(
-                projectInstance);
-            allParsedProjects[configurationMetadata] = graphNode;
-            return graphNode;
+            var graphNode = new ProjectGraphNode(projectInstance);
+
+            var referenceInfos = ParseReferences(graphNode);
+
+            return new ParsedProject(configurationMetadata, graphNode, referenceInfos);
         }
 
         /// <summary>
@@ -237,79 +471,50 @@ namespace Microsoft.Build.Experimental.Graph
         ///     Maintain a queue of projects to be processed and evaluate projects in parallel
         ///     Returns false if loading the graph is not successful
         /// </summary>
-        private bool FindGraphNodes(
-            ConcurrentQueue<ConfigurationMetadata> projectsToEvaluate,
-            ProjectCollection projectCollection,
-            ProjectGraph.ProjectInstanceFactoryFunc projectInstanceFactory,
-            ProjectInterpretation projectInterpretation,
-            ConcurrentDictionary<ConfigurationMetadata, ProjectGraphNode> allParsedProjects,
-            out List<Exception> exceptions)
+        private Dictionary<ConfigurationMetadata, ParsedProject> FindGraphNodes()
         {
-            var tasksInProgress = new ConcurrentDictionary<ConfigurationMetadata, object>();
-            var evaluationWaitHandle = new AutoResetEvent(false);
-            var exceptionsInTasks = new ConcurrentBag<Exception>();
-
-            while (projectsToEvaluate.Count != 0 || tasksInProgress.Count != 0)
+            foreach (ConfigurationMetadata projectToEvaluate in _entryPointConfigurationMetadata)
             {
-                ConfigurationMetadata projectToEvaluate;
-                if (projectsToEvaluate.Count != 0)
-                {
-                    projectToEvaluate = projectsToEvaluate.Dequeue();
-                    var task = new Task(
-                        () =>
-                        {
-                            var parsedProject = CreateNewNode(projectToEvaluate, projectCollection, projectInstanceFactory, allParsedProjects);
-
-                            foreach (var (referenceConfig, _) in projectInterpretation.GetReferences(parsedProject.ProjectInstance))
-                            {
+                SubmitProjectForParsing(projectToEvaluate);
                                 /*todo: fix the following double check-then-act concurrency bug: one thread can pass the two checks, loose context,
                              meanwhile another thread passes the same checks with the same data and inserts its reference. The initial thread regains context
                              and duplicates the information, leading to wasted work
                              */
-                                if (!tasksInProgress.ContainsKey(referenceConfig))
-                                {
-                                    if (!allParsedProjects.ContainsKey(referenceConfig))
-                                    {
-                                        projectsToEvaluate.Enqueue(referenceConfig);
-                                        evaluationWaitHandle.Set();
-                                    }
-                                }
-                            }
-                        });
-
-                    if (tasksInProgress.TryAdd(projectToEvaluate, null))
-                    {
-                        // once the task completes, remove it from tasksInProgress using a chained task
-                        // signal the wait handle to process new projects that have been discovered by this task or exit if all projects have been evaluated
-                        task.ContinueWith(
-                            _ =>
-                            {
-                                if (task.IsFaulted)
-                                {
-                                    exceptionsInTasks.Add(task.Exception.InnerException);
-                                }
-                                tasksInProgress.TryRemove(projectToEvaluate, out var _);
-                                evaluationWaitHandle.Set();
-                            });
-                        task.Start();
-                    }
-                }
-                else
-                {
-                    // if projectsToEvaluate is empty but there are tasks in progress, there is nothing to do till a task completes and discovers new projects
-                    // wait till a task completes and sends a signal
-                    evaluationWaitHandle.WaitOne();
-                }
             }
 
-            if (exceptionsInTasks.Count != 0)
+            _graphWorkSet.WaitForAllWork();
+            _graphWorkSet.Complete();
+            _graphWorkSet.WaitForCompletion();
+
+            return _graphWorkSet.CompletedWork;
+        }
+
+        private void SubmitProjectForParsing(ConfigurationMetadata projectToEvaluate)
+        {
+            _graphWorkSet.AddWork(projectToEvaluate, () => ParseProject(projectToEvaluate));
+        }
+
+        private List<ProjectInterpretation.ReferenceInfo> ParseReferences(ProjectGraphNode parsedProject)
+        {
+            var referenceInfos = new List<ProjectInterpretation.ReferenceInfo>();
+
+            foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject.ProjectInstance))
             {
-                exceptions = exceptionsInTasks.ToList();
-                return false;
+                if (FileUtilities.IsSolutionFilename(referenceInfo.ReferenceConfiguration.ProjectFullPath))
+                {
+                    throw new InvalidOperationException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "StaticGraphDoesNotSupportSlnReferences",
+                        referenceInfo.ReferenceConfiguration.ProjectFullPath,
+                        referenceInfo.ReferenceConfiguration.ProjectFullPath
+                        ));
+                }
+                
+                SubmitProjectForParsing(referenceInfo.ReferenceConfiguration);
+
+                referenceInfos.Add(referenceInfo);
             }
 
-            exceptions = null;
-            return true;
+            return referenceInfos;
         }
 
         internal static string FormatCircularDependencyError(List<string> projectsInCycle)
@@ -379,6 +584,14 @@ namespace Microsoft.Build.Experimental.Graph
                 ReferenceItems.TryRemove(key, out _);
             }
 
+            internal IReadOnlyDictionary<(ConfigurationMetadata, ConfigurationMetadata), ProjectItemInstance> TestOnly_AsConfigurationMetadata()
+            {
+                return ReferenceItems.ToImmutableDictionary(
+                    kvp => (kvp.Key.Item1.ToConfigurationMetadata(), kvp.Key.Item2.ToConfigurationMetadata()),
+                    kvp => kvp.Value
+                    );
+            }
+
             internal bool TestOnly_HasEdge((ProjectGraphNode node, ProjectGraphNode reference) key) => ReferenceItems.ContainsKey(key);
         }
 
@@ -388,6 +601,20 @@ namespace Microsoft.Build.Experimental.Graph
             InProcess,
             // all project references of this project have been processed
             Processed
+        }
+    }
+
+    internal readonly struct ParsedProject
+    {
+        public ConfigurationMetadata ConfigurationMetadata { get; }
+        public ProjectGraphNode GraphNode { get; }
+        public List<ProjectInterpretation.ReferenceInfo> ReferenceInfos { get; }
+
+        public ParsedProject(ConfigurationMetadata configurationMetadata, ProjectGraphNode graphNode, List<ProjectInterpretation.ReferenceInfo> referenceInfos)
+        {
+            ConfigurationMetadata = configurationMetadata;
+            GraphNode = graphNode;
+            ReferenceInfos = referenceInfos;
         }
     }
 }

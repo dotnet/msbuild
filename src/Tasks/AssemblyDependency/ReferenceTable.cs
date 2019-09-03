@@ -898,7 +898,9 @@ namespace Microsoft.Build.Tasks
                 {
                     var implementationFile = reference.PrimarySourceItem.GetMetadata(ItemMetadataNames.winmdImplmentationFile);
 
-                    if (!String.IsNullOrEmpty(implementationFile))
+                    // Static library projects can produce a .winmd with an associated .lib, but that is not
+                    // a real ImplementationAssembly--it would fail downstream when trying to read its PE header.
+                    if (!String.IsNullOrEmpty(implementationFile) && Path.GetExtension(implementationFile) == ".dll")
                     {
                         companionFile = Path.Combine(Path.GetDirectoryName(baseName), implementationFile);
                     }

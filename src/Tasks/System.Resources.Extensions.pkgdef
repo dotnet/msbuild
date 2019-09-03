@@ -1,0 +1,7 @@
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{1A1A9DA4-9F25-4AB8-89BF-BCEF73875CA8}]
+"name"="System.Resources.Extensions"
+"codeBase"="$BaseInstallDir$\MSBuild\Current\Bin\System.Resources.Extensions.dll"
+"publicKeyToken"="cc7b13ffcd2ddd51"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-99.9.9.9"
+"newVersion"="4.0.0.0"
