@@ -869,6 +869,7 @@ namespace Microsoft.Build.UnitTests
             Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version48, VisualStudioVersion.Version100));
             Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version48, VisualStudioVersion.Version110));
             Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version48, VisualStudioVersion.Version120));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version48, VisualStudioVersion.Version140));
             ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version48, VisualStudioVersion.Version150).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK48);
 
             // Latest
