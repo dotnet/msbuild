@@ -29,7 +29,7 @@ namespace Microsoft.Build.Tasks
             s_version47Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version47));
             s_version471Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version471));
             s_version472Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version472));
-            s_version472Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version48));
+            s_version48Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version48));
         }
 
         #region ITask Members
