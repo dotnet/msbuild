@@ -33,6 +33,7 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using FrameworkLocationHelper = Microsoft.Build.Shared.FrameworkLocationHelper;
 using Xunit;
 using Xunit.Abstractions;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests.Construction
 {
@@ -2208,6 +2209,70 @@ EndGlobal
                 ProjectTaskInstance task = Assert.IsType<ProjectTaskInstance>(projectInstance.Targets["MyTarget"].Children[0]);
 
                 Assert.Equal("MyTask", task.Name);
+            }
+            finally
+            {
+                ObjectModelHelpers.DeleteTempProjectDirectory();
+            }
+        }
+
+        /// <summary>
+        /// Verifies that a target in an after.solution.sln.targets can AfterTargets/BeforeTargets a dynamically-created target.
+        /// </summary>
+        [Fact]
+        public void BeforeTargetsFromImportCanHookDynamicTarget()
+        {
+            string baseDirectory = Guid.NewGuid().ToString("N");
+
+            string solutionFilePath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"{Guid.NewGuid():N}.sln"), @"
+                Microsoft Visual Studio Solution File, Format Version 14.00
+                # Visual Studio 2015
+                Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary1"", ""ClassLibrary1.csproj"", ""{6185CC21-BE89-448A-B3C0-D1C27112E595}""
+                EndProject
+                Global
+	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		                Debug|Any CPU = Debug|Any CPU
+		                Release|Any CPU = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+	                EndGlobalSection
+                EndGlobal
+            ");
+
+            ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"after.{Path.GetFileName(solutionFilePath)}.targets"), @"
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+                    <Target Name=""MyTarget"" BeforeTargets=""DynamicTraversalTarget"">
+                        <Warning Text=""Message from MyTarget"" />
+                    </Target>
+                </Project>");
+
+            try
+            {
+                var solutionFile = SolutionFile.Parse(solutionFilePath);
+
+                string[] targetsToBuild = new[] { "DynamicTraversalTarget" };
+
+                ProjectInstance projectInstance = SolutionProjectGenerator.Generate(solutionFile, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), targetsToBuild).FirstOrDefault();
+
+                projectInstance.ShouldNotBeNull();
+
+                projectInstance.Targets.ShouldContainKey("MyTarget");
+
+                projectInstance.Targets["MyTarget"].Children
+                    .ShouldHaveSingleItem()
+                    .ShouldBeOfType<ProjectTaskInstance>()
+                    .Name.ShouldBe("Warning");
+
+                projectInstance.Targets["MyTarget"].BeforeTargets.ShouldBe("DynamicTraversalTarget");
+
+                MockLogger mockLogger = new MockLogger(output);
+                projectInstance.Build(targetsToBuild, new List <ILogger> { mockLogger })
+                    .ShouldBeFalse("The solution build should have failed due to a missing project");
+                mockLogger.AssertLogContains("Message from MyTarget");
             }
             finally
             {
