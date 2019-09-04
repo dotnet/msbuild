@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
  
         static TempRoot()
         {
-            Root = RepoDirectoriesProvider.TestArtifactsFolder;
+            Root = RepoDirectoriesProvider.TestWorkingFolder;
             DoDispose = false;
 
             Directory.CreateDirectory(Root);

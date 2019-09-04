@@ -30,8 +30,6 @@ namespace Microsoft.DotNet.TestFramework
 
         private bool _built = false;
 
-        public static string CurrentRuntimeFrameworkVersion = new Muxer().SharedFxVersion;
-
         public TestAssetInstance(TestAssetInfo testAssetInfo, DirectoryInfo root)
         {
             if (testAssetInfo == null)

@@ -19,7 +19,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         public readonly static string DotnetUnderTest;
         public readonly static string DotnetRidUnderTest;
         public readonly static string TestPackages;
-        public readonly static string TestArtifactsFolder;
 
         static RepoDirectoriesProvider()
         {
@@ -43,10 +42,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             RepoRoot = directory;
 
             TestWorkingFolder = Environment.GetEnvironmentVariable("CORESDK_TEST_FOLDER");
-            if (string.IsNullOrEmpty(TestWorkingFolder))
-            {
-                TestWorkingFolder = Path.Combine(AppContext.BaseDirectory, "Tests");
-            }
 
             DotnetUnderTest = Environment.GetEnvironmentVariable("DOTNET_UNDER_TEST");
             string dotnetExtension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : "";
@@ -61,7 +56,10 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                     string configuration = new DirectoryInfo(AppContext.BaseDirectory).Parent.Name;
                     DotnetUnderTest = Path.Combine(RepoRoot, "artifacts", "bin", "redist", configuration, "dotnet", "dotnet" + dotnetExtension);
                     TestPackages = Path.Combine(RepoRoot, "artifacts", "tmp", configuration, "test", "packages");
-                    TestArtifactsFolder = Path.Combine(RepoRoot, "artifacts", "tmp", configuration, "test", "artifacts");
+                    if (string.IsNullOrEmpty(TestWorkingFolder))
+                    {
+                        TestWorkingFolder = Path.Combine(RepoRoot, "artifacts", "tmp", configuration);
+                    }
                 }
             }
 
