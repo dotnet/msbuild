@@ -5,6 +5,8 @@
       "dotnet/x64": [
         "2.1.7"
       ]
+    },
+    "vs": {
     }
   },
   "msbuild-sdks": {
