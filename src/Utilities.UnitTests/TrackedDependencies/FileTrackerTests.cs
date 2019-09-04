@@ -1203,7 +1203,7 @@ class X
                 Assert.Equal(Path.GetFullPath(sourceFile).ToUpperInvariant(), lines[1]);
                 Assert.Equal(Path.GetFullPath(sourceFile3).ToUpperInvariant(), lines[2]);
                 Assert.Equal("^" + rootMarker, lines2[1]);
-                Assert.Equal(rootMarker, lines2[2]);
+                Assert.Equal(rootMarker, lines2[2], StringComparer.OrdinalIgnoreCase);
             }
             finally
             {
