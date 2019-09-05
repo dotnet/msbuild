@@ -95,6 +95,14 @@ namespace Microsoft.DotNet.Tools.Test
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
+            // Fix for https://github.com/Microsoft/vstest/issues/1453
+            // Try to run dll/exe directly using the VSTestForwardingApp
+            if (ContainsBuiltTestSources(args))
+            {
+                var convertedArgs = new VSTestArgumentConverter().Convert(args, out var ignoredArgs);
+                return new VSTestForwardingApp(convertedArgs).Execute();
+            }
+
             // Workaround for https://github.com/Microsoft/vstest/issues/1503
             const string NodeWindowEnvironmentName = "MSBUILDENSURESTDOUTFORTASKPROCESSES";
             string previousNodeWindowSetting = Environment.GetEnvironmentVariable(NodeWindowEnvironmentName);
@@ -108,6 +116,19 @@ namespace Microsoft.DotNet.Tools.Test
             {
                 Environment.SetEnvironmentVariable(NodeWindowEnvironmentName, previousNodeWindowSetting);
             }
+        }
+
+        private static bool ContainsBuiltTestSources(string[] args)
+        {
+            foreach (var arg in args)
+            {
+                if (!(arg.StartsWith("-") || arg.StartsWith("/")) &&
+                    (arg.EndsWith("dll", StringComparison.OrdinalIgnoreCase) || arg.EndsWith("exe", StringComparison.OrdinalIgnoreCase)))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private static string GetSemiColonEscapedString(string arg)
