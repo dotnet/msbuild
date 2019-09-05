@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NETCore.App" Version="3.1.0-preview1.19455.15">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.1.0-preview1.19455.16">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>8cdffdc87fb6c1d63adb575df18645e5e45c0d94</Sha>
     </Dependency>
