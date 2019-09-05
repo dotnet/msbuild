@@ -212,17 +212,17 @@
         <target state="translated">コマンドに関する詳細情報については、'dotnet [command] --help' を実行します。</target>
         <note />
       </trans-unit>
-      <trans-unit id="AdditionalprobingpathDefinition">
+      <trans-unit id="AdditionalProbingPathDefinition">
         <source>Path containing probing policy and assemblies to probe for.</source>
         <target state="translated">調査ポリシーと調査対象アセンブリを含むパス。</target>
         <note />
       </trans-unit>
-      <trans-unit id="DepsfilDefinition">
+      <trans-unit id="DepsFileDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
         <target state="translated">&lt;application&gt;.deps.json ファイルへのパス。</target>
         <note />
       </trans-unit>
-      <trans-unit id="RuntimeconfigDefinition">
+      <trans-unit id="RuntimeConfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
         <target state="translated">&lt;application&gt;.runtimeconfig.json ファイルへのパス。</target>
         <note />
