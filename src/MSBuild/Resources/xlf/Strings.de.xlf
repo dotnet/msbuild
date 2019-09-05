@@ -337,14 +337,15 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="needs-review-translation">  -logger:&lt;Protokollierung&gt;   Mithilfe dieser Protokollierung werden Ereignisse von MSBuild protokolliert. Um mehrere Protokollierungen anzugeben, 
+        <target state="translated">  -logger:&lt;Protokollierung&gt;   Mithilfe dieser Protokollierung werden Ereignisse von MSBuild protokolliert. Um mehrere Protokollierungen anzugeben, 
                      wird jede Protokollierung gesondert angegeben.
                      Die Syntax für die &lt;Protokollierung&gt; lautet:
-                       [&lt;Protokollierungsklasse&gt;,]&lt;Protokollierungsassembly&gt;[;&lt;Protokollierungsparameter&gt;]
+                       [&lt;Klasse&gt;,]&lt;Assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
                      Die Syntax für die &lt;Protokollierungsklasse&gt; lautet:
                         [&lt;Teilweiser oder vollständiger Namespace&gt;.]&lt;Name der Protokollierungsklasse&gt;
                      Die Syntax für die &lt;Protokollierungsassembly&gt; lautet:
                        {&lt;Assemblyname&gt;[,&lt;strong name&gt;] | &lt;Assemblydatei&gt;}
+                     Die Protokollierungsoptionen geben an, wie MSBuild die Protokollierung erstellt.
                      Die &lt;Protokollierungsparameter&gt; sind optional und werden genau 
                      so an die Protokollierung übergeben, wie sie eingegeben wurden. (Kurzform: -l)
                      Beispiele:
@@ -605,17 +606,18 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="needs-review-translation">  -distributedlogger:&lt;Zentrale Protokollierung&gt;*&lt;Weiterleitende Protokollierung&gt;
+        <target state="translated">  -distributedlogger:&lt;Zentrale Protokollierung&gt;*&lt;Weiterleitende Protokollierung&gt;
                      Mithilfe dieser Protokollierung werden Ereignisse von MSBuild protokolliert, wobei an jeden Knoten eine andere 
                      Protokollierungsinstanz angefügt wird. Um mehrere Protokollierungen anzugeben, wird jede Protokollierung 
-                     gesondert angegeben. 
+                     gesondert angegeben.
                      (Kurzform -dl)
                      Die Syntax für die &lt;Protokollierung&gt; lautet:
-                       [&lt;Protokollierungsklasse&gt;,]&lt;Protokollierungsassembly&gt;[;&lt;Protokollierungsparameter&gt;]
+                       [&lt;Klasse&gt;,]&lt;Assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
                      Die Syntax für die &lt;Protokollierungsklasse&gt; lautet:
-                       [&lt;Teilweiser oder vollständiger Namespace&gt;.]&lt;Name der Protokollierungsklasse&gt;
+                        [&lt;Teilweiser oder vollständiger Namespace&gt;.]&lt;Name der Protokollierungsklasse&gt;
                      Die Syntax für die &lt;Protokollierungsassembly&gt; lautet:
                        {&lt;Assemblyname&gt;[,&lt;strong name&gt;] | &lt;Assemblydatei&gt;}
+                     Die Protokollierungsoptionen geben an, wie MSBuild die Protokollierung erstellt.
                      Die &lt;Protokollierungsparameter&gt; sind optional und werden genau 
                      so an die Protokollierung übergeben, wie sie eingegeben wurden. (Kurzform: -l)
                      Beispiele:
@@ -1129,7 +1131,7 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
       </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
         <source>The specified logger could not be created and will not be used. {0}</source>
-        <target state="new">The specified logger could not be created and will not be used. {0}</target>
+        <target state="translated">Die angegebene Protokollierung konnte nicht erstellt werden und wird nicht verwendet. {0}</target>
         <note>
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: {0} contains the exception message explaining why the
