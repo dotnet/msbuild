@@ -17,11 +17,11 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/core-setup -->
-    <MicrosoftNETCoreAppPackageVersion>3.1.0-preview1.19455.15</MicrosoftNETCoreAppPackageVersion>
-    <MicrosoftDotNetPlatformAbstractionsPackageVersion>3.1.0-preview1.19455.15</MicrosoftDotNetPlatformAbstractionsPackageVersion>
-    <MicrosoftExtensionsDependencyModelPackageVersion>3.1.0-preview1.19455.15</MicrosoftExtensionsDependencyModelPackageVersion>
-    <MicrosoftNETCoreDotNetHostResolverPackageVersion>3.1.0-preview1.19455.15</MicrosoftNETCoreDotNetHostResolverPackageVersion>
-    <MicrosoftNETHostModelVersion>3.1.0-preview1.19455.15</MicrosoftNETHostModelVersion>
+    <MicrosoftNETCoreAppPackageVersion>3.1.0-preview1.19455.16</MicrosoftNETCoreAppPackageVersion>
+    <MicrosoftDotNetPlatformAbstractionsPackageVersion>3.1.0-preview1.19455.16</MicrosoftDotNetPlatformAbstractionsPackageVersion>
+    <MicrosoftExtensionsDependencyModelPackageVersion>3.1.0-preview1.19455.16</MicrosoftExtensionsDependencyModelPackageVersion>
+    <MicrosoftNETCoreDotNetHostResolverPackageVersion>3.1.0-preview1.19455.16</MicrosoftNETCoreDotNetHostResolverPackageVersion>
+    <MicrosoftNETHostModelVersion>3.1.0-preview1.19455.16</MicrosoftNETHostModelVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore -->
