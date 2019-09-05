@@ -870,7 +870,10 @@ do
             shift
             runtime="$1"
             if [[ "$runtime" != "dotnet" ]] && [[ "$runtime" != "aspnetcore" ]]; then
-                say_err "Unsupported value for --runtime: '$1'. Valid values are 'dotnet' and 'aspnetcore'. WindowsDesktop archives are manufactured for Windows platforms only."
+                say_err "Unsupported value for --runtime: '$1'. Valid values are 'dotnet' and 'aspnetcore'."
+                if [[ "$runtime" == "windowsdesktop" ]]; then
+                    say_err "WindowsDesktop archives are manufactured for Windows platforms only."
+                fi
                 exit 1
             fi
             ;;
