@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="CmdDeprecatedDescription">
         <source>Lists packages that have been deprecated.</source>
-        <target state="new">Lists packages that have been deprecated.</target>
+        <target state="translated">Seznam zastaralých balíčků</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
@@ -44,22 +44,22 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>The path to the NuGet config file to use. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">Cesta ke konfiguračnímu souboru NuGet, který se má použít. Vyžaduje přepínač --outdated.</target>
+        <target state="translated">Cesta ke konfiguračnímu souboru NuGet, který se má použít. Vyžaduje přepínač --outdated nebo --deprecated.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestMinorDescription">
         <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">Při hledání novějších balíčků se budou brát v úvahu jenom balíčky s odpovídajícím číslem hlavní verze. Vyžaduje přepínač --outdated.</target>
+        <target state="translated">Při hledání novějších balíčků se budou brát v úvahu jen balíčky s odpovídajícím číslem hlavní verze. Vyžaduje přepínač --outdated nebo --deprecated.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestPatchDescription">
         <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">Při hledání novějších balíčků se budou brát v úvahu jenom balíčky s odpovídajícími čísly hlavní verze a podverze. Vyžaduje přepínač --outdated.</target>
+        <target state="translated">Při hledání novějších balíčků se budou brát v úvahu jen balíčky s odpovídajícími čísly hlavní verze a podverze. Vyžaduje přepínač --outdated nebo --deprecated.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPrereleaseDescription">
         <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">Při hledání novějších balíčků se budou brát v úvahu i balíčky v předběžných verzích. Vyžaduje přepínač --outdated.</target>
+        <target state="translated">Při hledání novějších balíčků se budou brát v úvahu i balíčky v předběžných verzích. Vyžaduje přepínač --outdated nebo --deprecated.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSource">
@@ -69,12 +69,12 @@
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">Zdroje NuGet, které se mají použít při hledání novějších balíčků. Vyžaduje přepínač --outdated.</target>
+        <target state="translated">Zdroje NuGet, které se mají použít při hledání novějších balíčků. Vyžaduje přepínač --outdated nebo --deprecated.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutdatedAndDeprecatedOptionsCannotBeCombined">
         <source>Option '--outdated' and '--deprecated' cannot be combined.</source>
-        <target state="new">Option '--outdated' and '--deprecated' cannot be combined.</target>
+        <target state="translated">Možnosti --outdated a --deprecated se nedají kombinovat.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileNotFound">
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="OutdatedOrDeprecatedOptionOnly">
         <source>Option '{0}' requires the '--outdated' or '--deprecated' option to be specified.</source>
-        <target state="new">Option '{0}' requires the '--outdated' or '--deprecated' option to be specified.</target>
+        <target state="translated">Přepínač {0} vyžaduje, aby se zadal přepínač --outdated nebo --deprecated.</target>
         <note />
       </trans-unit>
     </body>

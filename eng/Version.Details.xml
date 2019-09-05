@@ -5,41 +5,41 @@
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>e8d6da33000a416b2b36b4f04b1756dcc99f671d</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview9-19423-09">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-rc1-19455-02">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>2be172345a420387413bab7ce9053a52624c4461</Sha>
+      <Sha>caa8d3b1edd7eec947f6283f8342a9249b5d7171</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.PlatformAbstractions" Version="3.0.0-preview9-19423-09">
+    <Dependency Name="Microsoft.DotNet.PlatformAbstractions" Version="3.0.0-rc1-19455-02">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>2be172345a420387413bab7ce9053a52624c4461</Sha>
+      <Sha>caa8d3b1edd7eec947f6283f8342a9249b5d7171</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.HostModel" Version="3.0.0-preview9-19423-09">
+    <Dependency Name="Microsoft.NET.HostModel" Version="3.0.0-rc1-19455-02">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>2be172345a420387413bab7ce9053a52624c4461</Sha>
+      <Sha>caa8d3b1edd7eec947f6283f8342a9249b5d7171</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="3.0.0-preview9-19423-09">
+    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="3.0.0-rc1-19455-02">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>2be172345a420387413bab7ce9053a52624c4461</Sha>
+      <Sha>caa8d3b1edd7eec947f6283f8342a9249b5d7171</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.DotNetHostResolver" Version="3.0.0-preview9-19423-09">
+    <Dependency Name="Microsoft.NETCore.DotNetHostResolver" Version="3.0.0-rc1-19455-02">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>2be172345a420387413bab7ce9053a52624c4461</Sha>
+      <Sha>caa8d3b1edd7eec947f6283f8342a9249b5d7171</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.0.0-preview9.19424.4">
+    <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.0.0-rc1.19453.1">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
-      <Sha>66de493473521e173fa15ca557f5f97601cedb23</Sha>
+      <Sha>0abe61f391b30219ce5983b9a2964c1d85665449</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19421.1">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19424.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>7aa107d818fe87e627154c0331d6de5d47f39a45</Sha>
+      <Sha>a7b5eb8de300b6a30bd797c4ecc8769f7028aeec</Sha>
     </Dependency>
   </ToolsetDependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-preview9.19426.11">
+    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-rc1.19453.1">
       <Uri>https://github.com/dotnet/sdk</Uri>
-      <Sha>1c91e0a4d59ba7d254637f3e3a430ad3aab6992f</Sha>
+      <Sha>59e63b28d24a769652b754f341d38c9de7c3d0d1</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Cli.CommandLine" Version="1.0.0-preview.19208.1">
       <Uri>https://github.com/dotnet/CliCommandLineParser</Uri>

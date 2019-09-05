@@ -8,7 +8,7 @@
   <!-- Repo Version Information -->
   <PropertyGroup>
     <VersionPrefix>3.0.100</VersionPrefix>
-    <PreReleaseVersionLabel>preview9</PreReleaseVersionLabel>
+    <PreReleaseVersionLabel>rc1</PreReleaseVersionLabel>
   </PropertyGroup>
   <!-- Production Dependencies -->
   <PropertyGroup>
@@ -17,15 +17,15 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/core-setup -->
-    <MicrosoftNETCoreAppPackageVersion>3.0.0-preview9-19423-09</MicrosoftNETCoreAppPackageVersion>
-    <MicrosoftDotNetPlatformAbstractionsPackageVersion>3.0.0-preview9-19423-09</MicrosoftDotNetPlatformAbstractionsPackageVersion>
-    <MicrosoftExtensionsDependencyModelPackageVersion>3.0.0-preview9-19423-09</MicrosoftExtensionsDependencyModelPackageVersion>
-    <MicrosoftNETCoreDotNetHostResolverPackageVersion>3.0.0-preview9-19423-09</MicrosoftNETCoreDotNetHostResolverPackageVersion>
-    <MicrosoftNETHostModelVersion>3.0.0-preview9-19423-09</MicrosoftNETHostModelVersion>
+    <MicrosoftNETCoreAppPackageVersion>3.0.0-rc1-19455-02</MicrosoftNETCoreAppPackageVersion>
+    <MicrosoftDotNetPlatformAbstractionsPackageVersion>3.0.0-rc1-19455-02</MicrosoftDotNetPlatformAbstractionsPackageVersion>
+    <MicrosoftExtensionsDependencyModelPackageVersion>3.0.0-rc1-19455-02</MicrosoftExtensionsDependencyModelPackageVersion>
+    <MicrosoftNETCoreDotNetHostResolverPackageVersion>3.0.0-rc1-19455-02</MicrosoftNETCoreDotNetHostResolverPackageVersion>
+    <MicrosoftNETHostModelVersion>3.0.0-rc1-19455-02</MicrosoftNETHostModelVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore -->
-    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>3.0.0-preview9.19424.4</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
+    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>3.0.0-rc1.19453.1</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/microsoft/msbuild -->
@@ -36,7 +36,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/sdk -->
-    <MicrosoftNETSdkPackageVersion>3.0.100-preview9.19426.11</MicrosoftNETSdkPackageVersion>
+    <MicrosoftNETSdkPackageVersion>3.0.100-rc1.19453.1</MicrosoftNETSdkPackageVersion>
     <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
   </PropertyGroup>
   <PropertyGroup>

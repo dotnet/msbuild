@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../CommonLocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../CommonLocalizableStrings.resx">
     <body>
       <trans-unit id="CommandInteractiveOptionDescription">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
@@ -25,15 +25,15 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using bash, you can add it to your profile by running the following command:
+        <target state="translated">工具目錄 '{0}' 目前不在 PATH 環境變數中。
+若目前使用 bash，可執行下列命令將其新增至您的設定檔:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
+# 新增 .NET Core SDK 工具
 export PATH="$PATH:{0}"
 EOF
 
-You can add it to the current session by running the following command:
+您可執行下列命令，將其新增至目前的工作階段:
 
 export PATH="$PATH:{0}"
 </target>
@@ -54,17 +54,17 @@ You can only add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using zsh, you can add it to your profile by running the following command:
+        <target state="translated">工具目錄 '{0}' 目前不在 PATH 環境變數上。
+如果您在使用 zsh，可以執行以下命令將其新增至您的設定檔:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
-# Add .NET Core SDK tools
+# 新增 .NET Core SDK 工具
 export PATH="$PATH:{0}"
 EOF
 
-And run `zsh -l` to make it available for current session.
+並執行 `zsh -l` 讓其可用於目前的工作階段。
 
-You can only add it to the current session by running the following command:
+您只能執行以下命令將其新增至目前的工作階段:
 
 export PATH="$PATH:{0}"
 </target>

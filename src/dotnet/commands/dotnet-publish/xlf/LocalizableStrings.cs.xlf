@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="NoSelfContainedOptionDescription">
         <source>Publish your application as a framework dependent application without the .NET Core runtime. A supported .NET Core runtime must be installed to run your application.</source>
-        <target state="new">Publish your application as a framework dependent application without the .NET Core runtime. A supported .NET Core runtime must be installed to run your application.</target>
+        <target state="translated">Publikujte svoji aplikaci jako aplikaci závislou na architektuře bez modulu runtime .NET Core. Aby bylo možné vaši aplikaci spustit, musí být nainstalovaný podporovaný modul runtime .NET Core.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -66,7 +66,7 @@ Ve výchozím nastavení je publikována aplikace závislá na architektuře.</t
       </trans-unit>
       <trans-unit id="SelfContainAndNoSelfContainedConflict">
         <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
-        <target state="new">The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</target>
+        <target state="translated">Možnosti --self-contained a --no-self-contained jsou vzájemně konfliktní. Zadejte pouze jednu z nich.</target>
         <note />
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
