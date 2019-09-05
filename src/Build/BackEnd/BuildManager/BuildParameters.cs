@@ -832,7 +832,7 @@ namespace Microsoft.Build.Execution
             // ResetCaches is not transmitted.
             // LegacyThreadingSemantics is not transmitted.
             // InputResultsCacheFiles and OutputResultsCacheFile are not transmitted, as they are only used by the BuildManager
-            // DiscardBuildResults is not trasmitted.
+            // DiscardBuildResults is not transmitted.
         }
 
 #region INodePacketTranslatable Members
