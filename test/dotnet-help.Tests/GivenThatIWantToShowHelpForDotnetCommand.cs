@@ -21,8 +21,10 @@ Execute a .NET Core application.
 runtime-options:
   --additionalprobingpath <path>   Path containing probing policy and assemblies to probe for.
   --additional-deps <path>         Path to additional deps.json file.
+  --depsfile                       Path to <application>.deps.json file.
   --fx-version <version>           Version of the installed Shared Framework to use to run the application.
   --roll-forward <setting>         Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).
+  --runtimeconfig                  Path to <application>.runtimeconfig.json file.
 
 path-to-application:
   The path to an application .dll file to execute.

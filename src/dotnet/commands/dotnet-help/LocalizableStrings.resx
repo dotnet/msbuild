@@ -249,13 +249,13 @@
   <data name="RunDotnetCommandHelpForMore" xml:space="preserve">
     <value>Run 'dotnet [command] --help' for more information on a command.</value>
   </data>
-  <data name="AdditionalprobingpathDefinition" xml:space="preserve">
+  <data name="AdditionalProbingPathDefinition" xml:space="preserve">
     <value>Path containing probing policy and assemblies to probe for.</value>
   </data>
-  <data name="DepsfilDefinition" xml:space="preserve">
+  <data name="DepsFileDefinition" xml:space="preserve">
     <value>Path to &lt;application&gt;.deps.json file.</value>
   </data>
-  <data name="RuntimeconfigDefinition" xml:space="preserve">
+  <data name="RuntimeConfigDefinition" xml:space="preserve">
     <value>Path to &lt;application&gt;.runtimeconfig.json file.</value>
   </data>
   <data name="FxVersionDefinition" xml:space="preserve">
