@@ -50,7 +50,7 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] ReadyToRunFilesToPublish => _r2rFiles.ToArray();
 
         [Output]
-        public ITaskItem[] ReadyToRunFilesToReference => _r2rReferences.ToArray();
+        public ITaskItem[] ReadyToRunAssembliesToReference => _r2rReferences.ToArray();
 
         private List<ITaskItem> _compileList = new List<ITaskItem>();
         private List<ITaskItem> _symbolsCompileList = new List<ITaskItem>();
