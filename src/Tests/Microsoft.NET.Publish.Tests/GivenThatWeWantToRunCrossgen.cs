@@ -292,7 +292,7 @@ public class Program
             return null;
         }
 
-        private bool DoesImageHaveR2RInfo(string path)
+        public static bool DoesImageHaveR2RInfo(string path)
         {
             using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
             {

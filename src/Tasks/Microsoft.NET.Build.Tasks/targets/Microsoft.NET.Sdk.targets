@@ -157,6 +157,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary;
                             _HandlePackageFileConflicts;
                             _ComputeReferenceAssemblies;
+                            _ComputeUserRuntimeAssemblies;
                             ResolveRuntimePackAssets;
                             _ComputePackageReferencePublish"
           BeforeTargets="CopyFilesToOutputDirectory"
@@ -193,6 +194,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       CompilerOptions="@(DependencyFileCompilerOptions)"
                       CompileReferences="@(ResolvedCompileFileDefinitions)"
                       ResolvedNuGetFiles="@(NativeCopyLocalItems);@(ResourceCopyLocalItems);@(RuntimeCopyLocalItems)"
+                      UserRuntimeAssemblies="@(UserRuntimeAssembly)"
                       ResolvedRuntimeTargetsFiles="@(RuntimeTargetsCopyLocalItems)"
                       IsSelfContained="$(SelfContained)"
                       IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)">
@@ -595,6 +597,31 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_ReferenceAssemblies Include="@(_ReferenceOnlyAssemblies)" />
     </ItemGroup>
 
+  </Target>
+  <!--
+    ============================================================
+                                        _ComputeUserRuntimeAssemblies
+
+    Computes references or reference dependencies that are copy local.
+
+     NOTE: NuGet and framework references are never copy local so those are not included here.
+           These will be project references and direct references and their copy local dependencies.
+    ============================================================
+    -->
+  <Target Name="_ComputeUserRuntimeAssemblies">
+    <ItemGroup>
+      <!-- IncludeRuntimeDependency=true metadata is escape hatch to include a non-copy local reference in deps file as a runtime dependency -->
+      <ReferencePath>
+        <IncludeRuntimeDependency Condition="'%(ReferencePath.IncludeRuntimeDependency)' == '' and '%(ReferencePath.CopyLocal)' == 'true'">true</IncludeRuntimeDependency>
+      </ReferencePath>
+
+      <ReferenceDependencyPaths>
+        <IncludeRuntimeDependency Condition="'%(ReferenceDependencyPaths.IncludeRuntimeDependency)' == '' and '%(ReferenceDependencyPaths.CopyLocal)' == 'true'">true</IncludeRuntimeDependency>
+      </ReferenceDependencyPaths>
+
+      <UserRuntimeAssembly Include="@(ReferencePath->WithMetadataValue('IncludeRuntimeDependency', 'true'))"  />
+      <UserRuntimeAssembly Include="@(ReferenceDependencyPaths->WithMetadataValue('IncludeRuntimeDependency', 'true'))" />
+    </ItemGroup>
   </Target>
 
   <!--
