@@ -295,6 +295,7 @@ namespace Microsoft.Build.Execution
             _isolateProjects = other._isolateProjects;
             _inputResultsCacheFiles = other._inputResultsCacheFiles;
             _outputResultsCacheFile = other._outputResultsCacheFile;
+            DiscardBuildResults = other.DiscardBuildResults;
         }
 
 #if FEATURE_THREAD_PRIORITY
@@ -831,6 +832,7 @@ namespace Microsoft.Build.Execution
             // ResetCaches is not transmitted.
             // LegacyThreadingSemantics is not transmitted.
             // InputResultsCacheFiles and OutputResultsCacheFile are not transmitted, as they are only used by the BuildManager
+            // DiscardBuildResults is not transmitted.
         }
 
 #region INodePacketTranslatable Members
