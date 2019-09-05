@@ -174,7 +174,7 @@ namespace Microsoft.Build.UnitTests
             ITaskItem[] throwawayInput = { new TaskItem("hello.resx") };
 
             t.InputFiles = throwawayInput;
-            t.ToolPath = Path.GetDirectoryName(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.VersionLatest));
+            t.ToolPath = Path.GetDirectoryName(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Latest));
 
             Assert.False(t.PublicClass); // "PublicClass should be false by default"
             CommandLine.ValidateNoParameterStartsWith(t, @"/publicClass", true /* resgen 4.0 supports response files */);
@@ -197,7 +197,7 @@ namespace Microsoft.Build.UnitTests
             ITaskItem b = new TaskItem();
 
             t.InputFiles = throwawayInput;
-            t.ToolPath = Path.GetDirectoryName(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.VersionLatest));
+            t.ToolPath = Path.GetDirectoryName(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Latest));
 
             a.ItemSpec = "foo.dll";
             b.ItemSpec = "bar.dll";
@@ -339,7 +339,7 @@ namespace Microsoft.Build.UnitTests
             t.StronglyTypedLanguage = "CSharp";
 
             t.InputFiles = throwawayInput;
-            t.ToolPath = Path.GetDirectoryName(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.VersionLatest));
+            t.ToolPath = Path.GetDirectoryName(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Latest));
             return t;
         }
 
@@ -396,7 +396,7 @@ namespace Microsoft.Build.UnitTests
 
             // Without any inputs, the task just passes
             t.InputFiles = throwawayInput;
-            t.ToolPath = Path.GetDirectoryName(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.VersionLatest));
+            t.ToolPath = Path.GetDirectoryName(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Latest));
 
             // Language is null by default
             Assert.Null(t.StronglyTypedLanguage); // "StronglyTypedLanguage should be null by default"
@@ -483,7 +483,7 @@ namespace Microsoft.Build.UnitTests
             ITaskItem[] throwawayInput = { new TaskItem("hello.resx") };
 
             t.InputFiles = throwawayInput;
-            t.ToolPath = Path.GetDirectoryName(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.VersionLatest));
+            t.ToolPath = Path.GetDirectoryName(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Latest));
 
             Assert.False(t.UseSourcePath); // "UseSourcePath should be false by default"
             CommandLine.ValidateNoParameterStartsWith(t, @"/useSourcePath", true /* resgen 4.0 supports response files */);
