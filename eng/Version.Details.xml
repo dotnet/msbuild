@@ -25,9 +25,9 @@
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>097dd7b734c66138462a3b2eed84c6f4af725c21</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Razor" Version="5.0.0-alpha1.19454.1">
+    <Dependency Name="Microsoft.NET.Sdk.Razor" Version="5.0.0-alpha1.19455.19">
       <Uri>https://github.com/aspnet/AspNetCore-Tooling</Uri>
-      <Sha>02221c21da9dbd325fddc1895d360acb41fb6df3</Sha>
+      <Sha>16e871c88db521f59958ef311c6e9ac63c6de5ad</Sha>
     </Dependency>
     <!-- For coherency purposes, this version should be gated by the version of wpf routed via core setup -->
     <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-preview9.19407.13" CoherentParentDependency="Microsoft.NETCore.App">
