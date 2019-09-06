@@ -124,7 +124,7 @@
     </ItemGroup>
 
     <Error Condition=" '$(TlbExpPath)' == '' "
-           Text="TlbExp was not found. This may be because MSBuild is trying to refer to a default .NET SDK that isn't installed." />
+           Text="TlbExp was not found. Ensure that you have installed everything from .vsconfig. If you have, please report a bug to MSBuild." />
 
     <Exec Command="&quot;$(TlbExpPath)&quot; $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') &quot;$(TargetPath)&quot; /out:&quot;$(TargetDir)$(TargetName).tlb&quot;" />
   </Target>
