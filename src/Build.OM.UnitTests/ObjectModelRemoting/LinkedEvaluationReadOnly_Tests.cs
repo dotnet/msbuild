@@ -69,6 +69,44 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             ViewValidation.Verify(this.StdGroup.View, this.StdGroup.Real);
         }
 
-        // TODO: add individual item tests for easy of diagnostics and ensure our sample data is adequate.
+        [Fact]
+        public void ProjectItemReadOnly_Tests()
+        {
+            var viewItems = this.StdGroup.View.AllEvaluatedItems;
+            var realItems = this.StdGroup.Real.AllEvaluatedItems;
+
+            Assert.NotEmpty(viewItems);
+            ViewValidation.Verify(viewItems, realItems);
+        }
+
+        [Fact]
+        public void ProjectItemDefinitionReadOnly_Tests()
+        {
+            var viewItemDefinitions = this.StdGroup.View.ItemDefinitions;
+            var realItemDefinitions = this.StdGroup.Real.ItemDefinitions;
+
+            Assert.NotEmpty(viewItemDefinitions);
+            ViewValidation.Verify(viewItemDefinitions, realItemDefinitions, ViewValidation.Verify);
+        }
+
+        [Fact]
+        public void ProjectPropertiesReadOnly_Tests()
+        {
+            var viewProperties = this.StdGroup.View.Properties;
+            var realProperties = this.StdGroup.Real.Properties;
+
+            Assert.NotEmpty(viewProperties);
+            ViewValidation.Verify(viewProperties, realProperties);
+        }
+
+        [Fact]
+        public void ProjectMetadataReadOnly_Tests()
+        {
+            var viewMetadata = this.StdGroup.View.AllEvaluatedItemDefinitionMetadata;
+            var realMetadata = this.StdGroup.Real.AllEvaluatedItemDefinitionMetadata;
+
+            Assert.NotEmpty(viewMetadata);
+            ViewValidation.Verify(viewMetadata, realMetadata);
+        }
     }
 }
