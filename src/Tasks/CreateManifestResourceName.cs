@@ -149,9 +149,9 @@ namespace Microsoft.Build.Tasks
                     // If opted into convention and no DependentUpon metadata, reference "<filename>.cs" if it exists.
                     if (UseDependentUponConvention && string.IsNullOrEmpty(dependentUpon))
                     {
-                        string conventionDependentUpon = Path.ChangeExtension(fileName, SourceFileExtension);
+                        string conventionDependentUpon = Path.ChangeExtension(Path.GetFileName(fileName), SourceFileExtension);
 
-                        if (File.Exists(conventionDependentUpon))
+                        if (File.Exists(Path.Combine(Path.GetDirectoryName(fileName), conventionDependentUpon)))
                         {
                             dependentUpon = conventionDependentUpon;
                         }
