@@ -1,6 +1,7 @@
 trigger:
 - master
 - vs*
+- exp/*
 
 # If defined here, these values are not overrideable
 # Once they exist, we should define these as "runtime parameters"

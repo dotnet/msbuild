@@ -586,6 +586,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             @"C:\WinMDArchVerification\DependsOnIA64.dll",
             @"C:\WinMDArchVerification\DependsOnUnknown.Winmd",
             @"C:\WinMDArchVerification\DependsOnUnknown.dll",
+            @"C:\WinMDLib\LibWithWinmdAndNoDll.lib",
+            @"C:\WinMDLib\LibWithWinmdAndNoDll.pri",
+            @"C:\WinMDLib\LibWithWinmdAndNoDll.Winmd",
             @"C:\FakeSDK\References\Debug\X86\DebugX86SDKWinMD.Winmd",
             @"C:\FakeSDK\References\Debug\Neutral\DebugNeutralSDKWinMD.Winmd",
             @"C:\FakeSDK\References\CommonConfiguration\x86\x86SDKWinMD.Winmd",
@@ -758,6 +761,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return true;
             }
             else if (String.Compare(fullPath, @"C:\FakeSDK\WindowsMetadata\SDKWinMD.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                return true;
+            }
+            else if (String.Compare(fullPath, @"C:\WinMDLib\LibWithWinmdAndNoDll.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return true;
             }
