@@ -1,8 +1,8 @@
 <Project>
 
   <PropertyGroup>
-      <MicrosoftNetCompilersVersion>3.3.1-beta3-19421-04</MicrosoftNetCompilersVersion>
-      <CompilerToolsVersion>3.3.1-beta3-19421-04</CompilerToolsVersion>
+      <MicrosoftNetCompilersVersion>3.3.1-beta3-19423-01</MicrosoftNetCompilersVersion>
+      <CompilerToolsVersion>3.3.1-beta3-19423-01</CompilerToolsVersion>
       <NuGetPackageVersion>5.3.0-rtm.6192</NuGetPackageVersion>
       <NuGetBuildTasksVersion Condition="'$(NuGetBuildTasksVersion)' == ''">$(NuGetPackageVersion)</NuGetBuildTasksVersion>
       <NuGetCommandsVersion Condition="'$(NuGetCommandsVersion)' == ''">$(NuGetPackageVersion)</NuGetCommandsVersion>

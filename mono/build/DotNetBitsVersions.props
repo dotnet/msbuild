@@ -1,12 +1,12 @@
 <Project>
     <PropertyGroup>
-        <MicrosoftNETSdkPackageVersion>3.0.100-preview9.19413.5</MicrosoftNETSdkPackageVersion>
+        <MicrosoftNETSdkPackageVersion>3.0.100-rc1.19453.1</MicrosoftNETSdkPackageVersion>
 
         <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
 
-        <MicrosoftNETSdkRazorPackageVersion>3.0.0-preview9.19422.6</MicrosoftNETSdkRazorPackageVersion>
+        <MicrosoftNETSdkRazorPackageVersion>3.0.0-preview9.19455.12</MicrosoftNETSdkRazorPackageVersion>
 
-        <MicrosoftNETSdkWebPackageVersion>3.0.100-preview9.19423.3</MicrosoftNETSdkWebPackageVersion>
+        <MicrosoftNETSdkWebPackageVersion>3.0.100-rc1.19455.5</MicrosoftNETSdkWebPackageVersion>
         <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
         <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
 
