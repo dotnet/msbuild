@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-rc2-19457-04">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-rc2-19457-07">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>c80d8d2853aa5e7d8a964eeb019d0b26357add84</Sha>
+      <Sha>b9c2e11748e0e031605f93dc1a7715893a01fb13</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.0.100-rc2.19457.8">
       <Uri>https://github.com/dotnet/cli</Uri>
@@ -50,17 +50,17 @@
       <Uri>https://github.com/mono/linker</Uri>
       <Sha>1127689f262d52ea8ff68ef03d706fa62b3b40a1</Sha>
     </Dependency>
-    <Dependency Name="System.CodeDom" Version="4.6.0-rc2.19456.18" CoherentParentDependency="Microsoft.NETCore.App">
+    <Dependency Name="System.CodeDom" Version="4.6.0-rc2.19457.2" CoherentParentDependency="Microsoft.NETCore.App">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>68a13f2ef09727e758c498991596e419f79146b3</Sha>
+      <Sha>aabbc368fe4351c78d97d1fcaf79238a3db285bc</Sha>
     </Dependency>
-    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="4.6.0-rc2.19456.18" CoherentParentDependency="Microsoft.NETCore.App">
+    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="4.6.0-rc2.19457.2" CoherentParentDependency="Microsoft.NETCore.App">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>68a13f2ef09727e758c498991596e419f79146b3</Sha>
+      <Sha>aabbc368fe4351c78d97d1fcaf79238a3db285bc</Sha>
     </Dependency>
-    <Dependency Name="System.Text.Encoding.CodePages" Version="4.6.0-rc2.19456.18" CoherentParentDependency="Microsoft.NETCore.App">
+    <Dependency Name="System.Text.Encoding.CodePages" Version="4.6.0-rc2.19457.2" CoherentParentDependency="Microsoft.NETCore.App">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>68a13f2ef09727e758c498991596e419f79146b3</Sha>
+      <Sha>aabbc368fe4351c78d97d1fcaf79238a3db285bc</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
