@@ -93,7 +93,6 @@ lib/mono/msbuild/Current/bin/Sdks/ILLink.Tasks/tools/net472/System.Collections.I
 lib/mono/msbuild/Current/bin/Sdks/ILLink.Tasks/tools/net472/System.Reflection.Metadata.dll
 lib/mono/msbuild/Current/bin/Sdks/Microsoft.Docker.Sdk/Sdk/Sdk.props
 lib/mono/msbuild/Current/bin/Sdks/Microsoft.Docker.Sdk/Sdk/Sdk.targets
-lib/mono/msbuild/Current/bin/Sdks/Microsoft.NET.Sdk.Publish/Sdk/ImportPublishProfile.targets
 lib/mono/msbuild/Current/bin/Sdks/Microsoft.NET.Sdk.Publish/Sdk/Sdk.props
 lib/mono/msbuild/Current/bin/Sdks/Microsoft.NET.Sdk.Publish/Sdk/Sdk.targets
 lib/mono/msbuild/Current/bin/Sdks/Microsoft.NET.Sdk.Publish/targets/ComputeTargets/Microsoft.NET.Sdk.Publish.ComputeFiles.targets

@@ -1,9 +1,9 @@
 <Project>
 
   <PropertyGroup>
-      <MicrosoftNetCompilersVersion>3.3.0-beta2-19381-14</MicrosoftNetCompilersVersion>
-      <CompilerToolsVersion>3.3.0-beta2-19381-14</CompilerToolsVersion>
-      <NuGetPackageVersion>5.3.0-preview.2.6136</NuGetPackageVersion>
+      <MicrosoftNetCompilersVersion>3.3.1-beta3-19421-04</MicrosoftNetCompilersVersion>
+      <CompilerToolsVersion>3.3.1-beta3-19421-04</CompilerToolsVersion>
+      <NuGetPackageVersion>5.3.0-rtm.6192</NuGetPackageVersion>
       <NuGetBuildTasksVersion Condition="'$(NuGetBuildTasksVersion)' == ''">$(NuGetPackageVersion)</NuGetBuildTasksVersion>
       <NuGetCommandsVersion Condition="'$(NuGetCommandsVersion)' == ''">$(NuGetPackageVersion)</NuGetCommandsVersion>
       <NuGetProtocolVersion Condition="'$(NuGetProtocolVersion)' == ''">$(NuGetPackageVersion)</NuGetProtocolVersion>
@@ -41,10 +41,7 @@
     <PackageReference Update="System.Runtime.Serialization.Primitives" Version="4.1.1" />
     <PackageReference Update="System.Security.Principal.Windows" Version="4.3.0" />
     <PackageReference Update="System.Text.Encoding.CodePages" Version="4.0.1" />
-
-    <PackageReference Update="System.Threading.Tasks.Dataflow" Version="4.5.24.0" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
-    <PackageReference Update="System.Threading.Tasks.Dataflow" Version="4.6.0" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'"/>
-
+    <PackageReference Update="System.Threading.Tasks.Dataflow" Version="4.9.0" />
     <PackageReference Update="System.Threading.Thread" Version="4.0.0" />
     <PackageReference Update="System.Xml.XPath" Version="4.3.0" />
     <PackageReference Update="xunit.assert" Version="$(XUnitVersion)" />

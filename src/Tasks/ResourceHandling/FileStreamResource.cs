@@ -16,21 +16,23 @@ namespace Microsoft.Build.Tasks.ResourceHandling
     internal class FileStreamResource : IResource
     {
         public string Name { get; }
-        public string TypeName { get; }
+        public string TypeAssemblyQualifiedName { get; }
         public string OriginatingFile { get; }
         public string FileName { get; }
+
+        public string TypeFullName => NameUtilities.FullNameFromAssemblyQualifiedName(TypeAssemblyQualifiedName);
 
         /// <summary>
         /// Construct a new linked resource.
         /// </summary>
         /// <param name="name">The resource's name</param>
-        /// <param name="typeName">The assembly-qualified type name of the resource (at runtime).</param>
+        /// <param name="assemblyQualifiedTypeName">The assembly-qualified type name of the resource (at runtime).</param>
         /// <param name="fileName">The absolute path of the file to be embedded as a resource.</param>
         /// <param name="originatingFile">The absolute path of the file that defined the ResXFileRef to this resource.</param>
-        public FileStreamResource(string name, string typeName, string fileName, string originatingFile)
+        public FileStreamResource(string name, string assemblyQualifiedTypeName, string fileName, string originatingFile)
         {
             Name = name;
-            TypeName = typeName;
+            TypeAssemblyQualifiedName = assemblyQualifiedTypeName;
             FileName = fileName;
             OriginatingFile = originatingFile;
         }
@@ -41,7 +43,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             {
                 FileStream fileStream = new FileStream(FileName, FileMode.Open, FileAccess.Read, FileShare.Read);
 
-                preserializedResourceWriter.AddActivatorResource(Name, fileStream, TypeName, closeAfterWrite: true);
+                preserializedResourceWriter.AddActivatorResource(Name, fileStream, TypeAssemblyQualifiedName, closeAfterWrite: true);
             }
             else
             {

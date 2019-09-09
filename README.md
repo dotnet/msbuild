@@ -1,18 +1,18 @@
 # Microsoft.Build (MSBuild)
 
-The Microsoft Build Engine is a platform for building applications. This engine, which is also known as MSBuild, provides an XML schema for a project file that controls how the build platform processes and builds software. Visual Studio uses MSBuild, but MSBuild *does not* depend on Visual Studio. By invoking msbuild.exe on your project or solution file, you can orchestrate and build products in environments where Visual Studio isn't installed.
+The Microsoft Build Engine is a platform for building applications. This engine, also known as MSBuild, provides an XML schema for a project file that controls how the build platform processes and builds software. Visual Studio uses MSBuild, but MSBuild can run without Visual Studio. By invoking msbuild.exe on your project or solution file, you can orchestrate and build products in environments where Visual Studio isn't installed.
 
 For more information on MSBuild, see the [MSBuild documentation](https://docs.microsoft.com/visualstudio/msbuild/msbuild) on docs.microsoft.com.
 
 ### Build Status
 
-The current development branch is `master`. Changes in `master` will go into a future update of MSBuild, which will release with Visual Studio 16.3 and .NET Core SDK 3.0.100.
+The current development branch is `master`. Changes in `master` will go into a future update of MSBuild, which will release with Visual Studio 16.4 and a corresponding version of the .NET Core SDK.
 
 [![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=master)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=master)
 
-We have forked for MSBuild 16.2 in the branch [`vs16.2`](https://github.com/Microsoft/msbuild/tree/vs16.2). Changes to that branch need special approval.
+We have forked for MSBuild 16.3 in the branch [`vs16.3`](https://github.com/Microsoft/msbuild/tree/vs16.3). Changes to that branch need special approval.
 
-[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.2)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=vs16.2)
+[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.3)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=vs16.3)
 
 MSBuild 16.0 builds from the branch [`vs16.0`](https://github.com/Microsoft/msbuild/tree/vs16.0). Only high-priority bugfixes will be considered for servicing 16.0.
 
@@ -25,28 +25,26 @@ MSBuild 15.9 builds from the branch [`vs15.9`](https://github.com/Microsoft/msbu
 | **Full Framework** |[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.9/innerloop_Windows_NT_Full)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.9/job/innerloop_Windows_NT_Full)| N/A | N/A | N/A |
 |**.NET Core**|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.9/innerloop_Windows_NT_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.9/job/innerloop_Windows_NT_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.9/innerloop_Ubuntu16.04_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.9/job/innerloop_Ubuntu16.04_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.9/innerloop_OSX10.13_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.9/job/innerloop_OSX10.13_CoreCLR)|
 
-### Source code
-
-* Clone the sources: `git clone https://github.com/Microsoft/msbuild.git`
-
 ## Building
 
-### Building MSBuild with Visual Studio 2019
+### Building MSBuild with Visual Studio 2019 on Windows
 
 For the full supported experience, you will need to have Visual Studio 2019 or higher.
 
 To get started on **Visual Studio 2019**:
 
 1. [Install Visual Studio 2019](https://www.visualstudio.com/vs/).  Select the following Workloads:
-  - _.NET desktop development_
-  - _.NET Core cross-platform development_
-2. [Install the .NET Core 2.1 SDK](https://www.microsoft.com/net/learn/get-started/windows).
-2. Clone the source code (see above).
+  - .NET desktop development
+  - .NET Core cross-platform development
 2. Open a `Developer Command Prompt for VS 2019` prompt.
-3. Build the code using the `build.cmd` script at the root of the repo. This also restores packages needed to open the projects in Visual Studio.
+3. Clone the source code: `git clone https://github.com/Microsoft/msbuild.git`
+  - You may have to [download git](https://git-scm.com/downloads) first.
+4. Run `.\build.cmd` from the root of the repo to build the code. This also restores packages needed to open the projects in Visual Studio.
 5. Open `MSBuild.sln` or `MSBuild.Dev.sln` in Visual Studio 2019.
 
-Note: To produce a "bootstrap" build, run `.\build.cmd /p:CreateBootstrap=true`.
+Note: To create a usable MSBuild with your changes, run `.\build.cmd /p:CreateBootstrap=true`.
+
+This newly-built MSBuild will be located at `artifacts\bin\bootstrap\net472\MSBuild\Current\Bin\MSBuild.exe`. It may not work for all scenarios, including C++ builds.
 
 ### Building MSBuild in Unix (Mac & Linux)
 
@@ -62,7 +60,7 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 
 #### Getting Started
 
-Before you contribute, please read through the contributing and developer guides to get an idea of what kinds of pull requests we will or won't accept.
+Before you contribute, please read through the contributing and developer guides to get an idea of what kinds of pull requests we accept.
 
 * [Contributing Guide](documentation/wiki/Contributing-Code.md)
 
