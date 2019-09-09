@@ -581,8 +581,8 @@
         <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
-        <source>MSB4019: The imported project "{0}" was not found. Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk.</source>
-        <target state="translated">MSB4019: 找不到匯入的專案 "{0}"。請確認 &lt;Import&gt; 宣告中的路徑正確，而且檔案存在於磁碟上。</target>
+        <source>MSB4019: The imported project "{0}" was not found. Confirm that the path in the Import declaration "{1}" is correct, and that the file exists on disk.</source>
+        <target state="new">MSB4019: The imported project "{0}" was not found. Confirm that the path in the Import declaration "{1}" is correct, and that the file exists on disk.</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">
