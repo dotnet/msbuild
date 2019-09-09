@@ -1,14 +1,13 @@
 <Project ToolsVersion="14.0" DefaultTargets="Test">
   <Import Project="test/TestPackageProjects.targets" />
-  <Import Project="test/OverlaySdkOnLKG.targets" />
 
   <PropertyGroup>
-    <TestPackagesDir>$(TestOutputDir)packages</TestPackagesDir>
+    <TestPackagesDir>$(ArtifactsTmpDir)testpackages/</TestPackagesDir>
   </PropertyGroup>
 
   <ItemGroup>
-    <_CopyDirectoryBuildTestDependenciesInput Include="$(MSBuildThisFileDirectory)test/Empty.props" />
-    <_CopyDirectoryBuildTestDependenciesInput Include="$(MSBuildThisFileDirectory)test/Empty.targets" />
+    <_CopyDirectoryBuildTestDependenciesInput Include="$(MSBuildThisFileDirectory)targets/Empty.props" />
+    <_CopyDirectoryBuildTestDependenciesInput Include="$(MSBuildThisFileDirectory)targets/Empty.targets" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,9 +18,8 @@
   <Target Name="PrepareTests"
           DependsOnTargets="CreateTestAssetPackageNuPkgs;
                             CopyDirectoryBuildTestDependencies;
-                            OverlaySdkOnLKG"
-          BeforeTargets="Build"
-          Condition="'$(TargetFramework)' == ''">
+                            "
+          BeforeTargets="Build">
   </Target>
 
   <Target Name="CreateTestAssetPackageNuPkgs"
@@ -33,7 +31,6 @@
     <MSBuild
       BuildInParallel="False"
       Projects="%(TestPackageProject.ProjectPath)"
-      Properties="ImportDirectoryBuildTargets=false"
       Targets="Restore"
       RemoveProperties="TargetFramework" />
 

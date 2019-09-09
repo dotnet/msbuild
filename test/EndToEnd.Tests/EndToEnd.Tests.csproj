@@ -5,16 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <_CopyDirectoryBuildTestDependenciesInput Include="$(MSBuildThisFileDirectory)targets/Empty.props" />
-    <_CopyDirectoryBuildTestDependenciesInput Include="$(MSBuildThisFileDirectory)targets/Empty.targets" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <_CopyDirectoryBuildTestDependenciesOutput Include="$(ArtifactsTmpDir)Directory.Build.props" />
-    <_CopyDirectoryBuildTestDependenciesOutput Include="$(ArtifactsTmpDir)Directory.Build.targets" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="$(SdkOutputDirectory)\sdk\*\.version">
       <Link>.version</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -29,11 +19,4 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)" />
   </ItemGroup>
-
-  <Target Name="CopyDirectoryBuildTestDependencies"
-        Inputs="@(_CopyDirectoryBuildTestDependenciesInput)"
-        Outputs="@(_CopyDirectoryBuildTestDependenciesOutput)"
-        AfterTargets="Build">
-    <Copy SourceFiles="@(_CopyDirectoryBuildTestDependenciesInput)" DestinationFiles="@(_CopyDirectoryBuildTestDependenciesOutput)" />
-  </Target>
 </Project>

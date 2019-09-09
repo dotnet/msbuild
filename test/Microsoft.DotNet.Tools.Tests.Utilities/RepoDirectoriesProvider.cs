@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 {
                     string configuration = new DirectoryInfo(AppContext.BaseDirectory).Parent.Name;
                     DotnetUnderTest = Path.Combine(RepoRoot, "artifacts", "bin", "redist", configuration, "dotnet", "dotnet" + dotnetExtension);
-                    TestPackages = Path.Combine(RepoRoot, "artifacts", "tmp", configuration, "test", "packages");
+                    TestPackages = Path.Combine(RepoRoot, "artifacts", "tmp", configuration, "testpackages");
                     if (string.IsNullOrEmpty(TestWorkingFolder))
                     {
                         TestWorkingFolder = Path.Combine(RepoRoot, "artifacts", "tmp", configuration);

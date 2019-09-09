@@ -39,7 +39,7 @@
         <Version>$(Version)</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
-      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-desktop-and-portable"
+      <!--<BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-desktop-and-portable"
                               Condition=" '$(OS)' == 'Windows_NT' " >
         <Name>dotnet-desktop-and-portable</Name>
         <ProjectName>dotnet-desktop-and-portable.csproj</ProjectName>
@@ -47,7 +47,7 @@
         <IsApplicable>True</IsApplicable>
         <Version>$(Version)</Version>
         <Clean>True</Clean>
-      </BaseTestPackageProject>
+      </BaseTestPackageProject>-->
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-desktop-binding-redirects"
                               Condition=" '$(OS)' == 'Windows_NT' ">
         <Name>dotnet-desktop-binding-redirects</Name>
@@ -74,14 +74,14 @@
         <Version>2.0.0</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
-      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-outputsframeworkversion/dotnet-outputsframeworkversion-netcoreapp1.0">
+      <!--<BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-outputsframeworkversion/dotnet-outputsframeworkversion-netcoreapp1.0">
         <Name>dotnet-outputsframeworkversion-netcoreapp1.0</Name>
         <ProjectName>dotnet-outputsframeworkversion-netcoreapp1.0.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
         <Version>1.0.0</Version>
         <Clean>True</Clean>
-      </BaseTestPackageProject>
+      </BaseTestPackageProject>-->
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-portable">
         <Name>dotnet-portable</Name>
         <ProjectName>dotnet-portable.csproj</ProjectName>
@@ -90,22 +90,22 @@
         <Version>1.0.0</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
-      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-portable-v1">
+      <!--<BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-portable-v1">
         <Name>dotnet-portable</Name>
         <ProjectName>dotnet-portable-v1.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
         <Version>1.0.0</Version>
         <Clean>True</Clean>
-      </BaseTestPackageProject>
-      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-portable-v1-prefercli">
+      </BaseTestPackageProject>-->
+      <!--<BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-portable-v1-prefercli">
         <Name>dotnet-portable</Name>
         <ProjectName>dotnet-portable-v1-prefercli.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
         <Version>1.0.0</Version>
         <Clean>True</Clean>
-      </BaseTestPackageProject>
+      </BaseTestPackageProject>-->
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-fallbackfoldertool">
         <Name>dotnet-fallbackfoldertool</Name>
         <ProjectName>dotnet-fallbackfoldertool.csproj</ProjectName>
