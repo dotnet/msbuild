@@ -143,15 +143,15 @@
     </GetUseBundledNETCoreAppPackageVersionAsDefaultNetCorePatchVersion>
 
     <PropertyGroup>
-      <MicrosoftNETCoreAppLatestVersion1_0 Condition="'$(MicrosoftNETCoreAppLatestVersion1_0)' == ''">1.0.15</MicrosoftNETCoreAppLatestVersion1_0>
-      <MicrosoftNETCoreAppLatestVersion1_1 Condition="'$(MicrosoftNETCoreAppLatestVersion1_1)' == ''">1.1.12</MicrosoftNETCoreAppLatestVersion1_1>
-      <MicrosoftNETCoreAppLatestVersion2_1 Condition="'$(MicrosoftNETCoreAppLatestVersion2_1)' == ''">2.1.9</MicrosoftNETCoreAppLatestVersion2_1>
+      <MicrosoftNETCoreAppLatestVersion1_0 Condition="'$(MicrosoftNETCoreAppLatestVersion1_0)' == ''">1.0.16</MicrosoftNETCoreAppLatestVersion1_0>
+      <MicrosoftNETCoreAppLatestVersion1_1 Condition="'$(MicrosoftNETCoreAppLatestVersion1_1)' == ''">1.1.13</MicrosoftNETCoreAppLatestVersion1_1>
+      <MicrosoftNETCoreAppLatestVersion2_1 Condition="'$(MicrosoftNETCoreAppLatestVersion2_1)' == ''">2.1.13</MicrosoftNETCoreAppLatestVersion2_1>
       <MicrosoftNETCoreAppLatestVersion2_2 Condition="'$(MicrosoftNETCoreAppLatestVersion2_2)' == ''">$(_NETCoreAppPackageVersion)</MicrosoftNETCoreAppLatestVersion2_2>
 
-      <MicrosoftAspNetCoreAppLatestVersion2_1 Condition="'$(MicrosoftAspNetCoreAppLatestVersion2_1)' == ''">2.1.9</MicrosoftAspNetCoreAppLatestVersion2_1>
+      <MicrosoftAspNetCoreAppLatestVersion2_1 Condition="'$(MicrosoftAspNetCoreAppLatestVersion2_1)' == ''">2.1.13</MicrosoftAspNetCoreAppLatestVersion2_1>
       <MicrosoftAspNetCoreAppLatestVersion2_2 Condition="'$(MicrosoftAspNetCoreAppLatestVersion2_2)' == ''">$(_AspNetCoreAppPackageVersion)</MicrosoftAspNetCoreAppLatestVersion2_2>
 
-      <MicrosoftAspNetCoreAllLatestVersion2_1 Condition="'$(MicrosoftAspNetCoreAllLatestVersion2_1)' == ''">2.1.9</MicrosoftAspNetCoreAllLatestVersion2_1>
+      <MicrosoftAspNetCoreAllLatestVersion2_1 Condition="'$(MicrosoftAspNetCoreAllLatestVersion2_1)' == ''">2.1.13</MicrosoftAspNetCoreAllLatestVersion2_1>
       <MicrosoftAspNetCoreAllLatestVersion2_2 Condition="'$(MicrosoftAspNetCoreAllLatestVersion2_2)' == ''">$(_AspNetCoreAllPackageVersion)</MicrosoftAspNetCoreAllLatestVersion2_2>
     </PropertyGroup>
 
