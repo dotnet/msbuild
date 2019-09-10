@@ -337,21 +337,20 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="needs-review-translation">  -logger:&lt;journaliseur&gt;   Journaliseur des événements MSBuild. Pour indiquer
-         plusieurs journaliseurs, spécifiez chacun d'eux séparément.
-         Syntaxe de &lt;journaliseur&gt; :
-           [&lt;classe de journalisation&gt;,]&lt;assembly de journalisation&gt;
-           [;&lt;paramètres de journalisation&gt;]
-         Syntaxe de &lt;classe de journalisation&gt; :
-           [&lt;espace de noms partiels ou complets&gt;.]&lt;nom de la
-           classe de journalisation&gt;
-         Syntaxe de &lt;assembly de journalisation&gt; :
-           {&lt;nom d'assembly&gt;[,&lt;strong name&gt;] | &lt;fichier d'assembly&gt;}
-         Les &lt;paramètres de journalisation&gt; sont facultatifs. Ils sont passés
-         au journaliseur tels que vous les avez tapés. (Forme abrégée : -l)
-         Exemples :
-           -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
-           -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
+        <target state="translated">  -logger:&lt;journaliseur&gt;   Utilise ce journaliseur pour les événements MSBuild. Pour indiquer
+                     plusieurs journaliseurs, spécifiez chacun d'eux séparément.
+                     Syntaxe de &lt;journaliseur&gt; :
+                       [&lt;classe&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;paramètres&gt;]
+                     Syntaxe de &lt;classe de journalisation&gt; :
+                       [&lt;espace de noms partiels ou complets&gt;.]&lt;nom de la classe de journalisation&gt;
+                     Syntaxe de &lt;assembly de journalisation&gt; :
+                       {&lt;nom d'assembly&gt;[,&lt;strong name&gt;] | &lt;fichier d'assembly&gt;}
+                     Les options de journalisation spécifient la façon dont MSBuild crée le journaliseur.
+                     Les &lt;paramètres de journalisation&gt; sont facultatifs. Ils sont passés
+                     au journaliseur tels que vous les avez tapés. (Forme abrégée : -l)
+                     Exemples :
+                       -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
+                       -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -607,24 +606,23 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="needs-review-translation">  -distributedLogger:&lt;journaliseur central&gt;*&lt;journaliseur de transfert&gt;
-         Utilise ce journaliseur pour consigner les événements MSBuild, en
-         attachant une instance de journaliseur différente à chaque nœud. Pour
-         indiquer plusieurs journaliseurs, spécifiez chacun d'eux séparément.
-         (Forme abrégée -dl)
-         Syntaxe de &lt;journaliseur&gt; :
-           [&lt;classe de journalisation&gt;,]&lt;assembly de journalisation&gt;
-           [;&lt;paramètres de journalisation&gt;]
-         Syntaxe de &lt;classe de journalisation&gt; :
-           [&lt;espace de noms partiels ou complets&gt;.]&lt;nom de la
-           classe de journalisation&gt;
-         Syntaxe de &lt;assembly de journalisation&gt; :
-           {&lt;nom d'assembly&gt;[,&lt;strong name&gt;] | &lt;fichier d'assembly&gt;}
-         Les &lt;paramètres de journalisation&gt; sont facultatifs. Ils sont passés
-         au journaliseur tels que vous les avez tapés. (Forme abrégée : -l)
-         Exemples :
-           -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
-           -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
+        <target state="translated">  -distributedLogger:&lt;journaliseur central&gt;*&lt;journaliseur de transfert&gt;
+                     Utilise ce journaliseur pour consigner les événements MSBuild, en attachant
+                     une instance de journaliseur différente à chaque nœud. Pour indiquer
+                     plusieurs journaliseurs, spécifiez chacun d'eux séparément.
+                     (Forme abrégée : -dl)
+                     Syntaxe de &lt;journaliseur&gt; :
+                       [&lt;classe&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;paramètres&gt;]
+                     Syntaxe de &lt;classe de journalisation&gt; :
+                       [&lt;espace de noms partiels ou complets&gt;.]&lt;nom de la classe de journalisation&gt;
+                     Syntaxe de &lt;assembly de journalisation&gt; :
+                       {&lt;nom d'assembly&gt;[,&lt;strong name&gt;] | &lt;fichier d'assembly&gt;}
+                     Les options de journalisation spécifient la façon dont MSBuild crée le journaliseur.
+                     Les &lt;paramètres de journalisation&gt; sont facultatifs. Ils sont passés
+                     au journaliseur tels que vous les avez tapés. (Forme abrégée : -l)
+                     Exemples :
+                       -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
+                       -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -1134,7 +1132,7 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
       </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
         <source>The specified logger could not be created and will not be used. {0}</source>
-        <target state="new">The specified logger could not be created and will not be used. {0}</target>
+        <target state="translated">Le journaliseur spécifié n'a pas pu être créé et ne sera pas utilisé. {0}</target>
         <note>
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: {0} contains the exception message explaining why the

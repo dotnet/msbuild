@@ -1001,12 +1001,12 @@
       </trans-unit>
       <trans-unit id="GenerateResource.PreserializedResourcesRequiresExtensions">
         <source>MSB3822: Non-string resources require the System.Resources.Extensions assembly at runtime, but it was not found in this project's references.</source>
-        <target state="new">MSB3822: Non-string resources require the System.Resources.Extensions assembly at runtime, but it was not found in this project's references.</target>
+        <target state="translated">MSB3822: con le risorse non di stringa è richiesto l'assembly System.Resources.Extensions in fase di esecuzione, che non è stato trovato nei riferimenti di questo progetto.</target>
         <note>{StrBegin="MSB3822: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.PreserializedResourcesRequiresProperty">
         <source>MSB3823: Non-string resources require the property GenerateResourceUsePreserializedResources to be set to true.</source>
-        <target state="new">MSB3823: Non-string resources require the property GenerateResourceUsePreserializedResources to be set to true.</target>
+        <target state="translated">MSB3823: con le risorse non di stringa è necessario impostare su true la proprietà GenerateResourceUsePreserializedResources.</target>
         <note>{StrBegin="MSB3823: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ResourceNotFound">

@@ -344,7 +344,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="needs-review-translation">  -logger:&lt;rejestrator&gt;  Umożliwia użycie podanego rejestratora do rejestrowania
+        <target state="translated">  -logger:&lt;rejestrator&gt;  Umożliwia użycie podanego rejestratora do rejestrowania
                          zdarzeń pochodzących z programu MSBuild. Aby określić
                      wiele rejestratorów, określ każdy z nich osobno.
                      Składnia elementu &lt;rejestrator&gt;:
@@ -618,7 +618,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="needs-review-translation">  -distributedLogger:&lt;centralny rejestrator&gt;*&lt;rejestrator przekazujący&gt;
+        <target state="translated">  -distributedLogger:&lt;centralny rejestrator&gt;*&lt;rejestrator przekazujący&gt;
                      Umożliwia użycie podanego rejestratora do rejestrowania
                      zdarzeń pochodzących z programu MSBuild. Aby określić
                      wiele rejestratorów, określ każdy z nich osobno.
@@ -1144,7 +1144,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
       </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
         <source>The specified logger could not be created and will not be used. {0}</source>
-        <target state="new">The specified logger could not be created and will not be used. {0}</target>
+        <target state="translated">Nie można utworzyć określonego rejestratora i nie zostanie on użyty. {0}</target>
         <note>
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: {0} contains the exception message explaining why the
