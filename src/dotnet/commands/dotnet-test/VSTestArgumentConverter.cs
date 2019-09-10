@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Cli
             ["diag"] = "diagnostic"
         };
 
-        private readonly string[] IgnoredArgumentArray = new string[]
+        private readonly string[] IgnoredArguments = new string[]
         {
             "-c",
             "--configuration",
@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.Cli
                 {
                     if (!string.IsNullOrEmpty(activeArgument))
                     {
-                        if (IgnoredArgumentArray.Contains(activeArgument))
+                        if (IgnoredArguments.Contains(activeArgument))
                         {
                             ignoredArgs.Add(activeArgument);
                         }
@@ -83,23 +83,22 @@ namespace Microsoft.DotNet.Cli
                     {
                         var argValues = arg.Split(':');
 
+                        if (IgnoredArguments.Contains(argValues[0]))
+                        {
+                            ignoredArgs.Add(arg);
+                            continue;
+                        }
+
+                        if (this.IsVerbosityArg(argValues[0]))
+                        {
+                            UpdateVerbosity(argValues[1], newArgList);
+                            continue;
+                        }
+
                         // Check if the argument is shortname
                         if (ArgumentMapping.TryGetValue(argValues[0].ToLower(), out var longName))
                         {
                             argValues[0] = longName;
-                        }
-                        else if (this.IsVerbosityArg(argValues[0]))
-                        {
-                            if (argValues.Length == 2)
-                            {
-                                UpdateVerbosity(argValues[1], newArgList);
-                            }
-                            continue;
-                        }
-                        else if (IgnoredArgumentArray.Contains(argValues[0]))
-                        {
-                            ignoredArgs.Add(arg);
-                            continue;
                         }
 
                         newArgList.Add(string.Join(":", argValues));
@@ -119,7 +118,7 @@ namespace Microsoft.DotNet.Cli
                     {
                         UpdateVerbosity(arg, newArgList);
                     }
-                    else if (IgnoredArgumentArray.Contains(activeArgument))
+                    else if (IgnoredArguments.Contains(activeArgument))
                     {
                         ignoredArgs.Add(activeArgument);
                         ignoredArgs.Add(arg);
@@ -139,7 +138,7 @@ namespace Microsoft.DotNet.Cli
 
             if (!string.IsNullOrEmpty(activeArgument))
             {
-                if (IgnoredArgumentArray.Contains(activeArgument))
+                if (IgnoredArguments.Contains(activeArgument))
                 {
                     ignoredArgs.Add(activeArgument);
                 }
@@ -162,11 +161,9 @@ namespace Microsoft.DotNet.Cli
             if (VerbosityMapping.TryGetValue(verbosity.ToLower(), out string longValue))
             {
                 newArgList.Add(verbosityString + longValue);
+                return;
             }
-            else
-            {
-                newArgList.Add(verbosityString + verbosity);
-            }
+            newArgList.Add(verbosityString + verbosity);
         }
     }
 }
