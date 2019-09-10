@@ -100,6 +100,10 @@ namespace Microsoft.DotNet.Tools.Test
             if (ContainsBuiltTestSources(args))
             {
                 var convertedArgs = new VSTestArgumentConverter().Convert(args, out var ignoredArgs);
+                if (ignoredArgs.Any())
+                {
+                    Console.WriteLine(LocalizableStrings.IgnoredArgumentsMessage, string.Join(" ", ignoredArgs));
+                }
                 return new VSTestForwardingApp(convertedArgs).Execute();
             }
 
