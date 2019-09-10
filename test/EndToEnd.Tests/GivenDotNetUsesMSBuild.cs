@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Xml.Linq;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
@@ -59,6 +60,17 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             var testInstance = TestAssets.Get("MSBuildTestApp")
                                          .CreateInstance()
                                          .WithSourceFiles()
+                                         .WithProjectChanges(project =>
+                                         {
+                                             var ns = project.Root.Name.Namespace;
+
+                                             var itemGroup = new XElement(ns + "ItemGroup");
+                                             itemGroup.Add(new XElement(ns + "DotNetCliToolReference",
+                                                                new XAttribute("Include", "dotnet-portable"),
+                                                                new XAttribute("Version", "1.0.0")));
+
+                                             project.Root.Add(itemGroup);
+                                         })
                                          .WithRestoreFiles();
 
             var testProjectDirectory = testInstance.Root;

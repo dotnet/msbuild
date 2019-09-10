@@ -11,8 +11,12 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
+using Microsoft.DotNet.TestFramework;
+using Microsoft.DotNet.Tools.Test.Utilities;
+
 
 namespace Microsoft.DotNet.TestFramework
 {
@@ -260,27 +264,13 @@ namespace Microsoft.DotNet.TestFramework
 
         private void Restore(FileInfo projectFile)
         {
-            var restoreArgs = new string[] { "restore", projectFile.FullName };
+            var restoreArgs = new string[] { "restore", projectFile.FullName,
+                                             "/bl:" +  Path.Combine(projectFile.DirectoryName, "restore.binlog") };
 
-            var commandResult = CreateCommand(TestAssetInfo.DotnetExeFile.FullName, restoreArgs)
-                                .CaptureStdOut()
-                                .CaptureStdErr()
-                                .Execute();
-
-            int exitCode = commandResult.ExitCode;
-
-            if (exitCode != 0)
-            {
-                Console.WriteLine(commandResult.StdOut);
-
-                Console.WriteLine(commandResult.StdErr);
-
-                string message = string.Format($"TestAsset Restore '{TestAssetInfo.AssetName}'@'{projectFile.FullName}' Failed with {exitCode}" + Environment.NewLine +
-                    commandResult.StdOut + Environment.NewLine +
-                    commandResult.StdErr);
-
-                throw new Exception(message);
-            }
+            new RestoreCommand()
+                .WithWorkingDirectory(projectFile.DirectoryName)
+                .Execute()
+                .Should().Pass();
         }
 
         private void RestoreAllProjects()
