@@ -122,7 +122,7 @@ namespace Microsoft.DotNet.Tools.Test
         {
             foreach (var arg in args)
             {
-                if (!(arg.StartsWith("-") || arg.StartsWith("/")) &&
+                if (!arg.StartsWith("-") &&
                     (arg.EndsWith("dll", StringComparison.OrdinalIgnoreCase) || arg.EndsWith("exe", StringComparison.OrdinalIgnoreCase)))
                 {
                     return true;
