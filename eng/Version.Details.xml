@@ -13,13 +13,13 @@
       <Uri>https://github.com/dotnet/sdk</Uri>
       <Sha>82055971c3d76fd3bb33d17d6c08c373e81bf54f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="16.3.0-preview-19377-01">
+    <Dependency Name="Microsoft.Build" Version="16.3.0-preview-19456-02">
       <Uri>https://github.com/Microsoft/msbuild</Uri>
-      <Sha>dd8019d9e1de5080594965f27618b524dab8a34d</Sha>
+      <Sha>ee8294b5597fe21ca5c44c8fd4c142d27fcec2cb</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.FSharp.Compiler" Version="10.6.0-beta.19376.4">
+    <Dependency Name="Microsoft.FSharp.Compiler" Version="10.7.0-beta.19460.5">
       <Uri>https://github.com/dotnet/fsharp</Uri>
-      <Sha>d4884581c1e7a93232914a2e335928210d8ddd84</Sha>
+      <Sha>e6bb0f12d5de504c819938a8f06fc46698b595c7</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.Compilers" Version="3.4.0-beta1-19456-03">
       <Uri>https://github.com/dotnet/roslyn</Uri>
@@ -34,19 +34,19 @@
       <Uri>https://github.com/dotnet/wpf</Uri>
       <Sha>ac7f91f37d67a0ae46273429da5530821de9665a</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="5.1.0-rtm.5921">
-      <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>27af96bdb7ba8d6d7ea9ad53fc76cd1d1aa80703</Sha>
+    <Dependency Name="NuGet.Build.Tasks" Version="5.3.0-rtm.6192">
+      <Uri>https://github.com/NuGet/NuGet.Client</Uri>
+      <Sha>bb60d6720d24890b8f3e071e70d27ea0f2bef57e</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.3.0-preview-20190715-02">
+    <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.3.0-preview-20190911-02">
       <Uri>https://github.com/microsoft/vstest</Uri>
-      <Sha>1e37ee32dbba48ad797b03bff0058c5c60a3a770</Sha>
+      <Sha>32a75bd117876d8ad9c023cd0029df97412d1706</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Sdk.Web" Version="5.0.100-alpha1.19460.3">
       <Uri>https://github.com/aspnet/websdk</Uri>
       <Sha>6d56b750d230aaa88fc26bc0a92f9fb06f313c32</Sha>
     </Dependency>
-    <Dependency Name="ILLink.Tasks" Version="0.1.6-prerelease.19379.2">
+    <Dependency Name="ILLink.Tasks" Version="0.1.6-prerelease.19380.1">
       <Uri>https://github.com/mono/linker</Uri>
       <Sha>18ff3f49475c3fc3fafa1d17161b1525eea182d8</Sha>
     </Dependency>
