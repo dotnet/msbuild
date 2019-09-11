@@ -30,7 +30,7 @@
       <Sha>912b8a89a9dcedfc2b5046b91facde1ca01e94b1</Sha>
     </Dependency>
     <!-- For coherency purposes, this version should be gated by the version of wpf routed via core setup -->
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-rc2.19459.11" CoherentParentDependency="Microsoft.NETCore.App">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-rc1.19459.3" CoherentParentDependency="Microsoft.NETCore.App">
       <Uri>https://github.com/dotnet/wpf</Uri>
       <Sha>b5574a2d2c6b2d5e55276a7707ae45c2d53c94ce</Sha>
     </Dependency>
