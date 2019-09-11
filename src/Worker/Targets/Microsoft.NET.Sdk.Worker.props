@@ -27,6 +27,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Set CopyToOutputDirectory and CopyToPublishDirectory to Never for items under AppDesignerFolder ("Properties", by default) to avoid publishing launchSettings.json -->
     <Content Update="$(AppDesignerFolder)\**" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" Condition="'$(AppDesignerFolder)' != ''"/>
 
+    <!-- Remove Content items from other item types -->
+    <None Remove="**\*.json;**\*.config" />
+
     <!-- Keep track of the default content items for later to distinguish them from newly generated content items -->
     <_ContentIncludedByDefault Include="@(Content)" />
 
