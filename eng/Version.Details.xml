@@ -9,19 +9,19 @@
       <Uri>https://github.com/dotnet/cli</Uri>
       <Sha>a6e4f7bfd93943b9336fd4741343a3bdbc5f550b</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-rc1.19422.1">
+    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-rc2.19455.7">
       <Uri>https://github.com/dotnet/sdk</Uri>
-      <Sha>83dffb6faab234c0c878e92c1679fa47c0cab3dd</Sha>
+      <Sha>b88161ed99ded0dd598779ad1afe044818422a6f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="16.3.0-preview-19414-01">
+    <Dependency Name="Microsoft.Build" Version="16.3.0-preview-19456-02">
       <Uri>https://github.com/Microsoft/msbuild</Uri>
-      <Sha>bbd9cfeca416875f020168a5c46898d90895c535</Sha>
+      <Sha>ee8294b5597fe21ca5c44c8fd4c142d27fcec2cb</Sha>
     </Dependency>
     <Dependency Name="Microsoft.FSharp.Compiler" Version="10.7.0-beta.19460.5">
       <Uri>https://github.com/dotnet/fsharp</Uri>
       <Sha>e6bb0f12d5de504c819938a8f06fc46698b595c7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Compilers" Version="3.3.0-beta3-19459-07">
+    <Dependency Name="Microsoft.NETCore.Compilers" Version="3.3.1-beta3-19423-01">
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>f5ba9f2c61a2fe853dc4913888d40df221539147</Sha>
     </Dependency>
@@ -30,21 +30,21 @@
       <Sha>912b8a89a9dcedfc2b5046b91facde1ca01e94b1</Sha>
     </Dependency>
     <!-- For coherency purposes, this version should be gated by the version of wpf routed via core setup -->
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-rc1.19459.3" CoherentParentDependency="Microsoft.NETCore.App">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.0.0-rc2.19459.11" CoherentParentDependency="Microsoft.NETCore.App">
       <Uri>https://github.com/dotnet/wpf</Uri>
       <Sha>b5574a2d2c6b2d5e55276a7707ae45c2d53c94ce</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="5.3.0-preview.2.6167">
+    <Dependency Name="NuGet.Build.Tasks" Version="5.3.0-rtm.6192">
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
-      <Sha>4590967639182b183b247355596aedc7d0855a86</Sha>
+      <Sha>bb60d6720d24890b8f3e071e70d27ea0f2bef57e</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.3.0-preview-20190822-01">
+    <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.3.0-preview-20190911-02">
       <Uri>https://github.com/microsoft/vstest</Uri>
-      <Sha>e8a07507b66c5e5ebee63ee9ba82e2d643e367e2</Sha>
+      <Sha>32a75bd117876d8ad9c023cd0029df97412d1706</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-rc1.19422.3">
+    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-rc2.19461.2">
       <Uri>https://github.com/aspnet/websdk</Uri>
-      <Sha>4a90ee700f3b496f826d777ce19fcdb95005e1ec</Sha>
+      <Sha>9471e9daf66b1e4f03d8b461c3ca0594f742923b</Sha>
     </Dependency>
     <Dependency Name="ILLink.Tasks" Version="0.1.6-prerelease.19380.1">
       <Uri>https://github.com/mono/linker</Uri>
