@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using MSBuildConstants = Microsoft.Build.Tasks.MSBuildConstants;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -688,7 +689,7 @@ namespace Microsoft.Build.UnitTests
                              .Select(line => line.Trim())
                              .Where(line => line.Length > 0 && !line.StartsWith(commentStart)));
 
-            Assert.Equal(expectedContent, normalizedActualContent);
+            expectedContent.ShouldBe(normalizedActualContent);
         }
     }
 }
