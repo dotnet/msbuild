@@ -17,6 +17,9 @@ using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+#if MSBUILDENABLEPROFILING
+using Microsoft.VisualStudio.Profiler;
+#endif
 
 namespace Microsoft.Build.Evaluation
 {
@@ -87,7 +90,9 @@ namespace Microsoft.Build.Evaluation
             {
                 return true;
             }
-
+#if MSBUILDENABLEPROFILING
+            EvaluateConditionEventSource.Log.Load(String.Format("Evaluate Condition {0} - Begin", condition));
+#endif
             using (lazyEvaluator._evaluationProfiler.TrackCondition(element.ConditionLocation, condition))
             {
                 bool result = ConditionEvaluator.EvaluateCondition
@@ -102,7 +107,9 @@ namespace Microsoft.Build.Evaluation
                     lazyEvaluator._loggingContext.BuildEventContext,
                     lazyEvaluator.FileSystem
                     );
-
+#if MSBUILDENABLEPROFILING
+                EvaluateConditionEventSource.Log.Load(String.Format("Evaluate Condition {0} - End", condition));
+#endif
                 return result;
             }
         }

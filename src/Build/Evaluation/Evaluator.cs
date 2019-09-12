@@ -22,9 +22,6 @@ using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Evaluation.Context;
-#if MSBUILDENABLEPROFILING 
-using Microsoft.VisualStudio.Profiler;
-#endif
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
@@ -277,10 +274,11 @@ namespace Microsoft.Build.Evaluation
             bool interactive = false)
         {
             {
-#if MSBUILDENABLEPROFILING
-                string projectFile = String.IsNullOrEmpty(root.ProjectFileLocation.File) ? "(null)" : root.ProjectFileLocation.File;
-                EvaluateEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Begin", projectFile);
-#endif
+                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+                {
+                    string projectFile = String.IsNullOrEmpty(root.ProjectFileLocation.File) ? "(null)" : root.ProjectFileLocation.File;
+                    EvaluateEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Begin", projectFile));
+                }
                 var profileEvaluation = (loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0 || loggingService.IncludeEvaluationProfile;
                 var evaluator = new Evaluator<P, I, M, D>(
                     data,
@@ -298,10 +296,11 @@ namespace Microsoft.Build.Evaluation
                     interactive);
 
                 evaluator.Evaluate(loggingService, buildEventContext);
-#if MSBUILDENABLEPROFILING
-                string projectFile = String.IsNullOrEmpty(root.ProjectFileLocation.File) ? "(null)" : root.ProjectFileLocation.File;
-                EvaluateEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End", projectFile);
-#endif
+                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+                {
+                    string projectFile = String.IsNullOrEmpty(root.ProjectFileLocation.File) ? "(null)" : root.ProjectFileLocation.File;
+                    EvaluateEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End", projectFile));
+                }
             }
         }
 
@@ -627,10 +626,11 @@ namespace Microsoft.Build.Evaluation
 
                 ErrorUtilities.VerifyThrow(_data.EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
-#if MSBUILDENABLEPROFILING
-                string projectFile = String.IsNullOrEmpty(root.ProjectFileLocation.File) ? "(null)" : root.ProjectFileLocation.File;
-                EvaluateEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End", projectFile);
-#endif
+                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+                {
+                    projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
+                    EvaluateEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 0 (Initial Properties)", projectFile));
+                }
 
                 // Pass1: evaluate properties, load imports, and gather everything else
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Properties))
@@ -647,9 +647,10 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 _data.InitialTargets = initialTargets;
-#if MSBUILDENABLEPROFILING
-                EvaluateEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End", projectFile);
-#endif
+                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+                {
+                    EvaluateEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 1 (Properties and Imports", projectFile));
+                }
                 // Pass2: evaluate item definitions
                 // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
                 using (_evaluationProfiler.TrackPass(EvaluationPass.ItemDefinitionGroups))
@@ -662,9 +663,10 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
                 }
-#if MSBUILDENABLEPROFILING
-                EvaluateEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End", projectFile);
-#endif
+                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+                {
+                    EvaluateEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 2 (Item Definitions)", projectFile));
+                }
                 LazyItemEvaluator<P, I, M, D> lazyEvaluator = null;
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Items))
                 {
@@ -709,9 +711,10 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-#if MSBUILDENABLEPROFILING
-                EvaluateEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End", projectFile);
-#endif
+                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+                {
+                    EvaluateEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 3 (Items)", projectFile));
+                }
                 // Pass4: evaluate using-tasks
                 using (_evaluationProfiler.TrackPass(EvaluationPass.UsingTasks))
                 {
@@ -739,9 +742,10 @@ namespace Microsoft.Build.Evaluation
                 Dictionary<string, List<TargetSpecification>> targetsWhichRunAfterByTarget = new Dictionary<string, List<TargetSpecification>>(StringComparer.OrdinalIgnoreCase);
                 LinkedList<ProjectTargetElement> activeTargetsByEvaluationOrder = new LinkedList<ProjectTargetElement>();
                 Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets = new Dictionary<string, LinkedListNode<ProjectTargetElement>>(StringComparer.OrdinalIgnoreCase);
-#if MSBUILDENABLEPROFILING
-                EvaluateEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End", projectFile);
-#endif
+                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+                {
+                    EvaluateEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 4 (UsingTasks)", projectFile));
+                }
 
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Targets))
                 {

@@ -40,6 +40,7 @@ using Microsoft.Build.Utilities;
 using System.Xml.Linq;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.ResourceHandling;
+using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.Tasks
 {
@@ -665,9 +666,10 @@ namespace Microsoft.Build.Tasks
         public override bool Execute()
         {
             bool outOfProcExecutionSucceeded = true;
-#if MSBUILDENABLEPROFILING
-            ExecuteGenerateResourceEventSource.Log.Load(1, "Execute GenerateResource task - Begin");
-#endif
+            if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+            {
+                ExecuteGenerateResourceEventSource.Log.Load("Execute GenerateResource task - Begin");
+            }
             {
                 // If we're extracting ResW files from assemblies (instead of building resources),
                 // our Sources can contain PDB's, pictures, and other non-DLL's.  Prune that list.  

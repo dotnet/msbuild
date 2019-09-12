@@ -18,11 +18,9 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared.FileSystem;
-#if MSBUILDENABLEPROFILING 
-using Microsoft.VisualStudio.Profiler;
-#endif
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Construction
 {
@@ -1478,9 +1476,10 @@ namespace Microsoft.Build.Construction
             ErrorUtilities.VerifyThrowInvalidOperation(_projectFileLocation != null, "OM_MustSetFileNameBeforeSave");
 
             Directory.CreateDirectory(DirectoryPath);
-#if MSBUILDENABLEPROFILING
-            SaveEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Save Project To File - Begin")
-#endif
+            if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+            {
+                SaveEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Save Project To File - Begin"));
+            }
             {
                 // Note: We're using string Equals on encoding and not EncodingUtilities.SimilarToEncoding in order
                 // to force a save if the Encoding changed from UTF8 with BOM to UTF8 w/o BOM (for example).
@@ -1508,9 +1507,10 @@ namespace Microsoft.Build.Construction
                     _versionOnDisk = Version;
                 }
             }
-#if MSBUILDENABLEPROFILING
-            SaveEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Save Project To File - End")
-#endif
+            if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+            {
+                SaveEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Save Project To File - End"));
+            }
         }
 
         /// <summary>
@@ -1985,9 +1985,10 @@ namespace Microsoft.Build.Construction
             {
                 try
                 {
-#if MSBUILDENABLEPROFILING
-            LoadDocumentEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Load Project From File - Begin");
-#endif
+                    if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+                    {
+                        LoadDocumentEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Load Project From File - Begin"));
+                    }
                     using (XmlReaderExtension xtr = XmlReaderExtension.Create(fullPath, loadAsReadOnly))
                     {
                         _encoding = xtr.Encoding;
@@ -2018,9 +2019,10 @@ namespace Microsoft.Build.Construction
 
                     ProjectFileErrorUtilities.ThrowInvalidProjectFile(fileInfo, ex, "InvalidProjectFile", ex.Message);
                 }
-#if MSBUILDENABLEPROFILING
-            LoadDocumentEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Load Project From File - End")
-#endif
+                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+                {
+                    LoadDocumentEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Load Project From File - End"));
+                }
             }
 
             return document;

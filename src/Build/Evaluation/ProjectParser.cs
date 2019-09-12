@@ -6,12 +6,12 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
 
-#if MSBUILDENABLEPROFILING
-using Microsoft.VisualStudio.Profiler;
-#endif
 using Expander = Microsoft.Build.Evaluation.Expander<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
+using Microsoft.Build.Utilities;
+using Microsoft.Build.Evaluation;
+using System.Globalization;
 
 namespace Microsoft.Build.Construction
 {
@@ -113,18 +113,20 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal static void Parse(XmlDocumentWithLocation document, ProjectRootElement projectRootElement)
         {
-#if MSBUILDENABLEPROFILING
+            if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+            {
                 string projectFile = String.IsNullOrEmpty(projectRootElement.ProjectFileLocation.File) ? "(null)" : projectRootElement.ProjectFileLocation.File;
-                ParseEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Parse Project {0} - Begin", projectFile));
-#endif
+                ParseEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Parse Project {0} - Begin", projectFile));
+            }
             {
                 ProjectParser parser = new ProjectParser(document, projectRootElement);
                 parser.Parse();
             }
-#if MSBUILDENABLEPROFILING
+            if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+            {
                 string projectFile = String.IsNullOrEmpty(projectRootElement.ProjectFileLocation.File) ? "(null)" : projectRootElement.ProjectFileLocation.File;
-                ParseEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Parse Project {0} - End", projectFile));
-#endif
+                ParseEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Parse Project {0} - End", projectFile));
+            }
         }
 
             /// <summary>

@@ -25,9 +25,6 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Utilities;
-#if MSBUILDENABLEPROFILING 
-using Microsoft.VisualStudio.Profiler;
-#endif
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
@@ -696,13 +693,14 @@ namespace Microsoft.Build.BackEnd
                 {
                     SetCommonWorkerThreadParameters();
                 }
-#if MSBUILDENABLEPROFILING
-                    RequestThreadProcEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Build Project - Start");
-#endif
+                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling) {
+                    RequestThreadProcEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Build Project - Start"));
+                }
                 await BuildAndReport();
-#if MSBUILDENABLEPROFILING
-                    RequestThreadProcEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Build Project - End");
-#endif
+                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+                {
+                    RequestThreadProcEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Build Project - End"));
+                }
             }
 #if FEATURE_VARIOUS_EXCEPTIONS
             catch (ThreadAbortException)

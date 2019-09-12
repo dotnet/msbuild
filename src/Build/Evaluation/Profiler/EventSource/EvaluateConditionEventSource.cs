@@ -4,20 +4,20 @@ using System.Diagnostics.Tracing;
 
 
 //
-// Profiles logging of results from executing a task.
+// This captures information relevant to resolving conditionals.
 //
 namespace Microsoft.Build.Evaluation
 {
-    // /OnlyProviders=*LogResults-Profiling
-    [EventSource(Name = "LogResults-Profiling")]
-    public sealed class LogResultsEventSource : EventSource
+    // /OnlyProviders=*EvaluateCondition-Profiling
+    [EventSource(Name = "EvaluateCondition-Profiling")]
+    public sealed class EvaluateConditionEventSource : EventSource
     {
         #region Singleton instance
 
         // define the singleton instance of the event source
-        public static LogResultsEventSource Log = new LogResultsEventSource();
+        public static EvaluateConditionEventSource Log = new EvaluateConditionEventSource();
 
-        private LogResultsEventSource() { }
+        private EvaluateConditionEventSource() { }
 
         #endregion
 

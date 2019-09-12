@@ -8,16 +8,16 @@ using System.Diagnostics.Tracing;
 //
 namespace Microsoft.Build.Evaluation
 {
-    // /OnlyProvider=*ExecuteGeneralResource-Profiling
+    // /OnlyProvider=*ExecuteGenerateResource-Profiling
     [EventSource(Name = "ExecuteGeneralResource-Profiling")]
-    public sealed class ExecuteGeneralResourceEventSource : EventSource
+    public sealed class ExecuteGenerateResourceEventSource : EventSource
     {
         #region Singleton instance
 
         // define the singleton instance of the event source
-        public static ExecuteGeneralResourceEventSource Log = new ExecuteGeneralResourceEventSource();
+        public static ExecuteGenerateResourceEventSource Log = new ExecuteGenerateResourceEventSource();
 
-        private ExecuteGeneralResourceEventSource() { }
+        private ExecuteGenerateResourceEventSource() { }
 
         #endregion
 

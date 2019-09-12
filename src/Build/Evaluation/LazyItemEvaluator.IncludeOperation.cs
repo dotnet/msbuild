@@ -8,6 +8,9 @@ using Microsoft.Build.Construction;
 using System.Collections.Immutable;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+#if MSBUILDENABLEPROFILING
+using Microsoft.VisualStudio.Profiler;
+#endif
 
 namespace Microsoft.Build.Evaluation
 {
@@ -97,6 +100,9 @@ namespace Microsoft.Build.Evaluation
                         }
 
                         string[] includeSplitFilesEscaped;
+#if MSBUILDENABLEPROFILING
+                        SelectItemsEventSource.Log.Load("Select Items - Begin");
+#endif
                         using (_lazyEvaluator._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
                         {
                             includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
@@ -105,6 +111,9 @@ namespace Microsoft.Build.Evaluation
                                 excludePatternsForGlobs
                             );
                         }
+#if MSBUILDENABLEPROFILING
+                  SelectItemsEventSource.Log.Load("Select Items - Begin");
+#endif
 
                         foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
                         {

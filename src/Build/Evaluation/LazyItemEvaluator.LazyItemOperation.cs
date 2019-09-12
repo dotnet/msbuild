@@ -9,6 +9,9 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+#if MSBUILDENABLEPROFILING
+using Microsoft.VisualStudio.Profiler;
+#endif
 
 namespace Microsoft.Build.Evaluation
 {
@@ -51,12 +54,18 @@ namespace Microsoft.Build.Evaluation
 
             public virtual void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
+#if MSBUILDENABLEPROFILING
+                ApplyEventSource.Log.Load("Select Mutate Save Items - Begin");
+#endif
                 using (_lazyEvaluator._evaluationProfiler.TrackElement(_itemElement))
                 {
                     var items = SelectItems(listBuilder, globsToIgnore);
                     MutateItems(items);
                     SaveItems(items, listBuilder);
                 }
+#if MSBUILDENABLEPROFILING
+                ApplyEventSource.Log.Load("Select Mutate Save Items - End");
+#endif
             }
 
             /// <summary>

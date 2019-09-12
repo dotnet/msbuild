@@ -9,7 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
-
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.AssemblyDependency;
@@ -1340,9 +1340,10 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void RemoveReferencesMarkedForExclusion(bool removeOnlyNoWarning, string subsetName)
         {
-#if (MSBUILDENABLEPROFILING)
-            RemoveReferencesMarkedForExclusionEventSource.Log.Load(1, "Remove References Start");
-#endif
+            if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+            {
+                RemoveReferencesMarkedForExclusionEventSource.Log.Load("Remove References Start");
+            }
             {
                 // Create a table which will contain the references which are not in the black list
                 var goodReferences = new Dictionary<AssemblyNameExtension, Reference>(AssemblyNameComparer.GenericComparer);
@@ -1595,9 +1596,10 @@ namespace Microsoft.Build.Tasks
             List<Exception> exceptions
         )
         {
-#if (MSBUILDENABLEPROFILING)
-            ComputeClosureEventSource.Log.Load(1, "Compute Closure Start");
-#endif
+            if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+            {
+                ComputeClosureEventSource.Log.Load("Compute Closure Start");
+            }
             {
                 References.Clear();
                 _externallyResolvedPrimaryReferences.Clear();

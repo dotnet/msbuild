@@ -131,6 +131,8 @@ namespace Microsoft.Build.Utilities
 
         public readonly ProjectInstanceTranslationMode? ProjectInstanceTranslation = ComputeProjectInstanceTranslation();
 
+        public readonly bool MSBuildEnableProfiling = Environment.GetEnvironmentVariable("MSBUILDENABLEPROFILING") == "1";
+
         /// <summary>
         /// Never use the slow (but more accurate) CreateFile approach to timestamp extraction.
         /// </summary>

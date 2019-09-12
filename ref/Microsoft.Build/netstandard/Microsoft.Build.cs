@@ -495,11 +495,25 @@ namespace Microsoft.Build.Definition
 }
 namespace Microsoft.Build.Evaluation
 {
+    [System.Diagnostics.Tracing.EventSourceAttribute(Name="Apply-Profiling")]
+    public sealed partial class ApplyEventSource : System.Diagnostics.Tracing.EventSource
+    {
+        internal ApplyEventSource() { }
+        public static Microsoft.Build.Evaluation.ApplyEventSource Log;
+        public void Load(string info) { }
+    }
     [System.Diagnostics.Tracing.EventSourceAttribute(Name="ComputeClosure-Profiling")]
     public sealed partial class ComputeClosureEventSource : System.Diagnostics.Tracing.EventSource
     {
         internal ComputeClosureEventSource() { }
         public static Microsoft.Build.Evaluation.ComputeClosureEventSource Log;
+        public void Load(string info) { }
+    }
+    [System.Diagnostics.Tracing.EventSourceAttribute(Name="EvaluateCondition-Profiling")]
+    public sealed partial class EvaluateConditionEventSource : System.Diagnostics.Tracing.EventSource
+    {
+        internal EvaluateConditionEventSource() { }
+        public static Microsoft.Build.Evaluation.EvaluateConditionEventSource Log;
         public void Load(string info) { }
     }
     [System.Diagnostics.Tracing.EventSourceAttribute(Name="Evaluate-Profiling")]
@@ -542,8 +556,8 @@ namespace Microsoft.Build.Evaluation
     [System.Diagnostics.Tracing.EventSourceAttribute(Name="LogResults-Profiling")]
     public sealed partial class LogResultsEventSource : System.Diagnostics.Tracing.EventSource
     {
+        internal LogResultsEventSource() { }
         public static Microsoft.Build.Evaluation.LogResultsEventSource Log;
-        public LogResultsEventSource() { }
         public void Load(string info) { }
     }
     [System.FlagsAttribute]
@@ -887,6 +901,13 @@ namespace Microsoft.Build.Evaluation
     {
         internal SaveEventSource() { }
         public static Microsoft.Build.Evaluation.SaveEventSource Log;
+        public void Load(string info) { }
+    }
+    [System.Diagnostics.Tracing.EventSourceAttribute(Name="SelectItems-Profiling")]
+    public sealed partial class SelectItemsEventSource : System.Diagnostics.Tracing.EventSource
+    {
+        internal SelectItemsEventSource() { }
+        public static Microsoft.Build.Evaluation.SelectItemsEventSource Log;
         public void Load(string info) { }
     }
     public partial class SubToolset

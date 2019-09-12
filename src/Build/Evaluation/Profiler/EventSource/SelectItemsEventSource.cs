@@ -4,20 +4,20 @@ using System.Diagnostics.Tracing;
 
 
 //
-// Profiles logging of results from executing a task.
+// This captures information relevant to identifying a list of files that correspond to an item with a wildcard.
 //
 namespace Microsoft.Build.Evaluation
 {
-    // /OnlyProviders=*LogResults-Profiling
-    [EventSource(Name = "LogResults-Profiling")]
-    public sealed class LogResultsEventSource : EventSource
+    // /OnlyProviders=*SelectItems-Profiling
+    [EventSource(Name = "SelectItems-Profiling")]
+    public sealed class SelectItemsEventSource : EventSource
     {
         #region Singleton instance
 
         // define the singleton instance of the event source
-        public static LogResultsEventSource Log = new LogResultsEventSource();
+        public static SelectItemsEventSource Log = new SelectItemsEventSource();
 
-        private LogResultsEventSource() { }
+        private SelectItemsEventSource() { }
 
         #endregion
 

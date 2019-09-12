@@ -18,6 +18,7 @@ using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using System.Xml.Linq;
 using Microsoft.Build.Tasks.AssemblyDependency;
+using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.Tasks
 {
@@ -925,9 +926,10 @@ namespace Microsoft.Build.Tasks
         )
         {
             bool success = true;
-#if (MSBUILDENABLEPROFILING)
-            LogResultsEventSource.Log.Load(1, "Log Results - Start");
-#endif
+            if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+            {
+                LogResultsEventSource.Log.Load("Log Results - Start");
+            }
             {
                 /*
                 PERF NOTE: The Silent flag turns off logging completely from the task side. This means
@@ -1915,9 +1917,10 @@ namespace Microsoft.Build.Tasks
         )
         {
             bool success = true;
-#if (MSBUILDENABLEPROFILING)
-            ExecuteTaskEventSource.Log.Load(1, "Execute Task - Begin");
-#endif
+            if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+            {
+                ExecuteTaskEventSource.Log.Load("Execute Task - Begin");
+            }
             {
                 try
                 {

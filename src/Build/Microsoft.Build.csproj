@@ -171,6 +171,9 @@
     <Compile Include="Evaluation\Profiler\EventSource\RemoveReferencesMarkedForExclusionEventSource.cs" />
     <Compile Include="Evaluation\Profiler\EventSource\RequestThreadProcEventSource.cs" />
     <Compile Include="Evaluation\Profiler\EventSource\SaveEventSource.cs" />
+    <Compile Include="Evaluation\Profiler\EventSource\EvaluateConditionEventSource.cs" />
+    <Compile Include="Evaluation\Profiler\EventSource\ApplyEventSource.cs" />
+    <Compile Include="Evaluation\Profiler\EventSource\SelectItemsEventSource.cs" />
     <Compile Include="Graph\GraphBuilder.cs" />
     <Compile Include="Graph\ParallelWorkSet.cs" />
     <Compile Include="Graph\ProjectInterpretation.cs" />
