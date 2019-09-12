@@ -25,11 +25,8 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Utilities;
-#if (!STANDALONEBUILD)
-using Microsoft.Internal.Performance;
-#if MSBUILDENABLEVSPROFILING 
+#if MSBUILDENABLEPROFILING 
 using Microsoft.VisualStudio.Profiler;
-#endif
 #endif
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
@@ -699,26 +696,12 @@ namespace Microsoft.Build.BackEnd
                 {
                     SetCommonWorkerThreadParameters();
                 }
-#if (!STANDALONEBUILD)
-                using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildEngineBuildProjectBegin, CodeMarkerEvent.perfMSBuildEngineBuildProjectEnd))
-                {
-#if MSBUILDENABLEVSPROFILING
-                try
-                {
-                    string beginProjectBuild = String.Format(CultureInfo.CurrentCulture, "Build Project {0} - Start", requestEntry.RequestConfiguration.ProjectFullPath);
-                    DataCollection.CommentMarkProfile(8802, beginProjectBuild);
-#endif
+#if MSBUILDENABLEPROFILING
+                    RequestThreadProcEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Build Project - Start");
 #endif
                 await BuildAndReport();
-#if (!STANDALONEBUILD)
-#if MSBUILDENABLEVSPROFILING 
-                }
-                finally
-                {
-                    DataCollection.CommentMarkProfile(8803, "Build Project - End");
-                }
-#endif
-                }
+#if MSBUILDENABLEPROFILING
+                    RequestThreadProcEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Build Project - End");
 #endif
             }
 #if FEATURE_VARIOUS_EXCEPTIONS

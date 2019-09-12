@@ -22,7 +22,7 @@ using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Evaluation.Context;
-#if MSBUILDENABLEVSPROFILING 
+#if MSBUILDENABLEPROFILING 
 using Microsoft.VisualStudio.Profiler;
 #endif
 
@@ -37,10 +37,6 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
-
-#if (!STANDALONEBUILD)
-using Microsoft.Internal.Performance;
-#endif
 
 namespace Microsoft.Build.Evaluation
 {
@@ -280,16 +276,10 @@ namespace Microsoft.Build.Evaluation
             EvaluationContext evaluationContext = null,
             bool interactive = false)
         {
-#if (!STANDALONEBUILD)
-            using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectEvaluateBegin, CodeMarkerEvent.perfMSBuildProjectEvaluateEnd))
-#endif
             {
-#if MSBUILDENABLEVSPROFILING
-            try
-            {
+#if MSBUILDENABLEPROFILING
                 string projectFile = String.IsNullOrEmpty(root.ProjectFileLocation.File) ? "(null)" : root.ProjectFileLocation.File;
-                string beginProjectEvaluate = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Begin", projectFile);
-                DataCollection.CommentMarkProfile(8812, beginProjectEvaluate);
+                EvaluateEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Begin", projectFile);
 #endif
                 var profileEvaluation = (loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0 || loggingService.IncludeEvaluationProfile;
                 var evaluator = new Evaluator<P, I, M, D>(
@@ -308,14 +298,9 @@ namespace Microsoft.Build.Evaluation
                     interactive);
 
                 evaluator.Evaluate(loggingService, buildEventContext);
-#if MSBUILDENABLEVSPROFILING 
-            }
-            finally
-            {
+#if MSBUILDENABLEPROFILING
                 string projectFile = String.IsNullOrEmpty(root.ProjectFileLocation.File) ? "(null)" : root.ProjectFileLocation.File;
-                string beginProjectEvaluate = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End", projectFile);
-                DataCollection.CommentMarkProfile(8813, beginProjectEvaluate);
-            }
+                EvaluateEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End", projectFile);
 #endif
             }
         }
@@ -633,9 +618,6 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-#if (!STANDALONEBUILD)
-            CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildProjectEvaluatePass0End);
-#endif
                 projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
 
                 _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, projectFile);
@@ -645,9 +627,9 @@ namespace Microsoft.Build.Evaluation
 
                 ErrorUtilities.VerifyThrow(_data.EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
-#if MSBUILDENABLEVSPROFILING
-        string endPass0 = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 0 (Initial properties)", projectFile);
-        DataCollection.CommentMarkProfile(8816, endPass0);
+#if MSBUILDENABLEPROFILING
+                string projectFile = String.IsNullOrEmpty(root.ProjectFileLocation.File) ? "(null)" : root.ProjectFileLocation.File;
+                EvaluateEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End", projectFile);
 #endif
 
                 // Pass1: evaluate properties, load imports, and gather everything else
@@ -665,12 +647,8 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 _data.InitialTargets = initialTargets;
-#if (!STANDALONEBUILD)
-        CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildProjectEvaluatePass1End);
-#endif
-#if MSBUILDENABLEVSPROFILING
-        string endPass1 = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 1 (Properties and Imports)", projectFile);
-        DataCollection.CommentMarkProfile(8817, endPass1);
+#if MSBUILDENABLEPROFILING
+                EvaluateEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End", projectFile);
 #endif
                 // Pass2: evaluate item definitions
                 // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
@@ -684,12 +662,8 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
                 }
-#if (!STANDALONEBUILD)
-        CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildProjectEvaluatePass2End);
-#endif
-#if MSBUILDENABLEVSPROFILING
-        string endPass2 = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 2 (Item Definitions)", projectFile);
-        DataCollection.CommentMarkProfile(8818, endPass2);
+#if MSBUILDENABLEPROFILING
+                EvaluateEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End", projectFile);
 #endif
                 LazyItemEvaluator<P, I, M, D> lazyEvaluator = null;
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Items))
@@ -735,12 +709,8 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-#if (!STANDALONEBUILD)
-        CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildProjectEvaluatePass3End);
-#endif
-#if MSBUILDENABLEVSPROFILING
-        string endPass3 = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 3 (Items)", projectFile);
-        DataCollection.CommentMarkProfile(8819, endPass3);
+#if MSBUILDENABLEPROFILING
+                EvaluateEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End", projectFile);
 #endif
                 // Pass4: evaluate using-tasks
                 using (_evaluationProfiler.TrackPass(EvaluationPass.UsingTasks))
@@ -769,12 +739,8 @@ namespace Microsoft.Build.Evaluation
                 Dictionary<string, List<TargetSpecification>> targetsWhichRunAfterByTarget = new Dictionary<string, List<TargetSpecification>>(StringComparer.OrdinalIgnoreCase);
                 LinkedList<ProjectTargetElement> activeTargetsByEvaluationOrder = new LinkedList<ProjectTargetElement>();
                 Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets = new Dictionary<string, LinkedListNode<ProjectTargetElement>>(StringComparer.OrdinalIgnoreCase);
-#if (!STANDALONEBUILD)
-        CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildProjectEvaluatePass4End);
-#endif
-#if MSBUILDENABLEVSPROFILING
-        string endPass4 = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 4 (UsingTasks)", projectFile);
-        DataCollection.CommentMarkProfile(8820, endPass4);
+#if MSBUILDENABLEPROFILING
+                EvaluateEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End", projectFile);
 #endif
 
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Targets))

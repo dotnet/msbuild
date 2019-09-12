@@ -14,9 +14,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
-#if (!STANDALONEBUILD)
-using Microsoft.Internal.Performance;
-#endif
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using System.Xml.Linq;
@@ -928,8 +925,8 @@ namespace Microsoft.Build.Tasks
         )
         {
             bool success = true;
-#if (!STANDALONEBUILD)
-            using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildRARLogResultsBegin, CodeMarkerEvent.perfMSBuildRARLogResultsEnd))
+#if (MSBUILDENABLEPROFILING)
+            LogResultsEventSource.Log.Load(1, "Log Results - Start");
 #endif
             {
                 /*
@@ -1918,8 +1915,8 @@ namespace Microsoft.Build.Tasks
         )
         {
             bool success = true;
-#if (!STANDALONEBUILD)
-            using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildResolveAssemblyReferenceBegin, CodeMarkerEvent.perfMSBuildResolveAssemblyReferenceEnd))
+#if (MSBUILDENABLEPROFILING)
+            ExecuteTaskEventSource.Log.Load(1, "Execute Task - Begin");
 #endif
             {
                 try

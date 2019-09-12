@@ -18,11 +18,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared.FileSystem;
-#if (!STANDALONEBUILD)
-using Microsoft.Internal.Performance;
-#if MSBUILDENABLEVSPROFILING 
+#if MSBUILDENABLEPROFILING 
 using Microsoft.VisualStudio.Profiler;
-#endif
 #endif
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -1480,16 +1477,9 @@ namespace Microsoft.Build.Construction
         {
             ErrorUtilities.VerifyThrowInvalidOperation(_projectFileLocation != null, "OM_MustSetFileNameBeforeSave");
 
-#if MSBUILDENABLEVSPROFILING 
-            try
-            {
-                string beginProjectSave = String.Format(CultureInfo.CurrentCulture, "Save Project {0} To File - Begin", projectFileLocation.File);
-                DataCollection.CommentMarkProfile(8810, beginProjectSave);
-#endif
-
             Directory.CreateDirectory(DirectoryPath);
-#if (!STANDALONEBUILD)
-            using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectSaveToFileBegin, CodeMarkerEvent.perfMSBuildProjectSaveToFileEnd))
+#if MSBUILDENABLEPROFILING
+            SaveEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Save Project To File - Begin")
 #endif
             {
                 // Note: We're using string Equals on encoding and not EncodingUtilities.SimilarToEncoding in order
@@ -1518,13 +1508,8 @@ namespace Microsoft.Build.Construction
                     _versionOnDisk = Version;
                 }
             }
-#if MSBUILDENABLEVSPROFILING 
-            }
-            finally
-            {
-                string endProjectSave = String.Format(CultureInfo.CurrentCulture, "Save Project {0} To File - End", projectFileLocation.File);
-                DataCollection.CommentMarkProfile(8811, endProjectSave);
-            }
+#if MSBUILDENABLEPROFILING
+            SaveEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Save Project To File - End")
 #endif
         }
 
@@ -1996,15 +1981,12 @@ namespace Microsoft.Build.Construction
                 FullPath = fullPath,
                 PreserveWhitespace = preserveFormatting
             };
-#if (!STANDALONEBUILD)
-            using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectLoadFromFileBegin, CodeMarkerEvent.perfMSBuildProjectLoadFromFileEnd))
-#endif
+
             {
                 try
                 {
-#if MSBUILDENABLEVSPROFILING
-                    string beginProjectLoad = String.Format(CultureInfo.CurrentCulture, "Load Project {0} From File - Start", fullPath);
-                    DataCollection.CommentMarkProfile(8806, beginProjectLoad);
+#if MSBUILDENABLEPROFILING
+            LoadDocumentEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Load Project From File - Begin");
 #endif
                     using (XmlReaderExtension xtr = XmlReaderExtension.Create(fullPath, loadAsReadOnly))
                     {
@@ -2036,12 +2018,8 @@ namespace Microsoft.Build.Construction
 
                     ProjectFileErrorUtilities.ThrowInvalidProjectFile(fileInfo, ex, "InvalidProjectFile", ex.Message);
                 }
-#if MSBUILDENABLEVSPROFILING 
-                finally
-                {
-                    string endProjectLoad = String.Format(CultureInfo.CurrentCulture, "Load Project {0} From File - End", fullPath);
-                    DataCollection.CommentMarkProfile(8807, endProjectLoad);
-                }
+#if MSBUILDENABLEPROFILING
+            LoadDocumentEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Load Project From File - End")
 #endif
             }
 

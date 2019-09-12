@@ -34,9 +34,6 @@ using System.ComponentModel.Design;
 using System.Runtime.Remoting;
 #endif
 
-#if (!STANDALONEBUILD)
-using Microsoft.Internal.Performance;
-#endif
 using System.Runtime.Versioning;
 
 using Microsoft.Build.Utilities;
@@ -668,8 +665,8 @@ namespace Microsoft.Build.Tasks
         public override bool Execute()
         {
             bool outOfProcExecutionSucceeded = true;
-#if (!STANDALONEBUILD)
-            using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildGenerateResourceBegin, CodeMarkerEvent.perfMSBuildGenerateResourceEnd))
+#if MSBUILDENABLEPROFILING
+            ExecuteGenerateResourceEventSource.Log.Load(1, "Execute GenerateResource task - Begin");
 #endif
             {
                 // If we're extracting ResW files from assemblies (instead of building resources),

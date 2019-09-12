@@ -14,9 +14,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
-#if (!STANDALONEBUILD)
-using Microsoft.Internal.Performance;
-#endif
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
@@ -1343,8 +1340,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void RemoveReferencesMarkedForExclusion(bool removeOnlyNoWarning, string subsetName)
         {
-#if (!STANDALONEBUILD)
-            using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildRARRemoveFromExclusionListBegin, CodeMarkerEvent.perfMSBuildRARRemoveFromExclusionListEnd))
+#if (MSBUILDENABLEPROFILING)
+            RemoveReferencesMarkedForExclusionEventSource.Log.Load(1, "Remove References Start");
 #endif
             {
                 // Create a table which will contain the references which are not in the black list
@@ -1598,8 +1595,8 @@ namespace Microsoft.Build.Tasks
             List<Exception> exceptions
         )
         {
-#if (!STANDALONEBUILD)
-            using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildRARComputeClosureBegin, CodeMarkerEvent.perfMSBuildRARComputeClosureEnd))
+#if (MSBUILDENABLEPROFILING)
+            ComputeClosureEventSource.Log.Load(1, "Compute Closure Start");
 #endif
             {
                 References.Clear();

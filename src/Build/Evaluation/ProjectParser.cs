@@ -5,12 +5,9 @@ using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
-#if (!STANDALONEBUILD)
-using Microsoft.Internal.Performance;
 
-#if MSBUILDENABLEVSPROFILING
+#if MSBUILDENABLEPROFILING
 using Microsoft.VisualStudio.Profiler;
-#endif
 #endif
 using Expander = Microsoft.Build.Evaluation.Expander<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
@@ -116,35 +113,24 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal static void Parse(XmlDocumentWithLocation document, ProjectRootElement projectRootElement)
         {
-#if MSBUILDENABLEVSPROFILING
-            try
-            {
+#if MSBUILDENABLEPROFILING
                 string projectFile = String.IsNullOrEmpty(projectRootElement.ProjectFileLocation.File) ? "(null)" : projectRootElement.ProjectFileLocation.File;
-                string projectParseBegin = String.Format(CultureInfo.CurrentCulture, "Parse Project {0} - Begin", projectFile);
-                DataCollection.CommentMarkProfile(8808, projectParseBegin);
-#endif
-#if (!STANDALONEBUILD)
-                using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectConstructBegin, CodeMarkerEvent.perfMSBuildProjectConstructEnd))
+                ParseEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Parse Project {0} - Begin", projectFile));
 #endif
             {
                 ProjectParser parser = new ProjectParser(document, projectRootElement);
                 parser.Parse();
             }
-#if MSBUILDENABLEVSPROFILING
-            }
-            finally
-            {
+#if MSBUILDENABLEPROFILING
                 string projectFile = String.IsNullOrEmpty(projectRootElement.ProjectFileLocation.File) ? "(null)" : projectRootElement.ProjectFileLocation.File;
-                string projectParseEnd = String.Format(CultureInfo.CurrentCulture, "Parse Project {0} - End", projectFile);
-                DataCollection.CommentMarkProfile(8809, projectParseEnd);
-            }
+                ParseEventSource.Log.Load(1, String.Format(CultureInfo.CurrentCulture, "Parse Project {0} - End", projectFile));
 #endif
         }
 
-        /// <summary>
-        /// Parses the project into the ProjectRootElement
-        /// </summary>
-        private void Parse()
+            /// <summary>
+            /// Parses the project into the ProjectRootElement
+            /// </summary>
+            private void Parse()
         {
             // XML guarantees exactly one root element
             XmlElementWithLocation element = _document.DocumentElement as XmlElementWithLocation;
