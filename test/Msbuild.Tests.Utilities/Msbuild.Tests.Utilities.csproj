@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
-    <TargetFramework>$(CliTargetFramework)</TargetFramework>
+    <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
     <AssemblyName>Msbuild.Tests.Utilities</AssemblyName>
     <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4;portable-net451+win8</AssetTargetFallback>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
