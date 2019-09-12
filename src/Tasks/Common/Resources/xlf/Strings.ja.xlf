@@ -102,6 +102,11 @@
         <target state="translated">NETSDK1091: .NET Core COM ホストが見つかりません。Windows がターゲットの場合、.NET Core COM ホストを利用できるのは .NET Core 3.0 以上の場合のみです。</target>
         <note>{StrBegin="NETSDK1091: "}</note>
       </trans-unit>
+      <trans-unit id="CannotFindIjwhost">
+        <source>NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.0 or higher when targeting Windows.</source>
+        <target state="new">NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.0 or higher when targeting Windows.</target>
+        <note>{StrBegin="NETSDK1114: "}</note>
+      </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
         <source>NETSDK1007: Cannot find project info for '{0}'. This can indicate a missing project reference.</source>
         <target state="translated">NETSDK1007: '{0}' のプロジェクト情報が見つかりません。これは、プロジェクト参照がないことを示している可能性があります。</target>
@@ -385,6 +390,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1069: This project uses a library that targets .NET Standard 1.5 or higher, and the project targets a version of .NET Framework that doesn't have built-in support for that version of .NET Standard. Visit https://aka.ms/net-standard-known-issues for a set of known issues. Consider retargeting to .NET Framework 4.7.2.</source>
         <target state="translated">NETSDK1069: このプロジェクトは .NET Standard 1.5 以上をターゲットとするライブラリを使用します。また、このプロジェクトは、そのバージョンの .NET Standard に対するサポートが組み込まれていない .NET Framework のバージョンをターゲットとしています。一連の既知の問題について、https://aka.ms/net-standard-known-issues をご覧ください。.NET Framework 4.7.2 への再ターゲットを検討してください。</target>
         <note>{StrBegin="NETSDK1069: "}</note>
+      </trans-unit>
+      <trans-unit id="NETFrameworkWithoutUsingNETSdkDefaults">
+        <source>NETSDK1115: The current .NET SDK does not support .NET Framework without using .NET SDK Defaults. It is likely due to a mismatch between C++/CLI project CLRSupport property and TargetFramework.</source>
+        <target state="new">NETSDK1115: The current .NET SDK does not support .NET Framework without using .NET SDK Defaults. It is likely due to a mismatch between C++/CLI project CLRSupport property and TargetFramework.</target>
+        <note>{StrBegin="NETSDK1115: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
         <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>

@@ -143,6 +143,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       />    
   </Target>
 
+  <Target Name="_CheckForUnsupportedTargetFrameworkAndFeatureCombination" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;Restore;CollectPackageReferences"
+        Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+
+    <NETSdkError Condition="'$(UsingNETSdkDefaults)' != 'true'"
+                 ResourceName="NETFrameworkWithoutUsingNETSdkDefaults" />
+  </Target>
 
   <!-- Exclude files from OutputPath and IntermediateOutputPath from default item globs.  Use the value
        of these properties before the TargetFramework is appended, so that if these values are specified
@@ -156,7 +162,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultItemExcludes>$(DefaultItemExcludes);$(IntermediateOutputPath)/**</DefaultItemExcludes>
   </PropertyGroup>
 
-  <PropertyGroup>
+  <!-- Projects which don't use Microsoft.NET.Sdk will typically define the OutputPath directly (usually in a
+       Configuration-specific PropertyGroup), so in that case we won't append to it by default. -->
+  <PropertyGroup Condition="'$(UsingNETSdkDefaults)' == 'true'">
     <AppendTargetFrameworkToOutputPath Condition="'$(AppendTargetFrameworkToOutputPath)' == ''">true</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 

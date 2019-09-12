@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28906.232
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NETCoreCppCliTest", "NETCoreCppCliTest\NETCoreCppCliTest.vcxproj", "{CF5DA8D7-1FDF-4E8F-AFE6-450BE16E906A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSConsoleApp", "CSConsoleApp\CSConsoleApp.csproj", "{FEF2B7B6-169B-4AF9-8836-7C81192E0A99}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CF5DA8D7-1FDF-4E8F-AFE6-450BE16E906A}.Debug|x64.ActiveCfg = Debug|x64
+		{CF5DA8D7-1FDF-4E8F-AFE6-450BE16E906A}.Debug|x64.Build.0 = Debug|x64
+		{CF5DA8D7-1FDF-4E8F-AFE6-450BE16E906A}.Release|x64.ActiveCfg = Release|x64
+		{CF5DA8D7-1FDF-4E8F-AFE6-450BE16E906A}.Release|x64.Build.0 = Release|x64
+		{FEF2B7B6-169B-4AF9-8836-7C81192E0A99}.Debug|x64.ActiveCfg = Debug|x64
+		{FEF2B7B6-169B-4AF9-8836-7C81192E0A99}.Debug|x64.Build.0 = Debug|x64
+		{FEF2B7B6-169B-4AF9-8836-7C81192E0A99}.Release|x64.ActiveCfg = Release|x64
+		{FEF2B7B6-169B-4AF9-8836-7C81192E0A99}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8977F871-9F16-4AAE-ACD7-D6F80F9DC18E}
+	EndGlobalSection
+EndGlobal
