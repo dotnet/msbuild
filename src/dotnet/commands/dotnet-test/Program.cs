@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.Tools.Test
                 var convertedArgs = new VSTestArgumentConverter().Convert(args, out var ignoredArgs);
                 if (ignoredArgs.Any())
                 {
-                    Console.WriteLine(LocalizableStrings.IgnoredArgumentsMessage, string.Join(" ", ignoredArgs));
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.IgnoredArgumentsMessage, string.Join(" ", ignoredArgs)).Yellow());
                 }
                 return new VSTestForwardingApp(convertedArgs).Execute();
             }
