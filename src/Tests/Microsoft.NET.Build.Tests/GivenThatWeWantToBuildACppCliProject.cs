@@ -29,8 +29,6 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource()
                 .Restore(Log, "NETCoreCppCliTest.sln");
 
-            WorkaroundSDKBlockOnAssetsJsonExistence(testAsset);
-
             // build projects separately with BuildProjectReferences=false to simulate VS build behavior
             new BuildCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest"))
                 .Execute("-p:Platform=x64")
@@ -55,19 +53,9 @@ namespace Microsoft.NET.Build.Tests
             File.Exists(expectedIjwhost).Should().BeTrue();
         }
 
-        private static void WorkaroundSDKBlockOnAssetsJsonExistence(TestAsset testAsset)
-        {
-            var lockFile = new LockFile();
-            lockFile.Targets.Add(new LockFileTarget { TargetFramework = NuGetFramework.Parse(".NETCoreApp,Version=v3.0") });
-
-            var objDirectory = Directory.CreateDirectory(Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest", "obj"));
-            new LockFileFormat().Write(objDirectory.File("project.assets.json").FullName, lockFile);
-        }
-
         [FullMSBuildOnlyFact]
         public void It_fails_with_error_message_on_fullframework()
         {
-          //  Debugger.Launch();
             var testAsset = _testAssetsManager
                 .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
                 .WithSource()
@@ -89,6 +77,19 @@ namespace Microsoft.NET.Build.Tests
                 .Fail()
                 .And
                 .HaveStdOutContaining(Strings.NETFrameworkWithoutUsingNETSdkDefaults);
+        }
+
+        [FullMSBuildOnlyFact]
+        public void Given_no_restore_It_builds_cpp_project()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
+                .WithSource();
+
+            new BuildCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest"))
+                .Execute("-p:Platform=x64")
+                .Should()
+                .Pass();
         }
     }
 }

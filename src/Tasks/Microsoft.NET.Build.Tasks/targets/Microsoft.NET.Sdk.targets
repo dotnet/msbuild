@@ -26,7 +26,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="Microsoft.NET.Sdk.Common.targets" />
 
   <ImportGroup>
-    <Import Project="$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets')" />
+    <Import Project="$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets') and '$(Language)' != 'C++'" />
+    <Import Project="$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolutionStubs.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolutionStubs.targets') and '$(Language)' == 'C++'" />
   </ImportGroup>
 
   <Import Project="Microsoft.NET.Sdk.DefaultItems.targets" />
