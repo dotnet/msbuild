@@ -6,6 +6,7 @@
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <OutputType>Exe</OutputType>
     <VersionSuffix></VersionSuffix>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

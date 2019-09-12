@@ -23,7 +23,7 @@
     </Content>
   </ItemGroup>
   
-  <Target Name="WriteExpectedVersion"
+  <!--<Target Name="WriteExpectedVersion"
           BeforeTargets="BeforeBuild"
           DependsOnTargets="PrepareForBuild">
 
@@ -49,7 +49,7 @@
       <Content Include="$(ExpectedVersionFileInIntermediateFolder)" CopyToOutputDirectory="PreserveNewest" />
       <FileWrites Include="$(ExpectedVersionFileInIntermediateFolder)" />
     </ItemGroup>
-  </Target>
+  </Target>-->
 
   <Target Name="WriteExpectedTargetFrameworkMoniker" BeforeTargets="BeforeBuild" DependsOnTargets="PrepareForBuild">
     <PropertyGroup>

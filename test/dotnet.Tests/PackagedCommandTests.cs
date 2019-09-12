@@ -29,35 +29,6 @@ namespace Microsoft.DotNet.Tests
             _output = output;
         }
 
-        public static IEnumerable<object[]> DependencyToolArguments
-        {
-            get
-            {
-                var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
-                var projectOutputPath = $"AppWithProjTool2Fx\\bin\\Debug\\net451\\{rid}\\dotnet-desktop-and-portable.exe";
-                return new[]
-                {
-                    new object[] { "CoreFX", ".NETCoreApp,Version=v1.0", "lib\\netcoreapp1.0\\dotnet-desktop-and-portable.dll" },
-                    new object[] { "NetFX", ".NETFramework,Version=v4.5.1", projectOutputPath }
-                };
-            }
-        }
-        public static IEnumerable<object[]> LibraryDependencyToolArguments
-        {
-            get
-            {
-                var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
-
-                var projectOutputPath = $"LibWithProjTool2Fx\\bin\\Debug\\net451\\dotnet-desktop-and-portable.exe";
-
-                return new[]
-                {
-                    new object[] { "CoreFX", ".NETStandard,Version=v1.6", "lib\\netstandard1.6\\dotnet-desktop-and-portable.dll" },
-                    new object[] { "NetFX", ".NETFramework,Version=v4.5.1", projectOutputPath }
-                };
-            }
-        }
-
         [Theory]
         [InlineData("AppWithDirectAndToolDep")]
         [InlineData("AppWithToolDependency")]
@@ -66,7 +37,7 @@ namespace Microsoft.DotNet.Tests
             var testInstance = TestAssets.Get(appName)
                 .CreateInstance()
                 .WithSourceFiles()
-                .WithNuGetConfig(new RepoDirectoriesProvider().TestPackages);
+                .WithNuGetConfig(RepoDirectoriesProvider.TestPackages);
 
             // restore again now that the project has changed
             new RestoreCommand()
@@ -95,7 +66,7 @@ namespace Microsoft.DotNet.Tests
             var testInstance = TestAssets.Get("AppWithToolDependency")
                 .CreateInstance(identifier: toolPrefersCLIRuntime ? "preferCLIRuntime" : "")
                 .WithSourceFiles()
-                .WithNuGetConfig(new RepoDirectoriesProvider().TestPackages);
+                .WithNuGetConfig(RepoDirectoriesProvider.TestPackages);
 
             testInstance = testInstance.WithProjectChanges(project =>
             {
@@ -130,23 +101,16 @@ namespace Microsoft.DotNet.Tests
         {
             string toolName = "dotnet-portable-v1";
 
-            var toolFolder = Path.Combine(new RepoDirectoriesProvider().NugetPackages,
-                                          ".tools",
-                                          toolName);
-
-            //  Other tests may have restored the tool for netcoreapp2.1, so delete its tools folder
-            if (Directory.Exists(toolFolder))
-            {
-                Directory.Delete(toolFolder, true);
-            }
-
             var testInstance = TestAssets.Get("AppWithToolDependency")
                 .CreateInstance()
                 .WithSourceFiles()
-                .WithNuGetConfig(new RepoDirectoriesProvider().TestPackages);
+                .WithNuGetConfig(RepoDirectoriesProvider.TestPackages);
 
-            testInstance = testInstance.WithProjectChanges(project =>
+            string projectFolder = null;
+
+            testInstance = testInstance.WithProjectChanges((projectPath, project) =>
             {
+                projectFolder = Path.GetDirectoryName(projectPath);
                 var ns = project.Root.Name.Namespace;
 
                 //  Remove reference to tool that won't restore on 1.x
@@ -164,7 +128,17 @@ namespace Microsoft.DotNet.Tests
                 project.Root.Element(ns + "PropertyGroup")
                     .Add(new XElement(ns + "DotnetCliToolTargetFramework", "netcoreapp1.1"));
 
+                //  Use project-specific global packages folder
+                project.Root.Element(ns + "PropertyGroup")
+                    .Add(new XElement(ns + "RestorePackagesPath", @"$(MSBuildProjectDirectory)\packages"));
+
             });
+
+            var toolFolder = Path.Combine(projectFolder,
+                                          "packages",
+                                          ".tools",
+                                          toolName);
+
 
             testInstance = testInstance.WithRestoreFiles();
 
@@ -264,7 +238,7 @@ namespace Microsoft.DotNet.Tests
                 .WithSourceFiles()
                 .WithRestoreFiles();
 
-            new DependencyContextTestCommand(DotnetUnderTest.FullName)
+            new DependencyContextTestCommand(RepoDirectoriesProvider.DotnetUnderTest)
                 .WithWorkingDirectory(testInstance.Root)
                 .Execute("")
                 .Should().Pass();
@@ -276,7 +250,7 @@ namespace Microsoft.DotNet.Tests
             var testInstance = TestAssets.Get("AppWithDirectDep")
                 .CreateInstance()
                 .WithSourceFiles()
-                .WithNuGetConfig(new RepoDirectoriesProvider().TestPackages);
+                .WithNuGetConfig(RepoDirectoriesProvider.TestPackages);
 
             // restore again now that the project has changed
             new RestoreCommand()
@@ -298,66 +272,6 @@ namespace Microsoft.DotNet.Tests
             result.StdErr.Should().Contain(string.Format(LocalizableStrings.NoExecutableFoundMatchingCommand, "dotnet-hello"));
             
             result.Should().Fail();        
-        }
-
-        [Fact(Skip = "https://github.com/dotnet/cli/issues/6144")]
-        public void WhenToolAssetsFileIsInUseThenCLIRetriesLaunchingTheCommandForAtLeastOneSecond()
-        {
-            var testInstance = TestAssets.Get("AppWithToolDependency")
-                .CreateInstance()
-                .WithSourceFiles()
-                .WithRestoreFiles();
-
-            var assetsFile = new DirectoryInfo(new RepoDirectoriesProvider().NugetPackages)
-                .GetDirectory(".tools", "dotnet-portable", "1.0.0", "netcoreapp3.0")
-                .GetFile("project.assets.json");
-
-            var stopWatch = Stopwatch.StartNew();
-
-            using (assetsFile.Lock()
-                             .DisposeAfter(TimeSpan.FromMilliseconds(1000)))
-            {
-                new PortableCommand()
-                    .WithWorkingDirectory(testInstance.Root)
-                    .ExecuteWithCapturedOutput()
-                    .Should().HaveStdOutContaining("Hello Portable World!")
-                        .And.NotHaveStdErr()
-                        .And.Pass();
-            }
-
-            stopWatch.Stop();
-
-            stopWatch.ElapsedMilliseconds.Should().BeGreaterThan(1000, "Because dotnet should respect the NuGet lock");
-        }
-
-        [Fact(Skip="https://github.com/dotnet/cli/issues/6006")]
-        public void WhenToolAssetsFileIsLockedByNuGetThenCLIRetriesLaunchingTheCommandForAtLeastOneSecond()
-        {
-            var testInstance = TestAssets.Get("AppWithToolDependency")
-                .CreateInstance()
-                .WithSourceFiles()
-                .WithRestoreFiles();
-
-            var assetsFile = new DirectoryInfo(new RepoDirectoriesProvider().NugetPackages)
-                .GetDirectory(".tools", "dotnet-portable", "1.0.0", "netcoreapp1.0")
-                .GetFile("project.assets.json");
-
-            var stopWatch = Stopwatch.StartNew();
-
-            using (assetsFile.NuGetLock()
-                             .DisposeAfter(TimeSpan.FromMilliseconds(1000)))
-            {
-                new PortableCommand()
-                    .WithWorkingDirectory(testInstance.Root)
-                    .ExecuteWithCapturedOutput()
-                    .Should().HaveStdOutContaining("Hello Portable World!")
-                        .And.NotHaveStdErr()
-                        .And.Pass();
-            }
-
-            stopWatch.Stop();
-
-            stopWatch.ElapsedMilliseconds.Should().BeGreaterThan(1000, "Because dotnet should respect the NuGet lock");
         }
 
         private void SetGeneratedPackageName(FileInfo project, string packageName)

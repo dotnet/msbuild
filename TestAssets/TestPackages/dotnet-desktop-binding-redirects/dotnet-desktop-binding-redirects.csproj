@@ -8,6 +8,7 @@
     <OutputType>Exe</OutputType>
     <RuntimeIdentifiers>win7-x86;win7-x64</RuntimeIdentifiers>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

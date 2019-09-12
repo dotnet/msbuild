@@ -4,6 +4,7 @@
   <PropertyGroup>
     <TargetFramework>net45</TargetFramework>
     <AssemblyName>PackageWithFakeNativeDep</AssemblyName>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

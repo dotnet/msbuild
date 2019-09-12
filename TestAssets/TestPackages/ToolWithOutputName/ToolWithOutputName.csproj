@@ -7,6 +7,7 @@
     <AssemblyName>dotnet-tool-with-output-name</AssemblyName>
     <PackageId>ToolWithOutputName</PackageId>
     <OutputType>Exe</OutputType>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
 </Project>

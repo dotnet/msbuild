@@ -24,16 +24,9 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         
         private FileInfo _projectFile;
 
-        private DirectoryInfo _workingDirectory;
-
         public override CommandResult Execute(string args = "")
         {
             args = $"build {GetNoDependencies()} {GetProjectFile()} {GetOutputPath()} {GetConfiguration()} {GetFramework()} {GetRuntime()} {args}";
-
-            if (_workingDirectory != null)
-            {
-                this.WithWorkingDirectory(_workingDirectory);
-            }
             
             if (_captureOutput)
             {
@@ -103,7 +96,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public BuildCommand WithProjectDirectory(DirectoryInfo projectDirectory)
         {
-            _workingDirectory = projectDirectory;
+            WorkingDirectory = projectDirectory.FullName;
 
             return this;
         }
@@ -117,7 +110,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public BuildCommand WithWorkingDirectory(DirectoryInfo workingDirectory)
         {
-            _workingDirectory = workingDirectory;
+            WorkingDirectory = workingDirectory.FullName;
 
             return this;
         }

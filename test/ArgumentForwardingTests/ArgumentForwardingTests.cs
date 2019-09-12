@@ -252,7 +252,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = DotnetUnderTest.FullName,
+                    FileName = RepoDirectoriesProvider.DotnetUnderTest,
                     Arguments = $"{ReflectorPath} {testUserArgument}",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,

@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
     {
         public static bool HasSharedFramework(string framework)
         {
-            var dotnetFolder = Path.GetFileName(RepoDirectoriesProvider.DotnetUnderTest);
+            var dotnetFolder = Path.GetDirectoryName(RepoDirectoriesProvider.DotnetUnderTest);
             string runtimesFolder =
                 Path.Combine(dotnetFolder, "shared", "Microsoft.NETCore.App");
 
