@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to clean for.</source>
-        <target state="translated">O tempo de execução de destino para o qual a limpeza ocorrerá.</target>
+        <target state="translated">O runtime de destino para o qual a limpeza ocorrerá.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">

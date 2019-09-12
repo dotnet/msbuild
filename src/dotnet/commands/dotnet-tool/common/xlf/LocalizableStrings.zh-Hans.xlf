@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-HANS" original="../LocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="NoManifestGuide">
         <source>If you intended to perform the action on a global tool, use the `--global` option for the command.</source>
-        <target state="needs-review-translation">如果打算在全局工具上执行操作，请使用命令的 `--global` 选项。</target>
+        <target state="translated">如果打算在全局工具上执行操作，请使用命令的 "--global" 选项。</target>
         <note />
       </trans-unit>
       <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
@@ -15,7 +15,7 @@
       <trans-unit id="SamePackageIdInOtherManifestFile">
         <source>Warning: There are other manifest files in the directory hierarchy that will affect this local tool. The following files have not been changed:
 {0}</source>
-        <target state="needs-review-translation">警告: 当前目录中存在可能会影响本地工具的其他清单文件。不会更改以下文件:
+        <target state="translated">警告: 目录层次结构中存在其他将影响此本地工具的清单文件。未更改以下文件:
 {0}</target>
         <note />
       </trans-unit>

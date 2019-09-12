@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-HANS" original="../LocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppFullName">
         <source>List all package references of the project or solution.</source>
@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="CmdDeprecatedDescription">
         <source>Lists packages that have been deprecated.</source>
-        <target state="new">Lists packages that have been deprecated.</target>
+        <target state="translated">列出已弃用的包。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
@@ -44,22 +44,22 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>The path to the NuGet config file to use. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">要使用的 NuGet 配置文件的路径。需要 "--outdated" 选项。</target>
+        <target state="translated">要使用的 NuGet 配置文件的路径。需要 "--outdated" 或 "--deprecated" 选项。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestMinorDescription">
         <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">在搜索较新的包时，仅考虑具有匹配的主要版本号的包。需要 "--outdated" 选项。</target>
+        <target state="translated">在搜索较新的包时，仅考虑具有匹配的主版本号的包。需要 "--outdated" 或 "--deprecated" 选项。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestPatchDescription">
         <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">在搜索较新的包时，仅考虑具有匹配的主要和次要版本号的包。需要 "--outdated" 选项。</target>
+        <target state="translated">在搜索较新的包时，仅考虑具有匹配的主要和次要版本号的包。需要 "--outdated" 或 "--deprecated" 选项。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPrereleaseDescription">
         <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">在搜索较新的包时，请考虑使用具有预发行版本的包。需要 "--outdated" 选项。</target>
+        <target state="translated">在搜索较新的包时，请考虑使用具有预发行版本的包。需要 "--outdated" 或 "--deprecated" 选项。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSource">
@@ -69,12 +69,12 @@
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">搜索较新的包时要使用的 NuGet 源。需要 "--outdated" 选项。</target>
+        <target state="translated">搜索较新的包时要使用的 NuGet 源。需要 "--outdated" 或 "--deprecated" 选项。</target>
         <note />
       </trans-unit>
       <trans-unit id="OutdatedAndDeprecatedOptionsCannotBeCombined">
         <source>Option '--outdated' and '--deprecated' cannot be combined.</source>
-        <target state="new">Option '--outdated' and '--deprecated' cannot be combined.</target>
+        <target state="translated">不可结合使用 "--outdated" 或 "--deprecated"。</target>
         <note />
       </trans-unit>
       <trans-unit id="FileNotFound">
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="OutdatedOrDeprecatedOptionOnly">
         <source>Option '{0}' requires the '--outdated' or '--deprecated' option to be specified.</source>
-        <target state="new">Option '{0}' requires the '--outdated' or '--deprecated' option to be specified.</target>
+        <target state="translated">选项“{0}”要求指定 "--outdated" 或 "--deprecated" 选项。</target>
         <note />
       </trans-unit>
     </body>

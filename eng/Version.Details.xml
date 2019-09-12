@@ -37,13 +37,17 @@
     </Dependency>
   </ToolsetDependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-preview9.19413.5">
+    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-rc2.19455.7">
       <Uri>https://github.com/dotnet/sdk</Uri>
-      <Sha>21ebcc7ff5b9136ecaaf2b1f362f5588c3cc520a</Sha>
+      <Sha>b88161ed99ded0dd598779ad1afe044818422a6f</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Cli.CommandLine" Version="1.0.0-preview.19208.1">
       <Uri>https://github.com/dotnet/CliCommandLineParser</Uri>
       <Sha>0e89c2116ad28e404ba56c14d1c3f938caa25a01</Sha>
+    </Dependency>
+    <Dependency Name="NuGet.Build.Tasks" Version="5.3.0-rtm.6192">
+      <Uri>https://github.com/NuGet/NuGet.Client</Uri>
+      <Sha>bb60d6720d24890b8f3e071e70d27ea0f2bef57e</Sha>
     </Dependency>
   </ProductDependencies>
 </Dependencies>

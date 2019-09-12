@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="CmdDeprecatedDescription">
         <source>Lists packages that have been deprecated.</source>
-        <target state="new">Lists packages that have been deprecated.</target>
+        <target state="translated">Список нерекомендуемых пакетов.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
@@ -44,22 +44,22 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>The path to the NuGet config file to use. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">Путь к используемому файлу NuGet. Требуется указать параметр '--outdated'.</target>
+        <target state="translated">Путь к используемому файлу конфигурации NuGet. Требуется указать параметр "--outdated" или "--deprecated".</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestMinorDescription">
         <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">Учитывает только пакеты с соответствующим номером основной версии при поиске более новых версий пакетов. Требуется указать параметр '--outdated'.</target>
+        <target state="translated">Учитывать только пакеты с соответствующим основным номером версии при поиске более новых версий пакетов. Требуется указать параметр "--outdated" или "--deprecated".</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestPatchDescription">
         <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">Учитывать только пакеты с соответствующими номерами основной и дополнительной версий при поиске более новых версий пакетов. Требуется указать параметр "--outdated".</target>
+        <target state="translated">Учитывать только пакеты с соответствующими основным и дополнительным номерами версий при поиске более новых версий пакетов. Требуется указать параметр "--outdated" или "--deprecated".</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPrereleaseDescription">
         <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">Учитывает пакеты с версиями предварительных выпусков при поиске более новых версий пакетов. Требуется указать параметр '--outdated'.</target>
+        <target state="translated">Учитывать пакеты с версиями предварительных выпусков при поиске более новых версий пакетов. Требуется указать параметр "--outdated" или "--deprecated".</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSource">
@@ -69,12 +69,12 @@
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">Источники NuGet, используемые при поиске более новых версий пакетов. Требуется указать параметр '--outdated'.</target>
+        <target state="translated">Источники NuGet, используемые при поиске более новых версий пакетов. Требуется указать параметр "--outdated" или "--deprecated".</target>
         <note />
       </trans-unit>
       <trans-unit id="OutdatedAndDeprecatedOptionsCannotBeCombined">
         <source>Option '--outdated' and '--deprecated' cannot be combined.</source>
-        <target state="new">Option '--outdated' and '--deprecated' cannot be combined.</target>
+        <target state="translated">Параметры "--outdated" и "--deprecated" не могут использоваться вместе.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileNotFound">
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="OutdatedOrDeprecatedOptionOnly">
         <source>Option '{0}' requires the '--outdated' or '--deprecated' option to be specified.</source>
-        <target state="new">Option '{0}' requires the '--outdated' or '--deprecated' option to be specified.</target>
+        <target state="translated">Для параметра "{0}" необходимо указать параметр "--outdated" или "--deprecated".</target>
         <note />
       </trans-unit>
     </body>

@@ -25,15 +25,15 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using bash, you can add it to your profile by running the following command:
+        <target state="translated">Adresář nástrojů {0} se v tuto chvíli nenachází v proměnné prostředí PATH.
+Pokud používáte bash, můžete ho přidat do profilu tak, že spustíte následující příkaz:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-You can add it to the current session by running the following command:
+Pokud ho chcete přidat do aktuální relace, slouží k tomuto tento příkaz:
 
 export PATH="$PATH:{0}"
 </target>
@@ -54,17 +54,17 @@ You can only add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using zsh, you can add it to your profile by running the following command:
+        <target state="translated">Adresář nástrojů {0} se aktuálně nenachází v proměnné prostředí PATH.
+Pokud používáte zsh, můžete si ho přidat do profilu tak, že spustíte následující příkaz:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
-# Add .NET Core SDK tools
+# Přidání nástrojů .NET Core SDK
 export PATH="$PATH:{0}"
 EOF
 
-And run `zsh -l` to make it available for current session.
+Pak ho spuštěním příkazu zsh -l zpřístupněte pro aktuální relaci.
 
-You can only add it to the current session by running the following command:
+Pokud ho chcete přidat do aktuální relace, slouží k tomuto tento příkaz:
 
 export PATH="$PATH:{0}"
 </target>
