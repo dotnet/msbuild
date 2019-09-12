@@ -76,7 +76,7 @@ stages:
                 -configuration $(BuildConfiguration)
                 -officialBuildId $(Build.BuildNumber)
                 -officialSkipApplyOptimizationData $(SkipApplyOptimizationData)
-                /p:RepositoryName=Microsoft/msbuild
+                /p:RepositoryName=$(Build.Repository.Name)
                 /p:VisualStudioIbcSourceBranchName=$(IbcSourceBranchName)
                 /p:VisualStudioDropAccessToken=$(System.AccessToken)
                 /p:VisualStudioDropName=$(VisualStudio.DropName)
