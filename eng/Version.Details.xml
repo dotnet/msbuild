@@ -11,9 +11,9 @@
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>7aa107d818fe87e627154c0331d6de5d47f39a45</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.HostModel" Version="3.0.0-rc1-19423-11">
+    <Dependency Name="Microsoft.NET.HostModel" Version="3.0.0-rc2-19460-02">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>abecfcd748e6b8850e1111184bf34c93e9277f90</Sha>
+      <Sha>4421cfb105df112492038e5c5a70c24bce48e72f</Sha>
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="5.3.0-rtm.6192">
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
