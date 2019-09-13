@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
@@ -15,6 +16,15 @@ namespace Microsoft.Build.Construction
     [DebuggerDisplay("Name={Name} ParameterType={ParameterType} Output={Output} Required={Required}")]
     public class ProjectUsingTaskParameterElement : ProjectElement
     {
+        ProjectUsingTaskParameterElementLink TaskParameterLink => (ProjectUsingTaskParameterElementLink)Link;
+        /// <summary>
+        /// External projects support
+        /// </summary>
+        internal ProjectUsingTaskParameterElement(ProjectUsingTaskParameterElementLink link)
+            : base(link)
+        {
+        }
+
         /// <summary>
         /// Initialize a parented UsingTaskParameterElement instance
         /// </summary>
@@ -47,13 +57,25 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Name
         {
-            get => XmlElement.Name;
+            get => ElementName;
 
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, nameof(Name));
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.name, value);
-                MarkDirty("Set usingtaskparameter {0}", value);
+
+                if (Link != null) { TaskParameterLink.Name = value; return; }
+                // TODO: There seems to be a bug here
+                // the Name returns the element name (consistent with XML view aka:)
+                // <fooParam .../> => this.Name = fooParan
+                // while setter will "set" the "Name" attribute, instead of renaming the XML element aka
+                // <fooParam Name="newName".../> instead of (so this.Name still is "fooParam"
+                // <newName .../>
+                // i have changed the "link" to support either way, should check whether it has to be fix on real object as well.
+
+                XmlElementWithLocation newElement = XmlUtilities.RenameXmlElement(XmlElement, value, XmlElement.NamespaceURI);
+                ReplaceElement(newElement);
+
+                 // SetOrRemoveAttribute(XMakeAttributes.name, value, "Set usingtaskparameter {0}", value);
             }
         }
 
@@ -65,15 +87,14 @@ namespace Microsoft.Build.Construction
         {
             get
             {
-                string typeAttribute = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.parameterType);
+                string typeAttribute = GetAttributeValue(XMakeAttributes.parameterType);
                 return String.IsNullOrEmpty(typeAttribute) ? typeof(String).FullName : typeAttribute;
             }
 
             set
             {
                 // If null or empty is passed in remove the attribute from the element
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.parameterType, value);
-                MarkDirty("Set usingtaskparameter ParameterType {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.parameterType, value, "Set usingtaskparameter ParameterType {0}", value);
             }
         }
 
@@ -84,14 +105,13 @@ namespace Microsoft.Build.Construction
         {
             get
             {
-                string outputAttribute = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.output);
+                string outputAttribute = GetAttributeValue(XMakeAttributes.output);
                 return String.IsNullOrEmpty(outputAttribute) ? bool.FalseString : outputAttribute;
             }
 
             set
             {
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.output, value);
-                MarkDirty("Set usingtaskparameter Output {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.output, value, "Set usingtaskparameter Output {0}", value);
             }
         }
 
@@ -102,14 +122,13 @@ namespace Microsoft.Build.Construction
         {
             get
             {
-                string requiredAttribute = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.required);
+                string requiredAttribute = GetAttributeValue(XMakeAttributes.required);
                 return String.IsNullOrEmpty(requiredAttribute) ? bool.FalseString : requiredAttribute;
             }
 
             set
             {
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.required, value);
-                MarkDirty("Set usingtaskparameter Required {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.required, value, "Set usingtaskparameter Required {0}", value);
             }
         }
 
@@ -130,21 +149,21 @@ namespace Microsoft.Build.Construction
         /// If there is no such attribute, returns the location of the element,
         /// in lieu of the default value it uses for the attribute.
         /// </summary>
-        public ElementLocation ParameterTypeLocation => XmlElement.GetAttributeLocation(XMakeAttributes.parameterType) ?? Location;
+        public ElementLocation ParameterTypeLocation => GetAttributeLocation(XMakeAttributes.parameterType) ?? Location;
 
         /// <summary>
         /// Location of the Output attribute.
         /// If there is no such attribute, returns the location of the element,
         /// in lieu of the default value it uses for the attribute.
         /// </summary>
-        public ElementLocation OutputLocation => XmlElement.GetAttributeLocation(XMakeAttributes.output) ?? Location;
+        public ElementLocation OutputLocation => GetAttributeLocation(XMakeAttributes.output) ?? Location;
 
         /// <summary>
         /// Location of the Required attribute.
         /// If there is no such attribute, returns the location of the element,
         /// in lieu of the default value it uses for the attribute.
         /// </summary>
-        public ElementLocation RequiredLocation => XmlElement.GetAttributeLocation(XMakeAttributes.required) ?? Location;
+        public ElementLocation RequiredLocation => GetAttributeLocation(XMakeAttributes.required) ?? Location;
 
         /// <summary>
         /// Creates an unparented UsingTaskParameterElement, wrapping an unparented XmlElement.

@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 
+using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
@@ -16,6 +17,14 @@ namespace Microsoft.Build.Construction
     [DebuggerDisplay("TaskName={TaskName} AssemblyName={AssemblyName} AssemblyFile={AssemblyFile} Condition={Condition} Runtime={Runtime} Architecture={Architecture}")]
     public class ProjectUsingTaskElement : ProjectElementContainer
     {
+        /// <summary>
+        /// External projects support
+        /// </summary>
+        internal ProjectUsingTaskElement(ProjectUsingTaskElementLink link)
+            : base(link)
+        {
+        }
+
         /// <summary>
         /// Initialize a parented ProjectUsingTaskElement
         /// </summary>
@@ -40,15 +49,14 @@ namespace Microsoft.Build.Construction
         public string AssemblyFile
         {
             get => FileUtilities.FixFilePath(
-                ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.assemblyFile));
+                GetAttributeValue(XMakeAttributes.assemblyFile));
 
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.assemblyName);
-                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(AssemblyName), "OM_EitherAttributeButNotBoth", XmlElement.Name, XMakeAttributes.assemblyFile, XMakeAttributes.assemblyName);
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(AssemblyName), "OM_EitherAttributeButNotBoth", ElementName, XMakeAttributes.assemblyFile, XMakeAttributes.assemblyName);
                 value = FileUtilities.FixFilePath(value);
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.assemblyFile, value);
-                MarkDirty("Set usingtask AssemblyFile {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.assemblyFile, value, "Set usingtask AssemblyFile {0}", value);
             }
         }
 
@@ -58,14 +66,13 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string AssemblyName
         {
-            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.assemblyName);
+            get => GetAttributeValue(XMakeAttributes.assemblyName);
 
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.assemblyName);
                 ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(AssemblyFile), "OM_EitherAttributeButNotBoth", XMakeElements.usingTask, XMakeAttributes.assemblyFile, XMakeAttributes.assemblyName);
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.assemblyName, value);
-                MarkDirty("Set usingtask AssemblyName {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.assemblyName, value, "Set usingtask AssemblyName {0}", value);
             }
         }
 
@@ -74,13 +81,12 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string TaskName
         {
-            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.taskName);
+            get => GetAttributeValue(XMakeAttributes.taskName);
 
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.taskName);
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.taskName, value);
-                MarkDirty("Set usingtask TaskName {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.taskName, value, "Set usingtask TaskName {0}", value);
             }
         }
 
@@ -89,12 +95,11 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string TaskFactory
         {
-            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.taskFactory);
+            get => GetAttributeValue(XMakeAttributes.taskFactory);
 
             set
             {
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.taskFactory, value);
-                MarkDirty("Set usingtask TaskFactory {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.taskFactory, value, "Set usingtask TaskFactory {0}", value);
             }
         }
 
@@ -103,12 +108,11 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Runtime
         {
-            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.runtime);
+            get => GetAttributeValue(XMakeAttributes.runtime);
 
             set
             {
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.runtime, value);
-                MarkDirty("Set usingtask Runtime {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.runtime, value, "Set usingtask Runtime {0}", value);
             }
         }
 
@@ -117,12 +121,11 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Architecture
         {
-            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.architecture);
+            get => GetAttributeValue(XMakeAttributes.architecture);
 
             set
             {
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.architecture, value);
-                MarkDirty("Set usingtask Architecture {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.architecture, value, "Set usingtask Architecture {0}", value);
             }
         }
 
@@ -153,32 +156,32 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Location of the task name attribute
         /// </summary>
-        public ElementLocation TaskNameLocation => XmlElement.GetAttributeLocation(XMakeAttributes.taskName);
+        public ElementLocation TaskNameLocation => GetAttributeLocation(XMakeAttributes.taskName);
 
         /// <summary>
         /// Location of the assembly file attribute, if any
         /// </summary>
-        public ElementLocation AssemblyFileLocation => XmlElement.GetAttributeLocation(XMakeAttributes.assemblyFile);
+        public ElementLocation AssemblyFileLocation => GetAttributeLocation(XMakeAttributes.assemblyFile);
 
         /// <summary>
         /// Location of the assembly name attribute, if any
         /// </summary>
-        public ElementLocation AssemblyNameLocation => XmlElement.GetAttributeLocation(XMakeAttributes.assemblyName);
+        public ElementLocation AssemblyNameLocation => GetAttributeLocation(XMakeAttributes.assemblyName);
 
         /// <summary>
         /// Location of the Runtime attribute, if any
         /// </summary>
-        public ElementLocation RuntimeLocation => XmlElement.GetAttributeLocation(XMakeAttributes.runtime);
+        public ElementLocation RuntimeLocation => GetAttributeLocation(XMakeAttributes.runtime);
 
         /// <summary>
         /// Location of the Architecture attribute, if any
         /// </summary>
-        public ElementLocation ArchitectureLocation => XmlElement.GetAttributeLocation(XMakeAttributes.architecture);
+        public ElementLocation ArchitectureLocation => GetAttributeLocation(XMakeAttributes.architecture);
 
         /// <summary>
         /// Location of the TaskFactory attribute, if any
         /// </summary>
-        public ElementLocation TaskFactoryLocation => XmlElement.GetAttributeLocation(XMakeAttributes.taskFactory);
+        public ElementLocation TaskFactoryLocation => GetAttributeLocation(XMakeAttributes.taskFactory);
 
         /// <summary>
         /// Convenience method that picks a location based on a heuristic:
