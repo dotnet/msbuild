@@ -4,20 +4,20 @@ using System.Diagnostics.Tracing;
 
 
 //
-// This captures information relevant to resolving conditionals.
+// This captures information relevant to collecting a set of items, mutating them in a specified way, and saving the results.
 //
-namespace Microsoft.Build.Evaluation
+namespace Microsoft.Build.Eventing
 {
-    // /OnlyProviders=*EvaluateCondition-Profiling
-    [EventSource(Name = "EvaluateCondition-Profiling")]
-    public sealed class EvaluateConditionEventSource : EventSource
+    // /OnlyProviders=*Apply-Profiling
+    [EventSource(Name = "Apply-Profiling")]
+    public sealed class ApplyEventSource : EventSource
     {
         #region Singleton instance
 
         // define the singleton instance of the event source
-        public static EvaluateConditionEventSource Log = new EvaluateConditionEventSource();
+        public static ApplyEventSource Log = new ApplyEventSource();
 
-        private EvaluateConditionEventSource() { }
+        private ApplyEventSource() { }
 
         #endregion
 

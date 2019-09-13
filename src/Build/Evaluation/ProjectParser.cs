@@ -10,7 +10,7 @@ using Expander = Microsoft.Build.Evaluation.Expander<Microsoft.Build.Evaluation.
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Evaluation;
+using Microsoft.Build.Eventing;
 using System.Globalization;
 
 namespace Microsoft.Build.Construction

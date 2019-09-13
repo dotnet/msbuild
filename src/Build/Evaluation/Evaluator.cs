@@ -22,6 +22,7 @@ using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.Eventing;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;

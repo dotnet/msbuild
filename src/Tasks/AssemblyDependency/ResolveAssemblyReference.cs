@@ -18,7 +18,7 @@ using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using System.Xml.Linq;
 using Microsoft.Build.Tasks.AssemblyDependency;
-using Microsoft.Build.Evaluation;
+using Microsoft.Build.Eventing;
 
 namespace Microsoft.Build.Tasks
 {

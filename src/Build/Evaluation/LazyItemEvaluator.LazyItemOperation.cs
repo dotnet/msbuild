@@ -6,12 +6,11 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-#if MSBUILDENABLEPROFILING
-using Microsoft.VisualStudio.Profiler;
-#endif
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -54,18 +53,20 @@ namespace Microsoft.Build.Evaluation
 
             public virtual void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-#if MSBUILDENABLEPROFILING
-                ApplyEventSource.Log.Load("Select Mutate Save Items - Begin");
-#endif
+                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+                {
+                    ApplyEventSource.Log.Load("Select Mutate Save Items - Begin");
+                }
                 using (_lazyEvaluator._evaluationProfiler.TrackElement(_itemElement))
                 {
                     var items = SelectItems(listBuilder, globsToIgnore);
                     MutateItems(items);
                     SaveItems(items, listBuilder);
                 }
-#if MSBUILDENABLEPROFILING
-                ApplyEventSource.Log.Load("Select Mutate Save Items - End");
-#endif
+                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+                {
+                    ApplyEventSource.Log.Load("Select Mutate Save Items - End");
+                }
             }
 
             /// <summary>

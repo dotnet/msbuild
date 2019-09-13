@@ -4,20 +4,20 @@ using System.Diagnostics.Tracing;
 
 
 //
-// Class to provide timing analysis for requesting a new builder thread.
+// This captures information relevant to resolving references.
 //
-namespace Microsoft.Build.Evaluation
+namespace Microsoft.Build.Eventing
 {
-    // /OnlyProviders=*RequestThreadProc-Profiling
-    [EventSource(Name = "RequestThreadProc-Profiling")]
-    public sealed class RequestThreadProcEventSource : EventSource
+    // /OnlyProviders=*ComputeClosure-Profiling
+    [EventSource(Name = "ComputeClosure-Profiling")]
+    public sealed class ComputeClosureEventSource : EventSource
     {
         #region Singleton instance
 
         // define the singleton instance of the event source
-        public static RequestThreadProcEventSource Log = new RequestThreadProcEventSource();
+        public static ComputeClosureEventSource Log = new ComputeClosureEventSource();
 
-        private RequestThreadProcEventSource() { }
+        private ComputeClosureEventSource() { }
 
         #endregion
 

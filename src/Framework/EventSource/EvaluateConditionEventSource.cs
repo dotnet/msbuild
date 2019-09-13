@@ -4,20 +4,20 @@ using System.Diagnostics.Tracing;
 
 
 //
-// Timing analysis for saving a project to the file system if dirty, creating directories as necessary.
+// This captures information relevant to resolving conditionals.
 //
-namespace Microsoft.Build.Evaluation
+namespace Microsoft.Build.Eventing
 {
-    // /OnlyProviders=*Save-Profiling
-    [EventSource(Name = "Save-Profiling")]
-    public sealed class SaveEventSource : EventSource
+    // /OnlyProviders=*EvaluateCondition-Profiling
+    [EventSource(Name = "EvaluateCondition-Profiling")]
+    public sealed class EvaluateConditionEventSource : EventSource
     {
         #region Singleton instance
 
         // define the singleton instance of the event source
-        public static SaveEventSource Log = new SaveEventSource();
+        public static EvaluateConditionEventSource Log = new EvaluateConditionEventSource();
 
-        private SaveEventSource() { }
+        private EvaluateConditionEventSource() { }
 
         #endregion
 

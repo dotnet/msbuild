@@ -4,20 +4,20 @@ using System.Diagnostics.Tracing;
 
 
 //
-// Profiler for loading a XmlDocumentWithLocation document from a path.
+// Class to provide timing analysis for requesting a new builder thread.
 //
-namespace Microsoft.Build.Evaluation
+namespace Microsoft.Build.Eventing
 {
-    // /OnlyProviders=*LoadDocument-Profiling
-    [EventSource(Name = "LoadDocument-Profiling")]
-    public sealed class LoadDocumentEventSource : EventSource
+    // /OnlyProviders=*RequestThreadProc-Profiling
+    [EventSource(Name = "RequestThreadProc-Profiling")]
+    public sealed class RequestThreadProcEventSource : EventSource
     {
         #region Singleton instance
 
         // define the singleton instance of the event source
-        public static LoadDocumentEventSource Log = new LoadDocumentEventSource();
+        public static RequestThreadProcEventSource Log = new RequestThreadProcEventSource();
 
-        private LoadDocumentEventSource() { }
+        private RequestThreadProcEventSource() { }
 
         #endregion
 

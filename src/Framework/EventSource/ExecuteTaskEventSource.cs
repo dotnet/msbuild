@@ -4,20 +4,20 @@ using System.Diagnostics.Tracing;
 
 
 //
-// Profiling for the function that parses an XML document into a ProjectRootElement.
+// Executes a task.
 //
-namespace Microsoft.Build.Evaluation
+namespace Microsoft.Build.Eventing
 {
-    // /OnlyProviders=*Parse-Profiling
-    [EventSource(Name = "Parse-Profiling")]
-    public sealed class ParseEventSource : EventSource
+    // /OnlyProviders=*ExecuteTask-Profiling
+    [EventSource(Name = "ExecuteTask-Profiling")]
+    public sealed class ExecuteTaskEventSource : EventSource
     {
         #region Singleton instance
 
         // define the singleton instance of the event source
-        public static ParseEventSource Log = new ParseEventSource();
+        public static ExecuteTaskEventSource Log = new ExecuteTaskEventSource();
 
-        private ParseEventSource() { }
+        private ExecuteTaskEventSource() { }
 
         #endregion
 

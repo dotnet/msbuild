@@ -40,7 +40,7 @@ using Microsoft.Build.Utilities;
 using System.Xml.Linq;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.ResourceHandling;
-using Microsoft.Build.Evaluation;
+using Microsoft.Build.Eventing;
 
 namespace Microsoft.Build.Tasks
 {

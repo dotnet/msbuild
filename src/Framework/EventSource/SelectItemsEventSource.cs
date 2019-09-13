@@ -4,20 +4,20 @@ using System.Diagnostics.Tracing;
 
 
 //
-// Evaluates the project data passed in. This has multiple "endpoints" (that it continues through).
+// This captures information relevant to identifying a list of files that correspond to an item with a wildcard.
 //
-namespace Microsoft.Build.Evaluation
+namespace Microsoft.Build.Eventing
 {
-    // /OnlyProviders=*Evaluate-Profiling
-    [EventSource(Name = "Evaluate-Profiling")]
-    public sealed class EvaluateEventSource : EventSource
+    // /OnlyProviders=*SelectItems-Profiling
+    [EventSource(Name = "SelectItems-Profiling")]
+    public sealed class SelectItemsEventSource : EventSource
     {
         #region Singleton instance
 
         // define the singleton instance of the event source
-        public static EvaluateEventSource Log = new EvaluateEventSource();
+        public static SelectItemsEventSource Log = new SelectItemsEventSource();
 
-        private EvaluateEventSource() { }
+        private SelectItemsEventSource() { }
 
         #endregion
 

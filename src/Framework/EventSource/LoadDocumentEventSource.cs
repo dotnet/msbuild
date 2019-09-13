@@ -4,20 +4,20 @@ using System.Diagnostics.Tracing;
 
 
 //
-// Profiles logging of results from executing a task.
+// Profiler for loading a XmlDocumentWithLocation document from a path.
 //
-namespace Microsoft.Build.Evaluation
+namespace Microsoft.Build.Eventing
 {
-    // /OnlyProviders=*LogResults-Profiling
-    [EventSource(Name = "LogResults-Profiling")]
-    public sealed class LogResultsEventSource : EventSource
+    // /OnlyProviders=*LoadDocument-Profiling
+    [EventSource(Name = "LoadDocument-Profiling")]
+    public sealed class LoadDocumentEventSource : EventSource
     {
         #region Singleton instance
 
         // define the singleton instance of the event source
-        public static LogResultsEventSource Log = new LogResultsEventSource();
+        public static LoadDocumentEventSource Log = new LoadDocumentEventSource();
 
-        private LogResultsEventSource() { }
+        private LoadDocumentEventSource() { }
 
         #endregion
 

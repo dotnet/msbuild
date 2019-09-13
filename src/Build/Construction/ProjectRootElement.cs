@@ -13,7 +13,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Evaluation;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
@@ -21,6 +21,7 @@ using Microsoft.Build.Shared.FileSystem;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Microsoft.Build.Utilities;
+using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.Construction
 {

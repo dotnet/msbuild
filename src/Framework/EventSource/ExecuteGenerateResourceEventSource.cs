@@ -4,20 +4,20 @@ using System.Diagnostics.Tracing;
 
 
 //
-// This captures information relevant to resolving references.
+// Main entrypoint for the GenerateResource task.
 //
-namespace Microsoft.Build.Evaluation
+namespace Microsoft.Build.Eventing
 {
-    // /OnlyProviders=*ComputeClosure-Profiling
-    [EventSource(Name = "ComputeClosure-Profiling")]
-    public sealed class ComputeClosureEventSource : EventSource
+    // /OnlyProvider=*ExecuteGenerateResource-Profiling
+    [EventSource(Name = "ExecuteGeneralResource-Profiling")]
+    public sealed class ExecuteGenerateResourceEventSource : EventSource
     {
         #region Singleton instance
 
         // define the singleton instance of the event source
-        public static ComputeClosureEventSource Log = new ComputeClosureEventSource();
+        public static ExecuteGenerateResourceEventSource Log = new ExecuteGenerateResourceEventSource();
 
-        private ComputeClosureEventSource() { }
+        private ExecuteGenerateResourceEventSource() { }
 
         #endregion
 

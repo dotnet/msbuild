@@ -6,7 +6,7 @@ using System.Diagnostics.Tracing;
 //
 // Profiling for the method that removes blacklisted references from the reference table. It puts primary and dependency references in invalid file lists.
 //
-namespace Microsoft.Build.Evaluation
+namespace Microsoft.Build.Eventing
 {
     // /OnlyProviders=*RemoveReferencesMarkedForExclusion-Profiling
     [EventSource(Name = "RemoveReferencesMarkedForExclusion-Profiling")]

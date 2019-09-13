@@ -4,20 +4,20 @@ using System.Diagnostics.Tracing;
 
 
 //
-// Main entrypoint for the GenerateResource task.
+// Timing analysis for saving a project to the file system if dirty, creating directories as necessary.
 //
-namespace Microsoft.Build.Evaluation
+namespace Microsoft.Build.Eventing
 {
-    // /OnlyProvider=*ExecuteGenerateResource-Profiling
-    [EventSource(Name = "ExecuteGeneralResource-Profiling")]
-    public sealed class ExecuteGenerateResourceEventSource : EventSource
+    // /OnlyProviders=*Save-Profiling
+    [EventSource(Name = "Save-Profiling")]
+    public sealed class SaveEventSource : EventSource
     {
         #region Singleton instance
 
         // define the singleton instance of the event source
-        public static ExecuteGenerateResourceEventSource Log = new ExecuteGenerateResourceEventSource();
+        public static SaveEventSource Log = new SaveEventSource();
 
-        private ExecuteGenerateResourceEventSource() { }
+        private SaveEventSource() { }
 
         #endregion
 

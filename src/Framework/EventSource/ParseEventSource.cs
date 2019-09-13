@@ -4,20 +4,20 @@ using System.Diagnostics.Tracing;
 
 
 //
-// This captures information relevant to identifying a list of files that correspond to an item with a wildcard.
+// Profiling for the function that parses an XML document into a ProjectRootElement.
 //
-namespace Microsoft.Build.Evaluation
+namespace Microsoft.Build.Eventing
 {
-    // /OnlyProviders=*SelectItems-Profiling
-    [EventSource(Name = "SelectItems-Profiling")]
-    public sealed class SelectItemsEventSource : EventSource
+    // /OnlyProviders=*Parse-Profiling
+    [EventSource(Name = "Parse-Profiling")]
+    public sealed class ParseEventSource : EventSource
     {
         #region Singleton instance
 
         // define the singleton instance of the event source
-        public static SelectItemsEventSource Log = new SelectItemsEventSource();
+        public static ParseEventSource Log = new ParseEventSource();
 
-        private SelectItemsEventSource() { }
+        private ParseEventSource() { }
 
         #endregion
 

@@ -4,20 +4,20 @@ using System.Diagnostics.Tracing;
 
 
 //
-// Executes a task.
+// Profiles logging of results from executing a task.
 //
-namespace Microsoft.Build.Evaluation
+namespace Microsoft.Build.Eventing
 {
-    // /OnlyProviders=*ExecuteTask-Profiling
-    [EventSource(Name = "ExecuteTask-Profiling")]
-    public sealed class ExecuteTaskEventSource : EventSource
+    // /OnlyProviders=*LogResults-Profiling
+    [EventSource(Name = "LogResults-Profiling")]
+    public sealed class LogResultsEventSource : EventSource
     {
         #region Singleton instance
 
         // define the singleton instance of the event source
-        public static ExecuteTaskEventSource Log = new ExecuteTaskEventSource();
+        public static LogResultsEventSource Log = new LogResultsEventSource();
 
-        private ExecuteTaskEventSource() { }
+        private LogResultsEventSource() { }
 
         #endregion
 

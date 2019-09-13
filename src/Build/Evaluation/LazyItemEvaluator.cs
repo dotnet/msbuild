@@ -17,9 +17,7 @@ using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
-#if MSBUILDENABLEPROFILING
-using Microsoft.VisualStudio.Profiler;
-#endif
+using Microsoft.Build.Eventing;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -90,9 +88,11 @@ namespace Microsoft.Build.Evaluation
             {
                 return true;
             }
-#if MSBUILDENABLEPROFILING
-            EvaluateConditionEventSource.Log.Load(String.Format("Evaluate Condition {0} - Begin", condition));
-#endif
+            if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+            {
+                EvaluateConditionEventSource.Log.Load(String.Format("Evaluate Condition {0} - Begin", condition));
+            }
+
             using (lazyEvaluator._evaluationProfiler.TrackCondition(element.ConditionLocation, condition))
             {
                 bool result = ConditionEvaluator.EvaluateCondition
@@ -107,9 +107,11 @@ namespace Microsoft.Build.Evaluation
                     lazyEvaluator._loggingContext.BuildEventContext,
                     lazyEvaluator.FileSystem
                     );
-#if MSBUILDENABLEPROFILING
-                EvaluateConditionEventSource.Log.Load(String.Format("Evaluate Condition {0} - End", condition));
-#endif
+                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
+                {
+                    EvaluateConditionEventSource.Log.Load(String.Format("Evaluate Condition {0} - End", condition));
+                }
+
                 return result;
             }
         }

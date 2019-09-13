@@ -4,20 +4,20 @@ using System.Diagnostics.Tracing;
 
 
 //
-// This captures information relevant to collecting a set of items, mutating them in a specified way, and saving the results.
+// Evaluates the project data passed in. This has multiple "endpoints" (that it continues through).
 //
-namespace Microsoft.Build.Evaluation
+namespace Microsoft.Build.Eventing
 {
-    // /OnlyProviders=*Apply-Profiling
-    [EventSource(Name = "Apply-Profiling")]
-    public sealed class ApplyEventSource : EventSource
+    // /OnlyProviders=*Evaluate-Profiling
+    [EventSource(Name = "Evaluate-Profiling")]
+    public sealed class EvaluateEventSource : EventSource
     {
         #region Singleton instance
 
         // define the singleton instance of the event source
-        public static ApplyEventSource Log = new ApplyEventSource();
+        public static EvaluateEventSource Log = new EvaluateEventSource();
 
-        private ApplyEventSource() { }
+        private EvaluateEventSource() { }
 
         #endregion
 
