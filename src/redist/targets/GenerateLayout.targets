@@ -191,7 +191,7 @@
           AfterTargets="Build">
     <PropertyGroup>
       <ReplacementPattern>"version": ".*"</ReplacementPattern>
-      <ReplacementString>"version": "$(MicrosoftNETCoreAppPackageVersion)"</ReplacementString>
+      <ReplacementString>"version": "$(MicrosoftNETCoreAppRuntimewinx64PackageVersion)"</ReplacementString>
     </PropertyGroup>
     <ItemGroup>
       <ToolRuntimeConfigPath Include="$(OutputPath)/**/*.runtimeconfig.json" />
