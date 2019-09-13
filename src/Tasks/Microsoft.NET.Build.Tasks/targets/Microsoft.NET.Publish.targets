@@ -1004,4 +1004,18 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <Target Name="RunResolvePublishAssemblies" />
 
+  <!--
+    ============================================================
+    _CheckForLanguageAndPublishFeatureCombinationSupport
+    
+    Block unsupported language and feature combination.
+    ============================================================
+    -->
+  <Target Name="_CheckForLanguageAndPublishFeatureCombinationSupport"
+        BeforeTargets="Publish;PrepareForPublish">
+
+    <NETSdkError Condition="'$(Language)' == 'C++' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
+                 ResourceName="NoSupportCppPublishDotnetCore" />
+
+  </Target>
 </Project>

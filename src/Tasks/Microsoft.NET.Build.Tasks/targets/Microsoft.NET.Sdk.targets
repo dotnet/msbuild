@@ -861,6 +861,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.CrossGen.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ObsoleteReferences.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Publish.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackStubs.targets" Condition="'$(Language)' == 'C++'"/>
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackTool.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackProjectTool.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PreserveCompilationContext.targets" />

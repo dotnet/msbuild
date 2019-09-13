@@ -9,8 +9,6 @@ using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using NuGet.Frameworks;
-using NuGet.ProjectModel;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
@@ -40,17 +38,60 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            // There is a bug in MSVC in CI's old VS image.
-            // Once https://github.com/dotnet/core-eng/issues/7409/ is done
-            // we should directly run the app to test.
-            var expectedIjwhost = Path.Combine(
-                //find the platform directory
+            var exe = Path.Combine( //find the platform directory
                 new DirectoryInfo(Path.Combine(testAsset.TestRoot, "CSConsoleApp", "bin")).GetDirectories().Single().FullName,
                 "Debug",
                 "netcoreapp3.0",
-                "Ijwhost.dll");
+                "CSConsoleApp.exe");
 
-            File.Exists(expectedIjwhost).Should().BeTrue();
+            var runCommand = new RunExeCommand(Log, exe);
+            runCommand
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello, World!");
+        }
+
+        [FullMSBuildOnlyFact]
+        public void Given_no_restore_It_builds_cpp_project()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
+                .WithSource();
+
+            new BuildCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest"))
+                .Execute("-p:Platform=x64")
+                .Should()
+                .Pass();
+        }
+
+        [FullMSBuildOnlyFact]
+        public void It_fails_with_error_message_on_EnableComHosting()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
+                .WithSource()
+                .WithProjectChanges((projectPath, project) =>
+                {
+                    if (Path.GetExtension(projectPath) == ".vcxproj")
+                    {
+                        XNamespace ns = project.Root.Name.Namespace;
+
+                        var globalPropertyGroup = project.Root
+                            .Descendants(ns + "PropertyGroup")
+                            .Where(e => e.Attribute("Label")?.Value == "Globals")
+                            .Single();
+                        globalPropertyGroup.Add(new XElement(ns + "EnableComHosting", "true"));
+                    }
+                });
+
+            new BuildCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest"))
+                .Execute("-p:Platform=x64")
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining(Strings.NoSupportCppEnableComHosting);
         }
 
         [FullMSBuildOnlyFact]
@@ -77,19 +118,6 @@ namespace Microsoft.NET.Build.Tests
                 .Fail()
                 .And
                 .HaveStdOutContaining(Strings.NETFrameworkWithoutUsingNETSdkDefaults);
-        }
-
-        [FullMSBuildOnlyFact]
-        public void Given_no_restore_It_builds_cpp_project()
-        {
-            var testAsset = _testAssetsManager
-                .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
-                .WithSource();
-
-            new BuildCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest"))
-                .Execute("-p:Platform=x64")
-                .Should()
-                .Pass();
         }
     }
 }
