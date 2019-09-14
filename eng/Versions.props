@@ -17,14 +17,14 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/sdk -->
-    <MicrosoftNETSdkPackageVersion>3.0.100-rc2.19463.5</MicrosoftNETSdkPackageVersion>
+    <MicrosoftNETSdkPackageVersion>3.1.100-preview1.19463.6</MicrosoftNETSdkPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/Microsoft/msbuild -->
-    <MicrosoftBuildPackageVersion>16.3.0</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildPackageVersion>16.4.0-preview-19463-03</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
-    <MicrosoftBuildLocalizationPackageVersion>16.3.0-preview-19463-05</MicrosoftBuildLocalizationPackageVersion>
+    <MicrosoftBuildLocalizationPackageVersion>16.4.0-preview-19463-03</MicrosoftBuildLocalizationPackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
   </PropertyGroup>
   <PropertyGroup>
@@ -33,7 +33,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/roslyn -->
-    <MicrosoftNETCoreCompilersPackageVersion>3.3.1-beta4-19462-11</MicrosoftNETCoreCompilersPackageVersion>
+    <MicrosoftNETCoreCompilersPackageVersion>3.4.0-beta2-19462-12</MicrosoftNETCoreCompilersPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore-Tooling -->

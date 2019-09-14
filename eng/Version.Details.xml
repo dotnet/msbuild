@@ -9,25 +9,25 @@
       <Uri>https://github.com/dotnet/cli</Uri>
       <Sha>b69f164d2dee4f26f525a18858c369c9fd3b540c</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk" Version="3.1.100-preview1.19463.2">
+    <Dependency Name="Microsoft.NET.Sdk" Version="3.1.100-preview1.19463.6">
       <Uri>https://github.com/dotnet/sdk</Uri>
-      <Sha>a19b734139ab62de631c31897b0ffc35f8462f3f</Sha>
+      <Sha>4c9ef45fabff500c82a18d5c48c1b7fff9680d43</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="16.3.0">
+    <Dependency Name="Microsoft.Build" Version="16.4.0-preview-19463-03">
       <Uri>https://github.com/microsoft/msbuild</Uri>
-      <Sha>0f4c62feac0a5726f63b56472de7b1c1527459fc</Sha>
+      <Sha>1adb5c56a1cb00ec44986c5dfd2bed81e05212a0</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build.Localization" Version="16.3.0-preview-19463-05">
+    <Dependency Name="Microsoft.Build.Localization" Version="16.4.0-preview-19463-03">
       <Uri>https://github.com/microsoft/msbuild</Uri>
-      <Sha>0f4c62feac0a5726f63b56472de7b1c1527459fc</Sha>
+      <Sha>1adb5c56a1cb00ec44986c5dfd2bed81e05212a0</Sha>
     </Dependency>
     <Dependency Name="Microsoft.FSharp.Compiler" Version="10.7.0-beta.19460.5">
       <Uri>https://github.com/dotnet/fsharp</Uri>
       <Sha>e6bb0f12d5de504c819938a8f06fc46698b595c7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Compilers" Version="3.3.1-beta4-19462-11">
+    <Dependency Name="Microsoft.NETCore.Compilers" Version="3.4.0-beta2-19462-12">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>f5ba9f2c61a2fe853dc4913888d40df221539147</Sha>
+      <Sha>345ce42e73270b32101aaceb1f00efe012d5ef9b</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Sdk.Razor" Version="3.1.0-preview1.19463.5">
       <Uri>https://github.com/aspnet/AspNetCore-Tooling</Uri>
