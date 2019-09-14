@@ -17,7 +17,7 @@ namespace Microsoft.NET.Build.Tasks
 {
     public class PrepareForReadyToRunCompilation : TaskBase
     {
-        public ITaskItem[] FilesToPublish { get; set; }
+        public ITaskItem[] Assemblies { get; set; }
         public string[] ExcludeList { get; set; }
         public bool EmitSymbols { get; set; }
 
@@ -49,10 +49,13 @@ namespace Microsoft.NET.Build.Tasks
         [Output]
         public ITaskItem[] ReadyToRunFilesToPublish => _r2rFiles.ToArray();
 
+        [Output]
+        public ITaskItem[] ReadyToRunAssembliesToReference => _r2rReferences.ToArray();
+
         private List<ITaskItem> _compileList = new List<ITaskItem>();
         private List<ITaskItem> _symbolsCompileList = new List<ITaskItem>();
-
         private List<ITaskItem> _r2rFiles = new List<ITaskItem>();
+        private List<ITaskItem> _r2rReferences = new List<ITaskItem>();
 
         private string _runtimeIdentifier;
         private string _packagePath;
@@ -112,20 +115,33 @@ namespace Microsoft.NET.Build.Tasks
                 CrossgenTool.SetMetadata("DiaSymReader", _diasymreaderPath);
 
             // Process input lists of files
-            ProcessInputFileList(FilesToPublish, _compileList, _symbolsCompileList, _r2rFiles);
+            ProcessInputFileList(Assemblies, _compileList, _symbolsCompileList, _r2rFiles, _r2rReferences);
         }
 
-        void ProcessInputFileList(ITaskItem[] inputFiles, List<ITaskItem> imageCompilationList, List<ITaskItem> symbolsCompilationList, List<ITaskItem> r2rFilesPublishList)
+        private void ProcessInputFileList(ITaskItem[] inputFiles, List<ITaskItem> imageCompilationList, List<ITaskItem> symbolsCompilationList, List<ITaskItem> r2rFilesPublishList, List<ITaskItem> r2rReferenceList)
         {
             if (inputFiles == null)
             {
                 return;
             }
+            
+            var exclusionSet = ExcludeList == null ? null : new HashSet<string>(ExcludeList, StringComparer.OrdinalIgnoreCase);
 
             foreach (var file in inputFiles)
             {
-                if (!InputFileEligibleForCompilation(file))
+                var eligibility = GetInputFileEligibility(file, exclusionSet);
+
+                if (eligibility == Eligibility.None)
+                {
                     continue;
+                }
+
+                r2rReferenceList.Add(file);
+
+                if (eligibility == Eligibility.ReferenceOnly)
+                {
+                    continue;
+                }
 
                 var outputR2RImageRelativePath = file.GetMetadata(MetadataKeys.RelativePath);
                 var outputR2RImage = Path.Combine(OutputPath, outputR2RImageRelativePath);
@@ -199,20 +215,15 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        bool InputFileEligibleForCompilation(ITaskItem file)
+        private enum Eligibility
         {
-            // Check if the file is explicitly excluded from being compiled
-            if (ExcludeList != null)
-            {
-                foreach (var item in ExcludeList)
-                {
-                    if (String.Compare(Path.GetFileName(file.ItemSpec), item, true) == 0)
-                    {
-                        return false;
-                    }
-                }
-            }
+            None,
+            ReferenceOnly,
+            CompileAndReference
+        };
 
+        private static Eligibility GetInputFileEligibility(ITaskItem file, HashSet<string> exclusionSet)
+        {
             // Check to see if this is a valid ILOnly image that we can compile
             using (FileStream fs = new FileStream(file.ItemSpec, FileMode.Open, FileAccess.Read))
             {
@@ -221,35 +232,55 @@ namespace Microsoft.NET.Build.Tasks
                     using (var pereader = new PEReader(fs))
                     {
                         if (!pereader.HasMetadata)
-                            return false;
-
-                        if ((pereader.PEHeaders.CorHeader.Flags & CorFlags.ILOnly) != CorFlags.ILOnly)
-                            return false;
+                        {
+                            return Eligibility.None;
+                        }
 
                         MetadataReader mdReader = pereader.GetMetadataReader();
                         if (!mdReader.IsAssembly)
                         {
-                            return false;
+                            return Eligibility.None;
+                        }
+                        
+                        if (IsReferenceAssembly(mdReader))
+                        {
+                            // crossgen can only take implementation assemblies, even as references
+                            return Eligibility.None;
                         }
 
-                        // Skip reference assemblies and assemblies that reference winmds
-                        if (ReferencesWinMD(mdReader) || IsReferenceAssembly(mdReader) || !HasILCode(pereader, mdReader))
+                        if ((pereader.PEHeaders.CorHeader.Flags & CorFlags.ILOnly) != CorFlags.ILOnly)
                         {
-                            return false;
+                            return Eligibility.ReferenceOnly;
                         }
+
+                        if (file.HasMetadataValue(MetadataKeys.ReferenceOnly, "true"))
+                        {
+                            return Eligibility.ReferenceOnly;
+                        }
+
+                        if (exclusionSet != null && exclusionSet.Contains(Path.GetFileName(file.ItemSpec)))
+                        {
+                            return Eligibility.ReferenceOnly;
+                        }
+
+                        // save these most expensive checks for last. We don't want to scan all references for IL code
+                        if (ReferencesWinMD(mdReader) || !HasILCode(pereader, mdReader))
+                        {
+                            return Eligibility.ReferenceOnly;
+                        }
+
+                        return Eligibility.CompileAndReference;
                     }
                 }
                 catch (BadImageFormatException)
                 {
                     // Not a valid assembly file
-                    return false;
+                    return Eligibility.None;
                 }
             }
-
-            return true;
         }
 
-        private bool IsReferenceAssembly(MetadataReader mdReader)
+        private static bool IsReferenceAssembly(MetadataReader mdReader)
         {
             foreach (var attributeHandle in mdReader.GetAssemblyDefinition().GetCustomAttributes())
             {
@@ -288,7 +319,7 @@ namespace Microsoft.NET.Build.Tasks
             return false;
         }
 
-        private bool ReferencesWinMD(MetadataReader mdReader)
+        private static bool ReferencesWinMD(MetadataReader mdReader)
         {
             foreach (var assemblyRefHandle in mdReader.AssemblyReferences)
             {
@@ -300,7 +331,7 @@ namespace Microsoft.NET.Build.Tasks
             return false;
         }
 
-        private bool HasILCode(PEReader peReader, MetadataReader mdReader)
+        private static bool HasILCode(PEReader peReader, MetadataReader mdReader)
         {
             foreach (var methoddefHandle in mdReader.MethodDefinitions)
             {
@@ -314,7 +345,7 @@ namespace Microsoft.NET.Build.Tasks
             return false;
         }
 
-        bool ExtractTargetPlatformAndArchitecture(string runtimeIdentifier, out string platform, out Architecture architecture)
+        private static bool ExtractTargetPlatformAndArchitecture(string runtimeIdentifier, out string platform, out Architecture architecture)
         {
             platform = null;
             architecture = default;
@@ -349,7 +380,7 @@ namespace Microsoft.NET.Build.Tasks
             return true;
         }
 
-        bool GetCrossgenComponentsPaths()
+        private bool GetCrossgenComponentsPaths()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
