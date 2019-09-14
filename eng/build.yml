@@ -213,7 +213,7 @@ jobs:
          TestResults/$(_BuildConfig)/**/*	
         TargetFolder: '$(Build.ArtifactStagingDirectory)'	
       continueOnError: true	
-      condition: not(succeeded())	
+      condition: always()	
 
     - task: PublishBuildArtifacts@1	
       displayName: Publish Logs to VSTS	
@@ -222,4 +222,4 @@ jobs:
         ArtifactName: '$(_AgentOSName)_$(Agent.JobName)_$(Build.BuildNumber)'	
         publishLocation: Container	
       continueOnError: true	
-      condition: not(succeeded())
+      condition: always()
