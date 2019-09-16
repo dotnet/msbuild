@@ -4,7 +4,7 @@
 
         <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
 
-        <MicrosoftNETSdkRazorPackageVersion>3.0.0-rc1.19457.3</MicrosoftNETSdkRazorPackageVersion>
+        <MicrosoftNETSdkRazorPackageVersion>3.0.0</MicrosoftNETSdkRazorPackageVersion>
 
         <MicrosoftNETSdkWebPackageVersion>3.0.100-rc2.19465.1</MicrosoftNETSdkWebPackageVersion>
         <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
