@@ -1,21 +1,21 @@
 <Project>
     <PropertyGroup>
-        <MicrosoftNETSdkPackageVersion>3.0.100-rc1.19458.1</MicrosoftNETSdkPackageVersion>
+        <MicrosoftNETSdkPackageVersion>3.0.100-rc2.19463.5</MicrosoftNETSdkPackageVersion>
 
         <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
 
         <MicrosoftNETSdkRazorPackageVersion>3.0.0-rc1.19457.3</MicrosoftNETSdkRazorPackageVersion>
 
-        <MicrosoftNETSdkWebPackageVersion>3.0.100-rc1.19458.1</MicrosoftNETSdkWebPackageVersion>
+        <MicrosoftNETSdkWebPackageVersion>3.0.100-rc2.19465.1</MicrosoftNETSdkWebPackageVersion>
         <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
         <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
 
         <NuGetBuildTasksPackageVersion>5.3.0-rtm.6192</NuGetBuildTasksPackageVersion>
         <NuGetBuildTasksPackPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetBuildTasksPackPackageVersion>
 
-        <MicrosoftDotNetMSBuildSdkResolverPackageVersion>3.0.100-rc1.19458.6</MicrosoftDotNetMSBuildSdkResolverPackageVersion>
+        <MicrosoftDotNetMSBuildSdkResolverPackageVersion>3.0.100-rc2.19465.3</MicrosoftDotNetMSBuildSdkResolverPackageVersion>
 
-        <MicrosoftNETCoreAppPackageVersion>3.0.0-rc1-19456-20</MicrosoftNETCoreAppPackageVersion>
+        <MicrosoftNETCoreAppPackageVersion>3.0.0</MicrosoftNETCoreAppPackageVersion>
         <DotNetSdkVersionForLibHostFxr>$(MicrosoftNETCoreAppPackageVersion)</DotNetSdkVersionForLibHostFxr>
 
         <ILLinkTasksPackageVersion>0.1.6-prerelease.19380.1</ILLinkTasksPackageVersion>
