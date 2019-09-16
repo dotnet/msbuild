@@ -337,16 +337,21 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="needs-review-translation">  -logger:&lt;registrador&gt;   Use este registrador para registrar eventos de MSBuild. Para especificar
-                     varios registradores, especifique cada uno de ellos por separado.
-                     La sintaxis del &lt;registrador&gt; es:
-                       [&lt;clase del registrador&gt;,]&lt;ensamblado del registrador&gt;[;&lt;parámetros del registrador&gt;]
-                     La sintaxis de la &lt;clase del registrador&gt; es:
-                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre de clase del registrador&gt;
-                     La sintaxis del &lt;ensamblado del registrador&gt; es:
-                       {&lt;nombre del ensamblado&gt;[,&lt;strong name&gt;] | &lt;archivo de ensamblado&gt;}
-                     Los &lt;parámetros del registrador&gt; son opcionales y pasan
-                     al registrador tal como se escriben. (Forma corta: /l)
+        <target state="translated">  -logger:&lt;registrador&gt;   Use este registrador para registrar eventos
+                     de MSBuild. Para especificar varios registradores, especifique
+                     cada uno de ellos por separado.
+                     La sintaxis de &lt;registrador&gt; es:
+                       [&lt;clase&gt;,]&lt;ensamblado&gt;[,&lt;opciones&gt;][;&lt;parámetros&gt;]
+                     La sintaxis de &lt;clase del registrador&gt; es:
+                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre de
+                       clase del registrador&gt;
+                     La sintaxis de &lt;ensamblado del registrador&gt; es:
+                       {&lt;nombre del ensamblado&gt;[,&lt;strong name&gt;] | &lt;archivo
+                       de ensamblado&gt;}
+                     Las opciones del registrador especifican cómo crea MSBuild
+                     el registrador.
+                     Los &lt;parámetros del registrador&gt; son opcionales y se pasan
+                     al registrador tal como se escriben. (Forma corta: -l)
                      Ejemplos:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
@@ -607,17 +612,21 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="needs-review-translation">  -distributedLogger:&lt;registrador central&gt;*&lt;registrador de reenvío&gt;                    
-                     Use este registrador para registrar eventos de MSBuild, adjuntando una
-                     interfaz de registrador diferente a cada nodo. Para especificar
-                     varios registradores, especifique cada uno de ellos por separado.
-                     (Forma corta -dl)
+        <target state="translated">  -distributedLogger:&lt;registrador central&gt;*&lt;registrador de reenvío&gt;
+                     Use este registrador para registrar eventos de MSBuild,
+                     asociando una interfaz de registrador diferente a cada nodo.
+                     Para especificar varios registradores, especifique cada uno
+                     de ellos por separado. (Forma corta: -dl)
                      La sintaxis de &lt;registrador&gt; es:
-                        [&lt;clase del registrador&gt;,]&lt;ensamblado del registrador&gt;[;&lt;parámetros del registrador&gt;]
+                       [&lt;clase&gt;,]&lt;ensamblado&gt;[,&lt;opciones&gt;][;&lt;parámetros&gt;]
                      La sintaxis de &lt;clase del registrador&gt; es:
-                        [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre de clase del registrador&gt;
-                    La sintaxis de &lt;ensamblado del registrador&gt; es:
-                        {&lt;nombre del ensamblado&gt;[,&lt;strong name&gt;] | &lt;archivo de ensamblado&gt;}
+                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre
+                       de la clase del registrador&gt;
+                     La sintaxis de &lt;ensamblado del registrador&gt; es:
+                       {&lt;nombre del ensamblado&gt;[,&lt;strong name&gt;] | &lt;archivo
+                      de ensamblado&gt;}
+                     Las opciones del registrador especifican cómo crea MSBuild
+                     el registrador.
                      Los &lt;parámetros del registrador&gt; son opcionales y se pasan
                      al registrador tal como se escriben. (Forma corta: -l)
                      Ejemplos:
@@ -1131,7 +1140,7 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
       </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
         <source>The specified logger could not be created and will not be used. {0}</source>
-        <target state="new">The specified logger could not be created and will not be used. {0}</target>
+        <target state="translated">No se pudo crear el registrador especificado y no se usará. {0}</target>
         <note>
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: {0} contains the exception message explaining why the
