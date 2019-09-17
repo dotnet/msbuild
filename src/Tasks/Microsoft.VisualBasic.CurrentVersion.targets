@@ -377,8 +377,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <!-- Note that unlike C#, VB gets its mscorlib.dll path from the $(FrameworkPathOverride) property
            via the /sdkpath parameter.
            In addition to that, VB normally treats System.dll as a "standard library" however since we are
-           passing NoCompilerStandardLib=true we need an explicit reference to System in order to maintain the
-           correct behaviour.
+           passing NoCompilerStandardLib=true we need an explicit reference to System in order to avoid
+           resolving it from, e.g., {CandidateAssemblyFiles}.
       -->
         <_ExplicitReference Include="$(FrameworkPathOverride)\System.dll" />
     </ItemGroup>

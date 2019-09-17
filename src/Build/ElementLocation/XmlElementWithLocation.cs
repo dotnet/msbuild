@@ -5,6 +5,7 @@ using Microsoft.Build.Shared;
 using System;
 using System.Xml;
 using System.Diagnostics;
+using Microsoft.Build.ObjectModelRemoting;
 
 namespace Microsoft.Build.Construction
 {
@@ -17,7 +18,7 @@ namespace Microsoft.Build.Construction
     /// C# doesn't currently allow covariance in method overloading, only on delegates.
     /// The caller must bravely downcast.
     /// </remarks>
-    internal class XmlElementWithLocation : XmlElement, IXmlLineInfo
+    internal class XmlElementWithLocation : XmlElement, IXmlLineInfo, ILinkedXml
     {
         /// <summary>
         /// Line, column, file information
@@ -47,6 +48,11 @@ namespace Microsoft.Build.Construction
             int adjustedColumn = (columnNumber == 0) ? columnNumber : columnNumber - 1;
             _elementLocation = ElementLocation.Create(documentWithLocation.FullPath, lineNumber, adjustedColumn);
         }
+
+        ProjectElementLink ILinkedXml.Link => null;
+
+        XmlElementWithLocation ILinkedXml.Xml => this;
+
 
         /// <summary>
         /// Returns the line number if available, else 0.

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Xml;
 using System.Diagnostics;
 using System.Linq;
+using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 
@@ -17,6 +18,14 @@ namespace Microsoft.Build.Construction
     [DebuggerDisplay("ProjectChooseElement (#Children={Count} HasOtherwise={OtherwiseElement != null})")]
     public class ProjectChooseElement : ProjectElementContainer
     {
+        /// <summary>
+        /// External projects support
+        /// </summary>
+        internal ProjectChooseElement(ProjectChooseElementLink link)
+            : base(link)
+        {
+        }
+
         /// <summary>
         /// Initialize a parented ProjectChooseElement
         /// </summary>
@@ -83,6 +92,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal static ProjectChooseElement CreateDisconnected(ProjectRootElement containingProject)
         {
+            ErrorUtilities.VerifyThrow(containingProject.Link == null, "External project");
+
             XmlElementWithLocation element = containingProject.CreateElement(XMakeElements.choose);
             return new ProjectChooseElement(element, containingProject);
         }
