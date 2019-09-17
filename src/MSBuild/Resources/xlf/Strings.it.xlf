@@ -347,16 +347,17 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="needs-review-translation">  -logger:&lt;logger&gt;   Usare questo logger per registrare eventi da MSBuild. Per specificare
+        <target state="translated">  -logger:&lt;logger&gt;   Usare questo logger per registrare eventi da MSBuild. Per specificare
                      più logger, specificare ogni logger separatamente.
                      La sintassi di &lt;logger&gt; è la seguente:
-                     [&lt;classe logger&gt;,]&lt;assembly logger&gt;[;&lt;parametri logger&gt;]
+                       [&lt;classe&gt;,]&lt;assembly&gt;[,&lt;opzioni&gt;][;&lt;parametri&gt;]
                      La sintassi di &lt;classe logger&gt; è la seguente:
-                     [&lt;spazio nomi parziale o completo&gt;.]&lt;nome classe logger&gt;
-                     La sintassi di &lt;logger assembly&gt; è la seguente:
-                     {&lt;nome assembly&gt;[,&lt;strong name&gt;] | &lt;file assembly&gt;}
+                       [&lt;spazio dei nomi parziale o completo&gt;.]&lt;nome classe logger&gt;
+                     La sintassi di &lt;assembly logger&gt; è la seguente:
+                       {&lt;nome assembly&gt;[,&lt;strong name&gt;] | &lt;file di assembly&gt;}
+                     Le opzioni di logger consentono di specificare in che modo MSBuild crea il logger.
                      I &lt;parametri logger&gt; sono facoltativi e vengono passati al
-                     logger nel formato in cui vengono specificati. Forma breve: -l.
+                     logger così come vengono digitati. Forma breve: -l.
                      Esempi:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
@@ -623,20 +624,21 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="needs-review-translation">  -distributedLogger:&lt;logger centrale&gt;*&lt;logger inoltro&gt;
-                               Usare questo logger per registrare eventi da MSBuild,
-                               associando un'istanza di logger diversa a ogni nodo. Per
-                               specificare più logger, specificare ogni logger
-                               separatamente. Forma breve -dl.
-                               La sintassi di &lt;logger&gt; è la seguente:
-                                 [&lt;classe logger&gt;,]&lt;assembly logger&gt;[;&lt;parametri logger&gt;]
-                               La sintassi di &lt;classe logger&gt; è la seguente:
-                                 [&lt;spazio nomi parziale o completo&gt;.]&lt;nome classe logger&gt;
-                               La sintassi di &lt;assembly logger&gt; è la seguente:
-                                 {&lt;nome assembly&gt;[,&lt;strong name&gt;] | &lt;file assembly&gt;}
-                               I &lt;parametri logger&gt; sono facoltativi e vengono passati al
-                               logger nel formato in cui vengono specificati. Forma
-                               breve: -l.                               Esempi:
+        <target state="translated">  -distributedLogger:&lt;logger centrale&gt;*&lt;logger inoltro&gt;
+                     Usare questo logger per registrare eventi da MSBuild
+                     associando un'istanza di logger diversa a ogni nodo. Per
+                     specificare più logger, specificare ogni logger
+                     separatamente. Forma breve: -dl.
+                     La sintassi di &lt;logger&gt; è la seguente:
+                       [&lt;classe&gt;,]&lt;assembly&gt;[,&lt;opzioni&gt;][;&lt;parametri&gt;]
+                     La sintassi di &lt;classe logger&gt; è la seguente:
+                       [&lt;spazio dei nomi parziale o completo&gt;.]&lt;nome classe logger&gt;
+                     La sintassi di &lt;assembly logger&gt; è la seguente:
+                       {&lt;nome assembly&gt;[,&lt;strong name&gt;] | &lt;file di assembly&gt;}
+                     Le opzioni di logger consentono di specificare in che modo MSBuild crea il logger.
+                     I &lt;parametri logger&gt; sono facoltativi e vengono passati al
+                     logger così come vengono digitati. Forma breve: -l
+                     Esempi:
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </target>
@@ -1150,7 +1152,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
       </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
         <source>The specified logger could not be created and will not be used. {0}</source>
-        <target state="new">The specified logger could not be created and will not be used. {0}</target>
+        <target state="translated">Non è stato possibile creare il logger specificato, che quindi non verrà usato. {0}</target>
         <note>
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: {0} contains the exception message explaining why the

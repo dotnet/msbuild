@@ -67,11 +67,6 @@
         <target state="translated">MSB4257: Określony plik wyjściowej pamięci podręcznej wyników jest pusty.</target>
         <note />
       </trans-unit>
-      <trans-unit id="EnvironmentVariableRead">
-        <source>Read environment variable "{0}"</source>
-        <target state="new">Read environment variable "{0}"</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
         <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
         <target state="translated">MSB4256: Podczas odczytywania plików wejściowej pamięci podręcznej wyników ze ścieżki „{0}” wystąpił błąd: {1}</target>
@@ -113,11 +108,6 @@
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
       </trans-unit>
-      <trans-unit id="PropertyAssignment">
-        <source>Property initial value: $({0})="{1}" Source: {2}</source>
-        <target state="new">Property initial value: $({0})="{1}" Source: {2}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: W przypadku projektu „{0}” pominięto ograniczenia izolacji grafu dla przywoływanego projektu „{1}”</target>
@@ -127,7 +117,7 @@
       </trans-unit>
       <trans-unit id="StaticGraphAcceptsSingleSolutionEntryPoint">
         <source>MSB4261: Static graph only accepts a solution as the only entry point. Multiple entry points detected: {0}</source>
-        <target state="new">MSB4261: Static graph only accepts a solution as the only entry point. Multiple entry points detected: {0}</target>
+        <target state="translated">MSB4261: wykres statyczny akceptuje tylko rozwiązanie jako jedyny punkt wejścia. Wykryto wiele punktów wejścia: {0}</target>
         <note>
       LOCALIZATION: {0} is a semicolon delimited list of files
     </note>
@@ -135,7 +125,7 @@
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
         <source>MSB4263: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
     </source>
-        <target state="new">MSB4263: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
+        <target state="translated">MSB4263: projekt „{0}” ma odwołanie do pliku rozwiązania „{1}”. Odwoływanie do rozwiązań nie jest obsługiwane w przypadku wykresu statycznego.
     </target>
         <note>
       LOCALIZATION: {0} and {1} are file paths
@@ -146,9 +136,9 @@
            Warnings: {1}
            Errors: {2}
     </source>
-        <target state="new">MSB4262: Solution file "{0}" contains the following warnings and errors:
-           Warnings: {1}
-           Errors: {2}
+        <target state="translated">MSB4262: plik rozwiązania „{0}” zawiera następujące ostrzeżenia i błędy:
+           Ostrzeżenia: {1}
+           Błędy: {2}
     </target>
         <note>
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
@@ -161,11 +151,6 @@
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
     </note>
-      </trans-unit>
-      <trans-unit id="UninitializedPropertyRead">
-        <source>Read uninitialized property "{0}"</source>
-        <target state="new">Read uninitialized property "{0}"</target>
-        <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">
         <source>Using input build results caches: {0}</source>
@@ -1618,12 +1603,12 @@
       </trans-unit>
       <trans-unit id="ProjectInstanceConflictsWithAffinity">
         <source>MSB4209: The specified project instance conflicts with the affinity specified in the HostServices.</source>
-        <target state="translated">MSB4209: Określone wystąpienie projektu koliduje z koligacją określoną w obiekcie HostServices.</target>
+        <target state="translated">MSB4209: Określone wystąpienie projektu jest w konflikcie z koligacją określoną w obiekcie HostServices.</target>
         <note>{StrBegin="MSB4209: "}</note>
       </trans-unit>
       <trans-unit id="AffinityConflict">
         <source>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for this project.</source>
-        <target state="translated">MSB4213: Podana koligacja żądania {0} koliduje z poprzednią koligacją {1} określoną dla tego projektu.</target>
+        <target state="translated">MSB4213: Podana koligacja żądania {0} jest w konflikcie z poprzednią koligacją {1} określoną dla tego projektu.</target>
         <note>{StrBegin="MSB4213: "}</note>
       </trans-unit>
       <trans-unit id="UnableToCreateNode">
@@ -1967,7 +1952,7 @@ Wykorzystanie:          Średnie wykorzystanie {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="OM_BuildSubmissionsMultipleProjectCollections">
         <source>All build submissions in a build must use project instances originating from the same project collection.</source>
-        <target state="translated">Wszystkie przesłania kompilacji w kompilacji muszą używać wystąpień projektu pochodzących z tej samej kolekcji projektu.</target>
+        <target state="translated">Wszystkie przesłania kompilacji w kompilacji muszą używać wystąpień projektu pochodzących z tej samej kolekcji projektów.</target>
         <note>This occurs if a client tries to add two BuildSubmissions to a build, each involving a ProjectInstance originating in different ProjectCollection. This is not allowed.</note>
       </trans-unit>
       <trans-unit id="BuildStarted">
