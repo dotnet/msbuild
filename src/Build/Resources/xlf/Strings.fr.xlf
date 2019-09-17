@@ -117,7 +117,7 @@
       </trans-unit>
       <trans-unit id="StaticGraphAcceptsSingleSolutionEntryPoint">
         <source>MSB4261: Static graph only accepts a solution as the only entry point. Multiple entry points detected: {0}</source>
-        <target state="new">MSB4261: Static graph only accepts a solution as the only entry point. Multiple entry points detected: {0}</target>
+        <target state="translated">MSB4261: le graphe statique n'accepte qu'une solution comme seul point d'entrée. Plusieurs points d'entrée ont été détectés : {0}</target>
         <note>
       LOCALIZATION: {0} is a semicolon delimited list of files
     </note>
@@ -125,7 +125,7 @@
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
         <source>MSB4263: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
     </source>
-        <target state="new">MSB4263: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
+        <target state="translated">MSB4263: le projet "{0}" contient une référence au fichier solution "{1}". Le référencement des solutions n'est pas pris en charge dans le graphe statique.
     </target>
         <note>
       LOCALIZATION: {0} and {1} are file paths
@@ -136,9 +136,9 @@
            Warnings: {1}
            Errors: {2}
     </source>
-        <target state="new">MSB4262: Solution file "{0}" contains the following warnings and errors:
-           Warnings: {1}
-           Errors: {2}
+        <target state="translated">MSB4262: le fichier solution "{0}" contient les avertissements et erreurs ci-après :
+           Avertissements : {1}
+           Erreurs : {2}
     </target>
         <note>
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
