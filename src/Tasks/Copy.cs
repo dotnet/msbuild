@@ -104,6 +104,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool UseSymboliclinksIfPossible { get; set; } = s_forceSymlinks;
 
+        /// <summary>
+        /// Fail if unable to create a symbolic or hard link instead of falling back to copy
+        /// </summary>
+        public bool ErrorIfLinkFails { get; set; }
+
         public bool SkipUnchangedFiles { get; set; }
 
         [Output]
@@ -255,6 +260,12 @@ namespace Microsoft.Build.Tasks
             else if (UseSymboliclinksIfPossible)
             {
                 TryCopyViaLink("Copy.SymbolicLinkComment", MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out linkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeSymbolicLink(destination, source, ref errorMessage));
+            }
+
+            if (ErrorIfLinkFails && !linkCreated)
+            {
+                Log.LogErrorWithCodeFromResources("Copy.LinkFailed", sourceFileState.Name, destinationFileState.Name);
+                return false;
             }
 
             // If the link was not created (either because the user didn't want one, or because it couldn't be created)
@@ -605,6 +616,12 @@ namespace Microsoft.Build.Tasks
             if (UseHardlinksIfPossible & UseSymboliclinksIfPossible)
             {
                 Log.LogErrorWithCodeFromResources("Copy.ExactlyOneTypeOfLink", "UseHardlinksIfPossible", "UseSymboliclinksIfPossible");
+                return false;
+            }
+
+            if (ErrorIfLinkFails && !UseHardlinksIfPossible && !UseSymboliclinksIfPossible)
+            {
+                Log.LogErrorWithCodeFromResources("Copy.ErrorIfLinkFailsSetWithoutLinkOption");
                 return false;
             }
 
