@@ -155,8 +155,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_CheckForLanguageAndFeatureCombinationSupport"
           BeforeTargets="_CheckForInvalidConfigurationAndPlatform;ProcessFrameworkReferences">
 
-    <NETSdkError Condition="'$(Language)' == 'C++' and $(OutputType) == 'Exe' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
-                 ResourceName="NoSupportCppExeDotnetCore" />
+    <NETSdkError Condition="'$(Language)' == 'C++' and $(OutputType) != 'library' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
+                 ResourceName="NoSupportCppNonDynamicLibraryDotnetCore" />
 
     <NETSdkError Condition="'$(Language)' == 'C++' and $(EnableComHosting) == 'true'"
                  ResourceName="NoSupportCppEnableComHosting" />

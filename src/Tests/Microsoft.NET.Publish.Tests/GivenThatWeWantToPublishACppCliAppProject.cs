@@ -29,7 +29,7 @@ namespace Microsoft.NET.Build.Tests
                 .Execute("/restore", "/p:NoBuild=true")
                 .Should()
                 .Fail()
-                .And.HaveStdOutContaining(Strings.NoSupportCppExeDotnetCore);
+                .And.HaveStdOutContaining(Strings.NoSupportCppNonDynamicLibraryDotnetCore);
         }
     }
 }
