@@ -18,9 +18,9 @@
     <MicrosoftNETHostModelVersion>3.0.0</MicrosoftNETHostModelVersion>
     <NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-26011-01</NETStandardLibraryNETFrameworkVersion>
     <NewtonsoftJsonVersion>9.0.1</NewtonsoftJsonVersion>
-    <NuGetBuildTasksPackVersion>5.3.0-preview.2.6167</NuGetBuildTasksPackVersion>
-    <NuGetPackagingVersion>$(NuGetBuildTasksPackVersion)</NuGetPackagingVersion>
-    <NuGetProjectModelVersion>$(NuGetBuildTasksPackVersion)</NuGetProjectModelVersion>
+    <NuGetBuildTasksPackageVersion>5.3.0-rtm.6251</NuGetBuildTasksPackageVersion>
+    <NuGetPackagingVersion>$(NuGetBuildTasksPackageVersion)</NuGetPackagingVersion>
+    <NuGetProjectModelVersion>$(NuGetBuildTasksPackageVersion)</NuGetProjectModelVersion>
     <PlatformAbstractionsVersion>2.0.0</PlatformAbstractionsVersion>
     <SystemDiagnosticsFileVersionInfoVersion>4.0.0</SystemDiagnosticsFileVersionInfoVersion>
     <SystemReflectionMetadataVersion>1.5.0</SystemReflectionMetadataVersion>
