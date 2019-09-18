@@ -113,20 +113,12 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal static void Parse(XmlDocumentWithLocation document, ProjectRootElement projectRootElement)
         {
-            if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
-            {
-                string projectFile = String.IsNullOrEmpty(projectRootElement.ProjectFileLocation.File) ? "(null)" : projectRootElement.ProjectFileLocation.File;
-                ParseEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Parse Project {0} - Begin", projectFile));
-            }
+            ParseEventSource.Log.ParseStart(projectRootElement.ProjectFileLocation.File);
             {
                 ProjectParser parser = new ProjectParser(document, projectRootElement);
                 parser.Parse();
             }
-            if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
-            {
-                string projectFile = String.IsNullOrEmpty(projectRootElement.ProjectFileLocation.File) ? "(null)" : projectRootElement.ProjectFileLocation.File;
-                ParseEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Parse Project {0} - End", projectFile));
-            }
+            ParseEventSource.Log.ParseStop(projectRootElement.ProjectFileLocation.File);
         }
 
             /// <summary>

@@ -39,6 +39,7 @@ using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
+using Microsoft.Build.Eventing;
 
 namespace Microsoft.Build.CommandLine
 {
@@ -515,14 +516,7 @@ namespace Microsoft.Build.CommandLine
             ConsoleCancelEventHandler cancelHandler = Console_CancelKeyPress;
             try
             {
-#if (!STANDALONEBUILD)
-                // Enable CodeMarkers for MSBuild.exe
-                CodeMarkers.Instance.InitPerformanceDll(CodeMarkerApp.MSBUILDPERF,  String.Format(CultureInfo.InvariantCulture, @"Software\Microsoft\MSBuild\{0}", MSBuildConstants.CurrentProductVersion));
-#endif
-#if MSBUILDENABLEVSPROFILING 
-                string startMSBuildExe = String.Format(CultureInfo.CurrentCulture, "Running MSBuild.exe with command line {0}", commandLine);
-                DataCollection.CommentMarkProfile(8800, startMSBuildExe);
-#endif
+                XMakeEventSource.Log.XMakeStart("Execute MSBuild - Begin");
                 Console.CancelKeyPress += cancelHandler;
 
                 // check the operating system the code is running on
@@ -797,10 +791,8 @@ namespace Microsoft.Build.CommandLine
 
                 // Wait for any pending cancel, so that we get any remaining messages
                 s_cancelComplete.WaitOne();
-#if (!STANDALONEBUILD)
-                // Turn off codemarkers
-                CodeMarkers.Instance.UninitializePerformanceDLL(CodeMarkerApp.MSBUILDPERF);
-#endif
+                
+                XMakeEventSource.Log.XMakeStop("Execute MSBuild - End");
             }
             /**********************************************************************************************************************
              * WARNING: Do NOT add any more catch blocks above!

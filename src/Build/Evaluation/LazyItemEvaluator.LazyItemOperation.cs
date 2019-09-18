@@ -53,20 +53,14 @@ namespace Microsoft.Build.Evaluation
 
             public virtual void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
-                {
-                    ApplyEventSource.Log.Load("Select Mutate Save Items - Begin");
-                }
+                ApplyEventSource.Log.ApplyStart("Select Mutate Save Items - Begin");
                 using (_lazyEvaluator._evaluationProfiler.TrackElement(_itemElement))
                 {
                     var items = SelectItems(listBuilder, globsToIgnore);
                     MutateItems(items);
                     SaveItems(items, listBuilder);
                 }
-                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
-                {
-                    ApplyEventSource.Log.Load("Select Mutate Save Items - End");
-                }
+                ApplyEventSource.Log.ApplyStop("Select Mutate Save Items - End");
             }
 
             /// <summary>

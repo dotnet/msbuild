@@ -275,11 +275,7 @@ namespace Microsoft.Build.Evaluation
             bool interactive = false)
         {
             {
-                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
-                {
-                    string projectFile = String.IsNullOrEmpty(root.ProjectFileLocation.File) ? "(null)" : root.ProjectFileLocation.File;
-                    EvaluateEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Begin", projectFile));
-                }
+                EvaluateEventSource.Log.EvaluateStart(root.ProjectFileLocation.File);
                 var profileEvaluation = (loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0 || loggingService.IncludeEvaluationProfile;
                 var evaluator = new Evaluator<P, I, M, D>(
                     data,
@@ -297,11 +293,7 @@ namespace Microsoft.Build.Evaluation
                     interactive);
 
                 evaluator.Evaluate(loggingService, buildEventContext);
-                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
-                {
-                    string projectFile = String.IsNullOrEmpty(root.ProjectFileLocation.File) ? "(null)" : root.ProjectFileLocation.File;
-                    EvaluateEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End", projectFile));
-                }
+                EvaluateEventSource.Log.EvaluateStop(root.ProjectFileLocation.File);
             }
         }
 
@@ -627,11 +619,7 @@ namespace Microsoft.Build.Evaluation
 
                 ErrorUtilities.VerifyThrow(_data.EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
-                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
-                {
-                    projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
-                    EvaluateEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 0 (Initial Properties)", projectFile));
-                }
+                EvaluateEventSource.Log.EvaluateStopOne(projectFile);
 
                 // Pass1: evaluate properties, load imports, and gather everything else
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Properties))
@@ -648,10 +636,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 _data.InitialTargets = initialTargets;
-                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
-                {
-                    EvaluateEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 1 (Properties and Imports", projectFile));
-                }
+                EvaluateEventSource.Log.EvaluateStopTwo(projectFile);
                 // Pass2: evaluate item definitions
                 // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
                 using (_evaluationProfiler.TrackPass(EvaluationPass.ItemDefinitionGroups))
@@ -664,10 +649,7 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
                 }
-                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
-                {
-                    EvaluateEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 2 (Item Definitions)", projectFile));
-                }
+                EvaluateEventSource.Log.EvaluateStopThree(projectFile);
                 LazyItemEvaluator<P, I, M, D> lazyEvaluator = null;
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Items))
                 {
@@ -712,10 +694,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
-                {
-                    EvaluateEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 3 (Items)", projectFile));
-                }
+                EvaluateEventSource.Log.EvaluateStopFour(projectFile);
                 // Pass4: evaluate using-tasks
                 using (_evaluationProfiler.TrackPass(EvaluationPass.UsingTasks))
                 {
@@ -743,10 +722,7 @@ namespace Microsoft.Build.Evaluation
                 Dictionary<string, List<TargetSpecification>> targetsWhichRunAfterByTarget = new Dictionary<string, List<TargetSpecification>>(StringComparer.OrdinalIgnoreCase);
                 LinkedList<ProjectTargetElement> activeTargetsByEvaluationOrder = new LinkedList<ProjectTargetElement>();
                 Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets = new Dictionary<string, LinkedListNode<ProjectTargetElement>>(StringComparer.OrdinalIgnoreCase);
-                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
-                {
-                    EvaluateEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 4 (UsingTasks)", projectFile));
-                }
+                EvaluateEventSource.Log.EvaluateStopFive(projectFile);
 
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Targets))
                 {

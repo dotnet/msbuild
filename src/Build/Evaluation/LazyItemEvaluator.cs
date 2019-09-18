@@ -88,10 +88,7 @@ namespace Microsoft.Build.Evaluation
             {
                 return true;
             }
-            if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
-            {
-                EvaluateConditionEventSource.Log.Load(String.Format("Evaluate Condition {0} - Begin", condition));
-            }
+            EvaluateConditionEventSource.Log.EvaluateConditionStart(String.Format("Evaluate Condition {0} - Begin", condition));
 
             using (lazyEvaluator._evaluationProfiler.TrackCondition(element.ConditionLocation, condition))
             {
@@ -107,10 +104,7 @@ namespace Microsoft.Build.Evaluation
                     lazyEvaluator._loggingContext.BuildEventContext,
                     lazyEvaluator.FileSystem
                     );
-                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
-                {
-                    EvaluateConditionEventSource.Log.Load(String.Format("Evaluate Condition {0} - End", condition));
-                }
+                EvaluateConditionEventSource.Log.EvaluateConditionStop(String.Format("Evaluate Condition {0} - End", condition));
 
                 return result;
             }

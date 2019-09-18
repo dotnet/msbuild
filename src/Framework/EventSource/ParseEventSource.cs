@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Diagnostics.Tracing;
+using System.Globalization;
 
 
 //
@@ -16,6 +17,7 @@ namespace Microsoft.Build.Eventing
 
         // define the singleton instance of the event source
         public static ParseEventSource Log = new ParseEventSource();
+        private static int logNum = 1;
 
         private ParseEventSource() { }
 
@@ -24,12 +26,30 @@ namespace Microsoft.Build.Eventing
         #region Events and NonEvents
 
         /// <summary>
-        /// Call this method to notify listeners of the specified event.
+        /// Call this method to notify listeners of the start of the specified event.
         /// </summary>
-        /// <param name="info">Relevant information about where in the run of the progam it is.</param>
-        public void Load(string info)
+        /// <param name="projectFileName">Relevant information about where in the run of the progam it is.</param>
+        public void ParseStart(string projectFileName)
         {
-            WriteEvent(1, info);
+
+            if (IsEnabled(EventLevel.Error, Keywords.Project))
+            {
+                string name = String.IsNullOrEmpty(projectFileName) ? "(null)" : projectFileName;
+                WriteEvent(logNum++, String.Format(CultureInfo.CurrentCulture, "Parse Project {0} - Start", name));
+            }
+        }
+
+        /// <summary>
+        /// Call this method to notify listeners of the end of the specified event.
+        /// </summary>
+        /// <param name="projectFileName">Relevant information about where in the run of the progam it is.</param>
+        public void ParseStop(string projectFileName)
+        {
+            if (IsEnabled(EventLevel.Error, Keywords.Project))
+            {
+                string name = String.IsNullOrEmpty(projectFileName) ? "(null)" : projectFileName;
+                WriteEvent(logNum++, String.Format(CultureInfo.CurrentCulture, "Parse Project {0} - Stop", name));
+            }
         }
 
         #endregion

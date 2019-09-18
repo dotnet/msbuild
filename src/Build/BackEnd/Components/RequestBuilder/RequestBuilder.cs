@@ -694,14 +694,9 @@ namespace Microsoft.Build.BackEnd
                 {
                     SetCommonWorkerThreadParameters();
                 }
-                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling) {
-                    RequestThreadProcEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Build Project - Start"));
-                }
+                RequestThreadProcEventSource.Log.RequestThreadProcStart(String.Format(CultureInfo.CurrentCulture, "Build Project - Start"));
                 await BuildAndReport();
-                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
-                {
-                    RequestThreadProcEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Build Project - End"));
-                }
+                RequestThreadProcEventSource.Log.RequestThreadProcStop(String.Format(CultureInfo.CurrentCulture, "Build Project - End"));
             }
 #if FEATURE_VARIOUS_EXCEPTIONS
             catch (ThreadAbortException)

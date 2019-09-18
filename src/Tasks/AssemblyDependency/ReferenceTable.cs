@@ -1340,10 +1340,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void RemoveReferencesMarkedForExclusion(bool removeOnlyNoWarning, string subsetName)
         {
-            if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
-            {
-                RemoveReferencesMarkedForExclusionEventSource.Log.Load("Remove References Start");
-            }
+            RemoveReferencesMarkedForExclusionEventSource.Log.RemoveReferencesMArkedForExclusionStart("Remove References Start");
             {
                 // Create a table which will contain the references which are not in the black list
                 var goodReferences = new Dictionary<AssemblyNameExtension, Reference>(AssemblyNameComparer.GenericComparer);
@@ -1430,6 +1427,7 @@ namespace Microsoft.Build.Tasks
 
                 // Replace the references table with the list only containing good references.
                 References = goodReferences;
+                RemoveReferencesMarkedForExclusionEventSource.Log.RemoveReferencesMArkedForExclusionStop("Remove References Stop");
             }
         }
 
@@ -1596,10 +1594,7 @@ namespace Microsoft.Build.Tasks
             List<Exception> exceptions
         )
         {
-            if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
-            {
-                ComputeClosureEventSource.Log.Load("Compute Closure Start");
-            }
+            ComputeClosureEventSource.Log.ComputeClosureStart("Compute Closure Start");
             {
                 References.Clear();
                 _externallyResolvedPrimaryReferences.Clear();
@@ -1610,6 +1605,7 @@ namespace Microsoft.Build.Tasks
 
                 ComputeClosure();
             }
+            ComputeClosureEventSource.Log.ComputeClosureStop("Compute Closure End");
         }
 
         /// <summary>

@@ -926,10 +926,7 @@ namespace Microsoft.Build.Tasks
         )
         {
             bool success = true;
-            if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
-            {
-                LogResultsEventSource.Log.Load("Log Results - Start");
-            }
+            LogResultsEventSource.Log.LogResultsStart("Log Results - Start");
             {
                 /*
                 PERF NOTE: The Silent flag turns off logging completely from the task side. This means
@@ -1132,6 +1129,8 @@ namespace Microsoft.Build.Tasks
                 }
             }
 #endif
+
+            LogResultsEventSource.Log.LogResultsStop("Log Results - End");
 
             return success;
         }
@@ -1917,10 +1916,7 @@ namespace Microsoft.Build.Tasks
         )
         {
             bool success = true;
-            if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
-            {
-                ExecuteTaskEventSource.Log.Load("Execute Task - Begin");
-            }
+            ExecuteTaskEventSource.Log.ExecuteTaskStart("Execute Task - Begin");
             {
                 try
                 {
@@ -2392,6 +2388,7 @@ namespace Microsoft.Build.Tasks
                             }
                         }
                     }
+                    ExecuteTaskEventSource.Log.ExecuteTaskStop("Execute Task - End");
                     return success && !Log.HasLoggedErrors;
                 }
                 catch (ArgumentException e)
@@ -2407,6 +2404,8 @@ namespace Microsoft.Build.Tasks
                         "ResolveAssemblyReference.InvalidParameter", e.ParamName, e.ActualValue, e.Message);
                 }
             }
+
+            ExecuteTaskEventSource.Log.ExecuteTaskStop("Execute Task - End");
 
             return success && !Log.HasLoggedErrors;
         }

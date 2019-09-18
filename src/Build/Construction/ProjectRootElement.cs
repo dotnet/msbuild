@@ -13,6 +13,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
 using Microsoft.Build.Collections;
+
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -1477,10 +1478,7 @@ namespace Microsoft.Build.Construction
             ErrorUtilities.VerifyThrowInvalidOperation(_projectFileLocation != null, "OM_MustSetFileNameBeforeSave");
 
             Directory.CreateDirectory(DirectoryPath);
-            if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
-            {
-                SaveEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Save Project To File - Begin"));
-            }
+            SaveEventSource.Log.SaveStart(String.Format(CultureInfo.CurrentCulture, "Save Project To File - Begin"));
             {
                 // Note: We're using string Equals on encoding and not EncodingUtilities.SimilarToEncoding in order
                 // to force a save if the Encoding changed from UTF8 with BOM to UTF8 w/o BOM (for example).
@@ -1508,10 +1506,7 @@ namespace Microsoft.Build.Construction
                     _versionOnDisk = Version;
                 }
             }
-            if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
-            {
-                SaveEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Save Project To File - End"));
-            }
+            SaveEventSource.Log.SaveStop(String.Format(CultureInfo.CurrentCulture, "Save Project To File - End"));
         }
 
         /// <summary>
@@ -1986,10 +1981,7 @@ namespace Microsoft.Build.Construction
             {
                 try
                 {
-                    if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
-                    {
-                        LoadDocumentEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Load Project From File - Begin"));
-                    }
+                    LoadDocumentEventSource.Log.LoadDocumentStart(String.Format(CultureInfo.CurrentCulture, "Load Project From File - Begin"));
                     using (XmlReaderExtension xtr = XmlReaderExtension.Create(fullPath, loadAsReadOnly))
                     {
                         _encoding = xtr.Encoding;
@@ -2020,10 +2012,7 @@ namespace Microsoft.Build.Construction
 
                     ProjectFileErrorUtilities.ThrowInvalidProjectFile(fileInfo, ex, "InvalidProjectFile", ex.Message);
                 }
-                if (Traits.Instance.EscapeHatches.MSBuildEnableProfiling)
-                {
-                    LoadDocumentEventSource.Log.Load(String.Format(CultureInfo.CurrentCulture, "Load Project From File - End"));
-                }
+                LoadDocumentEventSource.Log.LoadDocumentStop(String.Format(CultureInfo.CurrentCulture, "Load Project From File - End"));
             }
 
             return document;
