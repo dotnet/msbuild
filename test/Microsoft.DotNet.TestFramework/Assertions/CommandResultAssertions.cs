@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         public AndConstraint<CommandResultAssertions> HaveStdErrContaining(string pattern)
         {
             Execute.Assertion.ForCondition(_commandResult.StdErr.Contains(pattern))
-                .FailWith(AppendDiagnosticsTo($"The command error output did not contain expected result: {pattern}{Environment.NewLine}"));
+                .FailWith(AppendDiagnosticsTo($"The command error output did not contain expected result: {pattern}{Environment.NewLine}{_commandResult.StdErr}{Environment.NewLine}"));
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
