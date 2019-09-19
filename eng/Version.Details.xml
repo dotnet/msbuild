@@ -5,25 +5,25 @@
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>778951d25fd4fd5e04a2d2c9220e20b7074d1cbc</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.App" Version="5.0.0-alpha1.19468.2">
+    <Dependency Name="Microsoft.NETCore.App" Version="5.0.0-alpha1.19468.6">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>e6f9309bae0f8242045b80a50f65513da975906d</Sha>
+      <Sha>30c4a25a9a675d632b6e7180e53a87e6fcacb909</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.PlatformAbstractions" Version="5.0.0-alpha1.19468.2">
+    <Dependency Name="Microsoft.DotNet.PlatformAbstractions" Version="5.0.0-alpha1.19468.6">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>e6f9309bae0f8242045b80a50f65513da975906d</Sha>
+      <Sha>30c4a25a9a675d632b6e7180e53a87e6fcacb909</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.HostModel" Version="5.0.0-alpha1.19468.2">
+    <Dependency Name="Microsoft.NET.HostModel" Version="5.0.0-alpha1.19468.6">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>e6f9309bae0f8242045b80a50f65513da975906d</Sha>
+      <Sha>30c4a25a9a675d632b6e7180e53a87e6fcacb909</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="5.0.0-alpha1.19468.2">
+    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="5.0.0-alpha1.19468.6">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>e6f9309bae0f8242045b80a50f65513da975906d</Sha>
+      <Sha>30c4a25a9a675d632b6e7180e53a87e6fcacb909</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.DotNetHostResolver" Version="5.0.0-alpha1.19468.2">
+    <Dependency Name="Microsoft.NETCore.DotNetHostResolver" Version="5.0.0-alpha1.19468.6">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>e6f9309bae0f8242045b80a50f65513da975906d</Sha>
+      <Sha>30c4a25a9a675d632b6e7180e53a87e6fcacb909</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="5.0.0-alpha1.19427.5">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
