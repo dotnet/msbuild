@@ -14,10 +14,9 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
     public class GivenDotnetStoresAndPublishesProjects : TestBase
     {
         private static string _tfm = "netcoreapp3.0";
-        private static string _frameworkVersion = TestAssetInstance.CurrentRuntimeFrameworkVersion;
         private static string _arch = RuntimeEnvironment.RuntimeArchitecture.ToLowerInvariant();
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/2914")]
+        [Fact(Skip = "https://github.com/dotnet/cli/issues/12482")]
         public void ItPublishesARunnablePortableApp()
         {
             var testAppName = "NewtonSoftDependentProject";
@@ -28,7 +27,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .WithSourceFiles();
 
             var testProjectDirectory = testInstance.Root.FullName;
-            var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
+            var rid = EnvironmentInfo.GetCompatibleRid();
             var localAssemblyCache = Path.Combine(testProjectDirectory, "localAssemblyCache");
             var intermediateWorkingDirectory = Path.Combine(testProjectDirectory, "workingDirectory");
             var profileProjectPath = TestAssets.Get(profileProjectName).Root.FullName;
@@ -44,7 +43,6 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .WithFramework(_tfm)
                 .WithRuntime(rid)
                 .WithOutput(localAssemblyCache)
-                .WithRuntimeFrameworkVersion(_frameworkVersion)
                 .WithIntermediateWorkingDirectory(intermediateWorkingDirectory)
                 .Execute()
                 .Should().Pass();
@@ -109,7 +107,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         }
 
         //  Windows only for now due to https://github.com/dotnet/cli/issues/7501
-        [WindowsOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/2914")]
+        [WindowsOnlyFact(Skip = "https://github.com/dotnet/cli/issues/12482")]
         public void ItPublishesAnAppWithMultipleProfiles()
         {
             var testAppName = "MultiDependentProject";
@@ -121,7 +119,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .WithSourceFiles();
 
             var testProjectDirectory = testInstance.Root.FullName;
-            var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
+            var rid = EnvironmentInfo.GetCompatibleRid();
             var localAssemblyCache = Path.Combine(testProjectDirectory, "lAC");
             var intermediateWorkingDirectory = Path.Combine(testProjectDirectory, "workingDirectory");
 
@@ -144,7 +142,6 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .WithFramework(_tfm)
                 .WithRuntime(rid)
                 .WithOutput(localAssemblyCache)
-                .WithRuntimeFrameworkVersion(_frameworkVersion)
                 .WithIntermediateWorkingDirectory(intermediateWorkingDirectory)
                 .Execute()
                 .Should().Pass();

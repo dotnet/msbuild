@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Version>$(SdkVersion)</Version>
-    <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
+    <TargetFrameworks>$(ToolsetTargetFramework);net472</TargetFrameworks>
     <WarningsAsErrors>true</WarningsAsErrors>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>

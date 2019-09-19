@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <None Update="CollectCodeCoverage.runsettings">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 </Project>

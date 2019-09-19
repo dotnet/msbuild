@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Tests
         {
             Environment.SetEnvironmentVariable(
                 Constants.MSBUILD_EXE_PATH,
-                Path.Combine(new RepoDirectoriesProvider().Stage2Sdk, "MSBuild.dll"));
+                Path.Combine(RepoDirectoriesProvider.SdkFolderUnderTest, "MSBuild.dll"));
 
             _configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
         }
@@ -160,7 +160,7 @@ namespace Microsoft.DotNet.Tests
         {
             Environment.SetEnvironmentVariable(
                 Constants.MSBUILD_EXE_PATH,
-                Path.Combine(new RepoDirectoriesProvider().Stage2Sdk, "MSBuild.dll"));
+                Path.Combine(RepoDirectoriesProvider.SdkFolderUnderTest, "MSBuild.dll"));
 
             CommandContext.SetVerbose(true);
 

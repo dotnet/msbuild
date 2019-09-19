@@ -19,10 +19,11 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             var testProjectDirectory = TestAssets.Get("VSTestMulti")
                 .CreateInstance("1")
                 .WithSourceFiles()
-                .WithNuGetConfig(new RepoDirectoriesProvider().TestPackages)
+                .WithVersionVariables()
+                .WithNuGetConfig(RepoDirectoriesProvider.TestPackages)
                 .Root;
-            
-            var runtime = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
+
+            var runtime = EnvironmentInfo.GetCompatibleRid();
 
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
@@ -57,7 +58,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             string testAppName = "XunitMulti";
             var testInstance = TestAssets.Get(testAppName)
                             .CreateInstance("2")
-                            .WithSourceFiles();
+                            .WithSourceFiles()
+                            .WithVersionVariables();
 
             var testProjectDirectory = testInstance.Root.FullName;
 
@@ -99,7 +101,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             string testAppName = "XunitMulti";
             var testInstance = TestAssets.Get(testAppName)
                             .CreateInstance("3")
-                            .WithSourceFiles();
+                            .WithSourceFiles()
+                            .WithVersionVariables();
 
             var testProjectDirectory = testInstance.Root.FullName;
 

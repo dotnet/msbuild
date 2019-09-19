@@ -10,7 +10,7 @@ using FluentAssertions;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
-namespace Microsoft.DotNet.Tools.Pack.Tests
+namespace Microsoft.DotNet.Pack.Tests
 {
     public class PackTests : TestBase
     {

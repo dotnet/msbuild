@@ -444,11 +444,11 @@ namespace Microsoft.DotNet.ShellShim.Tests
             processStartInfo.EnvironmentVariables["PATH"] = environmentProvider.GetEnvironmentVariable("PATH");
             if (Environment.Is64BitProcess)
             {
-                processStartInfo.EnvironmentVariables["DOTNET_ROOT"] = new RepoDirectoriesProvider().DotnetRoot;
+                processStartInfo.EnvironmentVariables["DOTNET_ROOT"] = Path.GetDirectoryName(RepoDirectoriesProvider.DotnetUnderTest);
             }
             else
             {
-                processStartInfo.EnvironmentVariables["DOTNET_ROOT(x86)"] = new RepoDirectoriesProvider().DotnetRoot;
+                processStartInfo.EnvironmentVariables["DOTNET_ROOT(x86)"] = Path.GetDirectoryName(RepoDirectoriesProvider.DotnetUnderTest);
             }
 
             processStartInfo.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
@@ -461,7 +461,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         private static string GetAppHostTemplateFromStage2()
         {
             var stage2AppHostTemplateDirectory =
-                new DirectoryInfo(new RepoDirectoriesProvider().Stage2Sdk)
+                new DirectoryInfo(RepoDirectoriesProvider.SdkFolderUnderTest)
                 .GetDirectory("AppHostTemplate").FullName;
             return stage2AppHostTemplateDirectory;
         }

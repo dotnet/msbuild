@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Microsoft.DotNet.TestFramework Class Library</Description>
-    <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
+    <TargetFrameworks>$(ToolsetTargetFramework);net472</TargetFrameworks>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>

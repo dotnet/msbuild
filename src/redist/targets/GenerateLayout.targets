@@ -194,7 +194,9 @@
       <ReplacementString>"version": "$(MicrosoftNETCoreAppPackageVersion)"</ReplacementString>
     </PropertyGroup>
     <ItemGroup>
-      <ToolRuntimeConfigPath Include="$(OutputPath)/**/*.runtimeconfig.json" />
+      <!-- Exclude F# from retargeting: https://github.com/dotnet/toolset/issues/2866 -->
+      <ToolRuntimeConfigPath Include="$(OutputPath)/**/*.runtimeconfig.json"
+                             Exclude="$(OutputPath)/**/fsc.runtimeconfig.json;$(OutputPath)/**/fsi.runtimeconfig.json"/>
 
       <MSBuild15Items Include="$(OutputPath)/15.0/**/*" />
     </ItemGroup>

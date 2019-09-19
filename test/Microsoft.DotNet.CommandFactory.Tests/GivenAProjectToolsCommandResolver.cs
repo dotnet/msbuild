@@ -15,6 +15,7 @@ using Xunit;
 using Microsoft.DotNet.Tools.Tests.Utilities;
 using Microsoft.DotNet.CommandFactory;
 using LocalizableStrings = Microsoft.DotNet.CommandFactory.LocalizableStrings;
+using Microsoft.DotNet.Tools.MSBuild;
 
 namespace Microsoft.DotNet.Tests
 {
@@ -209,6 +210,7 @@ namespace Microsoft.DotNet.Tests
             var testInstance = TestAssets.Get(TestProjectName)
                 .CreateInstance()
                 .WithSourceFiles()
+                .WithRepoGlobalPackages()
                 .WithRestoreFiles();
 
             var commandResolverArguments = new CommandResolverArguments()
@@ -218,9 +220,7 @@ namespace Microsoft.DotNet.Tests
                 ProjectDirectory = testInstance.Root.FullName
             };
 
-            var repoDirectoriesProvider = new RepoDirectoriesProvider();
-
-            var nugetPackagesRoot = repoDirectoriesProvider.NugetPackages;
+            var nugetPackagesRoot = RepoDirectoriesProvider.TestGlobalPackagesFolder;
 
             var toolPathCalculator = new ToolPathCalculator(nugetPackagesRoot);
 
@@ -254,13 +254,11 @@ namespace Microsoft.DotNet.Tests
             var testInstance = TestAssets.Get(TestProjectName)
                 .CreateInstance()
                 .WithSourceFiles()
+                .WithRepoGlobalPackages()
                 .WithRestoreFiles();
 
-            var repoDirectoriesProvider = new RepoDirectoriesProvider();
 
-            var nugetPackagesRoot = repoDirectoriesProvider.NugetPackages;
-
-            var toolPathCalculator = new ToolPathCalculator(nugetPackagesRoot);
+            var toolPathCalculator = new ToolPathCalculator(RepoDirectoriesProvider.TestGlobalPackagesFolder);
 
             var lockFilePath = toolPathCalculator.GetLockFilePath(
                 "dotnet-portable",
@@ -315,7 +313,7 @@ namespace Microsoft.DotNet.Tests
             var testInstance = TestAssets.Get("AppWithFallbackFolderToolDependency")
                 .CreateInstance("NF") // use shorter name since path could be too long
                 .WithSourceFiles()
-                .WithNuGetConfigAndExternalRestoreSources(new RepoDirectoriesProvider().TestPackages);
+                .WithNuGetConfig(RepoDirectoriesProvider.TestPackages);
             var testProjectDirectory = testInstance.Root.FullName;
             var fallbackFolder = Path.Combine(testProjectDirectory, "fallbackFolder");
 
@@ -340,7 +338,7 @@ namespace Microsoft.DotNet.Tests
             var testInstance = TestAssets.Get("AppWithFallbackFolderToolDependency")
                 .CreateInstance("DN") // use shorter name since path could be too long
                 .WithSourceFiles()
-                .WithNuGetConfigAndExternalRestoreSources(new RepoDirectoriesProvider().TestPackages);
+                .WithNuGetConfig(RepoDirectoriesProvider.TestPackages);
             var testProjectDirectory = testInstance.Root.FullName;
             var fallbackFolder = Path.Combine(testProjectDirectory, "fallbackFolder");
             var nugetPackages = Path.Combine(testProjectDirectory, "nugetPackages");
@@ -402,7 +400,13 @@ namespace Microsoft.DotNet.Tests
         {
             Environment.SetEnvironmentVariable(
                 Constants.MSBUILD_EXE_PATH,
-                Path.Combine(new RepoDirectoriesProvider().Stage2Sdk, "MSBuild.dll"));
+                Path.Combine(RepoDirectoriesProvider.SdkFolderUnderTest, "MSBuild.dll"));
+
+            Environment.SetEnvironmentVariable(
+                "MSBuildSDKsPath",
+                Path.Combine(RepoDirectoriesProvider.SdkFolderUnderTest, "Sdks"));
+
+            MSBuildForwardingAppWithoutLogging.MSBuildExtensionsPathTestHook = RepoDirectoriesProvider.SdkFolderUnderTest;
 
             var packagedCommandSpecFactory = new PackagedCommandSpecFactoryWithCliRuntime();
 
@@ -416,7 +420,7 @@ namespace Microsoft.DotNet.Tests
         {
             //  When using the product, the ToolDepsJsonGeneratorProject property is used to get this path, but for testing
             //  we'll hard code the path inside the SDK since we don't have a project to evaluate here
-            return Path.Combine(new RepoDirectoriesProvider().Stage2Sdk, "Sdks", "Microsoft.NET.Sdk", "targets", "GenerateDeps", "GenerateDeps.proj");
+            return Path.Combine(RepoDirectoriesProvider.SdkFolderUnderTest, "Sdks", "Microsoft.NET.Sdk", "targets", "GenerateDeps", "GenerateDeps.proj");
         }
     }
 }

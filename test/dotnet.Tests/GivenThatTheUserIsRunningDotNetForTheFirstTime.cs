@@ -12,7 +12,7 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using FluentAssertions;
 
-[assembly: CollectionBehavior(DisableTestParallelization = true)]
+//[assembly: CollectionBehavior(DisableTestParallelization = true)]
 
 namespace Microsoft.DotNet.Tests
 {

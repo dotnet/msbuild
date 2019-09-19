@@ -103,7 +103,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         public void ItPublishesSelfContainedWithRid(string args)
         {
             var testAppName = "MSBuildTestApp";
-            var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
+            var rid = EnvironmentInfo.GetCompatibleRid();
             var outputDirectory = PublishApp(testAppName, rid, args);
 
             var outputProgram = Path.Combine(outputDirectory.FullName, $"{testAppName}{Constants.ExeSuffix}");
@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         public void ItPublishesFrameworkDependentWithRid(string args)
         {
             var testAppName = "MSBuildTestApp";
-            var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
+            var rid = EnvironmentInfo.GetCompatibleRid();
             var outputDirectory = PublishApp(testAppName, rid, args);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
@@ -135,7 +135,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var command = new TestCommand(outputProgram);
             command.Environment[Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)"] =
-                new RepoDirectoriesProvider().DotnetRoot;
+                Path.GetDirectoryName(RepoDirectoriesProvider.DotnetUnderTest);
             command.ExecuteWithCapturedOutput()
                 .Should()
                 .Pass()
@@ -172,7 +172,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         public void ItFailsToPublishWithConflictingArgument(string args)
         {
             var testAppName = "MSBuildTestApp";
-            var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
+            var rid = EnvironmentInfo.GetCompatibleRid();
 
             var testInstance = TestAssets.Get(testAppName)
                 .CreateInstance($"PublishApp_{rid ?? "none"}_{args ?? "none"}")
@@ -272,7 +272,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var rootPath = testInstance.Root;
 
-            var rid = selfContained ? DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier() : "";
+            var rid = selfContained ? EnvironmentInfo.GetCompatibleRid() : "";
             var ridArg = selfContained ? $"-r {rid}" : "";
 
             new BuildCommand()

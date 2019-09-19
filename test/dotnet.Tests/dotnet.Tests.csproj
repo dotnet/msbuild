@@ -11,6 +11,56 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\crossgen.Tests\**\*.cs" LinkBase="crossgen" />
+    <Compile Include="..\dotnet-add-package.Tests\**\*.cs" LinkBase="dotnet-add-package" />
+    <Compile Include="..\dotnet-back-compat.Tests\**\*.cs" LinkBase="dotnet-back-compat" />
+    <Compile Include="..\dotnet-build.Tests\**\*.cs" LinkBase="dotnet-build" />
+    <Compile Include="..\dotnet-clean.Tests\**\*.cs" LinkBase="dotnet-clean" />
+    <Compile Include="..\dotnet-fsi.Tests\**\*.cs" LinkBase="dotnet-fsi" />
+    <Compile Include="..\dotnet-help.Tests\**\*.cs" LinkBase="dotnet-help" />
+    <Compile Include="..\dotnet-install-tool.Tests\**\*.cs" LinkBase="dotnet-install-tool" />
+    <Compile Include="..\dotnet-new.Tests\**\*.cs" LinkBase="dotnet-new" />
+    <Compile Include="..\dotnet-nuget.UnitTests\**\*.cs" LinkBase="dotnet-nuget" />
+    <Compile Include="..\dotnet-pack.Tests\**\*.cs" LinkBase="dotnet-pack" />
+    <Compile Include="..\dotnet-publish.Tests\**\*.cs" LinkBase="dotnet-publish" />
+    <Compile Include="..\dotnet-remove-package.Tests\**\*.cs" LinkBase="dotnet-remove-package" />
+    <Compile Include="..\dotnet-remove-reference.Tests\**\*.cs" LinkBase="dotnet-remove-reference" />
+    <Compile Include="..\dotnet-restore.Tests\**\*.cs" LinkBase="dotnet-restore" />
+    <Compile Include="..\dotnet-run.Tests\**\*.cs" LinkBase="dotnet-run" />
+    <Compile Include="..\dotnet-store.Tests\**\*.cs" LinkBase="dotnet-store" />
+    <Compile Include="..\dotnet-test.Tests\**\*.cs" LinkBase="dotnet-test" />
+    <Compile Include="..\dotnet-vstest.Tests\**\*.cs" LinkBase="dotnet-vstest" />
+    <Compile Include="..\Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests\**\*.cs" LinkBase="Telemetry.PersistenceChannel"/>
+    <Compile Include="..\Microsoft.DotNet.CommandFactory.Tests\**\*.cs" LinkBase="CommandFactory"/>
+    <Compile Include="..\Microsoft.DotNet.Configurer.UnitTests\**\*.cs" LinkBase="Configurer"/>
+    <Compile Include="..\Microsoft.DotNet.ShellShim.Tests\**\*.cs" LinkBase="ShellShim"/>
+    
+
+    <None Include="..\Microsoft.DotNet.ShellShim.Tests\WpfBinaryTestAsssets\testwpf.dll" LinkBase="WpfBinaryTestAsssets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+
+    <None Update="CollectCodeCoverage.runsettings">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>MSTestVersion</_Parameter1>
+      <_Parameter2>$(MSTestVersion)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>MicrosoftNETTestSdkPackageVersion</_Parameter1>
+      <_Parameter2>$(MicrosoftNETTestSdkPackageVersion)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>XUnitVersion</_Parameter1>
+      <_Parameter2>$(XUnitVersion)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <!--<ItemGroup>
     <Content Include="..\..\TestAssets\TestProjects\AppWithToolDependency\**\*">
       <Link>TestAssets/TestProjects/AppWithToolDependency/%(RecursiveDir)%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -21,7 +71,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-  </ItemGroup>
+  </ItemGroup>-->
   
   <!--<Target Name="WriteExpectedVersion"
           BeforeTargets="BeforeBuild"
@@ -74,6 +124,7 @@
     <ProjectReference Include="..\..\src\dotnet\dotnet.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.DotNet.Cli.Sln.Internal\Microsoft.DotNet.Cli.Sln.Internal.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
+    <ProjectReference Include="..\Msbuild.Tests.Utilities\Msbuild.Tests.Utilities.csproj" />
   </ItemGroup>
 
   <ItemGroup>

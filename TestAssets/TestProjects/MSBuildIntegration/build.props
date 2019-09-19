@@ -1,6 +1,4 @@
 <Project ToolsVersion="14.0" DefaultTargets="Validate">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-
   <ItemGroup>
     <Sdk Include="Microsoft.NET.Sdk" Version="$(MicrosoftNETSdkPackageVersion)" />
   </ItemGroup>

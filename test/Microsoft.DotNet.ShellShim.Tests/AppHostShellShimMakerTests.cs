@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         {
             var tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             Directory.CreateDirectory(tempDirectory);
-            var appHostShellShimMaker = new AppHostShellShimMaker(Path.Combine(new RepoDirectoriesProvider().Stage2Sdk, "AppHostTemplate"));
+            var appHostShellShimMaker = new AppHostShellShimMaker(Path.Combine(RepoDirectoriesProvider.SdkFolderUnderTest, "AppHostTemplate"));
             string shimPath = Path.Combine(tempDirectory, Path.GetRandomFileName());
 
             appHostShellShimMaker.CreateApphostShellShim(

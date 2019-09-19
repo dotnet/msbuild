@@ -21,6 +21,7 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
                 .CreateInstance()
                 .WithSourceFiles()
                 .WithRestoreFiles()
+                .WithVersionVariables()
                 .Root;
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";

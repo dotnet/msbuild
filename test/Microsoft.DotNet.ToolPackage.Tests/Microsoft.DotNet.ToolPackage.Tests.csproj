@@ -53,8 +53,6 @@
     <None Remove="SampleGlobalToolWithDifferentCasing/**" />
   </ItemGroup>
 
-  <UsingTask TaskName="DownloadFile" AssemblyFile="$(CLIBuildDll)" />
-
   <Target Name="CreateNupkgFromSource" BeforeTargets="Build">
     <PropertyGroup>
       <testAssetSourceRoot>$(BaseOutputPath)/TestAsset/SampleGlobalTool</testAssetSourceRoot>

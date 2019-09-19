@@ -17,18 +17,20 @@ namespace Microsoft.DotNet.Tests
     /// </summary>
     public class CrossgenTests : TestBase
     {
-        [Fact(Skip="https://github.com/dotnet/cli/issues/3059")]
+        [Fact(Skip = "This coverage needs to be in core-sdk, which is where crossgen is applied")]
         public void CLI_SDK_assemblies_must_be_crossgened()
         {
+            //  TODO: Update method of finding cliPath (right now it's finding a ref path in stage 0
             string dotnetDir = FindDotnetDirInPath();
             string cliPath = Directory.EnumerateFiles(dotnetDir, "dotnet.dll", SearchOption.AllDirectories).First();
             cliPath = Path.GetDirectoryName(cliPath);
             CheckDirectoryIsCrossgened(cliPath);
         }
 
-        [Fact(Skip="https://github.com/dotnet/cli/issues/3059")]
+        [Fact(Skip ="This coverage needs to be in core-sdk, which is where crossgen is applied")]
         public void Shared_Fx_assemblies_must_be_crossgened()
         {
+            //  TODO: Update method of finding sharedFxPath
             string dotnetDir = FindDotnetDirInPath();
             string sharedFxPath = Directory.EnumerateFiles(dotnetDir, "mscorlib*.dll", SearchOption.AllDirectories).First();
             sharedFxPath = Path.GetDirectoryName(sharedFxPath);

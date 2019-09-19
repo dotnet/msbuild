@@ -12,6 +12,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Xml;
 using System.Xml.Linq;
+using System.Reflection;
+using dotnet.Tests;
 
 namespace Microsoft.DotNet.Cli.Test.Tests
 {
@@ -46,7 +48,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             string testAppName = "VSTestCore";
             var testInstance = TestAssets.Get(testAppName)
                             .CreateInstance()
-                            .WithSourceFiles();
+                            .WithSourceFiles()
+                            .WithVersionVariables();
 
             var testProjectDirectory = testInstance.Root.FullName;
 
@@ -74,7 +77,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             string testAppName = "VSTestCore";
             var testInstance = TestAssets.Get(testAppName)
                             .CreateInstance()
-                            .WithSourceFiles();
+                            .WithSourceFiles()
+                            .WithVersionVariables();
 
             var testProjectDirectory = testInstance.Root.FullName;
 
@@ -91,7 +95,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             string testAppName = "VSTestCore";
             var testInstance = TestAssets.Get(testAppName)
                             .CreateInstance()
-                            .WithSourceFiles();
+                            .WithSourceFiles()
+                            .WithVersionVariables();
 
             var testProjectDirectory = testInstance.Root.FullName;
 
@@ -108,7 +113,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             string testAppName = "XunitCore";
             var testInstance = TestAssets.Get(testAppName)
                             .CreateInstance("4")
-                            .WithSourceFiles();
+                            .WithSourceFiles()
+                            .WithVersionVariables();
 
             var testProjectDirectory = testInstance.Root.FullName;
 
@@ -142,7 +148,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         {
             var testInstance = TestAssets.Get("XunitCore")
                 .CreateInstance()
-                .WithSourceFiles();
+                .WithSourceFiles()
+                .WithVersionVariables();
 
             var result = new DotnetTestCommand()
                 .WithWorkingDirectory(testInstance.Root.FullName)
@@ -285,7 +292,11 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         public void ItBuildsAndTestsAppWhenRestoringToSpecificDirectory()
         {
             // Creating folder with name short name "RestoreTest" to avoid PathTooLongException
-            var rootPath = TestAssets.Get("VSTestCore").CreateInstance("8").WithSourceFiles().Root.FullName;
+            var rootPath = TestAssets.Get("VSTestCore")
+                .CreateInstance("8")
+                .WithSourceFiles()
+                .WithVersionVariables()
+                .Root.FullName;
 
             // Moving pkgs folder on top to avoid PathTooLongException
             string dir = @"..\..\..\..\pkgs";
@@ -350,10 +361,11 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         {
             var testInstance = TestAssets.Get("XunitCore")
                             .CreateInstance()
-                            .WithSourceFiles();
+                            .WithSourceFiles()
+                            .WithVersionVariables();
 
             var rootPath = testInstance.Root.FullName;
-            var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
+            var rid = EnvironmentInfo.GetCompatibleRid();
 
             new BuildCommand()
                 .WithWorkingDirectory(rootPath)
@@ -424,6 +436,9 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                                         .ExecuteWithCapturedOutput(
                                             "--settings " + settingsPath
                                             + " --results-directory " + resultsDirectory);
+
+            File.WriteAllText(Path.Combine(testProjectDirectory, "output.txt"),
+                                result.StdOut + Environment.NewLine + result.StdErr);
 
             // Verify test results
             if (!DotnetUnderTest.IsLocalized())
@@ -508,6 +523,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             var testInstance = TestAssets.Get(testAppName)
                 .CreateInstance()
                 .WithSourceFiles()
+                .WithVersionVariables()
                 .WithProjectChanges(ProjectModification.AddDisplayMessageBeforeVsTestToProject);
 
             var testProjectDirectory = testInstance.Root.FullName;
@@ -533,6 +549,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             var testInstance = TestAssets.Get(testAppName)
                 .CreateInstance()
                 .WithSourceFiles()
+                .WithVersionVariables()
                 .WithProjectChanges(ProjectModification.AddDisplayMessageBeforeVsTestToProject);
 
             var testProjectDirectory = testInstance.Root.FullName;
@@ -555,9 +572,11 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         {
             // Copy VSTestCore project in output directory of project dotnet-vstest.Tests
             string testAppName = "VSTestCore";
+
             var testInstance = TestAssets.Get(testAppName)
                             .CreateInstance(callingMethod)
-                            .WithSourceFiles();
+                            .WithSourceFiles()
+                            .WithVersionVariables();
 
             var testProjectDirectory = testInstance.Root.FullName;
 

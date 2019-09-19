@@ -9,6 +9,11 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 {
     public static class EnvironmentInfo
     {
+        public static string GetCompatibleRid()
+        {
+            return RuntimeEnvironment.GetRuntimeIdentifier();
+        }
+
         public static bool HasSharedFramework(string framework)
         {
             var dotnetFolder = Path.GetDirectoryName(RepoDirectoriesProvider.DotnetUnderTest);

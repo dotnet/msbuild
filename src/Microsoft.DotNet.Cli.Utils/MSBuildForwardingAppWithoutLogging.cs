@@ -19,10 +19,12 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private readonly ForwardingAppImplementation _forwardingApp;
 
+        internal static string MSBuildExtensionsPathTestHook = null;
+
         private readonly Dictionary<string, string> _msbuildRequiredEnvironmentVariables =
             new Dictionary<string, string>
             {
-                { "MSBuildExtensionsPath", AppContext.BaseDirectory },
+                { "MSBuildExtensionsPath", MSBuildExtensionsPathTestHook ?? AppContext.BaseDirectory },
                 { "MSBuildSDKsPath", GetMSBuildSDKsPath() },
                 { "DOTNET_HOST_PATH", GetDotnetPath() },
             };
