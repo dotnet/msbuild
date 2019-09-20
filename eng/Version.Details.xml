@@ -11,5 +11,37 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>173d70b99a5dbb3ff9298a6e2e9c7f7e7b56dd7c</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.NET.Sdk" Version="3.0.100-rc1.19425.1">
+      <Uri>https://github.com/dotnet/sdk</Uri>
+      <Sha>d5f22a0303747707a506fbc460884b49f26698d2</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.NET.Sdk.Razor" Version="3.0.0-rc1.19426.5">
+      <Uri>https://github.com/aspnet/AspNetCore-Tooling</Uri>
+      <Sha>f290e8285d888950250a86f8ad55d8cf4cc13994</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-rc1.19427.3">
+      <Uri>https://github.com/aspnet/websdk</Uri>
+      <Sha>0162efb78f266ec4d87405d4667325bcfa11b290</Sha>
+    </Dependency>
+    <Dependency Name="ILLink.Tasks" Version="0.1.6-prerelease.19380.1">
+      <Uri>https://github.com/mono/linker</Uri>
+      <Sha>1127689f262d52ea8ff68ef03d706fa62b3b40a1</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-rc1-19426-11">
+      <Uri>https://github.com/dotnet/core-setup</Uri>
+      <Sha>b33b6c20d855e7f9fdda6383ad12d849079f9b21</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.0.100-rc1.19427.4">
+      <Uri>https://github.com/dotnet/cli</Uri>
+      <Sha>d23afb6757bb73014e8c23b3f7c772578827049c</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.Net.Compilers" Version="3.3.1-beta3-19426-02">
+      <Uri>https://github.com/dotnet/roslyn</Uri>
+      <Sha>c82648d8964d1e683f92b7daa91beef2fdc5fb72</Sha>
+    </Dependency>
+    <Dependency Name="NuGet.Build.Tasks" Version="5.3.0-preview.2.6167">
+      <Uri>https://github.com/NuGet/NuGet.Client</Uri>
+      <Sha>4590967639182b183b247355596aedc7d0855a86</Sha>
+    </Dependency>
   </ProductDependencies>
 </Dependencies>

@@ -1,36 +1,26 @@
 <Project>
+    <Import Project="..\..\eng\Versions.props" />
     <PropertyGroup>
-        <MicrosoftNETSdkPackageVersion>3.0.100-rc2.19463.5</MicrosoftNETSdkPackageVersion>
+        <MicrosoftNETBuildExtensionsVersion>$(MicrosoftNETSdkVersion)</MicrosoftNETBuildExtensionsVersion>
 
-        <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
+        <MicrosoftNETSdkPublishVersion>$(MicrosoftNETSdkWebVersion)</MicrosoftNETSdkPublishVersion>
+        <MicrosoftNETSdkWebProjectSystemVersion>$(MicrosoftNETSdkWebVersion)</MicrosoftNETSdkWebProjectSystemVersion>
+        <NuGetBuildTasksPackVersion>$(NuGetBuildTasksVersion)</NuGetBuildTasksPackVersion>
 
-        <MicrosoftNETSdkRazorPackageVersion>3.0.0</MicrosoftNETSdkRazorPackageVersion>
-
-        <MicrosoftNETSdkWebPackageVersion>3.0.100-rc2.19465.1</MicrosoftNETSdkWebPackageVersion>
-        <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
-        <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
-
-        <NuGetBuildTasksPackageVersion>5.3.0-rtm.6192</NuGetBuildTasksPackageVersion>
-        <NuGetBuildTasksPackPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetBuildTasksPackPackageVersion>
-
-        <MicrosoftDotNetMSBuildSdkResolverPackageVersion>3.0.100-rc2.19465.3</MicrosoftDotNetMSBuildSdkResolverPackageVersion>
-
-        <MicrosoftNETCoreAppPackageVersion>3.0.0</MicrosoftNETCoreAppPackageVersion>
-        <DotNetSdkVersionForLibHostFxr>$(MicrosoftNETCoreAppPackageVersion)</DotNetSdkVersionForLibHostFxr>
-
-        <ILLinkTasksPackageVersion>0.1.6-prerelease.19380.1</ILLinkTasksPackageVersion>
+        <MicrosoftDotNetMSBuildSdkResolverVersion>$(MicrosoftDotNetCliRuntimeVersion)</MicrosoftDotNetMSBuildSdkResolverVersion>
+        <DotNetSdkVersionForLibHostFxr>$(MicrosoftNETCoreAppVersion)</DotNetSdkVersionForLibHostFxr>
     </PropertyGroup>
 
     <ItemGroup>
-        <BundledSdk Include="Microsoft.NET.Sdk" Version="$(MicrosoftNETSdkPackageVersion)" />
-        <BundledSdk Include="Microsoft.NET.Sdk.Razor" Version="$(MicrosoftNETSdkRazorPackageVersion)" />
-        <BundledSdk Include="Microsoft.NET.Sdk.Web" Version="$(MicrosoftNETSdkWebPackageVersion)" />
-        <BundledSdk Include="Microsoft.NET.Sdk.Publish" Version="$(MicrosoftNETSdkPublishPackageVersion)" />
-        <BundledSdk Include="Microsoft.NET.Sdk.Web.ProjectSystem" Version="$(MicrosoftNETSdkWebProjectSystemPackageVersion)" />
+        <BundledSdk Include="Microsoft.NET.Sdk" Version="$(MicrosoftNETSdkVersion)" />
+        <BundledSdk Include="Microsoft.NET.Sdk.Razor" Version="$(MicrosoftNETSdkRazorVersion)" />
+        <BundledSdk Include="Microsoft.NET.Sdk.Web" Version="$(MicrosoftNETSdkWebVersion)" />
+        <BundledSdk Include="Microsoft.NET.Sdk.Publish" Version="$(MicrosoftNETSdkPublishVersion)" />
+        <BundledSdk Include="Microsoft.NET.Sdk.Web.ProjectSystem" Version="$(MicrosoftNETSdkWebProjectSystemVersion)" />
 
-        <BundledSdk Include="ILLink.Tasks" Version="$(ILLinkTasksPackageVersion)" />
+        <BundledSdk Include="ILLink.Tasks" Version="$(ILLinkTasksVersion)" />
 
-        <BundledSdk Include="NuGet.Build.Tasks.Pack" Version="$(NuGetBuildTasksPackPackageVersion)" />
+        <BundledSdk Include="NuGet.Build.Tasks.Pack" Version="$(NuGetBuildTasksPackVersion)" />
 
         <BundledSdk Include="FSharp.NET.Sdk" Version="1.0.4-bundled-0100" />
         <BundledSdk Include="Microsoft.Docker.Sdk" Version="1.1.0" />
