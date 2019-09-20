@@ -55,8 +55,6 @@ namespace Microsoft.NET.Build.Tests
                 testProject,
                 identifier: withoutCopyingRefs.ToString());
 
-            testAsset = testAsset.Restore(Log, testProject.Name);
-
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
             buildCommand
@@ -101,8 +99,7 @@ namespace Microsoft.NET.Build.Tests
             };
             testProject.AdditionalProperties.Add("PreserveCompilationContext", "true");
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             buildCommand

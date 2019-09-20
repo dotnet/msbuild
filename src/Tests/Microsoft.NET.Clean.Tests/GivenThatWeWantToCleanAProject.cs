@@ -79,8 +79,7 @@ namespace Microsoft.NET.Clean.Tests
         {
             var testAsset = _testAssetsManager
               .CopyTestAsset("HelloWorld")
-              .WithSource()
-              .Restore(Log);
+              .WithSource();
 
             var cleanAndBuildCommand = new MSBuildCommand(Log, "Clean;Build", testAsset.TestRoot);
 

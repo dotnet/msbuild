@@ -39,8 +39,7 @@ namespace Microsoft.NET.Build.Tests
                     var ns = project.Root.Name.Namespace;
                     var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
                     propertyGroup.Element(ns + "TargetFramework").SetValue(targetFramework);
-                })
-                .Restore(Log);
+                });
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand

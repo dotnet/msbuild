@@ -37,8 +37,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: Path.DirectorySeparatorChar + attributeToOptOut)
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
@@ -103,8 +102,6 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            testAsset.Restore(Log, testProject.Name);
-
             var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
 
@@ -136,8 +133,6 @@ namespace Microsoft.NET.Build.Tests
                         new XElement(ns + "PropertyGroup",
                             new XElement("SourceControlInformationFeatureSupported", "true")));
                 });
-
-            testAsset.Restore(Log, testProject.Name);
 
             var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
@@ -171,8 +166,6 @@ namespace Microsoft.NET.Build.Tests
                             new XElement("SourceControlInformationFeatureSupported", "true"),
                             new XElement("IncludeSourceRevisionInInformationalVersion", "false")));
                 });
-
-            testAsset.Restore(Log, testProject.Name);
 
             var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
@@ -210,8 +203,6 @@ namespace Microsoft.NET.Build.Tests
                         new XElement(ns + "PropertyGroup",
                             new XElement("SourceControlInformationFeatureSupported", "true")));
                 });
-
-            testAsset.Restore(Log, testProject.Name);
 
             var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
@@ -251,8 +242,6 @@ namespace Microsoft.NET.Build.Tests
                             new XElement("InformationalVersion", "1.2.3+abc")));
                 });
 
-            testAsset.Restore(Log, testProject.Name);
-
             var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
 
@@ -271,8 +260,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: targetFramework)
-                .WithSource()
-                .Restore(Log, "", $"/p:OutputType=Library", $"/p:TargetFramework={targetFramework}");
+                .WithSource();
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
@@ -301,8 +289,7 @@ namespace Microsoft.NET.Build.Tests
             // Given a project that has already been built
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: targetFramework)
-                .WithSource()
-                .Restore(Log, "", $"/p:OutputType=Library", $"/p:TargetFramework={targetFramework}");
+                .WithSource();
             BuildProject(versionPrefix: "1.2.3");
 
             // When the same project is built again using a different VersionPrefix property
@@ -329,8 +316,7 @@ namespace Microsoft.NET.Build.Tests
             var targetFramework = "netstandard1.5";
             var testAsset = _testAssetsManager
                 .CopyTestAsset("KitchenSink", identifier: targetFramework)
-                .WithSource()
-                .Restore(Log, "TestLibrary");
+                .WithSource();
 
             var firstBuildCommand = BuildProject(buildNumber: "1");
             var assemblyPath = Path.Combine(firstBuildCommand.GetOutputDirectory(targetFramework).FullName, "TestLibrary.dll");

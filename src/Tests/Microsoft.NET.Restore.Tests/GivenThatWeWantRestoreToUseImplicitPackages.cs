@@ -30,8 +30,7 @@ namespace Microsoft.NET.Restore.Tests
             };
 
             var testAsset = _testAssetsManager
-                .CreateTestProject(project)
-                .Restore(Log, project.Name);
+                .CreateTestProject(project);
 
             string projectAssetsJsonPath = Path.Combine(
                 testAsset.Path,
@@ -66,8 +65,7 @@ namespace Microsoft.NET.Restore.Tests
             };
 
             var testAsset = _testAssetsManager
-                .CreateTestProject(project)
-                .Restore(Log, project.Name);
+                .CreateTestProject(project);
 
             string projectAssetsJsonPath = Path.Combine(
                 testAsset.Path,

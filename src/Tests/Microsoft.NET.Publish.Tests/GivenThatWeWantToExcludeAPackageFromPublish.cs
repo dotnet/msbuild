@@ -43,8 +43,7 @@ namespace Microsoft.NET.Publish.Tests
                     itemGroup.Add(new XElement(ns + "PackageReference", new XAttribute("Include", "NEWTONSOFT.Json"),
                                                                         new XAttribute("Version", "9.0.1"),
                                                                         new XAttribute("PrivateAssets", "All")));
-                })
-                .Restore(Log);
+                });
 
             var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute();
@@ -89,8 +88,7 @@ namespace Microsoft.NET.Publish.Tests
                     itemGroup.Add(new XElement(ns + "PackageReference", new XAttribute("Include", "Newtonsoft.Json"),
                                                                         new XAttribute("Version", "9.0.1"),
                                                                         new XAttribute("Publish", "false")));
-                })
-                .Restore(Log);
+                });
 
             var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute();
@@ -136,8 +134,7 @@ namespace Microsoft.NET.Publish.Tests
                                                                         new XAttribute("Version", "9.0.1"),
                                                                         new XAttribute("PrivateAssets", "All"),
                                                                         new XAttribute("Publish", "true")));
-                })
-                .Restore(Log);
+                });
 
             var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute();
@@ -192,8 +189,7 @@ namespace Microsoft.NET.Publish.Tests
 
             testProject.ReferencedProjects.Add(testLibraryProject);
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 

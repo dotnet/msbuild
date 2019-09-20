@@ -28,7 +28,7 @@ namespace Microsoft.NET.Build.Tests
 
             using (var exclusive = File.Open(assetsFile, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
             {
-                build.Execute().Should().Fail().And.HaveStdOutContaining(assetsFile);
+                build.ExecuteWithoutRestore().Should().Fail().And.HaveStdOutContaining(assetsFile);
             }
         }
 
@@ -39,7 +39,7 @@ namespace Microsoft.NET.Build.Tests
             var build = new BuildCommand(Log, testAsset.TestRoot);
             var assetsFile = Path.Combine(build.GetBaseIntermediateDirectory().FullName, "project.assets.json");
 
-            build.Execute().Should().Fail().And.HaveStdOutContaining(assetsFile);
+            build.ExecuteWithoutRestore().Should().Fail().And.HaveStdOutContaining(assetsFile);
         }
 
         [Fact]
@@ -50,7 +50,7 @@ namespace Microsoft.NET.Build.Tests
             var assetsFile = Path.Combine(build.GetBaseIntermediateDirectory().FullName, "project.assets.json");
 
             File.WriteAllText(assetsFile, "{ corrupt_file: ");
-            build.Execute().Should().Fail().And.HaveStdOutMatching($"{Regex.Escape(assetsFile)}.*corrupt_file");
+            build.ExecuteWithoutRestore().Should().Fail().And.HaveStdOutMatching($"{Regex.Escape(assetsFile)}.*corrupt_file");
         }
     }
 }

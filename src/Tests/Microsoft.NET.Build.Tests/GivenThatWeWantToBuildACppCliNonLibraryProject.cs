@@ -28,7 +28,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource();
 
             new BuildCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest.sln"))
-                .Execute("/restore")
+                .Execute()
                 .Should()
                 .Fail()
                 .And.HaveStdOutContaining(Strings.NoSupportCppNonDynamicLibraryDotnetCore);
@@ -54,7 +54,7 @@ namespace Microsoft.NET.Build.Tests
                 });
 
             new BuildCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest.sln"))
-                .Execute("/restore")
+                .Execute()
                 .Should()
                 .Fail()
                 .And.HaveStdOutContaining(Strings.NoSupportCppNonDynamicLibraryDotnetCore);

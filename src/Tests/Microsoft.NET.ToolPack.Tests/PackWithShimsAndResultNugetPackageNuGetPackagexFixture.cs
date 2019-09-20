@@ -81,8 +81,7 @@ namespace Microsoft.NET.ToolPack.Tests
                     propertyGroup.Add(new XElement(ns + "PackAsToolShimRuntimeIdentifiers", "win-x64;osx.10.12-x64"));
                     propertyGroup.Add(new XElement(ns + "ToolCommandName", _customToolCommandName));
                 })
-                .WithTargetFrameworkOrFrameworks(targetFramework, multiTarget)
-                .Restore(Log);
+                .WithTargetFrameworkOrFrameworks(targetFramework, multiTarget);
         }
     }
 }

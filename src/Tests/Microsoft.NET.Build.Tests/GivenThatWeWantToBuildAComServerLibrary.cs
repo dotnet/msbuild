@@ -26,8 +26,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("ComServer")
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
@@ -64,8 +63,7 @@ namespace Microsoft.NET.Build.Tests
                     var ns = project.Root.Name.Namespace;
                     var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
                     propertyGroup.Add(new XElement("EnableRegFreeCom", true));
-                })
-                .Restore(Log);
+                });
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
@@ -99,8 +97,7 @@ namespace Microsoft.NET.Build.Tests
                     var ns = project.Root.Name.Namespace;
                     var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
                     propertyGroup.Add(new XElement("RuntimeIdentifier", rid));
-                })
-                .Restore(Log);
+                });
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
@@ -130,8 +127,7 @@ namespace Microsoft.NET.Build.Tests
                 {
                     var ns = project.Root.Name.Namespace;
                     var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                })
-                .Restore(Log);
+                });
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
@@ -155,8 +151,7 @@ namespace Microsoft.NET.Build.Tests
                     var ns = project.Root.Name.Namespace;
                     var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
                     propertyGroup.Add(new XElement("RuntimeIdentifier", rid));
-                })
-                .Restore(Log);
+                });
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand

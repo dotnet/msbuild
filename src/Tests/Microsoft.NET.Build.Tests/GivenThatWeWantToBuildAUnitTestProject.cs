@@ -21,8 +21,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("XUnitTestProject")
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand

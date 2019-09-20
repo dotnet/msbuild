@@ -46,7 +46,7 @@ namespace Microsoft.NET.ToolPack.Tests
             var appProjectDirectory = Path.Combine(testAsset.TestRoot);
             var publishCommand = new PublishCommand(Log, appProjectDirectory);
 
-            CommandResult result = publishCommand.Execute("/restore");
+            CommandResult result = publishCommand.Execute();
 
             result.Should()
                   .Pass();
@@ -73,7 +73,7 @@ namespace Microsoft.NET.ToolPack.Tests
             var appProjectDirectory = Path.Combine(testAsset.TestRoot);
             var buildCommand = new BuildCommand(Log, appProjectDirectory);
 
-            CommandResult result = buildCommand.Execute("/restore");
+            CommandResult result = buildCommand.Execute();
 
             result.Should()
                   .Pass();
