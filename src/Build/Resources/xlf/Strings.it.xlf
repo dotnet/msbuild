@@ -100,6 +100,11 @@
       LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
     </note>
       </trans-unit>
+      <trans-unit id="OM_TargetNameNullOrEmpty">
+        <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
+        <target state="new">Method {0} cannot be called with a collection containing null or empty target names.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
         <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
         <target state="translated">MSB4250: ProjectGraph non supporta elementi ProjectReference con metadati ToolsVersion impostati. L'elemento ProjectReference "{0}" con ToolsVersion è stato trovato nel file "{1}"</target>
@@ -117,7 +122,7 @@
       </trans-unit>
       <trans-unit id="StaticGraphAcceptsSingleSolutionEntryPoint">
         <source>MSB4261: Static graph only accepts a solution as the only entry point. Multiple entry points detected: {0}</source>
-        <target state="new">MSB4261: Static graph only accepts a solution as the only entry point. Multiple entry points detected: {0}</target>
+        <target state="translated">MSB4261: l'unico punto di ingresso accettato dal grafo statico è una soluzione. Sono stati rilevati più punti di ingresso: {0}</target>
         <note>
       LOCALIZATION: {0} is a semicolon delimited list of files
     </note>
@@ -125,7 +130,7 @@
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
         <source>MSB4263: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
     </source>
-        <target state="new">MSB4263: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
+        <target state="translated">MSB4263: il progetto "{0}" contiene un riferimento al file di soluzione "{1}". Il riferimento a soluzioni non è supportato nel grafo statico.
     </target>
         <note>
       LOCALIZATION: {0} and {1} are file paths
@@ -136,9 +141,9 @@
            Warnings: {1}
            Errors: {2}
     </source>
-        <target state="new">MSB4262: Solution file "{0}" contains the following warnings and errors:
-           Warnings: {1}
-           Errors: {2}
+        <target state="translated">MSB4262: il file di soluzione "{0}" contiene gli avvisi e gli errori seguenti:
+           Avvisi: {1}
+           Errori {2}
     </target>
         <note>
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
@@ -581,8 +586,8 @@
         <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
-        <source>MSB4019: The imported project "{0}" was not found. Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk.</source>
-        <target state="translated">MSB4019: progetto importato "{0}" non trovato. Verificare che il percorso nella dichiarazione &lt;Import&gt; sia corretto e che il file sia presente sul disco.</target>
+        <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</source>
+        <target state="new">MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">

@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
+using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using System;
@@ -61,6 +62,8 @@ namespace Microsoft.Build.Evaluation
             _metadata = null;
         }
 
+        internal virtual ProjectItemDefinitionLink Link => null;
+
         /// <summary>
         /// Project that this item lives in.
         /// ProjectDefinitions always live in a project.
@@ -90,14 +93,14 @@ namespace Microsoft.Build.Evaluation
         /// This is a read-only collection.
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods", Justification = "This is a reasonable choice. API review approved")]
-        public IEnumerable<ProjectMetadata> Metadata => _metadata ?? Enumerable.Empty<ProjectMetadata>();
+        public IEnumerable<ProjectMetadata> Metadata => Link != null ? Link.Metadata : _metadata ?? Enumerable.Empty<ProjectMetadata>();
 
         /// <summary>
         /// Count of metadata on the item definition.
         /// </summary>
         public int MetadataCount
         {
-            get { return (_metadata == null) ? 0 : _metadata.Count; }
+            get { return Link != null ? Link.Metadata.Count : (_metadata == null) ? 0 : _metadata.Count; }
         }
 
         /// <summary>
@@ -116,7 +119,7 @@ namespace Microsoft.Build.Evaluation
         [DebuggerStepThrough]
         public ProjectMetadata GetMetadata(string name)
         {
-            return (_metadata == null) ? null : _metadata[name];
+            return Link != null ? Link.GetMetadata(name) : (_metadata == null) ? null : _metadata[name];
         }
 
         /// <summary>
@@ -125,6 +128,11 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public string GetMetadataValue(string name)
         {
+            if (Link != null)
+            {
+                return Link.GetMetadataValue(name);
+            }
+
             string escapedValue = (this as IMetadataTable).GetEscapedValue(name);
 
             return (escapedValue == null) ? null : EscapingUtilities.UnescapeAll(escapedValue);
@@ -136,6 +144,11 @@ namespace Microsoft.Build.Evaluation
         /// <remarks>Unevaluated value is assumed to be escaped as necessary</remarks>
         public ProjectMetadata SetMetadataValue(string name, string unevaluatedValue)
         {
+            if (Link != null)
+            {
+                return Link.SetMetadataValue(name, unevaluatedValue);
+            }
+
             XmlUtilities.VerifyThrowArgumentValidElementName(name);
             ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name), "ItemSpecModifierCannotBeCustomMetadata", name);
             ErrorUtilities.VerifyThrowInvalidOperation(!XMakeElements.ReservedItemNames.Contains(name), "CannotModifyReservedItemMetadata", name);

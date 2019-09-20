@@ -6,6 +6,7 @@ using System.Diagnostics;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
+using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
@@ -30,6 +31,12 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private string _evaluatedValueEscaped;
 
+        internal ProjectProperty(Project project)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(project, "project");
+            _project = project;
+        }
+
         /// <summary>
         /// Creates a property.
         /// </summary>
@@ -41,6 +48,8 @@ namespace Microsoft.Build.Evaluation
             _project = project;
             _evaluatedValueEscaped = evaluatedValueEscaped;
         }
+
+        internal virtual string EvaluatedValueEscapedIntenral => _evaluatedValueEscaped;
 
         /// <summary>
         /// Name of the property.
@@ -70,7 +79,7 @@ namespace Microsoft.Build.Evaluation
         {
             [DebuggerStepThrough]
             get
-            { return EscapingUtilities.UnescapeAll(_evaluatedValueEscaped); }
+            { return EscapingUtilities.UnescapeAll(EvaluatedValueEscapedIntenral); }
         }
 
         /// <summary>
@@ -85,8 +94,7 @@ namespace Microsoft.Build.Evaluation
         string IProperty.EvaluatedValueEscaped
         {
             [DebuggerStepThrough]
-            get
-            { return _evaluatedValueEscaped; }
+            get => EvaluatedValueEscapedIntenral;
         }
 
         /// <summary>
@@ -193,8 +201,7 @@ namespace Microsoft.Build.Evaluation
         string IValued.EscapedValue
         {
             [DebuggerStepThrough]
-            get
-            { return _evaluatedValueEscaped; }
+            get => EvaluatedValueEscapedIntenral;
         }
 
         #region IEquatable<ProjectProperty> Members
@@ -218,7 +225,7 @@ namespace Microsoft.Build.Evaluation
 
             return _project == other._project &&
                    Xml == other.Xml &&
-                   _evaluatedValueEscaped == other._evaluatedValueEscaped &&
+                   EvaluatedValueEscapedIntenral == other.EvaluatedValueEscapedIntenral &&
                    Name == other.Name;
         }
 
@@ -621,5 +628,10 @@ namespace Microsoft.Build.Evaluation
                 get { return false; }
             }
         }
+
+
+        /// <summary>
+        /// External projects support
+        /// </summary>
     }
 }

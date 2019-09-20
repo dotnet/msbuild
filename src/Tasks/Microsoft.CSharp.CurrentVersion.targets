@@ -375,7 +375,8 @@ using System.Reflection%3b
     <ItemGroup Condition=" '$(NoCompilerStandardLib)' == 'true' and '$(NoStdLib)' != 'true' ">
       <!-- Note that unlike VB, C# does not automatically locate System.dll as a "standard library"
            instead the reference is always passed from the project. Also, for mscorlib.dll 
-           we need to provide the explicit location in order to maintain the correct behaviour
+           we need to provide the explicit location in order to avoid resolving from, e.g.,
+           {CandidateAssemblyFiles}.
       -->
         <_ExplicitReference Include="$(FrameworkPathOverride)\mscorlib.dll" />
     </ItemGroup>

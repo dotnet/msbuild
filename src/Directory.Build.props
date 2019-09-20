@@ -24,11 +24,12 @@
     <!-- Defaults for target frameworks and architecture -->
     <LibraryTargetFrameworks>$(FullFrameworkTFM);netstandard2.0</LibraryTargetFrameworks>
     <LibraryTargetFrameworks Condition="'$(MonoBuild)'=='true'">$(FullFrameworkTFM)</LibraryTargetFrameworks>
+    <LibraryTargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">netstandard2.0</LibraryTargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
 
     <!-- Target frameworks for Exe and unit test projects (ie projects with runtime output) -->
     <RuntimeOutputTargetFrameworks>netcoreapp2.1</RuntimeOutputTargetFrameworks>
-    <RuntimeOutputTargetFrameworks Condition="'$(OsEnvironment)'=='windows'">$(FullFrameworkTFM);$(RuntimeOutputTargetFrameworks)</RuntimeOutputTargetFrameworks>
+    <RuntimeOutputTargetFrameworks Condition="'$(OsEnvironment)'=='windows' and '$(DotNetBuildFromSource)' != 'true'">$(FullFrameworkTFM);$(RuntimeOutputTargetFrameworks)</RuntimeOutputTargetFrameworks>
     <RuntimeOutputTargetFrameworks Condition="'$(MonoBuild)' == 'true'">$(FullFrameworkTFM)</RuntimeOutputTargetFrameworks>
 
     <!-- Don't automatically append target framework to output path, since we want to put the Platform Target beforehand, if it's not AnyCPU -->

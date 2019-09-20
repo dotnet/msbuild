@@ -108,8 +108,9 @@
   </Target>
 
   <Target Name="CreateTypeLib" BeforeTargets="AfterBuild" Condition="'$(BuildingInsideVisualStudio)' != 'true' and '$(CreateTlb)' == 'true' and '$(OsEnvironment)' == 'windows' and '$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MSBuildRuntimeType)' != 'Core'">
-    <!-- Provide a mechanism for turning on verbose TlbExp output for diagnosing issues -->
     <PropertyGroup>
+      <TlbExpPath>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPathToDotNetFrameworkSdkFile('tlbexp.exe'))</TlbExpPath>
+      <!-- Provide a mechanism for turning on verbose TlbExp output for diagnosing issues -->
       <TlbExpVerbosity Condition="'$(VerboseTlbExp)' == 'true'">/verbose</TlbExpVerbosity>
       <TlbExpVerbosity Condition="'$(VerboseTlbExp)' != 'true'">/silent</TlbExpVerbosity>
     </PropertyGroup>
@@ -122,7 +123,10 @@
       <TlbExpAssemblyPaths Include="@(_TlbExpAssemblyPaths->'%(SlashlessPath)')" />
     </ItemGroup>
 
-    <Exec Command="&quot;$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPathToDotNetFrameworkSdkFile('tlbexp.exe'))&quot; $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') &quot;$(TargetPath)&quot; /out:&quot;$(TargetDir)$(TargetName).tlb&quot;" />
+    <Error Condition=" '$(TlbExpPath)' == '' "
+           Text="TlbExp was not found. Ensure that you have installed everything from .vsconfig. If you have, please report a bug to MSBuild." />
+
+    <Exec Command="&quot;$(TlbExpPath)&quot; $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') &quot;$(TargetPath)&quot; /out:&quot;$(TargetDir)$(TargetName).tlb&quot;" />
   </Target>
 
   <Import Project="$(BUILD_STAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.IBCMerge.*\**\build\MicroBuild.Plugins.*.targets" Condition="'$(BUILD_STAGINGDIRECTORY)' != '' and $(TargetFramework.StartsWith('net4')) and '$(MicroBuild_EnablePGO)' != 'false'" />

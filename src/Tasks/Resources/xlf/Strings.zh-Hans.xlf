@@ -161,6 +161,11 @@
         <target state="translated">MSB3021: 无法将文件“{0}”复制到“{1}”。{2}</target>
         <note>{StrBegin="MSB3021: "}</note>
       </trans-unit>
+      <trans-unit id="Copy.ErrorIfLinkFailsSetWithoutLinkOption">
+        <source>MSB3892: ErrorIfLinkFails requires UseHardlinksIfPossible or UseSymbolicLinksIfPossible to be set.</source>
+        <target state="new">MSB3892: ErrorIfLinkFails requires UseHardlinksIfPossible or UseSymbolicLinksIfPossible to be set.</target>
+        <note>{StrBegin="MSB3892: "} LOCALIZATION: Do not localize "ErrorIfLinkFails", "UseHardLinksIfPossible", or "UseSymbolicLinksIfPossible".</note>
+      </trans-unit>
       <trans-unit id="Copy.ExactlyOneTypeOfDestination">
         <source>MSB3022: Both "{0}" and "{1}" were specified as input parameters in the project file. Please choose one or the other.</source>
         <target state="translated">MSB3022: 在项目文件中，“{0}”和“{1}”均被指定为输入参数。请选择其中一个。</target>
@@ -175,6 +180,11 @@
         <source>Creating hard link to copy "{0}" to "{1}".</source>
         <target state="translated">创建硬链接以将“{0}”复制到“{1}”。</target>
         <note>LOCALIZATION: {0} and {1} are paths.</note>
+      </trans-unit>
+      <trans-unit id="Copy.LinkFailed">
+        <source>MSB3893: Could not use a link to copy "{0}" to "{1}".</source>
+        <target state="new">MSB3893: Could not use a link to copy "{0}" to "{1}".</target>
+        <note>{StrBegin="MSB3893: "} LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
       <trans-unit id="Copy.RetryingAsFileCopy">
         <source>Could not use a link to copy "{0}" to "{1}". Copying the file instead. {2}</source>
@@ -1001,12 +1011,12 @@
       </trans-unit>
       <trans-unit id="GenerateResource.PreserializedResourcesRequiresExtensions">
         <source>MSB3822: Non-string resources require the System.Resources.Extensions assembly at runtime, but it was not found in this project's references.</source>
-        <target state="new">MSB3822: Non-string resources require the System.Resources.Extensions assembly at runtime, but it was not found in this project's references.</target>
+        <target state="translated">MSB3822: 非字符串资源要求在运行时使用 System.Resources.Extensions 程序集，但未在此项目的引用中找到它。</target>
         <note>{StrBegin="MSB3822: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.PreserializedResourcesRequiresProperty">
         <source>MSB3823: Non-string resources require the property GenerateResourceUsePreserializedResources to be set to true.</source>
-        <target state="new">MSB3823: Non-string resources require the property GenerateResourceUsePreserializedResources to be set to true.</target>
+        <target state="translated">MSB3823: 非字符串资源要求将属性 GenerateResourceUsePreserializedResources 设置为 true。</target>
         <note>{StrBegin="MSB3823: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ResourceNotFound">

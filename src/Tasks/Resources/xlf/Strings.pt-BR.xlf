@@ -161,6 +161,11 @@
         <target state="translated">MSB3021: Não é possível copiar o arquivo "{0}" para "{1}". {2}</target>
         <note>{StrBegin="MSB3021: "}</note>
       </trans-unit>
+      <trans-unit id="Copy.ErrorIfLinkFailsSetWithoutLinkOption">
+        <source>MSB3892: ErrorIfLinkFails requires UseHardlinksIfPossible or UseSymbolicLinksIfPossible to be set.</source>
+        <target state="new">MSB3892: ErrorIfLinkFails requires UseHardlinksIfPossible or UseSymbolicLinksIfPossible to be set.</target>
+        <note>{StrBegin="MSB3892: "} LOCALIZATION: Do not localize "ErrorIfLinkFails", "UseHardLinksIfPossible", or "UseSymbolicLinksIfPossible".</note>
+      </trans-unit>
       <trans-unit id="Copy.ExactlyOneTypeOfDestination">
         <source>MSB3022: Both "{0}" and "{1}" were specified as input parameters in the project file. Please choose one or the other.</source>
         <target state="translated">MSB3022: "{0}" e "{1}" foram especificados como parâmetros de entrada no arquivo de projeto. Escolha um deles.</target>
@@ -175,6 +180,11 @@
         <source>Creating hard link to copy "{0}" to "{1}".</source>
         <target state="translated">Criando link físico para copiar "{0}" em "{1}".</target>
         <note>LOCALIZATION: {0} and {1} are paths.</note>
+      </trans-unit>
+      <trans-unit id="Copy.LinkFailed">
+        <source>MSB3893: Could not use a link to copy "{0}" to "{1}".</source>
+        <target state="new">MSB3893: Could not use a link to copy "{0}" to "{1}".</target>
+        <note>{StrBegin="MSB3893: "} LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
       <trans-unit id="Copy.RetryingAsFileCopy">
         <source>Could not use a link to copy "{0}" to "{1}". Copying the file instead. {2}</source>
@@ -1001,12 +1011,12 @@
       </trans-unit>
       <trans-unit id="GenerateResource.PreserializedResourcesRequiresExtensions">
         <source>MSB3822: Non-string resources require the System.Resources.Extensions assembly at runtime, but it was not found in this project's references.</source>
-        <target state="new">MSB3822: Non-string resources require the System.Resources.Extensions assembly at runtime, but it was not found in this project's references.</target>
+        <target state="translated">MSB3822: recursos diferentes de cadeias de caracteres exigem o assembly System.Resources.Extensions no tempo de execução, mas ele não foi encontrado nas referências deste projeto.</target>
         <note>{StrBegin="MSB3822: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.PreserializedResourcesRequiresProperty">
         <source>MSB3823: Non-string resources require the property GenerateResourceUsePreserializedResources to be set to true.</source>
-        <target state="new">MSB3823: Non-string resources require the property GenerateResourceUsePreserializedResources to be set to true.</target>
+        <target state="translated">MSB3823: recursos diferentes de cadeias de caracteres exigem que a propriedade GenerateResourceUsePreserializedResources seja definida como true.</target>
         <note>{StrBegin="MSB3823: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ResourceNotFound">
@@ -1748,12 +1758,12 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.MismatchBetweenTargetedAndReferencedArch">
         <source>MSB3270: There was a mismatch between the processor architecture of the project being built "{0}" and the processor architecture of the reference "{1}", "{2}". This mismatch may cause runtime failures. Please consider changing the targeted processor architecture of your project through the Configuration Manager so as to align the processor architectures between your project and references, or take a dependency on references with a processor architecture that matches the targeted processor architecture of your project.</source>
-        <target state="translated">MSB3270: Houve uma incompatibilidade entre a arquitetura de processador do projeto que está sendo compilado "{0}" e a arquitetura de processador da referência "{1}", "{2}". Essa incompatibilidade poderá causar falhas de tempo de execução. Considere a alteração da arquitetura de processador de destino de seu projeto por meio do Configuration Manager de forma a alinhar as arquiteturas de processador entre seu projeto e as referências ou obtenha uma dependência sobre referências com uma arquitetura de processador que corresponda à arquitetura de processador de destino de seu projeto.</target>
+        <target state="translated">MSB3270: Houve uma incompatibilidade entre a arquitetura de processador do projeto que está sendo compilado "{0}" e a arquitetura de processador da referência "{1}", "{2}". Essa incompatibilidade poderá causar falhas de runtime. Considere a alteração da arquitetura de processador de destino de seu projeto por meio do Configuration Manager de forma a alinhar as arquiteturas de processador entre seu projeto e as referências ou obtenha uma dependência sobre referências com uma arquitetura de processador que corresponda à arquitetura de processador de destino de seu projeto.</target>
         <note>{StrBegin="MSB3270: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.MismatchBetweenTargetedAndReferencedArchOfImplementation">
         <source>MSB3271: There was a mismatch between the processor architecture of the project being built "{0}" and the processor architecture, "{1}", of the implementation file "{2}" for "{3}". This mismatch may cause runtime failures. Please consider changing the targeted processor architecture of your project through the Configuration Manager so as to align the processor architectures between your project and implementation file, or choose a winmd file with an implementation file that has a processor architecture which matches the targeted processor architecture of your project.</source>
-        <target state="translated">MSB3271: Houve uma incompatibilidade entre a arquitetura do processador do projeto que está sendo compilado "{0}" e a arquitetura do processador "{1}" do arquivo de implementação "{2}" para "{3}". Essa incompatibilidade poderá causar falhas de tempo de execução. Considere alterar a arquitetura de processador de destino do seu projeto por meio do Configuration Manager de forma a alinhar as arquiteturas de processador entre seu projeto e o arquivo de implementação ou escolha um arquivo winmd com um arquivo de implementação com arquitetura de processador que corresponda à arquitetura de processador de destino de seu projeto.</target>
+        <target state="translated">MSB3271: Houve uma incompatibilidade entre a arquitetura do processador do projeto que está sendo compilado "{0}" e a arquitetura do processador "{1}" do arquivo de implementação "{2}" para "{3}". Essa incompatibilidade poderá causar falhas de runtime. Considere alterar a arquitetura de processador de destino do seu projeto por meio do Configuration Manager de forma a alinhar as arquiteturas de processador entre seu projeto e o arquivo de implementação ou escolha um arquivo winmd com um arquivo de implementação com arquitetura de processador que corresponda à arquitetura de processador de destino de seu projeto.</target>
         <note>{StrBegin="MSB3271: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.ProblemReadingImplementationDll">
@@ -2905,7 +2915,7 @@
       </trans-unit>
       <trans-unit id="ResolveSDKReference.NoMatchingAppxLocation">
         <source>MSB3778: "APPX" attributes were found in the SDK manifest file "{0}" however none of the attributes matched the targeted configuration and architecture "{1} | {2}" and no "APPX" attribute without configuration and architecture could be found. If an app package is required then the project will fail at runtime.</source>
-        <target state="translated">MSB3778: Atributos "APPX" foram encontrados no arquivo de manifesto do SDK "{0}", mas nenhum dos atributos coincidiu com a configuração e a arquitetura "{1} | {2}" de destino e não foi possível encontrar nenhum atributo "APPX" sem configuração e arquitetura. Se um pacote do aplicativo for necessário, o projeto falhará em tempo de execução.</target>
+        <target state="translated">MSB3778: Atributos "APPX" foram encontrados no arquivo de manifesto do SDK "{0}", mas nenhum dos atributos coincidiu com a configuração e a arquitetura "{1} | {2}" de destino e não foi possível encontrar nenhum atributo "APPX" sem configuração e arquitetura. Se um pacote do aplicativo for necessário, o projeto falhará em runtime.</target>
         <note>{StrBegin="MSB3778: "}</note>
       </trans-unit>
       <trans-unit id="ResolveSDKReference.TargetArchitectureNotSupported">
@@ -2920,7 +2930,7 @@
       </trans-unit>
       <trans-unit id="ResolveSDKReference.SDKMissingDependency">
         <source>MSB3781: The SDK "{0}" depends on the following SDK(s) {1}, which have not been added to the project or were not found. Please ensure that you add these dependencies to your project or you may experience runtime issues. You can add dependencies to your project through the Reference Manager.</source>
-        <target state="translated">MSB3781: O SDK "{0}" depende dos seguintes SDKs {1}, os quais não foram adicionados ao projeto ou não foram encontrados. Certifique-se de adicionar essas dependências ao seu projeto para não haver problemas em tempo de execução. Você pode adicionar dependências ao projeto por meio do Gerenciador de Referências.</target>
+        <target state="translated">MSB3781: O SDK "{0}" depende dos seguintes SDKs {1}, os quais não foram adicionados ao projeto ou não foram encontrados. Certifique-se de adicionar essas dependências ao seu projeto para não haver problemas em runtime. Você pode adicionar dependências ao projeto por meio do Gerenciador de Referências.</target>
         <note>{StrBegin="MSB3781: "}</note>
       </trans-unit>
       <trans-unit id="ResolveSDKReference.Prefer32BitNotSupportedWithNeutralProject">

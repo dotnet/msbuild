@@ -21,6 +21,7 @@
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
     <SemanticVersioningV1>true</SemanticVersioningV1>
+    <MicroBuildPluginsSwixBuildVersion>1.0.672</MicroBuildPluginsSwixBuildVersion>
     <MonoBuild Condition="'$(Configuration)' == 'Debug-MONO' or '$(Configuration)' == 'Release-MONO'">true</MonoBuild>
   </PropertyGroup>
   <!-- Repo Toolset Features -->
@@ -36,7 +37,7 @@
   </PropertyGroup>
   <!-- Product Dependencies -->
   <PropertyGroup>
-    <SystemResourcesExtensionsVersion>4.6.0-rc1.19425.2</SystemResourcesExtensionsVersion>
+    <SystemResourcesExtensionsVersion>4.6.0-rc2.19458.3</SystemResourcesExtensionsVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386

@@ -191,6 +191,7 @@ stages:
   - template: /eng/common/templates/job/publish-build-assets.yml
     parameters:
       enablePublishBuildArtifacts: true
+      publishUsingPipelines: true
       dependsOn:
         - Windows_NT
       pool:

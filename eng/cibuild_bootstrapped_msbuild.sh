@@ -75,7 +75,6 @@ if [ $host_type = "mono" ] ; then
   export _InitializeBuildTool="mono"
   export _InitializeBuildToolCommand="$mono_msbuild_dir/MSBuild.dll"
   export _InitializeBuildToolFramework="net472"
-  export MONO_ENV_OPTIONS="$MONO_ENV_OPTIONS --assembly-loader=strict"
 
   configuration="$configuration-MONO"
   extn_path="$mono_msbuild_dir/Extensions"

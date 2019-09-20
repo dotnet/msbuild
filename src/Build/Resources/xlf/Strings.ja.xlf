@@ -100,6 +100,11 @@
       LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
     </note>
       </trans-unit>
+      <trans-unit id="OM_TargetNameNullOrEmpty">
+        <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
+        <target state="new">Method {0} cannot be called with a collection containing null or empty target names.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
         <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
         <target state="translated">MSB4250: ProjectGraph では、ToolsVersion メタデータが設定された ProjectReference 項目はサポートしていません。ToolsVersion が含まれる ProjectReference "{0}" がファイル "{1}" で見つかりました</target>
@@ -117,7 +122,7 @@
       </trans-unit>
       <trans-unit id="StaticGraphAcceptsSingleSolutionEntryPoint">
         <source>MSB4261: Static graph only accepts a solution as the only entry point. Multiple entry points detected: {0}</source>
-        <target state="new">MSB4261: Static graph only accepts a solution as the only entry point. Multiple entry points detected: {0}</target>
+        <target state="translated">MSB4261: 静的グラフでは、ソリューションを唯一のエントリ ポイントとして受け入れるのみです。複数のエントリ ポイントが検出されました: {0}</target>
         <note>
       LOCALIZATION: {0} is a semicolon delimited list of files
     </note>
@@ -125,7 +130,7 @@
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
         <source>MSB4263: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
     </source>
-        <target state="new">MSB4263: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
+        <target state="translated">MSB4263: プロジェクト "{0}" には、ソリューション ファイル "{1}" への参照が含まれています。静的グラフでは、ソリューションの参照はサポートされていません。
     </target>
         <note>
       LOCALIZATION: {0} and {1} are file paths
@@ -136,9 +141,9 @@
            Warnings: {1}
            Errors: {2}
     </source>
-        <target state="new">MSB4262: Solution file "{0}" contains the following warnings and errors:
-           Warnings: {1}
-           Errors: {2}
+        <target state="translated">MSB4262: ソリューション ファイル "{0}" には、次の警告とエラーが含まれています:
+           警告: {1}
+           エラー: {2}
     </target>
         <note>
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
@@ -581,8 +586,8 @@
         <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
-        <source>MSB4019: The imported project "{0}" was not found. Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk.</source>
-        <target state="translated">MSB4019: インポートされたプロジェクト "{0}" が見つかりませんでした。&lt;Import&gt; 宣言のパスが正しいかどうか、およびファイルがディスクに存在しているかどうかを確認してください。</target>
+        <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</source>
+        <target state="new">MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">

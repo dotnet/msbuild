@@ -4214,6 +4214,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <!-- By default we're not using Hard Links to copy to the output directory, and never when building in VS -->
       <CreateHardLinksForCopyFilesToOutputDirectoryIfPossible Condition="'$(BuildingInsideVisualStudio)' == 'true' or '$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)' == ''">false</CreateHardLinksForCopyFilesToOutputDirectoryIfPossible>
       <CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible Condition="'$(BuildingInsideVisualStudio)' == 'true' or '$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)' == ''">false</CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible>
+      <ErrorIfLinkFailsForCopyFilesToOutputDirectory Condition="'$(BuildingInsideVisualStudio)' == 'true' or '$(ErrorIfLinkFailsForCopyFilesToOutputDirectory)' == ''">false</ErrorIfLinkFailsForCopyFilesToOutputDirectory>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -4232,6 +4233,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
         UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
+        ErrorIfLinkFails="$(ErrorIfLinkFailsForCopyFilesToOutputDirectory)"
         Condition="'$(CopyBuildOutputToOutputDirectory)' == 'true' and '$(SkipCopyBuildProduct)' != 'true'"
             >
 
@@ -4281,6 +4283,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
         UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
+        ErrorIfLinkFails="$(ErrorIfLinkFailsForCopyFilesToOutputDirectory)"
         Condition="'$(_SGenDllCreated)'=='true'">
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
@@ -4297,6 +4300,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
         UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
+        ErrorIfLinkFails="$(ErrorIfLinkFailsForCopyFilesToOutputDirectory)"
         Condition="'$(_DebugSymbolsProduced)'=='true' and '$(SkipCopyingSymbolsToOutputDirectory)' != 'true' and '$(CopyOutputSymbolsToOutputDirectory)'=='true'">
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
@@ -4313,6 +4317,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
         UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
+        ErrorIfLinkFails="$(ErrorIfLinkFailsForCopyFilesToOutputDirectory)"
         Condition="'$(_DocumentationFileProduced)'=='true' and '$(CopyDocumentationFileToOutputDirectory)'=='true'">
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
@@ -4329,6 +4334,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
         UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
+        ErrorIfLinkFails="$(ErrorIfLinkFailsForCopyFilesToOutputDirectory)"
         Condition="'@(IntermediateSatelliteAssembliesWithTargetPath)' != ''"
             >
 
@@ -4366,6 +4372,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
         UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
+        ErrorIfLinkFails="$(ErrorIfLinkFailsForCopyFilesToOutputDirectory)"
         Condition="'$(SkipCopyWinMDArtifact)' != 'true' and '@(WinMDExpArtifacts)' != ''"
             >
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
