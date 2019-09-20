@@ -23,9 +23,7 @@ jobs:
     name: ${{ parameters.agentOs }}
     ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
       enableMicrobuild: true
-    enablePublishBuildArtifacts: true
     enablePublishBuildAssets: true
-    enablePublishTestResults: true
     enablePublishUsingPipelines: ${{parameters.enablePublishUsingPipelines}}
     enableTelemetry: true
     helixRepo: dotnet/toolset
@@ -33,6 +31,7 @@ jobs:
     ${{ if ne(parameters.strategy, '') }}:
       strategy: ${{ parameters.strategy }}
     variables: 
+      - _AgentOSName: ${{ parameters.agentOs }}
       - ${{ insert }}: ${{ parameters.variables }}
       - _AgentOSName: ${{ parameters.agentOs }}
       - BuildConfig: $(_BuildConfig)
@@ -98,3 +97,33 @@ jobs:
           ArtifactName: AssetManifests
         continueOnError: ${{ parameters.continueOnError }}
         condition: and(succeeded(), eq(variables['_DotNetPublishToBlobFeed'], 'true'), eq(variables['_PublishBuildAssetManifest'], 'true'))
+
+    - task: PublishTestResults@1	
+      displayName: Publish Test Results	
+      inputs:	
+        testRunner: XUnit	
+        testResultsFiles: 'artifacts/TestResults/$(_BuildConfig)/*.xml'	
+        testRunTitle: '$(_AgentOSName)_$(Agent.JobName)'	
+        platform: '$(BuildPlatform)'	
+        configuration: '$(_BuildConfig)'	
+      condition: always()
+
+    - task: CopyFiles@2	
+      displayName: Gather Logs	
+      inputs:	
+        SourceFolder: '$(Build.SourcesDirectory)/artifacts'	
+        Contents: |	
+         log/$(_BuildConfig)/**/*	
+         TestResults/$(_BuildConfig)/**/*	
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'	
+      continueOnError: true	
+      condition: always()
+
+    - task: PublishBuildArtifacts@1	
+      displayName: Publish Logs to VSTS	
+      inputs:	
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'	
+        ArtifactName: '$(_AgentOSName)_$(Agent.JobName)_$(Build.BuildNumber)'	
+        publishLocation: Container	
+      continueOnError: true	
+      condition: always()
