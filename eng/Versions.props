@@ -76,7 +76,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/core-setup -->
-    <MicrosoftNETCoreAppPackageVersion>3.1.0-preview1.19467.7</MicrosoftNETCoreAppPackageVersion>
+    <MicrosoftNETCoreAppPackageVersion>3.1.0-preview1.19470.5</MicrosoftNETCoreAppPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>2.2.0-preview1-26620-03</MicrosoftDotNetPlatformAbstractionsPackageVersion>
