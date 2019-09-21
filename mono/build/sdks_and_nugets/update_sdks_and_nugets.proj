@@ -1,4 +1,4 @@
-<Project>
+<Project DefaultTargets="DeploySdksAndNuGets">
     <Import Project="$(MSBuildThisFileDirectory)\..\common.props" />
     <Import Project="$(MSBuildThisFileDirectory)\..\DotnetBitsVersions.props" />
 
@@ -15,7 +15,7 @@
 
         <HostFxrUrl>$(CoreSetupRootUrl)$(HostFxrVersion)/$(DownloadedHostFxrInstallerFileName)$(CoreSetupBlobAccessTokenParam)</HostFxrUrl>
         <MSBuildSdkResolverOutDir>$(DotNetOverlayDirectory)\msbuild-bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver</MSBuildSdkResolverOutDir>
-        <RuntimeDepsInstallerUrl>$(CoreSetupRootUrl)$(MicrosoftNETCoreAppPackageVersion)/$(DownloadedRuntimeDepsInstallerFileName)$(CoreSetupBlobAccessTokenParam)</RuntimeDepsInstallerUrl>
+        <RuntimeDepsInstallerUrl>$(CoreSetupRootUrl)$(MicrosoftNETCoreAppVersion)/$(DownloadedRuntimeDepsInstallerFileName)$(CoreSetupBlobAccessTokenParam)</RuntimeDepsInstallerUrl>
     </PropertyGroup>
 
     <Target Name="DeploySdksAndNuGets">
@@ -38,7 +38,7 @@
                 <Properties>
                     ProjectWithProperties=ms_extensions.proj;
                     DependencyPackageName=Microsoft.NET.Build.Extensions;
-                    DependencyPackageVersion=$(MicrosoftNETBuildExtensionsPackageVersion);
+                    DependencyPackageVersion=$(MicrosoftNETBuildExtensionsVersion);
                     NuGetPackagesDir=$(NuGetPackagesDir);
                     MSBuildExtensionsPathToolsVersionOutputDirectory=$(MSBuildExtensionsPathToolsVersionOutputDirectory);
                     MSBuildExtensionsPathOutputDirectory=$(MSBuildExtensionsPathOutputDirectory)
@@ -49,7 +49,7 @@
                 <Properties>
                     ProjectWithProperties=dotnet_resolver.proj;
                     DependencyPackageName=Microsoft.DotNet.MSBuildSdkResolver;
-                    DependencyPackageVersion=$(MicrosoftDotNetMSBuildSdkResolverPackageVersion);
+                    DependencyPackageVersion=$(MicrosoftDotNetMSBuildSdkResolverVersion);
                     NuGetPackagesDir=$(NuGetPackagesDir);
                     DotnetSdkResolverDir=$(MSBuildSdkResolverOutDir)
                 </Properties>

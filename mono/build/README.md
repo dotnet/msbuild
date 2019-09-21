@@ -1,6 +1,6 @@
 Update various SDKs that we bundle with mono.
 
-- Update the various versions in `mono/build/DotNetBitsVersions.props`.
+- Update the various versions in `eng/Versions.props`
 - If any nuget sources need to be updated, then do that in `mono/build/RestoreSourcesOverrides.props`.
 
 - For NuGet update, ensure that the version is updated in `eng/Packages.props`:
