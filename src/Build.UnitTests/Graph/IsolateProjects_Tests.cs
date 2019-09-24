@@ -185,16 +185,16 @@ BuildEngine5.BuildProjectFilesInParallel(
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/3876")]
         public void CacheEnforcementShouldFailWhenReferenceWasNotPreviouslyBuiltAndOnContinueOnError()
         {
-            CacheEnforcementShouldFailWhenReferenceWasNotPreviouslyBuilt2(addContinueOnError: true);
+            CacheEnforcementImpl(addContinueOnError: true);
         }
 
         [Fact]
         public void CacheEnforcementShouldFailWhenReferenceWasNotPreviouslyBuiltWithoutContinueOnError()
         {
-            CacheEnforcementShouldFailWhenReferenceWasNotPreviouslyBuilt2(addContinueOnError: false);
+            CacheEnforcementImpl(addContinueOnError: false);
         }
 
-        private void CacheEnforcementShouldFailWhenReferenceWasNotPreviouslyBuilt2(bool addContinueOnError)
+        private void CacheEnforcementImpl(bool addContinueOnError)
         {
             AssertBuild(
                 new[] {"BuildDeclaredReference"},
@@ -206,6 +206,14 @@ BuildEngine5.BuildProjectFilesInParallel(
 
                     logger.Errors.First()
                         .Message.ShouldStartWith("MSB4252:");
+
+                    logger.Errors.First().BuildEventContext.ShouldNotBe(BuildEventContext.Invalid);
+
+                    logger.Errors.First().BuildEventContext.NodeId.ShouldNotBe(BuildEventContext.InvalidNodeId);
+                    logger.Errors.First().BuildEventContext.ProjectInstanceId.ShouldNotBe(BuildEventContext.InvalidProjectInstanceId);
+                    logger.Errors.First().BuildEventContext.ProjectContextId.ShouldNotBe(BuildEventContext.InvalidProjectContextId);
+                    logger.Errors.First().BuildEventContext.TargetId.ShouldNotBe(BuildEventContext.InvalidTargetId);
+                    logger.Errors.First().BuildEventContext.TaskId.ShouldNotBe(BuildEventContext.InvalidTaskId);
                 },
                 addContinueOnError: addContinueOnError);
         }
