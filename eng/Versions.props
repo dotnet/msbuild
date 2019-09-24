@@ -73,6 +73,7 @@
     <SystemCodeDomPackageVersion>4.7.0-preview1.19463.3</SystemCodeDomPackageVersion>
     <SystemTextEncodingCodePagesPackageVersion>4.7.0-preview1.19463.3</SystemTextEncodingCodePagesPackageVersion>
     <SystemSecurityCryptographyProtectedDataPackageVersion>4.7.0-preview1.19463.3</SystemSecurityCryptographyProtectedDataPackageVersion>
+    <SystemResourcesExtensionsPackageVersion>4.7.0-preview1.19463.3</SystemResourcesExtensionsPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/core-setup -->

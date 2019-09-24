@@ -66,6 +66,10 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>d0f0bfa5b123b4c1183c889cf4017bb529675502</Sha>
     </Dependency>
+    <Dependency Name="System.Extensions.Resources" Version="4.7.0-preview1.19463.3" CoherentParentDependency="Microsoft.NETCore.App.Runtime.win-x64">
+      <Uri>https://github.com/dotnet/corefx</Uri>
+      <Sha>d0f0bfa5b123b4c1183c889cf4017bb529675502</Sha>
+    </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19461.7">
