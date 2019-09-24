@@ -362,5 +362,47 @@ namespace Microsoft.NET.Build.Tests
                 return command;
             }
         }
+
+        [Theory]
+        [InlineData(false, false, false)]
+        [InlineData(true, false, true)]
+        [InlineData(false, true, true)]
+        [InlineData(true, true, true)]
+        public void GenerateUserSecrets(bool referenceAspNetCore, bool referenceExtensionsUserSecrets, bool shouldHaveAttribute)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "UserSecretTest",
+                IsSdkProject = true,
+                TargetFrameworks = "netcoreapp3.0"
+            };
+
+            testProject.AdditionalProperties["UserSecretsId"] = "SecretsIdValue";
+
+            if (referenceAspNetCore)
+            {
+                testProject.FrameworkReferences.Add("Microsoft.AspNetCore.App");
+            }
+            if (referenceExtensionsUserSecrets)
+            {
+                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.Extensions.Configuration.UserSecrets", "3.0.0"));
+            }
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: referenceAspNetCore.ToString() + referenceExtensionsUserSecrets.ToString())
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(testProject.TargetFrameworks).FullName, testProject.Name + ".dll");
+
+            if (shouldHaveAttribute)
+            {
+                AssemblyInfo.Get(assemblyPath)["UserSecretsIdAttribute"].Should().Be("SecretsIdValue");
+            }
+        }
     }
 }
