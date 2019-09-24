@@ -81,6 +81,13 @@
         <target state="translated">MSB4255: os arquivos de cache do resultado de entrada a seguir não existem: "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="LogLoggerVerbosity">
+        <source>Logging verbosity is set to: {0}.</source>
+        <target state="new">Logging verbosity is set to: {0}.</target>
+        <note>
+      LOCALIZATION: {0} is an enum value of LoggerVerbosity.
+    </note>
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">Metaprojeto "{0}" gerado.</target>

@@ -83,7 +83,7 @@ namespace Microsoft.Build.Logging
 
             if (!SkipProjectStartedText && Verbosity >= LoggerVerbosity.Normal)
             {
-                eventSource.BuildStarted += (obj, args) => WriteHandler($"Verbosity is set to: {Verbosity}.");
+                eventSource.BuildStarted += (obj, args) => WriteHandler(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("LogLoggerVerbosity", Verbosity));
             }
 
             try
