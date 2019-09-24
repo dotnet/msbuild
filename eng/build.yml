@@ -54,17 +54,32 @@ jobs:
         - _PerfIterations: 25
     steps:
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
-      - script: eng\CIBuild.cmd
+      - script: eng\common\CIBuild.cmd
                   -configuration $(_BuildConfig)
                   $(_PublishArgs)
                   $(_SignArgs)
                   $(_OfficialBuildIdArgs)
-                  $(_TestArgs)
+                  /p:Test=false
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
           BlobFeedUrl: $(PB_PublishBlobFeedUrl)
           PublishType: $(_PublishType)
+          SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+          HelixAccessToken: ${{ parameters.HelixAccessToken }}
+      - powershell: eng\common\build.ps1
+              -configuration $(_BuildConfig)
+              -prepareMachine
+              -ci
+              -restore
+              $(_TestArgs)
+              -projects $(Build.SourcesDirectory)/src/Tests/UnitTests.proj
+              /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\TestInHelix.binlog
+              /p:_CustomHelixTargetQueue=${{ parameters.helixTargetQueue }}
+        displayName: Run Tests in Helix
+        env:
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+            HelixAccessToken: ''
 
     - ${{ if eq(parameters.agentOs, 'Windows_NT_FullFramework') }}:
       - script: eng\common\CIBuild.cmd
@@ -72,12 +87,42 @@ jobs:
                   $(_PublishArgs)
                   $(_SignArgs)
                   $(_OfficialBuildIdArgs)
+                  /p:Test=false
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
           BlobFeedUrl: $(PB_PublishBlobFeedUrl)
           PublishType: $(_PublishType)
           TestFullMSBuild: 'true'
+          SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+          HelixAccessToken: ${{ parameters.HelixAccessToken }}
+      - powershell: eng\common\build.ps1
+              -configuration $(_BuildConfig)
+              -prepareMachine
+              -ci
+              -restore
+              -test
+              -projects $(Build.SourcesDirectory)\src\Tests\Microsoft.NET.Build.NonHelix.Tests\Microsoft.NET.Build.NonHelix.Tests.csproj
+              /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\TestInNonHelix.binlog
+        displayName: Run Tests that cannot run in Helix
+        env:
+            TestFullMSBuild: 'true'
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+            HelixAccessToken: ''
+      - powershell: eng\common\build.ps1
+              -configuration $(_BuildConfig)
+              -prepareMachine
+              -ci
+              -restore
+              -test
+              -projects $(Build.SourcesDirectory)\src\Tests\UnitTests.proj
+              /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\TestInHelix.binlog
+              /p:_CustomHelixTargetQueue=${{ parameters.helixTargetQueue }}
+        displayName: Run Tests in Helix
+        env:
+            TestFullMSBuild: 'true'
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+            HelixAccessToken: ''
 
     - ${{ if eq(parameters.agentOs, 'Windows_NT_TestAsTools') }}:
       - script: eng\common\CIBuild.cmd
@@ -185,16 +230,30 @@ jobs:
             WorkItemCommand: './build/RunPerfTestsOnHelix.sh $(_BuildConfig) $(_PerfIterations) $(Build.SourceVersion) $(Build.SourceBranchName) rolling x64 Ubuntu_16.04 Ubuntu.1604.Amd64.Perf $(Build.BuildNumber)'
 
     - ${{ if notIn(parameters.agentOs, 'Windows_NT', 'Windows_NT_FullFramework', 'Windows_NT_TestAsTools', 'Windows_Perf_CI', 'Linux_Perf_CI', 'Windows_Perf_Helix', 'Windows_Perf_CI_FullFramework', 'Windows_Perf_Helix_Fullframework', 'Linux_Perf_Helix') }}:
-      - script: eng/common/cibuild.sh 
+      - script: eng/common/cibuild.sh
                   --configuration $(_BuildConfig)
                   $(_PublishArgs)
                   $(_SignArgs)
                   $(_OfficialBuildIdArgs)
+                  -p:Test=false
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
           BlobFeedUrl: $(PB_PublishBlobFeedUrl)
           PublishType: $(_PublishType)
+      - script: eng/common/build.sh
+              --configuration $(_BuildConfig)
+              --prepareMachine
+              --ci
+              --restore
+              --test
+              --projects $(Build.SourcesDirectory)/src/Tests/UnitTests.proj
+              /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/TestInHelix.binlog
+              /p:_CustomHelixTargetQueue=${{ parameters.helixTargetQueue }}
+        displayName: Run Tests in Helix
+        env:
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+            HelixAccessToken: ''
 
     - task: PublishTestResults@1	
       displayName: Publish Test Results	
