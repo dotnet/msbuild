@@ -399,7 +399,7 @@ namespace Microsoft.Build.UnitTests
                 project.ProjectCollection.UnregisterAllLoggers();
 
                 string log = File.ReadAllText(logFile.Path);
-                var message = $"Verbosity is set to: {loggerVerbosity}.";
+                var message = $"Logging verbosity is set to: {loggerVerbosity}.";
                 if (shouldContain)
                 {
                     Assert.Contains(message, log);
