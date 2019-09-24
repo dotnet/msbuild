@@ -251,14 +251,14 @@ namespace Microsoft.Build.UnitTests
 
             for (var i = 0; i < expectedItems.Length; i++)
             {
-                if (normalizeSlashes)
+                if (!normalizeSlashes)
                 {
-                    var normalizedItem = NormalizeSlashes(expectedItems[i]);
-                    items[i].EvaluatedInclude.ShouldBe(normalizedItem);
+                    items[i].EvaluatedInclude.ShouldBe(expectedItems[i]);
                 }
                 else
                 {
-                    items[i].EvaluatedInclude.ShouldBe(expectedItems[i]);
+                    var normalizedItem = NormalizeSlashes(expectedItems[i]);
+                    items[i].EvaluatedInclude.ShouldBe(normalizedItem);
                 }
 
                 AssertItemHasMetadata(expectedDirectMetadataPerItem[i], items[i]);
@@ -449,7 +449,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(expected.Length, actual.Length); // "Expected array length of <" + expected.Length + "> but was <" + actual.Length + ">.");
 
             // Now that we've verified they're both non-null and of the same length, compare each item in the array.
-            for (int i = expected.Length - 1; i >= 0; i--)
+            for (int i = 0; i < expected.Length; i++)
             {
                 Assert.Equal(expected[i], actual[i]); // "At index " + i + " expected " + expected[i].ToString() + " but was " + actual.ToString());
             }
