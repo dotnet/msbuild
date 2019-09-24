@@ -6,7 +6,7 @@
       <Sha>1e35b022cbc45bd8185cfa3f3151451298bf6de4</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.1.100-preview1.19474.2">
-      <Uri>https://github.com/dotnet/core-setup</Uri>
+      <Uri>https://github.com/dotnet/cli</Uri>
       <Sha>4a9e195d7123e1c3d774cf8e6881d3ff93f47c44</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Sdk" Version="3.1.100-preview1.19469.1">
@@ -17,7 +17,6 @@
       <Uri>https://github.com/microsoft/msbuild</Uri>
       <Sha>1adb5c56a1cb00ec44986c5dfd2bed81e05212a0</Sha>
     </Dependency>
-
     <Dependency Name="Microsoft.FSharp.Compiler" Version="10.7.0-beta.19466.6">
       <Uri>https://github.com/dotnet/fsharp</Uri>
       <Sha>3897909a5fd085bb4932363b686a8bcf56b51479</Sha>
