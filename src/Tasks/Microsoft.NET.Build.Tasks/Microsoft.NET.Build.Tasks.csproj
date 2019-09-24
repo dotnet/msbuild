@@ -43,7 +43,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelVersion)" />
     <PackageReference Include="Microsoft.NET.HostModel" Version="$(MicrosoftNETHostModelVersion)" />
     <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelVersion)" />
-    <PackageReference Include="NuGet.Build.Tasks.Pack" Version="$(NuGetBuildTasksPackVersion)" ExcludeAssets="All" />
+    <PackageReference Include="NuGet.Build.Tasks.Pack" Version="$(NuGetBuildTasksPackageVersion)" ExcludeAssets="All" />
   </ItemGroup>
 
   <!-- System.Reflection.Metadata is in-box for .NET Core 2.0, so we only need to reference it for .NET Framework -->
@@ -83,7 +83,7 @@
 
   <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
     <PropertyGroup>
-      <_NugetBuildTasksPackPath>$(NuGetPackageRoot)nuget.build.tasks.pack\$(NuGetBuildTasksPackVersion)</_NugetBuildTasksPackPath>
+      <_NugetBuildTasksPackPath>$(NuGetPackageRoot)nuget.build.tasks.pack\$(NuGetBuildTasksPackageVersion)</_NugetBuildTasksPackPath>
       <_Stage0SdksFolder>$(DOTNET_INSTALL_DIR)\sdk\$(NETCoreSdkVersion)\Sdks</_Stage0SdksFolder>
     </PropertyGroup>
     <ItemGroup>
