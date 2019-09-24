@@ -369,6 +369,49 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// File logger is writting the verbosity level as soon the build starts.
+        /// </summary>
+        [Theory]
+        [InlineData(LoggerVerbosity.Quiet, false)]
+        [InlineData(LoggerVerbosity.Minimal, false)]
+        [InlineData(LoggerVerbosity.Normal, true)]
+        [InlineData(LoggerVerbosity.Detailed, true)]
+        [InlineData(LoggerVerbosity.Diagnostic, true)]
+        public void LogVerbosityMessage(LoggerVerbosity loggerVerbosity, bool shouldContain)
+        {
+            using (var testEnvironment = TestEnvironment.Create())
+            {
+                var fileLogger = new FileLogger
+                {
+                    Verbosity = loggerVerbosity
+                };
+
+                var logFile = testEnvironment.CreateFile(".log");
+                fileLogger.Parameters = "logfile=" + logFile.Path;
+
+                Project project = ObjectModelHelpers.CreateInMemoryProject(@"
+                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                    <Target Name=`Build` />
+                </Project>
+                ");
+
+                project.Build(fileLogger);
+                project.ProjectCollection.UnregisterAllLoggers();
+
+                string log = File.ReadAllText(logFile.Path);
+                var message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("LogLoggerVerbosity", loggerVerbosity);
+                if (shouldContain)
+                {
+                    Assert.Contains(message, log);
+                }
+                else
+                {
+                    Assert.DoesNotContain(message, log);
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets a filename for a nonexistent temporary file.
         /// </summary>
         /// <returns></returns>

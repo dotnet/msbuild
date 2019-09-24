@@ -1795,6 +1795,12 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION: {0} and {1} are file paths
     </comment>
   </data>
+  <data name="LogLoggerVerbosity" xml:space="preserve">
+    <value>Logging verbosity is set to: {0}.</value>
+    <comment>
+      LOCALIZATION: {0} is an enum value of LoggerVerbosity.
+    </comment>
+  </data>
   <!--
         The engine message bucket is: MSB4001 - MSB4999
 
