@@ -13,7 +13,7 @@
   <!-- Production Dependencies -->
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/cli  -->
-    <MicrosoftDotNetCliRuntimePackageVersion>3.0.100-rc2.19463.15</MicrosoftDotNetCliRuntimePackageVersion>
+    <MicrosoftDotNetCliRuntimePackageVersion>3.1.100-preview1.19474.2</MicrosoftDotNetCliRuntimePackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/sdk -->
@@ -29,7 +29,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/Microsoft/visualfsharp -->
-    <MicrosoftFSharpCompilerPackageVersion>10.7.0-beta.19460.5</MicrosoftFSharpCompilerPackageVersion>
+    <MicrosoftFSharpCompilerPackageVersion>10.7.0-beta.19466.6</MicrosoftFSharpCompilerPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/roslyn -->
@@ -37,7 +37,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore-Tooling -->
-    <MicrosoftNETSdkRazorPackageVersion>3.1.0-preview1.19463.5</MicrosoftNETSdkRazorPackageVersion>
+    <MicrosoftNETSdkRazorPackageVersion>3.1.0-preview1.19473.1</MicrosoftNETSdkRazorPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/websdk -->
@@ -76,7 +76,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/core-setup -->
-    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>3.1.0-preview1.19463.3</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
+    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>3.1.0-preview1.19470.9</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>2.2.0-preview1-26620-03</MicrosoftDotNetPlatformAbstractionsPackageVersion>
