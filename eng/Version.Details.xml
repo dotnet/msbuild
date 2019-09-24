@@ -38,17 +38,17 @@
       <Uri>https://github.com/dotnet/wpf</Uri>
       <Sha>acd0da083a426b222a54201c9f37860da50a906a</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="5.3.0-rtm.6192">
+    <Dependency Name="NuGet.Build.Tasks" Version="5.3.0-rtm.6251">
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
-      <Sha>bb60d6720d24890b8f3e071e70d27ea0f2bef57e</Sha>
+      <Sha>b75150f2f4127a77a166c9552845e86fb24a3282</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.3.0">
       <Uri>https://github.com/microsoft/vstest</Uri>
       <Sha>55e7e45431c9c05656c999b902686e7402664573</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-rc2.19462.2">
+    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-rc2.19465.1">
       <Uri>https://github.com/aspnet/websdk</Uri>
-      <Sha>4d0e7029a9972dbccfd7429a979dbe7775378427</Sha>
+      <Sha>002ea5ca7c699d925281abd8307556ec8eccb530</Sha>
     </Dependency>
     <Dependency Name="ILLink.Tasks" Version="0.1.6-prerelease.19380.1">
       <Uri>https://github.com/mono/linker</Uri>
