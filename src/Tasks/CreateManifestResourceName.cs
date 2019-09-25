@@ -146,8 +146,13 @@ namespace Microsoft.Build.Tasks
                     string fileName = resourceFile.ItemSpec;
                     string dependentUpon = resourceFile.GetMetadata(ItemMetadataNames.dependentUpon);
 
-                    // If opted into convention and no DependentUpon metadata, reference "<filename>.cs" if it exists.
-                    if (UseDependentUponConvention && string.IsNullOrEmpty(dependentUpon))
+                    string fileType = resourceFile.GetMetadata("Type");
+
+                    // If it has a file type metadata is "Resx" or has the file extension ".resx", we know it's a resx file.
+                    bool isResxFile = (!string.IsNullOrEmpty(fileType) && fileType == "Resx") || Path.GetExtension(fileName) == ".resx";
+
+                    // If opted into convention and no DependentUpon metadata and is a resx file, reference "<filename>.cs" if it exists.
+                    if (isResxFile && UseDependentUponConvention && string.IsNullOrEmpty(dependentUpon))
                     {
                         string conventionDependentUpon = Path.ChangeExtension(Path.GetFileName(fileName), SourceFileExtension);
 
