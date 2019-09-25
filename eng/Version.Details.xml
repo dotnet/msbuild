@@ -31,9 +31,9 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>4ac4c0367003fe3973a3648eb0715ddb0e3bbcea</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.0.0-rc2.19465.2">
+    <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.0.0-rc2.19475.14">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
-      <Sha>aee5e4080331553ea9dfb7fb388b6d72f715bf6a</Sha>
+      <Sha>f3b70774443dd39f9b96bbcc59cf7c8a6c7a8858</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
