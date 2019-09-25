@@ -403,6 +403,52 @@ namespace Microsoft.NET.Build.Tests
             {
                 AssemblyInfo.Get(assemblyPath)["UserSecretsIdAttribute"].Should().Be("SecretsIdValue");
             }
+            else
+            {
+                AssemblyInfo.Get(assemblyPath).Should().NotContainKey("SecretsIdValue");
+            }
+        }
+
+        [Fact]
+        public void GenerateUserSecretsForTestProject()
+        {
+            //  Test the scenario where a test project references a web app and uses user secrets.
+            var testProject = new TestProject()
+            {
+                Name = "WebApp",
+                IsSdkProject = true,
+                TargetFrameworks = "netcoreapp3.0"
+            };
+            testProject.FrameworkReferences.Add("Microsoft.AspNetCore.App");
+
+            var testTestProject = new TestProject()
+            {
+                Name = "WebAppTests",
+                IsSdkProject = true,
+                TargetFrameworks = "netcoreapp3.0",
+                ReferencedProjects = { testProject }
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testTestProject);
+
+            File.WriteAllText(Path.Combine(testAsset.TestRoot, "Directory.Build.props"), @"
+<Project>
+  <PropertyGroup>
+    <UserSecretsId>SecretsIdValue</UserSecretsId>
+  </PropertyGroup>
+
+</Project>
+");
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testTestProject.Name);
+
+            buildCommand.Execute("/restore")
+                .Should()
+                .Pass();
+
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(testTestProject.TargetFrameworks).FullName, testTestProject.Name + ".dll");
+
+            AssemblyInfo.Get(assemblyPath)["UserSecretsIdAttribute"].Should().Be("SecretsIdValue");
+
         }
     }
 }
