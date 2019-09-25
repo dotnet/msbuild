@@ -348,8 +348,16 @@ Copyright (c) .NET Foundation. All rights reserved.
       If the Microsoft.Extensions.Configuration.UserSecrets package 2.2 or higher is referenced directly,
       it will also add an AssemblyAttribute item. Since this attribute only allows one per assembly, do not
       duplicate the item.
+      
+      Also don't add the attribute if there is neither a Microsoft.AspNetCore.App FrameworkReference nor a
+      Microsoft.Extensions.Configuration.UserSecrets PackageReference, in order to preserve 2.x SDK behavior
+      where projects would successfully build if they define the UserSecretsId property but don't reference
+      the corresponding API.
+      
     -->
-     <ItemGroup Condition=" @(AssemblyAttribute->WithMetadataValue('Identity', 'Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute')->Count()) == 0 ">
+     <ItemGroup Condition=" @(AssemblyAttribute->WithMetadataValue('Identity', 'Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute')->Count()) == 0 And
+                            (@(FrameworkReference->WithMetadataValue('Identity', 'Microsoft.AspNetCore.App')->Count()) != 0 Or
+                            @(PackageReference->WithMetadataValue('Identity', 'Microsoft.Extensions.Configuration.UserSecrets')->Count()) != 0)">
       <AssemblyAttribute Include="Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute">
         <_Parameter1>$(UserSecretsId.Trim())</_Parameter1>
       </AssemblyAttribute>
