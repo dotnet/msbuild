@@ -7,7 +7,7 @@
         <OutputPath>$(TemplatesDir)</OutputPath>
         <EnableDefaultItems>False</EnableDefaultItems>
         <IsPackable>true</IsPackable>
-        <NoWarn>2008;NU5105</NoWarn>
+        <NoWarn>$(NoWarn);2008;NU5105</NoWarn>
         <NoPackageAnalysis>true</NoPackageAnalysis>
         <PackageId>Microsoft.DotNet.Common.ProjectTemplates.2.2</PackageId>
         <Authors>Microsoft</Authors>
