@@ -6,8 +6,8 @@
   </PropertyGroup>
   <!-- Repo Version Information -->
   <PropertyGroup>
-    <VersionPrefix>3.0.100</VersionPrefix>
-    <PreReleaseVersionLabel>rc2</PreReleaseVersionLabel>
+    <VersionPrefix>3.0.101</VersionPrefix>
+    <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
   </PropertyGroup>
   <!-- Production Dependencies -->
   <PropertyGroup>
