@@ -15,6 +15,7 @@
         <language>en-US</language>
         <PackageProjectUrl>https://github.com/dotnet/templating</PackageProjectUrl>
         <PackageType>Template</PackageType>
+        <SuppressDependenciesWhenPacking>True</SuppressDependenciesWhenPacking>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Remove="Microsoft.NETCore.App" />
