@@ -36,8 +36,7 @@ namespace Microsoft.NET.Build.Tests
                 IsSdkProject = true
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(project, identifier: targetFramework)
-                .Restore(Log, project.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(project, identifier: targetFramework);
 
             string projectFolder = Path.Combine(testAsset.Path, project.Name);
 
@@ -82,8 +81,7 @@ public static class {project.Name}
                             new XAttribute("Version", dependency.Item2)));
                     }
 
-                })
-                .Restore(Log, project.Name);
+                });
 
             string projectFolder = Path.Combine(testAsset.Path, project.Name);
 

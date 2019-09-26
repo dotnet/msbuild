@@ -26,10 +26,10 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource();
 
             new PublishCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest.sln"))
-                .Execute("/restore", "/p:NoBuild=true")
+                .Execute("/p:NoBuild=true")
                 .Should()
                 .Fail()
-                .And.HaveStdOutContaining(Strings.NoSupportCppExeDotnetCore);
+                .And.HaveStdOutContaining(Strings.NoSupportCppNonDynamicLibraryDotnetCore);
         }
     }
 }

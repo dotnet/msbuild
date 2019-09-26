@@ -47,7 +47,7 @@ namespace Microsoft.NET.TestFramework.Commands
             return this;
         }
 
-        protected override SdkCommandSpec CreateCommand(params string[] args)
+        protected override SdkCommandSpec CreateCommand(IEnumerable<string> args)
         {
             var newArgs = new List<string>();
 

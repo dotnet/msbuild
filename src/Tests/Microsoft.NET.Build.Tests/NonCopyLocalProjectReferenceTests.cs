@@ -51,8 +51,7 @@ namespace Microsoft.NET.Build.Tests
                        .OfType<XElement>()
                        .Where(e => e.Name.LocalName == "ProjectReference")
                        .SingleOrDefault()
-                       ?.Add(new XAttribute("Private", "False")))
-                .Restore(Log, testProject.Name);
+                       ?.Add(new XAttribute("Private", "False")));
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             buildCommand.Execute().Should().Pass();

@@ -47,7 +47,7 @@ namespace Microsoft.NET.Rebuild.Tests
             var rebuildCommand = new RebuildCommand(Log, testAsset.TestRoot);
 
             rebuildCommand
-                .Execute()
+                .ExecuteWithoutRestore()
                 .Should()
                 .Pass()
                 .And

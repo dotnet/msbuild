@@ -421,9 +421,9 @@ The following are names of parameters or literal values and should not be transl
         <target state="new">NETSDK1119: C++/CLI projects targeting .NET Core cannot use EnableComHosting=true.</target>
         <note>{StrBegin="NETSDK1119: "}</note>
       </trans-unit>
-      <trans-unit id="NoSupportCppExeDotnetCore">
-        <source>NETSDK1116: C++/CLI projects targeting .NET Core must be libraries and cannot be applications.</source>
-        <target state="new">NETSDK1116: C++/CLI projects targeting .NET Core must be libraries and cannot be applications.</target>
+      <trans-unit id="NoSupportCppNonDynamicLibraryDotnetCore">
+        <source>NETSDK1116: C++/CLI projects targeting .NET Core must be dynamic libraries.</source>
+        <target state="new">NETSDK1116: C++/CLI projects targeting .NET Core must be dynamic libraries.</target>
         <note>{StrBegin="NETSDK1116: "}</note>
       </trans-unit>
       <trans-unit id="NoSupportCppPackDotnetCore">

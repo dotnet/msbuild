@@ -35,9 +35,7 @@ namespace Microsoft.NET.Build.Tests
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
-                .Execute(new string[] {
-                    "/restore",
-                })
+                .Execute()
                 .Should()
                 .Pass();
 
@@ -77,7 +75,7 @@ namespace Microsoft.NET.Build.Tests
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
-                .Execute(new string[] { "/restore" })
+                .Execute()
                 .Should()
                 .Pass();
 
@@ -108,7 +106,6 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
                 .Execute(new string[] {
-                    "/restore",
                     $"/p:TargetFramework={targetFramework}",
                     $"/p:PlatformTarget={target}",
                     $"/p:NETCoreSdkRuntimeIdentifier={EnvironmentInfo.GetCompatibleRid(targetFramework)}"
@@ -148,8 +145,7 @@ namespace Microsoft.NET.Build.Tests
             };
             testProject.AdditionalProperties.Add("AssemblyVersion", version);
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -177,8 +173,7 @@ namespace Microsoft.NET.Build.Tests
                     var ns = project.Root.Name.Namespace;
                     var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
                     propertyGroup.Element(ns + "TargetFramework").SetValue(targetFramework);
-                })
-                .Restore(Log);
+                });
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
@@ -213,8 +208,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.AdditionalProperties["SelfContained"] = "false";
             testProject.AdditionalProperties["UseAppHost"] = "false";
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
 
@@ -237,8 +231,7 @@ namespace Microsoft.NET.Build.Tests
                 IsExe = true,
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var projectDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
 

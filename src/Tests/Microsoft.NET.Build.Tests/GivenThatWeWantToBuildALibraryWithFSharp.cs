@@ -33,8 +33,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibraryFS")
-                .WithSource()
-                .Restore(Log, relativePath: "TestLibrary");
+                .WithSource();
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
@@ -58,8 +57,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibraryFS")
-                .WithSource()
-                .Restore(Log, relativePath: "TestLibrary");
+                .WithSource();
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
@@ -98,8 +96,6 @@ namespace Microsoft.NET.Build.Tests
                 testAsset.WithProjectChanges(projectChanges);
             }
 
-            testAsset.Restore(log, relativePath: "TestLibrary");
-
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
             var getValuesCommand = new GetValuesCommand(log, libraryProjectDirectory,
@@ -131,7 +127,7 @@ namespace Microsoft.NET.Build.Tests
 
             var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
             buildCommand
-                .Execute()
+                .ExecuteWithoutRestore()
                 .Should()
                 .Fail();
         }
@@ -167,8 +163,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibraryFS", "ImplicitConfigurationConstantsFS", configuration)
-                .WithSource()
-                .Restore(Log, relativePath: "TestLibrary");
+                .WithSource();
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
@@ -235,8 +230,7 @@ namespace Microsoft.NET.Build.Tests
                         shouldCompile = true;
                         targetFrameworkProperties.Single().SetValue(targetFramework);
                     }
-                })
-                .Restore(Log, relativePath: "TestLibrary");
+                });
 
             if (buildOnlyOnWindows && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {

@@ -24,8 +24,7 @@ namespace Microsoft.NET.Pack.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
 
             new PackCommand(Log, testAsset.TestRoot)
                 .Execute()

@@ -25,8 +25,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
-                .WithSource()
-                .Restore(Log, "NETCoreCppCliTest.sln");
+                .WithSource();
 
             WorkaroundSDKBlockOnAssetsJsonExistence(testAsset);
 
@@ -56,8 +55,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
-                .WithSource()
-                .Restore(Log, "NETCoreCppCliTest.sln");
+                .WithSource();
 
             WorkaroundSDKBlockOnAssetsJsonExistence(testAsset);
 

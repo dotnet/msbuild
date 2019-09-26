@@ -42,8 +42,7 @@ namespace Microsoft.NET.Build.Tests
                     var ns = project.Root.Name.Namespace;
                     var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
                     propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", runtimeIdentifier));
-                })
-                .Restore(Log);
+                });
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot));
 
@@ -104,8 +103,7 @@ namespace Microsoft.NET.Build.Tests
 					var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
 					propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", RuntimeIdentifier));
                     propertyGroup.Add(new XElement(ns + "PlatformTarget", PlatformTarget));
-				})
-				.Restore(Log);
+				});
 
 			var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot));
 
@@ -133,8 +131,7 @@ namespace Microsoft.NET.Build.Tests
 					var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
 					propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", runtimeIdentifier));
 					propertyGroup.Add(new XElement(ns + "PlatformTarget", "AnyCPU"));
-				})
-				.Restore(Log);
+				});
 
 			var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot));
 

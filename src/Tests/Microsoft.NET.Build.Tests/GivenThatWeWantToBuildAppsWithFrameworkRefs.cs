@@ -28,10 +28,6 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppsWithFrameworkReferences")
                 .WithSource();
-
-            testAsset.Restore(Log, "EntityFrameworkApp");
-            testAsset.Restore(Log, "StopwatchLib");
-
             VerifyProjectsBuild(testAsset);
         }
 
@@ -41,10 +37,6 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppsWithFrameworkReferences")
                 .WithSource();
-
-            testAsset.Restore(Log, "EntityFrameworkApp");
-            testAsset.Restore(Log, "StopwatchLib");
-
             VerifyProjectsBuild(testAsset, "/p:DisableImplicitFrameworkReferences=true");
         }
 
@@ -94,10 +86,6 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppsWithFrameworkReferences", "CleanTargetRemovesAll")
                 .WithSource();
-
-            testAsset.Restore(Log, "EntityFrameworkApp");
-            testAsset.Restore(Log, "StopwatchLib");
-
             VerifyClean(testAsset, "StopwatchLib", "net45", "",
                 "StopwatchLib.dll",
                 "StopwatchLib.pdb");
