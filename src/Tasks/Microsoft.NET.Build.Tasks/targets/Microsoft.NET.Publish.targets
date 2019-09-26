@@ -272,7 +272,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <PrepareForReadyToRunCompilation RuntimePacks="@(ResolvedRuntimePack)"
                                      RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
-                                     KnownFrameworkReferences="@(KnownFrameworkReference)"
                                      NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)"
                                      OutputPath="$(_ReadyToRunOutputPath)"
                                      Assemblies="@(_ReadyToRunImplementationAssemblies)"

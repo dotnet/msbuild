@@ -26,8 +26,6 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public ITaskItem[] RuntimePacks { get; set; }
         [Required]
-        public ITaskItem[] KnownFrameworkReferences { get; set; }
-        [Required]
         public string RuntimeGraphPath { get; set; }
         [Required]
         public string NETCoreSdkRuntimeIdentifier { get; set; }
@@ -67,16 +65,15 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            // Get the list of runtime identifiers that we support and can target
-            ITaskItem frameworkRef = KnownFrameworkReferences.Where(item => String.Compare(item.ItemSpec, "Microsoft.NETCore.App", true) == 0).SingleOrDefault();
-            string supportedRuntimeIdentifiers = frameworkRef == null ? null : frameworkRef.GetMetadata("RuntimePackRuntimeIdentifiers");
-
             // Get information on the runtime package used for the current target
             ITaskItem frameworkPack = RuntimePacks.Where(pack => 
                     pack.GetMetadata(MetadataKeys.FrameworkName).Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase))
                 .SingleOrDefault();
-            _runtimeIdentifier = frameworkPack == null ? null : frameworkPack.GetMetadata(MetadataKeys.RuntimeIdentifier);
-            _packagePath = frameworkPack == null ? null : frameworkPack.GetMetadata(MetadataKeys.PackageDirectory);
+            _runtimeIdentifier = frameworkPack?.GetMetadata(MetadataKeys.RuntimeIdentifier);
+            _packagePath = frameworkPack?.GetMetadata(MetadataKeys.PackageDirectory);
+
+            // Get the list of runtime identifiers that we support and can target
+            string supportedRuntimeIdentifiers = frameworkPack?.GetMetadata(MetadataKeys.AvailableRuntimeIdentifiers);
 
             var runtimeGraph = new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath);
             var supportedRIDsList = supportedRuntimeIdentifiers == null ? Array.Empty<string>() : supportedRuntimeIdentifiers.Split(';');
