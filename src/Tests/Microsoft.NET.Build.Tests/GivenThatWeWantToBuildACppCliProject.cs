@@ -24,8 +24,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
-                .WithSource()
-                .Restore(Log, "NETCoreCppCliTest.sln");
+                .WithSource();
 
             // build projects separately with BuildProjectReferences=false to simulate VS build behavior
             new BuildCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest"))

@@ -106,8 +106,6 @@ class Program
             // Workaround https://github.com/dotnet/cli/issues/9701
             var useBundledNETCoreAppPackage = "/p:UseBundledNETCoreAppPackageVersionAsDefaultNetCorePatchVersion=true";
 
-            toolProjectInstance.Restore(Log, toolProject.Name, "/v:n", useBundledNETCoreAppPackage);
-
             var packCommand = new PackCommand(Log, Path.Combine(toolProjectInstance.TestRoot, toolProject.Name));
 
             packCommand.Execute(useBundledNETCoreAppPackage)
@@ -206,7 +204,7 @@ class Program
 
             var generateDepsCommand = new MSBuildCommand(Log, "BuildDepsJson", generateDepsProjectDirectoryPath, generateDepsProjectFileName);
 
-            generateDepsCommand.Execute(args.ToArray())
+            generateDepsCommand.ExecuteWithoutRestore(args)
                 .Should()
                 .Pass();
 

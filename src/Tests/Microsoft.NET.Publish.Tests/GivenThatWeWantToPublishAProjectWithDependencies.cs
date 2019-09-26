@@ -29,8 +29,7 @@ namespace Microsoft.NET.Publish.Tests
         {
             TestAsset simpleDependenciesAsset = _testAssetsManager
                 .CopyTestAsset("SimpleDependencies")
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
 
             PublishCommand publishCommand = new PublishCommand(Log, simpleDependenciesAsset.TestRoot);
             publishCommand
@@ -73,8 +72,7 @@ namespace Microsoft.NET.Publish.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("DesktopNeedsBindingRedirects")
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
 
             PublishCommand publishCommand = new PublishCommand(Log, testAsset.TestRoot);
             publishCommand
@@ -101,8 +99,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testAsset = _testAssetsManager
                 .CopyTestAsset("NetCoreApp11WithP2P")
-                .WithSource()
-                .Restore(Log, "App");
+                .WithSource();
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "App");
             PublishCommand publishCommand = new PublishCommand(Log, appProjectDirectory);
@@ -127,8 +124,7 @@ namespace Microsoft.NET.Publish.Tests
 
                     var targetFrameworkElement = projectFile.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").Single();
                     targetFrameworkElement.SetValue(targetFramework);
-                })
-                .Restore(Log);
+                });
 
             string filterProjDir = _testAssetsManager.GetAndValidateTestProjectDirectory("StoreManifests");
             string manifestFileName1 = "NewtonsoftFilterProfile.xml";
@@ -176,8 +172,7 @@ namespace Microsoft.NET.Publish.Tests
 
                     var targetFrameworkElement = projectFile.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").Single();
                     targetFrameworkElement.SetValue(targetFramework);
-                })
-                .Restore(Log, "", $"/p:RuntimeIdentifier={rid}");
+                });
 
             string filterProjDir = _testAssetsManager.GetAndValidateTestProjectDirectory("StoreManifests");
             string manifestFile = Path.Combine(filterProjDir, "NewtonsoftFilterProfile.xml");
@@ -218,7 +213,6 @@ namespace Microsoft.NET.Publish.Tests
             var kitchenSinkAsset = _testAssetsManager
                 .CopyTestAsset("KitchenSink", identifier: $"{expectAppDocPublished}_{expectLibProjectDocPublished}")
                 .WithSource();
-            kitchenSinkAsset.Restore(Log, "TestApp");
             
             var publishCommand = new PublishCommand(Log, Path.Combine(kitchenSinkAsset.TestRoot, "TestApp"));
             var publishArgs = properties.Split(';').Select(p => $"/p:{p}").ToArray();
@@ -261,8 +255,7 @@ namespace Microsoft.NET.Publish.Tests
                 TargetFrameworks = "netstandard1.0"
             };
 
-            var libAsset = _testAssetsManager.CreateTestProject(libProject, identifier: identifier)
-                .Restore(Log, "NetStdLib");
+            var libAsset = _testAssetsManager.CreateTestProject(libProject, identifier: identifier);
 
             var libPublishCommand = new PublishCommand(Log, Path.Combine(libAsset.TestRoot, "NetStdLib"));
             var libPublishResult = libPublishCommand.Execute("/t:Publish", "/p:GenerateDocumentationFile=true");

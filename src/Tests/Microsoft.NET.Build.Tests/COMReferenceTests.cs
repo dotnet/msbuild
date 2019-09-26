@@ -75,8 +75,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager
                 .CreateTestProject(testProject, identifier: embedInteropTypes.ToString())
-                .WithProjectChanges(doc => doc.Root.Add(reference))
-                .Restore(Log, testProject.Name);
+                .WithProjectChanges(doc => doc.Root.Add(reference));
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             buildCommand.Execute().Should().Pass();

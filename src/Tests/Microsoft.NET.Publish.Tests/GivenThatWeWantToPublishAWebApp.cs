@@ -84,7 +84,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var rid = EnvironmentInfo.GetCompatibleRid(tfm);
             command
-                .Execute("/restore", $"/p:RuntimeIdentifier={rid}")
+                .Execute($"/p:RuntimeIdentifier={rid}")
                 .Should()
                 .Pass();
 
@@ -142,7 +142,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var rid = EnvironmentInfo.GetCompatibleRid(tfm);
             command
-                .Execute("/restore", $"/p:RuntimeIdentifier={rid}", "/p:SelfContained=false")
+                .Execute($"/p:RuntimeIdentifier={rid}", "/p:SelfContained=false")
                 .Should()
                 .Pass();
 
@@ -206,7 +206,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var command = new PublishCommand(Log, projectDirectory);
             command
-                .Execute("/restore", "/p:PublishProfile=test")
+                .Execute("/p:PublishProfile=test")
                 .Should()
                 .Pass();
 

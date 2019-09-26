@@ -39,7 +39,6 @@ namespace Microsoft.NET.ToolPack.Tests
                                             propertyGroup.Add(new XElement("ToolEntryPoint", explicitEntryPoint));
                                         });
 
-            helloWorldAsset.Restore(Log);
             var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
 
             packCommand.Execute();
@@ -74,8 +73,7 @@ namespace Microsoft.NET.ToolPack.Tests
                                             XNamespace ns = project.Root.Name.Namespace;
                                             XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
                                             propertyGroup.Add(new XElement("ToolCommandName", explicitCommandName));
-                                        })
-                                        .Restore(Log);
+                                        });
             var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
 
             packCommand.Execute();

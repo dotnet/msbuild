@@ -944,8 +944,6 @@ public static class Program
 
         private string RestoreAndBuild(TestAsset testAsset, TestProject testProject)
         {
-            testAsset.Restore(Log, testProject.Name);
-
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
             buildCommand.Execute()

@@ -3,6 +3,8 @@
 
 using Microsoft.DotNet.Cli.Utils;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit.Abstractions;
@@ -14,6 +16,7 @@ namespace Microsoft.NET.TestFramework.Commands
         public string Target { get;  }
 
         private readonly string _projectRootPath;
+
         public string ProjectRootPath => _projectRootPath;
 
         public string ProjectFile { get; }
@@ -26,6 +29,7 @@ namespace Microsoft.NET.TestFramework.Commands
             Target = target;
 
             _projectRootPath = projectRootPath;
+
             ProjectFile = FindProjectFile(ref _projectRootPath, relativePathToProject);
         }
 
@@ -96,11 +100,35 @@ namespace Microsoft.NET.TestFramework.Commands
             return new DirectoryInfo(output);
         }
 
-        protected override SdkCommandSpec CreateCommand(params string[] args)
+        protected virtual bool ExecuteWithRestoreByDefault => true;
+
+        public override CommandResult Execute(IEnumerable<string> args)
+        {
+            if (ExecuteWithRestoreByDefault)
+            {
+                args = new[] { "/restore" }.Concat(args);
+            }
+
+            return base.Execute(args);
+        }
+
+        public CommandResult ExecuteWithoutRestore(IEnumerable<string> args)
+        {
+            return base.Execute(args);
+        }
+
+        public CommandResult ExecuteWithoutRestore(params string[] args)
+        {
+            IEnumerable<string> enumerableArgs = args;
+            return ExecuteWithoutRestore(enumerableArgs);
+        }
+
+        protected override SdkCommandSpec CreateCommand(IEnumerable<string> args)
         {
             var newArgs = args.ToList();
             newArgs.Insert(0, FullPathProjectFile);
-            return TestContext.Current.ToolsetUnderTest.CreateCommandForTarget(Target, newArgs.ToArray());
+            
+            return TestContext.Current.ToolsetUnderTest.CreateCommandForTarget(Target, newArgs);
         }
     }
 }

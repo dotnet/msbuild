@@ -21,7 +21,7 @@ namespace Microsoft.NET.Build.Tests
             Type loggerType = typeof(LogTelemetryToStdOutForTest);
             string telemetryTestLogger = $"/Logger:{loggerType.FullName},{loggerType.GetTypeInfo().Assembly.Location}";
 
-            var testAsset = _testAssetsManager.CopyTestAsset("HelloWorld").WithSource().Restore(Log);
+            var testAsset = _testAssetsManager.CopyTestAsset("HelloWorld").WithSource();
 
             var mSBuildCommand = new MSBuildCommand(Log, "GenerateToolsSettingsFileFromBuildProperty", Path.Combine(testAsset.TestRoot));
 

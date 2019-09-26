@@ -23,11 +23,10 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
-                .WithSource()
-                .Restore(Log, "NETCoreCppCliTest.sln");
+                .WithSource();
 
             new PackCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest", "NETCoreCppCliTest.vcxproj"))
-                .Execute("/restore", "-p:Platform=x64")
+                .Execute("-p:Platform=x64")
                 .Should()
                 .Fail()
                 .And
