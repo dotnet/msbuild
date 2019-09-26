@@ -104,7 +104,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = ProjectName,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = "netcoreapp3.1",
                 IsSdkProject = true,
                 IsExe = true,
             };
