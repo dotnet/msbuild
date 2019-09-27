@@ -620,17 +620,14 @@ namespace Microsoft.Build.Evaluation
                 ErrorUtilities.VerifyThrow(_data.EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
                 EvaluateEventSource.Log.EvaluatePhase(projectFile, 0);
-                EvaluateEventSource.Log.EvaluatePhase(projectFile, 5);
                 // Pass1: evaluate properties, load imports, and gather everything else
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Properties))
                 {
                     PerformDepthFirstPass(_projectRootElement);
                 }
-                EvaluateEventSource.Log.EvaluatePhase(projectFile, 6);
 
                 SetAllProjectsProperty();
-                EvaluateEventSource.Log.EvaluatePhase(projectFile, 7);
-
+                
                 List<string> initialTargets = new List<string>(_initialTargetsList.Count);
                 foreach (var initialTarget in _initialTargetsList)
                 {

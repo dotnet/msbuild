@@ -121,10 +121,10 @@ namespace Microsoft.Build.Construction
             ParseEventSource.Log.ParseStop(projectRootElement.ProjectFileLocation.File);
         }
 
-            /// <summary>
-            /// Parses the project into the ProjectRootElement
-            /// </summary>
-            private void Parse()
+        /// <summary>
+        /// Parses the project into the ProjectRootElement
+        /// </summary>
+        private void Parse()
         {
             // XML guarantees exactly one root element
             XmlElementWithLocation element = _document.DocumentElement as XmlElementWithLocation;
