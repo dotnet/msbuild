@@ -70,9 +70,13 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void ItShowsTheAppropriateMessageToTheUser()
         {
+            var expectedVersion = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "ExpectedSdkVersion.txt"));
             _firstDotnetVerbUseCommandResult.StdOut
                 .Should()
-                .ContainVisuallySameFragment(string.Format(Configurer.LocalizableStrings.FirstTimeMessageWelcome, Product.Version))
+                .ContainVisuallySameFragment(string.Format(
+                    Configurer.LocalizableStrings.FirstTimeMessageWelcome,
+                    DotnetFirstTimeUseConfigurer.DeriveDotnetVersionFromProductVersion(expectedVersion),
+                    expectedVersion))
                 .And.ContainVisuallySameFragment(Configurer.LocalizableStrings.FirstTimeMessageMoreInformation)
                 .And.NotContain("Restore completed in");
         }
@@ -143,9 +147,14 @@ namespace Microsoft.DotNet.Tests
 
             var result = command.ExecuteWithCapturedOutput("new --debug:ephemeral-hive");
 
+            var expectedVersion = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "ExpectedSdkVersion.txt"));
+
             result.StdOut
                 .Should()
-                .ContainVisuallySameFragment(string.Format(Configurer.LocalizableStrings.FirstTimeMessageWelcome, Product.Version))
+                .ContainVisuallySameFragment(string.Format(
+                    Configurer.LocalizableStrings.FirstTimeMessageWelcome,
+                    DotnetFirstTimeUseConfigurer.DeriveDotnetVersionFromProductVersion(expectedVersion),
+                    expectedVersion))
                 .And.ContainVisuallySameFragment(Configurer.LocalizableStrings.FirstTimeMessageMoreInformation);
         }
 
