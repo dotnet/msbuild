@@ -26,6 +26,8 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public ITaskItem[] RuntimePacks { get; set; }
         [Required]
+        public ITaskItem[] TargetingPacks { get; set; }
+        [Required]
         public string RuntimeGraphPath { get; set; }
         [Required]
         public string NETCoreSdkRuntimeIdentifier { get; set; }
@@ -65,15 +67,13 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            // Get information on the runtime package used for the current target
-            ITaskItem frameworkPack = RuntimePacks.Where(pack => 
-                    pack.GetMetadata(MetadataKeys.FrameworkName).Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase))
-                .SingleOrDefault();
-            _runtimeIdentifier = frameworkPack?.GetMetadata(MetadataKeys.RuntimeIdentifier);
-            _packagePath = frameworkPack?.GetMetadata(MetadataKeys.PackageDirectory);
+            ITaskItem runtimePack = GetNETCoreAppRuntimePack();
+            _runtimeIdentifier = runtimePack?.GetMetadata(MetadataKeys.RuntimeIdentifier);
+            _packagePath = runtimePack?.GetMetadata(MetadataKeys.PackageDirectory);
 
-            // Get the list of runtime identifiers that we support and can target
-            string supportedRuntimeIdentifiers = frameworkPack?.GetMetadata(MetadataKeys.AvailableRuntimeIdentifiers);
+            // Get the list of runtime identifiers that we support and can target 
+            ITaskItem targetingPack = GetNETCoreAppTargetingPack();
+            string supportedRuntimeIdentifiers = targetingPack?.GetMetadata(MetadataKeys.RuntimePackRuntimeIdentifiers);
 
             var runtimeGraph = new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath);
             var supportedRIDsList = supportedRuntimeIdentifiers == null ? Array.Empty<string>() : supportedRuntimeIdentifiers.Split(';');
@@ -113,6 +113,23 @@ namespace Microsoft.NET.Build.Tasks
 
             // Process input lists of files
             ProcessInputFileList(Assemblies, _compileList, _symbolsCompileList, _r2rFiles, _r2rReferences);
+        }
+
+        private ITaskItem GetNETCoreAppRuntimePack()
+        {
+            return GetNETCoreAppPack(RuntimePacks, MetadataKeys.FrameworkName);
+        }
+
+        private ITaskItem GetNETCoreAppTargetingPack()
+        {
+            return GetNETCoreAppPack(TargetingPacks, MetadataKeys.RuntimeFrameworkName);
+        }
+
+        private static ITaskItem GetNETCoreAppPack(ITaskItem[] packs, string metadataKey)
+        { 
+            return packs.SingleOrDefault(
+                pack => pack.GetMetadata(metadataKey)
+                            .Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase));
         }
 
         private void ProcessInputFileList(ITaskItem[] inputFiles, List<ITaskItem> imageCompilationList, List<ITaskItem> symbolsCompilationList, List<ITaskItem> r2rFilesPublishList, List<ITaskItem> r2rReferenceList)
