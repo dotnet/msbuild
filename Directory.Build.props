@@ -10,12 +10,16 @@
   <PropertyGroup>
     <LangVersion>Latest</LangVersion>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-    <DebugType>embedded</DebugType>
+    <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
     <IsShippingPackage>false</IsShippingPackage>
+
+    <!-- Workaround for https://github.com/NuGet/NuGet.Client/pull/3016 -->
+    <NoWarn>$(NoWarn);NU5131</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
+    <DebugType>embedded</DebugType>
     <ExcludeFromSourceBuild>true</ExcludeFromSourceBuild>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GenerateProgramFile>false</GenerateProgramFile>
@@ -25,5 +29,15 @@
   <PropertyGroup>
     <SdkLayoutDirectory>$(ArtifactsBinDir)$(Configuration)\dotnetLayout</SdkLayoutDirectory>
   </PropertyGroup>
+
+  <Target Name="OverrideSymbolsOutput" BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+          Condition="'$(DebugType)' != 'embedded'">
+
+    <ItemGroup>
+      <_DebugSymbolsOutputPath Remove="@(_DebugSymbolsOutputPath)" />
+      <_DebugSymbolsOutputPath Include="@(_DebugSymbolsIntermediatePath->'$(ArtifactsSymStoreDirectory)$(MSBuildProjectName)\$(TargetFramework.ToLowerInvariant())\%(Filename)%(Extension)')" />
+    </ItemGroup>
+    
+  </Target>
 
 </Project>
