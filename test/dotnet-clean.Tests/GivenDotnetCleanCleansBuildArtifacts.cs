@@ -12,7 +12,8 @@ namespace Microsoft.DotNet.Cli.Clean.Tests
 {
     public class GivenDotnetCleanCleansBuildArtifacts : TestBase
     {
-        [Fact]
+        //  Windows only due to CI failure during repo merge: https://github.com/dotnet/sdk/issues/3684
+        [WindowsOnlyFact]
         public void ItCleansAProjectBuiltWithRuntimeIdentifier()
         {
             var testAppName = "MSBuildTestApp";
