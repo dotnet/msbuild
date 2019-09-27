@@ -27,8 +27,6 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
                 .WithSource();
 
-            WorkaroundSDKBlockOnAssetsJsonExistence(testAsset);
-
             new PublishCommand(Log, Path.Combine(testAsset.TestRoot, "CSConsoleApp"))
                 .Execute(new string[] { "-p:Platform=x64" })
                 .Should()
@@ -57,22 +55,11 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
                 .WithSource();
 
-            WorkaroundSDKBlockOnAssetsJsonExistence(testAsset);
-
             new PublishCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest"))
                 .Execute(new string[] { "-p:Platform=x64" })
                 .Should()
                 .Fail()
                 .And.HaveStdOutContaining(Strings.NoSupportCppPublishDotnetCore);
-        }
-
-        private static void WorkaroundSDKBlockOnAssetsJsonExistence(TestAsset testAsset)
-        {
-            var lockFile = new LockFile();
-            lockFile.Targets.Add(new LockFileTarget { TargetFramework = NuGetFramework.Parse(".NETCoreApp,Version=v3.0") });
-
-            var objDirectory = Directory.CreateDirectory(Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest", "obj"));
-            new LockFileFormat().Write(objDirectory.File("project.assets.json").FullName, lockFile);
         }
     }
 }
