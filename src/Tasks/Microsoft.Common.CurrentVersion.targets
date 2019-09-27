@@ -1800,33 +1800,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </MSBuild>
 
     <!--
-        QUIRKING FOR DEV10
-
-        In the 4.0 version of the targets, we built the targets specified in the Targets metadata in addition to
-        GetTargetPath when building in the IDE.  In 4.5, we changed this to just GetTargetPath because it was
-        causing performance trouble with certain systems that specified targets that did a significant amount of
-        work in the Targets metadata, expecting them to only build when doing a real build.
-
-        However, that change broke C++ unit testing in Dev10 + 4.5 scenarios, because they required use of the
-        Targets metadata in order to get design time builds to work properly.  Thus, we need to make sure we
-        restore the Dev10 behavior when building on Dev10.
-        -->
-
-    <MSBuild
-        Projects="@(_MSBuildProjectReferenceExistent)"
-        Targets="%(_MSBuildProjectReferenceExistent.Targets);GetTargetPath"
-        BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
-        Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and ('$(BuildingInsideVisualStudio)' == 'true' or '$(BuildProjectReferences)' != 'true') and '$(VisualStudioVersion)' == '10.0' and '@(_MSBuildProjectReferenceExistent)' != ''"
-        ContinueOnError="!$(BuildingProject)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
-
-      <Output TaskParameter="TargetOutputs" ItemName="_ResolvedProjectReferencePaths" Condition="'%(_MSBuildProjectReferenceExistent.ReferenceOutputAssembly)'=='true'"/>
-      <Output TaskParameter="TargetOutputs" ItemName="%(_MSBuildProjectReferenceExistent.OutputItemType)" Condition="'%(_MSBuildProjectReferenceExistent.OutputItemType)' != ''"/>
-
-    </MSBuild>
-
-    <!--
         Build referenced projects when building from the command line.
         -->
     <MSBuild
