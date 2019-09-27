@@ -45,9 +45,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="ComputeRefAssembliesToPublish"
           Condition="'$(PreserveCompilationReferences)' == 'true'"
           DependsOnTargets="ResolvePackageAssets;
-                            _ParseTargetManifestFiles"
-          AfterTargets="ComputeFilesToPublish"
-          BeforeTargets="CopyFilesToPublishDirectory">
+                            _ParseTargetManifestFiles">
 
     <FindItemsFromPackages Items="@(RuntimeCopyLocalItems)"
                            Packages="@(RuntimeStorePackages)">

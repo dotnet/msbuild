@@ -30,8 +30,7 @@ namespace Microsoft.NET.Perf.Tests
                 IsExe = true
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             string[] propertiesToShow = new[]
             {

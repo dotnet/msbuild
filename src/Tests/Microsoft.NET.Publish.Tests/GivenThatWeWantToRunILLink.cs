@@ -31,8 +31,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
             string[] restoreArgs = { $"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true" };
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name, restoreArgs);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true").Should().Pass();
@@ -58,18 +57,18 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp3.0")]
-        public void ILLink_runs_and_creates_linked_app(string targetFramework)
+        [InlineData("netcoreapp3.0", true)]
+        [InlineData("netcoreapp3.0", false)]
+        public void ILLink_runs_and_creates_linked_app(string targetFramework, bool referenceClassLibAsPackage)
         {
             var projectName = "HelloWorld";
             var referenceProjectName = "ClassLibForILLink";
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
-            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName, referenceClassLibAsPackage);
             string[] restoreArgs = { $"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true" };
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .WithProjectChanges(project => EnableNonFrameworkTrimming(project))
-                .Restore(Log, testProject.Name, restoreArgs);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework + referenceClassLibAsPackage)
+                .WithProjectChanges(project => EnableNonFrameworkTrimming(project));
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true").Should().Pass();
@@ -109,8 +108,7 @@ namespace Microsoft.NET.Publish.Tests
             string[] restoreArgs = { $"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true" };
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .WithProjectChanges(project => EnableNonFrameworkTrimming(project))
-                .WithProjectChanges(project => AddRootDescriptor(project, $"{referenceProjectName}.xml"))
-                .Restore(Log, testProject.Name, restoreArgs);
+                .WithProjectChanges(project => AddRootDescriptor(project, $"{referenceProjectName}.xml"));
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             // Inject extra arguments to prevent the linker from
@@ -144,8 +142,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
             string[] restoreArgs = { $"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true" };
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name, restoreArgs);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -176,8 +173,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
             string[] restoreArgs = { $"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true" };
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name, restoreArgs);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             publishCommand.Execute("/v:n", $"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true").Should().Pass();
@@ -216,8 +212,7 @@ namespace Microsoft.NET.Publish.Tests
             string[] restoreArgs = { $"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true" };
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .WithProjectChanges(project => EnableNonFrameworkTrimming(project))
-                .WithProjectChanges(project => AddRootDescriptor(project, $"{referenceProjectName}.xml"))
-                .Restore(Log, testProject.Name, restoreArgs);
+                .WithProjectChanges(project => AddRootDescriptor(project, $"{referenceProjectName}.xml"));
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -266,8 +261,7 @@ namespace Microsoft.NET.Publish.Tests
             var referenceProjectName = "ClassLibForILLink";
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             publishCommand.Execute("/p:PublishTrimmed=true")
@@ -285,12 +279,55 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
             string[] restoreArgs = { $"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true" };
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             publishCommand.Execute("/p:PublishTrimmed=true", $"/p:SelfContained=true", "/p:PublishTrimmed=true")
                 .Should().Pass().And.HaveStdOutContainingIgnoreCase("https://aka.ms/dotnet-illink");
+        }
+
+        [Fact(Skip = "https://github.com/aspnet/AspNetCore/issues/12064")]
+        public void ILLink_and_crossgen_process_razor_assembly()
+        { 
+            var targetFramework = "netcoreapp3.0";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = new TestProject
+            {
+                Name = "TestWeb",
+                IsSdkProject = true,
+                IsExe = true,
+                ProjectSdk = "Microsoft.NET.Sdk.Web",
+                TargetFrameworks = targetFramework,
+                SourceFiles =
+                {
+                    ["Program.cs"] = @"
+                        class Program
+                        {
+                            static void Main() {}
+                        }",
+                    ["Test.cshtml"] = @"
+                        @page
+                        @{
+                            System.IO.Compression.ZipFile.OpenRead(""test.zip"");
+                        }
+                    ",
+                },
+                AdditionalProperties =
+                {
+                    ["RuntimeIdentifier"] = rid,
+                    ["PublishTrimmed"] = "true",
+                    ["PublishReadyToRun"] = "true",
+                }
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute().Should().Pass();
+
+            var publishDir = publishCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: rid);
+            publishDir.Should().HaveFile("System.IO.Compression.ZipFile.dll");
+            GivenThatWeWantToRunCrossgen.DoesImageHaveR2RInfo(publishDir.File("TestWeb.Views.dll").FullName);
         }
 
         private static bool DoesImageHaveMethod(string path, string methodNameToCheck)
@@ -328,7 +365,7 @@ namespace Microsoft.NET.Publish.Tests
 
         private TestPackageReference GetPackageReference(TestProject project)
         {
-            var asset = _testAssetsManager.CreateTestProject(project, project.Name).Restore(Log, project.Name);
+            var asset = _testAssetsManager.CreateTestProject(project, project.Name);
             var pack = new PackCommand(Log, Path.Combine(asset.TestRoot, project.Name));
             pack.Execute().Should().Pass();
 
@@ -380,7 +417,7 @@ namespace Microsoft.NET.Publish.Tests
                                                  new XElement("action"))));
         }
 
-        private TestProject CreateTestProjectForILLinkTesting(string targetFramework, string mainProjectName, string referenceProjectName)
+        private TestProject CreateTestProjectForILLinkTesting(string targetFramework, string mainProjectName, string referenceProjectName, bool usePackageReference = true)
         {
             var referenceProject = new TestProject()
             {
@@ -401,19 +438,25 @@ public class ClassLib
     }
 }
 ";
-
-            var packageReference = GetPackageReference(referenceProject);
-
             var testProject = new TestProject()
             {
                 Name = mainProjectName,
                 TargetFrameworks = targetFramework,
                 IsSdkProject = true,
-                PackageReferences = { packageReference }
             };
 
-            testProject.AdditionalProperties.Add("RestoreAdditionalProjectSources", 
-                                                 "$(RestoreAdditionalProjectSources);" + Path.GetDirectoryName(packageReference.NupkgPath));
+            if (usePackageReference)
+            {
+                var packageReference = GetPackageReference(referenceProject);
+                testProject.PackageReferences.Add(packageReference);
+                testProject.AdditionalProperties.Add(
+                    "RestoreAdditionalProjectSources",
+                    "$(RestoreAdditionalProjectSources);" + Path.GetDirectoryName(packageReference.NupkgPath));
+            }
+            else
+            {
+                testProject.ReferencedProjects.Add(referenceProject);
+            }
 
             testProject.SourceFiles[$"{mainProjectName}.cs"] = @"
 using System;

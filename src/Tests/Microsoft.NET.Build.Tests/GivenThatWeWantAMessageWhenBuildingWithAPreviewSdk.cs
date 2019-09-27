@@ -25,8 +25,7 @@ namespace Microsoft.NET.Build.Tests
         {
             TestAsset testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot));
 
@@ -42,8 +41,7 @@ namespace Microsoft.NET.Build.Tests
         {
             TestAsset testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot));
 

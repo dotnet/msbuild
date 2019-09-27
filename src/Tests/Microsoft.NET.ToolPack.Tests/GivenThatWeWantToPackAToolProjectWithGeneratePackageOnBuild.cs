@@ -41,8 +41,6 @@ namespace Microsoft.NET.ToolPack.Tests
                     }
                 });
 
-            testAsset.Restore(Log, "App");
-
             return testAsset;
         }
 

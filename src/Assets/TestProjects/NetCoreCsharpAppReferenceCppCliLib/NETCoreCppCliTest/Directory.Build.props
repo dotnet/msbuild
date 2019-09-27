@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <ResolveNuGetPackages>false</ResolveNuGetPackages>
+    <EnableCppNETCoreSupport>true</EnableCppNETCoreSupport>
+    <EnableManagedIncrementalBuild>false</EnableManagedIncrementalBuild>
+
+    <!-- Workaround: These should be changed in Microsoft.CppCommon.targets to the following. -->
+    <MicrosoftNETSdkBeforeCommonTargets>Sdk.BeforeCommon.targets</MicrosoftNETSdkBeforeCommonTargets>
+    <MicrosoftNETSdkAfterCommonTargets>Sdk.AfterCommon.targets</MicrosoftNETSdkAfterCommonTargets>
+  </PropertyGroup>
+</Project>

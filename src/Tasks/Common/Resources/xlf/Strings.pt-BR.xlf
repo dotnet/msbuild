@@ -102,6 +102,11 @@
         <target state="translated">NETSDK1091: não é possível encontrar um host .NET Core COM. O host .NET Core COM só está disponível no .NET Core 3.0 ou superior quando direcionado ao Windows.</target>
         <note>{StrBegin="NETSDK1091: "}</note>
       </trans-unit>
+      <trans-unit id="CannotFindIjwhost">
+        <source>NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.0 or higher when targeting Windows.</source>
+        <target state="new">NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.0 or higher when targeting Windows.</target>
+        <note>{StrBegin="NETSDK1114: "}</note>
+      </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
         <source>NETSDK1007: Cannot find project info for '{0}'. This can indicate a missing project reference.</source>
         <target state="translated">NETSDK1007: Não é possível localizar informações do projeto para '{0}'. Isso pode indicar a ausência de uma referência de projeto.</target>
@@ -386,6 +391,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1069: este projeto utiliza uma biblioteca que tem como destino o .NET Standard 1.5 ou superior, e o projeto tem como destino uma versão do .NET Framework que não tem suporte interno para essa versão do .NET Standard. Visite o site https://aka.ms/net-standard-known-issues para ter acesso a uma variedade de problemas conhecidos. Considere alterar o destino para o .NET Framework 4.7.2.</target>
         <note>{StrBegin="NETSDK1069: "}</note>
       </trans-unit>
+      <trans-unit id="NETFrameworkWithoutUsingNETSdkDefaults">
+        <source>NETSDK1115: The current .NET SDK does not support .NET Framework without using .NET SDK Defaults. It is likely due to a mismatch between C++/CLI project CLRSupport property and TargetFramework.</source>
+        <target state="new">NETSDK1115: The current .NET SDK does not support .NET Framework without using .NET SDK Defaults. It is likely due to a mismatch between C++/CLI project CLRSupport property and TargetFramework.</target>
+        <note>{StrBegin="NETSDK1115: "}</note>
+      </trans-unit>
       <trans-unit id="NoAppHostAvailable">
         <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>
         <target state="translated">NETSDK1084: não há nenhum host do aplicativo disponível para o RuntimeIdentifier especificado '{0}'.</target>
@@ -405,6 +415,26 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1082: There was no runtime pack for {0} available for the specified RuntimeIdentifier '{1}'.</source>
         <target state="translated">NETSDK1082: não havia nenhum pacote de tempo de execução de {0} disponível para o RuntimeIdentifier especificado '{1}'.</target>
         <note>{StrBegin="NETSDK1082: "}</note>
+      </trans-unit>
+      <trans-unit id="NoSupportCppEnableComHosting">
+        <source>NETSDK1119: C++/CLI projects targeting .NET Core cannot use EnableComHosting=true.</source>
+        <target state="new">NETSDK1119: C++/CLI projects targeting .NET Core cannot use EnableComHosting=true.</target>
+        <note>{StrBegin="NETSDK1119: "}</note>
+      </trans-unit>
+      <trans-unit id="NoSupportCppNonDynamicLibraryDotnetCore">
+        <source>NETSDK1116: C++/CLI projects targeting .NET Core must be dynamic libraries.</source>
+        <target state="new">NETSDK1116: C++/CLI projects targeting .NET Core must be dynamic libraries.</target>
+        <note>{StrBegin="NETSDK1116: "}</note>
+      </trans-unit>
+      <trans-unit id="NoSupportCppPackDotnetCore">
+        <source>NETSDK1118: C++/CLI projects targeting .NET Core cannot be packed.</source>
+        <target state="new">NETSDK1118: C++/CLI projects targeting .NET Core cannot be packed.</target>
+        <note>{StrBegin="NETSDK1118: "}</note>
+      </trans-unit>
+      <trans-unit id="NoSupportCppPublishDotnetCore">
+        <source>NETSDK1117: Does not support publish of C++/CLI project targeting dotnet core.</source>
+        <target state="new">NETSDK1117: Does not support publish of C++/CLI project targeting dotnet core.</target>
+        <note>{StrBegin="NETSDK1117: "}</note>
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>

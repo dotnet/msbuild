@@ -98,5 +98,9 @@ namespace Microsoft.NET.Build.Tasks
         // The DestinationSubPath is the path to the asset, relative to the destination folder.
         public const string DestinationSubPath = "DestinationSubPath";
         public const string AssetType = "AssetType";
+
+        public const string ReferenceOnly = "ReferenceOnly";  
+
+        public const string AvailableRuntimeIdentifiers = "AvailableRuntimeIdentifiers";
     }
 }

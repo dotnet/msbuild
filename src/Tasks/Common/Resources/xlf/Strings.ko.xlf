@@ -102,6 +102,11 @@
         <target state="translated">NETSDK1091: .NET Core COM 호스트를 찾을 수 없습니다. .NET Core COM 호스트는 Windows를 대상으로 할 경우 .NET Core 3.0 이상에서만 사용할 수 있습니다.</target>
         <note>{StrBegin="NETSDK1091: "}</note>
       </trans-unit>
+      <trans-unit id="CannotFindIjwhost">
+        <source>NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.0 or higher when targeting Windows.</source>
+        <target state="new">NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.0 or higher when targeting Windows.</target>
+        <note>{StrBegin="NETSDK1114: "}</note>
+      </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
         <source>NETSDK1007: Cannot find project info for '{0}'. This can indicate a missing project reference.</source>
         <target state="translated">NETSDK1007: '{0}'에 대한 프로젝트 정보를 찾을 수 없습니다. 프로젝트 참조가 없음을 나타낼 수 있습니다.</target>
@@ -386,6 +391,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1069: 이 프로젝트는 .NET Standard 1.5 이상을 대상으로 하는 라이브러리를 사용하며, 이 프로젝트는 해당 버전의 .NET Standard를 기본으로 제공하지 않는 .NET Framework 버전을 대상으로 합니다. 알려진 문제에 대해서는 https://aka.ms/net-standard-known-issues를 참조하세요. .NET Framework 4.7.2로 대상을 다시 지정해 보세요.</target>
         <note>{StrBegin="NETSDK1069: "}</note>
       </trans-unit>
+      <trans-unit id="NETFrameworkWithoutUsingNETSdkDefaults">
+        <source>NETSDK1115: The current .NET SDK does not support .NET Framework without using .NET SDK Defaults. It is likely due to a mismatch between C++/CLI project CLRSupport property and TargetFramework.</source>
+        <target state="new">NETSDK1115: The current .NET SDK does not support .NET Framework without using .NET SDK Defaults. It is likely due to a mismatch between C++/CLI project CLRSupport property and TargetFramework.</target>
+        <note>{StrBegin="NETSDK1115: "}</note>
+      </trans-unit>
       <trans-unit id="NoAppHostAvailable">
         <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>
         <target state="translated">NETSDK1084: 지정된 RuntimeIdentifier '{0}'에 사용할 수 있는 애플리케이션 호스트가 없습니다.</target>
@@ -405,6 +415,26 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1082: There was no runtime pack for {0} available for the specified RuntimeIdentifier '{1}'.</source>
         <target state="translated">NETSDK1082: 지정된 RuntimeIdentifier '{1}'에 사용할 수 있는 {0}용 런타임 팩이 없습니다.</target>
         <note>{StrBegin="NETSDK1082: "}</note>
+      </trans-unit>
+      <trans-unit id="NoSupportCppEnableComHosting">
+        <source>NETSDK1119: C++/CLI projects targeting .NET Core cannot use EnableComHosting=true.</source>
+        <target state="new">NETSDK1119: C++/CLI projects targeting .NET Core cannot use EnableComHosting=true.</target>
+        <note>{StrBegin="NETSDK1119: "}</note>
+      </trans-unit>
+      <trans-unit id="NoSupportCppNonDynamicLibraryDotnetCore">
+        <source>NETSDK1116: C++/CLI projects targeting .NET Core must be dynamic libraries.</source>
+        <target state="new">NETSDK1116: C++/CLI projects targeting .NET Core must be dynamic libraries.</target>
+        <note>{StrBegin="NETSDK1116: "}</note>
+      </trans-unit>
+      <trans-unit id="NoSupportCppPackDotnetCore">
+        <source>NETSDK1118: C++/CLI projects targeting .NET Core cannot be packed.</source>
+        <target state="new">NETSDK1118: C++/CLI projects targeting .NET Core cannot be packed.</target>
+        <note>{StrBegin="NETSDK1118: "}</note>
+      </trans-unit>
+      <trans-unit id="NoSupportCppPublishDotnetCore">
+        <source>NETSDK1117: Does not support publish of C++/CLI project targeting dotnet core.</source>
+        <target state="new">NETSDK1117: Does not support publish of C++/CLI project targeting dotnet core.</target>
+        <note>{StrBegin="NETSDK1117: "}</note>
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>

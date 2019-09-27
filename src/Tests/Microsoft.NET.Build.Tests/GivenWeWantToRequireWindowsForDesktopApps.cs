@@ -34,7 +34,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new BuildCommand(Log, Path.Combine(asset.Path, ProjectName));
 
             command
-                .Execute("/restore")
+                .Execute()
                 .Should()
                 .Pass();
         }
@@ -51,7 +51,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new BuildCommand(Log, Path.Combine(asset.Path, ProjectName));
 
             command
-                .Execute("/restore")
+                .Execute()
                 .Should()
                 .Fail()
                 .And
@@ -71,7 +71,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new BuildCommand(Log, Path.Combine(asset.Path, ProjectName));
 
             command
-                .Execute("/restore")
+                .Execute()
                 .Should()
                 .Pass();
         }
@@ -89,7 +89,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new BuildCommand(Log, Path.Combine(asset.Path, ProjectName));
 
             command
-                .Execute("/restore")
+                .Execute()
                 .Should()
                 .Fail()
                 .And
@@ -104,7 +104,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = ProjectName,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = "netcoreapp3.1",
                 IsSdkProject = true,
                 IsExe = true,
             };
@@ -116,7 +116,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new BuildCommand(Log, Path.Combine(asset.Path, ProjectName));
 
             command
-                .Execute("/restore")
+                .Execute()
                 .Should()
                 .Pass();
 
@@ -145,7 +145,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new PublishCommand(Log, Path.Combine(asset.Path, ProjectName));
 
             command
-                .Execute("/restore")
+                .Execute()
                 .Should()
                 .Pass();
 

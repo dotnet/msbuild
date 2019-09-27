@@ -136,8 +136,7 @@ namespace Microsoft.NET.Build.Tests
             string assetType = "resources";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
-               .WithProjectChanges(project => AddSkipTarget(project, filenameToSkip))
-               .Restore(Log, testProject.Name);
+               .WithProjectChanges(project => AddSkipTarget(project, filenameToSkip));
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -177,8 +176,7 @@ namespace Microsoft.NET.Build.Tests
         private void TestSkippingFile(TestProject testProject, string filenameToSkip, string assetType)
         {
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
-                .WithProjectChanges(project => AddSkipTarget(project, filenameToSkip))
-                .Restore(Log, testProject.Name);
+                .WithProjectChanges(project => AddSkipTarget(project, filenameToSkip));
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 

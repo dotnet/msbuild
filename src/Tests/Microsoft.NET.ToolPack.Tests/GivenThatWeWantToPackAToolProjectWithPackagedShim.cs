@@ -78,8 +78,7 @@ namespace Microsoft.NET.ToolPack.Tests
                         }
                     }
                 })
-                .WithTargetFrameworkOrFrameworks(targetFramework, multiTarget)
-                .Restore(Log);
+                .WithTargetFrameworkOrFrameworks(targetFramework, multiTarget);
         }
 
         [Theory]
@@ -162,8 +161,7 @@ namespace Microsoft.NET.ToolPack.Tests
                     propertyGroup.Add(new XElement(ns + "ToolCommandName", _customToolCommandName));
                     propertyGroup.Add(new XElement(ns + "PackagedShimOutputRootDirectory", shimoutputPath));
                 })
-                .WithTargetFrameworkOrFrameworks(targetFramework, multiTarget)
-                .Restore(Log);
+                .WithTargetFrameworkOrFrameworks(targetFramework, multiTarget);
 
             _testRoot = helloWorldAsset.TestRoot;
 
@@ -419,7 +417,7 @@ namespace Microsoft.NET.ToolPack.Tests
             var packCommand = new PackCommand(Log, Path.Combine(asset.Path, testProject.Name));
 
             packCommand
-                .Execute("/restore")
+                .Execute()
                 .Should()
                 .Pass();
 

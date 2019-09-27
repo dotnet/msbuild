@@ -35,8 +35,7 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
                 .WithSource()
-                .WithTargetFramework(targetFramework)
-                .Restore(Log);
+                .WithTargetFramework(targetFramework);
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
@@ -80,8 +79,7 @@ namespace Microsoft.NET.Build.Tests
                 testProject.PackageReferences.Add(new TestPackageReference("Microsoft.NETCore.Platforms", "2.1.0"));
             }
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: packageName + "_" + referencePlatformPackage.ToString())
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: packageName + "_" + referencePlatformPackage.ToString());
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -140,8 +138,7 @@ namespace Microsoft.NET.Build.Tests
                            propertyGroup.Element(ns + "TargetFramework").Remove();
                            propertyGroup.Add(new XElement(ns + "TargetFrameworks", "net46;netcoreapp1.1"));
                        }
-                   })
-                  .Restore(Log);
+                   });
 
                 var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
                 buildCommand
@@ -189,8 +186,7 @@ namespace Microsoft.NET.Build.Tests
                             propertyGroup.Element(ns + "TargetFramework").Remove();
                             propertyGroup.Add(new XElement(ns + "TargetFrameworks", "net46;netcoreapp1.1"));
                         }
-                    })
-                    .Restore(Log);
+                    });
 
                 var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
                 buildCommand
@@ -259,8 +255,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("DesktopMinusRid", identifier: Path.DirectorySeparatorChar + runtimeIdentifier)
-                .WithSource()
-                .Restore(Log, "", $"/p:RuntimeIdentifier={runtimeIdentifier}");
+                .WithSource();
 
             var getValuesCommand = new GetValuesCommand(Log, testAsset.TestRoot,
                 "net46", "PlatformTarget", GetValuesCommand.ValueType.Property);
@@ -281,8 +276,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("DesktopMinusRid")
-                .WithSource()
-                .Restore(Log, "", $"/p:RuntimeIdentifier=win7-x86");
+                .WithSource();
 
             var getValuesCommand = new GetValuesCommand(Log, testAsset.TestRoot,
                 "net46", "PlatformTarget", GetValuesCommand.ValueType.Property);
@@ -326,8 +320,7 @@ namespace DefaultReferences
 }";
             testProject.SourceFiles.Add("TestClass.cs", sourceFile);
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, "DefaultReferences");
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, "DefaultReferences"));
 
@@ -352,8 +345,7 @@ namespace DefaultReferences
                 IsExe = true
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -392,8 +384,7 @@ namespace DefaultReferences
                     p.Root.Add(itemGroup);
 
                     itemGroup.Add(new XElement(ns + "Reference", new XAttribute("Include", "System")));
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -427,8 +418,7 @@ namespace DefaultReferences
                     itemGroup.Add(new XElement(ns + "PackageReference",
                                     new XAttribute("Include", "NewtonSoft.Json"),
                                     new XAttribute("Version", "9.0.1")));
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -458,8 +448,7 @@ namespace DefaultReferences
 
             testProject.PackageReferences.Add(new TestPackageReference("System.Net.Http", "4.1.0"));
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -495,8 +484,7 @@ namespace DefaultReferences
                     itemGroup.Add(new XElement(ns + "PackageReference",
                                     new XAttribute("Include", "System.Security.Cryptography.Algorithms"),
                                     new XAttribute("Version", "4.3.0")));
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -588,8 +576,7 @@ class Program
                     }
 
                     itemGroup.Add(httpReference);
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -655,8 +642,7 @@ class Program
 
                     httpReference.SetAttributeValue("Aliases", "snh");
                     itemGroup.Add(httpReference);
-                })
-                .Restore(Log, testProject.Name);
+                });
 
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
@@ -672,8 +658,7 @@ class Program
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("DesktopNeedsBindingRedirects")
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
 
@@ -698,8 +683,7 @@ class Program
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("DesktopNeedsBindingRedirects")
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
 
             XElement root = BuildTestAssetGetAppConfig(testAsset);
             root.Elements("startup").Single().Elements().Should().Contain(e => e.Name.LocalName == "supportedRuntime");
@@ -710,8 +694,7 @@ class Program
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("DesktopNeedsBindingRedirects")
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
 
@@ -748,8 +731,7 @@ class Program
                     var propertyGroup = project.Root.Elements(ns + "ItemGroup").First();
 
                     propertyGroup.Elements(ns + "PackageReference").Remove();
-                })
-                .Restore(Log);
+                });
 
             XElement root = BuildTestAssetGetAppConfig(testAsset);
             root.Elements("startup").Single()
@@ -762,8 +744,7 @@ class Program
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("DesktopNeedsBindingRedirects")
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
 
             var appconfigWithoutSupportedRuntime = new XDocument(
                     new XDeclaration("1.0", "utf-8", "true"),
@@ -786,8 +767,7 @@ class Program
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("DesktopNeedsBindingRedirects")
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
 
             var appconfigWithoutSupportedRuntime = new XDocument(
                     new XDeclaration("1.0", "utf-8", "true"),
@@ -846,8 +826,7 @@ class Program
                         var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
                         propertyGroup.Element(ns + "TargetFramework").Name += "s";
                     }
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             buildCommand
@@ -873,8 +852,7 @@ class Program
                 TargetFrameworkVersion = "V4.6.1"
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 

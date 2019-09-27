@@ -113,7 +113,7 @@ namespace Microsoft.NET.Publish.Tests
             var buildCommand = new BuildCommand(Log, testAsset.Path, testProject.Name);
 
             buildCommand
-                .Execute("/restore")
+                .Execute()
                 .Should()
                 .Pass();
 
@@ -166,8 +166,7 @@ namespace Microsoft.NET.Publish.Tests
             testProject.AdditionalProperties["RuntimeIdentifiers"] = compatibleRid + ";" + compatibleRid;
             testProject.RuntimeIdentifier = compatibleRid;
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, testAsset.Path, testProject.Name);
 

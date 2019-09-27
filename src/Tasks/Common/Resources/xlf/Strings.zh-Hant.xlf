@@ -102,6 +102,11 @@
         <target state="translated">NETSDK1091: 找不到 .NET Core COM 主機。目標為 Windows 時，只有在 .NET Core 3.0 或更高的版本上才可使用 .NET Core COM 主機。</target>
         <note>{StrBegin="NETSDK1091: "}</note>
       </trans-unit>
+      <trans-unit id="CannotFindIjwhost">
+        <source>NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.0 or higher when targeting Windows.</source>
+        <target state="new">NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.0 or higher when targeting Windows.</target>
+        <note>{StrBegin="NETSDK1114: "}</note>
+      </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
         <source>NETSDK1007: Cannot find project info for '{0}'. This can indicate a missing project reference.</source>
         <target state="translated">NETSDK1007: 找不到 '{0}' 的專案資訊。這可能表示遺漏專案參考。</target>
@@ -386,6 +391,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1069: 此專案使用以 .NET Standard 1.5 或更新版本為目標的程式庫，而專案的目標 .NET Framework 版本則為尚未具備該 .NET Standard 版本內建支援的 .NET Framework。請瀏覽 https://aka.ms/net-standard-known-issues，以了解已知問題的集合。請考慮轉為以 .NET Framework 4.7.2 為目標。</target>
         <note>{StrBegin="NETSDK1069: "}</note>
       </trans-unit>
+      <trans-unit id="NETFrameworkWithoutUsingNETSdkDefaults">
+        <source>NETSDK1115: The current .NET SDK does not support .NET Framework without using .NET SDK Defaults. It is likely due to a mismatch between C++/CLI project CLRSupport property and TargetFramework.</source>
+        <target state="new">NETSDK1115: The current .NET SDK does not support .NET Framework without using .NET SDK Defaults. It is likely due to a mismatch between C++/CLI project CLRSupport property and TargetFramework.</target>
+        <note>{StrBegin="NETSDK1115: "}</note>
+      </trans-unit>
       <trans-unit id="NoAppHostAvailable">
         <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>
         <target state="translated">NETSDK1084: 對指定的 RuntimeIdentifier '{0}'，無法使用任何應用程式主機。</target>
@@ -405,6 +415,26 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1082: There was no runtime pack for {0} available for the specified RuntimeIdentifier '{1}'.</source>
         <target state="translated">NETSDK1082: 對指定的 RuntimeIdentifier '{1}'，無法使用任何 {0} 的執行階段套件。</target>
         <note>{StrBegin="NETSDK1082: "}</note>
+      </trans-unit>
+      <trans-unit id="NoSupportCppEnableComHosting">
+        <source>NETSDK1119: C++/CLI projects targeting .NET Core cannot use EnableComHosting=true.</source>
+        <target state="new">NETSDK1119: C++/CLI projects targeting .NET Core cannot use EnableComHosting=true.</target>
+        <note>{StrBegin="NETSDK1119: "}</note>
+      </trans-unit>
+      <trans-unit id="NoSupportCppNonDynamicLibraryDotnetCore">
+        <source>NETSDK1116: C++/CLI projects targeting .NET Core must be dynamic libraries.</source>
+        <target state="new">NETSDK1116: C++/CLI projects targeting .NET Core must be dynamic libraries.</target>
+        <note>{StrBegin="NETSDK1116: "}</note>
+      </trans-unit>
+      <trans-unit id="NoSupportCppPackDotnetCore">
+        <source>NETSDK1118: C++/CLI projects targeting .NET Core cannot be packed.</source>
+        <target state="new">NETSDK1118: C++/CLI projects targeting .NET Core cannot be packed.</target>
+        <note>{StrBegin="NETSDK1118: "}</note>
+      </trans-unit>
+      <trans-unit id="NoSupportCppPublishDotnetCore">
+        <source>NETSDK1117: Does not support publish of C++/CLI project targeting dotnet core.</source>
+        <target state="new">NETSDK1117: Does not support publish of C++/CLI project targeting dotnet core.</target>
+        <note>{StrBegin="NETSDK1117: "}</note>
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>

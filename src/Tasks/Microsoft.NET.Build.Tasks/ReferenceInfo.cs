@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -52,29 +53,33 @@ namespace Microsoft.NET.Build.Tasks
 
         public static IEnumerable<ReferenceInfo> CreateDirectReferenceInfos(
             IEnumerable<ITaskItem> referencePaths,
-            IEnumerable<ITaskItem> referenceSatellitePaths)
+            IEnumerable<ITaskItem> referenceSatellitePaths,
+            Func<ITaskItem, bool> isRuntimeAssembly)
         {
             IEnumerable<ITaskItem> directReferencePaths = referencePaths
-                .Where(r => r.HasMetadataValue("CopyLocal", "true") &&
-                            r.HasMetadataValue("ReferenceSourceTarget", "ResolveAssemblyReference") &&
-                            !IsNuGetReference(r));
+                .Where(r => !IsProjectReference(r) && !IsNuGetReference(r) && isRuntimeAssembly(r));
 
             return CreateFilteredReferenceInfos(directReferencePaths, referenceSatellitePaths);
         }
 
         private static bool IsNuGetReference(ITaskItem reference)
         {
-            return !string.IsNullOrEmpty(reference.GetMetadata("NuGetSourceType")) &&
-                   reference.GetMetadata("NuGetIsFrameworkReference") != "true";
+            return reference.HasMetadataValue("NuGetSourceType")
+                && !reference.HasMetadataValue("NuGetIsFrameworkReference", "true");
+        }
+
+        public static bool IsProjectReference(ITaskItem reference)
+        {
+            return reference.HasMetadataValue(MetadataKeys.ReferenceSourceTarget, "ProjectReference");
         }
 
         public static IEnumerable<ReferenceInfo> CreateDependencyReferenceInfos(
             IEnumerable<ITaskItem> referenceDependencyPaths,
-            IEnumerable<ITaskItem> referenceSatellitePaths)
+            IEnumerable<ITaskItem> referenceSatellitePaths,
+            Func<ITaskItem, bool> isRuntimeAssembly)
         {
             IEnumerable<ITaskItem> indirectReferencePaths = referenceDependencyPaths
-                .Where(r => r.HasMetadataValue("CopyLocal", "true") &&
-                            !IsNuGetReference(r));
+                .Where(r => !IsNuGetReference(r) && isRuntimeAssembly(r));
 
             return CreateFilteredReferenceInfos(indirectReferencePaths, referenceSatellitePaths);
         }

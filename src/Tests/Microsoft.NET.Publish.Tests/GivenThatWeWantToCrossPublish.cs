@@ -32,8 +32,7 @@ namespace Microsoft.NET.Publish.Tests
 
             testProject.PackageReferences.Add(new TestPackageReference("System.Threading", "4.3.0"));
 
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
 
