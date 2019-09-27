@@ -17,7 +17,6 @@ namespace Microsoft.Build.Eventing
 
         // define the singleton instance of the event source
         public static EvaluateEventSource Log = new EvaluateEventSource();
-        private static int logNum = 1;
 
         private EvaluateEventSource() { }
 
@@ -34,7 +33,7 @@ namespace Microsoft.Build.Eventing
             if (IsEnabled(EventLevel.Informational, Keywords.Project))
             {
                 string projectFile = String.IsNullOrEmpty(file) ? "(null)" : file;
-                WriteEvent(logNum++, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Start", projectFile));
+                WriteEvent(1, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Start", projectFile));
             }
         }
 
@@ -42,64 +41,13 @@ namespace Microsoft.Build.Eventing
         /// Call this method to notify listeners of progress made on Evaluate.
         /// </summary>
         /// <param name="file">Relevant information about where in the run of the progam it is.</param>
-        public void EvaluateStopOne(string file)
+        /// <param name="phaseNum">The stage in Evaluate that the program has reached.</param>
+        public void EvaluatePhase(string file, long phaseNum)
         {
             if (IsEnabled(EventLevel.Informational, Keywords.Project))
             {
                 string projectFile = String.IsNullOrEmpty(file) ? "(null)" : file;
-                WriteEvent(logNum++, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Stop", projectFile));
-            }
-        }
-
-        /// <summary>
-        /// Call this method to notify listeners of progress made on Evaluate.
-        /// </summary>
-        /// <param name="file">Relevant information about where in the run of the progam it is.</param>
-        public void EvaluateStopTwo(string file)
-        {
-            if (IsEnabled(EventLevel.Informational, Keywords.Project))
-            {
-                string projectFile = String.IsNullOrEmpty(file) ? "(null)" : file;
-                WriteEvent(logNum++, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Stop", projectFile));
-            }
-        }
-
-        /// <summary>
-        /// Call this method to notify listeners of progress made on Evaluate.
-        /// </summary>
-        /// <param name="file">Relevant information about where in the run of the progam it is.</param>
-        public void EvaluateStopThree(string file)
-        {
-            if (IsEnabled(EventLevel.Informational, Keywords.Project))
-            {
-                string projectFile = String.IsNullOrEmpty(file) ? "(null)" : file;
-                WriteEvent(logNum++, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Stop", projectFile));
-            }
-        }
-
-        /// <summary>
-        /// Call this method to notify listeners of progress made on Evaluate.
-        /// </summary>
-        /// <param name="file">Relevant information about where in the run of the progam it is.</param>
-        public void EvaluateStopFour(string file)
-        {
-            if (IsEnabled(EventLevel.Informational, Keywords.Project))
-            {
-                string projectFile = String.IsNullOrEmpty(file) ? "(null)" : file;
-                WriteEvent(logNum++, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Stop", projectFile));
-            }
-        }
-
-        /// <summary>
-        /// Call this method to notify listeners of progress made on Evaluate.
-        /// </summary>
-        /// <param name="file">Relevant information about where in the run of the progam it is.</param>
-        public void EvaluateStopFive(string file)
-        {
-            if (IsEnabled(EventLevel.Informational, Keywords.Project))
-            {
-                string projectFile = String.IsNullOrEmpty(file) ? "(null)" : file;
-                WriteEvent(logNum++, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Stop", projectFile));
+                WriteEvent(2, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0}", projectFile), phaseNum);
             }
         }
 
@@ -112,7 +60,7 @@ namespace Microsoft.Build.Eventing
             if (IsEnabled(EventLevel.Informational, Keywords.Project))
             {
                 string projectFile = String.IsNullOrEmpty(file) ? "(null)" : file;
-                WriteEvent(logNum++, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Stop", projectFile));
+                WriteEvent(3, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Stop", projectFile));
             }
         }
 

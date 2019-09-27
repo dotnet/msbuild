@@ -16,7 +16,6 @@ namespace Microsoft.Build.Eventing
 
         // define the singleton instance of the event source
         public static ExecuteTaskEventSource Log = new ExecuteTaskEventSource();
-        private static int logNum = 1;
 
         private ExecuteTaskEventSource() { }
 
@@ -30,7 +29,7 @@ namespace Microsoft.Build.Eventing
         /// <param name="info">Relevant information about where in the run of the progam it is.</param>
         public void ExecuteTaskStart(string info)
         {
-            if (IsEnabled(EventLevel.Error, Keywords.Task)) WriteEvent(logNum++, info);
+            if (IsEnabled(EventLevel.Error, Keywords.Task)) WriteEvent(1, info);
         }
 
         /// <summary>
@@ -39,7 +38,7 @@ namespace Microsoft.Build.Eventing
         /// <param name="info">Relevant information about where in the run of the progam it is.</param>
         public void ExecuteTaskStop(string info)
         {
-            if (IsEnabled(EventLevel.Error, Keywords.Task)) WriteEvent(logNum++, info);
+            if (IsEnabled(EventLevel.Error, Keywords.Task)) WriteEvent(2, info);
         }
 
         #endregion

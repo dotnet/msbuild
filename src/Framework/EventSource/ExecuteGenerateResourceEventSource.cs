@@ -16,7 +16,6 @@ namespace Microsoft.Build.Eventing
 
         // define the singleton instance of the event source
         public static ExecuteGenerateResourceEventSource Log = new ExecuteGenerateResourceEventSource();
-        private static int logNum = 1;
 
         private ExecuteGenerateResourceEventSource() { }
 
@@ -30,7 +29,7 @@ namespace Microsoft.Build.Eventing
         /// <param name="info">Relevant information about where in the run of the progam it is.</param>
         public void ExecuteGeneralResourceStart(string info)
         {
-            if (IsEnabled(EventLevel.Verbose, Keywords.Task)) WriteEvent(logNum++, info);
+            if (IsEnabled(EventLevel.Verbose, Keywords.Task)) WriteEvent(1, info);
         }
 
         /// <summary>
@@ -39,7 +38,7 @@ namespace Microsoft.Build.Eventing
         /// <param name="info">Relevant information about where in the run of the progam it is.</param>
         public void ExecuteGeneralResourceStop(string info)
         {
-            if (IsEnabled(EventLevel.Verbose, Keywords.Task)) WriteEvent(logNum++, info);
+            if (IsEnabled(EventLevel.Verbose, Keywords.Task)) WriteEvent(2, info);
         }
 
         #endregion

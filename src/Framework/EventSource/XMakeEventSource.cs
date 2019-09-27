@@ -16,7 +16,6 @@ namespace Microsoft.Build.Eventing
 
         // define the singleton instance of the event source
         public static XMakeEventSource Log = new XMakeEventSource();
-        private static int logNum = 1;
 
         private XMakeEventSource() { }
 
@@ -30,7 +29,7 @@ namespace Microsoft.Build.Eventing
         /// <param name="info">Relevant information about where in the run of the progam it is.</param>
         public void XMakeStart(string info)
         {
-            if (IsEnabled(EventLevel.Critical, Keywords.Project)) WriteEvent(logNum++, info);
+            if (IsEnabled(EventLevel.Critical, Keywords.Project)) WriteEvent(1, info);
         }
 
         /// <summary>
@@ -39,7 +38,7 @@ namespace Microsoft.Build.Eventing
         /// <param name="info">Relevant information about where in the run of the progam it is.</param>
         public void XMakeStop(string info)
         {
-            if (IsEnabled(EventLevel.Critical, Keywords.Project)) WriteEvent(logNum++, info);
+            if (IsEnabled(EventLevel.Critical, Keywords.Project)) WriteEvent(2, info);
         }
 
         #endregion

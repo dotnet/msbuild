@@ -619,15 +619,17 @@ namespace Microsoft.Build.Evaluation
 
                 ErrorUtilities.VerifyThrow(_data.EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
-                EvaluateEventSource.Log.EvaluateStopOne(projectFile);
-
+                EvaluateEventSource.Log.EvaluatePhase(projectFile, 0);
+                EvaluateEventSource.Log.EvaluatePhase(projectFile, 5);
                 // Pass1: evaluate properties, load imports, and gather everything else
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Properties))
                 {
                     PerformDepthFirstPass(_projectRootElement);
                 }
+                EvaluateEventSource.Log.EvaluatePhase(projectFile, 6);
 
                 SetAllProjectsProperty();
+                EvaluateEventSource.Log.EvaluatePhase(projectFile, 7);
 
                 List<string> initialTargets = new List<string>(_initialTargetsList.Count);
                 foreach (var initialTarget in _initialTargetsList)
@@ -636,7 +638,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 _data.InitialTargets = initialTargets;
-                EvaluateEventSource.Log.EvaluateStopTwo(projectFile);
+                EvaluateEventSource.Log.EvaluatePhase(projectFile, 1);
                 // Pass2: evaluate item definitions
                 // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
                 using (_evaluationProfiler.TrackPass(EvaluationPass.ItemDefinitionGroups))
@@ -649,7 +651,7 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
                 }
-                EvaluateEventSource.Log.EvaluateStopThree(projectFile);
+                EvaluateEventSource.Log.EvaluatePhase(projectFile, 2);
                 LazyItemEvaluator<P, I, M, D> lazyEvaluator = null;
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Items))
                 {
@@ -694,7 +696,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                EvaluateEventSource.Log.EvaluateStopFour(projectFile);
+                EvaluateEventSource.Log.EvaluatePhase(projectFile, 3);
                 // Pass4: evaluate using-tasks
                 using (_evaluationProfiler.TrackPass(EvaluationPass.UsingTasks))
                 {
@@ -722,7 +724,7 @@ namespace Microsoft.Build.Evaluation
                 Dictionary<string, List<TargetSpecification>> targetsWhichRunAfterByTarget = new Dictionary<string, List<TargetSpecification>>(StringComparer.OrdinalIgnoreCase);
                 LinkedList<ProjectTargetElement> activeTargetsByEvaluationOrder = new LinkedList<ProjectTargetElement>();
                 Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets = new Dictionary<string, LinkedListNode<ProjectTargetElement>>(StringComparer.OrdinalIgnoreCase);
-                EvaluateEventSource.Log.EvaluateStopFive(projectFile);
+                EvaluateEventSource.Log.EvaluatePhase(projectFile, 4);
 
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Targets))
                 {

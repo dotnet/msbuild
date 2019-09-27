@@ -16,7 +16,6 @@ namespace Microsoft.Build.Eventing
 
         // define the singleton instance of the event source
         public static LoadDocumentEventSource Log = new LoadDocumentEventSource();
-        private static int logNum = 1;
 
         private LoadDocumentEventSource() { }
 
@@ -30,7 +29,7 @@ namespace Microsoft.Build.Eventing
         /// <param name="info">Relevant information about where in the run of the progam it is.</param>
         public void LoadDocumentStart(string info)
         {
-            if (IsEnabled(EventLevel.Informational, Keywords.Item)) WriteEvent(logNum++, info);
+            if (IsEnabled(EventLevel.Informational, Keywords.Item)) WriteEvent(1, info);
         }
 
         /// <summary>
@@ -39,7 +38,7 @@ namespace Microsoft.Build.Eventing
         /// <param name="info">Relevant information about where in the run of the progam it is.</param>
         public void LoadDocumentStop(string info)
         {
-            if (IsEnabled(EventLevel.Informational, Keywords.Item)) WriteEvent(logNum++, info);
+            if (IsEnabled(EventLevel.Informational, Keywords.Item)) WriteEvent(2, info);
         }
 
         #endregion

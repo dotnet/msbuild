@@ -16,7 +16,6 @@ namespace Microsoft.Build.Eventing
 
         // define the singleton instance of the event source
         public static SelectItemsEventSource Log = new SelectItemsEventSource();
-        private static int logNum = 1;
 
         private SelectItemsEventSource() { }
 
@@ -30,7 +29,7 @@ namespace Microsoft.Build.Eventing
         /// <param name="info">Relevant information about where in the run of the progam it is.</param>
         public void SelectItemsStart(string info)
         {
-            if (IsEnabled(EventLevel.Informational, Keywords.Item)) WriteEvent(logNum++, info);
+            if (IsEnabled(EventLevel.Informational, Keywords.Item)) WriteEvent(1, info);
         }
 
         /// <summary>
@@ -39,7 +38,7 @@ namespace Microsoft.Build.Eventing
         /// <param name="info">Relevant information about where in the run of the progam it is.</param>
         public void SelectItemsStop(string info)
         {
-            if (IsEnabled(EventLevel.Informational, Keywords.Item)) WriteEvent(logNum++, info);
+            if (IsEnabled(EventLevel.Informational, Keywords.Item)) WriteEvent(2, info);
         }
 
         #endregion

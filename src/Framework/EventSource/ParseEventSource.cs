@@ -17,7 +17,6 @@ namespace Microsoft.Build.Eventing
 
         // define the singleton instance of the event source
         public static ParseEventSource Log = new ParseEventSource();
-        private static int logNum = 1;
 
         private ParseEventSource() { }
 
@@ -35,7 +34,7 @@ namespace Microsoft.Build.Eventing
             if (IsEnabled(EventLevel.Error, Keywords.Project))
             {
                 string name = String.IsNullOrEmpty(projectFileName) ? "(null)" : projectFileName;
-                WriteEvent(logNum++, String.Format(CultureInfo.CurrentCulture, "Parse Project {0} - Start", name));
+                WriteEvent(1, String.Format(CultureInfo.CurrentCulture, "Parse Project {0} - Start", name));
             }
         }
 
@@ -48,7 +47,7 @@ namespace Microsoft.Build.Eventing
             if (IsEnabled(EventLevel.Error, Keywords.Project))
             {
                 string name = String.IsNullOrEmpty(projectFileName) ? "(null)" : projectFileName;
-                WriteEvent(logNum++, String.Format(CultureInfo.CurrentCulture, "Parse Project {0} - Stop", name));
+                WriteEvent(2, String.Format(CultureInfo.CurrentCulture, "Parse Project {0} - Stop", name));
             }
         }
 

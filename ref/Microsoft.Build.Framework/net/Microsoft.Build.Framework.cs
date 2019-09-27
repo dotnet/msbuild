@@ -31,13 +31,9 @@ namespace Microsoft.Build.Eventing
     {
         internal EvaluateEventSource() { }
         public static Microsoft.Build.Eventing.EvaluateEventSource Log;
+        public void EvaluatePhase(string file, long phaseNum) { }
         public void EvaluateStart(string file) { }
         public void EvaluateStop(string file) { }
-        public void EvaluateStopFive(string file) { }
-        public void EvaluateStopFour(string file) { }
-        public void EvaluateStopOne(string file) { }
-        public void EvaluateStopThree(string file) { }
-        public void EvaluateStopTwo(string file) { }
     }
     [System.Diagnostics.Tracing.EventSourceAttribute(Name="ExecuteGeneralResource-Profiling")]
     public sealed partial class ExecuteGenerateResourceEventSource : System.Diagnostics.Tracing.EventSource

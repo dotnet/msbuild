@@ -16,7 +16,6 @@ namespace Microsoft.Build.Eventing
 
         // define the singleton instance of the event source
         public static EvaluateConditionEventSource Log = new EvaluateConditionEventSource();
-        private static int logNum = 1;
         private EvaluateConditionEventSource() { }
 
         #endregion
@@ -29,7 +28,7 @@ namespace Microsoft.Build.Eventing
         /// <param name="info">Relevant information about where in the run of the progam it is.</param>
         public void EvaluateConditionStart(string info)
         {
-            if (IsEnabled(EventLevel.Error, Keywords.Project)) WriteEvent(logNum++, info);
+            if (IsEnabled(EventLevel.Error, Keywords.Project)) WriteEvent(1, info);
         }
 
         /// <summary>
@@ -38,7 +37,7 @@ namespace Microsoft.Build.Eventing
         /// <param name="info">Relevant information about where in the run of the progam it is.</param>
         public void EvaluateConditionStop(string info)
         {
-            if (IsEnabled(EventLevel.Error, Keywords.Project)) WriteEvent(logNum++, info);
+            if (IsEnabled(EventLevel.Error, Keywords.Project)) WriteEvent(2, info);
         }
 
         #endregion
