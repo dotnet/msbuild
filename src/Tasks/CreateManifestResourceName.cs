@@ -148,10 +148,11 @@ namespace Microsoft.Build.Tasks
 
                     string fileType = resourceFile.GetMetadata("Type");
 
-                    // If it has a file type metadata is "Resx"
+                    // If it has "type" metadata and the value is "Resx"
+                    // This value can be specified by the user, if not it will have been automatically assigned by the SplitResourcesByCulture target.
                     bool isResxFile = (!string.IsNullOrEmpty(fileType) && fileType == "Resx");
 
-                    //fall back onto the extension
+                    // If not, fall back onto the extension.
                     if (string.IsNullOrEmpty(fileType))
                     {
                         isResxFile = Path.GetExtension(fileName) == ".resx";
