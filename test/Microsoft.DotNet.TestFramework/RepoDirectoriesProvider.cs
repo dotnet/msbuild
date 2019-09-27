@@ -50,6 +50,20 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             DotnetUnderTest = Environment.GetEnvironmentVariable("DOTNET_UNDER_TEST");
             string dotnetExtension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : "";
+
+            string artifactsFolder;
+            string arcadeContainer = Environment.GetEnvironmentVariable("ARCADE_CONTAINER");
+            if (string.IsNullOrEmpty(arcadeContainer))
+            {
+                artifactsFolder = Path.Combine(RepoRoot, "artifacts");
+            }
+            else
+            {
+                artifactsFolder = Path.Combine(RepoRoot, "artifacts-" + arcadeContainer);
+            }
+            
+            
+
             if (string.IsNullOrEmpty(DotnetUnderTest))
             {
                 if (RepoRoot == null)
@@ -59,16 +73,16 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 else
                 {
                     string configuration = new DirectoryInfo(AppContext.BaseDirectory).Parent.Name;
-                    DotnetUnderTest = Path.Combine(RepoRoot, "artifacts", "bin", "redist", configuration, "dotnet", "dotnet" + dotnetExtension);
-                    TestPackages = Path.Combine(RepoRoot, "artifacts", "tmp", configuration, "testpackages");
+                    DotnetUnderTest = Path.Combine(artifactsFolder, "bin", "redist", configuration, "dotnet", "dotnet" + dotnetExtension);
+                    TestPackages = Path.Combine(artifactsFolder, "tmp", configuration, "testpackages");
                     if (string.IsNullOrEmpty(TestWorkingFolder))
                     {
-                        TestWorkingFolder = Path.Combine(RepoRoot, "artifacts", "tmp", configuration);
+                        TestWorkingFolder = Path.Combine(artifactsFolder, "tmp", configuration);
                     }
                 }
             }
 
-            TestGlobalPackagesFolder = Path.Combine(RepoRoot, "artifacts", ".nuget", "packages");
+            TestGlobalPackagesFolder = Path.Combine(artifactsFolder, ".nuget", "packages");
 
             //  TODO: Resolve dotnet folder even if DotnetUnderTest doesn't have full path
             var sdkFolders = Directory.GetDirectories(Path.Combine(Path.GetDirectoryName(DotnetUnderTest), "sdk"));

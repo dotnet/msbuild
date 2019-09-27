@@ -124,7 +124,7 @@
         <NuPkgContentForMSBuildExtensionsRelativePaths Include="@(NuPkgContentForMSBuildExtensions->'runtimes/any/native/%(RecursiveDir)%(Filename)%(Extension)')" />
       </ItemGroup>
 
-      <Move SourceFiles="@(NuPkgContentForMSBuildExtensions)"
+      <Copy SourceFiles="@(NuPkgContentForMSBuildExtensions)"
             DestinationFiles="@(NuPkgContentForMSBuildExtensions->'$(OutputPath)/%(RecursiveDir)%(Filename)%(Extension)')" />
 
       <RemoveAssetFromDepsPackages DepsFile="$(OutputPath)/$(TargetName).deps.json"

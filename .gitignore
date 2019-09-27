@@ -96,6 +96,7 @@ dlldata.c
 # DNX
 project.lock.json
 artifacts/
+artifacts-*/
 bin/
 
 *_i.c
@@ -292,6 +293,7 @@ _Pvt_Extensions
 
 # Stage0 CLI
 .dotnet/
+.dotnet-*/
 
 # Exceptions
 # Build Scripts

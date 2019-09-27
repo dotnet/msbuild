@@ -42,7 +42,8 @@
       RemoveProperties="TargetFramework" />
   </Target>
 
-  <Target Name="CopyDirectoryBuildTestDependencies" Inputs="@(_CopyDirectoryBuildTestDependenciesInput)" Outputs="@(_CopyDirectoryBuildTestDependenciesOutput)">
+  <Target Name="CopyDirectoryBuildTestDependencies" Inputs="@(_CopyDirectoryBuildTestDependenciesInput)" Outputs="@(_CopyDirectoryBuildTestDependenciesOutput)"
+          Condition="'$(TargetFramework)' == '' Or '$(TargetFrameworks)' == ''">
     <Copy SourceFiles="@(_CopyDirectoryBuildTestDependenciesInput)" DestinationFiles="@(_CopyDirectoryBuildTestDependenciesOutput)" />
   </Target>
 
