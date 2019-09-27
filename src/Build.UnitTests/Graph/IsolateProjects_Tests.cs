@@ -387,9 +387,9 @@ BuildEngine5.BuildProjectFilesInParallel(
             Func<string, string> projectReferenceModifier = null,
             Func<string, string> msbuildOnDeclaredReferenceModifier = null)
         {
-            var rootProjectFile = _env.CreateFile().Path;
-            var declaredReferenceFile = _env.CreateFile().Path;
-            var undeclaredReferenceFile = _env.CreateFile().Path;
+            var rootProjectFile = CreateTmpFile(_env).Path;
+            var declaredReferenceFile = CreateTmpFile(_env).Path;
+            var undeclaredReferenceFile = CreateTmpFile(_env).Path;
 
             var projectContents = string.Format(
                 _project.Cleanup(),
@@ -428,6 +428,13 @@ BuildEngine5.BuildProjectFilesInParallel(
                 var result = buildManagerSession.BuildProjectFile(rootProjectFile, targets);
 
                 assert(result, buildManagerSession.Logger);
+            }
+
+            TransientTestFile CreateTmpFile(TestEnvironment env)
+            {
+                return NativeMethodsShared.IsMono && NativeMethodsShared.IsOSX
+                                                ? env.CreateFile(new TransientTestFolder(Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString("N"))))
+                                                : env.CreateFile();
             }
         }
 
