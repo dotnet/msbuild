@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="AppHostCreationFailedWithRetry">
         <source>NETSDK1113: Failed to create apphost (attempt {0} out of {1}): {2}</source>
-        <target state="new">NETSDK1113: Failed to create apphost (attempt {0} out of {1}): {2}</target>
+        <target state="translated">NETSDK1113: non è stato possibile creare apphost (tentativo {0} di {1}): {2}</target>
         <note>{StrBegin="NETSDK1113: "}</note>
       </trans-unit>
       <trans-unit id="AppHostCustomizationRequiresWindowsHostWarning">
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="CannotCreateReadyToRunImagesForLibProjects">
         <source>NETSDK1108: ReadyToRun compilation will be skipped because it is only supported for executable projects.</source>
-        <target state="new">NETSDK1108: ReadyToRun compilation will be skipped because it is only supported for executable projects.</target>
+        <target state="translated">NETSDK1108: la compilazione eseguita con ReadyToRun verrà ignorata perché è supportata solo per i progetti eseguibili.</target>
         <note>{StrBegin="NETSDK1108: "}</note>
       </trans-unit>
       <trans-unit id="CannotEmbedClsidMapIntoComhost">
@@ -101,6 +101,11 @@
         <source>NETSDK1091: Unable to find a .NET Core COM host. The .NET Core COM host is only available on .NET Core 3.0 or higher when targeting Windows.</source>
         <target state="translated">NETSDK1091: non è possibile trovare un host COM .NET Core. L'host COM .NET Core è disponibile solo in .NET Core 3.0 o versioni successive quando è destinato a Windows.</target>
         <note>{StrBegin="NETSDK1091: "}</note>
+      </trans-unit>
+      <trans-unit id="CannotFindIjwhost">
+        <source>NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.0 or higher when targeting Windows.</source>
+        <target state="new">NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.0 or higher when targeting Windows.</target>
+        <note>{StrBegin="NETSDK1114: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
         <source>NETSDK1007: Cannot find project info for '{0}'. This can indicate a missing project reference.</source>
@@ -144,27 +149,27 @@
       </trans-unit>
       <trans-unit id="ChoosingAssemblyVersion_Info">
         <source>Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</source>
-        <target state="new">Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</target>
+        <target state="translated">Verrà scelto '{0}' perché il valore di AssemblyVersion '{1}' è maggiore di '{2}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="ChoosingCopyLocalArbitrarily_Info">
         <source>Choosing '{0}' arbitrarily as both items are copy-local and have equal file and assembly versions.</source>
-        <target state="new">Choosing '{0}' arbitrarily as both items are copy-local and have equal file and assembly versions.</target>
+        <target state="translated">Verrà scelto '{0}' in modo arbitrario perché entrambi gli elementi sono una copia locale e contengono versioni di file e assembly uguali.</target>
         <note />
       </trans-unit>
       <trans-unit id="ChoosingFileVersion_Info">
         <source>Choosing '{0}' because file version '{1}' is greater than '{2}'.</source>
-        <target state="new">Choosing '{0}' because file version '{1}' is greater than '{2}'.</target>
+        <target state="translated">Verrà scelto '{0}' perché la versione del file '{1}' è maggiore di '{2}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="ChoosingPlatformItem_Info">
         <source>Choosing '{0}' because it is a platform item.</source>
-        <target state="new">Choosing '{0}' because it is a platform item.</target>
+        <target state="translated">Verrà scelto '{0}' perché è un elemento della piattaforma.</target>
         <note />
       </trans-unit>
       <trans-unit id="ChoosingPreferredPackage_Info">
         <source>Choosing '{0}' because it comes from a package that is preferred.</source>
-        <target state="new">Choosing '{0}' because it comes from a package that is preferred.</target>
+        <target state="translated">Verrà scelto '{0}' perché proviene da un pacchetto preferito.</target>
         <note />
       </trans-unit>
       <trans-unit id="ClsidMapConflictingGuids">
@@ -199,22 +204,22 @@
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_DoesNotExist_Info">
         <source>Could not determine winner because '{0}' does not exist.</source>
-        <target state="new">Could not determine winner because '{0}' does not exist.</target>
+        <target state="translated">Non è stato possibile determinare la versione da usare perché '{0}' non esiste.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_EqualVersions_Info">
         <source>Could not determine winner due to equal file and assembly versions.</source>
-        <target state="new">Could not determine winner due to equal file and assembly versions.</target>
+        <target state="translated">Non è stato possibile determinare la versione da usare perché le versioni dell'assembly e del file sono uguali.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_NoFileVersion_Info">
         <source>Could not determine a winner because '{0}' has no file version.</source>
-        <target state="new">Could not determine a winner because '{0}' has no file version.</target>
+        <target state="translated">Non è stato possibile determinare la versione da usare perché non esiste alcuna versione del file per '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_NotAnAssembly_Info">
         <source>Could not determine a winner because '{0}' is not an assembly.</source>
-        <target state="new">Could not determine a winner because '{0}' is not an assembly.</target>
+        <target state="translated">Non è stato possibile determinare la versione da usare perché '{0}' non è un assembly.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotLoadPlatformManifest">
@@ -244,12 +249,12 @@
       </trans-unit>
       <trans-unit id="DuplicateRuntimePackAsset">
         <source>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET Core team here: https://aka.ms/dotnet-sdk-issue.</source>
-        <target state="new">NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET Core team here: https://aka.ms/dotnet-sdk-issue.</target>
+        <target state="translated">NETSDK1110: più di un asset nel pacchetto di runtime ha lo stesso percorso secondario di destinazione di '{0}'. Segnalare questo errore al team di .NET Core all'indirizzo: https://aka.ms/dotnet-sdk-issue.</target>
         <note>{StrBegin="NETSDK1110: "}</note>
       </trans-unit>
       <trans-unit id="EncounteredConflict_Info">
         <source>Encountered conflict between '{0}' and '{1}'.</source>
-        <target state="new">Encountered conflict between '{0}' and '{1}'.</target>
+        <target state="translated">È stato rilevato un conflitto tra '{0}' e '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorParsingFrameworkListInvalidValue">
@@ -274,7 +279,7 @@
       </trans-unit>
       <trans-unit id="FailedToDeleteApphost">
         <source>NETSDK1111: Failed to delete output apphost: {0}</source>
-        <target state="new">NETSDK1111: Failed to delete output apphost: {0}</target>
+        <target state="translated">NETSDK1111: non è stato possibile eliminare l'apphost di output: {0}</target>
         <note>{StrBegin="NETSDK1111: "}</note>
       </trans-unit>
       <trans-unit id="FailedToLockResource">
@@ -324,7 +329,7 @@
       </trans-unit>
       <trans-unit id="ILLink_Info">
         <source>Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
-        <target state="new">Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</target>
+        <target state="translated">Verrà eseguita l'ottimizzazione degli assembly per le dimensioni. Questa operazione potrebbe comportare la modifica del comportamento dell'app. Assicurarsi di testarla dopo la pubblicazione. Vedere: https://aka.ms/dotnet-illink</target>
         <note />
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
@@ -334,7 +339,7 @@
       </trans-unit>
       <trans-unit id="IncorrectTargetFormat">
         <source>NETSDK1025: The target manifest {0} provided is of not the correct format</source>
-        <target state="needs-review-translation">NETSDK1025: il formato del manifesto di destinazione specificato {0} non è corretto</target>
+        <target state="translated">NETSDK1025: il formato del manifesto di destinazione specificato {0} non è corretto</target>
         <note>{StrBegin="NETSDK1025: "}</note>
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
@@ -360,7 +365,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="InvalidRollForwardValue">
         <source>NETSDK1104: RollForward value '{0}' is invalid. Allowed values are {1}.</source>
-        <target state="new">NETSDK1104: RollForward value '{0}' is invalid. Allowed values are {1}.</target>
+        <target state="translated">NETSDK1104: il valore '{0}' di RollForward non è valido. I valori consentiti sono {1}.</target>
         <note>{StrBegin="NETSDK1104: "}</note>
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
@@ -386,6 +391,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1069: questo progetto usa una libreria destinata a .NET Standard 1.5 o versione successiva ed è destinato a una versione di .NET Framework che non include il supporto predefinito per tale versione di .NET Standard. Per un serie di problemi noti, visitare https://aka.ms/net-standard-known-issues. Provare a impostare come destinazione .NET Framework 4.7.2.</target>
         <note>{StrBegin="NETSDK1069: "}</note>
       </trans-unit>
+      <trans-unit id="NETFrameworkWithoutUsingNETSdkDefaults">
+        <source>NETSDK1115: The current .NET SDK does not support .NET Framework without using .NET SDK Defaults. It is likely due to a mismatch between C++/CLI project CLRSupport property and TargetFramework.</source>
+        <target state="new">NETSDK1115: The current .NET SDK does not support .NET Framework without using .NET SDK Defaults. It is likely due to a mismatch between C++/CLI project CLRSupport property and TargetFramework.</target>
+        <note>{StrBegin="NETSDK1115: "}</note>
+      </trans-unit>
       <trans-unit id="NoAppHostAvailable">
         <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>
         <target state="translated">NETSDK1084: non è disponibile alcun host applicazione per l'elemento RuntimeIdentifier specificato '{0}'.</target>
@@ -405,6 +415,26 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1082: There was no runtime pack for {0} available for the specified RuntimeIdentifier '{1}'.</source>
         <target state="translated">NETSDK1082: non è disponibile alcun pacchetto di runtime per {0} per l'elemento RuntimeIdentifier specificato '{1}'.</target>
         <note>{StrBegin="NETSDK1082: "}</note>
+      </trans-unit>
+      <trans-unit id="NoSupportCppEnableComHosting">
+        <source>NETSDK1119: C++/CLI projects targeting .NET Core cannot use EnableComHosting=true.</source>
+        <target state="new">NETSDK1119: C++/CLI projects targeting .NET Core cannot use EnableComHosting=true.</target>
+        <note>{StrBegin="NETSDK1119: "}</note>
+      </trans-unit>
+      <trans-unit id="NoSupportCppNonDynamicLibraryDotnetCore">
+        <source>NETSDK1116: C++/CLI projects targeting .NET Core must be dynamic libraries.</source>
+        <target state="new">NETSDK1116: C++/CLI projects targeting .NET Core must be dynamic libraries.</target>
+        <note>{StrBegin="NETSDK1116: "}</note>
+      </trans-unit>
+      <trans-unit id="NoSupportCppPackDotnetCore">
+        <source>NETSDK1118: C++/CLI projects targeting .NET Core cannot be packed.</source>
+        <target state="new">NETSDK1118: C++/CLI projects targeting .NET Core cannot be packed.</target>
+        <note>{StrBegin="NETSDK1118: "}</note>
+      </trans-unit>
+      <trans-unit id="NoSupportCppPublishDotnetCore">
+        <source>NETSDK1117: Does not support publish of C++/CLI project targeting dotnet core.</source>
+        <target state="new">NETSDK1117: Does not support publish of C++/CLI project targeting dotnet core.</target>
+        <note>{StrBegin="NETSDK1117: "}</note>
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>
@@ -448,7 +478,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="ReadyToRunCompilationHasWarnings_Info">
         <source>Some ReadyToRun compilations emitted warnings, indicating potential missing dependencies. Missing dependencies could potentially cause runtime failures. To show the warnings, set the PublishReadyToRunShowWarnings property to true.</source>
-        <target state="new">Some ReadyToRun compilations emitted warnings, indicating potential missing dependencies. Missing dependencies could potentially cause runtime failures. To show the warnings, set the PublishReadyToRunShowWarnings property to true.</target>
+        <target state="translated">Alcune compilazioni eseguite con la proprietà ReadyToRun hanno restituito avvisi per indicare potenziali dipendenze mancanti. Le dipendenze mancanti potrebbero causare errori di runtime. Per visualizzare gli avvisi, impostare la proprietà PublishReadyToRunShowWarnings su true.</target>
         <note />
       </trans-unit>
       <trans-unit id="ReadyToRunNoValidRuntimePackageError">
@@ -458,12 +488,12 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="ReadyToRunTargetNotSupportedError">
         <source>NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are using a supported runtime identifier, or set the PublishReadyToRun property to false.</source>
-        <target state="new">NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are using a supported runtime identifier, or set the PublishReadyToRun property to false.</target>
+        <target state="translated">NETSDK1095: l'ottimizzazione degli assembly per le prestazioni non è supportata per la piattaforma o l'architettura di destinazione selezionata. Verificare di usare un identificatore di runtime supportato oppure impostare la proprietà PublishReadyToRun su false.</target>
         <note>{StrBegin="NETSDK1095: "}</note>
       </trans-unit>
       <trans-unit id="RollForwardRequiresVersion30">
         <source>NETSDK1103: RollForward setting is only supported on .NET Core 3.0 or higher.</source>
-        <target state="new">NETSDK1103: RollForward setting is only supported on .NET Core 3.0 or higher.</target>
+        <target state="translated">NETSDK1103: l'impostazione RollForward è supportata solo in .NET Core 3.0 o versione successiva.</target>
         <note>{StrBegin="NETSDK1103: "}</note>
       </trans-unit>
       <trans-unit id="RuntimeIdentifierNotRecognized">
@@ -478,12 +508,12 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="RuntimeListNotFound">
         <source>NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET Core team here: https://aka.ms/dotnet-sdk-issue.</source>
-        <target state="new">NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET Core team here: https://aka.ms/dotnet-sdk-issue.</target>
+        <target state="translated">NETSDK1109: il file di elenco di runtime '{0}' non è stato trovato. Segnalare questo errore al team di .NET Core all'indirizzo: https://aka.ms/dotnet-sdk-issue.</target>
         <note>{StrBegin="NETSDK1109: "}</note>
       </trans-unit>
       <trans-unit id="RuntimePackNotDownloaded">
         <source>NETSDK1112: The runtime pack for {0} was not downloaded. Try running a NuGet restore with the RuntimeIdentifier '{1}'.</source>
-        <target state="new">NETSDK1112: The runtime pack for {0} was not downloaded. Try running a NuGet restore with the RuntimeIdentifier '{1}'.</target>
+        <target state="translated">NETSDK1112: il pacchetto di runtime per {0} non è stato scaricato. Provare a eseguire un ripristino NuGet con RuntimeIdentifier '{1}'.</target>
         <note>{StrBegin="NETSDK1112: "}</note>
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
@@ -503,7 +533,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnableToUsePackageAssetsCache_Info">
         <source>Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</source>
-        <target state="new">Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</target>
+        <target state="translated">Non è possibile usare la cache delle risorse del pacchetto a causa dell'errore di I/O. Questo problema può verificarsi quando lo stesso progetto viene compilato più volte in parallelo. Può influire sulle prestazioni, ma non sul risultato della compilazione.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedFileType">
@@ -548,22 +578,22 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework">
         <source>NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop is required to build Windows desktop applications. 'UseWpf' and 'UseWindowsForms' are not supported by the current SDK.</source>
-        <target state="new">NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop is required to build Windows desktop applications. 'UseWpf' and 'UseWindowsForms' are not supported by the current SDK.</target>
+        <target state="translated">NETSDK1107: per compilare applicazioni desktop di Windows, è necessario Microsoft.NET.Sdk.WindowsDesktop. 'UseWpf' e 'UseWindowsForms' non sono supportati dall'SDK corrente.</target>
         <note>{StrBegin="NETSDK1107: "}</note>
       </trans-unit>
       <trans-unit id="UsingPreviewSdk_Info">
         <source>You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</source>
-        <target state="new">You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</target>
+        <target state="translated">Si sta usando una versione in anteprima di .NET Core. Vedere https://aka.ms/dotnet-core-preview</target>
         <note />
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresUseWpfOrUseWindowsForms">
         <source>NETSDK1106: Microsoft.NET.Sdk.WindowsDesktop requires 'UseWpf' or 'UseWindowsForms' to be set to 'true'</source>
-        <target state="new">NETSDK1106: Microsoft.NET.Sdk.WindowsDesktop requires 'UseWpf' or 'UseWindowsForms' to be set to 'true'</target>
+        <target state="translated">NETSDK1106: con Microsoft.NET.Sdk.WindowsDesktop 'UseWpf' o 'UseWindowsForms' deve essere impostato su 'true'</target>
         <note>{StrBegin="NETSDK1106: "}</note>
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresVersion30">
         <source>NETSDK1105: Windows desktop applications are only supported on .NET Core 3.0 or higher.</source>
-        <target state="new">NETSDK1105: Windows desktop applications are only supported on .NET Core 3.0 or higher.</target>
+        <target state="translated">NETSDK1105: le applicazioni desktop di Windows sono supportate solo in .NET Core 3.0 o versioni successive.</target>
         <note>{StrBegin="NETSDK1105: "}</note>
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresWindows">

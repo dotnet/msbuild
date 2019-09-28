@@ -31,9 +31,6 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppWithLibrary")
                 .WithSource();
 
-            testAsset.Restore(Log, "TestApp");
-            testAsset.Restore(Log, "TestLibrary");
-
             VerifyAppBuilds(testAsset);
         }
 
@@ -43,10 +40,6 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary")
                 .WithSource();
-
-            testAsset.Restore(Log, "TestApp");
-            testAsset.Restore(Log, "TestLibrary");
-
 
             for (int i = 0; i < 2; i++)
             {
@@ -107,9 +100,6 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("KitchenSink")
                 .WithSource();
 
-            testAsset.Restore(Log, "TestApp");
-            testAsset.Restore(Log, "TestLibrary");
-
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 
             var buildCommand = new BuildCommand(Log, appProjectDirectory);
@@ -155,8 +145,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary")
-                .WithSource()
-                .Restore(Log, "TestApp");
+                .WithSource();
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 
@@ -194,8 +183,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var asset = _testAssetsManager
                 .CopyTestAsset("AppxReferencingCrossTargeting")
-                .WithSource()
-                .Restore(Log, "Appx");
+                .WithSource();
 
             var buildCommand = new BuildCommand(Log, Path.Combine(asset.TestRoot, "Appx"));
 

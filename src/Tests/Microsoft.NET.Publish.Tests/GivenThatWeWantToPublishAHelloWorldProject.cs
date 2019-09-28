@@ -33,8 +33,7 @@ namespace Microsoft.NET.Publish.Tests
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: targetFramework)
                 .WithSource()
-                .WithTargetFramework(targetFramework)
-                .Restore(Log);
+                .WithTargetFramework(targetFramework);
 
             var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute();
@@ -78,8 +77,7 @@ namespace Microsoft.NET.Publish.Tests
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", "SelfContained", identifier: targetFramework)
                 .WithSource()
-                .WithTargetFramework(targetFramework)
-                .Restore(Log, relativePath: "", args: $"/p:RuntimeIdentifier={rid}");
+                .WithTargetFramework(targetFramework);
 
             var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:CopyLocalLockFileAssemblies=true");
@@ -152,7 +150,6 @@ public static class Program
 ";
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
-            testProjectInstance.Restore(Log, testProject.Name);
             var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
             publishCommand.Execute().Should().Pass();
 
@@ -198,7 +195,6 @@ public static class Program
 ";
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: runtimeIdentifier);
 
-            testProjectInstance.Restore(Log, testProject.Name);
             var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
             var publishResult = publishCommand.Execute();
 
@@ -313,8 +309,7 @@ public static class Program
                         propertyGroup.Add(new XElement(ns + "SelfContained",
                             "false"));
                     }
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
             var publishResult = publishCommand.Execute();
@@ -406,8 +401,7 @@ public static class Program
 
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("DeployProjectReferencingSdkProject")
-                .WithSource()
-                .Restore(Log, relativePath: "HelloWorld", args: $"/p:RuntimeIdentifiers={rid}");
+                .WithSource();
 
             var buildCommand = new BuildCommand(Log, helloWorldAsset.TestRoot, Path.Combine("DeployProj", "Deploy.proj"));
 
@@ -422,8 +416,7 @@ public static class Program
         {
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
-                .WithSource()
-                .Restore(Log, "", "/p:RuntimeIdentifier=notvalid");
+                .WithSource();
 
             var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute("/p:RuntimeIdentifier=notvalid");
@@ -436,8 +429,7 @@ public static class Program
         {
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
-                .WithSource()
-                .Restore(Log, "", "/p:RuntimeIdentifier=notvalid");
+                .WithSource();
 
             var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute("/p:RuntimeIdentifier=notvalid", "/p:EnsureNETCoreAppRuntime=false");
@@ -458,8 +450,7 @@ public static class Program
                 IsExe = true
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -493,8 +484,7 @@ public static class Program
                 .WithProjectChanges(project =>
                 {
                     project.Root.Add(XElement.Parse(@"<Target Name=""InvokeBuild"" DependsOnTargets=""Build"" BeforeTargets=""Publish"" />"));
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
                 .Execute()
@@ -563,8 +553,7 @@ public static class Program
     </RemoveDuplicates>
     <Message Condition=""'@(AssetDestinationSubPaths)' != '@(FilteredAssetDestinationSubPaths)'"" Importance=""High"" Text=""Duplicate DestinationSubPaths are present in: @(AssetDestinationSubPaths)!"" />
 </Target>"));
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
                 .Execute()
@@ -618,7 +607,7 @@ public static class Program
 
             var command = new PublishCommand(Log, projectDirectory);
             command
-                .Execute("/restore", "/p:PublishProfile=test")
+                .Execute("/p:PublishProfile=test")
                 .Should()
                 .Pass();
 
@@ -704,7 +693,6 @@ public static class Program
             var command = new PublishCommand(Log, projectDirectory);
             command
                 .Execute(
-                    "/restore",
                     $"/p:WebPublishProfileFile={publishProfilePath}",
                     $"/p:ProjectToOverrideProjectExtensionsPath={projectPath}"
                 )

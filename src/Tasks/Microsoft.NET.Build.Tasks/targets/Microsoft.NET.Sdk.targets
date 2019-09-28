@@ -11,6 +11,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <PropertyGroup Condition="'$(UsingNETSdkDefaults)' != 'true'">
+    <!-- Skip import of Microsoft.NuGet.props and Microsoft.NuGet.targets -->
+    <SkipImportNuGetProps>true</SkipImportNuGetProps>
+    <SkipImportNuGetBuildTargets>true</SkipImportNuGetBuildTargets>
+  </PropertyGroup>
+
   <!-- Workaround: https://github.com/Microsoft/msbuild/issues/1293 -->
   <PropertyGroup Condition="'$(MSBuildRuntimeType)' == 'Core' Or '$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <GenerateResourceMSBuildArchitecture Condition=" '$(GenerateResourceMSBuildArchitecture)' == '' ">CurrentArchitecture</GenerateResourceMSBuildArchitecture>
@@ -20,7 +26,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="Microsoft.NET.Sdk.Common.targets" />
 
   <ImportGroup>
-    <Import Project="$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets')" />
+    <Import Project="$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolution.targets') and '$(Language)' != 'C++'" />
+    <Import Project="$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolutionStubs.targets" Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.PackageDependencyResolutionStubs.targets') and '$(Language)' == 'C++'" />
   </ImportGroup>
 
   <Import Project="Microsoft.NET.Sdk.DefaultItems.targets" />
@@ -68,6 +75,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <_NativeExecutableExtension Condition="'$(_NativeExecutableExtension)' == '' and ($(RuntimeIdentifier.StartsWith('win')) or $(DefaultAppHostRuntimeIdentifier.StartsWith('win')))">.exe</_NativeExecutableExtension>
     <_ComHostLibraryExtension Condition="'$(_ComHostLibraryExtension)' == '' and ($(RuntimeIdentifier.StartsWith('win')) or $(DefaultAppHostRuntimeIdentifier.StartsWith('win')))">.dll</_ComHostLibraryExtension>
+    <_IjwHostLibraryExtension Condition="'$(_IjwHostLibraryExtension)' == '' and ($(RuntimeIdentifier.StartsWith('win')) or $(DefaultAppHostRuntimeIdentifier.StartsWith('win')))">.dll</_IjwHostLibraryExtension>
 
     <_DotNetHostExecutableName>dotnet$(_NativeExecutableExtension)</_DotNetHostExecutableName>
     <_DotNetAppHostExecutableNameWithoutExtension>apphost</_DotNetAppHostExecutableNameWithoutExtension>
@@ -75,6 +83,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <_DotNetComHostLibraryNameWithoutExtension>comhost</_DotNetComHostLibraryNameWithoutExtension>
     <_DotNetComHostLibraryName>$(_DotNetComHostLibraryNameWithoutExtension)$(_ComHostLibraryExtension)</_DotNetComHostLibraryName>
+    <_DotNetIjwHostLibraryNameWithoutExtension>Ijwhost</_DotNetIjwHostLibraryNameWithoutExtension>
+    <_DotNetIjwHostLibraryName>$(_DotNetIjwHostLibraryNameWithoutExtension)$(_IjwHostLibraryExtension)</_DotNetIjwHostLibraryName>
     <_DotNetHostPolicyLibraryName>$(_NativeLibraryPrefix)hostpolicy$(_NativeLibraryExtension)</_DotNetHostPolicyLibraryName>
     <_DotNetHostFxrLibraryName>$(_NativeLibraryPrefix)hostfxr$(_NativeLibraryExtension)</_DotNetHostFxrLibraryName>
   </PropertyGroup>
@@ -93,6 +103,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateResourceUsePreserializedResources
       Condition="'$(GenerateResourceUsePreserializedResources)' == '' and
                  ('$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_TargetFrameworkVersionWithoutV)' >= '3.0')">true</GenerateResourceUsePreserializedResources>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <EmbeddedResourceUseDependentUponConvention 
+      Condition="'$(EmbeddedResourceUseDependentUponConvention)' == '' and
+                 (('$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_TargetFrameworkVersionWithoutV)' >= '3.0') or
+                  ('$(TargetFrameworkIdentifier)' == '.NETStandard' and '$(_TargetFrameworkVersionWithoutV)' >= '2.1'))">true</EmbeddedResourceUseDependentUponConvention>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -150,12 +167,18 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary;
                             _HandlePackageFileConflicts;
                             _ComputeReferenceAssemblies;
+                            _ComputeUserRuntimeAssemblies;
                             ResolveRuntimePackAssets;
                             _ComputePackageReferencePublish"
           BeforeTargets="CopyFilesToOutputDirectory"
           Condition="'$(GenerateDependencyFile)' == 'true'"
           Inputs="$(ProjectAssetsFile);$(ProjectAssetsCacheFile);$(MSBuildAllProjects)"
           Outputs="$(ProjectDepsFilePath)">
+
+    <!-- Set a dummy Version if it hasn't been set by DefaultAssemblyInfo.targets -->
+    <PropertyGroup Condition="'$(UsingNETSdkDefaults)' != 'true'">
+      <Version Condition="'$(Version)' == ''">1.0.0</Version>
+    </PropertyGroup>
 
     <ItemGroup>
       <ResolvedCompileFileDefinitions Remove="@(_ConflictPackageFiles)" Condition="'%(_ConflictPackageFiles.ConflictItemType)' == 'Reference'" />
@@ -186,6 +209,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       CompilerOptions="@(DependencyFileCompilerOptions)"
                       CompileReferences="@(ResolvedCompileFileDefinitions)"
                       ResolvedNuGetFiles="@(NativeCopyLocalItems);@(ResourceCopyLocalItems);@(RuntimeCopyLocalItems)"
+                      UserRuntimeAssemblies="@(UserRuntimeAssembly)"
                       ResolvedRuntimeTargetsFiles="@(RuntimeTargetsCopyLocalItems)"
                       IsSelfContained="$(SelfContained)"
                       IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)">
@@ -218,7 +242,10 @@ Copyright (c) .NET Foundation. All rights reserved.
       <RollForward Condition="'$(RollForward)' == '' and '$(EnableDynamicLoading)' == 'true' and '$(_IsRollForwardSupported)' == 'true'">LatestMinor</RollForward>
     </PropertyGroup>
 
-    <NETSdkError Condition="'$(RollForward)' != '' and '$(_IsRollForwardSupported)' != 'true'"
+    <!-- RollForward is only supported since .NET Core 3.0, but we should allow limited usage when the app is targeting even lower versions
+         This is to let 2.* apps specify that they are OK to run on 3.0 and above. So explicitly allow just Major and LatestMajor
+         other values should still keep failing as they won't have any effect when run on 2.*. -->
+    <NETSdkError Condition="'$(RollForward)' != '' and '$(RollForward)' != 'Major' and '$(RollForward)' != 'LatestMajor' and '$(_IsRollForwardSupported)' != 'true'"
                  ResourceName="RollForwardRequiresVersion30"/>
 
     <GenerateRuntimeConfigurationFiles AssetsFilePath="$(ProjectAssetsFile)"
@@ -334,6 +361,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       $(CompileDependsOn);
       _CreateAppHost;
       _CreateComHost;
+      _GetIjwHostPaths;
     </CompileDependsOn>
   </PropertyGroup>
 
@@ -376,7 +404,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
      -->
   <Target Name="_GetAppHostPaths"
-          DependsOnTargets="ResolvePackageAssets"
+          DependsOnTargets="ResolvePackageAssets;ResolveFrameworkReferences"
           Condition="'$(UseAppHost)' == 'true' and '$(_IsExecutable)' == 'true'">
 
     <NETSdkError Condition="'@(_NativeRestoredAppHostNETCore->Count())' > 1"
@@ -472,7 +500,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
      -->
   <Target Name="_GetComHostPaths"
-          DependsOnTargets="ResolvePackageAssets"
+          DependsOnTargets="ResolvePackageAssets;ResolveFrameworkReferences"
           Condition="'$(EnableComHosting)' == 'true' and '$(_IsExecutable)' != 'true'">
     <PropertyGroup>
       <ComHostFileName>$(AssemblyName).comhost$(_ComHostLibraryExtension)</ComHostFileName>
@@ -481,6 +509,22 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <NETSdkError Condition="'$(ComHostSourcePath)' == '' or !Exists('$(ComHostSourcePath)')"
              ResourceName="CannotFindComhost" />
+  </Target>
+
+  <!--
+    ============================================================
+                                        _GetIjwHostPaths
+
+    Gets the path to the restored Ijwhost, and if the restored Ijwhost
+    was present, Computes the path for the destination Ijwhost.
+    ============================================================
+     -->
+  <Target Name="_GetIjwHostPaths"
+          DependsOnTargets="ResolvePackageAssets;ResolveFrameworkReferences"
+          Condition="'$(UseIJWHost)' == 'true'">
+
+    <NETSdkError Condition="'$(IjwHostSourcePath)' == '' or !Exists('$(IjwHostSourcePath)')"
+             ResourceName="CannotFindIjwhost" />
   </Target>
   
   <!--
@@ -491,7 +535,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="_ComputeNETCoreBuildOutputFiles"
-          DependsOnTargets="_GetAppHostPaths;_GetComHostPaths"
+          DependsOnTargets="_GetAppHostPaths;_GetComHostPaths;_GetIjwHostPaths"
           BeforeTargets="AssignTargetPaths"
           Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true'">
 
@@ -549,6 +593,14 @@ Copyright (c) .NET Foundation. All rights reserved.
       </None>
 
     </ItemGroup>
+
+    <ItemGroup Condition="'$(IjwHostSourcePath)' != '' and '$(UseIJWHost)' == 'true'">
+      <None Include="$(IjwHostSourcePath)">
+        <Link>$(_DotNetIjwHostLibraryName)</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </None>
+    </ItemGroup>
   </Target>
 
   <!--
@@ -585,6 +637,31 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_ReferenceAssemblies Include="@(_ReferenceOnlyAssemblies)" />
     </ItemGroup>
 
+  </Target>
+  <!--
+    ============================================================
+                                        _ComputeUserRuntimeAssemblies
+
+    Computes references or reference dependencies that are copy local.
+
+     NOTE: NuGet and framework references are never copy local so those are not included here.
+           These will be project references and direct references and their copy local dependencies.
+    ============================================================
+    -->
+  <Target Name="_ComputeUserRuntimeAssemblies">
+    <ItemGroup>
+      <!-- IncludeRuntimeDependency=true metadata is escape hatch to include a non-copy local reference in deps file as a runtime dependency -->
+      <ReferencePath>
+        <IncludeRuntimeDependency Condition="'%(ReferencePath.IncludeRuntimeDependency)' == '' and '%(ReferencePath.CopyLocal)' == 'true'">true</IncludeRuntimeDependency>
+      </ReferencePath>
+
+      <ReferenceDependencyPaths>
+        <IncludeRuntimeDependency Condition="'%(ReferenceDependencyPaths.IncludeRuntimeDependency)' == '' and '%(ReferenceDependencyPaths.CopyLocal)' == 'true'">true</IncludeRuntimeDependency>
+      </ReferenceDependencyPaths>
+
+      <UserRuntimeAssembly Include="@(ReferencePath->WithMetadataValue('IncludeRuntimeDependency', 'true'))"  />
+      <UserRuntimeAssembly Include="@(ReferenceDependencyPaths->WithMetadataValue('IncludeRuntimeDependency', 'true'))" />
+    </ItemGroup>
   </Target>
 
   <!--
@@ -776,19 +853,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ProjectCapability Remove="ReferenceManagerAssemblies" />
   </ItemGroup>
 
-  <!-- Publish capabilities -->
-  <ItemGroup>
-    <ProjectCapability Include="FolderPublish" />
-  </ItemGroup>
-
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DisableStandardFrameworkResolution.targets" Condition="'$(DisableStandardFrameworkResolution)' == 'true'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DesignerSupport.targets" />
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.GenerateAssemblyInfo.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.GenerateAssemblyInfo.targets" Condition="'$(UsingNETSdkDefaults)' == 'true'"/>
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.GenerateSupportedRuntime.targets" />
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ComposeStore.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ComposeStore.targets" Condition="'$(UsingNETSdkDefaults)' == 'true'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.CrossGen.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ObsoleteReferences.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Publish.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackStubs.targets" Condition="'$(Language)' == 'C++'"/>
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackTool.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackProjectTool.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PreserveCompilationContext.targets" />

@@ -44,7 +44,7 @@ namespace Microsoft.NET.Build.Tests
 
             var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
             buildCommand
-                .Execute("/restore", "/bl:" + Path.Combine(libraryProjectDirectory, "build.binlog"))
+                .Execute()
                 .Should()
                 .Pass();
 
@@ -62,8 +62,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary")
-                .WithSource()
-                .Restore(Log, relativePath: "TestLibrary");
+                .WithSource();
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
@@ -101,8 +100,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 testAsset.WithProjectChanges(projectChanges);
             }
-
-            testAsset.Restore(log, relativePath: "TestLibrary");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
@@ -153,8 +150,7 @@ namespace Microsoft.NET.Build.Tests
                     {
                         propertyGroup.Add(new XElement(ns + "DocumentationFile", documentationFile));
                     }
-                })
-                .Restore(Log, relativePath: "TestLibrary");
+                });
 
             return testAsset;
         }
@@ -299,8 +295,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary", "ImplicitConfigurationConstants", configuration)
-                .WithSource()
-                .Restore(Log, relativePath: "TestLibrary");
+                .WithSource();
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
@@ -374,8 +369,7 @@ namespace Microsoft.NET.Build.Tests
                         shouldCompile = true;
                         targetFrameworkProperties.Single().SetValue(targetFramework);
                     }
-                })
-                .Restore(Log, relativePath: "TestLibrary");
+                });
 
             if (buildOnlyOnWindows && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -457,8 +451,8 @@ namespace Microsoft.NET.Build.Tests
                 });
             }
 
-            TestCommand restoreCommand;
-            TestCommand buildCommand;
+            RestoreCommand restoreCommand;
+            BuildCommand buildCommand;
 
             if (useSolution)
             {
@@ -505,7 +499,7 @@ namespace Microsoft.NET.Build.Tests
             }
 
             buildCommand
-                .Execute()
+                .ExecuteWithoutRestore()
                 .Should()
                 .Fail()
                 .And
@@ -514,7 +508,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp3.1")]
+        [InlineData("netcoreapp3.2")]
         [InlineData("netstandard2.2")]
         public void It_fails_to_build_if_targeting_a_higher_framework_than_is_supported(string targetFramework)
         {
@@ -596,8 +590,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("UwpUsingSdkExtras")
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
@@ -635,8 +628,7 @@ namespace Microsoft.NET.Build.Tests
                                 new XElement(ns + "MarkPackageReferencesAsExternallyResolved",
                                     markAsExternallyResolved)));
                     }
-                })
-                .Restore(Log, project.Name);
+                });
 
             var command = new GetValuesCommand(
                 Log,
@@ -684,8 +676,7 @@ namespace Microsoft.NET.Build.Tests
                 testProject.AdditionalProperties["CopyLocalLockFileAssemblies"] = copyLocal.ToString().ToLower();
             }
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
 

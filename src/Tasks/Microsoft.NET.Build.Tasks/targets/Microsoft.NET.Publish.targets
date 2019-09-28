@@ -241,7 +241,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <UsingTask TaskName="PrepareForReadyToRunCompilation" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-  <Target Name="_PrepareForReadyToRunCompilation">
+  <Target Name="_PrepareForReadyToRunCompilation" DependsOnTargets="_ComputeManagedRuntimePackAssemblies;_ComputeAssembliesToPostprocessOnPublish">
 
     <PropertyGroup>
       <_ReadyToRunOutputPath>$(IntermediateOutputPath)R2R</_ReadyToRunOutputPath>
@@ -249,12 +249,32 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <MakeDir Directories="$(_ReadyToRunOutputPath)" />
 
+    <ItemGroup>
+      <_ReadyToRunImplementationAssemblies Include="@(ResolvedFileToPublish->WithMetadataValue('PostprocessAssembly', 'true'))" />
+    </ItemGroup>
+
+    <!-- Even if app is not self-contained, crossgen requires closure of implementation assemblies. Resolve conflicts
+         of the runtime pack assets as though we were copying them locally, and add them to the R2R implementation
+         assembly list. -->
+     <ItemGroup Condition="'$(SelfContained)' != 'true'">
+       <_ReadyToRunImplementationAssemblies Include="@(_ManagedRuntimePackAssembly)" ReferenceOnly="true" />
+     </ItemGroup>
+
+     <ResolvePackageFileConflicts Condition="'$(SelfContained)' != 'true'"
+                                 ReferenceCopyLocalPaths="@(_ReadyToRunImplementationAssemblies)">
+      <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ReadyToRunImplementationAssembliesWithoutConflicts" />
+    </ResolvePackageFileConflicts>
+
+    <ItemGroup Condition="'$(SelfContained)' != 'true'">
+      <_ReadyToRunImplementationAssemblies Remove="@(_ReadyToRunImplementationAssemblies)" />
+      <_ReadyToRunImplementationAssemblies Include="@(_ReadyToRunImplementationAssembliesWithoutConflicts)" />
+    </ItemGroup>
+
     <PrepareForReadyToRunCompilation RuntimePacks="@(ResolvedRuntimePack)"
                                      RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
-                                     KnownFrameworkReferences="@(KnownFrameworkReference)"
                                      NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)"
                                      OutputPath="$(_ReadyToRunOutputPath)"
-                                     FilesToPublish="@(ResolvedFileToPublish)"
+                                     Assemblies="@(_ReadyToRunImplementationAssemblies)"
                                      ExcludeList="@(PublishReadyToRunExclude)"
                                      EmitSymbols="$(PublishReadyToRunEmitSymbols)"
                                      IncludeSymbolsInSingleFile="$(IncludeSymbolsInSingleFile)">
@@ -265,31 +285,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="ReadyToRunSymbolsCompileList" ItemName="_ReadyToRunSymbolsCompileList" />
 
       <Output TaskParameter="ReadyToRunFilesToPublish" ItemName="_ReadyToRunFilesToPublish" />
+      <Output TaskParameter="ReadyToRunAssembliesToReference" ItemName="_ReadyToRunAssembliesToReference" />
 
     </PrepareForReadyToRunCompilation>
-
-    <!--  TODO: https://github.com/dotnet/sdk/issues/3109 - Gather appropriate list of managed runtime assemblies for crossen.
-          Current approach is to pass all resolved files to publish and inspect if they are managed. -->
-    <ItemGroup>
-      <_ReadyToRunImplementationAssemblies Include="@(ResolvedFileToPublish)" />
-    </ItemGroup>
-
-    <!-- Even if app is not self-contained, crossgen requires closure of implementation assemblies. Resolve conflicts
-         of the runtime pack assets as though we were copying them locally, and add them to the R2R implementation
-         assembly list. -->
-    <ItemGroup Condition="'$(SelfContained)' != 'true'">
-      <_ReadyToRunImplementationAssemblies Include="@(RuntimePackAsset)" />
-    </ItemGroup>
-
-    <ResolvePackageFileConflicts Condition="'$(SelfContained)' != 'true'"
-                                 ReferenceCopyLocalPaths="@(_ReadyToRunImplementationAssemblies)">
-      <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ReadyToRunImplementationAssembliesWithoutConflicts" />
-    </ResolvePackageFileConflicts>
-
-    <ItemGroup Condition="'$(SelfContained)' != 'true'">
-      <_ReadyToRunImplementationAssemblies Remove="@(_ReadyToRunImplementationAssemblies)" />
-      <_ReadyToRunImplementationAssemblies Include="@(_ReadyToRunImplementationAssembliesWithoutConflicts)" />
-    </ItemGroup>
   </Target>
 
   <!--
@@ -305,7 +303,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           Outputs="%(_ReadyToRunCompileList.OutputR2RImage)">
 
     <RunReadyToRunCompiler CrossgenTool="@(_CrossgenTool)"
-                           ImplementationAssemblies="@(_ReadyToRunImplementationAssemblies)"
+                           ImplementationAssemblyReferences="@(_ReadyToRunAssembliesToReference)"
                            ShowCompilerWarnings="$(PublishReadyToRunShowWarnings)"
                            CompilationEntry="@(_ReadyToRunCompileList)"
                            ContinueOnError="ErrorAndContinue">
@@ -336,7 +334,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           Outputs="%(_ReadyToRunSymbolsCompileList.OutputPDBImage)">
 
     <RunReadyToRunCompiler CrossgenTool="@(_CrossgenTool)"
-                           ImplementationAssemblies="@(_ReadyToRunImplementationAssemblies)"
+                           ImplementationAssemblyReferences="@(_ReadyToRunAssembliesToReference)"
                            ShowCompilerWarnings="$(PublishReadyToRunShowWarnings)"
                            CompilationEntry="@(_ReadyToRunSymbolsCompileList)"
                            ContinueOnError="ErrorAndContinue">
@@ -386,6 +384,12 @@ Copyright (c) .NET Foundation. All rights reserved.
                             CreateReadyToRunImages">
   </Target>
 
+  <PropertyGroup>
+    <CopyBuildOutputToPublishDirectory Condition="'$(CopyBuildOutputToPublishDirectory)'==''">true</CopyBuildOutputToPublishDirectory>
+    <CopyOutputSymbolsToPublishDirectory Condition="'$(CopyOutputSymbolsToPublishDirectory)'==''">true</CopyOutputSymbolsToPublishDirectory>
+    <IncludeSymbolsInSingleFile Condition="'$(IncludeSymbolsInSingleFile)' == ''">false</IncludeSymbolsInSingleFile>
+  </PropertyGroup>
+
   <!--
     ============================================================
                                         ComputeResolvedFilesToPublishList
@@ -395,14 +399,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <Target Name="ComputeResolvedFilesToPublishList"
           DependsOnTargets="_ComputeResolvedCopyLocalPublishAssets;
-                            _ComputeCopyToPublishDirectoryItems">
-
-    <PropertyGroup>
-      <CopyBuildOutputToPublishDirectory Condition="'$(CopyBuildOutputToPublishDirectory)'==''">true</CopyBuildOutputToPublishDirectory>
-      <CopyOutputSymbolsToPublishDirectory Condition="'$(CopyOutputSymbolsToPublishDirectory)'==''">true</CopyOutputSymbolsToPublishDirectory>
-      <IncludeSymbolsInSingleFile Condition="'$(IncludeSymbolsInSingleFile)' == ''">false</IncludeSymbolsInSingleFile>
-    </PropertyGroup>
-
+                            _ComputeCopyToPublishDirectoryItems;
+                            ComputeRefAssembliesToPublish">
     <ItemGroup>
       <!-- Copy the build product (.dll or .exe). -->
       <ResolvedFileToPublish Include="@(IntermediateAssembly)"
@@ -762,7 +760,70 @@ Copyright (c) .NET Foundation. All rights reserved.
       </_NoneWithTargetPath>
 
     </ItemGroup>
+  </Target>
 
+  <PropertyGroup Condition="'$(SelfContained)' == 'true'">
+    <_ComputeManagedRuntimePackAssembliesIfSelfContained>_ComputeManagedRuntimePackAssemblies</_ComputeManagedRuntimePackAssembliesIfSelfContained>
+  </PropertyGroup>
+
+  <!-- Determine the managed assembly subset of ResolvedFileToPublish that should be post-processed by linker, and ready to run compilation -->
+  <Target Name="_ComputeAssembliesToPostprocessOnPublish" 
+          DependsOnTargets="_ComputeUserRuntimeAssemblies;$(_ComputeManagedRuntimePackAssembliesIfSelfContained)">
+    
+    <!-- 
+      Default set of files to post-process correspond to the items that would be designated
+      as managed runtime assemblies in .deps.json, and published to root of the application.
+      RuntimeTargets and satellite assemblies are excluded. Currently, both linker and ready
+      to run require a RID, so there will not be RuntimeTargets. Linker could conceptually 
+      operate without a RID, but would not know how to handle multiple assemblies with same
+      identity.
+    -->
+    <ItemGroup>
+      <!-- Assemblies from packages -->
+      <_ManagedRuntimeAssembly Include="@(RuntimeCopyLocalItems)" />
+      
+      <!-- Assemblies from other references -->
+      <_ManagedRuntimeAssembly Include="@(UserRuntimeAssembly)" />
+      
+      <!-- Assembly produced by this project -->
+      <_ManagedRuntimeAssembly Include="@(IntermediateAssembly)" />
+    </ItemGroup>
+
+    <!-- Assemblies from runtime packs for self-contained apps -->
+    <ItemGroup Condition="'$(SelfContained)' == 'true'">
+      <_ManagedRuntimeAssembly Include="@(_ManagedRuntimePackAssembly)" />
+    </ItemGroup>
+    
+    <!-- 
+      Match above with ResolvedFileToPublish. Some of above would have been excluded from publish in
+      various ways and should be excluded from the list of files to postprocess as well. Furthermore,
+      the metadata must match ResolvedFileToPublish as the tools modify or remove these items in that
+      list to implement their post-processing.
+    -->
+    <JoinItems Left="@(_ManagedRuntimeAssembly)" Right="@(ResolvedFileToPublish)" RightMetadata="*">
+      <Output TaskParameter="JoinResult" ItemName="_AssemblyToPostprocessOnPublish" />
+    </JoinItems>
+
+    <!--
+      Set PostprocessAssembly=true metadata on ResolvedFileToPublish, which will be honored by linker
+      and crossgen.
+      
+      Assemblies injected into ResolvedFileToPublish outside the set above (such as razor views) are
+      responsible for setting this metadata to opt in to post-processing.
+    -->
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(_AssemblyToPostprocessOnPublish)" />
+      <ResolvedFileToPublish Include="@(_AssemblyToPostprocessOnPublish)" PostprocessAssembly="true" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_ComputeManagedRuntimePackAssemblies" Returns="@(_ManagedRuntimePackAssembly)">
+    <ItemGroup>
+      <!-- Special case for System.Private.Corelib due to https://github.com/dotnet/core-setup/issues/7728 -->
+      <_ManagedRuntimePackAssembly Include="@(RuntimePackAsset)"
+                                   Condition="'%(RuntimePackAsset.AssetType)' == 'runtime' 
+                                                or '%(RuntimePackAsset.Filename)' == 'System.Private.Corelib'" />
+    </ItemGroup>
   </Target>
 
   <Target Name="_ComputeUseBuildDependencyFile"
@@ -826,6 +887,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                             _HandlePackageFileConflicts;
                             _HandlePackageFileConflictsForPublish;
                             _ComputeReferenceAssemblies;
+                            _ComputeUserRuntimeAssemblies;
                             ResolveRuntimePackAssets;
                             _ComputePackageReferencePublish"
           Condition="'$(GenerateDependencyFile)' == 'true' and '$(_UseBuildDependencyFile)' != 'true'">
@@ -868,6 +930,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       CompileReferences="@(ResolvedCompileFileDefinitions)"
                       ResolvedNuGetFiles="@(_ResolvedNuGetFilesForPublish)"
                       ResolvedRuntimeTargetsFiles="@(RuntimeTargetsCopyLocalItems)"
+                      UserRuntimeAssemblies="@(UserRuntimeAssembly)"
                       IsSelfContained="$(SelfContained)"
                       IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)"/>
 
@@ -940,4 +1003,18 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <Target Name="RunResolvePublishAssemblies" />
 
+  <!--
+    ============================================================
+    _CheckForLanguageAndPublishFeatureCombinationSupport
+    
+    Block unsupported language and feature combination.
+    ============================================================
+    -->
+  <Target Name="_CheckForLanguageAndPublishFeatureCombinationSupport"
+        BeforeTargets="Publish;PrepareForPublish">
+
+    <NETSdkError Condition="'$(Language)' == 'C++' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
+                 ResourceName="NoSupportCppPublishDotnetCore" />
+
+  </Target>
 </Project>

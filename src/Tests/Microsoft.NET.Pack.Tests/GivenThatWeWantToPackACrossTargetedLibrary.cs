@@ -24,8 +24,7 @@ namespace Microsoft.NET.Pack.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("CrossTargeting")
-                .WithSource()
-                .Restore(Log, "NetStandardAndNetCoreApp");
+                .WithSource();
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "NetStandardAndNetCoreApp");
 

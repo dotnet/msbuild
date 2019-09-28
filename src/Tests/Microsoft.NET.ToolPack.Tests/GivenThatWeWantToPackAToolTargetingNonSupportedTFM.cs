@@ -47,8 +47,6 @@ namespace Microsoft.NET.ToolPack.Tests
                                             propertyGroup.Add(new XElement(ns + targetFrameworkProperty, targetFramework));
                                         });
 
-            helloWorldAsset.Restore(Log);
-
             var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
 
             CommandResult result = packCommand.Execute();

@@ -85,8 +85,7 @@ namespace Microsoft.NET.Build.Tests
             };
 
             var testAsset = _testAssetsManager
-                .CreateTestProject(testProject, identifier: targetFramework + isExe, targetExtension: ".vbproj")
-                .Restore(Log, testProject.Name);
+                .CreateTestProject(testProject, identifier: targetFramework + isExe, targetExtension: ".vbproj");
 
             var buildCommand = new GetValuesCommand(
                 Log,
@@ -181,7 +180,7 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyFact(Skip="https://github.com/dotnet/sdk/issues/3678")]
         public void It_builds_a_vb_wpf_app()
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;

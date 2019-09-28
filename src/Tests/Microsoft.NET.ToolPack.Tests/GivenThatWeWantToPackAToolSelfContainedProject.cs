@@ -59,7 +59,6 @@ namespace Microsoft.NET.ToolPack.Tests
                                                         propertyGroup.Add(new XElement("RuntimeIdentifier", "win-x64"));
                                                     });
 
-            helloWorldAsset.Restore(Log);
             return helloWorldAsset;
         }
     }

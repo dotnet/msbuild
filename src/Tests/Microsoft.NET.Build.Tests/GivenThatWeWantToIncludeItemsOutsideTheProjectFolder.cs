@@ -40,8 +40,7 @@ namespace Microsoft.NET.Build.Tests
                     var propertyGroup = project.Root.Element(ns + "PropertyGroup");
                     propertyGroup.Add(new XElement(ns + "IncludeWithGlob", includeWithGlob));
                     propertyGroup.Add(new XElement(ns + "UseLinkBase", useLinkBase));
-                })
-                .Restore(Log, relativePath: "LinkTest");
+                });
 
             var command = new MSBuildCommand(Log, "WriteItems", testAsset.TestRoot, "LinkTest");
 

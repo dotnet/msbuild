@@ -28,8 +28,7 @@ namespace Microsoft.NET.Pack.Tests
         {
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", "PackHelloWorld")
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
 
             var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
 
@@ -72,8 +71,7 @@ namespace Microsoft.NET.Pack.Tests
                 .WithProjectChanges(project =>
                 {
                     project.Root.Add(XElement.Parse(@"<Target Name=""InvokeBuild"" DependsOnTargets=""Build"" BeforeTargets=""Pack"" />"));
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
                 .Execute()

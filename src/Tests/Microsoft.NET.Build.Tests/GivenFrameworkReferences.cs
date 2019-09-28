@@ -54,8 +54,7 @@ namespace FrameworkReferenceTest
     }
 }");
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -101,8 +100,7 @@ namespace FrameworkReferenceTest
     }
 }");
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -145,8 +143,7 @@ namespace FrameworkReferenceTest
                     itemGroup.Add(new XElement(ns + "FrameworkReference",
                                                new XAttribute("Include", "AnotherUnknownFramework")));
 
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -183,8 +180,7 @@ namespace FrameworkReferenceTest
 
                     itemGroup.Add(new XElement(ns + "FrameworkReference",
                                                new XAttribute("Include", "Microsoft.ASPNETCORE.App")));
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -242,23 +238,23 @@ namespace FrameworkReferenceTest
         }
 
         [Theory]
-        [InlineData("Major", true)]
-        [InlineData("latestMinor", true)]
-        [InlineData("Invalid", false)]
-        public void RollForwardCanBeSpecifiedViaProperty(string rollForwardValue, bool valid)
+        [InlineData("Major", "netcoreapp3.0", true)]
+        [InlineData("Major", "netcoreapp2.0", true)]
+        [InlineData("latestMinor", "netcoreapp3.0", true)]
+        [InlineData("Invalid", "netcoreapp3.0", false)]
+        public void RollForwardCanBeSpecifiedViaProperty(string rollForwardValue, string tfm, bool valid)
         {
             var testProject = new TestProject()
             {
                 Name = "RollForwardSetting",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = tfm,
                 IsSdkProject = true,
                 IsExe = true
             };
 
             testProject.AdditionalProperties["RollForward"] = rollForwardValue;
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -287,8 +283,16 @@ namespace FrameworkReferenceTest
             }
         }
 
-        [Fact]
-        public void RollForwardIsNotSupportedOn22()
+        [Theory]
+        [InlineData("Major", true)]
+        [InlineData("LatestMajor", true)]
+        [InlineData("latestMAJOR", true)]
+        [InlineData("Disable", false)]
+        [InlineData("LatestPatch", false)]
+        [InlineData("Minor", false)]
+        [InlineData("LatestMinor", false)]
+        [InlineData("LATESTminor", false)]
+        public void RollForwardIsNotSupportedOn22(string rollForwardValue, bool valid)
         {
             var testProject = new TestProject()
             {
@@ -298,19 +302,28 @@ namespace FrameworkReferenceTest
                 IsExe = true
             };
 
-            testProject.AdditionalProperties["RollForward"] = "Major";
+            testProject.AdditionalProperties["RollForward"] = rollForwardValue;
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
-            buildCommand
-                .Execute()
-                .Should()
-                .Fail()
-                .And
-                .HaveStdOutContaining("NETSDK1103");
+            var result = buildCommand.Execute();
+
+            if (valid)
+            {
+                result
+                    .Should()
+                    .Pass();
+            }
+            else
+            {
+                result
+                    .Should()
+                    .Fail()
+                    .And
+                    .HaveStdOutContaining("NETSDK1103");
+            }
         }
 
         [CoreMSBuildAndWindowsOnlyFact]
@@ -336,8 +349,7 @@ namespace FrameworkReferenceTest
                     var frameworkReference = new XElement(ns + "FrameworkReference",
                                                new XAttribute("Include", "Microsoft.WindowsDesktop.App"));
                     itemGroup.Add(frameworkReference);
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -412,7 +424,7 @@ namespace FrameworkReferenceTest
             string expectedErrorCode = "NETSDK1047";
 
             buildCommand
-                .Execute($"/p:RuntimeIdentifier={runtimeIdentifier}")
+                .ExecuteWithoutRestore($"/p:RuntimeIdentifier={runtimeIdentifier}")
                 .Should()
                 .Fail()
                 .And
@@ -593,8 +605,7 @@ namespace FrameworkReferenceTest
 
             testProject.ReferencedProjects.Add(referencedProject);
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -624,8 +635,7 @@ namespace FrameworkReferenceTest
             };
             referencedPackage.FrameworkReferences.Add("Microsoft.ASPNETCORE.App");
 
-            var packageAsset = _testAssetsManager.CreateTestProject(referencedPackage)
-                .Restore(Log, referencedPackage.Name);
+            var packageAsset = _testAssetsManager.CreateTestProject(referencedPackage);
 
             var packCommand = new PackCommand(Log, packageAsset.TestRoot, referencedPackage.Name);
 
@@ -655,7 +665,7 @@ namespace FrameworkReferenceTest
                 .WithEnvironmentVariable("NUGET_PACKAGES", nugetPackagesFolder);
 
             buildCommand
-                .Execute("/restore")
+                .Execute()
                 .Should()
                 .Pass();
 
@@ -729,8 +739,7 @@ namespace FrameworkReferenceTest
             testProject.FrameworkReferences.Add("Microsoft.AspNetCore.App");
             testProject.FrameworkReferences.Add("Microsoft.WindowsDesktop.App");
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var projectFolder = Path.Combine(testAsset.TestRoot, testProject.Name);
 
@@ -856,8 +865,7 @@ namespace FrameworkReferenceTest
 
             string identifier = selfContained ? "_selfcontained" : string.Empty;
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, callingMethod, identifier)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, callingMethod, identifier);
 
             string projectFolder = Path.Combine(testAsset.TestRoot, testProject.Name);
 
@@ -982,7 +990,7 @@ namespace FrameworkReferenceTest
 
             var command = new MSBuildCommand(Log, "WriteResolvedVersions", Path.Combine(testAsset.TestRoot, testProject.Name));
 
-            command.Execute()
+            command.ExecuteWithoutRestore()
                 .Should()
                 .Pass();
 
@@ -1010,8 +1018,6 @@ namespace FrameworkReferenceTest
             {
                 testAsset = testAsset.WithProjectChanges(projectChanges);
             }
-
-            testAsset.Restore(Log, testProject.Name);
 
             var command = new GetValuesCommand(Log, Path.Combine(testAsset.Path, testProject.Name), targetFramework,
                                                         "ResolvedFileToPublish", GetValuesCommand.ValueType.Item)

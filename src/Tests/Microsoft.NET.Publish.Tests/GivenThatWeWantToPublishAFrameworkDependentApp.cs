@@ -46,7 +46,6 @@ namespace Microsoft.NET.Publish.Tests
 
             var msbuildArgs = new List<string>()
             {
-                "/restore",
                 $"/p:RuntimeIdentifier={runtimeIdentifier}",
                 $"/p:TestRuntimeIdentifier={runtimeIdentifier}",
                 "/p:SelfContained=false",

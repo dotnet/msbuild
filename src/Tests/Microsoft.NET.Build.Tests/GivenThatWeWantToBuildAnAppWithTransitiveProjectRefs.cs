@@ -35,10 +35,6 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppWithTransitiveProjectRefs", "BuildAppWithTransitiveProjectRef")
                 .WithSource();
 
-            testAsset.Restore(Log, "TestApp");
-            testAsset.Restore(Log, "MainLibrary");
-            testAsset.Restore(Log, "AuxLibrary");
-
             VerifyAppBuilds(testAsset);
         }
 
@@ -81,8 +77,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithTransitiveProjectRefs")
-                .WithSource()
-                .Restore(Log, "TestApp");
+                .WithSource();
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 
@@ -127,10 +122,6 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithTransitiveProjectRefs", "BuildAppWithTransitiveProjectRefDisabled")
                 .WithSource();
-
-            testAsset.Restore(Log, "TestApp");
-            testAsset.Restore(Log, "MainLibrary");
-            testAsset.Restore(Log, "AuxLibrary");
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
             var buildCommand = new BuildCommand(Log, appProjectDirectory);

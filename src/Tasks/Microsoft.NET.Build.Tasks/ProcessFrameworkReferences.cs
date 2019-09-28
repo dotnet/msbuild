@@ -296,6 +296,7 @@ namespace Microsoft.NET.Build.Tasks
                         runtimePackItem.SetMetadata(MetadataKeys.FrameworkName, knownFrameworkReference.Name);
                         runtimePackItem.SetMetadata(MetadataKeys.RuntimeIdentifier, runtimePackRuntimeIdentifier);
                         runtimePackItem.SetMetadata(MetadataKeys.IsTrimmable, isTrimmable);
+                        runtimePackItem.SetMetadata(MetadataKeys.AvailableRuntimeIdentifiers, knownFrameworkReference.RuntimePackRuntimeIdentifiers);
 
                         runtimePacks.Add(runtimePackItem);
                     }

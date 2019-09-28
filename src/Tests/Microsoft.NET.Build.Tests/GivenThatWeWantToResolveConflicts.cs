@@ -69,8 +69,7 @@ namespace Microsoft.NET.Build.Tests
         private void GetReferences(TestProject testProject, bool expectConflicts, out List<string> references, out List<string> referenceCopyLocalPaths)
         {
             string targetFramework = testProject.TargetFrameworks;
-            TestAsset tempTestAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            TestAsset tempTestAsset = _testAssetsManager.CreateTestProject(testProject);
 
             string projectFolder = Path.Combine(tempTestAsset.TestRoot, testProject.Name);
 
@@ -119,8 +118,7 @@ namespace Microsoft.NET.Build.Tests
 
             testProject.PackageReferences.Add(new TestPackageReference("Microsoft.AspNetCore.Mvc.Razor", "2.0.1"));
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             string projectFolder = Path.Combine(testAsset.Path, testProject.Name);
 
@@ -166,8 +164,7 @@ namespace Microsoft.NET.Build.Tests
                     itemGroup.Add(new XElement(ns + "Reference",
                         new XAttribute("Include", @"$(NuGetPackageRoot)/microsoft.visualstudio.composition/15.8.112/lib/net45/Microsoft.VisualStudio.Composition.dll"),
                         new XAttribute("Private", "true")));
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             string projectFolder = Path.Combine(testAsset.Path, testProject.Name);
 
@@ -193,8 +190,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.References.Add("System.Runtime");
             testProject.PackageReferences.Add(new TestPackageReference("System.Runtime", "4.3.0"));
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             string projectFolder = Path.Combine(testAsset.Path, testProject.Name);
 
@@ -227,8 +223,7 @@ namespace Microsoft.NET.Build.Tests
                     project.Root.Add(itemGroup);
                     itemGroup.Add(new XElement(ns + "FrameworkReference",
                                     new XAttribute("Include", "Microsoft.AspNetCore.App")));
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
 

@@ -9,205 +9,179 @@ variables:
     value: ''
   - name: _DotNetPublishToBlobFeed
     value: false
+  - name: _DotNetArtifactsCategory
+    value: .NETCore
+  - name: _DotNetValidationArtifactsCategory
+    value: .NETCore
   - ${{ if ne(variables['System.TeamProject'], 'public') }}:
     - name: PB_PublishBlobFeedUrl
       value: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
     - name: _DotNetPublishToBlobFeed
       value: true
 
-jobs:
-- template: /eng/build.yml
-  parameters:
-    agentOs: Windows_NT
-    pool:
-      ${{ if eq(variables['System.TeamProject'], 'public') }}:
-        name: NetCorePublic-Pool
-        queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
-      ${{ if ne(variables['System.TeamProject'], 'public') }}:
-        name: NetCoreInternal-Pool
-        queue: buildpool.windows.10.amd64.vs2017
-    strategy:
-      matrix:
+stages:
+- stage: build
+  displayName: Build
+  jobs:
+  - template: /eng/build.yml
+    parameters:
+      agentOs: Windows_NT
+      pool:
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          Build_Debug:
-            _BuildConfig: Debug
-            _PublishType: none
-            _SignType: test
-        Build_Release:
-          _BuildConfig: Release
+          name: NetCorePublic-Pool
+          queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
+        ${{ if ne(variables['System.TeamProject'], 'public') }}:
+          name: NetCoreInternal-Pool
+          queue: buildpool.windows.10.amd64.vs2017
+      strategy:
+        matrix:
           ${{ if eq(variables['System.TeamProject'], 'public') }}:
-            _PublishType: none
-            _SignType: test
-          ${{ if ne(variables['System.TeamProject'], 'public') }}:
-            _PublishType: blob
-            _SignType: real
-
-- ${{ if ne(variables['System.TeamProject'], 'public') }}:
-  - template: /eng/build.yml
-    parameters:
-      agentOs: Windows_Perf_Helix
-      pool:
-        name: Hosted VS2017
-      strategy:
-        matrix:
+            Build_Debug:
+              _BuildConfig: Debug
+              _PublishType: none
+              _SignType: test
+              _Test: -test
           Build_Release:
             _BuildConfig: Release
-            _PublishType: none
-            _SignType: test
-            _DotNetPublishToBlobFeed: false
+            ${{ if eq(variables['System.TeamProject'], 'public') }}:
+              _PublishType: none
+              _SignType: test
+              _Test: -test
+            ${{ if ne(variables['System.TeamProject'], 'public') }}:
+              _PublishType: blob
+              _SignType: real
+              _Test: ''
 
-- ${{ if ne(variables['System.TeamProject'], 'public') }}:
-  - template: /eng/build.yml
-    parameters:
-      agentOs: Windows_Perf_Helix_Fullframework
-      pool:
-        name: Hosted VS2017
-      strategy:
-        matrix:
-          Build_Release:
-            _BuildConfig: Release
-            _PublishType: none
-            _SignType: test
-            _DotNetPublishToBlobFeed: false
+  - ${{ if eq(variables['System.TeamProject'], 'public') }}:
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Windows_NT_FullFramework
+        pool:
+          name: NetCorePublic-Pool
+          queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
+        strategy:
+          matrix:
+            Build_Debug:
+              _BuildConfig: Debug
+              _PublishType: none
+              _SignType: test
+            Build_Release:
+              _BuildConfig: Release
+              _PublishType: none
+              _SignType: test
 
-  - template: /eng/build.yml
-    parameters:
-      agentOs: Linux_Perf_Helix
-      pool:
-        name: Hosted Ubuntu 1604
-      strategy:
-        matrix:
-          Build_Release:
-            _BuildConfig: Release
-            _PublishType: none
-            _SignType: test
-            _DotNetPublishToBlobFeed: false
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Windows_NT_TestAsTools
+        pool:
+          name: NetCorePublic-Pool
+          queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
+        strategy:
+          matrix:
+            Build_Debug:
+              _BuildConfig: Debug
+              _PublishType: none
+              _SignType: test
 
-- ${{ if eq(variables['System.TeamProject'], 'public') }}:
-  - template: /eng/build.yml
-    parameters:
-      agentOs: Windows_NT_FullFramework
-      pool:
-        name: NetCorePublic-Pool
-        queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
-      strategy:
-        matrix:
-          Build_Debug:
-            _BuildConfig: Debug
-            _PublishType: none
-            _SignType: test
-          Build_Release:
-            _BuildConfig: Release
-            _PublishType: none
-            _SignType: test
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Ubuntu_14_04
+        pool:
+          name: Hosted Ubuntu 1604
+        strategy:
+          matrix:
+            Build_Debug:
+              _BuildConfig: Debug
+              _PublishType: none
+              _SignType: test
+            Build_Release:
+              _BuildConfig: Release
+              _PublishType: none
+              _SignType: test
+        variables:
+          _PREVIEW_VSTS_DOCKER_IMAGE: microsoft/dotnet-buildtools-prereqs:ubuntu-14.04-cross-0cd4667-20170319080304
 
-  - template: /eng/build.yml
-    parameters:
-      agentOs: Windows_NT_TestAsTools
-      pool:
-        name: NetCorePublic-Pool
-        queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
-      strategy:
-        matrix:
-          Build_Debug:
-            _BuildConfig: Debug
-            _PublishType: none
-            _SignType: test
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Ubuntu_16_04
+        pool:
+          name: Hosted Ubuntu 1604
+        strategy:
+          matrix:
+            Build_Debug:
+              _BuildConfig: Debug
+              _PublishType: none
+              _SignType: test
+            Build_Release:
+              _BuildConfig: Release
+              _PublishType: none
+              _SignType: test
+        variables:
+          _PREVIEW_VSTS_DOCKER_IMAGE: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-e435274-20180628134544
 
-  - template: /eng/build.yml
-    parameters:
-      agentOs: Ubuntu_14_04
-      pool:
-        name: Hosted Ubuntu 1604
-      strategy:
-        matrix:
-          Build_Debug:
-            _BuildConfig: Debug
-            _PublishType: none
-            _SignType: test
-          Build_Release:
-            _BuildConfig: Release
-            _PublishType: none
-            _SignType: test
-      variables:
-        _PREVIEW_VSTS_DOCKER_IMAGE: microsoft/dotnet-buildtools-prereqs:ubuntu-14.04-cross-0cd4667-20170319080304
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Darwin
+        pool:
+          name: Hosted macOS
+        strategy:
+          matrix:
+            Build_Debug:
+              _BuildConfig: Debug
+              _PublishType: none
+              _SignType: test
+            Build_Release:
+              _BuildConfig: Release
+              _PublishType: none
+              _SignType: test
 
-  - template: /eng/build.yml
-    parameters:
-      agentOs: Ubuntu_16_04
-      pool:
-        name: Hosted Ubuntu 1604
-      strategy:
-        matrix:
-          Build_Debug:
-            _BuildConfig: Debug
-            _PublishType: none
-            _SignType: test
-          Build_Release:
-            _BuildConfig: Release
-            _PublishType: none
-            _SignType: test
-      variables:
-        _PREVIEW_VSTS_DOCKER_IMAGE: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-e435274-20180628134544
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Windows_Perf_CI
+        pool:
+          name: NetCorePublic-Pool
+          queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
+        strategy:
+          matrix:
+            Build_Release:
+              _BuildConfig: Release
+              _PublishType: none
+              _SignType: test
 
-  - template: /eng/build.yml
-    parameters:
-      agentOs: Darwin
-      pool:
-        name: Hosted macOS
-      strategy:
-        matrix:
-          Build_Debug:
-            _BuildConfig: Debug
-            _PublishType: none
-            _SignType: test
-          Build_Release:
-            _BuildConfig: Release
-            _PublishType: none
-            _SignType: test
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Windows_Perf_CI_FullFramework
+        pool:
+          name: NetCorePublic-Pool
+          queue: buildpool.windows.10.amd64.vs2017.open
+        strategy:
+          matrix:
+            Build_Release:
+              _BuildConfig: Release
+              _PublishType: none
+              _SignType: test
 
-  - template: /eng/build.yml
-    parameters:
-      agentOs: Windows_Perf_CI
-      pool:
-        name: NetCorePublic-Pool
-        queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
-      strategy:
-        matrix:
-          Build_Release:
-            _BuildConfig: Release
-            _PublishType: none
-            _SignType: test
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Linux_Perf_CI
+        pool:
+          name: Hosted Ubuntu 1604
+        strategy:
+          matrix:
+            Build_Release:
+              _BuildConfig: Release
+              _PublishType: none
+              _SignType: test
 
-  - template: /eng/build.yml
-    parameters:
-      agentOs: Windows_Perf_CI_FullFramework
-      pool:
-        name: NetCorePublic-Pool
-        queue: buildpool.windows.10.amd64.vs2017.open
-      strategy:
-        matrix:
-          Build_Release:
-            _BuildConfig: Release
-            _PublishType: none
-            _SignType: test
-
-  - template: /eng/build.yml
-    parameters:
-      agentOs: Linux_Perf_CI
-      pool:
-        name: Hosted Ubuntu 1604
-      strategy:
-        matrix:
-          Build_Release:
-            _BuildConfig: Release
-            _PublishType: none
-            _SignType: test
-
+  - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+    - template: /eng/common/templates/job/publish-build-assets.yml
+      parameters:
+        publishUsingPipelines: true
+        dependsOn:
+          - Windows_NT
+        queue:
+          name: Hosted VS2017
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-  - template: /eng/common/templates/job/publish-build-assets.yml
+  - template: /eng/common/templates/post-build/post-build.yml
     parameters:
-      dependsOn:
-        - Windows_NT
-      queue:
-        name: Hosted VS2017
+      enableSymbolValidation: false
