@@ -34,10 +34,6 @@
   <PropertyGroup>
     <DotNetCliVersion>3.0.100-preview6-012264</DotNetCliVersion>
   </PropertyGroup>
-  <!-- Product Dependencies -->
-  <PropertyGroup>
-    <SystemResourcesExtensionsVersion>4.6.0-rc2.19458.3</SystemResourcesExtensionsVersion>
-  </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386
 
