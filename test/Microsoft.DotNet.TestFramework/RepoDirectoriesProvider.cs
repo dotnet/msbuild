@@ -98,6 +98,17 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             var lines = File.ReadAllLines(versionFile);
             DotnetRidUnderTest = lines[2].Trim();
 
+            //  Set up test hooks for in-process tests
+            Environment.SetEnvironmentVariable(
+                Cli.Utils.Constants.MSBUILD_EXE_PATH,
+                Path.Combine(SdkFolderUnderTest, "MSBuild.dll"));
+
+            Environment.SetEnvironmentVariable(
+                "MSBuildSDKsPath",
+                Path.Combine(SdkFolderUnderTest, "Sdks"));
+
+            Cli.Utils.MSBuildForwardingAppWithoutLogging.MSBuildExtensionsPathTestHook = RepoDirectoriesProvider.SdkFolderUnderTest;
+
 
         }
 

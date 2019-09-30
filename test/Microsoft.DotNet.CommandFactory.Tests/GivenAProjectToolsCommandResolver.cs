@@ -398,16 +398,6 @@ namespace Microsoft.DotNet.Tests
 
         private ProjectToolsCommandResolver SetupProjectToolsCommandResolver()
         {
-            Environment.SetEnvironmentVariable(
-                Constants.MSBUILD_EXE_PATH,
-                Path.Combine(RepoDirectoriesProvider.SdkFolderUnderTest, "MSBuild.dll"));
-
-            Environment.SetEnvironmentVariable(
-                "MSBuildSDKsPath",
-                Path.Combine(RepoDirectoriesProvider.SdkFolderUnderTest, "Sdks"));
-
-            MSBuildForwardingAppWithoutLogging.MSBuildExtensionsPathTestHook = RepoDirectoriesProvider.SdkFolderUnderTest;
-
             var packagedCommandSpecFactory = new PackagedCommandSpecFactoryWithCliRuntime();
 
             var projectToolsCommandResolver =
