@@ -100,16 +100,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
                 .WithSource()
                 .WithProjectChanges((projectPath, project) =>
-                {
-                    if (Path.GetExtension(projectPath) == ".vcxproj")
-                    {
-                        XNamespace ns = project.Root.Name.Namespace;
-
-                        project.Root.Descendants(ns + "PropertyGroup")
-                                    .Descendants(ns + "TargetFramework")
-                                    .Single().Value = "net472";
-                    }
-                });
+                    ChangeTargetFramework(projectPath, project, "net472"));
 
             new BuildCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest"))
                 .Execute("-p:Platform=x64")
@@ -117,6 +108,35 @@ namespace Microsoft.NET.Build.Tests
                 .Fail()
                 .And
                 .HaveStdOutContaining(Strings.NETFrameworkWithoutUsingNETSdkDefaults);
+        }
+
+        [FullMSBuildOnlyFact]
+        public void It_fails_with_error_message_on_tfm_lower_than_3_1()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
+                .WithSource()
+                .WithProjectChanges((projectPath, project) =>
+                    ChangeTargetFramework(projectPath, project, "netcoreapp3.0"));
+
+            new BuildCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest"))
+                .Execute("-p:Platform=x64")
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining(Strings.CppRequiresTFMVersion31);
+        }
+
+        private void ChangeTargetFramework(string projectPath, XDocument project, string targetFramework)
+        {
+            if (Path.GetExtension(projectPath) == ".vcxproj")
+            {
+                XNamespace ns = project.Root.Name.Namespace;
+
+                project.Root.Descendants(ns + "PropertyGroup")
+                                            .Descendants(ns + "TargetFramework")
+                                            .Single().Value = targetFramework;
+            }
         }
     }
 }

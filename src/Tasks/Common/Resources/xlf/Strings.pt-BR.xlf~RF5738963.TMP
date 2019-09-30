@@ -1,180 +1,180 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.resx">
+  <file datatype="xml" source-language="en" target-language="pt-BR" original="../Strings.resx">
     <body>
       <trans-unit id="AddResourceWithNonIntegerResource">
         <source>NETSDK1076: AddResource can only be used with integer resource types.</source>
-        <target state="translated">NETSDK1076: AddResource 只能與整數資源類型一起使用。</target>
+        <target state="translated">NETSDK1076: AddResource só pode ser usado com os tipos de recursos inteiros.</target>
         <note>{StrBegin="NETSDK1076: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
         <source>NETSDK1070: The application configuration file must have root configuration element.</source>
-        <target state="translated">NETSDK1070: 應用程式組態檔必須有根組態元素。</target>
+        <target state="translated">NETSDK1070: o arquivo de configuração do aplicativo deve ter um elemento de configuração raiz.</target>
         <note>{StrBegin="NETSDK1070: "}</note>
       </trans-unit>
       <trans-unit id="AppHostCreationFailedWithRetry">
         <source>NETSDK1113: Failed to create apphost (attempt {0} out of {1}): {2}</source>
-        <target state="translated">NETSDK1113: 無法建立 apphost (嘗試 {0} 之 {1} 次): {2}</target>
+        <target state="translated">NETSDK1113: falha ao criar appHost (tentativa {0} de {1}): {2}</target>
         <note>{StrBegin="NETSDK1113: "}</note>
       </trans-unit>
       <trans-unit id="AppHostCustomizationRequiresWindowsHostWarning">
         <source>NETSDK1074: The application host executable will not be customized because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
-        <target state="translated">NETSDK1074: 因為正在新增需要在 Windows (不含 Nano 伺服器) 上執行組建的資源，所以該應用程式主機可執行檔無法進行自訂。</target>
+        <target state="translated">NETSDK1074: o host do aplicativo executável não será personalizado porque a adição de recursos requer que o build seja executado no Windows (excluindo Nano Server).</target>
         <note>{StrBegin="NETSDK1074: "}</note>
       </trans-unit>
       <trans-unit id="AppHostHasBeenModified">
         <source>NETSDK1029: Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
-        <target state="translated">NETSDK1029: 無法使用 '{0}' 作為應用程式主機可執行檔，因為它並未包含應有的預留位置位元組序列 '{1}'，其會標示寫入應用程式名稱的位置。</target>
+        <target state="translated">NETSDK1029: Não é possível usar '{0}' como executável do host de aplicativo, porque ele não contém a sequência de bytes de espaço reservado esperada '{1}' que marcaria o local em que o nome do aplicativo seria gravado.</target>
         <note>{StrBegin="NETSDK1029: "}</note>
       </trans-unit>
       <trans-unit id="AppHostNotWindows">
         <source>NETSDK1078: Unable to use '{0}' as application host executable because it's not a Windows PE file.</source>
-        <target state="translated">NETSDK1078: 因為 '{0}' 並非 Windows PE 檔案，所以無法將其用為應用程式主機可執行檔。</target>
+        <target state="translated">NETSDK1078: não é possível usar '{0}' como um host de aplicativo executável porque ele não é um arquivo do Windows PE.</target>
         <note>{StrBegin="NETSDK1078: "}</note>
       </trans-unit>
       <trans-unit id="AppHostNotWindowsCLI">
         <source>NETSDK1072: Unable to use '{0}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem.</source>
-        <target state="translated">NETSDK1072: 因為 '{0}' 並非 CUI (主控台) 子系統的 Windows 可執行檔，所以其無法做為應用程式主機可執行檔。</target>
+        <target state="translated">NETSDK1072: não é possível usar '{0}' como um host de aplicativo executável porque ele não é um executável do Windows para o subsistema CUI (Console).</target>
         <note>{StrBegin="NETSDK1072: "}</note>
       </trans-unit>
       <trans-unit id="AspNetCoreAllNotSupported">
         <source>NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</source>
-        <target state="translated">NETSDK1079: 目標為 .NET Core 3.0 或更新的版本時，不支援 Microsoft.AspNetCore.All 套件。應改用 Microsoft.AspNetCore.App 的 FrameworkReference，且會由 Microsoft.NET.Sdk.Web 隱含包含。</target>
+        <target state="translated">NETSDK1079: o pacote Microsoft.AspNetCore.All não tem suporte quando direcionado ao .NET Core 3.0 ou superior. Um FrameworkReference para Microsoft.AspNetCore.App deve ser usado e será incluído implicitamente pelo Microsoft.NET.Sdk.Web.</target>
         <note>{StrBegin="NETSDK1079: "}</note>
       </trans-unit>
       <trans-unit id="AspNetCoreUsesFrameworkReference">
         <source>NETSDK1080: A PackageReference to Microsoft.AspNetCore.App is not necessary when targeting .NET Core 3.0 or higher. If Microsoft.NET.Sdk.Web is used, the shared framework will be referenced automatically. Otherwise, the PackageReference should be replaced with a FrameworkReference.</source>
-        <target state="translated">NETSDK1080: 目標為 .NET Core 3.0 或更高的版本時，不需要 Microsoft.AspNetCore.App 的 PackageReference。若是使用 Microsoft.NET.Sdk.Web，將會自動參考共用的架構。否則，應以 FrameworkReference 取代 PackageReference。</target>
+        <target state="translated">NETSDK1080: um PackageReference para Microsoft.AspNetCore.App não é necessário quando direcionado ao .NET Core 3.0 ou superior. Se o Microsoft.NET.Sdk.Web for usado, a estrutura compartilhada será referenciada automaticamente. Caso contrário, o PackageReference deverá ser substituído por um FrameworkReference.</target>
         <note>{StrBegin="NETSDK1080: "}</note>
       </trans-unit>
       <trans-unit id="AssetPreprocessorMustBeConfigured">
         <source>NETSDK1017: Asset preprocessor must be configured before assets are processed.</source>
-        <target state="translated">NETSDK1017: 必須設定資產前置處理器，才可處理資產。</target>
+        <target state="translated">NETSDK1017: O pré-processador de ativos precisa ser configurado antes que os ativos sejam processados.</target>
         <note>{StrBegin="NETSDK1017: "}</note>
       </trans-unit>
       <trans-unit id="AssetsFileMissingRuntimeIdentifier">
         <source>NETSDK1047: Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
-        <target state="translated">NETSDK1047: 資產檔 '{0}' 沒有 '{1}' 的目標。請確定已執行還原，且在專案的 TargetFrameworks 中已納入 '{2}'。有可能也需要在專案的 RuntimeIdentifiers 中納入 '{3}'。</target>
+        <target state="translated">NETSDK1047: O arquivo de ativos '{0}' não tem um destino para '{1}'. Verifique se a restauração foi executada e se você incluiu '{2}' no TargetFrameworks do projeto. Talvez você também precise incluir '{3}' no RuntimeIdentifiers do projeto.</target>
         <note>{StrBegin="NETSDK1047: "}</note>
       </trans-unit>
       <trans-unit id="AssetsFileMissingTarget">
         <source>NETSDK1005: Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project.</source>
-        <target state="translated">NETSDK1005: 資產檔 '{0}' 沒有 '{1}' 的目標。請確定已執行還原作業，且在您專案的 TargetFrameworks 中已納入 '{2}'。</target>
+        <target state="translated">NETSDK1005: O arquivo de ativos '{0}' não tem um destino para '{1}'. Verifique se a restauração foi executada e se você incluiu '{2}' no TargetFrameworks do projeto.</target>
         <note>{StrBegin="NETSDK1005: "}</note>
       </trans-unit>
       <trans-unit id="AssetsFileNotFound">
         <source>NETSDK1004: Assets file '{0}' not found. Run a NuGet package restore to generate this file.</source>
-        <target state="translated">NETSDK1004: 找不到資產檔案 '{0}'。請執行 NuGet 套件還原，以產生此檔案。</target>
+        <target state="translated">NETSDK1004: Arquivo de ativos '{0}' não encontrado. Execute uma restauração de pacote do NuGet para gerar esse arquivo.</target>
         <note>{StrBegin="NETSDK1004: "}</note>
       </trans-unit>
       <trans-unit id="AssetsFileNotSet">
         <source>NETSDK1063: The path to the project assets file was not set. Run a NuGet package restore to generate this file.</source>
-        <target state="translated">NETSDK1063: 未設定到達專案資產檔案的路徑。請執行 NuGet 套件還原，以產生此檔案。</target>
+        <target state="translated">NETSDK1063: O caminho para o arquivo de ativos do projeto não foi configurado. Execute uma restauração de pacote do NuGet para gerar esse arquivo.</target>
         <note>{StrBegin="NETSDK1063: "}</note>
       </trans-unit>
       <trans-unit id="AssetsFilePathNotRooted">
         <source>NETSDK1006: Assets file path '{0}' is not rooted. Only full paths are supported.</source>
-        <target state="translated">NETSDK1006: 資產檔案路徑 '{0}' 並非根目錄。僅支援完整的路徑。</target>
+        <target state="translated">NETSDK1006: O caminho de arquivo de ativos '{0}' não tem raiz. Há suporte apenas para caminhos completos.</target>
         <note>{StrBegin="NETSDK1006: "}</note>
       </trans-unit>
       <trans-unit id="AtLeastOneTargetFrameworkMustBeSpecified">
         <source>NETSDK1001: At least one possible target framework must be specified.</source>
-        <target state="translated">NETSDK1001: 至少必須指定一個可能的目標架構。</target>
+        <target state="translated">NETSDK1001: É necessário especificar pelo menos uma estrutura de destino possível.</target>
         <note>{StrBegin="NETSDK1001: "}</note>
       </trans-unit>
       <trans-unit id="CannotCreateReadyToRunImagesForLibProjects">
         <source>NETSDK1108: ReadyToRun compilation will be skipped because it is only supported for executable projects.</source>
-        <target state="translated">NETSDK1108: 因為只有可執行專案支援 ReadyToRun 編譯，所以將予以跳過。</target>
+        <target state="translated">NETSDK1108: a compilação de ReadyToRun será ignorada porque só tem suporte em projetos executáveis.</target>
         <note>{StrBegin="NETSDK1108: "}</note>
       </trans-unit>
       <trans-unit id="CannotEmbedClsidMapIntoComhost">
         <source>NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
-        <target state="translated">NETSDK1092: 因為正在新增需要在 Windows (不含 Nano 伺服器) 上執行組建的資源，所以無法將 CLSIDMap 內嵌到 COM 主機上。</target>
+        <target state="translated">NETSDK1092: o CLSIDMap não pode ser inserido no host COM porque a adição de recursos requer que o build seja executado no Windows (excluindo Nano Server).</target>
         <note>{StrBegin="NETSDK1092: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindApphostForRid">
         <source>NETSDK1065: Cannot find app host for {0}. {0} could be an invalid runtime identifier (RID). For more information about RID, see https://aka.ms/rid-catalog.</source>
-        <target state="translated">NETSDK1065: 找不到 {0} 的應用程式主機。{0} 可能是無效的執行階段識別碼 (RID)。如需有關 RID 的詳細資訊，請參閱 https://aka.ms/rid-catalog。</target>
+        <target state="translated">NETSDK1065: Não é possível encontrar o host do aplicativo para {0}. {0} poderia ser um RID (identificador de runtime inválido). Para obter mais informações sobre RID, confira https://aka.ms/rid-catalog.</target>
         <note>{StrBegin="NETSDK1065: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindComhost">
         <source>NETSDK1091: Unable to find a .NET Core COM host. The .NET Core COM host is only available on .NET Core 3.0 or higher when targeting Windows.</source>
-        <target state="translated">NETSDK1091: 找不到 .NET Core COM 主機。目標為 Windows 時，只有在 .NET Core 3.0 或更高的版本上才可使用 .NET Core COM 主機。</target>
+        <target state="translated">NETSDK1091: não é possível encontrar um host .NET Core COM. O host .NET Core COM só está disponível no .NET Core 3.0 ou superior quando direcionado ao Windows.</target>
         <note>{StrBegin="NETSDK1091: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindIjwhost">
-        <source>NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.1 or higher when targeting Windows.</source>
-        <target state="new">NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.1 or higher when targeting Windows.</target>
+        <source>NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.0 or higher when targeting Windows.</source>
+        <target state="new">NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.0 or higher when targeting Windows.</target>
         <note>{StrBegin="NETSDK1114: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
         <source>NETSDK1007: Cannot find project info for '{0}'. This can indicate a missing project reference.</source>
-        <target state="translated">NETSDK1007: 找不到 '{0}' 的專案資訊。這可能表示遺漏專案參考。</target>
+        <target state="translated">NETSDK1007: Não é possível localizar informações do projeto para '{0}'. Isso pode indicar a ausência de uma referência de projeto.</target>
         <note>{StrBegin="NETSDK1007: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
         <source>NETSDK1032: The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
-        <target state="translated">NETSDK1032: RuntimeIdentifier 平台 '{0}' 必須與 PlatformTarget '{1}' 相容。</target>
+        <target state="translated">NETSDK1032: A plataforma '{0}' do RuntimeIdentifier e o PlatformTarget '{1}' precisam ser compatíveis.</target>
         <note>{StrBegin="NETSDK1032: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSelfContainedWithoutRuntimeIdentifier">
         <source>NETSDK1031: It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</source>
-        <target state="translated">NETSDK1031: 不支援在未指定 RuntimeIdentifier 的情況下，建置或發行獨立的應用程式。請指定 RuntimeIdentifier，或將 SelfContained 設為 False。</target>
+        <target state="translated">NETSDK1031: Não há suporte para criar ou publicar um aplicativo autossuficiente sem especificar um RuntimeIdentifier. Especifique um RuntimeIdentifier ou defina SelfContained como falso.</target>
         <note>{StrBegin="NETSDK1031: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutRuntimeIdentifier">
         <source>NETSDK1097: It is not supported to publish an application to a single-file without specifying a RuntimeIdentifier. Please either specify a RuntimeIdentifier or set PublishSingleFile to false.</source>
-        <target state="translated">NETSDK1097: 不支援在未指定 RuntimeIdentifier 的情況下，將應用程式發行到單一檔案。請指定 RuntimeIdentifier，或將 PublishSingleFile 設為 False。</target>
+        <target state="translated">NETSDK1097: não há suporte para publicar um aplicativo em um único arquivo sem especificar um RuntimeIdentifier. Especifique um RuntimeIdentifier ou defina PublishSingleFile como false.</target>
         <note>{StrBegin="NETSDK1097: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutAppHost">
         <source>NETSDK1098: Applications published to a single-file are required to use the application host. Please either set PublishSingleFile to false or set UseAppHost to true.</source>
-        <target state="translated">NETSDK1098: 發行到單一檔案的應用程式必須使用應用程式主機。請將 PublishSingleFile 設為 false，或將 UseAppHost 設為 true。</target>
+        <target state="translated">NETSDK1098: são necessários aplicativos publicados em um arquivo único para usar o host de aplicativo. Defina PublishSingleFile como false ou defina UseAppHost como true.</target>
         <note>{StrBegin="NETSDK1098: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutExecutable">
         <source>NETSDK1099: Publishing to a single-file is only supported for executable applications.</source>
-        <target state="translated">NETSDK1099: 只有可執行應用程式支援發行到單一檔案。</target>
+        <target state="translated">NETSDK1099: só há suporte para a publicação em um arquivo único em aplicativos executáveis.</target>
         <note>{StrBegin="NETSDK1099: "}</note>
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentifierAndVersion">
         <source>NETSDK1013: The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
-        <target state="translated">NETSDK1013: 無法辨識 TargetFramework 值 '{0}'。拼字可能有誤。若非此情況，即必須明確指定 TargetFrameworkIdentifier 及 (或) TargetFrameworkVersion 屬性。</target>
+        <target state="translated">NETSDK1013: O valor '{0}' do TargetFramework não foi reconhecido. Ele pode ter sido escrito com ortografia incorreta. Caso contrário, as propriedades TargetFrameworkIdentifier e/ou TargetFrameworkVersion precisarão ser especificadas explicitamente.</target>
         <note>{StrBegin="NETSDK1013: "}</note>
       </trans-unit>
       <trans-unit id="CannotUseSelfContainedWithoutAppHost">
         <source>NETSDK1067: Self-contained applications are required to use the application host. Either set SelfContained to false or set UseAppHost to true.</source>
-        <target state="translated">NETSDK1067: 需要獨立式應用程式，才可使用該應用程式主機。請將 SelfContained 設定為 False，或是將 UseAppHost 設定為 True。</target>
+        <target state="translated">NETSDK1067: os aplicativos independentes são necessários para utilizar o host do aplicativo. Defina SelfContained como falso ou defina UseAppHost como verdadeiro.</target>
         <note>{StrBegin="NETSDK1067: "}</note>
       </trans-unit>
       <trans-unit id="ChoosingAssemblyVersion_Info">
         <source>Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</source>
-        <target state="translated">因為 AssemblyVersion '{1}' 大於 '{2}'，所以選擇 '{0}'。</target>
+        <target state="translated">Escolhendo '{0}' porque AssemblyVersion '{1}' é maior que '{2}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="ChoosingCopyLocalArbitrarily_Info">
         <source>Choosing '{0}' arbitrarily as both items are copy-local and have equal file and assembly versions.</source>
-        <target state="translated">因為兩個項目都是複製到本機，而且具有相同的檔案和組件版本，所以任意選擇 '{0}'。</target>
+        <target state="translated">Escolhendo '{0}' arbitrariamente, pois os dois itens são de cópia local e têm versões iguais de arquivo e assembly.</target>
         <note />
       </trans-unit>
       <trans-unit id="ChoosingFileVersion_Info">
         <source>Choosing '{0}' because file version '{1}' is greater than '{2}'.</source>
-        <target state="translated">因為檔案版本 '{1}' 大於 '{2}'，所以選擇 '{0}'。</target>
+        <target state="translated">Escolhendo '{0}' porque a versão do arquivo '{1}' é maior que '{2}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="ChoosingPlatformItem_Info">
         <source>Choosing '{0}' because it is a platform item.</source>
-        <target state="translated">因為 '{0}' 為平台項目，所以選擇它。</target>
+        <target state="translated">Escolhendo '{0}' porque é um item de plataforma.</target>
         <note />
       </trans-unit>
       <trans-unit id="ChoosingPreferredPackage_Info">
         <source>Choosing '{0}' because it comes from a package that is preferred.</source>
-        <target state="translated">因為 '{0}' 來自慣用的套件，所以選擇它。</target>
+        <target state="translated">Escolhendo '{0}' porque vem de um pacote que é preferencial.</target>
         <note />
       </trans-unit>
       <trans-unit id="ClsidMapConflictingGuids">
         <source>NETSDK1089: The '{0}' and '{1}' types have the same CLSID '{2}' set in their GuidAttribute. Each COMVisible class needs to have a distinct guid for their CLSID.</source>
-        <target state="translated">NETSDK1089: '{0}' 與 '{1}' 類型在其 GuidAttribute 中設定了相同的 CLSID '{2}'。每個 COMVisible 類別對其 CLSID 都必須要有相異的 guid。</target>
+        <target state="translated">NETSDK1089: os tipos '{0}' e '{1}' têm o mesmo CLSID '{2}' definido em seu GuidAttribute. Cada classe COMVisible precisa ter um guid distinto para seus CLSID.</target>
         <note>{StrBegin="NETSDK1089: "}
 {0} - The first type with the conflicting guid.
 {1} - The second type with the conflicting guid.
@@ -182,200 +182,195 @@
       </trans-unit>
       <trans-unit id="ClsidMapExportedTypesRequireExplicitGuid">
         <source>NETSDK1088: The COMVisible class '{0}' must have a GuidAttribute with the CLSID of the class to be made visible to COM in .NET Core.</source>
-        <target state="translated">NETSDK1088: COMVisible 類別 '{0}' 必須要有 .NET Core 中 COM 可見到之 CLSID 類別的 GuidAttribute。</target>
+        <target state="translated">NETSDK1088: a classe COMVisible '{0}' deve ter um GuidAttribute com o CLSID da classe para fique visível para o COM no .NET Core.</target>
         <note>{StrBegin="NETSDK1088: "}
 {0} - The ComVisible class that doesn't have a GuidAttribute on it.</note>
       </trans-unit>
       <trans-unit id="ClsidMapInvalidAssembly">
         <source>NETSDK1090: The supplied assembly '{0}' is not valid. Cannot generate a CLSIDMap from it.</source>
-        <target state="translated">NETSDK1090: 提供的組件 '{0}' 無效。無法從其產生 CLSIDMap。</target>
+        <target state="translated">NETSDK1090: o assembly fornecido '{0}' não é válido. Não é possível gerar um CLSIDMap dele.</target>
         <note>{StrBegin="NETSDK1090: "}
 {0} - The path to the invalid assembly.</note>
       </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
         <source>NETSDK1014: Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</source>
-        <target state="translated">NETSDK1014: '{0}' 的內容項目設定了 '{1}'，但未提供 '{2}' 或 '{3}'。</target>
+        <target state="translated">NETSDK1014: O item de conteúdo para '{0}' define '{1}', mas não fornece '{2}' ou '{3}'.</target>
         <note>{StrBegin="NETSDK1014: "}</note>
       </trans-unit>
       <trans-unit id="ContentPreproccessorParameterRequired">
         <source>NETSDK1010: The '{0}' task must be given a value for parameter '{1}' in order to consume preprocessed content.</source>
-        <target state="translated">NETSDK1010: 必須為 '{0}' 工作指定參數 '{1}' 的值，才可取用前置處理過的內容。</target>
+        <target state="translated">NETSDK1010: A tarefa '{0}' precisa receber um valor para o parâmetro '{1}' para consumir o conteúdo pré-processado.</target>
         <note>{StrBegin="NETSDK1010: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_DoesNotExist_Info">
         <source>Could not determine winner because '{0}' does not exist.</source>
-        <target state="translated">因為 '{0}' 不存在，所以無法判斷成功者。</target>
+        <target state="translated">Não foi possível determinar o vencedor porque '{0}' não existe.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_EqualVersions_Info">
         <source>Could not determine winner due to equal file and assembly versions.</source>
-        <target state="translated">因為檔案和組件版本相同，所以無法判斷成功者。</target>
+        <target state="translated">Não foi possível determinar o vencedor porque as versões de arquivo e de assembly são iguais.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_NoFileVersion_Info">
         <source>Could not determine a winner because '{0}' has no file version.</source>
-        <target state="translated">因為 '{0}' 沒有檔案版本，所以無法判斷成功者。</target>
+        <target state="translated">Não foi possível determinar um vencedor porque '{0}' não tem versão de arquivo.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_NotAnAssembly_Info">
         <source>Could not determine a winner because '{0}' is not an assembly.</source>
-        <target state="translated">因為 '{0}' 並非組件，所以無法判斷成功者。</target>
+        <target state="translated">Não foi possível determinar um vencedor porque '{0}' não é um assembly.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotLoadPlatformManifest">
         <source>NETSDK1042: Could not load PlatformManifest from '{0}' because it did not exist.</source>
-        <target state="translated">NETSDK1042: 無法從 '{0}' 載入 PlatformManifest，因為它並不存在。</target>
+        <target state="translated">NETSDK1042: Não foi possível carregar PlatformManifest de '{0}' porque ele não existia.</target>
         <note>{StrBegin="NETSDK1042: "}</note>
-      </trans-unit>
-      <trans-unit id="CppRequiresTFMVersion31">
-        <source>NETSDK1120: C++/CLI projects targeting .NET Core require a target framework of at least 'netcoreapp3.1'.</source>
-        <target state="new">NETSDK1120: C++/CLI projects targeting .NET Core require a target framework of at least 'netcoreapp3.1'.</target>
-        <note>{StrBegin="NETSDK1120: "}</note>
       </trans-unit>
       <trans-unit id="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21">
         <source>NETSDK1055: DotnetTool does not support target framework lower than netcoreapp2.1.</source>
-        <target state="translated">NETSDK1055: DotnetTool 並不支援低於 netcoreapp2.1 的目標架構。</target>
+        <target state="translated">NETSDK1055: O DotnetTool não é compatível com uma estrutura de destino inferior ao netcoreapp2.1.</target>
         <note>{StrBegin="NETSDK1055: "}</note>
       </trans-unit>
       <trans-unit id="DotnetToolOnlySupportNetcoreapp">
         <source>NETSDK1054: only supports .NET Core.</source>
-        <target state="translated">NETSDK1054: 只支援 .NET Core。</target>
+        <target state="translated">NETSDK1054: É compatível apenas com o .NET Core.</target>
         <note>{StrBegin="NETSDK1054: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateItemsError">
         <source>NETSDK1022: Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
-        <target state="translated">NETSDK1022: 包含 '{0}' 個重複的項目。根據預設，.NET SDK 會包含來自您專案目錄的 '{0}' 個項目。您可以從專案檔移除這些項目，或若想要在專案檔中明確地納入這些項目，也可以將 '{1}' 屬性設定為 '{2}'。如需詳細資訊，請參閱 {4}。重複的項目為: {3}</target>
+        <target state="translated">NETSDK1022: Itens '{0}' duplicados foram incluídos. O SDK do .NET inclui '{0}' itens do diretório do projeto por padrão. Você poderá remover esses itens do arquivo de projeto ou configurar a propriedade '{1}' como '{2}' se desejar incluí-los explicitamente no arquivo de projeto. Para obter mais informações, confira {4}. Os itens duplicados eram: {3}</target>
         <note>{StrBegin="NETSDK1022: "}</note>
       </trans-unit>
       <trans-unit id="DuplicatePreprocessorToken">
         <source>NETSDK1015: The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</source>
-        <target state="translated">NETSDK1015: 已為前置處理器語彙基元 '{0}' 指定多個值。正在選擇 '{1}' 作為值。</target>
+        <target state="translated">NETSDK1015: O token de pré-processador '{0}' recebeu mais de um valor. Escolhendo '{1}' como o valor.</target>
         <note>{StrBegin="NETSDK1015: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateRuntimePackAsset">
         <source>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET Core team here: https://aka.ms/dotnet-sdk-issue.</source>
-        <target state="translated">NETSDK1110: 執行階段套件中有多個資產具有相同的目的地子路徑 '{0}'。請於此處將錯誤回報給 .NET Core 小組: https://aka.ms/dotnet-sdk-issue。</target>
+        <target state="translated">NETSDK1110: Mais de um ativo no pacote de runtime tem o mesmo subcaminho de destino de '{0}'. Relate esse erro à equipe do .NET Core: https://aka.ms/dotnet-sdk-issue.</target>
         <note>{StrBegin="NETSDK1110: "}</note>
       </trans-unit>
       <trans-unit id="EncounteredConflict_Info">
         <source>Encountered conflict between '{0}' and '{1}'.</source>
-        <target state="translated">'{0}' 與 '{1}' 之間發生衝突。</target>
+        <target state="translated">Encontrado um conflito entre '{0}' e '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorParsingFrameworkListInvalidValue">
         <source>NETSDK1051: Error parsing FrameworkList from '{0}'.  {1} '{2}' was invalid.</source>
-        <target state="translated">NETSDK1051: 剖析來自 '{0}' 的 FrameworkList 時發生錯誤。{1} '{2}' 無效。</target>
+        <target state="translated">NETSDK1051: Erro ao analisar FrameworkList de '{0}'.  {1} '{2}' era inválido.</target>
         <note>{StrBegin="NETSDK1051: "}</note>
       </trans-unit>
       <trans-unit id="ErrorParsingPlatformManifest">
         <source>NETSDK1043: Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</source>
-        <target state="translated">NETSDK1043: 從 '{0}' 行 {1} 剖析 PlatformManifest 時發生錯誤。各行的格式必須為 {2}。</target>
+        <target state="translated">NETSDK1043: Erro ao analisar PlatformManifest de '{0}', linha {1}. As linhas precisam ter o formato {2}.</target>
         <note>{StrBegin="NETSDK1043: "}</note>
       </trans-unit>
       <trans-unit id="ErrorParsingPlatformManifestInvalidValue">
         <source>NETSDK1044: Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</source>
-        <target state="translated">NETSDK1044: 從 '{0}' 行 {1} 剖析 PlatformManifest 時發生錯誤。{2} '{3}' 無效。</target>
+        <target state="translated">NETSDK1044: Erro ao analisar PlatformManifest de '{0}', linha {1}. {2} '{3}' era inválido.</target>
         <note>{StrBegin="NETSDK1044: "}</note>
       </trans-unit>
       <trans-unit id="ErrorReadingAssetsFile">
         <source>NETSDK1060: Error reading assets file: {0}</source>
-        <target state="translated">NETSDK1060: 讀取資產檔案時發生錯誤: {0}</target>
+        <target state="translated">NETSDK1060: Erro ao ler o arquivo de ativos: {0}</target>
         <note>{StrBegin="NETSDK1060: "}</note>
       </trans-unit>
       <trans-unit id="FailedToDeleteApphost">
         <source>NETSDK1111: Failed to delete output apphost: {0}</source>
-        <target state="translated">NETSDK1111: 無法刪除輸出 apphost: {0}</target>
+        <target state="translated">NETSDK1111: Falha ao excluir o apphost de saída: {0}</target>
         <note>{StrBegin="NETSDK1111: "}</note>
       </trans-unit>
       <trans-unit id="FailedToLockResource">
         <source>NETSDK1077: Failed to lock resource.</source>
-        <target state="translated">NETSDK1077: 無法鎖定資源。</target>
+        <target state="translated">NETSDK1077: falha ao bloquear o recurso.</target>
         <note>{StrBegin="NETSDK1077: "}</note>
       </trans-unit>
       <trans-unit id="FileNameIsTooLong">
         <source>NETSDK1030: Given file name '{0}' is longer than 1024 bytes</source>
-        <target state="translated">NETSDK1030: 指定的檔案名稱 '{0}'，長度超過 1024 個位元組</target>
+        <target state="translated">NETSDK1030: O nome de arquivo '{0}' fornecido tem mais de 1024 bytes</target>
         <note>{StrBegin="NETSDK1030: "}</note>
       </trans-unit>
       <trans-unit id="FolderAlreadyExists">
         <source>NETSDK1024: Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</source>
-        <target state="translated">NETSDK1024: 資料夾 '{0}' 已存在，請將其刪除或提供不同的 ComposeWorkingDir</target>
+        <target state="translated">NETSDK1024: A pasta '{0}' já existe. Exclua essa pasta ou forneça um ComposeWorkingDir diferente</target>
         <note>{StrBegin="NETSDK1024: "}</note>
       </trans-unit>
       <trans-unit id="FrameworkDependentAppHostRequiresVersion21">
         <source>NETSDK1068: The framework-dependent application host requires a target framework of at least 'netcoreapp2.1'.</source>
-        <target state="translated">NETSDK1068: 與架構相依的應用程式主機，至少需要 'netcoreapp2.1' 的目標架構。</target>
+        <target state="translated">NETSDK1068: o host do aplicativo dependente de estrutura exige uma estrutura de destino de, pelo menos, 'netcoreapp2.1'.</target>
         <note>{StrBegin="NETSDK1068: "}</note>
       </trans-unit>
       <trans-unit id="FrameworkListPathNotRooted">
         <source>NETSDK1052: Framework list file path '{0}' is not rooted. Only full paths are supported.</source>
-        <target state="translated">NETSDK1052: 架構清單路徑 '{0}' 並非根目錄。只支援完整路徑。</target>
+        <target state="translated">NETSDK1052: O caminho de arquivo de lista de estrutura '{0}' não tem raiz. Há suporte apenas para caminhos completos.</target>
         <note>{StrBegin="NETSDK1052: "}</note>
       </trans-unit>
       <trans-unit id="FrameworkReferenceDuplicateError">
         <source>NETSDK1087: Multiple FrameworkReference items for '{0}' were included in the project.</source>
-        <target state="translated">NETSDK1087: 專案中已包含多個 '{0}' 的 FrameworkReference 項目。</target>
+        <target state="translated">NETSDK1087: vários itens de FrameworkReference para '{0}' foram incluídos no projeto.</target>
         <note>{StrBegin="NETSDK1087: "}</note>
       </trans-unit>
       <trans-unit id="FrameworkReferenceOverrideWarning">
         <source>NETSDK1086: A FrameworkReference for '{0}' was included in the project. This is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
-        <target state="translated">NETSDK1086: 專案中已包含 '{0}' 的 FrameworkReference。.NET SDK 會隱含參考它，而您通常不需要從專案參考它。如需詳細資訊，請參閱 {1}</target>
+        <target state="translated">NETSDK1086: uma FrameworkReference para '{0}' foi incluída no projeto. Isso é referenciado implicitamente pelo SKD do .NET e, geralmente, não é necessário referenciar no seu projeto. Para obter mais informações, confira {1}</target>
         <note>{StrBegin="NETSDK1086: "}</note>
       </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
         <source>NETSDK1049: Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0} {1}</source>
-        <target state="translated">NETSDK1049: 解析的檔案含有毀損的映像、沒有中繼資料，或有其他無法存取的情況。{0} {1}</target>
+        <target state="translated">NETSDK1049: O arquivo resolvido tem uma imagem inválida, não tem metadados ou está inacessível. {0} {1}</target>
         <note>{StrBegin="NETSDK1049: "}</note>
       </trans-unit>
       <trans-unit id="ILLinkNotSupportedError">
         <source>NETSDK1102: Optimizing assemblies for size is not supported for the selected publish configuration. Please ensure that you are publishing a self-contained app.</source>
-        <target state="translated">NETSDK1102: 選取的發佈設定不支援最佳化組件的大小。請確定您發佈的是獨立式應用程式。</target>
+        <target state="translated">NETSDK1102: não há suporte para a otimização de assemblies para tamanho na configuração de publicação selecionada. Verifique se você está publicando um aplicativo independente.</target>
         <note>{StrBegin="NETSDK1102: "}</note>
       </trans-unit>
       <trans-unit id="ILLink_Info">
         <source>Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
-        <target state="translated">最佳化組件的大小可能會變更應用程式的行為。發佈後請務必加以測試。請參閱: https://aka.ms/dotnet-illink</target>
+        <target state="translated">Otimizando assemblies para tamanho, o que pode alterar o comportamento do aplicativo. Não se esqueça de testar após a publicação. Confira: https://aka.ms/dotnet-illink</target>
         <note />
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
         <source>NETSDK1020: Package Root {0} was incorrectly given for Resolved library {1}</source>
-        <target state="translated">NETSDK1020: 為已解析的程式庫 {1} 指定的套件根 {0} 不正確</target>
+        <target state="translated">NETSDK1020: A raiz do pacote {0} foi atribuída incorretamente para a biblioteca resolvida {1}</target>
         <note>{StrBegin="NETSDK1020: "}</note>
       </trans-unit>
       <trans-unit id="IncorrectTargetFormat">
         <source>NETSDK1025: The target manifest {0} provided is of not the correct format</source>
-        <target state="translated">NETSDK1025: 提供的目標資訊清單 {0} 格式不正確</target>
+        <target state="translated">NETSDK1025: o manifesto de destino {0} fornecido não está no formato correto</target>
         <note>{StrBegin="NETSDK1025: "}</note>
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
         <source>NETSDK1003: Invalid framework name: '{0}'.</source>
-        <target state="translated">NETSDK1003: 架構名稱 '{0}' 無效。</target>
+        <target state="translated">NETSDK1003: Nome de estrutura inválido: '{0}'.</target>
         <note>{StrBegin="NETSDK1003: "}</note>
       </trans-unit>
       <trans-unit id="InvalidItemSpecToUse">
         <source>NETSDK1058: Invalid value for ItemSpecToUse parameter: '{0}'.  This property must be blank or set to 'Left' or 'Right'</source>
-        <target state="translated">NETSDK1058: ItemSpecToUse 參數的值無效: '{0}'。此屬性必須為空白或設定為 'Left' 或 'Right'</target>
+        <target state="translated">NETSDK1058: Valor inválido para o parâmetro ItemSpecToUse: '{0}'. Essa propriedade precisa estar em branco ou ser definida como 'Left' ou 'Right'</target>
         <note>{StrBegin="NETSDK1058: "}
 The following are names of parameters or literal values and should not be translated: ItemSpecToUse, Left, Right</note>
       </trans-unit>
       <trans-unit id="InvalidNuGetVersionString">
         <source>NETSDK1018: Invalid NuGet version string: '{0}'.</source>
-        <target state="translated">NETSDK1018: NuGet 版本字串無效: '{0}'。</target>
+        <target state="translated">NETSDK1018: Cadeia de caracteres de versão do NuGet inválida: '{0}'.</target>
         <note>{StrBegin="NETSDK1018: "}</note>
       </trans-unit>
       <trans-unit id="InvalidResourceUpdate">
         <source>NETSDK1075: Update handle is invalid. This instance may not be used for further updates.</source>
-        <target state="translated">NETSDK1075: 更新控制代碼無效。此執行個體無法用於進一步更新。</target>
+        <target state="translated">NETSDK1075: o identificador de atualização não é válido. Esta instância não pode ser usada para obter atualizações.</target>
         <note>{StrBegin="NETSDK1075: "}</note>
       </trans-unit>
       <trans-unit id="InvalidRollForwardValue">
         <source>NETSDK1104: RollForward value '{0}' is invalid. Allowed values are {1}.</source>
-        <target state="translated">NETSDK1104: RollForward 值 '{0}' 無效。允許的值為 {1}。</target>
+        <target state="translated">NETSDK1104: o valor de RollForward '{0}' é inválido. Os valores permitidos são {1}.</target>
         <note>{StrBegin="NETSDK1104: "}</note>
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
         <source>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead. To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish. Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore. For more information, see https://aka.ms/dotnet-runtime-patch-selection.</source>
-        <target state="translated">NETSDK1061: 專案是使用 {0} 版本 {1} 還原的，但依照目前設定，使用的版本會是 {2}。若要解決此問題，請確認用於還原與後續作業 (例如建置或發佈) 的設定相同。一般而言，若在建置或發佈期間設定了 RuntimeIdentifier，但在還原期間未加以設定，就可能發生這個問題。如需詳細資訊，請參閱 https://aka.ms/dotnet-runtime-patch-selection。</target>
+        <target state="translated">NETSDK1061: o projeto foi restaurado usando o {0} versão {1}, mas, com as configurações atuais, a versão {2} seria usada. Para resolver esse problema, verifique se as mesmas configurações são usadas para restauração e para operações subsequentes, como compilação ou publicação. Normalmente, esse problema poderá ocorrer se a propriedade RuntimeIdentifier for definida durante a compilação ou a publicação, mas não durante a restauração. Para obter mais informações, consulte https://aka.ms/dotnet-runtime-patch-selection.</target>
         <note>{StrBegin="NETSDK1061: "}
 {0} - Package Identifier for platform package
 {1} - Restored version of platform package
@@ -383,17 +378,17 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="MissingItemMetadata">
         <source>NETSDK1008: Missing '{0}' metadata on '{1}' item '{2}'.</source>
-        <target state="translated">NETSDK1008: '{1}' 項目 '{2}' 上遺漏 '{0}' 中繼資料。</target>
+        <target state="translated">NETSDK1008: Metadados '{0}' ausentes no item '{1}' '{2}'.</target>
         <note>{StrBegin="NETSDK1008: "}</note>
       </trans-unit>
       <trans-unit id="MultipleFilesResolved">
         <source>NETSDK1021: More than one file found for {0}</source>
-        <target state="translated">NETSDK1021: 找到一個以上 {0} 的檔案</target>
+        <target state="translated">NETSDK1021: Mais de um arquivo encontrado para {0}</target>
         <note>{StrBegin="NETSDK1021: "}</note>
       </trans-unit>
       <trans-unit id="NETFrameworkToNonBuiltInNETStandard">
         <source>NETSDK1069: This project uses a library that targets .NET Standard 1.5 or higher, and the project targets a version of .NET Framework that doesn't have built-in support for that version of .NET Standard. Visit https://aka.ms/net-standard-known-issues for a set of known issues. Consider retargeting to .NET Framework 4.7.2.</source>
-        <target state="translated">NETSDK1069: 此專案使用以 .NET Standard 1.5 或更新版本為目標的程式庫，而專案的目標 .NET Framework 版本則為尚未具備該 .NET Standard 版本內建支援的 .NET Framework。請瀏覽 https://aka.ms/net-standard-known-issues，以了解已知問題的集合。請考慮轉為以 .NET Framework 4.7.2 為目標。</target>
+        <target state="translated">NETSDK1069: este projeto utiliza uma biblioteca que tem como destino o .NET Standard 1.5 ou superior, e o projeto tem como destino uma versão do .NET Framework que não tem suporte interno para essa versão do .NET Standard. Visite o site https://aka.ms/net-standard-known-issues para ter acesso a uma variedade de problemas conhecidos. Considere alterar o destino para o .NET Framework 4.7.2.</target>
         <note>{StrBegin="NETSDK1069: "}</note>
       </trans-unit>
       <trans-unit id="NETFrameworkWithoutUsingNETSdkDefaults">
@@ -403,22 +398,22 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
         <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>
-        <target state="translated">NETSDK1084: 對指定的 RuntimeIdentifier '{0}'，無法使用任何應用程式主機。</target>
+        <target state="translated">NETSDK1084: não há nenhum host do aplicativo disponível para o RuntimeIdentifier especificado '{0}'.</target>
         <note>{StrBegin="NETSDK1084: "}</note>
       </trans-unit>
       <trans-unit id="NoBuildRequested">
         <source>NETSDK1085: The 'NoBuild' property was set to true but the 'Build' target was invoked.</source>
-        <target state="translated">NETSDK1085: 已將 'NoBuild' 屬性設定為 True，但卻叫用了 'Build' 目標。</target>
+        <target state="translated">NETSDK1085: a propriedade 'NoBuild' foi definida como true, mas o destino 'Build' foi invocado.</target>
         <note>{StrBegin="NETSDK1085: "}</note>
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
         <source>NETSDK1002: Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</source>
-        <target state="translated">NETSDK1002: 專案 '{0}' 以 '{2}' 為目標。以 '{1}' 為目標的專案無法參考此專案。</target>
+        <target state="translated">NETSDK1002: O projeto '{0}' é direcionado a '{2}'. Ele não pode ser referenciado por um projeto direcionado a '{1}'.</target>
         <note>{StrBegin="NETSDK1002: "}</note>
       </trans-unit>
       <trans-unit id="NoRuntimePackAvailable">
         <source>NETSDK1082: There was no runtime pack for {0} available for the specified RuntimeIdentifier '{1}'.</source>
-        <target state="translated">NETSDK1082: 對指定的 RuntimeIdentifier '{1}'，無法使用任何 {0} 的執行階段套件。</target>
+        <target state="translated">NETSDK1082: não havia nenhum pacote de tempo de execução de {0} disponível para o RuntimeIdentifier especificado '{1}'.</target>
         <note>{StrBegin="NETSDK1082: "}</note>
       </trans-unit>
       <trans-unit id="NoSupportCppEnableComHosting">
@@ -443,167 +438,167 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>
-        <target state="translated">NETSDK1053: 封裝為工具不支援包含本身。</target>
+        <target state="translated">NETSDK1053: O pacote como ferramenta não é compatível com a opção autossuficiente.</target>
         <note>{StrBegin="NETSDK1053: "}</note>
       </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
-        <target state="translated">NETSDK1064: 找不到套件 {0}，版本 {1}。該套件可能因 NuGet restore 還原而刪除，或是可能因為路徑長度上限的限制，而讓 NuGet restore 可能只有部分完成所致。</target>
+        <target state="translated">NETSDK1064: O pacote {0}, versão {1}, não foi encontrado. Ele pode ter sido excluído desde a restauração do NuGet. Caso contrário, a restauração do NuGet pode ter sido concluída apenas parcialmente, o que pode ter ocorrido devido a restrições de comprimento máximo do caminho.</target>
         <note>{StrBegin="NETSDK1064: "}</note>
       </trans-unit>
       <trans-unit id="PackageReferenceOverrideWarning">
         <source>NETSDK1023: A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
-        <target state="translated">NETSDK1023: 您的專案中包含 '{0}' 的 PackageReference。.NET SDK 會隱含參考此套件，您通常不需要從專案參考它。如需詳細資訊，請參閱 {1}</target>
+        <target state="translated">NETSDK1023: Uma PackageReference para '{0}' foi incluída no projeto. Esse pacote é referenciado implicitamente pelo SKD do .NET e, geralmente, não é necessário referenciá-lo no seu projeto. Para obter mais informações, confira {1}</target>
         <note>{StrBegin="NETSDK1023: "}</note>
       </trans-unit>
       <trans-unit id="PackageReferenceVersionNotRecommended">
         <source>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</source>
-        <target state="translated">NETSDK1071: '{0}' 的 PackageReference 指定了 `{1}` 版本。不建議指定這個套件版本。如需詳細資訊，請參閱 https://aka.ms/sdkimplicitrefs</target>
+        <target state="translated">NETSDK1071: uma PackageReference para '{0}' especificou uma Versão de '{1}'. Não é recomendado especificar a versão deste pacote. Para obter mais informações, consulte https://aka.ms/sdkimplicitrefs</target>
         <note>{StrBegin="NETSDK1071: "}</note>
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
         <source>NETSDK1011: Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>
-        <target state="translated">NETSDK1011: 已從專案 '{0}' 取用資產，但在 '{1}' 中找不到相對應的 MSBuild 專案路徑。</target>
+        <target state="translated">NETSDK1011: Os ativos são consumidos de um projeto '{0}', mas não foi encontrado nenhum caminho de projeto do MSBuild correspondente em '{1}'.</target>
         <note>{StrBegin="NETSDK1011: "}</note>
       </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
         <source>NETSDK1059: The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
-        <target state="translated">NETSDK1059: 工具 '{0}' 現已包含在 .NET Core SDK 中。解決此警告的資訊位於 (https://aka.ms/dotnetclitools-in-box)。</target>
+        <target state="translated">NETSDK1059: A ferramenta '{0}' agora está incluída no SDK do .NET Core. Há informações de como resolver esse aviso em (https://aka.ms/dotnetclitools-in-box).</target>
         <note>{StrBegin="NETSDK1059: "}</note>
       </trans-unit>
       <trans-unit id="ProjectToolOnlySupportTFMLowerThanNetcoreapp22">
         <source>NETSDK1093: NETSDK1093: Project tools (DotnetCliTool) only support targeting .NET Core 2.2 and lower.</source>
-        <target state="translated">NETSDK1093: NETSDK1093: 專案工具 (DotnetCliTool) 僅支援目標為 .NET Core 2.2 或更低的版本。</target>
+        <target state="translated">NETSDK1093: NETSDK1093: as ferramentas de projeto (DotnetCliTool) são suporte somente o .NET Core 2.2 e inferior.</target>
         <note>{StrBegin="NETSDK1093: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunCompilationFailed">
         <source>NETSDK1096: Optimizing assemblies for performance failed. You can either exclude the failing assemblies from being optimized, or set the PublishReadyToRun property to false.</source>
-        <target state="translated">NETSDK1096: 最佳化組件的效能失敗。您可以排除失敗的組件不予最佳化，或將 ReadyToRun 屬性設定為 false。</target>
+        <target state="translated">NETSDK1096: falha ao otimizar assemblies para desempenho. Você pode impedir que os assemblies com falha sejam otimizados ou definir a propriedade PublishReadyToRun como false.</target>
         <note>{StrBegin="NETSDK1096: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunCompilationHasWarnings_Info">
         <source>Some ReadyToRun compilations emitted warnings, indicating potential missing dependencies. Missing dependencies could potentially cause runtime failures. To show the warnings, set the PublishReadyToRunShowWarnings property to true.</source>
-        <target state="translated">部分 ReadyToRun 編譯發出了警告，指出可能缺少相依性。缺少相依性可能會導致執行階段失敗。若要顯示警告，請將 PublishReadyToRunShowWarnings 屬性設為 true。</target>
+        <target state="translated">Algumas compilações do ReadyToRun emitiram avisos, indicando possíveis dependências ausentes. Dependências ausentes podem causar falhas em tempo de execução. Para mostrar os avisos, defina a propriedade PublishReadyToRunShowWarnings como true.</target>
         <note />
       </trans-unit>
       <trans-unit id="ReadyToRunNoValidRuntimePackageError">
         <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing.</source>
-        <target state="translated">NETSDK1094: 無法最佳化組件的效能: 找不到有效的執行階段套件。請將 ReadyToRun 屬性設定為 false，或在發佈時使用支援的執行階段識別碼。</target>
+        <target state="translated">NETSDK1094: não é possível otimizar assemblies para desempenho: não foi encontrado um pacote válido do tempo de execução. Defina a propriedade PublishReadyToRun como false ou use um identificador de tempo de execução compatível durante a publicação.</target>
         <note>{StrBegin="NETSDK1094: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunTargetNotSupportedError">
         <source>NETSDK1095: Optimizing assemblies for performance is not supported for the selected target platform or architecture. Please verify you are using a supported runtime identifier, or set the PublishReadyToRun property to false.</source>
-        <target state="translated">NETSDK1095: 選取的目標平台或架構不支援最佳化組件的效能。請務必使用支援的執行階段識別碼，或將 PublishReadyToRun 屬性設為 false。</target>
+        <target state="translated">NETSDK1095: não há suporte para otimizar assemblies para desempenho na arquitetura ou plataforma de destino selecionada. Verifique se você está usando um identificador de tempo de execução com suporte ou defina a propriedade PublishReadyToRun como false.</target>
         <note>{StrBegin="NETSDK1095: "}</note>
       </trans-unit>
       <trans-unit id="RollForwardRequiresVersion30">
         <source>NETSDK1103: RollForward setting is only supported on .NET Core 3.0 or higher.</source>
-        <target state="translated">NETSDK1103: 僅於 .NET Core 3.0 或更新版本支援 RollForward 設定。</target>
+        <target state="translated">NETSDK1103: só há suporte para a configuração RollForward no .NET Core 3.0 ou superior.</target>
         <note>{StrBegin="NETSDK1103: "}</note>
       </trans-unit>
       <trans-unit id="RuntimeIdentifierNotRecognized">
         <source>NETSDK1083: The specified RuntimeIdentifier '{0}' is not recognized.</source>
-        <target state="translated">NETSDK1083: 無法辨識指定的 RuntimeIdentifier '{0}'。</target>
+        <target state="translated">NETSDK1083: o RuntimeIdentifier especificado '{0}' não foi reconhecido.</target>
         <note>{StrBegin="NETSDK1083: "}</note>
       </trans-unit>
       <trans-unit id="RuntimeIdentifierWasNotSpecified">
         <source>NETSDK1028: Specify a RuntimeIdentifier</source>
-        <target state="translated">NETSDK1028: 指定 RuntimeIdentifier</target>
+        <target state="translated">NETSDK1028: Especifique um RuntimeIdentifier</target>
         <note>{StrBegin="NETSDK1028: "}</note>
       </trans-unit>
       <trans-unit id="RuntimeListNotFound">
         <source>NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET Core team here: https://aka.ms/dotnet-sdk-issue.</source>
-        <target state="translated">NETSDK1109: 找不到執行階段清單檔案 '{0}'。請於此處將錯誤回報給 .NET Core 小組: https://aka.ms/dotnet-sdk-issue。</target>
+        <target state="translated">NETSDK1109: O arquivo da lista de runtime '{0}' não foi encontrado. Relate esse erro à equipe do .NET Core: https://aka.ms/dotnet-sdk-issue.</target>
         <note>{StrBegin="NETSDK1109: "}</note>
       </trans-unit>
       <trans-unit id="RuntimePackNotDownloaded">
         <source>NETSDK1112: The runtime pack for {0} was not downloaded. Try running a NuGet restore with the RuntimeIdentifier '{1}'.</source>
-        <target state="translated">NETSDK1112: 未下載 {0} 的執行階段套件。請嘗試使用 RuntimeIdentifier '{1}' 執行 NuGet 還原。</target>
+        <target state="translated">NETSDK1112: o pacote de tempo de execução para {0} não foi baixado. Tente executar uma restauração do NuGet com o RuntimeIdentifier '{1}'.</target>
         <note>{StrBegin="NETSDK1112: "}</note>
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
-        <target state="translated">NETSDK1048: 已為 GenerateRuntimeConfigurationFiles 指定了 'AdditionalProbingPaths'，但因為 'RuntimeConfigDevPath' 是空的，所以已跳過它。</target>
+        <target state="translated">NETSDK1048: Os 'AdditionalProbingPaths' foram especificados para os GenerateRuntimeConfigurationFiles, mas estão sendo ignorados porque 'RuntimeConfigDevPath' está vazio.</target>
         <note>{StrBegin="NETSDK1048: "}</note>
       </trans-unit>
       <trans-unit id="TargetFrameworkWithSemicolon">
         <source>NETSDK1046: The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</source>
-        <target state="translated">NETSDK1046: TargetFramework 值 '{0}' 無效。若要設定多重目標，請改用 'TargetFrameworks' 屬性。</target>
+        <target state="translated">NETSDK1046: O valor '{0}' do TargetFramework não é válido. Para vários destinos, use a propriedade 'TargetFrameworks'.</target>
         <note>{StrBegin="NETSDK1046: "}</note>
       </trans-unit>
       <trans-unit id="UnableToFindResolvedPath">
         <source>NETSDK1016: Unable to find resolved path for '{0}'.</source>
-        <target state="translated">NETSDK1016: 找不到 '{0}' 的解析路徑。</target>
+        <target state="translated">NETSDK1016: Não foi possível localizar o caminho resolvido para '{0}'.</target>
         <note>{StrBegin="NETSDK1016: "}</note>
       </trans-unit>
       <trans-unit id="UnableToUsePackageAssetsCache_Info">
         <source>Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</source>
-        <target state="translated">因為發生 I/O 錯誤，所以無法使用套件資產。多次平行建置相同的專案，即可能發生此情況。效能可能會有所減損，但建置結果不會受到影響。</target>
+        <target state="translated">Não é possível usar o cache de ativos do pacote por causa de um erro de E/S. Isso pode ocorrer quando o mesmo projeto é compilado mais de uma vez em paralelo. O desempenho poderá ser degradado, mas o resultado do build não será afetado.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedFileType">
         <source>NETSDK1012: Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</source>
-        <target state="translated">NETSDK1012: 對 '{0}' 來說並非預期的檔案類型。類型為 '{1}' 和 '{2}'。</target>
+        <target state="translated">NETSDK1012: Tipo de arquivo inesperado para '{0}'. O tipo é '{1}' e '{2}'.</target>
         <note>{StrBegin="NETSDK1012: "}</note>
       </trans-unit>
       <trans-unit id="UnknownFrameworkReference">
         <source>NETSDK1073: The FrameworkReference '{0}' was not recognized</source>
-        <target state="translated">NETSDK1073: 無法辨識 FrameworkReference '{0}'</target>
+        <target state="translated">NETSDK1073: o FrameworkReference '{0}' não foi reconhecido</target>
         <note>{StrBegin="NETSDK1073: "}</note>
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
         <source>NETSDK1009: Unrecognized preprocessor token '{0}' in '{1}'.</source>
-        <target state="translated">NETSDK1009: '{1}' 中的前置處理器語彙基元 '{0}' 無法辨識。</target>
+        <target state="translated">NETSDK1009: Token de pré-processador não reconhecido '{0}' em '{1}'.</target>
         <note>{StrBegin="NETSDK1009: "}</note>
       </trans-unit>
       <trans-unit id="UnresolvedTargetingPack">
         <source>NETSDK1081: The targeting pack for {0} was not found. You may be able to resolve this by running a NuGet restore on the project.</source>
-        <target state="translated">NETSDK1081: 找不到 {0} 的目標套件。在專案上執行 NuGet 還原，可解決此問題。</target>
+        <target state="translated">NETSDK1081: o pacote de direcionamento de {0} não foi encontrado. Você poderá resolver isso executando uma restauração do NuGet no projeto.</target>
         <note>{StrBegin="NETSDK1081: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedFramework">
         <source>NETSDK1019: {0} is an unsupported framework.</source>
-        <target state="translated">NETSDK1019: {0} 為不受支援的架構。</target>
+        <target state="translated">NETSDK1019: {0} é uma estrutura sem suporte.</target>
         <note>{StrBegin="NETSDK1019: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedRuntimeIdentifier">
         <source>NETSDK1056: Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</source>
-        <target state="translated">NETSDK1056: 專案以執行階段 '{0}' 為目標，但並未解析任何專屬於執行階段的套件。目標架構可能不支援此執行階段。</target>
+        <target state="translated">NETSDK1056: O projeto é direcionado ao runtime '{0}', mas não resolveu nenhum pacote específico do runtime. Esse runtime pode não ser compatível com a estrutura de destino.</target>
         <note>{StrBegin="NETSDK1056: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
         <source>NETSDK1050: The version of Microsoft.NET.Sdk used by this project is insufficient to support references to libraries targeting .NET Standard 1.5 or higher.  Please install version 2.0 or higher of the .NET Core SDK.</source>
-        <target state="translated">NETSDK1050: 此專案使用的 Microsoft.NET.Sdk 版本，無法支援以.NET Standard 1.5 或更高版本為目標的程式庫參考。請安裝 .NET Core SDK 2.0 或更高版本。</target>
+        <target state="translated">NETSDK1050: A versão do Microsoft.NET.Sdk usada por este projeto é insuficiente para dar suporte às referências a bibliotecas direcionadas ao .NET Standard 1.5 ou superior. Instale a versão 2.0 ou superior do SDK do .NET Core.</target>
         <note>{StrBegin="NETSDK1050: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
         <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
-        <target state="translated">NETSDK1045: 目前的 .NET SDK 不支援以 {0} {1} 作為目標。請以 {0} {2} 或更低版本作為目標，或是使用支援 {0} {1} 的 .NET SDK 版本。</target>
+        <target state="translated">NETSDK1045: O SDK do .NET atual não dá suporte para direcionar a {0} {1}. Direcione a {0} {2} ou inferior, ou use uma versão do SDK do .NET compatível com  {0} {1}.</target>
         <note>{StrBegin="NETSDK1045: "}</note>
       </trans-unit>
       <trans-unit id="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework">
         <source>NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop is required to build Windows desktop applications. 'UseWpf' and 'UseWindowsForms' are not supported by the current SDK.</source>
-        <target state="translated">NETSDK1107: 需有 Microsoft.NET.Sdk.WindowsDesktop 才能建置 Windows 傳統型應用程式。目前的 SDK 不支援 'UseWpf' 和 'UseWindowsForms'。</target>
+        <target state="translated">NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop é necessário para compilar aplicativos da área de trabalho do Windows. Não há suporte para 'UseWpf' e 'UseWindowsForms' no SDK atual.</target>
         <note>{StrBegin="NETSDK1107: "}</note>
       </trans-unit>
       <trans-unit id="UsingPreviewSdk_Info">
         <source>You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</source>
-        <target state="translated">您目前使用 .NET Core 預覽版。請參閱: https://aka.ms/dotnet-core-preview</target>
+        <target state="translated">Você está usando uma versão prévia do .NET Core. Confira: https://aka.ms/dotnet-core-preview</target>
         <note />
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresUseWpfOrUseWindowsForms">
         <source>NETSDK1106: Microsoft.NET.Sdk.WindowsDesktop requires 'UseWpf' or 'UseWindowsForms' to be set to 'true'</source>
-        <target state="translated">NETSDK1106: Microsoft.NET.Sdk.WindowsDesktop 需要 'UseWpf' 或 'UseWindowsForms' 設為 'true'</target>
+        <target state="translated">NETSDK1106: Microsoft.NET.Sdk.WindowsDesktop exige 'UseWpf' ou 'UseWindowsForms' para ser definido como 'true'</target>
         <note>{StrBegin="NETSDK1106: "}</note>
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresVersion30">
         <source>NETSDK1105: Windows desktop applications are only supported on .NET Core 3.0 or higher.</source>
-        <target state="translated">NETSDK1105: 只有 .NET Core 3.0 或更高版本才支援 Windows 傳統型應用程式。</target>
+        <target state="translated">NETSDK1105: só há suporte para aplicativos de área de trabalho do Windows no .NET Core 3.0 ou superior.</target>
         <note>{StrBegin="NETSDK1105: "}</note>
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresWindows">
         <source>NETSDK1100: Windows is required to build Windows desktop applications.</source>
-        <target state="translated">NETSDK1100: 需要 Windows 才能建置 Windows 桌面應用程式。</target>
+        <target state="translated">NETSDK1100: o Windows é necessário para compilar aplicativos da área de trabalho do Windows.</target>
         <note>{StrBegin="NETSDK1100: "}</note>
       </trans-unit>
     </body>
