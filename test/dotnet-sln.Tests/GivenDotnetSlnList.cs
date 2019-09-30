@@ -122,7 +122,7 @@ Commands:
         }
 
         [Fact]
-        public void WhenNoSolutionExistsInTheDirectoryItPrintsErrorAndUsage()
+        public void WhenNoSolutionExistsInTheDirectoryListPrintsErrorAndUsage()
         {
             var projectDirectory = TestAssets
                 .Get("TestAppWithSlnAndCsprojFiles")

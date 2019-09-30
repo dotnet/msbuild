@@ -541,7 +541,7 @@ EndGlobal
         }
 
         [Fact]
-        public void WhenNoSolutionExistsInTheDirectoryItPrintsErrorAndUsage()
+        public void WhenNoSolutionExistsInTheDirectoryAddPrintsErrorAndUsage()
         {
             var projectDirectory = TestAssets
                 .Get("TestAppWithSlnAndCsprojFiles")
