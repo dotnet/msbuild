@@ -76,7 +76,12 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 }
                 else
                 {
-                    string configuration = new DirectoryInfo(AppContext.BaseDirectory).Parent.Name;
+                    //                    string configuration = new DirectoryInfo(AppContext.BaseDirectory).Parent.Name;
+#if DEBUG
+                    string configuration = "Debug";
+#else
+                    string configuration = "Release";
+#endif
                     DotnetUnderTest = Path.Combine(artifactsFolder, "bin", "redist", configuration, "dotnet", "dotnet" + dotnetExtension);
                     TestPackages = Path.Combine(artifactsFolder, "tmp", configuration, "testpackages");
                     if (string.IsNullOrEmpty(TestWorkingFolder))
