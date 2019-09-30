@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Transactions;
 using System.Xml.Linq;
@@ -235,8 +236,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
             Directory.EnumerateFileSystemEntries(pathToShim).Should().BeEmpty();
         }
 
-        //  Windows only due to CI failure during repo merge: https://github.com/dotnet/sdk/issues/3684
-        [WindowsOnlyTheory]
+        [Theory]
         [InlineData(false)]
         [InlineData(true)]
         public void GivenAnInstalledShimRemoveDeletesTheShimFiles(bool testMockBehaviorIsInSync)

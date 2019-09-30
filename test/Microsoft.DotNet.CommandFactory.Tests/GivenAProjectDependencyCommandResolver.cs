@@ -28,8 +28,7 @@ namespace Microsoft.DotNet.Tests
             _configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
         }
 
-        //  Windows only due to CI failure during repo merge: https://github.com/dotnet/sdk/issues/3684
-        [WindowsOnlyFact]
+        [Fact]
         public void ItReturnsACommandSpecWhenToolIsInAProjectRef()
         {
             MSBuildTestProjectInstance =
@@ -64,8 +63,7 @@ namespace Microsoft.DotNet.Tests
             result.Args.Should().Contain(commandResolverArguments.CommandName);
         }
 
-        //  Windows only due to CI failure during repo merge: https://github.com/dotnet/sdk/issues/3684
-        [WindowsOnlyFact]
+        [Fact]
         public void ItPassesDepsfileArgToHostWhenReturningACommandSpecForMSBuildProject()
         {
             MSBuildTestProjectInstance =
@@ -120,8 +118,7 @@ namespace Microsoft.DotNet.Tests
             result.Should().BeNull();
         }
 
-        //  Windows only due to CI failure during repo merge: https://github.com/dotnet/sdk/issues/3684
-        [WindowsOnlyFact]
+        [Fact]
         public void ItSetsDepsfileToOutputInCommandspecForMSBuild()
         {
             var testInstance = TestAssets
@@ -164,8 +161,6 @@ namespace Microsoft.DotNet.Tests
             Environment.SetEnvironmentVariable(
                 Constants.MSBUILD_EXE_PATH,
                 Path.Combine(RepoDirectoriesProvider.SdkFolderUnderTest, "MSBuild.dll"));
-
-            CommandContext.SetVerbose(true);
 
             environment = environment ?? new EnvironmentProvider();
 

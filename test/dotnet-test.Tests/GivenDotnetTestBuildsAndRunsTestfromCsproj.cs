@@ -202,8 +202,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             }
         }
 
-        //  Windows only due to CI failure during repo merge: https://github.com/dotnet/sdk/issues/3684
-        [WindowsOnlyFact]
+        [Fact]
         public void TestWillNotBuildTheProjectIfNoBuildArgsIsGiven()
         {
             // Copy and restore VSTestCore project in output directory of project dotnet-vstest.Tests
