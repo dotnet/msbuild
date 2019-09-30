@@ -27,6 +27,10 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         static RepoDirectoriesProvider()
         {
+            //  Show verbose debugging output for tests
+            Cli.Utils.CommandContext.SetVerbose(true);
+            Cli.Utils.Reporter.Reset();
+
 
 #if NET451
             string directory = AppDomain.CurrentDomain.BaseDirectory;
