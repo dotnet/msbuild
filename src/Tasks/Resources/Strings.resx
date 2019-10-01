@@ -911,7 +911,6 @@
   </data>
   <data name="GenerateResource.CorruptOutput">
     <value>MSB3555: Output file "{0}" is possibly corrupt.</value>
-    <comment>{StrBegin="MSB3555: "}</comment>
   </data>
   <data name="GenerateResource.OnlyStringsSupported">
     <value>MSB3556: Only strings can be written to a .txt file, resource "{0}" is type {1}.</value>
@@ -931,7 +930,6 @@
   </data>
   <data name="GenerateResource.DeleteCorruptOutputFailed">
     <value>MSB3560: Could not delete the possibly corrupt output file "{0}". {1}</value>
-    <comment>{StrBegin="MSB3560: "}</comment>
   </data>
   <data name="GenerateResource.ObsoleteStringsTag">
     <value>MSB3562: The "[strings]" tag is no longer necessary in text resources; please remove it.</value>
