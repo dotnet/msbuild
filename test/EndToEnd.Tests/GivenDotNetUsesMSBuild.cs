@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             var ns = project.Root.Name.Namespace;
             project.Root.Element(ns + "PropertyGroup")
                 .Element(ns + "TargetFramework")
-                .Value = "netcoreapp3.0";
+                .Value = "netcoreapp3.1";
             project.Save(projectPath);
 
 

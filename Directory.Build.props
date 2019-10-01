@@ -21,7 +21,7 @@
     <DebugSymbols>true</DebugSymbols>
 
     <IsShippingPackage>false</IsShippingPackage>
-    <ToolsetTargetFramework>netcoreapp3.0</ToolsetTargetFramework>
+    <ToolsetTargetFramework>netcoreapp3.1</ToolsetTargetFramework>
 
     <ArtifactsShippingSymbolsDir>$(ArtifactsDir)symbols\$(Configuration)\Shipping</ArtifactsShippingSymbolsDir>
 
