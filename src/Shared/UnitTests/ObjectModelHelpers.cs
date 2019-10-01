@@ -442,12 +442,10 @@ namespace Microsoft.Build.UnitTests
             if (expected == null)
             {
                 Assert.Null(actual); // "Expected a null array"
-            }
-            else
-            {
-                Assert.NotNull(actual); // "Result should be non-null."
+                return;
             }
 
+            Assert.NotNull(actual); // "Result should be non-null."
             Assert.Equal(expected.Length, actual.Length); // "Expected array length of <" + expected.Length + "> but was <" + actual.Length + ">.");
 
             // Now that we've verified they're both non-null and of the same length, compare each item in the array.

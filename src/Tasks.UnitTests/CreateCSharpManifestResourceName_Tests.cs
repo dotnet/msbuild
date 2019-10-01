@@ -417,6 +417,39 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Opt into DependentUpon convention and load the expected file properly when the file is in a subfolder.
+        /// </summary>
+        [Fact]
+        public void DependentUponConvention_FindsMatchInSubfolder()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var subfolder = env.DefaultTestDirectory.CreateDirectory("SR1");
+                var csFile = subfolder.CreateFile("SR1.cs", "namespace MyStuff.Namespace { class Class { } }");
+                var resXFile = subfolder.CreateFile("SR1.resx", "");
+
+                env.SetCurrentDirectory(env.DefaultTestDirectory.Path);
+
+                ITaskItem i = new TaskItem(@"SR1\SR1.resx");
+                i.SetMetadata("BuildAction", "EmbeddedResource");
+                // Don't set DependentUpon so it goes by convention
+
+                CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName
+                {
+                    BuildEngine = new MockEngine(_testOutput),
+                    UseDependentUponConvention = true,
+                    ResourceFiles = new ITaskItem[] { i }
+                };
+
+                t.Execute().ShouldBeTrue("Expected the task to succeed.");
+
+                t.ManifestResourceNames.ShouldHaveSingleItem();
+
+                t.ManifestResourceNames[0].ItemSpec.ShouldBe("MyStuff.Namespace.Class", "Expecting to find the namespace & class name from SR1.cs");
+            }
+        }
+
+        /// <summary>
         /// Opt into DependentUpon convention without creating the equivalent .cs file for our resource file.
         /// </summary>
         [Fact]

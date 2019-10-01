@@ -117,7 +117,7 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            using (Stream entryStream = OpenArchiveEntry(filePath, fileInfo.LastWriteTime))
+            using (Stream entryStream = OpenArchiveEntry(filePath))
             using (FileStream content = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete))
             {
                 content.CopyTo(entryStream);
@@ -144,18 +144,17 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            using (Stream entryStream = OpenArchiveEntry(filePath, DateTime.UtcNow))
+            using (Stream entryStream = OpenArchiveEntry(filePath))
             using (var content = new MemoryStream(Encoding.UTF8.GetBytes(data)))
             {
                 content.CopyTo(entryStream);
             }
         }
 
-        private Stream OpenArchiveEntry(string filePath, DateTime lastWriteTime)
+        private Stream OpenArchiveEntry(string filePath)
         {
             string archivePath = CalculateArchivePath(filePath);
             var archiveEntry = _zipArchive.CreateEntry(archivePath);
-            archiveEntry.LastWriteTime = lastWriteTime;
             return archiveEntry.Open();
         }
 
