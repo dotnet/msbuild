@@ -161,6 +161,12 @@
     <Compile Include="BackEnd\BuildManager\CacheAggregator.cs" />
     <Compile Include="BackEnd\Components\Caching\ConfigCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
+    <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectUsingTaskParameterElementLink.cs" />
+    <Compile Include="ObjectModelRemoting\ExternalProjectsProvider.cs" />
+    <Compile Include="ObjectModelRemoting\LinkedObjectFactory.cs" />
+    <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectItemDefinitionLink.cs" />
+    <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectItemLink.cs" />
+    <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectLink.cs" />
     <Compile Include="Graph\GraphBuilder.cs" />
     <Compile Include="Graph\ParallelWorkSet.cs" />
     <Compile Include="Graph\ProjectInterpretation.cs" />
@@ -608,6 +614,19 @@
     <Compile Include="Logging\SerialConsoleLogger.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectMetadataLink.cs" />
+    <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectPropertyLink.cs" />
+    <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectElementContainerLink.cs" />
+    <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectElementLink.cs" />
+    <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectExtensionsElementLink.cs" />
+    <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectImportElementLink.cs" />
+    <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectItemElementLink.cs" />
+    <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectMetadataElementLink.cs" />
+    <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectPropertyElementLink.cs" />
+    <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectRootElementLink.cs" />
+    <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectTargetElementLink.cs" />
+    <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectTaskElementLink.cs" />
+    <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectUsingTaskBodyElementLink.cs" />
     <Compile Include="Resources\AssemblyResources.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

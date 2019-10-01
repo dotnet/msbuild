@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics;
+using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
@@ -14,6 +15,14 @@ namespace Microsoft.Build.Construction
     [DebuggerDisplay("ExecuteTargetsAttribute={ExecuteTargetsAttribute}")]
     public class ProjectOnErrorElement : ProjectElement
     {
+        /// <summary>
+        /// External projects support
+        /// </summary>
+        internal ProjectOnErrorElement(ProjectOnErrorElementLink link)
+            : base(link)
+        {
+        }
+
         /// <summary>
         /// Initialize a parented ProjectOnErrorElement
         /// </summary>
@@ -42,14 +51,13 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.executeTargets);
+                return GetAttributeValue(XMakeAttributes.executeTargets);
             }
 
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.executeTargets);
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.executeTargets, value);
-                MarkDirty("Set OnError ExecuteTargets {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.executeTargets, value, "Set OnError ExecuteTargets {0}", value);
             }
         }
 
@@ -57,7 +65,7 @@ namespace Microsoft.Build.Construction
         /// Location of the "ExecuteTargets" attribute on this element, if any.
         /// If there is no such attribute, returns null;
         /// </summary>
-        public ElementLocation ExecuteTargetsLocation => XmlElement.GetAttributeLocation(XMakeAttributes.executeTargets);
+        public ElementLocation ExecuteTargetsLocation => GetAttributeLocation(XMakeAttributes.executeTargets);
 
         /// <summary>
         /// Creates an unparented ProjectOnErrorElement, wrapping an unparented XmlElement.

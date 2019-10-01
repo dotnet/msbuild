@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using Microsoft.Build.Framework;
+using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
@@ -15,6 +16,19 @@ namespace Microsoft.Build.Construction
     [DebuggerDisplay("Project={Project} Condition={Condition}")]
     public class ProjectImportElement : ProjectElement
     {
+        internal ProjectImportElementLink ImportLink => (ProjectImportElementLink)Link;
+
+        private ImplicitImportLocation _implicitImportLocation;
+        private ProjectElement _originalElement;
+
+        /// <summary>
+        /// External projects support
+        /// </summary>
+        internal ProjectImportElement(ProjectImportElementLink link)
+            : base(link)
+        {
+        }
+
         /// <summary>
         /// Initialize a parented ProjectImportElement
         /// </summary>
@@ -38,33 +52,35 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Project
         {
-            get => FileUtilities.FixFilePath(ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.project));
+            get => FileUtilities.FixFilePath(GetAttributeValue(XMakeAttributes.project));
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.project);
 
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.project, value);
-                MarkDirty("Set Import Project {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.project, value, "Set Import Project {0}", value);
             }
         }
 
         /// <summary>
         /// Location of the project attribute
         /// </summary>
-        public ElementLocation ProjectLocation => XmlElement.GetAttributeLocation(XMakeAttributes.project);
+        public ElementLocation ProjectLocation => GetAttributeLocation(XMakeAttributes.project);
 
         /// <summary>
         /// Gets or sets the SDK that contains the import.
         /// </summary>
         public string Sdk
         {
-            get => FileUtilities.FixFilePath(ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdk));
+            get => FileUtilities.FixFilePath(GetAttributeValue(XMakeAttributes.sdk));
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.sdk);
+                // TODO: here and other setters. Confirm that CheckUpdatedSdk() ussage is
+                //       really the intended one. Currently it does check for equality  before updating the attribute
+                //       so setter will only take effect if "ParsedSdkReference" is not updated. Currently it might work by accident
+                //       if all "Set" calls are different and no ParsedSdkReference is triggered in between.
                 if (!CheckUpdatedSdk()) return;
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.sdk, value);
-                MarkDirty("Set Import Sdk {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.sdk, value, "Set Import Sdk {0}", value);
             }
         }
 
@@ -73,12 +89,11 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Version
         {
-            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdkVersion);
+            get => GetAttributeValue(XMakeAttributes.sdkVersion);
             set
             {
                 if (!CheckUpdatedSdk()) return;
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.sdkVersion, value);
-                MarkDirty("Set Import Version {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.sdkVersion, value, "Set Import Version {0}", value);
             }
         }
 
@@ -87,32 +102,31 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string MinimumVersion
         {
-            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdkMinimumVersion);
+            get => GetAttributeValue(XMakeAttributes.sdkMinimumVersion);
             set
             {
                 if (!CheckUpdatedSdk()) return;
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.sdkMinimumVersion, value);
-                MarkDirty("Set Import Minimum Version {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.sdkMinimumVersion, value, "Set Import Minimum Version {0}", value);
             }
         }
 
         /// <summary>
         /// Location of the Sdk attribute
         /// </summary>
-        public ElementLocation SdkLocation => XmlElement.GetAttributeLocation(XMakeAttributes.sdk);
+        public ElementLocation SdkLocation => GetAttributeLocation(XMakeAttributes.sdk);
 
         /// <summary>
         /// Gets the <see cref="ImplicitImportLocation"/> of the import.  This indicates if the import was implicitly
         /// added because of the <see cref="ProjectRootElement.Sdk"/> attribute and the location where the project was
         /// imported.
         /// </summary>
-        public ImplicitImportLocation ImplicitImportLocation { get; internal set; }
+        public ImplicitImportLocation ImplicitImportLocation { get => Link != null ? ImportLink.ImplicitImportLocation : _implicitImportLocation; internal set => _implicitImportLocation = value; }
 
         /// <summary>
         /// If the import is an implicit one (<see cref="ImplicitImportLocation"/> != None) then this element points
         /// to the original element which generated this implicit import.
         /// </summary>
-        public ProjectElement OriginalElement { get; internal set; }
+        public ProjectElement OriginalElement { get => Link != null ? ImportLink.OriginalElement : _originalElement; internal set => _originalElement = value; }
 
 
         /// <summary>
@@ -176,9 +190,9 @@ namespace Microsoft.Build.Construction
         private bool CheckUpdatedSdk()
         {
             var sdk = new SdkReference(
-                ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdk, true),
-                ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdkVersion, true),
-                ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdkMinimumVersion, true));
+                GetAttributeValue(XMakeAttributes.sdk, true),
+                GetAttributeValue(XMakeAttributes.sdkVersion, true),
+                GetAttributeValue(XMakeAttributes.sdkMinimumVersion, true));
 
             if (sdk.Equals(ParsedSdkReference))
             {

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Diagnostics;
+using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Construction
@@ -12,6 +13,16 @@ namespace Microsoft.Build.Construction
     [DebuggerDisplay("{Name} Value={Value} Condition={Condition}")]
     public class ProjectMetadataElement : ProjectElement
     {
+        internal ProjectMetadataElementLink MetadataLink => (ProjectMetadataElementLink)Link;
+
+        /// <summary>
+        /// External projects support
+        /// </summary>
+        internal ProjectMetadataElement(ProjectMetadataElementLink link)
+            : base(link)
+        {
+        }
+
         /// <summary>
         /// Initialize a parented ProjectMetadataElement
         /// </summary>
@@ -34,7 +45,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Name
         {
-            get => XmlElement.Name;
+            get => ElementName;
             set => ChangeName(value);
         }
 
@@ -66,10 +77,16 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Value
         {
-            get => Internal.Utilities.GetXmlNodeInnerContents(XmlElement);
+            get => Link != null ? MetadataLink.Value : Internal.Utilities.GetXmlNodeInnerContents(XmlElement);
 
             set
             {
+                if (Link != null)
+                {
+                    MetadataLink.Value = value;
+                    return;
+                }
+
                 ErrorUtilities.VerifyThrowArgumentNull(value, nameof(Value));
                 Internal.Utilities.SetXmlNodeInnerContents(XmlElement, value);
                 Parent?.UpdateElementValue(this);
@@ -103,6 +120,12 @@ namespace Microsoft.Build.Construction
             ErrorUtilities.VerifyThrowArgumentLength(newName, nameof(newName));
             XmlUtilities.VerifyThrowArgumentValidElementName(newName);
             ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(newName), "CannotModifyReservedItemMetadata", newName);
+
+            if (Link != null)
+            {
+                MetadataLink.ChangeName(newName);
+                return;
+            }
 
             if (ExpressedAsAttribute)
             {

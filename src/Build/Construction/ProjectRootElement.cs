@@ -15,8 +15,9 @@ using System.Xml;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
+using Microsoft.Build.ObjectModelRemoting;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
@@ -79,6 +80,8 @@ namespace Microsoft.Build.Construction
         /// reloaded -- the version won't reset to '0'.
         /// </remarks>
         private static int s_globalVersionCounter;
+
+        private int _version;
 
         /// <summary>
         /// Version number of this object that was last saved to disk, or last loaded from disk.
@@ -143,6 +146,17 @@ namespace Microsoft.Build.Construction
         /// Parameter to be formatted into the dirty reason
         /// </summary>
         private string _dirtyParameter = String.Empty;
+
+
+        internal ProjectRootElementLink RootLink => (ProjectRootElementLink)Link;
+
+        /// <summary>
+        /// External projects support
+        /// </summary>
+        internal ProjectRootElement(ProjectRootElementLink link)
+            : base(link)
+        {
+        }
 
         /// <summary>
         /// Initialize a ProjectRootElement instance from a XmlReader.
@@ -365,7 +379,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string DirectoryPath
         {
-            get => _directory ?? String.Empty;
+            get => Link != null ? RootLink.DirectoryPath : _directory ?? String.Empty;
             internal set => _directory = value;
             // Used during solution load to ensure solutions which were created from a file have a location.
         }
@@ -383,11 +397,16 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public string FullPath
         {
-            get => _projectFileLocation?.File;
+            get => Link != null ? RootLink.FullPath : _projectFileLocation?.File;
 
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, nameof(value));
+                if (Link != null)
+                {
+                    RootLink.FullPath = value;
+                    return;
+                }
 
                 string oldFullPath = _projectFileLocation?.File;
 
@@ -435,6 +454,11 @@ namespace Microsoft.Build.Construction
         {
             get
             {
+                if (Link != null)
+                {
+                    return RootLink.Encoding;
+                }
+
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
                 if (_encoding == null)
                 {
@@ -458,14 +482,10 @@ namespace Microsoft.Build.Construction
         public string DefaultTargets
         {
             [DebuggerStepThrough]
-            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.defaultTargets);
+            get => GetAttributeValue(XMakeAttributes.defaultTargets);
 
             [DebuggerStepThrough]
-            set
-            {
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.defaultTargets, value);
-                MarkDirty("Set Project DefaultTargets to '{0}'", value);
-            }
+            set => SetOrRemoveAttribute(XMakeAttributes.defaultTargets, value, "Set Project DefaultTargets to '{0}'", value);
         }
 
         /// <summary>
@@ -475,14 +495,10 @@ namespace Microsoft.Build.Construction
         public string InitialTargets
         {
             [DebuggerStepThrough]
-            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.initialTargets);
+            get => GetAttributeValue(XMakeAttributes.initialTargets);
 
             [DebuggerStepThrough]
-            set
-            {
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.initialTargets, value);
-                MarkDirty("Set project InitialTargets to '{0}'", value);
-            }
+            set => SetOrRemoveAttribute(XMakeAttributes.initialTargets, value, "Set project InitialTargets to '{0}'", value);
         }
 
         /// <summary>
@@ -494,14 +510,10 @@ namespace Microsoft.Build.Construction
         public string Sdk
         {
             [DebuggerStepThrough]
-            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdk);
+            get => GetAttributeValue(XMakeAttributes.sdk);
 
             [DebuggerStepThrough]
-            set
-            {
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.sdk, value);
-                MarkDirty("Set project Sdk to '{0}'", value);
-            }
+            set => SetOrRemoveAttribute(XMakeAttributes.sdk, value, "Set project Sdk to '{0}'", value);
         }
 
         /// <summary>
@@ -511,14 +523,10 @@ namespace Microsoft.Build.Construction
         public string TreatAsLocalProperty
         {
             [DebuggerStepThrough]
-            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.treatAsLocalProperty);
+            get => GetAttributeValue(XMakeAttributes.treatAsLocalProperty);
 
             [DebuggerStepThrough]
-            set
-            {
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.treatAsLocalProperty, value);
-                MarkDirty("Set project TreatAsLocalProperty to '{0}'", value);
-            }
+            set => SetOrRemoveAttribute(XMakeAttributes.treatAsLocalProperty, value, "Set project TreatAsLocalProperty to '{0}'", value);
         }
 
         /// <summary>
@@ -528,14 +536,10 @@ namespace Microsoft.Build.Construction
         public string ToolsVersion
         {
             [DebuggerStepThrough]
-            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.toolsVersion);
+            get => GetAttributeValue(XMakeAttributes.toolsVersion);
 
             [DebuggerStepThrough]
-            set
-            {
-                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.toolsVersion, value);
-                MarkDirty("Set project ToolsVersion {0}", value);
-            }
+            set => SetOrRemoveAttribute(XMakeAttributes.toolsVersion, value, "Set project ToolsVersion {0}", value);
         }
 
         /// <summary>
@@ -550,6 +554,11 @@ namespace Microsoft.Build.Construction
         {
             get
             {
+                if (Link != null)
+                {
+                    return RootLink.RawXml;
+                }
+
                 using (var stringWriter = new EncodingStringWriter(Encoding))
                 {
                     using (var projectWriter = new ProjectWriter(stringWriter))
@@ -566,12 +575,12 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Whether the XML has been modified since it was last loaded or saved.
         /// </summary>
-        public bool HasUnsavedChanges => Version != _versionOnDisk;
+        public bool HasUnsavedChanges => Link != null ? RootLink.HasUnsavedChanges : Version != _versionOnDisk;
 
         /// <summary>
         /// Whether the XML is preserving formatting or not.
         /// </summary>
-        public bool PreserveFormatting => XmlDocument?.PreserveWhitespace ?? false;
+        public bool PreserveFormatting => Link != null ? RootLink.PreserveFormatting : XmlDocument?.PreserveWhitespace ?? false;
 
         /// <summary>
         /// Version number of this object.
@@ -593,7 +602,11 @@ namespace Microsoft.Build.Construction
         /// 
         /// We're assuming we don't have over 2 billion edits.
         /// </remarks>
-        public int Version { get; private set; }
+        public int Version
+        {
+            get => Link != null ? RootLink.Version : _version;
+            private set => _version = value;
+        }
 
         /// <summary>
         /// The time that this object was last changed. If it hasn't
@@ -602,14 +615,14 @@ namespace Microsoft.Build.Construction
         /// <remarks>
         /// This is used by the VB/C# project system.
         /// </remarks>
-        public DateTime TimeLastChanged => _timeLastChangedUtc.ToLocalTime();
+        public DateTime TimeLastChanged => Link != null ? RootLink.TimeLastChanged : _timeLastChangedUtc.ToLocalTime();
 
         /// <summary>
         /// The last-write-time of the file that was read, when it was read.
         /// This can be used to see whether the file has been changed on disk
         /// by an external means.
         /// </summary>
-        public DateTime LastWriteTimeWhenRead => _lastWriteTimeWhenRead;
+        public DateTime LastWriteTimeWhenRead => Link != null ? RootLink.LastWriteTimeWhenRead : _lastWriteTimeWhenRead;
 
         /// <summary>
         /// This does not allow conditions, so it should not be called.
@@ -628,33 +641,32 @@ namespace Microsoft.Build.Construction
         /// If the file has not been given a name, returns an empty location.
         /// This is a case where it is legitimate to "not have a location".
         /// </summary>
-        public ElementLocation ProjectFileLocation => _projectFileLocation ?? ElementLocation.EmptyLocation;
+        public ElementLocation ProjectFileLocation => Link != null ? RootLink.ProjectFileLocation : _projectFileLocation ?? ElementLocation.EmptyLocation;
 
         /// <summary>
         /// Location of the toolsversion attribute, if any
         /// </summary>
-        public ElementLocation ToolsVersionLocation => XmlElement.GetAttributeLocation(XMakeAttributes.toolsVersion);
+        public ElementLocation ToolsVersionLocation => GetAttributeLocation(XMakeAttributes.toolsVersion);
 
         /// <summary>
         /// Location of the defaulttargets attribute, if any
         /// </summary>
-        public ElementLocation DefaultTargetsLocation => XmlElement.GetAttributeLocation(XMakeAttributes.defaultTargets);
+        public ElementLocation DefaultTargetsLocation => GetAttributeLocation(XMakeAttributes.defaultTargets);
 
         /// <summary>
         /// Location of the initialtargets attribute, if any
         /// </summary>
-        public ElementLocation InitialTargetsLocation => XmlElement.GetAttributeLocation(XMakeAttributes.initialTargets);
+        public ElementLocation InitialTargetsLocation => GetAttributeLocation(XMakeAttributes.initialTargets);
 
         /// <summary>
         /// Location of the Sdk attribute, if any
         /// </summary>
-        public ElementLocation SdkLocation => XmlElement.GetAttributeLocation(XMakeAttributes.sdk);
+        public ElementLocation SdkLocation => GetAttributeLocation(XMakeAttributes.sdk);
 
         /// <summary>
         /// Location of the TreatAsLocalProperty attribute, if any
         /// </summary>
-        public ElementLocation TreatAsLocalPropertyLocation
-            => XmlElement.GetAttributeLocation(XMakeAttributes.treatAsLocalProperty);
+        public ElementLocation TreatAsLocalPropertyLocation => GetAttributeLocation(XMakeAttributes.treatAsLocalProperty);
 
         /// <summary>
         /// Has the project root element been explicitly loaded for a build or has it been implicitly loaded
@@ -1228,7 +1240,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectChooseElement CreateChooseElement()
         {
-            return ProjectChooseElement.CreateDisconnected(this);
+            return Link!=null ? RootLink.CreateChooseElement() : ProjectChooseElement.CreateDisconnected(this);
         }
 
         /// <summary>
@@ -1237,7 +1249,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectImportElement CreateImportElement(string project)
         {
-            return ProjectImportElement.CreateDisconnected(project, this);
+            return Link != null ? RootLink.CreateImportElement(project) : ProjectImportElement.CreateDisconnected(project, this);
         }
 
         /// <summary>
@@ -1246,7 +1258,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectItemElement CreateItemElement(string itemType)
         {
-            return ProjectItemElement.CreateDisconnected(itemType, this);
+            return Link != null ? RootLink.CreateItemElement(itemType) : ProjectItemElement.CreateDisconnected(itemType, this);
         }
 
         /// <summary>
@@ -1255,6 +1267,11 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectItemElement CreateItemElement(string itemType, string include)
         {
+            if (Link != null )
+            {
+                return RootLink.CreateItemElement(itemType, include);
+            }
+
             ProjectItemElement item = ProjectItemElement.CreateDisconnected(itemType, this);
 
             item.Include = include;
@@ -1268,7 +1285,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectItemDefinitionElement CreateItemDefinitionElement(string itemType)
         {
-            return ProjectItemDefinitionElement.CreateDisconnected(itemType, this);
+            return Link != null ? RootLink.CreateItemDefinitionElement(itemType) : ProjectItemDefinitionElement.CreateDisconnected(itemType, this);
         }
 
         /// <summary>
@@ -1277,7 +1294,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectItemDefinitionGroupElement CreateItemDefinitionGroupElement()
         {
-            return ProjectItemDefinitionGroupElement.CreateDisconnected(this);
+            return Link != null ? RootLink.CreateItemDefinitionGroupElement() : ProjectItemDefinitionGroupElement.CreateDisconnected(this);
         }
 
         /// <summary>
@@ -1286,7 +1303,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectItemGroupElement CreateItemGroupElement()
         {
-            return ProjectItemGroupElement.CreateDisconnected(this);
+            return Link != null ? RootLink.CreateItemGroupElement() : ProjectItemGroupElement.CreateDisconnected(this);
         }
 
         /// <summary>
@@ -1295,7 +1312,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectImportGroupElement CreateImportGroupElement()
         {
-            return ProjectImportGroupElement.CreateDisconnected(this);
+            return Link != null ? RootLink.CreateImportGroupElement() : ProjectImportGroupElement.CreateDisconnected(this);
         }
 
         /// <summary>
@@ -1304,7 +1321,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectMetadataElement CreateMetadataElement(string name)
         {
-            return ProjectMetadataElement.CreateDisconnected(name, this);
+            return Link != null ? RootLink.CreateMetadataElement(name) : ProjectMetadataElement.CreateDisconnected(name, this);
         }
 
         /// <summary>
@@ -1313,6 +1330,11 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectMetadataElement CreateMetadataElement(string name, string unevaluatedValue)
         {
+            if (Link != null)
+            {
+                return RootLink.CreateMetadataElement(name, unevaluatedValue);
+            }
+
             ProjectMetadataElement metadatum = ProjectMetadataElement.CreateDisconnected(name, this);
 
             metadatum.Value = unevaluatedValue;
@@ -1326,7 +1348,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectOnErrorElement CreateOnErrorElement(string executeTargets)
         {
-            return ProjectOnErrorElement.CreateDisconnected(executeTargets, this);
+            return Link != null ? RootLink.CreateOnErrorElement(executeTargets) : ProjectOnErrorElement.CreateDisconnected(executeTargets, this);
         }
 
         /// <summary>
@@ -1335,7 +1357,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectOtherwiseElement CreateOtherwiseElement()
         {
-            return ProjectOtherwiseElement.CreateDisconnected(this);
+            return Link != null ? RootLink.CreateOtherwiseElement() : ProjectOtherwiseElement.CreateDisconnected(this);
         }
 
         /// <summary>
@@ -1345,7 +1367,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectOutputElement CreateOutputElement(string taskParameter, string itemType, string propertyName)
         {
-            return ProjectOutputElement.CreateDisconnected(taskParameter, itemType, propertyName, this);
+            return Link != null ? RootLink.CreateOutputElement(taskParameter, itemType, propertyName) : ProjectOutputElement.CreateDisconnected(taskParameter, itemType, propertyName, this);
         }
 
         /// <summary>
@@ -1354,7 +1376,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectExtensionsElement CreateProjectExtensionsElement()
         {
-            return ProjectExtensionsElement.CreateDisconnected(this);
+            return Link != null ? RootLink.CreateProjectExtensionsElement() : ProjectExtensionsElement.CreateDisconnected(this);
         }
 
         /// <summary>
@@ -1363,7 +1385,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectPropertyGroupElement CreatePropertyGroupElement()
         {
-            return ProjectPropertyGroupElement.CreateDisconnected(this);
+            return Link != null ? RootLink.CreatePropertyGroupElement() : ProjectPropertyGroupElement.CreateDisconnected(this);
         }
 
         /// <summary>
@@ -1372,7 +1394,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectPropertyElement CreatePropertyElement(string name)
         {
-            return ProjectPropertyElement.CreateDisconnected(name, this);
+            return Link != null ? RootLink.CreatePropertyElement(name) : ProjectPropertyElement.CreateDisconnected(name, this);
         }
 
         /// <summary>
@@ -1381,7 +1403,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectTargetElement CreateTargetElement(string name)
         {
-            return ProjectTargetElement.CreateDisconnected(name, this);
+            return Link != null ? RootLink.CreateTargetElement(name) : ProjectTargetElement.CreateDisconnected(name, this);
         }
 
         /// <summary>
@@ -1390,7 +1412,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectTaskElement CreateTaskElement(string name)
         {
-            return ProjectTaskElement.CreateDisconnected(name, this);
+            return Link != null ? RootLink.CreateTaskElement(name) : ProjectTaskElement.CreateDisconnected(name, this);
         }
 
         /// <summary>
@@ -1411,7 +1433,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectUsingTaskElement CreateUsingTaskElement(string taskName, string assemblyFile, string assemblyName, string runtime, string architecture)
         {
-            return ProjectUsingTaskElement.CreateDisconnected(taskName, assemblyFile, assemblyName, runtime, architecture, this);
+            return Link != null ? RootLink.CreateUsingTaskElement(taskName, assemblyFile, assemblyName, runtime, architecture) : ProjectUsingTaskElement.CreateDisconnected(taskName, assemblyFile, assemblyName, runtime, architecture, this);
         }
 
         /// <summary>
@@ -1420,7 +1442,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public UsingTaskParameterGroupElement CreateUsingTaskParameterGroupElement()
         {
-            return UsingTaskParameterGroupElement.CreateDisconnected(this);
+            return Link != null ? RootLink.CreateUsingTaskParameterGroupElement() : UsingTaskParameterGroupElement.CreateDisconnected(this);
         }
 
         /// <summary>
@@ -1429,7 +1451,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectUsingTaskParameterElement CreateUsingTaskParameterElement(string name, string output, string required, string parameterType)
         {
-            return ProjectUsingTaskParameterElement.CreateDisconnected(name, output, required, parameterType, this);
+            return Link != null ? RootLink.CreateUsingTaskParameterElement(name, output, required, parameterType) : ProjectUsingTaskParameterElement.CreateDisconnected(name, output, required, parameterType, this);
         }
 
         /// <summary>
@@ -1438,7 +1460,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectUsingTaskBodyElement CreateUsingTaskBodyElement(string evaluate, string body)
         {
-            return ProjectUsingTaskBodyElement.CreateDisconnected(evaluate, body, this);
+            return Link != null ? RootLink.CreateUsingTaskBodyElement(evaluate, body) : ProjectUsingTaskBodyElement.CreateDisconnected(evaluate, body, this);
         }
 
         /// <summary>
@@ -1447,7 +1469,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectWhenElement CreateWhenElement(string condition)
         {
-            return ProjectWhenElement.CreateDisconnected(condition, this);
+            return Link != null ? RootLink.CreateWhenElement(condition) : ProjectWhenElement.CreateDisconnected(condition, this);
         }
 
         /// <summary>
@@ -1455,7 +1477,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectSdkElement CreateProjectSdkElement(string sdkName, string sdkVersion)
         {
-            return ProjectSdkElement.CreateDisconnected(sdkName, sdkVersion, this);
+            return Link != null ? RootLink.CreateProjectSdkElement(sdkName, sdkVersion) : ProjectSdkElement.CreateDisconnected(sdkName, sdkVersion, this);
         }
 
         /// <summary>
@@ -1478,6 +1500,12 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public void Save(Encoding saveEncoding)
         {
+            if (Link != null)
+            {
+                RootLink.Save(saveEncoding);
+                return;
+            }
+
             ErrorUtilities.VerifyThrowInvalidOperation(_projectFileLocation != null, "OM_MustSetFileNameBeforeSave");
 
 #if MSBUILDENABLEVSPROFILING 
@@ -1559,6 +1587,12 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public void Save(TextWriter writer)
         {
+            if (Link != null)
+            {
+                RootLink.Save(writer);
+                return;
+            }
+
             using (var projectWriter = new ProjectWriter(writer))
             {
                 projectWriter.Initialize(XmlDocument);
@@ -1600,6 +1634,12 @@ namespace Microsoft.Build.Construction
         {
             ErrorUtilities.VerifyThrowInvalidOperation(FileSystems.Default.FileExists(path), "FileToReloadFromDoesNotExist", path);
 
+            if (Link != null)
+            {
+                RootLink.ReloadFrom(path, throwIfUnsavedChanges, preserveFormatting ?? PreserveFormatting);
+                return;
+            }
+
             XmlDocumentWithLocation DocumentProducer(bool shouldPreserveFormatting) => LoadDocument(path, shouldPreserveFormatting, ProjectRootElementCache.LoadProjectsReadOnly);
             ReloadFrom(DocumentProducer, throwIfUnsavedChanges, preserveFormatting);
         }
@@ -1625,6 +1665,12 @@ namespace Microsoft.Build.Construction
         /// </param>
         public void ReloadFrom(XmlReader reader, bool throwIfUnsavedChanges = true, bool? preserveFormatting = null)
         {
+            if (Link != null)
+            {
+                RootLink.ReloadFrom(reader, throwIfUnsavedChanges, preserveFormatting ?? PreserveFormatting);
+                return;
+            }
+
             XmlDocumentWithLocation DocumentProducer(bool shouldPreserveFormatting)
             {
                 var document = LoadDocument(reader, shouldPreserveFormatting);
@@ -1738,6 +1784,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal XmlElementWithLocation CreateElement(string name)
         {
+            ErrorUtilities.VerifyThrow(Link == null, "External project");
             return (XmlElementWithLocation)XmlDocument.CreateElement(name, XmlNamespace);
         }
 
@@ -1763,6 +1810,12 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal sealed override void MarkDirty(string reason, string param)
         {
+            if (Link != null)
+            {
+                RootLink.MarkDirty(reason, param);
+                return;
+            }
+
             IncrementVersion();
 
             _dirtyReason = reason;
@@ -1788,6 +1841,7 @@ namespace Microsoft.Build.Construction
         internal void MarkProjectDirty(Project project)
         {
             ErrorUtilities.VerifyThrowArgumentNull(project, nameof(project));
+            ErrorUtilities.VerifyThrow(Link == null, "External project");
 
             // Only bubble this event up if the cache knows about this PRE, which is equivalent to
             // whether this PRE has a path.
@@ -1915,7 +1969,7 @@ namespace Microsoft.Build.Construction
         /// <param name="owner">The factory to use for creating the new instance.</param>
         protected override ProjectElement CreateNewInstance(ProjectRootElement owner)
         {
-            return Create(owner.ProjectRootElementCache);
+            return Link != null ? Link.CreateNewInstance(owner) : Create(owner.ProjectRootElementCache);
         }
 
         /// <summary>

@@ -1929,6 +1929,33 @@ namespace Microsoft.Build.UnitTests
             engine.AssertLogContains("MSB3027");
         }
 
+        [PlatformSpecific(TestPlatforms.Windows)]
+        internal virtual void ErrorIfLinkFailedCheck()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var source = env.DefaultTestDirectory.CreateFile("source.txt", "This is a source file").Path;
+                var existing = env.DefaultTestDirectory.CreateFile("destination.txt", "This is an existing file.").Path;
+
+                File.SetAttributes(existing, FileAttributes.ReadOnly);
+
+                MockEngine engine = new MockEngine(_testOutputHelper);
+                Copy t = new Copy
+                {
+                    RetryDelayMilliseconds = 1,
+                    UseHardlinksIfPossible = UseHardLinks,
+                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    ErrorIfLinkFails = true,
+                    BuildEngine = engine,
+                    SourceFiles = new ITaskItem[] { new TaskItem(source) },
+                    DestinationFiles = new ITaskItem[] { new TaskItem(existing) },
+                };
+
+                t.Execute().ShouldBeFalse();
+                engine.AssertLogContains("MSB3893");
+            }
+        }
+
         /// <summary>
         /// Helper functor for retry tests.
         /// Simulates the File.Copy method without touching the disk.
@@ -2053,6 +2080,30 @@ namespace Microsoft.Build.UnitTests
             {
                 Helpers.DeleteFiles(sourceFile, destFile);
             }
+        }
+
+        /// <summary>
+        /// Verifies that we error when ErrorIfLinkFailed is true when UseHardlinksIfPossible
+        /// and UseSymboliclinksIfPossible are false.
+        /// </summary>
+        [Fact]
+        public void InvalidErrorIfLinkFailed()
+        {
+            var engine = new MockEngine(true);
+            var t = new Copy
+            {
+                BuildEngine = engine,
+                SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
+                DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
+                UseHardlinksIfPossible = false,
+                UseSymboliclinksIfPossible = false,
+                ErrorIfLinkFails = true,
+            };
+
+            bool result = t.Execute();
+
+            Assert.False(result);
+            engine.AssertLogContains("MSB3892");
         }
     }
 
@@ -2320,6 +2371,12 @@ namespace Microsoft.Build.UnitTests
                 FileUtilities.DeleteWithoutTrailingBackslash(destFolder, true);
             }
         }
+
+        [Fact]
+        internal override void ErrorIfLinkFailedCheck()
+        {
+            base.ErrorIfLinkFailedCheck();
+        }
     }
 
     public class CopySymbolicLink_Tests : Copy_Tests
@@ -2408,6 +2465,12 @@ namespace Microsoft.Build.UnitTests
                     FileUtilities.DeleteWithoutTrailingBackslash(destFolder, true);
                 }
             }
+        }
+
+        [Fact]
+        internal override void ErrorIfLinkFailedCheck()
+        {
+            base.ErrorIfLinkFailedCheck();
         }
     }
 }

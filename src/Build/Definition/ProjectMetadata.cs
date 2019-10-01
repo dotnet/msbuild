@@ -6,6 +6,7 @@ using System.Diagnostics;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Collections;
+using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
@@ -51,6 +52,18 @@ namespace Microsoft.Build.Evaluation
         private ProjectMetadata _predecessor;
 
         /// <summary>
+        /// External projects support
+        /// </summary>
+        internal ProjectMetadata(object parent, ProjectMetadataElement xml)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(xml, "xml");
+
+            _parent = (IProjectMetadataParent)parent;
+            _xml = xml;
+        }
+
+        /// <summary>
         /// Creates a metadata backed by XML. 
         /// Constructed during evaluation of a project.
         /// </summary>
@@ -65,6 +78,8 @@ namespace Microsoft.Build.Evaluation
             _evaluatedValueEscaped = evaluatedValueEscaped;
             _predecessor = predecessor;
         }
+
+        internal virtual ProjectMetadataLink Link => null;
 
         /// <summary>
         /// Name of the metadata
@@ -85,7 +100,7 @@ namespace Microsoft.Build.Evaluation
         {
             [DebuggerStepThrough]
             get
-            { return EscapingUtilities.UnescapeAll(_evaluatedValueEscaped); }
+            { return EscapingUtilities.UnescapeAll(EvaluatedValueEscaped); }
         }
 
         /// <summary>
@@ -126,14 +141,20 @@ namespace Microsoft.Build.Evaluation
 
                 _xml.Value = value;
 
-                // Clear out the current value of this metadata, so the new value can't refer to the old one.
-                // The expansion call below otherwise passes in the parent item's metadata - including this one's
-                // current value.
-                _evaluatedValueEscaped = String.Empty;
+                if (_evaluatedValueEscaped != null)
+                {
 
-                _evaluatedValueEscaped = _parent.Project.ExpandMetadataValueBestEffortLeaveEscaped(_parent, value, Location);
+                    // Clear out the current value of this metadata, so the new value can't refer to the old one.
+                    // The expansion call below otherwise passes in the parent item's metadata - including this one's
+                    // current value.
+                    _evaluatedValueEscaped = String.Empty;
+
+                    _evaluatedValueEscaped = _parent.Project.ExpandMetadataValueBestEffortLeaveEscaped(_parent, value, Location);
+                }
             }
         }
+
+        internal IProjectMetadataParent Parent => _parent;
 
         /// <summary>
         /// Backing XML metadata.
@@ -179,7 +200,7 @@ namespace Microsoft.Build.Evaluation
         {
             [DebuggerStepThrough]
             get
-            { return _predecessor; }
+            { return Link != null ? Link.Predecessor : _predecessor; }
         }
 
         /// <summary>
@@ -244,8 +265,7 @@ namespace Microsoft.Build.Evaluation
         internal string EvaluatedValueEscaped
         {
             [DebuggerStepThrough]
-            get
-            { return _evaluatedValueEscaped; }
+            get => Link != null ? Link.EvaluatedValueEscaped : _evaluatedValueEscaped;
         }
 
         #region IEquatable<ProjectMetadata> Members
@@ -268,7 +288,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             return (_xml == other._xml &&
-                    _evaluatedValueEscaped == other._evaluatedValueEscaped);
+                    EvaluatedValueEscaped == other.EvaluatedValueEscaped);
         }
 
         #endregion

@@ -169,18 +169,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             public void RaiseRequestComplete(BuildRequestEntry entry)
             {
-                if (null != OnBuildRequestCompleted)
-                {
-                    OnBuildRequestCompleted(entry);
-                }
+                OnBuildRequestCompleted?.Invoke(entry);
             }
 
             public void RaiseRequestBlocked(BuildRequestEntry entry, int blockingId, string blockingTarget)
             {
-                if (null != OnBuildRequestBlocked)
-                {
-                    OnBuildRequestBlocked(entry, blockingId, blockingTarget, null);
-                }
+                OnBuildRequestBlocked?.Invoke(entry, blockingId, blockingTarget, null);
             }
 
             public void ContinueRequest()

@@ -929,6 +929,16 @@ namespace Microsoft.Build.BackEnd
                         {
                             overallSuccess = false;
                         }
+
+                        if (!string.IsNullOrEmpty(results[i].SchedulerInducedError))
+                        {
+                            LoggingContext.LogErrorFromText(
+                                subcategoryResourceName: null,
+                                errorCode: null,
+                                helpKeyword: null,
+                                file: new BuildEventFileInfo(ProjectFileOfTaskNode, LineNumberOfTaskNode, ColumnNumberOfTaskNode),
+                                message: results[i].SchedulerInducedError);
+                        }
                     }
 
                     ErrorUtilities.VerifyThrow(results.Length == projectFileNames.Length || overallSuccess == false, "The number of results returned {0} cannot be less than the number of project files {1} unless one of the results indicated failure.", results.Length, projectFileNames.Length);
