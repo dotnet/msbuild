@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NETCore.App.Runtime.win-x64" Version="3.1.0-preview1.19501.13">
+    <Dependency Name="Microsoft.NETCore.App.Runtime.win-x64" Version="3.1.0-preview1.19501.15">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>44ae29e1fbc978d358c6fb3ba307f3b841a37160</Sha>
+      <Sha>dc615e8b193c5cc25ed7122432562f8399672181</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.1.100-preview1.19501.11">
       <Uri>https://github.com/dotnet/cli</Uri>
@@ -50,21 +50,21 @@
       <Uri>https://github.com/mono/linker</Uri>
       <Sha>1127689f262d52ea8ff68ef03d706fa62b3b40a1</Sha>
     </Dependency>
-    <Dependency Name="System.CodeDom" Version="4.7.0-preview1.19470.8" CoherentParentDependency="Microsoft.NETCore.App.Runtime.win-x64">
+    <Dependency Name="System.CodeDom" Version="4.7.0-preview1.19501.5" CoherentParentDependency="Microsoft.NETCore.App.Runtime.win-x64">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>6a4153689e79a8e58ee3ed77e04d04a0d9dc2ea6</Sha>
+      <Sha>09e0353381e2b9da8dd90d64869de076740cc800</Sha>
     </Dependency>
-    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="4.7.0-preview1.19470.8" CoherentParentDependency="Microsoft.NETCore.App.Runtime.win-x64">
+    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="4.7.0-preview1.19501.5" CoherentParentDependency="Microsoft.NETCore.App.Runtime.win-x64">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>6a4153689e79a8e58ee3ed77e04d04a0d9dc2ea6</Sha>
+      <Sha>09e0353381e2b9da8dd90d64869de076740cc800</Sha>
     </Dependency>
-    <Dependency Name="System.Text.Encoding.CodePages" Version="4.7.0-preview1.19470.8" CoherentParentDependency="Microsoft.NETCore.App.Runtime.win-x64">
+    <Dependency Name="System.Text.Encoding.CodePages" Version="4.7.0-preview1.19501.5" CoherentParentDependency="Microsoft.NETCore.App.Runtime.win-x64">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>6a4153689e79a8e58ee3ed77e04d04a0d9dc2ea6</Sha>
+      <Sha>09e0353381e2b9da8dd90d64869de076740cc800</Sha>
     </Dependency>
-    <Dependency Name="System.Resources.Extensions" Version="4.7.0-preview1.19470.8" CoherentParentDependency="Microsoft.NETCore.App.Runtime.win-x64">
+    <Dependency Name="System.Resources.Extensions" Version="4.7.0-preview1.19501.5" CoherentParentDependency="Microsoft.NETCore.App.Runtime.win-x64">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>6a4153689e79a8e58ee3ed77e04d04a0d9dc2ea6</Sha>
+      <Sha>09e0353381e2b9da8dd90d64869de076740cc800</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
