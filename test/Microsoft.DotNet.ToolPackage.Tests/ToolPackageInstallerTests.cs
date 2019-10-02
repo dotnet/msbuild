@@ -704,7 +704,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [NonWindowsOnlyTheory]
-        [InlineData(false)]
+        //  https://github.com/dotnet/sdk/issues/3684
+        //[InlineData(false)]
         [InlineData(true)]
         // repro https://github.com/dotnet/cli/issues/10101
         public void GivenAPackageWithCasingAndenUSPOSIXInstallSucceeds(bool testMockBehaviorIsInSync)

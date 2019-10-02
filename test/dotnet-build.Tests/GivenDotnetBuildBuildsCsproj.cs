@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
         {
             var testAppName = "MSBuildTestApp";
             var testInstance = TestAssets.Get(testAppName)
-                .CreateInstance(testAppName)
+                .CreateInstance()
                 .WithSourceFiles()
                 .WithRestoreFiles();
 
@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
         {
             var testAppName = "NonDefaultTarget";
             var testInstance = TestAssets.Get(testAppName)
-                .CreateInstance(testAppName)
+                .CreateInstance()
                 .WithSourceFiles();
 
             new BuildCommand()
@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
         {
             var testAppName = "MSBuildTestApp";
             var testInstance = TestAssets.Get(testAppName)
-                .CreateInstance(testAppName)
+                .CreateInstance()
                 .WithSourceFiles();
 
             new BuildCommand()
@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
         {
             var testAppName = "MSBuildTestApp";
             var testInstance = TestAssets.Get(testAppName)
-                .CreateInstance(testAppName)
+                .CreateInstance()
                 .WithSourceFiles();
 
             new BuildCommand()

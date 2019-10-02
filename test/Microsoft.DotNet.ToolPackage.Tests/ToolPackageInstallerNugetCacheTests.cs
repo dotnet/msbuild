@@ -20,7 +20,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
     public class ToolPackageInstallToManagedLocationInstaller : TestBase
     {
         [Theory]
-        [InlineData(false)]
+        //  https://github.com/dotnet/sdk/issues/3684
+        //[InlineData(false)]
         [InlineData(true)]
         public void GivenNugetConfigInstallSucceeds(bool testMockBehaviorIsInSync)
         {
@@ -48,7 +49,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Theory]
-        [InlineData(false)]
+        //  https://github.com/dotnet/sdk/issues/3684
+        //[InlineData(false)]
         [InlineData(true)]
         public void GivenNugetConfigVersionRangeInstallSucceeds(bool testMockBehaviorIsInSync)
         {

@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
 
             var testAppName = "TestAppSimple";
             var testInstance = TestAssets.Get(testAppName)
-                .CreateInstance(testAppName + "_" + target.Replace('.', '_'))
+                .CreateInstance(identifier: target.Replace('.', '_'))
                 .WithSourceFiles();
 
             //   Replace the 'TargetFramework'
@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
 
             var testAppName = "TestAppSimple";
             var testInstance = TestAssets.Get(testAppName)
-                .CreateInstance(testAppName + "_" + target.Replace('.', '_'))
+                .CreateInstance(identifier: target.Replace('.', '_'))
                 .WithSourceFiles();
 
             //   Replace the 'TargetFramework'
