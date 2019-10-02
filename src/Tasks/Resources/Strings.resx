@@ -910,7 +910,7 @@
     <comment>{StrBegin="MSB3554: "}</comment>
   </data>
   <data name="GenerateResource.CorruptOutput">
-    <value>MSB3555: Output file "{0}" is possibly corrupt.</value>
+     <value>Output file "{0}" is possibly corrupt and will be deleted and recreated.</value>
   </data>
   <data name="GenerateResource.OnlyStringsSupported">
     <value>MSB3556: Only strings can be written to a .txt file, resource "{0}" is type {1}.</value>
