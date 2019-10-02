@@ -98,14 +98,14 @@ jobs:
         continueOnError: ${{ parameters.continueOnError }}
         condition: and(succeeded(), eq(variables['_DotNetPublishToBlobFeed'], 'true'), eq(variables['_PublishBuildAssetManifest'], 'true'))
 
-    - task: PublishTestResults@1	
+    - task: PublishTestResults@2
       displayName: Publish Test Results	
       inputs:	
-        testRunner: XUnit	
+        testResultsFormat: xUnit	
         testResultsFiles: 'artifacts/TestResults/$(_BuildConfig)/*.xml'	
         testRunTitle: '$(_AgentOSName)_$(Agent.JobName)'	
-        platform: '$(BuildPlatform)'	
-        configuration: '$(_BuildConfig)'	
+        buildPlatform: '$(BuildPlatform)'	
+        buildConfiguration: '$(_BuildConfig)'	
       condition: always()
 
     - task: CopyFiles@2	
