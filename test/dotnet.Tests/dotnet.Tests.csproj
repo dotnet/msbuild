@@ -18,12 +18,14 @@
   <ItemGroup>
     <Compile Include="..\crossgen.Tests\**\*.cs" LinkBase="crossgen" />
     <Compile Include="..\dotnet-add-package.Tests\**\*.cs" LinkBase="dotnet-add-package" />
+    <Compile Include="..\dotnet-add-reference.Tests\**\*.cs" LinkBase="dotnet-add-reference" />
     <Compile Include="..\dotnet-back-compat.Tests\**\*.cs" LinkBase="dotnet-back-compat" />
     <Compile Include="..\dotnet-build.Tests\**\*.cs" LinkBase="dotnet-build" />
     <Compile Include="..\dotnet-clean.Tests\**\*.cs" LinkBase="dotnet-clean" />
     <Compile Include="..\dotnet-fsi.Tests\**\*.cs" LinkBase="dotnet-fsi" />
     <Compile Include="..\dotnet-help.Tests\**\*.cs" LinkBase="dotnet-help" />
     <Compile Include="..\dotnet-install-tool.Tests\**\*.cs" LinkBase="dotnet-install-tool" />
+    <Compile Include="..\dotnet-list-reference.Tests\**\*.cs" LinkBase="dotnet-list-reference" />
     <Compile Include="..\dotnet-new.Tests\**\*.cs" LinkBase="dotnet-new" />
     <Compile Include="..\dotnet-nuget.UnitTests\**\*.cs" LinkBase="dotnet-nuget" />
     <Compile Include="..\dotnet-pack.Tests\**\*.cs" LinkBase="dotnet-pack" />
