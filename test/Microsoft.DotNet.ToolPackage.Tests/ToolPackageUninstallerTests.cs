@@ -24,7 +24,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
     public class ToolPackageUninstallerTests : TestBase
     {
         [Theory]
-        [InlineData(false)]
+        //  https://github.com/dotnet/sdk/issues/3684
+        //[InlineData(false)]
         [InlineData(true)]
         public void GivenAnInstalledPackageUninstallRemovesThePackage(bool testMockBehaviorIsInSync)
         {

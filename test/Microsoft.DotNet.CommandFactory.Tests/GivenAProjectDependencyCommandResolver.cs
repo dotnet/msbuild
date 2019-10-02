@@ -34,8 +34,9 @@ namespace Microsoft.DotNet.Tests
             MSBuildTestProjectInstance =
                 TestAssets.Get("TestAppWithProjDepTool")
                     .CreateInstance()
-                    .WithSourceFiles();
-            
+                    .WithSourceFiles()
+                    .WithNuGetConfig(RepoDirectoriesProvider.TestPackages);
+
             new BuildCommand()
                 .WithProjectDirectory(MSBuildTestProjectInstance.Root)
                 .WithConfiguration(_configuration)
@@ -69,8 +70,9 @@ namespace Microsoft.DotNet.Tests
             MSBuildTestProjectInstance =
                 TestAssets.Get("TestAppWithProjDepTool")
                     .CreateInstance()
-                    .WithSourceFiles();
-            
+                    .WithSourceFiles()
+                    .WithNuGetConfig(RepoDirectoriesProvider.TestPackages);
+
             new BuildCommand()
                 .WithProjectDirectory(MSBuildTestProjectInstance.Root)
                 .WithConfiguration(_configuration)
@@ -101,6 +103,7 @@ namespace Microsoft.DotNet.Tests
                 TestAssets.Get("TestAppWithProjDepTool")
                     .CreateInstance()
                     .WithSourceFiles()
+                    .WithNuGetConfig(RepoDirectoriesProvider.TestPackages)
                     .WithRestoreFiles();
 
             var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
@@ -125,6 +128,7 @@ namespace Microsoft.DotNet.Tests
                     .Get("TestAppWithProjDepTool")
                     .CreateInstance()
                     .WithSourceFiles()
+                    .WithNuGetConfig(RepoDirectoriesProvider.TestPackages)
                     .WithRestoreFiles();
 
             var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();

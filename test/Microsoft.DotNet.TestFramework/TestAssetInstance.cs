@@ -264,8 +264,7 @@ namespace Microsoft.DotNet.TestFramework
 
         private void Restore(FileInfo projectFile)
         {
-            var restoreArgs = new string[] { "restore", projectFile.FullName,
-                                             "/bl:" +  Path.Combine(projectFile.DirectoryName, "restore.binlog") };
+            string restoreWithBinlogArg = "/bl:" + Path.Combine(projectFile.DirectoryName, "restore.binlog");
 
             new RestoreCommand()
                 .WithWorkingDirectory(projectFile.DirectoryName)
