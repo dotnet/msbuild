@@ -87,7 +87,8 @@ stages:
       parameters:
         agentOs: Ubuntu_14_04
         pool:
-          name: Hosted Ubuntu 1604
+          name: NetCorePublic-Pool
+          queue: BuildPool.Ubuntu.1604.Amd64.Open
         strategy:
           matrix:
             Build_Debug:
@@ -105,7 +106,8 @@ stages:
       parameters:
         agentOs: Ubuntu_16_04
         pool:
-          name: Hosted Ubuntu 1604
+          name: NetCorePublic-Pool
+          queue: BuildPool.Ubuntu.1604.Amd64.Open
         strategy:
           matrix:
             Build_Debug:
@@ -165,7 +167,8 @@ stages:
       parameters:
         agentOs: Linux_Perf_CI
         pool:
-          name: Hosted Ubuntu 1604
+          name: NetCorePublic-Pool
+          queue: BuildPool.Ubuntu.1604.Amd64.Open
         strategy:
           matrix:
             Build_Release:
