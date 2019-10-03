@@ -14,10 +14,10 @@ namespace Microsoft.DotNet.Cli.List.Reference.Tests
 {
     public class GivenDotnetListReference : TestBase
     {
-        private const string HelpText = @"Usage: dotnet list <PROJECT | SOLUTION> reference [options]
+        private const string HelpText = @"Usage: dotnet list <PROJECT> reference [options]
 
 Arguments:
-  <PROJECT | SOLUTION>   The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.
+  <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
 
 Options:
   -h, --help   Show command line help.";
