@@ -1,0 +1,103 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+  <Import Project="$(RepoRoot)/build/MSBuildExtensions.targets" />
+
+  <PropertyGroup>
+    <TargetFramework>$(CliTargetFramework)</TargetFramework>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <CopyBuildOutputToPublishDirectory>false</CopyBuildOutputToPublishDirectory>
+    <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
+    <PackageId>Microsoft.DotNet.Cli.Runtime</PackageId>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\dotnet\dotnet.csproj" />
+
+    <!--
+      We will run tests with dotnet.deps.json from stage 0 as we do not have enough here
+      to regerate a full deps.json. To avoid a cycle where we have to update stage 0
+      when a new dll is added, set the runtimeconfig option to allow additional dlls in
+      app base to load. 
+    -->
+    <RuntimeHostConfigurationOption 
+      Include="Microsoft.NETCore.DotNetHostPolicy.SetAppPaths"
+      Value="true" />
+  </ItemGroup>
+
+  <Target Name="GetCustomPackageFiles"
+          BeforeTargets="_GetPackageFiles"
+          DependsOnTargets="PublishMSBuildExtensions;PublishSdks;ChmodPublishDir">
+    <ItemGroup>
+      <_PackageFiles Include="@(MSBuildExtensionsContent)" BuildAction="Content" PackageCopyToOutput="true" PackageFlatten="false" PackagePath="contentFiles\any\$(CliTargetFramework)\%(MSBuildExtensionsContent.PackagePath)" />
+      <_PackageFiles Include="@(SdksContent)" BuildAction="Content" PackageCopyToOutput="true" PackageFlatten="false" PackagePath="contentFiles\any\$(CliTargetFramework)\%(SdksContent.PackagePath)" />
+
+      <_BuildOutputInPackage Remove="@(_BuildOutputInPackage)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="PublishMSBuildExtensions"
+          DependsOnTargets="GenerateMSBuildExtensions"
+          AfterTargets="Build;Publish">
+    <ItemGroup>
+      <MSBuildExtensionsContent Update="@(MSBuildExtensionsContent)">
+        <DestinationPath Condition="'%(MSBuildExtensionsContent.DestinationPath)' == ''">$(OutputPath)/%(MSBuildExtensionsContent.DeploymentSubpath)%(RecursiveDir)%(Filename)%(Extension)</DestinationPath>
+        <PackagePath>%(MSBuildExtensionsContent.DeploymentSubpath)%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+      </MSBuildExtensionsContent>
+    </ItemGroup>
+
+    <Copy SourceFiles="@(MSBuildExtensionsContent)"
+          DestinationFiles="%(MSBuildExtensionsContent.DestinationPath)" />
+  </Target>
+
+  <Target Name="PublishSdks"
+          AfterTargets="Build;Publish">
+    <ItemGroup>
+      <SdksToBundle Include="$(RepoRoot)/build/RestoreDependency.proj">
+        <Properties>
+          DotNetExe=$(DotNetExe);
+          NuGetPackagesDir=$(NuGetPackagesDir);
+          SdkLayoutDirectory=$(OutputPath)Sdks/%(BundledSdk.Identity);
+          DependencyPackageName=%(BundledSdk.Identity);
+          DependencyPackageVersion=%(BundledSdk.Version)
+        </Properties>
+      </SdksToBundle>
+    </ItemGroup>
+
+    <MSBuild
+      BuildInParallel="False"
+      Projects="@(SdksToBundle)"
+      >
+    </MSBuild>
+
+    <ItemGroup>
+      <SdksContent Include="$(OutputPath)/Sdks/**/*">
+        <PackagePath>Sdks/%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+      </SdksContent>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="CopySdksToPublishDir"
+          AfterTargets="Publish">
+    <Copy SourceFiles="@(MSBuildExtensionsContent)"
+          DestinationFiles="@(MSBuildExtensionsContent -> '$(PublishDir)%(DeploymentSubpath)%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(SdksContent)"
+          DestinationFiles="@(SdksContent -> '$(PublishDir)Sdks/%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="CopyRuntimeConfiguration"
+          AfterTargets="Publish">
+     <Copy SourceFiles="$(ProjectRuntimeConfigFilePath)"
+           DestinationFiles="$(PublishDir)dotnet.runtimeconfig.json" />
+     <Copy SourceFiles="$(ProjectRuntimeConfigFilePath)"
+           DestinationFiles="$(PublishDir)MSBuild.runtimeconfig.json" />
+  </Target>
+
+  <Target Name="ChmodPublishDir"
+          AfterTargets="PublishMSBuildExtensions"
+          Condition=" '$(OS)' != 'Windows_NT' ">
+    
+    <Exec Command="find $(OutputPath) -type d -exec chmod 755 {} \;" />
+    <Exec Command="find $(OutputPath) -type f -exec chmod 644 {} \;" />
+  </Target>
+</Project>

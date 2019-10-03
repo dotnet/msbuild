@@ -1,0 +1,52 @@
+<Project ToolsVersion="14.0" DefaultTargets="Test">
+  <Import Project="test/TestPackageProjects.targets" />
+  <Import Project="test/OverlaySdkOnLKG.targets" />
+
+  <PropertyGroup>
+    <TestPackagesDir>$(TestOutputDir)packages</TestPackagesDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <_CopyDirectoryBuildTestDependenciesInput Include="$(MSBuildThisFileDirectory)test/Empty.props" />
+    <_CopyDirectoryBuildTestDependenciesInput Include="$(MSBuildThisFileDirectory)test/Empty.targets" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_CopyDirectoryBuildTestDependenciesOutput Include="$(ArtifactsTmpDir)Directory.Build.props" />
+    <_CopyDirectoryBuildTestDependenciesOutput Include="$(ArtifactsTmpDir)Directory.Build.targets" />
+  </ItemGroup>
+
+  <Target Name="PrepareTests"
+          DependsOnTargets="CreateTestAssetPackageNuPkgs;
+                            CopyDirectoryBuildTestDependencies;
+                            OverlaySdkOnLKG"
+          BeforeTargets="Build"
+          Condition="'$(TargetFramework)' == ''">
+  </Target>
+
+  <Target Name="CreateTestAssetPackageNuPkgs"
+          DependsOnTargets="SetupTestPackageProjectData;"
+          Inputs="@(CreateTestAssetPackageNuPkgsInput)"
+          Outputs="@(CreateTestAssetPackageNuPkgsOutput)">
+    <MakeDir Directories="$(TestPackagesDir)" Condition="!Exists('$(TestPackagesDir)')"/>
+
+    <MSBuild
+      BuildInParallel="False"
+      Projects="%(TestPackageProject.ProjectPath)"
+      Properties="ImportDirectoryBuildTargets=false"
+      Targets="Restore"
+      RemoveProperties="TargetFramework" />
+
+    <MSBuild
+      BuildInParallel="False"
+      Projects="%(TestPackageProject.ProjectPath)"
+      Properties="PackageOutputPath=$(TestPackagesDir);%(TestPackageProject.MsbuildArgs);Version=%(TestPackageProject.Version)"
+      Targets="Pack"
+      RemoveProperties="TargetFramework" />
+  </Target>
+
+  <Target Name="CopyDirectoryBuildTestDependencies" Inputs="@(_CopyDirectoryBuildTestDependenciesInput)" Outputs="@(_CopyDirectoryBuildTestDependenciesOutput)">
+    <Copy SourceFiles="@(_CopyDirectoryBuildTestDependenciesInput)" DestinationFiles="@(_CopyDirectoryBuildTestDependenciesOutput)" />
+  </Target>
+
+</Project>

@@ -3,8 +3,6 @@
 
 using System;
 using System.IO;
-using System.Linq;
-using System.Xml.Linq;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
@@ -17,58 +15,78 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         [Fact]
         public void ItCanNewRestoreBuildRunCleanMSBuildProject()
         {
-            var directory = TestAssets.CreateTestDirectory();
-            string projectDirectory = directory.FullName;
+            using (DisposableDirectory directory = Temp.CreateDirectory())
+            {
+                string projectDirectory = directory.Path;
 
-            string newArgs = "console --debug:ephemeral-hive --no-restore";
-            var newResult = new NewCommandShim()
-                .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput(newArgs);
+                string newArgs = "console -f netcoreapp3.0 --debug:ephemeral-hive --no-restore";
+                new NewCommandShim()
+                    .WithWorkingDirectory(projectDirectory)
+                    .Execute(newArgs)
+                    .Should().Pass();
 
-            newResult.Should().Pass();
+                new RestoreCommand()
+                    .WithWorkingDirectory(projectDirectory)
+                    .Execute("/p:SkipInvalidConfigurations=true")
+                    .Should().Pass();
 
-            string projectPath = Directory.GetFiles(projectDirectory, "*.csproj").Single();
+                new BuildCommand()
+                    .WithWorkingDirectory(projectDirectory)
+                    .Execute()
+                    .Should().Pass();
 
-            //  Override TargetFramework since there aren't .NET Core 3 templates yet
-            //  https://github.com/dotnet/core-sdk/issues/24 tracks removing this workaround
-            XDocument project = XDocument.Load(projectPath);
-            var ns = project.Root.Name.Namespace;
-            project.Root.Element(ns + "PropertyGroup")
-                .Element(ns + "TargetFramework")
-                .Value = "netcoreapp3.0";
-            project.Save(projectPath);
+                new RunCommand()
+                    .WithWorkingDirectory(projectDirectory)
+                    .ExecuteWithCapturedOutput()
+                    .Should().Pass()
+                         .And.HaveStdOutContaining("Hello World!");
 
+                var binDirectory = new DirectoryInfo(projectDirectory).Sub("bin");
+                binDirectory.Should().HaveFilesMatching("*.dll", SearchOption.AllDirectories);
 
-            new RestoreCommand()
-                .WithWorkingDirectory(projectDirectory)
-                .Execute("/p:SkipInvalidConfigurations=true")
-                .Should().Pass();
+                new CleanCommand()
+                    .WithWorkingDirectory(projectDirectory)
+                    .Execute()
+                    .Should().Pass();
 
-            new BuildCommand()
-                .WithWorkingDirectory(projectDirectory)
-                .Execute()
-                .Should().Pass();
+                binDirectory.Should().NotHaveFilesMatching("*.dll", SearchOption.AllDirectories);
+            }
+        }
 
-            var runCommand = new RunCommand()
-                .WithWorkingDirectory(projectDirectory);
+        [Fact]
+        public void ItCanRunToolsInACSProj()
+        {
+            var testInstance = TestAssets.Get("MSBuildTestApp")
+                                         .CreateInstance()
+                                         .WithSourceFiles()
+                                         .WithRestoreFiles();
 
-            //  Set DOTNET_ROOT as workaround for https://github.com/dotnet/cli/issues/10196
-            runCommand = runCommand.WithEnvironmentVariable(Environment.Is64BitProcess ? "DOTNET_ROOT": "DOTNET_ROOT(x86)",
-                Path.GetDirectoryName(DotnetUnderTest.FullName));
+            var testProjectDirectory = testInstance.Root;
 
-            runCommand.ExecuteWithCapturedOutput()
+            new DotnetCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput("portable")
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello Portable World!");;
+        }
+
+        [Fact(Skip="https://github.com/dotnet/cli/issues/9688")]
+        public void ItCanRunToolsThatPrefersTheCliRuntimeEvenWhenTheToolItselfDeclaresADifferentRuntime()
+        {
+            var testInstance = TestAssets.Get("MSBuildTestApp")
+                                         .CreateInstance()
+                                         .WithSourceFiles()
+                                         .WithRestoreFiles();
+
+            var testProjectDirectory = testInstance.Root;
+
+            new DotnetCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput("prefercliruntime")
                 .Should().Pass()
-                     .And.HaveStdOutContaining("Hello World!");
-
-            var binDirectory = new DirectoryInfo(projectDirectory).Sub("bin");
-            binDirectory.Should().HaveFilesMatching("*.dll", SearchOption.AllDirectories);
-
-            new CleanCommand()
-                .WithWorkingDirectory(projectDirectory)
-                .Execute()
-                .Should().Pass();
-
-            binDirectory.Should().NotHaveFilesMatching("*.dll", SearchOption.AllDirectories);
+                .And.HaveStdOutContaining("Hello I prefer the cli runtime World!");;
         }
     }
 }

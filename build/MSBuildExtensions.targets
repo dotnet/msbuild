@@ -1,0 +1,90 @@
+<Project>
+
+  <Target Name="GenerateMSBuildExtensions"
+          DependsOnTargets="RestoreMSBuildExtensionsPackages">
+
+    <ItemGroup>
+
+      <!-- The MSBuildExtensionsContent item is for the files that will be laid out in the CLI install -->
+      <MSBuildExtensionsContent Include="$(GeneratedMSBuildExtensionsDirectory)/**/*" />
+
+      <!-- We want to include the tasks and targets from the Microsoft.NET.Build.Extensions package, but we don't want to include the DLLs
+           from that package under the net461, net462, etc folders.  That is because they come from the NETStandard.Library.NETFramework
+           package, and we want to insert them directly into the CLI from CoreFx instead of having to do a two-hop insertion (CoreFX -> SDK -> CLI)
+           if we need to update them.
+
+           https://github.com/dotnet/sdk/issues/1324 has been filed to exclude these from the Microsoft.NET.Build.Extensions package when
+           we generate it.
+           -->
+      <MSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\**\*.*"
+                                Exclude="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\net*\**" />
+
+      <!-- Don't include .NET Framework MS.NET.Build.Extensions tasks in CLI layout -->
+      <MSBuildExtensionsContent Remove="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools\net46\**" />
+
+      <MSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions-ver\**\*.*"
+                                DeploymentSubpath="$(MSBuildExtensionsVersionSubfolder)/" />
+
+      <MSBuildExtensionsContent Include="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.*"
+                                Exclude="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.props;$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.targets"
+                                DeploymentSubpath="Microsoft/Microsoft.NET.Build.Extensions/" />
+
+
+      <!-- The VSMSBuildExtensionsContent item is for the files that will be included in the VS.Redist.Common.Net.Core.SDK.MSBuildExtensions
+           package and inserted into Visual Studio -->
+      <VSMSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\**\*.*"
+                                  Exclude="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\net*\**"
+                                  DeploymentSubpath="msbuildExtensions/"/>
+
+      <!-- Don't include .NET Core MS.NET.Build.Extensions tasks in Full Framework MSBuild layout -->
+      <VSMSBuildExtensionsContent Remove="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools\netcoreapp*\**" />
+
+      <VSMSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions-ver\**\*.*"
+                                  DeploymentSubpath="msbuildExtensions-ver/"/>
+      <VSMSBuildExtensionsContent Include="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.*"
+                                  Exclude="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.props;$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.targets"
+                                  DeploymentSubpath="msbuildExtensions/Microsoft/Microsoft.NET.Build.Extensions/" />
+
+      <VSMSBuildExtensionsContent Update="@(VSMSBuildExtensionsContent)">
+        <DestinationPath >$(MSBuildExtensionsLayoutDirectory)/%(VSMSBuildExtensionsContent.DeploymentSubpath)%(RecursiveDir)%(Filename)%(Extension)</DestinationPath>
+      </VSMSBuildExtensionsContent>
+    </ItemGroup>
+
+    <Copy SourceFiles="@(VSMSBuildExtensionsContent)" DestinationFiles="%(VSMSBuildExtensionsContent.DestinationPath)" />
+  </Target>
+
+  <Target Name="PrepareMSBuildExtensionsProps">
+    <PropertyGroup>
+      <MSBuildExtensionsPackageName>Microsoft.NET.Build.Extensions</MSBuildExtensionsPackageName>
+      <MSBuildExtensionsVersionSubfolder>Current</MSBuildExtensionsVersionSubfolder>
+      <MSBuildExtensionsNuPkgPath>$(NuGetPackagesDir)/$(MSBuildExtensionsPackageName.ToLower())/$(MicrosoftNETBuildExtensionsPackageVersion.ToLower())</MSBuildExtensionsNuPkgPath>
+
+      <NETStandardLibraryNETFrameworkPackageName>NETStandard.Library.NETFramework</NETStandardLibraryNETFrameworkPackageName>
+      <NETStandardLibraryNETFrameworkNuPkgPath>$(NuGetPackagesDir)/$(NETStandardLibraryNETFrameworkPackageName.ToLower())/$(CLI_NETStandardLibraryNETFrameworkVersion.ToLower())</NETStandardLibraryNETFrameworkNuPkgPath>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="RestoreMSBuildExtensionsPackages"
+          DependsOnTargets="PrepareMSBuildExtensionsProps">
+    <ItemGroup>
+      <ExtensionPackageToRestore Include="$(MSBuildExtensionsPackageName)" Version="$(MicrosoftNETBuildExtensionsPackageVersion)"/>
+      <ExtensionPackageToRestore Include="$(NETStandardLibraryNETFrameworkPackageName)" Version="$(CLI_NETStandardLibraryNETFrameworkVersion)"/>
+
+      <ExtensionRestore Include="$(RepoRoot)/build/RestoreDependency.proj">
+        <Properties>
+          DotNetExe=$(DotNetExe);
+          NuGetPackagesDir=$(NuGetPackagesDir);
+          DependencyPackageName=%(ExtensionPackageToRestore.Identity);
+          DependencyPackageVersion=%(ExtensionPackageToRestore.Version);
+        </Properties>
+      </ExtensionRestore>
+    </ItemGroup>
+
+    <MakeDir Directories="$(GeneratedMSBuildExtensionsDirectory)" />
+
+    <MSBuild
+      BuildInParallel="False"
+      Projects="@(ExtensionRestore)">
+    </MSBuild>
+  </Target>
+</Project>
