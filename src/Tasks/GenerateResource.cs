@@ -2902,7 +2902,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception deleteException)
             {
-                _logger.LogInfoWithCodeFromResources("GenerateResource.DeleteCorruptOutputFailed. Failed to remove possibly-corrupt output file: ", FileUtilities.GetFullPathNoThrow(filename), deleteException.Message);
+                _logger.LogMessageFromResources("GenerateResource.DeleteCorruptOutputFailed. Failed to remove possibly-corrupt output file: ", FileUtilities.GetFullPathNoThrow(filename), deleteException.Message);
 
                 if (ExceptionHandling.NotExpectedException(deleteException))
                 {

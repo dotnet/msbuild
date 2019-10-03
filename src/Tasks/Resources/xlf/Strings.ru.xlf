@@ -1035,9 +1035,9 @@
         <note>{StrBegin="MSB3554: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CorruptOutput">
-        <source>MSB3555: Output file "{0}" is possibly corrupt.</source>
-        <target state="translated">MSB3555: Выходной файл "{0}", вероятно, поврежден.</target>
-        <note>{StrBegin="MSB3555: "}</note>
+        <source>Output file "{0}" is possibly corrupt and will be deleted and recreated.</source>
+        <target state="needs-review-translation">MSB3555: Выходной файл "{0}", вероятно, поврежден.</target>
+        <note />
       </trans-unit>
       <trans-unit id="GenerateResource.OnlyStringsSupported">
         <source>MSB3556: Only strings can be written to a .txt file, resource "{0}" is type {1}.</source>
@@ -1061,8 +1061,8 @@
       </trans-unit>
       <trans-unit id="GenerateResource.DeleteCorruptOutputFailed">
         <source>MSB3560: Could not delete the possibly corrupt output file "{0}". {1}</source>
-        <target state="translated">MSB3560: Не удалось удалить возможно поврежденный файл вывода "{0}". {1}</target>
-        <note>{StrBegin="MSB3560: "}</note>
+        <target state="needs-review-translation">MSB3560: Не удалось удалить возможно поврежденный файл вывода "{0}". {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="GenerateResource.ObsoleteStringsTag">
         <source>MSB3562: The "[strings]" tag is no longer necessary in text resources; please remove it.</source>
