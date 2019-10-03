@@ -4,8 +4,24 @@
       <RedistLayoutPath>$(BaseOutputPath)$(Configuration)\dotnet\</RedistLayoutPath>
     </PropertyGroup>
 
+    <!-- This is a hack? to discover the stage 0 SDK version without having to duplicate the LKG SDK property between the global.json
+    and a property. -->
+    <ItemGroup>
+      <Stage0VersionFilePath Include="$(_DotNetHiveRoot)/sdk/*/.version" />
+      <Stage0SdkDirectoryPath Include="$([System.IO.Path]::GetDirectoryName('%(Stage0VersionFilePath.Identity)'))" />
+      <Stage0SdkVersion Include="$([System.IO.Path]::GetFileName('%(Stage0SdkDirectoryPath.Identity)'))" />
+    </ItemGroup>
+    <PropertyGroup>
+      <Stage0SdkVersion>@(Stage0SdkVersion)</Stage0SdkVersion>
+    </PropertyGroup>
+
     <ItemGroup>
       <OverlaySDK Include="$(_DotNetHiveRoot)/**/*" Exclude="$(_DotNetHiveRoot)sdk/**/*"/>
+      <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/Microsoft.NETCoreSdk.BundledVersions.props" />
+      <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/Microsoft.NETCoreSdk.BundledCliTools.props" />
+      <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/RuntimeIdentifierGraph.json" />
+      <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/DotnetTools/**/*" RelativeDestination="DotnetTools"/>
+      <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/AppHostTemplate/**/*" RelativeDestination="AppHostTemplate"/>
       <ToolsetToOverlay Include="$(OutputPath)/**/*" />
     </ItemGroup>
 
@@ -15,6 +31,12 @@
     <PropertyGroup>
       <SdkOutputDirectory>$(RedistLayoutPath)/sdk/$(Version)</SdkOutputDirectory>
     </PropertyGroup>
+
+    <Copy SourceFiles="@(OverlayBundledFiles)"
+          DestinationFolder="$(SdkOutputDirectory)"/>
+    
+    <Copy SourceFiles="@(OverlaySdkFilesFromStage0)"
+          DestinationFiles="@(OverlaySdkFilesFromStage0->'$(SdkOutputDirectory)\%(RelativeDestination)\%(RecursiveDir)%(Filename)%(Extension)')"/>
 
     <Copy SourceFiles="@(ToolsetToOverlay)"
           DestinationFiles="@(ToolsetToOverlay->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
