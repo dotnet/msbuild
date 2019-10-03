@@ -9,6 +9,8 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using FluentAssertions;
+using System.Reflection;
+using System.Linq;
 
 namespace Microsoft.DotNet.Tests
 {
@@ -17,22 +19,18 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void VersionCommandDisplaysCorrectVersion()
         {
-            var versionFilePath = Path.Combine(AppContext.BaseDirectory, "ExpectedSdkVersion.txt");
-            var version = GetVersionFromFile(versionFilePath);
+            var assemblyMetadata = typeof(TestAssetInstanceExtensions).Assembly
+                .GetCustomAttributes(typeof(AssemblyMetadataAttribute))
+                .Cast<AssemblyMetadataAttribute>()
+                .ToDictionary(a => a.Key, a => a.Value);
+
+            var expectedVersion = assemblyMetadata["SdkVersion"];
 
             CommandResult result = new DotnetCommand()
                     .ExecuteWithCapturedOutput("--version");
 
             result.Should().Pass();
-            result.StdOut.Trim().Should().Be(version);
-        }
-
-        private string GetVersionFromFile(string versionFilePath)
-        {
-            using (var reader = new StreamReader(File.OpenRead(versionFilePath)))
-            {
-                return reader.ReadLine();
-            }
+            result.StdOut.Trim().Should().Be(expectedVersion);
         }
     }
 }

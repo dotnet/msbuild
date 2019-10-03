@@ -37,10 +37,10 @@
     <Compile Include="..\dotnet-store.Tests\**\*.cs" LinkBase="dotnet-store" />
     <Compile Include="..\dotnet-test.Tests\**\*.cs" LinkBase="dotnet-test" />
     <Compile Include="..\dotnet-vstest.Tests\**\*.cs" LinkBase="dotnet-vstest" />
-    <Compile Include="..\Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests\**\*.cs" LinkBase="Telemetry.PersistenceChannel"/>
-    <Compile Include="..\Microsoft.DotNet.CommandFactory.Tests\**\*.cs" LinkBase="CommandFactory"/>
-    <Compile Include="..\Microsoft.DotNet.Configurer.UnitTests\**\*.cs" LinkBase="Configurer"/>
-    <Compile Include="..\Microsoft.DotNet.ShellShim.Tests\**\*.cs" LinkBase="ShellShim"/>
+    <Compile Include="..\Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests\**\*.cs" LinkBase="Telemetry.PersistenceChannel" />
+    <Compile Include="..\Microsoft.DotNet.CommandFactory.Tests\**\*.cs" LinkBase="CommandFactory" />
+    <Compile Include="..\Microsoft.DotNet.Configurer.UnitTests\**\*.cs" LinkBase="Configurer" />
+    <Compile Include="..\Microsoft.DotNet.ShellShim.Tests\**\*.cs" LinkBase="ShellShim" />
     
 
     <None Include="..\Microsoft.DotNet.ShellShim.Tests\WpfBinaryTestAsssets\testwpf.dll" LinkBase="WpfBinaryTestAsssets">
@@ -64,6 +64,10 @@
     <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
       <_Parameter1>XUnitVersion</_Parameter1>
       <_Parameter2>$(XUnitVersion)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>SdkVersion</_Parameter1>
+      <_Parameter2>$(Version)</_Parameter2>
     </AssemblyAttribute>
   </ItemGroup>
 
