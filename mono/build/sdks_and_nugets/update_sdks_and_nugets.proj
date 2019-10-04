@@ -13,9 +13,7 @@
         <MSBuildExtensionsPathOutputDirectory>$(DotNetOverlayDirectory)\ExtensionsPath</MSBuildExtensionsPathOutputDirectory>
         <MSBuildExtensionsPathToolsVersionOutputDirectory>$(DotNetOverlayDirectory)\ExtensionsPath-ToolsVersion</MSBuildExtensionsPathToolsVersionOutputDirectory>
 
-        <HostFxrUrl>$(CoreSetupRootUrl)$(HostFxrVersion)/$(DownloadedHostFxrInstallerFileName)$(CoreSetupBlobAccessTokenParam)</HostFxrUrl>
         <MSBuildSdkResolverOutDir>$(DotNetOverlayDirectory)\msbuild-bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver</MSBuildSdkResolverOutDir>
-        <RuntimeDepsInstallerUrl>$(CoreSetupRootUrl)$(MicrosoftNETCoreAppVersion)/$(DownloadedRuntimeDepsInstallerFileName)$(CoreSetupBlobAccessTokenParam)</RuntimeDepsInstallerUrl>
     </PropertyGroup>
 
     <Target Name="DeploySdksAndNuGets">
