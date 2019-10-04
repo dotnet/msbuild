@@ -434,6 +434,10 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     gotValidConnection = true;
+
+                    CommunicationsUtilities.Trace("Writing handshake to parent");
+                    localWritePipe.WriteLongForHandshake(GetClientHandshake());
+                    ChangeLinkStatus(LinkStatus.Active);
                 }
                 catch (Exception e)
                 {
@@ -453,30 +457,6 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
             }
-
-            CommunicationsUtilities.Trace("Writing handshake to parent");
-            try
-            {
-                localWritePipe.WriteLongForHandshake(GetClientHandshake());
-            }
-            catch (IOException e)
-            {
-                CommunicationsUtilities.Trace("Worker node was terminated. Exception: {0}", e.Message);
-                try
-                {
-                    if (localPipeServer.IsConnected)
-                    {
-                        localPipeServer.WaitForPipeDrain();
-                        localPipeServer.Disconnect();
-                    }
-                }
-                catch (Exception)
-                {
-                    // Disconnect should not fail.
-                }
-                return;
-            }
-            ChangeLinkStatus(LinkStatus.Active);
 
             RunReadLoop(
                 new BufferedReadStream(localReadPipe),
