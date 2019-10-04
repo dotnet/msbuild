@@ -7,29 +7,29 @@
     </Dependency>
   </ToolsetDependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NET.Sdk" Version="3.1.100-preview1.19463.2">
+    <Dependency Name="Microsoft.NET.Sdk" Version="3.1.100-preview1.19504.1">
       <Uri>https://github.com/dotnet/sdk</Uri>
-      <Sha>a19b734139ab62de631c31897b0ffc35f8462f3f</Sha>
+      <Sha>7def7a9c5adc9e4d52a4cf19eee2c3998e3f3b93</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Razor" Version="3.1.0-preview1.19470.1">
+    <Dependency Name="Microsoft.NET.Sdk.Razor" Version="3.1.0-preview1.19502.3">
       <Uri>https://github.com/aspnet/AspNetCore-Tooling</Uri>
-      <Sha>f283e4a7c0d47054c9a178ff0b29f00e68f307d3</Sha>
+      <Sha>4ccb010d3d0d0f805c2f2d645662643c5b181e25</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-rc2.19461.2">
+    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.1.100-preview1.19503.3">
       <Uri>https://github.com/aspnet/websdk</Uri>
-      <Sha>9471e9daf66b1e4f03d8b461c3ca0594f742923b</Sha>
+      <Sha>7ca44c4dbf83c00067054c4a9bd1f672bd2ba44e</Sha>
     </Dependency>
     <Dependency Name="ILLink.Tasks" Version="0.1.6-prerelease.19380.1">
       <Uri>https://github.com/mono/linker</Uri>
       <Sha>1127689f262d52ea8ff68ef03d706fa62b3b40a1</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.App" Version="3.1.0-preview1.19467.7">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.1.0-preview1.19504.2">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>1e19b8c0d63fe23da7bdd9625ca51c6bd2d1bab2</Sha>
+      <Sha>50de4c0d1f33599adc6d71ae6d5b8783140c0b83</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.1.100-preview1.19467.5">
+    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.1.100-preview1.19504.3">
       <Uri>https://github.com/dotnet/cli</Uri>
-      <Sha>11fe23d96c69dad32ab5267d63e572778c5d6de5</Sha>
+      <Sha>5a44f16c79b1d4f5bf0fb2500454347acdaa38aa</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Net.Compilers" Version="3.3.1-beta3-19426-02">
       <Uri>https://github.com/dotnet/roslyn</Uri>
