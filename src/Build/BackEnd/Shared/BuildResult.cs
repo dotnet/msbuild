@@ -114,6 +114,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private ProjectInstance _projectStateAfterBuild;
 
+        private string _schedulerInducedError;
+
         /// <summary>
         /// Constructor for serialization.
         /// </summary>
@@ -471,6 +473,16 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Container used to transport errors from the scheduler (issued while computing a build result)
+        /// to the TaskHost that has the proper logging context (project id, target id, task id, file location)
+        /// </summary>
+        internal string SchedulerInducedError
+        {
+            get => _schedulerInducedError;
+            set => _schedulerInducedError = value;
+        }
+
+        /// <summary>
         /// Indexer which sets or returns results for the specified target
         /// </summary>
         /// <param name="target">The target</param>
@@ -564,6 +576,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _baseOverallResult);
             translator.Translate(ref _projectStateAfterBuild, ProjectInstance.FactoryForDeserialization);
             translator.Translate(ref _savedCurrentDirectory);
+            translator.Translate(ref _schedulerInducedError);
             translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
         }
 

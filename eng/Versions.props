@@ -34,10 +34,6 @@
   <!-- Toolset Dependencies -->
   <PropertyGroup>
     <DotNetCliVersion>3.0.100-preview6-012264</DotNetCliVersion>
-  </PropertyGroup>
-  <!-- Product Dependencies -->
-  <PropertyGroup>
-    <SystemResourcesExtensionsVersion>4.6.0-rc2.19458.3</SystemResourcesExtensionsVersion>
     <MicrosoftNetCompilersVersion>3.3.1-beta4-19462-11</MicrosoftNetCompilersVersion>
     <MicrosoftNETSdkVersion>3.1.100-preview1.19463.2</MicrosoftNETSdkVersion>
     <MicrosoftNETSdkRazorVersion>3.1.0-preview1.19470.1</MicrosoftNETSdkRazorVersion>

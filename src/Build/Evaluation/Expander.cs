@@ -3686,7 +3686,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             if (TryGetArg(args, out string arg0))
                             {
-                                returnVal = string.Copy(arg0);
+                                returnVal = arg0;
                                 return true;
                             }
                         }
