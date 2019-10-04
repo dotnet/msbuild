@@ -13,11 +13,13 @@
   <!-- Production Dependencies -->
   <PropertyGroup>
     <!-- "Stage 0" from https://github.com/dotnet/core-sdk -->
-    <DotNetCoreSdkLKGVersion>3.0.100-preview8-013422</DotNetCoreSdkLKGVersion>
+    <DotNetCoreSdkLKGVersion>3.0.100</DotNetCoreSdkLKGVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/core-setup -->
-    <MicrosoftNETCoreAppRuntimewinx64Version>3.0.1</MicrosoftNETCoreAppRuntimewinx64Version>
+    <MicrosoftNETCoreAppRefPackageVersion>3.0.0</MicrosoftNETCoreAppRefPackageVersion>
+    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>3.0.1</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
+    <MicrosoftNETCoreAppRuntimePackageVersion>$(MicrosoftNETCoreAppRuntimewinx64PackageVersion)</MicrosoftNETCoreAppRuntimePackageVersion>
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>3.0.1</MicrosoftDotNetPlatformAbstractionsPackageVersion>
     <MicrosoftExtensionsDependencyModelPackageVersion>3.0.1</MicrosoftExtensionsDependencyModelPackageVersion>
     <MicrosoftNETCoreDotNetHostResolverPackageVersion>3.0.1</MicrosoftNETCoreDotNetHostResolverPackageVersion>
