@@ -4,18 +4,18 @@ parameters:
   publishInstallersAndChecksums: false
 
 stages:
-- stage: NetCore_Tools_Latest_Publish
+- stage: NetCore_3_Tools_Publish
   dependsOn: validate
   variables:
     - template: ../common-variables.yml
-  displayName: .NET Tools - Latest Publishing
+  displayName: .NET 3 Tools Publishing
   jobs:
   - template: ../setup-maestro-vars.yml
 
   - job:
     displayName: Symbol Publishing
     dependsOn: setupMaestroVars
-    condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', variables.NetCore_Tools_Latest_Channel_Id))
+    condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', variables.NetCore_3_Tools_Channel_Id))
     variables:
       - group: DotNet-Symbol-Server-Pats
     pool:
@@ -56,7 +56,7 @@ stages:
         value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.BARBuildId'] ]
       - name: IsStableBuild
         value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.IsStableBuild'] ]
-    condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', variables.NetCore_Tools_Latest_Channel_Id))
+    condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', variables.NetCore_3_Tools_Channel_Id))
     pool:
       vmImage: 'windows-2019'
     steps:
@@ -127,4 +127,4 @@ stages:
 
       - template: ../../steps/promote-build.yml
         parameters:
-          ChannelId: ${{ variables.NetCore_Tools_Latest_Channel_Id }}
+          ChannelId: ${{ variables.NetCore_3_Tools_Channel_Id }}
