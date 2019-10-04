@@ -16,6 +16,7 @@
   <Import Project="targets\GenerateLayout.targets" />
   <Import Project="targets\GenerateArchive.targets" />
   <Import Project="targets\OverlaySdkOnLKG.targets" />
+  <Import Project="targets\MSBuildExtensions.targets" />
 
   <ItemGroup>
     <PackageReference Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksPackageVersion)" />

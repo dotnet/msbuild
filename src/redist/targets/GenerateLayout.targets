@@ -29,6 +29,14 @@
     <Delete Files="@(RoslynFrameworkAssemblies)" />
   </Target>
 
+  <Target Name="PublishMSBuildExtensions"
+          DependsOnTargets="GenerateMSBuildExtensions"
+          BeforeTargets="Build">
+    <Copy SourceFiles="@(MSBuildExtensionsContent)"
+          DestinationFiles="@(MSBuildExtensionsContent->'$(OutputPath)\%(DeploymentSubpath)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    
+  </Target>
+
   <Target Name="PublishTestCli"
           BeforeTargets="Build">
     <PropertyGroup>
@@ -223,6 +231,7 @@
   <Target Name="GenerateLayout"
           DependsOnTargets="PublishVersionFile;
                             PublishRoslyn;
+                            PublishMSBuildExtensions;
                             PublishFSharp;
                             GenerateCliRuntimeConfigurationFiles;
                             MakeFscRunnableAndMoveToPublishDir;
