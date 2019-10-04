@@ -22,5 +22,8 @@
       replace PackageLicenseUrl with PackageLicenseExpression.
     -->
     <NoWarn>$(NoWarn);NU5125</NoWarn>
+
+    <!-- Workaround until we switch to embedded package icons -->
+    <NoWarn>$(NoWarn);NU5048;NU5128</NoWarn>
   </PropertyGroup>
 </Project>
