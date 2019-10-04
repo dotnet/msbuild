@@ -323,7 +323,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         }
 
         [Fact]
-        public void ItDoesNotPrintCopyrightInfo()
+        public void DotnetPublishDoesNotPrintCopyrightInfo()
         {
             var testInstance = TestAssets.Get("MSBuildTestApp")
                 .CreateInstance()

@@ -289,7 +289,7 @@ namespace Microsoft.DotNet.Pack.Tests
         }
 
         [Fact]
-        public void ItDoesNotPrintCopyrightInfo()
+        public void DotnetPackDoesNotPrintCopyrightInfo()
         {
             var testInstance = TestAssets.Get("MSBuildTestApp")
                 .CreateInstance()
