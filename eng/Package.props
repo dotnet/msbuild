@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!-- Shared package properties -->
-
   <PropertyGroup> 	
     <BuildOutputTargetFolder>tools</BuildOutputTargetFolder>
     <IncludeBuildOutput>False</IncludeBuildOutput>
+    <SuppressDependenciesWhenPacking>True</SuppressDependenciesWhenPacking>
   </PropertyGroup>
 
   <PropertyGroup>
     <Description>This package contains MSBuild targets and tasks for building and publishing ASP.NET Core projects. This package is required for building and publishing ASP.NET Core projects.</Description>
     <ProjectUrl>https://github.com/aspnet/websdk</ProjectUrl>
-    <PackageIconUrl>http://go.microsoft.com/fwlink/?LinkID=288859</PackageIconUrl>
+    <PackageIcon>packageIcon.png</PackageIcon>
+    <PackageIconFullPath>$(MSBuildThisFileDirectory)packageIcon.png</PackageIconFullPath>
     <PackageTags>WebSdk</PackageTags>
   </PropertyGroup>
+
+   <ItemGroup>
+    <None Include="$(PackageIconFullPath)" Pack="true" PackagePath="\"/>
+  </ItemGroup>
 </Project>
