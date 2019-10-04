@@ -455,7 +455,27 @@ namespace Microsoft.Build.BackEnd
             }
 
             CommunicationsUtilities.Trace("Writing handshake to parent");
-            localWritePipe.WriteLongForHandshake(GetClientHandshake());
+            try
+            {
+                localWritePipe.WriteLongForHandshake(GetClientHandshake());
+            }
+            catch (IOException e)
+            {
+                CommunicationsUtilities.Trace("Worker node was terminated. Exception: {0}", e.Message);
+                try
+                {
+                    if (localPipeServer.IsConnected)
+                    {
+                        localPipeServer.WaitForPipeDrain();
+                        localPipeServer.Disconnect();
+                    }
+                }
+                catch (Exception)
+                {
+                    // Disconnect should not fail.
+                }
+                return;
+            }
             ChangeLinkStatus(LinkStatus.Active);
 
             RunReadLoop(
