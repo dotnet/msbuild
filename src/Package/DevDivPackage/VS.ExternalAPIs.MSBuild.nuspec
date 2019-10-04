@@ -6,6 +6,9 @@
     <description>CoreXT package containing MSBuild binaries for the VS build. Produced from the MSBuild $branchname$ branch.</description>
     <authors>MSBuild</authors>
     <version>0.0</version>
+    <dependencies>
+      <group targetFramework=".NETFramework4.7.2" />
+    </dependencies>
   </metadata>
   <files>
     <file src="Microsoft.Build.dll" target="lib\net472" />
