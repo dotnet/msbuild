@@ -1502,12 +1502,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="ex">Exception to raise to event handlers</param>
         private void RaiseLoggingExceptionEvent(Exception ex)
         {
-            LoggingExceptionDelegate loggingException = OnLoggingThreadException;
-
-            if (loggingException != null)
-            {
-                loggingException(ex);
-            }
+            OnLoggingThreadException?.Invoke(ex);
         }
 
         /// <summary>

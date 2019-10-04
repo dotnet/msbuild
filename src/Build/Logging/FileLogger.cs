@@ -81,6 +81,11 @@ namespace Microsoft.Build.Logging
             // want to make decisions based on our verbosity, so we do this last.
             base.Initialize(eventSource, nodeCount);
 
+            if (!SkipProjectStartedText && Verbosity >= LoggerVerbosity.Normal)
+            {
+                eventSource.BuildStarted += (obj, args) => WriteHandler(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("LogLoggerVerbosity", Verbosity));
+            }
+
             try
             {
                 string logDirectory = null;

@@ -10,6 +10,7 @@ using System.Text;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.UnitTests;
 using Shouldly;
@@ -392,6 +393,12 @@ namespace Microsoft.Build.Experimental.Graph.UnitTests
             results["1"].Result.OverallResult.ShouldBe(BuildResultCode.Failure);
             results["1"].Logger.ErrorCount.ShouldBe(1);
             results["1"].Logger.Errors.First().Message.ShouldContain("MSB4252");
+
+            results["1"].Logger.Errors.First().BuildEventContext.NodeId.ShouldNotBe(BuildEventContext.InvalidNodeId);
+            results["1"].Logger.Errors.First().BuildEventContext.ProjectInstanceId.ShouldNotBe(BuildEventContext.InvalidProjectInstanceId);
+            results["1"].Logger.Errors.First().BuildEventContext.ProjectContextId.ShouldNotBe(BuildEventContext.InvalidProjectContextId);
+            results["1"].Logger.Errors.First().BuildEventContext.TargetId.ShouldNotBe(BuildEventContext.InvalidTargetId);
+            results["1"].Logger.Errors.First().BuildEventContext.TaskId.ShouldNotBe(BuildEventContext.InvalidTaskId);
         }
 
         /// <summary>

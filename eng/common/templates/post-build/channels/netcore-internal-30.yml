@@ -107,10 +107,10 @@ stages:
             /p:Configuration=Release
             /p:PublishInstallersAndChecksums=true
             /p:ChecksumsTargetStaticFeed=$(InternalChecksumsBlobFeedUrl)
-            /p:ChecksumsTargetStaticFeedKey=$(InternalChecksumsBlobFeedKey)
+            /p:ChecksumsAzureAccountKey=$(InternalChecksumsBlobFeedKey)
             /p:InstallersTargetStaticFeed=$(InternalInstallersBlobFeedUrl)
-            /p:InstallersTargetStaticFeedKey=$(InternalInstallersBlobFeedKey)
-            /p:PublishToAzureDevOpsNuGetFeeds=true
+            /p:InstallersAzureAccountKey=$(InternalInstallersBlobFeedKey)
+            /p:PublishToAzureDevOpsNuGetFeeds=false
             /p:AzureDevOpsStaticShippingFeed='https://pkgs.dev.azure.com/dnceng/_packaging/dotnet3-internal/nuget/v3/index.json'
             /p:AzureDevOpsStaticShippingFeedKey='$(dn-bot-dnceng-artifact-feeds-rw)'
             /p:AzureDevOpsStaticTransportFeed='https://pkgs.dev.azure.com/dnceng/_packaging/dotnet3-internal-transport/nuget/v3/index.json'
