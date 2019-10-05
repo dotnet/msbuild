@@ -1,9 +1,9 @@
 {
   "tools": {
-    "dotnet": "3.0.100-preview8-013422",
+    "dotnet": "3.0.100",
     "runtimes": {
       "dotnet": [
-        "$(MicrosoftNETCoreAppRuntimewinx64PackageVersion)"
+        "$(MicrosoftNETCoreAppRuntimePackageVersion)"
       ]
     }
   },
