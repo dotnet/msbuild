@@ -5,31 +5,31 @@
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>fa98e14b1b8d84a1a711ef909384f16ada8bbe7c</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.App.Runtime.win-x64" Version="3.1.0-preview1.19504.18">
+    <Dependency Name="Microsoft.NETCore.App.Runtime.win-x64" Version="3.1.0-preview1.19504.20">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>27610507ac04a478c225054699afb20e86cc7881</Sha>
+      <Sha>45f675b1acc38eaea182bf6ef284d1b13141d134</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.PlatformAbstractions" Version="3.1.0-preview1.19504.18">
+    <Dependency Name="Microsoft.DotNet.PlatformAbstractions" Version="3.1.0-preview1.19504.20">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>27610507ac04a478c225054699afb20e86cc7881</Sha>
+      <Sha>45f675b1acc38eaea182bf6ef284d1b13141d134</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.HostModel" Version="3.1.0-preview1.19504.18">
+    <Dependency Name="Microsoft.NET.HostModel" Version="3.1.0-preview1.19504.20">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>27610507ac04a478c225054699afb20e86cc7881</Sha>
+      <Sha>45f675b1acc38eaea182bf6ef284d1b13141d134</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="3.1.0-preview1.19504.18">
+    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="3.1.0-preview1.19504.20">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>27610507ac04a478c225054699afb20e86cc7881</Sha>
+      <Sha>45f675b1acc38eaea182bf6ef284d1b13141d134</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.DotNetHostResolver" Version="3.1.0-preview1.19504.18">
+    <Dependency Name="Microsoft.NETCore.DotNetHostResolver" Version="3.1.0-preview1.19504.20">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>27610507ac04a478c225054699afb20e86cc7881</Sha>
+      <Sha>45f675b1acc38eaea182bf6ef284d1b13141d134</Sha>
     </Dependency>
     <!-- Specific version here is not interesting, but we want Maestro to add corefx
          private feeds -->
-    <Dependency Name="System.Text.Json" Version="4.7.0-preview1.19504.8" CoherentParentDependency="Microsoft.NETCore.App.Runtime.win-x64">
+    <Dependency Name="System.Text.Json" Version="4.7.0-preview1.19504.10" CoherentParentDependency="Microsoft.NETCore.App.Runtime.win-x64">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>f4137889514bef5b9149e25d6edbaeb66f8beba6</Sha>
+      <Sha>0498dfedf8dbbd088c74399f45bc0b0c861c831a</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.1.0-preview1.19504.2">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
