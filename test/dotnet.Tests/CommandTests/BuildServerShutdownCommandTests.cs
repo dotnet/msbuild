@@ -165,7 +165,7 @@ namespace Microsoft.DotNet.Tests.Commands
         public void GivenARunningRazorServerItShutsDownSuccessfully()
         {
             var pipeName = Path.GetRandomFileName();
-            var pidDirectory = Path.GetFullPath(Path.Combine(TempRoot.Root, Path.GetRandomFileName()));
+            var pidDirectory = TestAssets.CreateTestDirectory(identifier: "pidDirectory").FullName;
 
             var testInstance = TestAssets.Get("TestRazorApp")
                 .CreateInstance()

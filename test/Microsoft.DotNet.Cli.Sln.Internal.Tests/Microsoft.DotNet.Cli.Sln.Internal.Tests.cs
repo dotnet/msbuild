@@ -8,6 +8,7 @@ using Xunit;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.DotNet.Cli.Sln.Internal.Tests
 {
@@ -96,13 +97,22 @@ Global
 EndGlobal
 ";
 
+        private string CreateFile([CallerMemberName] string callerName = null)
+        {
+            var folder = TestAssets.CreateTestDirectory(callingMethod: callerName, testProjectName: "tempfile");
+            var filename = Path.Combine(folder.FullName, Guid.NewGuid().ToString() + ".tmp");
+            using (new FileStream(filename, FileMode.CreateNew)) { }
+            return filename;
+        }
+        
+
         [Fact]
         public void WhenGivenAValidSlnFileItReadsAndVerifiesContents()
         {
-            var tmpFile = Temp.CreateFile();
-            tmpFile.WriteAllText(SolutionWithAppAndLibProjects);
+            var tmpFile = CreateFile();
+            File.WriteAllText(tmpFile, SolutionWithAppAndLibProjects);
 
-            SlnFile slnFile = SlnFile.Read(tmpFile.Path);
+            SlnFile slnFile = SlnFile.Read(tmpFile);
 
             Console.WriteLine(new
             {
@@ -112,15 +122,15 @@ EndGlobal
                 slnFile_MinimumVisualStudioVersion = slnFile.MinimumVisualStudioVersion,
                 slnFile_BaseDirectory = slnFile.BaseDirectory,
                 slnFile_FullPath = slnFile.FullPath,
-                tmpFilePath = tmpFile.Path
+                tmpFilePath = tmpFile
             }.ToString());
 
             slnFile.FormatVersion.Should().Be("12.00");
             slnFile.ProductDescription.Should().Be("Visual Studio 15");
             slnFile.VisualStudioVersion.Should().Be("15.0.26006.2");
             slnFile.MinimumVisualStudioVersion.Should().Be("10.0.40219.1");
-            slnFile.BaseDirectory.Should().Be(Path.GetDirectoryName(tmpFile.Path));
-            slnFile.FullPath.Should().Be(Path.GetFullPath(tmpFile.Path));
+            slnFile.BaseDirectory.Should().Be(Path.GetDirectoryName(tmpFile));
+            slnFile.FullPath.Should().Be(Path.GetFullPath(tmpFile));
 
             slnFile.Projects.Count.Should().Be(2);
             var project = slnFile.Projects[0];
@@ -247,20 +257,23 @@ EndGlobal
         [Fact]
         public void WhenGivenAValidReadOnlySlnFileItReadsContentsWithNoException()
         {
-            var tmpFile = Temp.CreateFile();
-            tmpFile.WriteAllText(SolutionWithAppAndLibProjects);
-            tmpFile.SetReadOnlyAttribute();
-            Action act = () => SlnFile.Read(tmpFile.Path);
+            var tmpFile = CreateFile();
+            File.WriteAllText(tmpFile, SolutionWithAppAndLibProjects);
+            var attr = File.GetAttributes(tmpFile);
+            attr = attr | FileAttributes.ReadOnly;
+            File.SetAttributes(tmpFile, attr);
+        
+            Action act = () => SlnFile.Read(tmpFile);
             act.ShouldNotThrow("Because readonly file is not being modified.");
         }
 
         [Fact]
         public void WhenGivenAValidSlnFileItModifiesSavesAndVerifiesContents()
         {
-            var tmpFile = Temp.CreateFile();
-            tmpFile.WriteAllText(SolutionWithAppAndLibProjects);
+            var tmpFile = CreateFile();
+            File.WriteAllText(tmpFile, SolutionWithAppAndLibProjects);
 
-            SlnFile slnFile = SlnFile.Read(tmpFile.Path);
+            SlnFile slnFile = SlnFile.Read(tmpFile);
 
             slnFile.FormatVersion = "14.00";
             slnFile.ProductDescription = "Visual Studio 16";
@@ -293,7 +306,7 @@ EndGlobal
 
             slnFile.Write();
 
-            File.ReadAllText(tmpFile.Path)
+            File.ReadAllText(tmpFile)
                 .Should().Be(SolutionModified);
         }
 
@@ -304,12 +317,12 @@ EndGlobal
         [InlineData("First Line\nSecondLine\nMicrosoft Visual Studio Solution File, Format Version \nFourth Line", 3)]
         public void WhenGivenASolutionWithMissingHeaderVersionItThrows(string fileContents, int lineNum)
         {
-            var tmpFile = Temp.CreateFile();
-            tmpFile.WriteAllText(fileContents);
+            var tmpFile = CreateFile();
+            File.WriteAllText(tmpFile, fileContents);
 
             Action action = () =>
             {
-                SlnFile.Read(tmpFile.Path);
+                SlnFile.Read(tmpFile);
             };
 
             action.ShouldThrow<InvalidSolutionFormatException>()
@@ -322,12 +335,12 @@ EndGlobal
         [InlineData("Microsoft Visual\nStudio Solution File,\nFormat Version ")]
         public void WhenGivenASolutionWithMissingHeaderItThrows(string fileContents)
         {
-            var tmpFile = Temp.CreateFile();
-            tmpFile.WriteAllText(fileContents);
+            var tmpFile = CreateFile();
+            File.WriteAllText(tmpFile, fileContents);
 
             Action action = () =>
             {
-                SlnFile.Read(tmpFile.Path);
+                SlnFile.Read(tmpFile);
             };
 
             action.ShouldThrow<InvalidSolutionFormatException>()
@@ -344,12 +357,12 @@ EndGlobal
 Global
 EndGlobal
 ";
-            var tmpFile = Temp.CreateFile();
-            tmpFile.WriteAllText(SolutionFile);
+            var tmpFile = CreateFile();
+            File.WriteAllText(tmpFile, SolutionFile);
 
             Action action = () =>
             {
-                SlnFile.Read(tmpFile.Path);
+                SlnFile.Read(tmpFile);
             };
 
             action.ShouldThrow<InvalidSolutionFormatException>()
@@ -363,12 +376,12 @@ EndGlobal
 Microsoft Visual Studio Solution File, Format Version 12.00
 Global
 ";
-            var tmpFile = Temp.CreateFile();
-            tmpFile.WriteAllText(SolutionFile);
+            var tmpFile = CreateFile();
+            File.WriteAllText(tmpFile, SolutionFile);
 
             Action action = () =>
             {
-                SlnFile.Read(tmpFile.Path);
+                SlnFile.Read(tmpFile);
             };
 
             action.ShouldThrow<InvalidSolutionFormatException>()
@@ -382,12 +395,12 @@ Global
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""App"", ""App\App.csproj"", ""{7072A694-548F-4CAE-A58F-12D257D5F486}""
 ";
-            var tmpFile = Temp.CreateFile();
-            tmpFile.WriteAllText(SolutionFile);
+            var tmpFile = CreateFile();
+            File.WriteAllText(tmpFile, SolutionFile);
 
             Action action = () =>
             {
-                SlnFile.Read(tmpFile.Path);
+                SlnFile.Read(tmpFile);
             };
 
             action.ShouldThrow<InvalidSolutionFormatException>()
@@ -403,12 +416,12 @@ Project""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""App"", ""App\App.csproj""
 EndProject
 ";
 
-            var tmpFile = Temp.CreateFile();
-            tmpFile.WriteAllText(SolutionFile);
+            var tmpFile = CreateFile();
+            File.WriteAllText(tmpFile, SolutionFile);
 
             Action action = () =>
             {
-                SlnFile.Read(tmpFile.Path);
+                SlnFile.Read(tmpFile);
             };
 
             action.ShouldThrow<InvalidSolutionFormatException>()
@@ -425,12 +438,12 @@ Global
 	EndGlobalSection
 EndGlobal
 ";
-            var tmpFile = Temp.CreateFile();
-            tmpFile.WriteAllText(SolutionFile);
+            var tmpFile = CreateFile();
+            File.WriteAllText(tmpFile, SolutionFile);
 
             Action action = () =>
             {
-                SlnFile.Read(tmpFile.Path);
+                SlnFile.Read(tmpFile);
             };
 
             action.ShouldThrow<InvalidSolutionFormatException>()
@@ -447,12 +460,12 @@ Global
 	EndGlobalSection
 EndGlobal
 ";
-            var tmpFile = Temp.CreateFile();
-            tmpFile.WriteAllText(SolutionFile);
+            var tmpFile = CreateFile();
+            File.WriteAllText(tmpFile, SolutionFile);
 
             Action action = () =>
             {
-                SlnFile.Read(tmpFile.Path);
+                SlnFile.Read(tmpFile);
             };
 
             action.ShouldThrow<InvalidSolutionFormatException>()
@@ -468,12 +481,12 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 EndGlobal
 ";
-            var tmpFile = Temp.CreateFile();
-            tmpFile.WriteAllText(SolutionFile);
+            var tmpFile = CreateFile();
+            File.WriteAllText(tmpFile, SolutionFile);
 
             Action action = () =>
             {
-                SlnFile.Read(tmpFile.Path);
+                SlnFile.Read(tmpFile);
             };
 
             action.ShouldThrow<InvalidSolutionFormatException>()
@@ -493,12 +506,12 @@ Global
 	EndGlobalSection
 EndGlobal
 ";
-            var tmpFile = Temp.CreateFile();
-            tmpFile.WriteAllText(SolutionFile);
+            var tmpFile = CreateFile();
+            File.WriteAllText(tmpFile, SolutionFile);
 
             Action action = () =>
             {
-                var slnFile = SlnFile.Read(tmpFile.Path);
+                var slnFile = SlnFile.Read(tmpFile);
                 if (slnFile.ProjectConfigurationsSection.Count == 0)
                 {
                     // Need to force loading of nested property sets

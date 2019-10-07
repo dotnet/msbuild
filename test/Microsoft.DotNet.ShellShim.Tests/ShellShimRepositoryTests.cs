@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Transactions;
 using System.Xml.Linq;
@@ -100,8 +101,9 @@ namespace Microsoft.DotNet.ShellShim.Tests
         public void GivenAnExecutablePathDirectoryThatDoesNotExistItCanGenerateShimFile()
         {
             var outputDll = _reusedHelloWorldExecutableDll.Value;
+            var testFolder = TestAssets.CreateTestDirectory().FullName;
             var extraNonExistDirectory = Path.GetRandomFileName();
-            var shellShimRepository = new ShellShimRepository(new DirectoryPath(Path.Combine(TempRoot.Root, extraNonExistDirectory)), GetAppHostTemplateFromStage2());
+            var shellShimRepository = new ShellShimRepository(new DirectoryPath(Path.Combine(testFolder, extraNonExistDirectory)), GetAppHostTemplateFromStage2());
             var shellCommandName = nameof(ShellShimRepositoryTests) + Path.GetRandomFileName();
 
             Action a = () => shellShimRepository.CreateShim(outputDll, new ToolCommandName(shellCommandName));
@@ -493,12 +495,9 @@ namespace Microsoft.DotNet.ShellShim.Tests
             return new FilePath(outputDll.FullName);
         }
 
-        private static string GetNewCleanFolderUnderTempRoot()
+        private string GetNewCleanFolderUnderTempRoot([CallerMemberName] string callingMethod = null)
         {
-            DirectoryInfo CleanFolderUnderTempRoot = new DirectoryInfo(Path.Combine(TempRoot.Root, "cleanfolder" + Path.GetRandomFileName()));
-            CleanFolderUnderTempRoot.Create();
-
-            return CleanFolderUnderTempRoot.FullName;
+            return TestAssets.CreateTestDirectory(identifier: "cleanfolder" + Path.GetRandomFileName()).FullName;
         }
 
         private ShellShimRepository GetShellShimRepositoryWithMockMaker(string pathToShim)

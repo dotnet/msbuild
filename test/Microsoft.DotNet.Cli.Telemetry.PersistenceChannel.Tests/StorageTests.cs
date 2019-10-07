@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using FluentAssertions;
 using Microsoft.ApplicationInsights.Channel;
@@ -21,7 +22,7 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
     ///     Therefore those UnitTests just doesn't mock the file system. Every unit test in <see cref="StorageTests" />
     ///     reads and writes files to/from the disk.
     /// </remarks>
-    public class StorageTestsBase
+    public class StorageTests : TestBase
     {
         [Fact]
         public void EnqueuedContentIsEqualToPeekedContent()
@@ -190,9 +191,9 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
             return firstTransmission;
         }
 
-        private static string GetTemporaryPath()
+        private static string GetTemporaryPath([CallerMemberName] string callingMethod = null)
         {
-            return Path.Combine(TempRoot.Root, "unittest" + Guid.NewGuid());
+            return TestAssets.CreateTestDirectory(callingMethod).FullName;
         }
     }
 }

@@ -17,7 +17,8 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         [WindowsOnlyFact]
         public void ItShouldDetectFileWithMarkOfTheWeb()
         {
-            var testFile = Path.Combine(TempRoot.Root, Path.GetRandomFileName());
+            var testFile = Path.Combine(TestAssets.CreateTestDirectory().FullName, Path.GetRandomFileName());
+            
             File.WriteAllText(testFile, string.Empty);
             AlternateStream.WriteAlternateStream(
                 testFile,
@@ -30,7 +31,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         [Fact]
         public void WhenThereIsNoFileItReturnsFalse()
         {
-            var testFile = Path.Combine(TempRoot.Root, Path.GetRandomFileName());
+            var testFile = Path.Combine(TestAssets.CreateTestDirectory().FullName, Path.GetRandomFileName());
 
             new DangerousFileDetector().IsDangerous(testFile).Should().BeFalse();
         }
@@ -38,7 +39,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         [NonWindowsOnlyFact]
         public void WhenRunOnNonWindowsReturnFalse()
         {
-            var testFile = Path.Combine(TempRoot.Root, Path.GetRandomFileName());
+            var testFile = Path.Combine(TestAssets.CreateTestDirectory().FullName, Path.GetRandomFileName());
             File.WriteAllText(testFile, string.Empty);
 
             new DangerousFileDetector().IsDangerous(testFile).Should().BeFalse();

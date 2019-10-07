@@ -6,6 +6,7 @@ using System.IO;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
+using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
@@ -53,7 +54,7 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void GivenASpecifiedDotnetCliHomeVariableItPrintsUsageMessage()
         {
-            var home = Path.Combine(TempRoot.Root, Path.GetRandomFileName());
+            var home = TestAssets.CreateTestDirectory(identifier: "DOTNET_HOME").FullName;
 
             new TestCommand("dotnet")
                 .WithEnvironmentVariable(CliFolderPathCalculator.DotnetHomeVariableName, home)

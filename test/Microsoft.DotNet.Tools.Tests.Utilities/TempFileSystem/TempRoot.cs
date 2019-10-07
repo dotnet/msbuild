@@ -45,24 +45,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             }
         }
  
-        public DisposableDirectory CreateDirectory()
-        {
-            var dir = new DisposableDirectory(this);
-            _temps.Add(dir);
-            return dir;
-        }
- 
-        public TempFile CreateFile(string prefix = null, string extension = null, string directory = null, [CallerFilePath]string callerSourcePath = null, [CallerLineNumber]int callerLineNumber = 0)
-        {
-            return AddFile(new DisposableFile(prefix, extension, directory, callerSourcePath, callerLineNumber));
-        }
- 
-        public DisposableFile AddFile(DisposableFile file)
-        {
-            _temps.Add(file);
-            return file;
-        }
- 
         internal static void CreateStream(string fullPath)
         {
             using (var file = new FileStream(fullPath, FileMode.CreateNew)) { }

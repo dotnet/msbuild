@@ -2,8 +2,10 @@
 
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using FluentAssertions;
+using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
@@ -119,9 +121,9 @@ namespace Microsoft.DotNet.Tests
             runtimeConfig.IsPortable.Should().BeTrue();
         }
 
-        private static string GetTempPath()
+        private static string GetTempPath([CallerMemberName] string callingMethod = null)
         {
-            return Path.Combine(TempRoot.Root, nameof(RuntimeConfigTests), Path.GetTempFileName());
+            return Path.Combine(TestAssets.CreateTestDirectory(callingMethod).FullName, Path.GetTempFileName());
         }
 
         private const string Basic =

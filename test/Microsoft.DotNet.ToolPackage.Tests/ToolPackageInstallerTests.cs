@@ -656,10 +656,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             var surrogate = char.ConvertFromUtf32(int.Parse("2A601", NumberStyles.HexNumber));
             string nonAscii = "ab Ṱ̺̺̕o 田中さん åä," + surrogate;
 
-            var root = new DirectoryPath(Path.Combine(TempRoot.Root, nonAscii, Path.GetRandomFileName()));
+            var root = TestAssets.CreateTestDirectory(testProjectName: nonAscii, identifier: "root");
             var reporter = new BufferedReporter();
             var fileSystem = new FileSystemWrapper();
-            var store = new ToolPackageStoreAndQuery(root);
+            var store = new ToolPackageStoreAndQuery(new DirectoryPath(root.FullName));
             WriteNugetConfigFileToPointToTheFeed(fileSystem, nugetConfigPath);
             var installer = new ToolPackageInstaller(
                 store: store,
@@ -892,7 +892,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 DirectoryPath? offlineFeed = null,
                 FilePath? writeLocalFeedToNugetConfig = null)
         {
-            var root = new DirectoryPath(Path.Combine(TempRoot.Root, Path.GetRandomFileName()));
+            var root = new DirectoryPath(TestAssets.CreateTestDirectory("root").FullName);
             var reporter = new BufferedReporter();
 
             IFileSystem fileSystem;

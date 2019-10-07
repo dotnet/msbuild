@@ -307,19 +307,5 @@ namespace Microsoft.DotNet.Pack.Tests
                 result.Should().NotHaveStdOutContaining("Copyright (C) Microsoft Corporation. All rights reserved.");
             }
         }
-
-        private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)
-        {
-            // copy all the files to temp dir
-            foreach (var file in Directory.EnumerateFiles(projectDir))
-            {
-                tempDir.CopyFile(file);
-            }
-        }
-
-        private string GetProjectPath(TempDirectory projectDir)
-        {
-            return Path.Combine(projectDir.Path, "project.json");
-        }
     }
 }

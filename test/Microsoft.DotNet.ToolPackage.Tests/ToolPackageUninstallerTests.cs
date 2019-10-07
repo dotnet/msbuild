@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 FilePath? tempProject = null,
                 DirectoryPath? offlineFeed = null)
         {
-            var root = new DirectoryPath(Path.Combine(TempRoot.Root, Path.GetRandomFileName()));
+            var root = new DirectoryPath(TestAssets.CreateTestDirectory("root").FullName);
             var reporter = new BufferedReporter();
 
             IFileSystem fileSystem;
