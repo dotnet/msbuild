@@ -2895,7 +2895,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="filename">Full path to file to delete</param>
         private void RemoveCorruptedFile(string filename)
         {
-            _logger.LogWarningWithCodeFromResources("GenerateResource.CorruptOutput", FileUtilities.GetFullPathNoThrow(filename));
+            _logger.LogMessageFromResources("GenerateResource.CorruptOutput", FileUtilities.GetFullPathNoThrow(filename));
             try
             {
                 File.Delete(filename);
