@@ -718,7 +718,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <!--
     Target that allows targets consuming source control confirmation to establish a dependency on targets producing this information.
 
-    Any target that reads SourceRevisionId, PrivateRepositoryUrl, SourceRoot, and other source control properties and items 
+    Any target that reads SourceRevisionId, PrivateRepositoryUrl, SourceRoot, and other source control properties and items
     should depend on this target and be conditioned on '$(SourceControlInformationFeatureSupported)' == 'true'.
 
     SourceRevisionId property uniquely identifies the source control revision of the repository the project belongs to.
@@ -730,11 +730,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     may include the repository URL in the nuspec file generated for NuGet package produced by the project if PublishRepositoryUrl is true.
 
     SourceRoot item group lists all source roots that the project source files reside under and their mapping to source control server URLs,
-    if available. This includes both source files under source control as well as source files in source packages. SourceRoot items are 
+    if available. This includes both source files under source control as well as source files in source packages. SourceRoot items are
     used by compilers to determine path map in deterministic build and by SourceLink provider, which maps local paths to URLs of source files
     stored on the source control server.
 
-    Source control information provider that sets these properties and items shall execute before this target (by including 
+    Source control information provider that sets these properties and items shall execute before this target (by including
     InitializeSourceControlInformation in its BeforeTargets) and set source control properties and items that haven't been initialized yet.
   -->
   <Target Name="InitializeSourceControlInformation" />
@@ -2745,7 +2745,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     Frameworks node of the Solution Explorer in the IDE.
   -->
   <Target Name="ResolveFrameworkReferences" />
-  
+
   <!--
     ***********************************************************************************************
     ***********************************************************************************************
@@ -3001,7 +3001,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <PropertyGroup>
       <GenerateResourceMSBuildArchitecture Condition="'$(GenerateResourceMSBuildArchitecture)' == ''">$(PlatformTargetAsMSBuildArchitecture)</GenerateResourceMSBuildArchitecture>
-      
+
       <ResgenToolPath Condition="'$(ResgenToolPath)' == ''">$(TargetFrameworkSDKToolsDirectory)</ResgenToolPath>
     </PropertyGroup>
 
@@ -3405,8 +3405,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <CoreCompileCache Include="$(DefineConstants)" />
     </ItemGroup>
 
-    <Hash 
-      ItemsToHash="@(CoreCompileCache)" 
+    <Hash
+      ItemsToHash="@(CoreCompileCache)"
       IgnoreCase="$([MSBuild]::ValueOrDefault(`$(CoreCompileCacheIgnoreCase)`, `true`))">
       <Output TaskParameter="HashResult" PropertyName="CoreCompileDependencyHash" />
     </Hash>
@@ -3950,7 +3950,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Flag primary dependencies-certain warnings emitted during application manifest generation apply only to them. -->
     <ItemGroup>
       <_SatelliteAssemblies Include="@(IntermediateSatelliteAssembliesWithTargetPath);@(ReferenceSatellitePaths)" />
-      <_DeploymentReferencePaths Include="@(ReferenceCopyLocalPaths)" 
+      <_DeploymentReferencePaths Include="@(ReferenceCopyLocalPaths)"
                                  Condition="'%(Extension)' == '.dll' Or '%(Extension)' == '.exe'">
         <IsPrimary>true</IsPrimary>
       </_DeploymentReferencePaths>
@@ -3998,7 +3998,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- We have to filter items out of the dependencies that have neither CopyLocal set to true, -->
     <!-- nor the dependency type manually set to 'Install'.                                       -->
     <ItemGroup>
-      <_DeploymentManifestDependencies Include="@(_DeploymentManifestDependenciesUnfiltered)" 
+      <_DeploymentManifestDependencies Include="@(_DeploymentManifestDependenciesUnfiltered)"
           Condition="!('%(_DeploymentManifestDependenciesUnfiltered.CopyLocal)' == 'false' And '%(_DeploymentManifestDependenciesUnfiltered.DependencyType)' != 'Install')" />
     </ItemGroup>
 
@@ -4414,16 +4414,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <GetCopyToOutputDirectoryItemsDependsOn>
       AssignTargetPaths;
       _SplitProjectReferencesByFileExistence;
-      _GetProjectReferenceTargetFrameworkProperties
+      _GetProjectReferenceTargetFrameworkProperties;
+
+      <!-- Compose the content items as the union between transitive content items and content items from this project. -->
+      _GetCopyToOutputDirectoryItemsFromTransitiveProjectReferences;
+      <!-- Get items from this project last so that they will be copied last. -->
+      _GetCopyToOutputDirectoryItemsFromThisProject
     </GetCopyToOutputDirectoryItemsDependsOn>
   </PropertyGroup>
-  <Target
-      Name="GetCopyToOutputDirectoryItems"
-      Returns="@(AllItemsFullPathWithTargetPath)"
-      KeepDuplicateOutputs=" '$(MSBuildDisableGetCopyToOutputDirectoryItemsOptimization)' == '' "
-      DependsOnTargets="$(GetCopyToOutputDirectoryItemsDependsOn)">
 
-
+  <Target Name="_PopulateCommonStateForGetCopyToOutputDirectoryItems">
     <!-- In the general case, clients need very little of the metadata which is generated by invoking this target on this project and its children.  For those
          cases, we can immediately discard the unwanted metadata, reducing memory usage, particularly in very large and interconnected systems of projects.
          However, if some client does require the original functionality, it is sufficient to set MSBuildDisableGetCopyToOutputDirectoryItemsOptimization to
@@ -4432,6 +4432,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_GCTODIKeepDuplicates>false</_GCTODIKeepDuplicates>
       <_GCTODIKeepMetadata>CopyToOutputDirectory;TargetPath</_GCTODIKeepMetadata>
     </PropertyGroup>
+  </Target>
+
+  <Target
+    Name="_GetCopyToOutputDirectoryItemsFromTransitiveProjectReferences"
+    DependsOnTargets="_PopulateCommonStateForGetCopyToOutputDirectoryItems">
 
     <!-- Get items from child projects first. -->
     <MSBuild
@@ -4450,24 +4455,29 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Target outputs must be full paths because they will be consumed by a different project. -->
     <ItemGroup>
-      <_SourceItemsToCopyToOutputDirectoryAlways KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_AllChildProjectItemsWithTargetPath->'%(FullPath)')" Condition="'%(_AllChildProjectItemsWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
-      <_SourceItemsToCopyToOutputDirectory       KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_AllChildProjectItemsWithTargetPath->'%(FullPath)')" Condition="'%(_AllChildProjectItemsWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
+      <_TransitiveItemsToCopyToOutputDirectoryAlways KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_AllChildProjectItemsWithTargetPath->'%(FullPath)')" Condition="'%(_AllChildProjectItemsWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
+      <_TransitiveItemsToCopyToOutputDirectory       KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_AllChildProjectItemsWithTargetPath->'%(FullPath)')" Condition="'%(_AllChildProjectItemsWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
     </ItemGroup>
 
     <!-- Remove items which we will never again use - they just sit around taking up memory otherwise -->
     <ItemGroup>
-      <_AllChildProjectItemsWithTargetPath Remove="@(_AllChildProjectItemsWithTargetPath)"/>
+      <_AllChildProjectItemsWithTargetPath       Remove="@(_AllChildProjectItemsWithTargetPath)"/>
     </ItemGroup>
 
-    <!-- Get items from this project last so that they will be copied last. -->
+  </Target>
+
+  <Target
+      Name="_GetCopyToOutputDirectoryItemsFromThisProject"
+      DependsOnTargets="_PopulateCommonStateForGetCopyToOutputDirectoryItems">
+
     <ItemGroup>
-      <_SourceItemsToCopyToOutputDirectoryAlways KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(ContentWithTargetPath->'%(FullPath)')" Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
-      <_SourceItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(ContentWithTargetPath->'%(FullPath)')" Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
+      <_ThisProjectItemsToCopyToOutputDirectoryAlways KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(ContentWithTargetPath->'%(FullPath)')" Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
+      <_ThisProjectItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(ContentWithTargetPath->'%(FullPath)')" Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
     </ItemGroup>
 
     <ItemGroup>
-      <_SourceItemsToCopyToOutputDirectoryAlways KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(EmbeddedResource->'%(FullPath)')" Condition="'%(EmbeddedResource.CopyToOutputDirectory)'=='Always'"/>
-      <_SourceItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(EmbeddedResource->'%(FullPath)')" Condition="'%(EmbeddedResource.CopyToOutputDirectory)'=='PreserveNewest'"/>
+      <_ThisProjectItemsToCopyToOutputDirectoryAlways KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(EmbeddedResource->'%(FullPath)')" Condition="'%(EmbeddedResource.CopyToOutputDirectory)'=='Always'"/>
+      <_ThisProjectItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(EmbeddedResource->'%(FullPath)')" Condition="'%(EmbeddedResource.CopyToOutputDirectory)'=='PreserveNewest'"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -4479,17 +4489,32 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </AssignTargetPath>
 
     <ItemGroup>
-      <_SourceItemsToCopyToOutputDirectoryAlways KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_CompileItemsToCopyWithTargetPath)" Condition="'%(_CompileItemsToCopyWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
-      <_SourceItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_CompileItemsToCopyWithTargetPath)" Condition="'%(_CompileItemsToCopyWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
+      <_ThisProjectItemsToCopyToOutputDirectoryAlways KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_CompileItemsToCopyWithTargetPath)" Condition="'%(_CompileItemsToCopyWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
+      <_ThisProjectItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_CompileItemsToCopyWithTargetPath)" Condition="'%(_CompileItemsToCopyWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
     </ItemGroup>
 
     <ItemGroup>
-      <_SourceItemsToCopyToOutputDirectoryAlways KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_NoneWithTargetPath->'%(FullPath)')" Condition="'%(_NoneWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
-      <_SourceItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_NoneWithTargetPath->'%(FullPath)')" Condition="'%(_NoneWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
+      <_ThisProjectItemsToCopyToOutputDirectoryAlways KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_NoneWithTargetPath->'%(FullPath)')" Condition="'%(_NoneWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
+      <_ThisProjectItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_NoneWithTargetPath->'%(FullPath)')" Condition="'%(_NoneWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
     </ItemGroup>
 
+  </Target>
+
+  <Target
+      Name="GetCopyToOutputDirectoryItems"
+      Returns="@(AllItemsFullPathWithTargetPath)"
+      KeepDuplicateOutputs=" '$(MSBuildDisableGetCopyToOutputDirectoryItemsOptimization)' == '' "
+      DependsOnTargets="$(GetCopyToOutputDirectoryItemsDependsOn)">
+
     <ItemGroup>
-      <AllItemsFullPathWithTargetPath            Include="@(_SourceItemsToCopyToOutputDirectoryAlways->'%(FullPath)');@(_SourceItemsToCopyToOutputDirectory->'%(FullPath)')"/>
+      <_SourceItemsToCopyToOutputDirectoryAlways           Include="@(_TransitiveItemsToCopyToOutputDirectoryAlways);@(_ThisProjectItemsToCopyToOutputDirectoryAlways)"/>
+      <_SourceItemsToCopyToOutputDirectory                 Include="@(_TransitiveItemsToCopyToOutputDirectory);@(_ThisProjectItemsToCopyToOutputDirectory)"/>
+      <AllItemsFullPathWithTargetPath                      Include="@(_SourceItemsToCopyToOutputDirectoryAlways->'%(FullPath)');@(_SourceItemsToCopyToOutputDirectory->'%(FullPath)')"/>
+
+      <_TransitiveItemsToCopyToOutputDirectoryAlways       Remove="@(_TransitiveItemsToCopyToOutputDirectoryAlways)"/>
+      <_TransitiveItemsToCopyToOutputDirectory             Remove="@(_TransitiveItemsToCopyToOutputDirectory)"/>
+      <_ThisProjectItemsToCopyToOutputDirectoryAlways      Remove="@(_ThisProjectItemsToCopyToOutputDirectoryAlways)"/>
+      <_ThisProjectItemsToCopyToOutputDirectory            Remove="@(_ThisProjectItemsToCopyToOutputDirectory)"/>
     </ItemGroup>
 
   </Target>
@@ -5810,7 +5835,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       ResolveReferences
     </CommonOutputGroupsDependsOn>
   </PropertyGroup>
-  
+
   <!--
     ============================================================
                                         AllProjectOutputGroupsDependencies
@@ -5867,7 +5892,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       $(CommonOutputGroupsDependsOn)
     </DebugSymbolsProjectOutputGroupDependenciesDependsOn>
   </PropertyGroup>
-  
+
   <Target
       Name="DebugSymbolsProjectOutputGroupDependencies"
       Condition="'$(DebugSymbols)'!='false'"
@@ -6018,7 +6043,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <!-- Expose the set of potential .editorconfig files so the project system can
        retrieve them. -->
   <Target Name="GetPotentialEditorConfigFiles" Returns="@(PotentialEditorConfigFiles)" />
-  
+
   <PropertyGroup>
     <CodeAnalysisTargets Condition="'$(CodeAnalysisTargets)'==''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\CodeAnalysis\Microsoft.CodeAnalysis.targets</CodeAnalysisTargets>
   </PropertyGroup>
