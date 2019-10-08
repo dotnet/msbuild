@@ -879,9 +879,12 @@ namespace Microsoft.Build.Construction
             // These are just dummies necessary to make the evaluation into a project instance succeed when 
             // any custom imported targets have declarations like BeforeTargets="Build"
             // They'll be replaced momentarily with the real ones.
-            foreach (string targetName in _defaultTargetNames)
+            string[] dummyTargetsForEvaluationTime = _defaultTargetNames.Union(_targetNames).ToArray();
+            foreach (string targetName in dummyTargetsForEvaluationTime)
             {
-                traversalProject.AddTarget(targetName);
+                ProjectTargetElement target = traversalProject.CreateTargetElement(targetName);
+                // Prepend so that any imported target overrides these default ones.
+                traversalProject.PrependChild(target);
             }
 
             // For debugging purposes: some information is lost when evaluating into a project instance,
@@ -903,10 +906,15 @@ namespace Microsoft.Build.Construction
                 _submissionId
                 );
 
-            // Make way for the real ones                
-            foreach (string targetName in _defaultTargetNames)
+            // Make way for the real ones
+            foreach (string targetName in dummyTargetsForEvaluationTime)
             {
-                traversalInstance.RemoveTarget(targetName);
+                // Remove targets only if they were the dummy ones (from the metaproj path),
+                // but leave them if they're from another source (imported/overridden).
+                if (traversalInstance.Targets[targetName].Location.File == traversalProject.FullPath)
+                {
+                    traversalInstance.RemoveTarget(targetName);
+                }
             }
 
             AddStandardTraversalTargets(traversalInstance, projectsInOrder);
