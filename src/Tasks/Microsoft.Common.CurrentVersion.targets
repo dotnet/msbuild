@@ -4411,16 +4411,38 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <PropertyGroup>
+    <_TargetsThatPrepareProjectReferences>_SplitProjectReferencesByFileExistence</_TargetsThatPrepareProjectReferences>
+    <!--
+      GetCopyToOutputDirectoryItems depends on an unspecified dependency _SplitProjectReferencesByFileExistence -> AssignProjectConfiguration (https://github.com/microsoft/msbuild/issues/4677).
+      When the unspecified dependency does not happen by accident, content copying is only 1 level deep instead of transitive.
+      This target enforces the dependency.
+
+      TODO: make transitive content copying the default when the breaking change is acceptable.
+    -->
+    <_TargetsThatPrepareProjectReferences Condition=" '$(MSBuildCopyContentTransitively)' == 'true' ">
+      AssignProjectConfiguration;
+      _SplitProjectReferencesByFileExistence
+    </_TargetsThatPrepareProjectReferences>
+
     <GetCopyToOutputDirectoryItemsDependsOn>
       AssignTargetPaths;
-      _SplitProjectReferencesByFileExistence;
+      $(_TargetsThatPrepareProjectReferences);
       _GetProjectReferenceTargetFrameworkProperties;
-
       <!-- Compose the content items as the union between transitive content items and content items from this project. -->
-      _GetCopyToOutputDirectoryItemsFromTransitiveProjectReferences;
       <!-- Get items from this project last so that they will be copied last. -->
+      _GetCopyToOutputDirectoryItemsFromTransitiveProjectReferences;
       _GetCopyToOutputDirectoryItemsFromThisProject
     </GetCopyToOutputDirectoryItemsDependsOn>
+
+    <!--
+      Mitigation for https://github.com/microsoft/msbuild/issues/4677
+      When MSBuildCopyContentTransitively == true, all content copying is transitive.
+      When MSBuildCopyContentTransitively == false, content copying is 1 level deep.
+      When MSBuildCopyContentTransitively != {true, false}, the legacy behaviour in https://github.com/microsoft/msbuild/issues/4677 manifests.
+     -->
+    <_RecursiveTargetForContentCopying>GetCopyToOutputDirectoryItems</_RecursiveTargetForContentCopying>
+    <!-- Enforce 1 level deep content copying by replacing the recursive content target with the target that retrieves the content for the current project only. -->
+    <_RecursiveTargetForContentCopying Condition=" '$(MSBuildCopyContentTransitively)' == 'false' ">_GetCopyToOutputDirectoryItemsFromThisProject </_RecursiveTargetForContentCopying>
   </PropertyGroup>
 
   <Target Name="_PopulateCommonStateForGetCopyToOutputDirectoryItems">
@@ -4441,7 +4463,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Get items from child projects first. -->
     <MSBuild
         Projects="@(_MSBuildProjectReferenceExistent)"
-        Targets="GetCopyToOutputDirectoryItems"
+        Targets="$(_RecursiveTargetForContentCopying)"
         BuildInParallel="$(BuildInParallel)"
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
         Condition="'@(_MSBuildProjectReferenceExistent)' != '' and '$(_GetChildProjectCopyToOutputDirectoryItems)' == 'true' and '%(_MSBuildProjectReferenceExistent.Private)' != 'false' and '$(UseCommonOutputDirectory)' != 'true'"
@@ -4453,6 +4475,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     </MSBuild>
 
+    <!-- Projects opting in for 1-level transitive content copying will have to replace OutputItemType metadata from ProjectReference items like so:
+        "Content" to "_OutputItemTypeContentItems"
+        "None" to "_OutputItemTypeNoneItems"
+        "EmbeddedResource" to "_OutputItemTypeEmbeddedResourceItems"
+     -->
+    <AssignTargetPath Files="@(_OutputItemTypeContentItems);@(_OutputItemTypeNoneItems);@(_OutputItemTypeEmbeddedResourceItems)" RootFolder="$(MSBuildProjectDirectory)">
+      <Output TaskParameter="AssignedFiles" ItemName="_AllChildProjectItemsWithTargetPath" />
+    </AssignTargetPath>
+
     <!-- Target outputs must be full paths because they will be consumed by a different project. -->
     <ItemGroup>
       <_TransitiveItemsToCopyToOutputDirectoryAlways KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_AllChildProjectItemsWithTargetPath->'%(FullPath)')" Condition="'%(_AllChildProjectItemsWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
@@ -4462,13 +4493,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Remove items which we will never again use - they just sit around taking up memory otherwise -->
     <ItemGroup>
       <_AllChildProjectItemsWithTargetPath       Remove="@(_AllChildProjectItemsWithTargetPath)"/>
+      <_OutputItemTypeContentItems               Remove="@(_OutputItemTypeContentItems)"/>
+      <_OutputItemTypeNoneItems                  Remove="@(_OutputItemTypeNoneItems)"/>
+      <_OutputItemTypeEmbeddedResourceItems      Remove="@(_OutputItemTypeEmbeddedResourceItems)"/>
     </ItemGroup>
 
   </Target>
 
   <Target
       Name="_GetCopyToOutputDirectoryItemsFromThisProject"
-      DependsOnTargets="_PopulateCommonStateForGetCopyToOutputDirectoryItems">
+      DependsOnTargets="AssignTargetPaths;_PopulateCommonStateForGetCopyToOutputDirectoryItems"
+      Returns="@(_ThisProjectItemsToCopyToOutputDirectoryAlways);@(_ThisProjectItemsToCopyToOutputDirectory)">
 
     <ItemGroup>
       <_ThisProjectItemsToCopyToOutputDirectoryAlways KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(ContentWithTargetPath->'%(FullPath)')" Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
@@ -4511,6 +4546,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_SourceItemsToCopyToOutputDirectory                 Include="@(_TransitiveItemsToCopyToOutputDirectory);@(_ThisProjectItemsToCopyToOutputDirectory)"/>
       <AllItemsFullPathWithTargetPath                      Include="@(_SourceItemsToCopyToOutputDirectoryAlways->'%(FullPath)');@(_SourceItemsToCopyToOutputDirectory->'%(FullPath)')"/>
 
+      <!-- Empty intermediate items to release memory -->
       <_TransitiveItemsToCopyToOutputDirectoryAlways       Remove="@(_TransitiveItemsToCopyToOutputDirectoryAlways)"/>
       <_TransitiveItemsToCopyToOutputDirectory             Remove="@(_TransitiveItemsToCopyToOutputDirectory)"/>
       <_ThisProjectItemsToCopyToOutputDirectoryAlways      Remove="@(_ThisProjectItemsToCopyToOutputDirectoryAlways)"/>
