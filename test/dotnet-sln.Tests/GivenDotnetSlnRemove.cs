@@ -321,7 +321,7 @@ EndGlobal
         }
 
         [Fact]
-        public void WhenInvalidSolutionIsFoundItPrintsErrorAndUsage()
+        public void WhenInvalidSolutionIsFoundRemovePrintsErrorAndUsage()
         {
             var projectDirectory = TestAssets
                 .Get("InvalidSolution")

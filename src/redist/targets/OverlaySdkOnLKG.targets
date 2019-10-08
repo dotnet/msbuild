@@ -32,13 +32,15 @@
       <SdkOutputDirectory>$(RedistLayoutPath)/sdk/$(Version)</SdkOutputDirectory>
     </PropertyGroup>
 
-    <Copy SourceFiles="@(OverlayBundledFiles)"
-          DestinationFolder="$(SdkOutputDirectory)"/>
-    
     <Copy SourceFiles="@(OverlaySdkFilesFromStage0)"
           DestinationFiles="@(OverlaySdkFilesFromStage0->'$(SdkOutputDirectory)\%(RelativeDestination)\%(RecursiveDir)%(Filename)%(Extension)')"/>
 
     <Copy SourceFiles="@(ToolsetToOverlay)"
           DestinationFiles="@(ToolsetToOverlay->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <!-- Run "dotnet new" (which will just display usage and available templates) in order to print first time
+         use message so that it doesn't interfere with tests which check the output of commands. -->
+    <Exec Command="$(RedistLayoutPath)dotnet new"
+          EnvironmentVariables="DOTNET_CLI_HOME=$(ArtifactsTmpDir).dotnet" />
   </Target>
 </Project>

@@ -14,6 +14,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Reflection;
 using dotnet.Tests;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.DotNet.Cli.Test.Tests
 {
@@ -301,11 +302,19 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 .WithVersionVariables()
                 .Root.FullName;
 
-            // Moving pkgs folder on top to avoid PathTooLongException
-            string dir = @"..\..\..\..\pkgs";
-            string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));
+            
+            string pkgDir;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Moving pkgs folder on top to avoid PathTooLongException
+                pkgDir = Path.Combine(RepoDirectoriesProvider.TestWorkingFolder, "pkgs");
+            }
+            else
+            {
+                pkgDir = Path.Combine(rootPath, "pkgs");
+            }
 
-            string args = $"--packages \"{dir}\"";
+            string args = $"--packages \"{pkgDir}\"";
             new RestoreCommand()
                 .WithWorkingDirectory(rootPath)
                 .Execute(args)

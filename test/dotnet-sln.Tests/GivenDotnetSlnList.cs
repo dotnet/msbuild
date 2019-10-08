@@ -103,7 +103,7 @@ Commands:
         }
 
         [Fact]
-        public void WhenInvalidSolutionIsFoundItPrintsErrorAndUsage()
+        public void WhenInvalidSolutionIsFoundListPrintsErrorAndUsage()
         {
             var projectDirectory = TestAssets
                 .Get("InvalidSolution")
