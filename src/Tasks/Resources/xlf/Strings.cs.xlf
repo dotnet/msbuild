@@ -1062,7 +1062,7 @@
       <trans-unit id="GenerateResource.DeleteCorruptOutputFailed">
         <source>MSB3560: Could not delete the possibly corrupt output file "{0}". {1}</source>
         <target state="needs-review-translation">MSB3560: Nelze odstranit výstupní soubor {0}, který by mohl být poškozen. {1}</target>
-        <note />
+        <note>{StrBegin="MSB3560: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ObsoleteStringsTag">
         <source>MSB3562: The "[strings]" tag is no longer necessary in text resources; please remove it.</source>
