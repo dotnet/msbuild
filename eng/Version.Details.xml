@@ -7,33 +7,33 @@
     </Dependency>
   </ToolsetDependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NET.Sdk" Version="3.1.100-preview1.19504.1">
+    <Dependency Name="Microsoft.NET.Sdk" Version="3.1.100-preview1.19506.1">
       <Uri>https://github.com/dotnet/sdk</Uri>
-      <Sha>7def7a9c5adc9e4d52a4cf19eee2c3998e3f3b93</Sha>
+      <Sha>357126710492d620198a60ee340ebeca9070f133</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Razor" Version="3.1.0-preview1.19502.3">
+    <Dependency Name="Microsoft.NET.Sdk.Razor" Version="3.1.0-preview1.19506.2">
       <Uri>https://github.com/aspnet/AspNetCore-Tooling</Uri>
-      <Sha>4ccb010d3d0d0f805c2f2d645662643c5b181e25</Sha>
+      <Sha>96fa41506a0f7b234edeb221a366540de442292d</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.0.100-rc2.19465.1">
+    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.1.100-preview1.19506.3">
       <Uri>https://github.com/aspnet/websdk</Uri>
-      <Sha>002ea5ca7c699d925281abd8307556ec8eccb530</Sha>
+      <Sha>c0a267ce79d0f14b8c700b9bdeff12b9ad672c75</Sha>
     </Dependency>
     <Dependency Name="ILLink.Tasks" Version="0.1.6-prerelease.19380.1">
       <Uri>https://github.com/mono/linker</Uri>
       <Sha>1127689f262d52ea8ff68ef03d706fa62b3b40a1</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.App" Version="3.1.0-preview1.19504.2">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.1.0-preview1.19506.1">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>50de4c0d1f33599adc6d71ae6d5b8783140c0b83</Sha>
+      <Sha>bbf5542781136f9f3a1f30b010cb782e775d54c7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.1.100-preview1.19504.3">
+    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.1.100-preview1.19506.9">
       <Uri>https://github.com/dotnet/cli</Uri>
-      <Sha>5a44f16c79b1d4f5bf0fb2500454347acdaa38aa</Sha>
+      <Sha>d8f1eacf0615884bfbc1c4b1f6d6a3690b35bb65</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="5.3.0-rtm.6192">
+    <Dependency Name="NuGet.Build.Tasks" Version="5.3.0-rtm.6251">
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
-      <Sha>bb60d6720d24890b8f3e071e70d27ea0f2bef57e</Sha>
+      <Sha>b75150f2f4127a77a166c9552845e86fb24a3282</Sha>
     </Dependency>
   </ProductDependencies>
 </Dependencies>
