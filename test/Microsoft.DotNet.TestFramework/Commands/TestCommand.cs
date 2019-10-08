@@ -225,13 +225,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             }
         }
 
-        private const string DotnetHomeVariableName = "DOTNET_CLI_HOME";
+        
 
         private void AddEnvironmentVariablesTo(ProcessStartInfo psi)
         {
-            if (!Environment.ContainsKey(DotnetHomeVariableName))
+            if (!Environment.ContainsKey(RepoDirectoriesProvider.DotnetHomeVariableName))
             {
-                Environment[DotnetHomeVariableName] = Path.Combine(RepoDirectoriesProvider.TestWorkingFolder, ".dotnet");
+                Environment[RepoDirectoriesProvider.DotnetHomeVariableName] = Path.Combine(RepoDirectoriesProvider.TestWorkingFolder, ".dotnet");
             }
 
             AddDotnetToolPathToAvoidSettingPermanentEnvInBuildMachineOnWindows();

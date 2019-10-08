@@ -25,6 +25,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         //  it with other tests
         public readonly static string TestGlobalPackagesFolder;
 
+        public const string DotnetHomeVariableName = "DOTNET_CLI_HOME";
+
         static RepoDirectoriesProvider()
         {
             //  Show verbose debugging output for tests

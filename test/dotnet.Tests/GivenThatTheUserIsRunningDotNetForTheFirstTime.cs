@@ -41,6 +41,7 @@ namespace Microsoft.DotNet.Tests
             command.Environment["DOTNET_CLI_TEST_LINUX_PROFILED_PATH"] = profiled;
             command.Environment["DOTNET_CLI_TEST_OSX_PATHSD_PATH"] = pathsd;
             command.Environment["SkipInvalidConfigurations"] = "true";
+            command.Environment[RepoDirectoriesProvider.DotnetHomeVariableName] = "";
 
             _firstDotnetNonVerbUseCommandResult = command.ExecuteWithCapturedOutput("--info");
             _firstDotnetVerbUseCommandResult = command.ExecuteWithCapturedOutput("new --debug:ephemeral-hive");
@@ -138,6 +139,7 @@ namespace Microsoft.DotNet.Tests
             command.Environment["DOTNET_CLI_TEST_LINUX_PROFILED_PATH"] = profiled;
             command.Environment["DOTNET_CLI_TEST_OSX_PATHSD_PATH"] = pathsd;
             command.Environment["SkipInvalidConfigurations"] = "true";
+            command.Environment[RepoDirectoriesProvider.DotnetHomeVariableName] = "";
 
             command.ExecuteWithCapturedOutput("internal-reportinstallsuccess test").Should().Pass();
 

@@ -44,6 +44,7 @@ namespace Microsoft.DotNet.Tests
         {
             new TestCommand("dotnet")
                 .WithEnvironmentVariable(CliFolderPathCalculator.PlatformHomeVariableName, value)
+                .WithEnvironmentVariable(RepoDirectoriesProvider.DotnetHomeVariableName, "")
                 .ExecuteWithCapturedOutput("--help")
                 .Should()
                 .Fail()
