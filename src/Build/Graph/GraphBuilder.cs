@@ -482,9 +482,7 @@ namespace Microsoft.Build.Experimental.Graph
                              */
             }
 
-            _graphWorkSet.WaitForAllWork();
-            _graphWorkSet.Complete();
-            _graphWorkSet.WaitForCompletion();
+            _graphWorkSet.WaitForAllWorkAndComplete();
 
             return _graphWorkSet.CompletedWork;
         }
