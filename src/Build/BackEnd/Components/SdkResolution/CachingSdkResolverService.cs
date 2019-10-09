@@ -48,14 +48,15 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 ConcurrentDictionary<string, Lazy<SdkResult>> cached = _cache.GetOrAdd(submissionId, new ConcurrentDictionary<string, Lazy<SdkResult>>(MSBuildNameIgnoreCaseComparer.Default));
 
                 /*
-                 * Get a cached result if available, otherwise resolve the SDK with the SdkResolverService.Instance.  If multiple projects are attempting to resolve
-                 * the same SDK, they will all block while the first one resolves.  Blocked requests will then get the cached result.  This ensures that a single
-                 * build submission resolves each unique SDK only one time.
+                 * Get a Lazy<SdkResult> if available, otherwise create a Lazy<SdkResult> which will resolve the SDK with the SdkResolverService.Instance.  If multiple projects are attempting to resolve
+                 * the same SDK, they will all get back the same Lazy<SdkResult> which ensures that a single build submission resolves each unique SDK only one time.
                  */
-                result = cached.GetOrAdd(
+                Lazy<SdkResult> resultLazy = cached.GetOrAdd(
                     sdk.Name,
-                    key => new Lazy<SdkResult>(() => base.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive)))
-                    .Value;
+                    key => new Lazy<SdkResult>(() => base.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive)));
+
+                // Get the lazy value which will block all waiting threads until the SDK is resolved at least once while subsequent calls get cached results.
+                result = resultLazy.Value;
             }
 
             if (result != null &&
