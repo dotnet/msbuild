@@ -17,6 +17,7 @@ using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingCont
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Eventing;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -466,7 +467,9 @@ namespace Microsoft.Build.BackEnd
                             _requestEntry.RequestConfiguration.ActivelyBuildingTargets[currentTargetEntry.Name] = _requestEntry.Request.GlobalRequestId;
 
                             // Execute all of the tasks on this target.
+                            MSBuildEventSource.Log.TargetStart(currentTargetEntry.Name);
                             await currentTargetEntry.ExecuteTarget(taskBuilder, _requestEntry, _projectLoggingContext, _cancellationToken);
+                            MSBuildEventSource.Log.TargetStop(currentTargetEntry.Name);
                         }
 
                         break;

@@ -666,7 +666,7 @@ namespace Microsoft.Build.Tasks
         public override bool Execute()
         {
             bool outOfProcExecutionSucceeded = true;
-            ExecuteGenerateResourceEventSource.Log.ExecuteGeneralResourceStart("Execute GenerateResource task - Begin");
+            MSBuildEventSource.Log.ExecuteGenerateResourceStart();
             {
                 // If we're extracting ResW files from assemblies (instead of building resources),
                 // our Sources can contain PDB's, pictures, and other non-DLL's.  Prune that list.  
@@ -919,7 +919,7 @@ namespace Microsoft.Build.Tasks
                 RecordFilesWritten();
             }
 
-            ExecuteGenerateResourceEventSource.Log.ExecuteGeneralResourceStop("Execute GenerateResource task - End");
+            MSBuildEventSource.Log.ExecuteGenerateResourceStop();
 
             return !Log.HasLoggedErrors && outOfProcExecutionSucceeded;
         }

@@ -1478,7 +1478,7 @@ namespace Microsoft.Build.Construction
             ErrorUtilities.VerifyThrowInvalidOperation(_projectFileLocation != null, "OM_MustSetFileNameBeforeSave");
 
             Directory.CreateDirectory(DirectoryPath);
-            SaveEventSource.Log.SaveStart(String.Format(CultureInfo.CurrentCulture, "Save Project To File - Begin"));
+            MSBuildEventSource.Log.SaveStart();
             {
                 // Note: We're using string Equals on encoding and not EncodingUtilities.SimilarToEncoding in order
                 // to force a save if the Encoding changed from UTF8 with BOM to UTF8 w/o BOM (for example).
@@ -1506,7 +1506,7 @@ namespace Microsoft.Build.Construction
                     _versionOnDisk = Version;
                 }
             }
-            SaveEventSource.Log.SaveStop(String.Format(CultureInfo.CurrentCulture, "Save Project To File - End"));
+            MSBuildEventSource.Log.SaveStop();
         }
 
         /// <summary>
@@ -1981,7 +1981,7 @@ namespace Microsoft.Build.Construction
             {
                 try
                 {
-                    LoadDocumentEventSource.Log.LoadDocumentStart(String.Format(CultureInfo.CurrentCulture, "Load Project From File - Begin"));
+                    MSBuildEventSource.Log.LoadDocumentStart();
                     using (XmlReaderExtension xtr = XmlReaderExtension.Create(fullPath, loadAsReadOnly))
                     {
                         _encoding = xtr.Encoding;
@@ -2012,7 +2012,7 @@ namespace Microsoft.Build.Construction
 
                     ProjectFileErrorUtilities.ThrowInvalidProjectFile(fileInfo, ex, "InvalidProjectFile", ex.Message);
                 }
-                LoadDocumentEventSource.Log.LoadDocumentStop(String.Format(CultureInfo.CurrentCulture, "Load Project From File - End"));
+                MSBuildEventSource.Log.LoadDocumentStop();
             }
 
             return document;

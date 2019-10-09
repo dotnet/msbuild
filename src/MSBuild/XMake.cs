@@ -516,7 +516,7 @@ namespace Microsoft.Build.CommandLine
             ConsoleCancelEventHandler cancelHandler = Console_CancelKeyPress;
             try
             {
-                XMakeEventSource.Log.XMakeStart("Execute MSBuild - Begin");
+                MSBuildEventSource.Log.XMakeStart();
                 Console.CancelKeyPress += cancelHandler;
 
                 // check the operating system the code is running on
@@ -791,8 +791,8 @@ namespace Microsoft.Build.CommandLine
 
                 // Wait for any pending cancel, so that we get any remaining messages
                 s_cancelComplete.WaitOne();
-                
-                XMakeEventSource.Log.XMakeStop("Execute MSBuild - End");
+
+                MSBuildEventSource.Log.XMakeStop();
             }
             /**********************************************************************************************************************
              * WARNING: Do NOT add any more catch blocks above!

@@ -88,7 +88,7 @@ namespace Microsoft.Build.Evaluation
             {
                 return true;
             }
-            EvaluateConditionEventSource.Log.EvaluateConditionStart(String.Format("Evaluate Condition {0} - Begin", condition));
+            MSBuildEventSource.Log.EvaluateConditionStart(condition);
 
             using (lazyEvaluator._evaluationProfiler.TrackCondition(element.ConditionLocation, condition))
             {
@@ -104,7 +104,7 @@ namespace Microsoft.Build.Evaluation
                     lazyEvaluator._loggingContext.BuildEventContext,
                     lazyEvaluator.FileSystem
                     );
-                EvaluateConditionEventSource.Log.EvaluateConditionStop(String.Format("Evaluate Condition {0} - End", condition));
+                MSBuildEventSource.Log.EvaluateConditionStop(condition);
 
                 return result;
             }

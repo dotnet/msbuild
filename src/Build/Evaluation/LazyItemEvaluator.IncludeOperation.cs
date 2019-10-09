@@ -100,7 +100,7 @@ namespace Microsoft.Build.Evaluation
                         }
 
                         string[] includeSplitFilesEscaped;
-                        SelectItemsEventSource.Log.SelectItemsStart("Select Items - Begin");
+                        MSBuildEventSource.Log.SelectItemsStart();
                         using (_lazyEvaluator._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
                         {
                             includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
@@ -109,7 +109,7 @@ namespace Microsoft.Build.Evaluation
                                 excludePatternsForGlobs
                             );
                         }
-                        SelectItemsEventSource.Log.SelectItemsStop("Select Items - Begin");
+                        MSBuildEventSource.Log.SelectItemsStop();
 
                         foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
                         {

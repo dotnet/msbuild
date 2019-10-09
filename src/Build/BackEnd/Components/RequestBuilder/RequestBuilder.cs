@@ -694,9 +694,9 @@ namespace Microsoft.Build.BackEnd
                 {
                     SetCommonWorkerThreadParameters();
                 }
-                RequestThreadProcEventSource.Log.RequestThreadProcStart(String.Format(CultureInfo.CurrentCulture, "Build Project - Start"));
+                MSBuildEventSource.Log.RequestThreadProcStart();
                 await BuildAndReport();
-                RequestThreadProcEventSource.Log.RequestThreadProcStop(String.Format(CultureInfo.CurrentCulture, "Build Project - End"));
+                MSBuildEventSource.Log.RequestThreadProcStop();
             }
 #if FEATURE_VARIOUS_EXCEPTIONS
             catch (ThreadAbortException)
@@ -1038,6 +1038,8 @@ namespace Microsoft.Build.BackEnd
             // logged with the node logging context
             _projectLoggingContext = null;
 
+            MSBuildEventSource.Log.BuildProjectStart();
+
             try
             {
                 // Load the project
@@ -1101,6 +1103,9 @@ namespace Microsoft.Build.BackEnd
 
             // Build the targets
             BuildResult result = await _targetBuilder.BuildTargets(_projectLoggingContext, _requestEntry, this, allTargets, _requestEntry.RequestConfiguration.BaseLookup, _cancellationTokenSource.Token);
+
+            MSBuildEventSource.Log.BuildProjectStop();
+
             return result;
         }
 

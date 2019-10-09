@@ -53,14 +53,14 @@ namespace Microsoft.Build.Evaluation
 
             public virtual void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-                ApplyEventSource.Log.ApplyStart("Select Mutate Save Items - Begin");
+                MSBuildEventSource.Log.ApplyStart();
                 using (_lazyEvaluator._evaluationProfiler.TrackElement(_itemElement))
                 {
                     var items = SelectItems(listBuilder, globsToIgnore);
                     MutateItems(items);
                     SaveItems(items, listBuilder);
                 }
-                ApplyEventSource.Log.ApplyStop("Select Mutate Save Items - End");
+                MSBuildEventSource.Log.ApplyStop();
             }
 
             /// <summary>

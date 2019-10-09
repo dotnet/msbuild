@@ -113,12 +113,12 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal static void Parse(XmlDocumentWithLocation document, ProjectRootElement projectRootElement)
         {
-            ParseEventSource.Log.ParseStart(projectRootElement.ProjectFileLocation.File);
+            MSBuildEventSource.Log.ParseStart(projectRootElement.ProjectFileLocation.File);
             {
                 ProjectParser parser = new ProjectParser(document, projectRootElement);
                 parser.Parse();
             }
-            ParseEventSource.Log.ParseStop(projectRootElement.ProjectFileLocation.File);
+            MSBuildEventSource.Log.ParseStop(projectRootElement.ProjectFileLocation.File);
         }
 
         /// <summary>
