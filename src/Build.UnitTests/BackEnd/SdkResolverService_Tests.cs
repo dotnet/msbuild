@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Build.Unittest;
 using Shouldly;
 using Xunit;
@@ -214,6 +215,44 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             resolver.ResolvedCalls.First().Key.ShouldBe("foo");
             resolver.ResolvedCalls.Count.ShouldBe(1);
+        }
+
+        /// <summary>
+        /// Verifies that an SDK resolver is only called once per build per SDK.
+        /// </summary>
+        [Fact]
+        public void CachingWrapperShouldOnlyResolveOnce()
+        {
+            var sdk = new SdkReference("foo", "1.0.0", null);
+
+            var resolver = new SdkUtilities.ConfigurableMockSdkResolver(
+                new SdkResultImpl(
+                    sdk,
+                    "path",
+                    "1.0.0",
+                    Enumerable.Empty<string>()
+                ));
+
+            var service = new CachingSdkResolverService();
+            service.InitializeForTests(
+                null,
+                new List<SdkResolver>
+                {
+                    resolver
+                });
+
+            // Resolve the SDK 10 times in parallel
+            Parallel.For(
+                0,
+                10,
+                _ => service.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false));
+
+            var result = resolver.ResolvedCalls.ShouldHaveSingleItem();
+
+            result.Key.ShouldBe(sdk.Name);
+
+            // The SDK resolver keeps track of the number of times it was called which should be 1
+            result.Value.ShouldBe(1, $"The SDK resolver should have only been called once but was called {result.Value} times");
         }
 
         [Fact]
