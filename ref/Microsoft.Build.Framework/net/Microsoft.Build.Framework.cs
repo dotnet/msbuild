@@ -2,135 +2,80 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 namespace Microsoft.Build.Eventing
 {
-    [System.Diagnostics.Tracing.EventSourceAttribute(Name="Apply-Profiling")]
-    public sealed partial class ApplyEventSource : System.Diagnostics.Tracing.EventSource
+    [System.Diagnostics.Tracing.EventSourceAttribute(Name="Microsoft-Build-Profiling")]
+    public sealed partial class MSBuildEventSource : System.Diagnostics.Tracing.EventSource
     {
-        internal ApplyEventSource() { }
-        public static Microsoft.Build.Eventing.ApplyEventSource Log;
+        internal MSBuildEventSource() { }
+        public static Microsoft.Build.Eventing.MSBuildEventSource Log;
+        [System.Diagnostics.Tracing.EventAttribute(1)]
         public void ApplyStart() { }
+        [System.Diagnostics.Tracing.EventAttribute(2)]
         public void ApplyStop() { }
-    }
-    [System.Diagnostics.Tracing.EventSourceAttribute(Name="Build-Profiling")]
-    public sealed partial class BuildEventSource : System.Diagnostics.Tracing.EventSource
-    {
-        internal BuildEventSource() { }
-        public static Microsoft.Build.Eventing.BuildEventSource Log;
+        [System.Diagnostics.Tracing.EventAttribute(5)]
+        public void BuildProjectStart() { }
+        [System.Diagnostics.Tracing.EventAttribute(6)]
+        public void BuildProjectStop() { }
+        [System.Diagnostics.Tracing.EventAttribute(3)]
         public void BuildStart() { }
+        [System.Diagnostics.Tracing.EventAttribute(4)]
         public void BuildStop() { }
-    }
-    [System.Diagnostics.Tracing.EventSourceAttribute(Name="ComputeClosure-Profiling")]
-    public sealed partial class ComputeClosureEventSource : System.Diagnostics.Tracing.EventSource
-    {
-        internal ComputeClosureEventSource() { }
-        public static Microsoft.Build.Eventing.ComputeClosureEventSource Log;
+        [System.Diagnostics.Tracing.EventAttribute(7)]
         public void ComputeClosureStart() { }
+        [System.Diagnostics.Tracing.EventAttribute(8)]
         public void ComputeClosureStop() { }
-        public void XMakeStart() { }
-        public void XMakeStop() { }
-    }
-    [System.Diagnostics.Tracing.EventSourceAttribute(Name="EvaluateCondition-Profiling")]
-    public sealed partial class EvaluateConditionEventSource : System.Diagnostics.Tracing.EventSource
-    {
-        internal EvaluateConditionEventSource() { }
-        public static Microsoft.Build.Eventing.EvaluateConditionEventSource Log;
+        [System.Diagnostics.Tracing.EventAttribute(9)]
         public void EvaluateConditionStart(string condition) { }
+        [System.Diagnostics.Tracing.EventAttribute(10)]
         public void EvaluateConditionStop(string condition) { }
-    }
-    [System.Diagnostics.Tracing.EventSourceAttribute(Name="Evaluate-Profiling")]
-    public sealed partial class EvaluateEventSource : System.Diagnostics.Tracing.EventSource
-    {
-        internal EvaluateEventSource() { }
-        public static Microsoft.Build.Eventing.EvaluateEventSource Log;
-        public void EvaluatePhase(string file, long phaseNum) { }
-        public void EvaluateStart(string file) { }
-        public void EvaluateStop(string file) { }
-    }
-    [System.Diagnostics.Tracing.EventSourceAttribute(Name="ExecuteGeneralResource-Profiling")]
-    public sealed partial class ExecuteGenerateResourceEventSource : System.Diagnostics.Tracing.EventSource
-    {
-        internal ExecuteGenerateResourceEventSource() { }
-        public static Microsoft.Build.Eventing.ExecuteGenerateResourceEventSource Log;
-        public void ExecuteGeneralResourceStart() { }
-        public void ExecuteGeneralResourceStop() { }
-    }
-    [System.Diagnostics.Tracing.EventSourceAttribute(Name="ExecuteTask-Profiling")]
-    public sealed partial class ExecuteTaskEventSource : System.Diagnostics.Tracing.EventSource
-    {
-        internal ExecuteTaskEventSource() { }
-        public static Microsoft.Build.Eventing.ExecuteTaskEventSource Log;
+        [System.Diagnostics.Tracing.EventAttribute(12)]
+        public void EvaluatePhase(string projectFile, long phaseNum) { }
+        [System.Diagnostics.Tracing.EventAttribute(11)]
+        public void EvaluateStart(string projectFile) { }
+        [System.Diagnostics.Tracing.EventAttribute(13)]
+        public void EvaluateStop(string projectFile) { }
+        [System.Diagnostics.Tracing.EventAttribute(14)]
+        public void ExecuteGenerateResourceStart() { }
+        [System.Diagnostics.Tracing.EventAttribute(15)]
+        public void ExecuteGenerateResourceStop() { }
+        [System.Diagnostics.Tracing.EventAttribute(16)]
         public void ExecuteTaskStart() { }
+        [System.Diagnostics.Tracing.EventAttribute(17)]
         public void ExecuteTaskStop() { }
-    }
-    [System.Diagnostics.Tracing.EventSourceAttribute(Name="LoadDocument-Profiling")]
-    public sealed partial class LoadDocumentEventSource : System.Diagnostics.Tracing.EventSource
-    {
-        internal LoadDocumentEventSource() { }
-        public static Microsoft.Build.Eventing.LoadDocumentEventSource Log;
+        [System.Diagnostics.Tracing.EventAttribute(18)]
         public void LoadDocumentStart() { }
+        [System.Diagnostics.Tracing.EventAttribute(19)]
         public void LoadDocumentStop() { }
-    }
-    [System.Diagnostics.Tracing.EventSourceAttribute(Name="LogResults-Profiling")]
-    public sealed partial class LogResultsEventSource : System.Diagnostics.Tracing.EventSource
-    {
-        internal LogResultsEventSource() { }
-        public static Microsoft.Build.Eventing.LogResultsEventSource Log;
+        [System.Diagnostics.Tracing.EventAttribute(20)]
         public void LogResultsStart() { }
+        [System.Diagnostics.Tracing.EventAttribute(21)]
         public void LogResultsStop() { }
-    }
-    [System.Diagnostics.Tracing.EventSourceAttribute(Name="Parse-Profiling")]
-    public sealed partial class ParseEventSource : System.Diagnostics.Tracing.EventSource
-    {
-        internal ParseEventSource() { }
-        public static Microsoft.Build.Eventing.ParseEventSource Log;
+        [System.Diagnostics.Tracing.EventAttribute(22)]
         public void ParseStart(string projectFileName) { }
+        [System.Diagnostics.Tracing.EventAttribute(23)]
         public void ParseStop(string projectFileName) { }
-    }
-    [System.Diagnostics.Tracing.EventSourceAttribute(Name="RemoveReferencesMarkedForExclusion-Profiling")]
-    public sealed partial class RemoveReferencesMarkedForExclusionEventSource : System.Diagnostics.Tracing.EventSource
-    {
-        internal RemoveReferencesMarkedForExclusionEventSource() { }
-        public static Microsoft.Build.Eventing.RemoveReferencesMarkedForExclusionEventSource Log;
-        public void RemoveReferencesMArkedForExclusionStart() { }
-        public void RemoveReferencesMArkedForExclusionStop() { }
-    }
-    [System.Diagnostics.Tracing.EventSourceAttribute(Name="RequestThreadProc-Profiling")]
-    public sealed partial class RequestThreadProcEventSource : System.Diagnostics.Tracing.EventSource
-    {
-        internal RequestThreadProcEventSource() { }
-        public static Microsoft.Build.Eventing.RequestThreadProcEventSource Log;
+        [System.Diagnostics.Tracing.EventAttribute(24)]
+        public void RemoveReferencesMarkedForExclusionStart() { }
+        [System.Diagnostics.Tracing.EventAttribute(25)]
+        public void RemoveReferencesMarkedForExclusionStop() { }
+        [System.Diagnostics.Tracing.EventAttribute(26)]
         public void RequestThreadProcStart() { }
+        [System.Diagnostics.Tracing.EventAttribute(27)]
         public void RequestThreadProcStop() { }
-    }
-    [System.Diagnostics.Tracing.EventSourceAttribute(Name="Save-Profiling")]
-    public sealed partial class SaveEventSource : System.Diagnostics.Tracing.EventSource
-    {
-        internal SaveEventSource() { }
-        public static Microsoft.Build.Eventing.SaveEventSource Log;
+        [System.Diagnostics.Tracing.EventAttribute(28)]
         public void SaveStart() { }
+        [System.Diagnostics.Tracing.EventAttribute(29)]
         public void SaveStop() { }
-    }
-    [System.Diagnostics.Tracing.EventSourceAttribute(Name="SelectItems-Profiling")]
-    public sealed partial class SelectItemsEventSource : System.Diagnostics.Tracing.EventSource
-    {
-        internal SelectItemsEventSource() { }
-        public static Microsoft.Build.Eventing.SelectItemsEventSource Log;
+        [System.Diagnostics.Tracing.EventAttribute(30)]
         public void SelectItemsStart() { }
+        [System.Diagnostics.Tracing.EventAttribute(31)]
         public void SelectItemsStop() { }
-    }
-    [System.Diagnostics.Tracing.EventSourceAttribute(Name="Target-Profiling")]
-    public sealed partial class TargetEventSource : System.Diagnostics.Tracing.EventSource
-    {
-        internal TargetEventSource() { }
-        public static Microsoft.Build.Eventing.TargetEventSource Log;
+        [System.Diagnostics.Tracing.EventAttribute(32)]
         public void TargetStart(string targetName) { }
+        [System.Diagnostics.Tracing.EventAttribute(33)]
         public void TargetStop(string targetName) { }
-    }
-    [System.Diagnostics.Tracing.EventSourceAttribute(Name="XMake-Profiling")]
-    public sealed partial class XMakeEventSource : System.Diagnostics.Tracing.EventSource
-    {
-        internal XMakeEventSource() { }
-        public static Microsoft.Build.Eventing.XMakeEventSource Log;
+        [System.Diagnostics.Tracing.EventAttribute(34)]
         public void XMakeStart() { }
+        [System.Diagnostics.Tracing.EventAttribute(35)]
         public void XMakeStop() { }
     }
 }

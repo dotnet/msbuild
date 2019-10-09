@@ -10,7 +10,7 @@ using System.Globalization;
 namespace Microsoft.Build.Eventing
 {
     // /OnlyProviders=*MSBuild-Profiling
-    [EventSource(Name = "MSBuild-Profiling")]
+    [EventSource(Name = "Microsoft-Build-Profiling")]
     public sealed class MSBuildEventSource : EventSource
     {
         #region Singleton instance
@@ -27,310 +27,327 @@ namespace Microsoft.Build.Eventing
         /// <summary>
         /// Call this method to notify listeners of information relevant to collecting a set of items, mutating them in a specified way, and saving the results.
         /// </summary>
+        [Event(1)]
         public void ApplyStart()
         {
-            if (IsEnabled()) WriteEvent(1);
+            WriteEvent(1);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
+        [Event(2)]
         public void ApplyStop()
         {
-            if (IsEnabled()) WriteEvent(2);
+            WriteEvent(2);
         }
 
         /// <summary>
         /// Call this method to notify listeners of information relevant to the setup for a BuildManager to receive build requests.
         /// </summary>
+        [Event(3)]
         public void BuildStart()
         {
-            if (IsEnabled()) WriteEvent(3);
+            WriteEvent(3);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
+        [Event(4)]
         public void BuildStop()
         {
-            if (IsEnabled()) WriteEvent(4);
+            WriteEvent(4);
         }
 
         /// <summary>
         /// Call this method to notify listeners of information of how a project file built.
         /// </summary>
+        [Event(5)]
         public void BuildProjectStart()
         {
-            if (IsEnabled()) WriteEvent(5);
+            WriteEvent(5);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
+        [Event(6)]
         public void BuildProjectStop()
         {
-            if (IsEnabled()) WriteEvent(6);
+            WriteEvent(6);
         }
 
         /// <summary>
         /// Call this method to notify listeners of information relevant to resolving references.
         /// </summary>
+        [Event(7)]
         public void ComputeClosureStart()
         {
-            if (IsEnabled()) WriteEvent(7);
+            WriteEvent(7);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
+        [Event(8)]
         public void ComputeClosureStop()
         {
-            if (IsEnabled()) WriteEvent(8);
+            WriteEvent(8);
         }
 
         /// <summary>
         /// Call this method to notify listeners of information relevant to resolving conditionals.
         /// </summary>
         /// <param name="condition">Relevant information about where in the run of the progam it is.</param>
+        [Event(9)]
         public void EvaluateConditionStart(string condition)
         {
-            if (IsEnabled()) WriteEvent(9, condition);
+            WriteEvent(9, condition);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
         /// <param name="condition">Relevant information about where in the run of the progam it is.</param>
+        [Event(10)]
         public void EvaluateConditionStop(string condition)
         {
-            if (IsEnabled()) WriteEvent(10, condition);
+            WriteEvent(10, condition);
         }
 
         /// <summary>
         /// Call this method to notify listeners of how the project data was evaluated.
         /// </summary>
-        /// <param name="file">Relevant information about where in the run of the progam it is.</param>
-        public void EvaluateStart(string file)
+        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        [Event(11)]
+        public void EvaluateStart(string projectFile)
         {
-            if (IsEnabled())
-            {
-                string projectFile = String.IsNullOrEmpty(file) ? "(null)" : file;
-                WriteEvent(11, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Start", projectFile));
-            }
+            WriteEvent(11, projectFile);
         }
 
         /// <summary>
         /// Call this method to notify listeners of progress made on Evaluate.
         /// </summary>
-        /// <param name="file">Relevant information about where in the run of the progam it is.</param>
+        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         /// <param name="phaseNum">The stage in Evaluate that the program has reached.</param>
-        public void EvaluatePhase(string file, long phaseNum)
+        [Event(12)]
+        public void EvaluatePhase(string projectFile, long phaseNum)
         {
-            if (IsEnabled())
-            {
-                string projectFile = String.IsNullOrEmpty(file) ? "(null)" : file;
-                WriteEvent(12, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0}", projectFile), phaseNum);
-            }
+            WriteEvent(12, projectFile, phaseNum);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
-        /// <param name="file">Relevant information about where in the run of the progam it is.</param>
-        public void EvaluateStop(string file)
+        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        [Event(13)]
+        public void EvaluateStop(string projectFile)
         {
-            if (IsEnabled())
-            {
-                string projectFile = String.IsNullOrEmpty(file) ? "(null)" : file;
-                WriteEvent(13, String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Stop", projectFile));
-            }
+            WriteEvent(13, projectFile);
         }
 
         /// <summary>
         /// Call this method to notify listeners of information relevant to the execution of the GenerateResource task.
         /// </summary>
+        [Event(14)]
         public void ExecuteGenerateResourceStart()
         {
-            if (IsEnabled()) WriteEvent(14);
+            WriteEvent(14);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
+        [Event(15)]
         public void ExecuteGenerateResourceStop()
         {
-            if (IsEnabled()) WriteEvent(15);
+            WriteEvent(15);
         }
 
         /// <summary>
         /// Call this method to notify listeners of profiling related to executing a task.
         /// </summary>
+        [Event(16)]
         public void ExecuteTaskStart()
         {
-            if (IsEnabled()) WriteEvent(16);
+            WriteEvent(16);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
+        [Event(17)]
         public void ExecuteTaskStop()
         {
-            if (IsEnabled()) WriteEvent(17);
+            WriteEvent(17);
         }
 
         /// <summary>
         /// Call this method to notify listeners of timing related to loading an XmlDocumentWithLocation from a path.
         /// </summary>
+        [Event(18)]
         public void LoadDocumentStart()
         {
-            if (IsEnabled()) WriteEvent(18);
+            WriteEvent(18);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
+        [Event(19)]
         public void LoadDocumentStop()
         {
-            if (IsEnabled()) WriteEvent(19);
+            WriteEvent(19);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the result of loggint the results from executing a task.
         /// </summary>
+        [Event(20)]
         public void LogResultsStart()
         {
-            if (IsEnabled()) WriteEvent(20);
+            WriteEvent(20);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
+        [Event(21)]
         public void LogResultsStop()
         {
-            if (IsEnabled()) WriteEvent(21);
+            WriteEvent(21);
         }
 
         /// <summary>
         /// Call this method to notify listeners of profiling for the function that parses an XML document into a ProjectRootElement.
         /// </summary>
         /// <param name="projectFileName">Relevant information about where in the run of the progam it is.</param>
+        [Event(22)]
         public void ParseStart(string projectFileName)
         {
 
-            if (IsEnabled())
-            {
-                WriteEvent(22, string.IsNullOrEmpty(projectFileName) ? "(null)" : projectFileName);
-            }
+            WriteEvent(22, projectFileName);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
         /// <param name="projectFileName">Relevant information about where in the run of the progam it is.</param>
+        [Event(23)]
         public void ParseStop(string projectFileName)
         {
-            if (IsEnabled())
-            {
-                WriteEvent(23, string.IsNullOrEmpty(projectFileName) ? "(null)" : projectFileName);
-            }
+            WriteEvent(23, projectFileName);
         }
 
         /// <summary>
         /// Call this method to notify listeners of profiling for the method that removes blacklisted references from the reference table. It puts primary and dependency references in invalid file lists.
         /// </summary>
+        [Event(24)]
         public void RemoveReferencesMarkedForExclusionStart()
         {
-            if (IsEnabled()) WriteEvent(24);
+            WriteEvent(24);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
+        [Event(25)]
         public void RemoveReferencesMarkedForExclusionStop()
         {
-            if (IsEnabled()) WriteEvent(25);
+            WriteEvent(25);
         }
 
         /// <summary>
         /// Call this method to provide timing analysis for requesting a new builder thread.
         /// </summary>
+        [Event(26)]
         public void RequestThreadProcStart()
         {
-            if (IsEnabled()) WriteEvent(26);
+            WriteEvent(26);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
+        [Event(27)]
         public void RequestThreadProcStop()
         {
-            if (IsEnabled()) WriteEvent(27);
+            WriteEvent(27);
         }
 
         /// <summary>
         /// Call this method to capturing timing information for saving a project to the file system if dirty, creating directories as necessary.
         /// </summary>
+        [Event(28)]
         public void SaveStart()
         {
-            if (IsEnabled()) WriteEvent(28);
+            WriteEvent(28);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
+        [Event(29)]
         public void SaveStop()
         {
-            if (IsEnabled()) WriteEvent(29);
+            WriteEvent(29);
         }
 
         /// <summary>
         /// Call this method to notify listeners of information relevant to identifying a list of files that correspond to an item with a wildcard.
         /// </summary>
+        [Event(30)]
         public void SelectItemsStart()
         {
-            if (IsEnabled()) WriteEvent(30);
+            WriteEvent(30);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
+        [Event(31)]
         public void SelectItemsStop()
         {
-            if (IsEnabled()) WriteEvent(31);
+            WriteEvent(31);
         }
 
         /// <summary>
         /// Call this method to notify listeners of a target beginning execution.
         /// </summary>
         /// <param name="targetName"/>The name of the target being executed.</param>
+        [Event(32)]
         public void TargetStart(string targetName)
         {
-            if (IsEnabled()) WriteEvent(32, targetName);
+            WriteEvent(32, targetName);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
         /// <param name="targetName">The name of the target being executed.</param>
+        [Event(33)]
         public void TargetStop(string targetName)
         {
-            if (IsEnabled()) WriteEvent(33, targetName);
+            WriteEvent(33, targetName);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the start of a build as called from the command line.
         /// </summary>
+        [Event(34)]
         public void XMakeStart()
         {
-            if (IsEnabled()) WriteEvent(34);
+            WriteEvent(34);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
+        [Event(35)]
         public void XMakeStop()
         {
-            if (IsEnabled()) WriteEvent(35);
+            WriteEvent(35);
         }
 
         #endregion
