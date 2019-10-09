@@ -130,224 +130,333 @@ namespace Microsoft.Build.Eventing
         /// Call this method to notify listeners of progress made on Evaluate.
         /// </summary>
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
-        /// <param name="phaseNum">The stage in Evaluate that the program has reached.</param>
         [Event(12)]
-        public void EvaluatePhase(string projectFile, long phaseNum)
+        public void EvaluatePhase0Start(string projectFile)
         {
-            WriteEvent(12, projectFile, phaseNum);
+            WriteEvent(12, projectFile);
+        }
+
+        /// <summary>
+        /// Call this method to notify listeners of progress made on Evaluate.
+        /// </summary>
+        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        [Event(13)]
+        public void EvaluatePhase0Stop(string projectFile)
+        {
+            WriteEvent(13, projectFile);
+        }
+
+        /// <summary>
+        /// Call this method to notify listeners of progress made on Evaluate.
+        /// </summary>
+        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        [Event(14)]
+        public void EvaluatePhase1Start(string projectFile)
+        {
+            WriteEvent(14, projectFile);
+        }
+
+        /// <summary>
+        /// Call this method to notify listeners of progress made on Evaluate.
+        /// </summary>
+        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        [Event(15)]
+        public void EvaluatePhase1Stop(string projectFile)
+        {
+            WriteEvent(15, projectFile);
+        }
+
+        /// <summary>
+        /// Call this method to notify listeners of progress made on Evaluate.
+        /// </summary>
+        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        [Event(16)]
+        public void EvaluatePhase2Start(string projectFile)
+        {
+            WriteEvent(16, projectFile);
+        }
+
+        /// <summary>
+        /// Call this method to notify listeners of progress made on Evaluate.
+        /// </summary>
+        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        [Event(17)]
+        public void EvaluatePhase2Stop(string projectFile)
+        {
+            WriteEvent(17, projectFile);
+        }
+
+        /// <summary>
+        /// Call this method to notify listeners of progress made on Evaluate.
+        /// </summary>
+        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        [Event(18)]
+        public void EvaluatePhase3Start(string projectFile)
+        {
+            WriteEvent(18, projectFile);
+        }
+
+        /// <summary>
+        /// Call this method to notify listeners of progress made on Evaluate.
+        /// </summary>
+        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        [Event(19)]
+        public void EvaluatePhase3Stop(string projectFile)
+        {
+            WriteEvent(19, projectFile);
+        }
+
+        /// <summary>
+        /// Call this method to notify listeners of progress made on Evaluate.
+        /// </summary>
+        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        [Event(20)]
+        public void EvaluatePhase4Start(string projectFile)
+        {
+            WriteEvent(20, projectFile);
+        }
+
+        /// <summary>
+        /// Call this method to notify listeners of progress made on Evaluate.
+        /// </summary>
+        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        [Event(21)]
+        public void EvaluatePhase4Stop(string projectFile)
+        {
+            WriteEvent(21, projectFile);
+        }
+
+        /// <summary>
+        /// Call this method to notify listeners of progress made on Evaluate.
+        /// </summary>
+        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        [Event(22)]
+        public void EvaluatePhase5Start(string projectFile)
+        {
+            WriteEvent(22, projectFile);
+        }
+
+        /// <summary>
+        /// Call this method to notify listeners of progress made on Evaluate.
+        /// </summary>
+        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        [Event(23)]
+        public void EvaluatePhase5Stop(string projectFile)
+        {
+            WriteEvent(23, projectFile);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
-        [Event(13)]
+        [Event(24)]
         public void EvaluateStop(string projectFile)
         {
-            WriteEvent(13, projectFile);
+            WriteEvent(24, projectFile);
         }
 
         /// <summary>
         /// Call this method to notify listeners of information relevant to the execution of the GenerateResource task.
         /// </summary>
-        [Event(14)]
+        [Event(25)]
         public void ExecuteGenerateResourceStart()
         {
-            WriteEvent(14);
+            WriteEvent(25);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
-        [Event(15)]
+        [Event(26)]
         public void ExecuteGenerateResourceStop()
         {
-            WriteEvent(15);
+            WriteEvent(26);
         }
 
         /// <summary>
         /// Call this method to notify listeners of profiling related to executing a task.
         /// </summary>
-        [Event(16)]
+        [Event(27)]
         public void ExecuteTaskStart()
         {
-            WriteEvent(16);
+            WriteEvent(27);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
-        [Event(17)]
+        [Event(28)]
         public void ExecuteTaskStop()
         {
-            WriteEvent(17);
+            WriteEvent(28);
         }
 
         /// <summary>
         /// Call this method to notify listeners of timing related to loading an XmlDocumentWithLocation from a path.
         /// </summary>
-        [Event(18)]
+        [Event(29)]
         public void LoadDocumentStart()
         {
-            WriteEvent(18);
+            WriteEvent(29);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
-        [Event(19)]
+        [Event(30)]
         public void LoadDocumentStop()
         {
-            WriteEvent(19);
+            WriteEvent(30);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the result of loggint the results from executing a task.
         /// </summary>
-        [Event(20)]
+        [Event(31)]
         public void LogResultsStart()
         {
-            WriteEvent(20);
+            WriteEvent(31);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
-        [Event(21)]
+        [Event(32)]
         public void LogResultsStop()
         {
-            WriteEvent(21);
+            WriteEvent(32);
         }
 
         /// <summary>
         /// Call this method to notify listeners of profiling for the function that parses an XML document into a ProjectRootElement.
         /// </summary>
         /// <param name="projectFileName">Relevant information about where in the run of the progam it is.</param>
-        [Event(22)]
+        [Event(33)]
         public void ParseStart(string projectFileName)
         {
 
-            WriteEvent(22, projectFileName);
+            WriteEvent(33, projectFileName);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
         /// <param name="projectFileName">Relevant information about where in the run of the progam it is.</param>
-        [Event(23)]
+        [Event(34)]
         public void ParseStop(string projectFileName)
         {
-            WriteEvent(23, projectFileName);
+            WriteEvent(34, projectFileName);
         }
 
         /// <summary>
         /// Call this method to notify listeners of profiling for the method that removes blacklisted references from the reference table. It puts primary and dependency references in invalid file lists.
         /// </summary>
-        [Event(24)]
+        [Event(35)]
         public void RemoveReferencesMarkedForExclusionStart()
         {
-            WriteEvent(24);
+            WriteEvent(35);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
-        [Event(25)]
+        [Event(36)]
         public void RemoveReferencesMarkedForExclusionStop()
         {
-            WriteEvent(25);
+            WriteEvent(36);
         }
 
         /// <summary>
         /// Call this method to provide timing analysis for requesting a new builder thread.
         /// </summary>
-        [Event(26)]
+        [Event(37]
         public void RequestThreadProcStart()
         {
-            WriteEvent(26);
+            WriteEvent(37);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
-        [Event(27)]
+        [Event(38)]
         public void RequestThreadProcStop()
         {
-            WriteEvent(27);
+            WriteEvent(38);
         }
 
         /// <summary>
         /// Call this method to capturing timing information for saving a project to the file system if dirty, creating directories as necessary.
         /// </summary>
-        [Event(28)]
+        [Event(39)]
         public void SaveStart()
         {
-            WriteEvent(28);
+            WriteEvent(39);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
-        [Event(29)]
+        [Event(40)]
         public void SaveStop()
         {
-            WriteEvent(29);
+            WriteEvent(40);
         }
 
         /// <summary>
         /// Call this method to notify listeners of information relevant to identifying a list of files that correspond to an item with a wildcard.
         /// </summary>
-        [Event(30)]
+        [Event(41)]
         public void SelectItemsStart()
         {
-            WriteEvent(30);
+            WriteEvent(41);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
-        [Event(31)]
+        [Event(42)]
         public void SelectItemsStop()
         {
-            WriteEvent(31);
+            WriteEvent(42);
         }
 
         /// <summary>
         /// Call this method to notify listeners of a target beginning execution.
         /// </summary>
         /// <param name="targetName"/>The name of the target being executed.</param>
-        [Event(32)]
+        [Event(43)]
         public void TargetStart(string targetName)
         {
-            WriteEvent(32, targetName);
+            WriteEvent(43, targetName);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
         /// <param name="targetName">The name of the target being executed.</param>
-        [Event(33)]
+        [Event(44]
         public void TargetStop(string targetName)
         {
-            WriteEvent(33, targetName);
+            WriteEvent(44, targetName);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the start of a build as called from the command line.
         /// </summary>
-        [Event(34)]
+        [Event(45)]
         public void XMakeStart()
         {
-            WriteEvent(34);
+            WriteEvent(45);
         }
 
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
-        [Event(35)]
+        [Event(46)]
         public void XMakeStop()
         {
-            WriteEvent(35);
+            WriteEvent(46);
         }
 
         #endregion
