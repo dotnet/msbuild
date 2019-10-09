@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <RootNamespace>WpfInferredTypeVaraibleName</RootNamespace>
+    <RootNamespace>InferredTypeVaraibleName</RootNamespace>
     <TargetFramework>netcoreapp3.0</TargetFramework>
   </PropertyGroup>
 

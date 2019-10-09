@@ -21,7 +21,7 @@ namespace Microsoft.NET.Build.Tests
         public void It_builds_with_implicit_namespace_imports_disabled()
         {
             var asset = _testAssetsManager
-                .CopyTestAsset("WpfInferredTypeVariableName")
+                .CopyTestAsset("InferredTypeVariableName")
                 .WithSource();
 
             var buildCommand = new BuildCommand(Log, Path.Combine(asset.TestRoot));
