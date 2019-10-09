@@ -2325,21 +2325,31 @@ EndGlobal
                     </PropertyGroup>
                 </Project>");
 
+            if (projectPath.StartsWith("Custom", StringComparison.OrdinalIgnoreCase))
+            {
+                // If a custom file name was given, create a Directory.Solution.props and Directory.Build.targets to ensure that they aren't imported
+                ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, "Directory.Solution.props"), $@"
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+                    <PropertyGroup>
+                        <PropertyA>This file should not be imported</PropertyA>
+                    </PropertyGroup>
+                </Project>");
+
+                ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, "Directory.Solution.targets"), $@"
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+                    <PropertyGroup>
+                        <PropertyA>This file should not be imported</PropertyA>
+                    </PropertyGroup>
+                </Project>");
+            }
+
             try
             {
                 Dictionary<string, string> globalProperties = new Dictionary<string, string>();
                 if (!enable)
                 {
-                    switch (projectName)
-                    {
-                        case "Directory.Solution.props":
-                            globalProperties["ImportDirectorySolutionProps"] = "false";
-                            break;
-
-                        case "Directory.Solution.targets":
-                            globalProperties["ImportDirectorySolutionTargets"] = "false";
-                            break;
-                    }
+                    globalProperties["ImportDirectorySolutionProps"] = "false";
+                    globalProperties["ImportDirectorySolutionTargets"] = "false";
                 }
                 else
                 {
