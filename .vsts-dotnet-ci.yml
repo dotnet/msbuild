@@ -7,7 +7,6 @@ jobs:
 - job: BootstrapMSBuildOnFullFrameworkWindows
   displayName: "Windows Full"
   pool:
-    name: 'Hosted'
     vmImage: 'windows-2019'
   steps:
   - task: BatchScript@1
@@ -52,7 +51,6 @@ jobs:
 - job: BootstrapMSBuildOnCoreWindows
   displayName: "Windows Core"
   pool:
-    name: 'Hosted'
     vmImage: 'windows-2019'
   steps:
   - task: BatchScript@1
@@ -98,7 +96,6 @@ jobs:
 - job: FullReleaseOnWindows
   displayName: "Windows Full Release (no bootstrap)"
   pool:
-    name: 'Hosted'
     vmImage: 'windows-2019'
   steps:
   - task: BatchScript@1
