@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Concurrent;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
@@ -17,7 +18,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// Stores the cache in a set of concurrent dictionaries.  The main dictionary is by build submission ID and the inner dictionary contains a case-insensitive SDK name and the cached <see cref="SdkResult"/>.
         /// </summary>
-        private readonly ConcurrentDictionary<int, ConcurrentDictionary<string, SdkResult>> _cache = new ConcurrentDictionary<int, ConcurrentDictionary<string, SdkResult>>();
+        private readonly ConcurrentDictionary<int, ConcurrentDictionary<string, Lazy<SdkResult>>> _cache = new ConcurrentDictionary<int, ConcurrentDictionary<string, Lazy<SdkResult>>>();
 
         public override void ClearCache(int submissionId)
         {
@@ -44,7 +45,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             else
             {
                 // Get the dictionary for the specified submission if one is already added otherwise create a new dictionary for the submission.
-                ConcurrentDictionary<string, SdkResult> cached = _cache.GetOrAdd(submissionId, new ConcurrentDictionary<string, SdkResult>(MSBuildNameIgnoreCaseComparer.Default));
+                ConcurrentDictionary<string, Lazy<SdkResult>> cached = _cache.GetOrAdd(submissionId, new ConcurrentDictionary<string, Lazy<SdkResult>>(MSBuildNameIgnoreCaseComparer.Default));
 
                 /*
                  * Get a cached result if available, otherwise resolve the SDK with the SdkResolverService.Instance.  If multiple projects are attempting to resolve
@@ -53,7 +54,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                  */
                 result = cached.GetOrAdd(
                     sdk.Name,
-                    key => base.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive));
+                    key => new Lazy<SdkResult>(() => base.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive)))
+                    .Value;
             }
 
             if (result != null &&
