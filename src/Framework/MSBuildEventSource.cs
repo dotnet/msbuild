@@ -10,7 +10,7 @@ using System.Globalization;
 namespace Microsoft.Build.Eventing
 {
     // /OnlyProviders=*MSBuild-Profiling
-    [EventSource(Name = "Microsoft-Build-Profiling")]
+    [EventSource(Name = "Microsoft-Build")]
     public sealed class MSBuildEventSource : EventSource
     {
         #region Singleton instance
@@ -370,7 +370,7 @@ namespace Microsoft.Build.Eventing
         /// <summary>
         /// Call this method to provide timing analysis for requesting a new builder thread.
         /// </summary>
-        [Event(37]
+        [Event(37)]
         public void RequestThreadProcStart()
         {
             WriteEvent(37);
@@ -435,7 +435,7 @@ namespace Microsoft.Build.Eventing
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
         /// <param name="targetName">The name of the target being executed.</param>
-        [Event(44]
+        [Event(44)]
         public void TargetStop(string targetName)
         {
             WriteEvent(44, targetName);
