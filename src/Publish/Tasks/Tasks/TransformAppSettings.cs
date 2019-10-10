@@ -100,7 +100,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
 
             if (string.IsNullOrEmpty(EnvironmentName))
             {
-                EnvironmentName = "production";
+                EnvironmentName = "Production";
             }
         }
 

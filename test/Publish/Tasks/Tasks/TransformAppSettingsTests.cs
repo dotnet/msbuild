@@ -52,7 +52,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.Tasks
 
             //Assert
             Assert.True(result);
-            string appSettingsProductionJson = (Path.Combine(publishDir, "appsettings.production.json"));
+            string appSettingsProductionJson = (Path.Combine(publishDir, "appsettings.Production.json"));
             Assert.True(File.Exists(appSettingsProductionJson));
 
             foreach (var eachValue in connectionStringData)
@@ -124,7 +124,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.Tasks
 
             //Assert
             Assert.True(result);
-            string appSettingsProductionJson = (Path.Combine(publishDir, $"MyCustomAppSettings.production.json"));
+            string appSettingsProductionJson = (Path.Combine(publishDir, $"MyCustomAppSettings.Production.json"));
             Assert.True(File.Exists(appSettingsProductionJson));
 
             foreach (var eachValue in connectionStringData)
