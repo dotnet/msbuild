@@ -5,7 +5,7 @@
     <!-- The signing infrastructure runs using MSBuild 14, which doesn't support some of the new syntax we're using.  So set the BuildingSingingProject
          property here to avoid importing files we don't need for signing which would cause errors if imported when using MSBuild 14. -->
     <BuildingSigningProject>true</BuildingSigningProject>
-    <ExternalCertificateId Condition="'$(ExternalCertificateId)' == ''">135020001</ExternalCertificateId>
+    <ExternalCertificateId Condition="'$(ExternalCertificateId)' == ''">135020002</ExternalCertificateId>
     <InternalCertificateId Condition="'$(InternalCertificateId)' == ''">Microsoft402</InternalCertificateId>
     <NugetCertificateId Condition="'$(NugetCertificateId)' == ''">NuGet</NugetCertificateId>
   </PropertyGroup>
