@@ -68,6 +68,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 RuntimeIdentifiers="$(RuntimeIdentifiers)"
                                 RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
                                 TargetLatestRuntimePatch="$(TargetLatestRuntimePatch)"
+                                TargetLatestRuntimePatchIsDefault="$(_TargetLatestRuntimePatchIsDefault)"
                                 EnableTargetingPackDownload="$(EnableTargetingPackDownload)">
 
       <Output TaskParameter="PackagesToDownload" ItemName="_PackageToDownload" />
