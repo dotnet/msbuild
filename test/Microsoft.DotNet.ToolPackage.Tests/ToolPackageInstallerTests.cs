@@ -28,8 +28,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
     public class ToolPackageInstallerTests : TestBase
     {
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public void GivenNoFeedInstallFailsWithException(bool testMockBehaviorIsInSync)
         {
@@ -47,8 +46,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public void GivenOfflineFeedInstallSucceeds(bool testMockBehaviorIsInSync)
         {
@@ -66,8 +64,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public void GivenAEmptySourceAndOfflineFeedInstallSucceeds(bool testMockBehaviorIsInSync)
         {
@@ -90,8 +87,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public void GivenNugetConfigInstallSucceeds(bool testMockBehaviorIsInSync)
         {
@@ -112,8 +108,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public void GivenNugetConfigInstallSucceedsInTransaction(bool testMockBehaviorIsInSync)
         {
@@ -142,8 +137,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public void GivenNugetConfigInstallCreatesAnAssetFile(bool testMockBehaviorIsInSync)
         {
@@ -180,8 +174,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public void GivenAConfigFileRootDirectoryPackageInstallSucceedsViaFindingNugetConfigInParentDir(
             bool testMockBehaviorIsInSync)
@@ -226,8 +219,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public void GivenAllButNoPackageVersionItCanInstallThePackage(bool testMockBehaviorIsInSync)
         {
@@ -248,8 +240,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public void GivenAllButNoTargetFrameworkItCanDownloadThePackage(bool testMockBehaviorIsInSync)
         {
@@ -269,8 +260,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public void GivenASourceInstallSucceeds(bool testMockBehaviorIsInSync)
         {
@@ -291,8 +281,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public void GivenARelativeSourcePathInstallSucceeds(bool testMockBehaviorIsInSync)
         {
@@ -314,8 +303,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public void GivenAUriSourceInstallSucceeds(bool testMockBehaviorIsInSync)
         {
@@ -336,8 +324,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public void GivenAEmptySourceAndNugetConfigInstallSucceeds(bool testMockBehaviorIsInSync)
         {
@@ -361,8 +348,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public void GivenFailedRestoreInstallWillRollback(bool testMockBehaviorIsInSync)
         {
@@ -387,8 +373,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public void GivenFailureAfterRestoreInstallWillRollback(bool testMockBehaviorIsInSync)
         {
@@ -603,8 +588,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public void GivenAPackageNameWithDifferentCaseItCanInstallThePackage(bool testMockBehaviorIsInSync)
         {
@@ -623,7 +607,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             uninstaller.Uninstall(package.PackageDirectory);
         }
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/3684")]
+        [Fact]
         public void GivenANuGetDiagnosticMessageItShouldNotContainTheTempProject()
         {
             var nugetConfigPath = GenerateRandomNugetConfigFilePath();
@@ -649,7 +633,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             uninstaller.Uninstall(package.PackageDirectory);
         }
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/3684")]
+        [Fact]
         public void GivenARootWithNonAsciiCharacterInstallSucceeds()
         {
             var nugetConfigPath = GenerateRandomNugetConfigFilePath();
@@ -664,7 +648,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             WriteNugetConfigFileToPointToTheFeed(fileSystem, nugetConfigPath);
             var installer = new ToolPackageInstaller(
                 store: store,
-                projectRestorer: new ProjectRestorer(reporter),
+                projectRestorer: new Stage2ProjectRestorer(reporter),
                 tempProject: GetUniqueTempProjectPathEachTest(),
                 offlineFeed: new DirectoryPath("does not exist"));
 
@@ -679,8 +663,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         // repro https://github.com/dotnet/cli/issues/9409
         public void GivenAComplexVersionRangeInstallSucceeds(bool testMockBehaviorIsInSync)
@@ -705,8 +688,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [NonWindowsOnlyTheory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         // repro https://github.com/dotnet/cli/issues/10101
         public void GivenAPackageWithCasingAndenUSPOSIXInstallSucceeds(bool testMockBehaviorIsInSync)
@@ -928,7 +910,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 storeQuery = toolPackageStore;
                 installer = new ToolPackageInstaller(
                     store: store,
-                    projectRestorer: new ProjectRestorer(reporter),
+                    projectRestorer: new Stage2ProjectRestorer(reporter),
                     tempProject: tempProject ?? GetUniqueTempProjectPathEachTest(),
                     offlineFeed: offlineFeed ?? new DirectoryPath("does not exist"));
                 uninstaller = new ToolPackageUninstaller(store);

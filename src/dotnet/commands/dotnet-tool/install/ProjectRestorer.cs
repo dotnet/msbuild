@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             return defaultVerbosity;
         }
 
-        private static void WriteLine(IReporter reporter, string line, FilePath project)
+        internal static void WriteLine(IReporter reporter, string line, FilePath project)
         {
             line = line ?? "";
 
