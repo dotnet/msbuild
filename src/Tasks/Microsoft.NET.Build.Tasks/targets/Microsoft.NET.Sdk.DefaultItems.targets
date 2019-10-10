@@ -80,6 +80,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(TargetLatestRuntimePatch)' == ''">
     <TargetLatestRuntimePatch Condition="'$(SelfContained)' == 'true' ">true</TargetLatestRuntimePatch>
     <TargetLatestRuntimePatch Condition="'$(SelfContained)' != 'true' ">false</TargetLatestRuntimePatch>
+    <_TargetLatestRuntimePatchIsDefault>true</_TargetLatestRuntimePatchIsDefault>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(DisableImplicitFrameworkReferences)' != 'true'">
