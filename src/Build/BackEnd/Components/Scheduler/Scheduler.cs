@@ -1832,21 +1832,14 @@ namespace Microsoft.Build.BackEnd
                     : string.Join(";", request.Targets));
 
             // Issue a failed build result to have the msbuild task marked as failed and thus stop the build
-            BuildResult result = new BuildResult(request, new InvalidOperationException(errorMessage));
+            BuildResult result = new BuildResult(request);
             result.SetOverallResult(false);
+
+            // Log an error to have something useful displayed to the user and to avoid having a failed build with 0 errors
+            result.SchedulerInducedError = errorMessage;
 
             var response = GetResponseForResult(nodeForResults, request, result);
             responses.Add(response);
-
-            // Log an error to have something displayed to the user and to avoid having a failed build with 0 errors
-            // todo Search if there's a way to have the error automagically logged in response to the failed build result
-            _componentHost.LoggingService.LogErrorFromText(
-                NewBuildEventContext(),
-                null,
-                null,
-                null,
-                new BuildEventFileInfo(requestConfig.ProjectFullPath),
-                errorMessage);
 
             return false;
 

@@ -337,20 +337,19 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="needs-review-translation">  -logger:&lt;günlükçü&gt; MSBuild'daki olayları günlüğe almak için bu günlükçüyü 
-                     kullanın. Birden çok günlükçü belirtmek için, her 
-                     günlükçüyü ayrı ayrı belirtin.
+        <target state="translated">  -logger:&lt;günlükçü&gt;   MSBuild'deki olayları günlüğe almak için bu günlükçüyü kullanın. Birden fazla
+                     günlükçü belirtmek için her günlükçüyü ayrı ayrı belirtin.
                      &lt;günlükçü&gt; söz dizimi şöyledir:
-                       [&lt;günlükçü sınıfı&gt;,]&lt;günlükçü derlemesi&gt;
-                       [;&lt;günlükçü parametreleri&gt;]
-                     &lt;günlükçü sınıfı&gt; söz dizimi şöyledir:
-                       [&lt;kısmi veya tam ad alanı&gt;.]&lt;günlükçü sınıfı adı&gt;
+                       [&lt;sınıf&gt;,]&lt;derleme&gt;[,&lt;seçenekler&gt;][;&lt;parametreler&gt;]
+                     &lt;günlükçü sınıfı &gt; söz dizimi şöyledir:
+                       [&lt;kısmi veya tam ad alanı &gt;.]&lt;günlükçü sınıfı adı&gt;
                      &lt;günlükçü derlemesi&gt; söz dizimi şöyledir:
                        {&lt;derleme adı&gt;[,&lt;strong name&gt;] | &lt;derleme dosyası&gt;}
-                     &lt;günlükçü parametreleri&gt; isteğe bağlıdır ve tam olarak
+                     Günlükçü seçenekleri, MSBuild'in günlükçüyü oluşturma biçimini belirtir.
+                     &lt;günlükçü parametreleri &gt; isteğe bağlıdır ve tam olarak 
                      yazdığınız şekliyle günlükçüye geçirilir. (Kısa biçim: -l)
                      Örnekler:
-                       /logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
+                       -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </target>
         <note>
@@ -607,18 +606,18 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="needs-review-translation">  -distributedlogger:&lt;merkezi günlükçü&gt;*&lt;iletilen günlükçü&gt;  
-                     MSBuild'dan gelen olayları her düğüme farklı bir günlükçü 
-                     örneği iliştirerek günlüğe almak için bu günlükçüyü 
-                     kullanın. Birden çok günlükçü belirtmek için, her 
-                     günlükçüyü ayrı belirtin. (Kısa biçim -dl)
+        <target state="translated">  -distributedLogger:&lt;merkezi günlükçü&gt;*&lt;iletilen günlükçü&gt;
+                     MSBuild'den gelen olayları her düğüme farklı bir günlükçü
+                     örneği iliştirerek günlüğe almak için bu günlükçüyü kullanın. Birden fazla
+                     günlükçü belirtmek için her günlükçüyü ayrı ayrı belirtin.
+                     (Kısa biçim -dl)
                      &lt;günlükçü&gt; söz dizimi şöyledir:
-                       [&lt;günlükçü sınıfı&gt;,]&lt;günlükçü derlemesi&gt;
-                       [;&lt;günlükçü parametreleri&gt;]
+                       [&lt;sınıf&gt;,]&lt;derleme&gt;[,&lt;seçenekler&gt;][;&lt;parametreler&gt;]
                      &lt;günlükçü sınıfı&gt; söz dizimi şöyledir:
                        [&lt;kısmi veya tam ad alanı&gt;.]&lt;günlükçü sınıfı adı&gt;
                      &lt;günlükçü derlemesi&gt; söz dizimi şöyledir:
                        {&lt;derleme adı&gt;[,&lt;strong name&gt;] | &lt;derleme dosyası&gt;}
+                     Günlükçü seçenekleri, MSBuild'in günlükçüyü oluşturma biçimini belirtir.
                      &lt;günlükçü parametreleri&gt; isteğe bağlıdır ve tam olarak
                      yazdığınız şekliyle günlükçüye geçirilir. (Kısa biçim: -l)
                      Örnekler:
@@ -1136,7 +1135,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
         <source>The specified logger could not be created and will not be used. {0}</source>
-        <target state="new">The specified logger could not be created and will not be used. {0}</target>
+        <target state="translated">Belirtilen günlükçü oluşturulamadığından kullanılamıyor. {0}</target>
         <note>
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: {0} contains the exception message explaining why the

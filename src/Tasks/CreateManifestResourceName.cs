@@ -146,12 +146,24 @@ namespace Microsoft.Build.Tasks
                     string fileName = resourceFile.ItemSpec;
                     string dependentUpon = resourceFile.GetMetadata(ItemMetadataNames.dependentUpon);
 
-                    // If opted into convention and no DependentUpon metadata, reference "<filename>.cs" if it exists.
-                    if (UseDependentUponConvention && string.IsNullOrEmpty(dependentUpon))
-                    {
-                        string conventionDependentUpon = Path.ChangeExtension(fileName, SourceFileExtension);
+                    string fileType = resourceFile.GetMetadata("Type");
 
-                        if (File.Exists(conventionDependentUpon))
+                    // If it has "type" metadata and the value is "Resx"
+                    // This value can be specified by the user, if not it will have been automatically assigned by the SplitResourcesByCulture target.
+                    bool isResxFile = (!string.IsNullOrEmpty(fileType) && fileType == "Resx");
+
+                    // If not, fall back onto the extension.
+                    if (string.IsNullOrEmpty(fileType))
+                    {
+                        isResxFile = Path.GetExtension(fileName) == ".resx";
+                    }
+
+                    // If opted into convention and no DependentUpon metadata and is a resx file, reference "<filename>.cs" if it exists.
+                    if (isResxFile && UseDependentUponConvention && string.IsNullOrEmpty(dependentUpon))
+                    {
+                        string conventionDependentUpon = Path.ChangeExtension(Path.GetFileName(fileName), SourceFileExtension);
+
+                        if (File.Exists(Path.Combine(Path.GetDirectoryName(fileName), conventionDependentUpon)))
                         {
                             dependentUpon = conventionDependentUpon;
                         }

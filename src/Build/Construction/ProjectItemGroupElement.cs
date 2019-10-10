@@ -5,8 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
+using Microsoft.Build.ObjectModelRemoting;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Construction
 {
@@ -16,6 +17,14 @@ namespace Microsoft.Build.Construction
     [DebuggerDisplay("#Items={Count} Condition={Condition} Label={Label}")]
     public class ProjectItemGroupElement : ProjectElementContainer
     {
+        /// <summary>
+        /// External projects support
+        /// </summary>
+        internal ProjectItemGroupElement(ProjectItemGroupElementLink link)
+            : base(link)
+        {
+        }
+
         /// <summary>
         /// True if it is known that no child items have wildcards in their
         /// include. An optimization helping Project.AddItem.
@@ -57,6 +66,11 @@ namespace Microsoft.Build.Construction
         {
             get
             {
+                if (Link != null)
+                {
+                    return Count == 0;
+                }
+
                 if (Count == 0)
                 {
                     _definitelyAreNoChildrenWithWildcards = true;

@@ -16,6 +16,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Utilities;
@@ -25,6 +26,8 @@ using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerExcepti
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using LoggerMode = Microsoft.Build.BackEnd.Logging.LoggerMode;
 using ObjectModel = System.Collections.ObjectModel;
+using System.Data.OleDb;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -147,6 +150,11 @@ namespace Microsoft.Build.Evaluation
         /// The projects loaded into this collection.
         /// </summary>
         private readonly LoadedProjectCollection _loadedProjects;
+
+        /// <summary>
+        /// External projects support
+        /// </summary>
+        private ExternalProjectsProvider _link;
 
         /// <summary>
         /// Single logging service used for all builds of projects in this project collection
@@ -564,16 +572,7 @@ namespace Microsoft.Build.Evaluation
         /// Each has a unique combination of path, global properties, and tools version.
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods", Justification = "This is a reasonable choice. API review approved")]
-        public ICollection<Project> LoadedProjects
-        {
-            get
-            {
-                using (_locker.EnterUpgradeableReadLock())
-                {
-                    return new List<Project>(_loadedProjects);
-                }
-            }
-        }
+        public ICollection<Project> LoadedProjects => GetLoadedProjects(true, null);
 
         /// <summary>
         /// Number of projects currently loaded into this collection.
@@ -816,6 +815,24 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
+
+        /// <summary>
+        /// Global collection id.
+        /// Can be used for external providers to optimize the cross-site link exchange
+        /// </summary>
+        internal Guid CollectionId { get; } = Guid.NewGuid();
+
+        /// <summary>
+        /// External project support.
+        /// Establish a remote project link for this collection.
+        /// </summary>
+
+        internal ExternalProjectsProvider Link
+        {
+            get => _link;
+            set => Interlocked.Exchange(ref _link, value)?.Disconnected(this);
+        }
+
         /// <summary>
         /// Logging service that should be used for project load and for builds
         /// </summary>
@@ -1051,13 +1068,34 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public ICollection<Project> GetLoadedProjects(string fullPath)
         {
+            return GetLoadedProjects(true, fullPath);
+        }
+
+        /// <summary>
+        /// Returns any and all loaded projects with the provided path.
+        /// There may be more than one, if they are distinguished by global properties
+        /// and/or tools version.
+        /// </summary>
+        internal ICollection<Project> GetLoadedProjects(bool includeExternal, string fullPath = null)
+        {
+            List<Project> loaded;
             using (_locker.EnterWriteLock())
             {
-                var loaded = new List<Project>(_loadedProjects.GetMatchingProjectsIfAny(fullPath));
-
-                return loaded;
+                    loaded = fullPath == null ? new List<Project>(_loadedProjects) : new List<Project>(_loadedProjects.GetMatchingProjectsIfAny(fullPath));
             }
+
+            if (includeExternal)
+            {
+                var link = Link;
+                if (link != null)
+                {
+                    loaded.AddRange(link.GetLoadedProjects(fullPath));
+                }
+            }
+
+            return loaded;
         }
+
 
         /// <summary>
         /// Loads a project with the specified filename, using the collection's global properties and tools version.
@@ -1274,6 +1312,12 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public void UnloadProject(Project project)
         {
+            if (project.IsLinked)
+            {
+                project.Zombify();
+                return;
+            }
+
             using (_locker.EnterWriteLock())
             {
                 bool existed = _loadedProjects.RemoveProject(project);
@@ -1321,10 +1365,14 @@ namespace Microsoft.Build.Evaluation
         public void UnloadProject(ProjectRootElement projectRootElement)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, nameof(projectRootElement));
+            if (projectRootElement.Link != null)
+            {
+                return;
+            }
 
             using (_locker.EnterWriteLock())
             {
-                Project conflictingProject = LoadedProjects.FirstOrDefault(project => project.UsesProjectRootElement(projectRootElement));
+                Project conflictingProject = GetLoadedProjects(false, null).FirstOrDefault(project => project.UsesProjectRootElement(projectRootElement));
                 if (conflictingProject != null)
                 {
                     ErrorUtilities.ThrowInvalidOperation("OM_ProjectXmlCannotBeUnloadedDueToLoadedProjects", projectRootElement.FullPath, conflictingProject.FullPath);
@@ -1468,12 +1516,16 @@ namespace Microsoft.Build.Evaluation
         public bool TryUnloadProject(ProjectRootElement projectRootElement)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, nameof(projectRootElement));
+            if (projectRootElement.Link != null)
+            {
+                return false;
+            }
 
             using (_locker.EnterWriteLock())
             {
                 ProjectRootElementCache.DiscardStrongReferences();
 
-                Project conflictingProject = LoadedProjects.FirstOrDefault(project => project.UsesProjectRootElement(projectRootElement));
+                Project conflictingProject = GetLoadedProjects(false, null).FirstOrDefault(project => project.UsesProjectRootElement(projectRootElement));
                 if (conflictingProject == null)
                 {
                     ProjectRootElementCache.DiscardAnyWeakReference(projectRootElement);

@@ -424,7 +424,7 @@
     <comment>{StrBegin="MSB4101: "}</comment>
   </data>
   <data name="ImportedProjectNotFound" UESanitized="false" Visibility="Public">
-    <value>MSB4019: The imported project "{0}" was not found. Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk.</value>
+    <value>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</value>
     <comment>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</comment>
   </data>
   <data name="ImportedProjectFromExtensionsPathNotFoundFromAppConfig" UESanitized="false" Visibility="Public">
@@ -1472,6 +1472,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="OM_NameInvalid">
     <value>The name "{0}" contains an invalid character "{1}".</value>
   </data>
+  <data name="OM_TargetNameNullOrEmpty">
+    <value>Method {0} cannot be called with a collection containing null or empty target names.</value>
+  </data>
   <data name="OM_NoOtherwiseBeforeWhenOrOtherwise">
     <value>An &lt;Otherwise&gt; element cannot be located before a &lt;When&gt; or &lt;Otherwise&gt; element.</value>
   </data>
@@ -1790,6 +1793,12 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     </value>
     <comment>
       LOCALIZATION: {0} and {1} are file paths
+    </comment>
+  </data>
+  <data name="LogLoggerVerbosity" xml:space="preserve">
+    <value>Logging verbosity is set to: {0}.</value>
+    <comment>
+      LOCALIZATION: {0} is an enum value of LoggerVerbosity.
     </comment>
   </data>
   <!--

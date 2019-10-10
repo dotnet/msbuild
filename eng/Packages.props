@@ -32,7 +32,7 @@
     <PackageReference Update="System.Net.Http" Version="4.3.4" />
     <PackageReference Update="System.Reflection.Metadata" Version="1.6.0" />
     <PackageReference Update="System.Reflection.TypeExtensions" Version="4.1.0" />
-    <PackageReference Update="System.Resources.Extensions" Version="$(SystemResourcesExtensionsVersion)" />
+    <PackageReference Update="System.Resources.Extensions" Version="4.6.0" />
     <PackageReference Update="System.Resources.Writer" Version="4.0.0" />
     <PackageReference Update="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
     <PackageReference Update="System.Runtime.Loader" Version="4.0.0" />
@@ -47,8 +47,11 @@
     <PackageReference Update="xunit.core" Version="$(XUnitVersion)" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true'">
     <GlobalPackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0-alpha-004" PrivateAssets="All"/>
+  </ItemGroup>
+
+  <ItemGroup>
     <GlobalPackageReference Include="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.15" PrivateAssets="All" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </ItemGroup>
 

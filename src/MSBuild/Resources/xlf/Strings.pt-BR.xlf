@@ -338,14 +338,15 @@ isoladamente.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="needs-review-translation">  -logger:&lt;logger&gt;   Use esse agente para registrar em log os eventos do MSBuild. Para especificar
-                     vários agentes, especifique cada agente separadamente.
+        <target state="translated">  -logger:&lt;logger&gt;   Use este agente para registrar os eventos do MSBuild. Para especificar
+                     vários agentes, especifique cada um separadamente.
                      A sintaxe de &lt;logger&gt; é:
-                       [&lt;logger class&gt;,]&lt;logger assembly&gt;[;&lt;logger parameters&gt;]
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
                      A sintaxe de &lt;logger class&gt; é:
                        [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
                      A sintaxe de &lt;logger assembly&gt; é:
                        {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                     As opções de agente especificam como o MSBuild cria o agente.
                      Os &lt;logger parameters&gt; são opcionais e são passados
                      ao agente exatamente como são digitados. (Forma abreviada: -l)
                      Exemplos:
@@ -606,17 +607,18 @@ isoladamente.
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="needs-review-translation">  -distributedLogger:&lt;central logger&gt;*&lt;forwarding logger&gt;
-                     Use esse agente para registrar eventos do MSBuild anexando uma
+        <target state="translated">  -distributedLogger:&lt;central logger&gt;*&lt;forwarding logger&gt;
+                     Use este agente para registrar eventos do MSBuild anexando uma
                      instância de agente diferente a cada nó. Para especificar
-                     vários agentes, especifique cada agente separadamente.
+                     vários agentes, especifique cada um separadamente.
                      (Forma abreviada -dl)
                      A sintaxe de &lt;logger&gt; é:
-                       [&lt;logger class&gt;,]&lt;logger assembly&gt;[;&lt;logger parameters&gt;]
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
                      A sintaxe de &lt;logger class&gt; é:
                        [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
                      A sintaxe de &lt;logger assembly&gt; é:
                        {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                     As opções de agente especificam como o MSBuild cria o agente.
                      Os &lt;logger parameters&gt; são opcionais e são passados
                      ao agente exatamente como são digitados. (Forma abreviada: -l)
                      Exemplos:
@@ -1130,7 +1132,7 @@ isoladamente.
       </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
         <source>The specified logger could not be created and will not be used. {0}</source>
-        <target state="new">The specified logger could not be created and will not be used. {0}</target>
+        <target state="translated">Não foi possível criar o agente especificado e ele não será usado. {0}</target>
         <note>
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: {0} contains the exception message explaining why the

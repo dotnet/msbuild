@@ -82,6 +82,13 @@
         <target state="translated">MSB4255: Następujące pliki wejściowej pamięci podręcznej wyników nie istnieją: „{0}”</target>
         <note />
       </trans-unit>
+      <trans-unit id="LogLoggerVerbosity">
+        <source>Logging verbosity is set to: {0}.</source>
+        <target state="new">Logging verbosity is set to: {0}.</target>
+        <note>
+      LOCALIZATION: {0} is an enum value of LoggerVerbosity.
+    </note>
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">Wygenerowano metaprojekt „{0}”.</target>
@@ -100,6 +107,11 @@
       LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
     </note>
       </trans-unit>
+      <trans-unit id="OM_TargetNameNullOrEmpty">
+        <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
+        <target state="new">Method {0} cannot be called with a collection containing null or empty target names.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
         <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
         <target state="translated">MSB4250: Element ProjectGraph nie obsługuje elementów ProjectReference z ustawionymi metadanymi atrybutu ToolsVersion. W pliku „{1}” odnaleziono element ProjectReference „{0}” z atrybutem ToolsVersion</target>
@@ -117,7 +129,7 @@
       </trans-unit>
       <trans-unit id="StaticGraphAcceptsSingleSolutionEntryPoint">
         <source>MSB4261: Static graph only accepts a solution as the only entry point. Multiple entry points detected: {0}</source>
-        <target state="new">MSB4261: Static graph only accepts a solution as the only entry point. Multiple entry points detected: {0}</target>
+        <target state="translated">MSB4261: wykres statyczny akceptuje tylko rozwiązanie jako jedyny punkt wejścia. Wykryto wiele punktów wejścia: {0}</target>
         <note>
       LOCALIZATION: {0} is a semicolon delimited list of files
     </note>
@@ -125,7 +137,7 @@
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
         <source>MSB4263: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
     </source>
-        <target state="new">MSB4263: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
+        <target state="translated">MSB4263: projekt „{0}” ma odwołanie do pliku rozwiązania „{1}”. Odwoływanie do rozwiązań nie jest obsługiwane w przypadku wykresu statycznego.
     </target>
         <note>
       LOCALIZATION: {0} and {1} are file paths
@@ -136,9 +148,9 @@
            Warnings: {1}
            Errors: {2}
     </source>
-        <target state="new">MSB4262: Solution file "{0}" contains the following warnings and errors:
-           Warnings: {1}
-           Errors: {2}
+        <target state="translated">MSB4262: plik rozwiązania „{0}” zawiera następujące ostrzeżenia i błędy:
+           Ostrzeżenia: {1}
+           Błędy: {2}
     </target>
         <note>
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
@@ -581,8 +593,8 @@
         <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
-        <source>MSB4019: The imported project "{0}" was not found. Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk.</source>
-        <target state="translated">MSB4019: Nie można odnaleźć zaimportowanego projektu „{0}”. Upewnij się, że ścieżka w deklaracji &lt;Import&gt; jest poprawna oraz że plik istnieje na dysku.</target>
+        <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</source>
+        <target state="new">MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">
@@ -1603,12 +1615,12 @@
       </trans-unit>
       <trans-unit id="ProjectInstanceConflictsWithAffinity">
         <source>MSB4209: The specified project instance conflicts with the affinity specified in the HostServices.</source>
-        <target state="translated">MSB4209: Określone wystąpienie projektu koliduje z koligacją określoną w obiekcie HostServices.</target>
+        <target state="translated">MSB4209: Określone wystąpienie projektu jest w konflikcie z koligacją określoną w obiekcie HostServices.</target>
         <note>{StrBegin="MSB4209: "}</note>
       </trans-unit>
       <trans-unit id="AffinityConflict">
         <source>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for this project.</source>
-        <target state="translated">MSB4213: Podana koligacja żądania {0} koliduje z poprzednią koligacją {1} określoną dla tego projektu.</target>
+        <target state="translated">MSB4213: Podana koligacja żądania {0} jest w konflikcie z poprzednią koligacją {1} określoną dla tego projektu.</target>
         <note>{StrBegin="MSB4213: "}</note>
       </trans-unit>
       <trans-unit id="UnableToCreateNode">
@@ -1952,7 +1964,7 @@ Wykorzystanie:          Średnie wykorzystanie {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="OM_BuildSubmissionsMultipleProjectCollections">
         <source>All build submissions in a build must use project instances originating from the same project collection.</source>
-        <target state="translated">Wszystkie przesłania kompilacji w kompilacji muszą używać wystąpień projektu pochodzących z tej samej kolekcji projektu.</target>
+        <target state="translated">Wszystkie przesłania kompilacji w kompilacji muszą używać wystąpień projektu pochodzących z tej samej kolekcji projektów.</target>
         <note>This occurs if a client tries to add two BuildSubmissions to a build, each involving a ProjectInstance originating in different ProjectCollection. This is not allowed.</note>
       </trans-unit>
       <trans-unit id="BuildStarted">

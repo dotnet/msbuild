@@ -5,8 +5,9 @@ using System.Collections.Generic;
 using System.Xml;
 using System.Diagnostics;
 using System.Linq;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
+using Microsoft.Build.ObjectModelRemoting;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Construction
 {
@@ -16,6 +17,14 @@ namespace Microsoft.Build.Construction
     [DebuggerDisplay("{ItemType} #Metadata={Count} Condition={Condition}")]
     public class ProjectItemDefinitionElement : ProjectElementContainer
     {
+        /// <summary>
+        /// External projects support
+        /// </summary>
+        internal ProjectItemDefinitionElement(ProjectItemDefinitionElementLink link)
+            : base(link)
+        {
+        }
+
         /// <summary>
         /// Initialize a ProjectItemDefinitionElement instance from a node read from a project file
         /// </summary>
@@ -36,7 +45,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Gets the definition's type.
         /// </summary>
-        public string ItemType => XmlElement.Name;
+        public string ItemType => ElementName;
 
         /// <summary>
         /// Get any child metadata definitions.
@@ -116,5 +125,7 @@ namespace Microsoft.Build.Construction
         /// Do not clone attributes which can be metadata. The corresponding expressed as attribute project elements are responsible for adding their attribute
         /// </summary>
         protected override bool ShouldCloneXmlAttribute(XmlAttribute attribute) => !ProjectMetadataElement.AttributeNameIsValidMetadataName(attribute.LocalName);
+
+        internal override bool ShouldCloneXmlAttribute(XmlAttributeLink attributeLink) => !ProjectMetadataElement.AttributeNameIsValidMetadataName(attributeLink.LocalName);
     }
 }
