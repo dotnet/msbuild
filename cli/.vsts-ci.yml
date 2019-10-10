@@ -92,13 +92,6 @@ jobs:
             _RuntimeIdentifier: ''
             _BuildArchitecture: 'x64'
             _DropSuffix: ''
-          Build_OpenSUSE_42_3_Debug_x64:
-            _BuildConfig: Debug
-            _DockerParameter: '--docker opensuse.42.3'
-            _LinuxPortable: '--linux-portable'
-            _RuntimeIdentifier: ''
-            _BuildArchitecture: 'x64'
-            _DropSuffix: ''
           Build_CentOS_7_1_Debug_x64:
             _BuildConfig: Debug
             _DockerParameter: '--docker centos'

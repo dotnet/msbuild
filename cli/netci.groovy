@@ -18,7 +18,6 @@ def platformList = [
   'Linux:arm64:Debug',
   'Linux-musl:x64:Debug',
   'Linux:x64:Release',
-  'opensuse.42.3:x64:Debug',
   'OSX10.12:x64:Release',
   'RHEL6:x64:Debug',
   'RHEL7.2:x64:Release',
