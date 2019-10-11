@@ -52,6 +52,47 @@ stages:
               _SignType: real
               _Test: ''
 
+  - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Windows_Perf_Helix
+        pool:
+          name: Hosted VS2017
+        strategy:
+          matrix:
+            Build_Release:
+              _BuildConfig: Release
+              _PublishType: none
+              _SignType: test
+              _DotNetPublishToBlobFeed: false
+
+  - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Windows_Perf_Helix_Fullframework
+        pool:
+          name: Hosted VS2017
+        strategy:
+          matrix:
+            Build_Release:
+              _BuildConfig: Release
+              _PublishType: none
+              _SignType: test
+              _DotNetPublishToBlobFeed: false
+
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Linux_Perf_Helix
+        pool:
+          name: Hosted Ubuntu 1604
+        strategy:
+          matrix:
+            Build_Release:
+              _BuildConfig: Release
+              _PublishType: none
+              _SignType: test
+              _DotNetPublishToBlobFeed: false
+
   - ${{ if eq(variables['System.TeamProject'], 'public') }}:
     - template: /eng/build.yml
       parameters:
@@ -85,25 +126,6 @@ stages:
 
     - template: /eng/build.yml
       parameters:
-        agentOs: Ubuntu_14_04
-        pool:
-          name: NetCorePublic-Pool
-          queue: BuildPool.Ubuntu.1604.Amd64.Open
-        strategy:
-          matrix:
-            Build_Debug:
-              _BuildConfig: Debug
-              _PublishType: none
-              _SignType: test
-            Build_Release:
-              _BuildConfig: Release
-              _PublishType: none
-              _SignType: test
-        variables:
-          _PREVIEW_VSTS_DOCKER_IMAGE: microsoft/dotnet-buildtools-prereqs:ubuntu-14.04-cross-0cd4667-20170319080304
-
-    - template: /eng/build.yml
-      parameters:
         agentOs: Ubuntu_16_04
         pool:
           name: NetCorePublic-Pool
@@ -118,8 +140,6 @@ stages:
               _BuildConfig: Release
               _PublishType: none
               _SignType: test
-        variables:
-          _PREVIEW_VSTS_DOCKER_IMAGE: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-e435274-20180628134544
 
     - template: /eng/build.yml
       parameters:
