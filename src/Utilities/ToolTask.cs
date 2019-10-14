@@ -699,6 +699,9 @@ namespace Microsoft.Build.Utilities
                 // Start the process
                 proc.Start();
 
+                // Execute process
+                this.ProcessStarted();
+
                 // Close the input stream. This is done to prevent commands from
                 // blocking the build waiting for input from the user.
                 if (NativeMethodsShared.IsWindows)
@@ -765,6 +768,14 @@ namespace Microsoft.Build.Utilities
             }
 
             return ExitCode;
+        }
+
+        /// <summary>
+        /// Optional overridable function called after proc.Start() in ExecuteTool.
+        /// </summary>
+        protected virtual void ProcessStarted()
+        {
+            
         }
 
         /// <summary>
