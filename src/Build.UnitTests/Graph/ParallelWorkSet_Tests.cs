@@ -5,7 +5,7 @@ using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 
-namespace Microsoft.Build.Experimental.Graph.UnitTests
+namespace Microsoft.Build.Graph.UnitTests
 {
     public class ParallelWorkSet_Tests
     {
