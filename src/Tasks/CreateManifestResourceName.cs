@@ -35,7 +35,7 @@ namespace Microsoft.Build.Tasks
 
         public bool UseDependentUponConvention { get; set; }
 
-        internal abstract string SourceFileExtension { get; }
+        protected abstract string SourceFileExtension { get; }
 
         /// <summary>
         /// The possibly dependent resource files.
