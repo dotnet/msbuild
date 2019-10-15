@@ -28,14 +28,6 @@ namespace Microsoft.DotNet.Tools.Test
 
         public static TestCommand FromArgs(string[] args, string msbuildPath = null)
         {
-            var msbuildArgs = new List<string>()
-            {
-                "-target:VSTest",
-                "-verbosity:quiet",
-                "-nodereuse:false", // workaround for https://github.com/Microsoft/vstest/issues/1503
-                "-nologo"
-            };
-
             var parser = Parser.Instance;
 
             var result = parser.ParseFrom("dotnet test", args);
@@ -44,6 +36,14 @@ namespace Microsoft.DotNet.Tools.Test
             result.ShowHelpOrErrorIfAppropriate();
 
             var parsedTest = result["dotnet"]["test"];
+
+            var msbuildArgs = new List<string>()
+            {
+                "-target:VSTest",
+                $"-verbosity:{GetDefaultVerbosity(parsedTest)}",
+                "-nodereuse:false", // workaround for https://github.com/Microsoft/vstest/issues/1503
+                "-nologo"
+            };
 
             msbuildArgs.AddRange(parsedTest.OptionValuesToBeForwarded());
 
@@ -80,38 +80,34 @@ namespace Microsoft.DotNet.Tools.Test
                 msbuildPath);
         }
 
+        private static string GetDefaultVerbosity(AppliedOption options)
+        {
+            var defaultVerbosity = "quiet";
+            if (options.HasOption(Constants.RestoreInteractiveOption))
+            {
+                defaultVerbosity = "minimal";
+            }
+
+            return defaultVerbosity;
+        }
+
         public static int Run(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
-
-            TestCommand cmd;
-
-            try
-            {
-                cmd = FromArgs(args);
-            }
-            catch (CommandCreationException e)
-            {
-                return e.ExitCode;
-            }
 
             // Workaround for https://github.com/Microsoft/vstest/issues/1503
             const string NodeWindowEnvironmentName = "MSBUILDENSURESTDOUTFORTASKPROCESSES";
             string previousNodeWindowSetting = Environment.GetEnvironmentVariable(NodeWindowEnvironmentName);
 
-            int result = -1;
-
             try
             {
                 Environment.SetEnvironmentVariable(NodeWindowEnvironmentName, "1");
-                result = cmd.Execute();
+                return FromArgs(args).Execute();
             }
             finally
             {
                 Environment.SetEnvironmentVariable(NodeWindowEnvironmentName, previousNodeWindowSetting);
             }
-
-            return result;
         }
 
         private static string GetSemiColonEscapedString(string arg)

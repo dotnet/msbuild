@@ -1,13 +1,13 @@
-﻿using Microsoft.DotNet.Cli.Utils;
-using Newtonsoft.Json.Linq;
+﻿using System.Text.Json;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 {
-    public interface ILaunchSettingsProvider
+    internal interface ILaunchSettingsProvider
     {
         string CommandName { get; }
 
-        LaunchSettingsApplyResult TryApplySettings(JObject document, JObject model, ref ICommand command);
+        LaunchSettingsApplyResult TryApplySettings(JsonElement model, ref ICommand command);
     }
 
 }

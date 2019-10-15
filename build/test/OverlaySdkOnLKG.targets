@@ -1,0 +1,24 @@
+<Project ToolsVersion="14.0" DefaultTargets="Test">
+  <Target Name="OverlaySdkOnLKG"
+          DependsOnTargets="PublishRedist">
+    <ItemGroup>
+      <OverlaySDK Include="$(_DotNetHiveRoot)**/*" />
+      <OverlayCLI Include="$(CliOutputDirectory)/**/*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(OverlaySDK)"
+          DestinationFiles="@(OverlaySDK->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <Copy SourceFiles="@(OverlayCLI)"
+          DestinationFiles="@(OverlayCLI->'$(SdkOutputDirectory)\sdk\$(DotNetCoreSdkLKGVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="PublishRedist">
+    <MSBuild
+      BuildInParallel="False"
+      Projects="$(RepoRoot)/src/redist/redist.csproj"
+      Properties="PublishDir=$(CliOutputDirectory)"
+      Targets="Publish"
+      RemoveProperties="TargetFramework" />
+  </Target>
+</Project>

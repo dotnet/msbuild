@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Tools.Clean
             var parsedClean = result["dotnet"]["clean"];
 
             msbuildArgs.AddRange(parsedClean.Arguments);
-                
+
             msbuildArgs.Add("-target:Clean");
 
             msbuildArgs.AddRange(parsedClean.OptionValuesToBeForwarded());
@@ -45,17 +45,7 @@ namespace Microsoft.DotNet.Tools.Clean
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            CleanCommand cmd;
-            try
-            {
-                cmd = FromArgs(args);
-            }
-            catch (CommandCreationException e)
-            {
-                return e.ExitCode;
-            }
-
-            return cmd.Execute();
+            return FromArgs(args).Execute();
         }
     }
 }

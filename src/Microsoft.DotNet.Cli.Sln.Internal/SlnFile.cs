@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             slnFile.FullPath = Path.GetFullPath(file);
             slnFile._format = FileUtil.GetTextFormatInfo(file);
 
-            using (var sr = new StreamReader(new FileStream(file, FileMode.Open)))
+            using (var sr = new StreamReader(new FileStream(file, FileMode.Open, FileAccess.Read)))
             {
                 slnFile.Read(sr);
             }

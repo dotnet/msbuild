@@ -12,8 +12,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     public class GivenMSBuildLogger
     {
-        [Fact(DisplayName = "It blocks telemetry that is not in the list")]
-        public void ItBlocks()
+        [Fact]
+        public void ItBlocksTelemetryThatIsNotInTheList()
         {
             var fakeTelemetry = new FakeTelemetry();
             var telemetryEventArgs = new TelemetryEventArgs
@@ -30,47 +30,26 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             fakeTelemetry.LogEntry.Should().BeNull();
         }
 
-        [Fact(DisplayName = "It masks event name with targetframeworkeval only on TargetFrameworkVersion")]
-        public void ItMasksTargetFrameworkEventname()
+        [Fact]
+        public void ItDoesNotMasksExceptionTelemetry()
         {
             var fakeTelemetry = new FakeTelemetry();
             var telemetryEventArgs = new TelemetryEventArgs
             {
-                EventName = "targetframeworkeval",
+                EventName = MSBuildLogger.SdkTaskBaseCatchExceptionTelemetryEventName,
                 Properties = new Dictionary<string, string>
-            {
-                { "TargetFrameworkVersion", ".NETStandard,Version=v2.0"},
-            }
+                {
+                    { "exceptionType", "System.Exception"},
+                    { "detail", "Exception detail"}
+                }
             };
 
             MSBuildLogger.FormatAndSend(fakeTelemetry, telemetryEventArgs);
 
-            fakeTelemetry.LogEntry.EventName.Should().Be("msbuild/targetframeworkeval");
-            fakeTelemetry.LogEntry.Properties.Keys.Count.Should().Be(1);
-            var expectedKey = "TargetFrameworkVersion";
-            fakeTelemetry.LogEntry.Properties.Should().ContainKey(expectedKey);
-            fakeTelemetry.LogEntry.Properties[expectedKey].Should().Be(Sha256Hasher.Hash(".NETSTANDARD,VERSION=V2.0"));
-        }
-
-        public class FakeTelemetry : ITelemetry
-        {
-            public bool Enabled { get; set; }
-
-            public void TrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)
-            {
-                LogEntry = new LogEntry { EventName = eventName, Properties = properties, Measurement = measurements };
-
-            }
-
-            public LogEntry LogEntry { get; private set; }
-
-        }
-
-        public class LogEntry
-        {
-            public string EventName { get; set; }
-            public IDictionary<string, string> Properties { get; set; }
-            public IDictionary<string, double> Measurement { get; set; }
+            fakeTelemetry.LogEntry.EventName.Should().Be(MSBuildLogger.SdkTaskBaseCatchExceptionTelemetryEventName);
+            fakeTelemetry.LogEntry.Properties.Keys.Count.Should().Be(2);
+            fakeTelemetry.LogEntry.Properties["exceptionType"].Should().Be("System.Exception");
+            fakeTelemetry.LogEntry.Properties["detail"].Should().Be("Exception detail");
         }
     }
 }

@@ -95,12 +95,13 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             var sb = new StringBuilder();
 
-            var needsQuotes = ShouldSurroundWithQuotes(arg);
+            var length = arg.Length;
+            var needsQuotes = length == 0 || ShouldSurroundWithQuotes(arg);
             var isQuoted = needsQuotes || IsSurroundedWithQuotes(arg);
 
             if (needsQuotes) sb.Append("\"");
 
-            for (int i = 0; i < arg.Length; ++i)
+            for (int i = 0; i < length; ++i)
             {
                 var backslashCount = 0;
 

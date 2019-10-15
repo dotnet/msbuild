@@ -1,15 +1,35 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="LocalOptionDescription">
+        <source>Uninstall the tool and remove it from the local tool manifest.</source>
+        <target state="translated">解除安裝該工具，並將其從本機工具資訊清單中移除。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionDescription">
+        <source>Path to the manifest file.</source>
+        <target state="translated">資訊清單檔的路徑。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoManifestFileContainPackageId">
+        <source>Cannot find a manifest file that contains package id '{0}'.</source>
+        <target state="translated">找不到包含套件識別碼 '{0}' 的資訊清單檔案。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to uninstall.</source>
         <target state="translated">要解除安裝之工具的 NuGet 套件識別碼。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Uninstall a tool from the current development environment.</source>
-        <target state="translated">從目前的開發環境中，解除安裝工具。</target>
+        <source>Uninstall a global tool or local tool.</source>
+        <target state="translated">解除安裝全域工具或本機工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
@@ -18,7 +38,7 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Please specify one tool Package Id to uninstall.</source>
+        <source>Specify one tool Package Id to uninstall.</source>
         <target state="translated">請指定一個要解除安裝的工具套件識別碼。</target>
         <note />
       </trans-unit>
@@ -27,14 +47,29 @@
         <target state="translated">從目前使用者的工具目錄，解除安裝工具。</target>
         <note />
       </trans-unit>
+      <trans-unit id="UninstallLocalToolSucceeded">
+        <source>Tool '{0}' was successfully uninstalled and removed from manifest file {1}.</source>
+        <target state="translated">已成功解除安裝工具 '{0}'，且已將其從資訊清單檔 {1} 中移除。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UninstallSucceeded">
         <source>Tool '{0}' (version '{1}') was successfully uninstalled.</source>
         <target state="translated">已成功解除安裝工具 '{0}' ('{1}' 版)。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolNotInstalled">
-        <source>Tool '{0}' is not currently installed.</source>
-        <target state="translated">目前未安裝工具 '{0}'。</target>
+        <source>A tool with the package Id '{0}' could not be found. 
+
+Tools are uninstalled using their package Id which may be different 
+from the tool name you use when calling the tool. You can find the tool names 
+and the corresponding package Ids for installed tools using the command
+'dotnet tool list'.</source>
+        <target state="translated">找不到套件識別碼為 '{0}' 的工具。
+
+必須使用工具的套件識別碼才能將其解除安裝，
+而該識別碼可能與您在呼叫工具時的工具名稱不同。您可以使用命令
+'dotnet tool list' 來針對已安裝工具尋找工具名稱
+和對應的套件識別碼。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
@@ -47,14 +82,9 @@
         <target state="translated">無法將工具 '{0}' 解除安裝: {1}</target>
         <note />
       </trans-unit>
-      <trans-unit id="UninstallToolCommandNeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="translated">請指定全域選項 (--global) 或工具路徑選項 (--tool-path) 兩者之一。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UninstallToolCommandInvalidGlobalAndToolPath">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="translated">(--global) 與工具路徑選項 (--tool-path) 衝突。請只指定其中一個選項。</target>
+      <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="translated">一次只能有一個本機選項 (--local)、全域選項 (--global)、工具路徑選項 (--tool-path)。請僅指定其中一個選項: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

@@ -2,136 +2,60 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Transactions;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Configurer;
-using Microsoft.DotNet.ShellShim;
-using Microsoft.DotNet.ToolPackage;
-using Microsoft.Extensions.EnvironmentAbstractions;
+using Microsoft.DotNet.Tools.Tool.Common;
 
 namespace Microsoft.DotNet.Tools.Tool.Uninstall
 {
-    internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null);
-    internal delegate IToolPackageStore CreateToolPackageStore(DirectoryPath? nonGlobalLocation = null);
     internal class ToolUninstallCommand : CommandBase
     {
         private readonly AppliedOption _options;
-        private readonly IReporter _reporter;
-        private readonly IReporter _errorReporter;
-        private CreateShellShimRepository _createShellShimRepository;
-        private CreateToolPackageStore _createToolPackageStore;
+        private readonly ToolUninstallLocalCommand _toolUninstallLocalCommand;
+        private readonly ToolUninstallGlobalOrToolPathCommand _toolUninstallGlobalOrToolPathCommand;
+        private readonly bool _global;
+        private readonly string _toolPath;
 
         public ToolUninstallCommand(
             AppliedOption options,
             ParseResult result,
-            CreateToolPackageStore createToolPackageStore = null,
-            CreateShellShimRepository createShellShimRepository = null,
-            IReporter reporter = null)
+            IReporter reporter = null,
+            ToolUninstallGlobalOrToolPathCommand toolUninstallGlobalOrToolPathCommand = null,
+            ToolUninstallLocalCommand toolUninstallLocalCommand = null)
             : base(result)
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
-            _reporter = reporter ?? Reporter.Output;
-            _errorReporter = reporter ?? Reporter.Error;
+            _toolUninstallLocalCommand
+                = toolUninstallLocalCommand ??
+                  new ToolUninstallLocalCommand(options, result);
 
-            _createShellShimRepository = createShellShimRepository ?? ShellShimRepositoryFactory.CreateShellShimRepository;
-            _createToolPackageStore = createToolPackageStore ?? ToolPackageFactory.CreateToolPackageStore;
+            _toolUninstallGlobalOrToolPathCommand =
+                toolUninstallGlobalOrToolPathCommand
+                ?? new ToolUninstallGlobalOrToolPathCommand(options, result);
+
+            _global = options.ValueOrDefault<bool>(ToolAppliedOption.GlobalOption);
+            _toolPath = options.SingleArgumentOrDefault(ToolAppliedOption.ToolPathOption);
         }
 
         public override int Execute()
         {
-            var global = _options.ValueOrDefault<bool>("global");
-            var toolPath = _options.SingleArgumentOrDefault("tool-path");
+            ToolAppliedOption.EnsureNoConflictGlobalLocalToolPathOption(
+                _options,
+                LocalizableStrings.UninstallToolCommandInvalidGlobalAndLocalAndToolPath);
 
-            DirectoryPath? toolDirectoryPath = null;
-            if (!string.IsNullOrWhiteSpace(toolPath))
+            ToolAppliedOption.EnsureToolManifestAndOnlyLocalFlagCombination(_options);
+
+            if (_global || !string.IsNullOrWhiteSpace(_toolPath))
             {
-                if (!Directory.Exists(toolPath))
-                {
-                    throw new GracefulException(
-                        string.Format(
-                            LocalizableStrings.InvalidToolPathOption,
-                            toolPath));
-                }
-
-                toolDirectoryPath = new DirectoryPath(toolPath);
+                return _toolUninstallGlobalOrToolPathCommand.Execute();
             }
-
-            if (toolDirectoryPath == null && !global)
+            else
             {
-                throw new GracefulException(LocalizableStrings.UninstallToolCommandNeedGlobalOrToolPath);
-            }
-
-            if (toolDirectoryPath != null && global)
-            {
-                throw new GracefulException(LocalizableStrings.UninstallToolCommandInvalidGlobalAndToolPath);
-            }
-
-            IToolPackageStore toolPackageStore = _createToolPackageStore(toolDirectoryPath);
-            IShellShimRepository shellShimRepository = _createShellShimRepository(toolDirectoryPath);
-
-            var packageId = new PackageId(_options.Arguments.Single());
-            IToolPackage package = null;
-            try
-            {
-                package = toolPackageStore.EnumeratePackageVersions(packageId).SingleOrDefault();
-                if (package == null)
-                {
-                    throw new GracefulException(
-                        messages: new[]
-                        {
-                            string.Format(
-                                LocalizableStrings.ToolNotInstalled,
-                                packageId),
-                        },
-                    isUserError: false);
-                }
-            }
-            catch (InvalidOperationException)
-            {
-                throw new GracefulException(
-                        messages: new[]
-                        {
-                            string.Format(
-                        LocalizableStrings.ToolHasMultipleVersionsInstalled,
-                        packageId),
-                        },
-                    isUserError: false);
-            }
-
-            try
-            {
-                using (var scope = new TransactionScope(
-                    TransactionScopeOption.Required,
-                    TimeSpan.Zero))
-                {
-                    foreach (var command in package.Commands)
-                    {
-                        shellShimRepository.RemoveShim(command.Name);
-                    }
-
-                    package.Uninstall();
-
-                    scope.Complete();
-                }
-
-                _reporter.WriteLine(
-                    string.Format(
-                        LocalizableStrings.UninstallSucceeded,
-                        package.Id,
-                        package.Version.ToNormalizedString()).Green());
-                return 0;
-            }
-            catch (Exception ex) when (ToolUninstallCommandLowLevelErrorConverter.ShouldConvertToUserFacingError(ex))
-            {
-                throw new GracefulException(
-                    messages: ToolUninstallCommandLowLevelErrorConverter.GetUserFacingMessages(ex, packageId),
-                    verboseMessages: new[] {ex.ToString()},
-                    isUserError: false);
+                return _toolUninstallLocalCommand.Execute();
             }
         }
     }

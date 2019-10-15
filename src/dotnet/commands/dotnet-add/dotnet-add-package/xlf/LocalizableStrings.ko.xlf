@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageReference">
-        <source>Please specify one package reference to add.</source>
-        <target state="translated">추가할 하나의 패키지 참조를 지정하세요.</target>
+        <source>Specify one package reference to add.</source>
+        <target state="translated">추가할 패키지 참조를 하나 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
@@ -78,7 +78,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdDGFileIOException">
-        <source>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Please clear the temp directory and try again.</source>
+        <source>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Clear the temp directory and try again.</source>
         <target state="translated">'{0}' 프로젝트에 대한 임시 파일을 생성할 수 없습니다. 패키지 참조를 추가할 수 없습니다. 임시 디렉터리를 지우고 다시 시도하세요.</target>
         <note />
       </trans-unit>

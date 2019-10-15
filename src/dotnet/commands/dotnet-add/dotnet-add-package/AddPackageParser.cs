@@ -6,11 +6,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using LocalizableStrings = Microsoft.DotNet.Tools.Add.PackageReference.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -74,15 +73,25 @@ namespace Microsoft.DotNet.Cli
                 yield break;
             }
 
-            JObject json;
-            using (var reader = new JsonTextReader(new StreamReader(result)))
+            foreach (var packageId in EnumerablePackageIdFromQueryResponse(result))
             {
-                json = JObject.Load(reader);
+                yield return packageId;
             }
+        }
 
-            foreach (var id in json["data"])
+        internal static IEnumerable<string> EnumerablePackageIdFromQueryResponse(Stream result)
+        {
+            using (JsonDocument doc = JsonDocument.Parse(result))
             {
-                yield return id.Value<string>();
+                JsonElement root = doc.RootElement;
+
+                if (root.TryGetProperty("data", out var data))
+                {
+                    foreach (JsonElement packageIdElement in data.EnumerateArray())
+                    {
+                        yield return packageIdElement.GetString();
+                    }
+                }
             }
         }
     }

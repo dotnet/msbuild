@@ -5,14 +5,18 @@ using FluentAssertions;
 using Microsoft.DotNet.Tools.Store;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using Microsoft.DotNet.Tools.Tests.Utilities;
 using Xunit;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
-    public class GivenDotnetStoreInvocation
+    public class GivenDotnetStoreInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
         const string ExpectedPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m -target:ComposeStore <project>";
         static readonly string[] ArgsPrefix = { "--manifest", "<project>" };
+        private static readonly string WorkingDirectory = 
+            TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetStoreInvocation));
 
         [Theory]
         [InlineData("-m")]
@@ -30,15 +34,20 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--framework", "<tfm>" }, @"-property:TargetFramework=<tfm>")]
         [InlineData(new string[] { "-r", "<rid>" }, @"-property:RuntimeIdentifier=<rid>")]
         [InlineData(new string[] { "--runtime", "<rid>" }, @"-property:RuntimeIdentifier=<rid>")]
-        [InlineData(new string[] { "--manifest", "one.xml", "--manifest", "two.xml", "--manifest", "three.xml" }, @"-property:AdditionalProjects=one.xml%3Btwo.xml%3Bthree.xml")]
+        [InlineData(new string[] { "--manifest", "one.xml", "--manifest", "two.xml", "--manifest", "three.xml" }, @"-property:AdditionalProjects=<cwd>one.xml%3B<cwd>two.xml%3B<cwd>three.xml")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
-            args = ArgsPrefix.Concat(args).ToArray();
-            expectedAdditionalArgs = (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}");
+            CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
+            {
+                args = ArgsPrefix.Concat(args).ToArray();
+                expectedAdditionalArgs =
+                    (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}")
+                    .Replace("<cwd>", WorkingDirectory);
 
-            var msbuildPath = "<msbuildpath>";
-            StoreCommand.FromArgs(args, msbuildPath)
-                .GetProcessStartInfo().Arguments.Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
+                var msbuildPath = "<msbuildpath>";
+                StoreCommand.FromArgs(args, msbuildPath)
+                    .GetProcessStartInfo().Arguments.Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
+            });
         }
 
         [Theory]
@@ -46,7 +55,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData("--output")]
         public void ItAddsOutputPathToMsBuildInvocation(string optionName)
         {
-            string path = "/some/path";
+            string path = Path.Combine("some", "path");
             var args = ArgsPrefix.Concat(new string[] { optionName, path }).ToArray();
 
             var msbuildPath = "<msbuildpath>";

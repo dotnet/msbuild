@@ -39,6 +39,12 @@ namespace Microsoft.DotNet.Tools.Publish
 
             var appliedPublishOption = result["dotnet"]["publish"];
 
+            if (appliedPublishOption.HasOption("--self-contained") &&
+                appliedPublishOption.HasOption("--no-self-contained"))
+            {
+                throw new GracefulException(LocalizableStrings.SelfContainAndNoSelfContainedConflict);
+            }
+
             msbuildArgs.AddRange(appliedPublishOption.OptionValuesToBeForwarded());
 
             msbuildArgs.AddRange(appliedPublishOption.Arguments);
@@ -58,17 +64,7 @@ namespace Microsoft.DotNet.Tools.Publish
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            PublishCommand cmd;
-            try
-            {
-                cmd = FromArgs(args);
-            }
-            catch (CommandCreationException e)
-            {
-                return e.ExitCode;
-            }
-
-            return cmd.Execute();
+            return FromArgs(args).Execute();
         }
     }
 }

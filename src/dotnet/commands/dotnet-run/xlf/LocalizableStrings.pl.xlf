@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pl" original="../LocalizableStrings.resx">
     <body>
@@ -22,8 +22,18 @@
         <target state="translated">Ścieżka do pliku projektu, który ma zostać uruchomiony (w przypadku tylko jednego projektu wartością domyślną jest bieżący katalog).</target>
         <note />
       </trans-unit>
+      <trans-unit id="CouldNotConvertToBoolean">
+        <source>Could not convert the value of property '{0}' to a boolean.</source>
+        <target state="translated">Nie można przekonwertować wartości właściwości „{0}” na wartość logiczną.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotConvertToString">
+        <source>Could not convert the value of property '{0}' to a string.</source>
+        <target state="translated">Nie można przekonwertować wartości właściwości „{0}” na ciąg.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RunCommandException">
-        <source>The build failed. Please fix the build errors and run again.</source>
+        <source>The build failed. Fix the build errors and run again.</source>
         <target state="translated">Kompilacja nie powiodła się. Napraw błędy kompilacji i uruchom ją ponownie.</target>
         <note />
       </trans-unit>
@@ -39,14 +49,14 @@
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
         <source>Unable to run your project
-Your project targets multiple frameworks. Please specify which framework to run using '{0}'.</source>
+Your project targets multiple frameworks. Specify which framework to run using '{0}'.</source>
         <target state="translated">Nie można uruchomić projektu
 Projekt ma wiele platform docelowych. Określ platformę do uruchomienia przy użyciu elementu „{0}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRun">
         <source>Unable to run your project.
-Please ensure you have a runnable project type and ensure '{0}' supports this project.
+Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
         <target state="translated">Nie można uruchomić projektu.
@@ -144,6 +154,16 @@ Bieżący element {1}: „{2}”.</target>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to run for. The target framework must also be specified in the project file.</source>
         <target state="translated">Platforma docelowa uruchomienia. Platforma docelowa musi być również określona w pliku projektu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to run for.</source>
+        <target state="translated">Docelowe środowisko uruchomieniowe na potrzeby przebiegu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ValueMustBeAnObject">
+        <source>The property '{0}' must be an object if it is specified.</source>
+        <target state="translated">Właściwość „{0}” musi być obiektem, jeśli jest określona.</target>
         <note />
       </trans-unit>
     </body>

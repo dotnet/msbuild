@@ -15,7 +15,7 @@ if [ -x "$(command -v curl)" ]; then
 elif [ -x "$(command -v wget)" ]; then
   wget -q https://github.com/dotnet/docs/archive/master.zip > /dev/null
 else
-  echo "Please install curl or wget to proceed"
+  echo "Install curl or wget to proceed"
   exit 1
 fi
 

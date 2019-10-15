@@ -2,7 +2,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), testAsset.props))\testAsset.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net46;netcoreapp2.2</TargetFrameworks>
+    <TargetFrameworks>net46;netcoreapp3.0</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">

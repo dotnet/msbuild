@@ -12,44 +12,32 @@ namespace Microsoft.DotNet.Configurer
     {
         public static readonly string SENTINEL = $"{Product.Version}.dotnetFirstUseSentinel";
 
-        private readonly IFile _file;
-        private readonly IDirectory _directory;
-
         private string _dotnetUserProfileFolderPath;
+        private readonly IFileSystem _fileSystem;
 
         private string SentinelPath => Path.Combine(_dotnetUserProfileFolderPath, SENTINEL);
 
         public FirstTimeUseNoticeSentinel() :
             this(
                 CliFolderPathCalculator.DotnetUserProfileFolderPath,
-                FileSystemWrapper.Default.File,
-                FileSystemWrapper.Default.Directory)
+                FileSystemWrapper.Default)
         {
         }
 
-        internal FirstTimeUseNoticeSentinel(string dotnetUserProfileFolderPath, IFile file, IDirectory directory)
+        internal FirstTimeUseNoticeSentinel(string dotnetUserProfileFolderPath, IFileSystem fileSystem)
         {
-            _file = file;
-            _directory = directory;
             _dotnetUserProfileFolderPath = dotnetUserProfileFolderPath;
+            _fileSystem = fileSystem;
         }
 
         public bool Exists()
         {
-            return _file.Exists(SentinelPath);
+            return _fileSystem.File.Exists(SentinelPath);
         }
 
         public void CreateIfNotExists()
         {
-            if (!Exists())
-            {
-                if (!_directory.Exists(_dotnetUserProfileFolderPath))
-                {
-                    _directory.CreateDirectory(_dotnetUserProfileFolderPath);
-                }
-
-                _file.CreateEmptyFile(SentinelPath);
-            }
+            _fileSystem.CreateIfNotExists(SentinelPath);
         }
 
         public void Dispose()

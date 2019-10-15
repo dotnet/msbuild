@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using Xunit;
 using Xunit.Abstractions;
+using SlnLocalizableStrings = Microsoft.DotNet.Tools.Sln;
 
 namespace Microsoft.DotNet.Cli.Sln.Add.Tests
 {
@@ -24,7 +25,9 @@ Arguments:
   <PROJECT_PATH>   The paths to the projects to add to the solution.
 
 Options:
-  -h, --help   Show command line help.";
+  --in-root               Place project in root of the solution, rather than creating a solution folder.
+  -s, --solution-folder   The destination solution folder path to add the projects to.
+  -h, --help              Show command line help.";
 
         private const string SlnCommandHelpText = @"Usage: dotnet sln [options] <SLN_FILE> [command]
 
@@ -229,7 +232,7 @@ Global
 EndGlobal
 ";
 
-  private const string ExpectedSlnFileAfterAddingProjectWithMatchingConfigs = @"
+        private const string ExpectedSlnFileAfterAddingProjectWithMatchingConfigs = @"
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26006.2
@@ -274,7 +277,7 @@ Global
 EndGlobal
 ";
 
-    private const string ExpectedSlnFileAfterAddingProjectWithAdditionalConfigs = @"
+        private const string ExpectedSlnFileAfterAddingProjectWithAdditionalConfigs = @"
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26006.2
@@ -315,6 +318,111 @@ Global
 		{A302325B-D680-4C0E-8680-7AE283981624}.Foo Bar|x64.Build.0 = FooBar|x64
 		{A302325B-D680-4C0E-8680-7AE283981624}.Foo Bar|x86.ActiveCfg = FooBar|x86
 		{A302325B-D680-4C0E-8680-7AE283981624}.Foo Bar|x86.Build.0 = FooBar|x86
+	EndGlobalSection
+EndGlobal
+";
+
+        private const string ExpectedSlnFileAfterAddingProjectWithInRootOption = @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26006.2
+MinimumVisualStudioVersion = 10.0.40219.1
+Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""App"", ""App.csproj"", ""{7072A694-548F-4CAE-A58F-12D257D5F486}""
+EndProject
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""Lib"", ""src\Lib\Lib.csproj"", ""{84A45D44-B677-492D-A6DA-B3A71135AB8E}""
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|x64.ActiveCfg = Debug|x64
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|x64.Build.0 = Debug|x64
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|x86.ActiveCfg = Debug|x86
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|x86.Build.0 = Debug|x86
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x64.ActiveCfg = Release|x64
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x64.Build.0 = Release|x64
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x86.ActiveCfg = Release|x86
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x86.Build.0 = Release|x86
+		{84A45D44-B677-492D-A6DA-B3A71135AB8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84A45D44-B677-492D-A6DA-B3A71135AB8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84A45D44-B677-492D-A6DA-B3A71135AB8E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{84A45D44-B677-492D-A6DA-B3A71135AB8E}.Debug|x64.Build.0 = Debug|Any CPU
+		{84A45D44-B677-492D-A6DA-B3A71135AB8E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{84A45D44-B677-492D-A6DA-B3A71135AB8E}.Debug|x86.Build.0 = Debug|Any CPU
+		{84A45D44-B677-492D-A6DA-B3A71135AB8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84A45D44-B677-492D-A6DA-B3A71135AB8E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84A45D44-B677-492D-A6DA-B3A71135AB8E}.Release|x64.ActiveCfg = Release|Any CPU
+		{84A45D44-B677-492D-A6DA-B3A71135AB8E}.Release|x64.Build.0 = Release|Any CPU
+		{84A45D44-B677-492D-A6DA-B3A71135AB8E}.Release|x86.ActiveCfg = Release|Any CPU
+		{84A45D44-B677-492D-A6DA-B3A71135AB8E}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
+";
+
+        private const string ExpectedSlnFileAfterAddingProjectWithSolutionFolderOption = @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26006.2
+MinimumVisualStudioVersion = 10.0.40219.1
+Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""App"", ""App.csproj"", ""{7072A694-548F-4CAE-A58F-12D257D5F486}""
+EndProject
+Project(""{2150E333-8FDC-42A3-9474-1A3956D46DE8}"") = ""TestFolder"", ""TestFolder"", ""__SOLUTION_FOLDER_GUID__""
+EndProject
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""Lib"", ""src\Lib\Lib.csproj"", ""__LIB_PROJECT_GUID__""
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|x64.ActiveCfg = Debug|x64
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|x64.Build.0 = Debug|x64
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|x86.ActiveCfg = Debug|x86
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Debug|x86.Build.0 = Debug|x86
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x64.ActiveCfg = Release|x64
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x64.Build.0 = Release|x64
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x86.ActiveCfg = Release|x86
+		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x86.Build.0 = Release|x86
+		__LIB_PROJECT_GUID__.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		__LIB_PROJECT_GUID__.Debug|Any CPU.Build.0 = Debug|Any CPU
+		__LIB_PROJECT_GUID__.Debug|x64.ActiveCfg = Debug|Any CPU
+		__LIB_PROJECT_GUID__.Debug|x64.Build.0 = Debug|Any CPU
+		__LIB_PROJECT_GUID__.Debug|x86.ActiveCfg = Debug|Any CPU
+		__LIB_PROJECT_GUID__.Debug|x86.Build.0 = Debug|Any CPU
+		__LIB_PROJECT_GUID__.Release|Any CPU.ActiveCfg = Release|Any CPU
+		__LIB_PROJECT_GUID__.Release|Any CPU.Build.0 = Release|Any CPU
+		__LIB_PROJECT_GUID__.Release|x64.ActiveCfg = Release|Any CPU
+		__LIB_PROJECT_GUID__.Release|x64.Build.0 = Release|Any CPU
+		__LIB_PROJECT_GUID__.Release|x86.ActiveCfg = Release|Any CPU
+		__LIB_PROJECT_GUID__.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		__LIB_PROJECT_GUID__ = __SOLUTION_FOLDER_GUID__
 	EndGlobalSection
 EndGlobal
 ";
@@ -622,12 +730,11 @@ EndGlobal
             solutionFolders["{DDF3765C-59FB-4AA6-BE83-779ED13AA64A}"]
                 .Should().Be("{72BFCA87-B033-4721-8712-4D12166B4A39}");
 
-            var newlyAddedSrcFolder = solutionFolderProjects.Where(
-                p => p.Id != "{72BFCA87-B033-4721-8712-4D12166B4A39}").Single();
+            var newlyAddedSrcFolder = solutionFolderProjects.Single(p => p.Id != "{72BFCA87-B033-4721-8712-4D12166B4A39}");
             solutionFolders[newlyAddedSrcFolder.Id]
                 .Should().Be("{72BFCA87-B033-4721-8712-4D12166B4A39}");
 
-            var libProject = slnFile.Projects.Where(p => p.Name == "Lib").Single();
+            var libProject = slnFile.Projects.Single(p => p.Name == "Lib");
             solutionFolders[libProject.Id]
                 .Should().Be(newlyAddedSrcFolder.Id);
         }
@@ -699,7 +806,6 @@ EndGlobal
                 .FullName;
 
             var projectToAdd = "Lib/Lib.csproj";
-            var projectPath = Path.Combine("Lib", "Lib.csproj");
             var cmd = new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"sln App.sln add {projectToAdd}");
@@ -729,7 +835,6 @@ EndGlobal
                 .FullName;
 
             var projectToAdd = "Lib/Library.cs";
-            var projectPath = Path.Combine("Lib", "Library.cs");
             var slnFile = SlnFile.Read(Path.Combine(projectDirectory, "App.sln"));
             var expectedNumberOfProjects = slnFile.Projects.Count();
 
@@ -839,8 +944,7 @@ EndGlobal
                 .Should().BeVisuallyEquivalentTo(contentBefore);
         }
 
-        //ISSUE: https://github.com/dotnet/sdk/issues/522
-        //[Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/522")]
         public void WhenPassedAnUnknownProjectTypeItFails()
         {
             var projectDirectory = TestAssets
@@ -858,7 +962,7 @@ EndGlobal
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"sln App.sln add {projectToAdd}");
             cmd.Should().Fail();
-            cmd.StdErr.Should().BeVisuallyEquivalentTo("Unsupported project type. Please check with your sdk provider.");
+            cmd.StdErr.Should().BeVisuallyEquivalentTo("Unsupported project type. Check with your sdk provider.");
 
             File.ReadAllText(slnFullPath)
                 .Should().BeVisuallyEquivalentTo(contentBefore);
@@ -1022,7 +1126,6 @@ EndGlobal
                 .Root
                 .FullName;
 
-            var slnFullPath = Path.Combine(solutionDirectory, "App.sln");
             var projectToAdd = Path.Combine("MultitargetedCS", "MultitargetedCS.csproj");
 
             new DotnetCommand()
@@ -1044,7 +1147,6 @@ EndGlobal
                 .Root
                 .FullName;
 
-            var slnFullPath = Path.Combine(solutionDirectory, "App.sln");
             var projectToAdd = Path.Combine("MultitargetedVB", "MultitargetedVB.vbproj");
 
             new DotnetCommand()
@@ -1078,6 +1180,76 @@ EndGlobal
                 .HaveStdOutContaining(string.Format(CommonLocalizableStrings.ProjectAddedToTheSolution, projectToAdd));
         }
 
+        [Fact]
+        public void WhenNestedProjectIsAddedAndInRootOptionIsPassedNoSolutionFoldersAreCreated()
+        {
+            var projectDirectory = TestAssets
+                .Get("TestAppWithSlnAndCsprojInSubDir")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var projectToAdd = Path.Combine("src", "Lib", "Lib.csproj");
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"sln App.sln add --in-root {projectToAdd}");
+            cmd.Should().Pass();
+
+            var slnPath = Path.Combine(projectDirectory, "App.sln");
+            var expectedSlnContents = GetExpectedSlnContents(slnPath, ExpectedSlnFileAfterAddingProjectWithInRootOption);
+            File.ReadAllText(slnPath)
+                .Should().BeVisuallyEquivalentTo(expectedSlnContents);
+        }
+
+        [Fact]
+        public void WhenSolutionFolderIsPassedProjectsAreAddedThere()
+        {
+            var projectDirectory = TestAssets
+                .Get("TestAppWithSlnAndCsprojInSubDir")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var projectToAdd = Path.Combine("src", "Lib", "Lib.csproj");
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"sln App.sln add --solution-folder TestFolder {projectToAdd}");
+            cmd.Should().Pass();
+
+            var slnPath = Path.Combine(projectDirectory, "App.sln");
+            var expectedSlnContents = GetExpectedSlnContents(slnPath, ExpectedSlnFileAfterAddingProjectWithSolutionFolderOption);
+            File.ReadAllText(slnPath)
+                .Should().BeVisuallyEquivalentTo(expectedSlnContents);
+        }
+
+        [Fact]
+        public void WhenSolutionFolderAndInRootIsPassedItFails()
+        {
+            var solutionDirectory = TestAssets
+                .Get("TestAppWithSlnAndCsprojInSubDir")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var solutionPath = Path.Combine(solutionDirectory, "App.sln");
+            var contentBefore = File.ReadAllText(solutionPath);
+
+            var projectToAdd = Path.Combine("src", "Lib", "Lib.csproj");
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(solutionDirectory)
+                .ExecuteWithCapturedOutput($"sln App.sln add --solution-folder blah --in-root {projectToAdd}");
+            cmd.Should().Fail();
+            cmd.StdErr.Should().Be(SlnLocalizableStrings.LocalizableStrings.SolutionFolderAndInRootMutuallyExclusive);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+
+            File.ReadAllText(solutionPath)
+                .Should()
+                .BeVisuallyEquivalentTo(contentBefore);
+        }
+
         private string GetExpectedSlnContents(
             string slnPath,
             string slnTemplate,
@@ -1103,6 +1275,14 @@ EndGlobal
             if (matchingSrcFolder.Count == 1)
             {
                 slnContents = slnContents.Replace("__SRC_FOLDER_GUID__", matchingSrcFolder[0].Id);
+            }
+
+            var matchingSolutionFolder = slnFile.Projects
+                    .Where((p) => p.FilePath == "TestFolder")
+                    .ToList();
+            if (matchingSolutionFolder.Count == 1)
+            {
+                slnContents = slnContents.Replace("__SOLUTION_FOLDER_GUID__", matchingSolutionFolder[0].Id);
             }
 
             return slnContents;

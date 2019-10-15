@@ -9,10 +9,10 @@ $@"{LocalizableStrings.Usage}: dotnet [runtime-options] [path-to-application] [a
 {LocalizableStrings.ExecutionUsageDescription}
 
 runtime-options:
-  --additionalprobingpath <path>     {LocalizableStrings.AdditionalprobingpathDefinition}
-  --additional-deps <path>           {LocalizableStrings.AdditionalDeps}
-  --fx-version <version>             {LocalizableStrings.FxVersionDefinition}
-  --roll-forward-on-no-candidate-fx  {LocalizableStrings.RollForwardOnNoCandidateFxDefinition}
+  --additionalprobingpath <path>   {LocalizableStrings.AdditionalprobingpathDefinition}
+  --additional-deps <path>         {LocalizableStrings.AdditionalDeps}
+  --fx-version <version>           {LocalizableStrings.FxVersionDefinition}
+  --roll-forward <setting>         {LocalizableStrings.RollForwardDefinition}
 
 path-to-application:
   {LocalizableStrings.PathToApplicationDefinition}
@@ -36,7 +36,6 @@ sdk-options:
   clean             {LocalizableStrings.CleanDefinition}
   help              {LocalizableStrings.HelpDefinition}
   list              {LocalizableStrings.ListDefinition}
-  migrate           {LocalizableStrings.MigrateDefinition}
   msbuild           {LocalizableStrings.MsBuildDefinition}
   new               {LocalizableStrings.NewDefinition}
   nuget             {LocalizableStrings.NugetDefinition}
@@ -53,7 +52,6 @@ sdk-options:
 
 {LocalizableStrings.AdditionalTools}
   dev-certs         {LocalizableStrings.DevCertsDefinition}
-  ef                {LocalizableStrings.EfDefinition}
   fsi               {LocalizableStrings.FsiDefinition}
   sql-cache         {LocalizableStrings.SqlCacheDefinition}
   user-secrets      {LocalizableStrings.UserSecretsDefinition}

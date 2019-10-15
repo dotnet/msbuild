@@ -1,78 +1,51 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="es" original="../LocalizableStrings.resx">
     <body>
-      <trans-unit id="FirstTimeWelcomeMessage">
-        <source>Welcome to .NET Core!
----------------------
-Learn more about .NET Core: https://aka.ms/dotnet-docs
-Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
-
-Telemetry
----------
-The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
-
-Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
-        <target state="translated">Bienvenido a .NET Core
----------------------
-Aprenda sobre .NET Core en https://aka.ms/dotnet-docs. Use "dotnet --help" para ver los comandos disponibles o vaya a https://aka.ms/dotnet-cli-docs.
-
-Telemetría
----------
-Las herramientas de .NET Core recopilan datos de uso con el fin de ayudarnos a mejorar su experiencia. Los datos son anónimos y no incluyen argumentos de la línea de comandos. Microsoft recopila los datos y los comparte con la comunidad. Si desea optar por no participar en la telemetría, establezca una variable de entorno DOTNET_CLI_TELEMETRY_OPTOUT en "1" o "true" con el shell de su preferencia.
-
-Obtenga más información sobre la telemetría de las herramientas de la CLI de .NET Core en https://aka.ms/dotnet-cli-telemetry.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FailedToPrimeCacheError">
-        <source>Failed to prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="translated">No se pudo desbloquear la caché de NuGet. Error de {0} con: {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NugetCachePrimeMessage">
-        <source>Configuring...
---------------
-A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
-        <target state="translated">Configurando...
---------------
-Se está ejecutando un comando para rellenar la caché de paquetes local para mejorar la velocidad de restauración y habilitar el acceso sin conexión. Este comando tarda en completarse hasta un minuto y solo se ejecuta una vez.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UnauthorizedAccessMessage">
-        <source>Permission denied to modify the '{0}' folder.
-
-Here are some options to fix this error:
-----------------------------------------
-1. Re-run this command with elevated access.
-2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
-3. Copy the .NET Core SDK to a non-protected location and use it from there.
-    </source>
-        <target state="translated">Permiso denegado para modificar la carpeta "{0}".
-
-Estas son algunas opciones para corregir este error:
-----------------------------------------
-1. Vuelva a ejecutar este comando con acceso con privilegios elevados.
-2. Deshabilite la primera experiencia de ejecución; para ello, establezca la variable de entorno DOTNET_SKIP_FIRST_TIME_EXPERIENCE en true.
-3. Copie el SDK de .NET Core en una ubicación no protegida y úselo desde ahí.
-    </target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AspNetCertificateInstalled">
-        <source>ASP.NET Core
-------------
-Successfully installed the ASP.NET Core HTTPS Development Certificate.
-To trust the certificate run 'dotnet dev-certs https --trust' (Windows and macOS only). For establishing trust on other platforms refer to the platform specific documentation.
-For more information on configuring HTTPS see https://go.microsoft.com/fwlink/?linkid=848054.</source>
-        <target state="translated">ASP.NET Core
-------------
-El certificado de desarrollo HTTPS de ASP.NET Core se ha instalado correctamente.
-Para confiar en el certificado, ejecute "dotnet dev-certs https --trust (solo Windows y macOS). Para establecer la confianza en otras plataformas, consulte la documentación específica de la plataforma.
-Para obtener más información sobre la configuración HTTPS, vea https://go.microsoft.com/fwlink/?linkid=848054.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="FailedToDetermineUserHomeDirectory">
         <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
         <target state="translated">No se puede determinar el directorio raíz del usuario. Establezca la variable de entorno “{0}” para especificar el directorio que debe usarse.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FirstTimeMessageMoreInformation">
+        <source>----------------
+Explore documentation: https://aka.ms/dotnet-docs
+Report issues and find source on GitHub: https://github.com/dotnet/core
+Find out what's new: https://aka.ms/dotnet-whats-new
+Learn about the installed HTTPS developer cert: https://aka.ms/aspnet-core-https
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
+Write your first app: https://aka.ms/first-net-core-app
+--------------------------------------------------------------------------------------</source>
+        <target state="translated">----------------
+Explore la documentación: https://aka.ms/dotnet-docs
+Informe de los problemas y busque código fuente en GitHub: https://github.com/dotnet/core
+Conozca las novedades: https://aka.ms/dotnet-whats-new
+Más información sobre el certificado de desarrollador HTTPS instalado: https://aka.ms/aspnet-core-https
+Use "dotnet --help" para ver los comandos disponibles o visite: https://aka.ms/dotnet-cli-docs
+Escriba su primera aplicación: https://aka.ms/first-net-core-app
+--------------------------------------------------------------------------------------</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FirstTimeMessageWelcome">
+        <source>Welcome to .NET Core 3.0!
+---------------------
+SDK Version: {0}</source>
+        <target state="translated">Bienvenido a .NET Core 3.0!
+---------------------
+Versión del SDK: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TelemetryMessage">
+        <source>Telemetry
+---------
+The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
+        <target state="translated">Telemetría
+---------
+Las herramientas de .NET Core recopilan datos de uso para ayudarnos a ejorar su experiencia. Estos datos son anónimos. Microsoft los recopila y comparte con la comunidad. Puede optar por no participar en la telemetría si establece la variable de entorno DOTNET_CLI_TELEMETRY_OPTOUT en "1" o "true" mediante su shell favorito.
+
+Lea más sobre la telemetría de las herramientas de la CLI de .NET Core: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
     </body>

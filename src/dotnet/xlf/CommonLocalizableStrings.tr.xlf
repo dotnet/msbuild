@@ -1,15 +1,78 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="tr" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="CommandInteractiveOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">Komutun durup kullanıcı girişini veya eylemini (örneğin, kimlik doğrulamasının tamamlanmasını) beklemesine izin verir .</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">`{0}` içinde proje bulunamadı.</target>
         <note />
       </trans-unit>
+      <trans-unit id="EnvironmentPathOSXBashManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">'{0}' araçlar dizini şu anda PATH ortam değişkeni üzerinde değil.
+Bash kullanıyorsanız, şu komutu çalıştırarak profilinize ekleyebilirsiniz:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+Şu komutu çalıştırarak geçerli komuta ekleyebilirsiniz:
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathOSXZshManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using zsh, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+And run `zsh -l` to make it available for current session.
+
+You can only add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">'{0}' araçlar dizini şu anda PATH ortam değişkeninde değil.
+zsh kullanıyorsanız, aşağıdaki komutu çalıştırarak bunu profilinize ekleyebilirsiniz:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
+# .NET Core SDK araçları ekleyin
+export PATH="$PATH:{0}"
+EOF
+
+Geçerli oturum için kullanılabilir hale getirmek üzere `zsh -l` komutunu çalıştırın.
+
+Aşağıdaki komutu çalıştırarak araçlar dizinini yalnızca geçerli oturuma ekleyebilirsiniz:
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
-        <source>Found more than one project in `{0}`. Please specify which one to use.</source>
-        <target state="translated">`{0}` içinde birden fazla proje bulundu. Lütfen hangisinin kullanılacağını belirtin.</target>
+        <source>Found more than one project in `{0}`. Specify which one to use.</source>
+        <target state="translated">`{0}` içinde birden fazla proje bulundu. Hangisinin kullanılacağını belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
@@ -293,8 +356,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOne">
-        <source>Please specify at least one {0}.</source>
-        <target state="translated">Lütfen en az bir {0} belirtin.</target>
+        <source>Specify at least one {0}.</source>
+        <target state="translated">En az bir {0} belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotConnectWithTheServer">
@@ -388,8 +451,8 @@
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyVersion">
-        <source>Please specify a version of the package.</source>
-        <target state="translated">Lütfen paket sürümünü belirtin.</target>
+        <source>Specify a version of the package.</source>
+        <target state="translated">Paket sürümünü belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectDoesNotExist">
@@ -473,8 +536,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">{1} projesinde {0} başvurusu yok. ;; {0}, istenen öğenin türü (proje, paket, p2p) ve {1}, üzerinde işlem yapılan nesnedir (bir proje dosyası veya çözüm dosyası). </target>
+        <source>There are no {0} references in project {1}.</source>
+        <target state="translated">{1} projesinde hiçbir {0} başvurusu yok.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
@@ -483,13 +546,13 @@
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyNewVersion">
-        <source>Please specify new version of the package.</source>
-        <target state="translated">Lütfen paketin yeni sürümünü belirtin.</target>
+        <source>Specify new version of the package.</source>
+        <target state="translated">Paketin yeni sürümünü belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyWhichPackageToUpdate">
-        <source>Please specify which package to update.</source>
-        <target state="translated">Lütfen güncelleştirilecek paketi belirtin.</target>
+        <source>Specify which package to update.</source>
+        <target state="translated">Güncelleştirilecek paketi belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="NothingToUpdate">
@@ -518,8 +581,8 @@
         <note />
       </trans-unit>
       <trans-unit id="TemplateCreatedSuccessfully">
-        <source>The template {0} created successfully. Please run "dotnet restore" to get started!</source>
-        <target state="translated">{0} şablonu başarıyla oluşturuldu. Başlamak için lütfen "dotnet restore" komutunu çalıştırın!</target>
+        <source>The template {0} created successfully. run "dotnet restore" to get started!</source>
+        <target state="translated">{0} şablonu başarıyla oluşturuldu. Başlamak için "dotnet restore" komutunu çalıştırın!</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInstalledSuccesfully">
@@ -538,13 +601,13 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifiedNameExists">
-        <source>Specified name {0} already exists. Please specify a different name.</source>
-        <target state="translated">Belirtilen {0} adı zaten var. Lütfen farklı bir ad belirtin.</target>
+        <source>Specified name {0} already exists. Specify a different name.</source>
+        <target state="translated">Belirtilen {0} adı zaten var. Farklı bir ad belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifiedAliasExists">
-        <source>Specified alias {0} already exists. Please specify a different alias.</source>
-        <target state="translated">Belirtilen {0} diğer adı zaten var. Lütfen farklı bir diğer ad belirtin.</target>
+        <source>Specified alias {0} already exists. Specify a different alias.</source>
+        <target state="translated">Belirtilen {0} diğer adı zaten var. Farklı bir diğer ad belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="MandatoryParameterMissing">
@@ -563,8 +626,8 @@
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOneSolutionInDirectory">
-        <source>Found more than one solution file in {0}. Please specify which one to use.</source>
-        <target state="translated">{0} içinde birden fazla çözüm dosyası bulundu. Lütfen hangisinin kullanılacağını belirtin.</target>
+        <source>Found more than one solution file in {0}. Specify which one to use.</source>
+        <target state="translated">{0} içinde birden fazla çözüm dosyası bulundu. Hangisinin kullanılacağını belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionAlreadyContainsProject">
@@ -583,8 +646,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ProjectNotCompatibleWithFrameworks">
-        <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:</source>
-        <target state="translated">`{0}` projesi, iki projede hedeflenen çerçevelerin birbiriyle uyumsuz olması nedeniyle eklenemiyor. Lütfen eklemeye çalıştığınız projeyi inceleyin ve aşağıdaki hedeflerle uyumlu olduğunu doğrulayın:</target>
+        <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Review the project you are trying to add and verify that is compatible with the following targets:</source>
+        <target state="translated">`{0}` projesi, iki projede hedeflenen Framework'lerin birbiriyle uyumsuz olması nedeniyle eklenemiyor. Eklemeye çalıştığınız projeyi inceleyin ve aşağıdaki hedeflerle uyumlu olduğunu doğrulayın:</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectDoesNotTargetFramework">
@@ -600,8 +663,8 @@
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
-        <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Please contact your SDK provider for support.</source>
-        <target state="translated">'{0}' projesi bilinmeyen bir proje türüne sahip ve çözüm dosyasına eklenemiyor. Lütfen destek için SDK sağlayıcınıza başvurun.</target>
+        <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Contact your SDK provider for support.</source>
+        <target state="translated">'{0}' projesi bilinmeyen bir proje türüne sahip ve çözüm dosyasına eklenemiyor. Destek için SDK sağlayıcınıza başvurun.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">
@@ -722,43 +785,18 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">'{0}' araç dizini şu an PATH ortam değişkeninde değil.
-bash kullanıyorsanız aşağıdaki komutu çalıştırarak profilinize ekleyebilirsiniz:
+        <target state="translated">'{0}' araçlar dizini şu anda PATH ortam değişkeni üzerinde değil.
+Bash kullanıyorsanız, şu komutu çalıştırarak profilinize ekleyebilirsiniz:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-Aşağıdaki komutu çalıştırarak geçerli oturuma ekleyebilirsiniz:
-
-export PATH="$PATH:{0}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="EnvironmentPathOSXManualInstructions">
-        <source>Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using bash, you can add it to your profile by running the following command:
-
-cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
-export PATH="$PATH:{0}"
-EOF
-
-You can add it to the current session by running the following command:
+Şu komutu çalıştırarak geçerli komuta ekleyebilirsiniz:
 
 export PATH="$PATH:{0}"
-</source>
-        <target state="translated">'{0}' araç dizini şu an PATH ortam değişkeninde değil.
-bash kullanıyorsanız aşağıdaki komutu çalıştırarak profilinize ekleyebilirsiniz:
-
-cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
-export PATH="$PATH:{0}"
-EOF
-
-Aşağıdaki komutu çalıştırarak geçerli dizine ekleyebilirsiniz:
-
-export PATH="$PATH:{0}"</target>
+</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstructions">
@@ -827,23 +865,23 @@ setx PATH "%PATH%;{0}"
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsHigher">
-        <source>Format version is higher than supported. This tool may not be supported in this SDK version. Please update your SDK.</source>
-        <target state="translated">Biçim sürümü desteklenenden daha yüksek. Bu araç bu SDK sürümünde desteklenmeyebilir. Lütfen SDK’nızı güncelleştirin.</target>
+        <source>Format version is higher than supported. This tool may not be supported in this SDK version. Update your SDK.</source>
+        <target state="translated">Biçim sürümü desteklenenden daha yüksek. Bu araç bu SDK sürümünde desteklenmeyebilir. SDK’nızı güncelleştirin.</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMalformed">
-        <source>Format version is malformed. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
-        <target state="translated">Biçim sürümü hatalı biçimlendirilmiş. Bu araç bu SDK sürümünde desteklenmeyebilir. Lütfen aracın yazarı ile iletişim kurun.</target>
+        <source>Format version is malformed. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
+        <target state="translated">Biçim sürümü hatalı biçimlendirilmiş. Bu araç bu SDK sürümünde desteklenmeyebilir. Aracın yazarına başvurun.</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMissing">
-        <source>Format version is missing. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
-        <target state="translated">Biçim sürümü eksik. Bu araç bu SDK sürümünde desteklenmeyebilir. Lütfen aracın yazarı ile iletişim kurun.</target>
+        <source>Format version is missing. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
+        <target state="translated">Biçim sürümü eksik. Bu araç bu SDK sürümünde desteklenmeyebilir. Aracın yazarına başvurun.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToSetToolsPathEnvironmentVariable">
-        <source>Failed to add '{0}' to the PATH environment variable. Please add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
-        <target state="translated">{0}' PATH ortam değişkenine eklenemedi. 'dotnet tool install' ile yüklenen araçları kullanmak için lütfen bu dizini PATH değişkeninize ekleyin.</target>
+        <source>Failed to add '{0}' to the PATH environment variable. Add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
+        <target state="translated">'{0}' dizini PATH ortam değişkenine eklenemedi. 'dotnet tool install' ile yüklenen araçları kullanmak için bu dizini PATH değişkeninize ekleyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOnePackagedShimAvailable">
@@ -899,11 +937,6 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="SolutionOrProjectArgumentName">
         <source>PROJECT | SOLUTION</source>
         <target state="translated">PROJE | ÇÖZÜM</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandInteractiveOptionDescription">
-        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="translated">Komutun durup kullanıcı girişini veya eylemini (örneğin, kimlik doğrulamasının tamamlanmasını) beklemesine izin verir .</target>
         <note />
       </trans-unit>
     </body>

@@ -3,7 +3,4 @@
     <TargetFramework>netstandard1.5</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="NETStandard.Library" Version="1.6.0" />
-  </ItemGroup>
 </Project>

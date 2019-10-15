@@ -148,7 +148,7 @@ get_linux_platform_name() {
             return 0
         elif [ -e /etc/redhat-release ]; then
             local redhatRelease=$(</etc/redhat-release)
-            if [[ $redhatRelease == "CentOS release 6."* || $redhatRelease == "Red Hat Enterprise Linux Server release 6."* ]]; then
+            if [[ $redhatRelease == "CentOS release 6."* || $redhatRelease == "Red Hat Enterprise Linux "*" release 6."* ]]; then
                 echo "rhel.6"
                 return 0
             fi
@@ -166,6 +166,9 @@ get_current_os_name() {
     if [ "$uname" = "Darwin" ]; then
         echo "osx"
         return 0
+    elif [ "$uname" = "FreeBSD" ]; then
+        echo "freebsd"
+        return 0        
     elif [ "$uname" = "Linux" ]; then
         local linux_platform_name
         linux_platform_name="$(get_linux_platform_name)" || { echo "linux" && return 0 ; }
@@ -252,10 +255,10 @@ check_pre_reqs() {
         local librarypath=${LD_LIBRARY_PATH:-}
         LDCONFIG_COMMAND="$LDCONFIG_COMMAND -NXv ${librarypath//:/ }"
 
-        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep libunwind)" ] && say_warning "Unable to locate libunwind. Probable prerequisite missing; please install libunwind."
-        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep libssl)" ] && say_warning "Unable to locate libssl. Probable prerequisite missing; please install libssl."
-        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep libicu)" ] && say_warning "Unable to locate libicu. Probable prerequisite missing; please install libicu."
-        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep -F libcurl.so)" ] && say_warning "Unable to locate libcurl. Probable prerequisite missing; please install libcurl."
+        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep libunwind)" ] && say_warning "Unable to locate libunwind. Probable prerequisite missing; install libunwind."
+        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep libssl)" ] && say_warning "Unable to locate libssl. Probable prerequisite missing; install libssl."
+        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep libicu)" ] && say_warning "Unable to locate libicu. Probable prerequisite missing; install libicu."
+        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep -F libcurl.so)" ] && say_warning "Unable to locate libcurl. Probable prerequisite missing; install libcurl."
     fi
 
     return 0
@@ -357,14 +360,16 @@ get_normalized_architecture_from_architecture() {
             ;;
     esac
 
-    say_err "Architecture \`$architecture\` not supported. If you think this is a bug, please report it at https://github.com/dotnet/cli/issues"
+    say_err "Architecture \`$architecture\` not supported. If you think this is a bug, report it at https://github.com/dotnet/cli/issues"
     return 1
 }
 
-# version_info is a conceptual two line string representing commit hash and 4-part version
-# format:
+# The version text returned from the feeds is a 1-line or 2-line string:
+# For the SDK and the dotnet runtime (2 lines):
 # Line 1: # commit_hash
 # Line 2: # 4-part version
+# For the aspnetcore runtime (1 line):
+# Line 1: # 4-part version
 
 # args:
 # version_text - stdin
@@ -372,15 +377,6 @@ get_version_from_version_info() {
     eval $invocation
 
     cat | tail -n 1 | sed 's/\r$//'
-    return 0
-}
-
-# args:
-# version_text - stdin
-get_commit_hash_from_version_info() {
-    eval $invocation
-
-    cat | head -n 1 | sed 's/\r$//'
     return 0
 }
 
@@ -616,6 +612,9 @@ copy_files_or_dirs_from_list() {
         local target="$out_path/$path"
         if [ "$override" = true ] || (! ([ -d "$target" ] || [ -e "$target" ])); then
             mkdir -p "$out_path/$(dirname "$path")"
+            if [ -d "$target" ]; then
+                rm -rf "$target"
+            fi
             cp -R $override_switch "$root_path/$path" "$target"
         fi
     done
@@ -728,23 +727,23 @@ calculate_vars() {
     specific_version="$(get_specific_version_from_version "$azure_feed" "$channel" "$normalized_architecture" "$version")"
     say_verbose "specific_version=$specific_version"
     if [ -z "$specific_version" ]; then
-        say_err "Could not get version information."
+        say_err "Could not resolve version information."
         return 1
     fi
 
     download_link="$(construct_download_link "$azure_feed" "$channel" "$normalized_architecture" "$specific_version")"
-    say_verbose "download_link=$download_link"
+    say_verbose "Constructed primary named payload URL: $download_link"
 
     legacy_download_link="$(construct_legacy_download_link "$azure_feed" "$channel" "$normalized_architecture" "$specific_version")" || valid_legacy_download_link=false
 
     if [ "$valid_legacy_download_link" = true ]; then
-        say_verbose "legacy_download_link=$legacy_download_link"
+        say_verbose "Constructed legacy named payload URL: $legacy_download_link"
     else
         say_verbose "Cound not construct a legacy_download_link; omitting..."
     fi
 
     install_root="$(resolve_installation_path "$install_dir")"
-    say_verbose "install_root=$install_root"
+    say_verbose "InstallRoot: $install_root"
 }
 
 install_dotnet() {
@@ -794,11 +793,16 @@ install_dotnet() {
             say_verbose "Legacy zip path: $zip_path"
             say "Downloading legacy link: $download_link"
             download "$download_link" "$zip_path" 2>&1 || download_failed=true
+
+            if [ "$download_failed" = true ]; then
+                say "Cannot download: $download_link"
+            fi
         fi
     fi
 
     if [ "$download_failed" = true ]; then
-        say_err "Could not download $asset_name version $specific_version"
+        say_err "Could not find/download: \`$asset_name\` with version = $specific_version"
+        say_err "Refer to: https://aka.ms/dotnet-os-lifecycle for information on .NET Core support"
         return 1
     fi
 
@@ -807,12 +811,14 @@ install_dotnet() {
 
     #  Check if the SDK version is now installed; if not, fail the installation.
     if ! is_dotnet_package_installed "$install_root" "$asset_relative_path" "$specific_version"; then
-        say_err "$asset_name version $specific_version failed to install with an unknown error."
+        say_err "\`$asset_name\` with version = $specific_version failed to install with an unknown error."
         return 1
     fi
 
     return 0
 }
+
+args=("$@")
 
 local_version_file_relative_path="/.version"
 bin_folder_relative_path=""
@@ -832,6 +838,7 @@ verbose=false
 runtime=""
 runtime_id=""
 override_non_versioned_files=true
+non_dynamic_parameters=""
 
 while [ $# -ne 0 ]
 do
@@ -872,31 +879,39 @@ do
             ;;
         --no-path|-[Nn]o[Pp]ath)
             no_path=true
+            non_dynamic_parameters+=" $name"
             ;;
         --verbose|-[Vv]erbose)
             verbose=true
+            non_dynamic_parameters+=" $name"
             ;;
         --no-cdn|-[Nn]o[Cc]dn)
             no_cdn=true
+            non_dynamic_parameters+=" $name"
             ;;
         --azure-feed|-[Aa]zure[Ff]eed)
             shift
             azure_feed="$1"
+            non_dynamic_parameters+=" $name "\""$1"\"""
             ;;
         --uncached-feed|-[Uu]ncached[Ff]eed)
             shift
             uncached_feed="$1"
+            non_dynamic_parameters+=" $name "\""$1"\"""
             ;;
         --feed-credential|-[Ff]eed[Cc]redential)
             shift
             feed_credential="$1"
+            non_dynamic_parameters+=" $name "\""$1"\"""
             ;;
         --runtime-id|-[Rr]untime[Ii]d)
             shift
             runtime_id="$1"
+            non_dynamic_parameters+=" $name "\""$1"\"""
             ;;
         --skip-non-versioned-files|-[Ss]kip[Nn]on[Vv]ersioned[Ff]iles)
             override_non_versioned_files=false
+            non_dynamic_parameters+=" $name"
             ;;
         -?|--?|-h|--help|-[Hh]elp)
             script_name="$(basename "$0")"
@@ -916,6 +931,7 @@ do
             echo "              examples: 2.0; 1.0"
             echo "          - Branch name"
             echo "              examples: release/2.0.0; Master"
+            echo "          Note: The version parameter overrides the channel parameter."
             echo "  -v,--version <VERSION>         Use specific VERSION, Defaults to \`$version\`."
             echo "      -Version"
             echo "          Possible values:"
@@ -973,13 +989,22 @@ fi
 
 check_min_reqs
 calculate_vars
+script_name=$(basename "$0")
 
 if [ "$dry_run" = true ]; then
-    say "Payload URL: $download_link"
+    say "Payload URLs:"
+    say "Primary named payload URL: $download_link"
     if [ "$valid_legacy_download_link" = true ]; then
-        say "Legacy payload URL: $legacy_download_link"
+        say "Legacy named payload URL: $legacy_download_link"
     fi
-    say "Repeatable invocation: ./$(basename "$0") --version $specific_version --channel $channel --install-dir $install_dir"
+    repeatable_command="./$script_name --version "\""$specific_version"\"" --install-dir "\""$install_root"\"" --architecture "\""$normalized_architecture"\"""
+    if [[ "$runtime" == "dotnet" ]]; then
+        repeatable_command+=" --runtime "\""dotnet"\"""
+    elif [[ "$runtime" == "aspnetcore" ]]; then
+        repeatable_command+=" --runtime "\""aspnetcore"\"""
+    fi
+    repeatable_command+="$non_dynamic_parameters"
+    say "Repeatable invocation: $repeatable_command"
     exit 0
 fi
 

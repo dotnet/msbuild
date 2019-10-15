@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="RollForwardDefinition">
+        <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
+        <target state="translated">前滚至框架版本(LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable)。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Usage">
         <source>Usage</source>
         <target state="translated">使用情况</target>
@@ -92,11 +97,6 @@
         <target state="translated">创建 NuGet 包。</target>
         <note />
       </trans-unit>
-      <trans-unit id="MigrateDefinition">
-        <source>Migrate a project.json project to an MSBuild project.</source>
-        <target state="translated">将 project.json 项目迁移到 MSBuild 项目。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
         <target state="translated">项目修改命令</target>
@@ -153,7 +153,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
-        <source>Specified command '{0}' is not a valid SDK command. Please specify a valid SDK command. For more information, run dotnet help.</source>
+        <source>Specified command '{0}' is not a valid SDK command. Specify a valid SDK command. For more information, run dotnet help.</source>
         <target state="translated">指定的命令“{0}”不是有效的 SDK 命令。请指定有效的 SDK 命令。有关详细信息，请运行 dotnet help。</target>
         <note />
       </trans-unit>
@@ -219,22 +219,17 @@
       </trans-unit>
       <trans-unit id="DepsfilDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
-        <target state="translated">&lt;application&gt;.deps.json 文件的路径。</target>
+        <target state="translated">指向 &lt;application&gt;.deps.json 文件的路径。</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeconfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
-        <target state="translated">&lt;application&gt;.runtimeconfig.json 文件的路径。</target>
+        <target state="translated">指向 &lt;application&gt;.runtimeconfig.json 文件的路径。</target>
         <note />
       </trans-unit>
       <trans-unit id="FxVersionDefinition">
         <source>Version of the installed Shared Framework to use to run the application.</source>
         <target state="translated">要用于运行应用程序的安装版共享框架的版本。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RollForwardOnNoCandidateFxDefinition">
-        <source>Roll forward on no candidate shared framework is enabled.</source>
-        <target state="translated">已启用“不前滚到候选共享框架”。</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">
@@ -260,11 +255,6 @@
       <trans-unit id="DevCertsDefinition">
         <source>Create and manage development certificates.</source>
         <target state="translated">创建和管理开发证书。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="EfDefinition">
-        <source>Entity Framework Core command-line tools.</source>
-        <target state="translated">Entity Framework Core 命令行工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="SqlCacheDefinition">
@@ -299,7 +289,7 @@
       </trans-unit>
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
-        <target state="translated">启动 F# 交互式/执行 F# 脚本。</target>
+        <target state="translated">启动 F# 交互/执行 F# 脚本。</target>
         <note />
       </trans-unit>
     </body>

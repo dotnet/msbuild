@@ -124,7 +124,7 @@
     <value>The NuGet Package Id of the tool to install.</value>
   </data>
   <data name="SpecifyExactlyOnePackageId" xml:space="preserve">
-    <value>Please specify one tool Package Id to install.</value>
+    <value>Specify one tool Package Id to install.</value>
   </data>
   <data name="VersionOptionName" xml:space="preserve">
     <value>VERSION</value>
@@ -139,7 +139,7 @@
     <value>Add an additional NuGet package source to use during installation.</value>
   </data>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Install a tool for use on the command line.</value>
+    <value>Install global or local tool. Local tools are added to manifest and restored.</value>
   </data>
   <data name="ConfigFileOptionName" xml:space="preserve">
     <value>FILE</value>
@@ -160,8 +160,15 @@
     <value>You can invoke the tool using the following command: {0}
 Tool '{1}' (version '{2}') was successfully installed.</value>
   </data>
+  <data name="LocalToolInstallationSucceeded" xml:space="preserve">
+    <value>You can invoke the tool from this directory using the following commands: 'dotnet tool run {0}' or 'dotnet {0}'.
+Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</value>
+  </data>
   <data name="GlobalOptionDescription" xml:space="preserve">
-    <value>Install the tool to the current user's tools directory.</value>
+    <value>Install the tool for the current user.</value>
+  </data>
+  <data name="LocalOptionDescription" xml:space="preserve">
+    <value>Install the tool and add to the local tool manifest (default).</value>
   </data>
   <data name="InstallFullCommandNameLocalized" xml:space="preserve">
     <value>.NET Install Command</value>
@@ -178,10 +185,12 @@ Tool '{1}' (version '{2}') was successfully installed.</value>
 * You are attempting to install a preview release and did not use the --version option to specify the version.
 * A package by this name was found, but it was not a .NET Core tool.
 * The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
-* You mistyped the name of the tool.</value>
+* You mistyped the name of the tool.
+
+For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</value>
   </data>
   <data name="ToolInstallationFailedContactAuthor" xml:space="preserve">
-    <value>Tool '{0}' failed to install. Please contact the tool author for assistance.</value>
+    <value>Tool '{0}' failed to install. Contact the tool author for assistance.</value>
   </data>
   <data name="ToolInstallationRestoreFailed" xml:space="preserve">
     <value>The tool package could not be restored.</value>
@@ -195,16 +204,26 @@ Tool '{1}' (version '{2}') was successfully installed.</value>
   <data name="InvalidNuGetVersionRange" xml:space="preserve">
     <value>Specified version '{0}' is not a valid NuGet version range.</value>
   </data>
-  <data name="InstallToolCommandNeedGlobalOrToolPath" xml:space="preserve">
-    <value>Please specify either the global option (--global) or the tool path option (--tool-path).</value>
-  </data>
-  <data name="InstallToolCommandInvalidGlobalAndToolPath" xml:space="preserve">
-    <value>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</value>
+  <data name="InstallToolCommandInvalidGlobalAndLocalAndToolPath" xml:space="preserve">
+    <value>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</value>
   </data>
   <data name="ToolPathOptionName" xml:space="preserve">
     <value>PATH</value>
   </data>
   <data name="ToolPathOptionDescription" xml:space="preserve">
     <value>The directory where the tool will be installed. The directory will be created if it does not exist.</value>
+  </data>
+  <data name="ManifestPathOptionDescription" xml:space="preserve">
+    <value>Path to the manifest file.</value>
+  </data>
+  <data name="ManifestPathOptionName" xml:space="preserve">
+    <value>PATH</value>
+  </data>
+  <data name="LocalOptionDoesNotSupportFrameworkOption" xml:space="preserve">
+    <value>The local option(--local) does not support the framework option (--framework).</value>
+  </data>
+  <data name="NoManifestGuide" xml:space="preserve">
+    <value>If you intended to install a global tool, add `--global` to the command.
+If you would like to create a manifest, use `dotnet new tool-manifest`, usually in the repo root directory.</value>
   </data>
 </root>

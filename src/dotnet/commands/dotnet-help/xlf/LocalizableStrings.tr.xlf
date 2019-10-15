@@ -1,7 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="RollForwardDefinition">
+        <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
+        <target state="translated">Şu framework sürümüne ileri sarın: (LatestPatch, İkincil, LatestMinor, Ana, LatestMajor, Devre dışı).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Usage">
         <source>Usage</source>
         <target state="translated">Kullanım</target>
@@ -92,11 +97,6 @@
         <target state="translated">Bir NuGet paketi oluşturur.</target>
         <note />
       </trans-unit>
-      <trans-unit id="MigrateDefinition">
-        <source>Migrate a project.json project to an MSBuild project.</source>
-        <target state="translated">Bir project.json projesini MSBuild projesine geçirir.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
         <target state="translated">Projede değişiklik komutları</target>
@@ -153,8 +153,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
-        <source>Specified command '{0}' is not a valid SDK command. Please specify a valid SDK command. For more information, run dotnet help.</source>
-        <target state="translated">Belirtilen '{0}' komutu geçerli bir SDK komutu değil. Lütfen geçerli bir SDK komutu belirtin. Daha fazla bilgi için dotnet yardımını çalıştırın.</target>
+        <source>Specified command '{0}' is not a valid SDK command. Specify a valid SDK command. For more information, run dotnet help.</source>
+        <target state="translated">Belirtilen '{0}' komutu geçerli bir SDK komutu değil. Geçerli bir SDK komutu belirtin. Daha fazla bilgi için dotnet help komutunu çalıştırın.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppFullName">
@@ -219,22 +219,17 @@
       </trans-unit>
       <trans-unit id="DepsfilDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
-        <target state="translated">&lt;Uygulama&gt;.deps.json dosyasının yolu.</target>
+        <target state="translated">&lt;application&gt;.deps.json dosyasının yolu.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeconfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
-        <target state="translated">&lt;Uygulama&gt;.runtimeconfig.json dosyasının yolu.</target>
+        <target state="translated">&lt;application&gt;.runtimeconfig.json dosyasının yolu.</target>
         <note />
       </trans-unit>
       <trans-unit id="FxVersionDefinition">
         <source>Version of the installed Shared Framework to use to run the application.</source>
         <target state="translated">Uygulamayı çalıştırmak için kullanılacak olan yüklü Paylaşılan Çerçevenin sürümü</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RollForwardOnNoCandidateFxDefinition">
-        <source>Roll forward on no candidate shared framework is enabled.</source>
-        <target state="translated">Aday paylaşılan çerçevelerin hiçbirinde ileri sarma etkin değil.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">
@@ -260,11 +255,6 @@
       <trans-unit id="DevCertsDefinition">
         <source>Create and manage development certificates.</source>
         <target state="translated">Geliştirme sertifikaları oluşturun ve yönetin.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="EfDefinition">
-        <source>Entity Framework Core command-line tools.</source>
-        <target state="translated">Entity Framework Core komut satırı araçları.</target>
         <note />
       </trans-unit>
       <trans-unit id="SqlCacheDefinition">
@@ -299,7 +289,7 @@
       </trans-unit>
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
-        <target state="translated">F# Interactive'i başlatın / F# betiklerini yürütün.</target>
+        <target state="translated">F# Etkileşimli'yi başlatın / F# betiklerini yürütün.</target>
         <note />
       </trans-unit>
     </body>

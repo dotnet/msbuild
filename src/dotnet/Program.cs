@@ -19,6 +19,7 @@ using NuGet.Frameworks;
 using Command = Microsoft.DotNet.Cli.Utils.Command;
 using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
 using LocalizableStrings = Microsoft.DotNet.Cli.Utils.LocalizableStrings;
+using Microsoft.DotNet.CommandFactory;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -67,6 +68,8 @@ namespace Microsoft.DotNet.Cli
             }
             catch (Exception e) when (!e.ShouldBeDisplayedAsError())
             {
+                // If telemetry object has not been initialized yet. It cannot be collected
+                TelemetryEventEntry.SendFiltered(e);
                 Reporter.Error.WriteLine(e.ToString().Red().Bold());
 
                 return 1;
@@ -90,7 +93,6 @@ namespace Microsoft.DotNet.Cli
             var lastArg = 0;
             TopLevelCommandParserResult topLevelCommandParserResult = TopLevelCommandParserResult.Empty;
 
-            using (INuGetCacheSentinel nugetCacheSentinel = new NuGetCacheSentinel())
             using (IFirstTimeUseNoticeSentinel disposableFirstTimeUseNoticeSentinel =
                 new FirstTimeUseNoticeSentinel())
             {
@@ -143,11 +145,11 @@ namespace Microsoft.DotNet.Cli
                         var environmentProvider = new EnvironmentProvider();
 
                         bool generateAspNetCertificate =
-                            environmentProvider.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", true);
-                        bool printTelemetryMessage =
-                            environmentProvider.GetEnvironmentVariableAsBool("DOTNET_PRINT_TELEMETRY_MESSAGE", true);
-                        bool skipFirstRunExperience =
-                            environmentProvider.GetEnvironmentVariableAsBool("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", false);
+                            environmentProvider.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", defaultValue: true);
+                        bool telemetryOptout =
+                          environmentProvider.GetEnvironmentVariableAsBool("DOTNET_CLI_TELEMETRY_OPTOUT", defaultValue: false);
+                        bool addGlobalToolsToPath =
+                            environmentProvider.GetEnvironmentVariableAsBool("DOTNET_ADD_GLOBAL_TOOLS_TO_PATH", defaultValue: true);
 
                         ReportDotnetHomeUsage(environmentProvider);
 
@@ -159,19 +161,14 @@ namespace Microsoft.DotNet.Cli
                             firstTimeUseNoticeSentinel = new NoOpFirstTimeUseNoticeSentinel();
                             toolPathSentinel = new NoOpFileSentinel(exists: false);
                             hasSuperUserAccess = true;
-
-                            // When running through a native installer, we want the cache expansion to happen, so
-                            // we need to override this.
-                            skipFirstRunExperience = false;
                         }
 
                         var dotnetFirstRunConfiguration = new DotnetFirstRunConfiguration(
-                            generateAspNetCertificate,
-                            printTelemetryMessage,
-                            skipFirstRunExperience);
+                            generateAspNetCertificate: generateAspNetCertificate,
+                            telemetryOptout: telemetryOptout,
+                            addGlobalToolsToPath: addGlobalToolsToPath);
 
                         ConfigureDotNetForFirstTimeUse(
-                            nugetCacheSentinel,
                             firstTimeUseNoticeSentinel,
                             aspNetCertificateSentinel,
                             toolPathSentinel,
@@ -221,13 +218,15 @@ namespace Microsoft.DotNet.Cli
             }
             else
             {
-                CommandResult result = Command.Create(
+                CommandResult result = CommandFactoryUsingResolver.Create(
                         "dotnet-" + topLevelCommandParserResult.Command,
                         appArgs,
                         FrameworkConstants.CommonFrameworks.NetStandardApp15)
                     .Execute();
                 exitCode = result.ExitCode;
             }
+
+            telemetryClient.Flush();
             return exitCode;
         }
 
@@ -252,7 +251,6 @@ namespace Microsoft.DotNet.Cli
         }
 
         private static void ConfigureDotNetForFirstTimeUse(
-            INuGetCacheSentinel nugetCacheSentinel,
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
             IAspNetCertificateSentinel aspNetCertificateSentinel,
             IFileSentinel toolPathSentinel,
@@ -262,16 +260,10 @@ namespace Microsoft.DotNet.Cli
         {
             using (PerfTrace.Current.CaptureTiming())
             {
-                var nugetPackagesArchiver = new NuGetPackagesArchiver();
                 var environmentPath = EnvironmentPathFactory.CreateEnvironmentPath(hasSuperUserAccess, environmentProvider);
                 var commandFactory = new DotNetCommandFactory(alwaysRunOutOfProc: true);
-                var nugetCachePrimer = new NuGetCachePrimer(
-                    nugetPackagesArchiver,
-                    nugetCacheSentinel);
                 var aspnetCertificateGenerator = new AspNetCoreCertificateGenerator();
                 var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(
-                    nugetCachePrimer,
-                    nugetCacheSentinel,
                     firstTimeUseNoticeSentinel,
                     aspNetCertificateSentinel,
                     aspnetCertificateGenerator,

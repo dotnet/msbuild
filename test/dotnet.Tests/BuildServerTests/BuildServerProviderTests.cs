@@ -146,7 +146,7 @@ namespace Microsoft.DotNet.Tests.BuildServerTests
 
             var directoryMock = new Mock<IDirectory>();
             directoryMock.Setup(d => d.Exists(pidDirectory)).Returns(true);
-            directoryMock.Setup(d => d.EnumerateFiles(pidDirectory, "*")).Returns(new [] { pidFilePath });
+            directoryMock.Setup(d => d.EnumerateFiles(pidDirectory)).Returns(new [] { pidFilePath });
 
             var fileMock = new Mock<IFile>();
             fileMock

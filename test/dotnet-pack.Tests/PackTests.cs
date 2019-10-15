@@ -158,9 +158,9 @@ namespace Microsoft.DotNet.Tools.Pack.Tests
         }
 
         [Theory]
-        [InlineData("C#", "TestAppSimple")]
-        [InlineData("F#", "FSharpTestAppSimple")]
-        public void PackWorksWithLocalProject(string language, string projectName)
+        [InlineData("TestAppSimple")]
+        [InlineData("FSharpTestAppSimple")]
+        public void PackWorksWithLocalProject(string projectName)
         {
             var testInstance = TestAssets.Get(projectName)
                 .CreateInstance()
@@ -286,6 +286,26 @@ namespace Microsoft.DotNet.Tools.Pack.Tests
             rootDir
                 .GetDirectory("bin")
                 .Should().HaveFilesMatching("*.nupkg", SearchOption.AllDirectories);
+        }
+
+        [Fact]
+        public void ItDoesNotPrintCopyrightInfo()
+        {
+            var testInstance = TestAssets.Get("MSBuildTestApp")
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
+
+            var result = new PackCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput("--nologo");
+
+            result.Should().Pass();
+
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result.Should().NotHaveStdOutContaining("Copyright (C) Microsoft Corporation. All rights reserved.");
+            }
         }
 
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)

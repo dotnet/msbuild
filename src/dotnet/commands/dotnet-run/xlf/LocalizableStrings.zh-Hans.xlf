@@ -22,8 +22,18 @@
         <target state="translated">要运行的项目文件的路径(如果只有一个项目，则默认使用当前目录)。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CouldNotConvertToBoolean">
+        <source>Could not convert the value of property '{0}' to a boolean.</source>
+        <target state="translated">无法将属性“{0}”的值转换为布尔值。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotConvertToString">
+        <source>Could not convert the value of property '{0}' to a string.</source>
+        <target state="translated">无法将属性“{0}”的值转换为字符串。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RunCommandException">
-        <source>The build failed. Please fix the build errors and run again.</source>
+        <source>The build failed. Fix the build errors and run again.</source>
         <target state="translated">生成失败。请修复生成错误并重新运行。</target>
         <note />
       </trans-unit>
@@ -39,19 +49,19 @@
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
         <source>Unable to run your project
-Your project targets multiple frameworks. Please specify which framework to run using '{0}'.</source>
+Your project targets multiple frameworks. Specify which framework to run using '{0}'.</source>
         <target state="translated">无法运行项目
 你的项目面向多个框架。请指定要使用“{0}”运行的框架。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRun">
         <source>Unable to run your project.
-Please ensure you have a runnable project type and ensure '{0}' supports this project.
+Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
         <target state="translated">无法运行项目。
 请确保你具有可运行的项目类型且“{0}”支持此项目。
-可运行的项目应面向可运行的 TFM (例如 netcoreapp2.0)且其 OutputType 为“Exe”。
+可运行的项目应面向可运行的 TFM (例如 netcoreapp2.0)且其 OutputType 为 "Exe"。
 当前的 {1} 为“{2}”。</target>
         <note />
       </trans-unit>
@@ -144,6 +154,16 @@ The current {1} is '{2}'.</source>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to run for. The target framework must also be specified in the project file.</source>
         <target state="translated">要运行的目标框架。必须在项目文件中指定目标框架。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to run for.</source>
+        <target state="translated">要为其运行的目标运行时。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ValueMustBeAnObject">
+        <source>The property '{0}' must be an object if it is specified.</source>
+        <target state="translated">如果指定，则属性“{0}”必须是一个对象。</target>
         <note />
       </trans-unit>
     </body>

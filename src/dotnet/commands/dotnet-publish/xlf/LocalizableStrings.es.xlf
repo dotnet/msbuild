@@ -1,10 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="es" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppDescription">
         <source>Publisher for the .NET Platform</source>
         <target state="translated">Publicador para la plataforma .NET</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="translated">No mostrar la pancarta de inicio ni el mensaje de copyright.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOption">
@@ -15,6 +20,11 @@
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to publish for. The target framework has to be specified in the project file.</source>
         <target state="translated">La plataforma de destino para la que se publica. La plataforma de destino se debe especificar en el archivo de proyecto.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoSelfContainedOptionDescription">
+        <source>Publish your application as a framework dependent application without the .NET Core runtime. A supported .NET Core runtime must be installed to run your application.</source>
+        <target state="translated">Publique la aplicación como dependiente del marco de trabajo sin el runtime de .NET Core. Para ejecutar la aplicación, debe instalarse un runtime de .NET Core admitido.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -45,7 +55,8 @@
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating a self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="translated">El tiempo de ejecución objetivo para publicar. Esto se utiliza al crear una implementación independiente. El valor predeterminado es publicar una aplicación dependiente del marco.</target>
+        <target state="translated">El tiempo de ejecución objetivo para publicar. Esto se utiliza al crear una implementación independiente.
+El valor predeterminado es publicar una aplicación dependiente del marco.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
@@ -53,10 +64,16 @@ The default is to publish a framework-dependent application.</source>
         <target state="translated">La configuración para la que se publica. El valor predeterminado para la mayoría de los proyectos es "Debug".</target>
         <note />
       </trans-unit>
+      <trans-unit id="SelfContainAndNoSelfContainedConflict">
+        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
+        <target state="translated">Las opciones "--self-contained" y "--no-self-contained" están en conflicto entre sí. Especifique solo una de ellas.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">Publique el tiempo de ejecución de .NET Core con la aplicación para que no sea necesario instalar el tiempo de ejecución en el equipo de destino. El valor predeterminado es "true" si se especifica un identificador de tiempo de ejecución.</target>
+        <target state="translated">Publique el tiempo de ejecución de .NET Core con la aplicación para que no sea necesario instalar el tiempo de ejecución en el equipo de destino.
+El valor predeterminado es "true" si se especifica un identificador de tiempo de ejecución.</target>
         <note />
       </trans-unit>
     </body>

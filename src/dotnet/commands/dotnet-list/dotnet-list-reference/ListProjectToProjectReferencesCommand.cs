@@ -16,19 +16,39 @@ namespace Microsoft.DotNet.Tools.List.ProjectToProjectReferences
 
         public ListProjectToProjectReferencesCommand(
             AppliedOption appliedCommand,
-            ParseResult parseResult) : base(parseResult)
+            ParseResult parseResult) : base()
         {
             if (appliedCommand == null)
             {
                 throw new ArgumentNullException(nameof(appliedCommand));
             }
+            if (parseResult == null)
+            {
+                throw new ArgumentNullException(nameof(parseResult));
+            }
+
+            // If showing help, replace the parent's argument rule so that this command's argument
+            // only shows `PROJECT` instead of `PROJECT | SOLUTION`.
+            if (parseResult.AppliedCommand().IsHelpRequested() &&
+                (parseResult.Command().Parent is ListCommandParser.ListCommand parent))
+            {
+                parent.SetArgumentsRule(
+                    Accept.ZeroOrOneArgument()
+                        .With(
+                            name: CommonLocalizableStrings.ProjectArgumentName,
+                            description: CommonLocalizableStrings.ProjectArgumentDescription)
+                        .DefaultToCurrentDirectory()
+                );
+            }
+
+            ShowHelpOrErrorIfAppropriate(parseResult);
 
             _fileOrDirectory = appliedCommand.Arguments.Single();
         }
 
         public override int Execute()
         {
-            var msbuildProj = MsbuildProject.FromFileOrDirectory(new ProjectCollection(), _fileOrDirectory);
+            var msbuildProj = MsbuildProject.FromFileOrDirectory(new ProjectCollection(), _fileOrDirectory, false);
 
             var p2ps = msbuildProj.GetProjectToProjectReferences();
             if (!p2ps.Any())

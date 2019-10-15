@@ -12,12 +12,17 @@
         <target state="translated">.NET 작성기</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="translated">시작 배너 또는 저작권 메시지를 표시하지 않습니다.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
         <source>Do not build project-to-project references and only build the specified project.</source>
         <target state="translated">p2p(프로젝트 간) 참조를 빌드하지 않고 지정한 프로젝트만 빌드합니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoIncrementialOptionDescription">
+      <trans-unit id="NoIncrementalOptionDescription">
         <source>Do not use incremental building.</source>
         <target state="translated">증분 빌드를 사용하지 않습니다.</target>
         <note />

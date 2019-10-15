@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Cli.Utils
                             LocalizableStrings.ProjectNotRestoredOrRestoreFailed));
                     }
                     
-                    var lockFile = FileAccessRetrier.RetryOnFileAccessFailure(() => subject.Read(path));
+                    var lockFile = FileAccessRetrier.RetryOnFileAccessFailure(() => subject.Read(path), LocalizableStrings.CouldNotAccessAssetsFile);
 
                     return lockFile;       
                 },

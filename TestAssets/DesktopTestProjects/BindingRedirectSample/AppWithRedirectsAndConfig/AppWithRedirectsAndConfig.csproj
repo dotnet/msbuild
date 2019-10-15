@@ -4,7 +4,7 @@
     <AssemblyName>AppWithRedirectsAndConfig</AssemblyName>
     <OutputType>Exe</OutputType>
     <RuntimeIdentifiers>win7-x64;win7-x86</RuntimeIdentifiers>
-    <RestoreAdditionalProjectSources Condition="'$(TEST_PACKAGES)' != ''">$(TEST_PACKAGES)</RestoreAdditionalProjectSources>
+    <RestoreAdditionalProjectSources Condition="'$(TEST_PACKAGES)' != ''">$(RestoreAdditionalProjectSources);$(TEST_PACKAGES)</RestoreAdditionalProjectSources>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <DotNetCliToolReference Include="dotnet-dependency-tool-invoker" Version="1.0.0-*" />
+    <DotNetCliToolReference Include="dotnet-hello" Version="1.0.0-*" />
   </ItemGroup>
 
 </Project>

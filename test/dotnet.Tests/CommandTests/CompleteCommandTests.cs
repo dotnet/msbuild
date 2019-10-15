@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenOnlyDotnetItSuggestsTopLevelCommandsAndOptions()
         {
-            var expected = new string[] {
+            var expected = new[] {
                 "--diagnostics",
                 "--help",
                 "--info",
@@ -32,7 +32,6 @@ namespace Microsoft.DotNet.Tests.Commands
                 "fsi",
                 "help",
                 "list",
-                "migrate",
                 "msbuild",
                 "new",
                 "nuget",
@@ -56,7 +55,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenASlashItSuggestsTopLevelOptions()
         {
-            var expected = new string[] {
+            var expected = new[] {
                 "--diagnostics",
                 "--help",
                 "--info",
@@ -74,10 +73,10 @@ namespace Microsoft.DotNet.Tests.Commands
             reporter.Lines.Should().Equal(expected.OrderBy(c => c));
         }
 
-        [Fact(Skip = "https://github.com/dotnet/cli/issues/9737")]
+        [Fact]
         public void GivenNewCommandItDisplaysCompletions()
         {
-            var expected = new string[] {
+            var expected = new[] {
                 "--dry-run",
                 "--force",
                 "--help",
@@ -95,7 +94,9 @@ namespace Microsoft.DotNet.Tests.Commands
                 "-lang",
                 "-n",
                 "-o",
-                "-u"
+                "-u",
+                "--update-check",
+                "--update-apply"
             };
 
             var reporter = new BufferedReporter();
@@ -106,7 +107,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenNuGetCommandItDisplaysCompletions()
         {
-            var expected = new string[] {
+            var expected = new[] {
                 "--help",
                 "--verbosity",
                 "--version",
@@ -125,7 +126,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenNuGetDeleteCommandItDisplaysCompletions()
         {
-            var expected = new string[] {
+            var expected = new[] {
                 "--api-key",
                 "--force-english-output",
                 "--help",
@@ -146,7 +147,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenNuGetLocalsCommandItDisplaysCompletions()
         {
-            var expected = new string[] {
+            var expected = new[] {
                 "--clear",
                 "--force-english-output",
                 "--help",
@@ -169,8 +170,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenNuGetPushCommandItDisplaysCompletions()
         {
-            var expected = new string[]
-            {
+            var expected = new[] {
                 "--api-key",
                 "--disable-buffering",
                 "--force-english-output",

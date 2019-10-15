@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         static TestBase()
         {
-            // set culture of test process to match CLI sub-processes when the UI language is overriden.
+            // set culture of test process to match CLI sub-processes when the UI language is overridden.
             string overriddenUILanguage = Environment.GetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE");
             if (overriddenUILanguage != null)
             {
@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
                     s_testAssets = new TestAssets(
                         new DirectoryInfo(assetsRoot),
-                        new FileInfo(new Muxer().MuxerPath),
+                        new FileInfo(DotnetUnderTest.FullName),
                         new RepoDirectoriesProvider().TestWorkingFolder); 
                 }
 
@@ -98,77 +98,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 string.Equals("true", val, StringComparison.OrdinalIgnoreCase) ||
                 string.Equals("1", val, StringComparison.OrdinalIgnoreCase) ||
                 string.Equals("on", val, StringComparison.OrdinalIgnoreCase));
-        }
-
-        protected CommandResult TestExecutable(string outputDir,
-            string executableName,
-            string expectedOutput)
-        {
-            var executablePath = Path.Combine(outputDir, executableName);
-            var args = new List<string>();
-
-            if (IsPortable(executablePath))
-            {
-                args.Add("exec");
-                args.Add(ArgumentEscaper.EscapeSingleArg(executablePath));
-
-                var muxer = new Muxer();
-                executablePath = muxer.MuxerPath;
-            }
-
-            var executableCommand = new TestCommand(executablePath);
-
-            var result = executableCommand.ExecuteWithCapturedOutput(string.Join(" ", args));
-
-            if (!string.IsNullOrEmpty(expectedOutput))
-            { 
-                result.Should().HaveStdOut(expectedOutput);
-            }
-            result.Should().NotHaveStdErr();
-            result.Should().Pass();
-            return result;
-        }
-
-        protected void TestOutputExecutable(
-            string outputDir,
-            string executableName,
-            string expectedOutput,
-            bool native = false)
-        {
-            TestExecutable(GetCompilationOutputPath(outputDir, native), executableName, expectedOutput);
-        }
-
-        protected void TestNativeOutputExecutable(string outputDir, string executableName, string expectedOutput)
-        {
-            TestOutputExecutable(outputDir, executableName, expectedOutput, true);
-        }
-
-        protected string GetCompilationOutputPath(string outputDir, bool native)
-        {
-            var executablePath = outputDir;
-            if (native)
-            {
-                executablePath = Path.Combine(executablePath, "native");
-            }
-
-            return executablePath;
-        }
-
-        private bool IsPortable(string executablePath)
-        {
-            var commandDir = Path.GetDirectoryName(executablePath);
-
-            var runtimeConfigPath = Directory.EnumerateFiles(commandDir)
-                .FirstOrDefault(x => x.EndsWith("runtimeconfig.json"));
-
-            if (runtimeConfigPath == null)
-            {
-                return false;
-            }
-
-            var runtimeConfig = new RuntimeConfig(runtimeConfigPath);
-            Console.WriteLine(runtimeConfig.Framework);
-            return runtimeConfig.IsPortable;
         }
     }
 }

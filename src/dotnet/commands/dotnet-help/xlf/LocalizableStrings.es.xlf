@@ -1,7 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="es" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="RollForwardDefinition">
+        <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
+        <target state="translated">Reenviar a la versión del marco (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Usage">
         <source>Usage</source>
         <target state="translated">Uso</target>
@@ -92,11 +97,6 @@
         <target state="translated">Crea un paquete de NuGet.</target>
         <note />
       </trans-unit>
-      <trans-unit id="MigrateDefinition">
-        <source>Migrate a project.json project to an MSBuild project.</source>
-        <target state="translated">Migra un proyecto project.json a un proyecto MSBuild.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
         <target state="translated">Comandos de modificación del proyecto</target>
@@ -153,7 +153,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
-        <source>Specified command '{0}' is not a valid SDK command. Please specify a valid SDK command. For more information, run dotnet help.</source>
+        <source>Specified command '{0}' is not a valid SDK command. Specify a valid SDK command. For more information, run dotnet help.</source>
         <target state="translated">El comando especificado "{0}" no es un comando de SDK válido. Especifique un comando de SDK válido. Para más información, ejecute la ayuda de dotnet.</target>
         <note />
       </trans-unit>
@@ -219,22 +219,17 @@
       </trans-unit>
       <trans-unit id="DepsfilDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
-        <target state="translated">Ruta al archivo &lt;application&gt;.deps.json.</target>
+        <target state="translated">Ruta de acceso al archivo &lt;aplicación&gt;.deps.json.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeconfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
-        <target state="translated">Ruta al archivo &lt;application&gt;.runtimeconfig.json.</target>
+        <target state="translated">Ruta de acceso al archivo &lt;aplicación&gt;.runtimeconfig.json.</target>
         <note />
       </trans-unit>
       <trans-unit id="FxVersionDefinition">
         <source>Version of the installed Shared Framework to use to run the application.</source>
         <target state="translated">Versión de la instancia de Shared Framework instalada que se usará para ejecutar la aplicación.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RollForwardOnNoCandidateFxDefinition">
-        <source>Roll forward on no candidate shared framework is enabled.</source>
-        <target state="translated">Puesta al día activada, no hay ninguna instancia de Shared Framework habilitada.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">
@@ -260,11 +255,6 @@
       <trans-unit id="DevCertsDefinition">
         <source>Create and manage development certificates.</source>
         <target state="translated">Crea y administra certificados de desarrollo.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="EfDefinition">
-        <source>Entity Framework Core command-line tools.</source>
-        <target state="translated">Herramientas de línea de comandos de Entity Framework Core</target>
         <note />
       </trans-unit>
       <trans-unit id="SqlCacheDefinition">
@@ -299,7 +289,7 @@
       </trans-unit>
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
-        <target state="translated">Inicie F# Interactive/ejecute scripts de F#.</target>
+        <target state="translated">Inicie F# interactivo o ejecute scripts de F#.</target>
         <note />
       </trans-unit>
     </body>

@@ -1,14 +1,77 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="it" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="CommandInteractiveOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">Consente al comando di arrestare l'esecuzione e attendere l'input o l'azione dell'utente, ad esempio per completare l'autenticazione.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">Non è stato trovato alcun progetto in `{0}`.</target>
         <note />
       </trans-unit>
+      <trans-unit id="EnvironmentPathOSXBashManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">La directory '{0}' degli strumenti non si trova attualmente nella variabile di ambiente PATH.
+Se si usa bash, è possibile aggiungerla al profilo eseguendo il comando seguente:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Aggiungi .NET Core SDK Tools
+export PATH="$PATH:{0}"
+EOF
+
+Per aggiungerla alla sessione corrente, eseguire il comando seguente:
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathOSXZshManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using zsh, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+And run `zsh -l` to make it available for current session.
+
+You can only add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">La directory '{0}' degli strumenti non si trova attualmente nella variabile di ambiente PATH.
+Se si usa zsh, è possibile aggiungerla al profilo eseguendo il comando seguente:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
+# Aggiungi strumenti .NET Core SDK
+export PATH="$PATH:{0}"
+EOF
+
+Eseguire `zsh -l` per renderla disponibile per la sessione corrente.
+
+Per aggiungerla solo alla sessione corrente, eseguire il comando seguente:
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
-        <source>Found more than one project in `{0}`. Please specify which one to use.</source>
+        <source>Found more than one project in `{0}`. Specify which one to use.</source>
         <target state="translated">Sono stati trovati più progetti in `{0}`. Specificare quello da usare.</target>
         <note />
       </trans-unit>
@@ -293,7 +356,7 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOne">
-        <source>Please specify at least one {0}.</source>
+        <source>Specify at least one {0}.</source>
         <target state="translated">Specificare almeno un elemento {0}.</target>
         <note />
       </trans-unit>
@@ -388,7 +451,7 @@
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyVersion">
-        <source>Please specify a version of the package.</source>
+        <source>Specify a version of the package.</source>
         <target state="translated">Specificare una versione del pacchetto.</target>
         <note />
       </trans-unit>
@@ -473,8 +536,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">Non ci sono riferimenti a {0} nel progetto {1}. ;; {0} è il tipo dell'elemento richiesto (progetto, pacchetto o P2P) e {1} è l'oggetto su cui si interviene (file di progetto o di soluzione). </target>
+        <source>There are no {0} references in project {1}.</source>
+        <target state="translated">Non sono presenti riferimenti a {0} nel progetto {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
@@ -483,12 +546,12 @@
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyNewVersion">
-        <source>Please specify new version of the package.</source>
+        <source>Specify new version of the package.</source>
         <target state="translated">Specificare la nuova versione del pacchetto.</target>
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyWhichPackageToUpdate">
-        <source>Please specify which package to update.</source>
+        <source>Specify which package to update.</source>
         <target state="translated">Specificare il pacchetto da aggiornare.</target>
         <note />
       </trans-unit>
@@ -518,7 +581,7 @@
         <note />
       </trans-unit>
       <trans-unit id="TemplateCreatedSuccessfully">
-        <source>The template {0} created successfully. Please run "dotnet restore" to get started!</source>
+        <source>The template {0} created successfully. run "dotnet restore" to get started!</source>
         <target state="translated">Il modello {0} è stato creato. Per iniziare, eseguire "dotnet restore".</target>
         <note />
       </trans-unit>
@@ -538,12 +601,12 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifiedNameExists">
-        <source>Specified name {0} already exists. Please specify a different name.</source>
+        <source>Specified name {0} already exists. Specify a different name.</source>
         <target state="translated">Il nome specificato {0} esiste già. Specificarne uno diverso.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifiedAliasExists">
-        <source>Specified alias {0} already exists. Please specify a different alias.</source>
+        <source>Specified alias {0} already exists. Specify a different alias.</source>
         <target state="translated">L'alias specificato {0} esiste già. Specificarne uno diverso.</target>
         <note />
       </trans-unit>
@@ -563,13 +626,13 @@
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOneSolutionInDirectory">
-        <source>Found more than one solution file in {0}. Please specify which one to use.</source>
+        <source>Found more than one solution file in {0}. Specify which one to use.</source>
         <target state="translated">Sono stati trovati più file di soluzione in {0}. Specificare quello da usare.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionAlreadyContainsProject">
         <source>Solution {0} already contains project {1}.</source>
-        <target state="translated">La soluzione {0} contiene già il progetto {\1\}.</target>
+        <target state="translated">La soluzione {0} contiene già il progetto {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentsProjectOrSolutionDescription">
@@ -583,7 +646,7 @@
         <note />
       </trans-unit>
       <trans-unit id="ProjectNotCompatibleWithFrameworks">
-        <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:</source>
+        <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Review the project you are trying to add and verify that is compatible with the following targets:</source>
         <target state="translated">Non è possibile aggiungere il progetto `{0}` a causa di framework di destinazione incompatibili tra i due progetti. Esaminare il progetto che si sta provando ad aggiungere e verificare che sia compatibile con le destinazioni seguenti:</target>
         <note />
       </trans-unit>
@@ -600,8 +663,8 @@
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
-        <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Please contact your SDK provider for support.</source>
-        <target state="translated">Il progetto '{0}' ha un tipo progetto sconosciuto e non può essere aggiunto al file di soluzione. Per assistenza, contattare il fornitore dell'SDK.</target>
+        <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Contact your SDK provider for support.</source>
+        <target state="translated">Il progetto '{0}' ha un tipo di progetto sconosciuto e non può essere aggiunto al file di soluzione. Per assistenza, contattare il fornitore dell'SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">
@@ -722,43 +785,18 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">La directory degli strumenti '{0}' non è attualmente presente nella variabile di ambiente PATH.
+        <target state="translated">La directory '{0}' degli strumenti non si trova attualmente nella variabile di ambiente PATH.
 Se si usa bash, è possibile aggiungerla al profilo eseguendo il comando seguente:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Aggiungi strumenti .NET Core SDK
+# Aggiungi .NET Core SDK Tools
 export PATH="$PATH:{0}"
 EOF
 
 Per aggiungerla alla sessione corrente, eseguire il comando seguente:
 
-export PATH="$PATH:{0}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="EnvironmentPathOSXManualInstructions">
-        <source>Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using bash, you can add it to your profile by running the following command:
-
-cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
 export PATH="$PATH:{0}"
-EOF
-
-You can add it to the current session by running the following command:
-
-export PATH="$PATH:{0}"
-</source>
-        <target state="translated">La directory degli strumenti '{0}' non è attualmente presente nella variabile di ambiente PATH.
-Se si usa bash, è possibile aggiungerla al profilo eseguendo il comando seguente:
-
-cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Aggiungi strumenti .NET Core SDK
-export PATH="$PATH:{0}"
-EOF
-
-Per aggiungerla alla sessione corrente, eseguire il comando seguente:
-
-export PATH="$PATH:{0}"</target>
+</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstructions">
@@ -827,22 +865,22 @@ setx PATH "%PATH%;{0}"
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsHigher">
-        <source>Format version is higher than supported. This tool may not be supported in this SDK version. Please update your SDK.</source>
+        <source>Format version is higher than supported. This tool may not be supported in this SDK version. Update your SDK.</source>
         <target state="translated">La versione di Format è successiva a quella supportata. È possibile che questo strumento non sia supportato in questa versione dell'SDK. Aggiornare l'SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMalformed">
-        <source>Format version is malformed. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
+        <source>Format version is malformed. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
         <target state="translated">La versione di Format non è corretta. È possibile che questo strumento non sia supportato in questa versione dell'SDK. Contattare l'autore dello strumento.</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMissing">
-        <source>Format version is missing. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
+        <source>Format version is missing. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
         <target state="translated">La versione di Format non è presente. È possibile che questo strumento non sia supportato in questa versione dell'SDK. Contattare l'autore dello strumento.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToSetToolsPathEnvironmentVariable">
-        <source>Failed to add '{0}' to the PATH environment variable. Please add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
+        <source>Failed to add '{0}' to the PATH environment variable. Add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
         <target state="translated">Non è stato possibile aggiungere '{0}' alla variabile di ambiente PATH. Aggiungere questa directory a PATH per usare gli strumenti installati con 'dotnet tool install'.</target>
         <note />
       </trans-unit>
@@ -899,11 +937,6 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="SolutionOrProjectArgumentName">
         <source>PROJECT | SOLUTION</source>
         <target state="translated">PROGETTO | SOLUZIONE</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandInteractiveOptionDescription">
-        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="translated">Consente al comando di arrestare l'esecuzione e attendere l'input o l'azione dell'utente, ad esempio per completare l'autenticazione.</target>
         <note />
       </trans-unit>
     </body>

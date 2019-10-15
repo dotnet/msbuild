@@ -137,5 +137,47 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var appliedOptions = result["dotnet"]["tool"]["update"];
             appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--disable-parallel");
         }
+
+        [Fact]
+        public void UpdateToolParserCanParseInteractiveRestoreOption()
+        {
+            var result =
+                Parser.Instance.Parse(@"dotnet tool update -g console.test.app --interactive");
+
+            var appliedOptions = result["dotnet"]["tool"]["update"];
+
+            appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--interactive");
+        }
+
+        [Fact]
+        public void UpdateToolParserCanParseVersionOption()
+        {
+            var result =
+                Parser.Instance.Parse(@"dotnet tool update -g console.test.app --version 1.2");
+
+            var appliedOptions = result["dotnet"]["tool"]["update"];
+
+            appliedOptions.SingleArgumentOrDefault("version").Should().Be("1.2");
+        }
+
+        [Fact]
+        public void UpdateToolParserCanParseLocalOption()
+        {
+            var result =
+                Parser.Instance.Parse(@"dotnet tool update --local console.test.app");
+
+            var appliedOptions = result["dotnet"]["tool"]["update"];
+            appliedOptions.ValueOrDefault<bool>("local").Should().Be(true);
+        }
+
+        [Fact]
+        public void UpdateToolParserCanParseToolManifestOption()
+        {
+            var result =
+                Parser.Instance.Parse(@"dotnet tool update --tool-manifest folder/my-manifest.format console.test.app");
+
+            var appliedOptions = result["dotnet"]["tool"]["update"];
+            appliedOptions.SingleArgumentOrDefault("tool-manifest").Should().Be(@"folder/my-manifest.format");
+        }
     }
 }

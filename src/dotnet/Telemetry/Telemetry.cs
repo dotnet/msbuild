@@ -4,17 +4,21 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.PlatformAbstractions;
+using Microsoft.DotNet.Cli.Telemetry.PersistenceChannel;
 
 namespace Microsoft.DotNet.Cli.Telemetry
 {
     public class Telemetry : ITelemetry
     {
         internal static string CurrentSessionId = null;
+        private readonly int _senderCount;
         private TelemetryClient _client = null;
         private Dictionary<string, string> _commonProperties = null;
         private Dictionary<string, double> _commonMeasurements = null;
@@ -29,9 +33,19 @@ namespace Microsoft.DotNet.Cli.Telemetry
 
         public Telemetry(IFirstTimeUseNoticeSentinel sentinel) : this(sentinel, null) { }
 
-        public Telemetry(IFirstTimeUseNoticeSentinel sentinel, string sessionId, bool blockThreadInitialization = false)
+        public Telemetry(
+            IFirstTimeUseNoticeSentinel sentinel,
+            string sessionId,
+            bool blockThreadInitialization = false,
+            IEnvironmentProvider environmentProvider = null,
+            int senderCount = 3)
         {
-            Enabled = !Env.GetEnvironmentVariableAsBool(TelemetryOptout) && PermissionExists(sentinel);
+            if (environmentProvider == null)
+            {
+                environmentProvider = new EnvironmentProvider();
+            }
+
+            Enabled = !environmentProvider.GetEnvironmentVariableAsBool(TelemetryOptout, false) && PermissionExists(sentinel);
 
             if (!Enabled)
             {
@@ -40,7 +54,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
 
             // Store the session ID in a static field so that it can be reused
             CurrentSessionId = sessionId ?? Guid.NewGuid().ToString();
-
+            _senderCount = senderCount;
             if (blockThreadInitialization)
             {
                 InitializeTelemetry();
@@ -48,7 +62,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
             else
             {
                 //initialize in task to offload to parallel thread
-                _trackEventTask = Task.Factory.StartNew(() => InitializeTelemetry());
+                _trackEventTask = Task.Run(() => InitializeTelemetry());
             }
         }
 
@@ -70,10 +84,20 @@ namespace Microsoft.DotNet.Cli.Telemetry
                 return;
             }
 
-            //continue task in existing parallel thread
+            //continue the task in different threads
             _trackEventTask = _trackEventTask.ContinueWith(
                 x => TrackEventTask(eventName, properties, measurements)
             );
+        }
+
+        public void Flush()
+        {
+            if (!Enabled || _trackEventTask == null)
+            {
+                return;
+            }
+
+            _trackEventTask.Wait();
         }
 
         public void ThreadBlockingTrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)
@@ -89,6 +113,10 @@ namespace Microsoft.DotNet.Cli.Telemetry
         {
             try
             {
+                var persistenceChannel = new PersistenceChannel.PersistenceChannel(sendersCount: _senderCount);
+                persistenceChannel.SendingInterval = TimeSpan.FromMilliseconds(1);
+                TelemetryConfiguration.Active.TelemetryChannel = persistenceChannel;
+
                 _client = new TelemetryClient();
                 _client.InstrumentationKey = InstrumentationKey;
                 _client.Context.Session.Id = CurrentSessionId;
@@ -120,8 +148,9 @@ namespace Microsoft.DotNet.Cli.Telemetry
                 Dictionary<string, string> eventProperties = GetEventProperties(properties);
                 Dictionary<string, double> eventMeasurements = GetEventMeasures(measurements);
 
+                eventProperties.Add("event id", Guid.NewGuid().ToString());
+
                 _client.TrackEvent(PrependProducerNamespace(eventName), eventProperties, eventMeasurements);
-                _client.Flush();
             }
             catch (Exception e)
             {

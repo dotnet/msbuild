@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Cli
             {
                 return MsbuildProject.FromFileOrDirectory(
                     new ProjectCollection(),
-                    Directory.GetCurrentDirectory());
+                    Directory.GetCurrentDirectory(), interactive: false);
             }
             catch (Exception e)
             {

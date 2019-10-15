@@ -18,7 +18,6 @@ namespace dotnet.Tests
         [InlineData("build -h")]
         [InlineData("clean -h")]
         [InlineData("list -h")]
-        [InlineData("migrate -h")]
         [InlineData("msbuild -h")]
         [InlineData("new -h")]
         [InlineData("nuget -h")]

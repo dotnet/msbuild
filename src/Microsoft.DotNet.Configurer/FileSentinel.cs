@@ -29,18 +29,7 @@ namespace Microsoft.DotNet.Configurer
 
         public void Create()
         {
-            if (Exists())
-            {
-                return;
-            }
-
-            var directory = _file.GetDirectoryPath();
-            if (!_fileSystem.Directory.Exists(directory.Value))
-            {
-                _fileSystem.Directory.CreateDirectory(directory.Value);
-            }
-
-            _fileSystem.File.CreateEmptyFile(_file.Value);
+            _fileSystem.CreateIfNotExists(_file.Value);
         }
     }
 }

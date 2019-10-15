@@ -51,7 +51,6 @@ namespace Microsoft.DotNet.Cli
                                     RunCommandParser.Run(),
                                     TestCommandParser.Test(),
                                     PackCommandParser.Pack(),
-                                    MigrateCommandParser.Migrate(),
                                     CleanCommandParser.Clean(),
                                     SlnCommandParser.Sln(),
                                     AddCommandParser.Add(),

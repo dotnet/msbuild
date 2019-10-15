@@ -123,8 +123,4 @@
   <data name="AppDescription" xml:space="preserve">
     <value>Command to list project to project references</value>
   </data>
-  <data name="NoReferencesFound" xml:space="preserve">
-    <value>There are no {0} references in project {1}.
-{0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </value>
-  </data>
 </root>

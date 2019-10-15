@@ -245,6 +245,16 @@ EndGlobal
         }
 
         [Fact]
+        public void WhenGivenAValidReadOnlySlnFileItReadsContentsWithNoException()
+        {
+            var tmpFile = Temp.CreateFile();
+            tmpFile.WriteAllText(SolutionWithAppAndLibProjects);
+            tmpFile.SetReadOnlyAttribute();
+            Action act = () => SlnFile.Read(tmpFile.Path);
+            act.ShouldNotThrow("Because readonly file is not being modified.");
+        }
+
+        [Fact]
         public void WhenGivenAValidSlnFileItModifiesSavesAndVerifiesContents()
         {
             var tmpFile = Temp.CreateFile();

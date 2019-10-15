@@ -1,7 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="fr" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="RollForwardDefinition">
+        <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
+        <target state="translated">Restaurer par progression la version du framework (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Usage">
         <source>Usage</source>
         <target state="translated">Utilisation</target>
@@ -92,11 +97,6 @@
         <target state="translated">Créez un package NuGet.</target>
         <note />
       </trans-unit>
-      <trans-unit id="MigrateDefinition">
-        <source>Migrate a project.json project to an MSBuild project.</source>
-        <target state="translated">Effectuez la migration d'un projet project.json vers un projet MSBuild.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
         <target state="translated">Commandes de modification de projet</target>
@@ -153,8 +153,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
-        <source>Specified command '{0}' is not a valid SDK command. Please specify a valid SDK command. For more information, run dotnet help.</source>
-        <target state="translated">La commande spécifiée '{0}' n'est pas une commande de kit SDK valide. Spécifiez une commande de kit SDK valide. Pour plus d'informations, exécutez dotnet help.</target>
+        <source>Specified command '{0}' is not a valid SDK command. Specify a valid SDK command. For more information, run dotnet help.</source>
+        <target state="translated">La commande spécifiée '{0}' n'est pas une commande SDK valide. Spécifiez une commande SDK valide. Pour plus d'informations, exécutez dotnet help.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppFullName">
@@ -232,11 +232,6 @@
         <target state="translated">Version du framework partagé installé à utiliser pour exécuter l'application.</target>
         <note />
       </trans-unit>
-      <trans-unit id="RollForwardOnNoCandidateFxDefinition">
-        <source>Roll forward on no candidate shared framework is enabled.</source>
-        <target state="translated">Effectuez une restauration par progression si aucun framework partagé candidat n'est activé.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="AdditionalDeps">
         <source>Path to additional deps.json file.</source>
         <target state="translated">Chemin du fichier deps.json supplémentaire.</target>
@@ -260,11 +255,6 @@
       <trans-unit id="DevCertsDefinition">
         <source>Create and manage development certificates.</source>
         <target state="translated">Créez et gérez des certificats de développement.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="EfDefinition">
-        <source>Entity Framework Core command-line tools.</source>
-        <target state="translated">Outils en ligne de commande Entity Framework Core.</target>
         <note />
       </trans-unit>
       <trans-unit id="SqlCacheDefinition">
@@ -299,7 +289,7 @@
       </trans-unit>
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
-        <target state="translated">Démarrez F# Interactive / exécutez les scripts F#.</target>
+        <target state="translated">Démarrer F# Interactive / exécuter les scripts F#.</target>
         <note />
       </trans-unit>
     </body>

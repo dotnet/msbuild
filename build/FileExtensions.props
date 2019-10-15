@@ -1,30 +1,7 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
-      <ArchiveExtension Condition=" '$(HostOSName)' == 'win' ">.zip</ArchiveExtension>
-      <ArchiveExtension Condition=" '$(HostOSName)' != 'win' ">.tar.gz</ArchiveExtension>
-
-      <InstallerExtension Condition=" '$(HostOSName)' == 'win' ">.msi</InstallerExtension>
-      <InstallerExtension Condition=" '$(HostOSName)' == 'osx' ">.pkg</InstallerExtension>
-      <InstallerExtension Condition=" '$(IsDebianBaseDistro)' == 'true' ">.deb</InstallerExtension>
-      <InstallerExtension Condition=" '$(IsRPMBasedDistro)' == true ">.rpm</InstallerExtension>
-
-      <BundleExtension Condition=" '$(HostOSName)' == 'win' ">.exe</BundleExtension>
-      <BundleExtension Condition=" '$(HostOSName)' == 'osx' ">$(InstallerExtension)</BundleExtension>
-      <BundleExtension Condition=" '$(IsDebianBaseDistro)' == 'true' ">$(InstallerExtension)</BundleExtension>
-      <BundleExtension Condition=" '$(IsRPMBasedDistro)' == true ">$(InstallerExtension)</BundleExtension>
-
-      <DynamicLibPrefix>lib</DynamicLibPrefix>
-      <DynamicLibPrefix Condition=" '$(HostOSName)' == 'win' "></DynamicLibPrefix>
-
-      <DynamicLibExtension>.so</DynamicLibExtension>
-      <DynamicLibExtension Condition=" '$(HostOSName)' == 'win' ">.dll</DynamicLibExtension>
-      <DynamicLibExtension Condition=" '$(HostOSName)' == 'osx' ">.dylib</DynamicLibExtension>
-
+      <ArchiveExtension>.zip</ArchiveExtension>
       <ExeExtension>.exe</ExeExtension>
       <ExeExtension Condition=" '$(OS)' != 'Windows_NT' "></ExeExtension>
-
-      <PlatformScriptExtension Condition=" '$(OS)' == 'Windows_NT' ">.ps1</PlatformScriptExtension>
-      <PlatformScriptExtension Condition=" '$(OS)' != 'Windows_NT' ">.sh</PlatformScriptExtension>
-
     </PropertyGroup>
 </Project>

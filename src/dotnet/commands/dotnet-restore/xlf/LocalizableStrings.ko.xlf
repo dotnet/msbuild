@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
@@ -87,11 +87,6 @@
 This is equivalent to deleting project.assets.json.</source>
         <target state="translated">마지막 복원이 성공적인 경우에도 모든 종속성을 확인합니다.
 project.assets.json을 삭제하는 것과 동일합니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdInteractiveRestoreOptionDescription">
-        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="translated">명령을 중지하고 사용자 입력 또는 작업을 기다리도록 허용합니다(예: 인증 완료).</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdLockedModeOptionDescription">

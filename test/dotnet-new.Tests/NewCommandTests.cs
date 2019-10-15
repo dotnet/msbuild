@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.New.Tests
             }
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/templating/issues/1971")]
         public void WhenTemplateNameIsNotUniquelyMatchedThenItIndicatesProblemToUser()
         {
             var cmd = new DotnetCommand().Execute("new c");

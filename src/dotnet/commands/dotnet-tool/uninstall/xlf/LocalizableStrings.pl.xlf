@@ -1,15 +1,35 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pl" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="LocalOptionDescription">
+        <source>Uninstall the tool and remove it from the local tool manifest.</source>
+        <target state="translated">Odinstaluj narzędzie i usuń je z manifestu narzędzi lokalnych.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionDescription">
+        <source>Path to the manifest file.</source>
+        <target state="translated">Ścieżka do pliku manifestu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionName">
+        <source>PATH</source>
+        <target state="translated">ŚCIEŻKA</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoManifestFileContainPackageId">
+        <source>Cannot find a manifest file that contains package id '{0}'.</source>
+        <target state="translated">Nie można odnaleźć pliku manifestu, który zawiera identyfikator pakietu „{0}”.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to uninstall.</source>
         <target state="translated">Identyfikator pakietu NuGet narzędzia do odinstalowania.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Uninstall a tool from the current development environment.</source>
-        <target state="translated">Odinstaluj narzędzie z bieżącego środowiska deweloperskiego.</target>
+        <source>Uninstall a global tool or local tool.</source>
+        <target state="translated">Odinstaluj narzędzie globalne lub lokalne.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
@@ -18,7 +38,7 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Please specify one tool Package Id to uninstall.</source>
+        <source>Specify one tool Package Id to uninstall.</source>
         <target state="translated">Określ jeden identyfikator pakietu narzędzia do odinstalowania.</target>
         <note />
       </trans-unit>
@@ -27,14 +47,29 @@
         <target state="translated">Odinstaluj narzędzie z katalogu narzędzi bieżącego użytkownika.</target>
         <note />
       </trans-unit>
+      <trans-unit id="UninstallLocalToolSucceeded">
+        <source>Tool '{0}' was successfully uninstalled and removed from manifest file {1}.</source>
+        <target state="translated">Narzędzie „{0}” zostało pomyślnie odinstalowane i usunięte z pliku manifestu {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UninstallSucceeded">
         <source>Tool '{0}' (version '{1}') was successfully uninstalled.</source>
         <target state="translated">Pomyślnie odinstalowano narzędzie „{0}” (wersja: „{1}”).</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolNotInstalled">
-        <source>Tool '{0}' is not currently installed.</source>
-        <target state="translated">Narzędzie „{0}” nie jest obecnie zainstalowane.</target>
+        <source>A tool with the package Id '{0}' could not be found. 
+
+Tools are uninstalled using their package Id which may be different 
+from the tool name you use when calling the tool. You can find the tool names 
+and the corresponding package Ids for installed tools using the command
+'dotnet tool list'.</source>
+        <target state="translated">Nie można odnaleźć narzędzia o identyfikatorze pakietu „{0}”. 
+
+Narzędzia są odinstalowywane przy użyciu ich identyfikatora pakietu, który może być inny 
+niż nazwa narzędzia używana podczas wywoływania narzędzia. Nazwy narzędzi 
+i odpowiednie identyfikatory pakietów zainstalowanych narzędzi można znaleźć przy użyciu polecenia
+„dotnet tool list”.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
@@ -47,14 +82,9 @@
         <target state="translated">Nie można odinstalować narzędzia „{0}”: {1}</target>
         <note />
       </trans-unit>
-      <trans-unit id="UninstallToolCommandNeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="translated">Określ opcję globalną (--global) lub opcję ścieżki narzędzia (--tool-path).</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UninstallToolCommandInvalidGlobalAndToolPath">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="translated">Opcja (--global) powoduje konflikt z opcją ścieżki narzędzia (--tool-path). Określ tylko jedną z opcji.</target>
+      <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="translated">Można określić tylko jedną opcję jednocześnie: opcję lokalną (--local), opcję globalną (--global) lub opcję ścieżki do narzędzia (--tool-path). Podaj tylko jedną z opcji: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

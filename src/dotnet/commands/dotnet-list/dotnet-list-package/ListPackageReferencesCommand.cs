@@ -53,45 +53,48 @@ namespace Microsoft.DotNet.Tools.List.PackageReferences
 
             if (_appliedCommand.HasOption("include-prerelease"))
             {
-                CheckForOutdated("--include-prerelease");
+                CheckForOutdatedOrDeprecated("--include-prerelease");
             }
 
             if (_appliedCommand.HasOption("highest-patch"))
             {
-                CheckForOutdated("--highest-patch");
+                CheckForOutdatedOrDeprecated("--highest-patch");
             }
 
             if (_appliedCommand.HasOption("highest-minor"))
             {
-                CheckForOutdated("--highest-minor");
+                CheckForOutdatedOrDeprecated("--highest-minor");
             }
 
             if (_appliedCommand.HasOption("config"))
             {
-                CheckForOutdated("--config");
+                CheckForOutdatedOrDeprecated("--config");
             }
 
             if (_appliedCommand.HasOption("source"))
             {
-                CheckForOutdated("--source");
+                CheckForOutdatedOrDeprecated("--source");
+            }
+
+            if (_appliedCommand.HasOption("deprecated") && _appliedCommand.HasOption("outdated"))
+            {
+                throw new GracefulException(LocalizableStrings.OutdatedAndDeprecatedOptionsCannotBeCombined);
             }
 
             return args.ToArray();
         }
 
         /// <summary>
-        /// A check for the outdated specific options. If --outdated not present,
-        /// these options must not be used, so error is thrown
+        /// A check for the outdated and deprecated specific options. If --outdated or --deprecated not present,
+        /// these options must not be used, so error is thrown.
         /// </summary>
         /// <param name="option"></param>
-        private void CheckForOutdated(string option)
+        private void CheckForOutdatedOrDeprecated(string option)
         {
-            if (!_appliedCommand.HasOption("outdated"))
+            if (!_appliedCommand.HasOption("deprecated") && !_appliedCommand.HasOption("outdated"))
             {
-                throw new GracefulException(LocalizableStrings.OutdatedOptionOnly, option);
-
+                throw new GracefulException(LocalizableStrings.OutdatedOrDeprecatedOptionOnly, option);
             }
-            
         }
 
         /// <summary>
@@ -103,7 +106,7 @@ namespace Microsoft.DotNet.Tools.List.PackageReferences
         private string GetProjectOrSolution()
         {
             string resultPath = _fileOrDirectory;
-            
+
             if (Directory.Exists(resultPath))
             {
                 var possibleSolutionPath = Directory.GetFiles(resultPath, "*.sln", SearchOption.TopDirectoryOnly);
@@ -142,12 +145,12 @@ namespace Microsoft.DotNet.Tools.List.PackageReferences
                     }
                 }
             }
-            
+
             if (!File.Exists(resultPath))
             {
                 throw new GracefulException(LocalizableStrings.FileNotFound, resultPath);
             }
-            
+
             return resultPath;
         }
     }

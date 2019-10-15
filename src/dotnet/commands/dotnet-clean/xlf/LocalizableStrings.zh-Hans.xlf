@@ -12,6 +12,11 @@
         <target state="translated">用于清除先前产生的生成输出的命令。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="translated">不显示启动版权标志或版权消息。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OUTPUT_DIR</source>
         <target state="translated">OUTPUT_DIR</target>

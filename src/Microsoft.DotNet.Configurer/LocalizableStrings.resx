@@ -117,44 +117,29 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="FirstTimeWelcomeMessage" xml:space="preserve">
-    <value>Welcome to .NET Core!
+  <data name="FirstTimeMessageWelcome" xml:space="preserve">
+    <value>Welcome to .NET Core 3.0!
 ---------------------
-Learn more about .NET Core: https://aka.ms/dotnet-docs
-Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
-
-Telemetry
----------
-The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
-
-Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</value>
-  </data>
-  <data name="NugetCachePrimeMessage" xml:space="preserve">
-    <value>Configuring...
---------------
-A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</value>
-  </data>
-  <data name="FailedToPrimeCacheError" xml:space="preserve">
-    <value>Failed to prime the NuGet cache. {0} failed with: {1}</value>
-  </data>
-  <data name="UnauthorizedAccessMessage" xml:space="preserve">
-    <value>Permission denied to modify the '{0}' folder.
-
-Here are some options to fix this error:
-----------------------------------------
-1. Re-run this command with elevated access.
-2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
-3. Copy the .NET Core SDK to a non-protected location and use it from there.
-    </value>
-  </data>
-  <data name="AspNetCertificateInstalled" xml:space="preserve">
-    <value>ASP.NET Core
-------------
-Successfully installed the ASP.NET Core HTTPS Development Certificate.
-To trust the certificate run 'dotnet dev-certs https --trust' (Windows and macOS only). For establishing trust on other platforms refer to the platform specific documentation.
-For more information on configuring HTTPS see https://go.microsoft.com/fwlink/?linkid=848054.</value>
+SDK Version: {0}</value>
   </data>
   <data name="FailedToDetermineUserHomeDirectory" xml:space="preserve">
     <value>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</value>
+  </data>
+  <data name="TelemetryMessage" xml:space="preserve">
+    <value>Telemetry
+---------
+The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</value>
+  </data>
+  <data name="FirstTimeMessageMoreInformation" xml:space="preserve">
+    <value>----------------
+Explore documentation: https://aka.ms/dotnet-docs
+Report issues and find source on GitHub: https://github.com/dotnet/core
+Find out what's new: https://aka.ms/dotnet-whats-new
+Learn about the installed HTTPS developer cert: https://aka.ms/aspnet-core-https
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
+Write your first app: https://aka.ms/first-net-core-app
+--------------------------------------------------------------------------------------</value>
   </data>
 </root>

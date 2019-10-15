@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Build.Construction;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using FluentAssertions;
@@ -20,10 +19,10 @@ namespace Microsoft.DotNet.Help.Tests
 Execute a .NET Core application.
 
 runtime-options:
-  --additionalprobingpath <path>     Path containing probing policy and assemblies to probe for.
-  --additional-deps <path>           Path to additional deps.json file.
-  --fx-version <version>             Version of the installed Shared Framework to use to run the application.
-  --roll-forward-on-no-candidate-fx  Roll forward on no candidate shared framework is enabled.
+  --additionalprobingpath <path>   Path containing probing policy and assemblies to probe for.
+  --additional-deps <path>         Path to additional deps.json file.
+  --fx-version <version>           Version of the installed Shared Framework to use to run the application.
+  --roll-forward <setting>         Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).
 
 path-to-application:
   The path to an application .dll file to execute.
@@ -47,7 +46,6 @@ SDK commands:
   clean             Clean build outputs of a .NET project.
   help              Show command line help.
   list              List project references of a .NET project.
-  migrate           Migrate a project.json project to an MSBuild project.
   msbuild           Run Microsoft Build Engine (MSBuild) commands.
   new               Create a new .NET project or file.
   nuget             Provides additional NuGet commands.
@@ -64,7 +62,6 @@ SDK commands:
 
 Additional commands from bundled tools:
   dev-certs         Create and manage development certificates.
-  ef                Entity Framework Core command-line tools.
   fsi               Start F# Interactive / execute F# scripts.
   sql-cache         SQL Server cache command-line tools.
   user-secrets      Manage development user secrets.

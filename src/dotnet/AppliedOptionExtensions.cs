@@ -26,5 +26,12 @@ namespace Microsoft.DotNet.Cli
                 .Select(o => o.Arguments.Single())
                 .SingleOrDefault();
         }
+
+        public static bool IsHelpRequested(this AppliedOption appliedOption)
+        {
+            return appliedOption.HasOption("help") ||
+                   appliedOption.Arguments.Contains("-?") ||
+                   appliedOption.Arguments.Contains("/?");
+        }
     }
 }

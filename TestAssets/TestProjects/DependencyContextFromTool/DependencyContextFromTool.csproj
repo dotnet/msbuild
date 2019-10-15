@@ -3,12 +3,12 @@
 
   <PropertyGroup>
     <VersionPrefix>1.0.0</VersionPrefix>
-    <TargetFrameworks>netcoreapp2.2</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.0</TargetFrameworks>
     <AssemblyName>DependencyContextFromTool</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <AssetTargetFallback>$(AssetTargetFallback);dnxcore50;portable-net45+win8</AssetTargetFallback>
-    <RestoreAdditionalProjectSources Condition="'$(TEST_PACKAGES)' != ''">$(TEST_PACKAGES)</RestoreAdditionalProjectSources>
+    <RestoreAdditionalProjectSources Condition="'$(TEST_PACKAGES)' != ''">$(RestoreAdditionalProjectSources);$(TEST_PACKAGES)</RestoreAdditionalProjectSources>
   </PropertyGroup>
 
   <ItemGroup>

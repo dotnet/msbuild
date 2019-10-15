@@ -1,8 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Run;
@@ -22,11 +20,13 @@ namespace Microsoft.DotNet.Cli
                     (
                         configuration: o.SingleArgumentOrDefault("--configuration"),
                         framework: o.SingleArgumentOrDefault("--framework"),
+                        runtime: o.SingleArgumentOrDefault("--runtime"),
                         noBuild: o.HasOption("--no-build"),
                         project: o.SingleArgumentOrDefault("--project"),
                         launchProfile: o.SingleArgumentOrDefault("--launch-profile"),
                         noLaunchProfile: o.HasOption("--no-launch-profile"),
                         noRestore: o.HasOption("--no-restore") || o.HasOption("--no-build"),
+                        interactive: o.HasOption(Utils.Constants.RestoreInteractiveOption),
                         restoreArgs: o.OptionValuesToBeForwarded(),
                         args: o.Arguments
                     )),
@@ -35,6 +35,7 @@ namespace Microsoft.DotNet.Cli
                     CommonOptions.HelpOption(),
                     CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription),
                     CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription),
+                    CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription),
                     Create.Option(
                         "-p|--project",
                         LocalizableStrings.CommandOptionProjectDescription,
@@ -51,6 +52,7 @@ namespace Microsoft.DotNet.Cli
                         "--no-build",
                         LocalizableStrings.CommandOptionNoBuildDescription,
                         Accept.NoArguments()),
+                    CommonOptions.InteractiveMsBuildForwardOption(),
                     CommonOptions.NoRestoreOption(),
                     CommonOptions.VerbosityOption()
                 });

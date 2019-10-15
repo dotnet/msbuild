@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="it" original="../LocalizableStrings.resx">
     <body>
@@ -10,6 +10,11 @@
       <trans-unit id="AppDescription">
         <source>pack for msbuild</source>
         <target state="translated">pack per MSBuild</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="translated">Evita la visualizzazione del messaggio di avvio o di copyright.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">

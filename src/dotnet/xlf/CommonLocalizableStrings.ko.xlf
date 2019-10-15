@@ -1,14 +1,77 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="CommandInteractiveOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">명령을 중지하고 사용자 입력 또는 작업을 기다리도록 허용합니다(예: 인증 완료).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">'{0}'에서 프로젝트를 찾을 수 없습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="EnvironmentPathOSXBashManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">도구 디렉터리 '{0}'이(가) 현재 PATH 환경 변수에 없습니다.
+Bash를 사용하는 경우 다음 명령을 실행하여 프로필에 Bash를 추가할 수 있습니다.
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+다음 명령을 실행하여 현재 세션에 Bash를 추가할 수 있습니다.
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathOSXZshManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using zsh, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+And run `zsh -l` to make it available for current session.
+
+You can only add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">도구 디렉터리 '{0}'이(가) 현재 PATH 환경 변수에 없습니다.
+zsh를 사용하는 경우 다음 명령을 실행하여 프로필에 zsh를 추가할 수 있습니다.
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+또한 'zsh -l'을 실행하여 현재 세션에 zsh를 사용하도록 설정합니다.
+
+현재 세션에 추가하려면 다음 명령을 실행해야 합니다.
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
-        <source>Found more than one project in `{0}`. Please specify which one to use.</source>
+        <source>Found more than one project in `{0}`. Specify which one to use.</source>
         <target state="translated">'{0}'에서 프로젝트를 두 개 이상 찾았습니다. 사용할 프로젝트를 지정하세요.</target>
         <note />
       </trans-unit>
@@ -293,7 +356,7 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOne">
-        <source>Please specify at least one {0}.</source>
+        <source>Specify at least one {0}.</source>
         <target state="translated">{0}을(를) 하나 이상 지정하세요.</target>
         <note />
       </trans-unit>
@@ -388,7 +451,7 @@
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyVersion">
-        <source>Please specify a version of the package.</source>
+        <source>Specify a version of the package.</source>
         <target state="translated">패키지 버전을 지정하세요.</target>
         <note />
       </trans-unit>
@@ -473,8 +536,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">{1} 프로젝트에 {0} 참조가 없습니다. ;; {0}은(는) 요청한 항목의 형식(프로젝트, 패키지, p2p)이고 {1}은(는) 작업 중인 개체(프로젝트 파일 또는 솔루션 파일)입니다. </target>
+        <source>There are no {0} references in project {1}.</source>
+        <target state="translated">{1} 프로젝트에 {0} 참조가 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
@@ -483,12 +546,12 @@
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyNewVersion">
-        <source>Please specify new version of the package.</source>
+        <source>Specify new version of the package.</source>
         <target state="translated">패키지의 새 버전을 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyWhichPackageToUpdate">
-        <source>Please specify which package to update.</source>
+        <source>Specify which package to update.</source>
         <target state="translated">업데이트할 패키지를 지정하세요.</target>
         <note />
       </trans-unit>
@@ -518,7 +581,7 @@
         <note />
       </trans-unit>
       <trans-unit id="TemplateCreatedSuccessfully">
-        <source>The template {0} created successfully. Please run "dotnet restore" to get started!</source>
+        <source>The template {0} created successfully. run "dotnet restore" to get started!</source>
         <target state="translated">{0} 템플릿을 만들었습니다. 시작하려면 "dotnet restore"를 실행하세요.</target>
         <note />
       </trans-unit>
@@ -538,12 +601,12 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifiedNameExists">
-        <source>Specified name {0} already exists. Please specify a different name.</source>
+        <source>Specified name {0} already exists. Specify a different name.</source>
         <target state="translated">지정한 이름 {0}이(가) 이미 있습니다. 다른 이름을 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifiedAliasExists">
-        <source>Specified alias {0} already exists. Please specify a different alias.</source>
+        <source>Specified alias {0} already exists. Specify a different alias.</source>
         <target state="translated">지정한 별칭 {0}이(가) 이미 있습니다. 다른 별칭을 지정하세요.</target>
         <note />
       </trans-unit>
@@ -563,7 +626,7 @@
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOneSolutionInDirectory">
-        <source>Found more than one solution file in {0}. Please specify which one to use.</source>
+        <source>Found more than one solution file in {0}. Specify which one to use.</source>
         <target state="translated">{0}에서 솔루션 파일을 두 개 이상 찾았습니다. 사용할 파일을 지정하세요.</target>
         <note />
       </trans-unit>
@@ -583,7 +646,7 @@
         <note />
       </trans-unit>
       <trans-unit id="ProjectNotCompatibleWithFrameworks">
-        <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:</source>
+        <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Review the project you are trying to add and verify that is compatible with the following targets:</source>
         <target state="translated">두 프로젝트 간에 호환되지 않는 대상 프레임워크 때문에 '{0}' 프로젝트를 추가할 수 없습니다. 추가하려는 프로젝트를 검토하고 다음 대상과 호환되는지 확인하세요.</target>
         <note />
       </trans-unit>
@@ -600,7 +663,7 @@
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
-        <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Please contact your SDK provider for support.</source>
+        <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Contact your SDK provider for support.</source>
         <target state="translated">'{0}' 프로젝트는 알 수 없는 프로젝트 형식이고 솔루션 파일에 추가할 수 없습니다. SDK 공급자에 문의하여 지원을 받으세요.</target>
         <note />
       </trans-unit>
@@ -722,43 +785,18 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">도구 디렉터리 '{0}'이(가) 현재 PATH 환경 변수에 있지 않습니다.
-Bash를 사용하는 경우 다음 명령을 실행하여 프로필에 추가할 수 있습니다.
+        <target state="translated">도구 디렉터리 '{0}'이(가) 현재 PATH 환경 변수에 없습니다.
+Bash를 사용하는 경우 다음 명령을 실행하여 프로필에 Bash를 추가할 수 있습니다.
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-다음 명령을 실행하여 현재 세션에 추가할 수 있습니다.
-
-export PATH="$PATH:{0}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="EnvironmentPathOSXManualInstructions">
-        <source>Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using bash, you can add it to your profile by running the following command:
-
-cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
-export PATH="$PATH:{0}"
-EOF
-
-You can add it to the current session by running the following command:
+다음 명령을 실행하여 현재 세션에 Bash를 추가할 수 있습니다.
 
 export PATH="$PATH:{0}"
-</source>
-        <target state="translated">도구 디렉터리 '{0}'이(가) 현재 PATH 환경 변수에 있지 않습니다.
-Bash를 사용하는 경우 다음 명령을 실행하여 프로필에 추가할 수 있습니다.
-
-cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
-export PATH="$PATH:{0}"
-EOF
-
-다음 명령을 실행하여 현재 세션에 추가할 수 있습니다.
-
-export PATH="$PATH:{0}"</target>
+</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstructions">
@@ -827,22 +865,22 @@ setx PATH "%PATH%;{0}"
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsHigher">
-        <source>Format version is higher than supported. This tool may not be supported in this SDK version. Please update your SDK.</source>
+        <source>Format version is higher than supported. This tool may not be supported in this SDK version. Update your SDK.</source>
         <target state="translated">형식 버전이 지원되는 버전보다 높습니다. 이 SDK 버전에서 이 도구를 지원하지 않을 수 있습니다. SDK를 업데이트하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMalformed">
-        <source>Format version is malformed. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
+        <source>Format version is malformed. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
         <target state="translated">형식 버전의 형식이 잘못되었습니다. 이 SDK 버전에서 이 도구를 지원하지 않을 수 있습니다. 도구 작성자에게 문의하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMissing">
-        <source>Format version is missing. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
+        <source>Format version is missing. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
         <target state="translated">형식 버전이 누락되었습니다. 이 SDK 버전에서 이 도구를 지원하지 않을 수 있습니다. 도구 작성자에게 문의하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToSetToolsPathEnvironmentVariable">
-        <source>Failed to add '{0}' to the PATH environment variable. Please add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
+        <source>Failed to add '{0}' to the PATH environment variable. Add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
         <target state="translated">PATH 환경 변수에 '{0}'을(를) 추가하지 못했습니다. 'dotnet tool install'로 설치한 도구를 사용하려면 이 디렉터리를 PATH에 추가하세요.</target>
         <note />
       </trans-unit>
@@ -899,11 +937,6 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="SolutionOrProjectArgumentName">
         <source>PROJECT | SOLUTION</source>
         <target state="translated">프로젝트 | 솔루션</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandInteractiveOptionDescription">
-        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="translated">명령을 중지하고 사용자 입력 또는 작업을 기다리도록 허용합니다(예: 인증 완료).</target>
         <note />
       </trans-unit>
     </body>

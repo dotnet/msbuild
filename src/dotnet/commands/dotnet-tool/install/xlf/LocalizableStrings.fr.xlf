@@ -1,12 +1,51 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="fr" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="translated">L'option locale (--local), l'option globale (--global) et l'option de chemin d'outil (--tool-path) ne peuvent pas être utilisées simultanément. Spécifiez une seule des options : {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InstallationSucceeded">
         <source>You can invoke the tool using the following command: {0}
 Tool '{1}' (version '{2}') was successfully installed.</source>
         <target state="translated">Vous pouvez appeler l'outil à l'aide de la commande suivante : {0}
 L'outil '{1}' (version '{2}') a été installé correctement.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalOptionDescription">
+        <source>Install the tool and add to the local tool manifest (default).</source>
+        <target state="translated">Installe l'outil et l'ajoute au manifeste d'outils locaux (par défaut).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalOptionDoesNotSupportFrameworkOption">
+        <source>The local option(--local) does not support the framework option (--framework).</source>
+        <target state="translated">L'option locale (--local) ne prend pas en charge l'option de framework (--framework).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalToolInstallationSucceeded">
+        <source>You can invoke the tool from this directory using the following commands: 'dotnet tool run {0}' or 'dotnet {0}'.
+Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</source>
+        <target state="translated">Vous pouvez appeler l'outil à partir de ce répertoire à l'aide des commandes suivantes : 'dotnet tool run {0}' ou 'dotnet {0}'.
+L'outil '{1}' (version '{2}') a été correctement installé. L'entrée est ajoutée au fichier manifeste {3}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionDescription">
+        <source>Path to the manifest file.</source>
+        <target state="translated">Chemin du fichier manifeste.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoManifestGuide">
+        <source>If you intended to install a global tool, add `--global` to the command.
+If you would like to create a manifest, use `dotnet new tool-manifest`, usually in the repo root directory.</source>
+        <target state="translated">Si vous avez l'intention d'installer un outil global, ajoutez '--global' à la commande.
+Si vous souhaitez créer un manifeste, utilisez 'dotnet new tool-manifest', généralement dans le répertoire racine de dépôt.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -15,8 +54,8 @@ L'outil '{1}' (version '{2}') a été installé correctement.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Install a tool for use on the command line.</source>
-        <target state="translated">Installez un outil à utiliser sur la ligne de commande.</target>
+        <source>Install global or local tool. Local tools are added to manifest and restored.</source>
+        <target state="translated">Installe un outil global ou local. Les outils locaux sont ajoutés au manifeste, puis restaurés.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -40,13 +79,13 @@ L'outil '{1}' (version '{2}') a été installé correctement.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Please specify one tool Package Id to install.</source>
+        <source>Specify one tool Package Id to install.</source>
         <target state="translated">Spécifiez un ID de package d'outil à installer.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
-        <source>Install the tool to the current user's tools directory.</source>
-        <target state="translated">Installez l'outil dans le répertoire des outils de l'utilisateur actuel.</target>
+        <source>Install the tool for the current user.</source>
+        <target state="translated">Installe l'outil pour l'utilisateur actuel.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">
@@ -60,7 +99,7 @@ L'outil '{1}' (version '{2}') a été installé correctement.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
-        <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
+        <source>Tool '{0}' failed to install. Contact the tool author for assistance.</source>
         <target state="translated">Impossible d'installer l'outil '{0}'. Contactez le créateur de l'outil pour obtenir de l'aide.</target>
         <note />
       </trans-unit>
@@ -89,16 +128,6 @@ L'outil '{1}' (version '{2}') a été installé correctement.</target>
         <target state="translated">La version spécifiée '{0}' n'est pas une plage de versions NuGet valide.</target>
         <note />
       </trans-unit>
-      <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="translated">Spécifiez l'option globale (--global) ou l'option de chemin de l'outil (--tool-path).</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="translated">(--global) est en conflit avec l'option de chemin de l'outil (--tool-path). Spécifiez uniquement l'une des options.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ToolInstallationFailed">
         <source>Tool '{0}' failed to install.</source>
         <target state="translated">Impossible d'installer l'outil '{0}'.</target>
@@ -110,13 +139,17 @@ L'outil '{1}' (version '{2}') a été installé correctement.</target>
 * You are attempting to install a preview release and did not use the --version option to specify the version.
 * A package by this name was found, but it was not a .NET Core tool.
 * The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
-* You mistyped the name of the tool.</source>
-        <target state="translated">Échec d'installation de l'outil '{0}'. Causes possibles de cet échec :
+* You mistyped the name of the tool.
 
-* Vous essayez d'installer une préversion, mais vous n'avez pas utilisé l'option --version pour spécifier la version.
+For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</source>
+        <target state="translated">Échec de l'installation de l'outil '{0}'. Causes possibles de cet échec :
+
+* Vous essayez d'installer une préversion, et vous n'avez pas utilisé l'option --version pour spécifier la version.
 * Un package portant ce nom a été trouvé, mais il ne s'agit pas d'un outil .NET Core.
-* Le flux NuGet exigé n'est pas accessible, peut-être en raison d'un problème de connexion Internet.
-* Vous avez mal tapé le nom de l'outil.</target>
+* Le flux NuGet nécessaire n'est pas accessible, peut-être en raison d'un problème de connexion à Internet.
+* Vous avez mal tapé le nom de l'outil.
+
+Pour plus d'informations, notamment sur le nommage de package, accédez à https://aka.ms/failure-installing-tool</target>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionDescription">

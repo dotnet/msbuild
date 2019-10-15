@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.CmdOutputDirDescription,
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.CmdOutputDir)
-                        .ForwardAsSingle(o => $"-property:PackageOutputPath={o.Arguments.Single()}")),
+                        .ForwardAsSingle(o => $"-property:PackageOutputPath={CommandDirectoryContext.GetFullPath(o.Arguments.Single())}")),
                 Create.Option(
                     "--no-build",
                     LocalizableStrings.CmdNoBuildOptionDescription,
@@ -43,6 +43,12 @@ namespace Microsoft.DotNet.Cli
                     "-s|--serviceable",
                     LocalizableStrings.CmdServiceableDescription,
                     Accept.NoArguments().ForwardAs("-property:Serviceable=true")),
+                Create.Option(
+                    "--nologo|/nologo",
+                    LocalizableStrings.CmdNoLogo,
+                    Accept.NoArguments()
+                          .ForwardAs("-nologo")),
+                CommonOptions.InteractiveMsBuildForwardOption(),
                 CommonOptions.NoRestoreOption(),
                 CommonOptions.VerbosityOption());
     }

@@ -16,28 +16,34 @@ namespace Microsoft.DotNet.Cli
                 "build",
                 LocalizableStrings.AppFullName,
                 Accept.ZeroOrMoreArguments()
-                      .With(name: CommonLocalizableStrings.ProjectArgumentName,
-                            description: CommonLocalizableStrings.ProjectArgumentDescription),
+                      .With(name: CommonLocalizableStrings.SolutionOrProjectArgumentName,
+                            description: CommonLocalizableStrings.SolutionOrProjectArgumentDescription),
                 CommonOptions.HelpOption(),
                 Create.Option(
                     "-o|--output",
                     LocalizableStrings.OutputOptionDescription,
                     Accept.ExactlyOneArgument()
                           .With(name: LocalizableStrings.OutputOptionName)
-                          .ForwardAsSingle(o => $"-property:OutputPath={o.Arguments.Single()}")),
+                          .ForwardAsSingle(o => $"-property:OutputPath={CommandDirectoryContext.GetFullPath(o.Arguments.Single())}")),
                 CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription),
                 CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription),
                 CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription),
                 CommonOptions.VersionSuffixOption(),
                 Create.Option(
                     "--no-incremental",
-                    LocalizableStrings.NoIncrementialOptionDescription),
+                    LocalizableStrings.NoIncrementalOptionDescription),
                 Create.Option(
                     "--no-dependencies",
                     LocalizableStrings.NoDependenciesOptionDescription,
                     Accept.NoArguments()
                           .ForwardAs("-property:BuildProjectReferences=false")),
+                Create.Option(
+                    "--nologo|/nologo",
+                    LocalizableStrings.CmdNoLogo,
+                    Accept.NoArguments()
+                          .ForwardAs("-nologo")),
                 CommonOptions.NoRestoreOption(),
+                CommonOptions.InteractiveMsBuildForwardOption(),
                 CommonOptions.VerbosityOption());
     }
 }

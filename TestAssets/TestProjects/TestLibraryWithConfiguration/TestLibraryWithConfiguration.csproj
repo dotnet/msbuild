@@ -4,8 +4,4 @@
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="NETStandard.Library" Version="1.6.0" />
-  </ItemGroup>
 </Project>

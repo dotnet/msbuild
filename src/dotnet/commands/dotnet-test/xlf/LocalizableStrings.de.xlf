@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="de" original="../LocalizableStrings.resx">
     <body>
@@ -10,6 +10,11 @@
       <trans-unit id="AppDescription">
         <source>Test Driver for the .NET Platform</source>
         <target state="translated">Testtreiber für die .NET-Plattform</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Run test(s), without displaying Microsoft Testplatform banner</source>
+        <target state="translated">Test(s) ohne Anzeige des Microsoft-Testplattformbanners ausführen</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSettingsFile">
@@ -65,11 +70,11 @@
                                         Log in trx format using a unique file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         See https://aka.ms/vstest-report for more information on logger arguments.</source>
-        <target state="translated">Die Protokollierung, die für Testergebnisse verwendet werden soll:
-Beispiele:
-Im TRX-Format mit einem eindeutigen Dateinamen protokollieren: --logger trx
-Im TRX-Format mit dem angegebenen Dateinamen protokollieren: --logger "trx;Protokolldateiname=&lt;Testergebnisse.trx&gt;"
-Weitere Informationen zu Protokollierungsargumenten finden Sie unter https://aka.ms/vstest-report.</target>
+        <target state="translated">Die für Testergebnisse zu verwendende Protokollierung.
+                                        Beispiele:
+                                        Protokollierung im TRX-Format mit einem eindeutigen Dateinamen: --logger trx
+                                        Protokollierung im TRX-Format mit dem angegebenen Dateinamen: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
+                                        Weitere Informationen zu Protokollierungsargumenten finden Sie unter https://aka.ms/vstest-report.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">

@@ -62,6 +62,10 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
         public virtual int Execute()
         {
+            // Ignore Ctrl-C for the remainder of the command's execution
+            // Forwarding commands will just spawn the child process and exit
+            Console.CancelKeyPress += (sender, e) => { e.Cancel = true; };
+
             return GetProcessStartInfo().Execute();
         }
     }

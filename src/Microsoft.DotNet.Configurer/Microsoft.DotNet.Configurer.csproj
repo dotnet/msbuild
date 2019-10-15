@@ -1,15 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <WarningsAsErrors>true</WarningsAsErrors>
-    <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>git://github.com/dotnet/cli</RepositoryUrl>
     <DefineConstants Condition="'$(IncludeAspNetCoreRuntime)' == 'false'">$(DefineConstants);EXCLUDE_ASPNETCORE</DefineConstants>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,11 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
     <PackageReference Include="NuGet.Common" Version="$(NuGetCommonPackageVersion)" />
     <PackageReference Include="NuGet.Configuration" Version="$(NuGetConfigurationPackageVersion)" />
-    <PackageReference Include="Microsoft.DotNet.Archive" Version="$(MicrosoftDotNetArchivePackageVersion)" />
-    <PackageReference Include="XliffTasks" Version="$(XliffTasksPackageVersion)" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>

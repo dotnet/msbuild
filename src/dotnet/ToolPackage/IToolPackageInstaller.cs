@@ -14,5 +14,10 @@ namespace Microsoft.DotNet.ToolPackage
             VersionRange versionRange = null,
             string targetFramework = null,
             string verbosity = null);
+
+        IToolPackage InstallPackageToExternalManagedLocation(PackageLocation packageLocation, PackageId packageId,
+            VersionRange versionRange = null,
+            string targetFramework = null,
+            string verbosity = null);
     }
 }

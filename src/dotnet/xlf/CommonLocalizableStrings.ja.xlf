@@ -2,13 +2,76 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ja" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="CommandInteractiveOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">コマンドを停止して、ユーザーの入力またはアクション (認証の完了など) を待機できるようにします。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">`{0}` にプロジェクトが見つかりませんでした。</target>
         <note />
       </trans-unit>
+      <trans-unit id="EnvironmentPathOSXBashManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">ツール ディレクトリ '{0}' は現在、PATH 環境変数にありません。
+Bash を使用している場合、次のコマンドを実行してプロファイルに追加できます。
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+次のコマンドを実行して現在のセッションに追加できます。
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathOSXZshManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using zsh, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+And run `zsh -l` to make it available for current session.
+
+You can only add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">ツール ディレクトリ '{0}' は現在、PATH 環境変数にありません。
+zsh を使用している場合、次のコマンドを実行してプロファイルに追加できます:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
+# .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+`zsh -l` を実行して現在のセッションで利用できるようにします。
+
+これは、次のコマンドを実行することによってのみ、現行のセッションに追加できます:
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
-        <source>Found more than one project in `{0}`. Please specify which one to use.</source>
+        <source>Found more than one project in `{0}`. Specify which one to use.</source>
         <target state="translated">`{0}` に複数のプロジェクトが見つかりました。使用するプロジェクトを指定してください。</target>
         <note />
       </trans-unit>
@@ -293,7 +356,7 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOne">
-        <source>Please specify at least one {0}.</source>
+        <source>Specify at least one {0}.</source>
         <target state="translated">少なくとも 1 つの {0} を指定してください。</target>
         <note />
       </trans-unit>
@@ -388,7 +451,7 @@
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyVersion">
-        <source>Please specify a version of the package.</source>
+        <source>Specify a version of the package.</source>
         <target state="translated">パッケージのバージョンを指定してください。</target>
         <note />
       </trans-unit>
@@ -473,8 +536,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">プロジェクト {1} 内に {0} 参照がありません。;; {0} は要求中のアイテムの種類であり (プロジェクト、パッケージ、p2p)、{1} は操作されるオブジェクト (プロジェクト ファイルまたはソリューション ファイル) です。</target>
+        <source>There are no {0} references in project {1}.</source>
+        <target state="translated">プロジェクト {1} には {0} 参照がありません。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
@@ -483,12 +546,12 @@
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyNewVersion">
-        <source>Please specify new version of the package.</source>
+        <source>Specify new version of the package.</source>
         <target state="translated">パッケージの新しいバージョンを指定してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyWhichPackageToUpdate">
-        <source>Please specify which package to update.</source>
+        <source>Specify which package to update.</source>
         <target state="translated">更新するパッケージを指定してください。</target>
         <note />
       </trans-unit>
@@ -518,8 +581,8 @@
         <note />
       </trans-unit>
       <trans-unit id="TemplateCreatedSuccessfully">
-        <source>The template {0} created successfully. Please run "dotnet restore" to get started!</source>
-        <target state="translated">テンプレート {0} が正常に作成されました。"dotnet restore" を実行して開始してください。</target>
+        <source>The template {0} created successfully. run "dotnet restore" to get started!</source>
+        <target state="translated">テンプレート {0} が正常に作成されました。"dotnet restore" を実行して開始します。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInstalledSuccesfully">
@@ -538,12 +601,12 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifiedNameExists">
-        <source>Specified name {0} already exists. Please specify a different name.</source>
+        <source>Specified name {0} already exists. Specify a different name.</source>
         <target state="translated">指定した名前 {0} は既に存在します。別の名前を指定してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifiedAliasExists">
-        <source>Specified alias {0} already exists. Please specify a different alias.</source>
+        <source>Specified alias {0} already exists. Specify a different alias.</source>
         <target state="translated">指定したエイリアス {0} は既に存在します。別のエイリアスを指定してください。</target>
         <note />
       </trans-unit>
@@ -563,8 +626,8 @@
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOneSolutionInDirectory">
-        <source>Found more than one solution file in {0}. Please specify which one to use.</source>
-        <target state="translated">{0} に複数のソリューションが見つかりました。どれを使用するか指定してください。</target>
+        <source>Found more than one solution file in {0}. Specify which one to use.</source>
+        <target state="translated">{0} に複数のソリューション ファイルが見つかりました。使用するファイルを指定してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionAlreadyContainsProject">
@@ -583,7 +646,7 @@
         <note />
       </trans-unit>
       <trans-unit id="ProjectNotCompatibleWithFrameworks">
-        <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:</source>
+        <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Review the project you are trying to add and verify that is compatible with the following targets:</source>
         <target state="translated">2 つのプロジェクト間のターゲット フレームワークに互換性がないため、プロジェクト `{0}` を追加できません。追加しようとしているプロジェクトを確認し、次のターゲットと互換性があることを確認してください:</target>
         <note />
       </trans-unit>
@@ -600,7 +663,7 @@
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
-        <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Please contact your SDK provider for support.</source>
+        <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Contact your SDK provider for support.</source>
         <target state="translated">プロジェクト '{0}' のプロジェクト タイプは不明であるため、ソリューション ファイルに追加することができません。サポートが必要な場合は、SDK プロバイダーにお問い合わせください。</target>
         <note />
       </trans-unit>
@@ -651,7 +714,7 @@
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
         <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
-        <target state="translated">.NET Core SDK をインストールしたばかりなので、インストールしたツールを実行する前に、ターミナルを再び開く必要があります。</target>
+        <target state="translated">.NET Core SDK をインストールしたばかりなので、インストールしたツールを実行する前に、端末を再び開く必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
@@ -722,43 +785,18 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">ツール ディレクトリ '{0}' は現在、PATH 環境変数に含まれていません。
-Bash を使用する場合は、次のコマンドを実行してプロファイルに追加できます:
+        <target state="translated">ツール ディレクトリ '{0}' は現在、PATH 環境変数にありません。
+Bash を使用している場合、次のコマンドを実行してプロファイルに追加できます。
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-また、次のコマンドを実行することにより、現在のセッションに追加できます:
-
-export PATH="$PATH:{0}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="EnvironmentPathOSXManualInstructions">
-        <source>Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using bash, you can add it to your profile by running the following command:
-
-cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
-export PATH="$PATH:{0}"
-EOF
-
-You can add it to the current session by running the following command:
+次のコマンドを実行して現在のセッションに追加できます。
 
 export PATH="$PATH:{0}"
-</source>
-        <target state="translated">PATH 環境変数には、ツール ディレクトリ '{0}' が含まれていません。
-Bash を使用する場合は、次のコマンドを実行してプロファイルに追加できます:
-
-cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
-export PATH="$PATH:{0}"
-EOF
-
-また、現在のセッションに追加する場合は、次のコマンドを実行してください:
-
-export PATH="$PATH:{0}"</target>
+</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstructions">
@@ -827,23 +865,23 @@ setx PATH "%PATH%;{0}"
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsHigher">
-        <source>Format version is higher than supported. This tool may not be supported in this SDK version. Please update your SDK.</source>
-        <target state="translated">形式のバージョンがサポートされているものを超えています。このツールはこのバージョンの SDK ではサポートされていない可能性があります。SDK を更新してください。</target>
+        <source>Format version is higher than supported. This tool may not be supported in this SDK version. Update your SDK.</source>
+        <target state="translated">形式のバージョンがサポートされているものを超えています。このツールはこのバージョンの SDK ではサポートされていない可能性があります。SDK を更新します。</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMalformed">
-        <source>Format version is malformed. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
+        <source>Format version is malformed. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
         <target state="translated">形式のバージョンが無効です。このツールはこのバージョンの SDK ではサポートされていない可能性があります。ツールの作成者にお問い合わせください。</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMissing">
-        <source>Format version is missing. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
+        <source>Format version is missing. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
         <target state="translated">形式のバージョンが見つかりません。このツールはこのバージョンの SDK ではサポートされていない可能性があります。ツールの作成者にお問い合わせください。</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToSetToolsPathEnvironmentVariable">
-        <source>Failed to add '{0}' to the PATH environment variable. Please add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
-        <target state="translated">'{0}' を PATH 環境変数に追加できませんでした。'dotnet tool install' でインストールしたツールを使用するには、このディレクトリを PATH に追加してください。</target>
+        <source>Failed to add '{0}' to the PATH environment variable. Add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
+        <target state="translated">'{0}' を PATH 環境変数に追加できませんでした。'dotnet tool install' でインストールしたツールを使用するには、このディレクトリを PATH に追加します。</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOnePackagedShimAvailable">
@@ -899,11 +937,6 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="SolutionOrProjectArgumentName">
         <source>PROJECT | SOLUTION</source>
         <target state="translated">プロジェクト | ソリューション</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandInteractiveOptionDescription">
-        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="translated">コマンドを停止して、ユーザーの入力またはアクション (認証の完了など) を待機できるようにします。</target>
         <note />
       </trans-unit>
     </body>

@@ -127,6 +127,6 @@
     <value>The package reference to remove.</value>
   </data>
   <data name="SpecifyExactlyOnePackageReference" xml:space="preserve">
-    <value>Please specify only one package reference to remove.</value>
+    <value>Specify only one package reference to remove.</value>
   </data>
 </root>

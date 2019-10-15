@@ -6,10 +6,6 @@
     <TargetFrameworks>net451;netcoreapp2.1</TargetFrameworks>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
-  </ItemGroup>
-
   <ItemGroup>
     <!-- Existing but empty item group - do not remove -->
   </ItemGroup>

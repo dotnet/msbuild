@@ -20,8 +20,12 @@ namespace Microsoft.DotNet.Cli.Utils
                 StartInfo = startInfo
             };
 
-            process.Start();
-            process.WaitForExit();
+            using (var reaper = new ProcessReaper(process))
+            {
+                process.Start();
+                reaper.NotifyProcessStarted();
+                process.WaitForExit();
+            }
 
             return process.ExitCode;
         }
@@ -41,18 +45,22 @@ namespace Microsoft.DotNet.Cli.Utils
 
             process.EnableRaisingEvents = true;
 
-            process.Start();
+            using (var reaper = new ProcessReaper(process))
+            {
+                process.Start();
+                reaper.NotifyProcessStarted();
 
-            var taskOut = outStream.BeginRead(process.StandardOutput);
-            var taskErr = errStream.BeginRead(process.StandardError);
+                var taskOut = outStream.BeginRead(process.StandardOutput);
+                var taskErr = errStream.BeginRead(process.StandardError);
 
-            process.WaitForExit();
+                process.WaitForExit();
 
-            taskOut.Wait();
-            taskErr.Wait();
+                taskOut.Wait();
+                taskErr.Wait();
 
-            stdOut = outStream.CapturedOutput;
-            stdErr = errStream.CapturedOutput;
+                stdOut = outStream.CapturedOutput;
+                stdErr = errStream.CapturedOutput;
+            }
 
             return process.ExitCode;
         }

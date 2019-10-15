@@ -3,19 +3,15 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net451;netcoreapp2.2</TargetFrameworks>
+    <TargetFrameworks>net451;netcoreapp3.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="dotnet-desktop-and-portable" Version="1.0.0-*" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.2' ">
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
-  </ItemGroup>
-
   <ItemGroup>
-    <DotNetCliToolReference Include="dotnet-dependency-tool-invoker" Version="1.0.0-*" />
+    <DotNetCliToolReference Include="dotnet-hello" Version="1.0.0-*" />
   </ItemGroup>
 
 </Project>

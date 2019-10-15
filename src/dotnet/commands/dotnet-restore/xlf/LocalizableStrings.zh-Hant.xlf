@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
     <body>
@@ -87,11 +87,6 @@
 This is equivalent to deleting project.assets.json.</source>
         <target state="translated">在即使上次還原已成功的情況下，仍然強制解決所有相依性。
 如此等同於刪除 project.assets.json。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdInteractiveRestoreOptionDescription">
-        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="translated">允許命令停止並等候使用者輸入或動作 (例如: 完成驗證)。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdLockedModeOptionDescription">

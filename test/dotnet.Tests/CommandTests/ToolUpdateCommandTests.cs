@@ -2,255 +2,97 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.ToolPackage;
-using Microsoft.DotNet.Tools.Tool.Install;
-using Microsoft.DotNet.Tools.Tests.ComponentMocks;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.Tools.Tool.Update;
-using Microsoft.Extensions.DependencyModel.Tests;
-using Microsoft.Extensions.EnvironmentAbstractions;
+using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using Parser = Microsoft.DotNet.Cli.Parser;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Update.LocalizableStrings;
-using Microsoft.DotNet.ShellShim;
-using System.IO;
 
-namespace Microsoft.DotNet.Tests.Commands
+namespace Microsoft.DotNet.Tests.Commands.Tool
 {
     public class ToolUpdateCommandTests
     {
         private readonly BufferedReporter _reporter;
-        private readonly IFileSystem _fileSystem;
-        private readonly EnvironmentPathInstructionMock _environmentPathInstructionMock;
-        private readonly ToolPackageStoreMock _store;
-        private readonly PackageId _packageId = new PackageId("global.tool.console.demo");
-        private readonly List<MockFeed> _mockFeeds;
-        private const string LowerPackageVersion = "1.0.4";
-        private const string HigherPackageVersion = "1.0.5";
-        private readonly string _shimsDirectory;
-        private readonly string _toolsDirectory;
+        private const string PackageId = "global.tool.console.demo";
+
 
         public ToolUpdateCommandTests()
         {
             _reporter = new BufferedReporter();
-            _fileSystem = new FileSystemMockBuilder().UseCurrentSystemTemporaryDirectory().Build();
-            var tempDirectory = _fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath;
-            _shimsDirectory = Path.Combine(tempDirectory, "shims");
-            _toolsDirectory = Path.Combine(tempDirectory, "tools");
-            _environmentPathInstructionMock = new EnvironmentPathInstructionMock(_reporter, _shimsDirectory);
-            _store = new ToolPackageStoreMock(new DirectoryPath(_toolsDirectory), _fileSystem);
-            _mockFeeds = new List<MockFeed>
-            {
-                new MockFeed
-                {
-                    Type = MockFeedType.FeedFromLookUpNugetConfig,
-                    Packages = new List<MockFeedPackage>
-                    {
-                        new MockFeedPackage
-                        {
-                            PackageId = _packageId.ToString(),
-                            Version = LowerPackageVersion
-                        },
-                        new MockFeedPackage
-                        {
-                            PackageId = _packageId.ToString(),
-                            Version = HigherPackageVersion
-                        }
-                    }
-                }
-            };
-        }
-
-        [Fact]
-        public void GivenANonExistentPackageItErrors()
-        {
-            var packageId = "does.not.exist";
-            var command = CreateUpdateCommand($"-g {packageId}");
-
-            Action a = () => command.Execute();
-
-            a.ShouldThrow<GracefulException>().And.Message
-                .Should().Contain(
-                    string.Format(
-                        LocalizableStrings.ToolNotInstalled,
-                        packageId));
-        }
-
-        [Fact]
-        public void GivenAnExistedLowerversionInstallationWhenCallItCanUpdateThePackageVersion()
-        {
-            CreateInstallCommand($"-g {_packageId} --version {LowerPackageVersion}").Execute();
-
-            var command = CreateUpdateCommand($"-g {_packageId}");
-
-            command.Execute();
-
-            _store.EnumeratePackageVersions(_packageId).Single().Version.ToFullString().Should()
-                .Be(HigherPackageVersion);
-        }
-
-        [Fact]
-        public void GivenAnExistedLowerversionInstallationWhenCallItCanPrintSucessMessage()
-        {
-            CreateInstallCommand($"-g {_packageId} --version {LowerPackageVersion}").Execute();
-            _reporter.Lines.Clear();
-
-            var command = CreateUpdateCommand($"-g {_packageId}");
-
-            command.Execute();
-
-            _reporter.Lines.First().Should().Contain(string.Format(
-                LocalizableStrings.UpdateSucceeded,
-                _packageId, LowerPackageVersion, HigherPackageVersion));
-        }
-
-        [Fact]
-        public void GivenAnExistedSameVersionInstallationWhenCallItCanPrintSucessMessage()
-        {
-            CreateInstallCommand($"-g {_packageId} --version {HigherPackageVersion}").Execute();
-            _reporter.Lines.Clear();
-
-            var command = CreateUpdateCommand($"-g {_packageId}");
-
-            command.Execute();
-
-            _reporter.Lines.First().Should().Contain(string.Format(
-                LocalizableStrings.UpdateSucceededVersionNoChange,
-                _packageId, HigherPackageVersion));
-        }
-
-        [Fact]
-        public void GivenAnExistedLowerversionWhenReinstallThrowsIthasTheFirstLineIndicateUpdateFailure()
-        {
-            CreateInstallCommand($"-g {_packageId} --version {LowerPackageVersion}").Execute();
-            _reporter.Lines.Clear();
-
-            ParseResult result = Parser.Instance.Parse("dotnet tool update " + $"-g {_packageId}");
-            var command = new ToolUpdateCommand(
-                result["dotnet"]["tool"]["update"],
-                result,
-                (location, forwardArguments) => (_store,
-                    new ToolPackageInstallerMock(
-                        _fileSystem,
-                        _store,
-                        new ProjectRestorerMock(
-                            _fileSystem,
-                            _reporter,
-                            _mockFeeds
-                        ),
-                        installCallback: () => throw new ToolConfigurationException("Simulated error"))),
-                _ => GetMockedShellShimRepository(),
-                _reporter);
-
-            Action a = () => command.Execute();
-            a.ShouldThrow<GracefulException>().And.Message.Should().Contain(
-                string.Format(LocalizableStrings.UpdateToolFailed, _packageId) + Environment.NewLine +
-                string.Format(Tools.Tool.Install.LocalizableStrings.InvalidToolConfiguration, "Simulated error"));
-        }
-
-        [Fact]
-        public void GivenAnExistedLowerversionWhenReinstallThrowsItRollsBack()
-        {
-            CreateInstallCommand($"-g {_packageId} --version {LowerPackageVersion}").Execute();
-            _reporter.Lines.Clear();
-
-            ParseResult result = Parser.Instance.Parse("dotnet tool update " + $"-g {_packageId}");
-            var command = new ToolUpdateCommand(
-                result["dotnet"]["tool"]["update"],
-                result,
-                (location, forwardArguments) => (_store,
-                    new ToolPackageInstallerMock(
-                        _fileSystem,
-                        _store,
-                        new ProjectRestorerMock(
-                            _fileSystem,
-                            _reporter,
-                            _mockFeeds
-                        ),
-                        installCallback: () => throw new ToolConfigurationException("Simulated error"))),
-                _ => GetMockedShellShimRepository(),
-                _reporter);
-
-            Action a = () => command.Execute();
-
-            _store.EnumeratePackageVersions(_packageId).Single().Version.ToFullString().Should()
-                .Be(LowerPackageVersion);
         }
 
         [Fact]
         public void WhenRunWithBothGlobalAndToolPathShowErrorMessage()
         {
-            var command = CreateUpdateCommand($"-g --tool-path /tmp/folder {_packageId}");
+            var result = Parser.Instance.Parse($"dotnet tool update -g --tool-path /tmp/folder {PackageId}");
+            var appliedCommand = result["dotnet"]["tool"]["update"];
 
-            Action a = () => command.Execute();
+            var toolUpdateCommand = new ToolUpdateCommand(
+                appliedCommand,
+                result);
+
+            Action a = () => toolUpdateCommand.Execute();
 
             a.ShouldThrow<GracefulException>().And.Message
-                .Should().Contain(
-                    LocalizableStrings.UpdateToolCommandInvalidGlobalAndToolPath);
+                .Should().Contain(string.Format(
+                    LocalizableStrings.UpdateToolCommandInvalidGlobalAndLocalAndToolPath,
+                    "global tool-path"));
         }
 
         [Fact]
-        public void WhenRunWithNeitherOfGlobalNorToolPathShowErrorMessage()
+        public void WhenRunWithBothGlobalAndLocalShowErrorMessage()
         {
-            var command = CreateUpdateCommand($"{_packageId}");
+            var result = Parser.Instance.Parse($"dotnet tool update --local --tool-path /tmp/folder {PackageId}");
+            var appliedCommand = result["dotnet"]["tool"]["update"];
 
-            Action a = () => command.Execute();
+            var toolUpdateCommand = new ToolUpdateCommand(
+                appliedCommand,
+                result);
+
+            Action a = () => toolUpdateCommand.Execute();
 
             a.ShouldThrow<GracefulException>().And.Message
                 .Should().Contain(
-                    LocalizableStrings.UpdateToolCommandNeedGlobalOrToolPath);
+                    string.Format(LocalizableStrings.UpdateToolCommandInvalidGlobalAndLocalAndToolPath,
+                        "local tool-path"));
         }
 
-        private ToolInstallCommand CreateInstallCommand(string options)
+        [Fact]
+        public void WhenRunWithGlobalAndToolManifestShowErrorMessage()
         {
-            ParseResult result = Parser.Instance.Parse("dotnet tool install " + options);
+            var result =
+                Parser.Instance.Parse($"dotnet tool update -g --tool-manifest folder/my-manifest.format {PackageId}");
+            var appliedCommand = result["dotnet"]["tool"]["update"];
 
-            return new ToolInstallCommand(
-                result["dotnet"]["tool"]["install"],
-                result,
-                (location, forwardArguments) => (_store, new ToolPackageInstallerMock(
-                    _fileSystem,
-                    _store,
-                    new ProjectRestorerMock(
-                        _fileSystem,
-                        _reporter,
-                        _mockFeeds
-                    ))),
-                (_) => GetMockedShellShimRepository(),
-                _environmentPathInstructionMock,
-                _reporter);
+            var toolUpdateCommand = new ToolUpdateCommand(
+                appliedCommand,
+                result);
+
+            Action a = () => toolUpdateCommand.Execute();
+
+            a.ShouldThrow<GracefulException>().And.Message
+                .Should().Contain(Tools.Tool.Common.LocalizableStrings.OnlyLocalOptionSupportManifestFileOption);
         }
 
-        private ToolUpdateCommand CreateUpdateCommand(string options)
+        [Fact]
+        public void WhenRunWithToolPathAndToolManifestShowErrorMessage()
         {
-            ParseResult result = Parser.Instance.Parse("dotnet tool update " + options);
+            var result =
+                Parser.Instance.Parse(
+                    $"dotnet tool update --tool-path /tmp/folder --tool-manifest folder/my-manifest.format {PackageId}");
+            var appliedCommand = result["dotnet"]["tool"]["update"];
 
-            return new ToolUpdateCommand(
-                result["dotnet"]["tool"]["update"],
-                result,
-                (location, forwardArguments) => (_store, new ToolPackageInstallerMock(
-                    _fileSystem,
-                    _store,
-                    new ProjectRestorerMock(
-                        _fileSystem,
-                        _reporter,
-                        _mockFeeds
-                    ))),
-                (_) => GetMockedShellShimRepository(),
-                _reporter);
-        }
+            var toolUpdateCommand = new ToolUpdateCommand(
+                appliedCommand,
+                result);
 
-        private ShellShimRepository GetMockedShellShimRepository()
-        {
-            return new ShellShimRepository(
-                    new DirectoryPath(_shimsDirectory),
-                    fileSystem: _fileSystem,
-                    appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem));
+            Action a = () => toolUpdateCommand.Execute();
+
+            a.ShouldThrow<GracefulException>().And.Message
+                .Should().Contain(Tools.Tool.Common.LocalizableStrings.OnlyLocalOptionSupportManifestFileOption);
         }
     }
 }

@@ -5,8 +5,4 @@
     <ProjectGuid>{84A45D44-B677-492D-A6DA-B3A71135AB8E}</ProjectGuid>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="NETStandard.Library" Version="1.6" />
-  </ItemGroup>
-
 </Project>

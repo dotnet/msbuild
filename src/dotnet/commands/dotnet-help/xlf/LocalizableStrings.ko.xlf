@@ -1,7 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="RollForwardDefinition">
+        <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
+        <target state="translated">프레임워크 버전(LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable)으로 롤포워드합니다.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Usage">
         <source>Usage</source>
         <target state="translated">사용법</target>
@@ -92,11 +97,6 @@
         <target state="translated">NuGet 패키지를 만듭니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="MigrateDefinition">
-        <source>Migrate a project.json project to an MSBuild project.</source>
-        <target state="translated">project.json 프로젝트를 MSBuild 프로젝트로 마이그레이션합니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
         <target state="translated">프로젝트 수정 명령</target>
@@ -153,7 +153,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
-        <source>Specified command '{0}' is not a valid SDK command. Please specify a valid SDK command. For more information, run dotnet help.</source>
+        <source>Specified command '{0}' is not a valid SDK command. Specify a valid SDK command. For more information, run dotnet help.</source>
         <target state="translated">지정된 명령 '{0}'은(는) 유효한 SDK 명령이 아닙니다. 유효한 SDK 명령을 지정하세요. 자세한 내용은 dotnet 도움말을 실행하세요.</target>
         <note />
       </trans-unit>
@@ -219,22 +219,17 @@
       </trans-unit>
       <trans-unit id="DepsfilDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
-        <target state="translated">&lt;애플리케이션&gt;.deps.json 파일의 경로입니다.</target>
+        <target state="translated">&lt;application&gt;.deps.json 파일의 경로입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeconfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
-        <target state="translated">&lt;애플리케이션&gt;.runtimeconfig.json 파일의 경로입니다.</target>
+        <target state="translated">&lt;application&gt;.runtimeconfig.json 파일의 경로입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="FxVersionDefinition">
         <source>Version of the installed Shared Framework to use to run the application.</source>
         <target state="translated">애플리케이션을 실행하는 데 사용할 설치된 공유 프레임워크의 버전입니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RollForwardOnNoCandidateFxDefinition">
-        <source>Roll forward on no candidate shared framework is enabled.</source>
-        <target state="translated">사용되지 않는 후보 공유 프레임워크에 대해 롤포워드합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">
@@ -260,11 +255,6 @@
       <trans-unit id="DevCertsDefinition">
         <source>Create and manage development certificates.</source>
         <target state="translated">개발 인증서를 만들고 관리합니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="EfDefinition">
-        <source>Entity Framework Core command-line tools.</source>
-        <target state="translated">Entity Framework Core 명령줄 도구입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SqlCacheDefinition">
@@ -299,7 +289,7 @@
       </trans-unit>
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
-        <target state="translated">F# 대화형 시작/F# 스크립트를 실행합니다.</target>
+        <target state="translated">F# Interactive를 시작하고 F# 스크립트를 실행합니다.</target>
         <note />
       </trans-unit>
     </body>

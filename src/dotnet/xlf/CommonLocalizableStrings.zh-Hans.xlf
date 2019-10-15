@@ -1,15 +1,78 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hans" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="CommandInteractiveOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">允许命令停止和等待用户输入或操作(例如，用以完成身份验证)。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">“{0}”中找不到任何项目。</target>
         <note />
       </trans-unit>
+      <trans-unit id="EnvironmentPathOSXBashManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">工具目录“{0}”当前不在 PATH 环境变量上。
+如果使用的是 bash，可运行以下命令直接将其添加到配置文件: 
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# 添加 .NET Core SDK 工具
+导出 PATH="$PATH:{0}"
+EOF
+
+可运行以下命令将其添加到当前会话:
+
+导出 PATH ="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathOSXZshManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using zsh, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+And run `zsh -l` to make it available for current session.
+
+You can only add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">工具目录 "{0}" 当前不在 PATH 环境变量上。
+如果使用的是 zsh，可运行以下命令直接将其添加到配置文件:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
+# 添加 .NET Core SDK 工具
+导出 PATH="$PATH:{0}"
+EOF
+
+并运行 `zsh -l` 使其用于当前会话。
+
+只可通过运行以下命令将其添加到当前会话:
+
+导出 PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
-        <source>Found more than one project in `{0}`. Please specify which one to use.</source>
-        <target state="translated">“{0}”中找到多个项目。请指定使用哪一个。</target>
+        <source>Found more than one project in `{0}`. Specify which one to use.</source>
+        <target state="translated">在“{0}”中找到多个项目。请指定使用哪一个。</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
@@ -293,7 +356,7 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOne">
-        <source>Please specify at least one {0}.</source>
+        <source>Specify at least one {0}.</source>
         <target state="translated">请至少指定一个 {0}。</target>
         <note />
       </trans-unit>
@@ -388,7 +451,7 @@
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyVersion">
-        <source>Please specify a version of the package.</source>
+        <source>Specify a version of the package.</source>
         <target state="translated">请指定包的版本。</target>
         <note />
       </trans-unit>
@@ -473,8 +536,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NoReferencesFound">
-        <source>There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">项目 {1} 中没有 {0} 引用。;; {0} 是正在请求的项类型(项目、包、p2p)，{1} 是操作的对象(项目文件或解决方案文件)。</target>
+        <source>There are no {0} references in project {1}.</source>
+        <target state="translated">项目 {1} 中没有 {0} 引用。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
@@ -483,12 +546,12 @@
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyNewVersion">
-        <source>Please specify new version of the package.</source>
+        <source>Specify new version of the package.</source>
         <target state="translated">请指定包的新版本。</target>
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyWhichPackageToUpdate">
-        <source>Please specify which package to update.</source>
+        <source>Specify which package to update.</source>
         <target state="translated">请指定要更新的包。</target>
         <note />
       </trans-unit>
@@ -518,7 +581,7 @@
         <note />
       </trans-unit>
       <trans-unit id="TemplateCreatedSuccessfully">
-        <source>The template {0} created successfully. Please run "dotnet restore" to get started!</source>
+        <source>The template {0} created successfully. run "dotnet restore" to get started!</source>
         <target state="translated">已成功创建模板 {0}。请运行 "dotnet restore" 以开始使用!</target>
         <note />
       </trans-unit>
@@ -538,12 +601,12 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifiedNameExists">
-        <source>Specified name {0} already exists. Please specify a different name.</source>
+        <source>Specified name {0} already exists. Specify a different name.</source>
         <target state="translated">已存在指定的名称 {0}。请指定不同的名称。</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifiedAliasExists">
-        <source>Specified alias {0} already exists. Please specify a different alias.</source>
+        <source>Specified alias {0} already exists. Specify a different alias.</source>
         <target state="translated">已存在指定的别名 {0}。请指定不同的别名。</target>
         <note />
       </trans-unit>
@@ -563,7 +626,7 @@
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOneSolutionInDirectory">
-        <source>Found more than one solution file in {0}. Please specify which one to use.</source>
+        <source>Found more than one solution file in {0}. Specify which one to use.</source>
         <target state="translated">在 {0} 中找到多个解决方案文件。请指定使用哪一个。</target>
         <note />
       </trans-unit>
@@ -583,7 +646,7 @@
         <note />
       </trans-unit>
       <trans-unit id="ProjectNotCompatibleWithFrameworks">
-        <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:</source>
+        <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Review the project you are trying to add and verify that is compatible with the following targets:</source>
         <target state="translated">由于两个项目之间的目标框架不兼容，无法添加项目“{0}”。请检查要添加的项目，并验证是否与以下目标兼容:</target>
         <note />
       </trans-unit>
@@ -600,7 +663,7 @@
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
-        <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Please contact your SDK provider for support.</source>
+        <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Contact your SDK provider for support.</source>
         <target state="translated">项目“{0}”包含未知的项目类型，且无法添加到解决方案文件。请联系 SDK 提供商获取支持。</target>
         <note />
       </trans-unit>
@@ -722,43 +785,18 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">工具目录“{0}”当前未在 PATH 环境变量上。
-如果要使用 bash，可通过运行以下命令将其添加到配置文件:
+        <target state="translated">工具目录“{0}”当前不在 PATH 环境变量上。
+如果使用的是 bash，可运行以下命令直接将其添加到配置文件: 
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
-export PATH="$PATH:{0}"
+# 添加 .NET Core SDK 工具
+导出 PATH="$PATH:{0}"
 EOF
 
-你可通过运行以下命令将其添加到当前会话:
+可运行以下命令将其添加到当前会话:
 
-export PATH="$PATH:{0}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="EnvironmentPathOSXManualInstructions">
-        <source>Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using bash, you can add it to your profile by running the following command:
-
-cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
-export PATH="$PATH:{0}"
-EOF
-
-You can add it to the current session by running the following command:
-
-export PATH="$PATH:{0}"
-</source>
-        <target state="translated">工具目录“{0}”当前未在 PATH 环境变量上。
-如果要使用 bash，可通过运行以下命令将其添加到配置文件中
-
-cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Add .NET Core SDK tools
-export PATH="$PATH:{0}"
-EOF
-
-你可通过运行以下命令将其添加到当前会话:
-
-export PATH="$PATH:{0}"</target>
+导出 PATH ="$PATH:{0}"
+</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstructions">
@@ -827,23 +865,23 @@ setx PATH "%PATH%;{0}"
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsHigher">
-        <source>Format version is higher than supported. This tool may not be supported in this SDK version. Please update your SDK.</source>
+        <source>Format version is higher than supported. This tool may not be supported in this SDK version. Update your SDK.</source>
         <target state="translated">格式版本高于受支持的版本。该 SDK 版本可能不支持此工具。请更新 SDK。</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMalformed">
-        <source>Format version is malformed. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
+        <source>Format version is malformed. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
         <target state="translated">格式版本格式不正确。该 SDK 版本可能不支持此工具。请联系工具作者。</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMissing">
-        <source>Format version is missing. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
-        <target state="translated">格式版本缺失。该 SDK 版本可能不支持此工具。请联系工具作者。</target>
+        <source>Format version is missing. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
+        <target state="translated">缺少格式版本。该 SDK 版本可能不支持此工具。请联系工具作者。</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToSetToolsPathEnvironmentVariable">
-        <source>Failed to add '{0}' to the PATH environment variable. Please add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
-        <target state="translated">未能将“{0}”添加到 PATH 环境变量。请将此目录添加到 PATH，以使用通过“dotnet tool install”安装的工具。</target>
+        <source>Failed to add '{0}' to the PATH environment variable. Add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
+        <target state="translated">未能将“{0}”添加到 PATH 环境变量。请将此目录添加到 PATH，以使用通过 "dotnet tool install" 安装的工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOnePackagedShimAvailable">
@@ -899,11 +937,6 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="SolutionOrProjectArgumentName">
         <source>PROJECT | SOLUTION</source>
         <target state="translated">项目 | 解决方案</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandInteractiveOptionDescription">
-        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="translated">允许命令停止和等待用户输入或操作(例如，用以完成身份验证)。</target>
         <note />
       </trans-unit>
     </body>

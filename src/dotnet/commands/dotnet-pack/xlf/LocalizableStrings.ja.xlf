@@ -12,6 +12,11 @@
         <target state="translated">msbuild のパック</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="translated">著作権情報を表示しません。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdOutputDir">
         <source>OUTPUT_DIR</source>
         <target state="translated">OUTPUT_DIR</target>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
     <body>
@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageReference">
-        <source>Please specify one package reference to add.</source>
-        <target state="translated">Zadejte prosím jeden odkaz na balíček, který chcete přidat.</target>
+        <source>Specify one package reference to add.</source>
+        <target state="translated">Zadejte jeden odkaz na balíček, který chcete přidat.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
@@ -78,8 +78,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdDGFileIOException">
-        <source>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Please clear the temp directory and try again.</source>
-        <target state="translated">Nejde generovat dočasný soubor pro projekt {0}. Není možné přidat odkaz na balíček. Vyprázdněte prosím dočasný adresář a zkuste to znovu.</target>
+        <source>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Clear the temp directory and try again.</source>
+        <target state="translated">Nejde generovat dočasný soubor pro projekt {0}. Není možné přidat odkaz na balíček. Vyprázdněte dočasný adresář a zkuste to znovu.</target>
         <note />
       </trans-unit>
     </body>

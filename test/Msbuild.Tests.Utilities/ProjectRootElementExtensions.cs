@@ -2,9 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Construction;
-using Microsoft.DotNet.ProjectJsonMigration;
 using System.Linq;
 using System.Collections.Generic;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Msbuild.Tests.Utilities
 {

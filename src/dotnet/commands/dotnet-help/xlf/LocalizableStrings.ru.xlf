@@ -1,7 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ru" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="RollForwardDefinition">
+        <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
+        <target state="translated">Накат до версии платформы (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Usage">
         <source>Usage</source>
         <target state="translated">Использование</target>
@@ -92,11 +97,6 @@
         <target state="translated">Создание пакета NuGet.</target>
         <note />
       </trans-unit>
-      <trans-unit id="MigrateDefinition">
-        <source>Migrate a project.json project to an MSBuild project.</source>
-        <target state="translated">Перенос проекта project.json в проект MSBuild.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
         <target state="translated">Команды изменения проекта</target>
@@ -153,7 +153,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
-        <source>Specified command '{0}' is not a valid SDK command. Please specify a valid SDK command. For more information, run dotnet help.</source>
+        <source>Specified command '{0}' is not a valid SDK command. Specify a valid SDK command. For more information, run dotnet help.</source>
         <target state="translated">Указанная команда "{0}" не является допустимой командой пакета SDK. Укажите допустимую. Для получения дополнительных сведений выполните команду "dotnet help".</target>
         <note />
       </trans-unit>
@@ -232,11 +232,6 @@
         <target state="translated">Версия установленной общей платформы, которую следует использовать для запуска приложения.</target>
         <note />
       </trans-unit>
-      <trans-unit id="RollForwardOnNoCandidateFxDefinition">
-        <source>Roll forward on no candidate shared framework is enabled.</source>
-        <target state="translated">Если потенциальная общая платформа не включена, выполняется накат.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="AdditionalDeps">
         <source>Path to additional deps.json file.</source>
         <target state="translated">Путь к дополнительному файлу deps.json.</target>
@@ -260,11 +255,6 @@
       <trans-unit id="DevCertsDefinition">
         <source>Create and manage development certificates.</source>
         <target state="translated">Создание сертификатов разработки и управление ими.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="EfDefinition">
-        <source>Entity Framework Core command-line tools.</source>
-        <target state="translated">Инструменты командной строки Entity Framework Core.</target>
         <note />
       </trans-unit>
       <trans-unit id="SqlCacheDefinition">
@@ -299,7 +289,7 @@
       </trans-unit>
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
-        <target state="translated">Запустить интерактивную консоль F# / выполнить скрипты F#.</target>
+        <target state="translated">Запуск F# Interactive / выполнение скриптов F#.</target>
         <note />
       </trans-unit>
     </body>

@@ -1,10 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppDescription">
         <source>Publisher for the .NET Platform</source>
         <target state="translated">Vydavatel pro platformu .NET</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="translated">Nezobrazovat úvodní nápis ani zprávu o autorských právech</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOption">
@@ -15,6 +20,11 @@
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to publish for. The target framework has to be specified in the project file.</source>
         <target state="translated">Cílová architektura pro publikování. Cílová architektura musí být zadaná v souboru projektu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoSelfContainedOptionDescription">
+        <source>Publish your application as a framework dependent application without the .NET Core runtime. A supported .NET Core runtime must be installed to run your application.</source>
+        <target state="translated">Publikujte svoji aplikaci jako aplikaci závislou na architektuře bez modulu runtime .NET Core. Aby bylo možné vaši aplikaci spustit, musí být nainstalovaný podporovaný modul runtime .NET Core.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -52,6 +62,11 @@ Ve výchozím nastavení je publikována aplikace závislá na architektuře.</t
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
         <target state="translated">Konfigurace pro publikování. Výchozí možností pro většinu projektů je Debug.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainAndNoSelfContainedConflict">
+        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
+        <target state="translated">Možnosti --self-contained a --no-self-contained jsou vzájemně konfliktní. Zadejte pouze jednu z nich.</target>
         <note />
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">

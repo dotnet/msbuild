@@ -1,250 +1,178 @@
-variables:
-- name:  Build.Repository.Clean
-  value: true
-
 trigger:
-- release/2.2*
+- master
+- release/*
 
-pr:
-- release/2.2*
+variables:
+  teamName: Roslyn-Project-System
+  _DotNetArtifactsCategory: .NETCore
+  ${{ if eq(variables['System.TeamProject'], 'public') }}:
+    PB_PublishBlobFeedKey:
+    PB_PublishBlobFeedUrl:
+    _DotNetPublishToBlobFeed: false
+    _PublishUsingPipelines: false
+    _PublishType: none
+    _SignType: test
+  ${{ if ne(variables['System.TeamProject'], 'public') }}:
+    PB_PublishBlobFeedUrl: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
+    _DotNetPublishToBlobFeed: true
+    _PublishUsingPipelines: true
+    _PublishType: blob
+    _SignType: real
 
-jobs:
-- job: debug_centos71_x64
-  displayName: CentOS7.1 x64 Debug Build
-  pool:
-    vmImage: ubuntu-16.04
-  steps:
-  - script: ./build.sh --skip-prereqs --configuration Debug --targets Default
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: VSTest
-      testResultsFiles: '**/*.trx'
-    condition: always()
+stages:
+- stage: build
+  displayName: Build
+  jobs:
+  - template: /eng/build.yml
+    parameters:
+      agentOs: Windows_NT
+      pool:
+        ${{ if eq(variables['System.TeamProject'], 'public') }}:
+          name: NetCorePublic-Pool
+          queue: buildpool.windows.10.amd64.vs2017.open
+        ${{ if ne(variables['System.TeamProject'], 'public') }}:
+          name: NetCoreInternal-Pool
+          queue: buildpool.windows.10.amd64.vs2017
+      timeoutInMinutes: 180
+      strategy:
+        matrix:
+          ${{ if eq(variables['System.TeamProject'], 'public') }}:
+            Build_Debug_x86:
+              _BuildConfig: Debug
+              _BuildArchitecture: x86
+              _DOTNET_CLI_UI_LANGUAGE: ''
+              _DropSuffix: ''
+            Build_ES_Debug_x64:
+              _BuildConfig: Debug
+              _BuildArchitecture: x64
+              _DOTNET_CLI_UI_LANGUAGE: es
+              _DropSuffix: ''
+            Build_DropSuffix_Release_x64:
+              _BuildConfig: Release
+              _BuildArchitecture: x64
+              _DOTNET_CLI_UI_LANGUAGE: ''
+              _DropSuffix: true
+          Build_Release_x64:
+            _BuildConfig: Release
+            _BuildArchitecture: x64
+            _DOTNET_CLI_UI_LANGUAGE: ''
+            _DropSuffix: ''
 
-- job: debug_debian82_x64
-  displayName: Debian8.2 x64 Debug Build
-  pool:
-    vmImage: ubuntu-16.04
-  steps:
-  - script: ./build.sh --skip-prereqs --configuration Debug --targets Default
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: VSTest
-      testResultsFiles: '**/*.trx'
-    condition: always()
+  - ${{ if eq(variables['System.TeamProject'], 'public') }}:
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Linux
+        pool:
+          name: Hosted Ubuntu 1604
+        timeoutInMinutes: 180
+        strategy:
+          matrix:
+            Build_Ubuntu_14_04_Release_x64:
+              _BuildConfig: Release
+              _DockerParameter: '--docker ubuntu.14.04'
+              _LinuxPortable: ''
+              _RuntimeIdentifier: ''
+              _BuildArchitecture: 'x64'
+              _DropSuffix: ''
+            Build_Ubuntu_16_04_Debug_x64:
+              _BuildConfig: Debug
+              _DockerParameter: '--docker ubuntu.16.04'
+              _LinuxPortable: ''
+              _RuntimeIdentifier: ''
+              _BuildArchitecture: 'x64'
+              _DropSuffix: ''
+            Build_Ubuntu_18_04_Debug_x64:
+              _BuildConfig: Debug
+              _DockerParameter: '--docker ubuntu.18.04'
+              _LinuxPortable: '--linux-portable'
+              _RuntimeIdentifier: ''
+              _BuildArchitecture: 'x64'
+              _DropSuffix: ''
+            Build_Fedora_27_Debug_x64:
+              _BuildConfig: Debug
+              _DockerParameter: '--docker fedora.27'
+              _LinuxPortable: '--linux-portable'
+              _RuntimeIdentifier: ''
+              _BuildArchitecture: 'x64'
+              _DropSuffix: ''
+            Build_OpenSUSE_42_3_Debug_x64:
+              _BuildConfig: Debug
+              _DockerParameter: '--docker opensuse.42.3'
+              _LinuxPortable: '--linux-portable'
+              _RuntimeIdentifier: ''
+              _BuildArchitecture: 'x64'
+              _DropSuffix: ''
+            Build_CentOS_7_1_Debug_x64:
+              _BuildConfig: Debug
+              _DockerParameter: '--docker centos'
+              _LinuxPortable: ''
+              _RuntimeIdentifier: ''
+              _BuildArchitecture: 'x64'
+              _DropSuffix: ''
+            Build_Debian_jessie_Debug_x64:
+              _BuildConfig: Debug
+              _DockerParameter: '--docker debian'
+              _LinuxPortable: ''
+              _RuntimeIdentifier: ''
+              _BuildArchitecture: 'x64'
+              _DropSuffix: ''
+            Build_Rhel_7_2_Release_x64:
+              _BuildConfig: Release
+              _DockerParameter: '--docker rhel'
+              _LinuxPortable: ''
+              _RuntimeIdentifier: ''
+              _BuildArchitecture: 'x64'
+              _DropSuffix: ''
+            Build_Rhel_6_Debug_x64:
+              _BuildConfig: Debug
+              _DockerParameter: '--docker rhel.6'
+              _LinuxPortable: ''
+              _RuntimeIdentifier: '--runtime-id rhel.6-x64'
+              _BuildArchitecture: 'x64'
+              _DropSuffix: ''
+            Build_Linux_musl_Debug_x64:
+              _BuildConfig: Debug
+              _DockerParameter: '--docker alpine.3.6'
+              _LinuxPortable: ''
+              _RuntimeIdentifier: '--runtime-id linux-musl-x64'
+              _BuildArchitecture: 'x64'
+              _DropSuffix: ''
+            Build_LinuxPortable_Release_x64:
+              _BuildConfig: Release
+              _DockerParameter: ''
+              _LinuxPortable: '--linux-portable'
+              _RuntimeIdentifier: ''
+              _BuildArchitecture: 'x64'
+              _DropSuffix: ''
+            Build_LinuxPortable_NoSuffix_Release_x64:
+              _BuildConfig: Release
+              _DockerParameter: ''
+              _LinuxPortable: '--linux-portable'
+              _RuntimeIdentifier: ''
+              _BuildArchitecture: 'x64'
+              _DropSuffix: true
 
-- job: debug_fedora27_x64
-  displayName: fedora.27 x64 Debug Build
-  pool:
-    vmImage: ubuntu-16.04
-  steps:
-  - script: ./build.sh --skip-prereqs --configuration Debug --targets Default --docker fedora.27 --linux-portable
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: VSTest
-      testResultsFiles: '**/*.trx'
-    condition: always()
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Darwin
+        pool:
+          name: Hosted macOS
+        timeoutInMinutes: 180
+        strategy:
+          matrix:
+            Build_Release:
+              _BuildConfig: Release
 
-- job: debug_linux_arm
-  displayName: Linux arm Debug Build
-  pool:
-    vmImage: ubuntu-16.04
-  steps:
-  - script: ./build.sh --skip-prereqs --configuration Debug --targets Default --linux-portable --architecture arm /p:CLIBUILD_SKIP_TESTS=true
+  - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+    - template: /eng/common/templates/job/publish-build-assets.yml
+      parameters:
+        publishUsingPipelines: true
+        dependsOn:
+          - Windows_NT
+        queue:
+          name: Hosted VS2017
 
-- job: debug_linux_arm64
-  displayName: Linux arm64 Debug Build
-  pool:
-    vmImage: ubuntu-16.04
-  steps:
-  - script: ./build.sh --skip-prereqs --configuration Debug --targets Default --linux-portable --architecture arm64 /p:CLIBUILD_SKIP_TESTS=true
-
-- job: debug_linux_musl_x64
-  displayName: Linux-musl x64 Debug Build
-  pool:
-    vmImage: ubuntu-16.04
-  steps:
-  - script: ./build.sh --skip-prereqs --configuration Debug --targets Default --runtime-id linux-musl-x64 --docker alpine.3.6
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: VSTest
-      testResultsFiles: '**/*.trx'
-    condition: always()
-
-- job: debug_opensuse423_x64
-  displayName: opensuse.42.3 x64 Debug Build
-  pool:
-    vmImage: ubuntu-16.04
-  steps:
-  - script: ./build.sh --skip-prereqs --configuration Debug --targets Default --docker opensuse.42.3 --linux-portable
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: VSTest
-      testResultsFiles: '**/*.trx'
-    condition: always()
-
-- job: debug_rhel6_x64
-  displayName: RHEL6 x64 Debug Build
-  pool:
-    vmImage: ubuntu-16.04
-  steps:
-  - script: ./build.sh --skip-prereqs --configuration Debug --targets Default --runtime-id rhel.6-x64 --docker rhel.6
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: VSTest
-      testResultsFiles: '**/*.trx'
-    condition: always()
-
-- job: debug_ubuntu1604_x64
-  displayName: Ubuntu16.04 x64 Debug Build
-  pool:
-    vmImage: ubuntu-16.04
-  steps:
-  - script: ./build.sh --skip-prereqs --configuration Debug --targets Default
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: VSTest
-      testResultsFiles: '**/*.trx'
-    condition: always()
-
-- job: debug_ubuntu1804_x64
-  displayName: ubuntu.18.04 x64 Debug Build
-  pool:
-    vmImage: ubuntu-16.04
-  steps:
-  - script: ./build.sh --skip-prereqs --configuration Debug --targets Default --docker ubuntu.18.04 --linux-portable
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: VSTest
-      testResultsFiles: '**/*.trx'
-    condition: always()
-
-- job: debug_windows_nt_arm
-  displayName: Windows_NT arm Debug Build
-  pool:
-    vmImage: vs2017-win2016
-  steps:
-  - script: .\build.cmd -Configuration Debug -Architecture arm -Targets Default /p:CLIBUILD_SKIP_TESTS=true
-
-- job: debug_windows_nt_es_x64
-  displayName: Windows_NT_ES x64 Debug Build
-  pool:
-    vmImage: vs2017-win2016
-  steps:
-  - script: |
-      set DOTNET_CLI_UI_LANGUAGE=es
-      .\build.cmd -Configuration Debug -Architecture x64 -Targets Default
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: VSTest
-      testResultsFiles: '**/*.trx'
-    condition: always()
-
-- job: debug_windows_nt_x86
-  displayName: Windows_NT x86 Debug Build
-  pool:
-    vmImage: vs2017-win2016
-  steps:
-  - script: .\build.cmd -Configuration Debug -Architecture x86 -Targets Default
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: VSTest
-      testResultsFiles: '**/*.trx'
-    condition: always()
-
-- job: release_linux_nosuffix_arm
-  displayName: Linux_NoSuffix arm Release Build
-  pool:
-    vmImage: ubuntu-16.04
-  steps:
-  - script: |
-      export DropSuffix=true
-      ./build.sh --skip-prereqs --configuration Release --targets Default --linux-portable --architecture arm /p:CLIBUILD_SKIP_TESTS=true
-
-- job: release_linux_nosuffix_x64
-  displayName: Linux_NoSuffix x64 Release Build
-  pool:
-    vmImage: ubuntu-16.04
-  steps:
-  - script: |
-      export DropSuffix=true
-      ./build.sh --skip-prereqs --configuration Release --targets Default --linux-portable
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: VSTest
-      testResultsFiles: '**/*.trx'
-    condition: always()
-
-- job: release_linux_x64
-  displayName: Linux x64 Release Build
-  pool:
-    vmImage: ubuntu-16.04
-  steps:
-  - script: ./build.sh --skip-prereqs --configuration Release --targets Default --linux-portable
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: VSTest
-      testResultsFiles: '**/*.trx'
-    condition: always()
-
-- job: release_osx_x64
-  displayName: OSX x64 Release Build
-  pool:
-    vmImage: macOS-10.13
-  steps:
-  - script: ./build.sh --skip-prereqs --configuration Release --targets Default
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: VSTest
-      testResultsFiles: '**/*.trx'
-    condition: always()
-
-- job: release_rhel72_x64
-  displayName: RHEL7.2 x64 Release Build
-  pool:
-    vmImage: ubuntu-16.04
-  steps:
-  - script: ./build.sh --skip-prereqs --configuration Release --targets Default
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: VSTest
-      testResultsFiles: '**/*.trx'
-    condition: always()
-
-- job: release_ubuntu_x64
-  displayName: Ubuntu x64 Release Build
-  pool:
-    vmImage: ubuntu-16.04
-  steps:
-  - script: ./build.sh --skip-prereqs --configuration Release --targets Default --docker ubuntu.14.04
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: VSTest
-      testResultsFiles: '**/*.trx'
-    condition: always()
-
-- job: release_windows_nt_nosuffix_x64
-  displayName: Windows_NT_NoSuffix x64 Release Build
-  pool:
-    vmImage: vs2017-win2016
-  steps:
-  - script: |
-      set DropSuffix=true
-      .\build.cmd -Configuration Release -Architecture x64 -Targets Default
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: VSTest
-      testResultsFiles: '**/*.trx'
-    condition: always()
-
-- job: release_windows_nt_x64
-  displayName: Windows_NT x64 Release Build
-  pool:
-    vmImage: vs2017-win2016
-  steps:
-  - script: .\build.cmd -Configuration Release -Architecture x64 -Targets Default
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: VSTest
-      testResultsFiles: '**/*.trx'
-    condition: always()
+- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+  - template: /eng/common/templates/post-build/post-build.yml
+    parameters:
+      enableSymbolValidation: false

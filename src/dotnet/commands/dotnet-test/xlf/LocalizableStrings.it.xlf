@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="it" original="../LocalizableStrings.resx">
     <body>
@@ -10,6 +10,11 @@
       <trans-unit id="AppDescription">
         <source>Test Driver for the .NET Platform</source>
         <target state="translated">Driver di test per la piattaforma .NET</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Run test(s), without displaying Microsoft Testplatform banner</source>
+        <target state="translated">Esegui test senza visualizzare il banner di Microsoft Testplatform</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSettingsFile">
@@ -69,7 +74,7 @@
                                         Esempi:
                                         Log in formato trx con nome file univoco: --logger trx
                                         Log in formato trx con il nome file specificato: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
-                                        Per altre informazioni sugli argomenti del logger, vedere: https://aka.ms/vstest-report.</target>
+                                        Per altre informazioni sugli argomenti del logger, vedere https://aka.ms/vstest-report.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">

@@ -8,7 +8,6 @@ using Microsoft.DotNet.Tools.Clean;
 using Microsoft.DotNet.Tools.Fsi;
 using Microsoft.DotNet.Tools.Help;
 using Microsoft.DotNet.Tools.List;
-using Microsoft.DotNet.Tools.Migrate;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.New;
 using Microsoft.DotNet.Tools.NuGet;
@@ -65,13 +64,6 @@ namespace Microsoft.DotNet.Cli
                 Command = ListCommand.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-list-reference
                 DocLink = "https://aka.ms/dotnet-list"
-            },
-            ["migrate"] = new BuiltInCommandMetadata
-            {
-                Command = MigrateCommandCompose.Run,
-                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-migrate
-                DocLink = "http://aka.ms/dotnet-migrate"
-
             },
             ["msbuild"] = new BuiltInCommandMetadata
             {

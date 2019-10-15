@@ -144,16 +144,19 @@
   <data name="FrameworkOptionDescription" xml:space="preserve">
     <value>The target framework to run for. The target framework must also be specified in the project file.</value>
   </data>
+  <data name="RuntimeOptionDescription" xml:space="preserve">
+    <value>The target runtime to run for.</value>
+  </data>
   <data name="RunCommandException" xml:space="preserve">
-    <value>The build failed. Please fix the build errors and run again.</value>
+    <value>The build failed. Fix the build errors and run again.</value>
   </data>
   <data name="RunCommandExceptionUnableToRunSpecifyFramework" xml:space="preserve">
     <value>Unable to run your project
-Your project targets multiple frameworks. Please specify which framework to run using '{0}'.</value>
+Your project targets multiple frameworks. Specify which framework to run using '{0}'.</value>
   </data>
   <data name="RunCommandExceptionUnableToRun" xml:space="preserve">
     <value>Unable to run your project.
-Please ensure you have a runnable project type and ensure '{0}' supports this project.
+Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</value>
   </data>
@@ -201,5 +204,14 @@ The current {1} is '{2}'.</value>
   </data>
   <data name="RunCommandSpecifiecFileIsNotAValidProject" xml:space="preserve">
     <value>'{0}' is not a valid project file.</value>
+  </data>
+  <data name="CouldNotConvertToBoolean" xml:space="preserve">
+    <value>Could not convert the value of property '{0}' to a boolean.</value>
+  </data>
+  <data name="CouldNotConvertToString" xml:space="preserve">
+    <value>Could not convert the value of property '{0}' to a string.</value>
+  </data>
+  <data name="ValueMustBeAnObject" xml:space="preserve">
+    <value>The property '{0}' must be an object if it is specified.</value>
   </data>
 </root>

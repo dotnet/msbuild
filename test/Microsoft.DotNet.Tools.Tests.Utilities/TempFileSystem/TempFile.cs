@@ -110,6 +110,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return WriteAllBytes(File.ReadAllBytes(path));
         }
  
+        public void SetReadOnlyAttribute()
+        {
+            var attr = File.GetAttributes(_path);
+            attr = attr | FileAttributes.ReadOnly;
+            File.SetAttributes(Path, attr);
+        }
+
         public override string ToString()
         {
             return _path;

@@ -1,10 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pl" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppDescription">
         <source>Publisher for the .NET Platform</source>
         <target state="translated">Wydawca dla platformy .NET.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="translated">Nie wyświetlaj baneru początkowego ani komunikatu o prawach autorskich.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOption">
@@ -15,6 +20,11 @@
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to publish for. The target framework has to be specified in the project file.</source>
         <target state="translated">Platforma docelowa publikacji. Platforma docelowa musi być określona w pliku projektu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoSelfContainedOptionDescription">
+        <source>Publish your application as a framework dependent application without the .NET Core runtime. A supported .NET Core runtime must be installed to run your application.</source>
+        <target state="translated">Opublikuj aplikację jako aplikację zależną od struktury bez środowiska uruchomieniowego .NET Core. Aby uruchomić aplikację, należy zainstalować obsługiwane środowisko uruchomieniowe .NET Core.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -52,6 +62,11 @@ Domyślnie publikowana jest aplikacja zależna od struktury.</target>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
         <target state="translated">Konfiguracja, dla której ma być wykonane publikowanie. W przypadku większości projektów ustawienie domyślne to „Debugowanie”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainAndNoSelfContainedConflict">
+        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
+        <target state="translated">Występuje konflikt między opcjami „--self-contained” i „--no-self-contained”. Określ tylko jedną z tych opcji.</target>
         <note />
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">

@@ -6,7 +6,4 @@
     <TargetFrameworks>netcoreapp2.1</TargetFrameworks>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
-  </ItemGroup>
 </Project>

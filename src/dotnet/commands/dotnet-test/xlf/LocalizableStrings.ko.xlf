@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
@@ -10,6 +10,11 @@
       <trans-unit id="AppDescription">
         <source>Test Driver for the .NET Platform</source>
         <target state="translated">.NET 플랫폼용 테스트 드라이버입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Run test(s), without displaying Microsoft Testplatform banner</source>
+        <target state="translated">Microsoft Testplatform 배너를 표시하지 않고 테스트 실행</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSettingsFile">
@@ -66,10 +71,10 @@
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         See https://aka.ms/vstest-report for more information on logger arguments.</source>
         <target state="translated">테스트 결과에 사용할 로거입니다.
-                                         예 :
-                                         고유한 파일 이름을 사용하여 trx 형식으로 로그인: --logger trx
-                                         지정된 파일 이름을 사용하여 trx 형식으로 로그인: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
-                                         로거 인수에 대한 자세한 내용은 https://aka.ms/vstest-report를 참조하세요.</target>
+                                        예:
+                                        고유한 파일 이름을 사용하여 trx 형식으로 기록합니다. --logger trx
+                                        지정된 파일 이름을 사용하여 trx 형식으로 기록합니다. --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
+                                        로거 인수에 대한 자세한 내용은 https://aka.ms/vstest-report를 참조하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">

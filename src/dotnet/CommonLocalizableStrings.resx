@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="UnsupportedProjectType" xml:space="preserve">
-    <value>Project '{0}' has an unknown project type and cannot be added to the solution file. Please contact your SDK provider for support.</value>
+    <value>Project '{0}' has an unknown project type and cannot be added to the solution file. Contact your SDK provider for support.</value>
   </data>
   <data name="ProjectAlreadyHasAreference" xml:space="preserve">
     <value>Project already has a reference to `{0}`.</value>
@@ -292,7 +292,7 @@
     <value>{0} not provided.</value>
   </data>
   <data name="SpecifyAtLeastOne" xml:space="preserve">
-    <value>Please specify at least one {0}.</value>
+    <value>Specify at least one {0}.</value>
   </data>
   <data name="CouldNotConnectWithTheServer" xml:space="preserve">
     <value>Could not connect with the server.</value>
@@ -319,7 +319,7 @@
     <value>Could not find project or directory `{0}`.</value>
   </data>
   <data name="MoreThanOneProjectInDirectory" xml:space="preserve">
-    <value>Found more than one project in `{0}`. Please specify which one to use.</value>
+    <value>Found more than one project in `{0}`. Specify which one to use.</value>
   </data>
   <data name="FoundInvalidProject" xml:space="preserve">
     <value>Found a project `{0}` but it is invalid.</value>
@@ -337,7 +337,7 @@
     <value>Could not find solution or directory `{0}`.</value>
   </data>
   <data name="MoreThanOneSolutionInDirectory" xml:space="preserve">
-    <value>Found more than one solution file in {0}. Please specify which one to use.</value>
+    <value>Found more than one solution file in {0}. Specify which one to use.</value>
   </data>
   <data name="InvalidSolutionFormatString" xml:space="preserve">
     <value>Invalid solution `{0}`. {1}.</value>
@@ -367,7 +367,7 @@
     <value>Project {0} already has a reference `{1}`.</value>
   </data>
   <data name="PleaseSpecifyVersion" xml:space="preserve">
-    <value>Please specify a version of the package.</value>
+    <value>Specify a version of the package.</value>
   </data>
   <data name="ProjectDoesNotExist" xml:space="preserve">
     <value>Project `{0}` does not exist.</value>
@@ -424,7 +424,7 @@
     <value>Project `{0}` deleted from solution.</value>
   </data>
   <data name="NoReferencesFound" xml:space="preserve">
-    <value>There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </value>
+    <value>There are no {0} references in project {1}.</value>
   </data>
   <data name="NoProjectsFound" xml:space="preserve">
     <value>No projects found in the solution.</value>
@@ -442,10 +442,10 @@
     <value>FRAMEWORK</value>
   </data>
   <data name="PleaseSpecifyNewVersion" xml:space="preserve">
-    <value>Please specify new version of the package.</value>
+    <value>Specify new version of the package.</value>
   </data>
   <data name="PleaseSpecifyWhichPackageToUpdate" xml:space="preserve">
-    <value>Please specify which package to update.</value>
+    <value>Specify which package to update.</value>
   </data>
   <data name="NothingToUpdate" xml:space="preserve">
     <value>Nothing to update.</value>
@@ -463,7 +463,7 @@
     <value>Could not update the version of the package `{0}`.</value>
   </data>
   <data name="TemplateCreatedSuccessfully" xml:space="preserve">
-    <value>The template {0} created successfully. Please run "dotnet restore" to get started!</value>
+    <value>The template {0} created successfully. run "dotnet restore" to get started!</value>
   </data>
   <data name="TemplateInstalledSuccesfully" xml:space="preserve">
     <value>The template {0} installed successfully. You can use "dotnet new {0}" to get started with the new template.</value>
@@ -475,16 +475,16 @@
     <value>Template {0} could not be installed. Error returned was: {1}.</value>
   </data>
   <data name="SpecifiedNameExists" xml:space="preserve">
-    <value>Specified name {0} already exists. Please specify a different name.</value>
+    <value>Specified name {0} already exists. Specify a different name.</value>
   </data>
   <data name="SpecifiedAliasExists" xml:space="preserve">
-    <value>Specified alias {0} already exists. Please specify a different alias.</value>
+    <value>Specified alias {0} already exists. Specify a different alias.</value>
   </data>
   <data name="MandatoryParameterMissing" xml:space="preserve">
     <value>Mandatory parameter {0} missing for template {1}. </value>
   </data>
   <data name="ProjectNotCompatibleWithFrameworks" xml:space="preserve">
-    <value>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:</value>
+    <value>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Review the project you are trying to add and verify that is compatible with the following targets:</value>
   </data>
   <data name="ProjectDoesNotTargetFramework" xml:space="preserve">
     <value>Project `{0}` does not target framework `{1}`.</value>
@@ -552,7 +552,7 @@ export PATH="$PATH:{0}"
   <data name="EnvironmentPathLinuxNeedLogout" xml:space="preserve">
     <value>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</value>
   </data>
-  <data name="EnvironmentPathOSXManualInstructions" xml:space="preserve">
+  <data name="EnvironmentPathOSXBashManualInstructions" xml:space="preserve">
     <value>Tools directory '{0}' is not currently on the PATH environment variable.
 If you are using bash, you can add it to your profile by running the following command:
 
@@ -562,6 +562,22 @@ export PATH="$PATH:{0}"
 EOF
 
 You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</value>
+  </data>
+  <data name="EnvironmentPathOSXZshManualInstructions" xml:space="preserve">
+    <value>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using zsh, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+And run `zsh -l` to make it available for current session.
+
+You can only add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </value>
@@ -581,7 +597,7 @@ setx PATH "%PATH%;{0}"
     <value>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</value>
   </data>
   <data name="FailedToSetToolsPathEnvironmentVariable" xml:space="preserve">
-    <value>Failed to add '{0}' to the PATH environment variable. Please add this directory to your PATH to use tools installed with 'dotnet tool install'.</value>
+    <value>Failed to add '{0}' to the PATH environment variable. Add this directory to your PATH to use tools installed with 'dotnet tool install'.</value>
   </data>
   <data name="FailedToCreateShellShim" xml:space="preserve">
     <value>Failed to create tool shim for command '{0}': {1}</value>
@@ -617,13 +633,13 @@ setx PATH "%PATH%;{0}"
     <value>The command name '{0}' cannot begin with a leading dot (.).</value>
   </data>
   <data name="FormatVersionIsHigher" xml:space="preserve">
-    <value>Format version is higher than supported. This tool may not be supported in this SDK version. Please update your SDK.</value>
+    <value>Format version is higher than supported. This tool may not be supported in this SDK version. Update your SDK.</value>
   </data>
   <data name="FormatVersionIsMalformed" xml:space="preserve">
-    <value>Format version is malformed. This tool may not be supported in this SDK version. Please contact the author of the tool.</value>
+    <value>Format version is malformed. This tool may not be supported in this SDK version. Contact the author of the tool.</value>
   </data>
   <data name="FormatVersionIsMissing" xml:space="preserve">
-    <value>Format version is missing. This tool may not be supported in this SDK version. Please contact the author of the tool.</value>
+    <value>Format version is missing. This tool may not be supported in this SDK version. Contact the author of the tool.</value>
   </data>
   <data name="MoreThanOnePackagedShimAvailable" xml:space="preserve">
     <value>More than one packaged shim is available: {0}.</value>
@@ -652,7 +668,7 @@ setx PATH "%PATH%;{0}"
   <data name="SolutionOrProjectArgumentName" xml:space="preserve">
     <value>PROJECT | SOLUTION</value>
   </data>
-    <data name="CommandInteractiveOptionDescription" xml:space="preserve">
+  <data name="CommandInteractiveOptionDescription" xml:space="preserve">
     <value>Allows the command to stop and wait for user input or action (for example to complete authentication).</value>
   </data>
 </root>

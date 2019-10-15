@@ -17,8 +17,10 @@ namespace Microsoft.DotNet.Tools.MSBuild
             new FirstTimeUseNoticeSentinel();
         private readonly ITelemetry _telemetry;
         private const string NewEventName = "msbuild";
-        private const string TargetFrameworkTelemetryEventName = "targetframeworkeval";
-        private const string TargetFrameworkVersionTelemetryPropertyKey= "TargetFrameworkVersion";
+        internal const string TargetFrameworkTelemetryEventName = "targetframeworkeval";
+        internal const string SdkTaskBaseCatchExceptionTelemetryEventName = "taskBaseCatchException";
+
+        internal const string TargetFrameworkVersionTelemetryPropertyKey = "TargetFrameworkVersion";
 
         public MSBuildLogger()
         {
@@ -29,7 +31,14 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
                 if (sessionId != null)
                 {
-                    _telemetry = new Telemetry(_sentinel, sessionId);
+                    // senderCount: 0 to disable sender.
+                    // When senders in different process running at the same
+                    // time they will read from the same global queue and cause
+                    // sending duplicated events. Disable sender to reduce it.
+                    _telemetry = new Telemetry(
+                        _sentinel,
+                        sessionId,
+                        senderCount: 0);
                 }
             }
             catch (Exception)
@@ -66,13 +75,18 @@ namespace Microsoft.DotNet.Tools.MSBuild
             if (args.EventName == TargetFrameworkTelemetryEventName)
             {
                 var newEventName = $"msbuild/{TargetFrameworkTelemetryEventName}";
-                Dictionary<string, string>  maskedProperties = new Dictionary<string, string>();
-                if (args.Properties.TryGetValue(TargetFrameworkVersionTelemetryPropertyKey, out string value))
+                Dictionary<string, string> maskedProperties = new Dictionary<string, string>();
+                if (args.Properties.TryGetValue(TargetFrameworkVersionTelemetryPropertyKey, out string targetFrameworkVersionValue))
                 {
-                    maskedProperties.Add(TargetFrameworkVersionTelemetryPropertyKey, Sha256Hasher.HashWithNormalizedCasing(value));
+                    maskedProperties.Add(TargetFrameworkVersionTelemetryPropertyKey, Sha256Hasher.HashWithNormalizedCasing(targetFrameworkVersionValue));
                 }
 
                 telemetry.TrackEvent(newEventName, maskedProperties, measurements: null);
+            }
+
+            if (args.EventName == SdkTaskBaseCatchExceptionTelemetryEventName)
+            {
+                telemetry.TrackEvent(args.EventName, args.Properties, measurements: null);
             }
         }
 

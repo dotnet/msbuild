@@ -1,7 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="RollForwardDefinition">
+        <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
+        <target state="translated">Role para frente para a versão de estrutura (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Usage">
         <source>Usage</source>
         <target state="translated">Uso</target>
@@ -92,11 +97,6 @@
         <target state="translated">Criar um pacote do NuGet.</target>
         <note />
       </trans-unit>
-      <trans-unit id="MigrateDefinition">
-        <source>Migrate a project.json project to an MSBuild project.</source>
-        <target state="translated">Migrar um projeto project.json para um projeto do MSBuild.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
         <target state="translated">Comandos de modificação de projeto</target>
@@ -153,8 +153,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
-        <source>Specified command '{0}' is not a valid SDK command. Please specify a valid SDK command. For more information, run dotnet help.</source>
-        <target state="translated">O comando '{0}' especificado não é um comando do SDK válido. Especifique um comando do SDK válido. Para obter mais informações, execute a ajuda do dotnet.</target>
+        <source>Specified command '{0}' is not a valid SDK command. Specify a valid SDK command. For more information, run dotnet help.</source>
+        <target state="translated">O comando especificado '{0}' não é um comando do SDK válido. Especifique um comando do SDK válido. Para obter mais informações, execute a ajuda do dotnet.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppFullName">
@@ -219,22 +219,17 @@
       </trans-unit>
       <trans-unit id="DepsfilDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
-        <target state="translated">Caminho para o arquivo &lt;aplicativo&gt;.deps.json.</target>
+        <target state="translated">Caminho para o arquivo &lt;application&gt;.deps.json.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeconfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
-        <target state="translated">Caminho para o arquivo &lt;aplicativo&gt;.runtimeconfig.json.</target>
+        <target state="translated">Caminho para o arquivo &lt;application&gt;. runtimeconfig.json.</target>
         <note />
       </trans-unit>
       <trans-unit id="FxVersionDefinition">
         <source>Version of the installed Shared Framework to use to run the application.</source>
         <target state="translated">Versão do Shared Framework instalada a ser usada para a execução do aplicativo.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RollForwardOnNoCandidateFxDefinition">
-        <source>Roll forward on no candidate shared framework is enabled.</source>
-        <target state="translated">Avançar quando nenhuma estrutura compartilhada candidata estiver habilitada.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">
@@ -244,7 +239,7 @@
       </trans-unit>
       <trans-unit id="StoreDefinition">
         <source>Store the specified assemblies in the runtime package store.</source>
-        <target state="translated">Armazenar os assemblies especificados no repositório de pacotes do tempo de execução.</target>
+        <target state="translated">Armazenar os assemblies especificados no repositório de pacotes do runtime.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolDefinition">
@@ -260,11 +255,6 @@
       <trans-unit id="DevCertsDefinition">
         <source>Create and manage development certificates.</source>
         <target state="translated">Crie e gerencie certificados de desenvolvimento.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="EfDefinition">
-        <source>Entity Framework Core command-line tools.</source>
-        <target state="translated">Ferramentas de linha de comando do Entity Framework Core.</target>
         <note />
       </trans-unit>
       <trans-unit id="SqlCacheDefinition">
@@ -299,7 +289,7 @@
       </trans-unit>
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
-        <target state="translated">Iniciar F# interativo / executar scripts F#.</target>
+        <target state="translated">Iniciar F# Interativo / executar scripts do F#.</target>
         <note />
       </trans-unit>
     </body>

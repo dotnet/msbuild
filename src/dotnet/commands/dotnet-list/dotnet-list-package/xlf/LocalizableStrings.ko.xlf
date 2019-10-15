@@ -7,6 +7,11 @@
         <target state="translated">프로젝트 또는 솔루션의 모든 패키지 참조를 나열합니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdDeprecatedDescription">
+        <source>Lists packages that have been deprecated.</source>
+        <target state="translated">사용되지 않는 패키지를 나열합니다.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK | FRAMEWORK\RID</source>
         <target state="translated">프레임워크 | FRAMEWORK\RID</target>
@@ -38,43 +43,48 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
-        <source>The path to the NuGet config file to use. Requires the '--outdated' option.</source>
-        <target state="translated">사용할 NuGet 구성 파일의 경로입니다. '--outdated' 옵션이 필요합니다.</target>
+        <source>The path to the NuGet config file to use. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="translated">사용할 NuGet 구성 파일의 경로입니다. '--outdated' 또는 '--deprecated' 옵션이 필요합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestMinorDescription">
-        <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="translated">최신 패키지를 검색할 때 주 버전 번호가 일치하는 패키지만 고려합니다. '--outdated' 옵션이 필요합니다.</target>
+        <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="translated">최신 패키지를 검색할 때 주 버전 번호가 일치하는 패키지만 고려합니다. '--outdated' 또는 '--deprecated' 옵션이 필요합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestPatchDescription">
-        <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="translated">최신 패키지를 검색할 때 주 버전 번호와 부 버전 번호가 일치하는 패키지만 고려합니다. '--outdated' 옵션이 필요합니다.</target>
+        <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="translated">최신 패키지를 검색할 때 주 버전 번호와 부 버전 번호가 일치하는 패키지만 고려합니다. '--outdated' 또는 '--deprecated' 옵션이 필요합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPrereleaseDescription">
-        <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="translated">최신 패키지를 검색할 때 시험판 버전이 있는 패키지를 고려합니다. '--outdated' 옵션이 필요합니다.</target>
+        <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="translated">최신 패키지를 검색할 때 시험판 버전이 있는 패키지를 고려합니다. '--outdated' 또는 '--deprecated' 옵션이 필요합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSource">
         <source>SOURCE</source>
-        <target state="translated">소스</target>
+        <target state="translated">SOURCE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
-        <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="translated">최신 패키지를 검색할 때 사용하는 NuGet 소스입니다. '--outdated' 옵션이 필요합니다.</target>
+        <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="translated">최신 패키지를 검색할 때 사용하는 NuGet 소스입니다. '--outdated' 또는 '--deprecated' 옵션이 필요합니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="OutdatedOptionOnly">
-        <source>Option '{0}' requires the '--outdated' option to be specified.</source>
-        <target state="translated">'{0}' 옵션을 사용하려면 '--outdated' 옵션을 지정해야 합니다.</target>
+      <trans-unit id="OutdatedAndDeprecatedOptionsCannotBeCombined">
+        <source>Option '--outdated' and '--deprecated' cannot be combined.</source>
+        <target state="translated">'--outdated'와 '--deprecated' 옵션은 함께 사용할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileNotFound">
         <source>Could not find file or directory '{0}'.</source>
         <target state="translated">'{0}' 파일 또는 디렉터리를 찾을 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutdatedOrDeprecatedOptionOnly">
+        <source>Option '{0}' requires the '--outdated' or '--deprecated' option to be specified.</source>
+        <target state="translated">'{0}' 옵션을 사용하려면 '--outdated' 또는 '--deprecated' 옵션을 지정해야 합니다.</target>
         <note />
       </trans-unit>
     </body>

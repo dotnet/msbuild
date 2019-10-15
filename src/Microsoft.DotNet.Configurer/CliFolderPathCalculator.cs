@@ -14,6 +14,7 @@ namespace Microsoft.DotNet.Configurer
         public const string DotnetHomeVariableName = "DOTNET_CLI_HOME";
         private const string DotnetProfileDirectoryName = ".dotnet";
         private const string ToolsShimFolderName = "tools";
+        private const string ToolsResolverCacheFolderName = "toolResolverCache";
 
         public static string CliFallbackFolderPath =>
             Environment.GetEnvironmentVariable("DOTNET_CLI_TEST_FALLBACKFOLDER") ??
@@ -30,6 +31,8 @@ namespace Microsoft.DotNet.Configurer
 
         public static string DotnetUserProfileFolderPath =>
             Path.Combine(DotnetHomePath, DotnetProfileDirectoryName);
+
+        public static string ToolsResolverCachePath => Path.Combine(DotnetUserProfileFolderPath, ToolsResolverCacheFolderName);
 
         public static string PlatformHomeVariableName =>
             RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "USERPROFILE" : "HOME";

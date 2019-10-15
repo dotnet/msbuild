@@ -1,0 +1,184 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="BuildOutputPathDoesNotExist">
+        <source>outputpathresolver: {0} does not exist</source>
+        <target state="translated">outputpathresolver: {0}이(가) 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AttemptingToFindCommand">
+        <source>{0}: attempting to find command {1} in {2}</source>
+        <target state="translated">{0}: {2}에서 {1} 명령을 찾으려고 시도 중</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToFindToolAssembly">
+        <source>{0}: failed to find toolAssembly for {1}</source>
+        <target state="translated">{0}: {1}용 toolAssembly 찾기 실패</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToFindCommandPath">
+        <source>{0}: failed to find commandPath {1}</source>
+        <target state="translated">{0}: commandPath {1} 찾기 실패</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToLocateDotnetMultiplexer">
+        <source>Unable to locate dotnet multiplexer</source>
+        <target state="translated">dotnet multiplexer를 찾을 수 없음</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LookingForPreferCliRuntimeFile">
+        <source>{0}: Looking for prefercliruntime file at `{1}`</source>
+        <target state="translated">{0}: '{1}'에서 prefercliruntime 파일을 찾는 중</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AttemptingToResolve">
+        <source>{0}: attempting to resolve {1}</source>
+        <target state="translated">{0}: {1} 확인을 시도 중</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DidNotFindAMatchingProject">
+        <source>{0}: Did not find a matching project {1}.</source>
+        <target state="translated">{0}: 일치하는 프로젝트 {1}을(를) 찾지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidCommandResolverArguments">
+        <source>{0}: invalid commandResolverArguments</source>
+        <target state="translated">{0}: 잘못된 commandResolverArguments</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DoesNotExist">
+        <source>{0}: {1} does not exist</source>
+        <target state="translated">{0}: {1}이(가) 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AmbiguousCommandName">
+        <source>Ambiguous command name: {0}</source>
+        <target state="translated">모호한 명령 이름: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolLibraryFound">
+        <source>{0}: tool library found {1}</source>
+        <target state="translated">{0}: 도구 라이브러리가 발견됨({1})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildExePath">
+        <source>{0}: MSBUILD_EXE_PATH = {1}</source>
+        <target state="translated">{0}: MSBUILD_EXE_PATH = {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildProjectPath">
+        <source>{0}: MSBuild project path = {1}</source>
+        <target state="translated">{0}: MSBuild 프로젝트 경로 = {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MultipleProjectFilesFound">
+        <source>Specify which project file to use because this '{0}' contains more than one project file.</source>
+        <target state="translated">이 '{0}'에 둘 이상의 프로젝트 파일이 포함되어 있으므로 사용할 프로젝트 파일을 지정하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DidNotFindProject">
+        <source>{0}: ProjectFactory did not find Project.</source>
+        <target state="translated">{0}: ProjectFactory에서 프로젝트를 찾지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResolvingCommandSpec">
+        <source>{0}: resolving commandspec from {1} Tool Libraries.</source>
+        <target state="translated">{0}: {1} 도구 라이브러리에서 commandspec을 확인하는 중입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToResolveCommandSpec">
+        <source>{0}: failed to resolve commandspec from library.</source>
+        <target state="translated">{0}: 라이브러리에서 commandspec을 확인하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AttemptingToResolveCommandSpec">
+        <source>{0}: Attempting to resolve command spec from tool {1}</source>
+        <target state="translated">{0}: {1} 도구에서 command spec을 확인하려고 시도하는 중입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NuGetPackagesRoot">
+        <source>{0}: nuget packages root:
+{1}</source>
+        <target state="translated">{0}: nuget 패키지 루트:
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FoundToolLockFile">
+        <source>{0}: found tool lockfile at : {1}</source>
+        <target state="translated">{0}: {1}에서 도구 잠금 파일을 찾았습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LibraryNotFoundInLockFile">
+        <source>{0}: library not found in lock file.</source>
+        <target state="translated">{0}: 잠금 파일에서 라이브러리를 찾지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AttemptingToCreateCommandSpec">
+        <source>{0}: attempting to create commandspec</source>
+        <target state="translated">{0}: commandspec 만들기 시도 중</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandSpecIsNull">
+        <source>{0}: commandSpec is null.</source>
+        <target state="translated">{0}: commandSpec이 null입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExpectDepsJsonAt">
+        <source>{0}: expect deps.json at: {1}</source>
+        <target state="translated">{0}: {1}에서 deps.json 필요</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GeneratingDepsJson">
+        <source>Generating deps.json at: {0}</source>
+        <target state="translated">{0}에서 deps.json 생성 중</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToGenerateDepsJson">
+        <source>Unable to generate deps.json, it may have been already generated.  You can specify the "-d" option before the tool name for diagnostic output (for example, "dotnet -d &lt;toolname&gt;": {0}</source>
+        <target state="translated">deps.json을 생성할 수 없습니다. 이미 생성되었을 수 있습니다. 진단 출력의 도구 이름 앞에 "-d" 옵션을 지정할 수 있습니다(예: "dotnet-d &lt;toolname&gt;": {0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToDeleteTemporaryDepsJson">
+        <source>unable to delete temporary deps.json file: {0}</source>
+        <target state="translated">임시 deps.json 파일을 삭제할 수 없습니다. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionForPackageCouldNotBeResolved">
+        <source>Version for package `{0}` could not be resolved.</source>
+        <target state="translated">'{0}' 패키지의 버전을 확인할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IgnoringPreferCLIRuntimeFile">
+        <source>{0}: Ignoring prefercliruntime file as the tool target framework ({1}) has a different major version than the current CLI runtime ({2})</source>
+        <target state="translated">{0}: 도구 대상 프레임워크({1})에 현재 CLI 런타임({2})과 다른 주 버전이 있으므로 prefercliruntime 파일 무시</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindToolRuntimeConfigFile">
+        <source>{0}: Could not find runtimeconfig.json file for tool {1}</source>
+        <target state="translated">{0}: 도구 {1}에 대한 runtimeconfig.json 파일을 찾을 수 없음</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DepsJsonGeneratorProjectNotSet">
+        <source>Unable to find deps.json generator project.</source>
+        <target state="translated">deps.json 생성기 프로젝트를 찾을 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandAssembliesNotFound">
+        <source>The command executable for "{0}" was not found. The project may not have been restored or restore failed - run `dotnet restore`</source>
+        <target state="translated">"{0}"에 대해 실행 가능한 명령을 찾지 못했습니다. 프로젝트가 복원되지 않았거나 복원이 실패했을 수 있습니다. 'dotnet restore'를 실행하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildArgs">
+        <source>MSBuild arguments: {0}</source>
+        <target state="translated">MSBuild 인수: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NeedRunToolRestore">
+        <source>Run "dotnet tool restore" to make the "{0}" command available.</source>
+        <target state="translated">"dotnet tool restore"를 실행하여 "{0}" 명령을 사용할 수 있도록 만듭니다.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

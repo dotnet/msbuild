@@ -1,7 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="RollForwardDefinition">
+        <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
+        <target state="translated">Posune se na vyšší verzi architektury (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Usage">
         <source>Usage</source>
         <target state="translated">Použití</target>
@@ -92,11 +97,6 @@
         <target state="translated">Vytvoří balíček NuGet.</target>
         <note />
       </trans-unit>
-      <trans-unit id="MigrateDefinition">
-        <source>Migrate a project.json project to an MSBuild project.</source>
-        <target state="translated">Migruje projekt project.json na projekt MSBuild.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ProjectModificationCommands">
         <source>Project modification commands</source>
         <target state="translated">Příkazy pro úpravy projektu</target>
@@ -153,8 +153,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
-        <source>Specified command '{0}' is not a valid SDK command. Please specify a valid SDK command. For more information, run dotnet help.</source>
-        <target state="translated">Zadaný příkaz {0} není platným příkazem sady SDK. Zadejte prosím platný příkaz sady SDK. Další informace získáte spuštěním příkazu dotnet help.</target>
+        <source>Specified command '{0}' is not a valid SDK command. Specify a valid SDK command. For more information, run dotnet help.</source>
+        <target state="translated">Zadaný příkaz {0} není platným příkazem sady SDK. Zadejte platný příkaz sady SDK. Další informace získáte spuštěním příkazu dotnet help.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppFullName">
@@ -219,22 +219,17 @@
       </trans-unit>
       <trans-unit id="DepsfilDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
-        <target state="translated">Cesta k souboru &lt;aplikace&gt;.deps.json</target>
+        <target state="translated">Cesta k souboru &lt;aplikace&gt;.deps.json.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeconfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
-        <target state="translated">Cesta k souboru &lt;aplikace&gt;.runtimeconfig.json</target>
+        <target state="translated">Cesta k souboru &lt;aplikace&gt;.runtimeconfig.json.</target>
         <note />
       </trans-unit>
       <trans-unit id="FxVersionDefinition">
         <source>Version of the installed Shared Framework to use to run the application.</source>
         <target state="translated">Verze nainstalované sdílené architektury, která se má použít ke spuštění aplikace</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RollForwardOnNoCandidateFxDefinition">
-        <source>Roll forward on no candidate shared framework is enabled.</source>
-        <target state="translated">Posune se vpřed, pokud není povolený žádný kandidát sdílené architektury.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">
@@ -260,11 +255,6 @@
       <trans-unit id="DevCertsDefinition">
         <source>Create and manage development certificates.</source>
         <target state="translated">Vytvoří a spravuje certifikáty pro vývoj.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="EfDefinition">
-        <source>Entity Framework Core command-line tools.</source>
-        <target state="translated">Nástroje příkazového řádku Entity Framework Core</target>
         <note />
       </trans-unit>
       <trans-unit id="SqlCacheDefinition">
@@ -299,7 +289,7 @@
       </trans-unit>
       <trans-unit id="FsiDefinition">
         <source>Start F# Interactive / execute F# scripts.</source>
-        <target state="translated">Umožňuje spustit F# Interactive / provést skripty v jazyce F#.</target>
+        <target state="translated">Spustí F# Interactive / spustí skripty F#.</target>
         <note />
       </trans-unit>
     </body>
