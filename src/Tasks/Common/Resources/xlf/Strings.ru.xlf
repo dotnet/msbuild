@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ru" original="../Strings.resx">
     <body>
+      <trans-unit id="AppConfigRequiresRootConfiguration">
+        <source>NETSDK1070: The application configuration file must have root configuration element.</source>
+        <target state="translated">NETSDK1070: В файле конфигурации приложения должен присутствовать корневой элемент конфигурации.</target>
+        <note>{StrBegin="NETSDK1070: "}</note>
+      </trans-unit>
       <trans-unit id="AtLeastOneTargetFrameworkMustBeSpecified">
         <source>NETSDK1001: At least one possible target framework must be specified.</source>
         <target state="translated">NETSDK1001: необходимо указать хотя бы одну целевую платформу.</target>
@@ -61,6 +66,11 @@
         <source>NETSDK1008: Missing '{0}' metadata on '{1}' item '{2}'.</source>
         <target state="translated">NETSDK1008: отсутствуют метаданные "{0}" для элемента "{2}" в "{1}".</target>
         <note>{StrBegin="NETSDK1008: "}</note>
+      </trans-unit>
+      <trans-unit id="PackageReferenceVersionNotRecommended">
+        <source>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</source>
+        <target state="translated">NETSDK1071: В ссылке PackageReference на '{0}' указана версия {1}. Указывать версию этого пакета не рекомендуется. Дополнительные сведения см. на странице https://aka.ms/sdkimplicitrefs</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
         <source>NETSDK1009: Unrecognized preprocessor token '{0}' in '{1}'.</source>
@@ -293,8 +303,8 @@
         <note>{StrBegin="NETSDK1056: "}</note>
       </trans-unit>
       <trans-unit id="UsingPreviewSdkWarning">
-        <source>NETSDK1057: You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://go.microsoft.com/fwlink/?linkid=869452</source>
-        <target state="translated">NETSDK1057: вы работаете с предварительной версией пакета SDK для .NET Core. Установить версию SDK можно в файле global.json текущего проекта. Дополнительные сведения: https://go.microsoft.com/fwlink/?linkid=869452</target>
+        <source>NETSDK1057: You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</source>
+        <target state="translated">NETSDK1057: Вы используете предварительную версию .NET Core. Дополнительные сведения см. на странице https://aka.ms/dotnet-core-preview</target>
         <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="InvalidItemSpecToUse">

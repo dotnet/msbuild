@@ -342,7 +342,7 @@
     <comment>{StrBegin="NETSDK1056: "}</comment>
   </data>
   <data name="UsingPreviewSdkWarning" xml:space="preserve">
-    <value>NETSDK1057: You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://go.microsoft.com/fwlink/?linkid=869452</value>
+    <value>NETSDK1057: You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</value>
     <comment>{StrBegin="NETSDK1057: "}</comment>
   </data>
   <data name="InvalidItemSpecToUse" xml:space="preserve">
@@ -396,5 +396,12 @@ The following are names of parameters or literal values and should not be transl
   <data name="NETFrameworkToNonBuiltInNETStandard" xml:space="preserve">
     <value>NETSDK1069: This project uses a library that targets .NET Standard 1.5 or higher, and the project targets a version of .NET Framework that doesn't have built-in support for that version of .NET Standard. Visit https://aka.ms/net-standard-known-issues for a set of known issues. Consider retargeting to .NET Framework 4.7.2.</value>
     <comment>{StrBegin="NETSDK1069: "}</comment>
+  </data>
+  <data name="AppConfigRequiresRootConfiguration" xml:space="preserve">
+    <value>NETSDK1070: The application configuration file must have root configuration element.</value>
+    <comment>{StrBegin="NETSDK1070: "}</comment>
+  </data>
+  <data name="PackageReferenceVersionNotRecommended" xml:space="preserve">
+    <value>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</value>
   </data>
 </root>

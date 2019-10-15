@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.resx">
     <body>
+      <trans-unit id="AppConfigRequiresRootConfiguration">
+        <source>NETSDK1070: The application configuration file must have root configuration element.</source>
+        <target state="translated">NETSDK1070: 應用程式組態檔必須有根組態元素。</target>
+        <note>{StrBegin="NETSDK1070: "}</note>
+      </trans-unit>
       <trans-unit id="AtLeastOneTargetFrameworkMustBeSpecified">
         <source>NETSDK1001: At least one possible target framework must be specified.</source>
         <target state="translated">NETSDK1001: 至少必須指定一個可能的目標架構。</target>
@@ -61,6 +66,11 @@
         <source>NETSDK1008: Missing '{0}' metadata on '{1}' item '{2}'.</source>
         <target state="translated">NETSDK1008: '{1}' 項目 '{2}' 上遺漏 '{0}' 中繼資料。</target>
         <note>{StrBegin="NETSDK1008: "}</note>
+      </trans-unit>
+      <trans-unit id="PackageReferenceVersionNotRecommended">
+        <source>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</source>
+        <target state="translated">NETSDK1071: '{0}' 的 PackageReference 指定了 `{1}` 版本。不建議指定這個套件版本。如需詳細資訊，請參閱 https://aka.ms/sdkimplicitrefs</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
         <source>NETSDK1009: Unrecognized preprocessor token '{0}' in '{1}'.</source>
@@ -293,8 +303,8 @@
         <note>{StrBegin="NETSDK1056: "}</note>
       </trans-unit>
       <trans-unit id="UsingPreviewSdkWarning">
-        <source>NETSDK1057: You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://go.microsoft.com/fwlink/?linkid=869452</source>
-        <target state="translated">NETSDK1057: 您目前正使用 .NET Core SDK 的預覽版本。您可透過目前專案中的 global.json 檔案，定義 SDK 版本。如需更多項目，請前往 https://go.microsoft.com/fwlink/?linkid=869452</target>
+        <source>NETSDK1057: You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</source>
+        <target state="translated">NETSDK1057: 您使用的是 .NET Core 預覽版。請參閱: https://aka.ms/dotnet-core-preview</target>
         <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="InvalidItemSpecToUse">

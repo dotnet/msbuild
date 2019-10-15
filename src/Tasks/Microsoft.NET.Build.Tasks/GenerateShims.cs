@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,31 +15,11 @@ namespace Microsoft.NET.Build.Tasks
 {
     public sealed class GenerateShims : TaskBase
     {
-        private NuGetPackageResolver _packageResolver;
-
         /// <summary>
-        /// Path to assets.json.
+        /// Relative paths for Apphost for different ShimRuntimeIdentifiers with RuntimeIdentifier as meta data
         /// </summary>
         [Required]
-        public string ProjectAssetsFile { get; set; }
-
-        /// <summary>
-        /// The file name of Apphost asset.
-        /// </summary>
-        [Required]
-        public string DotNetAppHostExecutableNameWithoutExtension { get; set; }
-
-        /// <summary>
-        /// Path to project file (.csproj|.vbproj|.fsproj)
-        /// </summary>
-        [Required]
-        public string ProjectPath { get; set; }
-
-        /// <summary>
-        /// TFM to use for compile-time assets.
-        /// </summary>
-        [Required]
-        public string TargetFrameworkMoniker { get; set; }
+        public ITaskItem[] ApphostsForShimRuntimeIdentifiers { get; private set; }
 
         /// <summary>
         /// PackageId of the dotnet tool NuGet Package.
@@ -51,6 +32,12 @@ namespace Microsoft.NET.Build.Tasks
         /// </summary>
         [Required]
         public string PackageVersion { get; set; }
+
+        /// <summary>
+        /// TFM to use for compile-time assets.
+        /// </summary>
+        [Required]
+        public string TargetFrameworkMoniker { get; set; }
 
         /// <summary>
         /// The command name of the dotnet tool.
@@ -84,14 +71,10 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            NuGetFramework targetFramework = NuGetUtils.ParseFrameworkName(TargetFrameworkMoniker);
-            LockFile lockFile = new LockFileCache(this).GetLockFile(ProjectAssetsFile);
-            _packageResolver = NuGetPackageResolver.CreateResolver(lockFile, ProjectPath);
-
             var embeddedApphostPaths = new List<ITaskItem>();
             foreach (var runtimeIdentifier in ShimRuntimeIdentifiers.Select(r => r.ItemSpec))
             {
-                var resolvedApphostAssetPath = GetApphostAsset(targetFramework, lockFile, runtimeIdentifier);
+                var resolvedApphostAssetPath = GetApphostAsset(ApphostsForShimRuntimeIdentifiers, runtimeIdentifier);
 
                 var packagedShimOutputDirectoryAndRid = Path.Combine(
                         PackagedShimOutputDirectory,
@@ -99,7 +82,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 var appHostDestinationFilePath = Path.Combine(
                         packagedShimOutputDirectoryAndRid,
-                        ToolCommandName + Path.GetExtension(resolvedApphostAssetPath));
+                        ToolCommandName + ExecutableExtension.ForRuntimeIdentifier(runtimeIdentifier));
 
                 Directory.CreateDirectory(packagedShimOutputDirectoryAndRid);
 
@@ -115,7 +98,7 @@ namespace Microsoft.NET.Build.Tasks
                         PackageId.ToLowerInvariant(),
                         normalizedPackageVersion,
                         "tools",
-                        targetFramework.GetShortFolderName(),
+                        NuGetUtils.ParseFrameworkName(TargetFrameworkMoniker).GetShortFolderName(),
                         "any",
                         ToolEntryPoint});
 
@@ -127,53 +110,16 @@ namespace Microsoft.NET.Build.Tasks
                 );
 
                 var item = new TaskItem(appHostDestinationFilePath);
-                item.SetMetadata("ShimRuntimeIdentifier", runtimeIdentifier);
+                item.SetMetadata(MetadataKeys.ShimRuntimeIdentifier, runtimeIdentifier);
                 embeddedApphostPaths.Add(item);
             }
 
             EmbeddedApphostPaths = embeddedApphostPaths.ToArray();
         }
 
-        private string GetApphostAsset(NuGetFramework targetFramework, LockFile lockFile, string runtimeIdentifier)
+        private string GetApphostAsset(ITaskItem[] apphostsForShimRuntimeIdentifiers, string runtimeIdentifier)
         {
-            var apphostName = DotNetAppHostExecutableNameWithoutExtension;
-
-            if (runtimeIdentifier.StartsWith("win"))
-            {
-                apphostName += ".exe";
-            }
-
-            LockFileTarget runtimeTarget = lockFile.GetTargetAndThrowIfNotFound(targetFramework, runtimeIdentifier);
-
-            return FindApphostInRuntimeTarget(apphostName, runtimeTarget);
-        }
-
-        private string FindApphostInRuntimeTarget(string apphostName, LockFileTarget runtimeTarget)
-        {
-            foreach (LockFileTargetLibrary library in runtimeTarget.Libraries)
-            {
-                if (!library.IsPackage())
-                {
-                    continue;
-                }
-
-                foreach (LockFileItem asset in library.NativeLibraries)
-                {
-                    if (asset.IsPlaceholderFile())
-                    {
-                        continue;
-                    }
-
-                    var resolvedPackageAssetPath = _packageResolver.ResolvePackageAssetPath(library, asset.Path);
-
-                    if (Path.GetFileName(resolvedPackageAssetPath) == apphostName)
-                    {
-                        return resolvedPackageAssetPath;
-                    }
-                }
-            }
-
-            throw new BuildErrorException(Strings.CannotFindApphostForRid, runtimeTarget.RuntimeIdentifier);
+            return apphostsForShimRuntimeIdentifiers.Single(i => i.GetMetadata(MetadataKeys.RuntimeIdentifier) == runtimeIdentifier).ItemSpec;
         }
     }
 }

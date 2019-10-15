@@ -23,6 +23,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <SupportedTargetFramework Include=".NETCoreApp,Version=v1.1" DisplayName=".NET Core 1.1" />
         <SupportedTargetFramework Include=".NETCoreApp,Version=v2.0" DisplayName=".NET Core 2.0" />
         <SupportedTargetFramework Include=".NETCoreApp,Version=v2.1" DisplayName=".NET Core 2.1" />
+        <SupportedTargetFramework Include=".NETCoreApp,Version=v2.2" DisplayName=".NET Core 2.2" />
     </ItemGroup>
 
     <!-- .NET Standard -->

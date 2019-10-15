@@ -272,11 +272,11 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: targetFramework)
                 .WithSource()
-                .Restore(Log, "", $"/p:OutputType=Library;TargetFramework={targetFramework}");
+                .Restore(Log, "", $"/p:OutputType=Library", $"/p:TargetFramework={targetFramework}");
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
-                .Execute($"/p:OutputType=Library;TargetFramework={targetFramework};VersionPrefix=1.2.3")
+                .Execute($"/p:OutputType=Library", $"/p:TargetFramework={targetFramework}", $"/p:VersionPrefix=1.2.3")
                 .Should()
                 .Pass();
 
@@ -302,7 +302,7 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: targetFramework)
                 .WithSource()
-                .Restore(Log, "", $"/p:OutputType=Library;TargetFramework={targetFramework}");
+                .Restore(Log, "", $"/p:OutputType=Library", $"/p:TargetFramework={targetFramework}");
             BuildProject(versionPrefix: "1.2.3");
 
             // When the same project is built again using a different VersionPrefix proeprty
@@ -316,7 +316,7 @@ namespace Microsoft.NET.Build.Tests
             BuildCommand BuildProject(string versionPrefix)
             {
                 var command = new BuildCommand(Log, testAsset.TestRoot);
-                command.Execute($"/p:OutputType=Library;TargetFramework={targetFramework};VersionPrefix={versionPrefix}")
+                command.Execute($"/p:OutputType=Library", $"/p:TargetFramework={targetFramework}", $"/p:VersionPrefix={versionPrefix}")
                        .Should()
                        .Pass();
                 return command;

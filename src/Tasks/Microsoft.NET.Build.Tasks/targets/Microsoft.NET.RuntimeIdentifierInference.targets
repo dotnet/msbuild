@@ -106,7 +106,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(HasRuntimeOutput)' == 'true' and '$(RuntimeIdentifier)' != ''">
     <SelfContained Condition="'$(SelfContained)' == ''">true</SelfContained>
-    <UseAppHost Condition="'$(UseAppHost)' == '' and '$(SelfContained)' == 'true'">true</UseAppHost>
+    <UseAppHost Condition="'$(UseAppHost)' == '' and ('$(SelfContained)' == 'true' or '$(_TargetFrameworkVersionWithoutV)' >= '2.1')">true</UseAppHost>
   </PropertyGroup>
 
   <Target Name="_CheckForUnsupportedAppHostUsage"

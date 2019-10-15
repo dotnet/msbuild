@@ -21,9 +21,9 @@ using System.Text.RegularExpressions;
 
 namespace Microsoft.NET.Build.Tests
 {
-    public class GivenThatWeWantToBuildADesktopExeWithFSharp : SdkTest
+    public class GivenThatWeWantToBuildADesktopExeWithVB : SdkTest
     {
-        public GivenThatWeWantToBuildADesktopExeWithFSharp(ITestOutputHelper log) : base(log)
+        public GivenThatWeWantToBuildADesktopExeWithVB(ITestOutputHelper log) : base(log)
         {
         }
 
@@ -32,7 +32,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var targetFramework = "net45";
             var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorldFS")
+                .CopyTestAsset("HelloWorldVB")
                 .WithSource()
                 .WithProjectChanges(project =>
                 {
@@ -51,11 +51,9 @@ namespace Microsoft.NET.Build.Tests
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
-                "TestApp.exe",
-                "TestApp.exe.config",
-                "TestApp.pdb",
-                "FSharp.Core.dll",
-                "System.ValueTuple.dll",
+                "HelloWorld.exe",
+                "HelloWorld.exe.config",
+                "HelloWorld.pdb"
             });
         }
     }

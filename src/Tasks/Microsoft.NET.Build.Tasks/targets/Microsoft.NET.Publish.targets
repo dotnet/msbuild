@@ -46,6 +46,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ResolveReferences;
       PrepareResourceNames;
       ComputeIntermediateSatelliteAssemblies;
+      ComputeEmbeddedApphostPaths;
     </_BeforePublishNoBuildTargets>
 
     <_CorePublishTargets>
@@ -247,6 +248,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                               Condition="'$(PublishDocumentationFile)' == 'true'">
         <RelativePath>@(FinalDocFile->'%(Filename)%(Extension)')</RelativePath>
       </ResolvedFileToPublish>
+
+      <!-- Copy all PackAsTool shims (if any) -->
+      <ResolvedFileToPublish Include="@(_EmbeddedApphostPaths)">
+        <RelativePath>shims/%(_EmbeddedApphostPaths.ShimRuntimeIdentifier)/%(_EmbeddedApphostPaths.Filename)%(_EmbeddedApphostPaths.Extension)</RelativePath>
+      </ResolvedFileToPublish >
     </ItemGroup>
 
   </Target>
@@ -634,10 +640,36 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ResolvedFileToPublish Include="%(NativeAppHostNETCore.Identity)">
         <RelativePath>$(AssemblyName)$(_NativeExecutableExtension)</RelativePath>
       </ResolvedFileToPublish>
-      
+
 
     </ItemGroup>
 
   </Target>
 
+  <!--
+    ============================================================
+                                        ComputeEmbeddedApphostPaths
+
+    When no build flag is set, EmbeddedApphostPaths is not available. Compute EmbeddedApphostPaths is required to find build asset.
+    ============================================================
+    -->
+
+  <UsingTask TaskName="Microsoft.NET.Build.Tasks.GetEmbeddedApphostPaths"
+          AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <Target Name="ComputeEmbeddedApphostPaths">
+
+    <ItemGroup>
+      <_PackAsToolShimRuntimeIdentifiers Include="$(PackAsToolShimRuntimeIdentifiers)"/>
+    </ItemGroup>
+
+    <GetEmbeddedApphostPaths
+      PackagedShimOutputDirectory="$(PackagedShimOutputRootDirectory)/shims/$(TargetFramework)"
+      ShimRuntimeIdentifiers="@(_PackAsToolShimRuntimeIdentifiers)"
+      ToolCommandName="$(ToolCommandName)"
+      >
+
+      <Output TaskParameter="EmbeddedApphostPaths" ItemName="_EmbeddedApphostPaths" />
+    </GetEmbeddedApphostPaths>
+
+  </Target>
 </Project>
