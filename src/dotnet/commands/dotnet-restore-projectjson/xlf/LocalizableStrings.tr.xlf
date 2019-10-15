@@ -10,7 +10,7 @@
       </trans-unit>
       <trans-unit id="AddRestore">
         <source>restore</source>
-        <target state="translated">restore</target>
+        <target state="translated">geri yükleme</target>
         <note />
       </trans-unit>
     </body>

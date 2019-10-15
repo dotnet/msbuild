@@ -56,6 +56,7 @@ namespace Microsoft.DotNet.Cli
                                     })),
                   CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription),
                   CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription),
+                  CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription, withShortOption: false),
                   Create.Option(
                         "-o|--output",
                         LocalizableStrings.CmdOutputDescription,

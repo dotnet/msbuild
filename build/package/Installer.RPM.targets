@@ -9,8 +9,9 @@
     <BuildRpmPackage Condition=" '$(IsRPMBasedDistro)' == 'True' ">True</BuildRpmPackage>
   </PropertyGroup>
 
+  <!-- Re-enable "TestSdkRpm" when the following issue is resolved: https://github.com/dotnet/cli/issues/9672 -->
   <Target Name="GenerateRpms"
-          DependsOnTargets="TestFPMTool;BuildRpms;TestSdkRpm"
+          DependsOnTargets="TestFPMTool;BuildRpms"
           Condition=" '$(BuildRpmPackage)' == 'True' "
           Outputs="@(GeneratedInstallers)"/>
 

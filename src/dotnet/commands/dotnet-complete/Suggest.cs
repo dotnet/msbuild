@@ -40,6 +40,11 @@ namespace Microsoft.DotNet.Cli
                 .Select(r => r.Include) ??
             Empty<string>();
 
+        public static IEnumerable<string> ConfigurationsFromProjectFileOrDefaults() =>
+            GetMSBuildProject()
+                ?.GetConfigurations() ??
+            new[] { "Debug", "Release" };
+
         private static MsbuildProject GetMSBuildProject()
         {
             try

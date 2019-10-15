@@ -725,8 +725,8 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">O diretório de ferramentas '{0}' não está na variável de ambiente PATH no momento.
-Se você estiver usando o Bash, poderá adicioná-lo ao seu perfil executando o seguinte comando:
+        <target state="translated">Atualmente, o diretório de ferramentas '{0}' não está na variável de ambiente PATH.
+Se você estiver usando Bash, poderá adicioná-lo ao seu perfil executando o seguinte comando:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
@@ -735,8 +735,7 @@ EOF
 
 Você pode adicioná-lo à sessão atual executando o seguinte comando:
 
-export PATH="$PATH:{0}"
-</target>
+export PATH="$PATH:{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXManualInstructions">
@@ -752,8 +751,8 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">O diretório de ferramentas '{0}' não está na variável de ambiente PATH no momento.
-Se você estiver usando o Bash, poderá adicioná-lo ao seu perfil executando o seguinte comando:
+        <target state="translated">Atualmente, o diretório de ferramentas '{0}' não está na variável de ambiente PATH.
+Se você estiver usando Bash, poderá adicioná-lo ao seu perfil executando o seguinte comando:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
@@ -762,8 +761,7 @@ EOF
 
 Você pode adicioná-lo à sessão atual executando o seguinte comando:
 
-export PATH="$PATH:{0}"
-</target>
+export PATH="$PATH:{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstructions">
@@ -894,6 +892,16 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="VersionSuffixArgumentName">
         <source>VERSION_SUFFIX</source>
         <target state="translated">SUFIXO_DA_VERSÃO</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionOrProjectArgumentDescription">
+        <source>The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.</source>
+        <target state="translated">O arquivo de solução ou projeto para operar. Se um arquivo não for especificado, o comando pesquisará um no diretório atual.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionOrProjectArgumentName">
+        <source>PROJECT | SOLUTION</source>
+        <target state="translated">PROJETO | SOLUÇÃO</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandInteractiveOptionDescription">

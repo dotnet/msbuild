@@ -7,6 +7,7 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.List.ProjectToProjectReferences;
+using Microsoft.DotNet.Tools.List.PackageReferences;
 
 namespace Microsoft.DotNet.Tools.List
 {
@@ -23,6 +24,10 @@ namespace Microsoft.DotNet.Tools.List
                 {
                     "reference",
                     o => new ListProjectToProjectReferencesCommand(o, ParseResult)
+                },
+                {
+                    "package",
+                    o => new ListPackageReferencesCommand(o, ParseResult)
                 }
             };
 

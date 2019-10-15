@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Tests
                 _testInstance.Root.FullName,
                 "bin",
                 configuration,
-                "netcoreapp2.1",
+                "netcoreapp2.2",
                 "publish",
                 "VBTestApp.dll");
 

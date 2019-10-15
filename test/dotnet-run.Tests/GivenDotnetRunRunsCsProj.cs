@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             new RunCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput("--framework netcoreapp2.1")
+                .ExecuteWithCapturedOutput("--framework netcoreapp2.2")
                 .Should().Pass()
                          .And.HaveStdOutContaining("This string came from the test library!");
         }
@@ -150,7 +150,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             new RunCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput("--framework netcoreapp2.1")
+                .ExecuteWithCapturedOutput("--framework netcoreapp2.2")
                 .Should().Pass()
                          .And.HaveStdOut("Hello World!");
         }
@@ -343,6 +343,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                             .WithSourceFiles();
 
             var testProjectDirectory = testInstance.Root.FullName;
+            var launchSettingsPath = Path.Combine(testProjectDirectory, "Properties", "launchSettings.json");
 
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
@@ -359,8 +360,30 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .ExecuteWithCapturedOutput();
 
             cmd.Should().Pass()
+                .And.NotHaveStdOutContaining(string.Format(LocalizableStrings.UsingLaunchSettingsFromMessage, launchSettingsPath))
                 .And.HaveStdOutContaining("First");
                          
+            cmd.StdErr.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void ItPrintsUsingLaunchSettingsMessageWhenNotQuiet()
+        {
+            var testInstance = TestAssets.Get("AppWithLaunchSettings")
+                            .CreateInstance()
+                            .WithSourceFiles();
+
+            var testProjectDirectory = testInstance.Root.FullName;
+            var launchSettingsPath = Path.Combine(testProjectDirectory, "Properties", "launchSettings.json");
+
+            var cmd = new RunCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .ExecuteWithCapturedOutput("-v:m");
+
+            cmd.Should().Pass()
+                .And.HaveStdOutContaining(string.Format(LocalizableStrings.UsingLaunchSettingsFromMessage, launchSettingsPath))
+                .And.HaveStdOutContaining("First");
+
             cmd.StdErr.Should().BeEmpty();
         }
 

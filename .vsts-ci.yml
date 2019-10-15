@@ -3,10 +3,10 @@ variables:
   value: true
 
 trigger:
-- release/2.1*
+- release/2.2*
 
 pr:
-- release/2.1*
+- release/2.2*
 
 jobs:
 - job: debug_centos71_x64
@@ -118,6 +118,13 @@ jobs:
       testResultsFormat: VSTest
       testResultsFiles: '**/*.trx'
     condition: always()
+
+- job: debug_windows_nt_arm
+  displayName: Windows_NT arm Debug Build
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - script: .\build.cmd -Configuration Debug -Architecture arm -Targets Default /p:CLIBUILD_SKIP_TESTS=true
 
 - job: debug_windows_nt_es_x64
   displayName: Windows_NT_ES x64 Debug Build

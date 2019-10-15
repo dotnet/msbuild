@@ -239,7 +239,7 @@ namespace Microsoft.DotNet.Tests
                      .And.Pass();
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/cli/issues/9688")]
         public void CanInvokeToolFromDirectDependenciesIfPackageNameDifferentFromToolName()
         {
             var testInstance = TestAssets.Get("AppWithDirectDepWithOutputName")
@@ -247,7 +247,7 @@ namespace Microsoft.DotNet.Tests
                 .WithSourceFiles()
                 .WithRestoreFiles();
 
-            string framework = Tools.Tests.Utilities.NuGetFrameworks.NetCoreApp21.DotNetFrameworkName;
+            string framework = Tools.Tests.Utilities.NuGetFrameworks.NetCoreApp22.DotNetFrameworkName;
 
             new BuildCommand()
                 .WithProjectDirectory(testInstance.Root)
@@ -369,7 +369,7 @@ namespace Microsoft.DotNet.Tests
                 .Should().Fail();
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/cli/issues/9688")]
         public void ToolsCanAccessDependencyContextProperly()
         {
             var testInstance = TestAssets.Get("DependencyContextFromTool")
@@ -423,7 +423,7 @@ namespace Microsoft.DotNet.Tests
                 .WithRestoreFiles();
 
             var assetsFile = new DirectoryInfo(new RepoDirectoriesProvider().NugetPackages)
-                .GetDirectory(".tools", "dotnet-portable", "1.0.0", "netcoreapp2.1")
+                .GetDirectory(".tools", "dotnet-portable", "1.0.0", "netcoreapp2.2")
                 .GetFile("project.assets.json");
 
             var stopWatch = Stopwatch.StartNew();

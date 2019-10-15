@@ -206,7 +206,7 @@ namespace Microsoft.DotNet.Tests.Commands
             return new ToolInstallCommand(
                 result["dotnet"]["tool"]["install"],
                 result,
-                (_) => (store, packageInstallerMock),
+                (location, forwardArguments) => (store, packageInstallerMock),
                 (_) => new ShellShimRepository(
                     new DirectoryPath(_shimsDirectory),
                     fileSystem: _fileSystem,

@@ -722,18 +722,17 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">Adresář nástrojů {0} není momentálně v proměnné prostředí PATH.
-Pokud používáte bash, přidáte ho do svého profilu spuštěním následujícího příkazu:
+        <target state="translated">Adresář nástrojů {0} není aktuálně součástí proměnné prostředí PATH.
+Pokud používáte bash, můžete ho přidat do svého profilu spuštěním následujícího příkazu:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Přidání nástrojů sady .NET Core SDK
+# Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-Do aktuální relace ho přidáte spuštěním následujícího příkazu:
+Do aktuální relace ho můžete přidat spuštěním následujícího příkazu:
 
-export PATH="$PATH:{0}"
-</target>
+export PATH="$PATH:{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXManualInstructions">
@@ -749,18 +748,17 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">Adresář nástrojů {0} není momentálně v proměnné prostředí PATH.
-Pokud používáte bash, přidáte ho do svého profilu spuštěním následujícího příkazu:
+        <target state="translated">Adresář nástrojů {0} není aktuálně součástí proměnné prostředí PATH.
+Pokud používáte bash, můžete ho přidat do svého profilu spuštěním následujícího příkazu:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
-# Přidání nástrojů sady .NET Core SDK
+# Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-Do aktuální relace ho přidáte spuštěním následujícího příkazu:
+Do aktuální relace ho můžete přidat spuštěním následujícího příkazu:
 
-export PATH="$PATH:{0}"
-</target>
+export PATH="$PATH:{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstructions">
@@ -891,6 +889,16 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="VersionSuffixArgumentName">
         <source>VERSION_SUFFIX</source>
         <target state="translated">VERSION_SUFFIX</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionOrProjectArgumentDescription">
+        <source>The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.</source>
+        <target state="translated">Soubor projektu nebo řešení, se kterým se má operace provést. Pokud soubor není zadaný, příkaz ho bude hledat v aktuálním adresáři.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionOrProjectArgumentName">
+        <source>PROJECT | SOLUTION</source>
+        <target state="translated">PROJEKT | ŘEŠENÍ</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandInteractiveOptionDescription">

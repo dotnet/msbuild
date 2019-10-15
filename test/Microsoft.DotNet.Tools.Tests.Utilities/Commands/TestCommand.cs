@@ -183,11 +183,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         private string GetBaseDirectory()
         {
-#if NET451
-            return AppDomain.CurrentDomain.BaseDirectory;
-#else
             return AppContext.BaseDirectory;
-#endif
         }
 
         private void ResolveCommand(ref string executable, ref string args)
@@ -220,11 +216,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         {
             foreach (var name in _cliGeneratedEnvironmentVariables)
             {
-#if NET451
-                psi.EnvironmentVariables.Remove(name);
-#else
                 psi.Environment.Remove(name);
-#endif
             }
         }
 
@@ -234,11 +226,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             foreach (var item in Environment)
             {
-#if NET451
-                psi.EnvironmentVariables[item.Key] = item.Value;
-#else
                 psi.Environment[item.Key] = item.Value;
-#endif
             }
 
             //  Flow the TEST_PACKAGES environment variable to the child process

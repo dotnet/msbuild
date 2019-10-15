@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
@@ -18,25 +19,28 @@ namespace Microsoft.DotNet.Tools.Tool.Install
         private readonly IReporter _reporter;
         private readonly IReporter _errorReporter;
         private readonly bool _forceOutputRedirection;
+        private readonly IEnumerable<string> _additionalRestoreArguments;
 
-        public ProjectRestorer(IReporter reporter = null)
+        public ProjectRestorer(IReporter reporter = null,
+            IEnumerable<string> additionalRestoreArguments = null)
         {
+            _additionalRestoreArguments = additionalRestoreArguments;
             _reporter = reporter ?? Reporter.Output;
             _errorReporter = reporter ?? Reporter.Error;
             _forceOutputRedirection = reporter != null;
         }
 
         public void Restore(FilePath project,
-            FilePath? nugetConfig = null,
+            PackageLocation packageLocation,
             string verbosity = null)
         {
             var argsToPassToRestore = new List<string>();
 
             argsToPassToRestore.Add(project.Value);
-            if (nugetConfig != null)
+            if (packageLocation.NugetConfig != null)
             {
                 argsToPassToRestore.Add("--configfile");
-                argsToPassToRestore.Add(nugetConfig.Value.Value);
+                argsToPassToRestore.Add(packageLocation.NugetConfig.Value.Value);
             }
 
             argsToPassToRestore.AddRange(new List<string>
@@ -46,6 +50,11 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             });
 
             argsToPassToRestore.Add($"-verbosity:{verbosity ?? "quiet"}");
+
+            if (_additionalRestoreArguments != null)
+            {
+                argsToPassToRestore.AddRange(_additionalRestoreArguments);
+            }
 
             var command = new DotNetCommandFactory(alwaysRunOutOfProc: true)
                 .Create("restore", argsToPassToRestore);

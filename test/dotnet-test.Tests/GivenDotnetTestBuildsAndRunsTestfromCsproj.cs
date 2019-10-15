@@ -202,7 +202,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("5");
             string configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
             string expectedError = Path.Combine(testProjectDirectory, "bin",
-                                   configuration, "netcoreapp2.1", "VSTestCore.dll");
+                                   configuration, "netcoreapp2.2", "VSTestCore.dll");
             expectedError = "The test source file " + "\"" + expectedError + "\"" + " provided was not found.";
 
             // Call test
@@ -340,6 +340,51 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 result.StdOut.Should().Contain("Failed: 1");
                 result.StdOut.Should().NotContain("\u221a TestNamespace.VSTestTests.VSTestPassTest");
                 result.StdOut.Should().NotContain("X TestNamespace.VSTestTests.VSTestFailTest");
+            }
+
+            result.ExitCode.Should().Be(1);
+        }
+
+        [Fact]
+        public void ItTestsWithTheSpecifiedRuntimeOption()
+        {
+            var testInstance = TestAssets.Get("XunitCore")
+                            .CreateInstance()
+                            .WithSourceFiles();
+
+            var rootPath = testInstance.Root.FullName;
+            var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
+
+            new BuildCommand()
+                .WithWorkingDirectory(rootPath)
+                .ExecuteWithCapturedOutput($"--runtime {rid}")
+                .Should()
+                .Pass()
+                .And.NotHaveStdErr();
+
+            var result = new DotnetTestCommand()
+                .WithWorkingDirectory(rootPath)
+                .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --no-build --runtime {rid}");
+
+            result
+                .Should()
+                .NotHaveStdErrContaining("MSB1001")
+                .And
+                .HaveStdOutContaining(rid);
+
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result
+                    .Should()
+                    .HaveStdOutContaining("Total tests: 2")
+                    .And
+                    .HaveStdOutContaining("Passed: 1")
+                    .And
+                    .HaveStdOutContaining("Failed: 1")
+                    .And
+                    .HaveStdOutContaining("\u221a TestNamespace.VSTestXunitTests.VSTestXunitPassTest")
+                    .And
+                    .HaveStdOutContaining("X TestNamespace.VSTestXunitTests.VSTestXunitFailTest");
             }
 
             result.ExitCode.Should().Be(1);

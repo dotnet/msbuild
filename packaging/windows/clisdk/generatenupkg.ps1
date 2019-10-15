@@ -26,7 +26,7 @@ function DownloadNugetExe
 
     if (-not (Test-Path $NuGetExe)) {
         Write-Output 'Downloading nuget.exe to ' + $NuGetExe
-        wget https://dist.nuget.org/win-x86-commandline/v3.5.0-rc1/NuGet.exe -OutFile $NuGetExe
+        wget https://dist.nuget.org/win-x86-commandline/v4.7.0/nuget.exe -OutFile $NuGetExe
     }
 }
 

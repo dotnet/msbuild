@@ -36,10 +36,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 useMock: testMockBehaviorIsInSync,
                 feeds: new MockFeed[0]);
 
-            Action a = () => installer.InstallPackage(
-                packageId: TestPackageId,
-                versionRange: VersionRange.Parse(TestPackageVersion),
-                targetFramework: _testTargetframework);
+            Action a = () => installer.InstallPackage(new PackageLocation(), packageId: TestPackageId,
+                versionRange: VersionRange.Parse(TestPackageVersion), targetFramework: _testTargetframework);
 
             a.ShouldThrow<ToolPackageException>().WithMessage(LocalizableStrings.ToolInstallationRestoreFailed);
 
@@ -57,10 +55,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 offlineFeed: new DirectoryPath(GetTestLocalFeedPath()),
                 feeds: GetOfflineMockFeed());
 
-            var package = installer.InstallPackage(
-                packageId: TestPackageId,
-                versionRange: VersionRange.Parse(TestPackageVersion),
-                targetFramework: _testTargetframework);
+            var package = installer.InstallPackage(new PackageLocation(), packageId: TestPackageId,
+                versionRange: VersionRange.Parse(TestPackageVersion), targetFramework: _testTargetframework);
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -80,11 +76,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 offlineFeed: new DirectoryPath(GetTestLocalFeedPath()),
                 feeds: GetOfflineMockFeed());
 
-            var package = installer.InstallPackage(
+            var package = installer.InstallPackage(new PackageLocation(additionalFeeds: new[] {emptySource}),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
-                targetFramework: _testTargetframework,
-                additionalFeeds: new[] {emptySource});
+                targetFramework: _testTargetframework);
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -102,11 +97,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForConfigFile(nugetConfigPath));
 
-            var package = installer.InstallPackage(
+            var package = installer.InstallPackage(new PackageLocation(nugetConfig: nugetConfigPath),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
-                targetFramework: _testTargetframework,
-                nugetConfig: nugetConfigPath);
+                targetFramework: _testTargetframework);
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -129,11 +123,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 TransactionScopeOption.Required,
                 TimeSpan.Zero))
             {
-                package = installer.InstallPackage(
+                package = installer.InstallPackage(new PackageLocation(nugetConfig: nugetConfigPath),
                     packageId: TestPackageId,
                     versionRange: VersionRange.Parse(TestPackageVersion),
-                    targetFramework: _testTargetframework,
-                    nugetConfig: nugetConfigPath);
+                    targetFramework: _testTargetframework);
 
                 transactionScope.Complete();
             }
@@ -154,11 +147,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForConfigFile(nugetConfigPath));
 
-            var package = installer.InstallPackage(
+            var package = installer.InstallPackage(new PackageLocation(nugetConfig: nugetConfigPath),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
-                targetFramework: _testTargetframework,
-                nugetConfig: nugetConfigPath);
+                targetFramework: _testTargetframework);
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -189,10 +181,9 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             var (store, installer, reporter, fileSystem) = Setup(useMock: false);
 
             var package = installer.InstallPackage(
-                packageId: TestPackageId,
+                new PackageLocation(rootConfigDirectory: nugetConfigPath.GetDirectoryPath()), packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
-                targetFramework: _testTargetframework,
-                rootConfigDirectory: nugetConfigPath.GetDirectoryPath());
+                targetFramework: _testTargetframework);
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -211,9 +202,9 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 feeds: GetMockFeedsForConfigFile(nugetConfigPath));
 
             var package = installer.InstallPackage(
+                new PackageLocation(nugetConfig: nugetConfigPath), 
                 packageId: TestPackageId,
-                targetFramework: _testTargetframework,
-                nugetConfig: nugetConfigPath);
+                targetFramework: _testTargetframework);
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -231,10 +222,9 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForConfigFile(nugetConfigPath));
 
-            var package = installer.InstallPackage(
+            var package = installer.InstallPackage(new PackageLocation(nugetConfig: nugetConfigPath),
                 packageId: TestPackageId,
-                versionRange: VersionRange.Parse(TestPackageVersion),
-                nugetConfig: nugetConfigPath);
+                versionRange: VersionRange.Parse(TestPackageVersion));
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -252,11 +242,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(source));
 
-            var package = installer.InstallPackage(
+            var package = installer.InstallPackage(new PackageLocation(additionalFeeds: new[] {source}),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
-                targetFramework: _testTargetframework,
-                additionalFeeds: new[] {source});
+                targetFramework: _testTargetframework);
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -275,10 +264,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 feeds: GetMockFeedsForSource(source));
 
             var package = installer.InstallPackage(
-                packageId: TestPackageId,
+                new PackageLocation(additionalFeeds: new[]
+                    {Path.GetRelativePath(Directory.GetCurrentDirectory(), source)}), packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
-                targetFramework: _testTargetframework,
-                additionalFeeds: new[] { Path.GetRelativePath(Directory.GetCurrentDirectory(), source) });
+                targetFramework: _testTargetframework);
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -297,10 +286,9 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 feeds: GetMockFeedsForSource(source));
 
             var package = installer.InstallPackage(
-                packageId: TestPackageId,
+                new PackageLocation(additionalFeeds: new[] {new Uri(source).AbsoluteUri}), packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
-                targetFramework: _testTargetframework,
-                additionalFeeds: new[] { new Uri(source).AbsoluteUri });
+                targetFramework: _testTargetframework);
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -320,11 +308,11 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(emptySource));
 
-            var package = installer.InstallPackage(
+            var package = installer.InstallPackage(new PackageLocation(nugetConfig: nugetConfigPath,
+                    additionalFeeds: new[] {emptySource}),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
-                targetFramework: _testTargetframework,
-                nugetConfig: nugetConfigPath, additionalFeeds: new[] {emptySource});
+                targetFramework: _testTargetframework);
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -339,12 +327,13 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             var (store, installer, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync);
 
-            Action a = () => {
+            Action a = () =>
+            {
                 using (var t = new TransactionScope(
                     TransactionScopeOption.Required,
                     TimeSpan.Zero))
                 {
-                    installer.InstallPackage(new PackageId("non.existent.package.id"));
+                    installer.InstallPackage(new PackageLocation(), new PackageId("non.existent.package.id"));
 
                     t.Complete();
                 }
@@ -368,16 +357,16 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             void FailedStepAfterSuccessRestore() => throw new GracefulException("simulated error");
 
-            Action a = () => {
+            Action a = () =>
+            {
                 using (var t = new TransactionScope(
                     TransactionScopeOption.Required,
                     TimeSpan.Zero))
                 {
-                    installer.InstallPackage(
+                    installer.InstallPackage(new PackageLocation(additionalFeeds: new[] {source}),
                         packageId: TestPackageId,
                         versionRange: VersionRange.Parse(TestPackageVersion),
-                        targetFramework: _testTargetframework,
-                        additionalFeeds: new[] {source});
+                        targetFramework: _testTargetframework);
 
                     FailedStepAfterSuccessRestore();
                     t.Complete();
@@ -400,24 +389,23 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(source));
 
-            Action a = () => {
+            Action a = () =>
+            {
                 using (var t = new TransactionScope(
                     TransactionScopeOption.Required,
                     TimeSpan.Zero))
                 {
-                    Action first = () => installer.InstallPackage(
+                    Action first = () => installer.InstallPackage(new PackageLocation(additionalFeeds: new[] {source}),
                         packageId: TestPackageId,
                         versionRange: VersionRange.Parse(TestPackageVersion),
-                        targetFramework: _testTargetframework,
-                        additionalFeeds: new[] {source});
+                        targetFramework: _testTargetframework);
 
                     first.ShouldNotThrow();
 
-                    installer.InstallPackage(
+                    installer.InstallPackage(new PackageLocation(additionalFeeds: new[] {source}),
                         packageId: TestPackageId,
                         versionRange: VersionRange.Parse(TestPackageVersion),
-                        targetFramework: _testTargetframework,
-                        additionalFeeds: new[] {source});
+                        targetFramework: _testTargetframework);
 
                     t.Complete();
                 }
@@ -425,10 +413,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             a.ShouldThrow<ToolPackageException>().Where(
                 ex => ex.Message ==
-                    string.Format(
-                        CommonLocalizableStrings.ToolPackageConflictPackageId,
-                        TestPackageId,
-                        TestPackageVersion));
+                      string.Format(
+                          CommonLocalizableStrings.ToolPackageConflictPackageId,
+                          TestPackageId,
+                          TestPackageVersion));
 
             AssertInstallRollBack(fileSystem, store);
         }
@@ -444,28 +432,26 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(source));
 
-            var package = installer.InstallPackage(
+            var package = installer.InstallPackage(new PackageLocation(additionalFeeds: new[] {source}),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
-                targetFramework: _testTargetframework,
-                additionalFeeds: new[] {source});
+                targetFramework: _testTargetframework);
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
-            Action secondCall = () => installer.InstallPackage(
+            Action secondCall = () => installer.InstallPackage(new PackageLocation(additionalFeeds: new[] {source}),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
-                targetFramework: _testTargetframework,
-                additionalFeeds: new[] {source});
+                targetFramework: _testTargetframework);
 
             reporter.Lines.Should().BeEmpty();
 
             secondCall.ShouldThrow<ToolPackageException>().Where(
                 ex => ex.Message ==
-                    string.Format(
-                        CommonLocalizableStrings.ToolPackageConflictPackageId,
-                        TestPackageId,
-                        TestPackageVersion));
+                      string.Format(
+                          CommonLocalizableStrings.ToolPackageConflictPackageId,
+                          TestPackageId,
+                          TestPackageVersion));
 
             fileSystem
                 .Directory
@@ -493,11 +479,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(source));
 
-            var package = installer.InstallPackage(
+            var package = installer.InstallPackage(new PackageLocation(additionalFeeds: new[] {source}),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
-                targetFramework: _testTargetframework,
-                additionalFeeds: new[] {source});
+                targetFramework: _testTargetframework);
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -518,10 +503,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 feeds: GetMockFeedsForSource(source));
 
             var package = installer.InstallPackage(
+                new PackageLocation(additionalFeeds: new[] {source}),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
-                targetFramework: _testTargetframework,
-                additionalFeeds: new[] {source});
+                targetFramework: _testTargetframework);
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -542,7 +527,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public void GivenAnInstalledPackageUninstallRemovesThePackageWhenTransactionCommits(bool testMockBehaviorIsInSync)
+        public void GivenAnInstalledPackageUninstallRemovesThePackageWhenTransactionCommits(
+            bool testMockBehaviorIsInSync)
         {
             var source = GetTestLocalFeedPath();
 
@@ -550,11 +536,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(source));
 
-            var package = installer.InstallPackage(
+            var package = installer.InstallPackage(new PackageLocation(additionalFeeds: new[] {source}),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
-                targetFramework: _testTargetframework,
-                additionalFeeds: new[] {source});
+                targetFramework: _testTargetframework);
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -580,10 +565,9 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForConfigFile(nugetConfigPath));
 
-            var package = installer.InstallPackage(
+            var package = installer.InstallPackage(new PackageLocation(nugetConfig: nugetConfigPath),
                 packageId: new PackageId("GlObAl.TooL.coNsoLe.DemO"),
-                targetFramework: _testTargetframework,
-                nugetConfig: nugetConfigPath);
+                targetFramework: _testTargetframework);
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -600,11 +584,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 useMock: false,
                 tempProject: tempProject);
 
-            var package = installer.InstallPackage(
+            var package = installer.InstallPackage(new PackageLocation(nugetConfig: nugetConfigPath),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse("1.0.0"),
-                targetFramework: _testTargetframework,
-                nugetConfig: nugetConfigPath);
+                targetFramework: _testTargetframework);
 
             reporter.Lines.Should().NotBeEmpty();
             reporter.Lines.Should().Contain(l => l.Contains("warning"));
@@ -634,12 +617,11 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 tempProject: GetUniqueTempProjectPathEachTest(),
                 offlineFeed: new DirectoryPath("does not exist"));
 
-            var package = installer.InstallPackage(
+            var package = installer.InstallPackage(new PackageLocation(nugetConfig: nugetConfigPath),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
-                targetFramework: _testTargetframework,
-                nugetConfig: nugetConfigPath);
-                
+                targetFramework: _testTargetframework);
+
             AssertPackageInstall(reporter, fileSystem, package, store);
 
             package.Uninstall();
@@ -659,11 +641,11 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(emptySource));
 
-            var package = installer.InstallPackage(
+            var package = installer.InstallPackage(new PackageLocation(nugetConfig: nugetConfigPath,
+                    additionalFeeds: new[] {emptySource}),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse("1.0.0-rc*"),
-                targetFramework: _testTargetframework,
-                nugetConfig: nugetConfigPath, additionalFeeds: new[] { emptySource });
+                targetFramework: _testTargetframework);
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
@@ -706,10 +688,12 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 CultureInfo.CurrentCulture = new CultureInfo("en-US-POSIX");
                 IToolPackage package = null;
                 Action action = () => package = installer.InstallPackage(
+                    new PackageLocation(
+                        nugetConfig: nugetConfigPath,
+                        additionalFeeds: new[] { emptySource }),
                     packageId: packageId,
                     versionRange: VersionRange.Parse(packageVersion),
-                    targetFramework: _testTargetframework,
-                    nugetConfig: nugetConfigPath, additionalFeeds: new[] { emptySource });
+                    targetFramework: _testTargetframework);
 
                 action.ShouldNotThrow<ToolConfigurationException>();
 
@@ -741,7 +725,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 .Equal(TestPackageVersion);
 
             package.Commands.Count.Should().Be(1);
-            fileSystem.File.Exists(package.Commands[0].Executable.Value).Should().BeTrue($"{package.Commands[0].Executable.Value} should exist");
+            fileSystem.File.Exists(package.Commands[0].Executable.Value).Should()
+                .BeTrue($"{package.Commands[0].Executable.Value} should exist");
             package.Commands[0].Executable.Value.Should().Contain(store.Root.Value);
         }
 
@@ -891,7 +876,9 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             return new FilePath(Path.GetFullPath(Path.Combine(tempPathForNugetConfigWithWhiteSpace, nugetConfigName)));
         }
 
-        private static string GetTestLocalFeedPath() => Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "TestAssetLocalNugetFeed");
+        private static string GetTestLocalFeedPath() =>
+            Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "TestAssetLocalNugetFeed");
+
         private readonly string _testTargetframework = BundledTargetFramework.GetTargetFrameworkMoniker();
         private const string TestPackageVersion = "1.0.4";
         private static readonly PackageId TestPackageId = new PackageId("global.tool.console.demo");

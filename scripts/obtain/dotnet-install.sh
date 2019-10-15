@@ -75,16 +75,24 @@ get_legacy_os_name_from_platform() {
             echo "debian"
             return 0
             ;;
+        "debian.9")
+            echo "debian.9"
+            return 0
+            ;;
         "fedora.23")
             echo "fedora.23"
+            return 0
+            ;;
+        "fedora.24")
+            echo "fedora.24"
             return 0
             ;;
         "fedora.27")
             echo "fedora.27"
             return 0
             ;;
-        "fedora.24")
-            echo "fedora.24"
+        "fedora.28")
+            echo "fedora.28"
             return 0
             ;;
         "opensuse.13.2")
@@ -628,7 +636,7 @@ extract_dotnet_package() {
     tar -xzf "$zip_path" -C "$temp_out_path" > /dev/null || failed=true
 
     local folders_with_version_regex='^.*/[0-9]+\.[0-9]+[^/]+/'
-    find "$temp_out_path" -type f | grep -Eo "$folders_with_version_regex" | copy_files_or_dirs_from_list "$temp_out_path" "$out_path" false
+    find "$temp_out_path" -type f | grep -Eo "$folders_with_version_regex" | sort | copy_files_or_dirs_from_list "$temp_out_path" "$out_path" false
     find "$temp_out_path" -type f | grep -Ev "$folders_with_version_regex" | copy_files_or_dirs_from_list "$temp_out_path" "$out_path" "$override_non_versioned_files"
 
     rm -rf "$temp_out_path"
@@ -647,6 +655,11 @@ download() {
 
     local remote_path="$1"
     local out_path="${2:-}"
+
+    if [[ "$remote_path" != "http"* ]]; then
+        cp "$remote_path" "$out_path"
+        return $?
+    fi
 
     local failed=false
     if machine_has "curl"; then
@@ -811,6 +824,7 @@ install_dir="<auto>"
 architecture="<auto>"
 dry_run=false
 no_path=false
+no_cdn=false
 azure_feed="https://dotnetcli.azureedge.net/dotnet"
 uncached_feed="https://dotnetcli.blob.core.windows.net/dotnet"
 feed_credential=""
@@ -861,6 +875,9 @@ do
             ;;
         --verbose|-[Vv]erbose)
             verbose=true
+            ;;
+        --no-cdn|-[Nn]o[Cc]dn)
+            no_cdn=true
             ;;
         --azure-feed|-[Aa]zure[Ff]eed)
             shift
@@ -924,6 +941,7 @@ do
             echo "  --verbose,-Verbose                 Display diagnostics information."
             echo "  --azure-feed,-AzureFeed            Azure feed location. Defaults to $azure_feed, This parameter typically is not changed by the user."
             echo "  --uncached-feed,-UncachedFeed      Uncached feed location. This parameter typically is not changed by the user."
+            echo "  --no-cdn,-NoCdn                    Disable downloading from the Azure CDN, and use the uncached feed directly."
             echo "  --feed-credential,-FeedCredential  Azure feed shared access token. This parameter typically is not specified."
             echo "  --runtime-id                       Installs the .NET Tools for the given platform (use linux-x64 for portable linux)."
             echo "      -RuntimeId"
@@ -948,6 +966,10 @@ do
 
     shift
 done
+
+if [ "$no_cdn" = true ]; then
+    azure_feed="$uncached_feed"
+fi
 
 check_min_reqs
 calculate_vars

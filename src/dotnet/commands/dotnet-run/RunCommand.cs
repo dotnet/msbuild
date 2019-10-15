@@ -26,6 +26,10 @@ namespace Microsoft.DotNet.Tools.Run
 
         private List<string> _args;
         private bool ShouldBuild => !NoBuild;
+        private bool HasQuietVerbosity =>
+            RestoreArgs.All(arg => !arg.StartsWith("-verbosity:", StringComparison.Ordinal) ||
+                                    arg.Equals("-verbosity:q", StringComparison.Ordinal) ||
+                                    arg.Equals("-verbosity:quiet", StringComparison.Ordinal));
 
         public string LaunchProfile { get; private set; }
         public bool NoLaunchProfile { get; private set; }
@@ -114,7 +118,10 @@ namespace Microsoft.DotNet.Tools.Run
                 var launchSettingsPath = Path.Combine(buildPathContainer, "Properties", "launchSettings.json");
                 if (File.Exists(launchSettingsPath))
                 {
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.UsingLaunchSettingsFromMessage, launchSettingsPath));
+                    if (!HasQuietVerbosity) {
+                        Reporter.Output.WriteLine(string.Format(LocalizableStrings.UsingLaunchSettingsFromMessage, launchSettingsPath));
+                    }
+
                     string profileName = string.IsNullOrEmpty(LaunchProfile) ? LocalizableStrings.DefaultLaunchProfileDisplayName : LaunchProfile;
 
                     try

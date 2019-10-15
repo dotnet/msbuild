@@ -109,19 +109,23 @@ namespace Microsoft.DotNet.TestFramework
             return this;
         }
 
-        public TestAssetInstance WithNuGetConfig(string nugetCache)
+        public TestAssetInstance WithNuGetConfig(string nugetCache, string externalRestoreSources = null)
         {
             var thisAssembly = typeof(TestAssetInstance).GetTypeInfo().Assembly;
             var newNuGetConfig = Root.GetFile("NuGet.Config");
+            externalRestoreSources = externalRestoreSources ?? string.Empty;
 
             var content = @"<?xml version=""1.0"" encoding=""utf-8""?>
             <configuration>
               <packageSources>
                 <add key=""dotnet-core"" value=""https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json"" />
                 <add key=""test-packages"" value=""$fullpath$"" />
+                $externalRestoreSources$
               </packageSources>
             </configuration>";
-            content = content.Replace("$fullpath$", nugetCache);
+            content = content
+                .Replace("$fullpath$", nugetCache)
+                .Replace("$externalRestoreSources$", externalRestoreSources);
 
             using (var newNuGetConfigStream =
                 new FileStream(newNuGetConfig.FullName, FileMode.Create, FileAccess.Write))

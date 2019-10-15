@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="ClosingSectionTagNotFoundError">
         <source>Closing section tag not found</source>
-        <target state="translated">Marca de fechamento de seção não encontrada</target>
+        <target state="translated">Tag de fechamento de seção não encontrada</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorMessageFormatString">

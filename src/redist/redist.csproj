@@ -259,7 +259,7 @@
   </Target>
 
   <Target Name="CrossgenPublishDir"
-          Condition=" '$(DISABLE_CROSSGEN)' == '' And !$(Architecture.StartsWith('arm')) "
+          Condition=" '$(DISABLE_CROSSGEN)' == '' And '$(rid)' != 'linux-arm' "
           AfterTargets="PublishSdks">
     <ItemGroup>
       <RoslynFiles Include="$(PublishDir)Roslyn\bincore\**\*" />
@@ -283,7 +283,7 @@
       <FSharpFiles Remove="$(PublishDir)FSharp\**\*.resources.dll" />
       <RemainingFiles Remove="$(PublishDir)**\*.resources.dll" />
 
-      <DiasymReaderPath Include="$(SharedFrameworkNameVersionPath)/Microsoft.DiaSymReader.Native.*.dll" />
+      <DiasymReaderPath Include="$(SharedFrameworkNameVersionPath)/Microsoft.DiaSymReader.Native.$(DIASymReaderCrossgenFilter).dll" />
 
       <!-- MSBuild includes reference assemblies to compile in-memory tasks. Don't try to crossgen. -->
       <RemainingFiles Remove="$(PublishDir)ref\*.dll" />

@@ -62,14 +62,14 @@
       <trans-unit id="CmdLoggerDescription">
         <source>The logger to use for test results.
                                         Examples:
-                                        Log in trx format using a unqiue file name: --logger trx
+                                        Log in trx format using a unique file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         See https://aka.ms/vstest-report for more information on logger arguments.</source>
         <target state="translated">Test sonuçları için kullanılacak günlükçü.
                                         Örnekler:
-                                        Benzersiz bir dosya adı kullanarak trx biçiminde günlüğe kaydet: --logger trx
-                                        Belirtilen dosya adını kullanarak trx biçiminde günlüğe kaydet: --logger "trx;LogFileName=&lt;TestSonuçları.trx&gt;"
-                                        logger bağımsız değişkenleri hakkında dafa fazla bilgi için bkz. https://aka.ms/vstest-report.</target>
+                                        Benzersiz bir dosya adı kullanan trx biçimli günlük: --logger trx
+                                        Belirtilen dosya adını kullanan trx biçimli günlük: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
+                                        Günlükçü bağımsız değişkenleri hakkında daha fazla bilgi edinmek için bkz. https://aka.ms/vstest-report.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">
@@ -158,6 +158,11 @@ Geçerli dizinde testin kilitlenmeden önceki test yürütme sırasını yakalay
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for running tests. The default for most projects is 'Debug'.</source>
         <target state="translated">Testleri çalıştırmak için kullanılacak yapılandırma. Çoğu proje için varsayılan, ‘Hata Ayıklama’ seçeneğidir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to test for.</source>
+        <target state="translated">Test için hedef çalışma zamanı.</target>
         <note />
       </trans-unit>
     </body>

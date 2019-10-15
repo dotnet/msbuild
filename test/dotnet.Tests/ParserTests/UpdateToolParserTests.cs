@@ -107,5 +107,35 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var appliedOptions = result["dotnet"]["tool"]["update"];
             appliedOptions.SingleArgumentOrDefault("tool-path").Should().Be(@"C:\TestAssetLocalNugetFeed");
         }
+
+        [Fact]
+        public void UpdateToolParserCanParseNoCacheOption()
+        {
+            var result =
+                Parser.Instance.Parse(@"dotnet tool update -g console.test.app --no-cache");
+
+            var appliedOptions = result["dotnet"]["tool"]["update"];
+            appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--no-cache");
+        }
+
+        [Fact]
+        public void UpdateToolParserCanParseIgnoreFailedSourcesOption()
+        {
+            var result =
+                Parser.Instance.Parse(@"dotnet tool update -g console.test.app --ignore-failed-sources");
+
+            var appliedOptions = result["dotnet"]["tool"]["update"];
+            appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--ignore-failed-sources");
+        }
+
+        [Fact]
+        public void UpdateToolParserCanParseDisableParallelOption()
+        {
+            var result =
+                Parser.Instance.Parse(@"dotnet tool update -g console.test.app --disable-parallel");
+
+            var appliedOptions = result["dotnet"]["tool"]["update"];
+            appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--disable-parallel");
+        }
     }
 }

@@ -37,9 +37,9 @@ namespace Microsoft.DotNet.Cli
                     .With(name: CommonLocalizableStrings.FrameworkArgumentName)
                     .ForwardAsSingle(o => $"-property:TargetFramework={o.Arguments.Single()}"));
         
-        public static Option RuntimeOption(string description) =>
+        public static Option RuntimeOption(string description, bool withShortOption = true) =>
             Create.Option(
-                "-r|--runtime",
+                withShortOption ? "-r|--runtime" : "--runtime",
                 description,
                 Accept.ExactlyOneArgument()
                     .WithSuggestionsFrom(_ => Suggest.RunTimesFromProjectFile())
@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Cli
                 description,
                 Accept.ExactlyOneArgument()
                     .With(name: CommonLocalizableStrings.ConfigurationArgumentName)
-                    .WithSuggestionsFrom("Debug", "Release")
+                    .WithSuggestionsFrom(_ => Suggest.ConfigurationsFromProjectFileOrDefaults())
                     .ForwardAsSingle(o => $"-property:Configuration={o.Arguments.Single()}"));
 
         public static Option VersionSuffixOption() =>
