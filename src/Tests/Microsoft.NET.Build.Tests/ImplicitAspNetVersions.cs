@@ -193,6 +193,78 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("NETSDK1023");
         }
 
+        [Theory]
+        [InlineData(true, null)]
+        [InlineData(true, "2.1.1")]
+        [InlineData(false, null)]
+        public void WhenTargetingNetCore3_0AspNetCoreAllPackageReferenceErrors(bool useWebSdk, string packageVersion)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "AspNetCoreAll_On3_0",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                ProjectSdk = useWebSdk ? "Microsoft.NET.Sdk.Web" : null,
+                IsExe = true
+            };
+
+            //  Add PackageReference
+            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.AspNetCore.All", packageVersion));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: $"{useWebSdk}_{packageVersion}");
+
+            var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            restoreCommand.Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1079");
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand.Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1079");
+        }
+
+        [Theory]
+        [InlineData(true, null)]
+        [InlineData(true, "2.1.1")]
+        [InlineData(false, null)]
+        public void WhenTargetingNetCore3_0AspNetCoreAppPackageReferenceWarns(bool useWebSdk, string packageVersion)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "AspNetCoreApp_On3_0",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                ProjectSdk = useWebSdk ? "Microsoft.NET.Sdk.Web" : null,
+                IsExe = true
+            };
+
+            //  Add PackageReference
+            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.AspNetCore.App", packageVersion));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: $"{useWebSdk}_{packageVersion}");
+
+            var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            restoreCommand.Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("NETSDK1080");
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand.Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("NETSDK1080");
+        }
+
         static NuGetVersion GetLibraryVersion(TestProject testProject, BuildCommand buildCommand, string libraryName)
         {
             LockFile lockFile = LockFileUtilities.GetLockFile(

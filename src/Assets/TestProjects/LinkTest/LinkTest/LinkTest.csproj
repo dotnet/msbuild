@@ -10,6 +10,8 @@
     <None Include="..\Linked\**\*.None.txt" LinkBase="Linked\Files" />
     <Content Include="..\Linked\**\*.Content.txt" LinkBase="Linked\Files" />
     <EmbeddedResource Include="..\Linked\**\*.Embedded.txt" LinkBase="Linked\Files" />
+    <Page Include="..\Linked\**\*.page.xaml" LinkBase="Linked\Files" />
+    <Resource Include="..\Linked\**\*.resource.xaml" LinkBase="Linked\Files" />
     <CustomItem Include="..\Linked\**\*.Custom.txt" LinkBase="Linked\Files" />
   </ItemGroup>
 
@@ -19,6 +21,8 @@
     <None Include="..\Linked\**\*.None.txt" />
     <Content Include="..\Linked\**\*.Content.txt" />
     <EmbeddedResource Include="..\Linked\**\*.Embedded.txt" />
+    <Page Include="..\Linked\**\*.page.xaml" />
+    <Resource Include="..\Linked\**\*.resource.xaml" />
     <CustomItem Include="..\Linked\**\*.Custom.txt" />
   </ItemGroup>
 
@@ -28,6 +32,8 @@
     <None Include="..\Linked\Linked.None.txt" LinkBase="Linked\Files"/>
     <Content Include="..\Linked\Linked.Content.txt" LinkBase="Linked\Files"/>
     <EmbeddedResource Include="..\Linked\Linked.Embedded.txt" LinkBase="Linked\Files"/>
+    <Page Include="..\Linked\Linked.page.xaml" LinkBase="Linked\Files"/>
+    <Resource Include="..\Linked\Linked.resource.xaml" LinkBase="Linked\Files"/>
     <CustomItem Include="..\Linked\*Linked.Custom.txt" LinkBase="Linked\Files"/>
   </ItemGroup>
 
@@ -37,6 +43,8 @@
     <None Include="..\Linked\Linked.None.txt" />
     <Content Include="..\Linked\Linked.Content.txt" />
     <EmbeddedResource Include="..\Linked\Linked.Embedded.txt" />
+    <Page Include="..\Linked\Linked.page.xaml" />
+    <Resource Include="..\Linked\Linked.resource.xaml" />
     <CustomItem Include="..\Linked\*Linked.Custom.txt" />
   </ItemGroup>
 
@@ -48,6 +56,8 @@
       <LinesToWrite Include="None%09%(None.FullPath)%09%(None.Link)" />
       <LinesToWrite Include="Content%09%(Content.FullPath)%09%(Content.Link)" />
       <LinesToWrite Include="EmbeddedResource%09%(EmbeddedResource.FullPath)%09%(EmbeddedResource.Link)" />
+      <LinesToWrite Include="Page%09%(Page.FullPath)%09%(Page.Link)" />
+      <LinesToWrite Include="Resource%09%(Resource.FullPath)%09%(Resource.Link)" />
       <LinesToWrite Include="CustomItem%09%(CustomItem.FullPath)%09%(CustomItem.Link)" />
     </ItemGroup>
 

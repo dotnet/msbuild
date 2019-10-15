@@ -37,7 +37,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         /// by which packages before doing any other conflict resolution.
         /// </summary>
         /// <remarks>
-        /// This is an optimizaiton so AssemblyVersions, FileVersions, etc. don't need to be read
+        /// This is an optimization so AssemblyVersions, FileVersions, etc. don't need to be read
         /// in the default cases where platform packages (Microsoft.NETCore.App) should override specific packages
         /// (System.Console v4.3.0).
         /// </remarks>
@@ -156,16 +156,22 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             //  passed to the compiler.
             //  So what we do is keep track of Platform items that win conflicts with Reference items in
             //  the compile scope, and explicitly add references to them here.
+
+            var referenceItemSpecs = new HashSet<string>(ReferencesWithoutConflicts?.Select(r => r.ItemSpec) ?? Enumerable.Empty<string>(),
+                                                                     StringComparer.OrdinalIgnoreCase);
             ReferencesWithoutConflicts = SafeConcat(ReferencesWithoutConflicts,
                 //  The Reference item we create in this case should be without the .dll extension
                 //  (which is added in FrameworkListReader in order to make the framework items
                 //  correctly conflict with DLLs from NuGet packages)
                 compilePlatformWinners.Select(c => Path.GetFileNameWithoutExtension(c.FileName))
+                                      //  Don't add a reference if we already have one (especially in case the existing one has
+                                      //  metadata we want to keep, such as aliases)
+                                      .Where(simplename => !referenceItemSpecs.Contains(simplename))
                                       .Select(r => new TaskItem(r)));
 
         }
 
-        //  Concatanate two things, either of which may be null.  Interpret null as empty,
+        //  Concatenate two things, either of which may be null.  Interpret null as empty,
         //  and return null if the result would be empty.
         private ITaskItem[] SafeConcat(ITaskItem[] first, IEnumerable<ITaskItem> second)
         {
@@ -202,6 +208,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             if (conflict.PackageId != null)
             {
                 item.SetMetadata(nameof(ConflictItemType), conflict.ItemType.ToString());
+                item.SetMetadata(MetadataKeys.NuGetPackageId, conflict.PackageId);
             }
 
             return item;
@@ -255,7 +262,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             var result = new ITaskItem[original.Length - conflicts.Count];
             int index = 0;
 
-            foreach(var originalItem in original)
+            foreach (var originalItem in original)
             {
                 if (!conflicts.Contains(originalItem))
                 {
@@ -265,6 +272,14 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                     }
                     result[index++] = originalItem;
                 }
+            }
+
+            //  If there are duplicates in the original list, then our size calculation for the result will have been wrong.
+            //  So we have to re-allocate the array with the right size.
+            //  Duplicates can happen if there are duplicate Reference items that are joined with a reference from a package in ResolveLockFileReferences
+            if (index != result.Length)
+            {
+                return result.Take(index).ToArray();
             }
 
             return result;

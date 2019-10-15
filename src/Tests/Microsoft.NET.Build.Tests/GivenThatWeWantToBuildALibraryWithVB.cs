@@ -170,10 +170,10 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData("Debug", new[] { "CONFIG=\"Debug\"", "DEBUG=-1", "TRACE=-1" })]
-        [InlineData("Release", new[] { "CONFIG=\"Release\"", "RELEASE=-1", "TRACE=-1" })]
-        [InlineData("CustomConfiguration",  new[] { "CONFIG=\"CustomConfiguration\"", "CUSTOMCONFIGURATION=-1" })]
-        [InlineData("Debug-NetCore",  new[] { "CONFIG=\"Debug-NetCore\"", "DEBUG_NETCORE=-1" })]
+        [InlineData("Debug", new[] { "CONFIG=\"Debug\"", "DEBUG=-1", "TRACE=-1", "_MyType=\"Empty\"" })]
+        [InlineData("Release", new[] { "CONFIG=\"Release\"", "RELEASE=-1", "TRACE=-1", "_MyType=\"Empty\"" })]
+        [InlineData("CustomConfiguration",  new[] { "CONFIG=\"CustomConfiguration\"", "CUSTOMCONFIGURATION=-1", "_MyType=\"Empty\"" })]
+        [InlineData("Debug-NetCore",  new[] { "CONFIG=\"Debug-NetCore\"", "DEBUG_NETCORE=-1", "_MyType=\"Empty\"" })]
         public void It_implicitly_defines_compilation_constants_for_the_configuration(string configuration, string[] expectedDefines)
         {
             var testAsset = _testAssetsManager
@@ -200,16 +200,16 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData(".NETStandard,Version=v1.0", new[] { "NETSTANDARD=-1", "NETSTANDARD1_0=-1" }, false)]
-        [InlineData("netstandard1.3", new[] { "NETSTANDARD=-1", "NETSTANDARD1_3=-1" }, false)]
-        [InlineData("netstandard1.6", new[] { "NETSTANDARD=-1", "NETSTANDARD1_6=-1" }, false)]
+        [InlineData(".NETStandard,Version=v1.0", new[] { "NETSTANDARD=-1", "NETSTANDARD1_0=-1", "_MyType=\"Empty\"" }, false)]
+        [InlineData("netstandard1.3", new[] { "NETSTANDARD=-1", "NETSTANDARD1_3=-1", "_MyType=\"Empty\"" }, false)]
+        [InlineData("netstandard1.6", new[] { "NETSTANDARD=-1", "NETSTANDARD1_6=-1", "_MyType=\"Empty\"" }, false)]
         [InlineData("net45", new[] { "NETFRAMEWORK=-1", "NET45=-1" }, true)]
         [InlineData("net461", new[] { "NETFRAMEWORK=-1", "NET461=-1" }, true)]
-        [InlineData("netcoreapp1.0", new[] { "NETCOREAPP=-1", "NETCOREAPP1_0=-1" }, false)]
-        [InlineData(".NETPortable,Version=v4.5,Profile=Profile78", new string[] { }, false)]
+        [InlineData("netcoreapp1.0", new[] { "NETCOREAPP=-1", "NETCOREAPP1_0=-1", "_MyType=\"Empty\"" }, false)]
+        [InlineData(".NETPortable,Version=v4.5,Profile=Profile78", new string[] { "_MyType=\"Empty\"" }, false)]
         [InlineData(".NETFramework,Version=v4.0,Profile=Client", new string[] { "NETFRAMEWORK=-1", "NET40=-1" }, false)]
-        [InlineData("Xamarin.iOS,Version=v1.0", new string[] { "XAMARINIOS=-1", "XAMARINIOS1_0=-1" }, false)]
-        [InlineData("UnknownFramework,Version=v3.14", new string[] { "UNKNOWNFRAMEWORK=-1", "UNKNOWNFRAMEWORK3_14=-1" }, false)]
+        [InlineData("Xamarin.iOS,Version=v1.0", new string[] { "XAMARINIOS=-1", "XAMARINIOS1_0=-1", "_MyType=\"Empty\"" }, false)]
+        [InlineData("UnknownFramework,Version=v3.14", new string[] { "UNKNOWNFRAMEWORK=-1", "UNKNOWNFRAMEWORK3_14=-1", "_MyType=\"Empty\"" }, false)]
         public void It_implicitly_defines_compilation_constants_for_the_target_framework(string targetFramework, string[] expectedDefines, bool buildOnlyOnWindows)
         {
             bool shouldCompile = true;

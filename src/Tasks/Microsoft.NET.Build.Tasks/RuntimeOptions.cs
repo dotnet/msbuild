@@ -9,9 +9,14 @@ namespace Microsoft.NET.Build.Tasks
 {
     internal class RuntimeOptions
     {
-        public string tfm { get; set; }
+        public string Tfm { get; set; }
+
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string RollForward { get; set; }
 
         public RuntimeConfigFramework Framework { get; set; }
+
+        public List<RuntimeConfigFramework> Frameworks { get; set; }
 
         public List<string> AdditionalProbingPaths { get; set; }
 

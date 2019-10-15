@@ -107,6 +107,11 @@ namespace Microsoft.NET.Publish.Tests
         private void Versions_are_included(bool build, [CallerMemberName] string callingMethod = "")
         {
             var testProject = GetTestProject();
+            if (!EnvironmentInfo.SupportsTargetFramework(testProject.TargetFrameworks))
+            {
+                return;
+            }
+
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, callingMethod)
@@ -224,13 +229,9 @@ static class Program
             //  to force the .NET Core 2.0 app to run on that version
             string rollForwardVersion = GetRollForwardNetCoreAppVersion();
 
-            var foo = TestContext.Current.ToolsetUnderTest.CliVersionForBundledVersions;
-            var runAppCommand = Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath,
-                new string[] { "exec", "--fx-version", rollForwardVersion, exePath });
+            var runAppCommand = new DotnetCommand(Log, "exec", "--fx-version", rollForwardVersion, exePath );
 
             var runAppResult = runAppCommand
-                .CaptureStdOut()
-                .CaptureStdErr()
                 .Execute();
 
             runAppResult

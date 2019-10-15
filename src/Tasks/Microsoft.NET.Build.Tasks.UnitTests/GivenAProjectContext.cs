@@ -20,8 +20,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             LockFile lockFile = TestLockFiles.GetLockFile("dependencies.withgraphs");
             ProjectContext projectContext = lockFile.CreateProjectContext(
                FrameworkConstants.CommonFrameworks.NetStandard16,
-               null,
+               runtime: null,
                Constants.DefaultPlatformLibrary,
+               runtimeFrameworks: null,
                isSelfContained: false);
 
             IEnumerable<string> excludeFromPublishPackageIds = new[] { "Microsoft.Extensions.Logging.Abstractions" };

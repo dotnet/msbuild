@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,6 +17,8 @@ namespace Microsoft.NET.Build.Tasks
     /// </summary>
     public sealed class ResolveToolPackagePaths : TaskBase
     {
+        public string AppHostIntermediatePath { get; set; }
+
         [Required]
         public ITaskItem[] ResolvedFileToPublish { get; set; }
 
@@ -36,6 +39,12 @@ namespace Microsoft.NET.Build.Tasks
             var result = new List<TaskItem>();
             foreach (ITaskItem r in ResolvedFileToPublish)
             {
+                // skip packing apphost since a dotnet tool will get a generated shim executable once installed
+                if (r.ItemSpec.Equals(AppHostIntermediatePath, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
                 string relativePath = r.GetMetadata("RelativePath");
                 var fullpath = Path.GetFullPath(
                     Path.Combine(PublishDir,

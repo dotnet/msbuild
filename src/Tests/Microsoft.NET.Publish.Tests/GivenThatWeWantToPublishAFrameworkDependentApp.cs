@@ -32,13 +32,16 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(null, "netcoreapp2.2")]
         [InlineData("true", "netcoreapp2.2")]
         [InlineData("false", "netcoreapp2.2")]
+        [InlineData(null, "netcoreapp3.0")]
+        [InlineData("true", "netcoreapp3.0")]
+        [InlineData("false", "netcoreapp3.0")]
         public void It_publishes_with_or_without_apphost(string useAppHost, string targetFramework)
         {
             var runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();
             var appHostName = $"{TestProjectName}{Constants.ExeSuffix}";
 
             var testAsset = _testAssetsManager
-                .CopyTestAsset(TestProjectName, $"It_publishes_with_or_without_apphost_{(useAppHost ?? "null")}")
+                .CopyTestAsset(TestProjectName, $"It_publishes_with_or_without_apphost_{(useAppHost ?? "null")}_{targetFramework}")
                 .WithSource();
 
             var msbuildArgs = new List<string>()
@@ -53,6 +56,14 @@ namespace Microsoft.NET.Publish.Tests
             if (useAppHost != null)
             {
                 msbuildArgs.Add($"/p:UseAppHost={useAppHost}");
+            }
+
+            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX) &&
+                targetFramework == "netcoreapp2.1")
+            {
+                //  .NET Core 2.1.0 packages don't support latest versions of OS X, so roll forward to the
+                //  latest patch which does
+                msbuildArgs.Add("/p:TargetLatestRuntimePatch=true");
             }
 
             var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
@@ -82,11 +93,10 @@ namespace Microsoft.NET.Publish.Tests
             // Run the apphost if one was generated
             if (useAppHost != "false")
             {
-                Command.Create(Path.Combine(publishDirectory.FullName, appHostName), Enumerable.Empty<string>())
-                    .EnvironmentVariable(
+                new RunExeCommand(Log, Path.Combine(publishDirectory.FullName, appHostName))
+                    .WithEnvironmentVariable(
                         Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)",
                         Path.GetDirectoryName(TestContext.Current.ToolsetUnderTest.DotNetHostPath))
-                    .CaptureStdOut()
                     .Execute()
                     .Should()
                     .Pass()
@@ -96,32 +106,14 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Fact]
-        public void It_errors_when_using_app_host_without_rid()
-        {
-            var testAsset = _testAssetsManager
-                .CopyTestAsset(TestProjectName)
-                .WithSource();
-
-            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
-            publishCommand
-                .Execute(
-                    "/p:SelfContained=false",
-                    "/p:UseAppHost=true",
-                    "/p:TargetFramework=netcoreapp2.2")
-                .Should()
-                .Fail()
-                .And
-                .HaveStdOutContaining(Strings.CannotUseAppHostWithoutRuntimeIdentifier);
-        }
-
-        [Fact]
         public void It_errors_when_using_app_host_with_older_target_framework()
         {
             var runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();
 
             var testAsset = _testAssetsManager
                 .CopyTestAsset(TestProjectName)
-                .WithSource();
+                .WithSource()
+                .WithTargetFramework("netcoreapp2.0");
 
             var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
             publishCommand

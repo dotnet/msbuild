@@ -22,7 +22,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 metadata: new Dictionary<string, string> { { "Version", kvp.Version.ToString() } })).ToArray();
 
         [Fact]
-        public void RemovDuplicatePackageReference()
+        public void RemoveDuplicatePackageReference()
         {
             var knownpackage = new List<PackageIdentity>();
 

@@ -3,6 +3,9 @@
 
 using System;
 using Microsoft.Build.Utilities;
+using Microsoft.Build.Framework;
+using System.Collections.Generic;
+using System.Globalization;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -38,73 +41,74 @@ namespace Microsoft.NET.Build.Tasks
             {
                 Log.LogError(e.Message);
             }
+            catch (Exception e)
+            {
+                LogErrorTelemetry("taskBaseCatchException", e);
+                throw;
+            }
 
             return !Log.HasLoggedErrors;
         }
 
-        protected abstract void ExecuteCore();
-
-        private sealed class LogAdapter : Logger
+        private void LogErrorTelemetry(string eventName, Exception e)
         {
-            private TaskLoggingHelper _taskLogger;
+            (BuildEngine as IBuildEngine5)?.LogTelemetry(eventName, new Dictionary<string, string> {
+                        {"exceptionType", e.GetType().ToString() },
+                        {"detail", ExceptionToStringWithoutMessage(e) }});
+        }
 
-            public LogAdapter(TaskLoggingHelper taskLogger)
+        private static string ExceptionToStringWithoutMessage(Exception e)
+        {
+            const string AggregateException_ToString = "{0}{1}---> (Inner Exception #{2}) {3}{4}{5}";
+            if (e is AggregateException aggregate)
             {
-                _taskLogger = taskLogger;
-            }
+                string text = NonAggregateExceptionToStringWithoutMessage(aggregate);
 
-            protected override void LogCore(in Message message)
-            {
-                switch (message.Level)
+                for (int i = 0; i < aggregate.InnerExceptions.Count; i++)
                 {
-                    case MessageLevel.Error:
-                        _taskLogger.LogError(
-                            subcategory: default,
-                            errorCode: message.Code,
-                            helpKeyword: default,
-                            file: message.File,
-                            lineNumber: default,
-                            columnNumber: default,
-                            endLineNumber: default,
-                            endColumnNumber: default,
-                            message: message.Text);
-                        break;
-
-                    case MessageLevel.Warning:
-                        _taskLogger.LogWarning(
-                            subcategory: default,
-                            warningCode: message.Code,
-                            helpKeyword: default,
-                            file: message.File,
-                            lineNumber: default,
-                            columnNumber: default,
-                            endLineNumber: default,
-                            endColumnNumber: default,
-                            message: message.Text);
-                        break;
-
-                    case MessageLevel.HighImportance:
-                    case MessageLevel.NormalImportance:
-                    case MessageLevel.LowImportance:
-                        _taskLogger.LogMessage(
-                            subcategory: default,
-                            code: message.Code,
-                            helpKeyword: default,
-                            file: message.File,
-                            lineNumber: default,
-                            columnNumber: default,
-                            endLineNumber: default,
-                            endColumnNumber: default,
-                            importance: message.Level.ToImportance(),
-                            message: message.Text);
-                        break;
-
-                    default:
-                        throw new ArgumentException(
-                            $"Message \"{message.Code}: {message.Text}\" logged with invalid Level=${message.Level}",
-                            paramName: nameof(message));
+                    text = string.Format(CultureInfo.InvariantCulture,
+                                         AggregateException_ToString,
+                                         text,
+                                         Environment.NewLine,
+                                         i,
+                                         ExceptionToStringWithoutMessage(aggregate.InnerExceptions[i]),
+                                         "<---",
+                                         Environment.NewLine);
                 }
+
+                return text;
+            }
+            else
+            {
+                return NonAggregateExceptionToStringWithoutMessage(e);
             }
         }
+
+        private static string NonAggregateExceptionToStringWithoutMessage(Exception e)
+        {
+            string s;
+            const string Exception_EndOfInnerExceptionStack = "--- End of inner exception stack trace ---";
+
+
+            s = e.GetType().ToString();
+
+            if (e.InnerException != null)
+            {
+                s = s + " ---> " + ExceptionToStringWithoutMessage(e.InnerException) + Environment.NewLine +
+                "   " + Exception_EndOfInnerExceptionStack;
+
+            }
+
+            var stackTrace = e.StackTrace;
+
+            if (stackTrace != null)
+            {
+                s += Environment.NewLine + stackTrace;
+            }
+
+            return s;
+        }
+
+        protected abstract void ExecuteCore();
     }
 }

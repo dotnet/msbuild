@@ -11,10 +11,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-  </PropertyGroup>
-
   <!--
     .NETFramework cannot load native package dependencies dynamically
     based on the current architecture.  We have must have a RID to
@@ -104,9 +100,24 @@ Copyright (c) .NET Foundation. All rights reserved.
     Default SelfContained based on the RuntimeIdentifier, so projects don't have to explicitly set SelfContained.
     This avoids a breaking change from 1.0 behavior.
     -->
-  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(HasRuntimeOutput)' == 'true' and '$(RuntimeIdentifier)' != ''">
-    <SelfContained Condition="'$(SelfContained)' == ''">true</SelfContained>
-    <UseAppHost Condition="'$(UseAppHost)' == '' and ('$(SelfContained)' == 'true' or '$(_TargetFrameworkVersionWithoutV)' >= '2.1')">true</UseAppHost>
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(HasRuntimeOutput)' == 'true'">
+    <SelfContained Condition="'$(SelfContained)' == '' and '$(RuntimeIdentifier)' != ''">true</SelfContained>
+    <SelfContained Condition="'$(SelfContained)' == ''">false</SelfContained>
+    <UseAppHost Condition="'$(UseAppHost)' == '' and
+                           ('$(SelfContained)' == 'true' or
+                            ('$(RuntimeIdentifier)' != '' and '$(_TargetFrameworkVersionWithoutV)' >= '2.1') or
+                            '$(_TargetFrameworkVersionWithoutV)' >= '3.0')">true</UseAppHost>
+    <UseAppHost Condition="'$(UseAppHost)' == ''">false</UseAppHost>
+  </PropertyGroup>
+
+  <!-- Only use the default apphost if building without a RID and without a deps file path (used by GenerateDeps.proj for CLI tools). -->
+  <PropertyGroup Condition="'$(DefaultAppHostRuntimeIdentifier)' == '' and
+                            '$(RuntimeIdentifier)' == '' and
+                            (('$(UseAppHost)' == 'true' and '$(ProjectDepsFilePath)' == '') or
+                            ('$(EnableComHosting)' == 'true' and '$(_IsExecutable)' != 'true'))">
+    <DefaultAppHostRuntimeIdentifier>$(NETCoreSdkRuntimeIdentifier)</DefaultAppHostRuntimeIdentifier>
+    <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and '$(PlatformTarget)' == 'x64'">win-x64</DefaultAppHostRuntimeIdentifier>
+    <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and '$(PlatformTarget)' == 'x86'">win-x86</DefaultAppHostRuntimeIdentifier>
   </PropertyGroup>
 
   <Target Name="_CheckForUnsupportedAppHostUsage"
@@ -116,11 +127,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(RuntimeIdentifier)' == ''"
                  ResourceName="CannotHaveSelfContainedWithoutRuntimeIdentifier" />
 
-    <NETSdkError Condition="'$(UseAppHost)' == 'true' and '$(RuntimeIdentifier)' == ''"
-                 ResourceName="CannotUseAppHostWithoutRuntimeIdentifier" />
-
     <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(UseAppHost)' != 'true'"
                  ResourceName="CannotUseSelfContainedWithoutAppHost" />
+
+    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and '$(RuntimeIdentifier)' == ''"
+                 ResourceName="CannotHaveSingleFileWithoutRuntimeIdentifier" />
+
+    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and '$(UseAppHost)' != 'true'"
+                 ResourceName="CannotHaveSingleFileWithoutAppHost" />
 
     <NETSdkError Condition="'$(SelfContained)' != 'true' and '$(UseAppHost)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' &lt; '2.1'"
                  ResourceName="FrameworkDependentAppHostRequiresVersion21" />
@@ -131,7 +145,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
           Condition="'$(RuntimeIdentifier)' != '' and '$(PlatformTarget)' != ''">
 
-    <NETSdkError Condition="'$(PlatformTarget)' != 'AnyCPU' and !$(RuntimeIdentifier.ToUpper().Contains($(PlatformTarget.ToUpper())))"
+    <NETSdkError Condition="'$(PlatformTarget)' != 'AnyCPU' and !$(RuntimeIdentifier.ToUpperInvariant().Contains($(PlatformTarget.ToUpperInvariant())))"
                  ResourceName="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget"
                  FormatArguments="$(RuntimeIdentifier);$(PlatformTarget)" />
 
@@ -160,6 +174,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <OutputPath>$(OutputPath)$(RuntimeIdentifier)\</OutputPath>
   </PropertyGroup>
 
+  <UsingTask TaskName="Microsoft.NET.Build.Tasks.GetDefaultPlatformTargetForNetFramework"
+           AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+
   <!-- 
     Switch our default .NETFramework CPU architecture choice back to AnyCPU before 
     compiling the exe if no copy-local native dependencies were resolved from NuGet 
@@ -168,11 +186,14 @@ Copyright (c) .NET Foundation. All rights reserved.
           AfterTargets="ResolvePackageAssets"
           BeforeTargets="CoreCompile"
           Condition="'$(_UsingDefaultPlatformTarget)' == 'true' and
-                     '$(_UsingDefaultRuntimeIdentifier)' == 'true' and 
-                     '@(NativeCopyLocalItems)' == ''">
-    <PropertyGroup>
-      <PlatformTarget>AnyCPU</PlatformTarget>
-    </PropertyGroup>
+                     '$(_UsingDefaultRuntimeIdentifier)' == 'true'">
+
+    <GetDefaultPlatformTargetForNetFramework PackageDependencies="@(PackageDependencies)"
+                                             NativeCopyLocalItems="@(NativeCopyLocalItems)">
+
+      <Output TaskParameter="DefaultPlatformTarget" PropertyName="PlatformTarget" />
+      
+    </GetDefaultPlatformTargetForNetFramework>
   </Target>
 
 </Project>

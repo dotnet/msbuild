@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <PackageId>Microsoft.NET.Build.Extensions</PackageId>
     <RootNamespace>Microsoft.NET.Build.Tasks</RootNamespace>
-    <TargetFrameworks>netcoreapp2.0;net472</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.1;net472</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -17,22 +17,19 @@
     <EnableDefaultItems>false</EnableDefaultItems>
     <GenerateDependencyFile>false</GenerateDependencyFile>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <OutDirName>Sdks\$(PackageId)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools</OutDirName>
+    <OutDirName>$(Configuration)\Sdks\$(PackageId)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools</OutDirName>
     <NoPackageAnalysis>true</NoPackageAnalysis>
+    <!-- MSBuild Task DLLs need to be versioned with every build -->
+    <AutoGenerateAssemblyVersion>true</AutoGenerateAssemblyVersion>
   </PropertyGroup>
 
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
   <PropertyGroup>
-    <!-- MSBuild Task DLLs need to be versioned with every build -->
-    <AssemblyVersion>$(FileVersion)</AssemblyVersion>
-  </PropertyGroup>
-
-  <PropertyGroup>
+    <OutputPath>$(BaseOutputPath)</OutputPath>
     <DefineConstants>$(DefineConstants);EXTENSIONS</DefineConstants>
     <IsPackable>true</IsPackable>
-    <IncludeSymbols>true</IncludeSymbols>
-    <PackageLayoutOutputPath>$(ArtifactsBinDir)Sdks\$(PackageId)\</PackageLayoutOutputPath>
+    <PackageLayoutOutputPath>$(ArtifactsBinDir)$(Configuration)\Sdks\$(PackageId)\</PackageLayoutOutputPath>
   </PropertyGroup>
 
   <ItemDefinitionGroup>
@@ -67,11 +64,12 @@
     <None Include="msbuildExtensions-ver\**\*" PackagePath="msbuildExtensions-ver\" />
     <None Include="..\Common\Resources\xlf\**\*" LinkBase="Resources\xlf" />
     <None Include="..\Common\targets\**\*" PackagePath="msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\" LinkBase="%(PackagePath)" />
+    <UpToDateCheckInput Include="@(None)" />
   </ItemGroup>
 
   <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
     <PropertyGroup>
-      <_NETStandardLibraryNETFrameworkPath>$(NuGetPackageRoot)NETStandard.Library.NETFramework\$(NETStandardLibraryNETFrameworkVersion)\build</_NETStandardLibraryNETFrameworkPath>
+      <_NETStandardLibraryNETFrameworkPath>$(NuGetPackageRoot)netstandard.library.netframework\$(NETStandardLibraryNETFrameworkVersion)\build</_NETStandardLibraryNETFrameworkPath>
     </PropertyGroup>
     <ItemGroup>
       <LayoutFile Include="@(None)" Condition="'%(None.PackagePath)' != ''">
@@ -93,15 +91,6 @@
   <Target Name="PackLayout" DependsOnTargets="CopyAdditionalFilesToLayout" BeforeTargets="$(GenerateNuspecDependsOn)">
     <ItemGroup>
       <Content Include="$(PackageLayoutOutputPath)**\*" PackagePath="\" />
-    </ItemGroup>
-  </Target>
-
-  <!-- Remove files from copy local that would not be published as they are provided by the platform package -->
-  <!-- https://github.com/dotnet/sdk/issues/933 tracks a first class feature for this -->
-  <Target Name="FilterCopyLocal" DependsOnTargets="GetFrameworkPaths;GetReferenceAssemblyPaths;RunResolvePublishAssemblies" BeforeTargets="ResolveLockFileCopyLocalProjectDeps">
-    <ItemGroup>
-      <_CopyLocalButNotPublished Include="@(AllCopyLocalItems)" Exclude="@(ResolvedAssembliesToPublish)" />
-      <AllCopyLocalItems Remove="@(_CopyLocalButNotPublished)" />
     </ItemGroup>
   </Target>
 

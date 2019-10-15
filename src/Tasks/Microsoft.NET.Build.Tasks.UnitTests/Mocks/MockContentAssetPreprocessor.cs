@@ -38,7 +38,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             if (!_exists(pathToFinalAsset))
             {
-                // Mock reading, processsing and writing content
+                // Mock reading, processing and writing content
                 var inputBytes = Encoding.ASCII.GetBytes(MockReadContent);
                 using (MemoryStream input = new MemoryStream(inputBytes))
                 {

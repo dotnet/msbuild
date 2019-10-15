@@ -75,6 +75,8 @@ namespace Microsoft.NET.Build.Tests
                 ["None"] = new List<string>() { @"..\Linked\Linked.None.txt" },
                 ["Content"] = new List<string>() { @"..\Linked\Linked.Content.txt" },
                 ["EmbeddedResource"] = new List<string>() { @"..\Linked\Linked.Embedded.txt" },
+                ["Page"] = new List<string>() { @"..\Linked\Linked.page.xaml" },
+                ["Resource"] = new List<string>() { @"..\Linked\Linked.resource.xaml" },
                 ["CustomItem"] = new List<string>() { @"..\Linked\Linked.Custom.txt" },
             };
 
@@ -85,6 +87,8 @@ namespace Microsoft.NET.Build.Tests
                 expectedItems["None"].Add(@"..\Linked\A\B C\Linked.None.txt");
                 expectedItems["Content"].Add(@"..\Linked\A\B C\Linked.Content.txt");
                 expectedItems["EmbeddedResource"].Add(@"..\Linked\A\B C\Linked.Embedded.txt");
+                expectedItems["Page"].Add(@"..\Linked\A\B C\Linked.page.xaml");
+                expectedItems["Resource"].Add(@"..\Linked\A\B C\Linked.resource.xaml");
                 expectedItems["CustomItem"].Add(@"..\Linked\A\B C\Linked.Custom.txt");
             }
 

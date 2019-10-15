@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using FluentAssertions;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -21,6 +22,7 @@ namespace Microsoft.NET.Build.Tests
 
         [Theory]
         [InlineData("netcoreapp2.0", true, false)]
+        [InlineData("netcoreapp3.0", false, false)]
         [InlineData("net47", false, true)]
         public void It_only_publish_selected_ResourceLanguages(string targetFramework, bool explicitCopyLocalLockFile,
             bool needsNetFrameworkReferenceAssemblies)
@@ -73,6 +75,11 @@ namespace Microsoft.NET.Build.Tests
                     $"{testProject.Name}.runtimeconfig.json",
                     $"{testProject.Name}.runtimeconfig.dev.json"
                 });
+
+                if (testProject.TargetFrameworks == "netcoreapp3.0")
+                {
+                    expectedFiles.Add($"{testProject.Name}{Constants.ExeSuffix}");
+                }
             }
             else
             {

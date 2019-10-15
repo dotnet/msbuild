@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
+<Project>
+  <ItemGroup Condition="'$(IsTestProject)' == 'true' AND '$(OutputType)' == 'Exe'">
+    <PackageReference Include="xunit.console" Version="$(XUnitVersion)" Private="true" />
+
+    <!-- These files are both included via a .props file in xunit.runner.visualstudio, as well as 
+         via package dependencies of xunit.console.  To prevent warnings about duplicate files
+         from Pack, don't copy the ones from the .props file to the output directory. -->
+    <None Update="@(None)">
+      <CopyToOutputDirectory Condition="'%(Filename)' == 'xunit.runner.utility.netcoreapp10'">false</CopyToOutputDirectory>
+      <CopyToOutputDirectory Condition="'%(Filename)' == 'xunit.runner.reporters.netcoreapp10'">false</CopyToOutputDirectory>
+    </None>
+    
+  </ItemGroup>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.DotNet.Arcade.Sdk" />
+
+  <!-- Optionally override arcade's test target with one which will run the tests as tools.
+       Conditionally overriding a target requires a conditional import of another (.targets)
+       file. -->
+  <Import Project="OverrideTest.targets"
+          Condition="'$(RunTestsAsTool)' == 'true' And '$(CanRunTestAsTool)' == 'true'"/>
+
+</Project>

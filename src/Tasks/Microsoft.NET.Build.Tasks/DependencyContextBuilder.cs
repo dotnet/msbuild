@@ -1,11 +1,7 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.DependencyModel;
 using NuGet.Packaging;
@@ -17,63 +13,84 @@ namespace Microsoft.NET.Build.Tasks
 {
     internal class DependencyContextBuilder
     {
-        private readonly VersionFolderPathResolver _versionFolderPathResolver;
         private readonly SingleProjectInfo _mainProjectInfo;
-        private readonly ProjectContext _projectContext;
         private readonly bool _includeRuntimeFileVersions;
-        private readonly NuGetPackageResolver _packageResolver;
         private IEnumerable<ReferenceInfo> _referenceAssemblies;
         private IEnumerable<ReferenceInfo> _directReferences;
         private IEnumerable<ReferenceInfo> _dependencyReferences;
+        private Dictionary<string, List<ReferenceInfo>> _compileReferences;
+        private Dictionary<string, List<ResolvedFile>> _resolvedNuGetFiles;
         private Dictionary<string, SingleProjectInfo> _referenceProjectInfos;
-        private IEnumerable<string> _excludeFromPublishPackageIds;
+        private Dictionary<string, List<RuntimePackAssetInfo>> _runtimePackAssets;
         private CompilationOptions _compilationOptions;
         private string _referenceAssembliesPath;
         private Dictionary<PackageIdentity, string> _filteredPackages;
         private bool _includeMainProjectInDepsFile = true;
+        private Dictionary<string, DependencyLibrary> _dependencyLibraries;
+        private Dictionary<string, List<LibraryDependency>> _libraryDependencies;
+        private List<string> _mainProjectDependencies;
+        private HashSet<PackageIdentity> _packagesToBeFiltered;
+        private bool _isFrameworkDependent;
+        private string _platformLibrary;
+        private string _dotnetFrameworkName;
+        private string _runtimeIdentifier;
+        private bool _isPortable;
         private HashSet<string> _usedLibraryNames;
+
         private Dictionary<ReferenceInfo, string> _referenceLibraryNames;
+
+        // This resolver is only used for building file names, so that base path is not required.
+        private readonly VersionFolderPathResolver _versionFolderPathResolver = new VersionFolderPathResolver(rootPath: null);
+
+        private const string NetCorePlatformLibrary = "Microsoft.NETCore.App";
 
         public DependencyContextBuilder(SingleProjectInfo mainProjectInfo, ProjectContext projectContext, bool includeRuntimeFileVersions)
         {
             _mainProjectInfo = mainProjectInfo;
-            _projectContext = projectContext;
             _includeRuntimeFileVersions = includeRuntimeFileVersions;
 
-            // This resolver is only used for building file names, so that base path is not required.
-            _versionFolderPathResolver = new VersionFolderPathResolver(rootPath: null);
+            var libraryLookup = new LockFileLookup(projectContext.LockFile);
 
-            if (_includeRuntimeFileVersions)
-            {
-                //  This is used to look up the paths to package files on disk, which is only needed in this class if
-                //  it needs to read the file versions
-                _packageResolver = NuGetPackageResolver.CreateResolver(projectContext.LockFile, mainProjectInfo.ProjectPath);
-            }
-        }
-
-        /// <summary>
-        /// Keeps track of the Library names being used in the DependencyContext.
-        /// </summary>
-        /// <remarks>
-        /// Since `Reference` and `PackageReference` names can conflict, we need to ensure
-        /// each separate Library has a unique name. Since PackageReference names are guaranteed
-        /// to be unique amongst other PackageReferences, start with that set, and ensure
-        /// Reference names are unique amongst all.
-        /// </remarks>
-        private HashSet<string> UsedLibraryNames
-        {
-            get
-            {
-                if (_usedLibraryNames == null)
+            _dependencyLibraries = projectContext.LockFileTarget.Libraries
+                .Select(lockFileTargetLibrary =>
                 {
-                    _usedLibraryNames = new HashSet<string>(
-                        _projectContext.LockFile.Libraries.Select(l => l.Name),
-                        StringComparer.OrdinalIgnoreCase);
-                }
+                    var dependencyLibrary = new DependencyLibrary(lockFileTargetLibrary.Name, lockFileTargetLibrary.Version, lockFileTargetLibrary.Type);
 
-                return _usedLibraryNames;
+                    LockFileLibrary library;
+                    if (libraryLookup.TryGetLibrary(lockFileTargetLibrary, out library))
+                    {
+                        dependencyLibrary.Sha512 = library.Sha512;
+                        dependencyLibrary.Path = library.Path;
+                        dependencyLibrary.MSBuildProject = library.MSBuildProject;
+                    }
+
+                    return dependencyLibrary;
+                }).ToDictionary(d => d.Name, StringComparer.OrdinalIgnoreCase);
+
+            _libraryDependencies = new Dictionary<string, List<LibraryDependency>>(StringComparer.OrdinalIgnoreCase);
+            foreach (var library in projectContext.LockFileTarget.Libraries)
+            {
+                _libraryDependencies[library.Name] = library.Dependencies
+                    .Select(d => new LibraryDependency()
+                    {
+                        Name = d.Id,
+                        MinVersion = d.VersionRange.MinVersion
+                    }).ToList();
             }
+
+            _mainProjectDependencies = projectContext.GetTopLevelDependencies().ToList();
+            _packagesToBeFiltered = projectContext.PackagesToBeFiltered;
+
+            _isFrameworkDependent = projectContext.IsFrameworkDependent;
+            _platformLibrary = projectContext.PlatformLibrary?.Name;
+            _dotnetFrameworkName = projectContext.LockFileTarget.TargetFramework.DotNetFrameworkName;
+            _runtimeIdentifier = projectContext.LockFileTarget.RuntimeIdentifier;
+            _isPortable = projectContext.IsPortable;
+
+            _usedLibraryNames = new HashSet<string>(_dependencyLibraries.Keys, StringComparer.OrdinalIgnoreCase);
         }
+
+        private bool IncludeCompilationLibraries => _compilationOptions != null;
 
         private Dictionary<ReferenceInfo, string> ReferenceLibraryNames
         {
@@ -86,12 +103,6 @@ namespace Microsoft.NET.Build.Tasks
 
                 return _referenceLibraryNames;
             }
-        }
-
-        public DependencyContextBuilder WithMainProjectInDepsFile(bool includeMainProjectInDepsFile)
-        {
-            _includeMainProjectInDepsFile = includeMainProjectInDepsFile;
-            return this;
         }
 
         public DependencyContextBuilder WithReferenceAssemblies(IEnumerable<ReferenceInfo> referenceAssemblies)
@@ -114,15 +125,53 @@ namespace Microsoft.NET.Build.Tasks
             return this;
         }
 
+        public DependencyContextBuilder WithCompileReferences(IEnumerable<ReferenceInfo> compileReferences)
+        {
+            _compileReferences = new Dictionary<string, List<ReferenceInfo>>(StringComparer.OrdinalIgnoreCase);
+            foreach (var group in compileReferences.GroupBy(r => r.PackageName, StringComparer.OrdinalIgnoreCase))
+            {
+                _compileReferences.Add(group.Key, group.ToList());
+            }
+
+            return this;
+        }
+
+        public DependencyContextBuilder WithResolvedNuGetFiles(IEnumerable<ResolvedFile> resolvedNuGetFiles)
+        {
+            _resolvedNuGetFiles = new Dictionary<string, List<ResolvedFile>>(StringComparer.OrdinalIgnoreCase);
+            foreach (var group in resolvedNuGetFiles.GroupBy(f => f.PackageName, StringComparer.OrdinalIgnoreCase))
+            {
+                _resolvedNuGetFiles.Add(group.Key, group.ToList());
+            }
+
+            return this;
+        }
+
         public DependencyContextBuilder WithReferenceProjectInfos(Dictionary<string, SingleProjectInfo> referenceProjectInfos)
         {
             _referenceProjectInfos = referenceProjectInfos;
             return this;
         }
 
-        public DependencyContextBuilder WithExcludeFromPublishAssets(IEnumerable<string> excludeFromPublishPackageIds)
+        public DependencyContextBuilder WithMainProjectInDepsFile(bool includeMainProjectInDepsFile)
         {
-            _excludeFromPublishPackageIds = excludeFromPublishPackageIds;
+            _includeMainProjectInDepsFile = includeMainProjectInDepsFile;
+            return this;
+        }
+
+        public DependencyContextBuilder WithRuntimePackAssets(IEnumerable<RuntimePackAssetInfo> runtimePackAssets)
+        {
+            _runtimePackAssets = new Dictionary<string, List<RuntimePackAssetInfo>>();
+            foreach (var runtimePackGroup in runtimePackAssets.GroupBy(a => a.PackageName))
+            {
+                var dependencyLibrary = new DependencyLibrary("runtimepack." + runtimePackGroup.Key,
+                    NuGetVersion.Parse(runtimePackGroup.First().PackageVersion),
+                    "runtimepack");
+
+                _dependencyLibraries.Add(dependencyLibrary.Name, dependencyLibrary);
+
+                _runtimePackAssets[dependencyLibrary.Name] = runtimePackGroup.ToList();
+            }
             return this;
         }
 
@@ -134,11 +183,21 @@ namespace Microsoft.NET.Build.Tasks
 
         public DependencyContextBuilder WithReferenceAssembliesPath(string referenceAssembliesPath)
         {
-            _referenceAssembliesPath = EnsureTrailingSlash(referenceAssembliesPath);
+            // if the path is empty, we want to use the original string instead of a single trailing character.
+            if (string.IsNullOrEmpty(referenceAssembliesPath) ||
+                referenceAssembliesPath[referenceAssembliesPath.Length - 1] == Path.DirectorySeparatorChar)
+            {
+                _referenceAssembliesPath = referenceAssembliesPath;
+            }
+            else
+            {
+                _referenceAssembliesPath = referenceAssembliesPath + Path.DirectorySeparatorChar;
+            }
+
             return this;
         }
 
-        public DependencyContextBuilder WithPackagesThatWhereFiltered(Dictionary<PackageIdentity, string> packagesThatWhereFiltered)
+        public DependencyContextBuilder WithPackagesThatWereFiltered(Dictionary<PackageIdentity, string> packagesThatWhereFiltered)
         {
             _filteredPackages = packagesThatWhereFiltered;
             return this;
@@ -146,67 +205,129 @@ namespace Microsoft.NET.Build.Tasks
 
         public DependencyContext Build()
         {
-            bool includeCompilationLibraries = _compilationOptions != null;
+            CalculateExcludedLibraries();
 
-            IEnumerable<LockFileTargetLibrary> runtimeExports = _projectContext.GetRuntimeLibraries(_excludeFromPublishPackageIds);
-            IEnumerable<LockFileTargetLibrary> compilationExports =
-                includeCompilationLibraries ?
-                    _projectContext.GetCompileLibraries(_excludeFromPublishPackageIds) :
-                    Enumerable.Empty<LockFileTargetLibrary>();
+            List<RuntimeLibrary> runtimeLibraries = new List<RuntimeLibrary>();
 
-            var dependencyLookup = compilationExports
-                .Concat(runtimeExports)
-                .Distinct()
-                .Select(library => new Dependency(library.Name, library.Version.ToString()))
-                .ToDictionary(dependency => dependency.Name, StringComparer.OrdinalIgnoreCase);
-
-            var libraryLookup = new LockFileLookup(_projectContext.LockFile);
-
-            var runtimeSignature = GenerateRuntimeSignature(runtimeExports);
-
-            IEnumerable<RuntimeLibrary> runtimeLibraries = Enumerable.Empty<RuntimeLibrary>();
             if (_includeMainProjectInDepsFile)
             {
-                runtimeLibraries = runtimeLibraries.Concat(new[]
-                {
-                    GetProjectRuntimeLibrary(
-                        _mainProjectInfo,
-                        _projectContext,
-                        dependencyLookup,
-                        includeCompilationLibraries)
-                });
+                runtimeLibraries.Add(GetProjectRuntimeLibrary());
             }
-            runtimeLibraries = runtimeLibraries
-                .Concat(GetLibraries(runtimeExports, libraryLookup, dependencyLookup, runtime: true).Cast<RuntimeLibrary>())
-                .Concat(GetDirectReferenceRuntimeLibraries())
-                .Concat(GetDependencyReferenceRuntimeLibraries());
 
-            IEnumerable<CompilationLibrary> compilationLibraries = Enumerable.Empty<CompilationLibrary>();
-            if (includeCompilationLibraries)
+            runtimeLibraries.AddRange(GetRuntimePackLibraries());
+
+            foreach (var library in _dependencyLibraries.Values
+                .Where(l => !l.ExcludeFromRuntime && l.Type != "runtimepack"))
+            {
+                var runtimeLibrary = GetRuntimeLibrary(library);
+                if (runtimeLibrary != null)
+                {
+                    runtimeLibraries.Add(runtimeLibrary);
+                }
+            }
+
+            var directAndDependencyReferences = _directReferences ?? Enumerable.Empty<ReferenceInfo>();
+            if (_dependencyReferences != null)
+            {
+                directAndDependencyReferences = directAndDependencyReferences.Concat(_dependencyReferences);
+            }
+
+            foreach (var directReference in directAndDependencyReferences)
+            {
+                var runtimeLibrary = new RuntimeLibrary(
+                    type: "reference",
+                    name: GetReferenceLibraryName(directReference),
+                    version: directReference.Version,
+                    hash: string.Empty,
+                    runtimeAssemblyGroups: new[] { new RuntimeAssetGroup(string.Empty, new[] { CreateRuntimeFile(directReference.FileName, directReference.FullPath) }) },
+                    nativeLibraryGroups: new RuntimeAssetGroup[] { },
+                    resourceAssemblies: CreateResourceAssemblies(directReference.ResourceAssemblies),
+                    dependencies: Enumerable.Empty<Dependency>(),
+                    path: null,
+                    hashPath: null,
+                    runtimeStoreManifestName: null,
+                    serviceable: false);
+
+                runtimeLibraries.Add(runtimeLibrary);
+            }
+
+            List<CompilationLibrary> compilationLibraries = new List<CompilationLibrary>();
+            if (IncludeCompilationLibraries)
             {
                 if (_includeMainProjectInDepsFile)
                 {
-                    compilationLibraries = compilationLibraries.Concat(new[]
-                    {
-                        GetProjectCompilationLibrary(
-                            _mainProjectInfo,
-                            _projectContext,
-                            dependencyLookup,
-                            includeCompilationLibraries)
-                    });
+                    var dependencies = GetProjectDependencies();
+
+                    var projectCompilationLibrary = new CompilationLibrary(
+                        type: "project",
+                        name: _mainProjectInfo.Name,
+                        version: _mainProjectInfo.Version,
+                        hash: string.Empty,
+                        assemblies: new[] { _mainProjectInfo.OutputName },
+                        dependencies: dependencies,
+                        serviceable: false);
+
+                    compilationLibraries.Add(projectCompilationLibrary);
                 }
 
-                compilationLibraries = compilationLibraries
-                    .Concat(GetReferenceAssemblyLibraries())
-                    .Concat(GetLibraries(compilationExports, libraryLookup, dependencyLookup, runtime: false).Cast<CompilationLibrary>())
-                    .Concat(GetDirectReferenceCompilationLibraries());
+                if (_referenceAssemblies != null)
+                {
+                    foreach (var referenceAssembly in _referenceAssemblies)
+                    {
+                        string resolvedPath;
+                        if (!string.IsNullOrEmpty(_referenceAssembliesPath) &&
+                            referenceAssembly.FullPath?.StartsWith(_referenceAssembliesPath) == true)
+                        {
+                            resolvedPath = referenceAssembly.FullPath.Substring(_referenceAssembliesPath.Length);
+                        }
+                        else
+                        {
+                            resolvedPath = Path.GetFileName(referenceAssembly.FullPath);
+                        }
+
+                        compilationLibraries.Add(new CompilationLibrary(
+                            type: "referenceassembly",
+                            name: GetReferenceLibraryName(referenceAssembly),
+                            version: referenceAssembly.Version,
+                            hash: string.Empty,
+                            assemblies: new[] { resolvedPath },
+                            dependencies: Enumerable.Empty<Dependency>(),
+                            serviceable: false));
+                    }
+                }
+
+                foreach (var library in _dependencyLibraries.Values
+                    .Where(l => !l.ExcludeFromCompilation && l.Type != "runtimepack"))
+                {
+                    var compilationLibrary = GetCompilationLibrary(library);
+                    if (compilationLibrary != null)
+                    {
+                        compilationLibraries.Add(compilationLibrary);
+                    }
+                }
+
+                if (_directReferences != null)
+                {
+                    foreach (var directReference in _directReferences)
+                    {
+                        compilationLibraries.Add(new CompilationLibrary(
+                            type: "reference",
+                            name: GetReferenceLibraryName(directReference),
+                            version: directReference.Version,
+                            hash: string.Empty,
+                            assemblies: new[] { directReference.FileName },
+                            dependencies: Enumerable.Empty<Dependency>(),
+                            serviceable: false));
+                    }
+                }
             }
 
+
             var targetInfo = new TargetInfo(
-                _projectContext.LockFileTarget.TargetFramework.DotNetFrameworkName,
-                _projectContext.LockFileTarget.RuntimeIdentifier,
-                runtimeSignature,
-                _projectContext.IsPortable);
+                _dotnetFrameworkName,
+                _runtimeIdentifier,
+                runtimeSignature: string.Empty,
+                _isPortable);
 
             return new DependencyContext(
                 targetInfo,
@@ -216,241 +337,300 @@ namespace Microsoft.NET.Build.Tasks
                 new RuntimeFallbacks[] { });
         }
 
-        private static string GenerateRuntimeSignature(IEnumerable<LockFileTargetLibrary> runtimeExports)
+        private RuntimeLibrary GetProjectRuntimeLibrary()
         {
-            var sha1 = SHA1.Create();
-            var builder = new StringBuilder();
-            var packages = runtimeExports
-                .Where(libraryExport => libraryExport.IsPackage());
-            var separator = "|";
-            foreach (var libraryExport in packages)
-            {
-                builder.Append(libraryExport.Name);
-                builder.Append(separator);
-                builder.Append(libraryExport.Version.ToString());
-                builder.Append(separator);
-            }
-            var hash = sha1.ComputeHash(Encoding.UTF8.GetBytes(builder.ToString()));
+            RuntimeAssetGroup[] runtimeAssemblyGroups = new[] { new RuntimeAssetGroup(string.Empty, _mainProjectInfo.OutputName) };
 
-            builder.Clear();
-            foreach (var hashByte in hash)
+            var dependencies = GetProjectDependencies();
+            
+            //  Runtime pack assets only get added as dependencies to the runtime (not the compile) project
+            if (_runtimePackAssets != null)
             {
-                builder.AppendFormat("{0:x2}", hashByte);
-            }
-            return builder.ToString();
-        }
-
-        private List<Dependency> GetProjectDependencies(
-            ProjectContext projectContext,
-            Dictionary<string, Dependency> dependencyLookup,
-            bool includeCompilationLibraries)
-        {
-            List<Dependency> dependencies = new List<Dependency>();
-
-            foreach (string dependencyName in projectContext.GetTopLevelDependencies())
-            {
-                Dependency dependency;
-                if (dependencyLookup.TryGetValue(dependencyName, out dependency))
+                foreach (var runtimePackName in _runtimePackAssets.Keys)
                 {
-                    dependencies.Add(dependency);
+                    dependencies.Add(_dependencyLibraries[runtimePackName].Dependency);
                 }
             }
 
-            var referenceInfos = Enumerable.Concat(
-                includeCompilationLibraries && _referenceAssemblies != null ? 
-                    _referenceAssemblies : 
-                    Enumerable.Empty<ReferenceInfo>(),
-                _directReferences ?? Enumerable.Empty<ReferenceInfo>());
+            return new RuntimeLibrary(
+                type: "project",
+                name: _mainProjectInfo.Name,
+                version: _mainProjectInfo.Version,
+                hash: string.Empty,
+                runtimeAssemblyGroups: runtimeAssemblyGroups,
+                nativeLibraryGroups: Array.Empty<RuntimeAssetGroup>(),
+                resourceAssemblies: CreateResourceAssemblies(_mainProjectInfo.ResourceAssemblies),
+                dependencies: dependencies,
+                path: null,
+                hashPath: null,
+                runtimeStoreManifestName: GetRuntimeStoreManifestName(_mainProjectInfo.Name, _mainProjectInfo.Version),
+                serviceable: false);
+        }
 
-            foreach (ReferenceInfo referenceInfo in referenceInfos)
+        private List<Dependency> GetProjectDependencies()
+        {
+            List<Dependency> dependencies = new List<Dependency>();
+            foreach (var dependencyName in _mainProjectDependencies)
             {
-                dependencies.Add(
-                    new Dependency(
-                        GetReferenceLibraryName(referenceInfo), 
-                        referenceInfo.Version));
+                if (_dependencyLibraries.TryGetValue(dependencyName, out var dependencyLibrary))
+                {
+                    //  Include dependency if it would be included either as a runtime or compilation
+                    //  (if compilation libraries are being included) library
+                    if (!dependencyLibrary.ExcludeFromRuntime ||
+                        (IncludeCompilationLibraries && !dependencyLibrary.ExcludeFromCompilation))
+                    {
+                        dependencies.Add(dependencyLibrary.Dependency);
+                    }                    
+                }
+            }
+
+            var references = _directReferences;
+            if (IncludeCompilationLibraries && _referenceAssemblies != null)
+            {
+                if (references == null)
+                {
+                    references = _referenceAssemblies;
+                }
+                else
+                {
+                    references = references.Concat(_referenceAssemblies);
+                }
+            }
+
+            if (references != null)
+            {
+                foreach (var directReference in references)
+                {
+                    dependencies.Add(
+                        new Dependency(
+                            GetReferenceLibraryName(directReference),
+                            directReference.Version));
+                }
             }
 
             return dependencies;
         }
 
-        private RuntimeLibrary CreateRuntimeLibrary(
-            string type,
-            string name,
-            string version,
-            string hash,
-            IReadOnlyList<RuntimeAssetGroup> runtimeAssemblyGroups,
-            IReadOnlyList<RuntimeAssetGroup> nativeLibraryGroups,
-            IEnumerable<ResourceAssembly> resourceAssemblies,
-            IEnumerable<Dependency> dependencies,
-            bool serviceable,
-            string path = null,
-            string hashPath = null)
+        private IEnumerable<RuntimeLibrary> GetRuntimePackLibraries()
         {
-            string runtimeStoreManifestName = null;
-            var pkg = new PackageIdentity(name, NuGetVersion.Parse(version));
-            _filteredPackages?.TryGetValue(pkg, out runtimeStoreManifestName);
+            if (_runtimePackAssets == null)
+            {
+                return Enumerable.Empty<RuntimeLibrary>();
+            }
+            return _runtimePackAssets.Select(runtimePack =>
+            {
+                var runtimeAssemblyGroup = new RuntimeAssetGroup(string.Empty,
+                    runtimePack.Value.Where(asset => asset.AssetType == AssetType.Runtime)
+                    .Select(asset => CreateRuntimeFile(asset.DestinationSubPath, asset.SourcePath)));
 
-            return new RuntimeLibrary(
-                type,
-                name: name,
-                version: version,
+                var nativeLibraryGroup = new RuntimeAssetGroup(string.Empty,
+                    runtimePack.Value.Where(asset => asset.AssetType == AssetType.Native)
+                    .Select(asset => CreateRuntimeFile(asset.DestinationSubPath, asset.SourcePath)));
+
+                return new RuntimeLibrary(
+                    type: "runtimepack",
+                    name: runtimePack.Key,
+                    version: runtimePack.Value.First().PackageVersion,
+                    hash: string.Empty,
+                    runtimeAssemblyGroups: new[] { runtimeAssemblyGroup },
+                    nativeLibraryGroups: new[] { nativeLibraryGroup },
+                    resourceAssemblies: Enumerable.Empty<ResourceAssembly>(),
+                    dependencies: Enumerable.Empty<Dependency>(),
+                    serviceable: false);
+            });
+        }
+
+        private RuntimeLibrary GetRuntimeLibrary(DependencyLibrary library)
+        {
+            GetCommonLibraryProperties(library,
+                out string hash,
+                out HashSet<Dependency> libraryDependencies,
+                out bool serviceable,
+                out string path,
+                out string hashPath,
+                out SingleProjectInfo referenceProjectInfo);
+
+            if (referenceProjectInfo is UnreferencedProjectInfo)
+            {
+                // unreferenced ProjectInfos will be added later as simple dll dependencies
+                return null;
+            }
+
+            List<RuntimeAssetGroup> runtimeAssemblyGroups = new List<RuntimeAssetGroup>();
+            List<RuntimeAssetGroup> nativeLibraryGroups = new List<RuntimeAssetGroup>();
+            List<ResourceAssembly> resourceAssemblies = new List<ResourceAssembly>();
+
+            if (library.Type == "project" && !(referenceProjectInfo is UnreferencedProjectInfo))
+            {
+                runtimeAssemblyGroups.Add(new RuntimeAssetGroup(string.Empty, referenceProjectInfo.OutputName));
+
+                resourceAssemblies.AddRange(referenceProjectInfo.ResourceAssemblies
+                                .Select(r => new ResourceAssembly(r.RelativePath, r.Culture)));
+            }
+            else
+            {
+                if (_resolvedNuGetFiles != null && _resolvedNuGetFiles.TryGetValue(library.Name, out var resolvedNuGetFiles))
+                {
+                    var runtimeFiles = resolvedNuGetFiles.Where(f => f.Asset == AssetType.Runtime &&
+                                                                !f.IsRuntimeTarget);
+
+                    runtimeAssemblyGroups.Add(new RuntimeAssetGroup(string.Empty,
+                                                runtimeFiles.Select(CreateRuntimeFile)));
+
+                    var nativeFiles = resolvedNuGetFiles.Where(f => f.Asset == AssetType.Native &&
+                                                                !f.IsRuntimeTarget);
+
+                    nativeLibraryGroups.Add(new RuntimeAssetGroup(string.Empty,
+                                                nativeFiles.Select(CreateRuntimeFile)));
+
+                    var resourceFiles = resolvedNuGetFiles.Where(f => f.Asset == AssetType.Resources &&
+                                                                !f.IsRuntimeTarget);
+
+                    resourceAssemblies.AddRange(resourceFiles.Select(f => new ResourceAssembly(f.PathInPackage, f.Culture)));
+
+                    var runtimeTargets = resolvedNuGetFiles.Where(f => f.IsRuntimeTarget)
+                                                                .GroupBy(f => f.RuntimeIdentifier);
+
+                    foreach (var runtimeIdentifierGroup in runtimeTargets)
+                    {
+                        var managedRuntimeTargetsFiles = runtimeIdentifierGroup.Where(f => f.Asset == AssetType.Runtime).ToList();
+                        if (managedRuntimeTargetsFiles.Any())
+                        {
+                            runtimeAssemblyGroups.Add(new RuntimeAssetGroup(runtimeIdentifierGroup.Key,
+                                                            managedRuntimeTargetsFiles.Select(CreateRuntimeFile)));
+                        }
+
+                        var nativeRuntimeTargetsFiles = runtimeIdentifierGroup.Where(f => f.Asset == AssetType.Native).ToList();
+                        if (nativeRuntimeTargetsFiles.Any())
+                        {
+                            nativeLibraryGroups.Add(new RuntimeAssetGroup(runtimeIdentifierGroup.Key,
+                                                            nativeRuntimeTargetsFiles.Select(CreateRuntimeFile)));
+                        }
+                    }
+                }
+
+            }
+
+            var runtimeLibrary = new RuntimeLibrary(
+                type: library.Type,
+                name: library.Name,
+                version: library.Version.ToString(),
                 hash: hash,
                 runtimeAssemblyGroups: runtimeAssemblyGroups,
                 nativeLibraryGroups: nativeLibraryGroups,
                 resourceAssemblies: resourceAssemblies,
-                dependencies: dependencies,
+                dependencies: libraryDependencies,
                 path: path,
                 hashPath: hashPath,
-                runtimeStoreManifestName: runtimeStoreManifestName,
+                runtimeStoreManifestName: GetRuntimeStoreManifestName(library.Name, library.Version.ToString()),
                 serviceable: serviceable);
+
+            return runtimeLibrary;
         }
 
-        private RuntimeLibrary GetProjectRuntimeLibrary(
-            SingleProjectInfo projectInfo,
-            ProjectContext projectContext,
-            Dictionary<string, Dependency> dependencyLookup,
-            bool includeCompilationLibraries)
+        private CompilationLibrary GetCompilationLibrary(DependencyLibrary library)
         {
-            RuntimeAssetGroup[] runtimeAssemblyGroups = new[] { new RuntimeAssetGroup(string.Empty, projectInfo.OutputName) };
+            GetCommonLibraryProperties(library,
+                out string hash,
+                out HashSet<Dependency> libraryDependencies,
+                out bool serviceable,
+                out string path,
+                out string hashPath,
+                out SingleProjectInfo referenceProjectInfo);
 
-            List<Dependency> dependencies = GetProjectDependencies(projectContext, dependencyLookup, includeCompilationLibraries);
+            List<string> assemblies = new List<string>();
 
-            return CreateRuntimeLibrary(
-                type: "project",
-                name: projectInfo.Name,
-                version: projectInfo.Version,
-                hash: string.Empty,
-                runtimeAssemblyGroups: runtimeAssemblyGroups,
-                nativeLibraryGroups: new RuntimeAssetGroup[] { },
-                resourceAssemblies: CreateResourceAssemblies(projectInfo.ResourceAssemblies),
-                dependencies: dependencies.ToArray(),
-                serviceable: false);
-        }
-
-        private CompilationLibrary GetProjectCompilationLibrary(
-            SingleProjectInfo projectInfo,
-            ProjectContext projectContext,
-            Dictionary<string, Dependency> dependencyLookup,
-            bool includeCompilationLibraries)
-        {
-            List<Dependency> dependencies = GetProjectDependencies(projectContext, dependencyLookup, includeCompilationLibraries);
-
-            return new CompilationLibrary(
-                type: "project",
-                name: projectInfo.Name,
-                version: projectInfo.Version,
-                hash: string.Empty,
-                assemblies: new[] { projectInfo.OutputName },
-                dependencies: dependencies.ToArray(),
-                serviceable: false);
-        }
-
-        private IEnumerable<Library> GetLibraries(
-            IEnumerable<LockFileTargetLibrary> exports,
-            LockFileLookup libraryLookup,
-            IDictionary<string, Dependency> dependencyLookup,
-            bool runtime)
-        {
-            return exports.Select(export => GetLibrary(export, libraryLookup, dependencyLookup, runtime));
-        }
-
-        private Library GetLibrary(
-            LockFileTargetLibrary export,
-            LockFileLookup libraryLookup,
-            IDictionary<string, Dependency> dependencyLookup,
-            bool runtime)
-        {
-            var type = export.Type;
-            bool isPackage = export.IsPackage();
-
-            // TEMPORARY: All packages are serviceable in RC2
-            // See https://github.com/dotnet/cli/issues/2569
-            var serviceable = isPackage;
-            var libraryDependencies = new HashSet<Dependency>();
-
-            foreach (PackageDependency libraryDependency in export.Dependencies)
+            if (library.Type == "project" && !(referenceProjectInfo is UnreferencedProjectInfo))
             {
-                Dependency dependency;
-                if (dependencyLookup.TryGetValue(libraryDependency.Id, out dependency))
+                assemblies.Add(referenceProjectInfo.OutputName);
+            }
+            else if (_compileReferences != null && _compileReferences.TryGetValue(library.Name, out var compileReferences))
+            {
+                foreach (var compileReference in compileReferences)
                 {
-                    libraryDependencies.Add(dependency);
+                    assemblies.Add(compileReference.PathInPackage);
                 }
             }
 
-            string hash = string.Empty;
-            string path = null;
-            string hashPath = null;
-            LockFileLibrary library;
-            SingleProjectInfo referenceProjectInfo = null;
-            if (libraryLookup.TryGetLibrary(export, out library))
+            return new CompilationLibrary(
+                type: library.Type,
+                name: library.Name,
+                version: library.Version.ToString(),
+                hash,
+                assemblies,
+                libraryDependencies,
+                serviceable,
+                path,
+                hashPath);
+        }
+
+        private void GetCommonLibraryProperties(DependencyLibrary library,
+                    out string hash,
+                    out HashSet<Dependency> dependencies,
+                    out bool serviceable,
+                    out string path,
+                    out string hashPath,
+                    out SingleProjectInfo referenceProjectInfo)
+        {
+            serviceable = true;
+            referenceProjectInfo = null;
+
+            dependencies = new HashSet<Dependency>();
+            List<LibraryDependency> libraryDependencies;
+            if (_libraryDependencies.TryGetValue(library.Name, out libraryDependencies))
             {
-                if (isPackage)
+                foreach (var dependency in libraryDependencies)
                 {
-                    if (!string.IsNullOrEmpty(library.Sha512))
+                    if (_dependencyLibraries.TryGetValue(dependency.Name, out var libraryDependency))
                     {
-                        hash = "sha512-" + library.Sha512;
-                        hashPath = _versionFolderPathResolver.GetHashFileName(export.Name, export.Version);
-                    }
-
-                    path = library.Path;
-                }
-                else if (export.IsProject())
-                {
-                    referenceProjectInfo = GetProjectInfo(library);
-
-                    if (runtime)
-                    {
-                        // DependencyReferences do not get passed to the compilation, so we should only
-                        // process them when getting the runtime libraries.
-
-                        foreach (var dependencyReference in referenceProjectInfo.DependencyReferences)
+                        if (!libraryDependency.ExcludeFromRuntime ||
+                            (!libraryDependency.ExcludeFromCompilation && IncludeCompilationLibraries))
                         {
-                            libraryDependencies.Add(
-                                new Dependency(
-                                    GetReferenceLibraryName(dependencyReference),
-                                    dependencyReference.Version));
+                            dependencies.Add(libraryDependency.Dependency);
                         }
                     }
                 }
             }
 
-            if (runtime)
+            hash = string.Empty;
+            path = null;
+            hashPath = null;
+            if (library.Type == "package")
             {
-                return CreateRuntimeLibrary(
-                    type.ToLowerInvariant(),
-                    export.Name,
-                    export.Version.ToString(),
-                    hash,
-                    CreateRuntimeAssemblyGroups(export, referenceProjectInfo),
-                    CreateNativeLibraryGroups(export),
-                    CreateResourceAssemblyGroups(export, referenceProjectInfo),
-                    libraryDependencies,
-                    serviceable,
-                    path,
-                    hashPath);
-            }
-            else
-            {
-                IEnumerable<string> assemblies = GetCompileTimeAssemblies(export, referenceProjectInfo);
+                // TEMPORARY: All packages are serviceable in RC2
+                // See https://github.com/dotnet/cli/issues/2569
+                serviceable = true;
+                if (!string.IsNullOrEmpty(library.Sha512))
+                {
+                    hash = "sha512-" + library.Sha512;
+                    hashPath = _versionFolderPathResolver.GetHashFileName(library.Name, library.Version);
+                }
 
-                return new CompilationLibrary(
-                    type.ToLowerInvariant(),
-                    export.Name,
-                    export.Version.ToString(),
-                    hash,
-                    assemblies,
-                    libraryDependencies,
-                    serviceable,
-                    path,
-                    hashPath);
+                path = library.Path;
+            }
+            else if (library.Type == "project")
+            {
+                serviceable = false;
+                referenceProjectInfo = GetProjectInfo(library);
+
+                foreach (var dependencyReference in referenceProjectInfo.DependencyReferences)
+                {
+                    dependencies.Add(
+                        new Dependency(
+                            GetReferenceLibraryName(dependencyReference),
+                            dependencyReference.Version));
+                }
             }
         }
 
-        private RuntimeFile CreateRuntimeFile(LockFileTargetLibrary library, LockFileItem item)
+        private RuntimeFile CreateRuntimeFile(ResolvedFile resolvedFile)
         {
-            //  _packageResolver will be null if _includeRuntimeFileVersions is false, hence the "?."
-            var itemFullPath = _packageResolver?.ResolvePackageAssetPath(library, item.Path);
-            return CreateRuntimeFile(item.Path, itemFullPath);
+            string relativePath = resolvedFile.PathInPackage;
+            if (string.IsNullOrEmpty(relativePath))
+            {
+                relativePath = resolvedFile.DestinationSubPath;
+            }
+            return CreateRuntimeFile(relativePath, resolvedFile.SourcePath);
         }
 
         private RuntimeFile CreateRuntimeFile(string path, string fullPath)
@@ -467,216 +647,13 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        private IReadOnlyList<RuntimeAssetGroup> CreateRuntimeAssemblyGroups(LockFileTargetLibrary targetLibrary, SingleProjectInfo referenceProjectInfo)
-        {
-            if (targetLibrary.IsProject())
-            {
-                EnsureProjectInfo(referenceProjectInfo, targetLibrary.Name);
-                return new[] { new RuntimeAssetGroup(string.Empty, referenceProjectInfo.OutputName) };
-            }
-            else
-            {
-                List<RuntimeAssetGroup> assemblyGroups = new List<RuntimeAssetGroup>();
-
-                assemblyGroups.Add(
-                    new RuntimeAssetGroup(
-                        string.Empty,
-                        targetLibrary.RuntimeAssemblies.FilterPlaceholderFiles().Select(a => CreateRuntimeFile(targetLibrary, a))));
-
-                foreach (var runtimeTargetsGroup in targetLibrary.GetRuntimeTargetsGroups("runtime"))
-                {
-                    assemblyGroups.Add(
-                        new RuntimeAssetGroup(
-                            runtimeTargetsGroup.Key,
-                            runtimeTargetsGroup.Select(t => CreateRuntimeFile(targetLibrary, t))));
-                }
-
-                return assemblyGroups;
-            }
-        }
-
-        private IReadOnlyList<RuntimeAssetGroup> CreateNativeLibraryGroups(LockFileTargetLibrary export)
-        {
-            List<RuntimeAssetGroup> nativeGroups = new List<RuntimeAssetGroup>();
-
-            nativeGroups.Add(
-                new RuntimeAssetGroup(
-                    string.Empty,
-                    export.NativeLibraries.FilterPlaceholderFiles().Select(a => CreateRuntimeFile(export, a))));
-
-            foreach (var runtimeTargetsGroup in export.GetRuntimeTargetsGroups("native"))
-            {
-                nativeGroups.Add(
-                    new RuntimeAssetGroup(
-                        runtimeTargetsGroup.Key,
-                        runtimeTargetsGroup.Select(t => CreateRuntimeFile(export, t))));
-            }
-
-            return nativeGroups;
-        }
-
-        private IEnumerable<ResourceAssembly> CreateResourceAssemblyGroups(LockFileTargetLibrary targetLibrary, SingleProjectInfo referenceProjectInfo)
-        {
-            if (targetLibrary.IsProject())
-            {
-                EnsureProjectInfo(referenceProjectInfo, targetLibrary.Name);
-                return CreateResourceAssemblies(referenceProjectInfo.ResourceAssemblies);
-            }
-            else
-            {
-                return targetLibrary.ResourceAssemblies.FilterPlaceholderFiles().Select(CreateResourceAssembly);
-            }
-        }
-
-        private ResourceAssembly CreateResourceAssembly(LockFileItem resourceAssembly)
-        {
-            string locale;
-            if (!resourceAssembly.Properties.TryGetValue("locale", out locale))
-            {
-                locale = null;
-            }
-
-            return new ResourceAssembly(resourceAssembly.Path, locale);
-        }
-
-        private IEnumerable<string> GetCompileTimeAssemblies(LockFileTargetLibrary targetLibrary, SingleProjectInfo referenceProjectInfo)
-        {
-            if (targetLibrary.IsProject())
-            {
-                EnsureProjectInfo(referenceProjectInfo, targetLibrary.Name);
-                return new[] { referenceProjectInfo.OutputName };
-            }
-            else
-            {
-                return targetLibrary
-                    .CompileTimeAssemblies
-                    .FilterPlaceholderFiles()
-                    .Select(libraryAsset => libraryAsset.Path);
-            }
-        }
-
-        private IEnumerable<CompilationLibrary> GetReferenceAssemblyLibraries()
-        {
-            return _referenceAssemblies
-                ?.Select(r => new CompilationLibrary(
-                    type: "referenceassembly",
-                    name: GetReferenceLibraryName(r),
-                    version: r.Version,
-                    hash: string.Empty,
-                    assemblies: new[] { ResolveFrameworkReferencePath(r.FullPath) },
-                    dependencies: Enumerable.Empty<Dependency>(),
-                    serviceable: false))
-                ??
-                Enumerable.Empty<CompilationLibrary>();
-        }
-
-        private string ResolveFrameworkReferencePath(string fullPath)
-        {
-            // If resolved path is under ReferenceAssembliesPath store it as a relative to it
-            // if not, save only assembly name and try to find it somehow later
-            if (!string.IsNullOrEmpty(_referenceAssembliesPath) &&
-                fullPath?.StartsWith(_referenceAssembliesPath) == true)
-            {
-                return fullPath.Substring(_referenceAssembliesPath.Length);
-            }
-
-            return Path.GetFileName(fullPath);
-        }
-
-        private IEnumerable<RuntimeLibrary> GetReferenceRuntimeLibraries(IEnumerable<ReferenceInfo> references)
-        {
-            return references
-                ?.Select(r => CreateRuntimeLibrary(
-                    type: "reference",
-                    name: GetReferenceLibraryName(r),
-                    version: r.Version,
-                    hash: string.Empty,
-                    runtimeAssemblyGroups: new[] { new RuntimeAssetGroup(string.Empty, new[] { CreateRuntimeFile(r.FileName, r.FullPath) }) },
-                    nativeLibraryGroups: new RuntimeAssetGroup[] { },
-                    resourceAssemblies: CreateResourceAssemblies(r.ResourceAssemblies),
-                    dependencies: Enumerable.Empty<Dependency>(),
-                    serviceable: false))
-                ??
-                Enumerable.Empty<RuntimeLibrary>();
-        }
-
-        private IEnumerable<CompilationLibrary> GetReferenceCompilationLibraries(IEnumerable<ReferenceInfo> references)
-        {
-            return references
-                ?.Select(r => new CompilationLibrary(
-                    type: "reference",
-                    name: GetReferenceLibraryName(r),
-                    version: r.Version,
-                    hash: string.Empty,
-                    assemblies: new[] { r.FileName },
-                    dependencies: Enumerable.Empty<Dependency>(),
-                    serviceable: false))
-                ??
-                Enumerable.Empty<CompilationLibrary>();
-        }
-
-        private IEnumerable<RuntimeLibrary> GetDirectReferenceRuntimeLibraries()
-        {
-            return GetReferenceRuntimeLibraries(_directReferences);
-        }
-
-        private IEnumerable<CompilationLibrary> GetDirectReferenceCompilationLibraries()
-        {
-            return GetReferenceCompilationLibraries(_directReferences);
-        }
-
-        private IEnumerable<RuntimeLibrary> GetDependencyReferenceRuntimeLibraries()
-        {
-            return GetReferenceRuntimeLibraries(_dependencyReferences);
-        }
-
-        private string GetReferenceLibraryName(ReferenceInfo reference)
-        {
-            if (!ReferenceLibraryNames.TryGetValue(reference, out string name))
-            {
-                // Reference names can conflict with PackageReference names, so
-                // ensure that the Reference names are unique when creating libraries
-                name = GetUniqueReferenceName(reference.Name);
-
-                ReferenceLibraryNames.Add(reference, name);
-                UsedLibraryNames.Add(name);
-            }
-
-            return name;
-        }
-
-        private string GetUniqueReferenceName(string name)
-        {
-            if (UsedLibraryNames.Contains(name))
-            {
-                string startingName = $"{name}.Reference";
-                name = startingName;
-
-                int suffix = 1;
-                while (UsedLibraryNames.Contains(name))
-                {
-                    name = $"{startingName}{suffix++}";
-                }
-            }
-
-            return name;
-        }
-
         private static IEnumerable<ResourceAssembly> CreateResourceAssemblies(IEnumerable<ResourceAssemblyInfo> resourceAssemblyInfos)
         {
             return resourceAssemblyInfos
                 .Select(r => new ResourceAssembly(r.RelativePath, r.Culture));
         }
 
-        private static void EnsureProjectInfo(SingleProjectInfo referenceProjectInfo, string libraryName)
-        {
-            if (referenceProjectInfo == null)
-            {
-                throw new BuildErrorException(Strings.CannotFindProjectInfo, libraryName);
-            }
-        }
-
-        private SingleProjectInfo GetProjectInfo(LockFileLibrary library)
+        private SingleProjectInfo GetProjectInfo(DependencyLibrary library)
         {
             string projectPath = library.MSBuildProject;
             if (string.IsNullOrEmpty(projectPath))
@@ -691,26 +668,151 @@ namespace Microsoft.NET.Build.Tasks
             if (_referenceProjectInfos?.TryGetValue(fullProjectPath, out referenceProjectInfo) != true ||
                 referenceProjectInfo == null)
             {
-                throw new BuildErrorException(Strings.CannotFindProjectInfo, fullProjectPath);
+                return UnreferencedProjectInfo.Default;
             }
 
             return referenceProjectInfo;
         }
 
-        private static string EnsureTrailingSlash(string path)
+        private void CalculateExcludedLibraries()
         {
-            return EnsureTrailingCharacter(path, Path.DirectorySeparatorChar);
-        }
+            Dictionary<string, DependencyLibrary> libraries = _dependencyLibraries;
 
-        private static string EnsureTrailingCharacter(string path, char trailingCharacter)
-        {
-            // if the path is empty, we want to return the original string instead of a single trailing character.
-            if (string.IsNullOrEmpty(path) || path[path.Length - 1] == trailingCharacter)
+            HashSet<string> runtimeExclusionList = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            if (_isFrameworkDependent && !string.IsNullOrEmpty(_platformLibrary))
             {
-                return path;
+                //  Exclude platform library and dependencies.
+                runtimeExclusionList.Add(_platformLibrary);
+
+                Stack<LibraryDependency> dependenciesToWalk = new Stack<LibraryDependency>(_libraryDependencies[_platformLibrary]);
+
+                // If the platform library is not Microsoft.NETCore.App, treat it as an implicit dependency.
+                // This makes it so Microsoft.AspNet.* 2.x platforms also exclude Microsoft.NETCore.App files.
+                if (!string.Equals(_platformLibrary, NetCorePlatformLibrary, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (_dependencyLibraries.TryGetValue(NetCorePlatformLibrary, out var netCoreDependencyLibrary))
+                    {
+                        dependenciesToWalk.Push(new LibraryDependency()
+                        {
+                            Name = netCoreDependencyLibrary.Name,
+                            MinVersion = netCoreDependencyLibrary.Version
+                        });
+                    }
+                }
+
+                while (dependenciesToWalk.Any())
+                {
+                    var dependency = dependenciesToWalk.Pop();
+                    if (runtimeExclusionList.Contains(dependency.Name))
+                    {
+                        continue;
+                    }
+
+                    //  Resolved version of library has to match dependency version exactly, so that we
+                    //  don't exclude newer versions of libraries that are part of the platform
+                    if (_dependencyLibraries[dependency.Name].Version == dependency.MinVersion)
+                    {
+                        runtimeExclusionList.Add(dependency.Name);
+                        foreach (var newDependency in _libraryDependencies[dependency.Name])
+                        {
+                            dependenciesToWalk.Push(newDependency);
+                        }
+                    }
+                }
             }
 
-            return path + trailingCharacter;
+            if (_packagesToBeFiltered != null)
+            {
+                foreach (var packageToFilter in _packagesToBeFiltered)
+                {
+                    if (_dependencyLibraries.TryGetValue(packageToFilter.Id, out var library))
+                    {
+                        if (library.Type == "package" &&
+                            _dependencyLibraries[packageToFilter.Id].Version == packageToFilter.Version)
+                        {
+                            runtimeExclusionList.Add(packageToFilter.Id);
+                        }
+                    }
+                }
+            }
+
+            foreach (var packageToExcludeFromRuntime in runtimeExclusionList)
+            {
+                _dependencyLibraries[packageToExcludeFromRuntime].ExcludeFromRuntime = true;
+            }
+        }
+
+        private string GetReferenceLibraryName(ReferenceInfo reference)
+        {
+            if (!ReferenceLibraryNames.TryGetValue(reference, out string name))
+            {
+                // Reference names can conflict with PackageReference names, so
+                // ensure that the Reference names are unique when creating libraries
+                name = GetUniqueReferenceName(reference.Name);
+
+                ReferenceLibraryNames.Add(reference, name);
+                _usedLibraryNames.Add(name);
+            }
+
+            return name;
+        }
+
+        private string GetUniqueReferenceName(string name)
+        {
+            if (_usedLibraryNames.Contains(name))
+            {
+                string startingName = $"{name}.Reference";
+                name = startingName;
+
+                int suffix = 1;
+                while (_usedLibraryNames.Contains(name))
+                {
+                    name = $"{startingName}{suffix++}";
+                }
+            }
+
+            return name;
+        }
+
+        private string GetRuntimeStoreManifestName(string packageName, string packageVersion)
+        {
+            string runtimeStoreManifestName = null;
+            if (_filteredPackages != null && _filteredPackages.Any())
+            {
+                var pkg = new PackageIdentity(packageName, NuGetVersion.Parse(packageVersion));
+                _filteredPackages?.TryGetValue(pkg, out runtimeStoreManifestName);
+            }
+            return runtimeStoreManifestName;
+        }
+
+        private class DependencyLibrary
+        {
+            public string Name { get; }
+            public NuGetVersion Version { get; }
+            public string Type { get; }
+            public Dependency Dependency { get; }
+            public string Sha512 { get; set; }
+            public string Path { get; set; }
+            public string MSBuildProject { get; set; }
+
+            public bool ExcludeFromRuntime { get; set; }
+
+            public bool ExcludeFromCompilation { get; set; }
+
+            public DependencyLibrary(string name, NuGetVersion version, string type)
+            {
+                Name = name;
+                Version = version;
+                Type = type;
+                Dependency = new Dependency(name, version.ToString());
+            }
+        }
+
+        private struct LibraryDependency
+        {
+            public string Name { get; set; }
+            public NuGetVersion MinVersion { get; set; }
         }
     }
 }

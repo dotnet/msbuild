@@ -21,15 +21,17 @@ Copyright (c) .NET Foundation. All rights reserved.
       AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <!--
-    Mark all dependecy as private assets. But keep them as Publish. So dependency DLLs will be included in NuGet package, while
+    Mark all dependency as private assets. But keep them as Publish. So dependency DLLs will be included in NuGet package, while
     there is no dependency in nuspec. And add Microsoft.NETCore.Platforms, which is used to select correct RID assets.
     -->
   <PropertyGroup>
     <_ToolsSettingsFilePath>$(BaseIntermediateOutputPath)DotnetToolSettings.xml</_ToolsSettingsFilePath>
     <SuppressDependenciesWhenPacking Condition=" '$(PackAsTool)' == 'true' ">true</SuppressDependenciesWhenPacking>
+    <_PackToolPublishDependency Condition=" ('$(GeneratePackageOnBuild)' != 'true' and '$(NoBuild)' != 'true') and $(IsPublishable) == 'true' ">_PublishBuildAlternative</_PackToolPublishDependency>
+    <_PackToolPublishDependency Condition=" ('$(GeneratePackageOnBuild)' == 'true' or '$(NoBuild)' == 'true') and $(IsPublishable) == 'true' ">$(_PublishNoBuildAlternativeDependsOn)</_PackToolPublishDependency>
   </PropertyGroup>
 
-  <Target Name="PackTool" DependsOnTargets="GenerateToolsSettingsFileFromBuildProperty;Publish;_PackToolValidation" Condition=" '$(PackAsTool)' == 'true' ">
+  <Target Name="PackTool" DependsOnTargets="GenerateToolsSettingsFileFromBuildProperty;$(_PackToolPublishDependency);_PackToolValidation" Condition=" '$(PackAsTool)' == 'true' ">
     <ItemGroup>
       <_GeneratedFiles Include="$(PublishDepsFilePath)"/>
       <_GeneratedFiles Include="$(PublishRuntimeConfigFilePath)"/>
@@ -37,6 +39,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <ResolveToolPackagePaths
+      AppHostIntermediatePath="$(AppHostIntermediatePath)"
       ResolvedFileToPublish="@(ResolvedFileToPublish)"
       PublishDir="$(PublishDir)"
       TargetFramework="$(TargetFramework)">
@@ -97,12 +100,14 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="GenerateShimsAssets"
           BeforeTargets="CopyFilesToOutputDirectory"
           DependsOnTargets="ResolvePackageAssets;_PackToolValidation;_GenerateShimInputCache;_ComputeExpectedEmbeddedApphostPaths"
-          Condition="'$(PackAsTool)' == 'true'"
+          Condition="'$(PackAsTool)' == 'true' and $(PackAsToolShimRuntimeIdentifiers) != '' "
           Inputs="@(_GenerateShimsAssetsInput)"
           Outputs="$(_ShimCreatedSentinelFile)">
 
     <GenerateShims
       ApphostsForShimRuntimeIdentifiers="@(_ApphostsForShimRuntimeIdentifiers)"
+      IntermediateAssembly="@(IntermediateAssembly->'%(FullPath)')"
+      OutputType="$(OutputType)"
       PackagedShimOutputDirectory="$(PackagedShimOutputRootDirectory)/shims/$(TargetFramework)"
       PackageId="$(PackageId)"
       PackageVersion="$(PackageVersion)"

@@ -40,10 +40,11 @@
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
-  <Target Name="PopulatePerformanceTestsFromGitHub" BeforeTargets="CoreCompile">
+  <Target Name="PopulatePerformanceTestsFromGitHub" BeforeTargets="CoreCompile"
+          Condition="'$(DesignTimeBuild)' != 'true'">
     <PropertyGroup>
       <PerformanceTestsRepoURL>https://github.com/dotnet/BuildPerformanceTestAssets</PerformanceTestsRepoURL>
-      <PerformanceTestsCommit>daf705c</PerformanceTestsCommit>
+      <PerformanceTestsCommit>36477bd5bff522888698daad265840c2c36a4ae3</PerformanceTestsCommit>
       <PerformanceTestsLocalDirectory>$(RepoRoot).perftestsource</PerformanceTestsLocalDirectory>
     </PropertyGroup>
 

@@ -83,9 +83,9 @@ namespace Microsoft.NET.Build.Tests
                 expectedInfo.Remove(attributeToOptOut);
             }
 
-            expectedInfo.Add("TargetFrameworkAttribute", ".NETCoreApp,Version=v1.1");
+            expectedInfo.Add("TargetFrameworkAttribute", ".NETCoreApp,Version=v2.1");
 
-            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netcoreapp1.1", "Release").FullName, "HelloWorld.dll");
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netcoreapp2.1", "Release").FullName, "HelloWorld.dll");
             var actualInfo = AssemblyInfo.Get(assemblyPath);
 
             actualInfo.Should().Equal(expectedInfo);
@@ -260,7 +260,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [WindowsOnlyTheory]
-        [InlineData("netcoreapp1.1")]
+        [InlineData("netcoreapp2.1")]
         [InlineData("net45")]
         public void It_respects_version_prefix(string targetFramework)
         {
@@ -289,7 +289,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [WindowsOnlyTheory]
-        [InlineData("netcoreapp1.1")]
+        [InlineData("netcoreapp2.1")]
         [InlineData("net45")]
         public void It_respects_version_changes_on_incremental_build(string targetFramework)
         {
@@ -305,7 +305,7 @@ namespace Microsoft.NET.Build.Tests
                 .Restore(Log, "", $"/p:OutputType=Library", $"/p:TargetFramework={targetFramework}");
             BuildProject(versionPrefix: "1.2.3");
 
-            // When the same project is built again using a different VersionPrefix proeprty
+            // When the same project is built again using a different VersionPrefix property
             var incrementalBuildCommand = BuildProject(versionPrefix: "1.2.4");
 
             // Then the version of the built assembly shall match the provided VersionPrefix
@@ -324,7 +324,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Fact]
-        public void It_respects_custom_assembly_atrribute_items_on_incremental_build()
+        public void It_respects_custom_assembly_attribute_items_on_incremental_build()
         {
             var targetFramework = "netstandard1.5";
             var testAsset = _testAssetsManager

@@ -33,5 +33,26 @@ namespace Microsoft.NET.Build.Tests
             var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp2.0");
             outputDirectory.Should().HaveFile(@"XUnitTestProject.runtimeconfig.json");
         }
+
+        [Fact]
+        public void It_builds_when_has_runtime_output_is_true()
+        {
+            const string targetFramework = "netcoreapp2.1";
+
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("XUnitTestProject")
+                .WithSource();
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            buildCommand
+                .Execute(new string[] {
+                    "/restore",
+                    $"/p:TargetFramework={targetFramework}",
+                    $"/p:HasRuntimeOutput=true",
+                    $"/p:NETCoreSdkRuntimeIdentifier={EnvironmentInfo.GetCompatibleRid(targetFramework)}"
+                })
+                .Should()
+                .Pass();
+        }
     }
 }

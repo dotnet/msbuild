@@ -120,7 +120,7 @@ namespace Microsoft.NET.Pack.Tests
         }
 
         [WindowsOnlyFact]
-        public void Packing_an_app_exclude_dependencys_framework_assemblies_dependency()
+        public void Packing_an_app_exclude_dependencies_framework_assemblies_dependency()
         {
             TestProject testProject = new TestProject()
             {
@@ -142,14 +142,16 @@ namespace Microsoft.NET.Pack.Tests
             dependencies.Single().Attribute("assemblyName").Value.Should().Be("System.Web");
         }
 
-        [Fact]
-        public void Packing_a_netcoreapp_2_0_app_does_not_include_the_implicit_dependency()
+        [Theory]
+        [InlineData("netcoreapp2.0")]
+        [InlineData("netcoreapp3.0")]
+        public void Packing_a_netcoreapp_2_0_app_includes_no_dependencies(string targetFramework)
         {
             TestProject testProject = new TestProject()
             {
-                Name = "PackNetCoreApp20App",
+                Name = "PackApp_" + targetFramework,
                 IsSdkProject = true,
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = targetFramework,
                 IsExe = true
             };
 

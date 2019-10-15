@@ -18,7 +18,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <GeneratedAssemblyInfoFile Condition="'$(GeneratedAssemblyInfoFile)' ==''">$(IntermediateOutputPath)$(MSBuildProjectName).AssemblyInfo$(DefaultLanguageSourceExtension)</GeneratedAssemblyInfoFile>
     <GenerateAssemblyInfo Condition="'$(GenerateAssemblyInfo)' == ''">true</GenerateAssemblyInfo>
   </PropertyGroup>

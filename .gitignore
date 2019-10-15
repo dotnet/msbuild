@@ -20,3 +20,5 @@ obj/
 .perftestsource/
 
 *.binlog
+
+sdk.sln.DotSettings.user

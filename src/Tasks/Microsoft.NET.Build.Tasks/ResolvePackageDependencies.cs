@@ -129,7 +129,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 if (_packageResolver == null)
                 {
-                    _packageResolver = NuGetPackageResolver.CreateResolver(LockFile, ProjectPath);
+                    _packageResolver = NuGetPackageResolver.CreateResolver(LockFile);
                 }
 
                 return _packageResolver;

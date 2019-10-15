@@ -12,9 +12,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-
     <RefAssembliesFolderName Condition="'$(RefAssembliesFolderName)' == ''">refs</RefAssembliesFolderName>
+    
+    <PreserveCompilationReferences Condition=" '$(PreserveCompilationReferences)' == ''">$(PreserveCompilationContext)</PreserveCompilationReferences>
   </PropertyGroup>
 
   <Target Name="ComputeDependencyFileCompilerOptions"
@@ -43,7 +43,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <UsingTask TaskName="FindItemsFromPackages" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="ComputeRefAssembliesToPublish"
-          Condition="'$(PreserveCompilationContext)' == 'true'"
+          Condition="'$(PreserveCompilationReferences)' == 'true'"
           DependsOnTargets="ResolvePackageAssets;
                             _ParseTargetManifestFiles"
           AfterTargets="ComputeFilesToPublish"
@@ -59,7 +59,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       Don't copy a compilation assembly if it's also a runtime assembly. There is no need to copy the same
       assembly to the 'refs' folder, if it is already in the publish directory.
       -->
-      <_RefAssembliesToExclude Include="@(ResolvedAssembliesToPublish->'%(FullPath)')" />
+      <_RefAssembliesToExclude Include="@(_ResolvedCopyLocalPublishAssets->'%(FullPath)')" />
       <!--
       Similarly, don't copy a compilation assembly if it's also a runtime assembly that is in a runtime store.
       It will be resolved from the runtime store directory at runtime.
@@ -82,7 +82,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="_CopyReferenceOnlyAssembliesForBuild"
-          Condition="'$(PreserveCompilationContext)' == 'true'"
+          Condition="'$(PreserveCompilationReferences)' == 'true'"
           DependsOnTargets="_ComputeReferenceAssemblies"
           AfterTargets="CopyFilesToOutputDirectory">
 

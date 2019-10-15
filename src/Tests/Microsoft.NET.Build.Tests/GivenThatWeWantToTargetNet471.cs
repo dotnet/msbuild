@@ -154,7 +154,7 @@ namespace Microsoft.NET.Build.Tests
                 $"{testProject.Name}.exe.config",
                 $"{testProject.Name}.pdb",
                 
-                // These two will be includded because Netstandard1.x has a higher version of these two contracts than net4.7.1 which is why they will be added.
+                // These two will be included because Netstandard1.x has a higher version of these two contracts than net4.7.1 which is why they will be added.
                 "System.Net.Http.dll",
                 "System.IO.Compression.dll",
 
@@ -295,6 +295,65 @@ namespace Microsoft.NET.Build.Tests
                 $"{testProject.Name}.pdb",
                 $"{testProject.Name}.exe.config", // We have now added binding redirects so we should expect a config flag to be dropped to the output directory.
             }.Concat(net471Shims));
+        }
+
+        
+        [WindowsOnlyFact]
+        public void Aliases_are_preserved_for_replaced_references()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "Net471AliasTest",
+                TargetFrameworks = "net471",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var netStandardProject = new TestProject()
+            {
+                Name = "NetStandard20_Library",
+                TargetFrameworks = "netstandard2.0",
+                IsSdkProject = true
+            };
+
+            testProject.SourceFiles["Program.cs"] = $@"
+extern alias snh;
+using System;
+public static class Program
+{{
+    public static void Main()
+    {{
+        new snh::System.Net.Http.HttpClient();
+        Console.WriteLine(""Hello, World!"");
+        Console.WriteLine({netStandardProject.Name}.{netStandardProject.Name}Class.Name);
+    }}
+}}
+";
+
+            testProject.ReferencedProjects.Add(netStandardProject);
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges((projectPath, project) =>
+                {
+                    if (Path.GetFileNameWithoutExtension(projectPath) == testProject.Name)
+                    {
+                        var ns = project.Root.Name.Namespace;
+
+                        var referenceElement = new XElement(ns + "Reference",
+                                                            new XAttribute("Include", "System.Net.Http"),
+                                                            new XAttribute("Aliases", "snh"));
+
+                        project.Root.Add(new XElement(ns + "ItemGroup", referenceElement));
+                    }
+                })
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
         }
 
         [FullMSBuildOnlyFact]
@@ -454,8 +513,7 @@ public static class NS16LibClass
 
             var exePath = Path.Combine(buildCommand.GetOutputDirectory(testProject.TargetFrameworks).FullName, testProject.Name + ".exe");
 
-            Command.Create(exePath, Array.Empty<string>())
-                .CaptureStdOut()
+            new RunExeCommand(Log, exePath)
                 .Execute()
                 .Should()
                 .Pass();

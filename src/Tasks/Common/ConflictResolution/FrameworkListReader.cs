@@ -98,7 +98,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                 }
 
                 ret.Add(new ConflictItem(assemblyName + ".dll",
-                                                packageId: null,
+                                                packageId: "TargetingPack",
                                                 assemblyVersion: assemblyVersion,
                                                 fileVersion: null));
             }

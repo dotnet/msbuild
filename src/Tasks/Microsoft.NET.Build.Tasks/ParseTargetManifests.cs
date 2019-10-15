@@ -31,13 +31,11 @@ namespace Microsoft.NET.Build.Tasks
                 var runtimeStorePackages = new Dictionary<PackageIdentity, StringBuilder>();
                 foreach (var manifestFile in targetManifestFileList)
                 {
-                    Log.LogMessage(MessageImportance.Low, string.Format(CultureInfo.CurrentCulture, Strings.ParsingFiles, manifestFile));
                     var packagesSpecified = StoreArtifactParser.Parse(manifestFile);
                     var targetManifestFileName = Path.GetFileName(manifestFile);
 
                     foreach (var pkg in packagesSpecified)
                     {
-                        Log.LogMessage(MessageImportance.Low, string.Format(CultureInfo.CurrentCulture, Strings.PackageInfoLog, pkg.Id, pkg.Version));
                         StringBuilder fileList;
                         if (runtimeStorePackages.TryGetValue(pkg, out fileList))
                         {

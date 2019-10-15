@@ -28,8 +28,8 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                 yield break;
             }
 
-            using (var manfiestStream = File.Open(manifestPath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete))
-            using (var manifestReader = new StreamReader(manfiestStream))
+            using (var manifestStream = File.Open(manifestPath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete))
+            using (var manifestReader = new StreamReader(manifestStream))
             {
                 for (int lineNumber = 0; !manifestReader.EndOfStream; lineNumber++)
                 {

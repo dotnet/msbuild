@@ -6,7 +6,7 @@
     <Description>The MSBuild targets and properties for building .NET Core projects.</Description>
     <OutputType>Library</OutputType>
     <PackageId>Microsoft.NET.Sdk</PackageId>
-    <TargetFrameworks>netcoreapp2.0;net472</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.1;net472</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -14,22 +14,19 @@
     <EnableDefaultItems>false</EnableDefaultItems>
     <GenerateDependencyFile>false</GenerateDependencyFile>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <OutDirName>Sdks\$(PackageId)\tools</OutDirName>
+    <OutDirName>$(Configuration)\Sdks\$(PackageId)\tools</OutDirName>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- MSBuild Task DLLs need to be versioned with every build -->
+    <AutoGenerateAssemblyVersion>true</AutoGenerateAssemblyVersion>
   </PropertyGroup>
 
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
   <PropertyGroup>
-    <!-- MSBuild Task DLLs need to be versioned with every build -->
-    <AssemblyVersion>$(FileVersion)</AssemblyVersion>
-  </PropertyGroup>
-
-  <PropertyGroup>
+    <OutputPath>$(BaseOutputPath)</OutputPath>
     <IsPackable>true</IsPackable>
-    <IncludeSymbols>true</IncludeSymbols>
-    <PackageLayoutOutputPath>$(ArtifactsBinDir)Sdks\$(PackageId)\</PackageLayoutOutputPath>
+    <PackageLayoutOutputPath>$(ArtifactsBinDir)$(Configuration)\Sdks\$(PackageId)\</PackageLayoutOutputPath>
   </PropertyGroup>
 
   <ItemDefinitionGroup>
@@ -40,11 +37,13 @@
   </ItemDefinitionGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildVersion)" ExcludeAssets="Runtime" />
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkVersion)" ExcludeAssets="Runtime" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCoreVersion)" ExcludeAssets="Runtime" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelVersion)" />
+    <PackageReference Include="Microsoft.NET.HostModel" Version="$(MicrosoftNETHostModelVersion)" />
     <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelVersion)" />
-    <PackageReference Include="NuGet.Build.Tasks.Pack" Version="$(NuGetBuildTasksPackVersion)" ExcludeAssets="All" />
+    <PackageReference Include="NuGet.Build.Tasks.Pack" Version="$(NuGetBuildTasksPackageVersion)" ExcludeAssets="All" />
   </ItemGroup>
 
   <!-- System.Reflection.Metadata is in-box for .NET Core 2.0, so we only need to reference it for .NET Framework -->
@@ -55,6 +54,7 @@
   <!-- These are loaded from the CLI's copy on .NET Core, we don't need to duplicate them on disk -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <PackageReference Update="Microsoft.Extensions.DependencyModel" ExcludeAssets="Runtime" />
+    <PackageReference Update="Microsoft.NET.HostModel" ExcludeAssets="Runtime" />
     <PackageReference Update="NuGet.ProjectModel" ExcludeAssets="Runtime" />
   </ItemGroup>
 
@@ -78,11 +78,12 @@
     <None Include="sdk\**\*" PackagePath="Sdk\" />
     <None Include="..\Common\targets\**\*" PackagePath="targets\" LinkBase="targets" />
     <None Include="..\Common\Resources\xlf\**\*" LinkBase="Resources\xlf" />
+    <UpToDateCheckInput Include="@(None)" />
   </ItemGroup>
 
   <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
     <PropertyGroup>
-      <_NugetBuildTasksPackPath>$(NuGetPackageRoot)nuget.build.tasks.pack\$(NuGetBuildTasksPackVersion)</_NugetBuildTasksPackPath>
+      <_NugetBuildTasksPackPath>$(NuGetPackageRoot)nuget.build.tasks.pack\$(NuGetBuildTasksPackageVersion)</_NugetBuildTasksPackPath>
       <_Stage0SdksFolder>$(DOTNET_INSTALL_DIR)\sdk\$(NETCoreSdkVersion)\Sdks</_Stage0SdksFolder>
     </PropertyGroup>
     <ItemGroup>
@@ -100,6 +101,8 @@
       <Stage0SdkFile Include="$(_Stage0SdksFolder)\Microsoft.NET.Sdk.Web\**" SdkName="Microsoft.NET.Sdk.Web" />
       <Stage0SdkFile Include="$(_Stage0SdksFolder)\Microsoft.NET.Sdk.Web.ProjectSystem\**" SdkName="Microsoft.NET.Sdk.Web.ProjectSystem" />
       <Stage0SdkFile Include="$(_Stage0SdksFolder)\Microsoft.NET.Sdk.Razor\**" SdkName="Microsoft.NET.Sdk.Razor" />
+      <Stage0SdkFile Include="$(_Stage0SdksFolder)\Microsoft.NET.Sdk.WindowsDesktop\**" SdkName="Microsoft.NET.Sdk.WindowsDesktop" />
+      <Stage0SdkFile Include="$(_Stage0SdksFolder)\ILLink.Tasks\**" SdkName="ILLink.Tasks" />
       <LayoutFile Include="@(Stage0SdkFile)">
         <TargetPath>..\%(Stage0SdkFile.SdkName)\%(Stage0SdkFile.RecursiveDir)%(Stage0SdkFile.Filename)%(Stage0SdkFile.Extension)</TargetPath>
       </LayoutFile>
@@ -119,14 +122,6 @@
     </ItemGroup>
   </Target>
 
-  <!-- Remove files from copy local that would not be published as they are provided by the platform package -->
-  <!-- https://github.com/dotnet/sdk/issues/933 tracks a first class feature for this -->
-  <Target Name="FilterCopyLocal" DependsOnTargets="GetFrameworkPaths;GetReferenceAssemblyPaths;RunResolvePublishAssemblies" BeforeTargets="ResolveLockFileCopyLocalProjectDeps">
-    <ItemGroup>
-      <_CopyLocalButNotPublished Include="@(AllCopyLocalItems)" Exclude="@(ResolvedAssembliesToPublish)" />
-      <AllCopyLocalItems Remove="@(_CopyLocalButNotPublished)" />
-    </ItemGroup>
-  </Target>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 

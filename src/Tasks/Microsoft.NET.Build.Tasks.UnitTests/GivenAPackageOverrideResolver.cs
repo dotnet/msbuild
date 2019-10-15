@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.NET.Build.Tasks.ConflictResolution;
 using Microsoft.NET.Build.Tasks.UnitTests.Mocks;
+using NuGet.Versioning;
 using Xunit;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests
@@ -33,11 +34,11 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             PackageOverride packageOverride = resolver.PackageOverrides["Platform"];
             Assert.Equal(5, packageOverride.OverriddenPackages.Count);
-            Assert.Equal(new Version(4, 2, 0), packageOverride.OverriddenPackages["System.Ben"]);
-            Assert.Equal(new Version(4, 3, 0), packageOverride.OverriddenPackages["System.Immo"]);
-            Assert.Equal(new Version(4, 3, 0), packageOverride.OverriddenPackages["System.Livar"]);
-            Assert.Equal(new Version(4, 2, 0), packageOverride.OverriddenPackages["System.Dave"]);
-            Assert.Equal(new Version(4, 2, 0), packageOverride.OverriddenPackages["System.Nick"]);
+            Assert.Equal(new NuGetVersion(4, 2, 0), packageOverride.OverriddenPackages["System.Ben"]);
+            Assert.Equal(new NuGetVersion(4, 3, 0), packageOverride.OverriddenPackages["System.Immo"]);
+            Assert.Equal(new NuGetVersion(4, 3, 0), packageOverride.OverriddenPackages["System.Livar"]);
+            Assert.Equal(new NuGetVersion(4, 2, 0), packageOverride.OverriddenPackages["System.Dave"]);
+            Assert.Equal(new NuGetVersion(4, 2, 0), packageOverride.OverriddenPackages["System.Nick"]);
         }
 
         [Fact]
@@ -67,7 +68,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var packageItem = new MockConflictItem("System.Eric")
             {
                 PackageId = "System.Eric",
-                PackageVersion = new Version(4, 0, 0),
+                PackageVersion = new NuGetVersion(4, 0, 0),
                 AssemblyVersion = new Version(4, 0, 0, 0),
                 ItemType = ConflictItemType.Reference
             };
@@ -85,7 +86,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var packageItem2 = new MockConflictItem("System.Eric")
             {
                 PackageId = "FakePlatform",
-                PackageVersion = new Version(4, 0, 0),
+                PackageVersion = new NuGetVersion(4, 0, 0),
                 AssemblyVersion = new Version(4, 0, 0, 0),
                 ItemType = ConflictItemType.Reference
             };

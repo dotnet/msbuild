@@ -21,14 +21,22 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Fact]
-        public void It_builds_a_runnable_output()
+        [Theory]
+        [InlineData("netcoreapp1.1", false)]
+        [InlineData("netcoreapp2.0", false)]
+        [InlineData("netcoreapp3.0", true)]
+        public void It_builds_a_runnable_output(string targetFramework, bool dependenciesIncluded)
         {
-            var targetFramework = "netcoreapp1.1";
+            if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
+            {
+                return;
+            }
+
             var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
             var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld")
+                .CopyTestAsset("HelloWorld", identifier: targetFramework)
                 .WithSource()
+                .WithTargetFramework(targetFramework)
                 .WithProjectChanges(project =>
                 {
                     var ns = project.Root.Name.Namespace;
@@ -49,7 +57,7 @@ namespace Microsoft.NET.Build.Tests
 
             string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
 
-            outputDirectory.Should().OnlyHaveFiles(new[] {
+            string[] expectedFiles = new[] {
                 selfContainedExecutable,
                 "HelloWorld.dll",
                 "HelloWorld.pdb",
@@ -58,10 +66,22 @@ namespace Microsoft.NET.Build.Tests
                 "HelloWorld.runtimeconfig.json",
                 $"{FileConstants.DynamicLibPrefix}hostfxr{FileConstants.DynamicLibSuffix}",
                 $"{FileConstants.DynamicLibPrefix}hostpolicy{FileConstants.DynamicLibSuffix}",
+            };
+
+            if (dependenciesIncluded)
+            {
+                outputDirectory.Should().HaveFiles(expectedFiles);
+            }
+            else
+            {
+                outputDirectory.Should().OnlyHaveFiles(expectedFiles);
+            }
+
+            outputDirectory.Should().NotHaveFiles(new[] {
+                $"apphost{Constants.ExeSuffix}",
             });
 
-            Command.Create(selfContainedExecutableFullPath, new string[] { })
-                .CaptureStdOut()
+            new RunExeCommand(Log, selfContainedExecutableFullPath)
                 .Execute()
                 .Should()
                 .Pass()
@@ -102,7 +122,7 @@ namespace Microsoft.NET.Build.Tests
 		[Fact]
 		public void It_succeeds_when_RuntimeIdentifier_and_PlatformTarget_mismatch_but_PT_is_AnyCPU()
 		{
-			var targetFramework = "netcoreapp1.1";
+			var targetFramework = "netcoreapp2.1";
 			var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
 			var testAsset = _testAssetsManager
 				.CopyTestAsset("HelloWorld")
@@ -128,8 +148,7 @@ namespace Microsoft.NET.Build.Tests
 
 			string selfContainedExecutableFullPath = Path.Combine(outputDirectory.FullName, selfContainedExecutable);
 
-			Command.Create(selfContainedExecutableFullPath, new string[] { })
-				.CaptureStdOut()
+            new RunExeCommand(Log, selfContainedExecutableFullPath)
 				.Execute()
 				.Should()
 				.Pass()

@@ -165,8 +165,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     new XDeclaration("1.0", "utf-8", "true"),
                     new XElement("configuration"));
 
-            var parserdFramework = NuGetFramework.ParseFolder(targetframework);
-            WriteAppConfigWithSupportedRuntime.AddSupportedRuntimeToAppconfig(doc, parserdFramework.Framework, parserdFramework.Version.ToString());
+            var parsedFramework = NuGetFramework.ParseFolder(targetframework);
+            WriteAppConfigWithSupportedRuntime.AddSupportedRuntimeToAppconfig(doc, parsedFramework.Framework, parsedFramework.Version.ToString());
 
             doc.Element("configuration")
                 .Elements("startup").Should().BeNullOrEmpty();

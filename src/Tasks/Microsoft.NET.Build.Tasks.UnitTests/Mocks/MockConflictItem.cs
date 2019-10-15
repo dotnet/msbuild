@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.NET.Build.Tasks.ConflictResolution;
+using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests.Mocks
 {
@@ -17,7 +18,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests.Mocks
             FileName = name + ".dll";
             FileVersion = new Version("1.0.0.0");
             PackageId = name;
-            PackageVersion = new Version("1.0.0");
+            PackageVersion = new NuGetVersion("1.0.0");
             DisplayName = name;
         }
         public string Key { get; set; }
@@ -34,7 +35,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests.Mocks
 
         public string PackageId { get; set; }
 
-        public Version PackageVersion { get; set; }
+        public NuGetVersion PackageVersion { get; set; }
 
         public string DisplayName { get; set; }
     }

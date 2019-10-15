@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Framework;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
 using System;
@@ -12,8 +13,21 @@ namespace Microsoft.NET.Build.Tasks
 {
     internal class ProjectContext
     {
-        private const string NetCorePlatformLibrary = "Microsoft.NETCore.App";
+        public class RuntimeFramework
+        {
+            public string Name { get; set; }
+            public string Version { get; set; }
 
+            public RuntimeFramework() { }
+
+            public RuntimeFramework(ITaskItem item)
+            {
+                Name = item.ItemSpec;
+                Version = item.GetMetadata(MetadataKeys.Version);
+            }
+        }
+
+        private const string NetCorePlatformLibrary = "Microsoft.NETCore.App";
         private readonly LockFile _lockFile;
         private readonly LockFileTarget _lockFileTarget;
         internal HashSet<PackageIdentity> PackagesToBeFiltered { get; set; }
@@ -35,22 +49,41 @@ namespace Microsoft.NET.Build.Tasks
 
         public LockFileTargetLibrary PlatformLibrary { get; }
 
+        public RuntimeFramework[] RuntimeFrameworks { get; }
+
         public LockFile LockFile => _lockFile;
         public LockFileTarget LockFileTarget => _lockFileTarget;
 
-        public ProjectContext(LockFile lockFile, LockFileTarget lockFileTarget, LockFileTargetLibrary platformLibrary, bool isFrameworkDependent)
+        public LockFileTarget CompilationLockFileTarget { get; }
+
+        public ProjectContext(LockFile lockFile, LockFileTarget lockFileTarget,
+            //  Trimmed from publish output, and if there are no runtimeFrameworks, written to runtimeconfig.json
+            LockFileTargetLibrary platformLibrary,
+            //  Written to runtimeconfig.json
+            RuntimeFramework[] runtimeFrameworks,
+            bool isFrameworkDependent)
         {
             Debug.Assert(lockFile != null);
             Debug.Assert(lockFileTarget != null);
             if (isFrameworkDependent)
             {
-                Debug.Assert(platformLibrary != null);
+                Debug.Assert(platformLibrary != null || 
+                    (runtimeFrameworks != null && runtimeFrameworks.Any()));
             }
 
             _lockFile = lockFile;
             _lockFileTarget = lockFileTarget;
+            if (string.IsNullOrEmpty(lockFileTarget.RuntimeIdentifier))
+            {
+                CompilationLockFileTarget = lockFileTarget;
+            }
+            else
+            {
+                CompilationLockFileTarget = lockFile.GetTargetAndThrowIfNotFound(lockFileTarget.TargetFramework, null);
+            }
 
             PlatformLibrary = platformLibrary;
+            RuntimeFrameworks = runtimeFrameworks;
             IsFrameworkDependent = isFrameworkDependent;
         }
 
@@ -62,7 +95,7 @@ namespace Microsoft.NET.Build.Tasks
 
             HashSet<string> allExclusionList = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            if (IsFrameworkDependent)
+            if (IsFrameworkDependent && PlatformLibrary != null)
             {
                 allExclusionList.UnionWith(_lockFileTarget.GetPlatformExclusionList(PlatformLibrary, libraryLookup));
 
@@ -144,13 +177,18 @@ namespace Microsoft.NET.Build.Tasks
 
         public IEnumerable<string> GetTopLevelDependencies()
         {
-            Dictionary<string, LockFileTargetLibrary> libraryLookup =
-                LockFileTarget.Libraries.ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);
+            return GetTopLevelDependencies(LockFile, LockFileTarget);
+        }
 
-            return LockFile
+        static public IEnumerable<string> GetTopLevelDependencies(LockFile lockFile, LockFileTarget lockFileTarget)
+        {
+            Dictionary<string, LockFileTargetLibrary> libraryLookup =
+                lockFileTarget.Libraries.ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);
+
+            return lockFile
                 .ProjectFileDependencyGroups
                 .Where(dg => dg.FrameworkName == string.Empty ||
-                             dg.FrameworkName == LockFileTarget.TargetFramework.DotNetFrameworkName)
+                             dg.FrameworkName == lockFileTarget.TargetFramework.DotNetFrameworkName)
                 .SelectMany(g => g.Dependencies)
                 .Select(projectFileDependency =>
                 {

@@ -12,35 +12,33 @@ Copyright (c) .NET Foundation. All rights reserved.
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-  </PropertyGroup>
-
   <Import Project="Microsoft.NET.DefaultPackageConflictOverrides.targets" />
 
   <UsingTask TaskName="ResolvePackageFileConflicts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-  <Target Name="_HandlePackageFileConflicts" DependsOnTargets="GetReferenceAssemblyPaths">
 
-    <ItemGroup Condition="'$(CopyLocalLockFileAssemblies)' != 'true'">
-      <!-- We need to find all the files that will be loaded from deps for conflict resolution.
-          To do this, we look at the files that would be copied local when CopyLocalLockFileAssemblies is true.
-          However, if CopyLocalLockFileAssemblies is true, then we don't add these items, as they
-          will always be included in ReferenceCopyLocalPaths.
-          -->
-      <_LockFileAssemblies Include="@(RuntimeCopyLocalItems)" />
-      <_LockFileAssemblies Include="@(NativeCopyLocalItems)" />
-      <_LockFileAssemblies Include="@(ResourceCopyLocalItems)" />
-    </ItemGroup>
+  <!--
+    _HandlePackageFileConflicts
+    Handles package file conflict resolution for build.
+    This will differ from the conflict resolution at publish time if the publish assets differ from build.
+  -->
+  <Target Name="_HandlePackageFileConflicts" DependsOnTargets="GetFrameworkPaths;GetReferenceAssemblyPaths;ResolveTargetingPackAssets">
 
-    <!-- Also include RuntimeTarget items, which aren't ever included in ReferenceCopyLocalPaths, but need to be considered
-         for conflict resolution. -->
     <ItemGroup>
-      <_LockFileAssemblies Include="@(ResolvedRuntimeTargets)" />
+      <!--
+        All runtime assets for conflict resolution.
+        Exclude the copy-local items since those are passed in separately.
+      -->
+      <_RuntimeAssetsForConflictResolution
+        Include="@(RuntimeCopyLocalItems);
+                 @(NativeCopyLocalItems);
+                 @(ResourceCopyLocalItems);
+                 @(RuntimeTargetsCopyLocalItems)"
+        Exclude="@(ReferenceCopyLocalPaths)" />
     </ItemGroup>
 
     <ResolvePackageFileConflicts References="@(Reference)"
                                  ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
-                                 OtherRuntimeItems="@(_LockFileAssemblies)"
+                                 OtherRuntimeItems="@(_RuntimeAssetsForConflictResolution)"
                                  PlatformManifests="@(PackageConflictPlatformManifests)"
                                  TargetFrameworkDirectories="$(TargetFrameworkDirectory)"
                                  PackageOverrides="@(PackageConflictOverrides)"
@@ -60,20 +58,35 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" />
       <ReferenceCopyLocalPaths Include="@(_ReferenceCopyLocalPathsWithoutConflicts)" />
     </ItemGroup>
+
   </Target>
 
-  <Target Name="_HandlePublishFileConflicts" AfterTargets="RunResolvePublishAssemblies"
-          DependsOnTargets="GetReferenceAssemblyPaths">
-    <ResolvePackageFileConflicts ReferenceCopyLocalPaths="@(ResolvedAssembliesToPublish)"
-                                PlatformManifests="@(PackageConflictPlatformManifests)"
-                                TargetFrameworkDirectories="$(TargetFrameworkDirectory)"
-                                PreferredPackages="$(PackageConflictPreferredPackages)">
-      <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ResolvedAssembliesToPublishWithoutConflicts" />
+  <!--
+    _HandlePackageFileConflictsForPublish
+    Handles package file conflict resolution for publish.
+    Currently, publish assets may differ due to the following reasons:
+      * A package was marked as excluded from publishing (including PrivateAssets="all").
+      * There are runtime store packages to publish against.
+      * If we're preserving store layout, which alters the destination paths of files.
+    When none of these things are true, then we can rely on the conflict resolution from build.
+  -->
+  <Target Name="_HandlePackageFileConflictsForPublish"
+          AfterTargets="_ResolveCopyLocalAssetsForPublish;
+                        _FilterSatelliteResourcesForPublish">
+
+    <ResolvePackageFileConflicts ReferenceCopyLocalPaths="@(_ResolvedCopyLocalPublishAssets)"
+                                 PlatformManifests="@(PackageConflictPlatformManifests)"
+                                 TargetFrameworkDirectories="$(TargetFrameworkDirectory)"
+                                 PreferredPackages="$(PackageConflictPreferredPackages)">
+      <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ResolvedCopyLocalPublishAssetsWithoutConflicts" />
       <Output TaskParameter="Conflicts" ItemName="_PublishConflictPackageFiles" />
     </ResolvePackageFileConflicts>
+
     <ItemGroup>
-      <ResolvedAssembliesToPublish Remove="@(ResolvedAssembliesToPublish)" />
-      <ResolvedAssembliesToPublish Include="@(_ResolvedAssembliesToPublishWithoutConflicts)" />
+      <_ResolvedCopyLocalPublishAssets Remove="@(_ResolvedCopyLocalPublishAssets)" />
+      <_ResolvedCopyLocalPublishAssets Include="@(_ResolvedCopyLocalPublishAssetsWithoutConflicts)" />
     </ItemGroup>
+
   </Target>
+
 </Project>

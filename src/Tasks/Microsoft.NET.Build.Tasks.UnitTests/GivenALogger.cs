@@ -46,16 +46,16 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             var logger = new TestLogger();
 
-            logger.LogMessage("NETSDK9876: Normal importance by default {0} {1} {2}", "a", "b", "c");
-            logger.LogMessage(MessageImportance.Low, "NETSDK1111: Low importance {0} {1} {2}", "x", "y", "z");
-            logger.LogMessage(MessageImportance.Normal, "NETSDK2222: Explicit normal importance");
-            logger.LogMessage(MessageImportance.High, "NETSDK3333: High importance");
+            logger.LogMessage("Normal importance by default {0} {1} {2}", "a", "b", "c");
+            logger.LogMessage(MessageImportance.Low, "Low importance {0} {1} {2}", "x", "y", "z");
+            logger.LogMessage(MessageImportance.Normal, "Explicit normal importance");
+            logger.LogMessage(MessageImportance.High, "High importance");
 
             logger.Messages.Should().Equal(
-                new Message(MessageLevel.NormalImportance, "Normal importance by default a b c", code: "NETSDK9876"),
-                new Message(MessageLevel.LowImportance, "Low importance x y z", code: "NETSDK1111"),
-                new Message(MessageLevel.NormalImportance, "Explicit normal importance", code: "NETSDK2222"),
-                new Message(MessageLevel.HighImportance, "High importance", "NETSDK3333"));
+                new Message(MessageLevel.NormalImportance, "Normal importance by default a b c"),
+                new Message(MessageLevel.LowImportance, "Low importance x y z"),
+                new Message(MessageLevel.NormalImportance, "Explicit normal importance"),
+                new Message(MessageLevel.HighImportance, "High importance"));
         }
 
         [Fact]
@@ -67,7 +67,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             logger.LogWarning("NETSDK0000: _");
             logger.HasLoggedErrors.Should().BeFalse();
 
-            logger.LogMessage("NETSDK0000: _");
+            logger.LogMessage("_");
             logger.HasLoggedErrors.Should().BeFalse();
 
             logger.LogError("NETSDK0000: _");
@@ -76,7 +76,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             logger.LogWarning("NETSDK0000: _");
             logger.HasLoggedErrors.Should().BeTrue();
 
-            logger.LogMessage("NETSDK0000: _");
+            logger.LogMessage("_");
             logger.HasLoggedErrors.Should().BeTrue();
 
             logger.LogError("NETSDK0000: _");

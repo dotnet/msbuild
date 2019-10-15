@@ -1,0 +1,25 @@
+<Project>
+  <ItemGroup>
+    <!-- 
+      Suppresses code signing on this file because it causes a false-positive on SIGN001.
+    -->
+    <FileSignInfo Include="Microsoft.DotNet.Cli.Utils.resources.dll" CertificateName="None" />
+  </ItemGroup>
+
+  <!--
+    These are third party libraries that we use in Arcade. We need to sign them even if they
+    are already signed. However, they must be signed with a 3rd party certificate.
+  -->
+  <ItemGroup>
+    <FileSignInfo Include="Newtonsoft.Json.dll" CertificateName="3PartySHA2" />
+    <FileSignInfo Include="CommandLine.dll" CertificateName="3PartySHA2" />
+    <FileSignInfo Include="FluentAssertions.dll" CertificateName="3PartySHA2" />
+    <FileSignInfo Include="FluentAssertions.Core.dll" CertificateName="3PartySHA2" />
+    <FileSignInfo Include="FluentAssertions.Json.dll" CertificateName="3PartySHA2" />
+    <FileSignInfo Include="Microsoft.3rdpartytools.MarkdownLog.dll" CertificateName="3PartySHA2" />
+    <FileSignInfo Include="xunit.performance.api.dll" CertificateName="3PartySHA2" />
+    <FileSignInfo Include="xunit.performance.core.dll" CertificateName="3PartySHA2" />
+    <FileSignInfo Include="xunit.performance.execution.dll" CertificateName="3PartySHA2" />
+    <FileSignInfo Include="xunit.performance.metrics.dll" CertificateName="3PartySHA2" />
+  </ItemGroup>
+</Project>

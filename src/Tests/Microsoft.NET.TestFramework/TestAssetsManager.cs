@@ -47,7 +47,8 @@ namespace Microsoft.NET.TestFramework
         public TestAsset CreateTestProject(
             TestProject testProject,
             [CallerMemberName] string callingMethod = "",
-            string identifier = "")
+            string identifier = "",
+            string targetExtension = ".csproj")
         {
             var testDestinationDirectory =
                 GetTestDestinationDirectoryPath(testProject.Name, callingMethod, identifier);
@@ -65,7 +66,7 @@ namespace Microsoft.NET.TestFramework
                 var project = projectStack.Pop();
                 if (!createdProjects.Contains(project))
                 {
-                   project.Create(testAsset, ProjectsRoot);
+                    project.Create(testAsset, ProjectsRoot, targetExtension);
                     createdProjects.Add(project);
 
                     foreach (var referencedProject in project.ReferencedProjects)

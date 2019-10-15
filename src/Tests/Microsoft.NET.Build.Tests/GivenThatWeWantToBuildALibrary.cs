@@ -29,23 +29,26 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Fact]
-        public void It_builds_the_library_successfully()
+        [Theory]
+        [InlineData("netstandard1.5")]
+        [InlineData("netcoreapp2.1")]
+        [InlineData("netcoreapp3.0")]
+        public void It_builds_the_library_successfully(string targetFramework)
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibrary")
+                .CopyTestAsset("AppWithLibrary", identifier: targetFramework)
                 .WithSource()
-                .Restore(Log, relativePath: "TestLibrary");
+                .WithTargetFramework(targetFramework, "TestLibrary");
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
             var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
             buildCommand
-                .Execute()
+                .Execute("/restore", "/bl:" + Path.Combine(libraryProjectDirectory, "build.binlog"))
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("netstandard1.5");
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "TestLibrary.dll",
@@ -75,83 +78,6 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
         }
-
-        [CoreMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/1810")]
-        public void All_props_and_targets_add_themselves_to_MSBuildAllTargets()
-        {
-            List<string> expectedAllProjects = new List<string>();
-            string baseIntermediateDirectory = null;
-
-            var allProjectsFromProperty = GetValuesFromTestLibrary(Log, _testAssetsManager, "MSBuildAllProjects", getValuesCommand =>
-            {
-                baseIntermediateDirectory = getValuesCommand.GetBaseIntermediateDirectory().FullName;
-
-                string preprocessedFile = Path.Combine(getValuesCommand.GetOutputDirectory("netstandard1.5").FullName, "preprocessed.xml");
-
-                //  Preprocess the file, and then scan it to find all the project files that were imported.  The preprocessed output
-                //  includes comments with long lines of "======", between which is the import statement and then the path to the file
-                //  that was imported
-                getValuesCommand.Execute("/pp:" + preprocessedFile)
-                    .Should()
-                    .Pass();
-
-                string previousLine = null;
-                bool insideDelimiters = false;
-                int lineNumber = 0;
-                foreach (string line in File.ReadAllLines(preprocessedFile))
-                {
-                    lineNumber++;
-                    if (line.All(c => c == '=') && line.Length >= 80)
-                    {
-                        if (insideDelimiters)
-                        {
-                            if (!previousLine.Trim().Equals("</Import>", StringComparison.OrdinalIgnoreCase))
-                            {
-                                //  MSBuild replaces "--" with "__" in the filenames, since a double hyphen isn't allowed in XML comments per the spec.
-                                //  This causes problems on the CI machines where the path includes "---".  So convert it back here.
-                                previousLine = previousLine.Replace("__", "--");
-
-                                expectedAllProjects.Add(previousLine);
-                            }
-                        }
-                        insideDelimiters = !insideDelimiters;
-                    }
-
-                    previousLine = line;
-                }
-
-                File.Delete(preprocessedFile);
-            }, valueType: GetValuesCommand.ValueType.Property);
-
-            string dotnetRoot = Path.GetDirectoryName(TestContext.Current.ToolsetUnderTest.DotNetHostPath);
-
-            expectedAllProjects = expectedAllProjects.Distinct().ToList();
-
-            var expectedBuiltinProjects = expectedAllProjects.Where(project => project.StartsWith(dotnetRoot, StringComparison.OrdinalIgnoreCase)).ToList();
-            var expectedIntermediateProjects = expectedAllProjects.Where(project => project.StartsWith(baseIntermediateDirectory, StringComparison.OrdinalIgnoreCase)).ToList();
-            var expectedOtherProjects = expectedAllProjects
-                .Except(expectedBuiltinProjects)
-                .Except(expectedIntermediateProjects)
-                .ToList();
-
-            var builtinProjectsFromProperty = allProjectsFromProperty.Where(project => project.StartsWith(dotnetRoot, StringComparison.OrdinalIgnoreCase)).ToList();
-            var intermediateProjectsFromProperty = allProjectsFromProperty.Where(project => project.StartsWith(baseIntermediateDirectory, StringComparison.OrdinalIgnoreCase)).ToList();
-            var otherProjectsFromProperty = allProjectsFromProperty.Except(builtinProjectsFromProperty).Except(intermediateProjectsFromProperty).ToList();
-
-            otherProjectsFromProperty.Should().BeEquivalentTo(expectedOtherProjects);
-
-            //  TODO: Uncomment the following lines when the following bugs are fixed:
-            //          - https://github.com/Microsoft/msbuild/issues/1298
-            //          - https://github.com/NuGet/Home/issues/3851
-            //          - https://github.com/dotnet/cli/issues/4571
-            //          - https://github.com/dotnet/roslyn/issues/14870
-            //  Tracking bug in the SDK repo for this: https://github.com/dotnet/sdk/issues/380
-
-            //intermediateProjectsFromProperty.Should().BeEquivalentTo(expectedIntermediateProjects);
-            //builtinProjectsFromProperty.Should().BeEquivalentTo(expectedBuiltinProjects);
-        }
-
-        
 
         internal static List<string> GetValuesFromTestLibrary(
             ITestOutputHelper log,
@@ -401,6 +327,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("net45", new[] { "NETFRAMEWORK", "NET45" }, true)]
         [InlineData("net461", new[] { "NETFRAMEWORK", "NET461" }, true)]
         [InlineData("netcoreapp1.0", new[] { "NETCOREAPP", "NETCOREAPP1_0" }, false)]
+        [InlineData("netcoreapp3.0", new[] { "NETCOREAPP", "NETCOREAPP3_0" }, false)]
         [InlineData(".NETPortable,Version=v4.5,Profile=Profile78", new string[] { }, false)]
         [InlineData(".NETFramework,Version=v4.0,Profile=Client", new string[] { "NETFRAMEWORK", "NET40" }, false)]
         [InlineData("Xamarin.iOS,Version=v1.0", new string[] { "XAMARINIOS", "XAMARINIOS1_0" }, false)]
@@ -572,7 +499,7 @@ namespace Microsoft.NET.Build.Tests
             else
             {
                 // Intentionally not checking the error message on restore here as we can't put ourselves in front of
-                // restore and customize the  message forinvalid target frameworks as that would break restoring packages
+                // restore and customize the message for invalid target frameworks as that would break restoring packages
                 // like MSBuild.Sdk.Extras that add support for extra TFMs.
                 restore.Should().Fail();
             }
@@ -587,8 +514,8 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp2.3")]
-        [InlineData("netstandard2.1")]
+        [InlineData("netcoreapp3.1")]
+        [InlineData("netstandard2.2")]
         public void It_fails_to_build_if_targeting_a_higher_framework_than_is_supported(string targetFramework)
         {
             var testProject = new TestProject()
@@ -728,6 +655,75 @@ namespace Microsoft.NET.Build.Tests
             {
                 metadata["ExternallyResolved"].Should().BeEquivalentTo((markAsExternallyResolved ?? true) ? "true" : "");
             }
+        }
+
+        [Theory]
+        [InlineData("netcoreapp2.2", null, false, null, false)]
+        [InlineData("netcoreapp3.0", null, true, null, true)]
+        [InlineData("netcoreapp3.0", "LatestMajor", true, null, true)]
+        [InlineData("netcoreapp3.0", null, true, false, false)]
+        [InlineData("netcoreapp3.0", "LatestMajor", true, false, false)]
+        public void It_can_build_with_dynamic_loading_enabled(string targetFramework, string rollForwardValue, bool shouldSetRollForward, bool? copyLocal, bool shouldCopyLocal)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "EnableDynamicLoading",
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true
+            };
+
+            testProject.AdditionalProperties["EnableDynamicLoading"] = "true";
+            if (!string.IsNullOrEmpty(rollForwardValue))
+            {
+                testProject.AdditionalProperties["RollForward"] = rollForwardValue;
+            }
+
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "11.0.2"));
+            if (copyLocal.HasValue)
+            {
+                testProject.AdditionalProperties["CopyLocalLockFileAssemblies"] = copyLocal.ToString().ToLower();
+            }
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            string runtimeConfigName = $"{testProject.Name}.runtimeconfig.json";
+            var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+            outputDirectory.Should().HaveFiles(new[] {
+                runtimeConfigName,
+                $"{testProject.Name}.runtimeconfig.dev.json"
+            });
+
+            if (shouldCopyLocal)
+            {
+                outputDirectory.Should().HaveFile("Newtonsoft.Json.dll");
+            }
+            else
+            {
+                outputDirectory.Should().NotHaveFile("Newtonsoft.Json.dll");
+            }
+
+            string runtimeConfigFile = Path.Combine(outputDirectory.FullName, runtimeConfigName);
+            string runtimeConfigContents = File.ReadAllText(runtimeConfigFile);
+            JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
+            JToken rollForward= runtimeConfig["runtimeOptions"]["rollForward"];
+            if (shouldSetRollForward)
+            {
+                rollForward.Value<string>().Should().Be(string.IsNullOrEmpty(rollForwardValue) ? "LatestMinor" : rollForwardValue);
+            }
+            else
+            {
+                rollForward.Should().BeNull();
+            }
+
+
         }
     }
 }

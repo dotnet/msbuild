@@ -18,7 +18,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Fact]
-        public void It_builds_solusuccessfully()
+        public void It_builds_solution_successfully()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("x64SolutionBuild")

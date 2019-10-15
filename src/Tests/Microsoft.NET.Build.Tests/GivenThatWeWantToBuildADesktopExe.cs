@@ -35,12 +35,7 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
                 .WithSource()
-                .WithProjectChanges(project =>
-                {
-                    var ns = project.Root.Name.Namespace;
-                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                    propertyGroup.Element(ns + "TargetFramework").SetValue(targetFramework);
-                })
+                .WithTargetFramework(targetFramework)
                 .Restore(Log);
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
@@ -56,6 +51,48 @@ namespace Microsoft.NET.Build.Tests
                 "HelloWorld.pdb",
                 "HelloWorld.exe.config"
             });
+        }
+
+        //  Windows only because default RuntimeIdentifier only applies when current OS is Windows
+        [WindowsOnlyTheory]
+        [InlineData("Microsoft.DiasymReader.Native/1.7.0", false, "AnyCPU")]
+        [InlineData("Microsoft.DiasymReader.Native/1.7.0", true, "x86")]
+        [InlineData("SQLite/3.13.0", false, "x86")]
+        [InlineData("SQLite/3.13.0", true, "x86")]
+
+        public void PlatformTargetInferredCorrectly(string packageToReference, bool referencePlatformPackage, string expectedPlatform)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "AutoRuntimeIdentifierTest",
+                TargetFrameworks = "net472",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var packageElements = packageToReference.Split('/');
+            string packageName = packageElements[0];
+            string packageVersion = packageElements[1];
+
+            testProject.PackageReferences.Add(new TestPackageReference(packageName, packageVersion));
+            if (referencePlatformPackage)
+            {
+                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.NETCore.Platforms", "2.1.0"));
+            }
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: packageName + "_" + referencePlatformPackage.ToString())
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+
+            var getValueCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, "PlatformTarget");
+
+            getValueCommand.Execute().Should().Should();
+            getValueCommand.GetValues().Single().Should().Be(expectedPlatform);
         }
 
         [WindowsOnlyTheory]
@@ -76,7 +113,7 @@ namespace Microsoft.NET.Build.Tests
         // If we set AnyCPU and do use native dependency, we get any CPU app that can't find its native dependency.
         // Tests current behavior, but ideally we'd also raise a build diagnostic in this case: https://github.com/dotnet/sdk/issues/843
         [InlineData("AnyCPUNative", "AnyCPU", true, "Native code failed (MSIL)")]
-        public void It_handles_native_depdencies_and_platform_target(
+        public void It_handles_native_dependencies_and_platform_target(
              string identifier,
              string platformTarget,
              bool useNativeCode,
@@ -113,9 +150,8 @@ namespace Microsoft.NET.Build.Tests
                     .Pass();
 
                 var exe = Path.Combine(buildCommand.GetOutputDirectory("net46").FullName, "DesktopMinusRid.exe");
-                var runCommand = Command.Create(exe, Array.Empty<string>());
+                var runCommand = new RunExeCommand(Log, exe);
                 runCommand
-                    .CaptureStdOut()
                     .Execute()
                     .Should()
                     .Pass()
@@ -125,7 +161,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [WindowsOnlyTheory]
-        // implict rid with option to append rid to output path off -> do not append
+        // implicit rid with option to append rid to output path off -> do not append
         [InlineData("implicitOff", "", false, false)]
         // implicit rid with option to append rid to output path on -> do not append (never append implicit rid irrespective of option)
         [InlineData("implicitOn", "", true, false)]
@@ -194,9 +230,8 @@ namespace Microsoft.NET.Build.Tests
                 {
                     var exe = Path.Combine(directory.FullName, "DesktopMinusRid.exe");
 
-                    var runCommand = Command.Create(exe, Array.Empty<string>());
+                    var runCommand = new RunExeCommand(Log, exe);
                     runCommand
-                        .CaptureStdOut()
                         .Execute()
                         .Should()
                         .Pass()
@@ -495,8 +530,7 @@ namespace DefaultReferences
         {
             Test_inbox_assembly_wins_conflict_resolution(true, httpPackageVersion);
         }
-
-        void Test_inbox_assembly_wins_conflict_resolution(bool useSdkProject, string httpPackageVersion)
+        void Test_inbox_assembly_wins_conflict_resolution(bool useSdkProject, string httpPackageVersion, bool useAlias = false)
         {
             var testProject = new TestProject()
             {
@@ -517,27 +551,43 @@ namespace DefaultReferences
 
             testProject.PackageReferences.Add(new TestPackageReference("System.Net.Http", httpPackageVersion));
 
-            testProject.SourceFiles["Program.cs"] = @"using System;
-using System.Net.Http;
+            testProject.SourceFiles["Program.cs"] = 
+                (useAlias ? "extern alias snh;" + Environment.NewLine : "") +
+
+                @"using System;
+
 
 class Program
 {
     static void Main(string[] args)
     {
-        HttpClient client = new HttpClient();
+" +
+        (useAlias ? "var client = new snh::System.Net.Http.HttpClient();" :
+                    "var client = new System.Net.Http.HttpClient();") +
+@"
     }
 }";
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name,
-                                                                 identifier: (useSdkProject ? "_SDK_" : "_") + httpPackageVersion)
+            string identifier = (useSdkProject ? "_SDK_" : "_") +
+                                (useAlias ? "alias" : "") +
+                                httpPackageVersion;
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier)
                 .WithProjectChanges(p =>
                 {
                     var ns = p.Root.Name.Namespace;
                     var itemGroup = new XElement(ns + "ItemGroup");
                     p.Root.Add(itemGroup);
 
-                    itemGroup.Add(new XElement(ns + "Reference",
-                                    new XAttribute("Include", "System.Net.Http")));
+                    var httpReference = new XElement(ns + "Reference",
+                                                     new XAttribute("Include", "System.Net.Http"));
+
+                    if (useAlias)
+                    {
+                        httpReference.SetAttributeValue("Aliases", "snh");
+                    }
+
+                    itemGroup.Add(httpReference);
                 })
                 .Restore(Log, testProject.Name);
 
@@ -550,6 +600,71 @@ class Program
                 .And.NotHaveStdOutContaining("MSB3277") // MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
                 .And.NotHaveStdOutContaining("MSB3243") // MSB3243: No way to resolve conflict between...
                 .And.NotHaveStdOutContaining("Could not determine");
+        }
+
+        [FullMSBuildOnlyTheory(Skip = "https://github.com/NuGet/Home/issues/8238")]
+        [InlineData("4.3.3")]
+        [InlineData("4.1.0")]
+        public void Aliases_are_preserved_if_inbox_assembly_wins_conflict_resolution(string httpPackageVersion)
+        {
+            Test_inbox_assembly_wins_conflict_resolution(false, httpPackageVersion, useAlias: true);
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData("4.3.3")]
+        [InlineData("4.1.0")]
+        public void Aliases_are_preserved_if_inbox_assembly_wins_conflict_resolution_sdk(string httpPackageVersion)
+        {
+            Test_inbox_assembly_wins_conflict_resolution(true, httpPackageVersion, useAlias: true);
+        }
+
+        [WindowsOnlyFact]
+        public void Aliases_are_preserved_if_framework_reference_is_overridden_by_package()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "OverriddenAlias",
+                IsExe = true,
+                IsSdkProject = true,
+                TargetFrameworks = "net461"
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("System.Net.Http", "4.3.3"));
+
+            testProject.SourceFiles["Program.cs"] = @"
+extern alias snh;
+using System;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        var client = new snh::System.Net.Http.HttpClient();
+    }
+}";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
+                .WithProjectChanges(p =>
+                {
+                    var ns = p.Root.Name.Namespace;
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    p.Root.Add(itemGroup);
+
+                    var httpReference = new XElement(ns + "Reference",
+                                                     new XAttribute("Include", "System.Net.Http"));
+
+                    httpReference.SetAttributeValue("Aliases", "snh");
+                    itemGroup.Add(httpReference);
+                })
+                .Restore(Log, testProject.Name);
+
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
         }
 
         [WindowsOnlyFact]

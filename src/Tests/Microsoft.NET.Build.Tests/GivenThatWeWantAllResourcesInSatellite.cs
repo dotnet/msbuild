@@ -75,12 +75,12 @@ namespace Microsoft.NET.Build.Tests
                     "en/AllResourcesInSatellite.resources.dll"
                 };
 
-                Command command;
+                TestCommand command;
                 if (targetFramework == "net46")
                 {
                     outputFiles.Add("AllResourcesInSatellite.exe");
                     outputFiles.Add("AllResourcesInSatellite.exe.config");
-                    command = Command.Create(Path.Combine(outputDirectory.FullName, "AllResourcesInSatellite.exe"), Array.Empty<string>());
+                    command = new RunExeCommand(log, Path.Combine(outputDirectory.FullName, "AllResourcesInSatellite.exe"));
                 }
                 else
                 {
@@ -88,13 +88,12 @@ namespace Microsoft.NET.Build.Tests
                     outputFiles.Add("AllResourcesInSatellite.deps.json");
                     outputFiles.Add("AllResourcesInSatellite.runtimeconfig.json");
                     outputFiles.Add("AllResourcesInSatellite.runtimeconfig.dev.json");
-                    command = Command.Create(TestContext.Current.ToolsetUnderTest.DotNetHostPath, new[] { Path.Combine(outputDirectory.FullName, "AllResourcesInSatellite.dll") });
+                    command = new DotnetCommand(log, Path.Combine(outputDirectory.FullName, "AllResourcesInSatellite.dll"));
                 }
 
                 outputDirectory.Should().OnlyHaveFiles(outputFiles);
 
                 command
-                    .CaptureStdOut()
                     .Execute()
                     .Should()
                     .Pass()

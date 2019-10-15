@@ -17,7 +17,7 @@ partial class Program
         //  Help argument needs to be the first one to xunit, so don't insert assembly location in that case
         if (testCommandLine.ShouldShowHelp)
         {
-            newArgs.Insert(0, "/?");
+            newArgs.Insert(0, "-?");
         }
         else
         {
@@ -26,6 +26,7 @@ partial class Program
 
         if (!testCommandLine.ShouldShowHelp)
         {
+            newArgs.AddRange(testCommandLine.GetXunitArgsFromTestConfig());
             BeforeTestRun(newArgs);
         }
 

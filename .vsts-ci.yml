@@ -1,240 +1,210 @@
 trigger:
-- release/2.1*
-- release/2.2*
+- master
+- release/*
 
-pr:
-- release/2.1*
-- release/2.2*
+variables:
+  - name: teamName
+    value: Roslyn-Project-System
+  - name: PB_PublishBlobFeedUrl
+    value: ''
+  - name: _DotNetPublishToBlobFeed
+    value: false
+  - name: _DotNetArtifactsCategory
+    value: .NETCore
+  - name: _DotNetValidationArtifactsCategory
+    value: .NETCore
+  - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+    - name: PB_PublishBlobFeedUrl
+      value: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
+    - name: _DotNetPublishToBlobFeed
+      value: true
 
-jobs:
-- job: debug_osx
-  displayName: OSX Debug
-  pool:
-    vmImage: macOS-10.13
-  variables:
-    DOTNET_RUNTIME_ID: osx.10.12-x64
-  steps:
-  - checkout: self
-    clean: true
-  - script: ./build/cibuild.sh --configuration Debug
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: xUnit
-      testResultsFiles: 'artifacts/Debug/TestResults/*.xml'
-    condition: always()
-  - task: CopyFiles@2
-    inputs:
-      contents: 'artifacts/Debug/log/*'
-      targetFolder: $(Build.ArtifactStagingDirectory)
-    condition: failed()
-  - task: CopyFiles@2
-    inputs:
-      contents: 'artifacts/Debug/TestResults/*'
-      targetFolder: $(Build.ArtifactStagingDirectory)
-    condition: failed()
-  - task: PublishBuildArtifacts@1
-    inputs:
-      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      artifactName: debug_osx
+stages:
+- stage: build
+  displayName: Build
+  jobs:
+  - template: /eng/build.yml
+    parameters:
+      agentOs: Windows_NT
+      pool:
+        ${{ if eq(variables['System.TeamProject'], 'public') }}:
+          name: NetCorePublic-Pool
+          queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
+        ${{ if ne(variables['System.TeamProject'], 'public') }}:
+          name: NetCoreInternal-Pool
+          queue: buildpool.windows.10.amd64.vs2017
+      strategy:
+        matrix:
+          ${{ if eq(variables['System.TeamProject'], 'public') }}:
+            Build_Debug:
+              _BuildConfig: Debug
+              _PublishType: none
+              _SignType: test
+              _Test: -test
+          Build_Release:
+            _BuildConfig: Release
+            ${{ if eq(variables['System.TeamProject'], 'public') }}:
+              _PublishType: none
+              _SignType: test
+              _Test: -test
+            ${{ if ne(variables['System.TeamProject'], 'public') }}:
+              _PublishType: blob
+              _SignType: real
+              _Test: ''
 
-- job: debug_ubuntu1604
-  displayName: Ubuntu16.04 Debug
-  pool:
-    vmImage: ubuntu-16.04
-  steps:
-  - checkout: self
-    clean: true
-  - script: ./build/cibuild.sh --configuration Debug
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: xUnit
-      testResultsFiles: 'artifacts/Debug/TestResults/*.xml'
-    condition: always()
-  - task: CopyFiles@2
-    inputs:
-      contents: 'artifacts/Debug/log/*'
-      targetFolder: $(Build.ArtifactStagingDirectory)
-    condition: failed()
-  - task: CopyFiles@2
-    inputs:
-      contents: 'artifacts/Debug/TestResults/*'
-      targetFolder: $(Build.ArtifactStagingDirectory)
-    condition: failed()
-  - task: PublishBuildArtifacts@1
-    inputs:
-      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      artifactName: debug_ubuntu1604
+  - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Windows_Perf_Helix
+        pool:
+          name: Hosted VS2017
+        strategy:
+          matrix:
+            Build_Release:
+              _BuildConfig: Release
+              _PublishType: none
+              _SignType: test
+              _DotNetPublishToBlobFeed: false
 
-- job: debug_windows_nt
-  displayName: Windows_NT Debug
-  pool:
-    name: NetCorePublic-Pool
-    queue: BuildPool.Windows.10.Amd64.VS2017.Open
-  steps:
-  - checkout: self
-    clean: true
-  - script: .\build\cibuild.cmd -configuration Debug
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: xUnit
-      testResultsFiles: 'artifacts/Debug/TestResults/*.xml'
-    condition: always()
-  - task: CopyFiles@2
-    inputs:
-      contents: 'artifacts/Debug/log/*'
-      targetFolder: $(Build.ArtifactStagingDirectory)
-    condition: failed()
-  - task: CopyFiles@2
-    inputs:
-      contents: 'artifacts/Debug/TestResults/*'
-      targetFolder: $(Build.ArtifactStagingDirectory)
-    condition: failed()
-  - task: PublishBuildArtifacts@1
-    inputs:
-      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      artifactName: debug_windows_nt
+  - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Windows_Perf_Helix_Fullframework
+        pool:
+          name: Hosted VS2017
+        strategy:
+          matrix:
+            Build_Release:
+              _BuildConfig: Release
+              _PublishType: none
+              _SignType: test
+              _DotNetPublishToBlobFeed: false
 
-- job: debug_windows_nt_fullframework
-  displayName: Windows_NT_FullFramework Debug
-  pool:
-    name: NetCorePublic-Pool
-    queue: BuildPool.Windows.10.Amd64.VS2017.Open
-  steps:
-  - checkout: self
-    clean: true
-  - script: .\build\cibuild.cmd -configuration Debug -fullMSBuild
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: xUnit
-      testResultsFiles: 'artifacts/Debug/TestResults/*.xml'
-    condition: always()
-  - task: CopyFiles@2
-    inputs:
-      contents: 'artifacts/Debug/log/*'
-      targetFolder: $(Build.ArtifactStagingDirectory)
-    condition: failed()
-  - task: CopyFiles@2
-    inputs:
-      contents: 'artifacts/Debug/TestResults/*'
-      targetFolder: $(Build.ArtifactStagingDirectory)
-    condition: failed()
-  - task: PublishBuildArtifacts@1
-    inputs:
-      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      artifactName: debug_windows_nt_fullframework
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Linux_Perf_Helix
+        pool:
+          name: Hosted Ubuntu 1604
+        strategy:
+          matrix:
+            Build_Release:
+              _BuildConfig: Release
+              _PublishType: none
+              _SignType: test
+              _DotNetPublishToBlobFeed: false
 
-- job: release_osx
-  displayName: OSX Release
-  pool:
-    vmImage: macOS-10.13
-  variables:
-    DOTNET_RUNTIME_ID: osx.10.12-x64
-  steps:
-  - checkout: self
-    clean: true
-  - script: ./build/cibuild.sh --configuration Release
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: xUnit
-      testResultsFiles: 'artifacts/Release/TestResults/*.xml'
-    condition: always()
-  - task: CopyFiles@2
-    inputs:
-      contents: 'artifacts/Release/log/*'
-      targetFolder: $(Build.ArtifactStagingDirectory)
-    condition: failed()
-  - task: CopyFiles@2
-    inputs:
-      contents: 'artifacts/Release/TestResults/*'
-      targetFolder: $(Build.ArtifactStagingDirectory)
-    condition: failed()
-  - task: PublishBuildArtifacts@1
-    inputs:
-      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      artifactName: release_osx
+  - ${{ if eq(variables['System.TeamProject'], 'public') }}:
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Windows_NT_FullFramework
+        pool:
+          name: NetCorePublic-Pool
+          queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
+        strategy:
+          matrix:
+            Build_Debug:
+              _BuildConfig: Debug
+              _PublishType: none
+              _SignType: test
+            Build_Release:
+              _BuildConfig: Release
+              _PublishType: none
+              _SignType: test
 
-- job: release_ubuntu1604
-  displayName: Ubuntu16.04 Release
-  pool:
-    vmImage: ubuntu-16.04
-  steps:
-  - checkout: self
-    clean: true
-  - script: ./build/cibuild.sh --configuration Release
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: xUnit
-      testResultsFiles: 'artifacts/Release/TestResults/*.xml'
-    condition: always()
-  - task: CopyFiles@2
-    inputs:
-      contents: 'artifacts/Release/log/*'
-      targetFolder: $(Build.ArtifactStagingDirectory)
-    condition: failed()
-  - task: CopyFiles@2
-    inputs:
-      contents: 'artifacts/Release/TestResults/*'
-      targetFolder: $(Build.ArtifactStagingDirectory)
-    condition: failed()
-  - task: PublishBuildArtifacts@1
-    inputs:
-      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      artifactName: release_ubuntu1604
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Windows_NT_TestAsTools
+        pool:
+          name: NetCorePublic-Pool
+          queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
+        strategy:
+          matrix:
+            Build_Debug:
+              _BuildConfig: Debug
+              _PublishType: none
+              _SignType: test
 
-- job: release_windows_nt
-  displayName: Windows_NT Release
-  pool:
-    name: NetCorePublic-Pool
-    queue: BuildPool.Windows.10.Amd64.VS2017.Open
-  steps:
-  - checkout: self
-    clean: true
-  - script: .\build\cibuild.cmd -configuration Release
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: xUnit
-      testResultsFiles: 'artifacts/Release/TestResults/*.xml'
-    condition: always()
-  - task: CopyFiles@2
-    inputs:
-      contents: 'artifacts/Release/log/*'
-      targetFolder: $(Build.ArtifactStagingDirectory)
-    condition: failed()
-  - task: CopyFiles@2
-    inputs:
-      contents: 'artifacts/Release/TestResults/*'
-      targetFolder: $(Build.ArtifactStagingDirectory)
-    condition: failed()
-  - task: PublishBuildArtifacts@1
-    inputs:
-      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      artifactName: release_windows_nt
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Ubuntu_16_04
+        pool:
+          name: NetCorePublic-Pool
+          queue: BuildPool.Ubuntu.1604.Amd64.Open
+        strategy:
+          matrix:
+            Build_Debug:
+              _BuildConfig: Debug
+              _PublishType: none
+              _SignType: test
+            Build_Release:
+              _BuildConfig: Release
+              _PublishType: none
+              _SignType: test
 
-- job: release_windows_nt_fullframework
-  displayName: Windows_NT_FullFramework Release
-  pool:
-    name: NetCorePublic-Pool
-    queue: BuildPool.Windows.10.Amd64.VS2017.Open
-  steps:
-  - checkout: self
-    clean: true
-  - script: .\build\cibuild.cmd -configuration Release -fullMSBuild
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFormat: xUnit
-      testResultsFiles: 'artifacts/Release/TestResults/*.xml'
-    condition: always()
-  - task: CopyFiles@2
-    inputs:
-      contents: 'artifacts/Release/log/*'
-      targetFolder: $(Build.ArtifactStagingDirectory)
-    condition: failed()
-  - task: CopyFiles@2
-    inputs:
-      contents: 'artifacts/Release/TestResults/*'
-      targetFolder: $(Build.ArtifactStagingDirectory)
-    condition: failed()
-  - task: PublishBuildArtifacts@1
-    inputs:
-      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      artifactName: release_windows_nt_fullframework
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Darwin
+        pool:
+          name: Hosted macOS
+        strategy:
+          matrix:
+            Build_Debug:
+              _BuildConfig: Debug
+              _PublishType: none
+              _SignType: test
+            Build_Release:
+              _BuildConfig: Release
+              _PublishType: none
+              _SignType: test
+
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Windows_Perf_CI
+        pool:
+          name: NetCorePublic-Pool
+          queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
+        strategy:
+          matrix:
+            Build_Release:
+              _BuildConfig: Release
+              _PublishType: none
+              _SignType: test
+
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Windows_Perf_CI_FullFramework
+        pool:
+          name: NetCorePublic-Pool
+          queue: buildpool.windows.10.amd64.vs2017.open
+        strategy:
+          matrix:
+            Build_Release:
+              _BuildConfig: Release
+              _PublishType: none
+              _SignType: test
+
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Linux_Perf_CI
+        pool:
+          name: NetCorePublic-Pool
+          queue: BuildPool.Ubuntu.1604.Amd64.Open
+        strategy:
+          matrix:
+            Build_Release:
+              _BuildConfig: Release
+              _PublishType: none
+              _SignType: test
+
+  - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+    - template: /eng/common/templates/job/publish-build-assets.yml
+      parameters:
+        publishUsingPipelines: true
+        dependsOn:
+          - Windows_NT
+        queue:
+          name: Hosted VS2017
+- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+  - template: /eng/common/templates/post-build/post-build.yml
+    parameters:
+      enableSymbolValidation: false
