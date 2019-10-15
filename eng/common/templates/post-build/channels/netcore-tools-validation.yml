@@ -23,7 +23,7 @@ stages:
         value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.BARBuildId'] ]
       - name: IsStableBuild
         value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.IsStableBuild'] ]
-    condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', variables.PublicValidationRelease_30_Channel_Id))
+    condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', variables.NetCore_Tools_Validation_Channel_Id))
     pool:
       vmImage: 'windows-2019'
     steps:
@@ -83,7 +83,6 @@ stages:
             /p:InstallersAzureAccountKey=$(dotnetcli-storage-key)
             /p:ChecksumsTargetStaticFeed=$(ChecksumsBlobFeedUrl)
             /p:ChecksumsAzureAccountKey=$(dotnetclichecksums-storage-key)
-            /p:PublishToAzureDevOpsNuGetFeeds=true
             /p:AzureDevOpsStaticShippingFeed='https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools/nuget/v3/index.json'
             /p:AzureDevOpsStaticShippingFeedKey='$(dn-bot-dnceng-artifact-feeds-rw)'
             /p:AzureDevOpsStaticTransportFeed='https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools/nuget/v3/index.json'
@@ -94,4 +93,4 @@ stages:
 
       - template: ../../steps/promote-build.yml
         parameters:
-          ChannelId: ${{ variables.PublicValidationRelease_30_Channel_Id }}
+          ChannelId: ${{ variables.NetCore_Tools_Validation_Channel_Id }}
