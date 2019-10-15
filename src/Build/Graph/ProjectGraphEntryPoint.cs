@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Experimental.Graph
+namespace Microsoft.Build.Graph
 {
     /// <summary>
     /// Represents an entry point into the project graph which is comprised of a project file and a set of global properties
