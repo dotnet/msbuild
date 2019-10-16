@@ -2103,8 +2103,10 @@ EndGlobal
         /// <summary>
         /// Verifies that illegal user target names (the ones already used internally) don't crash the SolutionProjectGenerator
         /// </summary>
-        [Fact]
-        public void IllegalUserTargetNamesDoNotThrow()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void IllegalUserTargetNamesDoNotThrow(bool forceCaseDifference)
         {
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper
             (@"
@@ -2145,7 +2147,18 @@ EndGlobal
                 "ValidateProjects",
             })
             {
-                instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService(), builtInTargetName == null ? null : new [] { builtInTargetName });
+                string[] targetNames;
+
+                if (builtInTargetName == null)
+                {
+                    targetNames = null;
+                } else
+                {
+                    string targetName = forceCaseDifference ? builtInTargetName.ToUpperInvariant() : builtInTargetName;
+                    targetNames = new[] { targetName };
+                }
+
+                instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService(), targetNames);
 
                 Assert.Single(instances);
 
