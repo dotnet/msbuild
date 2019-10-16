@@ -27,12 +27,12 @@ GitHub에서 문제 보고 및 소스 찾기: https://github.com/dotnet/core
         <note />
       </trans-unit>
       <trans-unit id="FirstTimeMessageWelcome">
-        <source>Welcome to .NET Core 3.0!
+        <source>Welcome to .NET Core {0}!
 ---------------------
-SDK Version: {0}</source>
-        <target state="translated">.NET Core 3.0을 시작합니다!
+SDK Version: {1}</source>
+        <target state="new">Welcome to .NET Core {0}!
 ---------------------
-SDK 버전: {0}</target>
+SDK Version: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="TelemetryMessage">
