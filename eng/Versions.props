@@ -17,7 +17,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/core-setup -->
-    <MicrosoftNETCoreAppRuntimewinx64Version>3.1.0-preview2.19511.6</MicrosoftNETCoreAppRuntimewinx64Version>
+    <MicrosoftNETCoreAppRefPackageVersion>3.1.0-preview2.19511.6</MicrosoftNETCoreAppRefPackageVersion>
+    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>3.1.0-preview2.19511.6</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
+    <MicrosoftNETCoreAppRuntimePackageVersion>$(MicrosoftNETCoreAppRuntimewinx64PackageVersion)</MicrosoftNETCoreAppRuntimePackageVersion>
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>3.1.0-preview2.19511.6</MicrosoftDotNetPlatformAbstractionsPackageVersion>
     <MicrosoftExtensionsDependencyModelPackageVersion>3.1.0-preview2.19511.6</MicrosoftExtensionsDependencyModelPackageVersion>
     <MicrosoftNETCoreDotNetHostResolverPackageVersion>3.1.0-preview2.19511.6</MicrosoftNETCoreDotNetHostResolverPackageVersion>
