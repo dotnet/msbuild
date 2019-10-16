@@ -244,7 +244,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         public void GivenAnInstalledShimRemoveDeletesTheShimFiles(bool testMockBehaviorIsInSync)
         {
             var shellCommandName = nameof(ShellShimRepositoryTests) + Path.GetRandomFileName();
-            var pathToShim = GetNewCleanFolderUnderTempRoot();
+            var pathToShim = GetNewCleanFolderUnderTempRoot(identifier: testMockBehaviorIsInSync.ToString());
 
             IShellShimRepository shellShimRepository;
             if (testMockBehaviorIsInSync)
@@ -312,7 +312,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         public void GivenAnInstalledShimRemoveCommitsIfTransactionIsCompleted(bool testMockBehaviorIsInSync)
         {
             var shellCommandName = nameof(ShellShimRepositoryTests) + Path.GetRandomFileName();
-            var pathToShim = GetNewCleanFolderUnderTempRoot();
+            var pathToShim = GetNewCleanFolderUnderTempRoot(identifier: testMockBehaviorIsInSync.ToString());
 
             IShellShimRepository shellShimRepository;
             if (testMockBehaviorIsInSync)
@@ -496,9 +496,9 @@ namespace Microsoft.DotNet.ShellShim.Tests
             return new FilePath(outputDll.FullName);
         }
 
-        private string GetNewCleanFolderUnderTempRoot([CallerMemberName] string callingMethod = null)
+        private string GetNewCleanFolderUnderTempRoot([CallerMemberName] string callingMethod = null, string identifier = "")
         {
-            return TestAssets.CreateTestDirectory(identifier: "cleanfolder" + Path.GetRandomFileName()).FullName;
+            return TestAssets.CreateTestDirectory(callingMethod: callingMethod, identifier: "cleanfolder" + identifier + Path.GetRandomFileName()).FullName;
         }
 
         private ShellShimRepository GetShellShimRepositoryWithMockMaker(string pathToShim)
