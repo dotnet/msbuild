@@ -2152,7 +2152,8 @@ EndGlobal
                 if (builtInTargetName == null)
                 {
                     targetNames = null;
-                } else
+                }
+                else
                 {
                     string targetName = forceCaseDifference ? builtInTargetName.ToUpperInvariant() : builtInTargetName;
                     targetNames = new[] { targetName };
