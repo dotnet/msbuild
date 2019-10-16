@@ -9,9 +9,9 @@
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>3fccad76fc65967dc194983284c3a43de37e95a0</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="5.0.100-alpha1.19515.2">
+    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="5.0.100-alpha1.19516.1">
       <Uri>https://github.com/dotnet/cli</Uri>
-      <Sha>6e0a12cb5ca1bd1f1f76d142a0a6b9ed0c891768</Sha>
+      <Sha>fb9280b4458ebf8a5d3679e85f0878d07d6d0635</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Sdk" Version="5.0.100-alpha1.19501.2">
       <Uri>https://github.com/dotnet/sdk</Uri>
@@ -37,9 +37,9 @@
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
       <Sha>af0a2048a207b49bee29de9629208afd8ba27da4</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Razor" Version="5.0.0-alpha1.19513.1">
+    <Dependency Name="Microsoft.NET.Sdk.Razor" Version="5.0.0-alpha1.19515.1">
       <Uri>https://github.com/aspnet/AspNetCore-Tooling</Uri>
-      <Sha>debe2d2e911020ffee5d6e95eb4dc6d0754bd8ef</Sha>
+      <Sha>9a8b07ac0b544bbc3cb69cf157383ce6b60eb570</Sha>
     </Dependency>
     <!-- For coherency purposes, this version should be gated by the version of wpf routed via core setup -->
     <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="5.0.0-alpha1.19504.4" CoherentParentDependency="Microsoft.NETCore.App">
@@ -76,9 +76,9 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="5.0.0-beta.19515.1">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="5.0.0-beta.19515.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>a093b5b2bef24499239a2e9b4114db01fa19e446</Sha>
+      <Sha>cbfa29d4e859622ada3d226f90f103f659665d31</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
