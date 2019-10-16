@@ -178,19 +178,16 @@ namespace Microsoft.DotNet.Cli.Telemetry
 
         private Dictionary<string, string> GetEventProperties(IDictionary<string, string> properties)
         {
+            var eventProperties = new Dictionary<string, string>(_commonProperties);
             if (properties != null)
             {
-                var eventProperties = new Dictionary<string, string>(_commonProperties);
                 foreach (KeyValuePair<string, string> property in properties)
                 {
                     eventProperties[property.Key] = property.Value;
                 }
-                return eventProperties;
             }
-            else
-            {
-                return _commonProperties;
-            }
+
+            return eventProperties;
         }
     }
 }
