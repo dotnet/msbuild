@@ -7,7 +7,7 @@
     </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Runtime.win-x64" Version="3.0.1">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>19942e71998242599a0b6d4496066eaa38588af5</Sha>
+      <Sha>edb6dcec30095c0cfd72cba3a251582ad36ed525</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.0.101-servicing.19503.4">
       <Uri>https://github.com/dotnet/cli</Uri>
