@@ -16,6 +16,24 @@ namespace Microsoft.DotNet.InstallationScript.Tests
 {
     public class GivenThatIWantToInstallTheSdkFromAScript : TestBase
     {
+        private static string InstallationScriptTestsJsonFile = Path.Combine(RepoDirectoriesProvider.RepoRoot, "TestAssets", "InstallationScriptTests", "InstallationScriptTests.json").ToString();
+
+        [Fact]
+        public void WhenJsonFileIsPassedToInstallScripts()
+        {
+            var args = new List<string> { "-dryrun", "-jsonfile", InstallationScriptTestsJsonFile };
+
+            var commandResult = CreateInstallCommand(args)
+                            .CaptureStdOut()
+                            .CaptureStdErr()
+                            .Execute();
+
+            commandResult.Should().Pass();
+            commandResult.Should().NotHaveStdOutContaining("dryrun");
+            commandResult.Should().NotHaveStdOutContaining("jsonfile");
+            commandResult.Should().HaveStdOutContaining("Repeatable invocation:");
+            commandResult.Should().HaveStdOutContaining("1.0.0-beta.19463.3");
+        }
 
         [Theory]
         [InlineData("-nopath", "")]

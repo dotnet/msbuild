@@ -388,6 +388,9 @@ namespace Microsoft.DotNet.Tools.Common
                     var solutionFoldersInUse = slnFile.GetSolutionFoldersThatContainProjectsInItsHierarchy(
                         nestedProjectsSection.Properties);
 
+                    solutionFoldersInUse.UnionWith(slnFile.GetSolutionFoldersThatContainSolutionItemsInItsHierarchy(
+                        nestedProjectsSection.Properties));
+
                     foreach (var solutionFolderProject in solutionFolderProjects)
                     {
                         if (!solutionFoldersInUse.Contains(solutionFolderProject.Id))
@@ -428,6 +431,37 @@ namespace Microsoft.DotNet.Tools.Common
             }
 
             return solutionFoldersInUse;
+        }
+
+        private static HashSet<string> GetSolutionFoldersThatContainSolutionItemsInItsHierarchy(
+            this SlnFile slnFile,
+            SlnPropertySet nestedProjects)
+        {
+            var solutionFoldersInUse = new HashSet<string>();
+
+            var solutionItemsFolderProjects = slnFile.Projects
+                    .GetProjectsByType(ProjectTypeGuids.SolutionFolderGuid)
+                    .Where(ContainsSolutionItems);
+
+            foreach (var solutionItemsFolderProject in solutionItemsFolderProjects)
+            {
+                var id = solutionItemsFolderProject.Id;
+                solutionFoldersInUse.Add(id);
+
+                while (nestedProjects.ContainsKey(id))
+                {
+                    id = nestedProjects[id];
+                    solutionFoldersInUse.Add(id);
+                }
+            }
+
+            return solutionFoldersInUse;
+        }
+
+        private static bool ContainsSolutionItems(SlnProject project)
+        {
+            return project.Sections
+                .GetSection("SolutionItems", SlnSectionType.PreProcess) != null;
         }
     }
 }
