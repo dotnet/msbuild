@@ -22,6 +22,7 @@ using Microsoft.TemplateEngine.Cli;
 using NuGet.Versioning;
 using Xunit;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Install.LocalizableStrings;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.DotNet.ToolPackage.Tests
 {
@@ -407,8 +408,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public void GivenSecondInstallInATransactionTheFirstInstallShouldRollback(bool testMockBehaviorIsInSync)
         {
@@ -451,8 +451,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public void GivenSecondInstallWithoutATransactionTheFirstShouldNotRollback(bool testMockBehaviorIsInSync)
         {
@@ -499,8 +498,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public void GivenAnInstalledPackageUninstallRemovesThePackage(bool testMockBehaviorIsInSync)
         {
@@ -523,8 +521,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public void GivenAnInstalledPackageUninstallRollsbackWhenTransactionFails(bool testMockBehaviorIsInSync)
         {
@@ -557,8 +554,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public void GivenAnInstalledPackageUninstallRemovesThePackageWhenTransactionCommits(
             bool testMockBehaviorIsInSync)
@@ -873,9 +869,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 List<MockFeed> feeds = null,
                 FilePath? tempProject = null,
                 DirectoryPath? offlineFeed = null,
-                FilePath? writeLocalFeedToNugetConfig = null)
+                FilePath? writeLocalFeedToNugetConfig = null,
+                [CallerMemberName] string callingMethod = "")
         {
-            var root = new DirectoryPath(TestAssets.CreateTestDirectory("root").FullName);
+            var root = new DirectoryPath(TestAssets.CreateTestDirectory("root", callingMethod, identifier: useMock.ToString()).FullName);
             var reporter = new BufferedReporter();
 
             IFileSystem fileSystem;

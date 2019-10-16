@@ -12,6 +12,7 @@ using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using LocalizableStrings = Microsoft.DotNet.Tools.Publish.LocalizableStrings;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.DotNet.Cli.Publish.Tests
 {
@@ -189,10 +190,10 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                     .And.HaveStdErrContaining(LocalizableStrings.SelfContainAndNoSelfContainedConflict);
         }
 
-        private DirectoryInfo PublishApp(string testAppName, string rid, string args = null)
+        private DirectoryInfo PublishApp(string testAppName, string rid, string args = null, [CallerMemberName] string callingMethod = "")
         {
             var testInstance = TestAssets.Get(testAppName)
-                .CreateInstance($"PublishApp_{rid ?? "none"}_{args ?? "none"}")
+                .CreateInstance(callingMethod: callingMethod, identifier: $"{rid ?? "none"}_{args ?? "none"}")
                 .WithSourceFiles()
                 .WithRestoreFiles();
 
