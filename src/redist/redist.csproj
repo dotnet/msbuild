@@ -16,6 +16,7 @@
   <Import Project="targets\GenerateLayout.targets" />
   <Import Project="targets\GenerateArchive.targets" />
   <Import Project="targets\OverlaySdkOnLKG.targets" />
+  <Import Project="targets\MSBuildExtensions.targets" />
 
   <ItemGroup>
     <PackageReference Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksPackageVersion)" />
@@ -34,8 +35,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\tool_msbuild\tool_msbuild.csproj" />
-    <ProjectReference Include="..\tool_cli\tool_cli.csproj" />
     <ProjectReference Include="..\tool_nuget\tool_nuget.csproj" />
+    <ProjectReference Include="..\dotnet\dotnet.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,107 @@
+parameters:
+  # Agent OS identifier and used as job name
+  agentOs: ''
+
+  # Agent pool
+  pool: {}
+
+  # Additional variables
+  variables: {}
+
+  # Build strategy - matrix
+  strategy: {}
+
+  # Job timeout
+  timeoutInMinutes: 180
+
+phases:
+- template: /eng/common/templates/job/job.yml
+  parameters:
+    name: ${{ parameters.agentOs }}
+    ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
+      enableMicrobuild: true
+    enablePublishBuildArtifacts: true
+    enablePublishBuildAssets: true
+    enablePublishTestResults: true
+    enableTelemetry: true
+    helixRepo: dotnet/cli
+    pool: ${{ parameters.pool }}
+    ${{ if ne(parameters.strategy, '') }}:
+      strategy: ${{ parameters.strategy }}
+    variables: 
+      - ${{ insert }}: ${{ parameters.variables }}
+      - _AgentOSName: ${{ parameters.agentOs }}
+      - BuildConfig: $(_BuildConfig)
+      - BuildArchitecture: $(_BuildArchitecture)
+      - DockerParameter: $(_DockerParameter)
+      - LinuxPortable: $(_LinuxPortable)
+      - RuntimeId: $(_RuntimeIdentifier)
+      - _OfficialBuildIdArgs: ''
+      - _PublishArgs: ''
+      - _SignArgs: ''
+
+      - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+        - group: DotNet-Symbol-Server-PATs
+        - group: DotNet-HelixApi-Access
+        - group: DotNet-Blob-Feed
+        - _OfficialBuildIdArgs: /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
+        - _PublishArgs: /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
+                    /p:DotNetPublishBlobFeedUrl=$(PB_PublishBlobFeedUrl)
+                    /p:DotNetPublishToBlobFeed=$(_DotNetPublishToBlobFeed)
+                    /p:DotNetPublishUsingPipelines=$(_PublishUsingPipelines)
+                    /p:DotNetArtifactsCategory=$(_DotNetArtifactsCategory)
+                    /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
+                    /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
+                    /p:PB_PublishType=$(_PublishType)
+        - _SignArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
+
+    steps:
+    - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
+      - script: build.cmd
+                  -test -sign -pack -publish -ci
+                  -Configuration $(BuildConfig)
+                  -Architecture $(BuildArchitecture)
+                  $(_PublishArgs)
+                  $(_SignArgs)
+                  $(_OfficialBuildIdArgs)
+        displayName: Build
+        env:
+          DOTNET_CLI_UI_LANGUAGE: $(_DOTNET_CLI_UI_LANGUAGE)
+          DropSuffix: $(_DropSuffix)
+          BlobFeedUrl: $(PB_PublishBlobFeedUrl)
+          PublishType: $(_PublishType)
+
+    - ${{ if eq(parameters.agentOs, 'Linux') }}:
+      - script: ./build.sh
+                  --test --pack --publish --ci
+                  --configuration $(BuildConfig)
+                  $(DockerParameter)
+                  --architecture $(BuildArchitecture)
+                  $(LinuxPortable)
+                  $(RuntimeId)
+        displayName: Build
+        env:
+          DropSuffix: $(_DropSuffix)
+
+    - ${{ if eq(parameters.agentOs, 'Darwin') }}:
+      - script: ./build.sh
+                  --test --pack --publish --ci
+                  --configuration $(BuildConfig)
+        displayName: Build
+
+    - ${{ if and(eq(parameters.enablePublishBuildAssets, true), eq(parameters.runAsPublic, 'false'), ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+      - task: CopyFiles@2
+        displayName: Gather Asset Manifests
+        inputs:
+          SourceFolder: '$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/AssetManifest'
+          TargetFolder: '$(Build.StagingDirectory)/AssetManifests'
+        continueOnError: ${{ parameters.continueOnError }}
+        condition: and(succeeded(), eq(variables['_DotNetPublishToBlobFeed'], 'true'), eq(variables['_PublishBuildAssetManifest'], 'true'))
+      - task: PublishBuildArtifacts@1
+        displayName: Push Asset Manifests
+        inputs:
+          PathtoPublish: '$(Build.StagingDirectory)/AssetManifests'
+          PublishLocation: Container
+          ArtifactName: AssetManifests
+        continueOnError: ${{ parameters.continueOnError }}
+        condition: and(succeeded(), eq(variables['_DotNetPublishToBlobFeed'], 'true'), eq(variables['_PublishBuildAssetManifest'], 'true'))

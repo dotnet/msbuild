@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>Remove a NuGet package reference from the project.</source>
+        <target state="translated">프로젝트에서 NuGet 패키지 참조를 제거합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Command to remove package reference.</source>
+        <target state="translated">패키지 참조를 제거하는 명령입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppHelpText">
+        <source>The package reference to remove.</source>
+        <target state="translated">제거할 패키지 참조입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageReference">
+        <source>Specify only one package reference to remove.</source>
+        <target state="translated">제거할 패키지 참조를 하나만 지정하세요.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

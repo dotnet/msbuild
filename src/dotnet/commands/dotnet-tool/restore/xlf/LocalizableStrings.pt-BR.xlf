@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CommandDescription">
+        <source>Restore tools defined in the local tool manifest.</source>
+        <target state="translated">Restaure as ferramentas definidas no manifesto de ferramenta local.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidPackageWarning">
+        <source>Warning: tool package '{0}' is invalid, contact tool author:
+{1}</source>
+        <target state="translated">Aviso: o pacote de ferramentas '{0}' é inválido. Entre em contato com o autor da ferramenta:
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoToolsWereRestored">
+        <source>No tools were restored.</source>
+        <target state="translated">Nenhuma ferramenta foi restaurada.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdColumn">
+        <source>Package Id</source>
+        <target state="translated">ID do Pacote</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionColumn">
+        <source>Version</source>
+        <target state="translated">Versão</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandsColumn">
+        <source>Commands</source>
+        <target state="translated">Comandos</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionDescription">
+        <source>Add an additional NuGet package source to use during installation.</source>
+        <target state="translated">Adicionar uma origem adicional do pacote do NuGet a ser usada durante a instalação.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionName">
+        <source>SOURCE</source>
+        <target state="translated">ORIGEM</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionDescription">
+        <source>The NuGet configuration file to use.</source>
+        <target state="translated">O arquivo de configuração do NuGet a ser usado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionName">
+        <source>FILE</source>
+        <target state="translated">ARQUIVO</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionDescription">
+        <source>The version of the tool package to install.</source>
+        <target state="translated">A versão do pacote da ferramenta a ser instalada.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionName">
+        <source>VERSION</source>
+        <target state="translated">VERSION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageFailedToRestore">
+        <source>Package "{0}" failed to restore, due to {1}</source>
+        <target state="translated">Falha na restauração do pacote "{0}" devido a {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RestoreFailed">
+        <source>Restore failed.</source>
+        <target state="translated">Falha na restauração.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandsMismatch">
+        <source>The command {0} specified in the tool manifest file is not contained in the package with Package Id {1}. The commands contained in the package are {2}.</source>
+        <target state="translated">O comando {0} especificado no arquivo de manifesto de ferramenta não está contido no pacote com a ID de Pacote {1}. Os comandos contidos no pacote são {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionDescription">
+        <source>Path to the manifest file.</source>
+        <target state="translated">Caminho para o arquivo de manifesto.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RestoreSuccessful">
+        <source>Tool '{0}' (version '{1}') was restored. Available commands: {2}</source>
+        <target state="translated">A ferramenta '{0}' (versão '{1}') foi restaurada. Comandos disponíveis: {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalToolsRestoreWasSuccessful">
+        <source>Restore was successful.</source>
+        <target state="translated">A restauração foi bem-sucedida.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackagesCommandNameCollisionConclusion">
+        <source>Command names conflict. Command names are case insensitive.
+{0}</source>
+        <target state="translated">Conflito de nomes de comando. Os nomes de comando não diferenciam maiúsculas de minúsculas.
+{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackagesCommandNameCollisionForOnePackage">
+        <source>A command "{0}" in package "{1}"</source>
+        <target state="translated">Um comando "{0}" no pacote "{1}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RestorePartiallyFailed">
+        <source>Restore partially failed.</source>
+        <target state="translated">Falha parcial na restauração.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,167 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="LastArgumentMultiValueError">
+        <source>The last argument '{0}' accepts multiple values. No more argument can be added.</source>
+        <target state="translated">마지막 인수 '{0}'은(는) 여러 값을 허용합니다. 더 이상 인수를 추가할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedValueForOptionError">
+        <source>Unexpected value '{0}' for option '{1}'</source>
+        <target state="translated">'{1}' 옵션에 대한 예기치 않은 값 '{0}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedArgumentError">
+        <source>Unrecognized {0} '{1}'</source>
+        <target state="translated">인식할 수 없는 {0} '{1}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResponseFileNotFoundError">
+        <source>Response file '{0}' doesn't exist.</source>
+        <target state="translated">'{0}' 응답 파일이 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShowHelpInfo">
+        <source>Show command line help.</source>
+        <target state="translated">명령줄 도움말을 표시합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShowVersionInfo">
+        <source>Show version information</source>
+        <target state="translated">버전 정보 표시</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShowHintInfo">
+        <source>Specify --{0} for a list of available options and commands.</source>
+        <target state="translated">사용 가능한 옵션 및 명령의 목록을 보려면 --{0}을(를) 지정합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageHeader">
+        <source>Usage:</source>
+        <target state="translated">사용법:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageArgumentsToken">
+        <source> [arguments]</source>
+        <target state="translated"> [arguments]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageArgumentsHeader">
+        <source>Arguments:</source>
+        <target state="translated">인수:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageOptionsToken">
+        <source> [options]</source>
+        <target state="translated"> [options]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageOptionsHeader">
+        <source>Options:</source>
+        <target state="translated">옵션:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandToken">
+        <source> [command]</source>
+        <target state="translated"> [command]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandsHeader">
+        <source>Commands:</source>
+        <target state="translated">명령:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandsDetailHelp">
+        <source>Use "{0} [command] --help" for more information about a command.</source>
+        <target state="translated">명령에 대한 자세한 정보를 보려면 "{0} [command] --help"를 사용합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandArgs">
+        <source> [args]</source>
+        <target state="translated"> [args]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandAdditionalArgs">
+        <source> [[--] &lt;additional arguments&gt;...]]</source>
+        <target state="translated"> [[--] &lt;additional arguments&gt;...]]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandsAdditionalArgsHeader">
+        <source>Additional Arguments:</source>
+        <target state="translated">추가 인수:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidTemplateError">
+        <source>Invalid template pattern '{0}'</source>
+        <target state="translated">잘못된 템플릿 패턴 '{0}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildAdditionalArgsHelpText">
+        <source>Any extra options that should be passed to MSBuild. See 'dotnet msbuild -h' for available options.</source>
+        <target state="translated">MSBuild에 전달해야 할 추가 옵션입니다. 사용 가능한 옵션은 'dotnet msbuild -h'를 참조하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionRequiresSingleValueWhichIsMissing">
+        <source>Required value for option '{0}' was not provided.</source>
+        <target state="translated">옵션 '{0}'에 대해 필요한 값이 제공되지 않았습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandAcceptsOnlyOneArgument">
+        <source>Command '{0}' only accepts a single argument but {1} were provided.</source>
+        <target state="translated">'{0}' 명령은 단일 인수만 허용하는데, {1}이(가) 제공되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandAcceptsOnlyOneSubcommand">
+        <source>Command '{0}' only accepts a single subcommand but multiple were provided: {1}</source>
+        <target state="translated">'{0}' 명령은 단일 하위 명령만 허용하는데, 여러 하위 명령이 제공되었습니다. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileDoesNotExist">
+        <source>File does not exist: {0}</source>
+        <target state="translated">파일이 없습니다. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoArgumentsAllowed">
+        <source>Arguments not allowed for option: {0}</source>
+        <target state="translated">옵션에 대해 인수가 허용되지 않습니다. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionAcceptsOnlyOneArgument">
+        <source>Option '{0}' only accepts a single argument but {1} were provided.</source>
+        <target state="translated">'{0}' 옵션은 단일 인수만 허용하는데, {1}이(가) 제공되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentMissingForCommand">
+        <source>Required argument missing for command: {0}</source>
+        <target state="translated">명령 {0}에 대한 필수 인수가 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentMissingForOption">
+        <source>Required argument missing for option: {0}</source>
+        <target state="translated">옵션 {0}에 대한 필수 인수가 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredCommandWasNotProvided">
+        <source>Required command was not provided.</source>
+        <target state="translated">필수 명령을 제공하지 않았습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedArgument">
+        <source>Argument '{0}' not recognized. Must be one of: {1}</source>
+        <target state="translated">'{0}' 인수를 인식할 수 없습니다. 다음 중 하나여야 합니다. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedCommandOrArgument">
+        <source>Unrecognized command or argument '{0}'</source>
+        <target state="translated">인식할 수 없는 명령 또는 인수 '{0}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedOption">
+        <source>Option '{0}' not recognized. Must be one of: {1}</source>
+        <target state="translated">'{0}' 옵션을 인식할 수 없습니다. 다음 중 하나여야 합니다. {1}</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

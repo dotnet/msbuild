@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
+    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="5.0.0-alpha1.19428.1">
+      <Uri>https://github.com/dotnet/templating</Uri>
+      <Sha>40bcaca36d5db25dae9f9ad7e85891fc73714320</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.NETCore.App" Version="5.0.0-alpha1.19506.5">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>3fccad76fc65967dc194983284c3a43de37e95a0</Sha>
@@ -13,6 +17,10 @@
       <Uri>https://github.com/dotnet/sdk</Uri>
       <Sha>419501cb5731805c7e49bae276a2938e7c1844de</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.DotNet.Cli.CommandLine" Version="1.0.0-preview.19208.1">
+      <Uri>https://github.com/dotnet/CliCommandLineParser</Uri>
+      <Sha>0e89c2116ad28e404ba56c14d1c3f938caa25a01</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.Build" Version="16.3.0-preview-19456-02">
       <Uri>https://github.com/Microsoft/msbuild</Uri>
       <Sha>ee8294b5597fe21ca5c44c8fd4c142d27fcec2cb</Sha>
@@ -24,6 +32,10 @@
     <Dependency Name="Microsoft.NETCore.Compilers" Version="3.4.0-beta1-19456-03">
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>3c865821f2864393a0ff7fe22c92ded6d51a546c</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="5.0.0-alpha1.19427.5">
+      <Uri>https://github.com/aspnet/AspNetCore</Uri>
+      <Sha>af0a2048a207b49bee29de9629208afd8ba27da4</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Sdk.Razor" Version="5.0.0-alpha1.19515.1">
       <Uri>https://github.com/aspnet/AspNetCore-Tooling</Uri>

@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
+    <AssemblyName>ArgumentForwardingTests</AssemblyName>
+    <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4;portable-net451+win8</AssetTargetFallback>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\dotnet\dotnet.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.Utilities\Microsoft.DotNet.Tools.Tests.Utilities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)" />
+  </ItemGroup>
+
+  <Target Name="PrecompileScript" BeforeTargets="Build" Condition=" '$(IsCrossTargetingBuild)' != 'true' ">
+    <MSBuild
+      BuildInParallel="False"
+      Projects="../ArgumentsReflector/ArgumentsReflector.csproj"
+      Properties="PublishDir=$(OutputPath)"
+      Targets="Publish" />
+  </Target>
+
+</Project>

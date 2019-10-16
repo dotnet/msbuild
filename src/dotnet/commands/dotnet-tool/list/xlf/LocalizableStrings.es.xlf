@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="es" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CommandDescription">
+        <source>List tools installed globally or locally.</source>
+        <target state="translated">Mostrar las herramientas instaladas local o globalmente.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalOptionDescription">
+        <source>List tools installed for the current user.</source>
+        <target state="translated">Mostrar las herramientas instaladas para el usuario actual.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ListToolCommandInvalidGlobalAndLocalAndToolPath">
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="translated">La opción local (--local), la opción global (--global) y la opción de ruta de acceso de herramienta (--tool-path), solo pueden estar una cada vez. Especifique solo una de las opciones: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalOptionDescription">
+        <source>List the tools installed in the local tool manifest.</source>
+        <target state="translated">Mostrar las herramientas instaladas en el manifiesto de la herramienta local.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestFileColumn">
+        <source>Manifest</source>
+        <target state="translated">Manifiesto</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionColumn">
+        <source>Version</source>
+        <target state="translated">Versión</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandsColumn">
+        <source>Commands</source>
+        <target state="translated">Comandos</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdColumn">
+        <source>Package Id</source>
+        <target state="translated">Id. de paquete</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidPackageWarning">
+        <source>Warning: tool package '{0}' is invalid, contact tool author:
+{1}</source>
+        <target state="translated">Advertencia: El paquete de herramienta "{0}" no es válido, póngase en contacto con el autor de la herramienta:
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidToolPathOption">
+        <source>Tool path '{0}' does not exist.</source>
+        <target state="translated">La ruta de acceso de la herramienta "{0}" no existe.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionDescription">
+        <source>The directory containing the tools to list.</source>
+        <target state="translated">El directorio que contiene las herramientas que se van a enumerar.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

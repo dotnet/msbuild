@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AddProjectSolutionFolderArgumentDescription">
+        <source>The destination solution folder path to add the projects to.</source>
+        <target state="translated">プロジェクトの追加先のソリューション フォルダー パス。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppFullName">
+        <source>.NET modify solution file command</source>
+        <target state="translated">.NET ソリューション ファイルを変更するコマンド</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Command to add, remove, and list projects from the solution (SLN) file.</source>
+        <target state="translated">ソリューション (SLN) ファイルを追加、削除、およびファイルからプロジェクトを一覧表示するコマンド。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppHelpText">
+        <source>Projects to add or to remove from the solution.</source>
+        <target state="translated">ソリューションにファイルを追加、またはソリューションから削除するプロジェクト。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddAppFullName">
+        <source>Add one or more projects to a solution file.</source>
+        <target state="translated">1 つ以上のプロジェクトをソリューション ファイルに追加します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InRoot">
+        <source>Place project in root of the solution, rather than creating a solution folder.</source>
+        <target state="translated">ソリューション フォルダーを作成するのではなく、プロジェクトをソリューションのルートに配置します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RemoveAppFullName">
+        <source>Remove one or more projects from a solution file.</source>
+        <target state="translated">1 つ以上のプロジェクトをソリューション ファイルから削除します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RemoveSubcommandHelpText">
+        <source>Remove the specified project(s) from the solution. The project is not impacted.</source>
+        <target state="translated">指定のプロジェクトをソリューションから削除します。プロジェクトに影響はありません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ListAppFullName">
+        <source>List all projects in a solution file.</source>
+        <target state="translated">ソリューション ファイル内のすべてのプロジェクトを一覧表示します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ListSubcommandHelpText">
+        <source>List all projects in the solution.</source>
+        <target state="translated">ソリューション内のすべてのプロジェクトを一覧表示します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionArgumentName">
+        <source>SLN_FILE</source>
+        <target state="translated">&lt;SLN_FILE&gt;</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionArgumentDescription">
+        <source>The solution file to operate on. If not specified, the command will search the current directory for one.</source>
+        <target state="translated">操作するソリューション ファイル。指定しない場合、コマンドによって現在のディレクトリから検索されます。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddProjectPathArgumentName">
+        <source>PROJECT_PATH</source>
+        <target state="translated">PROJECT_PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddProjectPathArgumentDescription">
+        <source>The paths to the projects to add to the solution.</source>
+        <target state="translated">ソリューションに追加するプロジェクトへのパス。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RemoveProjectPathArgumentName">
+        <source>PROJECT_PATH</source>
+        <target state="translated">PROJECT_PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RemoveProjectPathArgumentDescription">
+        <source>The paths to the projects to remove from the solution.</source>
+        <target state="translated">ソリューションから削除するプロジェクトへのパス。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectsHeader">
+        <source>Project(s)</source>
+        <target state="translated">プロジェクト</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionFolderAndInRootMutuallyExclusive">
+        <source>The --solution-folder and --in-root options cannot be used together; use only one of the options.</source>
+        <target state="translated">--solution-folder オプションと --in-root オプションを一緒に使用することはできません。いずれかのオプションだけを使用します。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

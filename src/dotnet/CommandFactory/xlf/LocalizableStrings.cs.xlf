@@ -1,0 +1,184 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="BuildOutputPathDoesNotExist">
+        <source>outputpathresolver: {0} does not exist</source>
+        <target state="translated">outputpathresolver: {0} neexistuje</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AttemptingToFindCommand">
+        <source>{0}: attempting to find command {1} in {2}</source>
+        <target state="translated">{0}: Pokus o nalezení příkazu {1} v {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToFindToolAssembly">
+        <source>{0}: failed to find toolAssembly for {1}</source>
+        <target state="translated">{0}: Nepodařilo se najít toolAssembly pro {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToFindCommandPath">
+        <source>{0}: failed to find commandPath {1}</source>
+        <target state="translated">{0}: Nepodařilo se najít commandPath {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToLocateDotnetMultiplexer">
+        <source>Unable to locate dotnet multiplexer</source>
+        <target state="translated">Nepodařilo se najít multiplexor dotnetu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LookingForPreferCliRuntimeFile">
+        <source>{0}: Looking for prefercliruntime file at `{1}`</source>
+        <target state="translated">{0}: Hledání souboru prefercliruntime v {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AttemptingToResolve">
+        <source>{0}: attempting to resolve {1}</source>
+        <target state="translated">{0}: Pokus o vyřešení {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DidNotFindAMatchingProject">
+        <source>{0}: Did not find a matching project {1}.</source>
+        <target state="translated">{0}: Nepodařilo se najít shodný projekt {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidCommandResolverArguments">
+        <source>{0}: invalid commandResolverArguments</source>
+        <target state="translated">{0}: Neplatné hodnoty commandResolverArguments</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DoesNotExist">
+        <source>{0}: {1} does not exist</source>
+        <target state="translated">{0}: {1} neexistuje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AmbiguousCommandName">
+        <source>Ambiguous command name: {0}</source>
+        <target state="translated">Nejednoznačný název příkazu {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolLibraryFound">
+        <source>{0}: tool library found {1}</source>
+        <target state="translated">{0}: Nalezena knihovna nástrojů {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildExePath">
+        <source>{0}: MSBUILD_EXE_PATH = {1}</source>
+        <target state="translated">{0}: MSBUILD_EXE_PATH = {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildProjectPath">
+        <source>{0}: MSBuild project path = {1}</source>
+        <target state="translated">{0}: Cesta k projektu MSBuildu = {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MultipleProjectFilesFound">
+        <source>Specify which project file to use because this '{0}' contains more than one project file.</source>
+        <target state="translated">Zadejte, jaký soubor projektu se použije, protože {0} obsahuje více souborů projektů.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DidNotFindProject">
+        <source>{0}: ProjectFactory did not find Project.</source>
+        <target state="translated">{0}: Objekt pro vytváření projektů ProjectFactory nenašel projekt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResolvingCommandSpec">
+        <source>{0}: resolving commandspec from {1} Tool Libraries.</source>
+        <target state="translated">{0}: Řeší se specifikace příkazu commandspec z knihoven nástroje {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToResolveCommandSpec">
+        <source>{0}: failed to resolve commandspec from library.</source>
+        <target state="translated">{0}: Specifikaci příkazu commandspec z knihovny se nepodařilo vyřešit.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AttemptingToResolveCommandSpec">
+        <source>{0}: Attempting to resolve command spec from tool {1}</source>
+        <target state="translated">{0}: Pokus o vyřešení specifikace příkazu nástroje {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NuGetPackagesRoot">
+        <source>{0}: nuget packages root:
+{1}</source>
+        <target state="translated">{0}: Kořen balíčků NuGet:
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FoundToolLockFile">
+        <source>{0}: found tool lockfile at : {1}</source>
+        <target state="translated">{0}: Zjištěný lockfile nástroje na: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LibraryNotFoundInLockFile">
+        <source>{0}: library not found in lock file.</source>
+        <target state="translated">{0}: Knihovna nebyla v souboru lock nalezena.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AttemptingToCreateCommandSpec">
+        <source>{0}: attempting to create commandspec</source>
+        <target state="translated">{0}: Pokus o vytvoření specifikace příkazu commandspec</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandSpecIsNull">
+        <source>{0}: commandSpec is null.</source>
+        <target state="translated">{0}: Specifikace příkazu commandSpec je null.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExpectDepsJsonAt">
+        <source>{0}: expect deps.json at: {1}</source>
+        <target state="translated">{0}: Soubor deps.json se očekává v: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GeneratingDepsJson">
+        <source>Generating deps.json at: {0}</source>
+        <target state="translated">Generování souboru deps.json do: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToGenerateDepsJson">
+        <source>Unable to generate deps.json, it may have been already generated.  You can specify the "-d" option before the tool name for diagnostic output (for example, "dotnet -d &lt;toolname&gt;": {0}</source>
+        <target state="translated">Nepovedlo se vygenerovat soubor deps.json, je možné, že se už vygeneroval. Pokud chcete získat výstup pro diagnostiku, můžete před název nástroje zadat možnost -d (například dotnet -d &lt;názevnástroje&gt;): {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToDeleteTemporaryDepsJson">
+        <source>unable to delete temporary deps.json file: {0}</source>
+        <target state="translated">nepodařilo se odstranit dočasný soubor deps.json: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionForPackageCouldNotBeResolved">
+        <source>Version for package `{0}` could not be resolved.</source>
+        <target state="translated">Verzi balíčku {0} se nepodařilo vyřešit.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IgnoringPreferCLIRuntimeFile">
+        <source>{0}: Ignoring prefercliruntime file as the tool target framework ({1}) has a different major version than the current CLI runtime ({2})</source>
+        <target state="translated">{0}: Soubor prefercliruntime se ignoruje, protože cílová architektura nástroje ({1}) má jinou hlavní verzi než aktuální modul runtime rozhraní příkazového řádku ({2}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindToolRuntimeConfigFile">
+        <source>{0}: Could not find runtimeconfig.json file for tool {1}</source>
+        <target state="translated">{0}: Soubor runtimeconfig.json nástroje {1} se nenašel.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DepsJsonGeneratorProjectNotSet">
+        <source>Unable to find deps.json generator project.</source>
+        <target state="translated">Projekt generátoru deps.json se nenašel.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandAssembliesNotFound">
+        <source>The command executable for "{0}" was not found. The project may not have been restored or restore failed - run `dotnet restore`</source>
+        <target state="translated">Spustitelný soubor příkazu {0} se nenašel. Projekt se nepodařilo obnovit nebo jeho obnovení nebylo úspěšné. Spusťte příkaz dotnet restore.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildArgs">
+        <source>MSBuild arguments: {0}</source>
+        <target state="translated">Argumenty MSBuild: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NeedRunToolRestore">
+        <source>Run "dotnet tool restore" to make the "{0}" command available.</source>
+        <target state="translated">Pokud chcete zpřístupnit příkaz {0}, spusťte dotnet tool restore.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

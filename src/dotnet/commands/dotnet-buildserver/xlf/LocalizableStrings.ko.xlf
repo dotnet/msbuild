@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CommandDescription">
+        <source>Interact with servers started from a build.</source>
+        <target state="translated">서버와 상호 작용이 빌드에서 시작되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildServerCommandName">
+        <source>.NET Build Server Command</source>
+        <target state="translated">.NET 빌드 서버 명령</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

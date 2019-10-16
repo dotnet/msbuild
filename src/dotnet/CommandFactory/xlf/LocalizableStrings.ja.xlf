@@ -1,0 +1,184 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="BuildOutputPathDoesNotExist">
+        <source>outputpathresolver: {0} does not exist</source>
+        <target state="translated">outputpathresolver: {0} は存在しません</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AttemptingToFindCommand">
+        <source>{0}: attempting to find command {1} in {2}</source>
+        <target state="translated">{0}: {2} でコマンド {1} を検索しています</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToFindToolAssembly">
+        <source>{0}: failed to find toolAssembly for {1}</source>
+        <target state="translated">{0}: {1} の toolAssembly が見つかりませんでした</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToFindCommandPath">
+        <source>{0}: failed to find commandPath {1}</source>
+        <target state="translated">{0}: commandPath {1} が見つかりませんでした</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToLocateDotnetMultiplexer">
+        <source>Unable to locate dotnet multiplexer</source>
+        <target state="translated">dotnet マルチプレクサーが見つかりません</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LookingForPreferCliRuntimeFile">
+        <source>{0}: Looking for prefercliruntime file at `{1}`</source>
+        <target state="translated">{0}:`{1}` で prefercliruntime ファイルを検索しています</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AttemptingToResolve">
+        <source>{0}: attempting to resolve {1}</source>
+        <target state="translated">{0}: {1} を解決しようとしています</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DidNotFindAMatchingProject">
+        <source>{0}: Did not find a matching project {1}.</source>
+        <target state="translated">{0}: 一致するプロジェクト {1}.が見つかりませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidCommandResolverArguments">
+        <source>{0}: invalid commandResolverArguments</source>
+        <target state="translated">{0}: 無効な commandResolverArguments</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DoesNotExist">
+        <source>{0}: {1} does not exist</source>
+        <target state="translated">{0}: {1} は存在しません</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AmbiguousCommandName">
+        <source>Ambiguous command name: {0}</source>
+        <target state="translated">あいまいなコマンド名: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolLibraryFound">
+        <source>{0}: tool library found {1}</source>
+        <target state="translated">{0}: ツール ライブラリで {1} が見つかりました</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildExePath">
+        <source>{0}: MSBUILD_EXE_PATH = {1}</source>
+        <target state="translated">{0}: MSBUILD_EXE_PATH = {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildProjectPath">
+        <source>{0}: MSBuild project path = {1}</source>
+        <target state="translated">{0}: MSBuild project path = {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MultipleProjectFilesFound">
+        <source>Specify which project file to use because this '{0}' contains more than one project file.</source>
+        <target state="translated">この '{0}' には複数のプロジェクト ファイルが含まれているため、使用するプロジェクト ファイルを指定します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DidNotFindProject">
+        <source>{0}: ProjectFactory did not find Project.</source>
+        <target state="translated">{0}:ProjectFactory でプロジェクトが見つかりませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResolvingCommandSpec">
+        <source>{0}: resolving commandspec from {1} Tool Libraries.</source>
+        <target state="translated">{0}: {1} ツール ライブラリから commandspec を解決しています。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToResolveCommandSpec">
+        <source>{0}: failed to resolve commandspec from library.</source>
+        <target state="translated">{0}: ライブラリから commandspec を解決できませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AttemptingToResolveCommandSpec">
+        <source>{0}: Attempting to resolve command spec from tool {1}</source>
+        <target state="translated">{0}: ツール {1} から commandspec を解決しようとしています</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NuGetPackagesRoot">
+        <source>{0}: nuget packages root:
+{1}</source>
+        <target state="translated">{0}: NuGet パッケージ ルート:
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FoundToolLockFile">
+        <source>{0}: found tool lockfile at : {1}</source>
+        <target state="translated">{0}: {1} でツールのロックファイルが見つかりました</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LibraryNotFoundInLockFile">
+        <source>{0}: library not found in lock file.</source>
+        <target state="translated">{0}: ロック ファイルにライブラリが見つかりませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AttemptingToCreateCommandSpec">
+        <source>{0}: attempting to create commandspec</source>
+        <target state="translated">{0}: commandspec を作成しようとしています</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandSpecIsNull">
+        <source>{0}: commandSpec is null.</source>
+        <target state="translated">{0}: commandSpec が null です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExpectDepsJsonAt">
+        <source>{0}: expect deps.json at: {1}</source>
+        <target state="translated">{0}: {1} で deps.json が必要です</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GeneratingDepsJson">
+        <source>Generating deps.json at: {0}</source>
+        <target state="translated">{0} で deps.json を生成しています</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToGenerateDepsJson">
+        <source>Unable to generate deps.json, it may have been already generated.  You can specify the "-d" option before the tool name for diagnostic output (for example, "dotnet -d &lt;toolname&gt;": {0}</source>
+        <target state="translated">deps.json を生成できません。既に生成されている可能性があります。診断出力のツール名の前に、"-d" オプションを指定できます (例: "dotnet -d &lt;toolname&gt;": {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToDeleteTemporaryDepsJson">
+        <source>unable to delete temporary deps.json file: {0}</source>
+        <target state="translated">deps.json 一時ファイルを削除できません: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionForPackageCouldNotBeResolved">
+        <source>Version for package `{0}` could not be resolved.</source>
+        <target state="translated">パッケージ `{0}` のバージョンを解決できませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IgnoringPreferCLIRuntimeFile">
+        <source>{0}: Ignoring prefercliruntime file as the tool target framework ({1}) has a different major version than the current CLI runtime ({2})</source>
+        <target state="translated">{0}: ツール ターゲット フレームワーク ({1}) のメジャー バージョンが現在の CLI ランタイム ({2}) と異なるため、prefercliruntime ファイルは無視されます。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindToolRuntimeConfigFile">
+        <source>{0}: Could not find runtimeconfig.json file for tool {1}</source>
+        <target state="translated">{0}: ツール {1} で runtimeconfig.json ファイルが見つかりませんでした</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DepsJsonGeneratorProjectNotSet">
+        <source>Unable to find deps.json generator project.</source>
+        <target state="translated">deps.json ジェネレーター プロジェクトが見つかりません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandAssembliesNotFound">
+        <source>The command executable for "{0}" was not found. The project may not have been restored or restore failed - run `dotnet restore`</source>
+        <target state="translated">"{0}" で実行可能なコマンドが見つかりませんでした。プロジェクトが復元されていない可能性があるか、または復元に失敗しました。`dotnet restore` を実行します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildArgs">
+        <source>MSBuild arguments: {0}</source>
+        <target state="translated">MSBuild 引数: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NeedRunToolRestore">
+        <source>Run "dotnet tool restore" to make the "{0}" command available.</source>
+        <target state="translated">"dotnet tool restore" を実行して、"{0}" コマンドを利用できるようにします。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

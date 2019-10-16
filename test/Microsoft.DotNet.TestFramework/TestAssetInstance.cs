@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -10,8 +11,12 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
+using Microsoft.DotNet.TestFramework;
+using Microsoft.DotNet.Tools.Test.Utilities;
+
 
 namespace Microsoft.DotNet.TestFramework
 {
@@ -28,8 +33,6 @@ namespace Microsoft.DotNet.TestFramework
         private bool _restored = false;
 
         private bool _built = false;
-
-        public static string CurrentRuntimeFrameworkVersion = new Muxer().SharedFxVersion;
 
         public TestAssetInstance(TestAssetInfo testAssetInfo, DirectoryInfo root)
         {
@@ -171,23 +174,6 @@ namespace Microsoft.DotNet.TestFramework
             return this;
         }
 
-        public TestAssetInstance UseCurrentRuntimeFrameworkVersion()
-        {
-            return WithProjectChanges(project =>
-            {
-                var ns = project.Root.Name.Namespace;
-
-                var propertyGroup = project.Root.Elements(ns + "PropertyGroup").LastOrDefault();
-                if (propertyGroup == null)
-                {
-                    propertyGroup = new XElement(ns + "PropertyGroup");
-                    project.Root.Add(propertyGroup);
-                }
-
-                propertyGroup.Add(new XElement(ns + "RuntimeFrameworkVersion", CurrentRuntimeFrameworkVersion));
-            });
-        }
-
         private static string RebasePath(string path, string oldBaseDirectory, string newBaseDirectory)
         {
             path = Path.IsPathRooted(path) ? PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(oldBaseDirectory), path) : path;
@@ -251,7 +237,7 @@ namespace Microsoft.DotNet.TestFramework
 
             Console.WriteLine($"TestAsset Build '{TestAssetInfo.AssetName}'");
 
-            var commandResult = Command.Create(TestAssetInfo.DotnetExeFile.FullName, args)
+            var commandResult = CreateCommand(TestAssetInfo.DotnetExeFile.FullName, args)
                                     .WorkingDirectory(Root.FullName)
                                     .CaptureStdOut()
                                     .CaptureStdErr()
@@ -278,25 +264,12 @@ namespace Microsoft.DotNet.TestFramework
 
         private void Restore(FileInfo projectFile)
         {
-            var restoreArgs = new string[] { "restore", projectFile.FullName };
+            string restoreWithBinlogArg = "/bl:" + Path.Combine(projectFile.DirectoryName, "restore.binlog");
 
-            var commandResult = Command.Create(TestAssetInfo.DotnetExeFile.FullName, restoreArgs)
-                                .CaptureStdOut()
-                                .CaptureStdErr()
-                                .Execute();
-
-            int exitCode = commandResult.ExitCode;
-
-            if (exitCode != 0)
-            {
-                Console.WriteLine(commandResult.StdOut);
-
-                Console.WriteLine(commandResult.StdErr);
-
-                string message = string.Format($"TestAsset Restore '{TestAssetInfo.AssetName}'@'{projectFile.FullName}' Failed with {exitCode}");
-
-                throw new Exception(message);
-            }
+            new RestoreCommand()
+                .WithWorkingDirectory(projectFile.DirectoryName)
+                .Execute()
+                .Should().Pass();
         }
 
         private void RestoreAllProjects()
@@ -308,5 +281,24 @@ namespace Microsoft.DotNet.TestFramework
                 Restore(projFile);
             }
         }
+
+        private static Command CreateCommand(string path, IEnumerable<string> args)
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = path,
+                Arguments = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args),
+                UseShellExecute = false
+            };
+
+
+            var _process = new Process
+            {
+                StartInfo = psi
+            };
+
+            return new Command(_process);
+        }
+
     }
 }
