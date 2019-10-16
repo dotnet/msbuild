@@ -176,7 +176,8 @@ namespace Microsoft.DotNet.ShellShim.Tests
         }
 
         [Theory]
-        [InlineData(false)]
+        // https://github.com/dotnet/sdk/issues/3684
+        //[InlineData(false)]
         [InlineData(true)]
         public void GivenAnExceptionItWillRollback(bool testMockBehaviorIsInSync)
         {
@@ -239,7 +240,8 @@ namespace Microsoft.DotNet.ShellShim.Tests
         }
 
         [Theory]
-        [InlineData(false)]
+        // https://github.com/dotnet/sdk/issues/3684
+        //[InlineData(false)]
         [InlineData(true)]
         public void GivenAnInstalledShimRemoveDeletesTheShimFiles(bool testMockBehaviorIsInSync)
         {
