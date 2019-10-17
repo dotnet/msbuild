@@ -2,7 +2,6 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), testAsset.props))\testAsset.props" />
 
   <PropertyGroup>
-    <VersionPrefix>1.0.0-rc</VersionPrefix>
     <TargetFramework>net451</TargetFramework>
     <AssemblyName>dotnet-desktop-binding-redirects</AssemblyName>
     <OutputType>Exe</OutputType>
