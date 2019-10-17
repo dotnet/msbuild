@@ -60,7 +60,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// A known list of target names to create.  This is for backwards compatibility.
         /// </summary>
-        internal static readonly ISet<string> _defaultTargetNames = ImmutableHashSet.Create(StringComparer.OrdinalIgnoreCase,
+        internal static readonly ImmutableHashSet<string> _defaultTargetNames = ImmutableHashSet.Create(StringComparer.OrdinalIgnoreCase,
             "Build",
             "Clean",
             "Rebuild",
