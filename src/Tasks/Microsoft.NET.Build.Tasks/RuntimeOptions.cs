@@ -18,6 +18,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public List<RuntimeConfigFramework> Frameworks { get; set; }
 
+        public List<RuntimeConfigFramework> IncludedFrameworks { get; set; }
+
         public List<string> AdditionalProbingPaths { get; set; }
 
         [JsonExtensionData]

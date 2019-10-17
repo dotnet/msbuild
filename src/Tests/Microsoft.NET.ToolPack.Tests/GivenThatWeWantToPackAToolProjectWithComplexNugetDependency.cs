@@ -41,8 +41,6 @@ namespace Microsoft.NET.ToolPack.Tests
                                         })
                                         .WithTargetFrameworkOrFrameworks("netcoreapp2.1", multiTarget);
 
-            helloWorldAsset.Restore(Log);
-
             var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
             packCommand.Execute();
             var nugetPackage = packCommand.GetNuGetPackage();

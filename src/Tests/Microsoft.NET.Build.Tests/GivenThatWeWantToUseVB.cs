@@ -85,8 +85,7 @@ namespace Microsoft.NET.Build.Tests
             };
 
             var testAsset = _testAssetsManager
-                .CreateTestProject(testProject, identifier: targetFramework + isExe, targetExtension: ".vbproj")
-                .Restore(Log, testProject.Name);
+                .CreateTestProject(testProject, identifier: targetFramework + isExe, targetExtension: ".vbproj");
 
             var buildCommand = new GetValuesCommand(
                 Log,

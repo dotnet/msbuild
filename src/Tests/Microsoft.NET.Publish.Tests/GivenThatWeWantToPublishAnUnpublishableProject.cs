@@ -25,8 +25,7 @@ namespace Microsoft.NET.Publish.Tests
         {
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("Unpublishable")
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
 
             var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute();

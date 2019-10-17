@@ -22,6 +22,14 @@ Copyright (c) .NET Foundation. All rights reserved.
       to use this flag and they are imported by Microsoft.Common.props.
     -->
     <UsingMicrosoftNETSdk>true</UsingMicrosoftNETSdk>
+
+    <!--
+      Indicate whether the set of SDK defaults that makes SDK style project concise are being used.
+      For example: globbing, importing msbuild common targets.
+
+      Similar to the property above, it must be set here.
+    -->
+    <UsingNETSdkDefaults>true</UsingNETSdkDefaults>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(MSBuildProjectFullPath)' == '$(ProjectToOverrideProjectExtensionsPath)'">

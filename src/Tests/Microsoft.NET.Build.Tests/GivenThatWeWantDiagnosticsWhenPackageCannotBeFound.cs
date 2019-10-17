@@ -47,7 +47,7 @@ namespace Microsoft.NET.Build.Tests
                 Log,
                 Path.Combine(asset.TestRoot, project.Name));
 
-            build.Execute()
+            build.ExecuteWithoutRestore()
                  .Should()
                  .Fail()
                  .And.HaveStdOutContaining(package.ID)
@@ -93,8 +93,7 @@ namespace Microsoft.NET.Build.Tests
             };
 
             var asset = _testAssetsManager
-               .CreateTestProject(project, project.Name)
-               .Restore(Log, project.Name);
+               .CreateTestProject(project, project.Name);
 
             var pack = new PackCommand(
                 Log,

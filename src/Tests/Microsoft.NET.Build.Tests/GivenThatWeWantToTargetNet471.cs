@@ -55,8 +55,7 @@ namespace Microsoft.NET.Build.Tests
                 IsExe = true
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -97,8 +96,7 @@ namespace Microsoft.NET.Build.Tests
 
             testProject.ReferencedProjects.Add(netStandardProject);
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, "net471_ref_ns20")
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, "net471_ref_ns20");
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -134,8 +132,7 @@ namespace Microsoft.NET.Build.Tests
 
             testProject.PackageReferences.Add(new TestPackageReference("NETStandard.Library", "1.6.1"));
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -183,8 +180,7 @@ namespace Microsoft.NET.Build.Tests
 
             testProject.ReferencedProjects.Add(netStandardProject);
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, "net471_ref_ns16")
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, "net471_ref_ns16");
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -236,8 +232,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.ReferencedProjects.Add(net471library);
             testProject.ReferencedProjects.Add(net461library);
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, "net471_ref_net471_net461")
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, "net471_ref_net471_net461");
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -275,8 +270,7 @@ namespace Microsoft.NET.Build.Tests
 
             testProject.AdditionalProperties.Add("DependsOnNETStandard", "true");
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, "net471_with_override_property")
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, "net471_with_override_property");
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -345,8 +339,7 @@ public static class Program
 
                         project.Root.Add(new XElement(ns + "ItemGroup", referenceElement));
                     }
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -495,8 +488,7 @@ public static class NS16LibClass
                                         new XElement(ns + "None", new XAttribute("Include", "app.config")));
 
                                 }
-                            })
-                            .Restore(Log, testProject.Name);
+                            });
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -603,8 +595,7 @@ public class Startup
                         }
                         project.Root.Add(reproTarget);
                     }
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 

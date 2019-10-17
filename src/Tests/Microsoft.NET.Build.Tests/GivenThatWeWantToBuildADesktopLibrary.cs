@@ -54,7 +54,7 @@ namespace Microsoft.NET.Build.Tests
                     }
                 }";
 
-            var testAsset = _testAssetsManager.CreateTestProject(netFrameworkLibrary, "FacadesFromTargetFramework").Restore(Log, netFrameworkLibrary.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(netFrameworkLibrary, "FacadesFromTargetFramework");
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, netFrameworkLibrary.Name));
             buildCommand.Execute().Should().Pass();
         }
@@ -112,8 +112,7 @@ public class NETFramework
 
                         itemGroup.Add(new XElement(ns + "Reference", new XAttribute("Include", "System.Net.Http")));
                     }
-                })
-                .Restore(Log, netFrameworkLibrary.Name);
+                });
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, netFrameworkLibrary.Name));
 
@@ -161,8 +160,7 @@ public class NETFramework
     }
 }
 ";
-            var testAsset = _testAssetsManager.CreateTestProject(netFrameworkLibrary, "ExchangeNETStandard2")
-                .Restore(Log, netFrameworkLibrary.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(netFrameworkLibrary, "ExchangeNETStandard2");
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, netFrameworkLibrary.Name));
 
@@ -220,8 +218,7 @@ public class NETFramework
     }
 }
 ";
-            var testAsset = _testAssetsManager.CreateTestProject(netFrameworkLibrary, "ExchangeValueTuple")
-                .Restore(Log, netFrameworkLibrary.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(netFrameworkLibrary, "ExchangeValueTuple");
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, netFrameworkLibrary.Name));
 
@@ -236,8 +233,7 @@ public class NETFramework
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("DesktopReferencingNetStandardLibrary")
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
@@ -287,8 +283,7 @@ public static class {project.Name}
                             new XAttribute("Version", dependency.Item2)));
                     }
 
-                })
-                .Restore(Log, project.Name);
+                });
 
             string projectFolder = Path.Combine(testAsset.Path, project.Name);
 
@@ -349,8 +344,7 @@ public static class {project.Name}
                         itemGroup.Add(new XElement(ns + "Reference",
                             new XAttribute("Include", "System.Net.Http")));
                     }
-                })
-                .Restore(Log, project.Name);
+                });
 
             string projectFolder = Path.Combine(testAsset.Path, project.Name);
 
@@ -411,8 +405,7 @@ public static class {project.Name}
                         new XElement(ns + "Reference",
                             new XAttribute("Include", "System.Net.Http"),
                             new XElement("HintPath", $"   {Environment.NewLine}{hintPath}   {Environment.NewLine}")));
-                })
-                .Restore(Log, project.Name);
+                });
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, project.Name));
             var msbuildBuildCommand = new MSBuildCommand(Log, "Build", buildCommand.FullPathProjectFile);
@@ -430,8 +423,7 @@ public static class {project.Name}
             };
 
             TestAsset referencedTestAsset = _testAssetsManager
-                .CreateTestProject(referencedProject, "SimpleNamesWithHintPathsWithNewLinesReferenced")
-                .Restore(Log, referencedProject.Name);
+                .CreateTestProject(referencedProject, "SimpleNamesWithHintPathsWithNewLinesReferenced");
 
             var referencedbuildCommand =
                 new BuildCommand(Log, Path.Combine(referencedTestAsset.TestRoot, referencedProject.Name));
@@ -464,8 +456,7 @@ public static class {project.Name}
                         new XAttribute("Name", "Repro"),
                         new XAttribute("DependsOnTargets", "RunResolvePublishAssemblies"),
                         new XAttribute("BeforeTargets", "BeforeBuild")));
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             var buildCommand = new BuildCommand(Log, testInstance.TestRoot, testProject.Name);
 

@@ -111,8 +111,7 @@ namespace Microsoft.NET.Build.Tests
                     //  of Visual Studio we are testing with.
                     p.Root.Add(new XElement(ns + "Target",
                                     new XAttribute("Name", "CollectFrameworkReferences")));
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             string projectFolder = Path.Combine(testAsset.TestRoot, testProject.Name);
 
@@ -133,17 +132,17 @@ namespace Microsoft.NET.Build.Tests
             project.Save(projectFilePath);
 
             buildCommand
-                .Execute(designTimeArgs)
+                .ExecuteWithoutRestore(designTimeArgs)
                 .Should()
                 .Pass();
 
             buildCommand
-                .Execute("/restore")
+                .Execute()
                 .Should()
                 .Pass();
 
             buildCommand
-                .Execute(designTimeArgs)
+                .ExecuteWithoutRestore(designTimeArgs)
                 .Should()
                 .Pass();
 
@@ -179,7 +178,6 @@ namespace Microsoft.NET.Build.Tests
                 "/t:CollectResolvedCompilationReferencesDesignTime;ResolveFrameworkReferences",
                 //  Set targeting pack folder to nonexistant folder so the project won't use installed targeting packs
                 "/p:NetCoreTargetingPackRoot=" + Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()),
-                "/bl:designtime.binlog"
             };
 
             return args;

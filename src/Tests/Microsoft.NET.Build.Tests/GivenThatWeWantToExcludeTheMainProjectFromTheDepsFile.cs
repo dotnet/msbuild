@@ -56,8 +56,7 @@ namespace Microsoft.NET.Build.Tests
 
                         propertyGroup.Add(new XElement(ns + "IncludeMainProjectInDepsFile", "false"));
                     }
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, testProject.Name);
 
