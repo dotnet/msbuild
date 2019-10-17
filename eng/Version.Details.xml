@@ -21,9 +21,9 @@
       <Uri>https://github.com/dotnet/fsharp</Uri>
       <Sha>e3676d75d501a2df6789ad0f5ebc310bc2cee6b5</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Compilers" Version="3.4.0-beta3-19516-01">
+    <Dependency Name="Microsoft.NETCore.Compilers" Version="3.4.0-beta3-19517-02">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>2ea4fdbd277a758e60ed4c33d7564a2043bb0227</Sha>
+      <Sha>6ec300539cbdc68c373a296f2731c562fe6d593d</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Sdk.Razor" Version="3.1.0-preview1.19508.6">
       <Uri>https://github.com/aspnet/AspNetCore-Tooling</Uri>
