@@ -119,6 +119,11 @@ Jeśli określony katalog nie istnieje, zostanie utworzony.</target>
         <target state="translated">KATALOG_WYNIKÓW</target>
         <note />
       </trans-unit>
+      <trans-unit id="IgnoredArgumentsMessage">
+        <source>The following arguments have been ignored : "{0}"</source>
+        <target state="new">The following arguments have been ignored : "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RunSettingsArgumentsDescription">
         <source>
 

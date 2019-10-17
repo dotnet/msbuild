@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="CmdDeprecatedDescription">
         <source>Lists packages that have been deprecated.</source>
-        <target state="new">Lists packages that have been deprecated.</target>
+        <target state="translated">Kullanım dışı bırakılan paketleri listeler.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
@@ -44,22 +44,22 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>The path to the NuGet config file to use. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">Kullanılacak NuGet yapılandırma dosyasının yolu. '--outdated' seçeneğini gerektirir.</target>
+        <target state="translated">Kullanılacak NuGet yapılandırma dosyasının yolu. '--outdated' veya '--deprecated' seçeneğini gerektirir.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestMinorDescription">
         <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">Daha yeni paketler aranırken yalnızca eşleşen birincil sürüm numarasına sahip paketleri göz önünde bulundurun. '--outdated' seçeneğini gerektirir.</target>
+        <target state="translated">Daha yeni paketler aranırken yalnızca eşleşen birincil sürüm numarasına sahip paketleri göz önünde bulundurun. '--outdated' veya '--deprecated' seçeneğini gerektirir.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestPatchDescription">
         <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">Daha yeni paketler aranırken yalnızca eşleşen birincil ve ikincil sürüm numaralarına sahip paketleri değerlendirin. '--outdated' seçeneğini gerektirir.</target>
+        <target state="translated">Daha yeni paketler aranırken yalnızca eşleşen birincil ve ikincil sürüm numaralarına sahip paketleri değerlendirin. '--outdated' veya '--deprecated' seçeneğini gerektirir.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPrereleaseDescription">
         <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">Daha yeni paketleri ararken yayın öncesi sürümlere sahip olan paketleri göz önünde bulundurun. '--outdated' seçeneğini gerektirir.</target>
+        <target state="translated">Daha yeni paketleri ararken yayın öncesi sürümlere sahip olan paketleri göz önünde bulundurun. '--outdated' veya '--deprecated' seçeneğini gerektirir.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSource">
@@ -69,12 +69,12 @@
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="needs-review-translation">Daha yeni paketler aranırken kullanılacak NuGet kaynakları. '--outdated' seçeneğini gerektirir.</target>
+        <target state="translated">Daha yeni paketler aranırken kullanılacak NuGet kaynakları. '--outdated' veya '--deprecated' seçeneğini gerektirir.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutdatedAndDeprecatedOptionsCannotBeCombined">
         <source>Option '--outdated' and '--deprecated' cannot be combined.</source>
-        <target state="new">Option '--outdated' and '--deprecated' cannot be combined.</target>
+        <target state="translated">'--outdated' ve '--deprecated' seçeneği birleştirilemez.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileNotFound">
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="OutdatedOrDeprecatedOptionOnly">
         <source>Option '{0}' requires the '--outdated' or '--deprecated' option to be specified.</source>
-        <target state="new">Option '{0}' requires the '--outdated' or '--deprecated' option to be specified.</target>
+        <target state="translated">'{0}' seçeneği '--outdated' veya '--deprecated' seçeneğinin belirtilmesini gerektirir.</target>
         <note />
       </trans-unit>
     </body>

@@ -239,7 +239,7 @@
       </trans-unit>
       <trans-unit id="StoreDefinition">
         <source>Store the specified assemblies in the runtime package store.</source>
-        <target state="translated">Armazenar os assemblies especificados no repositório de pacotes do tempo de execução.</target>
+        <target state="translated">Armazenar os assemblies especificados no repositório de pacotes do runtime.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolDefinition">

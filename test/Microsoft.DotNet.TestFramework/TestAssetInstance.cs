@@ -121,6 +121,7 @@ namespace Microsoft.DotNet.TestFramework
               <packageSources>
                 <add key=""dotnet-core"" value=""https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json"" />
                 <add key=""test-packages"" value=""$fullpath$"" />
+                <add key=""nuget.org"" value=""https://api.nuget.org/v3/index.json"" />
                 $externalRestoreSources$
               </packageSources>
             </configuration>";

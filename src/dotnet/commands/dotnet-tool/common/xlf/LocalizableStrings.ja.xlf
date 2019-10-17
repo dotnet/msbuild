@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="NoManifestGuide">
         <source>If you intended to perform the action on a global tool, use the `--global` option for the command.</source>
-        <target state="needs-review-translation">グローバル ツールでアクションを実行する場合は、コマンドで `--global` オプションを使用してください。</target>
+        <target state="translated">グローバル ツールでアクションを実行する場合は、コマンドで `--global` オプションを使用してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
@@ -15,7 +15,7 @@
       <trans-unit id="SamePackageIdInOtherManifestFile">
         <source>Warning: There are other manifest files in the directory hierarchy that will affect this local tool. The following files have not been changed:
 {0}</source>
-        <target state="needs-review-translation">警告: 現在のディレクトリには、ローカル ツールに影響を与える可能性がある他のマニフェスト ファイルがあります。次のファイルは変更されていません:
+        <target state="translated">警告: このローカル ツールに影響を与えるその他のマニフェスト ファイルがディレクトリ階層内に存在します。次のファイルは変更されていません:
 {0}</target>
         <note />
       </trans-unit>

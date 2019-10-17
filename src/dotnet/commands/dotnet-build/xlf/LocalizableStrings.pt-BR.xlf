@@ -44,7 +44,7 @@
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to build for.</source>
-        <target state="translated">O tempo de execução de destino no qual o build ocorrerá.</target>
+        <target state="translated">O runtime de destino no qual o build ocorrerá.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">

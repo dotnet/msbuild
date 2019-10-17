@@ -19,7 +19,7 @@ Explore documentation: https://aka.ms/dotnet-docs
 Report issues and find source on GitHub: https://github.com/dotnet/core
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
 --------------------------------------------------------------------------------------</source>
-        <target state="translated">----------------
+        <target state="needs-review-translation">----------------
 Erkunden Sie die Dokumentation: https://aka.ms/dotnet-docs
 Melden Sie Probleme, und finden Sie Quellen in GitHub: https://github.com/dotnet/core
 Informieren Sie sich über Neuheiten: https://aka.ms/dotnet-whats-new
@@ -30,12 +30,12 @@ Schreiben Sie Ihre erste Anwendung: https://aka.ms/first-net-core-app
         <note />
       </trans-unit>
       <trans-unit id="FirstTimeMessageWelcome">
-        <source>Welcome to .NET Core 5.0!
+        <source>Welcome to .NET Core {0}!
 ---------------------
-SDK Version: {0}</source>
-        <target state="needs-review-translation">Willkommen bei .NET Core 3.0!
+SDK Version: {1}</source>
+        <target state="new">Welcome to .NET Core {0}!
 ---------------------
-SDK-Version: {0}</target>
+SDK Version: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="TelemetryMessage">
