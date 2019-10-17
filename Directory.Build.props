@@ -27,9 +27,8 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
 
     <DisableImplicitPackageTargetFallback>true</DisableImplicitPackageTargetFallback>
 
-    <CliTargetFramework>netcoreapp3.0</CliTargetFramework>
-    <!-- We only need this until we get a dotnet/sdk in stage0 with a 3.0 support. -->
-    <NETCoreAppMaximumVersion>3.0</NETCoreAppMaximumVersion>
+    <CliTargetFramework>netcoreapp3.1</CliTargetFramework>
+    <LangVersion>latest</LangVersion>
 
     <UsingToolMicrosoftNetCompilers>false</UsingToolMicrosoftNetCompilers>
 
