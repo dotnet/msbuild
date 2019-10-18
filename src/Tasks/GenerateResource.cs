@@ -3387,8 +3387,13 @@ namespace Microsoft.Build.Tasks
 
                 PopulateAssemblyNames();
 
-                foreach (var assemblyName in _assemblyNames)
+                foreach (AssemblyNameExtension assemblyName in _assemblyNames)
                 {
+                    if (assemblyName == null)
+                    {
+                        continue;
+                    }
+
                     if (string.Equals(assemblyName.Name, "System.Resources.Extensions", StringComparison.OrdinalIgnoreCase))
                     {
                         _haveSystemResourcesExtensionsReference = true;
@@ -3761,14 +3766,16 @@ namespace Microsoft.Build.Tasks
         {
             using (StreamWriter writer = FileUtilities.OpenWrite(fileName, false, Encoding.UTF8))
             {
-                foreach (LiveObjectResource entry in reader.resources)
+                foreach (IResource resource in reader.resources)
                 {
-                    String key = entry.Name;
-                    Object v = entry.Value;
+                    LiveObjectResource entry = resource as LiveObjectResource;
+
+                    String key = entry?.Name;
+                    Object v = entry?.Value;
                     String value = v as String;
                     if (value == null)
                     {
-                        _logger.LogErrorWithCodeFromResources(null, fileName, 0, 0, 0, 0, "GenerateResource.OnlyStringsSupported", key, v.GetType().FullName);
+                        _logger.LogErrorWithCodeFromResources(null, fileName, 0, 0, 0, 0, "GenerateResource.OnlyStringsSupported", key, v?.GetType().FullName);
                     }
                     else
                     {
