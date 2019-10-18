@@ -1713,11 +1713,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Non-string resource with text output
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact (Skip = "https://github.com/Microsoft/msbuild/issues/308")]
-#else
         [Fact]
-#endif
         public void UnsupportedTextType()
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
@@ -1776,11 +1772,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Cause failures in ResourceReader
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact (Skip = "https://github.com/Microsoft/msbuild/issues/308")]
-#else
         [Fact]
-#endif
         public void FailedResourceReader()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -1844,11 +1836,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         /// Reference passed in that can't be loaded should error
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact (Skip = "https://github.com/Microsoft/msbuild/issues/308")]
-#else
         [Fact]
-#endif
         public void InvalidReference()
         {
             string txtFile = null;
