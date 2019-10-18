@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         {
             string projectDirectory = TestAssets.CreateTestDirectory().FullName;
 
-            string newArgs = "console -f netcoreapp3.1 --debug:ephemeral-hive --no-restore";
+            string newArgs = "console -f netcoreapp3.0 --debug:ephemeral-hive --no-restore";
             new NewCommandShim()
                 .WithWorkingDirectory(projectDirectory)
                 .Execute(newArgs)

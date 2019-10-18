@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void ItShowsTheAppropriateMessageToTheUser()
         {
-            var expectedVersion = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "ExpectedSdkVersion.txt"));
+            var expectedVersion = Path.GetFileName(RepoDirectoriesProvider.SdkFolderUnderTest);
             _firstDotnetVerbUseCommandResult.StdOut
                 .Should()
                 .ContainVisuallySameFragment(string.Format(
@@ -149,7 +149,7 @@ namespace Microsoft.DotNet.Tests
 
             var result = command.ExecuteWithCapturedOutput("new --debug:ephemeral-hive");
 
-            var expectedVersion = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "ExpectedSdkVersion.txt"));
+            var expectedVersion = Path.GetFileName(RepoDirectoriesProvider.SdkFolderUnderTest);
 
             result.StdOut
                 .Should()
