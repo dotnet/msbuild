@@ -24,8 +24,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
     public class ToolPackageUninstallerTests : TestBase
     {
         [Theory]
-        //  https://github.com/dotnet/sdk/issues/3684
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public void GivenAnInstalledPackageUninstallRemovesThePackage(bool testMockBehaviorIsInSync)
         {
@@ -121,7 +120,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 storeQuery = toolPackageStore;
                 installer = new ToolPackageInstaller(
                     store: store,
-                    projectRestorer: new ProjectRestorer(reporter),
+                    projectRestorer: new Stage2ProjectRestorer(reporter),
                     tempProject: tempProject ?? GetUniqueTempProjectPathEachTest(),
                     offlineFeed: offlineFeed ?? new DirectoryPath("does not exist"));
                 uninstaller = new ToolPackageUninstaller(store);
