@@ -206,7 +206,7 @@
           AfterTargets="Build">
     <PropertyGroup>
       <ReplacementPattern>"version": ".*"</ReplacementPattern>
-      <ReplacementString>"version": "$(MicrosoftNETCoreAppPackageVersion)"</ReplacementString>
+      <ReplacementString>"version": "$(MicrosoftNETCoreAppRuntimePackageVersion)"</ReplacementString>
     </PropertyGroup>
     <ItemGroup>
       <!-- Exclude F# from retargeting: https://github.com/dotnet/toolset/issues/2866 -->

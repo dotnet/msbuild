@@ -6,6 +6,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Configurer
 {
@@ -108,7 +109,11 @@ namespace Microsoft.DotNet.Configurer
         private void PrintFirstTimeMessageWelcome()
         {
             _reporter.WriteLine();
-            _reporter.WriteLine(string.Format(LocalizableStrings.FirstTimeMessageWelcome, Product.Version));
+            string productVersion = Product.Version;
+            _reporter.WriteLine(string.Format(
+                LocalizableStrings.FirstTimeMessageWelcome,
+                DeriveDotnetVersionFromProductVersion(productVersion),
+                productVersion));
         }
         private void PrintFirstTimeMessageMoreInformation()
         {
@@ -120,6 +125,16 @@ namespace Microsoft.DotNet.Configurer
         {
             _reporter.WriteLine();
             _reporter.WriteLine(LocalizableStrings.TelemetryMessage);
+        }
+
+        internal static string DeriveDotnetVersionFromProductVersion(string productVersion)
+        {
+            if (!NuGetVersion.TryParse(productVersion, out var parsedVersion))
+            {
+                return string.Empty;
+            }
+
+            return $"{parsedVersion.Major}.{parsedVersion.Minor}";
         }
     }
 }

@@ -19,7 +19,7 @@ Explore documentation: https://aka.ms/dotnet-docs
 Report issues and find source on GitHub: https://github.com/dotnet/core
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
 --------------------------------------------------------------------------------------</source>
-        <target state="translated">----------------
+        <target state="needs-review-translation">----------------
 설명서 살펴보기: https://aka.ms/dotnet-docs
 GitHub에서 문제 보고 및 소스 찾기: https://github.com/dotnet/core
 새로운 기능 확인: https://aka.ms/dotnet-whats-new
@@ -30,12 +30,12 @@ GitHub에서 문제 보고 및 소스 찾기: https://github.com/dotnet/core
         <note />
       </trans-unit>
       <trans-unit id="FirstTimeMessageWelcome">
-        <source>Welcome to .NET Core 5.0!
+        <source>Welcome to .NET Core {0}!
 ---------------------
-SDK Version: {0}</source>
-        <target state="needs-review-translation">.NET Core 3.0을 시작합니다!
+SDK Version: {1}</source>
+        <target state="new">Welcome to .NET Core {0}!
 ---------------------
-SDK 버전: {0}</target>
+SDK Version: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="TelemetryMessage">

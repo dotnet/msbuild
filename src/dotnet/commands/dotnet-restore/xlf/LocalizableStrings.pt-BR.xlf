@@ -79,7 +79,7 @@
       </trans-unit>
       <trans-unit id="CmdRuntimeOptionDescription">
         <source>The target runtime to restore packages for.</source>
-        <target state="translated">O tempo de execução de destino no qual os pacotes serão restaurados.</target>
+        <target state="translated">O runtime de destino no qual os pacotes serão restaurados.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdForceRestoreOptionDescription">

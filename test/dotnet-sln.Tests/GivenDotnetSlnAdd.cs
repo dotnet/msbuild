@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using Xunit;
 using Xunit.Abstractions;
+using SlnLocalizableStrings = Microsoft.DotNet.Tools.Sln;
 
 namespace Microsoft.DotNet.Cli.Sln.Add.Tests
 {
@@ -1241,7 +1242,7 @@ EndGlobal
                 .WithWorkingDirectory(solutionDirectory)
                 .ExecuteWithCapturedOutput($"sln App.sln add --solution-folder blah --in-root {projectToAdd}");
             cmd.Should().Fail();
-            cmd.StdErr.Should().Be("The --solution-folder and --in-root options cannot be used together; use only one of the options.");
+            cmd.StdErr.Should().Be(SlnLocalizableStrings.LocalizableStrings.SolutionFolderAndInRootMutuallyExclusive);
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
 
             File.ReadAllText(solutionPath)
