@@ -1837,6 +1837,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// Reference passed in that can't be loaded should error
         /// </summary>
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp,
+            reason: ".NET Core MSBuild doesn't load refs so it pushes this failure to runtime")]
         public void InvalidReference()
         {
             string txtFile = null;
