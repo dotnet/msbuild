@@ -10,11 +10,6 @@ Param(
 
 $dotnetRoot = Join-Path $RepoRoot ".dotnet"
 
-if ($env:ARCADE_CONTAINER -ne $null)
-{
-  $dotnetRoot = Join-Path $RepoRoot ".dotnet\$env:ARCADE_CONTAINER" 
-}
-
 $installdir = $dotnetRoot
 try {
     if ($architecture -and $architecture.Trim() -eq "x86") {

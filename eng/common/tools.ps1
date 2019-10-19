@@ -133,11 +133,7 @@ function InitializeDotNetCli([bool]$install) {
     $dotnetRoot = $env:DOTNET_INSTALL_DIR
   } else {
     $dotnetRoot = Join-Path $RepoRoot ".dotnet"
-    if ($env:ARCADE_CONTAINER -ne $null)
-    {
-      $dotnetRoot = Join-Path $RepoRoot ".dotnet\$env:ARCADE_CONTAINER" 
-    }
-    
+
     if (-not (Test-Path(Join-Path $dotnetRoot "sdk\$dotnetSdkVersion"))) {
       if ($install) {
         InstallDotNetSdk $dotnetRoot $dotnetSdkVersion
@@ -586,11 +582,6 @@ function GetMSBuildBinaryLogCommandLineArgument($arguments) {
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $EngRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
 $ArtifactsDir = Join-Path $RepoRoot "artifacts"
-if ($env:ARCADE_CONTAINER -ne $null)
-{
-  $ArtifactsDir = Join-Path $RepoRoot "artifacts-$env:ARCADE_CONTAINER" + "\"
-  $env:ArtifactsDir = $ArtifactsDir
-}
 $ToolsetDir = Join-Path $ArtifactsDir "toolset"
 $ToolsDir = Join-Path $RepoRoot ".tools"
 $LogDir = Join-Path (Join-Path $ArtifactsDir "log") $configuration

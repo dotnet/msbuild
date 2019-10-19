@@ -40,9 +40,6 @@ done
 
 . "$scriptroot/tools.sh"
 dotnetRoot="$repo_root/.dotnet"
-if [[ -n "${ARCADE_CONTAINER:-}" ]]; then
-  dotnetRoot="$repo_root/.dotnet-$ARCADE_CONTAINER"
-fi
 InstallDotNet $dotnetRoot $version "$architecture" $runtime true || {
   local exit_code=$?
   echo "dotnet-install.sh failed (exit code '$exit_code')." >&2
