@@ -25,15 +25,15 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using bash, you can add it to your profile by running the following command:
+        <target state="translated">도구 디렉터리 '{0}'이(가) 현재 PATH 환경 변수에 없습니다.
+Bash를 사용하는 경우 다음 명령을 실행하여 프로필에 Bash를 추가할 수 있습니다.
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-You can add it to the current session by running the following command:
+다음 명령을 실행하여 현재 세션에 Bash를 추가할 수 있습니다.
 
 export PATH="$PATH:{0}"
 </target>
@@ -54,17 +54,17 @@ You can only add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="new">Tools directory '{0}' is not currently on the PATH environment variable.
-If you are using zsh, you can add it to your profile by running the following command:
+        <target state="translated">도구 디렉터리 '{0}'이(가) 현재 PATH 환경 변수에 없습니다.
+zsh를 사용하는 경우 다음 명령을 실행하여 프로필에 zsh를 추가할 수 있습니다.
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-And run `zsh -l` to make it available for current session.
+또한 'zsh -l'을 실행하여 현재 세션에 zsh를 사용하도록 설정합니다.
 
-You can only add it to the current session by running the following command:
+현재 세션에 추가하려면 다음 명령을 실행해야 합니다.
 
 export PATH="$PATH:{0}"
 </target>

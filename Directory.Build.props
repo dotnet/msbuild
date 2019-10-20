@@ -22,6 +22,7 @@
 
     <IsShippingPackage>false</IsShippingPackage>
     <ToolsetTargetFramework>netcoreapp3.0</ToolsetTargetFramework>
+    <LangVersion>latest</LangVersion>
 
     <ArtifactsShippingSymbolsDir>$(ArtifactsDir)symbols\$(Configuration)\Shipping</ArtifactsShippingSymbolsDir>
 

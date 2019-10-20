@@ -212,17 +212,17 @@
         <target state="translated">명령에 대한 자세한 정보를 보려면 'dotnet [명령] --help'를 실행합니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="AdditionalprobingpathDefinition">
+      <trans-unit id="AdditionalProbingPathDefinition">
         <source>Path containing probing policy and assemblies to probe for.</source>
         <target state="translated">프로브할 프로빙 정책 및 어셈블리를 포함하는 경로입니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="DepsfilDefinition">
+      <trans-unit id="DepsFileDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
         <target state="translated">&lt;application&gt;.deps.json 파일의 경로입니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="RuntimeconfigDefinition">
+      <trans-unit id="RuntimeConfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
         <target state="translated">&lt;application&gt;.runtimeconfig.json 파일의 경로입니다.</target>
         <note />

@@ -118,9 +118,9 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="FirstTimeMessageWelcome" xml:space="preserve">
-    <value>Welcome to .NET Core 5.0!
+    <value>Welcome to .NET Core {0}!
 ---------------------
-SDK Version: {0}</value>
+SDK Version: {1}</value>
   </data>
   <data name="FailedToDetermineUserHomeDirectory" xml:space="preserve">
     <value>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</value>

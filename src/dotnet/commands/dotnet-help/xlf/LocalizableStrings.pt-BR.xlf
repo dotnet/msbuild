@@ -212,17 +212,17 @@
         <target state="translated">Execute 'dotnet [command] --help' para obter mais informações sobre um comando.</target>
         <note />
       </trans-unit>
-      <trans-unit id="AdditionalprobingpathDefinition">
+      <trans-unit id="AdditionalProbingPathDefinition">
         <source>Path containing probing policy and assemblies to probe for.</source>
         <target state="translated">Caminho contendo a política de investigação e os assemblies a investigar.</target>
         <note />
       </trans-unit>
-      <trans-unit id="DepsfilDefinition">
+      <trans-unit id="DepsFileDefinition">
         <source>Path to &lt;application&gt;.deps.json file.</source>
         <target state="translated">Caminho para o arquivo &lt;application&gt;.deps.json.</target>
         <note />
       </trans-unit>
-      <trans-unit id="RuntimeconfigDefinition">
+      <trans-unit id="RuntimeConfigDefinition">
         <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
         <target state="translated">Caminho para o arquivo &lt;application&gt;. runtimeconfig.json.</target>
         <note />
@@ -239,7 +239,7 @@
       </trans-unit>
       <trans-unit id="StoreDefinition">
         <source>Store the specified assemblies in the runtime package store.</source>
-        <target state="translated">Armazenar os assemblies especificados no repositório de pacotes do tempo de execução.</target>
+        <target state="translated">Armazenar os assemblies especificados no repositório de pacotes do runtime.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolDefinition">
