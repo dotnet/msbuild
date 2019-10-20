@@ -122,7 +122,7 @@ namespace Microsoft.Build.Execution
 #endif
 
         /// <summary>
-        /// Flag indicating whether the build process should run as low privilege.
+        /// Flag indicating whether the build process should run as low priority.
         /// </summary>
         private bool _lowPriority = false;
 
@@ -776,7 +776,7 @@ namespace Microsoft.Build.Execution
         public bool DiscardBuildResults { get; set; } = false;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the build process should run as low privilege.
+        /// Gets or sets a value indicating whether the build process should run as low priority.
         /// </summary>
         public bool LowPriority
         {
