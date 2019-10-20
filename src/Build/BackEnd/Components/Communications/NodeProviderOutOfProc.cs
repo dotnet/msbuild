@@ -116,12 +116,12 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            // Start the new process.  We pass in a node mode with a node number of 1, to indicate that we 
+            // Start the new process.  We pass in a node mode with a node number of 1, to indicate that we
             // want to start up just a standard MSBuild out-of-proc node.
             // Note: We need to always pass /nodeReuse to ensure the value for /nodeReuse from msbuild.rsp
             // (next to msbuild.exe) is ignored.
-            string commandLineArgs = ComponentHost.BuildParameters.EnableNodeReuse ? 
-                "/nologo /nodemode:1 /nodeReuse:true" : 
+            string commandLineArgs = ComponentHost.BuildParameters.EnableNodeReuse ?
+                "/nologo /nodemode:1 /nodeReuse:true" :
                 "/nologo /nodemode:1 /nodeReuse:false";
 
             // Make it here.
@@ -186,13 +186,17 @@ namespace Microsoft.Build.BackEnd
             // they must have been started with node reuse.
             bool nodeReuse = ComponentHost.BuildParameters?.EnableNodeReuse ?? true;
 
-            // If no BuildParameters were specified for this build,
-            // then they couldn't have been launched with priority since it defaults to off.
-            bool lowPriority = ComponentHost.BuildParameters?.LowPriority ?? false;
+            // To avoid issues with mismatched priorities not shutting
+            // down all the nodes on exit, we will attempt to shutdown
+            // all matching notes with and without the priroity bit set.
+            // So precompute both versions of the handshake now.
+            long hostHandshake = NodeProviderOutOfProc.GetHostHandshake(nodeReuse, enableLowPriority: false);
+            long hostHandshakeWithLow = NodeProviderOutOfProc.GetHostHandshake(nodeReuse, enableLowPriority: true);
 
             ShutdownAllNodes(
-                NodeProviderOutOfProc.GetHostHandshake(nodeReuse, lowPriority),
-                NodeProviderOutOfProc.GetClientHandshake(), 
+                hostHandshake,
+                hostHandshakeWithLow,
+                NodeProviderOutOfProc.GetClientHandshake(),
                 NodeContextTerminated);
         }
 
