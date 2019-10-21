@@ -2603,6 +2603,12 @@ namespace Microsoft.Build.Tasks
             {
                 ReadResources(inFile, _useSourcePath, outFileOrDir);
             }
+            catch (InputFormatNotSupportedException)
+            {
+                _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0,
+                                                      "GenerateResource.CoreSupportsLimitedScenarios");
+                return false;
+            }
             catch (MSBuildResXException msbuildResXException)
             {
                 _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0,
@@ -2988,7 +2994,7 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_ASSEMBLY_LOADFROM
                 ReadAssemblyResources(filename, outFileOrDir);
 #else
-                _logger.LogError("Reading resources from Assembly not supported on .NET Core MSBuild");
+                throw new InputFormatNotSupportedException("Reading resources from Assembly not supported on .NET Core MSBuild");
 #endif
             }
             else
@@ -3046,10 +3052,10 @@ namespace Microsoft.Build.Tasks
                     case Format.Binary:
 #if FEATURE_RESX_RESOURCE_READER
                         ReadResources(reader, new ResourceReader(filename), filename); // closes reader for us
-#else
-                        _logger.LogError("ResGen.exe not supported on .NET Core MSBuild");
-#endif
                         break;
+#else
+                        throw new InputFormatNotSupportedException("Reading resources from binary .resources not supported on .NET Core MSBuild");
+#endif
 
                     default:
                         // We should never get here, we've already checked the format

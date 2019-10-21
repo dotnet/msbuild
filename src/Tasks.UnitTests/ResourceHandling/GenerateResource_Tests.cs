@@ -1800,6 +1800,28 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 File.Delete(item.ItemSpec);
         }
 
+        [Theory]
+        [InlineData(".resources")]
+        [InlineData(".dll")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "This error is .NET Core only")]
+        public void ResourceReaderRejectsNonCoreCompatFormats(string inputExtension)
+        {
+            using var env = TestEnvironment.Create(_output);
+
+            GenerateResource t = Utilities.CreateTask(_output);
+            t.StateFile = new TaskItem(env.GetTempFile(".cache").Path);
+
+            // file contents aren't required since the extension is checked first
+            var resourcesFile = env.CreateFile(inputExtension).Path;
+
+            t.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
+            t.OutputResources = new ITaskItem[] { new TaskItem(env.GetTempFile(".resources").Path) };
+
+            t.Execute().ShouldBeFalse();
+
+            Utilities.AssertLogContains(t, "MSB3824");
+        }
+
         /// <summary>
         ///  Invalid STR Class name
         /// </summary>
