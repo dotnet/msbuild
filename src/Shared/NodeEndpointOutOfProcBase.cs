@@ -434,6 +434,10 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     gotValidConnection = true;
+
+                    CommunicationsUtilities.Trace("Writing handshake to parent");
+                    localWritePipe.WriteLongForHandshake(GetClientHandshake());
+                    ChangeLinkStatus(LinkStatus.Active);
                 }
                 catch (Exception e)
                 {
@@ -453,10 +457,6 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
             }
-
-            CommunicationsUtilities.Trace("Writing handshake to parent");
-            localWritePipe.WriteLongForHandshake(GetClientHandshake());
-            ChangeLinkStatus(LinkStatus.Active);
 
             RunReadLoop(
                 new BufferedReadStream(localReadPipe),

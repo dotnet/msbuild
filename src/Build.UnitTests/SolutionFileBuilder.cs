@@ -15,10 +15,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Experimental.Graph;
-using Microsoft.Build.Experimental.Graph.UnitTests;
+using Microsoft.Build.Graph;
+using Microsoft.Build.Graph.UnitTests;
 using Microsoft.Build.UnitTests;
-using Microsoft.Build.Utilities;
 using Shouldly;
 
 namespace Microsoft.Build.Engine.UnitTests

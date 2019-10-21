@@ -4,9 +4,8 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Experimental.Graph;
 
-namespace Microsoft.Build.Experimental.Graph
+namespace Microsoft.Build.Graph
 {
     public sealed class GraphBuildResult
     {

@@ -409,6 +409,7 @@ namespace Microsoft.Build.Utilities
         protected virtual void LogEventsFromTextOutput(string singleLine, Microsoft.Build.Framework.MessageImportance messageImportance) { }
         protected virtual void LogPathToTool(string toolName, string pathToTool) { }
         protected virtual void LogToolCommand(string message) { }
+        protected virtual void ProcessStarted() { }
         protected virtual string ResponseFileEscape(string responseString) { throw null; }
         protected virtual bool SkipTaskExecution() { throw null; }
         protected internal virtual bool ValidateParameters() { throw null; }
