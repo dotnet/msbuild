@@ -1773,6 +1773,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         ///  Cause failures in ResourceReader
         /// </summary>
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core MSBuild doesn't try to read binary input resources")]
         public void FailedResourceReader()
         {
             GenerateResource t = Utilities.CreateTask(_output);
