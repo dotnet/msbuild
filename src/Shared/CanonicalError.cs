@@ -8,12 +8,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-#if MICROSOFT_BUILD_TASKS
-using MSBuildConstants = Microsoft.Build.Tasks.MSBuildConstants;
-#else
-using MSBuildConstants = Microsoft.Build.Shared.MSBuildConstants;
-#endif
-
 namespace Microsoft.Build.Shared
 {
     /// <summary>
