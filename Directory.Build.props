@@ -13,6 +13,7 @@
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
     <IsShippingPackage>false</IsShippingPackage>
+    <SdkTargetFramework>netcoreapp3.0</SdkTargetFramework>
 
     <!-- Workaround for https://github.com/NuGet/NuGet.Client/pull/3016 -->
     <NoWarn>$(NoWarn);NU5131</NoWarn>

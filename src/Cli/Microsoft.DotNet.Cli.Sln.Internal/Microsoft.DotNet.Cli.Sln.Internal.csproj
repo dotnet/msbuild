@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>SLN file reader/writer</Description>
-    <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
+    <TargetFramework>$(SdkTargetFramework)</TargetFramework>
     <DebugType>portable</DebugType>
     <AssemblyName>Microsoft.DotNet.Cli.Sln.Internal</AssemblyName>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
