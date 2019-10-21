@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
+    <TargetFramework>$(SdkTargetFramework)</TargetFramework>
     <AssemblyName>dotnet</AssemblyName>
     <OutputType>Exe</OutputType>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
@@ -71,6 +71,7 @@
     <PackageReference Include="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="$(MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.Utils" Version="$(MicrosoftTemplateEngineUtilsPackageVersion)" />
     <PackageReference Include="Microsoft.TemplateSearch.Common" Version="$(MicrosoftTemplateEngineTemplateSearchCommonVersion)" />
+    <PackageReference Include="Microsoft.Win32.Registry" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup Condition=" '$(IncludeAspNetCoreRuntime)' != 'false' ">
     <PackageReference Include="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="$(MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion)" />

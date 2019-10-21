@@ -17,6 +17,9 @@
 
     <!-- Workaround for https://github.com/NuGet/NuGet.Client/pull/3016 -->
     <NoWarn>$(NoWarn);NU5131</NoWarn>
+
+    <!-- Avoid package downgrade warning for Microsoft.ApplicationInsights -->
+    <NoWarn>$(NoWarn);NU1701</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
@@ -40,5 +43,7 @@
     </ItemGroup>
     
   </Target>
+
+  <Import Project="build/GenerateResxSource.targets" />
 
 </Project>
