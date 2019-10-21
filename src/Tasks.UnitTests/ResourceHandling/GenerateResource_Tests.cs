@@ -3690,7 +3690,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <param name="useType">Indicates whether to include an enum to test type-specific resource encoding with assembly references</param>
         /// <param name="linkedBitmap">The name of a linked-in bitmap.  use 'null' for no bitmap.</param>
         /// <returns>The name of the resx file</returns>
-        public static string WriteTestResX(bool useType, string linkedBitmap, string extraToken, string resxFileToWrite = null)
+        public static string WriteTestResX(bool useType, string linkedBitmap, string extraToken, string resxFileToWrite = null, TestEnvironment env = null)
         {
             return WriteTestResX(useType, linkedBitmap, extraToken, useInvalidType: false, resxFileToWrite:resxFileToWrite);
         }
@@ -3701,16 +3701,27 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <param name="useType">Indicates whether to include an enum to test type-specific resource encoding with assembly references</param>
         /// <param name="linkedBitmap">The name of a linked-in bitmap.  use 'null' for no bitmap.</param>
         /// <returns>The name of the resx file</returns>
-        public static string WriteTestResX(bool useType, string linkedBitmap, string extraToken, bool useInvalidType, string resxFileToWrite = null)
+        public static string WriteTestResX(bool useType, string linkedBitmap, string extraToken, bool useInvalidType, string resxFileToWrite = null, TestEnvironment env = null)
         {
             string resgenFile = resxFileToWrite;
-            if (string.IsNullOrEmpty(resgenFile))
+
+            string contents = GetTestResXContent(useType, linkedBitmap, extraToken, useInvalidType);
+
+            if (env == null)
             {
-                resgenFile = GetTempFileName(".resx");
-                File.Delete(resgenFile);
+                if (string.IsNullOrEmpty(resgenFile))
+                {
+                        resgenFile = GetTempFileName(".resx");
+                        File.Delete(resgenFile);
+                }
+
+                File.WriteAllText(resgenFile, contents);
+            }
+            else
+            {
+                resgenFile = env.CreateFile(".resx", contents).Path;
             }
 
-            File.WriteAllText(resgenFile, GetTestResXContent(useType, linkedBitmap, extraToken, useInvalidType));
             return resgenFile;
         }
 
