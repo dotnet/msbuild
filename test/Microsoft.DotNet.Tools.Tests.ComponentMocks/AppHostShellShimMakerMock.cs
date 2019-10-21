@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 {
     internal class AppHostShellShimMakerMock : IAppHostShellShimMaker
     {
-        private static IFileSystem _fileSystem;
+        private readonly IFileSystem _fileSystem;
 
         public AppHostShellShimMakerMock(IFileSystem fileSystem = null)
         {
