@@ -11,7 +11,7 @@ namespace Microsoft.Build.Eventing
 {
     // /OnlyProviders=*MSBuild-Profiling
     [EventSource(Name = "Microsoft-Build")]
-    public sealed class MSBuildEventSource : EventSource
+    internal sealed class MSBuildEventSource : EventSource
     {
         #region Singleton instance
 
