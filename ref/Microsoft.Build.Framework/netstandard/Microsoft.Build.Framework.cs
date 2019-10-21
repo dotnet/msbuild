@@ -26,7 +26,7 @@ namespace Microsoft.Build.Eventing
         [System.Diagnostics.Tracing.EventAttribute(9)]
         public void EvaluateConditionStart(string condition) { }
         [System.Diagnostics.Tracing.EventAttribute(10)]
-        public void EvaluateConditionStop(string condition) { }
+        public void EvaluateConditionStop(string condition, bool result) { }
         [System.Diagnostics.Tracing.EventAttribute(12)]
         public void EvaluatePhase0Start(string projectFile) { }
         [System.Diagnostics.Tracing.EventAttribute(13)]

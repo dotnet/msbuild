@@ -104,7 +104,7 @@ namespace Microsoft.Build.Evaluation
                     lazyEvaluator._loggingContext.BuildEventContext,
                     lazyEvaluator.FileSystem
                     );
-                MSBuildEventSource.Log.EvaluateConditionStop(condition);
+                MSBuildEventSource.Log.EvaluateConditionStop(condition, result);
 
                 return result;
             }

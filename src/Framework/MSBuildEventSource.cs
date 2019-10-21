@@ -99,7 +99,7 @@ namespace Microsoft.Build.Eventing
         /// <summary>
         /// Call this method to notify listeners of information relevant to resolving conditionals.
         /// </summary>
-        /// <param name="condition">Relevant information about where in the run of the progam it is.</param>
+        /// <param name="condition">The condition being evaluated.</param>
         [Event(9)]
         public void EvaluateConditionStart(string condition)
         {
@@ -109,11 +109,12 @@ namespace Microsoft.Build.Eventing
         /// <summary>
         /// Call this method to notify listeners of the end of the specified event.
         /// </summary>
-        /// <param name="condition">Relevant information about where in the run of the progam it is.</param>
+        /// <param name="condition">The condition being evaluated.</param>
+        /// <param name="result">The result of evaluating the condition.</param>
         [Event(10)]
-        public void EvaluateConditionStop(string condition)
+        public void EvaluateConditionStop(string condition, bool result)
         {
-            WriteEvent(10, condition);
+            WriteEvent(10, condition, result);
         }
 
         /// <summary>
