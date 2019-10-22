@@ -13,11 +13,6 @@
   <!-- Production Dependencies -->
   <PropertyGroup>
     <MicrosoftApplicationInsightsPackageVersion>2.0.0</MicrosoftApplicationInsightsPackageVersion>
-    <MicrosoftBuildPackageVersion>15.4.8</MicrosoftBuildPackageVersion>
-    <MicrosoftBuildVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildVersion>
-    <MicrosoftBuildFrameworkVersion>15.4.8</MicrosoftBuildFrameworkVersion>
-    <MicrosoftBuildUtilitiesCorePackageVersion>15.4.8</MicrosoftBuildUtilitiesCorePackageVersion>
-    <MicrosoftBuildUtilitiesCoreVersion>$(MicrosoftBuildUtilitiesCorePackageVersion)</MicrosoftBuildUtilitiesCoreVersion>
     <MicrosoftNETHostModelVersion>5.0.0-alpha.1.19562.8</MicrosoftNETHostModelVersion>
     <MicrosoftExtensionsDependencyModelPackageVersion>2.1.0-preview2-26306-03</MicrosoftExtensionsDependencyModelPackageVersion>
     <MicrosoftExtensionsDependencyModelVersion>$(MicrosoftExtensionsDependencyModelPackageVersion)</MicrosoftExtensionsDependencyModelVersion>
@@ -33,11 +28,23 @@
     <NuGetFrameworksPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetFrameworksPackageVersion>
     <NuGetCommonPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetCommonPackageVersion>
     <NuGetConfigurationPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetConfigurationPackageVersion>
+    <NuGetCommandLineXPlatPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetCommandLineXPlatPackageVersion>
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>5.0.0-alpha1.19428.13</MicrosoftDotNetPlatformAbstractionsPackageVersion>
     <PlatformAbstractionsVersion>$(MicrosoftDotNetPlatformAbstractionsPackageVersion)</PlatformAbstractionsVersion>
     <SystemDiagnosticsFileVersionInfoVersion>4.0.0</SystemDiagnosticsFileVersionInfoVersion>
     <SystemReflectionMetadataVersion>1.5.0</SystemReflectionMetadataVersion>
     <MicrosoftDotNetSignToolVersion>5.0.0-beta.19601.1</MicrosoftDotNetSignToolVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!-- Dependencies from https://github.com/Microsoft/msbuild -->
+    <MicrosoftBuildPackageVersion>16.3.0-preview-19456-02</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
+    <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
+    <MicrosoftBuildLocalizationPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildLocalizationPackageVersion>
+    <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
+    <MicrosoftBuildVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildVersion>
+    <MicrosoftBuildFrameworkVersion>$(MicrosoftBuildFrameworkPackageVersion)</MicrosoftBuildFrameworkVersion>
+    <MicrosoftBuildUtilitiesCoreVersion>$(MicrosoftBuildUtilitiesCorePackageVersion)</MicrosoftBuildUtilitiesCoreVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/CliCommandLineParser -->
@@ -55,6 +62,10 @@
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore -->
     <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>5.0.0-alpha1.19427.5</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!-- Dependencies from https://github.com/Microsoft/visualfsharp -->
+    <MicrosoftFSharpCompilerPackageVersion>10.7.0-beta.19460.5</MicrosoftFSharpCompilerPackageVersion>
   </PropertyGroup>
   <!-- Get .NET Framework reference assemblies from NuGet packages -->
   <PropertyGroup>
