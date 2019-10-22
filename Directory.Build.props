@@ -18,8 +18,12 @@
     <!-- Workaround for https://github.com/NuGet/NuGet.Client/pull/3016 -->
     <NoWarn>$(NoWarn);NU5131</NoWarn>
 
-    <!-- Avoid package downgrade warning for Microsoft.ApplicationInsights -->
+    <!-- Disable implict package target fallback, and disable warning for when we explicitly add it (currently needed for
+         Microsoft.ApplicationInsights) -->
     <NoWarn>$(NoWarn);NU1701</NoWarn>
+    <DisableImplicitPackageTargetFallback>true</DisableImplicitPackageTargetFallback>
+
+    <!-- <ArtifactsShippingSymbolsDir>$(ArtifactsDir)symbols\$(Configuration)\Shipping</ArtifactsShippingSymbolsDir> -->
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsTestProject)' == 'true'">

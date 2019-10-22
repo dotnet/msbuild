@@ -29,6 +29,8 @@
     <PackageReference Include="NuGet.Configuration" Version="$(NuGetProjectModelVersion)" />
     <PackageReference Include="NuGet.Frameworks" Version="$(NuGetProjectModelVersion)" />
     <PackageReference Include="NuGet.Common" Version="$(NuGetProjectModelVersion)" />
+    
+    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)" />
 
     <!-- Referenced explicitly here because Microsoft.DotNet.Cli.Utils references a lower version at the moment, which causes
          RAR conflicts (though ideally I would think NuGet would resolve this) -->

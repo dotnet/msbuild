@@ -22,4 +22,14 @@
   <Import Project="OverrideTest.targets"
           Condition="'$(RunTestsAsTool)' == 'true' And '$(CanRunTestAsTool)' == 'true'"/>
 
+
+  <!-- Update KnownFrameworkReferences to target the right version of the runtime -->
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'
+                        and $(MicrosoftNETCoreAppRefPackageVersion.StartsWith('$(_TargetFrameworkVersionWithoutV)'))">
+    <FrameworkReference
+        Update="Microsoft.NETCore.App" 
+        TargetingPackVersion="$(MicrosoftNETCoreAppRefPackageVersion)"
+        RuntimeFrameworkVersion="$(MicrosoftNETCoreAppRuntimePackageersion)" />
+  </ItemGroup>
+
 </Project>
