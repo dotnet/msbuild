@@ -1,17 +1,15 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Eventing;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Framework;
 
 using Expander = Microsoft.Build.Evaluation.Expander<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Eventing;
-using System.Globalization;
 
 namespace Microsoft.Build.Construction
 {

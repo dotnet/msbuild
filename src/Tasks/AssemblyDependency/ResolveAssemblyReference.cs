@@ -2,23 +2,23 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Globalization;
-using System.Text;
-using System.Diagnostics;
-using System.Reflection;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Reflection;
+using System.Text;
+using System.Xml.Linq;
 
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
 
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
-using System.Xml.Linq;
-using Microsoft.Build.Tasks.AssemblyDependency;
-using Microsoft.Build.Eventing;
 
 namespace Microsoft.Build.Tasks
 {
@@ -926,7 +926,7 @@ namespace Microsoft.Build.Tasks
         )
         {
             bool success = true;
-            MSBuildEventSource.Log.LogResultsStart();
+            MSBuildEventSource.Log.RarLogResultsStart();
             {
                 /*
                 PERF NOTE: The Silent flag turns off logging completely from the task side. This means
@@ -1130,7 +1130,7 @@ namespace Microsoft.Build.Tasks
             }
 #endif
 
-            MSBuildEventSource.Log.LogResultsStop();
+            MSBuildEventSource.Log.RarLogResultsStop();
 
             return success;
         }
@@ -1916,7 +1916,7 @@ namespace Microsoft.Build.Tasks
         )
         {
             bool success = true;
-            MSBuildEventSource.Log.ExecuteTaskStart();
+            MSBuildEventSource.Log.RarOverallStart();
             {
                 try
                 {
@@ -2388,7 +2388,7 @@ namespace Microsoft.Build.Tasks
                             }
                         }
                     }
-                    MSBuildEventSource.Log.ExecuteTaskStop();
+                    MSBuildEventSource.Log.RarOverallStop();
                     return success && !Log.HasLoggedErrors;
                 }
                 catch (ArgumentException e)
@@ -2405,7 +2405,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            MSBuildEventSource.Log.ExecuteTaskStop();
+            MSBuildEventSource.Log.RarOverallStop();
 
             return success && !Log.HasLoggedErrors;
         }

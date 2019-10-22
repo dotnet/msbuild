@@ -1,16 +1,13 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -53,14 +50,14 @@ namespace Microsoft.Build.Evaluation
 
             public virtual void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-                MSBuildEventSource.Log.ApplyStart();
+                MSBuildEventSource.Log.ApplyLazyItemOperationsStart(_itemElement.ItemType);
                 using (_lazyEvaluator._evaluationProfiler.TrackElement(_itemElement))
                 {
                     var items = SelectItems(listBuilder, globsToIgnore);
                     MutateItems(items);
                     SaveItems(items, listBuilder);
                 }
-                MSBuildEventSource.Log.ApplyStop();
+                MSBuildEventSource.Log.ApplyLazyItemOperationsStop(_itemElement.ItemType);
             }
 
             /// <summary>

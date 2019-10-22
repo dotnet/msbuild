@@ -1340,7 +1340,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void RemoveReferencesMarkedForExclusion(bool removeOnlyNoWarning, string subsetName)
         {
-            MSBuildEventSource.Log.RemoveReferencesMarkedForExclusionStart();
+            MSBuildEventSource.Log.RarRemoveReferencesMarkedForExclusionStart();
             {
                 // Create a table which will contain the references which are not in the black list
                 var goodReferences = new Dictionary<AssemblyNameExtension, Reference>(AssemblyNameComparer.GenericComparer);
@@ -1427,7 +1427,7 @@ namespace Microsoft.Build.Tasks
 
                 // Replace the references table with the list only containing good references.
                 References = goodReferences;
-                MSBuildEventSource.Log.RemoveReferencesMarkedForExclusionStop();
+                MSBuildEventSource.Log.RarRemoveReferencesMarkedForExclusionStop();
             }
         }
 
@@ -1594,7 +1594,7 @@ namespace Microsoft.Build.Tasks
             List<Exception> exceptions
         )
         {
-            MSBuildEventSource.Log.ComputeClosureStart();
+            MSBuildEventSource.Log.RarComputeClosureStart();
             {
                 References.Clear();
                 _externallyResolvedPrimaryReferences.Clear();
@@ -1605,7 +1605,7 @@ namespace Microsoft.Build.Tasks
 
                 ComputeClosure();
             }
-            MSBuildEventSource.Log.ComputeClosureStop();
+            MSBuildEventSource.Log.RarComputeClosureStop();
         }
 
         /// <summary>

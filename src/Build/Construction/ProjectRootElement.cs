@@ -12,18 +12,16 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
-using Microsoft.Build.Collections;
 
+using Microsoft.Build.Collections;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.Construction
 {
@@ -1506,7 +1504,10 @@ namespace Microsoft.Build.Construction
             ErrorUtilities.VerifyThrowInvalidOperation(_projectFileLocation != null, "OM_MustSetFileNameBeforeSave");
 
             Directory.CreateDirectory(DirectoryPath);
-            MSBuildEventSource.Log.SaveStart();
+            if (MSBuildEventSource.Log.IsEnabled())
+            {
+                MSBuildEventSource.Log.SaveStart(_projectFileLocation.LocationString);
+            }
             {
                 // Note: We're using string Equals on encoding and not EncodingUtilities.SimilarToEncoding in order
                 // to force a save if the Encoding changed from UTF8 with BOM to UTF8 w/o BOM (for example).
@@ -1534,7 +1535,10 @@ namespace Microsoft.Build.Construction
                     _versionOnDisk = Version;
                 }
             }
-            MSBuildEventSource.Log.SaveStop();
+            if (MSBuildEventSource.Log.IsEnabled())
+            {
+                MSBuildEventSource.Log.SaveStop(_projectFileLocation.LocationString);
+            }
         }
 
         /// <summary>
@@ -2032,42 +2036,40 @@ namespace Microsoft.Build.Construction
                 PreserveWhitespace = preserveFormatting
             };
 
+            try
             {
-                try
+                MSBuildEventSource.Log.LoadDocumentStart(fullPath);
+                using (XmlReaderExtension xtr = XmlReaderExtension.Create(fullPath, loadAsReadOnly))
                 {
-                    MSBuildEventSource.Log.LoadDocumentStart();
-                    using (XmlReaderExtension xtr = XmlReaderExtension.Create(fullPath, loadAsReadOnly))
-                    {
-                        _encoding = xtr.Encoding;
-                        document.Load(xtr.Reader);
-                    }
-
-                    _projectFileLocation = ElementLocation.Create(fullPath);
-                    _escapedFullPath = null;
-                    _directory = Path.GetDirectoryName(fullPath);
-
-                    if (XmlDocument != null)
-                    {
-                        XmlDocument.FullPath = fullPath;
-                    }
-
-                    _lastWriteTimeWhenRead = FileUtilities.GetFileInfoNoThrow(fullPath).LastWriteTime;
+                    _encoding = xtr.Encoding;
+                    document.Load(xtr.Reader);
                 }
-                catch (Exception ex)
+
+                _projectFileLocation = ElementLocation.Create(fullPath);
+                _escapedFullPath = null;
+                _directory = Path.GetDirectoryName(fullPath);
+
+                if (XmlDocument != null)
                 {
-                    if (ExceptionHandling.NotExpectedIoOrXmlException(ex))
-                    {
-                        throw;
-                    }
-
-                    BuildEventFileInfo fileInfo = ex is XmlException xmlException
-                        ? new BuildEventFileInfo(fullPath, xmlException)
-                        : new BuildEventFileInfo(fullPath);
-
-                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(fileInfo, ex, "InvalidProjectFile", ex.Message);
+                    XmlDocument.FullPath = fullPath;
                 }
-                MSBuildEventSource.Log.LoadDocumentStop();
+
+                _lastWriteTimeWhenRead = FileUtilities.GetFileInfoNoThrow(fullPath).LastWriteTime;
             }
+            catch (Exception ex)
+            {
+                if (ExceptionHandling.NotExpectedIoOrXmlException(ex))
+                {
+                    throw;
+                }
+
+                BuildEventFileInfo fileInfo = ex is XmlException xmlException
+                    ? new BuildEventFileInfo(fullPath, xmlException)
+                    : new BuildEventFileInfo(fullPath);
+
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(fileInfo, ex, "InvalidProjectFile", ex.Message);
+            }
+            MSBuildEventSource.Log.LoadDocumentStop(fullPath);
 
             return document;
         }

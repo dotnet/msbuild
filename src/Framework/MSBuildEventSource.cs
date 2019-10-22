@@ -1,45 +1,38 @@
-﻿using System;
-using System.IO;
-using System.Diagnostics.Tracing;
-using System.Globalization;
+﻿using System.Diagnostics.Tracing;
 
-
-//
-// This captures information of how various key methods of building with MSBuild ran.
-//
 namespace Microsoft.Build.Eventing
 {
-    // /OnlyProviders=*MSBuild-Profiling
+
+    //
+    // This captures information of how various key methods of building with MSBuild ran.
+    //
+    // /OnlyProviders=*Microsoft-Build
     [EventSource(Name = "Microsoft-Build")]
     internal sealed class MSBuildEventSource : EventSource
     {
-        #region Singleton instance
 
         // define the singleton instance of the event source
         public static MSBuildEventSource Log = new MSBuildEventSource();
 
         private MSBuildEventSource() { }
 
-        #endregion
-
-        #region Events and NonEvents
+        #region Events
 
         /// <summary>
         /// Call this method to notify listeners of information relevant to collecting a set of items, mutating them in a specified way, and saving the results.
         /// </summary>
+        /// <param name="itemType">The type of the item being mutated.</param>
         [Event(1)]
-        public void ApplyStart()
+        public void ApplyLazyItemOperationsStart(string itemType)
         {
-            WriteEvent(1);
+            WriteEvent(1, itemType);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of the end of the specified event.
-        /// </summary>
+        /// <param name="itemType">The type of the item being mutated.</param>
         [Event(2)]
-        public void ApplyStop()
+        public void ApplyLazyItemOperationsStop(string itemType)
         {
-            WriteEvent(2);
+            WriteEvent(2, itemType);
         }
 
         /// <summary>
@@ -51,9 +44,6 @@ namespace Microsoft.Build.Eventing
             WriteEvent(3);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of the end of the specified event.
-        /// </summary>
         [Event(4)]
         public void BuildStop()
         {
@@ -62,43 +52,34 @@ namespace Microsoft.Build.Eventing
 
         /// <summary>
         /// Call this method to notify listeners of information of how a project file built.
+        /// <param name="projectPath">Filename of the project being built.</param>
         /// </summary>
         [Event(5)]
-        public void BuildProjectStart()
+        public void BuildProjectStart(string projectPath)
         {
-            WriteEvent(5);
+            WriteEvent(5, projectPath);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of the end of the specified event.
-        /// </summary>
+        /// <param name="projectPath">Filename of the project being built.</param>
+        /// <param name="targets">Names of the targets that built.</param>
         [Event(6)]
-        public void BuildProjectStop()
+        public void BuildProjectStop(string projectPath, string[] targets)
         {
-            WriteEvent(6);
+            WriteEvent(6, projectPath, targets);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of information relevant to resolving references.
-        /// </summary>
         [Event(7)]
-        public void ComputeClosureStart()
+        public void RarComputeClosureStart()
         {
             WriteEvent(7);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of the end of the specified event.
-        /// </summary>
         [Event(8)]
-        public void ComputeClosureStop()
+        public void RarComputeClosureStop()
         {
             WriteEvent(8);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of information relevant to resolving conditionals.
-        /// </summary>
         /// <param name="condition">The condition being evaluated.</param>
         [Event(9)]
         public void EvaluateConditionStart(string condition)
@@ -106,9 +87,6 @@ namespace Microsoft.Build.Eventing
             WriteEvent(9, condition);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of the end of the specified event.
-        /// </summary>
         /// <param name="condition">The condition being evaluated.</param>
         /// <param name="result">The result of evaluating the condition.</param>
         [Event(10)]
@@ -127,129 +105,90 @@ namespace Microsoft.Build.Eventing
             WriteEvent(11, projectFile);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of progress made on Evaluate.
-        /// </summary>
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(12)]
-        public void EvaluatePhase0Start(string projectFile)
+        public void EvaluatePass0Start(string projectFile)
         {
             WriteEvent(12, projectFile);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of progress made on Evaluate.
-        /// </summary>
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(13)]
-        public void EvaluatePhase0Stop(string projectFile)
+        public void EvaluatePass0Stop(string projectFile)
         {
             WriteEvent(13, projectFile);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of progress made on Evaluate.
-        /// </summary>
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(14)]
-        public void EvaluatePhase1Start(string projectFile)
+        public void EvaluatePass1Start(string projectFile)
         {
             WriteEvent(14, projectFile);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of progress made on Evaluate.
-        /// </summary>
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(15)]
-        public void EvaluatePhase1Stop(string projectFile)
+        public void EvaluatePass1Stop(string projectFile)
         {
             WriteEvent(15, projectFile);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of progress made on Evaluate.
-        /// </summary>
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(16)]
-        public void EvaluatePhase2Start(string projectFile)
+        public void EvaluatePass2Start(string projectFile)
         {
             WriteEvent(16, projectFile);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of progress made on Evaluate.
-        /// </summary>
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(17)]
-        public void EvaluatePhase2Stop(string projectFile)
+        public void EvaluatePass2Stop(string projectFile)
         {
             WriteEvent(17, projectFile);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of progress made on Evaluate.
-        /// </summary>
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(18)]
-        public void EvaluatePhase3Start(string projectFile)
+        public void EvaluatePass3Start(string projectFile)
         {
             WriteEvent(18, projectFile);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of progress made on Evaluate.
-        /// </summary>
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(19)]
-        public void EvaluatePhase3Stop(string projectFile)
+        public void EvaluatePass3Stop(string projectFile)
         {
             WriteEvent(19, projectFile);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of progress made on Evaluate.
-        /// </summary>
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(20)]
-        public void EvaluatePhase4Start(string projectFile)
+        public void EvaluatePass4Start(string projectFile)
         {
             WriteEvent(20, projectFile);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of progress made on Evaluate.
-        /// </summary>
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(21)]
-        public void EvaluatePhase4Stop(string projectFile)
+        public void EvaluatePass4Stop(string projectFile)
         {
             WriteEvent(21, projectFile);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of progress made on Evaluate.
-        /// </summary>
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(22)]
-        public void EvaluatePhase5Start(string projectFile)
+        public void EvaluatePass5Start(string projectFile)
         {
             WriteEvent(22, projectFile);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of progress made on Evaluate.
-        /// </summary>
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(23)]
-        public void EvaluatePhase5Stop(string projectFile)
+        public void EvaluatePass5Stop(string projectFile)
         {
             WriteEvent(23, projectFile);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of the end of the specified event.
-        /// </summary>
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(24)]
         public void EvaluateStop(string projectFile)
@@ -257,74 +196,70 @@ namespace Microsoft.Build.Eventing
             WriteEvent(24, projectFile);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of information relevant to the execution of the GenerateResource task.
-        /// </summary>
         [Event(25)]
-        public void ExecuteGenerateResourceStart()
+        public void GenerateResourceOverallStart()
         {
             WriteEvent(25);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of the end of the specified event.
-        /// </summary>
         [Event(26)]
-        public void ExecuteGenerateResourceStop()
+        public void GenerateResourceOverallStop()
         {
             WriteEvent(26);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of profiling related to executing a task.
-        /// </summary>
         [Event(27)]
-        public void ExecuteTaskStart()
+        public void RarOverallStart()
         {
             WriteEvent(27);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of the end of the specified event.
-        /// </summary>
         [Event(28)]
-        public void ExecuteTaskStop()
+        public void RarOverallStop()
         {
             WriteEvent(28);
         }
 
         /// <summary>
+        /// Call this method to notify listeners of information relevant to identifying a list of files that correspond to an item with a wildcard.
+        /// </summary>
+        [Event(41)]
+        public void ExpandGlobStart()
+        {
+            WriteEvent(41);
+        }
+
+        [Event(42)]
+        public void ExpandGlobStop()
+        {
+            WriteEvent(42);
+        }
+
+        /// <summary>
         /// Call this method to notify listeners of timing related to loading an XmlDocumentWithLocation from a path.
+        /// <param name="fullPath">Path to the document to load.</param>
         /// </summary>
         [Event(29)]
-        public void LoadDocumentStart()
+        public void LoadDocumentStart(string fullPath)
         {
-            WriteEvent(29);
+            WriteEvent(29, fullPath);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of the end of the specified event.
-        /// </summary>
+        /// <param name="fullPath">Path to the document to load.</param>
         [Event(30)]
-        public void LoadDocumentStop()
+        public void LoadDocumentStop(string fullPath)
         {
-            WriteEvent(30);
+            WriteEvent(30, fullPath);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of the result of loggint the results from executing a task.
-        /// </summary>
         [Event(31)]
-        public void LogResultsStart()
+        public void RarLogResultsStart()
         {
             WriteEvent(31);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of the end of the specified event.
-        /// </summary>
         [Event(32)]
-        public void LogResultsStop()
+        public void RarLogResultsStop()
         {
             WriteEvent(32);
         }
@@ -340,9 +275,6 @@ namespace Microsoft.Build.Eventing
             WriteEvent(33, projectFileName);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of the end of the specified event.
-        /// </summary>
         /// <param name="projectFileName">Relevant information about where in the run of the progam it is.</param>
         [Event(34)]
         public void ParseStop(string projectFileName)
@@ -354,77 +286,45 @@ namespace Microsoft.Build.Eventing
         /// Call this method to notify listeners of profiling for the method that removes blacklisted references from the reference table. It puts primary and dependency references in invalid file lists.
         /// </summary>
         [Event(35)]
-        public void RemoveReferencesMarkedForExclusionStart()
+        public void RarRemoveReferencesMarkedForExclusionStart()
         {
             WriteEvent(35);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of the end of the specified event.
-        /// </summary>
         [Event(36)]
-        public void RemoveReferencesMarkedForExclusionStop()
+        public void RarRemoveReferencesMarkedForExclusionStop()
         {
             WriteEvent(36);
         }
 
-        /// <summary>
-        /// Call this method to provide timing analysis for requesting a new builder thread.
-        /// </summary>
+        /// <param name="fullPath">File name of the project to build.</param>
         [Event(37)]
-        public void RequestThreadProcStart()
+        public void RequestThreadProcStart(string fullPath)
         {
-            WriteEvent(37);
+            WriteEvent(37, fullPath);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of the end of the specified event.
-        /// </summary>
+        /// <param name="fullPath">File name of the project to build.</param>
         [Event(38)]
-        public void RequestThreadProcStop()
+        public void RequestThreadProcStop(string fullPath)
         {
-            WriteEvent(38);
+            WriteEvent(38, fullPath);
         }
 
-        /// <summary>
-        /// Call this method to capturing timing information for saving a project to the file system if dirty, creating directories as necessary.
-        /// </summary>
+        /// <param name="fileLocation">Project file's location.</param>
         [Event(39)]
-        public void SaveStart()
+        public void SaveStart(string fileLocation)
         {
-            WriteEvent(39);
+            WriteEvent(39, fileLocation);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of the end of the specified event.
-        /// </summary>
+        /// <param name="fileLocation">Project file's location.</param>
         [Event(40)]
-        public void SaveStop()
+        public void SaveStop(string fileLocation)
         {
-            WriteEvent(40);
+            WriteEvent(40, fileLocation);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of information relevant to identifying a list of files that correspond to an item with a wildcard.
-        /// </summary>
-        [Event(41)]
-        public void SelectItemsStart()
-        {
-            WriteEvent(41);
-        }
-
-        /// <summary>
-        /// Call this method to notify listeners of the end of the specified event.
-        /// </summary>
-        [Event(42)]
-        public void SelectItemsStop()
-        {
-            WriteEvent(42);
-        }
-
-        /// <summary>
-        /// Call this method to notify listeners of a target beginning execution.
-        /// </summary>
         /// <param name="targetName"/>The name of the target being executed.</param>
         [Event(43)]
         public void TargetStart(string targetName)
@@ -432,9 +332,6 @@ namespace Microsoft.Build.Eventing
             WriteEvent(43, targetName);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of the end of the specified event.
-        /// </summary>
         /// <param name="targetName">The name of the target being executed.</param>
         [Event(44)]
         public void TargetStop(string targetName)
@@ -446,16 +343,13 @@ namespace Microsoft.Build.Eventing
         /// Call this method to notify listeners of the start of a build as called from the command line.
         /// </summary>
         [Event(45)]
-        public void XMakeStart()
+        public void MSBuildExeStart()
         {
             WriteEvent(45);
         }
 
-        /// <summary>
-        /// Call this method to notify listeners of the end of the specified event.
-        /// </summary>
         [Event(46)]
-        public void XMakeStop()
+        public void MSBuildExeStop()
         {
             WriteEvent(46);
         }

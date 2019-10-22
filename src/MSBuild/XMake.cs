@@ -19,6 +19,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -39,7 +40,6 @@ using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
-using Microsoft.Build.Eventing;
 
 namespace Microsoft.Build.CommandLine
 {
@@ -516,7 +516,7 @@ namespace Microsoft.Build.CommandLine
             ConsoleCancelEventHandler cancelHandler = Console_CancelKeyPress;
             try
             {
-                MSBuildEventSource.Log.XMakeStart();
+                MSBuildEventSource.Log.MSBuildExeStart();
                 Console.CancelKeyPress += cancelHandler;
 
                 // check the operating system the code is running on
@@ -795,7 +795,7 @@ namespace Microsoft.Build.CommandLine
                 // Wait for any pending cancel, so that we get any remaining messages
                 s_cancelComplete.WaitOne();
 
-                MSBuildEventSource.Log.XMakeStop();
+                MSBuildEventSource.Log.MSBuildExeStop();
             }
             /**********************************************************************************************************************
              * WARNING: Do NOT add any more catch blocks above!
