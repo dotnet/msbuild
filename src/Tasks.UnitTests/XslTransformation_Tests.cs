@@ -688,6 +688,7 @@ namespace Microsoft.Build.UnitTests
             CleanUp(dir);
         }
 
+#if FEATURE_COMPILED_XSL
         /// <summary>
         /// Missing XsltCompiledDll file.
         /// </summary>
@@ -715,7 +716,7 @@ namespace Microsoft.Build.UnitTests
 
             CleanUp(dir);
         }
-
+#endif
         /// <summary>
         /// Bad XML on "Parameter" parameter.
         /// </summary>
@@ -814,6 +815,7 @@ namespace Microsoft.Build.UnitTests
             CleanUp(dir);
         }
 
+#if FEATURE_COMPILED_XSL
         /// <summary>
         /// Passing a dll that has two types to XsltCompiledDll parameter without specifying a type.
         /// </summary>
@@ -826,10 +828,10 @@ namespace Microsoft.Build.UnitTests
             Prepare(out dir, out _, out _, out _, out outputPaths, out _, out _, out engine);
 
             // doubletype
-            string doubleTypePath = Path.Combine(dir, "double.dll");
-#if FEATURE_COMPILED_XSL
+        string doubleTypePath = Path.Combine(dir, "double.dll");
+
             CompileDoubleType(doubleTypePath);
-#endif
+
             {
                 XslTransformation t = new XslTransformation();
                 t.BuildEngine = engine;
@@ -851,7 +853,7 @@ namespace Microsoft.Build.UnitTests
 
             CleanUp(dir);
         }
-
+#endif
         /// <summary>
         /// Matching XmlInputPaths and OutputPaths
         /// </summary>
@@ -956,6 +958,7 @@ namespace Microsoft.Build.UnitTests
             CleanUp(dir);
         }
 
+#if FEATURE_COMPILED_XSL
         /// <summary>
         /// Validate that the XslTransformation task allows use of the document function
         /// </summary>
@@ -1009,6 +1012,7 @@ namespace Microsoft.Build.UnitTests
 
             CleanUp(dir);
         }
+#endif
 
         /// <summary>
         /// Prepares the test environment, creates necessary files.
@@ -1183,4 +1187,4 @@ namespace Microsoft.Build.UnitTests
         #endregion
     }
 #endif
-}
+    }
