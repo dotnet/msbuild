@@ -130,6 +130,15 @@ Copyright (c) .NET Foundation. All rights reserved.
       />
   </Target>
 
+  <!--
+    Trigger an error if C++ project targeting a lower version of .NET Core than 3.1.
+  -->
+  <Target Name="_CheckForUnsupportedCppNETCoreVersion" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;Restore;CollectPackageReferences">
+    <NETSdkError Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_TargetFrameworkVersionWithoutV)' &lt; '3.1' and '$(Language)' == 'C++'"
+                 ResourceName="CppRequiresTFMVersion31"
+      />
+  </Target>
+
   <PropertyGroup  Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(NETStandardMaximumVersion)' == ''">
     <NETStandardMaximumVersion>2.1</NETStandardMaximumVersion>
   </PropertyGroup>

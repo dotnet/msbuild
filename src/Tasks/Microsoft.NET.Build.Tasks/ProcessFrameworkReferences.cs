@@ -139,7 +139,9 @@ namespace Microsoft.NET.Build.Tasks
                 targetingPack.SetMetadata(MetadataKeys.PackageVersion, targetingPackVersion);
                 targetingPack.SetMetadata("TargetingPackFormat", knownFrameworkReference.TargetingPackFormat);
                 targetingPack.SetMetadata("TargetFramework", knownFrameworkReference.TargetFramework.GetShortFolderName());
-                targetingPack.SetMetadata("RuntimeFrameworkName", knownFrameworkReference.RuntimeFrameworkName);
+                targetingPack.SetMetadata(MetadataKeys.RuntimeFrameworkName, knownFrameworkReference.RuntimeFrameworkName);
+                targetingPack.SetMetadata(MetadataKeys.RuntimePackRuntimeIdentifiers, knownFrameworkReference.RuntimePackRuntimeIdentifiers);
+
                 if (!string.IsNullOrEmpty(knownFrameworkReference.Profile))
                 {
                     targetingPack.SetMetadata("Profile", knownFrameworkReference.Profile);
@@ -296,7 +298,6 @@ namespace Microsoft.NET.Build.Tasks
                         runtimePackItem.SetMetadata(MetadataKeys.FrameworkName, knownFrameworkReference.Name);
                         runtimePackItem.SetMetadata(MetadataKeys.RuntimeIdentifier, runtimePackRuntimeIdentifier);
                         runtimePackItem.SetMetadata(MetadataKeys.IsTrimmable, isTrimmable);
-                        runtimePackItem.SetMetadata(MetadataKeys.AvailableRuntimeIdentifiers, knownFrameworkReference.RuntimePackRuntimeIdentifiers);
 
                         runtimePacks.Add(runtimePackItem);
                     }
@@ -387,7 +388,7 @@ namespace Microsoft.NET.Build.Tasks
             public string Name => _item.ItemSpec;
 
             //  The framework name to write to the runtimeconfig file (and the name of the folder under dotnet/shared)
-            public string RuntimeFrameworkName => _item.GetMetadata("RuntimeFrameworkName");
+            public string RuntimeFrameworkName => _item.GetMetadata(MetadataKeys.RuntimeFrameworkName);
             public string DefaultRuntimeFrameworkVersion => _item.GetMetadata("DefaultRuntimeFrameworkVersion");
             public string LatestRuntimeFrameworkVersion => _item.GetMetadata("LatestRuntimeFrameworkVersion");
 
@@ -398,7 +399,7 @@ namespace Microsoft.NET.Build.Tasks
 
             public string RuntimePackNamePatterns => _item.GetMetadata("RuntimePackNamePatterns");
 
-            public string RuntimePackRuntimeIdentifiers => _item.GetMetadata("RuntimePackRuntimeIdentifiers");
+            public string RuntimePackRuntimeIdentifiers => _item.GetMetadata(MetadataKeys.RuntimePackRuntimeIdentifiers);
 
             public string IsTrimmable => _item.GetMetadata(MetadataKeys.IsTrimmable);
 

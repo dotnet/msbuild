@@ -561,7 +561,7 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1113: "}</comment>
   </data>
   <data name="CannotFindIjwhost" xml:space="preserve">
-    <value>NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.0 or higher when targeting Windows.</value>
+    <value>NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.1 or higher when targeting Windows.</value>
     <comment>{StrBegin="NETSDK1114: "}</comment>
   </data>
   <data name="NETFrameworkWithoutUsingNETSdkDefaults" xml:space="preserve">
@@ -583,5 +583,9 @@ The following are names of parameters or literal values and should not be transl
   <data name="NoSupportCppEnableComHosting" xml:space="preserve">
     <value>NETSDK1119: C++/CLI projects targeting .NET Core cannot use EnableComHosting=true.</value>
     <comment>{StrBegin="NETSDK1119: "}</comment>
+  </data>
+  <data name="CppRequiresTFMVersion31" xml:space="preserve">
+    <value>NETSDK1120: C++/CLI projects targeting .NET Core require a target framework of at least 'netcoreapp3.1'.</value>
+    <comment>{StrBegin="NETSDK1120: "}</comment>
   </data>
 </root>

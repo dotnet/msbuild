@@ -24,7 +24,9 @@ namespace Microsoft.NET.Build.Tasks
         public const string TargetFrameworkMoniker = "TargetFrameworkMoniker";
         public const string FrameworkName = "FrameworkName";
         public const string FrameworkVersion = "FrameworkVersion";
-        public const string IsTrimmable = "IsTrimmable";
+        public const string IsTrimmable = "IsTrimmable"; 
+        public const string RuntimeFrameworkName = "RuntimeFrameworkName";
+        public const string RuntimePackRuntimeIdentifiers = "RuntimePackRuntimeIdentifiers";
 
         // SDK Metadata
         public const string SDKPackageItemSpec = "SDKPackageItemSpec";
@@ -100,7 +102,5 @@ namespace Microsoft.NET.Build.Tasks
         public const string AssetType = "AssetType";
 
         public const string ReferenceOnly = "ReferenceOnly";  
-
-        public const string AvailableRuntimeIdentifiers = "AvailableRuntimeIdentifiers";
     }
 }

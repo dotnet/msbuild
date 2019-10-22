@@ -270,7 +270,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_ReadyToRunImplementationAssemblies Include="@(_ReadyToRunImplementationAssembliesWithoutConflicts)" />
     </ItemGroup>
 
-    <PrepareForReadyToRunCompilation RuntimePacks="@(ResolvedRuntimePack)"
+    <PrepareForReadyToRunCompilation RuntimePacks="@(ResolvedRuntimePack)" 
+                                     TargetingPacks="@(ResolvedTargetingPack)"
                                      RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
                                      NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)"
                                      OutputPath="$(_ReadyToRunOutputPath)"
