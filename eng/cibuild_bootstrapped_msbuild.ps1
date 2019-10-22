@@ -7,6 +7,10 @@ Param(
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
+# Ensure that static state in tools is aware that this is
+# a CI scenario
+$ci = $true
+
 . $PSScriptRoot\common\tools.ps1
 
 Set-StrictMode -Version 2.0
