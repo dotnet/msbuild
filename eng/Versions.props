@@ -70,14 +70,14 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/corefx -->
-    <SystemCodeDomPackageVersion>4.7.0-preview2.19521.5</SystemCodeDomPackageVersion>
-    <SystemTextEncodingCodePagesPackageVersion>4.7.0-preview2.19521.5</SystemTextEncodingCodePagesPackageVersion>
-    <SystemSecurityCryptographyProtectedDataPackageVersion>4.7.0-preview2.19521.5</SystemSecurityCryptographyProtectedDataPackageVersion>
-    <SystemResourcesExtensionsPackageVersion>4.7.0-preview2.19521.5</SystemResourcesExtensionsPackageVersion>
+    <SystemCodeDomPackageVersion>4.7.0-preview2.19521.15</SystemCodeDomPackageVersion>
+    <SystemTextEncodingCodePagesPackageVersion>4.7.0-preview2.19521.15</SystemTextEncodingCodePagesPackageVersion>
+    <SystemSecurityCryptographyProtectedDataPackageVersion>4.7.0-preview2.19521.15</SystemSecurityCryptographyProtectedDataPackageVersion>
+    <SystemResourcesExtensionsPackageVersion>4.7.0-preview2.19521.15</SystemResourcesExtensionsPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/core-setup -->
-    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>3.1.0-preview2.19521.15</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
+    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>3.1.0-preview2.19521.17</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>2.2.0-preview1-26620-03</MicrosoftDotNetPlatformAbstractionsPackageVersion>
