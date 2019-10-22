@@ -243,6 +243,39 @@ $@"  <data name='Image1' type='System.Resources.ResXFileRef, System.Windows.Form
             resource.TypeAssemblyQualifiedName.ShouldBe("System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
         }
 
+        [Theory]
+        [InlineData("System.IO.MemoryStream, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+        [InlineData("System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+        public void ResXFileRefToMemoryStream(string typeNameInResx)
+        {
+            using var env = TestEnvironment.Create(_output);
+
+            var baseDir = env.CreateFolder(createFolder: true);
+            var resourceHandlingFolder = baseDir.CreateDirectory("ResourceHandling");
+
+            var linkedTextFile = resourceHandlingFolder.CreateFile("FileToBeIncluded.txt");
+
+            File.WriteAllText(linkedTextFile.Path,
+                  "Test data");
+
+            var resources = MSBuildResXReader.GetResourcesFromString(
+                ResXHelper.SurroundWithBoilerplate(
+$@"  <data name='Image1' type='System.Resources.ResXFileRef, System.Windows.Forms'>
+    <value>{linkedTextFile.Path};{typeNameInResx}</value>
+  </data>
+"));
+
+            var resource = resources.ShouldHaveSingleItem()
+                .ShouldBeOfType<LiveObjectResource>();
+            resource.Name.ShouldBe("Image1");
+
+            byte[] bytes = new byte[4];
+            resource.Value
+                .ShouldBeOfType<MemoryStream>()
+                .Read(bytes, 0, 4);
+            bytes.ShouldBe(new byte[] { 84, 101, 115, 116 }, "Expected the bytes of 'Test' to start the stream");
+        }
+
         [Fact]
         public void AssemblyElementWithNoAliasInfersSimpleName()
         {

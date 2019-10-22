@@ -99,7 +99,7 @@ stages:
             /p:ArtifactsCategory=$(_DotNetArtifactsCategory)
             /p:IsStableBuild=$(IsStableBuild)
             /p:IsInternalBuild=$(IsInternalBuild)
-            /p:RepositoryName='microsoft-msbuild'
+            /p:RepositoryName=$(Build.Repository.Name)
             /p:CommitSha=$(Build.SourceVersion)
             /p:NugetPath=$(NuGetExeToolPath)
             /p:AzdoTargetFeedPAT='$(dn-bot-dnceng-universal-packages-rw)'

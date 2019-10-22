@@ -313,6 +313,11 @@ namespace Microsoft.Build.Utilities
         #region Overridable methods
 
         /// <summary>
+        /// Overridable function called after <see cref="Process.Start()"/> in <see cref="ExecuteTool"/>
+        /// </summary>
+        protected virtual void ProcessStarted() { }
+
+        /// <summary>
         /// Gets the fully qualified tool name. Should return ToolExe if ToolTask should search for the tool 
         /// in the system path. If ToolPath is set, this is ignored.
         /// </summary>
@@ -705,6 +710,9 @@ namespace Microsoft.Build.Utilities
                 {
                     proc.StandardInput.Dispose();
                 }
+
+                // Call user-provided hook for code that should execute immediately after the process starts
+                this.ProcessStarted();
 
                 // sign up for stderr callbacks
                 proc.BeginErrorReadLine();
