@@ -106,9 +106,8 @@ namespace Microsoft.NET.TestFramework
                 .First();
         }
 
-        public SdkCommandSpec CreateCommandForTarget(string target, params string[] args)
+        public SdkCommandSpec CreateCommandForTarget(string target, IEnumerable<string> args)
         {
-
             var newArgs = args.ToList();
             if (!string.IsNullOrEmpty(target))
             {

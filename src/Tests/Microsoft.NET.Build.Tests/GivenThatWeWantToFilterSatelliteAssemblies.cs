@@ -48,8 +48,7 @@ namespace Microsoft.NET.Build.Tests
                 testProject.AdditionalProperties.Add("CopyLocalLockFileAssemblies", "true");
             }
 
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework)
-                .Restore(Log, testProject.Name);
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
             var buildResult = buildCommand.Execute();
@@ -114,8 +113,7 @@ namespace Microsoft.NET.Build.Tests
                 testProject.AdditionalProperties.Add("CopyLocalLockFileAssemblies", "true");
             }
 
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework)
-                .Restore(Log, testProject.Name);
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
             var buildResult = buildCommand.Execute();

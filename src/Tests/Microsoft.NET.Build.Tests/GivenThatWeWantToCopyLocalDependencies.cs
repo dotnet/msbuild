@@ -44,8 +44,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
              var testProjectInstance = _testAssetsManager
-                .CreateTestProject(testProject)
-                .Restore(Log, ProjectName);
+                .CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
 
@@ -87,8 +86,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
              var testProjectInstance = _testAssetsManager
-                .CreateTestProject(testProject)
-                .Restore(Log, ProjectName);
+                .CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
 
@@ -127,8 +125,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
              var testProjectInstance = _testAssetsManager
-                .CreateTestProject(testProject)
-                .Restore(Log, ProjectName);
+                .CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
 
@@ -168,8 +165,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
              var testProjectInstance = _testAssetsManager
-                .CreateTestProject(testProject)
-                .Restore(Log, ProjectName);
+                .CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
 
@@ -203,8 +199,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
              var testProjectInstance = _testAssetsManager
-                .CreateTestProject(testProject)
-                .Restore(Log, ProjectName);
+                .CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
 
@@ -241,8 +236,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
              var testProjectInstance = _testAssetsManager
-                .CreateTestProject(testProject)
-                .Restore(Log, ProjectName);
+                .CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
 
@@ -276,8 +270,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
              var testProjectInstance = _testAssetsManager
-                .CreateTestProject(testProject)
-                .Restore(Log, ProjectName);
+                .CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
 
@@ -314,8 +307,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
              var testProjectInstance = _testAssetsManager
-                .CreateTestProject(testProject)
-                .Restore(Log, ProjectName);
+                .CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
 
@@ -352,8 +344,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
              var testProjectInstance = _testAssetsManager
-                .CreateTestProject(testProject)
-                .Restore(Log, ProjectName);
+                .CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
 

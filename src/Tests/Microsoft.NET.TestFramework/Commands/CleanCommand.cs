@@ -6,6 +6,7 @@ using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using System.IO;
 using Xunit.Abstractions;
+using System.Collections.Generic;
 
 namespace Microsoft.NET.TestFramework.Commands
 {
@@ -15,5 +16,7 @@ namespace Microsoft.NET.TestFramework.Commands
             : base(log, "Clean", projectPath, relativePathToProject)
         {
         }
+
+        protected override bool ExecuteWithRestoreByDefault => false;
     }
 }

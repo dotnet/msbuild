@@ -46,8 +46,7 @@ namespace Microsoft.NET.Publish.Tests
                                 itemGroup.Add(new XElement(ns + "FrameworkReference",
                                                            new XAttribute("Include", "Microsoft.AspNetCore.App")));
 
-                            })
-                            .Restore(Log, testProject.Name);
+                            });
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 

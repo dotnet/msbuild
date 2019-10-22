@@ -110,7 +110,6 @@ namespace Microsoft.NET.Build.Tests
 
             if (scenario != ReferenceScenario.ProjectReference)
             {
-                testAsset.Restore(Log, relativePath: LibraryName);
 
                 var libBuildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, LibraryName));
                 libBuildCommand
@@ -118,8 +117,6 @@ namespace Microsoft.NET.Build.Tests
                     .Should()
                     .Pass();
             }
-
-            testAsset.Restore(Log, relativePath: AppName);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, AppName));
             buildCommand
@@ -154,8 +151,6 @@ namespace Microsoft.NET.Build.Tests
                         AddReferenceToLibrary(project, ReferenceScenario.ProjectReference);
                     }
                 });
-
-            testAsset.Restore(Log, relativePath: AppName);
 
             var getCommandLineCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, AppName), "", "CscCommandLineArgs", GetValuesCommand.ValueType.Item);
 
@@ -243,11 +238,9 @@ namespace Microsoft.NET.Build.Tests
             if (usePackagesConfig)
             {
                 testAsset.NuGetRestore(Log, relativePath: AppName);
-                testAsset.Restore(Log, relativePath: LibraryName);
             }
             else
             {
-                testAsset.Restore(Log, relativePath: AppName);
             }
 
             // build should succeed without duplicates
@@ -300,8 +293,6 @@ namespace Microsoft.NET.Build.Tests
                         }
                     }
                 });
-
-            testAsset.Restore(Log, relativePath: AppName);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, AppName));
             buildCommand
@@ -364,8 +355,6 @@ namespace Microsoft.NET.Build.Tests
                     }
                 });
 
-            testAsset.Restore(Log, relativePath: AppName);
-
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, AppName));
             buildCommand
                 .Execute()
@@ -403,8 +392,6 @@ namespace Microsoft.NET.Build.Tests
                         targetFrameworkProperty.Value = "netstandard1.5";
                     }
                 });
-
-            testAsset.Restore(Log, relativePath: AppName);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, AppName));
             buildCommand

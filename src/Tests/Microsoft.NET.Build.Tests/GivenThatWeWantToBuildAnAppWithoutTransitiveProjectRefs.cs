@@ -193,7 +193,7 @@ namespace Microsoft.NET.Build.Tests
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "1");
 
             var buildCommand = new BuildCommand(Log, appProjectDirectory);
-            var buildResult = buildCommand.Execute(msbuildArguments);
+            var buildResult = buildCommand.ExecuteWithoutRestore(msbuildArguments);
 
             var outputDirectories = targetFrameworks.ToImmutableDictionary(tf => tf, tf => buildCommand.GetOutputDirectory(tf));
 

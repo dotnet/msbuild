@@ -106,8 +106,7 @@ namespace Microsoft.NET.Publish.Tests
                 .WithProjectChanges(doc =>
                 {
                     doc.Root.Element("PropertyGroup").Element("TargetFramework").SetValue(TargetFramework);
-                })
-                .Restore(Log, relativePath: "", args: $"/p:RuntimeIdentifier={runtimeIdentifier}");
+                });
 
             var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
             publishCommand
@@ -176,7 +175,7 @@ namespace Microsoft.NET.Publish.Tests
             var command = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
 
             command
-                .Execute("/restore", $"/p:RuntimeIdentifier={rid}")
+                .Execute($"/p:RuntimeIdentifier={rid}")
                 .Should()
                 .Pass();
 
@@ -222,7 +221,7 @@ namespace Microsoft.NET.Publish.Tests
             var command = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
 
             command
-                .Execute("/restore", $"/p:RuntimeIdentifier={rid}")
+                .Execute($"/p:RuntimeIdentifier={rid}")
                 .Should()
                 .Pass();
 

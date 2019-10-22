@@ -114,10 +114,13 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(DefaultAppHostRuntimeIdentifier)' == '' and
                             '$(RuntimeIdentifier)' == '' and
                             (('$(UseAppHost)' == 'true' and '$(ProjectDepsFilePath)' == '') or
-                            ('$(EnableComHosting)' == 'true' and '$(_IsExecutable)' != 'true'))">
+                            ('$(EnableComHosting)' == 'true' and '$(_IsExecutable)' != 'true') or
+                            '$(UseIJWHost)' == 'true')">
     <DefaultAppHostRuntimeIdentifier>$(NETCoreSdkRuntimeIdentifier)</DefaultAppHostRuntimeIdentifier>
     <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and '$(PlatformTarget)' == 'x64'">win-x64</DefaultAppHostRuntimeIdentifier>
     <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and '$(PlatformTarget)' == 'x86'">win-x86</DefaultAppHostRuntimeIdentifier>
+    <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and '$(PlatformTarget)' == 'ARM'">win-arm</DefaultAppHostRuntimeIdentifier>
+    <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and '$(PlatformTarget)' == 'ARM64'">win-arm64</DefaultAppHostRuntimeIdentifier>
   </PropertyGroup>
 
   <Target Name="_CheckForUnsupportedAppHostUsage"
@@ -151,13 +154,26 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </Target>
 
+  <Target Name="_CheckForLanguageAndFeatureCombinationSupport"
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform;ProcessFrameworkReferences">
+
+    <NETSdkError Condition="'$(Language)' == 'C++' and $(OutputType) != 'library' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
+                 ResourceName="NoSupportCppNonDynamicLibraryDotnetCore" />
+
+    <NETSdkError Condition="'$(Language)' == 'C++' and $(EnableComHosting) == 'true'"
+                 ResourceName="NoSupportCppEnableComHosting" />
+
+  </Target>
+
   <Target Name="_CheckForNETCoreSdkIsPreview"
           BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
           Condition=" '$(_NETCoreSdkIsPreview)' == 'true' AND '$(SuppressNETCoreSdkPreviewMessage)' != 'true' ">
     <ShowPreviewMessage />
   </Target>
 
-  <PropertyGroup>
+  <!-- Projects which don't use Microsoft.NET.Sdk will typically define the OutputPath directly (usually in a
+       Configuration-specific PropertyGroup), so in that case we won't append to it by default. -->
+  <PropertyGroup Condition="'$(UsingNETSdkDefaults)' == 'true'">
     <!-- Projects can opt out of having the RID appended to the output path by setting this to false. -->
     <AppendRuntimeIdentifierToOutputPath Condition="'$(AppendRuntimeIdentifierToOutputPath)' == ''">true</AppendRuntimeIdentifierToOutputPath>
   </PropertyGroup>

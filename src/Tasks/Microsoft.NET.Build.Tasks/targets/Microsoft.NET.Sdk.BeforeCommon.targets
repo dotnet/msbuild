@@ -11,6 +11,13 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <!-- For projects that aren't using Microsoft.NET.Sdk, these props files won't have been imported yet.
+       So import them here. -->
+  <ImportGroup Condition="'$(UsingNETSdkDefaults)' != 'true'">
+    <Import Project="Microsoft.NET.Sdk.DefaultItems.props" />
+    <Import Project="Microsoft.NET.SupportedTargetFrameworks.props" />
+  </ImportGroup>
+  
   <PropertyGroup>
     <_IsExecutable Condition="'$(OutputType)' == 'Exe' or '$(OutputType)'=='WinExe'">true</_IsExecutable>
   </PropertyGroup>
@@ -20,10 +27,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_UsingDefaultForHasRuntimeOutput>true</_UsingDefaultForHasRuntimeOutput>
   </PropertyGroup>
 
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultAssemblyInfo.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultAssemblyInfo.targets" Condition="'$(UsingNETSdkDefaults)' == 'true'"/>
 
   <!-- Set default intermediate and output paths -->
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultOutputPaths.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultOutputPaths.targets" Condition="'$(UsingNETSdkDefaults)' == 'true'"/>
   
   <!-- Before any additional SDK targets are imported, import the publish profile.
        This allows the publish profile to set properties like RuntimeIdentifier and them be
@@ -65,7 +72,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- Default settings for .NET Core and .NET Standard build logic -->
   <PropertyGroup Condition="'$(_IsNETCoreOrNETStandard)' == 'true'">
-    <GenerateDependencyFile Condition=" '$(GenerateDependencyFile)' == '' ">true</GenerateDependencyFile>
+    <GenerateDependencyFile Condition=" '$(GenerateDependencyFile)' == '' and '$(Language)' != 'C++' ">true</GenerateDependencyFile>
 
     <!-- Assembly and file versions of runtime assets should be written to the deps.json by default, to support
          runtime minor version roll-forward: https://github.com/dotnet/core-setup/issues/3546 -->

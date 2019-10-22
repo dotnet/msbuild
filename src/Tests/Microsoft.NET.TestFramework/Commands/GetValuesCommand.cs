@@ -41,10 +41,11 @@ namespace Microsoft.NET.TestFramework.Commands
             _valueType = valueType;
         }
 
-        protected override SdkCommandSpec CreateCommand(params string[] args)
+        protected override SdkCommandSpec CreateCommand(IEnumerable<string> args)
         {
-            var newArgs = new List<string>(args.Length + 2);
+            var newArgs = new List<string>();
             newArgs.Add(FullPathProjectFile);
+
             newArgs.Add($"/p:ValueName={_valueName}");
             newArgs.AddRange(args);
 
@@ -89,7 +90,7 @@ $@"<Project ToolsVersion=`14.0` xmlns=`http://schemas.microsoft.com/developer/ms
             var outputDirectory = GetOutputDirectory(_targetFramework);
             outputDirectory.Create();
 
-            return TestContext.Current.ToolsetUnderTest.CreateCommandForTarget("WriteValuesToFile", newArgs.ToArray());
+            return TestContext.Current.ToolsetUnderTest.CreateCommandForTarget("WriteValuesToFile", newArgs);
         }
 
         public List<string> GetValues()

@@ -53,8 +53,7 @@ namespace {project.Name}
 }}";
 
             var asset = _testAssetsManager
-                .CreateTestProject(project)
-                .Restore(Log, project.Name);
+                .CreateTestProject(project);
 
             var cmd = new BuildCommand(Log, Path.Combine(asset.Path, project.Name));
             cmd.Execute().Should().Pass();

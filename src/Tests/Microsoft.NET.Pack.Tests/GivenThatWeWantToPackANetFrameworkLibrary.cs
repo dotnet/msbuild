@@ -89,8 +89,6 @@ namespace Microsoft.NET.Pack.Tests
                 testProjectInstance = testProjectInstance.WithProjectChanges(xmlAction);
             }
 
-            testProjectInstance = testProjectInstance.Restore(Log, testProject.Name);
-
             var packCommand = new PackCommand(Log, testProjectInstance.TestRoot, testProject.Name);
 
             packCommand.Execute()
