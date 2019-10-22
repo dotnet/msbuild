@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <None Include="$(ThirdPartyNotice)" Pack="true" PackagePath="notices" Visible="false" Condition=" '$(IsPackable)' == 'true' " />
+    <None Include="$(RepoRoot)branding\MSBuild-NuGet-Icon.png" Pack="true" PackagePath="\" Visible="false" Condition=" '$(IsPackable)' == 'true' " />
   </ItemGroup>
 
   <Target Name="_RemoveMSSourceLinkGitHub" AfterTargets="CollectPackageReferences" Condition="'$(MonoBuild)' == 'true'">

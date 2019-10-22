@@ -3,10 +3,9 @@
 
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Experimental.Graph;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Experimental.Graph
+namespace Microsoft.Build.Graph
 {
     /// <summary>
     /// GraphBuildRequestData encapsulates all of the data needed to submit a graph build request.

@@ -10,7 +10,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 
-namespace Microsoft.Build.Experimental.Graph.UnitTests
+namespace Microsoft.Build.Graph.UnitTests
 {
     internal static class GraphTestingUtilities
     {

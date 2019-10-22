@@ -16,7 +16,7 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Experimental.Graph
+namespace Microsoft.Build.Graph
 {
     internal class GraphBuilder
     {
@@ -482,9 +482,7 @@ namespace Microsoft.Build.Experimental.Graph
                              */
             }
 
-            _graphWorkSet.WaitForAllWork();
-            _graphWorkSet.Complete();
-            _graphWorkSet.WaitForCompletion();
+            _graphWorkSet.WaitForAllWorkAndComplete();
 
             return _graphWorkSet.CompletedWork;
         }

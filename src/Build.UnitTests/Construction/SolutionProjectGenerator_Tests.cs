@@ -33,6 +33,7 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using FrameworkLocationHelper = Microsoft.Build.Shared.FrameworkLocationHelper;
 using Xunit;
 using Xunit.Abstractions;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests.Construction
 {
@@ -2102,8 +2103,10 @@ EndGlobal
         /// <summary>
         /// Verifies that illegal user target names (the ones already used internally) don't crash the SolutionProjectGenerator
         /// </summary>
-        [Fact]
-        public void IllegalUserTargetNamesDoNotThrow()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void IllegalUserTargetNamesDoNotThrow(bool forceCaseDifference)
         {
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper
             (@"
@@ -2144,7 +2147,19 @@ EndGlobal
                 "ValidateProjects",
             })
             {
-                instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService(), builtInTargetName == null ? null : new [] { builtInTargetName });
+                string[] targetNames;
+
+                if (builtInTargetName == null)
+                {
+                    targetNames = null;
+                }
+                else
+                {
+                    string targetName = forceCaseDifference ? builtInTargetName.ToUpperInvariant() : builtInTargetName;
+                    targetNames = new[] { targetName };
+                }
+
+                instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService(), targetNames);
 
                 Assert.Single(instances);
 
@@ -2208,6 +2223,168 @@ EndGlobal
                 ProjectTaskInstance task = Assert.IsType<ProjectTaskInstance>(projectInstance.Targets["MyTarget"].Children[0]);
 
                 Assert.Equal("MyTask", task.Name);
+            }
+            finally
+            {
+                ObjectModelHelpers.DeleteTempProjectDirectory();
+            }
+        }
+
+        /// <summary>
+        /// Verifies that a target in an after.solution.sln.targets can AfterTargets/BeforeTargets a dynamically-created target.
+        /// </summary>
+        [Fact]
+        public void BeforeTargetsFromImportCanHookDynamicTarget()
+        {
+            string baseDirectory = Guid.NewGuid().ToString("N");
+
+            string solutionFilePath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"{Guid.NewGuid():N}.sln"), @"
+                Microsoft Visual Studio Solution File, Format Version 14.00
+                # Visual Studio 2015
+                Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary1"", ""ClassLibrary1.csproj"", ""{6185CC21-BE89-448A-B3C0-D1C27112E595}""
+                EndProject
+                Global
+	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		                Debug|Any CPU = Debug|Any CPU
+		                Release|Any CPU = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+	                EndGlobalSection
+                EndGlobal
+            ");
+
+            ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"after.{Path.GetFileName(solutionFilePath)}.targets"), @"
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+                    <Target Name=""MyTarget"" BeforeTargets=""DynamicTraversalTarget"">
+                        <Warning Text=""Message from MyTarget"" />
+                    </Target>
+                </Project>");
+
+            try
+            {
+                var solutionFile = SolutionFile.Parse(solutionFilePath);
+
+                string[] targetsToBuild = new[] { "DynamicTraversalTarget" };
+
+                ProjectInstance projectInstance = SolutionProjectGenerator.Generate(solutionFile, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), targetsToBuild).FirstOrDefault();
+
+                projectInstance.ShouldNotBeNull();
+
+                projectInstance.Targets.ShouldContainKey("MyTarget");
+
+                projectInstance.Targets["MyTarget"].Children
+                    .ShouldHaveSingleItem()
+                    .ShouldBeOfType<ProjectTaskInstance>()
+                    .Name.ShouldBe("Warning");
+
+                projectInstance.Targets["MyTarget"].BeforeTargets.ShouldBe("DynamicTraversalTarget");
+
+                MockLogger mockLogger = new MockLogger(output);
+                projectInstance.Build(targetsToBuild, new List <ILogger> { mockLogger })
+                    .ShouldBeFalse("The solution build should have failed due to a missing project");
+                mockLogger.AssertLogContains("Message from MyTarget");
+            }
+            finally
+            {
+                ObjectModelHelpers.DeleteTempProjectDirectory();
+            }
+        }
+
+        /// <summary>
+        /// Verifies that Directory.Solution.props and Directory.Solution.targets are imported by the generated project, that the import
+        /// can be disabled, and that you can specify a custom name for the projects.
+        /// </summary>
+        /// <param name="projectName">The name of the project to create.</param>
+        /// <param name="enable"><code>true</code> to have the functionality enabled, otherwise <code>false</code>.</param>
+        [Theory]
+        [InlineData("Directory.Solution.props", true)]
+        [InlineData("Directory.Solution.props", false)]
+        [InlineData("Directory.Solution.targets", true)]
+        [InlineData("Directory.Solution.targets", false)]
+        [InlineData("Custom.Directory.Solution.props", true)]
+        [InlineData("Custom.Directory.Solution.targets", true)]
+        public void DirectorySolutionPropsTest(string projectName, bool enable)
+        {
+            const string expectedPropertyValue = "ValueA";
+
+            string baseDirectory = Guid.NewGuid().ToString("N");
+
+            string solutionFilePath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"{Guid.NewGuid():N}.sln"), @"
+                Microsoft Visual Studio Solution File, Format Version 14.00
+                # Visual Studio 2015
+                Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary1"", ""ClassLibrary1.csproj"", ""{6185CC21-BE89-448A-B3C0-D1C27112E595}""
+                EndProject
+                Global
+	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		                Debug|Any CPU = Debug|Any CPU
+		                Release|Any CPU = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+	                EndGlobalSection
+                EndGlobal
+            ");
+
+            string projectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, projectName), $@"
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+                    <PropertyGroup>
+                        <PropertyA>{expectedPropertyValue}</PropertyA>
+                    </PropertyGroup>
+                </Project>");
+
+            if (projectPath.StartsWith("Custom", StringComparison.OrdinalIgnoreCase))
+            {
+                // If a custom file name was given, create a Directory.Solution.props and Directory.Build.targets to ensure that they aren't imported
+                ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, "Directory.Solution.props"), $@"
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+                    <PropertyGroup>
+                        <PropertyA>This file should not be imported</PropertyA>
+                    </PropertyGroup>
+                </Project>");
+
+                ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, "Directory.Solution.targets"), $@"
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+                    <PropertyGroup>
+                        <PropertyA>This file should not be imported</PropertyA>
+                    </PropertyGroup>
+                </Project>");
+            }
+
+            try
+            {
+                Dictionary<string, string> globalProperties = new Dictionary<string, string>();
+                if (!enable)
+                {
+                    globalProperties["ImportDirectorySolutionProps"] = "false";
+                    globalProperties["ImportDirectorySolutionTargets"] = "false";
+                }
+                else
+                {
+                    switch (projectName)
+                    {
+                        case "Custom.Directory.Solution.props":
+                            globalProperties["DirectorySolutionPropsPath"] = projectPath;
+                            break;
+
+                        case "Custom.Directory.Solution.targets":
+                            globalProperties["DirectorySolutionTargetsPath"] = projectPath;
+                            break;
+                    }
+                }
+                var solutionFile = SolutionFile.Parse(solutionFilePath);
+
+                ProjectInstance projectInstance = SolutionProjectGenerator.Generate(solutionFile, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService(), new[] { "Build" }).FirstOrDefault();
+                
+                Assert.NotNull(projectInstance);
+
+                Assert.Equal(enable ? expectedPropertyValue : string.Empty, projectInstance.GetPropertyValue("PropertyA"));
             }
             finally
             {

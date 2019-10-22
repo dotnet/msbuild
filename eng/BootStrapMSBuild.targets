@@ -39,6 +39,8 @@
 
         <!-- NuGet.targets will be in the ResolvedRuntimeTargets ItemGroup -->
         <_NuGetRuntimeDependencies Include="%(RuntimeTargetsCopyLocalItems.Identity)" Condition="'@(RuntimeTargetsCopyLocalItems->Contains('NuGet.'))' == 'True'" />
+
+        <_NuGetRuntimeDependencies Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\RuntimeIdentifierGraph.json" />
     </ItemGroup>
   </Target>
 
