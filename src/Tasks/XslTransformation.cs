@@ -456,7 +456,7 @@ namespace Microsoft.Build.Tasks
 
                         xslct.Load(new XPathDocument(XmlReader.Create(_data)), settings, new XmlUrlResolver());
                         break;
-#if !MONO
+#if FEATURE_COMPILED_XSL
                     case XslModes.XsltCompiledDll:
                         // We accept type in format: assembly_name[;type_name]. type_name may be omitted if assembly has just one type defined
                         string dll = _data;
@@ -467,6 +467,8 @@ namespace Microsoft.Build.Tasks
                         Type t = FindType(assemblyPath, typeName);
                         xslct.Load(t);
                         break;
+#else
+                        throw new Exception("This is not supported on .NET Core.");
 #endif
                     default:
                         ErrorUtilities.ThrowInternalErrorUnreachable();
