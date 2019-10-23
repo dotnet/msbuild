@@ -3735,7 +3735,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 if (string.IsNullOrEmpty(resgenFile))
                 {
                         resgenFile = GetTempFileName(".resx");
-                        File.Delete(resgenFile);
                 }
 
                 File.WriteAllText(resgenFile, contents);
