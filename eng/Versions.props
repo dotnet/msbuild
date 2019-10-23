@@ -96,6 +96,7 @@
     <SystemCodeDomPackageVersion>5.0.0-alpha1.19521.4</SystemCodeDomPackageVersion>
     <SystemTextEncodingCodePagesPackageVersion>5.0.0-alpha1.19521.4</SystemTextEncodingCodePagesPackageVersion>
     <SystemSecurityCryptographyProtectedDataPackageVersion>5.0.0-alpha1.19521.4</SystemSecurityCryptographyProtectedDataPackageVersion>
+    <SystemResourcesExtensionsPackageVersion>5.0.0-alpha1.19521.4</SystemResourcesExtensionsPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/core-setup -->
