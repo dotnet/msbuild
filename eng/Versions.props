@@ -7,52 +7,52 @@
   </PropertyGroup>
   <!-- Repo Version Information -->
   <PropertyGroup>
-    <VersionPrefix>3.0.101</VersionPrefix>
-    <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
+    <VersionPrefix>3.1.100</VersionPrefix>
+    <PreReleaseVersionLabel>preview2</PreReleaseVersionLabel>
   </PropertyGroup>
   <!-- Production Dependencies -->
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/cli  -->
-    <MicrosoftDotNetCliRuntimePackageVersion>3.0.101-servicing.19517.5</MicrosoftDotNetCliRuntimePackageVersion>
+    <MicrosoftDotNetCliRuntimePackageVersion>3.1.100-preview2.19522.5</MicrosoftDotNetCliRuntimePackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/sdk -->
-    <MicrosoftNETSdkPackageVersion>3.0.101-servicing.19510.7</MicrosoftNETSdkPackageVersion>
+    <MicrosoftNETSdkPackageVersion>3.1.100-preview1.19506.1</MicrosoftNETSdkPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/Microsoft/msbuild -->
-    <MicrosoftBuildPackageVersion>16.3.2</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildPackageVersion>16.4.0-preview-19522-08</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
-    <MicrosoftBuildLocalizationPackageVersion>16.3.2-servicing-19509-09</MicrosoftBuildLocalizationPackageVersion>
+    <MicrosoftBuildLocalizationPackageVersion>16.4.0-preview-19522-08</MicrosoftBuildLocalizationPackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/Microsoft/visualfsharp -->
-    <MicrosoftFSharpCompilerPackageVersion>10.6.0-beta.19454.10</MicrosoftFSharpCompilerPackageVersion>
+    <MicrosoftFSharpCompilerPackageVersion>10.7.0-beta.19504.1</MicrosoftFSharpCompilerPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/roslyn -->
-    <MicrosoftNETCoreCompilersPackageVersion>3.3.1-beta4-19462-11</MicrosoftNETCoreCompilersPackageVersion>
+    <MicrosoftNETCoreCompilersPackageVersion>3.4.0-beta3-19523-01</MicrosoftNETCoreCompilersPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore-Tooling -->
-    <MicrosoftNETSdkRazorPackageVersion>3.0.1</MicrosoftNETSdkRazorPackageVersion>
+    <MicrosoftNETSdkRazorPackageVersion>3.1.0-preview2.19518.7</MicrosoftNETSdkRazorPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/websdk -->
-    <MicrosoftNETSdkWebPackageVersion>3.0.100-rc2.19516.3</MicrosoftNETSdkWebPackageVersion>
+    <MicrosoftNETSdkWebPackageVersion>3.1.100-preview2.19522.3</MicrosoftNETSdkWebPackageVersion>
     <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
     <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
     <MicrosoftNETSdkWorkerPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWorkerPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://devdiv.visualstudio.com/DevDiv/_git/DotNet-Trusted -->
-    <MicrosoftNETSdkWindowsDesktopPackageVersion>3.0.1-servicing.19510.3</MicrosoftNETSdkWindowsDesktopPackageVersion>
+    <MicrosoftNETSdkWindowsDesktopPackageVersion>3.1.0-preview2.19522.4</MicrosoftNETSdkWindowsDesktopPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/nuget/nuget.client -->
-    <NuGetBuildTasksPackageVersion>5.3.1-rtm.6268</NuGetBuildTasksPackageVersion>
+    <NuGetBuildTasksPackageVersion>5.4.0-preview.3.6271</NuGetBuildTasksPackageVersion>
     <NuGetBuildTasksPackPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetBuildTasksPackPackageVersion>
     <NuGetCommandLineXPlatPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetCommandLineXPlatPackageVersion>
     <NuGetProjectModelPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetProjectModelPackageVersion>
@@ -70,14 +70,15 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/corefx -->
-    <SystemCodeDomPackageVersion>4.6.0</SystemCodeDomPackageVersion>
-    <SystemTextEncodingCodePagesPackageVersion>4.6.0</SystemTextEncodingCodePagesPackageVersion>
-    <SystemSecurityCryptographyProtectedDataPackageVersion>4.6.0</SystemSecurityCryptographyProtectedDataPackageVersion>
+    <SystemCodeDomPackageVersion>4.7.0-preview2.19521.18</SystemCodeDomPackageVersion>
+    <SystemTextEncodingCodePagesPackageVersion>4.7.0-preview2.19521.18</SystemTextEncodingCodePagesPackageVersion>
+    <SystemSecurityCryptographyProtectedDataPackageVersion>4.7.0-preview2.19521.18</SystemSecurityCryptographyProtectedDataPackageVersion>
+    <SystemResourcesExtensionsPackageVersion>4.7.0-preview2.19521.18</SystemResourcesExtensionsPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/core-setup -->
-    <MicrosoftNETCoreAppRefPackageVersion>3.0.0</MicrosoftNETCoreAppRefPackageVersion>
-    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>3.0.1</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
+    <MicrosoftNETCoreAppRefPackageVersion>3.1.0-preview2.19523.4</MicrosoftNETCoreAppRefPackageVersion>
+    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>3.1.0-preview2.19523.4</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
     <MicrosoftNETCoreAppRuntimePackageVersion>$(MicrosoftNETCoreAppRuntimewinx64PackageVersion)</MicrosoftNETCoreAppRuntimePackageVersion>
   </PropertyGroup>
   <PropertyGroup>
