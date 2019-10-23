@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.Build.Experimental.Graph
+namespace Microsoft.Build.Graph
 {
     /// <summary>
     /// Provides deduping of expensive work by a key, or modeling of a set of deduped work that
@@ -30,12 +30,6 @@ namespace Microsoft.Build.Experimental.Graph
 
         private readonly ConcurrentQueue<Lazy<TResult>> _queue =
             new ConcurrentQueue<Lazy<TResult>>();
-
-        /// <summary>
-        /// Task completion source used for signaling that <see cref="Complete"/> method was called.
-        /// </summary>
-        private readonly TaskCompletionSource<object> _schedulingCompletedTcs =
-            new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
 
         private readonly SemaphoreSlim _semaphore;
 
@@ -67,7 +61,11 @@ namespace Microsoft.Build.Experimental.Graph
         /// <summary>
         /// Checks if the work set has been marked as completed.
         /// </summary>
-        internal bool IsCompleted => _isSchedulingCompleted;
+        internal bool IsCompleted
+        {
+            get => Volatile.Read(ref _isSchedulingCompleted);
+            private set => Volatile.Write(ref _isSchedulingCompleted, value);
+        }
 
         internal ParallelWorkSet(int degreeOfParallelism, IEqualityComparer<TKey> comparer, CancellationToken cancellationToken)
         {
@@ -97,6 +95,11 @@ namespace Microsoft.Build.Experimental.Graph
         /// <param name="workFunc"></param>
         internal void AddWork(TKey key, Func<TResult> workFunc)
         {
+            if (IsCompleted)
+            {
+                throw new InvalidOperationException("Cannot add new work after work set is marked as completed.");
+            }
+
             var workItem = new Lazy<TResult>(workFunc);
 
             if (!_inProgressOrCompletedWork.TryAdd(key, workItem))
@@ -115,41 +118,25 @@ namespace Microsoft.Build.Experimental.Graph
         }
 
         /// <summary>
-        /// Marks the work set as completed.
+        /// Assists processing items until all the items added to the queue are processed, completes the work set, and
+        /// propagates any exceptions thrown by workers.
         /// </summary>
-        internal void Complete()
+        internal void WaitForAllWorkAndComplete()
         {
-            bool schedulingCompleted = Volatile.Read(ref _isSchedulingCompleted);
-            if (schedulingCompleted)
+            if (IsCompleted)
             {
                 return;
             }
-
-            Volatile.Write(ref _isSchedulingCompleted, true);
-
-            // Release one thread that will release all the threads when all the elements are processed.
-            _semaphore.Release();
-            _schedulingCompletedTcs.SetResult(null);
-        }
-
-        /// <summary>
-        /// Waits until <see cref="Complete"/> method is called and all work items added to the queue are processed.
-        /// </summary>
-        internal void WaitForCompletion()
-        {
-            _schedulingCompletedTcs.Task.GetAwaiter().GetResult();
-            Task.WhenAll(_tasks.ToArray()).GetAwaiter().GetResult();
-        }
-
-        /// <summary>
-        /// Assists processing items until all the items added to the queue are processed.
-        /// </summary>
-        internal void WaitForAllWork()
-        {
-            while (Interlocked.Read(ref _pendingCount) > 0 && !_cancellationToken.IsCancellationRequested)
+            while (!_cancellationToken.IsCancellationRequested && Interlocked.Read(ref _pendingCount) > 0)
             {
                 ExecuteWorkItem();
             }
+
+            IsCompleted = true;
+
+            // Release one thread that will release all the threads when all the elements are processed.
+            _semaphore.Release();
+            Task.WhenAll(_tasks.ToArray()).GetAwaiter().GetResult();
         }
 
         private Task CreateProcessorItemTask()
@@ -157,9 +144,9 @@ namespace Microsoft.Build.Experimental.Graph
             return Task.Run(
                 async () =>
                 {
-                    bool shouldCancelWorker = false;
+                    bool shouldStopAllWorkers = false;
 
-                    while (!shouldCancelWorker)
+                    while (!shouldStopAllWorkers)
                     {
                         await _semaphore.WaitAsync(_cancellationToken);
 
@@ -169,14 +156,14 @@ namespace Microsoft.Build.Experimental.Graph
                         }
                         finally
                         {
-                            // Could be -1 if the number of pending items is already 0 and the task was awakened for graceful finish.
-                            if (Interlocked.Read(ref _pendingCount) <= 0 && Volatile.Read(ref _isSchedulingCompleted))
+                            shouldStopAllWorkers = Interlocked.Read(ref _pendingCount) == 0 && IsCompleted;
+
+                            if (shouldStopAllWorkers)
                             {
                                 // Ensure all tasks are unblocked and can gracefully
                                 // finish since there are at most degreeOfParallelism - 1 tasks
                                 // waiting at this point
                                 _semaphore.Release(_degreeOfParallelism);
-                                shouldCancelWorker = true;
                             }
                         }
                     }

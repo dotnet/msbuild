@@ -39,6 +39,9 @@
 
         <!-- NuGet.targets will be in the ResolvedRuntimeTargets ItemGroup -->
         <_NuGetRuntimeDependencies Include="%(RuntimeTargetsCopyLocalItems.Identity)" Condition="'@(RuntimeTargetsCopyLocalItems->Contains('NuGet.'))' == 'True'" />
+
+        <!-- We are not installing dotnet sdk for a mono build, so this file won't be available. It is copied over separately -->
+        <_NuGetRuntimeDependencies Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\RuntimeIdentifierGraph.json" Condition="'$(MonoBuild)' != 'true'" />
     </ItemGroup>
   </Target>
 

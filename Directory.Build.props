@@ -37,7 +37,7 @@
     <!-- Repository and project URLs (used in nuget packages) -->
     <RepositoryUrl>https://github.com/microsoft/msbuild</RepositoryUrl>
     <PackageProjectUrl>http://go.microsoft.com/fwlink/?LinkId=624683</PackageProjectUrl>
-    <PackageIconUrl>https://go.microsoft.com/fwlink/?linkid=825694</PackageIconUrl>
+    <PackageIcon>MSBuild-NuGet-Icon.png</PackageIcon>
     <PackageTags>MSBuild</PackageTags>
 
     <TargetMSBuildToolsVersion>Current</TargetMSBuildToolsVersion>

@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -18,10 +17,10 @@ using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.Build.UnitTests.Helpers;
 
-using ExpectedNodeBuildOutput = System.Collections.Generic.Dictionary<Microsoft.Build.Experimental.Graph.ProjectGraphNode, string[]>;
-using OutputCacheDictionary = System.Collections.Generic.Dictionary<Microsoft.Build.Experimental.Graph.ProjectGraphNode, string>;
+using ExpectedNodeBuildOutput = System.Collections.Generic.Dictionary<Microsoft.Build.Graph.ProjectGraphNode, string[]>;
+using OutputCacheDictionary = System.Collections.Generic.Dictionary<Microsoft.Build.Graph.ProjectGraphNode, string>;
 
-namespace Microsoft.Build.Experimental.Graph.UnitTests
+namespace Microsoft.Build.Graph.UnitTests
 {
     public class ResultCacheBasedBuilds_Tests : IDisposable
     {

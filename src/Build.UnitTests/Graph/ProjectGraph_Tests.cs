@@ -11,14 +11,14 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
-using static Microsoft.Build.Experimental.Graph.UnitTests.GraphTestingUtilities;
+using static Microsoft.Build.Graph.UnitTests.GraphTestingUtilities;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.Build.Experimental.Graph.UnitTests
+namespace Microsoft.Build.Graph.UnitTests
 {
     [ActiveIssue("https://github.com/Microsoft/msbuild/issues/4368")]
     public class ProjectGraphTests : IDisposable

@@ -35,8 +35,6 @@ namespace Microsoft.Build.Construction
     /// </summary>
     internal class SolutionProjectGenerator
     {
-        #region Private Fields
-
         /// <summary>
         /// Name of the property used to store the path to the solution being built.
         /// </summary>
@@ -62,7 +60,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// A known list of target names to create.  This is for backwards compatibility.
         /// </summary>
-        internal static readonly ISet<string> _defaultTargetNames = ImmutableHashSet.Create(StringComparer.OrdinalIgnoreCase,
+        internal static readonly ImmutableHashSet<string> _defaultTargetNames = ImmutableHashSet.Create(StringComparer.OrdinalIgnoreCase,
             "Build",
             "Clean",
             "Rebuild",
@@ -142,10 +140,6 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private readonly int _submissionId;
 
-#endregion // Private Fields
-
-#region Constructors
-
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -172,10 +166,6 @@ namespace Microsoft.Build.Construction
                 _targetNames = targetNames.Select(i => i.Split(MSBuildConstants.ColonChar, 2, StringSplitOptions.RemoveEmptyEntries).Last()).ToList();
             }
         }
-
-#endregion // Constructors
-
-#region Methods
 
         /// <summary>
         /// This method generates an MSBuild project file from the list of projects and project dependencies 
@@ -857,6 +847,65 @@ namespace Microsoft.Build.Construction
             ProjectImportElement importAfter = traversalProject.CreateImportElement(@"$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\SolutionFile\ImportAfter\*");
             importAfter.Condition = @"'$(ImportByWildcardBeforeSolution)' != 'false' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\SolutionFile\ImportAfter')"; // Avoids wildcard perf problem
 
+
+            /* The code below adds the following XML:
+
+            - TOP -
+
+                <PropertyGroup Condition="'$(ImportDirectorySolutionProps)' != 'false' and '$(DirectorySolutionPropsPath)' == ''">
+                  <_DirectorySolutionPropsFile Condition="'$(_DirectorySolutionPropsFile)' == ''">Directory.Solution.props</_DirectorySolutionPropsFile>
+                  <_DirectorySolutionPropsBasePath Condition="'$(_DirectorySolutionPropsBasePath)' == ''">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), '$(_DirectorySolutionPropsFile)'))</_DirectorySolutionPropsBasePath>
+                  <DirectorySolutionPropsPath Condition="'$(_DirectorySolutionPropsBasePath)' != '' and '$(_DirectorySolutionPropsFile)' != ''">$([System.IO.Path]::Combine('$(_DirectorySolutionPropsBasePath)', '$(_DirectorySolutionPropsFile)'))</DirectorySolutionPropsPath>
+                </PropertyGroup>
+
+                <Import Project="$(DirectorySolutionPropsPath)" Condition="'$(ImportDirectorySolutionProps)' != 'false' and exists('$(DirectorySolutionPropsPath)')"/>
+
+            - BOTTOM -
+
+                <PropertyGroup Condition="'$(ImportDirectorySolutionTargets)' != 'false' and '$(DirectorySolutionTargetsPath)' == ''">
+                  <_DirectorySolutionTargetsFile Condition="'$(_DirectorySolutionTargetsFile)' == ''">Directory.Solution.targets</_DirectorySolutionTargetsFile>
+                  <_DirectorySolutionTargetsBasePath Condition="'$(_DirectorySolutionTargetsBasePath)' == ''">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), '$(_DirectorySolutionTargetsFile)'))</_DirectorySolutionTargetsBasePath>
+                  <DirectorySolutionTargetsPath Condition="'$(_DirectorySolutionTargetsBasePath)' != '' and '$(_DirectorySolutionTargetsFile)' != ''">$([System.IO.Path]::Combine('$(_DirectorySolutionTargetsBasePath)', '$(_DirectorySolutionTargetsFile)'))</DirectorySolutionTargetsPath>
+                </PropertyGroup>
+
+                <Import Project="$(DirectorySolutionTargetsPath)" Condition="'$(ImportDirectorySolutionTargets)' != 'false' and exists('$(DirectorySolutionTargetsPath)')"/>
+            */
+            ProjectPropertyGroupElement directorySolutionPropsPropertyGroup = traversalProject.CreatePropertyGroupElement();
+            directorySolutionPropsPropertyGroup.Condition = "'$(ImportDirectorySolutionProps)' != 'false' and '$(DirectorySolutionPropsPath)' == ''";
+
+            ProjectPropertyElement directorySolutionPropsFileProperty = traversalProject.CreatePropertyElement("_DirectorySolutionPropsFile");
+            directorySolutionPropsFileProperty.Value = "Directory.Solution.props";
+            directorySolutionPropsFileProperty.Condition = "'$(_DirectorySolutionPropsFile)' == ''";
+
+            ProjectPropertyElement directorySolutionPropsBasePathProperty = traversalProject.CreatePropertyElement("_DirectorySolutionPropsBasePath");
+            directorySolutionPropsBasePathProperty.Value = "$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), '$(_DirectorySolutionPropsFile)'))";
+            directorySolutionPropsBasePathProperty.Condition = "'$(_DirectorySolutionPropsBasePath)' == ''";
+
+            ProjectPropertyElement directorySolutionPropsPathProperty = traversalProject.CreatePropertyElement("DirectorySolutionPropsPath");
+            directorySolutionPropsPathProperty.Value = "$([System.IO.Path]::Combine('$(_DirectorySolutionPropsBasePath)', '$(_DirectorySolutionPropsFile)'))";
+            directorySolutionPropsPathProperty.Condition = "'$(_DirectorySolutionPropsBasePath)' != '' and '$(_DirectorySolutionPropsFile)' != ''";
+
+            ProjectImportElement directorySolutionPropsImport = traversalProject.CreateImportElement("$(DirectorySolutionPropsPath)");
+            directorySolutionPropsImport.Condition = "'$(ImportDirectorySolutionProps)' != 'false' and exists('$(DirectorySolutionPropsPath)')";
+
+            ProjectPropertyGroupElement directorySolutionTargetsPropertyGroup = traversalProject.CreatePropertyGroupElement();
+            directorySolutionTargetsPropertyGroup.Condition = "'$(ImportDirectorySolutionTargets)' != 'false' and '$(DirectorySolutionTargetsPath)' == ''";
+
+            ProjectPropertyElement directorySolutionTargetsFileProperty = traversalProject.CreatePropertyElement("_DirectorySolutionTargetsFile");
+            directorySolutionTargetsFileProperty.Value = "Directory.Solution.targets";
+            directorySolutionTargetsFileProperty.Condition = "'$(_DirectorySolutionTargetsFile)' == ''";
+
+            ProjectPropertyElement directorySolutionTargetsBasePathProperty = traversalProject.CreatePropertyElement("_DirectorySolutionTargetsBasePath");
+            directorySolutionTargetsBasePathProperty.Value = "$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), '$(_DirectorySolutionTargetsFile)'))";
+            directorySolutionTargetsBasePathProperty.Condition = "'$(_DirectorySolutionTargetsBasePath)' == ''";
+
+            ProjectPropertyElement directorySolutionTargetsPathProperty = traversalProject.CreatePropertyElement("DirectorySolutionTargetsPath");
+            directorySolutionTargetsPathProperty.Value = "$([System.IO.Path]::Combine('$(_DirectorySolutionTargetsBasePath)', '$(_DirectorySolutionTargetsFile)'))";
+            directorySolutionTargetsPathProperty.Condition = "'$(_DirectorySolutionTargetsBasePath)' != '' and '$(_DirectorySolutionTargetsFile)' != ''";
+
+            ProjectImportElement directorySolutionTargetsImport = traversalProject.CreateImportElement("$(DirectorySolutionTargetsPath)");
+            directorySolutionTargetsImport.Condition = "'$(ImportDirectorySolutionTargets)' != 'false' and exists('$(DirectorySolutionTargetsPath)')";
+
             // Add our local extensibility points to the project representing the solution
             // Imported at the top: before.mysolution.sln.targets
             // Imported at the bottom: after.mysolution.sln.targets
@@ -872,16 +921,31 @@ namespace Microsoft.Build.Construction
 
             // Put locals second so they can override globals if they want
             traversalProject.PrependChild(importBeforeLocal);
+            traversalProject.PrependChild(directorySolutionPropsImport);
+            traversalProject.PrependChild(directorySolutionPropsPropertyGroup);
             traversalProject.PrependChild(importBefore);
             traversalProject.AppendChild(importAfter);
+            traversalProject.AppendChild(directorySolutionTargetsPropertyGroup);
+            traversalProject.AppendChild(directorySolutionTargetsImport);
             traversalProject.AppendChild(importAfterLocal);
+
+            directorySolutionTargetsPropertyGroup.AppendChild(directorySolutionTargetsFileProperty);
+            directorySolutionTargetsPropertyGroup.AppendChild(directorySolutionTargetsBasePathProperty);
+            directorySolutionTargetsPropertyGroup.AppendChild(directorySolutionTargetsPathProperty);
+
+            directorySolutionPropsPropertyGroup.AppendChild(directorySolutionPropsFileProperty);
+            directorySolutionPropsPropertyGroup.AppendChild(directorySolutionPropsBasePathProperty);
+            directorySolutionPropsPropertyGroup.AppendChild(directorySolutionPropsPathProperty);
 
             // These are just dummies necessary to make the evaluation into a project instance succeed when 
             // any custom imported targets have declarations like BeforeTargets="Build"
             // They'll be replaced momentarily with the real ones.
-            foreach (string targetName in _defaultTargetNames)
+            string[] dummyTargetsForEvaluationTime = _defaultTargetNames.Union(_targetNames).ToArray();
+            foreach (string targetName in dummyTargetsForEvaluationTime)
             {
-                traversalProject.AddTarget(targetName);
+                ProjectTargetElement target = traversalProject.CreateTargetElement(targetName);
+                // Prepend so that any imported target overrides these default ones.
+                traversalProject.PrependChild(target);
             }
 
             // For debugging purposes: some information is lost when evaluating into a project instance,
@@ -903,10 +967,15 @@ namespace Microsoft.Build.Construction
                 _submissionId
                 );
 
-            // Make way for the real ones                
-            foreach (string targetName in _defaultTargetNames)
+            // Make way for the real ones
+            foreach (string targetName in dummyTargetsForEvaluationTime)
             {
-                traversalInstance.RemoveTarget(targetName);
+                // Remove targets only if they were the dummy ones (from the metaproj path),
+                // but leave them if they're from another source (imported/overridden).
+                if (traversalInstance.Targets[targetName].Location.File == traversalProject.FullPath)
+                {
+                    traversalInstance.RemoveTarget(targetName);
+                }
             }
 
             AddStandardTraversalTargets(traversalInstance, projectsInOrder);
@@ -2356,7 +2425,5 @@ namespace Microsoft.Build.Construction
                                                             initialTarget.Location,
                                                             new List<ProjectPropertyGroupTaskPropertyInstance> { property }));
         }
-
-#endregion // Methods
     }
 }

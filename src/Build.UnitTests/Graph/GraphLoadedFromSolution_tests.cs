@@ -14,10 +14,10 @@ using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using static Microsoft.Build.Experimental.Graph.UnitTests.GraphTestingUtilities;
+using static Microsoft.Build.Graph.UnitTests.GraphTestingUtilities;
 using static Microsoft.Build.UnitTests.Helpers;
 
-namespace Microsoft.Build.Experimental.Graph.UnitTests
+namespace Microsoft.Build.Graph.UnitTests
 {
     public class GraphLoadedFromSolutionTests : IDisposable
     {
