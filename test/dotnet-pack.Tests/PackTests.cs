@@ -159,7 +159,7 @@ namespace Microsoft.DotNet.Pack.Tests
 
         [Theory]
         [InlineData("TestAppSimple")]
-        [InlineData("FSharpTestAppSimple")]
+        [InlineData("FSharpTestAppSimple", Skip = "https://github.com/dotnet/coreclr/issues/27275")]
         public void PackWorksWithLocalProject(string projectName)
         {
             var testInstance = TestAssets.Get(projectName)
