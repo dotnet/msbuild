@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.Tracing;
+﻿using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 
 namespace Microsoft.Build.Eventing
 {
@@ -223,16 +224,22 @@ namespace Microsoft.Build.Eventing
         /// <summary>
         /// Call this method to notify listeners of information relevant to identifying a list of files that correspond to an item with a wildcard.
         /// </summary>
+        /// <param name="rootDirectory">Source of files to glob.</param>
+        /// <param name="glob">Pattern, possibly with wildcard(s) to be expanded.</param>
+        /// <param name="excludedPatterns">Patterns not to expand.</param>
         [Event(41)]
-        public void ExpandGlobStart()
+        public void ExpandGlobStart(string rootDirectory, string glob, ISet<string> excludedPatterns)
         {
-            WriteEvent(41);
+            WriteEvent(41, rootDirectory, glob, excludedPatterns);
         }
 
+        /// <param name="rootDirectory">Source of files to glob.</param>
+        /// <param name="glob">Pattern, possibly with wildcard(s) to be expanded.</param>
+        /// <param name="excludedPatterns">Patterns not to expand.</param>
         [Event(42)]
-        public void ExpandGlobStop()
+        public void ExpandGlobStop(string rootDirectory, string glob, ISet<string> excludedPatterns)
         {
-            WriteEvent(42);
+            WriteEvent(42, rootDirectory, glob, excludedPatterns);
         }
 
         /// <summary>
