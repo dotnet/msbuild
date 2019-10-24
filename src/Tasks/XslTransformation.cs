@@ -468,7 +468,7 @@ namespace Microsoft.Build.Tasks
                         xslct.Load(t);
                         break;
 #else
-                        throw new Exception("This is not supported on .NET Core.");
+                        throw new PlatformNotSupportedException("Precompiled XSLTs are not supported on .NET Core.");
 #endif
                     default:
                         ErrorUtilities.ThrowInternalErrorUnreachable();

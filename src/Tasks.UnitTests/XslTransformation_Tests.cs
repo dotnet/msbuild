@@ -66,12 +66,12 @@ namespace Microsoft.Build.UnitTests
         /// The contents of xsl document for tests.
         /// </summary>
         private readonly string _xslDocument = "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:msxsl=\"urn:schemas-microsoft-com:xslt\" exclude-result-prefixes=\"msxsl\"><xsl:output method=\"xml\" indent=\"yes\"/><xsl:template match=\"@* | node()\"><surround><xsl:copy><xsl:apply-templates select=\"@* | node()\"/></xsl:copy></surround></xsl:template></xsl:stylesheet>";
-
+#if FEATURE_COMPILED_XSL
         /// <summary>
         /// The contents of another xsl document for tests
         /// </summary>
         private readonly string _xslDocument2 = "<?xml version = \"1.0\" ?><xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"><xsl:template match = \"myInclude\"><xsl:apply-templates select = \"document(@path)\"/></xsl:template><xsl:template match = \"@*|node()\"><xsl:copy><xsl:apply-templates select = \"@*|node()\"/></xsl:copy></xsl:template></xsl:stylesheet>";
-
+#endif
         /// <summary>
         /// The contents of xslparameters for tests.
         /// </summary>
@@ -828,7 +828,7 @@ namespace Microsoft.Build.UnitTests
             Prepare(out dir, out _, out _, out _, out outputPaths, out _, out _, out engine);
 
             // doubletype
-        string doubleTypePath = Path.Combine(dir, "double.dll");
+            string doubleTypePath = Path.Combine(dir, "double.dll");
 
             CompileDoubleType(doubleTypePath);
 
@@ -1167,7 +1167,6 @@ namespace Microsoft.Build.UnitTests
 
             ModuleBuilder modBldr = asmBldr.DefineDynamicModule(Path.GetFileName(outputFile), Path.GetFileName(outputFile), true);
 
-
             // Create TypeBuilder and compile the stylesheet into it
             TypeBuilder typeBldr = modBldr.DefineType(CompiledQueryName, TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit);
 
@@ -1187,4 +1186,4 @@ namespace Microsoft.Build.UnitTests
         #endregion
     }
 #endif
-    }
+}
