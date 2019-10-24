@@ -686,9 +686,9 @@ namespace Microsoft.Build.BackEnd
                 {
                     SetCommonWorkerThreadParameters();
                 }
-                MSBuildEventSource.Log.RequestThreadProcStart(RequestEntry.RequestConfiguration.ProjectFullPath);
+                MSBuildEventSource.Log.RequestThreadProcStart();
                 await BuildAndReport();
-                MSBuildEventSource.Log.RequestThreadProcStop(RequestEntry.RequestConfiguration.ProjectFullPath);
+                MSBuildEventSource.Log.RequestThreadProcStop();
             }
 #if FEATURE_VARIOUS_EXCEPTIONS
             catch (ThreadAbortException)

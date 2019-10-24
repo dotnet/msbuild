@@ -304,18 +304,16 @@ namespace Microsoft.Build.Eventing
             WriteEvent(36);
         }
 
-        /// <param name="fullPath">File name of the project to build.</param>
         [Event(37)]
-        public void RequestThreadProcStart(string fullPath)
+        public void RequestThreadProcStart()
         {
-            WriteEvent(37, fullPath);
+            WriteEvent(37);
         }
 
-        /// <param name="fullPath">File name of the project to build.</param>
         [Event(38)]
-        public void RequestThreadProcStop(string fullPath)
+        public void RequestThreadProcStop()
         {
-            WriteEvent(38, fullPath);
+            WriteEvent(38);
         }
 
         /// <param name="fileLocation">Project file's location.</param>
