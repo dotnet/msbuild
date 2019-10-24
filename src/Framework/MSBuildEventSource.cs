@@ -4,15 +4,15 @@ using System.Diagnostics.Tracing;
 namespace Microsoft.Build.Eventing
 {
 
-    //
+    // <summary>
     // This captures information of how various key methods of building with MSBuild ran.
-    //
-    // /OnlyProviders=*Microsoft-Build
+    // </summary>
     [EventSource(Name = "Microsoft-Build")]
     internal sealed class MSBuildEventSource : EventSource
     {
-
+        // <summary>
         // define the singleton instance of the event source
+        // </summary>
         public static MSBuildEventSource Log = new MSBuildEventSource();
 
         private MSBuildEventSource() { }
@@ -347,16 +347,18 @@ namespace Microsoft.Build.Eventing
         /// <summary>
         /// Call this method to notify listeners of the start of a build as called from the command line.
         /// </summary>
+        /// <param name="commandLine">The command line used to run MSBuild.</param>
         [Event(45)]
-        public void MSBuildExeStart()
+        public void MSBuildExeStart(string commandLine)
         {
-            WriteEvent(45);
+            WriteEvent(45, commandLine);
         }
 
+        /// <param name="commandLine">The command line used to run MSBuild.</param>
         [Event(46)]
-        public void MSBuildExeStop()
+        public void MSBuildExeStop(string commandLine)
         {
-            WriteEvent(46);
+            WriteEvent(46, commandLine);
         }
 
         #endregion

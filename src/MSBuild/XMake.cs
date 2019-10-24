@@ -516,7 +516,13 @@ namespace Microsoft.Build.CommandLine
             ConsoleCancelEventHandler cancelHandler = Console_CancelKeyPress;
             try
             {
-                MSBuildEventSource.Log.MSBuildExeStart();
+#if FEATURE_GET_COMMANDLINE
+                MSBuildEventSource.Log.MSBuildExeStart(commandLine);
+#else
+                if (MSBuildEventSource.Log.IsEnabled()) {
+                    MSBuildEventSource.Log.MSBuildExeStart(commandLine.ToString());
+                }
+#endif
                 Console.CancelKeyPress += cancelHandler;
 
                 // check the operating system the code is running on
@@ -795,7 +801,13 @@ namespace Microsoft.Build.CommandLine
                 // Wait for any pending cancel, so that we get any remaining messages
                 s_cancelComplete.WaitOne();
 
-                MSBuildEventSource.Log.MSBuildExeStop();
+#if FEATURE_GET_COMMANDLINE
+                MSBuildEventSource.Log.MSBuildExeStop(commandLine);
+#else
+                if (MSBuildEventSource.Log.IsEnabled()) {
+                    MSBuildEventSource.Log.MSBuildExeStop(commandLine.ToString());
+                }
+#endif
             }
             /**********************************************************************************************************************
              * WARNING: Do NOT add any more catch blocks above!

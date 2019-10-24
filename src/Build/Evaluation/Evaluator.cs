@@ -776,10 +776,9 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     _data.FinishEvaluation();
+                    MSBuildEventSource.Log.EvaluatePass5Stop(projectFile);
                 }
             }
-
-            MSBuildEventSource.Log.EvaluatePass5Stop(projectFile);
 
             ErrorUtilities.VerifyThrow(_evaluationProfiler.IsEmpty(), "Evaluation profiler stack is not empty.");
             _evaluationLoggingContext.LogBuildEvent(new ProjectEvaluationFinishedEventArgs(ResourceUtilities.GetResourceString("EvaluationFinished"), projectFile)
