@@ -551,7 +551,6 @@ namespace ItemCreationTask
             logger.AssertLogContains("[.ext]");
         }
 
-#if FEATURE_CODEDOM
         /// <summary>
         /// Verify that properties can be passed in to a task and out as items, despite
         /// having illegal characters for a file name
@@ -641,7 +640,6 @@ namespace ItemCreationTask
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents);
             logger.AssertLogContains("[foo: ]");
         }
-#endif
 
 #if FEATURE_CODETASKFACTORY
         /// <summary>
@@ -726,7 +724,6 @@ namespace ItemCreationTask
         }
 #endif
 
-#if FEATURE_CODEDOM
         /// <summary>
         /// Validates that the defining project metadata is set (or not set) as expected in 
         /// various task output-related operations, using a task built against the current 
@@ -760,7 +757,6 @@ namespace ItemCreationTask
             string customTaskPath = CustomTaskHelper.GetAssemblyForTask(s_itemCreationTaskContents, referenceAssemblies);
             ValidateDefiningProjectMetadataOnTaskOutputsHelper(customTaskPath);
         }
-#endif
 
 #if FEATURE_APARTMENT_STATE
         /// <summary>
@@ -890,7 +886,6 @@ namespace ItemCreationTask
  * 
  *********************************************************************************/
 
-#if FEATURE_CODEDOM
         /// <summary>
         /// Helper method for validating the setting of defining project metadata on items 
         /// coming from task outputs
@@ -955,7 +950,6 @@ namespace ItemCreationTask
                 }
             }
         }
-#endif // FEATURE_CODEDOM
 
 #if FEATURE_APARTMENT_STATE
         /// <summary>
@@ -1032,7 +1026,6 @@ namespace ItemCreationTask
         }
 #endif
 
-#if FEATURE_CODEDOM
         /// <summary>
         /// Helper to create the STA test task.
         /// </summary>
@@ -1104,7 +1097,6 @@ namespace ClassLibrary2
 }";
             return CustomTaskHelper.GetAssemblyForTask(taskContents);
         }
-#endif
 
         /// <summary>
         /// Creates a test project.
