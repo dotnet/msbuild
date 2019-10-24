@@ -162,7 +162,7 @@ namespace Microsoft.NET.TestFramework
             }
             else if (repoRoot != null)
             {
-                ret.DotNetHostPath = Path.Combine(repoRoot, ".dotnet", $"dotnet{Constants.ExeSuffix}");
+                ret.DotNetHostPath = Path.Combine(repoArtifactsDir, "bin", "redist", configuration, "dotnet", $"dotnet{Constants.ExeSuffix}");
             }
             else
             {
@@ -171,7 +171,9 @@ namespace Microsoft.NET.TestFramework
 
             if (repoRoot != null)
             {
-                ret.SdksPath = Path.Combine(repoArtifactsDir, "bin", configuration, "Sdks");
+                string dotnetSdkPath = Path.Combine(Path.GetDirectoryName(ret.DotNetHostPath), "sdk");
+                string sdkVersionPath = Directory.GetDirectories(dotnetSdkPath).Single();
+                ret.SdksPath = Path.Combine(sdkVersionPath, "Sdks");
             }
 
             if (!string.IsNullOrEmpty(commandLine.FullFrameworkMSBuildPath))
