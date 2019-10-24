@@ -17,10 +17,5 @@
   </PropertyGroup>
 
   <PropertyGroup Label="Warning Suppressions">
-    <!--
-      Suppress a warning about upcoming deprecation of PackageLicenseUrl. When embedding licenses are supported,
-      replace PackageLicenseUrl with PackageLicenseExpression.
-    -->
-    <NoWarn>$(NoWarn);NU5125</NoWarn>
   </PropertyGroup>
 </Project>
