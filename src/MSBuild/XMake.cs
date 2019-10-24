@@ -2244,7 +2244,7 @@ namespace Microsoft.Build.CommandLine
                     }
 
                     // cpuCount > 1 not supported on mono/unix yet
-                    if (cpuCount > 1 && NativeMethodsShared.IsMono && !NativeMethodsShared.IsWindows)
+                    if (cpuCount > 1 && NativeMethodsShared.IsMono && !(NativeMethodsShared.IsWindows || NativeMethodsShared.IsOSX))
                     {
                         cpuCount = 1;
 
