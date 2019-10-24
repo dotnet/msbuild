@@ -2,45 +2,34 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using ObjectModel = System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Execution;
-using ObjectModel = System.Collections.ObjectModel;
-using Microsoft.Build.Collections;
 using Microsoft.Build.BackEnd;
-using System.Globalization;
-using System.Threading;
 using Microsoft.Build.BackEnd.Components.Logging;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation.Context;
-#if MSBUILDENABLEVSPROFILING 
-using Microsoft.VisualStudio.Profiler;
-#endif
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
-using Constants = Microsoft.Build.Internal.Constants;
-using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
+using Microsoft.Build.Eventing;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
-
-#if (!STANDALONEBUILD)
-using Microsoft.Internal.Performance;
-#endif
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using Constants = Microsoft.Build.Internal.Constants;
+using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
+using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -280,17 +269,8 @@ namespace Microsoft.Build.Evaluation
             EvaluationContext evaluationContext = null,
             bool interactive = false)
         {
-#if (!STANDALONEBUILD)
-            using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectEvaluateBegin, CodeMarkerEvent.perfMSBuildProjectEvaluateEnd))
-#endif
             {
-#if MSBUILDENABLEVSPROFILING
-            try
-            {
-                string projectFile = String.IsNullOrEmpty(root.ProjectFileLocation.File) ? "(null)" : root.ProjectFileLocation.File;
-                string beginProjectEvaluate = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - Begin", projectFile);
-                DataCollection.CommentMarkProfile(8812, beginProjectEvaluate);
-#endif
+                MSBuildEventSource.Log.EvaluateStart(root.ProjectFileLocation.File);
                 var profileEvaluation = (loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0 || loggingService.IncludeEvaluationProfile;
                 var evaluator = new Evaluator<P, I, M, D>(
                     data,
@@ -308,15 +288,7 @@ namespace Microsoft.Build.Evaluation
                     interactive);
 
                 evaluator.Evaluate(loggingService, buildEventContext);
-#if MSBUILDENABLEVSPROFILING 
-            }
-            finally
-            {
-                string projectFile = String.IsNullOrEmpty(root.ProjectFileLocation.File) ? "(null)" : root.ProjectFileLocation.File;
-                string beginProjectEvaluate = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End", projectFile);
-                DataCollection.CommentMarkProfile(8813, beginProjectEvaluate);
-            }
-#endif
+                MSBuildEventSource.Log.EvaluateStop(root.ProjectFileLocation.File);
             }
         }
 
@@ -622,6 +594,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     // Pass0: load initial properties
                     // Follow the order of precedence so that Global properties overwrite Environment properties
+                    MSBuildEventSource.Log.EvaluatePass0Start(_projectRootElement.ProjectFileLocation.File);
                     builtInProperties = AddBuiltInProperties();
                     environmentProperties = AddEnvironmentProperties();
                     toolsetProperties = AddToolsetProperties();
@@ -633,9 +606,6 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-#if (!STANDALONEBUILD)
-            CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildProjectEvaluatePass0End);
-#endif
                 projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
 
                 _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, projectFile);
@@ -645,19 +615,17 @@ namespace Microsoft.Build.Evaluation
 
                 ErrorUtilities.VerifyThrow(_data.EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
-#if MSBUILDENABLEVSPROFILING
-        string endPass0 = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 0 (Initial properties)", projectFile);
-        DataCollection.CommentMarkProfile(8816, endPass0);
-#endif
+                MSBuildEventSource.Log.EvaluatePass0Stop(projectFile);
 
                 // Pass1: evaluate properties, load imports, and gather everything else
+                MSBuildEventSource.Log.EvaluatePass1Start(projectFile);
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Properties))
                 {
                     PerformDepthFirstPass(_projectRootElement);
                 }
 
                 SetAllProjectsProperty();
-
+                
                 List<string> initialTargets = new List<string>(_initialTargetsList.Count);
                 foreach (var initialTarget in _initialTargetsList)
                 {
@@ -665,15 +633,10 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 _data.InitialTargets = initialTargets;
-#if (!STANDALONEBUILD)
-        CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildProjectEvaluatePass1End);
-#endif
-#if MSBUILDENABLEVSPROFILING
-        string endPass1 = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 1 (Properties and Imports)", projectFile);
-        DataCollection.CommentMarkProfile(8817, endPass1);
-#endif
+                MSBuildEventSource.Log.EvaluatePass1Stop(projectFile);
                 // Pass2: evaluate item definitions
                 // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
+                MSBuildEventSource.Log.EvaluatePass2Start(projectFile);
                 using (_evaluationProfiler.TrackPass(EvaluationPass.ItemDefinitionGroups))
                 {
                     foreach (var itemDefinitionGroupElement in _itemDefinitionGroupElements)
@@ -684,13 +647,7 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
                 }
-#if (!STANDALONEBUILD)
-        CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildProjectEvaluatePass2End);
-#endif
-#if MSBUILDENABLEVSPROFILING
-        string endPass2 = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 2 (Item Definitions)", projectFile);
-        DataCollection.CommentMarkProfile(8818, endPass2);
-#endif
+                MSBuildEventSource.Log.EvaluatePass2Stop(projectFile);
                 LazyItemEvaluator<P, I, M, D> lazyEvaluator = null;
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Items))
                 {
@@ -698,6 +655,7 @@ namespace Microsoft.Build.Evaluation
                     lazyEvaluator = new LazyItemEvaluator<P, I, M, D>(_data, _itemFactory, _evaluationLoggingContext, _evaluationProfiler, _evaluationContext);
 
                     // Pass3: evaluate project items
+                    MSBuildEventSource.Log.EvaluatePass3Start(projectFile);
                     foreach (ProjectItemGroupElement itemGroup in _itemGroupElements)
                     {
                         using (_evaluationProfiler.TrackElement(itemGroup))
@@ -735,14 +693,10 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-#if (!STANDALONEBUILD)
-        CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildProjectEvaluatePass3End);
-#endif
-#if MSBUILDENABLEVSPROFILING
-        string endPass3 = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 3 (Items)", projectFile);
-        DataCollection.CommentMarkProfile(8819, endPass3);
-#endif
+                MSBuildEventSource.Log.EvaluatePass3Stop(projectFile);
+
                 // Pass4: evaluate using-tasks
+                MSBuildEventSource.Log.EvaluatePass4Start(projectFile);
                 using (_evaluationProfiler.TrackPass(EvaluationPass.UsingTasks))
                 {
                     foreach (var entry in _usingTaskElements)
@@ -769,17 +723,12 @@ namespace Microsoft.Build.Evaluation
                 Dictionary<string, List<TargetSpecification>> targetsWhichRunAfterByTarget = new Dictionary<string, List<TargetSpecification>>(StringComparer.OrdinalIgnoreCase);
                 LinkedList<ProjectTargetElement> activeTargetsByEvaluationOrder = new LinkedList<ProjectTargetElement>();
                 Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets = new Dictionary<string, LinkedListNode<ProjectTargetElement>>(StringComparer.OrdinalIgnoreCase);
-#if (!STANDALONEBUILD)
-        CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildProjectEvaluatePass4End);
-#endif
-#if MSBUILDENABLEVSPROFILING
-        string endPass4 = String.Format(CultureInfo.CurrentCulture, "Evaluate Project {0} - End Pass 4 (UsingTasks)", projectFile);
-        DataCollection.CommentMarkProfile(8820, endPass4);
-#endif
+                MSBuildEventSource.Log.EvaluatePass4Stop(projectFile);
 
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Targets))
                 {
                     // Pass5: read targets (but don't evaluate them: that happens during build)
+                    MSBuildEventSource.Log.EvaluatePass5Start(projectFile);
                     for (var i = 0; i < targetElementsCount; i++)
                     {
                         var element = _targetElements[i];
@@ -827,6 +776,7 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     _data.FinishEvaluation();
+                    MSBuildEventSource.Log.EvaluatePass5Stop(projectFile);
                 }
             }
 
