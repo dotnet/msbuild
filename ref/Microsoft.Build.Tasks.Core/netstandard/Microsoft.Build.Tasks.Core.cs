@@ -804,6 +804,20 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem XmlInputPath { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+    public partial class XslTransformation : Microsoft.Build.Tasks.TaskExtension
+    {
+        public XslTransformation() { }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] OutputPaths { get { throw null; } set { } }
+        public string Parameters { get { throw null; } set { } }
+        public bool UseTrustedSettings { get { throw null; } set { } }
+        public string XmlContent { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] XmlInputPaths { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem XslCompiledDllPath { get { throw null; } set { } }
+        public string XslContent { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem XslInputPath { get { throw null; } set { } }
+        public override bool Execute() { throw null; }
+    }
     public sealed partial class ZipDirectory : Microsoft.Build.Tasks.TaskExtension
     {
         public ZipDirectory() { }

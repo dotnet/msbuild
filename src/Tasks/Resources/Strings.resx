@@ -2267,6 +2267,10 @@
   <data name="XslTransform.UseTrustedSettings" xml:space="preserve">
     <value>The usage of the document() method and embedded scripts is prohibited by default, due to risks of foreign code execution.  If "{0}" is a trusted source that requires those constructs, please set the "UseTrustedSettings" parameter to "true" to allow their execution.</value>
   </data>
+    <data name="XslTransform.PrecompiledXsltError" xml:space="preserve">
+    <value>MSB3705: XslCompiledDllPath is not supported when building with .NET Core.</value>
+    <comment>{StrBegin="MSB3705: "}</comment>
+  </data>
 
 
   <!--
