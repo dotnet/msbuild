@@ -196,15 +196,15 @@ jobs:
           BlobFeedUrl: $(PB_PublishBlobFeedUrl)
           PublishType: $(_PublishType)
 
-    - task: PublishTestResults@1	
+    - task: PublishTestResults@2
       displayName: Publish Test Results	
       inputs:	
-        testRunner: XUnit	
+        testResultsFormat: xUnit	
         testResultsFiles: 'artifacts/TestResults/$(_BuildConfig)/*.xml'	
         testRunTitle: '$(_AgentOSName)_$(Agent.JobName)'	
-        platform: '$(BuildPlatform)'	
-        configuration: '$(_BuildConfig)'	
-      condition: not(succeeded())
+        buildPlatform: '$(BuildPlatform)'	
+        buildConfiguration: '$(_BuildConfig)'	
+      condition: always()
 
     - task: CopyFiles@2	
       displayName: Gather Logs	
@@ -215,7 +215,7 @@ jobs:
          TestResults/$(_BuildConfig)/**/*	
         TargetFolder: '$(Build.ArtifactStagingDirectory)'	
       continueOnError: true	
-      condition: always()	
+      condition: always()
 
     - task: PublishBuildArtifacts@1	
       displayName: Publish Logs to VSTS	
