@@ -41,11 +41,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   Import the Default PublishProfile if the profile is not already imported by the .NET SDK
   ***********************************************************************************************
  -->
-  <PropertyGroup Condition="'$(PublishProfileImported)' != 'true'">
-    <PublishProfile Condition="'$(PublishProfile)' ==''">FileSystem</PublishProfile>
-    <PublishProfileName Condition="'$(PublishProfileName)' == ''">$([System.IO.Path]::GetFileNameWithoutExtension($(PublishProfile)))</PublishProfileName>
-  </PropertyGroup>
-  
   <Import Project="$(_PublishProfilesDir)$(PublishProfileName).pubxml" Condition="Exists('$(_PublishProfilesDir)$(PublishProfileName).pubxml') And '$(PublishProfileImported)' != 'true'" />
 
   <!--
