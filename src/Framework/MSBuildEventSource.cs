@@ -4,15 +4,15 @@ using System.Diagnostics.Tracing;
 namespace Microsoft.Build.Eventing
 {
 
-    // <summary>
-    // This captures information of how various key methods of building with MSBuild ran.
-    // </summary>
+    /// <summary>
+    /// This captures information of how various key methods of building with MSBuild ran.
+    /// </summary>
     [EventSource(Name = "Microsoft-Build")]
     internal sealed class MSBuildEventSource : EventSource
     {
-        // <summary>
-        // define the singleton instance of the event source
-        // </summary>
+        /// <summary>
+        /// define the singleton instance of the event source
+        /// </summary>
         public static MSBuildEventSource Log = new MSBuildEventSource();
 
         private MSBuildEventSource() { }

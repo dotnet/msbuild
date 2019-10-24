@@ -1504,36 +1504,36 @@ namespace Microsoft.Build.Construction
             ErrorUtilities.VerifyThrowInvalidOperation(_projectFileLocation != null, "OM_MustSetFileNameBeforeSave");
 
             Directory.CreateDirectory(DirectoryPath);
+
+            // LocationString is normally cheap to calculate, but it can occasionally go down a rabbit hole of method calls. This makes it more consistent if this event is not enabled.
             if (MSBuildEventSource.Log.IsEnabled())
             {
                 MSBuildEventSource.Log.SaveStart(_projectFileLocation.LocationString);
             }
+            // Note: We're using string Equals on encoding and not EncodingUtilities.SimilarToEncoding in order
+            // to force a save if the Encoding changed from UTF8 with BOM to UTF8 w/o BOM (for example).
+            if (HasUnsavedChanges || !Equals(saveEncoding, Encoding))
             {
-                // Note: We're using string Equals on encoding and not EncodingUtilities.SimilarToEncoding in order
-                // to force a save if the Encoding changed from UTF8 with BOM to UTF8 w/o BOM (for example).
-                if (HasUnsavedChanges || !Equals(saveEncoding, Encoding))
+                using (var projectWriter = new ProjectWriter(_projectFileLocation.File, saveEncoding))
                 {
-                    using (var projectWriter = new ProjectWriter(_projectFileLocation.File, saveEncoding))
-                    {
-                        projectWriter.Initialize(XmlDocument);
-                        XmlDocument.Save(projectWriter);
-                    }
-
-                    _encoding = saveEncoding;
-
-                    FileInfo fileInfo = FileUtilities.GetFileInfoNoThrow(_projectFileLocation.File);
-
-                    // If the file was deleted by a race with someone else immediately after it was written above
-                    // then we obviously can't read the write time. In this obscure case, we'll retain the 
-                    // older last write time, which at worst would cause the next load to unnecessarily 
-                    // come from disk.
-                    if (fileInfo != null)
-                    {
-                        _lastWriteTimeWhenRead = fileInfo.LastWriteTime;
-                    }
-
-                    _versionOnDisk = Version;
+                    projectWriter.Initialize(XmlDocument);
+                    XmlDocument.Save(projectWriter);
                 }
+
+                _encoding = saveEncoding;
+
+                FileInfo fileInfo = FileUtilities.GetFileInfoNoThrow(_projectFileLocation.File);
+
+                // If the file was deleted by a race with someone else immediately after it was written above
+                // then we obviously can't read the write time. In this obscure case, we'll retain the 
+                // older last write time, which at worst would cause the next load to unnecessarily 
+                // come from disk.
+                if (fileInfo != null)
+                {
+                    _lastWriteTimeWhenRead = fileInfo.LastWriteTime;
+                }
+
+                _versionOnDisk = Version;
             }
             if (MSBuildEventSource.Log.IsEnabled())
             {

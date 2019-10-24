@@ -520,7 +520,7 @@ namespace Microsoft.Build.CommandLine
                 MSBuildEventSource.Log.MSBuildExeStart(commandLine);
 #else
                 if (MSBuildEventSource.Log.IsEnabled()) {
-                    MSBuildEventSource.Log.MSBuildExeStart(commandLine.ToString());
+                    MSBuildEventSource.Log.MSBuildExeStop(string.Join(" ", commandLine));
                 }
 #endif
                 Console.CancelKeyPress += cancelHandler;
@@ -805,7 +805,7 @@ namespace Microsoft.Build.CommandLine
                 MSBuildEventSource.Log.MSBuildExeStop(commandLine);
 #else
                 if (MSBuildEventSource.Log.IsEnabled()) {
-                    MSBuildEventSource.Log.MSBuildExeStop(commandLine.ToString());
+                    MSBuildEventSource.Log.MSBuildExeStop(string.Join(" ", commandLine));
                 }
 #endif
             }
