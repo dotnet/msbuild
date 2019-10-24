@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
-    <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
+    <TargetFramework>$(SdkTargetFramework)</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <CopyBuildOutputToPublishDirectory>false</CopyBuildOutputToPublishDirectory>
     <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
@@ -36,7 +36,11 @@
   <ItemGroup>
     <ProjectReference Include="..\tool_msbuild\tool_msbuild.csproj" />
     <ProjectReference Include="..\tool_nuget\tool_nuget.csproj" />
-    <ProjectReference Include="..\dotnet\dotnet.csproj" />
+    <ProjectReference Include="..\..\Cli\dotnet\dotnet.csproj" />
+    <ProjectReference Include="..\..\Tasks\Microsoft.NET.Build.Tasks\Microsoft.NET.Build.Tasks.csproj"
+                      ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\Tasks\Microsoft.NET.Build.Extensions.Tasks\Microsoft.NET.Build.Extensions.Tasks.csproj"
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>

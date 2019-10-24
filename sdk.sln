@@ -104,6 +104,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tool_msbuild", "src\Layout\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tool_nuget", "src\Layout\tool_nuget\tool_nuget.csproj", "{C2DF833D-2A83-408B-8122-3038ACDFDFD0}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "redist", "src\Layout\redist\redist.csproj", "{AA273ACB-56FE-4F0C-8CC9-C2C45D31491D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "toolset-tasks", "src\Layout\toolset-tasks\toolset-tasks.csproj", "{C687CA8D-9843-4045-BC20-917953F6C864}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -202,6 +206,14 @@ Global
 		{C2DF833D-2A83-408B-8122-3038ACDFDFD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2DF833D-2A83-408B-8122-3038ACDFDFD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2DF833D-2A83-408B-8122-3038ACDFDFD0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA273ACB-56FE-4F0C-8CC9-C2C45D31491D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA273ACB-56FE-4F0C-8CC9-C2C45D31491D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA273ACB-56FE-4F0C-8CC9-C2C45D31491D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA273ACB-56FE-4F0C-8CC9-C2C45D31491D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C687CA8D-9843-4045-BC20-917953F6C864}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C687CA8D-9843-4045-BC20-917953F6C864}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C687CA8D-9843-4045-BC20-917953F6C864}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C687CA8D-9843-4045-BC20-917953F6C864}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -236,6 +248,8 @@ Global
 		{8274C645-CBB8-4B94-B58D-5A485FA8514C} = {71C279BD-E850-4A8D-9775-11CA26B8E5BA}
 		{10D77F17-F5CB-46A1-B2A9-178615430C0E} = {71C279BD-E850-4A8D-9775-11CA26B8E5BA}
 		{C2DF833D-2A83-408B-8122-3038ACDFDFD0} = {71C279BD-E850-4A8D-9775-11CA26B8E5BA}
+		{AA273ACB-56FE-4F0C-8CC9-C2C45D31491D} = {71C279BD-E850-4A8D-9775-11CA26B8E5BA}
+		{C687CA8D-9843-4045-BC20-917953F6C864} = {71C279BD-E850-4A8D-9775-11CA26B8E5BA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB8F26CE-4DE6-433F-B32A-79183020BBD6}

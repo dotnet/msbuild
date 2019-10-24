@@ -41,7 +41,7 @@
 
   <Target Name="PrepareBundledDependencyProps">
     <PropertyGroup>
-      <DependencyNuPkgPath>$(NuGetPackagesDir)/$(DependencyPackageName.ToLower())/$(DependencyPackageVersion.ToLower())</DependencyNuPkgPath>
+      <DependencyNuPkgPath>$(NuGetPackageRoot)/$(DependencyPackageName.ToLower())/$(DependencyPackageVersion.ToLower())</DependencyNuPkgPath>
     </PropertyGroup>
   </Target>
 </Project>

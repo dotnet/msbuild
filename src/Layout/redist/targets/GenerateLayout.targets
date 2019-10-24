@@ -20,7 +20,7 @@
       <RoslynDirectory>$(OutputPath)/Roslyn</RoslynDirectory>
     </PropertyGroup>
     <ItemGroup>
-      <RoslynBits Include="$(NuGetPackagesDir)/microsoft.netcore.compilers/$(MicrosoftNETCoreCompilersPackageVersion)/tools/**/*" />
+      <RoslynBits Include="$(NuGetPackageRoot)/microsoft.netcore.compilers/$(MicrosoftNETCoreCompilersPackageVersion)/tools/**/*" />
     </ItemGroup>
     <Copy SourceFiles="@(RoslynBits)" DestinationFiles="@(RoslynBits->'$(RoslynDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
     <ItemGroup>
@@ -37,10 +37,25 @@
     
   </Target>
 
+  <Target Name="PublishNetSdk"
+          BeforeTargets="Build">
+    <PropertyGroup>
+      <NETSdkSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk</NETSdkSourceRoot>
+    </PropertyGroup>
+    <ItemGroup>
+      <NETSdkContent Include="$(NETSdkSourceRoot)\**\*.*" 
+                     DeploymentSubPath="Sdks\Microsoft.NET.Sdk"/>
+    </ItemGroup>
+    <Copy SourceFiles="@(NETSdkContent)"
+      DestinationFiles="@(NETSdkContent->'$(OutputPath)\%(DeploymentSubpath)\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+
+  </Target>
+
   <Target Name="PublishTestCli"
           BeforeTargets="Build">
     <PropertyGroup>
-      <TestCliNuGetDirectory>$(NuGetPackagesDir)/microsoft.testplatform.cli/$(MicrosoftTestPlatformCLIPackageVersion)/contentFiles/any/netcoreapp2.1/</TestCliNuGetDirectory>
+      <TestCliNuGetDirectory>$(NuGetPackageRoot)/microsoft.testplatform.cli/$(MicrosoftTestPlatformCLIPackageVersion)/contentFiles/any/netcoreapp2.1/</TestCliNuGetDirectory>
     </PropertyGroup>
     <ItemGroup>
       <!-- https://github.com/microsoft/vstest/issues/1886 -->
@@ -60,7 +75,7 @@
           BeforeTargets="Build">
     <MSBuild
       Targets="Publish"
-      Projects="$(RepoRoot)/src/tool_fsharp/tool_fsc.csproj"
+      Projects="$(RepoRoot)/src/Layout/tool_fsharp/tool_fsc.csproj"
       Properties="Configuration=$(Configuration);PublishDir=$(OutputPath)/FSharp" />
   </Target>
 
@@ -160,7 +175,7 @@
     <ItemGroup>
       <SdksToBundle Include="targets\RestoreDependency.proj">
         <Properties>
-          NuGetPackagesDir=$(NuGetPackagesDir);
+          NuGetPackageRoot=$(NuGetPackageRoot);
           SdkLayoutDirectory=$(OutputPath)/Sdks/%(BundledSdk.Identity);
           DependencyPackageName=%(BundledSdk.Identity);
           DependencyPackageVersion=%(BundledSdk.Version);

@@ -3,46 +3,27 @@
   <PropertyGroup>
     <MSBuildExtensionsPackageName>Microsoft.NET.Build.Extensions</MSBuildExtensionsPackageName>
     <MSBuildExtensionsVersionSubfolder>Current</MSBuildExtensionsVersionSubfolder>
-    <NETStandardLibraryNETFrameworkPackageName>NETStandard.Library.NETFramework</NETStandardLibraryNETFrameworkPackageName>
+    <MSBuildExtensionsSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\$(MSBuildExtensionsPackageName)</MSBuildExtensionsSourceRoot>
   </PropertyGroup>
-  
-  <ItemGroup>
-    <PackageDownload Include="$(MSBuildExtensionsPackageName)" Version="[$(MicrosoftNETBuildExtensionsPackageVersion)]" />
-    <PackageDownload Include="$(NETStandardLibraryNETFrameworkPackageName)" Version="[$(CLI_NETStandardLibraryNETFrameworkVersion)]" />
-  </ItemGroup>
 
-  <Target Name="GenerateMSBuildExtensions" BeforeTargets="Build">
+  <Target Name="GenerateMSBuildExtensions">
 
-    <PropertyGroup>
-      <MSBuildExtensionsNuPkgPath>$(NuGetPackageRoot)$(MSBuildExtensionsPackageName.ToLower())/$(MicrosoftNETBuildExtensionsPackageVersion.ToLower())</MSBuildExtensionsNuPkgPath>
-      <NETStandardLibraryNETFrameworkNuPkgPath>$(NuGetPackageRoot)$(NETStandardLibraryNETFrameworkPackageName.ToLower())/$(CLI_NETStandardLibraryNETFrameworkVersion.ToLower())</NETStandardLibraryNETFrameworkNuPkgPath>
-    </PropertyGroup>
-    
     <ItemGroup>
       
       <!-- Include MSBuild imports that are checked into repo -->
-      <MSBuildExtensionsContent Include="$(RepoRoot)/resources/MSBuildImports/**/*" />
+      <MSBuildExtensionsContent Include="$(MSBuildProjectDirectory)/MSBuildImports/**/*" />
 
-      <!-- We want to include the tasks and targets from the Microsoft.NET.Build.Extensions package, but we don't want to include the DLLs
-           from that package under the net461, net462, etc folders.  That is because they come from the NETStandard.Library.NETFramework
-           package, and we want to insert them directly into the toolset from CoreFx instead of having to do a two-hop insertion (CoreFX -> SDK -> CLI)
-           if we need to update them.
-
-           https://github.com/dotnet/sdk/issues/1324 has been filed to exclude these from the Microsoft.NET.Build.Extensions package when
-           we generate it.
-           -->
-      <MSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\**\*.*"
-                                Exclude="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\net*\**" />
+      
+      <MSBuildExtensionsContent Include="$(MSBuildExtensionsSourceRoot)\msbuildExtensions\**\*.*" />
 
       <!-- Don't include .NET Framework MS.NET.Build.Extensions tasks in CLI layout -->
-      <MSBuildExtensionsContent Remove="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools\net46\**" />
+      <MSBuildExtensionsContent Remove="$(MSBuildExtensionsSourceRoot)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools\net472\**" />
 
-      <MSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions-ver\**\*.*"
-                                DeploymentSubpath="$(MSBuildExtensionsVersionSubfolder)/" />
+      <MSBuildExtensionsContent Include="$(MSBuildExtensionsSourceRoot)\msbuildExtensions-ver\**\*.*"
+                          DeploymentSubpath="$(MSBuildExtensionsVersionSubfolder)/" />
 
-      <MSBuildExtensionsContent Include="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.*"
-                                Exclude="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.props;$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.targets"
-                                DeploymentSubpath="Microsoft/Microsoft.NET.Build.Extensions/" />
+
+
 
     </ItemGroup>
 

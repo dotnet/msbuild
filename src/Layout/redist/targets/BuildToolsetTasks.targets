@@ -1,11 +1,11 @@
 <Project>
   <PropertyGroup>
     <!-- Tasks are multitargeted to support building in VS and with desktop MSBuild -->
-    <TaskTargetFramework>$(ToolsetTargetFramework)</TaskTargetFramework>
+    <TaskTargetFramework>$(SdkTargetFramework)</TaskTargetFramework>
     <TaskTargetFramework Condition="'$(MSBuildRuntimeType)' != 'Core'">net472</TaskTargetFramework>
 
     <ToolsetTaskDll>$(ArtifactsDir)tasks\bin\toolset-tasks\$(Configuration)\$(TaskTargetFramework)\toolset-tasks.dll</ToolsetTaskDll>
-    <ToolsetTaskProject>$(RepoRoot)src\toolset-tasks\toolset-tasks.csproj</ToolsetTaskProject>
+    <ToolsetTaskProject>$(RepoRoot)src\Layout\toolset-tasks\toolset-tasks.csproj</ToolsetTaskProject>
   </PropertyGroup>
   <Target Name="BuildCoreSdkTasks" BeforeTargets="_CheckForInvalidConfigurationAndPlatform">
     <!-- Use a different ArtifactsDir for this invocation so that the tasks project can be part of the solution
