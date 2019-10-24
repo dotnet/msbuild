@@ -3,10 +3,10 @@
   <Import Project="Sdk.targets" Sdk="Microsoft.DotNet.Arcade.Sdk" />
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'
-                          and $(MicrosoftNETCoreAppRuntimewinx64PackageVersion.StartsWith('$(_TargetFrameworkVersionWithoutV)'))">
+                          and $(MicrosoftNETCoreAppRefPackageVersion.StartsWith('$(_TargetFrameworkVersionWithoutV)'))">
     <FrameworkReference
         Update="Microsoft.NETCore.App" 
-        TargetingPackVersion="$(MicrosoftNETCoreAppRuntimewinx64PackageVersion)"
-        RuntimeFrameworkVersion="$(MicrosoftNETCoreAppRuntimewinx64PackageVersion)" />
+        TargetingPackVersion="$(MicrosoftNETCoreAppRefPackageVersion)"
+        RuntimeFrameworkVersion="$(MicrosoftNETCoreAppRuntimePackageVersion)" />
   </ItemGroup>
 </Project>

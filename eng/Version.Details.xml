@@ -1,19 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
+    <Dependency Name="Microsoft.NETCore.App.Ref" Version="3.1.0-preview2.19523.6">
+      <Uri>https://github.com/dotnet/core-setup</Uri>
+      <Sha>10d8d0996dba48164eb035562afb32e8157e8d06</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Runtime.win-x64" Version="3.1.0-preview2.19523.6">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>10d8d0996dba48164eb035562afb32e8157e8d06</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.1.100-preview2.19523.1">
+    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.1.100-preview2.19523.2">
       <Uri>https://github.com/dotnet/cli</Uri>
-      <Sha>f0be1a76e3bd25bb184fe4e12e86bd452d39b6ce</Sha>
+      <Sha>4a4bf4ff87550e477c9db6de808d430908450da8</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Sdk" Version="3.1.100-preview1.19506.1">
       <Uri>https://github.com/dotnet/sdk</Uri>
       <Sha>357126710492d620198a60ee340ebeca9070f133</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Build" Version="16.4.0-preview-19522-08">
+      <Uri>https://github.com/microsoft/msbuild</Uri>
+      <Sha>72f86ff1cb1daad46fd454c14f2dfa490e6fc49b</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.Build.Localization" Version="16.4.0-preview-19522-08">
       <Uri>https://github.com/microsoft/msbuild</Uri>
       <Sha>72f86ff1cb1daad46fd454c14f2dfa490e6fc49b</Sha>
     </Dependency>
@@ -68,9 +76,9 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19461.7">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19474.3">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>8eb29ba860a3cfcfe68f9a8256caa7efc1f1aaba</Sha>
+      <Sha>0e9ffd6464aff37aef2dc41dc2162d258f266e32</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

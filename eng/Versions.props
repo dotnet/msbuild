@@ -13,7 +13,7 @@
   <!-- Production Dependencies -->
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/cli  -->
-    <MicrosoftDotNetCliRuntimePackageVersion>3.1.100-preview2.19523.1</MicrosoftDotNetCliRuntimePackageVersion>
+    <MicrosoftDotNetCliRuntimePackageVersion>3.1.100-preview2.19523.2</MicrosoftDotNetCliRuntimePackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/sdk -->
@@ -24,7 +24,7 @@
     <MicrosoftBuildPackageVersion>16.4.0-preview-19522-08</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
-    <MicrosoftBuildLocalizationPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildLocalizationPackageVersion>
+    <MicrosoftBuildLocalizationPackageVersion>16.4.0-preview-19522-08</MicrosoftBuildLocalizationPackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
   </PropertyGroup>
   <PropertyGroup>
@@ -77,12 +77,14 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/core-setup -->
+    <MicrosoftNETCoreAppRefPackageVersion>3.1.0-preview2.19523.6</MicrosoftNETCoreAppRefPackageVersion>
     <MicrosoftNETCoreAppRuntimewinx64PackageVersion>3.1.0-preview2.19523.6</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
+    <MicrosoftNETCoreAppRuntimePackageVersion>$(MicrosoftNETCoreAppRuntimewinx64PackageVersion)</MicrosoftNETCoreAppRuntimePackageVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <MicrosoftDotNetPlatformAbstractionsPackageVersion>2.2.0-preview1-26620-03</MicrosoftDotNetPlatformAbstractionsPackageVersion>
-    <MicrosoftDotNetCliUtilsPackageVersion>2.2.100-refac-20180613-1</MicrosoftDotNetCliUtilsPackageVersion>
-    <XliffTasksPackageVersion>0.2.0-beta-000042</XliffTasksPackageVersion>
+    <!-- Test only dependencies -->
+    <MicrosoftDotNetPlatformAbstractionsPackageVersion>$(MicrosoftNETCoreAppRuntimePackageVersion)</MicrosoftDotNetPlatformAbstractionsPackageVersion>
+    <MicrosoftDotNetCliUtilsPackageVersion>$(MicrosoftDotNetCliRuntimePackageVersion)</MicrosoftDotNetCliUtilsPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <UsingToolNetFrameworkReferenceAssemblies>true</UsingToolNetFrameworkReferenceAssemblies>
@@ -94,30 +96,5 @@
     <_DotNetHiveRoot Condition="'$(_DotNetHiveRoot)' == ''">$(RepoRoot).dotnet/</_DotNetHiveRoot>
     <_DotNetHiveRoot Condition="!HasTrailingSlash('$(_DotNetHiveRoot)')">$(_DotNetHiveRoot)/</_DotNetHiveRoot>
     <DotNetExe>$(_DotNetHiveRoot)dotnet$(ExeExtension)</DotNetExe>
-  </PropertyGroup>
-  <PropertyGroup>
-    <RestoreSources>
-      $(RestoreSources);
-      https://dotnet.myget.org/F/vstest/api/v3/index.json;
-      https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
-      https://dotnetfeed.blob.core.windows.net/dotnet-sdk/index.json;
-      https://dotnetfeed.blob.core.windows.net/aspnet-aspnetcore/index.json;
-      https://dotnetfeed.blob.core.windows.net/aspnet-aspnetcore-tooling/index.json;
-      https://dotnetfeed.blob.core.windows.net/nuget-nugetclient/index.json;
-      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
-      https://dotnet.myget.org/F/templating/api/v3/index.json;
-      https://dotnet.myget.org/F/dotnet-web/api/v3/index.json;
-      https://dotnet.myget.org/f/roslyn/api/v3/index.json;
-      https://dotnet.myget.org/F/nuget-build/api/v3/index.json;
-      https://api.nuget.org/v3/index.json;
-      https://www.myget.org/F/container-tools-for-visual-studio/api/v3/index.json;
-      https://dotnetfeed.blob.core.windows.net/orchestrated-release-2-1/20180420-03/aspnet-inputs/index.json;
-      https://dotnet.myget.org/F/msbuild/api/v3/index.json;
-      https://dotnet.myget.org/F/dotnet-cli/api/v3/index.json;
-      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
-      https://dotnet.myget.org/F/vstest/api/v3/index.json;
-      https://dotnetfeed.blob.core.windows.net/orchestrated-release-2-1/20180725-02/final/index.json;
-      https://dotnetfeed.blob.core.windows.net/dotnet-windowsdesktop/index.json
-    </RestoreSources>
   </PropertyGroup>
 </Project>

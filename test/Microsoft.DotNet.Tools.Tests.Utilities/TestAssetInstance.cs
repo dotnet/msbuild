@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
+using Microsoft.DotNet.Tools.Test.Utilities;
 
 namespace Microsoft.DotNet.TestFramework
 {
@@ -27,9 +28,7 @@ namespace Microsoft.DotNet.TestFramework
 
         private bool _restored = false;
 
-        private bool _built = false;
 
-        public static string CurrentRuntimeFrameworkVersion = new Muxer().SharedFxVersion;
 
         public TestAssetInstance(TestAssetInfo testAssetInfo, DirectoryInfo root)
         {
@@ -90,20 +89,10 @@ namespace Microsoft.DotNet.TestFramework
                 RestoreAllProjects();
 
                 _restored = true;
-            }
 
-            return this;
-        }
 
-        public TestAssetInstance WithBuildFiles()
-        {
-            if (!_built)
-            {
-                WithRestoreFiles();
 
-                BuildRootProjectOrSolution();
 
-                _built = true;
             }
 
             return this;
@@ -171,22 +160,8 @@ namespace Microsoft.DotNet.TestFramework
             return this;
         }
 
-        public TestAssetInstance UseCurrentRuntimeFrameworkVersion()
-        {
-            return WithProjectChanges(project =>
-            {
-                var ns = project.Root.Name.Namespace;
 
-                var propertyGroup = project.Root.Elements(ns + "PropertyGroup").LastOrDefault();
-                if (propertyGroup == null)
-                {
-                    propertyGroup = new XElement(ns + "PropertyGroup");
-                    project.Root.Add(propertyGroup);
-                }
 
-                propertyGroup.Add(new XElement(ns + "RuntimeFrameworkVersion", CurrentRuntimeFrameworkVersion));
-            });
-        }
 
         private static string RebasePath(string path, string oldBaseDirectory, string newBaseDirectory)
         {
@@ -245,31 +220,12 @@ namespace Microsoft.DotNet.TestFramework
             }
         }
 
-        private void BuildRootProjectOrSolution()
-        {
-            string[] args = new string[] { "build" };
 
-            Console.WriteLine($"TestAsset Build '{TestAssetInfo.AssetName}'");
 
-            var commandResult = Command.Create(TestAssetInfo.DotnetExeFile.FullName, args)
-                                    .WorkingDirectory(Root.FullName)
-                                    .CaptureStdOut()
-                                    .CaptureStdErr()
-                                    .Execute();
 
-            int exitCode = commandResult.ExitCode;
 
-            if (exitCode != 0)
-            {
-                Console.WriteLine(commandResult.StdOut);
 
-                Console.WriteLine(commandResult.StdErr);
 
-                string message = string.Format($"TestAsset Build '{TestAssetInfo.AssetName}' Failed with {exitCode}");
-
-                throw new Exception(message);
-            }
-        }
 
         private IEnumerable<FileInfo> GetProjectFiles()
         {
@@ -280,23 +236,14 @@ namespace Microsoft.DotNet.TestFramework
         {
             var restoreArgs = new string[] { "restore", projectFile.FullName };
 
-            var commandResult = Command.Create(TestAssetInfo.DotnetExeFile.FullName, restoreArgs)
-                                .CaptureStdOut()
-                                .CaptureStdErr()
-                                .Execute();
 
-            int exitCode = commandResult.ExitCode;
+            var commandResult = new DotnetCommand()
+                .Execute(ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(restoreArgs));
 
-            if (exitCode != 0)
-            {
-                Console.WriteLine(commandResult.StdOut);
+            commandResult.Should().Pass();
 
-                Console.WriteLine(commandResult.StdErr);
 
-                string message = string.Format($"TestAsset Restore '{TestAssetInfo.AssetName}'@'{projectFile.FullName}' Failed with {exitCode}");
 
-                throw new Exception(message);
-            }
         }
 
         private void RestoreAllProjects()
