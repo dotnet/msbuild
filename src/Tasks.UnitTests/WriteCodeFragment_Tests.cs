@@ -8,6 +8,7 @@ using Shouldly;
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -483,16 +484,8 @@ namespace Microsoft.Build.UnitTests
 
         private static readonly string VBCarriageReturn = "Global.Microsoft.VisualBasic.ChrW(13)";
         private static readonly string VBLineFeed = "Global.Microsoft.VisualBasic.ChrW(10)";
-        private static readonly string WindowsNewLine = $"{VBCarriageReturn}&{VBLineFeed}";
 
-        public static readonly string VBLineSeparator =
-#if FEATURE_CODEDOM
-            WindowsNewLine;
-#else
-            NativeMethodsShared.IsWindows
-                ? WindowsNewLine
-                : VBLineFeed;
-#endif
+        public static readonly string VBLineSeparator = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? $"{VBCarriageReturn}&{VBLineFeed}" : VBLineFeed;
 
         /// <summary>
         /// Multi line argument values should cause a verbatim string to be used
