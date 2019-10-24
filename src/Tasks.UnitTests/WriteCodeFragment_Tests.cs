@@ -1,16 +1,14 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.IO;
-
-using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using Xunit;
-using System.Collections.Generic;
+using Shouldly;
+using System;
+using System.IO;
 using System.Linq;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -694,7 +692,7 @@ namespace Microsoft.Build.UnitTests
                              .Select(line => line.Trim())
                              .Where(line => line.Length > 0 && !line.StartsWith(commentStart)));
 
-            Assert.Equal(expectedContent, normalizedActualContent);
+            expectedContent.ShouldBe(normalizedActualContent);
         }
     }
 }
