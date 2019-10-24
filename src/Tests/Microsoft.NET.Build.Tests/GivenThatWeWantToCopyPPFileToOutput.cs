@@ -37,17 +37,12 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
-            restoreCommand.Execute()
-                .Should()
-                .Pass();
-
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             buildCommand.Execute()
                 .Should()
                 .Pass();
 
-            var outputPath = Path.Combine(testAsset.TestRoot, testProject.Name, "bin", "Debug", "netcoreapp3.0");
+            var outputPath = Path.Combine(testAsset.TestRoot, testProject.Name, "bin", "Debug", testProject.TargetFrameworks);
             File.Exists(Path.Combine(outputPath, packageReference.ID + ".dll")).Should().BeTrue();
             File.Exists(Path.Combine(outputPath, "Nontransformed.ps1")).Should().BeTrue();
             File.Exists(Path.Combine(outputPath, "Test.ps1")).Should().BeTrue();
@@ -57,7 +52,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var referencedPackage = new TestProject()
             {
-                Name = "CopyPPTilesToOutput",
+                Name = "CopyPPFilesToOutput",
                 TargetFrameworks = "netcoreapp3.0",
                 IsSdkProject = true
             };
@@ -67,9 +62,6 @@ namespace Microsoft.NET.Build.Tests
             WriteFile(Path.Combine(packageAsset.TestRoot, referencedPackage.Name, "Test.ps1.pp"), "Content file");
             packageAsset = packageAsset
                 .WithProjectChanges(project => AddContent(project));
-
-            var restoreCommand = new RestoreCommand(Log, packageAsset.TestRoot, referencedPackage.Name);
-            restoreCommand.Execute().Should().Pass();
 
             var packCommand = new PackCommand(Log, packageAsset.TestRoot, referencedPackage.Name);
             packCommand.Execute()
