@@ -13,9 +13,9 @@
       <Uri>https://github.com/dotnet/cli</Uri>
       <Sha>db60cc51dbf2442013b6b2ae9d323339e80b2077</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk" Version="3.1.100-preview1.19506.1">
+    <Dependency Name="Microsoft.NET.Sdk" Version="3.1.100-preview2.19525.4">
       <Uri>https://github.com/dotnet/sdk</Uri>
-      <Sha>357126710492d620198a60ee340ebeca9070f133</Sha>
+      <Sha>5d0fe6572a2f7a11fe5eabdee4800002e111e726</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Build" Version="16.4.0-preview-19524-05">
       <Uri>https://github.com/microsoft/msbuild</Uri>
