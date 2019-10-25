@@ -526,6 +526,7 @@ function MSBuild() {
     # https://github.com/dotnet/arcade/issues/3932
     if ($ci -and $buildTool.Tool -eq "dotnet") {
       dotnet nuget locals http-cache -c
+
       $env:NUGET_PLUGIN_HANDSHAKE_TIMEOUT_IN_SECONDS = 20
       $env:NUGET_PLUGIN_REQUEST_TIMEOUT_IN_SECONDS = 20
       Write-PipelineSetVariable -Name 'NUGET_PLUGIN_HANDSHAKE_TIMEOUT_IN_SECONDS' -Value '20'
