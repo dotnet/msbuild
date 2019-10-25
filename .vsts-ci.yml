@@ -55,20 +55,6 @@ stages:
   - ${{ if ne(variables['System.TeamProject'], 'public') }}:
     - template: /eng/build.yml
       parameters:
-        agentOs: Windows_Perf_Helix
-        pool:
-          name: Hosted VS2017
-        strategy:
-          matrix:
-            Build_Release:
-              _BuildConfig: Release
-              _PublishType: none
-              _SignType: test
-              _DotNetPublishToBlobFeed: false
-
-  - ${{ if ne(variables['System.TeamProject'], 'public') }}:
-    - template: /eng/build.yml
-      parameters:
         agentOs: Windows_Perf_Helix_Fullframework
         pool:
           name: Hosted VS2017
