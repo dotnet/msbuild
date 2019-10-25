@@ -42,6 +42,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             Publish(testFolder, projectName, configuration, msBuildType);
         }
 
+
         [Theory]
         [InlineData("netcoreapp3.0", "Release", "core")]
         [InlineData("netcoreapp3.0", "Debug", "core")]
@@ -80,7 +81,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             string testFolder = Path.Combine(BaseTestDirectory, projectName);
 
             // dotnet new
-            int? exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true, testOutputHelper: _testOutputHelper);
+            int? exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
             Assert.True(exitCode.HasValue && exitCode.Value == 0);
 
             Publish(testFolder, projectName, configuration, msBuildType);
@@ -107,7 +108,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
             string testFolder = Path.Combine(BaseTestDirectory, projectName);
 
             // dotnet new
-            int? exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true, testOutputHelper: _testOutputHelper);
+            int? exitCode = new ProcessWrapper().RunProcess(DotNetExeName, dotNetNewArguments, testFolder, out int? processId1, createDirectoryIfNotExists: true);
             Assert.True(exitCode.HasValue && exitCode.Value == 0);
 
             Publish(testFolder, projectName, configuration, msBuildType);
