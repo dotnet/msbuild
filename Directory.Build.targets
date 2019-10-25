@@ -7,6 +7,6 @@
     <FrameworkReference
         Update="Microsoft.NETCore.App" 
         TargetingPackVersion="$(MicrosoftNETCoreAppRefPackageVersion)"
-        RuntimeFrameworkVersion="$(MicrosoftNETCoreAppRuntimePackageersion)" />
+        RuntimeFrameworkVersion="$(MicrosoftNETCoreAppRuntimePackageVersion)" />
   </ItemGroup>
 </Project>
