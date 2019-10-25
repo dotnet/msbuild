@@ -10,6 +10,7 @@ using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using System.ComponentModel;
 
 namespace Microsoft.Build.Tasks
 {
@@ -163,8 +164,19 @@ namespace Microsoft.Build.Tasks
                     {
                         string conventionDependentUpon = Path.ChangeExtension(Path.GetFileName(fileName), SourceFileExtension);
 
-                        if (File.Exists(Path.Combine(Path.GetDirectoryName(fileName), conventionDependentUpon)))
+                        // Figure out of this file has a culture associated with it
+                        Culture.ItemCultureInfo info = Culture.GetItemCultureInfo(fileName, "");
+
+                        // if it has a valid culture in the name (TestComponent.de.resx)
+                        if(info.culture != null)
                         {
+                            // ignore the culture when performing dependent upon convention (ie. look for TestComponent.cs)
+                            dependentUpon = Path.GetFileNameWithoutExtension(info.cultureNeutralFilename) + ".cs";
+                        }
+                        // This will always fail if there is a culture associated with the .resx file name
+                        else if (File.Exists(Path.Combine(Path.GetDirectoryName(fileName), conventionDependentUpon)))
+                        {
+                            //TODO: ASK IF WE SHOULD WORRY ABOUT TestComponent.de.cs 
                             dependentUpon = conventionDependentUpon;
                         }
                     }
