@@ -60,7 +60,7 @@ namespace Microsoft.NET.TestFramework
             command.Environment["GenerateResourceMSBuildRuntime"] = "CurrentRuntime";
 
             //  Use distinct nodes for test environment
-            command.Environment["MSBUILDNODEHANDSHAKESALT "] = "Test Environment for dotnet/sdk";
+            command.Environment["MSBUILDNODEHANDSHAKESALT"] = "Test Environment for dotnet/sdk";
 
             ToolsetUnderTest.AddTestEnvironmentVariables(command);
         }
