@@ -2599,6 +2599,12 @@ namespace Microsoft.Build.Tasks
             {
                 ReadResources(inFile, _useSourcePath, outFileOrDir);
             }
+            catch (InputFormatNotSupportedException)
+            {
+                _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0,
+                                                      "GenerateResource.CoreSupportsLimitedScenarios");
+                return false;
+            }
             catch (MSBuildResXException msbuildResXException)
             {
                 _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0,
@@ -2984,7 +2990,7 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_ASSEMBLY_LOADFROM
                 ReadAssemblyResources(filename, outFileOrDir);
 #else
-                _logger.LogError("Reading resources from Assembly not supported on .NET Core MSBuild");
+                throw new InputFormatNotSupportedException("Reading resources from Assembly not supported on .NET Core MSBuild");
 #endif
             }
             else
@@ -3042,10 +3048,10 @@ namespace Microsoft.Build.Tasks
                     case Format.Binary:
 #if FEATURE_RESX_RESOURCE_READER
                         ReadResources(reader, new ResourceReader(filename), filename); // closes reader for us
-#else
-                        _logger.LogError("ResGen.exe not supported on .NET Core MSBuild");
-#endif
                         break;
+#else
+                        throw new InputFormatNotSupportedException("Reading resources from binary .resources not supported on .NET Core MSBuild");
+#endif
 
                     default:
                         // We should never get here, we've already checked the format
@@ -3383,8 +3389,13 @@ namespace Microsoft.Build.Tasks
 
                 PopulateAssemblyNames();
 
-                foreach (var assemblyName in _assemblyNames)
+                foreach (AssemblyNameExtension assemblyName in _assemblyNames)
                 {
+                    if (assemblyName == null)
+                    {
+                        continue;
+                    }
+
                     if (string.Equals(assemblyName.Name, "System.Resources.Extensions", StringComparison.OrdinalIgnoreCase))
                     {
                         _haveSystemResourcesExtensionsReference = true;
@@ -3757,14 +3768,16 @@ namespace Microsoft.Build.Tasks
         {
             using (StreamWriter writer = FileUtilities.OpenWrite(fileName, false, Encoding.UTF8))
             {
-                foreach (LiveObjectResource entry in reader.resources)
+                foreach (IResource resource in reader.resources)
                 {
-                    String key = entry.Name;
-                    Object v = entry.Value;
+                    LiveObjectResource entry = resource as LiveObjectResource;
+
+                    String key = entry?.Name;
+                    Object v = entry?.Value;
                     String value = v as String;
                     if (value == null)
                     {
-                        _logger.LogErrorWithCodeFromResources(null, fileName, 0, 0, 0, 0, "GenerateResource.OnlyStringsSupported", key, v.GetType().FullName);
+                        _logger.LogErrorWithCodeFromResources(null, fileName, 0, 0, 0, 0, "GenerateResource.OnlyStringsSupported", key, v?.GetType().FullName);
                     }
                     else
                     {

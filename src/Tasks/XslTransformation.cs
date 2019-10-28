@@ -148,6 +148,11 @@ namespace Microsoft.Build.Tasks
             {
                 xslct = xsltinput.LoadXslt(UseTrustedSettings);
             }
+            catch (PlatformNotSupportedException)
+            {
+                Log.LogErrorWithCodeFromResources("XslTransform.PrecompiledXsltError");
+                return false;
+            }
             catch (Exception e)
             {
                 if (ExceptionHandling.IsCriticalException(e))
@@ -456,8 +461,8 @@ namespace Microsoft.Build.Tasks
 
                         xslct.Load(new XPathDocument(XmlReader.Create(_data)), settings, new XmlUrlResolver());
                         break;
-#if !MONO
                     case XslModes.XsltCompiledDll:
+#if FEATURE_COMPILED_XSL
                         // We accept type in format: assembly_name[;type_name]. type_name may be omitted if assembly has just one type defined
                         string dll = _data;
                         string[] pair = dll.Split(MSBuildConstants.SemicolonChar);
@@ -467,6 +472,8 @@ namespace Microsoft.Build.Tasks
                         Type t = FindType(assemblyPath, typeName);
                         xslct.Load(t);
                         break;
+#else
+                        throw new PlatformNotSupportedException("Precompiled XSLTs are not supported in .NET Core");
 #endif
                     default:
                         ErrorUtilities.ThrowInternalErrorUnreachable();

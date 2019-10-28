@@ -11,6 +11,8 @@ using Microsoft.Build.Shared;
 using Xunit;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -485,16 +487,8 @@ namespace Microsoft.Build.UnitTests
 
         private static readonly string VBCarriageReturn = "Global.Microsoft.VisualBasic.ChrW(13)";
         private static readonly string VBLineFeed = "Global.Microsoft.VisualBasic.ChrW(10)";
-        private static readonly string WindowsNewLine = $"{VBCarriageReturn}&{VBLineFeed}";
 
-        public static readonly string VBLineSeparator =
-#if FEATURE_CODEDOM
-            WindowsNewLine;
-#else
-            NativeMethodsShared.IsWindows
-                ? WindowsNewLine
-                : VBLineFeed;
-#endif
+        public static readonly string VBLineSeparator = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? $"{VBCarriageReturn}&{VBLineFeed}" : VBLineFeed;
 
         /// <summary>
         /// Multi line argument values should cause a verbatim string to be used
@@ -694,7 +688,7 @@ namespace Microsoft.Build.UnitTests
                              .Select(line => line.Trim())
                              .Where(line => line.Length > 0 && !line.StartsWith(commentStart)));
 
-            Assert.Equal(expectedContent, normalizedActualContent);
+            expectedContent.ShouldBe(normalizedActualContent);
         }
     }
 }

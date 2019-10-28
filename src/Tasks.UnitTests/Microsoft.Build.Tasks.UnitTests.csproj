@@ -132,7 +132,6 @@
     <Compile Remove="VisualBasicParserUtilitites_Tests.cs" />
     <Compile Remove="VisualBasicTokenizer_Tests.cs" />
     <Compile Remove="WinMDExp_Tests.cs" />
-    <Compile Remove="XslTransformation_Tests.cs" />
   </ItemGroup>
 
   <ItemGroup>

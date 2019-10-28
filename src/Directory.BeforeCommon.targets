@@ -30,11 +30,11 @@
     <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLYNAME_CLONE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_TYPE_GETCONSTRUCTOR</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_COM_INTEROP</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_COMPILED_XSL</DefineConstants>
     <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_COMPILE_IN_TESTS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CONSOLE_BUFFERWIDTH</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CONSTRAINED_EXECUTION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CHARSET_AUTO</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_CODEDOM</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CODETASKFACTORY</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_CONSOLE_FALLBACK</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_GETCULTUREINFO</DefineConstants>

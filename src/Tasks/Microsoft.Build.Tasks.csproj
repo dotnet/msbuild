@@ -500,6 +500,7 @@
     <Compile Include="Warning.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="XslTransformation.cs" />
     <Compile Include="AssignCulture.cs" />
     <Compile Include="Culture.cs" />
     <Compile Include="CultureInfoCache.cs" />
@@ -649,7 +650,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="WinMDExp.cs" />
-    <Compile Include="XslTransformation.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Compile Include="XamlTaskFactory\CommandLineGenerator.cs" />

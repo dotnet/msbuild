@@ -1130,6 +1130,10 @@
     <value>MSB3823: Non-string resources require the property GenerateResourceUsePreserializedResources to be set to true.</value>
     <comment>{StrBegin="MSB3823: "}</comment>
   </data>
+  <data name="GenerateResource.CoreSupportsLimitedScenarios">
+    <value>MSB3824: In order to build with .NET Core, resource inputs must be in .txt or .resx format.</value>
+    <comment>{StrBegin="MSB3824: "}</comment>
+  </data>
 
 
   <!--
@@ -2262,6 +2266,10 @@
   </data>
   <data name="XslTransform.UseTrustedSettings" xml:space="preserve">
     <value>The usage of the document() method and embedded scripts is prohibited by default, due to risks of foreign code execution.  If "{0}" is a trusted source that requires those constructs, please set the "UseTrustedSettings" parameter to "true" to allow their execution.</value>
+  </data>
+    <data name="XslTransform.PrecompiledXsltError" xml:space="preserve">
+    <value>MSB3705: XslCompiledDllPath is not supported when building with .NET Core.</value>
+    <comment>{StrBegin="MSB3705: "}</comment>
   </data>
 
 

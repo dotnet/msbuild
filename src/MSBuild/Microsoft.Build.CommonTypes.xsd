@@ -1632,6 +1632,16 @@ elementFormDefault="qualified">
         <xs:documentation><!-- _locID_text="PackageTargetFallback" _locComment="" -->Allows packages using alternative monikers to be referenced in this project, which include older (e.g. dnxcore50, dotnet5.x) and Portable Class Library names.</xs:documentation>
       </xs:annotation>
     </xs:element>
+    <xs:element name="AssetTargetFallback" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="AssetTargetFallback" _locComment="" -->Can be set to one or more target framework monikers. When determining package compatibility, if the package does not have compatible assets for the project's real target framework, compatibility will be rechecked using each target framework from the AssetTargetFramework project of the referencing project.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="Nullable" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="Nullable" _locComment="" -->Set the nullable annotations and warnings context for the C# project. Possible values are enable, disable, warnings and annotations.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
     <xs:element name="Platform" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="PlatformName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="PlatformFamilyName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>

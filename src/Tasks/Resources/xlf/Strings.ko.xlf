@@ -979,6 +979,11 @@
         <target state="translated">MSB3190: ClickOnce는 요청 실행 수준 '{0}'을(를) 지원하지 않습니다.</target>
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
+        <source>MSB3824: In order to build with .NET Core, resource inputs must be in .txt or .resx format.</source>
+        <target state="new">MSB3824: In order to build with .NET Core, resource inputs must be in .txt or .resx format.</target>
+        <note>{StrBegin="MSB3824: "}</note>
+      </trans-unit>
       <trans-unit id="GenerateResource.InputDoesntExist">
         <source>Input file "{0}" does not exist.</source>
         <target state="translated">입력 파일 "{0}"이(가) 없습니다.</target>
@@ -2587,6 +2592,11 @@
         <source>MSB3701: Unable to load arguments for the XslTransformation task. {0}</source>
         <target state="translated">MSB3701: XslTransformation 작업의 인수를 로드할 수 없습니다. {0}</target>
         <note>{StrBegin="MSB3701: "}</note>
+      </trans-unit>
+      <trans-unit id="XslTransform.PrecompiledXsltError">
+        <source>MSB3705: XslCompiledDllPath is not supported when building with .NET Core.</source>
+        <target state="new">MSB3705: XslCompiledDllPath is not supported when building with .NET Core.</target>
+        <note>{StrBegin="MSB3705: "}</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">
         <source>MSB3702: Unable to process the XsltParameters argument for the XslTransformation task. {0}</source>
