@@ -20,7 +20,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [FullMSBuildOnlyFact]
+        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/3785")]
         public void When_referenced_by_csharp_project_it_publishes_and_runs()
         {
             var testAsset = _testAssetsManager
@@ -48,7 +48,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("Hello, World!");
         }
 
-        [FullMSBuildOnlyFact]
+        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/3785")]
         public void When_not_referenced_by_csharp_project_it_fails_to_publish()
         {
             var testAsset = _testAssetsManager

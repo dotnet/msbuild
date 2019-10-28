@@ -524,7 +524,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
   -->
   <Target Name="ResolveLockFileCopyLocalFiles"
-          DependsOnTargets="ResolvePackageAssets">
+          DependsOnTargets="ResolvePackageAssets;RunProduceContentAssets">
 
     <ItemGroup>
       <_ResolvedCopyLocalBuildAssets Include="@(RuntimeCopyLocalItems)"
@@ -538,6 +538,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_ResolvedCopyLocalBuildAssets Include="@(RuntimeTargetsCopyLocalItems)"
                                      Condition="'%(RuntimeTargetsCopyLocalItems.CopyLocal)' == 'true'" />
 
+      <ReferenceCopyLocalPaths Include="@(_ContentCopyLocalItems)" />
       <ReferenceCopyLocalPaths Include="@(_ResolvedCopyLocalBuildAssets)"
                                Condition="'$(CopyLocalLockFileAssemblies)' == 'true'" />
     </ItemGroup>
