@@ -12,7 +12,7 @@ parameters:
   strategy: ''
 
   # Job timeout
-  timeoutInMinutes: 120
+  timeoutInMinutes: 180
 
 jobs:
 - template: /eng/common/templates/job/job.yml
@@ -21,6 +21,7 @@ jobs:
     enableMicrobuild: true
     enablePublishBuildAssets: true
     enableTelemetry: true
+    enablePublishUsingPipelines: true
     helixRepo: dotnet/sdk
     pool: ${{ parameters.pool }}
     timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
@@ -35,6 +36,7 @@ jobs:
       - _OfficialBuildIdArgs: ''
       - _PublishArgs: ''
       - _SignArgs: ''
+      - _TestArgs: $(_Test)
       - ${{ if ne(variables['System.TeamProject'], 'public') }}:
         - group: DotNet-Symbol-Server-PATs
         - group: DotNet-HelixApi-Access
@@ -47,15 +49,17 @@ jobs:
                     /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
                     /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
                     /p:PB_PublishType=$(_PublishType)
+                    /p:DotNetPublishUsingPipelines=true
         - _SignArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
         - _PerfIterations: 25
     steps:
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
-      - script: eng\common\CIBuild.cmd
+      - script: eng\CIBuild.cmd
                   -configuration $(_BuildConfig)
                   $(_PublishArgs)
                   $(_SignArgs)
                   $(_OfficialBuildIdArgs)
+                  $(_TestArgs)
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
@@ -211,7 +215,7 @@ jobs:
          TestResults/$(_BuildConfig)/**/*	
         TargetFolder: '$(Build.ArtifactStagingDirectory)'	
       continueOnError: true	
-      condition: not(succeeded())	
+      condition: always()	
 
     - task: PublishBuildArtifacts@1	
       displayName: Publish Logs to VSTS	
@@ -220,4 +224,4 @@ jobs:
         ArtifactName: '$(_AgentOSName)_$(Agent.JobName)_$(Build.BuildNumber)'	
         publishLocation: Container	
       continueOnError: true	
-      condition: not(succeeded())
+      condition: always()

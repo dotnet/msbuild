@@ -39,8 +39,7 @@ namespace Microsoft.NET.ToolPack.Tests
                     XNamespace ns = project.Root.Name.Namespace;
                     XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
                 })
-                .WithTargetFrameworkOrFrameworks(_targetFrameworkOrFrameworks, multiTarget)
-                .Restore(Log);
+                .WithTargetFrameworkOrFrameworks(_targetFrameworkOrFrameworks, multiTarget);
 
             _testRoot = helloWorldAsset.TestRoot;
 

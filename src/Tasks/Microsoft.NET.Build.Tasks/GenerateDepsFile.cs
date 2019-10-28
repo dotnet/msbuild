@@ -52,29 +52,41 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public bool IncludeMainProject { get; set; }
 
+        // @(ReferencePath) that will be passed to
         public ITaskItem[] ReferencePaths { get; set; } = Array.Empty<ITaskItem>();
 
+        // Full set of @(ReferenceDependencyPaths) found by RAR
         public ITaskItem[] ReferenceDependencyPaths { get; set; } = Array.Empty<ITaskItem>();
 
+        // Full set of @(ReferenceSatellitePaths) found by RAR
         public ITaskItem[] ReferenceSatellitePaths { get; set; } = Array.Empty<ITaskItem>();
 
+        // Subset of @(ReferencePath) that is not CopyLocal, used for compilation, but not runtime assets
         public ITaskItem[] ReferenceAssemblies { get; set; } = Array.Empty<ITaskItem>();
 
+        // Runtime assets for self-contained deployment from runtime pack
         public ITaskItem[] RuntimePackAssets { get; set; } = Array.Empty<ITaskItem>();
 
         public ITaskItem CompilerOptions { get; set; }
 
         public ITaskItem[] RuntimeStorePackages { get; set; }
 
+        // NuGet compilation assets
         [Required]
         public ITaskItem[] CompileReferences { get; set; }
 
-        //  NativeCopyLocalItems, ResourceCopyLocalItems, RuntimeCopyLocalItems
+        // NuGet runtime assets for root directory: @(NativeCopyLocalItems), @(ResourceCopyLocalItems), @(RuntimeCopyLocalItems)
         [Required]
         public ITaskItem[] ResolvedNuGetFiles { get; set; }
 
+        // NuGet runtime assets for runtimes* directory
         [Required]
         public ITaskItem[] ResolvedRuntimeTargetsFiles { get; set; }
+
+        // CopyLocal subset ot of @(ReferencePath), @(ReferenceDependencyPath)
+        // Used to filter out non-runtime assemblies from deps file. Only project and direct references in this
+        // set will be written to deps file as runtime dependencies.
+        public string[] UserRuntimeAssemblies { get; set; }
 
         public bool IsSelfContained { get; set; }
 
@@ -118,23 +130,23 @@ namespace Microsoft.NET.Build.Tasks
                 AssemblyVersion,
                 AssemblySatelliteAssemblies);
 
+            var userRuntimeAssemblySet = new HashSet<string>(UserRuntimeAssemblies ?? Enumerable.Empty<string>(), StringComparer.OrdinalIgnoreCase);
+            Func<ITaskItem, bool> isUserRuntimeAssembly = item => userRuntimeAssemblySet.Contains(item.ItemSpec);
+
             IEnumerable<ReferenceInfo> referenceAssemblyInfos =
                 ReferenceInfo.CreateReferenceInfos(ReferenceAssemblies);
 
             IEnumerable<ReferenceInfo> directReferences =
-                ReferenceInfo.CreateDirectReferenceInfos(ReferencePaths, ReferenceSatellitePaths);
+                ReferenceInfo.CreateDirectReferenceInfos(ReferencePaths, ReferenceSatellitePaths, isUserRuntimeAssembly);
 
             IEnumerable<ReferenceInfo> dependencyReferences =
-                ReferenceInfo.CreateDependencyReferenceInfos(ReferenceDependencyPaths, ReferenceSatellitePaths);
+                ReferenceInfo.CreateDependencyReferenceInfos(ReferenceDependencyPaths, ReferenceSatellitePaths, isUserRuntimeAssembly);
 
-            Dictionary<string, SingleProjectInfo> referenceProjects = SingleProjectInfo.CreateProjectReferenceInfos(
-                ReferencePaths,
-                ReferenceDependencyPaths,
-                ReferenceSatellitePaths);
+            Dictionary<string, SingleProjectInfo> referenceProjects =
+                SingleProjectInfo.CreateProjectReferenceInfos(ReferencePaths, ReferenceSatellitePaths, isUserRuntimeAssembly);
 
             IEnumerable<RuntimePackAssetInfo> runtimePackAssets =
                 IsSelfContained ? RuntimePackAssets.Select(item => RuntimePackAssetInfo.FromItem(item)) : Enumerable.Empty<RuntimePackAssetInfo>();
-
 
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 NuGetUtils.ParseFrameworkName(TargetFramework),

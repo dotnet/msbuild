@@ -39,7 +39,6 @@ namespace Microsoft.NET.Restore.Tests
             toolProject.AdditionalProperties.Add("PackageType", "DotnetCliTool");
 
             var toolProjectInstance = _testAssetsManager.CreateTestProject(toolProject, identifier: toolProject.Name);
-            toolProjectInstance.Restore(Log, toolProject.Name, "/v:n");
 
             var packCommand = new PackCommand(Log, Path.Combine(toolProjectInstance.TestRoot, toolProject.Name));
             packCommand.Execute().Should().Pass();
@@ -70,12 +69,6 @@ namespace Microsoft.NET.Restore.Tests
 
             var restoreResult = restoreCommand
                 .Execute("/v:n");
-
-            if (restoreResult.ExitCode != 0)
-            {
-                // retry once since it downloads from the web
-                toolReferenceProjectInstance.Restore(Log, toolReferenceProject.Name, "/v:n");
-            }
 
             var assetsJsonPath = Path.Combine(TestContext.Current.NuGetCachePath,
                                              ".tools",

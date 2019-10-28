@@ -26,8 +26,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithSharedProject")
-                .WithSource()
-                .Restore(Log, "TestApp");
+                .WithSource();
 
             var command = new MSBuildCommand(Log, "WriteItems", testAsset.TestRoot, "TestApp");
 
@@ -62,8 +61,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithSharedProject")
-                .WithSource()
-                .Restore(Log, "TestApp");
+                .WithSource();
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot, "TestApp");
 

@@ -37,6 +37,12 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string DotNetComHostLibraryNameWithoutExtension { get; set; }
 
+        /// <summary>
+        /// The file name of ijwhost asset.
+        /// </summary>
+        [Required]
+        public string DotNetIjwHostLibraryNameWithoutExtension { get; set; }
+
         [Required]
         public string RuntimeGraphPath { get; set; }
 
@@ -53,6 +59,9 @@ namespace Microsoft.NET.Build.Tasks
 
         [Output]
         public ITaskItem[] ComHost { get; set; }
+
+        [Output]
+        public ITaskItem[] IjwHost { get; set; }
 
         [Output]
         public ITaskItem[] PackAsToolShimAppHostPacks { get; set; }
@@ -110,6 +119,20 @@ namespace Microsoft.NET.Build.Tasks
                 if (comHostItem != null)
                 {
                     ComHost = new ITaskItem[] { comHostItem };
+                }
+
+                var ijwHostItem = GetHostItem(
+                    AppHostRuntimeIdentifier,
+                    knownAppHostPacksForTargetFramework,
+                    packagesToDownload,
+                    DotNetIjwHostLibraryNameWithoutExtension,
+                    "IjwHost",
+                    isExecutable: false,
+                    errorIfNotFound: true);
+
+                if (ijwHostItem != null)
+                {
+                    IjwHost = new ITaskItem[] { ijwHostItem };
                 }
             }
 

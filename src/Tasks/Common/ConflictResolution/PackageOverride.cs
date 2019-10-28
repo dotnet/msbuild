@@ -6,6 +6,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Framework;
 
+#if EXTENSIONS
+using OverrideVersion = System.Version;
+#else
+using OverrideVersion = NuGet.Versioning.NuGetVersion;
+using NuGet.Versioning;
+#endif
+
 namespace Microsoft.NET.Build.Tasks.ConflictResolution
 {
     /// <summary>
@@ -19,14 +26,14 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
     internal class PackageOverride
     {
         public string PackageName { get; }
-        public Dictionary<string, Version> OverriddenPackages { get; }
+        public Dictionary<string, OverrideVersion> OverriddenPackages { get; }
 
-        private PackageOverride(string packageName, IEnumerable<Tuple<string, Version>> overriddenPackages)
+        private PackageOverride(string packageName, IEnumerable<Tuple<string, OverrideVersion>> overriddenPackages)
         {
             PackageName = packageName;
 
-            OverriddenPackages = new Dictionary<string, Version>(StringComparer.OrdinalIgnoreCase);
-            foreach (Tuple<string, Version> package in overriddenPackages)
+            OverriddenPackages = new Dictionary<string, OverrideVersion>(StringComparer.OrdinalIgnoreCase);
+            foreach (Tuple<string, OverrideVersion> package in overriddenPackages)
             {
                 OverriddenPackages[package.Item1] = package.Item2;
             }
@@ -40,7 +47,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             return new PackageOverride(packageName, CreateOverriddenPackages(overriddenPackagesString));
         }
 
-        private static IEnumerable<Tuple<string, Version>> CreateOverriddenPackages(string overriddenPackagesString)
+        private static IEnumerable<Tuple<string, OverrideVersion>> CreateOverriddenPackages(string overriddenPackagesString)
         {
             if (!string.IsNullOrEmpty(overriddenPackagesString))
             {
@@ -52,9 +59,11 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                     int separatorIndex = trimmedOverriddenPackagesAndVersion.IndexOf('|');
                     if (separatorIndex != -1)
                     {
-                        if (Version.TryParse(trimmedOverriddenPackagesAndVersion.Substring(separatorIndex + 1), out Version version))
+                        string versionString = trimmedOverriddenPackagesAndVersion.Substring(separatorIndex + 1);
+                        string overriddenPackage = trimmedOverriddenPackagesAndVersion.Substring(0, separatorIndex);
+                        if (OverrideVersion.TryParse(versionString, out OverrideVersion version))
                         {
-                            yield return Tuple.Create(trimmedOverriddenPackagesAndVersion.Substring(0, separatorIndex), version);
+                            yield return Tuple.Create(overriddenPackage, version);
                         }
                     }
                 }

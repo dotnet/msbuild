@@ -47,8 +47,6 @@ namespace Microsoft.NET.Restore.Tests
 
             NuGetConfigWriter.Write(toolProjectInstance.TestRoot, NuGetConfigWriter.DotnetCoreBlobFeed);
 
-            toolProjectInstance.Restore(Log, toolProject.Name, "/v:n");
-
             RestoreCommand restoreCommand = toolProjectInstance.GetRestoreCommand(Log, toolProject.Name);
             restoreCommand.Execute("/v:n").Should()
                 .Pass()

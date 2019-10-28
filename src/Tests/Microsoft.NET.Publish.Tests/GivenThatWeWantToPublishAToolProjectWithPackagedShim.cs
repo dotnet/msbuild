@@ -37,8 +37,7 @@ namespace Microsoft.NET.Publish.Tests
                     XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
                     propertyGroup.Add(new XElement(ns + "PackAsToolShimRuntimeIdentifiers", "win-x64;osx.10.12-x64"));
                     propertyGroup.Add(new XElement(ns + "ToolCommandName", _customToolCommandName));
-                })
-                .Restore(Log);
+                });
 
             return helloWorldAsset;
         }

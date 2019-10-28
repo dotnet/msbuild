@@ -44,7 +44,7 @@ namespace Microsoft.NET.Build.Tests
 
             buildCommand
                 //  Pass "/clp:summary" so that we can check output for string "1 Error(s)"
-                .Execute("/clp:summary")
+                .ExecuteWithoutRestore("/clp:summary")
                 .Should()
                 .Fail()
                 .And.HaveStdOutContaining(assetsFile)
@@ -68,7 +68,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
 
             var result = buildCommand
-                .Execute("/restore");
+                .Execute();
 
             result
                 .Should()

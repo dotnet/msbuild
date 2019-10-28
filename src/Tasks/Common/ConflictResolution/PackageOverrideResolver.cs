@@ -5,6 +5,13 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
 
+#if EXTENSIONS
+using OverrideVersion = System.Version;
+#else
+using OverrideVersion = NuGet.Versioning.NuGetVersion;
+using NuGet.Versioning;
+#endif
+
 namespace Microsoft.NET.Build.Tasks.ConflictResolution
 {
     /// <summary>
@@ -60,9 +67,9 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         /// </summary>
         private static void MergePackageOverrides(PackageOverride newPackageOverride, PackageOverride existingPackageOverride)
         {
-            foreach (KeyValuePair<string, Version> newOverride in newPackageOverride.OverriddenPackages)
+            foreach (KeyValuePair<string, OverrideVersion> newOverride in newPackageOverride.OverriddenPackages)
             {
-                if (existingPackageOverride.OverriddenPackages.TryGetValue(newOverride.Key, out Version existingOverrideVersion))
+                if (existingPackageOverride.OverriddenPackages.TryGetValue(newOverride.Key, out OverrideVersion existingOverrideVersion))
                 {
                     if (existingOverrideVersion < newOverride.Value)
                     {
@@ -81,7 +88,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             if (PackageOverrides != null && item1.PackageId != null && item2.PackageId != null)
             {
                 PackageOverride packageOverride;
-                Version version;
+                OverrideVersion version;
                 if (PackageOverrides.TryGetValue(item1.PackageId, out packageOverride)
                     && packageOverride.OverriddenPackages.TryGetValue(item2.PackageId, out version)
                     && item2.PackageVersion != null

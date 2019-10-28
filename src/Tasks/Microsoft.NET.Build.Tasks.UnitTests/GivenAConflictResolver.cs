@@ -8,6 +8,7 @@ using FluentAssertions;
 using Microsoft.Build.Framework;
 using Microsoft.NET.Build.Tasks.ConflictResolution;
 using Microsoft.NET.Build.Tasks.UnitTests.Mocks;
+using NuGet.Versioning;
 using Xunit;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests
@@ -354,13 +355,13 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         [Fact]
         public void WhenPackageOverridesAreSpecifiedTheyAreUsed()
         {
-            var systemItem1 = new MockConflictItem("System.Ben") { PackageId = "System.Ben", PackageVersion = new Version("4.3.0") };
-            var systemItem2 = new MockConflictItem("System.Immo") { PackageId = "System.Immo", PackageVersion = new Version("4.2.0") };
-            var systemItem3 = new MockConflictItem("System.Dave") { PackageId = "System.Dave", PackageVersion = new Version("4.1.0") };
+            var systemItem1 = new MockConflictItem("System.Ben") { PackageId = "System.Ben", PackageVersion = new NuGetVersion("4.3.0") };
+            var systemItem2 = new MockConflictItem("System.Immo") { PackageId = "System.Immo", PackageVersion = new NuGetVersion("4.2.0") };
+            var systemItem3 = new MockConflictItem("System.Dave") { PackageId = "System.Dave", PackageVersion = new NuGetVersion("4.1.0") };
 
-            var platformItem1 = new MockConflictItem("System.Ben") { PackageId = "Platform", PackageVersion = new Version("2.0.0") };
-            var platformItem2 = new MockConflictItem("System.Immo") { PackageId = "Platform", PackageVersion = new Version("2.0.0") };
-            var platformItem3 = new MockConflictItem("System.Dave") { PackageId = "Platform", PackageVersion = new Version("2.0.0") };
+            var platformItem1 = new MockConflictItem("System.Ben") { PackageId = "Platform", PackageVersion = new NuGetVersion("2.0.0") };
+            var platformItem2 = new MockConflictItem("System.Immo") { PackageId = "Platform", PackageVersion = new NuGetVersion("2.0.0") };
+            var platformItem3 = new MockConflictItem("System.Dave") { PackageId = "Platform", PackageVersion = new NuGetVersion("2.0.0") };
 
             var result = GetConflicts(
                 new[] { systemItem1, systemItem2, systemItem3, platformItem1, platformItem2, platformItem3 },
@@ -379,17 +380,17 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         [Fact]
         public void WhenAHigherPackageIsUsedPackageOverrideLoses()
         {
-            var platformItem1 = new MockConflictItem("System.Ben") { PackageId = "Platform", PackageVersion = new Version("2.0.0") };
-            var platformItem2 = new MockConflictItem("System.Immo") { PackageId = "Platform", PackageVersion = new Version("2.0.0") };
-            var platformItem3 = new MockConflictItem("System.Dave") { PackageId = "Platform", PackageVersion = new Version("2.0.0") };
+            var platformItem1 = new MockConflictItem("System.Ben") { PackageId = "Platform", PackageVersion = new NuGetVersion("2.0.0") };
+            var platformItem2 = new MockConflictItem("System.Immo") { PackageId = "Platform", PackageVersion = new NuGetVersion("2.0.0") };
+            var platformItem3 = new MockConflictItem("System.Dave") { PackageId = "Platform", PackageVersion = new NuGetVersion("2.0.0") };
 
-            var systemItem1 = new MockConflictItem("System.Ben") { PackageId = "System.Ben", PackageVersion = new Version("4.3.0") };
-            var systemItem2 = new MockConflictItem("System.Immo") { PackageId = "System.Immo", PackageVersion = new Version("4.2.0") };
+            var systemItem1 = new MockConflictItem("System.Ben") { PackageId = "System.Ben", PackageVersion = new NuGetVersion("4.3.0") };
+            var systemItem2 = new MockConflictItem("System.Immo") { PackageId = "System.Immo", PackageVersion = new NuGetVersion("4.2.0") };
             // System.Dave has a higher PackageVersion than the PackageOverride
             var systemItem3 = new MockConflictItem("System.Dave")
             {
                 PackageId = "System.Dave",
-                PackageVersion = new Version("4.4.0"),
+                PackageVersion = new NuGetVersion("4.4.0"),
                 AssemblyVersion = new Version(platformItem3.AssemblyVersion.Major + 1, 0)
             };
 

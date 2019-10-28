@@ -46,8 +46,6 @@ namespace Microsoft.NET.Build.Tests
                 testAsset = testAsset.WithProjectChanges(projectChanges);
             }
 
-            testAsset = testAsset.Restore(log);
-
             var buildCommand = new BuildCommand(log, testAsset.TestRoot);
 
             if (setup != null)

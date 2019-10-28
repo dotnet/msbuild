@@ -44,7 +44,7 @@ namespace Microsoft.NET.ToolPack.Tests
             var appProjectDirectory = Path.Combine(testAsset.TestRoot);
             var buildCommand = new BuildCommand(Log, appProjectDirectory);
 
-            CommandResult result = buildCommand.Execute("/restore");
+            CommandResult result = buildCommand.Execute();
 
             result.Should()
                   .Pass();

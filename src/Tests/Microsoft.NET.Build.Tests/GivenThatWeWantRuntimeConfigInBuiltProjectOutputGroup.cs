@@ -26,8 +26,7 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: targetFramework)
                 .WithSource()
-                .WithTargetFramework(targetFramework)
-                .Restore(Log);
+                .WithTargetFramework(targetFramework);
 
             var command = new GetValuesCommand(
                 Log,

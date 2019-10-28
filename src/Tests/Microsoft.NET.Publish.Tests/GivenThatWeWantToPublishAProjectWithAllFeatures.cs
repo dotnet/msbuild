@@ -167,8 +167,6 @@ namespace Microsoft.NET.Publish.Tests
                     }
                 });
 
-            testAsset.Restore(Log, "TestApp");
-
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 
             return new PublishCommand(Log, appProjectDirectory);

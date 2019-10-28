@@ -81,8 +81,7 @@ class Class1
             testProject.ReferencedProjects.Add(referencedProjectWithMvc);
 
             var testProjectInstance = _testAssetsManager
-                .CreateTestProject(testProject, identifier: aspnetVersion)
-                .Restore(Log, testProject.Name);
+                .CreateTestProject(testProject, identifier: aspnetVersion);
 
             var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, testProject.Name);
 

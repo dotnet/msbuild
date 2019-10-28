@@ -12,22 +12,11 @@ namespace Microsoft.NET.TestFramework.Commands
 {
     public sealed class RestoreCommand : MSBuildCommand
     {
-        private List<string> _sources = new List<string>();
-
         public RestoreCommand(ITestOutputHelper log, string projectPath, string relativePathToProject = null)
             : base(log, "Restore", projectPath, relativePathToProject)
         {
         }
 
-        protected override SdkCommandSpec CreateCommand(params string[] args)
-        {
-            var newArgs = new List<string>();
-
-            newArgs.Add(FullPathProjectFile);
-
-            newArgs.AddRange(args);
-
-            return TestContext.Current.ToolsetUnderTest.CreateCommandForTarget("restore", newArgs.ToArray());
-        }
+        protected override bool ExecuteWithRestoreByDefault => false;
     }
 }

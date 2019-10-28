@@ -42,8 +42,7 @@ namespace Microsoft.NET.Build.Tests
                             new XElement(ns + "PackageReference",
                                 new XAttribute("Include", "Microsoft.CodeQuality.Analyzers"),
                                 new XAttribute("Version", "2.6.0"))));
-                })
-                .Restore(Log, relativePath: "TestApp");
+                });
 
             var command = new GetValuesCommand(
                 Log,

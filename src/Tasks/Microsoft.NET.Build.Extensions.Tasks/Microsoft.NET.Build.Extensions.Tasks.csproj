@@ -29,7 +29,6 @@
     <OutputPath>$(BaseOutputPath)</OutputPath>
     <DefineConstants>$(DefineConstants);EXTENSIONS</DefineConstants>
     <IsPackable>true</IsPackable>
-    <IncludeSymbols>true</IncludeSymbols>
     <PackageLayoutOutputPath>$(ArtifactsBinDir)$(Configuration)\Sdks\$(PackageId)\</PackageLayoutOutputPath>
   </PropertyGroup>
 
