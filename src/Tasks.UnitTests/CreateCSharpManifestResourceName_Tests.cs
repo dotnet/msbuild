@@ -595,7 +595,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CulturedResourceFileFindByConvention()
         {
-            using (var env = TestEnvironment.Create())
+            using (var env = TestEnvironment.Create(_testOutput))
             {
                 var csFile = env.CreateFile("SR1.cs", "namespace MyStuff.Namespace { class Class { } }");
                 var resXFile = env.CreateFile("SR1.de.resx", "");

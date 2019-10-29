@@ -10,11 +10,20 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
     sealed public class CreateVisualBasicManifestResourceName_Tests
     {
+
+        private readonly ITestOutputHelper _testOutput;
+
+        public CreateVisualBasicManifestResourceName_Tests(ITestOutputHelper output)
+        {
+            _testOutput = output;
+        }
+
         /// <summary>
         /// Test the basic functionality.
         /// </summary>
@@ -358,7 +367,7 @@ End Namespace
         [Fact]
         public void CulturedResourceFileFindByConvention()
         {
-            using (var env = TestEnvironment.Create())
+            using (var env = TestEnvironment.Create(_testOutput))
             {
                 var csFile = env.CreateFile("SR1.vb", @"
 Namespace MyStuff
