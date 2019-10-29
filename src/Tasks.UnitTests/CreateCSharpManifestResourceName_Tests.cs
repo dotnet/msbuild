@@ -590,6 +590,43 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// If we have a resource file that has a culture within it's name (resourceFile.de.cs), find it by convention.
+        /// </summary>
+        [Fact]
+        public void CulturedResourceFileFindByConvention()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var csFile = env.CreateFile("SR1.cs", "namespace MyStuff.Namespace { class Class { } }");
+                var resXFile = env.CreateFile("SR1.de.resx", "");
+
+                ITaskItem i = new TaskItem(resXFile.Path);
+
+                i.SetMetadata("BuildAction", "EmbeddedResource");
+
+                // this data is set automatically through the AssignCulture task, so we manually set it here
+                i.SetMetadata("WithCulture", "true");
+                i.SetMetadata("Culture", "de");
+
+                env.SetCurrentDirectory(Path.GetDirectoryName(resXFile.Path));
+
+                CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName
+                {
+                    BuildEngine = new MockEngine(),
+                    UseDependentUponConvention = true,
+                    ResourceFiles = new ITaskItem[] { i },
+                };
+
+                t.Execute().ShouldBeTrue("Expected the task to succeed");
+
+                t.ManifestResourceNames.ShouldHaveSingleItem();
+
+                // CreateManifestNameImpl appends culture to the end of the convention
+                t.ManifestResourceNames[0].ItemSpec.ShouldBe("MyStuff.Namespace.Class.de", "Expected Namespace.Class.Culture");
+            }
+        }
+
+        /// <summary>
         /// helper method for verifying manifest resource names
         /// </summary>
         private void VerifyExpectedManifestResourceName(string resourcePath, string expectedName)

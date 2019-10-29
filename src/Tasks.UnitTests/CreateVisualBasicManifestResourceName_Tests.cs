@@ -8,6 +8,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -349,6 +350,84 @@ End Namespace
 
             Assert.Single(resourceNames);
             Assert.Equal(@"CustomToolTest.SR1", resourceNames[0].ItemSpec);
+        }
+
+        /// <summary>
+        /// If we have a resource file that has a culture within it's name (resourceFile.de.vb), find it by convention.
+        /// </summary>
+        [Fact]
+        public void CulturedResourceFileFindByConvention2()
+        {
+
+            using (var env = TestEnvironment.Create())
+            {
+                var csFile = env.CreateFile("SR1.vb", "");
+                var resXFile = env.CreateFile("SR1.de.resx", "");
+                CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName();
+
+                t.BuildEngine = new MockEngine();
+
+                ITaskItem i = new TaskItem(resXFile.Path);
+
+                i.SetMetadata("BuildAction", "EmbeddedResource");
+                i.SetMetadata("WithCulture", "true");
+                i.SetMetadata("Culture", "de");
+                t.ResourceFiles = new ITaskItem[] { i };
+                t.RootNamespace = "CustomToolTest";
+                // go by convention
+                t.UseDependentUponConvention = true;
+
+
+                bool success = t.Execute(new Microsoft.Build.Tasks.CreateFileStream(CreateFileStream));
+
+                Assert.True(success); // "Expected the task to succeed."
+
+                ITaskItem[] resourceNames = t.ManifestResourceNames;
+
+                Assert.Single(resourceNames);
+                Assert.Equal(@"CustomToolTest.SR1", resourceNames[0].ItemSpec);
+            }
+        }
+
+        /// <summary>
+        /// If we have a resource file that has a culture within it's name (resourceFile.de.cs), find it by convention.
+        /// </summary>
+        [Fact]
+        public void CulturedResourceFileFindByConvention()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var csFile = env.CreateFile("SR1.vb", @"
+Namespace MyStuff
+    Class Class2
+    End Class
+End Namespace");
+                var resXFile = env.CreateFile("SR1.de.resx", "");
+
+                ITaskItem i = new TaskItem(resXFile.Path);
+
+                i.SetMetadata("BuildAction", "EmbeddedResource");
+
+                // this data is set automatically through the AssignCulture task, so we manually set it here
+                i.SetMetadata("WithCulture", "true");
+                i.SetMetadata("Culture", "de");
+
+                env.SetCurrentDirectory(Path.GetDirectoryName(resXFile.Path));
+
+                CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName
+                {
+                    BuildEngine = new MockEngine(),
+                    UseDependentUponConvention = true,
+                    ResourceFiles = new ITaskItem[] { i },
+                };
+
+                t.Execute().ShouldBeTrue("Expected the task to succeed");
+
+                t.ManifestResourceNames.ShouldHaveSingleItem();
+
+                // CreateManifestNameImpl appends culture to the end of the convention
+                t.ManifestResourceNames[0].ItemSpec.ShouldBe("MyStuff.Class2.de", "Expected Namespace.Class.Culture");
+            }
         }
 
         /// <summary>
