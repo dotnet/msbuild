@@ -132,7 +132,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 store = new ToolPackageStoreAndQuery(root);
                 installer = new ToolPackageInstaller(
                     store: store,
-                    projectRestorer: new ProjectRestorer(reporter),
+                    projectRestorer: new Stage2ProjectRestorer(reporter),
                     tempProject: tempProject ?? GetUniqueTempProjectPathEachTest(),
                     offlineFeed: offlineFeed ?? new DirectoryPath("does not exist"));
             }
