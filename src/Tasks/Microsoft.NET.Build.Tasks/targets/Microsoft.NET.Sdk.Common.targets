@@ -37,7 +37,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <HasRuntimeOutput Condition="'$(_UsingDefaultForHasRuntimeOutput)' == 'true'">$(_IsExecutable)</HasRuntimeOutput>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(DotnetCliToolTargetFramework)' == '' And '$(BundledNETCoreAppTargetFrameworkVersion)' != ''">
+  <PropertyGroup Condition="'$(DotnetCliToolTargetFramework)' == ''">
     <!-- Maximum supported target framework for DotnetCliProjectTools is .NET Core 2.2 -->
     <DotnetCliToolTargetFramework>netcoreapp2.2</DotnetCliToolTargetFramework>
   </PropertyGroup>

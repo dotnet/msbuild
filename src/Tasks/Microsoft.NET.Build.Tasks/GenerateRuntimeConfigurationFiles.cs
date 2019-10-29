@@ -10,7 +10,6 @@ using Microsoft.Build.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
-using NuGet.Packaging;
 using NuGet.ProjectModel;
 
 namespace Microsoft.NET.Build.Tasks
@@ -51,6 +50,8 @@ namespace Microsoft.NET.Build.Tasks
         public bool IsSelfContained { get; set; }
 
         public bool WriteAdditionalProbingPathsToMainConfig { get; set; }
+
+        public bool WriteIncludedFrameworks { get; set; }
 
         List<ITaskItem> _filesWritten = new List<ITaskItem>();
 
@@ -131,67 +132,73 @@ namespace Microsoft.NET.Build.Tasks
 
         private void AddFrameworks(RuntimeOptions runtimeOptions, ProjectContext projectContext)
         {
+            runtimeOptions.Tfm = TargetFramework;
+
+            var frameworks = new List<RuntimeConfigFramework>();
+            if (projectContext.RuntimeFrameworks == null || projectContext.RuntimeFrameworks.Length == 0)
+            {
+                //  If there are no RuntimeFrameworks (which would be set in the ProcessFrameworkReferences task based
+                //  on FrameworkReference items), then use package resolved from MicrosoftNETPlatformLibrary for
+                //  the runtimeconfig
+                RuntimeConfigFramework framework = new RuntimeConfigFramework();
+                framework.Name = projectContext.PlatformLibrary.Name;
+                framework.Version = projectContext.PlatformLibrary.Version.ToNormalizedString();
+
+                frameworks.Add(framework);
+            }
+            else
+            {
+                HashSet<string> usedFrameworkNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var platformLibrary in projectContext.RuntimeFrameworks)
+                {
+                    if (projectContext.RuntimeFrameworks.Length > 1 &&
+                        platformLibrary.Name.Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase) &&
+                        projectContext.IsFrameworkDependent)
+                    {
+                        //  If there are multiple runtime frameworks, then exclude Microsoft.NETCore.App,
+                        //  as a workaround for https://github.com/dotnet/core-setup/issues/4947
+                        //  The workaround only applies to normal framework references, included frameworks
+                        //  (in self-contained apps) must list all frameworks.
+                        continue;
+                    }
+
+                    //  Don't add multiple entries for the same shared framework.
+                    //  This is necessary if there are FrameworkReferences to different profiles
+                    //  that map to the same shared framework.
+                    if (!usedFrameworkNames.Add(platformLibrary.Name))
+                    {
+                        continue;
+                    }
+
+                    RuntimeConfigFramework framework = new RuntimeConfigFramework();
+                    framework.Name = platformLibrary.Name;
+                    framework.Version = platformLibrary.Version;
+
+                    frameworks.Add(framework);
+                }
+            }
+
             if (projectContext.IsFrameworkDependent)
             {
-                runtimeOptions.Tfm = TargetFramework;
                 runtimeOptions.RollForward = RollForward;
 
-                if (projectContext.RuntimeFrameworks == null || projectContext.RuntimeFrameworks.Length == 0)
+                //  If there is only one runtime framework, then it goes in the framework property of the json
+                //  If there are multiples, then we leave the framework property unset and put the list in
+                //  the frameworks property.
+                if (frameworks.Count == 1)
                 {
-                    //  If there are no RuntimeFrameworks (which would be set in the ProcessFrameworkReferences task based
-                    //  on FrameworkReference items), then use package resolved from MicrosoftNETPlatformLibrary for
-                    //  the runtimeconfig
-                    RuntimeConfigFramework framework = new RuntimeConfigFramework();
-                    framework.Name = projectContext.PlatformLibrary.Name;
-                    framework.Version = projectContext.PlatformLibrary.Version.ToNormalizedString();
-
-                    runtimeOptions.Framework = framework;
+                    runtimeOptions.Framework = frameworks[0];
                 }
                 else
                 {
-                    HashSet<string> usedFrameworkNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    foreach (var platformLibrary in projectContext.RuntimeFrameworks)
-                    {
-                        if (projectContext.RuntimeFrameworks.Length > 1 &&
-                            platformLibrary.Name.Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase))
-                        {
-                            //  If there are multiple runtime frameworks, then exclude Microsoft.NETCore.App,
-                            //  as a workaround for https://github.com/dotnet/core-setup/issues/4947
-                            continue;
-                        }
-
-                        //  Don't add multiple entries for the same shared framework.
-                        //  This is necessary if there are FrameworkReferences to different profiles
-                        //  that map to the same shared framework.
-                        if (!usedFrameworkNames.Add(platformLibrary.Name))
-                        {
-                            continue;
-                        }
-
-                        RuntimeConfigFramework framework = new RuntimeConfigFramework();
-                        framework.Name = platformLibrary.Name;
-                        framework.Version = platformLibrary.Version;
-
-                        //  If there is only one runtime framework, then it goes in the framework property of the json
-                        //  If there are multiples, then we leave the framework property unset and put the list in
-                        //  the frameworks property.
-                        if (runtimeOptions.Framework == null && runtimeOptions.Frameworks == null)
-                        {
-                            runtimeOptions.Framework = framework;
-                        }
-                        else
-                        {
-                            if (runtimeOptions.Frameworks == null)
-                            {
-                                runtimeOptions.Frameworks = new List<RuntimeConfigFramework>();
-                                runtimeOptions.Frameworks.Add(runtimeOptions.Framework);
-                                runtimeOptions.Framework = null;
-                            }
-
-                            runtimeOptions.Frameworks.Add(framework);
-                        }
-                    }
+                    runtimeOptions.Frameworks = frameworks;
                 }
+            }
+            else if (WriteIncludedFrameworks)
+            {
+                //  Self-contained apps don't have framework references, instead write the frameworks
+                //  into the includedFrameworks property.
+                runtimeOptions.IncludedFrameworks = frameworks;
             }
         }
 

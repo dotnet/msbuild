@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Xml.Linq;
 using FluentAssertions;
-using Microsoft.Build.Construction;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -15,7 +12,6 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -24,6 +20,19 @@ namespace Microsoft.NET.Build.Tests
         public GivenFrameworkReferences(ITestOutputHelper log) : base(log)
         {
         }
+
+        private const string FrameworkReferenceEmptyProgramSource = @"
+using System;
+
+namespace FrameworkReferenceTest
+{
+    public class Program
+    {
+        public static void Main(string [] args)
+        {
+        }
+    }
+}";
 
         //  Tests in this class are currently Core MSBuild only, as they check for PackageDownload items,
         //  which are currently only used in Core MSBuild
@@ -41,18 +50,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.FrameworkReferences.Add("Microsoft.ASPNETCORE.App");
             testProject.FrameworkReferences.Add("Microsoft.WindowsDesktop.App");
 
-            testProject.SourceFiles.Add("Program.cs", @"
-using System;
-
-namespace FrameworkReferenceTest
-{
-    public class Program
-    {
-        public static void Main(string [] args)
-        {
-        }
-    }
-}");
+            testProject.SourceFiles.Add("Program.cs", FrameworkReferenceEmptyProgramSource);
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -73,6 +71,53 @@ namespace FrameworkReferenceTest
             runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App", "Microsoft.WindowsDesktop.App");
         }
 
+        [CoreMSBuildOnlyTheory]
+        [InlineData("netcoreapp3.0", false)]
+        [InlineData("netcoreapp3.1", true)]
+        public void Multiple_frameworks_are_written_to_runtimeconfig_for_self_contained_apps(string tfm, bool shouldHaveIncludedFrameworks)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "MultipleFrameworkReferenceTest",
+                TargetFrameworks = tfm,
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            // Specifying RID makes the produced app self-contained.
+            testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
+
+            if (tfm == "netcoreapp3.1")
+            {
+                testProject.FrameworkReferences.Add("Microsoft.ASPNETCORE.App");
+            }
+
+            testProject.SourceFiles.Add("Program.cs", FrameworkReferenceEmptyProgramSource);
+
+            TestAsset testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            DirectoryInfo outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+
+            string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.RuntimeIdentifier, testProject.Name + ".runtimeconfig.json");
+            List<string> includedFrameworkNames = GetIncludedFrameworks(runtimeConfigFile);
+            if (shouldHaveIncludedFrameworks)
+            {
+                includedFrameworkNames.Should().BeEquivalentTo("Microsoft.NETCore.App", "Microsoft.AspNetCore.App");
+            }
+            else
+            {
+                includedFrameworkNames.Should().BeEmpty();
+            }
+        }
+
         [CoreMSBuildAndWindowsOnlyFact]
         public void DuplicateFrameworksAreNotWrittenToRuntimeConfigWhenThereAreDifferentProfiles()
         {
@@ -87,18 +132,7 @@ namespace FrameworkReferenceTest
             testProject.FrameworkReferences.Add("Microsoft.WindowsDesktop.App.WPF");
             testProject.FrameworkReferences.Add("Microsoft.WindowsDesktop.App.WindowsForms");
 
-            testProject.SourceFiles.Add("Program.cs", @"
-using System;
-
-namespace FrameworkReferenceTest
-{
-    public class Program
-    {
-        public static void Main(string [] args)
-        {
-        }
-    }
-}");
+            testProject.SourceFiles.Add("Program.cs", FrameworkReferenceEmptyProgramSource);
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -924,6 +958,16 @@ namespace FrameworkReferenceTest
 
                 return runtimeFrameworkNames;
             }
+        }
+
+        private List<string> GetIncludedFrameworks(string runtimeConfigPath)
+        {
+            JObject runtimeConfig = ReadRuntimeConfig(runtimeConfigPath);
+
+            var runtimeFrameworksList = (JArray)runtimeConfig["runtimeOptions"]["includedFrameworks"];
+            return runtimeFrameworksList == null
+                ? new List<string>()
+                : runtimeFrameworksList.Select(element => ((JValue)element["name"]).Value<string>()).ToList();
         }
 
         private ResolvedVersionInfo GetResolvedVersions(TestProject testProject,
