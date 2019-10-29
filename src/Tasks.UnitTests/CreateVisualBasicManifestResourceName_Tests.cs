@@ -367,7 +367,7 @@ End Namespace
         [Fact]
         public void CulturedResourceFileFindByConvention()
         {
-            using (var env = TestEnvironment.Create())
+            using (var env = TestEnvironment.Create(_testOutput))
             {
                 var csFile = env.CreateFile("SR1.vb", @"
 Namespace MyStuff

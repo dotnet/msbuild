@@ -392,7 +392,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DependentUponConvention_FindsMatch()
         {
-            using (var env = TestEnvironment.Create())
+            using (var env = TestEnvironment.Create(_testOutput))
             {
                 var csFile = env.CreateFile("SR1.cs", "namespace MyStuff.Namespace { class Class { } }");
                 var resXFile = env.CreateFile("SR1.resx", "");
