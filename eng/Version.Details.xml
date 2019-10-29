@@ -63,9 +63,9 @@
       <Uri>https://github.com/aspnet/AspNetCore-Tooling</Uri>
       <Sha>200bec7b2e7d659077f523a8287f52d99f6f06c0</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.WindowsDesktop.App" Version="5.0.0-alpha1.19526.1">
+    <Dependency Name="Microsoft.WindowsDesktop.App" Version="5.0.0-alpha1.19528.5">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
-      <Sha>06ceb08ae6171396774ad0e46c2fcde6a548c8a2</Sha>
+      <Sha>58fca161c042a3a101d9099dea6b15bf8f0312eb</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="5.0.0-alpha1.19462.16" CoherentParentDependency="Microsoft.WindowsDesktop.App">
       <Uri>https://github.com/dotnet/wpf</Uri>
@@ -79,9 +79,9 @@
       <Uri>https://github.com/microsoft/vstest</Uri>
       <Sha>55e7e45431c9c05656c999b902686e7402664573</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Web" Version="5.0.100-alpha1.19527.1">
+    <Dependency Name="Microsoft.NET.Sdk.Web" Version="5.0.100-alpha.1.19528.2">
       <Uri>https://github.com/aspnet/websdk</Uri>
-      <Sha>beca998fb70b13b52f1383663b400038d4d16d04</Sha>
+      <Sha>5f18d9a7604a8750c07e3713b03607742681f299</Sha>
     </Dependency>
     <Dependency Name="ILLink.Tasks" Version="0.1.6-prerelease.19523.1">
       <Uri>https://github.com/mono/linker</Uri>
@@ -106,9 +106,9 @@
 
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="5.0.0-beta.19527.3">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="5.0.0-beta.19528.5">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>5ce0aaed2f8df9cd2fe0221a426c021efe37f655</Sha>
+      <Sha>96e8fc12aa98264c4e1980252e962b908eaae956</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
