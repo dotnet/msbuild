@@ -9,12 +9,10 @@
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>b3749864f47f38599a94070497225c665124fe82</Sha>
     </Dependency>
-
     <Dependency Name="Microsoft.NETCore.App.Runtime.win-x64" Version="5.0.0-alpha1.19527.2">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>b3749864f47f38599a94070497225c665124fe82</Sha>
     </Dependency>
-
     <Dependency Name="Microsoft.DotNet.PlatformAbstractions" Version="5.0.0-alpha1.19527.2">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>b3749864f47f38599a94070497225c665124fe82</Sha>
@@ -103,7 +101,6 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>567241af05d1e43142d04572dee84870b78761aa</Sha>
     </Dependency>
-
   </ProductDependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="5.0.0-beta.19528.5">
