@@ -28,8 +28,6 @@ namespace Microsoft.NET.ToolPack.Tests
                 .CopyTestAsset("PortableToolWithTestProject")
                 .WithSource();
 
-            testAsset.Restore(Log, "App");
-
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "Test");
             var testCommand = new DotnetCommand(Log, "test", appProjectDirectory);
             testCommand

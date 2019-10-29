@@ -22,9 +22,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("x64SolutionBuild")
-                .WithSource()
-                .Restore(Log);
-
+                .WithSource();
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot, "x64SolutionBuild.sln");
             buildCommand

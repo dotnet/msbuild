@@ -1,0 +1,18 @@
+<Project>
+  <Target Name="Workaround_AdditionalRefToMscorlib" BeforeTargets="ResolveAssemblyReferences">
+    <PropertyGroup>
+      <AdditionalExplicitAssemblyReferences />
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="Workaround_MustPassAI" BeforeTargets="ClCompile" DependsOnTargets="GenerateTargetFrameworkMonikerAttribute">
+    <ItemGroup>
+      <_NETCoreReferenceDirectory Include="%(ReferencePath.RootDir)%(ReferencePath.Directory)" Condition="'%(ReferencePath.Filename)' == 'System.Runtime'" />
+    </ItemGroup>
+    <ItemGroup>
+      <ClCompile>
+        <AdditionalUsingDirectories>%(ClCompile.AdditionalUsingDirectories);@(_NETCoreReferenceDirectory)</AdditionalUsingDirectories>
+      </ClCompile>
+    </ItemGroup>
+  </Target>
+</Project>

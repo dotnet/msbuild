@@ -36,9 +36,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <NETSdkInformation ResourceName="ILLink_Info" />
 
-    <!-- For now, use ResolvedFileToPublish as input/output. This
-         should go away in favor of a well-defined set of runtime
-         assemblies with https://github.com/dotnet/sdk/issues/3109. -->
     <ItemGroup>
       <_LinkedResolvedFileToPublish Include="@(_LinkedResolvedFileToPublishCandidates)" Condition="Exists('%(Identity)')" />
       <ResolvedFileToPublish Remove="@(_ManagedAssembliesToLink)" />
@@ -51,10 +48,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_RemovedManagedAssemblies Include="@(_ManagedAssembliesToLink)" Condition="!Exists('$(IntermediateLinkDir)%(Filename)%(Extension)')" />
 
       <ResolvedCompileFileDefinitions Remove="@(_RemovedManagedAssemblies)" />
-      <NativeCopyLocalItems Remove="@(_RemovedManagedAssemblies)" />
-      <ResourceCopyLocalItems Remove="@(_RemovedManagedAssemblies)" />
       <RuntimeCopyLocalItems Remove="@(_RemovedManagedAssemblies)" />
       <RuntimeTargetsCopyLocalItems Remove="@(_RemovedManagedAssemblies)" />
+      <UserRuntimeAssembly Remove="@(_RemovedManagedAssemblies)" />
       <RuntimePackAsset Remove="@(_RemovedManagedAssemblies)" />
     </ItemGroup>
 
@@ -129,22 +125,19 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
                      _ComputeManagedAssembliesToLink
 
-    Compute the set of inputs to the linker. Currently this uses a
-    heuristic to get the relevant input from ResolvedFileToPublish,
-    but with https://github.com/dotnet/sdk/issues/3109, this should be
-    replaced with the exact set of runtime assemblies that will be in
-    the deps file.
+    Compute the set of inputs to the linker.
     ============================================================
     -->
   <UsingTask TaskName="ComputeManagedAssemblies" AssemblyFile="$(ILLinkTasksAssembly)" />
-  <Target Name="_ComputeManagedAssembliesToLink">
+  <Target Name="_ComputeManagedAssembliesToLink" DependsOnTargets="_ComputeAssembliesToPostprocessOnPublish">
 
-    <ComputeManagedAssemblies Assemblies="@(ResolvedFileToPublish)">
+    <!-- NB: There should not be non-managed assemblies in this list, but we still give the linker a chance to
+         further refine this list. It currently drops C++/CLI assemblies in ComputeManageAssemblies. -->
+    <ComputeManagedAssemblies Assemblies="@(ResolvedFileToPublish->WithMetadataValue('PostprocessAssembly', 'true'))">
       <Output TaskParameter="ManagedAssemblies" ItemName="_ManagedAssembliesToLink" />
     </ComputeManagedAssemblies>
 
     <ItemGroup>
-      <_ManagedAssembliesToLink Remove="@(_ManagedResolvedFileToPublish->WithMetadataValue('AssetType', 'resources'))" />
       <_LinkedResolvedFileToPublishCandidates Include="@(_ManagedAssembliesToLink->'$(IntermediateLinkDir)%(Filename)%(Extension)')" />
     </ItemGroup>
 

@@ -1,0 +1,72 @@
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.IO;
+using System.Linq;
+using System.Xml.Linq;
+using FluentAssertions;
+using Microsoft.Extensions.DependencyModel;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.ProjectConstruction;
+using Xunit;
+using Xunit.Abstractions;
+
+namespace Microsoft.NET.Build.Tests
+{
+    public class NonCopyLocalProjectReferenceTests : SdkTest
+    {
+        public NonCopyLocalProjectReferenceTests(ITestOutputHelper log) : base(log)
+        {
+        }
+
+        [Fact]
+        public void NonCopyLocalProjectReferenceDoesNotGoToDeps()
+        {
+            var targetFramework = "netcoreapp3.0";
+
+            var referencedProject = new TestProject
+            {
+                Name = "ReferencedProject",
+                IsSdkProject = true,
+                TargetFrameworks = targetFramework,
+                IsExe = false,
+            };
+
+            var testProject = new TestProject
+            {
+                Name = "MainProject",
+                IsSdkProject = true,
+                TargetFrameworks = targetFramework,
+                IsExe = true,
+                ReferencedProjects = { referencedProject },
+            };
+
+            var testAsset = _testAssetsManager
+                .CreateTestProject(testProject)
+                .WithProjectChanges(doc =>
+                    doc.Root
+                       .DescendantNodes()
+                       .OfType<XElement>()
+                       .Where(e => e.Name.LocalName == "ProjectReference")
+                       .SingleOrDefault()
+                       ?.Add(new XAttribute("Private", "False")));
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            buildCommand.Execute().Should().Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
+
+            using var stream = File.OpenRead(outputDirectory.File("MainProject.deps.json").FullName);
+            using var reader = new DependencyContextJsonReader();
+
+            reader
+                .Read(stream)
+                .GetRuntimeAssemblyNames("any")
+                .Select(n => n.Name)
+                .Should()
+                .NotContain("ReferencedProject");
+        }
+    }
+}

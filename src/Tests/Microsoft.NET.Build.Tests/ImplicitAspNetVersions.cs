@@ -39,8 +39,7 @@ namespace Microsoft.NET.Build.Tests
             //  Add versionless PackageReference
             testProject.PackageReferences.Add(new TestPackageReference(aspnetPackageName, null));
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: aspnetPackageName)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: aspnetPackageName);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -74,8 +73,7 @@ namespace Microsoft.NET.Build.Tests
             //  Add versionless PackageReference
             testProject.PackageReferences.Add(new TestPackageReference(aspnetPackageName, null));
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: aspnetPackageName)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: aspnetPackageName);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -107,8 +105,7 @@ namespace Microsoft.NET.Build.Tests
 
             testProject.PackageReferences.Add(new TestPackageReference(aspnetPackageName, explicitVersion));
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: aspnetPackageName)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: aspnetPackageName);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -139,8 +136,7 @@ namespace Microsoft.NET.Build.Tests
 
             testProject.PackageReferences.Add(new TestPackageReference(packageName, packageVersion));
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 

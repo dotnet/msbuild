@@ -49,7 +49,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             IEnumerable<ReferenceInfo> directReferences =
                 ReferenceInfo.CreateDirectReferenceInfos(
                     referencePaths ?? new ITaskItem[] { },
-                    referenceSatellitePaths ?? new ITaskItem[] { });
+                    referenceSatellitePaths ?? new ITaskItem[] { },
+                    i => true);
 
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 FrameworkConstants.CommonFrameworks.NetCoreApp10,

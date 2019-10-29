@@ -43,7 +43,6 @@ namespace Microsoft.NET.Publish.Tests
             var testAsset = _testAssetsManager
                .CopyTestAsset(TestProjectName)
                .WithSource();
-            testAsset.Restore(Log, testAsset.TestRoot, RuntimeIdentifier);
 
             return new PublishCommand(Log, testAsset.TestRoot);
         }
@@ -87,8 +86,7 @@ namespace Microsoft.NET.Publish.Tests
                 IsExe = false,
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name, RuntimeIdentifier);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 

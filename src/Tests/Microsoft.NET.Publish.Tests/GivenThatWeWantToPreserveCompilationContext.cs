@@ -67,8 +67,6 @@ namespace Microsoft.NET.Publish.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: appTargetFramework + withoutCopyingRefs);
 
-            testAsset.Restore(Log, "TestApp");
-
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
 
             var getValuesCommand = new GetValuesCommand(Log, appProjectDirectory, testProject.TargetFrameworks, "LangVersion");
@@ -212,7 +210,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var publishCommand = new PublishCommand(Log, appProjectDirectory);
             publishCommand
-                .Execute($"/p:TargetFramework={targetFramework}", $"/p:TargetManifestFiles={manifestFile}")
+                .ExecuteWithoutRestore($"/p:TargetFramework={targetFramework}", $"/p:TargetManifestFiles={manifestFile}")
                 .Should()
                 .Pass();
 
