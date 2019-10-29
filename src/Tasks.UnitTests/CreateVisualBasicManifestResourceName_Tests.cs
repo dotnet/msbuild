@@ -367,7 +367,7 @@ End Namespace
         [Fact]
         public void CulturedResourceFileFindByConvention()
         {
-            using (var env = TestEnvironment.Create(_testOutput))
+            using (var env = TestEnvironment.Create())
             {
                 var csFile = env.CreateFile("SR1.vb", @"
 Namespace MyStuff
@@ -388,7 +388,7 @@ End Namespace");
 
                 CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName
                 {
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_testOutput),
                     UseDependentUponConvention = true,
                     ResourceFiles = new ITaskItem[] { i },
                 };
