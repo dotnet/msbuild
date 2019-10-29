@@ -21,7 +21,8 @@
     <DebugSymbols>true</DebugSymbols>
 
     <IsShippingPackage>false</IsShippingPackage>
-    <ToolsetTargetFramework>netcoreapp3.1</ToolsetTargetFramework>
+    <ToolsetTargetFramework>netcoreapp5.0</ToolsetTargetFramework>
+    <LangVersion>latest</LangVersion>
 
     <ArtifactsShippingSymbolsDir>$(ArtifactsDir)symbols\$(Configuration)\Shipping</ArtifactsShippingSymbolsDir>
 
@@ -31,5 +32,7 @@
     <!-- The "pack" command under 'buildCrossTargeting' for 'Microsoft.DotNet.MSBuildSdkResolver' throws a "NU5104" warning/error while using a "2.1.300" stage0 SDK. For: Linux-x64, Linux-arm, and Linux-arm64 -->
     <NoWarn>NU1701;NU5104;NU5125;NU5105</NoWarn>
   </PropertyGroup>
+
+  <Import Project="build/GenerateResxSource.targets" />
 
 </Project>

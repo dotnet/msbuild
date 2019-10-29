@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ru" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>Remove a project-to-project reference from the project.</source>
+        <target state="translated">Удаление в проекте ссылки из одного проекта на другой.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Command to remove project to project reference</source>
+        <target state="translated">Эта команда удаляет ссылку из одного проекта на другой</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFrameworkDescription">
+        <source>Remove the reference only when targeting a specific framework.</source>
+        <target state="translated">Удалять ссылку только для конкретной целевой платформы.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectPathArgumentName">
+        <source>PROJECT_PATH</source>
+        <target state="translated">PROJECT_PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectPathArgumentDescription">
+        <source>The paths to the referenced projects to remove.</source>
+        <target state="translated">Путь к проектам, добавленным в качестве ссылок, которые необходимо удалить.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

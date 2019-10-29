@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="FailedToDetermineUserHomeDirectory">
+        <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
+        <target state="translated">无法确定用户的主目录。设置“{0}”环境变量以指定要使用的目录。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FirstTimeMessageMoreInformation">
+        <source>----------------
+Installed an ASP.NET Core HTTPS development certificate.
+To trust the certificate run 'dotnet dev-certs https --trust' (Windows and macOS only).
+Learn about HTTPS: https://aka.ms/dotnet-https
+----------------
+Write your first app: https://aka.ms/dotnet-hello-world
+Find out what's new: https://aka.ms/dotnet-whats-new
+Explore documentation: https://aka.ms/dotnet-docs
+Report issues and find source on GitHub: https://github.com/dotnet/core
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
+--------------------------------------------------------------------------------------</source>
+        <target state="needs-review-translation">----------------
+查看文档: https://aka.ms/dotnet-docs
+通过 GitHub 报告问题和查找源: https://github.com/dotnet/core
+查找最新功能: https://aka.ms/dotnet-whats-new
+了解已安装的 HTTPS 开发者证书: https://aka.ms/aspnet-core-https
+使用 "dotnet --help" 查看可用命令或访问: https://aka.ms/dotnet-cli-docs
+编写你的第一个应用: https://aka.ms/first-net-core-app
+--------------------------------------------------------------------------------------</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FirstTimeMessageWelcome">
+        <source>Welcome to .NET Core {0}!
+---------------------
+SDK Version: {1}</source>
+        <target state="new">Welcome to .NET Core {0}!
+---------------------
+SDK Version: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TelemetryMessage">
+        <source>Telemetry
+---------
+The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
+        <target state="translated">遥测
+---------
+.NET Core 工具收集使用数据，以帮助我们改善你的体验。数据是匿名的。它由 Microsoft 收集并与社区共享。你可以通过使用喜欢的 shell 将 DOTNET_CLI_TELEMETRY_OPTOUT 环境变量设置为 "1" 或 "true" 来选择退出遥测。
+
+阅读有关 .NET Core CLI 工具遥测的更多信息: https://aka.ms/dotnet-cli-telemetry</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>.NET Core NuGet Package Packer</source>
+        <target state="translated">.NET Core NuGet 包打包程序</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>pack for msbuild</source>
+        <target state="translated">用于 MSBuild 的包</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="translated">不显示启动版权标志或版权消息。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutputDir">
+        <source>OUTPUT_DIR</source>
+        <target state="translated">OUTPUT_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutputDirDescription">
+        <source>The output directory to place built packages in.</source>
+        <target state="translated">要放置生成包的输出目录。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoBuildOptionDescription">
+        <source>Do not build the project before packing. Implies --no-restore.</source>
+        <target state="translated">打包之前不要生成项目。Implies --no-restore.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdIncludeSymbolsDescription">
+        <source>Include packages with symbols in addition to regular packages in output directory.</source>
+        <target state="translated">除了输出目录中的常规包之外，还包括带符号的包。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdIncludeSourceDescription">
+        <source>Include PDBs and source files. Source files go into the 'src' folder in the resulting nuget package.</source>
+        <target state="translated">包括 PDB 和源文件。源文件放入 nuget 结果包的“src”文件夹中。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdServiceableDescription">
+        <source>Set the serviceable flag in the package. See https://aka.ms/nupkgservicing for more information.</source>
+        <target state="translated">在包中设置可用标志。有关详细信息，请参阅 https://aka.ms/nupkgservicing。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdArgumentProject">
+        <source>PROJECT</source>
+        <target state="translated">PROJECT</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdArgumentDescription">
+        <source>The project to pack, defaults to the project file in the current directory. Can be a path to any project file</source>
+        <target state="translated">要打包的项目，默认为当前目录中的项目文件。可以是任何项目文件的路径</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to use for building the package. The default for most projects is 'Debug'.</source>
+        <target state="translated">用于生成包的配置。大多数项目的默认值是 "Debug"。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

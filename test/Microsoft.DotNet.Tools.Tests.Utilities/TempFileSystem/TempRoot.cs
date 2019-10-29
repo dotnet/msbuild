@@ -16,18 +16,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
  
         static TempRoot()
         {
-            var persistedRoot = Environment.GetEnvironmentVariable("TEST_ARTIFACTS");
-
-            if (string.IsNullOrWhiteSpace(persistedRoot))
-            {
-                Root = Path.Combine(Path.GetTempPath(), "DotnetCLITests");
-                DoDispose = true;
-            }
-            else
-            {
-                Root = persistedRoot;
-                DoDispose = false;
-            }
+            Root = RepoDirectoriesProvider.TestWorkingFolder;
+            DoDispose = false;
 
             Directory.CreateDirectory(Root);
         }
@@ -53,24 +43,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                     // ignore
                 }
             }
-        }
- 
-        public DisposableDirectory CreateDirectory()
-        {
-            var dir = new DisposableDirectory(this);
-            _temps.Add(dir);
-            return dir;
-        }
- 
-        public TempFile CreateFile(string prefix = null, string extension = null, string directory = null, [CallerFilePath]string callerSourcePath = null, [CallerLineNumber]int callerLineNumber = 0)
-        {
-            return AddFile(new DisposableFile(prefix, extension, directory, callerSourcePath, callerLineNumber));
-        }
- 
-        public DisposableFile AddFile(DisposableFile file)
-        {
-            _temps.Add(file);
-            return file;
         }
  
         internal static void CreateStream(string fullPath)

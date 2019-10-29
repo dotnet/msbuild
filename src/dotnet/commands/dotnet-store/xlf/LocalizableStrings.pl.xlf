@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pl" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppDescription">
+        <source>Stores the specified assemblies for the .NET Platform. By default, these will be optimized for the target runtime and framework.</source>
+        <target state="translated">Przechowuje określone zestawy platformy .NET. Domyślnie są one optymalizowane pod kątem docelowego środowiska uruchomieniowego i platformy docelowej.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutputOption">
+        <source>OUTPUT_DIR</source>
+        <target state="translated">KATALOG_WYJŚCIOWY</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutputOptionDescription">
+        <source>The output directory to store the given assemblies in.</source>
+        <target state="translated">Katalog wyjściowy, w którym mają być przechowywane podane zestawy.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkVersionOption">
+        <source>FRAMEWORK_VERSION</source>
+        <target state="translated">WERSJA_PLATFORMY</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkVersionOptionDescription">
+        <source>The Microsoft.NETCore.App package version that will be used to run the assemblies.</source>
+        <target state="translated">Wersja pakietu Microsoft.NETCore.App, za pomocą której mają być uruchamiane zestawy.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IntermediateWorkingDirOption">
+        <source>WORKING_DIR</source>
+        <target state="translated">KATALOG_ROBOCZY</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IntermediateWorkingDirOptionDescription">
+        <source>The working directory used by the command to execute.</source>
+        <target state="translated">Katalog roboczy używany do wykonania polecenia.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IntermediateDirExists">
+        <source>Intermediate working directory {0} already exists. Remove {0} or specify another directory with -w.</source>
+        <target state="translated">Pośredni katalog roboczy {0} już istnieje. Usuń katalog {0} lub określ inny katalog przy użyciu elementu -w.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipOptimizationOptionDescription">
+        <source>Skip the optimization phase.</source>
+        <target state="translated">Pomiń fazę optymalizacji.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectManifest">
+        <source>PROJECT_MANIFEST</source>
+        <target state="translated">MANIFEST_PROJEKTU</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectManifestDescription">
+        <source>The XML file that contains the list of packages to be stored.</source>
+        <target state="translated">Plik XML zawierający listę pakietów, które mają być przechowywane.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipSymbolsOptionDescription">
+        <source>Skip creating symbol files which can be used for profiling the optimized assemblies.</source>
+        <target state="translated">Pomiń tworzenie plików symboli, za pomocą których można profilować zoptymalizowane zestawy.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyManifests">
+        <source>Specify at least one manifest with --manifest.</source>
+        <target state="translated">Określ co najmniej jeden manifest przy użyciu elementu --manifest.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to store packages for. The target framework has to be specified in the project file.</source>
+        <target state="translated">Platforma docelowa, dla której mają być przechowywane pakiety. Platforma docelowa musi być określona w pliku projektu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to store packages for.</source>
+        <target state="translated">Docelowe środowisko uruchomieniowe, dla którego mają być przechowywane pakiety.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

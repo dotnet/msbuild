@@ -5,6 +5,13 @@
     <WriteLinesToFile File="$(OutputPath)/.toolsetversion"
                       Lines="$(GitCommitHash);$(Version);$(Rid)"
                       Overwrite="true" />
+    
+    <!-- The .version file in the final product will be the .NET Core SDK version.  But
+         for the layout we produce here, use the toolset information, so that we don't
+         just always use the stage 0 version. -->
+    <WriteLinesToFile File="$(OutputPath)/.version"
+                      Lines="$(GitCommitHash);$(Version);$(Rid)"
+                      Overwrite="true" />
   </Target>
 
   <Target Name="PublishRoslyn"
@@ -20,6 +27,14 @@
       <RoslynFrameworkAssemblies Include="$(RoslynDirectory)/System.*.dll;$(RoslynDirectory)/runtimes/**/System.*.dll" Exclude="$(RoslynDirectory)/runtimes/**/System.IO.Pipes.AccessControl.dll"/>
     </ItemGroup>
     <Delete Files="@(RoslynFrameworkAssemblies)" />
+  </Target>
+
+  <Target Name="PublishMSBuildExtensions"
+          DependsOnTargets="GenerateMSBuildExtensions"
+          BeforeTargets="Build">
+    <Copy SourceFiles="@(MSBuildExtensionsContent)"
+          DestinationFiles="@(MSBuildExtensionsContent->'$(OutputPath)\%(DeploymentSubpath)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    
   </Target>
 
   <Target Name="PublishTestCli"
@@ -124,7 +139,7 @@
         <NuPkgContentForMSBuildExtensionsRelativePaths Include="@(NuPkgContentForMSBuildExtensions->'runtimes/any/native/%(RecursiveDir)%(Filename)%(Extension)')" />
       </ItemGroup>
 
-      <Move SourceFiles="@(NuPkgContentForMSBuildExtensions)"
+      <Copy SourceFiles="@(NuPkgContentForMSBuildExtensions)"
             DestinationFiles="@(NuPkgContentForMSBuildExtensions->'$(OutputPath)/%(RecursiveDir)%(Filename)%(Extension)')" />
 
       <RemoveAssetFromDepsPackages DepsFile="$(OutputPath)/$(TargetName).deps.json"
@@ -191,10 +206,12 @@
           AfterTargets="Build">
     <PropertyGroup>
       <ReplacementPattern>"version": ".*"</ReplacementPattern>
-      <ReplacementString>"version": "$(MicrosoftNETCoreAppRuntimewinx64PackageVersion)"</ReplacementString>
+      <ReplacementString>"version": "$(MicrosoftNETCoreAppRuntimePackageVersion)"</ReplacementString>
     </PropertyGroup>
     <ItemGroup>
-      <ToolRuntimeConfigPath Include="$(OutputPath)/**/*.runtimeconfig.json" />
+      <!-- Exclude F# from retargeting: https://github.com/dotnet/toolset/issues/2866 -->
+      <ToolRuntimeConfigPath Include="$(OutputPath)/**/*.runtimeconfig.json"
+                             Exclude="$(OutputPath)/**/fsc.runtimeconfig.json;$(OutputPath)/**/fsi.runtimeconfig.json"/>
 
       <MSBuild15Items Include="$(OutputPath)/15.0/**/*" />
     </ItemGroup>
@@ -214,6 +231,7 @@
   <Target Name="GenerateLayout"
           DependsOnTargets="PublishVersionFile;
                             PublishRoslyn;
+                            PublishMSBuildExtensions;
                             PublishFSharp;
                             GenerateCliRuntimeConfigurationFiles;
                             MakeFscRunnableAndMoveToPublishDir;
