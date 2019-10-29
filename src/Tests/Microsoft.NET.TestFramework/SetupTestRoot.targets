@@ -35,8 +35,7 @@
 
       <NugetConfigFeeds>
         <![CDATA[
-    <add key="darc-pub-dotnet-core-setup-7d57652" value="https://pkgs.dev.azure.com/dnceng/public/_packaging/darc-pub-dotnet-core-setup-7d57652f/nuget/v3/index.json" />
-    <add key="darc-pub-aspnet-AspNetCore-aee5e40" value="https://pkgs.dev.azure.com/dnceng/public/_packaging/darc-pub-aspnet-AspNetCore-aee5e408/nuget/v3/index.json" />
+    <add key="darc-pub-dotnet-core-setup-f8bfa42" value="https://pkgs.dev.azure.com/dnceng/public/_packaging/darc-pub-dotnet-core-setup-f8bfa424/nuget/v3/index.json" />
     <add key="BlobFeed" value="https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json" />
     <add key="dotnet-core" value="https://dotnet.myget.org/F/dotnet-core/api/v3/index.json" />
     <add key="aspnetcore-release" value="https://dotnet.myget.org/F/aspnetcore-release/api/v3/index.json" />
