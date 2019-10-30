@@ -40,19 +40,19 @@ namespace Microsoft.Build.Tasks
         {
             if (!FileSystems.Default.FileExists(File))
             {
-                Log.LogErrorFromResources("FileHash.FileNotFound", File);
+                Log.LogErrorWithCodeFromResources("FileHash.FileNotFound", File);
                 return false;
             }
 
             if (!GetFileHash.SupportsAlgorithm(Algorithm))
             {
-                Log.LogErrorFromResources("FileHash.UnrecognizedHashAlgorithm", Algorithm);
+                Log.LogErrorWithCodeFromResources("FileHash.UnrecognizedHashAlgorithm", Algorithm);
                 return false;
             }
 
             if (!GetFileHash.TryParseHashEncoding(HashEncoding, out var encoding))
             {
-                Log.LogErrorFromResources("FileHash.UnrecognizedHashEncoding", HashEncoding);
+                Log.LogErrorWithCodeFromResources("FileHash.UnrecognizedHashEncoding", HashEncoding);
                 return false;
             }
 
@@ -63,7 +63,7 @@ namespace Microsoft.Build.Tasks
                 : StringComparison.Ordinal;
             if (!string.Equals(actualHash, Hash, comparison))
             {
-                Log.LogErrorFromResources("VerifyFileHash.HashMismatch", File, Algorithm, Hash, actualHash);
+                Log.LogErrorWithCodeFromResources("VerifyFileHash.HashMismatch", File, Algorithm, Hash, actualHash);
                 return false;
             }
 
