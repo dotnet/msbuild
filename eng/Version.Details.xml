@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NETCore.App.Ref" Version="3.1.0-preview2.19529.3">
+    <Dependency Name="Microsoft.NETCore.App.Ref" Version="3.1.0-preview3.19530.4">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>fed3d3e9e7417f8f20ed56edfe7a41b3164b0756</Sha>
+      <Sha>ce871036d2f45c3268a9463cc5405958c4f5b3f7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.App.Runtime.win-x64" Version="3.1.0-preview2.19529.3">
+    <Dependency Name="Microsoft.NETCore.App.Runtime.win-x64" Version="3.1.0-preview3.19530.4">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>fed3d3e9e7417f8f20ed56edfe7a41b3164b0756</Sha>
+      <Sha>ce871036d2f45c3268a9463cc5405958c4f5b3f7</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.1.100-preview2.19530.2">
       <Uri>https://github.com/dotnet/cli</Uri>
