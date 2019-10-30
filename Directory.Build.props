@@ -30,14 +30,4 @@
     <SdkLayoutDirectory>$(ArtifactsBinDir)$(Configuration)\dotnetLayout</SdkLayoutDirectory>
   </PropertyGroup>
 
-  <Target Name="OverrideSymbolsOutput" BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
-          Condition="'$(DebugType)' != 'embedded'">
-
-    <ItemGroup>
-      <_DebugSymbolsOutputPath Remove="@(_DebugSymbolsOutputPath)" />
-      <_DebugSymbolsOutputPath Include="@(_DebugSymbolsIntermediatePath->'$(ArtifactsSymStoreDirectory)$(MSBuildProjectName)\$(TargetFramework.ToLowerInvariant())\%(Filename)%(Extension)')" />
-    </ItemGroup>
-    
-  </Target>
-
 </Project>
