@@ -15,70 +15,12 @@
     <Copy SourceFiles="@(_CopyDirectoryBuildTestDependenciesInput)" DestinationFiles="@(_CopyDirectoryBuildTestDependenciesOutput)" />
   </Target>
   
-  <Target Name="WriteNugetConfigFile" AfterTargets="Build">
-
-    <ItemGroup>
-      <NugetConfigPrivateFeeds Include="$(ExternalRestoreSources.Split(';'))" />
-    </ItemGroup>
-
-    <PropertyGroup>
-      <GeneratedNuGetConfig>$(ArtifactsTmpDir)NuGet.config</GeneratedNuGetConfig>
-      <NugetConfigHeader>
-        <![CDATA[
-<?xml version="1.0" encoding="utf-8"?>
-<configuration>
-<packageSources>
-<!--To inherit the global NuGet package sources remove the <clear/> line below -->
-<clear />
-        ]]>
-      </NugetConfigHeader>
-
-      <NugetConfigFeeds>
-        <![CDATA[
-    <add key="darc-pub-dotnet-core-setup-f8bfa42" value="https://pkgs.dev.azure.com/dnceng/public/_packaging/darc-pub-dotnet-core-setup-f8bfa424/nuget/v3/index.json" />
-    <add key="BlobFeed" value="https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json" />
-    <add key="dotnet-core" value="https://dotnet.myget.org/F/dotnet-core/api/v3/index.json" />
-    <add key="aspnetcore-release" value="https://dotnet.myget.org/F/aspnetcore-release/api/v3/index.json" />
-    <add key="roslyn" value="https://dotnet.myget.org/f/roslyn/api/v3/index.json" />
-    <add key="nuget-build" value="https://dotnet.myget.org/F/nuget-build/api/v3/index.json" />
-    <add key="api.nuget.org" value="https://api.nuget.org/v3/index.json" />
-    <add key="container-tools" value="https://www.myget.org/F/container-tools-for-visual-studio/api/v3/index.json" />
-    <add key="roslyn-tools" value="https://dotnet.myget.org/F/roslyn-tools/api/v3/index.json" />
-    <add key="dotnet-windowsdesktop" value="https://dotnetfeed.blob.core.windows.net/dotnet-windowsdesktop/index.json" />
-    <add key="aspnet-aspnetcore" value="https://dotnetfeed.blob.core.windows.net/aspnet-aspnetcore/index.json" />
-    <add key="aspnet-aspnetcore-tooling" value="https://dotnetfeed.blob.core.windows.net/aspnet-aspnetcore-tooling/index.json" />
-    <add key="aspnet-entityframeworkcore" value="https://dotnetfeed.blob.core.windows.net/aspnet-entityframeworkcore/index.json" />
-    <add key="aspnet-extensions" value="https://dotnetfeed.blob.core.windows.net/aspnet-extensions/index.json" />
-        ]]>
-      </NugetConfigFeeds>
-
-      <NugetConfigSuffix>
-        <![CDATA[
-</packageSources>
-</configuration>
-        ]]>
-      </NugetConfigSuffix>
-
-  </PropertyGroup>
-
-  <WriteLinesToFile File="$(GeneratedNuGetConfig)"
-                    Lines="$(NugetConfigHeader)"
-                    Overwrite="true" />
-
-  <WriteLinesToFile Condition="'$(ExternalRestoreSources)' != '' and '$(DotNetBuildOffline)' != 'true'"
-                    File="$(GeneratedNuGetConfig)"
-                    Lines="&lt;add key=&quot;PrivateBlobFeed%(NugetConfigPrivateFeeds.Filename)&quot; value=&quot;%(NugetConfigPrivateFeeds.Identity)&quot; /&gt;"
-                    Overwrite="false" />
-
-  <WriteLinesToFile Condition="'$(DotNetBuildOffline)' != 'true'"
-                    File="$(GeneratedNuGetConfig)"
-                    Lines="$(NugetConfigFeeds)"
-                    Overwrite="false" />
-
-  <WriteLinesToFile File="$(GeneratedNuGetConfig)"
-                    Lines="$(NugetConfigSuffix)"
-                    Overwrite="false" />
-
+  <Target Name="WriteNugetConfigFile" 
+          AfterTargets="Build"
+          Inputs="$(RepoRoot)NuGet.config"
+          Outputs="$(ArtifactsTmpDir)NuGet.config"
+          >
+    <Copy SourceFiles="$(RepoRoot)NuGet.config" DestinationFiles="$(ArtifactsTmpDir)NuGet.config" />
   </Target>
 
 </Project>

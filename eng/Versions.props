@@ -37,11 +37,4 @@
     <MicrosoftDotNetCliUtilsVersion>2.0.0</MicrosoftDotNetCliUtilsVersion>
     <MicrosoftNETTestSdkVersion>15.0.0</MicrosoftNETTestSdkVersion>
   </PropertyGroup>
-  <PropertyGroup>
-    <RestoreSources>
-      $(RestoreSources);
-      https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
-      https://dotnet.myget.org/F/nuget-build/api/v3/index.json
-    </RestoreSources>
-  </PropertyGroup>
 </Project>
