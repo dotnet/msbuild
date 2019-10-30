@@ -12,15 +12,20 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
-
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+#if (!STANDALONEBUILD)
+using Microsoft.Internal.Performance;
+#if MSBUILDENABLEVSPROFILING 
+using Microsoft.VisualStudio.Profiler;
+#endif
+#endif
+using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.Construction
@@ -1503,42 +1508,52 @@ namespace Microsoft.Build.Construction
 
             ErrorUtilities.VerifyThrowInvalidOperation(_projectFileLocation != null, "OM_MustSetFileNameBeforeSave");
 
+#if MSBUILDENABLEVSPROFILING 
+            try
+            {
+                string beginProjectSave = String.Format(CultureInfo.CurrentCulture, "Save Project {0} To File - Begin", projectFileLocation.File);
+                DataCollection.CommentMarkProfile(8810, beginProjectSave);
+#endif
+
             Directory.CreateDirectory(DirectoryPath);
-
-            // LocationString is normally cheap to calculate, but it can occasionally go down a rabbit hole of method calls. This makes it more consistent if this event is not enabled.
-            if (MSBuildEventSource.Log.IsEnabled())
+#if (!STANDALONEBUILD)
+            using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectSaveToFileBegin, CodeMarkerEvent.perfMSBuildProjectSaveToFileEnd))
+#endif
             {
-                MSBuildEventSource.Log.SaveStart(_projectFileLocation.LocationString);
-            }
-            // Note: We're using string Equals on encoding and not EncodingUtilities.SimilarToEncoding in order
-            // to force a save if the Encoding changed from UTF8 with BOM to UTF8 w/o BOM (for example).
-            if (HasUnsavedChanges || !Equals(saveEncoding, Encoding))
-            {
-                using (var projectWriter = new ProjectWriter(_projectFileLocation.File, saveEncoding))
+                // Note: We're using string Equals on encoding and not EncodingUtilities.SimilarToEncoding in order
+                // to force a save if the Encoding changed from UTF8 with BOM to UTF8 w/o BOM (for example).
+                if (HasUnsavedChanges || !Equals(saveEncoding, Encoding))
                 {
-                    projectWriter.Initialize(XmlDocument);
-                    XmlDocument.Save(projectWriter);
+                    using (var projectWriter = new ProjectWriter(_projectFileLocation.File, saveEncoding))
+                    {
+                        projectWriter.Initialize(XmlDocument);
+                        XmlDocument.Save(projectWriter);
+                    }
+
+                    _encoding = saveEncoding;
+
+                    FileInfo fileInfo = FileUtilities.GetFileInfoNoThrow(_projectFileLocation.File);
+
+                    // If the file was deleted by a race with someone else immediately after it was written above
+                    // then we obviously can't read the write time. In this obscure case, we'll retain the 
+                    // older last write time, which at worst would cause the next load to unnecessarily 
+                    // come from disk.
+                    if (fileInfo != null)
+                    {
+                        _lastWriteTimeWhenRead = fileInfo.LastWriteTime;
+                    }
+
+                    _versionOnDisk = Version;
                 }
-
-                _encoding = saveEncoding;
-
-                FileInfo fileInfo = FileUtilities.GetFileInfoNoThrow(_projectFileLocation.File);
-
-                // If the file was deleted by a race with someone else immediately after it was written above
-                // then we obviously can't read the write time. In this obscure case, we'll retain the 
-                // older last write time, which at worst would cause the next load to unnecessarily 
-                // come from disk.
-                if (fileInfo != null)
-                {
-                    _lastWriteTimeWhenRead = fileInfo.LastWriteTime;
-                }
-
-                _versionOnDisk = Version;
             }
-            if (MSBuildEventSource.Log.IsEnabled())
+#if MSBUILDENABLEVSPROFILING 
+            }
+            finally
             {
-                MSBuildEventSource.Log.SaveStop(_projectFileLocation.LocationString);
+                string endProjectSave = String.Format(CultureInfo.CurrentCulture, "Save Project {0} To File - End", projectFileLocation.File);
+                DataCollection.CommentMarkProfile(8811, endProjectSave);
             }
+#endif
         }
 
         /// <summary>
@@ -2035,41 +2050,54 @@ namespace Microsoft.Build.Construction
                 FullPath = fullPath,
                 PreserveWhitespace = preserveFormatting
             };
-
-            try
+#if (!STANDALONEBUILD)
+            using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectLoadFromFileBegin, CodeMarkerEvent.perfMSBuildProjectLoadFromFileEnd))
+#endif
             {
-                MSBuildEventSource.Log.LoadDocumentStart(fullPath);
-                using (XmlReaderExtension xtr = XmlReaderExtension.Create(fullPath, loadAsReadOnly))
+                try
                 {
-                    _encoding = xtr.Encoding;
-                    document.Load(xtr.Reader);
+#if MSBUILDENABLEVSPROFILING
+                    string beginProjectLoad = String.Format(CultureInfo.CurrentCulture, "Load Project {0} From File - Start", fullPath);
+                    DataCollection.CommentMarkProfile(8806, beginProjectLoad);
+#endif
+                    using (XmlReaderExtension xtr = XmlReaderExtension.Create(fullPath, loadAsReadOnly))
+                    {
+                        _encoding = xtr.Encoding;
+                        document.Load(xtr.Reader);
+                    }
+
+                    _projectFileLocation = ElementLocation.Create(fullPath);
+                    _escapedFullPath = null;
+                    _directory = Path.GetDirectoryName(fullPath);
+
+                    if (XmlDocument != null)
+                    {
+                        XmlDocument.FullPath = fullPath;
+                    }
+
+                    _lastWriteTimeWhenRead = FileUtilities.GetFileInfoNoThrow(fullPath).LastWriteTime;
                 }
-
-                _projectFileLocation = ElementLocation.Create(fullPath);
-                _escapedFullPath = null;
-                _directory = Path.GetDirectoryName(fullPath);
-
-                if (XmlDocument != null)
+                catch (Exception ex)
                 {
-                    XmlDocument.FullPath = fullPath;
-                }
+                    if (ExceptionHandling.NotExpectedIoOrXmlException(ex))
+                    {
+                        throw;
+                    }
 
-                _lastWriteTimeWhenRead = FileUtilities.GetFileInfoNoThrow(fullPath).LastWriteTime;
+                    BuildEventFileInfo fileInfo = ex is XmlException xmlException
+                        ? new BuildEventFileInfo(fullPath, xmlException)
+                        : new BuildEventFileInfo(fullPath);
+
+                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(fileInfo, ex, "InvalidProjectFile", ex.Message);
+                }
+#if MSBUILDENABLEVSPROFILING 
+                finally
+                {
+                    string endProjectLoad = String.Format(CultureInfo.CurrentCulture, "Load Project {0} From File - End", fullPath);
+                    DataCollection.CommentMarkProfile(8807, endProjectLoad);
+                }
+#endif
             }
-            catch (Exception ex)
-            {
-                if (ExceptionHandling.NotExpectedIoOrXmlException(ex))
-                {
-                    throw;
-                }
-
-                BuildEventFileInfo fileInfo = ex is XmlException xmlException
-                    ? new BuildEventFileInfo(fullPath, xmlException)
-                    : new BuildEventFileInfo(fullPath);
-
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(fileInfo, ex, "InvalidProjectFile", ex.Message);
-            }
-            MSBuildEventSource.Log.LoadDocumentStop(fullPath);
 
             return document;
         }

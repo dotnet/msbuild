@@ -12,6 +12,7 @@ using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using Xunit;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
+using ItemMetadataNames = Microsoft.Build.Tasks.ItemMetadataNames;
 using Xunit.Abstractions;
 using Shouldly;
 
