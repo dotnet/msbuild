@@ -33,7 +33,9 @@ namespace Microsoft.Build.UnitTests
             .Execute()
             .ShouldBeFalse();
 
-            _mockEngine.Log.ShouldContain("MSB3951");
+            var errorEvent = _mockEngine.ErrorEvents.ShouldHaveSingleItem();
+
+            errorEvent.Code.ShouldBe("MSB3951");
         }
 
         [Fact]
@@ -49,7 +51,9 @@ namespace Microsoft.Build.UnitTests
             .Execute()
             .ShouldBeFalse();
 
-            _mockEngine.Log.ShouldContain("MSB3953");
+            var errorEvent = _mockEngine.ErrorEvents.ShouldHaveSingleItem();
+
+            errorEvent.Code.ShouldBe("MSB3953");
         }
 
         [Fact]
@@ -65,7 +69,9 @@ namespace Microsoft.Build.UnitTests
             .Execute()
             .ShouldBeFalse();
 
-            _mockEngine.Log.ShouldContain("MSB3954");
+            var errorEvent = _mockEngine.ErrorEvents.ShouldHaveSingleItem();
+
+            errorEvent.Code.ShouldBe("MSB3954");
         }
 
         [Theory]
@@ -84,7 +90,9 @@ namespace Microsoft.Build.UnitTests
 
             task.Execute().ShouldBeFalse(() => _mockEngine.Log);
 
-            _mockEngine.Log.ShouldContain("MSB3952");
+            var errorEvent = _mockEngine.ErrorEvents.ShouldHaveSingleItem();
+
+            errorEvent.Code.ShouldBe("MSB3952");
         }
 
         [Theory]
