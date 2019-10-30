@@ -23,6 +23,7 @@ using Microsoft.Build.Evaluation;
 using System.Linq;
 using Microsoft.Build.Execution;
 using Xunit;
+using ItemMetadataNames = Microsoft.Build.Tasks.ItemMetadataNames;
 
 namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 {

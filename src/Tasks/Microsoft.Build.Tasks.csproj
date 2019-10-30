@@ -60,6 +60,10 @@
       <Link>CanonicalError.cs</Link>
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\Constants.cs">
+      <Link>Constants.cs</Link>
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="AssemblyDependency\AssemblyMetadata.cs" />
     <Compile Include="ConvertToAbsolutePath.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
