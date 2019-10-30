@@ -47,9 +47,9 @@
     </Dependency>
   </ToolsetDependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NET.Sdk" Version="3.1.100-preview2.19529.4">
+    <Dependency Name="Microsoft.NET.Sdk" Version="3.1.100-preview2.19529.5">
       <Uri>https://github.com/dotnet/sdk</Uri>
-      <Sha>c0f6cf7488d21f13d9e96b0e87e77851be0e350d</Sha>
+      <Sha>2aa52a135c1a1fc0d6cebbc333af20571f5057e9</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Cli.CommandLine" Version="1.0.0-preview.19208.1">
       <Uri>https://github.com/dotnet/CliCommandLineParser</Uri>
