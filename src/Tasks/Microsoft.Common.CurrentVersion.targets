@@ -504,10 +504,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PlatformTargetAsMSBuildArchitectureExplicitlySet Condition="'$(PlatformTargetAsMSBuildArchitecture)' != ''">true</PlatformTargetAsMSBuildArchitectureExplicitlySet>
     <PlatformTargetAsMSBuildArchitectureExplicitlySet Condition="'$(PlatformTargetAsMSBuildArchitecture)' == ''">false</PlatformTargetAsMSBuildArchitectureExplicitlySet>
 
-    <PlatformTargetAsMSBuildArchitecture Condition="('$(PlatformTarget)' == 'x86' and '$(MSBuildExtensionsPath86)' != '') or ('$(PlatformTarget)' == 'x64' and '$(MSBuildExtensionsPath64)' != '')">$(PlatformTarget)</PlatformTargetAsMSBuildArchitecture>
+    <PlatformTargetAsMSBuildArchitecture Condition="'$(PlatformTarget)' == 'x86' or ('$(PlatformTarget)' == 'x64' and '$(MSBuildExtensionsPath64)' != '')">$(PlatformTarget)</PlatformTargetAsMSBuildArchitecture>
     <PlatformTargetAsMSBuildArchitecture Condition="'$(PlatformTarget)' == 'arm'">x86</PlatformTargetAsMSBuildArchitecture>
     <PlatformTargetAsMSBuildArchitecture Condition="('$(PlatformTarget)' == 'ia64' and '$(MSBuildExtensionsPath64)' != '')">x64</PlatformTargetAsMSBuildArchitecture>
-    <PlatformTargetAsMSBuildArchitecture Condition="'$(PlatformTargetAsMSBuildArchitecture)' == ''">CurrentArchitecture</PlatformTargetAsMSBuildArchitecture>
+    <PlatformTargetAsMSBuildArchitecture Condition="'$(MSBuildRuntimeType)' == 'Core' or '$(PlatformTargetAsMSBuildArchitecture)' == ''">CurrentArchitecture</PlatformTargetAsMSBuildArchitecture>
   </PropertyGroup>
 
   <!-- Flavor is the project flavor. For example, Client, Smart Devices, SQL Server, etc. -->
