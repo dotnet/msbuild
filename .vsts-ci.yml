@@ -138,3 +138,15 @@ stages:
       enableSymbolValidation: false
       # This repo doesn't produce any signed packages.
       enableSigningValidation: false
+      SDLValidationParameters:
+        enable: true
+        params: ' -SourceToolsList @("policheck","credscan")
+        -TsaInstanceURL "https://devdiv.visualstudio.com/"
+        -TsaProjectName "DEVDIV"
+        -TsaNotificationEmail "$(TsaNotificationEmail)"
+        -TsaCodebaseAdmin "$(TsaCodebaseAdmin)"
+        -TsaBugAreaPath "DevDiv\NET Core"
+        -TsaIterationPath "DevDiv"
+        -TsaRepositoryName "core-sdk"
+        -TsaCodebaseName "core-sdk"
+        -TsaPublish $True'
