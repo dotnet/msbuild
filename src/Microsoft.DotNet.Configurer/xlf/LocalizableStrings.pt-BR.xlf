@@ -30,9 +30,9 @@ Crie seu primeiro aplicativo: https://aka.ms/first-net-core-app
         <source>Welcome to .NET Core {0}!
 ---------------------
 SDK Version: {1}</source>
-        <target state="new">Welcome to .NET Core {0}!
+        <target state="translated">Bem-vindo ao .NET Core {0}.
 ---------------------
-SDK Version: {1}</target>
+Versão do SDK: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="TelemetryMessage">

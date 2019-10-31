@@ -121,7 +121,7 @@ Das angegebene Verzeichnis wird erstellt, wenn es nicht vorhanden ist.</target>
       </trans-unit>
       <trans-unit id="IgnoredArgumentsMessage">
         <source>The following arguments have been ignored : "{0}"</source>
-        <target state="new">The following arguments have been ignored : "{0}"</target>
+        <target state="translated">Die folgenden Argumente wurden ignoriert: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RunSettingsArgumentsDescription">

@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>The directory containing the build artifacts to clean.</source>
-        <target state="translated">O diretório que contém os artefatos de build a serem limpos.</target>
+        <target state="translated">O diretório que contém os artefatos de compilação a serem limpos.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">

@@ -30,9 +30,9 @@ Utilisez 'dotnet --help' pour voir les commandes disponibles, ou accédez à htt
         <source>Welcome to .NET Core {0}!
 ---------------------
 SDK Version: {1}</source>
-        <target state="new">Welcome to .NET Core {0}!
+        <target state="translated">Bienvenue dans .NET Core {0} !
 ---------------------
-SDK Version: {1}</target>
+Version du kit SDK : {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="TelemetryMessage">

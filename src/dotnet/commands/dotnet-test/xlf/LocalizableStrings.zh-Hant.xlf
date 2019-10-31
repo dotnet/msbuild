@@ -121,7 +121,7 @@ The specified directory will be created if it does not exist.</source>
       </trans-unit>
       <trans-unit id="IgnoredArgumentsMessage">
         <source>The following arguments have been ignored : "{0}"</source>
-        <target state="new">The following arguments have been ignored : "{0}"</target>
+        <target state="translated">已忽略下列引數: "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="RunSettingsArgumentsDescription">

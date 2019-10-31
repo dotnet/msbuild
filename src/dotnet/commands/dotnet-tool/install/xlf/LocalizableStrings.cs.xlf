@@ -149,7 +149,7 @@ For more reasons, including package naming enforcement, visit https://aka.ms/fai
 * Požadovaný informační kanál NuGet je nedostupný, pravděpodobně z důvodu potíží s připojením k internetu.
 * Zadali jste chybně název nástroje.
 
-Další příčiny, včetně vynucování názvů balíčků, najdete tady: https://aka.ms/failure-installing-tool</target>
+Další příčiny, včetně vynucování formátu názvů balíčků, najdete tady: https://aka.ms/failure-installing-tool</target>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionDescription">
