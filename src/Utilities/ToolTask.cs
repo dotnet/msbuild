@@ -1365,7 +1365,7 @@ namespace Microsoft.Build.Utilities
                     }
                     else
                     {
-                        File.AppendAllText(_temporaryBatchFile, commandLineCommands, EncodingUtilities.CurrentSystemOemEncoding);
+                        File.AppendAllText(_temporaryBatchFile, commandLineCommands, Console.InputEncoding); // Or Ideally a new EncodingUtilities.CurrentConsoleEncoding
 
                         string batchFileForCommandLine = _temporaryBatchFile;
 
