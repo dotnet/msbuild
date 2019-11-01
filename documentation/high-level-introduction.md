@@ -2,17 +2,19 @@
 
 ## Introduction
 
-This document aims to be a “101 college” level introduction into MSBuild, useful for those coming to MSBuild with very little background in how it works.
+This document aims to be a gentle introduction to MSBuild, useful for those with very little background in how it works.
 
 ### What is MSBuild?
 
-MSBuild is a build system commonly used to build .NET projects. It is made up of the MSBuild toolchain itself, and some number of additional files provided by the SDKs which provide platform specific instructions on how to process projects of those types.
+MSBuild is a build system commonly used to build .NET projects. 
 
-MSBuild is built up of a few very generic ideas:
+It consists of the MSBuild toolchain itself and additional files from the SDK that provide platform-specific processing instructions.
+
+MSBuild is based upon a few simple ideas:
 
 - Run a sequence of defined steps (Tasks) based upon input / output files and dependency ordering
 - Store single and groups of values in a global table
-- Steps can load C# library tasks and execute them
+- Load and execute C# library tasks
 - Include other files in the file we are processing 
 
 Built on top of those bare bones are a huge number of conventions:
@@ -240,13 +242,13 @@ A very inaccurate but useful way of thinking about how MSBuild processes is to s
     - This means if you make changes to a task assembly, your changes may not be reflected until you restart your IDE.
     - This is why I always test using MSBuild from the command line OR write an nunit test that invokes MSBuild directly.
   - Ordering matters, dearly
-    - If file A defines and variable and B uses it, then A must be included before B in all cases.
-    - If you get this wrong, then B will start getting empty string and not the valid variable
+    - If file A defines a variable and B uses it, then A must be included before B in all cases.
+    - Otherwise, B will see the empty string instead of the true value of the variable.
     - This is why people generally use props and targets files to keep the order right
-    - You can not safely refactor MSBuild without serious testing. 
+    - You cannot safely refactor MSBuild without serious testing. 
   - Everything is a string
-    - Typos will ruin your day, since you’ll get empty strings in places you do not expect
-    - Make sure your quotes are correct else you will be very confused
+    - Typos will ruin your day, since you’ll get empty strings in in unexpected places
+    - Make sure your quotes are correct, or you will be very confused
 
 
 ## Further Reading 
