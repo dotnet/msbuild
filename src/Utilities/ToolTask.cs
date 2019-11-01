@@ -588,8 +588,20 @@ namespace Microsoft.Build.Utilities
                 LogPrivate.LogWarningWithCodeFromResources("ToolTask.CommandTooLong", GetType().Name);
             }
 
+            // Do *not* set startInfo.CreateNoWindow = true.
+            // This causes the child process to be launched with its console code page (Win32 GetConsoleCP),
+            // and console output code page (Win32 GetConsoleOutputCP) reset to the OEM code page (Win32 GetOEMCP),
+            // rather than inherited from this process.
+            //
+            // This is problematic because processes normally write to their standard output using
+            // the console output code page. If that is reset to the default OEM code page,
+            // then it will be impossible to represent all Unicode characters,
+            // since the default configuration for all Windows OS languages is a non-Unicode-capable OEM code page.
+            //
+            // The only way to get Unicode output through the console is if an ancestor process
+            // set the console output code page to UTF-8 and text-producing programs honor it.
             ProcessStartInfo startInfo = new ProcessStartInfo(pathToTool, commandLine);
-            startInfo.CreateNoWindow = true;
+            startInfo.CreateNoWindow = false;
             startInfo.UseShellExecute = false;
             startInfo.RedirectStandardError = true;
             startInfo.RedirectStandardOutput = true;
@@ -1365,7 +1377,11 @@ namespace Microsoft.Build.Utilities
                     }
                     else
                     {
-                        File.AppendAllText(_temporaryBatchFile, commandLineCommands, Console.InputEncoding); // Or ideally a new EncodingUtilities.CurrentConsoleEncoding based on GetConsoleCP
+                        // CMD.exe reads batch files using the current console code page,
+                        // as retrieved from the Win32 GetConsoleCP API or Console.InputEncoding in .NET.
+                        // The console code page defaults to the OEM code page (from GetOEMCP),
+                        // but may have been changed by any ancestor process and inherited down.
+                        File.AppendAllText(_temporaryBatchFile, commandLineCommands, Console.InputEncoding);
 
                         string batchFileForCommandLine = _temporaryBatchFile;
 
