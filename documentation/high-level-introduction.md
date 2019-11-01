@@ -1,4 +1,4 @@
-# A brief introduction to MSBuild (Level 101)
+# A gentle introduction to MSBuild
 
 ## Introduction
 
