@@ -1,14 +1,13 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Build.Construction;
-using Microsoft.Build.Eventing;
-using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
+using Microsoft.Build.Construction;
+using System.Collections.Immutable;
+using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -98,7 +97,6 @@ namespace Microsoft.Build.Evaluation
                         }
 
                         string[] includeSplitFilesEscaped;
-                        MSBuildEventSource.Log.ExpandGlobStart(_rootDirectory, glob, excludePatternsForGlobs);
                         using (_lazyEvaluator._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
                         {
                             includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
@@ -107,7 +105,6 @@ namespace Microsoft.Build.Evaluation
                                 excludePatternsForGlobs
                             );
                         }
-                        MSBuildEventSource.Log.ExpandGlobStop(_rootDirectory, glob, excludePatternsForGlobs);
 
                         foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
                         {
