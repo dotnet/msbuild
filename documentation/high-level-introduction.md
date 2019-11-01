@@ -6,11 +6,11 @@ This document aims to be a “101 college” level introduction into MSBuild, us
 
 ### What is MSBuild?
 
-MSBuild is a build system commonly used to build .NET projects. It is made up the MSBuild toolchain itself, and some number of additional files provided by the SDKs which provide platform specific instructions on how to process projects of those types.
+MSBuild is a build system commonly used to build .NET projects. It is made up of the MSBuild toolchain itself, and some number of additional files provided by the SDKs which provide platform specific instructions on how to process projects of those types.
 
 MSBuild is built up of a few very generic ideas:
 
-- Run a sequence of defined steps based upon input / output files and dependency ordering
+- Run a sequence of defined steps (Tasks) based upon input / output files and dependency ordering
 - Store single and groups of values in a global table
 - Steps can load C# library tasks and execute them
 - Include other files in the file we are processing 
@@ -21,7 +21,7 @@ Built on top of those bare bones are a huge number of conventions:
 - Creating common locations to import “SDK” files from
 - Standard variables to add source files \ references \ resources
 - Prefixing “private” tasks with underscore
-- Splitting language specific items from a Common file to CSharp and FSharp versions of the same file. 
+- Splitting language specific items from a Common file to language specific (CSharp, FSharp, VB.net, etc) versions of the same file. 
 
 None of these are enforced by MSBuild itself. The files commonly included by user projects just assume you will follow these conventions.
 
