@@ -23,7 +23,7 @@ Built on top of those bare bones are a huge number of conventions:
 - Creating common locations to import “SDK” files from
 - Standard variables to add source files / references / resources
 - Prefixing “private” tasks with underscore
-- Splitting language specific items from a Common file to language specific (CSharp, FSharp, VB.net, etc) versions of the same file. 
+- Splitting language specific items from a Common file to language specific (CSharp, FSharp, VB.net, etc) versions of the same file
 
 None of these are enforced by MSBuild itself. The files commonly included by user projects just assume you will follow these conventions.
 
@@ -38,16 +38,16 @@ Instead of including every single detail of a build in the user projects, this i
 
 
 - Project files (csproj)
-  - These are user provided files describing the files, references, and settings for the build in question. 
+  - These are user provided files describing the files, references, and settings for the build in question 
   - These tend to contain many Reference items and additions to the Compile and None item group
-  - These tend to include one single project specific “target” file that include the rest of the files needed to define the entire build.
+  - These tend to include one single project specific “target” file that include the rest of the files needed to define the entire build
 
 Examples:
 
 `<Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />`
 `<Import Project="$(MSBuildExtensionsPath)\Xamarin\Mac\Xamarin.Mac.CSharp.targets" />`
 
-- Solution files (.sln) combine one or more projects for editing and building. They contain some build dependency and configuration information, but project files are the main level of build knowledge.
+- Solution files (.sln) combine one or more projects for editing and building. They contain some build dependency and configuration information, but project files are the main level of build knowledge
 - Target Files (.targets)
   - These files are generally provided by the SDKs
   - These files generally describe a set of steps (targets) which need to be executed to process the build
@@ -69,7 +69,7 @@ Many parts of the build involve invoking outside tools or operations that would 
 - Task Assemblies (.dll)
   - These files are generally provided by the SDKs
   - These are C# libraries which reference various MSBuild libraries
-  - These define [tasks](#MSBuild-Tasks) which can be invoked inside defined targets to carry out parts of the builds.
+  - These define [tasks](#MSBuild-Tasks) which can be invoked inside defined targets to carry out parts of the builds
   - They are loaded when other MSBuild files use `UsingTask` nodes
 
 
@@ -77,7 +77,7 @@ Many parts of the build involve invoking outside tools or operations that would 
 ## Data
 
 
-- There is only one data type in MSBuild for values. Everything is a string.
+- There is only one data type in MSBuild for values. Everything is a string
 - MSBuild distinguished between two types of data, properties and items:
   - Properties are single named elements 
     - Think of accessing into a Dictionary<string, string> with the name type being the key
@@ -99,10 +99,10 @@ Many parts of the build involve invoking outside tools or operations that would 
 
       - This includes the value “System” in the Item Reference, which may already have zero or more items
     - There are also Exclude, Remove, and other actions you can do on an Item
-    - They are referenced later via @(LIST_NAME) or [list transforms](#List-Transforms).
+    - They are referenced later via @(LIST_NAME) or [list transforms](#List-Transforms)
     - The may be represented by a semicolon separated string of items
 - **Variables will return empty string if not defined!**
-  - If you reference an property when you meant an item, you will get the undefined empty string.
+  - If you reference an property when you meant an item, you will get the undefined empty string
 
 
 ## Node Types
@@ -111,7 +111,7 @@ There are many, but the most common include:
 
 
 - `<PropertyGroup>`
-  - As seen above, children of this are set as properties in the global context. 
+  - As seen above, children of this are set as properties in the global context
 - `<ItemGroup>`
   - As seen above, children of this are processed in as Items (lists) of the name of the node
 - `<Target>`
@@ -124,21 +124,21 @@ There are many, but the most common include:
 - `<Import>`
   - “Include” another file into the current process
 -  `<Project>`
-  - The “top level” parent of all content in a given file.
+  - The “top level” parent of all content in a given file
 
 
 ## XML Structure
   - The top level of each project/target/prop file is a `<Project>` node which contains many children
   - As noted above, each specific file type tends to contain certain items. However **these are all conventions**! 
-  - If the XML is invalid (unclosed tag, etc) your build may fail in strange ways.
+  - If the XML is invalid (unclosed tag, etc) your build may fail in strange ways
     - macios has an xml check as pat of `make MSBuild`
 
 **Logic Constructs**
 
-  - Many nodes can have Conditions which when false will prevent them and their children from being used in a given build.
-    - Conditions can even prevent entire files from being included. 
+  - Many nodes can have Conditions which when false will prevent them and their children from being used in a given build
+    - Conditions can even prevent entire files from being included 
     - Almost everything can have one and they are very powerful
-  - There are XML constructs that mirror switch statements, recursion, and many other programming elements.
+  - There are XML constructs that mirror switch statements, recursion, and many other programming elements
   - As everything is strings, comparisions involves a number of quotes:
 
             <SwiftVerbose Condition="'$(SwiftVerbose)' == ''">false</SwiftVerbose>
@@ -150,18 +150,18 @@ There are many, but the most common include:
 
 **List Transforms**
 
-  - If your contents contain a `%` then you will be run like a “for each” for each element in the relevant itemgroup.
-  - See the [XA doc](https://github.com/xamarin/xamarin-android/blob/master/Documentation/guides/MSBuildBestPractices.md#item-group-transforms) and [MSBuild docs](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-transforms?view=vs-2017) for more details. It’s powerful but complex.
+  - If your contents contain a `%` then you will be run like a “for each” for each element in the relevant itemgroup
+  - See the [XA doc](https://github.com/xamarin/xamarin-android/blob/master/Documentation/guides/MSBuildBestPractices.md#item-group-transforms) and [MSBuild docs](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-transforms?view=vs-2017) for more details. It’s powerful but complex
 
 **Property Functions**
 
-  - It is possible to invoke C# properties and functions from MSBuild. 
-  - This is useful for a number of use cases, including string and path manipulation and math operations.
-  - See the [documentation](https://docs.microsoft.com/en-us/visualstudio/msbuild/property-functions?view=vs-2019) for more details.
+  - It is possible to invoke C# properties and functions from MSBuild 
+  - This is useful for a number of use cases, including string and path manipulation and math operations
+  - See the [documentation](https://docs.microsoft.com/en-us/visualstudio/msbuild/property-functions?view=vs-2019) for more details
 
 ## MSBuild Tasks
-- These are C# types defined in a library. 
-- The specifics of creating a new task library is outside the scope of this guide.
+- These are C# types defined in a library 
+- The specifics of creating a new task library is outside the scope of this guide
 - There are two common base classes for Tasks:
   - `Task` - A generic “I want to do some work” base class with and `Execute ()` method to override
   - `ToolTask` - A base class that makes invoking a single external tool significantly easier
@@ -194,7 +194,7 @@ public abstract class MySpecialTask : Task
     </Target>
 ```
 - You can attach a C# debugger to the task, but that can be tricky on mono since there is no attach to process
-- `SessionId` is needed on most C# tasks to enable “build remoting” for Visual Studio Windows.
+- `SessionId` is needed on most C# tasks to enable “build remoting” for Visual Studio Windows
 
 ## Execution Model
 
@@ -224,26 +224,26 @@ A very inaccurate but useful way of thinking about how MSBuild processes is to s
 
 
 ## Debugging
-  - Easily the most important thing is to get a full diagnostic build. This will list all variables set and the ordering/execution of each target.
+  - Easily the most important thing is to get a full diagnostic build. This will list all variables set and the ordering/execution of each target
   - You can add debug “Console.WriteLine”s by using the built in MessageTask:
 
 
             <Message Text="Project File Name = $(MSBuildProjectFile)" />
 
-    - **Do note these must be inside targets**. They are only executed during Target Eval time.
-    - If you put them inside ItemGroups or PropertyGroups they will be ignored.
-  - There is a new “binary log” hotness which acts as a full diagnostics build but is faster and contains even more information. You can enable it by passing `/bl`  to MSBuild. Read more about it [here](https://github.com/Microsoft/msbuild/blob/master/documentation/wiki/Binary-Log.md). 
+    - **Do note these must be inside targets**. They are only executed during Target Eval time
+    - If you put them inside ItemGroups or PropertyGroups they will be ignored
+  - There is a new “binary log” hotness which acts as a full diagnostics build but is faster and contains even more information. You can enable it by passing `/bl`  to MSBuild. Read more about it [here](https://github.com/Microsoft/msbuild/blob/master/documentation/wiki/Binary-Log.md) 
     - The support for loading .binlog files in Visual Studio for Mac is still somewhat new
-  - If you are developing on Windows you can add a `System.Diagnostics.Debugger.Launch()` invocation and attach Visual Studio to the process.
+  - If you are developing on Windows you can add a `System.Diagnostics.Debugger.Launch()` invocation and attach Visual Studio to the process
 
 
 ## Gotchas
-  - Visual Studio for Mac will cache your task assemblies but not your target/prop files, usually.
-    - This means if you make changes to a task assembly, your changes may not be reflected until you restart your IDE.
-    - This is why I always test using MSBuild from the command line OR write an nunit test that invokes MSBuild directly.
+  - Visual Studio for Mac will cache your task assemblies but not your target/prop files, usually
+    - This means if you make changes to a task assembly, your changes may not be reflected until you restart your IDE
+    - This is why I always test using MSBuild from the command line OR write an nunit test that invokes MSBuild directly
   - Ordering matters, dearly
-    - If file A defines a variable and B uses it, then A must be included before B in all cases.
-    - Otherwise, B will see the empty string instead of the true value of the variable.
+    - If file A defines a variable and B uses it, then A must be included before B in all cases
+    - Otherwise, B will see the empty string instead of the true value of the variable
     - This is why people generally use props and targets files to keep the order right
     - You cannot safely refactor MSBuild without serious testing. 
   - Everything is a string
