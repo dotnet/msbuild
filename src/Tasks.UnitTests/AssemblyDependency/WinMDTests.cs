@@ -7,6 +7,7 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using ItemMetadataNames = Microsoft.Build.Tasks.ItemMetadataNames;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {

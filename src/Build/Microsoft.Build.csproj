@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -56,6 +56,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\BinaryWriterExtensions.cs" Link="BinaryWriterExtensions.cs" />
     <Compile Include="..\Shared\EncodingUtilities.cs">
       <Link>SharedUtilities\EncodingUtilities.cs</Link>
     </Compile>
@@ -82,6 +83,10 @@
     </Compile>
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\CanonicalError.cs</Link>
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\Constants.cs">
+      <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\Constants.cs</Link>
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">

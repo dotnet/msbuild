@@ -58,6 +58,9 @@
       <Link>AssemblyNameComparer.cs</Link>
     </Compile>
     <Compile Include="..\Shared\CollectionHelpers.cs" />
+    <Compile Include="..\Shared\Constants.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="..\Shared\FileDelegates.cs">
       <Link>FileDelegates.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
