@@ -420,7 +420,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="filenameExtension">This is the filename extension.</param>
         internal void AddRelatedFileExtension(string filenameExtension)
         {
-#if _DEBUG
+#if DEBUG
             Debug.Assert(filenameExtension[0]=='.', "Expected extension to start with '.'");
 #endif
             _relatedFileExtensions.Add(filenameExtension);
@@ -441,7 +441,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="filename">This is the filename relative the this reference.</param>
         internal void AddSatelliteFile(string filename)
         {
-#if _DEBUG
+#if DEBUG
             Debug.Assert(!Path.IsPathRooted(filename), "Satellite path should be relative to the current reference.");
 #endif
             _satelliteFiles.Add(filename);
@@ -453,7 +453,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="filename">This is the filename relative the this reference.</param>
         internal void AddSerializationAssemblyFile(string filename)
         {
-#if _DEBUG
+#if DEBUG
             Debug.Assert(!Path.IsPathRooted(filename), "Serialization assembly path should be relative to the current reference.");
 #endif
             _serializationAssemblyFiles.Add(filename);

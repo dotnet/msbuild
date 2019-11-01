@@ -293,7 +293,7 @@ namespace Microsoft.Build.Utilities
             }
 
             BuildEngine.LogMessageEvent(e);
-#if _DEBUG
+#if DEBUG
             // Assert that the message does not contain an error code.  Only errors and warnings
             // should have error codes.
             string errorCode;
@@ -464,7 +464,7 @@ namespace Microsoft.Build.Utilities
             ErrorUtilities.VerifyThrowArgumentNull(messageResourceName, nameof(messageResourceName));
 
             LogMessage(importance, FormatResourceString(messageResourceName, messageArgs));
-#if _DEBUG
+#if DEBUG
             // Assert that the message does not contain an error code.  Only errors and warnings
             // should have error codes.
             string errorCode;
@@ -694,7 +694,7 @@ namespace Microsoft.Build.Utilities
                 subcategory = FormatResourceString(subcategoryResourceName);
             }
 
-#if _DEBUG
+#if DEBUG
             // If the message does have a message code, LogErrorWithCodeFromResources
             // should have been called instead, so that the errorCode field gets populated.
             // Check this only in debug, to avoid the cost of attempting to extract a

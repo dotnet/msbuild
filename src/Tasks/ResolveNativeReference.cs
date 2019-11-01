@@ -131,7 +131,7 @@ namespace Microsoft.Build.Tasks
 
                 if (!String.IsNullOrEmpty(path))
                 {
-#if _DEBUG
+#if DEBUG
                     try
                     {
 #endif
@@ -139,7 +139,7 @@ namespace Microsoft.Build.Tasks
                     {
                         retValue = false;
                     }
-#if _DEBUG
+#if DEBUG
                     }
                     catch (Exception)
                     {
