@@ -182,7 +182,7 @@
       </trans-unit>
       <trans-unit id="ClsidMapExportedTypesRequireExplicitGuid">
         <source>NETSDK1088: The COMVisible class '{0}' must have a GuidAttribute with the CLSID of the class to be made visible to COM in .NET Core.</source>
-        <target state="translated">NETSDK1088: La clase COMVisible "{0" debe tener un valor de GuidAttribute con el CLSID de la clase de forma que sea visible para COM en .NET Core.</target>
+        <target state="translated">NETSDK1088: La clase COMVisible "{0}" debe tener un valor de GuidAttribute con el CLSID de la clase de forma que sea visible para COM en .NET Core.</target>
         <note>{StrBegin="NETSDK1088: "}
 {0} - The ComVisible class that doesn't have a GuidAttribute on it.</note>
       </trans-unit>
