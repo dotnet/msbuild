@@ -80,7 +80,7 @@ Many parts of the build involve invoking outside tools or operations that would 
 - There is only one data type in MSBuild for values. Everything is a string
 - MSBuild distinguished between two types of data, properties and items:
   - Properties are single named elements 
-    - Think of accessing into a Dictionary<string, string> with the name type being the key
+    - Think of accessing into a Dictionary<string, string> with the name type being the case insensitive key
     - They are defined in PropertyGroups
 
             <PropertyGroup>
