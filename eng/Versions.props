@@ -7,7 +7,7 @@
   <!-- Repo Version Information -->
   <PropertyGroup>
     <VersionPrefix>3.1.100</VersionPrefix>
-    <PreReleaseVersionLabel>preview2</PreReleaseVersionLabel>
+    <PreReleaseVersionLabel>preview3</PreReleaseVersionLabel>
   </PropertyGroup>
   <!-- Production Dependencies -->
   <PropertyGroup>
