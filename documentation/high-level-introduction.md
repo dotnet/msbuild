@@ -1,14 +1,14 @@
-# A brief introduction to msbuild (Level 101)
+# A brief introduction to MSBuild (Level 101)
 
 ## Introduction
 
-This document aims to be a “101 college” level introduction into msbuild, useful for those coming to msbuild with very little background in how it works.
+This document aims to be a “101 college” level introduction into MSBuild, useful for those coming to MSBuild with very little background in how it works.
 
-### What is msbuild?
+### What is MSBuild?
 
-msbuild is a build system commonly used to build .NET projects. It is made up the msbuild toolchain itself, and some number of additional files provided by the SDKs which provide platform specific instructions on how to process projects of those types.
+MSBuild is a build system commonly used to build .NET projects. It is made up the MSBuild toolchain itself, and some number of additional files provided by the SDKs which provide platform specific instructions on how to process projects of those types.
 
-msbuild is built up of a few very generic ideas:
+MSBuild is built up of a few very generic ideas:
 
 - Run a sequence of defined steps based upon input / output files and dependency ordering
 - Store single and groups of values in a global table
@@ -23,7 +23,7 @@ Built on top of those bare bones are a huge number of conventions:
 - Prefixing “private” tasks with underscore
 - Splitting language specific items from a Common file to CSharp and FSharp versions of the same file. 
 
-None of these are enforced by msbuild itself. The files commonly included by user projects just assume you will follow these conventions.
+None of these are enforced by MSBuild itself. The files commonly included by user projects just assume you will follow these conventions.
 
 
 ## File Structure Convention
@@ -61,22 +61,22 @@ As I noted above, there is nothing truly special with the names and suffixes, th
 
 ### Libraries 
 
-Many parts of the build involve invoking outside tools or operations that would be burdensome to write in XML. Task assemblies allow extension of the msbuild by defining types in a C# library that can be called by msbuild targets.
+Many parts of the build involve invoking outside tools or operations that would be burdensome to write in XML. Task assemblies allow extension of the MSBuild by defining types in a C# library that can be called by MSBuild targets.
 
 
 - Task Assemblies (.dll)
   - These files are generally provided by the SDKs
-  - These are C# libraries which reference various msbuild libraries
+  - These are C# libraries which reference various MSBuild libraries
   - These define [tasks](#MSBuild-Tasks) which can be invoked inside defined targets to carry out parts of the builds.
-  - They are loaded when other msbuild files use `UsingTask` nodes
+  - They are loaded when other MSBuild files use `UsingTask` nodes
 
 
 
 ## Data
 
 
-- There is only one data type in msbuild for values. Everything is a string.
-- msbuild distinguished between two types of data, properties and items:
+- There is only one data type in MSBuild for values. Everything is a string.
+- MSBuild distinguished between two types of data, properties and items:
   - Properties are single named elements 
     - Think of accessing into a Dictionary<string, string> with the name type being the key
     - They are defined in PropertyGroups
@@ -129,7 +129,7 @@ There are many, but the most common include:
   - The top level of each project\target\prop file is a `<Project>` node which contains many children
   - As noted above, each specific file type tends to contain certain items. However **these are all conventions**! 
   - If the XML is invalid (unclosed tag, etc) your build may fail in strange ways.
-    - macios has an xml check as pat of `make msbuild`
+    - macios has an xml check as pat of `make MSBuild`
 
 **Logic Constructs**
 
@@ -149,11 +149,11 @@ There are many, but the most common include:
 **List Transforms**
 
   - If your contents contain a `%` then you will be run like a “for each” for each element in the relevant itemgroup.
-  - See the [XA doc](https://github.com/xamarin/xamarin-android/blob/master/Documentation/guides/MSBuildBestPractices.md#item-group-transforms) and [msbuild docs](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-transforms?view=vs-2017) for more details. It’s powerful but complex.
+  - See the [XA doc](https://github.com/xamarin/xamarin-android/blob/master/Documentation/guides/MSBuildBestPractices.md#item-group-transforms) and [MSBuild docs](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-transforms?view=vs-2017) for more details. It’s powerful but complex.
 
 **Property Functions**
 
-  - It is possible to invoke C# properties and functions from msbuild. 
+  - It is possible to invoke C# properties and functions from MSBuild. 
   - This is useful for a number of use cases, including string and path manipulation and math operations.
   - See the [documentation](https://docs.microsoft.com/en-us/visualstudio/msbuild/property-functions?view=vs-2019) for more details.
 
@@ -176,7 +176,7 @@ public abstract class MySpecialTask : Task
 ```
 
   - Properties can be marked [Required] which will fail the build if given an empty string value
-  - Strings are the common type, but you can use types like bool and msbuild will convert for you
+  - Strings are the common type, but you can use types like bool and MSBuild will convert for you
   - ITaskItem[] are need to pass Items (lists) to \ from tasks when the task may need to modify them
 - They are later invoked with:
 
@@ -196,7 +196,7 @@ public abstract class MySpecialTask : Task
 
 ## Execution Model
 
-A very inaccurate but useful way of thinking about how msbuild processes is to split it into three parts.
+A very inaccurate but useful way of thinking about how MSBuild processes is to split it into three parts.
 
 - Loading
   - Starting with the csproj load each file included into a giant buffer
@@ -230,7 +230,7 @@ A very inaccurate but useful way of thinking about how msbuild processes is to s
 
     - **Do note these must be inside targets**. They are only executed during Target Eval time.
     - If you put them inside ItemGroups or PropertyGroups they will be ignored.
-  - There is a new “binary log” hotness which acts as a full diagnostics build but is faster and contains even more information. You can enable it by passing `/bl`  to msbuild. Read more about it [here](https://github.com/Microsoft/msbuild/blob/master/documentation/wiki/Binary-Log.md). 
+  - There is a new “binary log” hotness which acts as a full diagnostics build but is faster and contains even more information. You can enable it by passing `/bl`  to MSBuild. Read more about it [here](https://github.com/Microsoft/msbuild/blob/master/documentation/wiki/Binary-Log.md). 
     - The support for loading .binlog files in Visual Studio for Mac is still somewhat new
   - If you are developing on Windows you can add a `System.Diagnostics.Debugger.Launch()` invocation and attach Visual Studio to the process.
 
@@ -238,12 +238,12 @@ A very inaccurate but useful way of thinking about how msbuild processes is to s
 ## Gotchas
   - Visual Studio for Mac will cache your task assemblies but not your target\prop files, usually.
     - This means if you make changes to a task assembly, your changes may not be reflected until you restart your IDE.
-    - This is why I always test using msbuild from the command line OR write an nunit test that invokes msbuild directly.
+    - This is why I always test using MSBuild from the command line OR write an nunit test that invokes MSBuild directly.
   - Ordering matters, dearly
     - If file A defines and variable and B uses it, then A must be included before B in all cases.
     - If you get this wrong, then B will start getting empty string and not the valid variable
     - This is why people generally use props and targets files to keep the order right
-    - You can not safely refactor msbuild without serious testing. 
+    - You can not safely refactor MSBuild without serious testing. 
   - Everything is a string
     - Typos will ruin your day, since you’ll get empty strings in places you do not expect
     - Make sure your quotes are correct else you will be very confused
