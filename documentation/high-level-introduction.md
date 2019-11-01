@@ -19,7 +19,7 @@ Built on top of those bare bones are a huge number of conventions:
 
 - Separating your data and step definitions in different files (see file structure below)
 - Creating common locations to import “SDK” files from
-- Standard variables to add source files \ references \ resources
+- Standard variables to add source files / references / resources
 - Prefixing “private” tasks with underscore
 - Splitting language specific items from a Common file to language specific (CSharp, FSharp, VB.net, etc) versions of the same file. 
 
@@ -114,8 +114,8 @@ There are many, but the most common include:
   - As seen above, children of this are processed in as Items (lists) of the name of the node
 - `<Target>`
   - Defines a target which will be considered when we get to execution set
-  - Before\After and BuildDependsOn will determine ordering
-  - Inputs\Ouputs will determine if run at all
+  - Before/After and BuildDependsOn will determine ordering
+  - Inputs/Ouputs will determine if run at all
   - Can contain one or more children that are executed in sequence when the target is executed
 - `<UsingTask>`
   - Loads a task type from the given C# library assembly for execution later by a `<Target>`
@@ -126,7 +126,7 @@ There are many, but the most common include:
 
 
 ## XML Structure
-  - The top level of each project\target\prop file is a `<Project>` node which contains many children
+  - The top level of each project/target/prop file is a `<Project>` node which contains many children
   - As noted above, each specific file type tends to contain certain items. However **these are all conventions**! 
   - If the XML is invalid (unclosed tag, etc) your build may fail in strange ways.
     - macios has an xml check as pat of `make MSBuild`
@@ -177,7 +177,7 @@ public abstract class MySpecialTask : Task
 
   - Properties can be marked [Required] which will fail the build if given an empty string value
   - Strings are the common type, but you can use types like bool and MSBuild will convert for you
-  - ITaskItem[] are need to pass Items (lists) to \ from tasks when the task may need to modify them
+  - ITaskItem[] are need to pass Items (lists) to / from tasks when the task may need to modify them
 - They are later invoked with:
 
 ```xml
@@ -206,12 +206,12 @@ A very inaccurate but useful way of thinking about how MSBuild processes is to s
   - Starting from the top, evaluate every node
     - Property and Item Group will set items in the global context
     - UsingTask will load task assemblies and prepare to invoke them
-    - Targets will define then and their ordering\inputs\output
+    - Targets will define then and their ordering/inputs/output
       - **Their contents will not be executed yet**
   - This will respect conditions, and be done top to bottom based upon include order
 - Target Eval
   - Starting with the defined “DefaultTargets", which for our purposes is always “Build” determine a list of target to invoke and their ordering
-  - Invoke one at a time, comparing their Input\Output against file timestamps like make
+  - Invoke one at a time, comparing their Input/Output against file timestamps like make
 
 
 ## "SDK style” project and nuget injection
@@ -222,7 +222,7 @@ A very inaccurate but useful way of thinking about how MSBuild processes is to s
 
 
 ## Debugging
-  - Easily the most important thing is to get a full diagnostic build. This will list all variables set and the ordering\execution of each target.
+  - Easily the most important thing is to get a full diagnostic build. This will list all variables set and the ordering/execution of each target.
   - You can add debug “Console.WriteLine”s by using the built in MessageTask:
 
 
@@ -236,7 +236,7 @@ A very inaccurate but useful way of thinking about how MSBuild processes is to s
 
 
 ## Gotchas
-  - Visual Studio for Mac will cache your task assemblies but not your target\prop files, usually.
+  - Visual Studio for Mac will cache your task assemblies but not your target/prop files, usually.
     - This means if you make changes to a task assembly, your changes may not be reflected until you restart your IDE.
     - This is why I always test using MSBuild from the command line OR write an nunit test that invokes MSBuild directly.
   - Ordering matters, dearly
