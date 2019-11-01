@@ -14,6 +14,7 @@
     <file src="$repoRoot$/src/Package/MsBuild.Engine.Corext/README.md" target=""/>
     <file src="$repoRoot$/THIRDPARTYNOTICES.txt" target="v15.0/bin/THIRDPARTYNOTICES.txt" />
     <file src="$X86BinPath$/Microsoft.Common.props" target="\Extensions\15.0" />
+    <file src="$X86BinPath$/Microsoft.Common.props" target="\Extensions\Current" />
     <file src="$X86BinPath$/Microsoft.VisualStudioVersion.v15.Common.props" target="\Extensions\15.0" />
 
     <!-- x86 -->

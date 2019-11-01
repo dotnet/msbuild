@@ -16,9 +16,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <VersionPrefix>16.3.2</VersionPrefix>
-    <DotNetFinalVersionKind>release</DotNetFinalVersionKind>
+    <!-- <DotNetFinalVersionKind>release</DotNetFinalVersionKind> -->
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
-    <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
+    <PreReleaseVersionLabel>vs-ldr</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
     <SemanticVersioningV1>true</SemanticVersioningV1>
