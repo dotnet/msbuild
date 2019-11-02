@@ -956,8 +956,6 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Build a project file that can't be accessed
         /// </summary>
         [Fact]
-      
-
         public void ProjectCanNotBeOpened()
         {
             if (NativeMethodsShared.IsUnixLike)
@@ -1732,7 +1730,7 @@ true, true, true)]
             AssertProjectFileAfterReload(
                 true,
                 false,
-                (initial, reload, actualFile) => { Assert.Equal(reload, actualFile); });
+                (initial, reload, actualFile) => { Assert.Equal(reload, actualFile);});
         }
 
         [Fact]
