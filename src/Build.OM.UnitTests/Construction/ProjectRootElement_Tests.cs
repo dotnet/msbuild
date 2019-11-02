@@ -901,14 +901,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Build a solution file that can't be accessed
         /// </summary>
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Security classes are not supported on Unix
+
         public void SolutionCanNotBeOpened()
         {
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                // Security classes are not supported on Unix
-                return;
-            }
-
+            
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string solutionFile = null;
