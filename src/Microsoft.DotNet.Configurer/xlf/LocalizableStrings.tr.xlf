@@ -30,9 +30,9 @@ Kullanılabilen komutları görmek için 'dotnet --help' komutunu kullanın veya
         <source>Welcome to .NET Core {0}!
 ---------------------
 SDK Version: {1}</source>
-        <target state="new">Welcome to .NET Core {0}!
+        <target state="translated">.NET Core {0} sürümüne hoş geldiniz!
 ---------------------
-SDK Version: {1}</target>
+SDK Sürümü: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="TelemetryMessage">
