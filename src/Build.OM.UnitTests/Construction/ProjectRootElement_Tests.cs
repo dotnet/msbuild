@@ -956,10 +956,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Build a project file that can't be accessed
         /// </summary>
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // FileSecurity class is not supported on Unix
+      
 
         public void ProjectCanNotBeOpened()
         {
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                return; // FileSecurity class is not supported on Unix
+            }
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string projectFile = null;
