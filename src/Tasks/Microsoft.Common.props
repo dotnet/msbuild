@@ -73,10 +73,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             is already a file named "Microsoft.Common.props" in this directory so we have to have a slightly different
             directory name to hold extensions.
         -->
-   
-    <ImportIfExists Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportBefore\*"/>
-    <ImportIfExists Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportBefore\*"/>
-
+   <ImportIfExists Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportBefore\*"/>
+   <ImportIfExists Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportBefore\*"/>
   </ImportGroup>
 
   <!-- 
@@ -117,7 +115,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          Microsoft.Common.props from the 4.0 location, and make sure everything else in here is 
          set up such that if it's defaulted to something there, it won't be overridden here. -->
   <ImportIfExists Project="$(MSBuildExtensionsPath)\4.0\Microsoft.Common.props" />
-
   <PropertyGroup>
     <CustomBeforeMicrosoftCommonProps Condition="'$(CustomBeforeMicrosoftCommonProps)'==''">$(MSBuildExtensionsPath)\v$(MSBuildToolsVersion)\Custom.Before.$(MSBuildThisFile)</CustomBeforeMicrosoftCommonProps>
     <CustomAfterMicrosoftCommonProps Condition="'$(CustomAfterMicrosoftCommonProps)'==''">$(MSBuildExtensionsPath)\v$(MSBuildToolsVersion)\Custom.After.$(MSBuildThisFile)</CustomAfterMicrosoftCommonProps>
@@ -166,7 +163,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
    <!-- <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftCommonProps)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter')"/>
 -->
     <ImportIfExists Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter\*" />
-
     <ImportIfExists Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter\*" />
   </ImportGroup>
 </Project>
