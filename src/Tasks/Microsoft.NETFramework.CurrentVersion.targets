@@ -22,9 +22,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
      <ImportUserLocationsByWildcardAfterMicrosoftNetFrameworkTargets Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftNetFrameworkTargets)' == ''">true</ImportUserLocationsByWildcardAfterMicrosoftNetFrameworkTargets>
   </PropertyGroup>
 
-  <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportBefore\*" Condition="'$(ImportUserLocationsByWildcardBeforeMicrosoftNetFrameworkTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportBefore')"/>
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportBefore\*" Condition="'$(ImportByWildcardBeforeMicrosoftNetFrameworkTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportBefore')"/>
-  
+  <ImportIfExists Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportBefore\*"/>
+
+  <ImportIfExists Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportBefore\*"/>
+
   <Target
       Name="GetFrameworkPaths"
       DependsOnTargets="$(GetFrameworkPathsDependsOn)">
@@ -131,7 +132,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Import Project="$(MSBuildToolsPath)\Microsoft.WinFX.targets" Condition="'$(TargetFrameworkVersion)' != 'v2.0' and '$(TargetCompactFramework)' != 'true' and Exists('$(MSBuildToolsPath)\Microsoft.WinFX.targets')"/>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Data.Entity.targets" Condition="'$(TargetFrameworkVersion)' != 'v2.0' and '$(TargetFrameworkVersion)' !=  'v3.0' and Exists('$(MSBuildToolsPath)\Microsoft.Data.Entity.targets')"/>
   
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportAfter\*" Condition="'$(ImportByWildcardAfterMicrosoftNetFrameworkTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportAfter')"/>
-  <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftNetFrameworkTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportAfter')"/>
+  <ImportIfExists Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportAfter\*"/>
+
+  <ImportIfExists Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportAfter\*"/>
 
 </Project>

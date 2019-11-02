@@ -24,8 +24,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
        <ImportUserLocationsByWildcardAfterMicrosoftVisualBasicTargets Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftVisualBasicTargets)' == ''">true</ImportUserLocationsByWildcardAfterMicrosoftVisualBasicTargets>    
     </PropertyGroup>
 
-    <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.VisualBasic.targets\ImportBefore\*" Condition="'$(ImportUserLocationsByWildcardBeforeMicrosoftVisualBasicTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.VisualBasic.targets\ImportBefore')"/>
-    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.VisualBasic.targets\ImportBefore\*" Condition="'$(ImportByWildcardBeforeMicrosoftVisualBasicTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.VisualBasic.targets\ImportBefore')"/>
+    <ImportIfExists Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.VisualBasic.targets\ImportBefore\*" />
+    <ImportIfExists Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.VisualBasic.targets\ImportBefore\*" />
 
     <PropertyGroup>
        <CustomBeforeMicrosoftVisualBasicTargets Condition="'$(CustomBeforeMicrosoftVisualBasicTargets)'==''">$(MSBuildExtensionsPath)\v$(MSBuildToolsVersion)\Custom.Before.Microsoft.VisualBasic.targets</CustomBeforeMicrosoftVisualBasicTargets>
@@ -377,7 +377,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <Import Project="$(CustomAfterMicrosoftVisualBasicTargets)" Condition="'$(CustomAfterMicrosoftVisualBasicTargets)' != '' and Exists('$(CustomAfterMicrosoftVisualBasicTargets)')" />
 
-    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.VisualBasic.targets\ImportAfter\*" Condition="'$(ImportByWildcardAfterMicrosoftVisualBasicTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.VisualBasic.targets\ImportAfter')"/>
-    <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.VisualBasic.targets\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftVisualBasicTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.VisualBasic.targets\ImportAfter')"/>
+    <ImportIfExists Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.VisualBasic.targets\ImportAfter\*" />
+    <ImportIfExists Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.VisualBasic.targets\ImportAfter\*" />
 
 </Project>

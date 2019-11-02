@@ -22,8 +22,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
      <ImportUserLocationsByWildcardAfterMicrosoftNetFrameworkProps Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftNetFrameworkProps)' == ''">true</ImportUserLocationsByWildcardAfterMicrosoftNetFrameworkProps>
   </PropertyGroup>
 
-  <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportBefore\*" Condition="'$(ImportUserLocationsByWildcardBeforeMicrosoftNetFrameworkProps)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportBefore')"/>
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportBefore\*" Condition="'$(ImportByWildcardBeforeMicrosoftNetFrameworkProps)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportBefore')"/>
+  <ImportIfExists Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportBefore\*"/>
+
+  <ImportIfExists Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportBefore\*"/>
 
   <PropertyGroup>
     <!-- By default we want to replace subsets with profiles, but we do need a way to turning off this "upgrade" in case a user needs to target a subset-->
@@ -133,7 +134,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
 
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportAfter\*" Condition="'$(ImportByWildcardAfterMicrosoftNetFrameworkProps)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportAfter')"/>
-  <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftNetFrameworkProps)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportAfter')"/>
+  <ImportIfExists Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportAfter\*"/>
+
+  <ImportIfExists Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportAfter\*"/>
 
 </Project>

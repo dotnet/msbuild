@@ -65,15 +65,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
    </PropertyGroup>
 
    <ImportGroup Condition="'$(MSBuildAssemblyVersion)' == ''">
-      <Import Project="$(MSBuildUserExtensionsPath)\4.0\Microsoft.NETFramework.targets\ImportBefore\*" Condition="'$(ImportUserLocationsByWildcardBefore40MicrosoftNetFrameworkTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\4.0\Microsoft.NETFramework.targets\ImportBefore')"/>
-      <Import Project="$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.targets\ImportBefore\*" Condition="'$(ImportByWildcardBefore40MicrosoftNetFrameworkTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.targets\ImportBefore')"/>
+      <ImportIfExists Project="$(MSBuildUserExtensionsPath)\4.0\Microsoft.NETFramework.targets\ImportBefore\*" />
+      <ImportIfExists Project="$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.targets\ImportBefore\*" />
    </ImportGroup> 
 
    <Import Project="$(NetFrameworkTargetsPath)" />
 
    <ImportGroup Condition="'$(MSBuildAssemblyVersion)' == ''">
-      <Import Project="$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.targets\ImportAfter\*" Condition="'$(ImportByWildcardAfter40MicrosoftNetFrameworkTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.targets\ImportAfter')"/>
-      <Import Project="$(MSBuildUserExtensionsPath)\4.0\Microsoft.NETFramework.targets\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfter40MicrosoftNetFrameworkTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\4.0\Microsoft.NETFramework.targets\ImportAfter')"/>
+      <ImportIfExists Project="$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.targets\ImportAfter\*" />
+      <ImportIfExists Project="$(MSBuildUserExtensionsPath)\4.0\Microsoft.NETFramework.targets\ImportAfter\*" />
    </ImportGroup> 
 
 </Project>

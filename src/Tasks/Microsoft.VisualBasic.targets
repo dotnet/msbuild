@@ -135,16 +135,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <ImportGroup Condition="'$(MSBuildAssemblyVersion)' == ''">
-    <Import Project="$(MSBuildUserExtensionsPath)\4.0\Microsoft.VisualBasic.targets\ImportBefore\*" Condition="'$(ImportUserLocationsByWildcardBefore40MicrosoftVisualBasicTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\4.0\Microsoft.VisualBasic.targets\ImportBefore')"/>
-    <Import Project="$(MSBuildExtensionsPath)\4.0\Microsoft.VisualBasic.targets\ImportBefore\*" Condition="'$(ImportByWildcardBefore40MicrosoftVisualBasicTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\4.0\Microsoft.VisualBasic.targets\ImportBefore')"/>
+    <ImportIfExists Project="$(MSBuildUserExtensionsPath)\4.0\Microsoft.VisualBasic.targets\ImportBefore\*" />
+    <ImportIfExists Project="$(MSBuildExtensionsPath)\4.0\Microsoft.VisualBasic.targets\ImportBefore\*" />
   </ImportGroup> 
 
   <!-- Really should be imported right before Microsoft.Common.targets, but because Microsoft.VisualBasic.targets imports 
        Microsoft.Common.targets from the current directory rather than using MSBuildToolsPath (which would redirect to our
        targets), we're stuck doing it this way instead. --> 
   <ImportGroup Condition="'$(MSBuildAssemblyVersion)' == ''">
-    <Import Project="$(MSBuildUserExtensionsPath)\4.0\Microsoft.Common.targets\ImportBefore\*" Condition="'$(ImportUserLocationsByWildcardBefore40MicrosoftCommonTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\4.0\Microsoft.Common.targets\ImportBefore')"/>
-    <Import Project="$(MSBuildExtensionsPath)\4.0\Microsoft.Common.targets\ImportBefore\*" Condition="'$(ImportByWildcardBefore40MicrosoftCommonTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\4.0\Microsoft.Common.targets\ImportBefore')"/>
+    <ImportIfExists Project="$(MSBuildUserExtensionsPath)\4.0\Microsoft.Common.targets\ImportBefore\*" />
+    <ImportIfExists Project="$(MSBuildExtensionsPath)\4.0\Microsoft.Common.targets\ImportBefore\*" />
   </ImportGroup> 
 
   <!-- Really should be imported right before Microsoft.NETFramework.props, but because Microsoft.VisualBasic.targets imports 
@@ -152,8 +152,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
        targets), and Microsoft.Common.targets does likewise with Microsoft.NETFramework.props, we're stuck doing it this 
        way instead. --> 
   <ImportGroup Condition="'$(MSBuildAssemblyVersion)' == ''">
-    <Import Project="$(MSBuildUserExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportBefore\*" Condition="'$(ImportUserLocationsByWildcardBefore40MicrosoftNetFrameworkProps)' == 'true' and exists('$(MSBuildUserExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportBefore')"/>
-    <Import Project="$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportBefore\*" Condition="'$(ImportByWildcardBefore40MicrosoftNetFrameworkProps)' == 'true' and exists('$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportBefore')"/>
+    <ImportIfExists Project="$(MSBuildUserExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportBefore\*" />
+    <ImportIfExists Project="$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportBefore\*" />
   </ImportGroup> 
 
   <Import Project="$(MSBuildToolsPath)\Microsoft.Managed.targets" />
@@ -165,21 +165,21 @@ Copyright (C) Microsoft Corporation. All rights reserved.
        targets), and Microsoft.Common.targets does likewise with Microsoft.NETFramework.props, we're stuck doing it this 
        way instead. --> 
   <ImportGroup Condition="'$(MSBuildAssemblyVersion)' == ''">
-    <Import Project="$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportAfter\*" Condition="'$(ImportByWildcardAfter40MicrosoftNetFrameworkProps)' == 'true' and exists('$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportAfter')"/>
-    <Import Project="$(MSBuildUserExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfter40MicrosoftNetFrameworkProps)' == 'true' and exists('$(MSBuildUserExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportAfter')"/>
+    <ImportIfExists Project="$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportAfter\*" />
+    <ImportIfEXists Project="$(MSBuildUserExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportAfter\*" />
   </ImportGroup> 
 
   <!-- Really should be imported right after Microsoft.Common.targets, but because Microsoft.VisualBasic.targets imports 
        Microsoft.Common.targets from the current directory rather than using MSBuildToolsPath (which would redirect to our
        targets), we're stuck doing it this way instead. --> 
   <ImportGroup Condition="'$(MSBuildAssemblyVersion)' == ''">
-    <Import Project="$(MSBuildExtensionsPath)\4.0\Microsoft.Common.targets\ImportAfter\*" Condition="'$(ImportByWildcardAfter40MicrosoftCommonTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\4.0\Microsoft.Common.targets\ImportAfter')"/>
-    <Import Project="$(MSBuildUserExtensionsPath)\4.0\Microsoft.Common.targets\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfter40MicrosoftCommonTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\4.0\Microsoft.Common.targets\ImportAfter')"/>
+    <ImportIfExists Project="$(MSBuildExtensionsPath)\4.0\Microsoft.Common.targets\ImportAfter\*" />
+    <ImportIfExists Project="$(MSBuildUserExtensionsPath)\4.0\Microsoft.Common.targets\ImportAfter\*" />
   </ImportGroup> 
 
   <ImportGroup Condition="'$(MSBuildAssemblyVersion)' == ''">
-    <Import Project="$(MSBuildExtensionsPath)\4.0\Microsoft.VisualBasic.targets\ImportAfter\*" Condition="'$(ImportByWildcardAfter40MicrosoftVisualBasicTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\4.0\Microsoft.VisualBasic.targets\ImportAfter')"/>
-    <Import Project="$(MSBuildUserExtensionsPath)\4.0\Microsoft.VisualBasic.targets\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfter40MicrosoftVisualBasicTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\4.0\Microsoft.VisualBasic.targets\ImportAfter')"/>
+    <ImportIfExists Project="$(MSBuildExtensionsPath)\4.0\Microsoft.VisualBasic.targets\ImportAfter\*" />
+    <ImportIfExists Project="$(MSBuildUserExtensionsPath)\4.0\Microsoft.VisualBasic.targets\ImportAfter\*" />
   </ImportGroup> 
 
    <!-- Fix up FrameworkPathOverride, which is primarily used to determine the location of mscorlib.dll in the 
