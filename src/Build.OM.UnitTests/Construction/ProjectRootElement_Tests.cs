@@ -1034,12 +1034,9 @@ Project(""{";
         /// Open lots of projects concurrently to try to trigger problems
         /// </summary>
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]  //This test is platform specific for Windows
         public void ConcurrentProjectOpenAndCloseThroughProject()
         {
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                return; // TODO: This test hangs on Linux. Investigate
-            }
 
             int iterations = 500;
             string[] paths = ObjectModelHelpers.GetTempFiles(iterations);
