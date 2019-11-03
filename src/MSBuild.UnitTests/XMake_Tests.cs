@@ -1204,7 +1204,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LowPriorityBuild()
         {
-            RunPriorityBuildTest(expectedPrority: ProcessPriorityClass.BelowNormal, arguments: "/low /nr:false");
+            RunPriorityBuildTest(expectedPrority: ProcessPriorityClass.BelowNormal, arguments: "/low");
         }
 
         /// <summary>
@@ -1216,28 +1216,32 @@ namespace Microsoft.Build.UnitTests
             // In case we are already running at a  different priority, validate
             // the build runs as the current priority, and not some hard coded priority.
             ProcessPriorityClass currentPriority = Process.GetCurrentProcess().PriorityClass;
-            RunPriorityBuildTest(expectedPrority: currentPriority, arguments: "/nr:false");
+            RunPriorityBuildTest(expectedPrority: currentPriority);
         }
 
         private void RunPriorityBuildTest(ProcessPriorityClass expectedPrority, params string[] arguments)
         {
-            const string contents = @"
-<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
- <Target Name=""Build"">
+            string[] aggregateArguments = arguments.Union(new string[] { " /nr:false /v:diag "}).ToArray();
+
+            string contents = ObjectModelHelpers.CleanupFileContents(@"
+<?xml version=""1.0"" encoding=""utf-8""?>
+<Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+ <Target Name=`Build`>
     <Message Text='Task priority is ""$([System.Diagnostics.Process]::GetCurrentProcess().PriorityClass)""'/>
  </Target>
 </Project>
-";
+");
             // Set our test environment variables:
             //  - Disable in proc build to make sure priority is inherited by subprocesses.
             //  - Enable property functions so we can easily read our priority class.
             IDictionary<string, string> environmentVars = new Dictionary<string, string>
             {
                 { "MSBUILDNOINPROCNODE", "1"},
+                { "DISABLECONSOLECOLOR", "1"},
                 { "MSBUILDENABLEALLPROPERTYFUNCTIONS", "1" },
             };
 
-            string logContents = ExecuteMSBuildExeExpectSuccess(contents, envsToCreate: environmentVars, arguments: arguments);
+            string logContents = ExecuteMSBuildExeExpectSuccess(contents, envsToCreate: environmentVars, arguments: aggregateArguments);
 
             string expected = string.Format(@"Task priority is ""{0}""", expectedPrority);
             logContents.ShouldContain(expected, () => logContents);
