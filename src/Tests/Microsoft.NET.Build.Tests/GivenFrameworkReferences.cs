@@ -118,6 +118,35 @@ namespace FrameworkReferenceTest
             }
         }
 
+        [CoreMSBuildOnlyFact]
+        public void ForceGenerateRuntimeConfigurationFiles_works_even_on_netFramework_tfm()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "NETFrameworkTFMTest",
+                TargetFrameworks = "net472",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            testProject.SourceFiles.Add("Program.cs", FrameworkReferenceEmptyProgramSource);
+            testProject.AdditionalProperties.Add("GenerateRuntimeConfigurationFiles", "true");
+
+            TestAsset testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            DirectoryInfo outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+            string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
+            Assert.True(File.Exists(runtimeConfigFile), $"Expected to generate runtime config file '{runtimeConfigFile}'");
+        }
+
         [CoreMSBuildAndWindowsOnlyFact]
         public void DuplicateFrameworksAreNotWrittenToRuntimeConfigWhenThereAreDifferentProfiles()
         {
