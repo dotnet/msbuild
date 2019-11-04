@@ -1,24 +1,37 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BackEnd.SdkResolution;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Eventing;
-using Microsoft.Build.Exceptions;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Globalization;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Globalization;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Exceptions;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
+using Microsoft.Build.Utilities;
+#if (!STANDALONEBUILD)
+using Microsoft.Internal.Performance;
+#if MSBUILDENABLEVSPROFILING 
+using Microsoft.VisualStudio.Profiler;
+#endif
+#endif
+using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
 
@@ -686,9 +699,27 @@ namespace Microsoft.Build.BackEnd
                 {
                     SetCommonWorkerThreadParameters();
                 }
-                MSBuildEventSource.Log.RequestThreadProcStart();
+#if (!STANDALONEBUILD)
+                using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildEngineBuildProjectBegin, CodeMarkerEvent.perfMSBuildEngineBuildProjectEnd))
+                {
+#if MSBUILDENABLEVSPROFILING
+                try
+                {
+                    string beginProjectBuild = String.Format(CultureInfo.CurrentCulture, "Build Project {0} - Start", requestEntry.RequestConfiguration.ProjectFullPath);
+                    DataCollection.CommentMarkProfile(8802, beginProjectBuild);
+#endif
+#endif
                 await BuildAndReport();
-                MSBuildEventSource.Log.RequestThreadProcStop();
+#if (!STANDALONEBUILD)
+#if MSBUILDENABLEVSPROFILING 
+                }
+                finally
+                {
+                    DataCollection.CommentMarkProfile(8803, "Build Project - End");
+                }
+#endif
+                }
+#endif
             }
 #if FEATURE_VARIOUS_EXCEPTIONS
             catch (ThreadAbortException)
@@ -1015,8 +1046,6 @@ namespace Microsoft.Build.BackEnd
             // logged with the node logging context
             _projectLoggingContext = null;
 
-            MSBuildEventSource.Log.BuildProjectStart(_requestEntry.RequestConfiguration.ProjectFullPath);
-
             try
             {
                 // Load the project
@@ -1080,9 +1109,6 @@ namespace Microsoft.Build.BackEnd
 
             // Build the targets
             BuildResult result = await _targetBuilder.BuildTargets(_projectLoggingContext, _requestEntry, this, allTargets, _requestEntry.RequestConfiguration.BaseLookup, _cancellationTokenSource.Token);
-
-            MSBuildEventSource.Log.BuildProjectStop(_requestEntry.RequestConfiguration.ProjectFullPath, allTargets);
-
             return result;
         }
 
