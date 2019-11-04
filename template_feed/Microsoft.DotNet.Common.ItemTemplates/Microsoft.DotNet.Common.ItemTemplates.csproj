@@ -7,7 +7,7 @@
         <OutputPath>$(TemplatesDir)</OutputPath>
         <EnableDefaultItems>False</EnableDefaultItems>
         <IsPackable>true</IsPackable>
-        <NoWarn>2008;NU5105</NoWarn>
+        <NoWarn>$(NoWarn);2008;NU5105</NoWarn>
         <NoPackageAnalysis>true</NoPackageAnalysis>
         <PackageId>Microsoft.DotNet.Common.ItemTemplates</PackageId>
         <Authors>Microsoft</Authors>
@@ -15,6 +15,7 @@
         <language>en-US</language>
         <PackageProjectUrl>https://github.com/dotnet/templating</PackageProjectUrl>
         <PackageType>Template</PackageType>
+        <SuppressDependenciesWhenPacking>True</SuppressDependenciesWhenPacking>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Remove="Microsoft.NETCore.App" />
