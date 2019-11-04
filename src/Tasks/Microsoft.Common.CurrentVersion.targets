@@ -495,7 +495,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
 
-  <!-- Sensible defaults for the most-commonly-desired MSBuildRuntime and MSBuildArchitecture values. The Core and Mono runtimes do not currently support custom architectures or runtimes.
+  <!-- Sensible defaults for the most-commonly-desired MSBuildRuntime and MSBuildArchitecture values. The Core and Mono runtimes do not currently support specifying task architecture or runtime.
        The change to limit this to the 'Full' runtime originated from the 'ResolveComReferences' target in this file. The team that owns that target explicitly said they are not going to port it to .NET Core, so if you remove the below check, add a similar check in ResolveComReferences. -->
   <PropertyGroup Condition="'$(DisableOutOfProcTaskHost)' == '' and '$(MSBuildRuntimeType)' == 'Full'">
     <TargetFrameworkAsMSBuildRuntime Condition="'$(TargetFrameworkVersion)' == 'v2.0' or '$(TargetFrameworkVersion)' == 'v3.0' or '$(TargetFrameworkVersion)' == 'v3.5'">CLR2</TargetFrameworkAsMSBuildRuntime>
