@@ -9,7 +9,9 @@ variables:
     value: Toolset
   - ${{ if eq(variables['System.TeamProject'], 'public') }}:
     - name: PB_PublishBlobFeedKey
+      value:
     - name: PB_PublishBlobFeedUrl
+      value:
     - name: _DotNetPublishToBlobFeed
       value: false
     - name: _PublishUsingPipelines
