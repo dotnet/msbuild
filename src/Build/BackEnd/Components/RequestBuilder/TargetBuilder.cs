@@ -1,20 +1,22 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Build.Collections;
-using Microsoft.Build.Eventing;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
+using System.Xml;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Collections;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
-using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
+using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
+using System.Threading.Tasks;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -464,9 +466,7 @@ namespace Microsoft.Build.BackEnd
                             _requestEntry.RequestConfiguration.ActivelyBuildingTargets[currentTargetEntry.Name] = _requestEntry.Request.GlobalRequestId;
 
                             // Execute all of the tasks on this target.
-                            MSBuildEventSource.Log.TargetStart(currentTargetEntry.Name);
                             await currentTargetEntry.ExecuteTarget(taskBuilder, _requestEntry, _projectLoggingContext, _cancellationToken);
-                            MSBuildEventSource.Log.TargetStop(currentTargetEntry.Name);
                         }
 
                         break;

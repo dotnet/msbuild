@@ -12,6 +12,11 @@ using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+#if MICROSOFT_BUILD_TASKS
+using MSBuildConstants = Microsoft.Build.Tasks.MSBuildConstants;
+#else
+using MSBuildConstants = Microsoft.Build.Shared.MSBuildConstants;
+#endif
 
 namespace Microsoft.Build
 {

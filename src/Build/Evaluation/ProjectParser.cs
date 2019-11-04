@@ -1,12 +1,17 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Build.Eventing;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.Framework;
+#if (!STANDALONEBUILD)
+using Microsoft.Internal.Performance;
 
+#if MSBUILDENABLEVSPROFILING
+using Microsoft.VisualStudio.Profiler;
+#endif
+#endif
 using Expander = Microsoft.Build.Evaluation.Expander<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
@@ -111,12 +116,29 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal static void Parse(XmlDocumentWithLocation document, ProjectRootElement projectRootElement)
         {
-            MSBuildEventSource.Log.ParseStart(projectRootElement.ProjectFileLocation.File);
+#if MSBUILDENABLEVSPROFILING
+            try
+            {
+                string projectFile = String.IsNullOrEmpty(projectRootElement.ProjectFileLocation.File) ? "(null)" : projectRootElement.ProjectFileLocation.File;
+                string projectParseBegin = String.Format(CultureInfo.CurrentCulture, "Parse Project {0} - Begin", projectFile);
+                DataCollection.CommentMarkProfile(8808, projectParseBegin);
+#endif
+#if (!STANDALONEBUILD)
+                using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectConstructBegin, CodeMarkerEvent.perfMSBuildProjectConstructEnd))
+#endif
             {
                 ProjectParser parser = new ProjectParser(document, projectRootElement);
                 parser.Parse();
             }
-            MSBuildEventSource.Log.ParseStop(projectRootElement.ProjectFileLocation.File);
+#if MSBUILDENABLEVSPROFILING
+            }
+            finally
+            {
+                string projectFile = String.IsNullOrEmpty(projectRootElement.ProjectFileLocation.File) ? "(null)" : projectRootElement.ProjectFileLocation.File;
+                string projectParseEnd = String.Format(CultureInfo.CurrentCulture, "Parse Project {0} - End", projectFile);
+                DataCollection.CommentMarkProfile(8809, projectParseEnd);
+            }
+#endif
         }
 
         /// <summary>
