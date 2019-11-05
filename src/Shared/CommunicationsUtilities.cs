@@ -655,7 +655,9 @@ namespace Microsoft.Build.Internal
         /// <returns>Base Handshake</returns>
         private static long GetBaseHandshakeForContext(TaskHostContext hostContext)
         {
-            string salt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
+            string salt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") +
+                Environment.GetEnvironmentVariable("DOTNET_HOST_PATH") +
+                Environment.GetEnvironmentVariable("DOTNET_ROOT");
 
             long nodeHandshakeSalt = 0;
 
