@@ -74,7 +74,7 @@
       </trans-unit>
       <trans-unit id="ToolsLocationHelper.InvalidRedistFile">
         <source>There was an error reading the redist list file "{0}". {1}</source>
-        <target state="translated">Error al leer el archivo de lista redist "{0}". {1}</target>
+        <target state="translated">Error al leer el archivo de lista de paquetes redistribuibles "{0}". {1}</target>
         <note>No Error code because this resource will be used in an exception. The error code is discarded if it is included</note>
       </trans-unit>
       <trans-unit id="ToolsLocationHelper.CouldNotCreateChain">
