@@ -128,7 +128,6 @@
   <PropertyGroup>
     <FluentAssertionsVersion>4.19.2</FluentAssertionsVersion>
     <FluentAssertionsJsonVersion>4.19.0</FluentAssertionsJsonVersion>
-    <MicrosoftDotNetCliUtilsVersion>2.0.0</MicrosoftDotNetCliUtilsVersion>
     <MicrosoftNETTestSdkVersion>15.0.0</MicrosoftNETTestSdkVersion>
   </PropertyGroup>
   <PropertyGroup>
