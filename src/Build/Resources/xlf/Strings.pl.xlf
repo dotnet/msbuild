@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
         <source>Logging verbosity is set to: {0}.</source>
-        <target state="new">Logging verbosity is set to: {0}.</target>
+        <target state="translated">Szczegółowość rejestrowania została ustawiona na: {0}.</target>
         <note>
       LOCALIZATION: {0} is an enum value of LoggerVerbosity.
     </note>
@@ -109,7 +109,7 @@
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
-        <target state="new">Method {0} cannot be called with a collection containing null or empty target names.</target>
+        <target state="translated">Metody {0} nie można wywołać przy użyciu kolekcji zawierającej nazwy docelowe o wartości null lub puste.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
@@ -594,7 +594,7 @@
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
         <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</source>
-        <target state="new">MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</target>
+        <target state="translated">MSB4019: Nie znaleziono zaimportowanego projektu „{0}”. Upewnij się, że wyrażenie w deklaracji Import „{1}” jest poprawne i że plik istnieje na dysku.</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">
@@ -1163,7 +1163,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectNoPublish">
         <source>Web projects do not support the "Publish" target.  Continuing with remaining projects ...</source>
-        <target state="translated">Projekty sieci Web nie obsługują elementu docelowego „Publish”.  Trwa kontynuowanie pozostałych projektów...</target>
+        <target state="translated">Projekty internetowe nie obsługują elementu docelowego „Publish”.  Trwa kontynuowanie pozostałych projektów...</target>
         <note>UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do not localize "Publish".</note>
       </trans-unit>
@@ -2140,7 +2140,7 @@ Wykorzystanie:          Średnie wykorzystanie {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="PropertyReassignment">
         <source>Property reassignment: $({0})="{1}" (previous value: "{2}") at {3}</source>
-        <target state="translated">Ponowny przydział właściwości: $({0})=„{1}” (poprzednia wartość: „{2}”) w {3}</target>
+        <target state="translated">Ponowne przypisanie właściwości: $({0})=„{1}” (poprzednia wartość: „{2}”) w {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveSdk">

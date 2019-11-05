@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../Strings.resx">
     <body>
       <trans-unit id="AmbiguousProjectError">
         <source>MSBUILD : error MSB1011: Specify which project or solution file to use because this folder contains more than one project or solution file.</source>
@@ -369,7 +369,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                        -verbosity:quiet
 </source>
         <target state="translated">  -verbosity:&lt;層級&gt; 在事件記錄檔中顯示此數量的資訊。
-                     可用的詳細資訊層級為: q[uiet]、m[inimal]、
+                     可用的詳細程度層級為: q[uiet]、m[inimal]、
                      n[ormal]、d[etailed] 和 diag[nostic]。(簡短形式: -v)
                      範例:
                        -verbosity:quiet
@@ -799,7 +799,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                             預設不會附加到記錄檔。
                         Encoding--指定檔案的編碼方式，
                             例如 UTF-8、Unicode 或 ASCII
-                     預設詳細資訊為「詳細」。
+                     預設詳細程度為「詳細」。
                      範例:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
@@ -1014,7 +1014,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="InvalidVerbosityError">
         <source>MSBUILD : error MSB1018: Verbosity level is not valid.</source>
-        <target state="translated">MSBUILD : error MSB1018: 詳細等級無效。</target>
+        <target state="translated">MSBUILD : error MSB1018: 詳細程度等級無效。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1018: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies an unknown verbosity level e.g. "msbuild -verbosity:foo". The only valid verbosities
@@ -1114,7 +1114,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="MissingVerbosityError">
         <source>MSBUILD : error MSB1016: Specify the verbosity level.</source>
-        <target state="translated">MSBUILD : error MSB1016: 請指定詳細等級。</target>
+        <target state="translated">MSBUILD : error MSB1016: 請指定詳細程度等級。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1016: "}UE: This happens if the user does something like "msbuild.exe -verbosity". The user must pass in a verbosity level
       after the switch e.g. "msbuild.exe -verbosity:detailed".
