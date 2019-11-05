@@ -52,7 +52,7 @@
       </trans-unit>
       <trans-unit id="InvalidVerbosity">
         <source>MSB4103: "{0}" is not a valid logger verbosity level.</source>
-        <target state="translated">MSB4103: "{0}" не является допустимым уровнем подробного ведения журнала.</target>
+        <target state="translated">MSB4103: "{0}" не является допустимым уровнем детализации средства ведения журнала.</target>
         <note>{StrBegin="MSB4103: "}</note>
       </trans-unit>
       <trans-unit id="MissingProject">

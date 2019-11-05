@@ -370,7 +370,7 @@ isoladamente.
                        -verbosity:quiet
 </source>
         <target state="translated">  -verbosity:&lt;level&gt; Exibir este volume de informações no log de eventos.
-                     Os níveis de detalhes disponíveis são: q[uiet], m[inimal],
+                     Os níveis de detalhamento disponíveis são: q[uiet], m[inimal],
                      n[ormal], d[etailed] e diag[nostic]. (Forma abreviada: -v)
                      Exemplo:
                        -verbosity:quiet
@@ -800,7 +800,7 @@ isoladamente.
                             O padrão é não acrescentar ao arquivo de log.
                         Encoding – especifica a codificação do arquivo,
                             por exemplo, UTF-8, Unicode ou ASCII
-                     O nível de detalhes padrão é Detalhado.
+                     O nível de detalhamento padrão é Detalhado.
                      Exemplos:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
@@ -1015,7 +1015,7 @@ isoladamente.
       </trans-unit>
       <trans-unit id="InvalidVerbosityError">
         <source>MSBUILD : error MSB1018: Verbosity level is not valid.</source>
-        <target state="translated">MSBUILD : error MSB1018: Nível de verbosidade não é válido.</target>
+        <target state="translated">MSBUILD : error MSB1018: Nível de detalhamento não é válido.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1018: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies an unknown verbosity level e.g. "msbuild -verbosity:foo". The only valid verbosities
@@ -1115,7 +1115,7 @@ isoladamente.
       </trans-unit>
       <trans-unit id="MissingVerbosityError">
         <source>MSBUILD : error MSB1016: Specify the verbosity level.</source>
-        <target state="translated">MSBUILD : error MSB1016: Especifique o nível de verbosidade.</target>
+        <target state="translated">MSBUILD : error MSB1016: Especifique o nível de detalhamento.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1016: "}UE: This happens if the user does something like "msbuild.exe -verbosity". The user must pass in a verbosity level
       after the switch e.g. "msbuild.exe -verbosity:detailed".

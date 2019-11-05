@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../Strings.resx">
     <body>
       <trans-unit id="AppConfig.BindingRedirectMissingOldVersion">
         <source>BindingRedirect is missing required field 'oldVersion'.</source>
@@ -163,7 +163,7 @@
       </trans-unit>
       <trans-unit id="Copy.ErrorIfLinkFailsSetWithoutLinkOption">
         <source>MSB3892: ErrorIfLinkFails requires UseHardlinksIfPossible or UseSymbolicLinksIfPossible to be set.</source>
-        <target state="new">MSB3892: ErrorIfLinkFails requires UseHardlinksIfPossible or UseSymbolicLinksIfPossible to be set.</target>
+        <target state="translated">MSB3892: ErrorIfLinkFails 必須設定 UseHardlinksIfPossible 或 UseSymbolicLinksIfPossible。</target>
         <note>{StrBegin="MSB3892: "} LOCALIZATION: Do not localize "ErrorIfLinkFails", "UseHardLinksIfPossible", or "UseSymbolicLinksIfPossible".</note>
       </trans-unit>
       <trans-unit id="Copy.ExactlyOneTypeOfDestination">
@@ -183,7 +183,7 @@
       </trans-unit>
       <trans-unit id="Copy.LinkFailed">
         <source>MSB3893: Could not use a link to copy "{0}" to "{1}".</source>
-        <target state="new">MSB3893: Could not use a link to copy "{0}" to "{1}".</target>
+        <target state="translated">MSB3893: 無法使用連結將 "{0}" 複製到 "{1}"。</target>
         <note>{StrBegin="MSB3893: "} LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
       <trans-unit id="Copy.RetryingAsFileCopy">
@@ -731,7 +731,7 @@
       </trans-unit>
       <trans-unit id="GenerateBootstrapper.PackageHomeSiteMissing">
         <source>MSB3164: No 'HomeSite' attribute has been provided for '{0}', so the package will be published to the same location as the bootstrapper.</source>
-        <target state="translated">MSB3164: 未提供 '{0}' 的 'HomeSite' 屬性，因此套件將與啟動載入器發行到相同的位置。</target>
+        <target state="translated">MSB3164: 未提供 '{0}' 的 'HomeSite' 屬性，因此套件將與啟動載入器發佈到相同的位置。</target>
         <note>{StrBegin="MSB3164: "}</note>
       </trans-unit>
       <trans-unit id="GenerateBootstrapper.PackageValidation">
@@ -861,7 +861,7 @@
       </trans-unit>
       <trans-unit id="GenerateManifest.GreaterMinimumRequiredVersion">
         <source>MSB3176: Specified minimum required version is greater than the current publish version. Please specify a version less than or equal to the current publish version.</source>
-        <target state="translated">MSB3176: 指定的最低必要版本高於目前的發行版本。請指定低於或等於目前發行版本的版本。</target>
+        <target state="translated">MSB3176: 指定的最低必要版本高於目前的發佈版本。請指定低於或等於目前發佈版本的版本。</target>
         <note>{StrBegin="MSB3176: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.HostInBrowserInvalidFrameworkVersion">
@@ -981,7 +981,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
         <source>MSB3824: In order to build with .NET Core, resource inputs must be in .txt or .resx format.</source>
-        <target state="new">MSB3824: In order to build with .NET Core, resource inputs must be in .txt or .resx format.</target>
+        <target state="translated">MSB3824: 若要使用 .NET Core 建置，資源輸入必須採用 .txt 或 .resx 格式。</target>
         <note>{StrBegin="MSB3824: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.InputDoesntExist">
@@ -1041,7 +1041,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.CorruptOutput">
         <source>Output file "{0}" is possibly corrupt and will be deleted and recreated.</source>
-        <target state="needs-review-translation">MSB3555: 輸出檔 "{0}" 可能已經損毀。</target>
+        <target state="translated">輸出檔案 "{0}" 可能已損毀，檔案將會受到刪除並重新建立。</target>
         <note />
       </trans-unit>
       <trans-unit id="GenerateResource.OnlyStringsSupported">
@@ -1066,7 +1066,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.DeleteCorruptOutputFailed">
         <source>MSB3560: Could not delete the possibly corrupt output file "{0}". {1}</source>
-        <target state="needs-review-translation">MSB3560: 無法刪除可能已經損毀的輸出檔 "{0}"。{1}</target>
+        <target state="translated">MSB3560: 無法刪除可能已經損毀的輸出檔 "{0}"。{1}</target>
         <note>{StrBegin="MSB3560: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ObsoleteStringsTag">
@@ -1708,7 +1708,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoRedistAssembliesToGenerateExclusionList">
         <source>MSB3256: No assemblies were read in from the redist lists. A TargetFramework profile exclusion list could not be generated. </source>
-        <target state="translated">MSB3256: 未從可轉散發清單讀入任何組件。無法產生 TargetFramework 設定檔排除清單。 </target>
+        <target state="translated">MSB3256: 未從可轉散發套件清單讀入任何組件。無法產生 TargetFramework 設定檔排除清單。 </target>
         <note>{StrBegin="MSB3256: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.PrimaryReferenceOutsideOfFramework">
@@ -1728,7 +1728,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoProfilesFound">
         <source>MSB3260: Could not find any target framework profile redist files in the FullFrameworkFolders locations.</source>
-        <target state="translated">MSB3260: 在 FullFrameworkFolders 位置中找不到任何目標 Framework 設定檔的可轉散發檔。</target>
+        <target state="translated">MSB3260: 在 FullFrameworkFolders 位置中找不到任何目標 Framework 設定檔的可轉散發套件檔案。</target>
         <note>{StrBegin="MSB3260: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FrameworkDirectoryOnProfiles">
@@ -1803,7 +1803,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FoundConflicts">
         <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.  These reference conflicts are listed in the build log when log verbosity is set to detailed.</source>
-        <target state="translated">MSB3277: 在 "{0}" 的不同版本間發現衝突，但無法解決。當記錄詳細資訊設定為 [詳細] 時，這些參考衝突會列在組建記錄檔中。</target>
+        <target state="translated">MSB3277: 在 "{0}" 的不同版本間發現衝突，但無法解決。當記錄詳細程度設定為 [詳細] 時，這些參考衝突會列在組建記錄檔中。</target>
         <note>{StrBegin="MSB3277: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.LogAttributeFormat">
@@ -1931,7 +1931,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.RemappedReference">
         <source>Due to a remapping entry in the currently targeted framework redist list, reference "{0}" was remapped to "{1}".</source>
-        <target state="translated">因為重新對應目前目標 Framework 可轉散發清單中的項目，所以將參考 "{0}" 重新對應到 "{1}"。</target>
+        <target state="translated">因為重新對應目前目標 Framework 可轉散發套件清單中的項目，所以將參考 "{0}" 重新對應到 "{1}"。</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnificationByFrameworkRetarget">
@@ -1991,7 +1991,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.TargetFrameworkRedistLogHeader">
         <source>Redist List File Paths:</source>
-        <target state="translated">可轉散發清單檔案路徑:</target>
+        <target state="translated">可轉散發套件清單檔案路徑:</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.TargetFrameworkExclusionListLogHeader">
@@ -2006,7 +2006,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
-        <target state="translated">可轉散發清單檔 "{0}" 在 FileList 項目中的可轉散發名稱為 null 或空白。請確認可轉散發名稱不為 null 或空白。</target>
+        <target state="translated">可轉散發套件清單檔 "{0}" 在 FileList 項目中的可轉散發套件名稱為 null 或空白。請確認可轉散發名稱不為 null 或空白。</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
@@ -2236,7 +2236,7 @@
       </trans-unit>
       <trans-unit id="ResolveManifestFiles.PublishFileNotFound">
         <source>MSB3331: Unable to apply publish properties for item "{0}".</source>
-        <target state="translated">MSB3331: 無法為項目 "{0}" 套用發行屬性。</target>
+        <target state="translated">MSB3331: 無法為項目 "{0}" 套用發佈屬性。</target>
         <note>{StrBegin="MSB3331: "}</note>
       </trans-unit>
       <trans-unit id="ResolveNativeReference.Comment">
@@ -2595,7 +2595,7 @@
       </trans-unit>
       <trans-unit id="XslTransform.PrecompiledXsltError">
         <source>MSB3705: XslCompiledDllPath is not supported when building with .NET Core.</source>
-        <target state="new">MSB3705: XslCompiledDllPath is not supported when building with .NET Core.</target>
+        <target state="translated">MSB3705: 在使用 .NET Core 建置時，不支援 XslCompiledDllPath。</target>
         <note>{StrBegin="MSB3705: "}</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">
@@ -3020,7 +3020,7 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.ExpandRedistFrom">
         <source>Looking for redist files under "{0}".</source>
-        <target state="translated">正在尋找 "{0}" 下的可轉散發檔案。</target>
+        <target state="translated">正在尋找 "{0}" 下的可轉散發套件檔案。</target>
         <note />
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.NotExpanding">
@@ -3035,17 +3035,17 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.AddingRedistFile">
         <source>Adding file "{0}" from redist folder with target path "{1}".</source>
-        <target state="translated">從目標路徑為 "{1}" 的可轉散發資料夾加入檔案 "{0}"。</target>
+        <target state="translated">從目標路徑為 "{1}" 的可轉散發套件資料夾加入檔案 "{0}"。</target>
         <note />
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.ConflictRedistSameSDK">
         <source>There was a conflict between two redist files going to the same target path "{0}" within the "{1}" SDK. Choosing "{2}" over "{3}" because it was resolved first.</source>
-        <target state="translated">兩個可轉散發檔案發生衝突，檔案即將移至 "{1}" SDK 內的相同目標路徑 "{0}"。將選擇 "{2}" 而不選擇 "{3}"，因為它先完成解析。</target>
+        <target state="translated">兩個可轉散發套件檔案發生衝突，檔案即將移至 "{1}" SDK 內的相同目標路徑 "{0}"。將選擇 "{2}" 而不選擇 "{3}"，因為它先完成解析。</target>
         <note />
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.ConflictRedistDifferentSDK">
         <source>There was a conflict between two files from the redist folder files going to the same target path "{0}" between the "{1}" and "{2}" SDKs. Choosing "{3}" over "{4}" because it was resolved first.</source>
-        <target state="translated">可轉散發資料夾中的兩個檔案發生衝突，檔案即將移至 "{1}" 與 "{2}" SDK 之間的相同目標路徑 "{0}"。將選擇 "{3}" 而不選擇 "{4}"，因為它先完成解析。</target>
+        <target state="translated">可轉散發套件資料夾中的兩個檔案發生衝突，檔案即將移至 "{1}" 與 "{2}" SDK 之間的相同目標路徑 "{0}"。將選擇 "{3}" 而不選擇 "{4}"，因為它先完成解析。</target>
         <note />
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.ConflictReferenceSameSDK">
@@ -3100,12 +3100,12 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.CannotHaveEmptyTargetConfiguration">
         <source>MSB3797: The targeted configuration for the resolved sdk reference "{0}" was empty. Cannot find reference or redist files without a targeted configuration.</source>
-        <target state="translated">MSB3797: 解析之 SDK 參考 "{0}" 的目標組態為空白。沒有目標組態就找不到參考檔案或可轉散發檔案。</target>
+        <target state="translated">MSB3797: 解析之 SDK 參考 "{0}" 的目標組態為空白。沒有目標組態就找不到參考檔案或可轉散發套件檔案。</target>
         <note>{StrBegin="MSB3797: "}</note>
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.CannotHaveEmptyTargetArchitecture">
         <source>MSB3798: The targeted architecture for the resolved sdk reference "{0}" was empty. Cannot find reference or redist files without a targeted architecture.</source>
-        <target state="translated">MSB3798: 解析之 SDK 參考 "{0}" 的目標架構為空白。沒有目標架構就找不到參考檔案或可轉散發檔案。</target>
+        <target state="translated">MSB3798: 解析之 SDK 參考 "{0}" 的目標架構為空白。沒有目標架構就找不到參考檔案或可轉散發套件檔案。</target>
         <note>{StrBegin="MSB3798: "}</note>
       </trans-unit>
       <trans-unit id="FindInvalidProjectReferences.WarnWhenVersionIsIncompatible">

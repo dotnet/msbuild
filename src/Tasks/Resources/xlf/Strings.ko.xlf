@@ -163,7 +163,7 @@
       </trans-unit>
       <trans-unit id="Copy.ErrorIfLinkFailsSetWithoutLinkOption">
         <source>MSB3892: ErrorIfLinkFails requires UseHardlinksIfPossible or UseSymbolicLinksIfPossible to be set.</source>
-        <target state="new">MSB3892: ErrorIfLinkFails requires UseHardlinksIfPossible or UseSymbolicLinksIfPossible to be set.</target>
+        <target state="translated">MSB3892: ErrorIfLinkFails에 대해 UseHardlinksIfPossible 또는 UseSymbolicLinksIfPossible을 설정해야 합니다.</target>
         <note>{StrBegin="MSB3892: "} LOCALIZATION: Do not localize "ErrorIfLinkFails", "UseHardLinksIfPossible", or "UseSymbolicLinksIfPossible".</note>
       </trans-unit>
       <trans-unit id="Copy.ExactlyOneTypeOfDestination">
@@ -183,7 +183,7 @@
       </trans-unit>
       <trans-unit id="Copy.LinkFailed">
         <source>MSB3893: Could not use a link to copy "{0}" to "{1}".</source>
-        <target state="new">MSB3893: Could not use a link to copy "{0}" to "{1}".</target>
+        <target state="translated">MSB3893: 링크를 사용하여 "{0}"을(를) "{1}"에 복사할 수 없습니다.</target>
         <note>{StrBegin="MSB3893: "} LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
       <trans-unit id="Copy.RetryingAsFileCopy">
@@ -981,7 +981,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
         <source>MSB3824: In order to build with .NET Core, resource inputs must be in .txt or .resx format.</source>
-        <target state="new">MSB3824: In order to build with .NET Core, resource inputs must be in .txt or .resx format.</target>
+        <target state="translated">MSB3824: .NET Core로 빌드하려면 리소스 입력이 .txt 또는 .resx 형식이어야 합니다.</target>
         <note>{StrBegin="MSB3824: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.InputDoesntExist">
@@ -1041,7 +1041,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.CorruptOutput">
         <source>Output file "{0}" is possibly corrupt and will be deleted and recreated.</source>
-        <target state="needs-review-translation">MSB3555: 출력 파일 "{0}"이(가) 손상된 것 같습니다.</target>
+        <target state="translated">출력 파일 "{0}"이(가) 손상된 것 같아 삭제된 후 다시 생성됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="GenerateResource.OnlyStringsSupported">
@@ -1066,7 +1066,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.DeleteCorruptOutputFailed">
         <source>MSB3560: Could not delete the possibly corrupt output file "{0}". {1}</source>
-        <target state="needs-review-translation">MSB3560: 손상된 출력 파일 "{0}"을(를) 삭제할 수 없습니다. {1}</target>
+        <target state="translated">MSB3560: 손상된 출력 파일 "{0}"을(를) 삭제할 수 없습니다. {1}</target>
         <note>{StrBegin="MSB3560: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ObsoleteStringsTag">
@@ -1708,7 +1708,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoRedistAssembliesToGenerateExclusionList">
         <source>MSB3256: No assemblies were read in from the redist lists. A TargetFramework profile exclusion list could not be generated. </source>
-        <target state="translated">MSB3256: 재배포 목록에서 읽어온 어셈블리가 없습니다. TargetFramework 프로필 제외 목록을 생성할 수 없습니다. </target>
+        <target state="translated">MSB3256: 재배포 가능 패키지 목록에서 읽어온 어셈블리가 없습니다. TargetFramework 프로필 제외 목록을 생성할 수 없습니다. </target>
         <note>{StrBegin="MSB3256: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.PrimaryReferenceOutsideOfFramework">
@@ -1728,7 +1728,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoProfilesFound">
         <source>MSB3260: Could not find any target framework profile redist files in the FullFrameworkFolders locations.</source>
-        <target state="translated">MSB3260: FullFrameworkFolders 위치에서 대상 프레임워크 프로필 재배포 파일을 찾을 수 없습니다.</target>
+        <target state="translated">MSB3260: FullFrameworkFolders 위치에서 대상 프레임워크 프로필 재배포 가능 패키지 파일을 찾을 수 없습니다.</target>
         <note>{StrBegin="MSB3260: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FrameworkDirectoryOnProfiles">
@@ -1931,7 +1931,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.RemappedReference">
         <source>Due to a remapping entry in the currently targeted framework redist list, reference "{0}" was remapped to "{1}".</source>
-        <target state="translated">현재 대상 프레임워크 재배포 목록에 있는 다시 매핑 항목으로 인해 "{0}" 참조가 "{1}"(으)로 다시 매핑되었습니다.</target>
+        <target state="translated">현재 대상 프레임워크 재배포 가능 패키지 목록에 있는 다시 매핑 항목으로 인해 "{0}" 참조가 "{1}"(으)로 다시 매핑되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnificationByFrameworkRetarget">
@@ -1991,7 +1991,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.TargetFrameworkRedistLogHeader">
         <source>Redist List File Paths:</source>
-        <target state="translated">재배포 목록 파일 경로:</target>
+        <target state="translated">재배포 가능 패키지 목록 파일 경로:</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.TargetFrameworkExclusionListLogHeader">
@@ -2595,7 +2595,7 @@
       </trans-unit>
       <trans-unit id="XslTransform.PrecompiledXsltError">
         <source>MSB3705: XslCompiledDllPath is not supported when building with .NET Core.</source>
-        <target state="new">MSB3705: XslCompiledDllPath is not supported when building with .NET Core.</target>
+        <target state="translated">MSB3705: XslCompiledDllPath는 .NET Core로 빌드할 때 지원되지 않습니다.</target>
         <note>{StrBegin="MSB3705: "}</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">
@@ -3020,7 +3020,7 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.ExpandRedistFrom">
         <source>Looking for redist files under "{0}".</source>
-        <target state="translated">"{0}" 아래에서 재배포 파일을 찾고 있습니다.</target>
+        <target state="translated">"{0}" 아래에서 재배포 가능 패키지 파일을 찾고 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.NotExpanding">
@@ -3035,17 +3035,17 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.AddingRedistFile">
         <source>Adding file "{0}" from redist folder with target path "{1}".</source>
-        <target state="translated">대상 경로가 "{1}"인 재배포 폴더에서 "{0}" 파일을 추가하고 있습니다.</target>
+        <target state="translated">대상 경로가 "{1}"인 재배포 가능 패키지 폴더에서 "{0}" 파일을 추가하고 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.ConflictRedistSameSDK">
         <source>There was a conflict between two redist files going to the same target path "{0}" within the "{1}" SDK. Choosing "{2}" over "{3}" because it was resolved first.</source>
-        <target state="translated">"{1}" SDK 내 동일한 대상 경로 "{0}"(으)로 이동하는 두 재배포 파일 간에 충돌이 발생했습니다. "{3}" 대신 먼저 확인된 "{2}"을(를) 선택합니다.</target>
+        <target state="translated">"{1}" SDK 내 동일한 대상 경로 "{0}"(으)로 이동하는 두 재배포 가능 패키지 파일 간에 충돌이 발생했습니다. "{3}" 대신 먼저 확인된 "{2}"을(를) 선택합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.ConflictRedistDifferentSDK">
         <source>There was a conflict between two files from the redist folder files going to the same target path "{0}" between the "{1}" and "{2}" SDKs. Choosing "{3}" over "{4}" because it was resolved first.</source>
-        <target state="translated">"{1}" 및 "{2}" SDK 사이의 동일한 대상 경로 "{0}"(으)로 이동하는 재배포 폴더 파일의 두 파일 간에 충돌이 발생했습니다. "{4}" 대신 먼저 확인된 "{3}"을(를) 선택합니다.</target>
+        <target state="translated">"{1}" 및 "{2}" SDK 사이의 동일한 대상 경로 "{0}"(으)로 이동하는 재배포 가능 패키지 폴더 파일의 두 파일 간에 충돌이 발생했습니다. "{4}" 대신 먼저 확인된 "{3}"을(를) 선택합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.ConflictReferenceSameSDK">
@@ -3100,12 +3100,12 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.CannotHaveEmptyTargetConfiguration">
         <source>MSB3797: The targeted configuration for the resolved sdk reference "{0}" was empty. Cannot find reference or redist files without a targeted configuration.</source>
-        <target state="translated">MSB3797: 확인된 SDK 참조 "{0}"에 대한 대상 구성이 비어 있습니다. 대상 구성이 없는 참조 또는 재배포 파일을 찾을 수 없습니다.</target>
+        <target state="translated">MSB3797: 확인된 SDK 참조 "{0}"에 대한 대상 구성이 비어 있습니다. 대상 구성이 없는 참조 또는 재배포 가능 패키지 파일을 찾을 수 없습니다.</target>
         <note>{StrBegin="MSB3797: "}</note>
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.CannotHaveEmptyTargetArchitecture">
         <source>MSB3798: The targeted architecture for the resolved sdk reference "{0}" was empty. Cannot find reference or redist files without a targeted architecture.</source>
-        <target state="translated">MSB3798: 확인된 SDK 참조 "{0}"에 대한 대상 아키텍처가 비어 있습니다. 대상 아키텍처가 없는 참조 또는 재배포 파일을 찾을 수 없습니다.</target>
+        <target state="translated">MSB3798: 확인된 SDK 참조 "{0}"에 대한 대상 아키텍처가 비어 있습니다. 대상 아키텍처가 없는 참조 또는 재배포 가능 패키지 파일을 찾을 수 없습니다.</target>
         <note>{StrBegin="MSB3798: "}</note>
       </trans-unit>
       <trans-unit id="FindInvalidProjectReferences.WarnWhenVersionIsIncompatible">
