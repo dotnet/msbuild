@@ -57,6 +57,7 @@
     <file src="$X86BinPath$/Microsoft.Xaml.targets" target="v15.0/bin" />
     <file src="$X86BinPath$/Workflow.targets" target="v15.0/bin" />
     <file src="$X86BinPath$/Workflow.VisualBasic.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.Net.props" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.NetFramework.CurrentVersion.props" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.NetFramework.CurrentVersion.targets" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.NetFramework.props" target="v15.0/bin" />
@@ -102,6 +103,7 @@
     <file src="$X86BinPath$/Microsoft.Xaml.targets" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Workflow.targets" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Workflow.VisualBasic.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.Net.props" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.NetFramework.CurrentVersion.props" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.NetFramework.CurrentVersion.targets" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.NetFramework.props" target="v15.0/bin/amd64" />

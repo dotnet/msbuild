@@ -47,6 +47,7 @@ $filesToCopyToBin = @(
     "artifacts\bin\MSBuild.Bootstrap\$configuration\net472\Microsoft.CSharp.targets"
     "artifacts\bin\MSBuild.Bootstrap\$configuration\net472\Microsoft.Data.Entity.targets"
     "artifacts\bin\MSBuild.Bootstrap\$configuration\net472\Microsoft.Managed.targets"
+    "artifacts\bin\MSBuild.Bootstrap\$configuration\net472\Microsoft.Net.props"
     "artifacts\bin\MSBuild.Bootstrap\$configuration\net472\Microsoft.NetFramework.CurrentVersion.props"
     "artifacts\bin\MSBuild.Bootstrap\$configuration\net472\Microsoft.NetFramework.CurrentVersion.targets"
     "artifacts\bin\MSBuild.Bootstrap\$configuration\net472\Microsoft.NetFramework.props"
