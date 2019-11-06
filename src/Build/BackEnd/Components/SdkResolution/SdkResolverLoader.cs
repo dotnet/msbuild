@@ -138,7 +138,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 #if !FEATURE_ASSEMBLYLOADCONTEXT
             return Assembly.LoadFrom(resolverPath);
 #else
-            _loader.AddDependencyLocation(Path.GetDirectoryName(resolverPath));
             return _loader.LoadFromPath(resolverPath);
 #endif
         }

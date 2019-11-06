@@ -178,7 +178,6 @@ namespace Microsoft.Build.Shared
                     else
                     {
                         var baseDir = Path.GetDirectoryName(assemblyLoadInfo.AssemblyFile);
-                        s_coreClrAssemblyLoader.AddDependencyLocation(baseDir);
                         loadedAssembly = s_coreClrAssemblyLoader.LoadFromPath(assemblyLoadInfo.AssemblyFile);
                     }
 #endif
