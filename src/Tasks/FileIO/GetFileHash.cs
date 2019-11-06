@@ -57,13 +57,13 @@ namespace Microsoft.Build.Tasks
         {
             if (!SupportsAlgorithm(Algorithm))
             {
-                Log.LogErrorFromResources("FileHash.UnrecognizedHashAlgorithm", Algorithm);
+                Log.LogErrorWithCodeFromResources("FileHash.UnrecognizedHashAlgorithm", Algorithm);
                 return false;
             }
 
             if (!TryParseHashEncoding(HashEncoding, out var encoding))
             {
-                Log.LogErrorFromResources("FileHash.UnrecognizedHashEncoding", HashEncoding);
+                Log.LogErrorWithCodeFromResources("FileHash.UnrecognizedHashEncoding", HashEncoding);
                 return false;
             }
 
@@ -71,7 +71,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (!FileSystems.Default.FileExists(file.ItemSpec))
                 {
-                    Log.LogErrorFromResources("FileHash.FileNotFound", file.ItemSpec);
+                    Log.LogErrorWithCodeFromResources("FileHash.FileNotFound", file.ItemSpec);
                 }
             }
 

@@ -3357,12 +3357,12 @@ namespace Microsoft.Build.Tasks
             {
                 if (!_usePreserializedResources)
                 {
-                    _logger.LogErrorFromResources("GenerateResource.PreserializedResourcesRequiresProperty");
+                    _logger.LogErrorWithCodeFromResources("GenerateResource.PreserializedResourcesRequiresProperty");
                 }
 
                 if (!HaveSystemResourcesExtensionsReference)
                 {
-                    _logger.LogErrorFromResources("GenerateResource.PreserializedResourcesRequiresExtensions");
+                    _logger.LogErrorWithCodeFromResources("GenerateResource.PreserializedResourcesRequiresExtensions");
                 }
 
                 // one of the above should have been logged as we would have used preserialized writer otherwise.
