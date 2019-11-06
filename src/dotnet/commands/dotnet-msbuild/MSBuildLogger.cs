@@ -21,6 +21,10 @@ namespace Microsoft.DotNet.Tools.MSBuild
         internal const string SdkTaskBaseCatchExceptionTelemetryEventName = "taskBaseCatchException";
 
         internal const string TargetFrameworkVersionTelemetryPropertyKey = "TargetFrameworkVersion";
+        internal const string RuntimeIdentifierTelemetryPropertyKey = "RuntimeIdentifier";
+        internal const string SelfContainedTelemetryPropertyKey = "SelfContained";
+        internal const string UseApphostTelemetryPropertyKey = "UseApphost";
+        internal const string OutputTypeTelemetryPropertyKey = "OutputType";
 
         public MSBuildLogger()
         {
@@ -79,6 +83,20 @@ namespace Microsoft.DotNet.Tools.MSBuild
                 if (args.Properties.TryGetValue(TargetFrameworkVersionTelemetryPropertyKey, out string targetFrameworkVersionValue))
                 {
                     maskedProperties.Add(TargetFrameworkVersionTelemetryPropertyKey, Sha256Hasher.HashWithNormalizedCasing(targetFrameworkVersionValue));
+                }
+
+                foreach (var key in new[] {
+                    TargetFrameworkVersionTelemetryPropertyKey,
+                    RuntimeIdentifierTelemetryPropertyKey,
+                    SelfContainedTelemetryPropertyKey,
+                    UseApphostTelemetryPropertyKey,
+                    OutputTypeTelemetryPropertyKey
+                })
+                {
+                    if (args.Properties.TryGetValue(key, out string value))
+                    {
+                        maskedProperties.Add(key, Sha256Hasher.HashWithNormalizedCasing(value));
+                    }
                 }
 
                 telemetry.TrackEvent(newEventName, maskedProperties, measurements: null);
