@@ -2559,9 +2559,9 @@
         <note>{StrBegin="MSB3492: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
-        <source>MSB3493: Skipping write to file "{0}" because content would not change.</source>
-        <target state="new">MSB3493: Skipping write to file "{0}" because content would not change.</target>
-        <note>{StrBegin="MSB3493: "}</note>
+        <source>Skipping write to file "{0}" because content would not change.</source>
+        <target state="new">Skipping write to file "{0}" because content would not change.</target>
+        <note />
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.InvalidTargetFrameworkMoniker">
         <source>MSB3642: The Target Framework Moniker "{0}" is invalid. "{1}"</source>

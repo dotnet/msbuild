@@ -1134,7 +1134,8 @@ namespace Microsoft.Build.UnitTests
             BuildErrorEventArgs error = mockLogger.Errors.FirstOrDefault();
 
             Assert.NotNull(error);
-            Assert.Equal("MSB4801: The task factory \"CodeTaskFactory\" is not supported on the .NET Core version of MSBuild.", error.Message);
+            Assert.Equal("MSB4801", error.Code);
+            Assert.Contains("CodeTaskFactory", error.Message);
         }
     }
 #endif

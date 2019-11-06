@@ -2134,8 +2134,7 @@
     <comment>{StrBegin="MSB3492: "}</comment>
   </data>
   <data name="WriteLinesToFile.SkippingUnchangedFile">
-    <value>MSB3493: Skipping write to file "{0}" because content would not change.</value>
-    <comment>{StrBegin="MSB3493: "}</comment>
+    <value>Skipping write to file "{0}" because content would not change.</value>
   </data>
   <!--
         The GetReferenceAssemblyPaths message bucket is: MSB3642 - MSB3646.
@@ -2914,6 +2913,7 @@
 
         The following codes are not longer used but have shipped so should not be reused:
             MSB3109
+            MSB3493
 
 
         The message spec is here:
