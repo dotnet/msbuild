@@ -144,12 +144,7 @@ get_linux_platform_name() {
     else
         if [ -e /etc/os-release ]; then
             . /etc/os-release
-            # in some distros such as Void Linux, VERSION_ID is not available in /etc/os-release
-            if [ -z ${VERSION_ID+x} ]; then
-                echo "$ID"
-            else
-                echo "$ID.$VERSION_ID"
-            fi
+            echo "$ID${VERSION_ID:+.${VERSION_ID}}"
             return 0
         elif [ -e /etc/redhat-release ]; then
             local redhatRelease=$(</etc/redhat-release)
@@ -211,12 +206,7 @@ get_legacy_os_name() {
     else
         if [ -e /etc/os-release ]; then
             . /etc/os-release
-            # in some distros such as Void Linux, VERSION_ID is not available in /etc/os-release
-            if [ -z ${VERSION_ID+x} ]; then
-                os=$(get_legacy_os_name_from_platform "$ID" || echo "")
-            else
-                os=$(get_legacy_os_name_from_platform "$ID.$VERSION_ID" || echo "")
-            fi
+            os=$(get_legacy_os_name_from_platform "$ID${VERSION_ID:+.${VERSION_ID}}" || echo "")
             if [ -n "$os" ]; then
                 echo "$os"
                 return 0
@@ -268,7 +258,7 @@ check_pre_reqs() {
             [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep libintl)" ] && say_warning "Unable to locate libintl. Probable prerequisite missing; install libintl (or gettext)."
         else
             if [ ! -x "$(command -v ldconfig)" ]; then
-                echo "ldconfig is not in PATH, trying /sbin/ldconfig."
+                say_verbose "ldconfig is not in PATH, trying /sbin/ldconfig."
                 LDCONFIG_COMMAND="/sbin/ldconfig"
             else
                 LDCONFIG_COMMAND="ldconfig"
@@ -277,10 +267,11 @@ check_pre_reqs() {
             LDCONFIG_COMMAND="$LDCONFIG_COMMAND -NXv ${librarypath//:/ }"
         fi
 
-        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep libunwind)" ] && say_warning "Unable to locate libunwind. Probable prerequisite missing; install libunwind."
-        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep libssl)" ] && say_warning "Unable to locate libssl. Probable prerequisite missing; install libssl."
+        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep zlib)" ] && say_warning "Unable to locate zlib. Probable prerequisite missing; install zlib."
+        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep ssl)" ] && say_warning "Unable to locate libssl. Probable prerequisite missing; install libssl."
         [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep libicu)" ] && say_warning "Unable to locate libicu. Probable prerequisite missing; install libicu."
-        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep -F libcurl.so)" ] && say_warning "Unable to locate libcurl. Probable prerequisite missing; install libcurl."
+        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep lttng)" ] && say_warning "Unable to locate liblttng. Probable prerequisite missing; install libcurl."
+        [ -z "$($LDCONFIG_COMMAND 2>/dev/null | grep libcurl)" ] && say_warning "Unable to locate libcurl. Probable prerequisite missing; install libcurl."
     fi
 
     return 0
@@ -382,7 +373,7 @@ get_normalized_architecture_from_architecture() {
             ;;
     esac
 
-    say_err "Architecture \`$architecture\` not supported. If you think this is a bug, report it at https://github.com/dotnet/cli/issues"
+    say_err "Architecture \`$architecture\` not supported. If you think this is a bug, report it at https://github.com/dotnet/sdk/issues"
     return 1
 }
 
