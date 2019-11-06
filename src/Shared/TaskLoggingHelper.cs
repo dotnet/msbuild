@@ -298,7 +298,7 @@ namespace Microsoft.Build.Utilities
             // should have error codes.
             string errorCode;
             ResourceUtilities.ExtractMessageCode(true /* only msbuild codes */, message, out errorCode);
-            ErrorUtilities.VerifyThrow(errorCode == null, errorCode, "This message contains an error code (" + errorCode + "), yet it was logged as a regular message: " + message);
+            ErrorUtilities.VerifyThrow(errorCode == null, "This message contains an error code (" + errorCode + "), yet it was logged as a regular message: " + message);
 #endif
         }
 
