@@ -161,7 +161,7 @@ namespace Microsoft.NET.Build.Tests
             apphostVersion.Should().Be(version);
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyFact(Skip = "https://github.com/dotnet/coreclr/issues/27275")]
         public void FSharp_app_can_customize_the_apphost()
         {
             var targetFramework = "netcoreapp3.0";
@@ -218,7 +218,7 @@ namespace Microsoft.NET.Build.Tests
 
         }
 
-        [Fact]
+        [WindowsOnlyFact] // Windows-only due to https://github.com/dotnet/corefx/issues/42455
         public void It_retries_on_failure_to_create_apphost()
         {
             const string TFM = "netcoreapp3.0";

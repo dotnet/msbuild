@@ -27,7 +27,7 @@ namespace Microsoft.NET.Publish.Tests
         {
             var testDir = _testAssetsManager.CreateTestDirectory();
 
-            string targetFramework = "netcoreapp3.1";
+            string targetFramework = "netcoreapp5.0";
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             var newCommand = new DotnetCommand(Log);

@@ -508,7 +508,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp3.2")]
+        [InlineData("netcoreapp5.1")]
         [InlineData("netstandard2.2")]
         public void It_fails_to_build_if_targeting_a_higher_framework_than_is_supported(string targetFramework)
         {
