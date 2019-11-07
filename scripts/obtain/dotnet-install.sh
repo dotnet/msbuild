@@ -864,13 +864,13 @@ install_dotnet() {
         release_version="${verArr[0]}"
         unset IFS;
         say_verbose "Checking installation: version = $release_version"
-        is_asset_installed=is_dotnet_package_installed "$install_root" "$asset_relative_path" "$release_version"
+        is_asset_installed="$(is_dotnet_package_installed "$install_root" "$asset_relative_path" "$release_version")"
     fi
 
     #  Check if the SDK version is installed.
     if [ "$is_asset_installed" = false ]; then
         say_verbose "Checking installation: version = $specific_version"
-        is_asset_installed=is_dotnet_package_installed "$install_root" "$asset_relative_path" "$specific_version"
+        is_asset_installed="$(is_dotnet_package_installed "$install_root" "$asset_relative_path" "$specific_version")"
     fi
 
     if [ "$is_asset_installed" = false ]; then
