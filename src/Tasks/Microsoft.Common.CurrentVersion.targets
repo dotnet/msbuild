@@ -4428,10 +4428,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       AssignTargetPaths;
       $(_TargetsThatPrepareProjectReferences);
       _GetProjectReferenceTargetFrameworkProperties;
-      <!-- Compose the content items as the union between transitive content items and content items from this project. -->
-      <!-- Get items from this project last so that they will be copied last. -->
-      _GetCopyToOutputDirectoryItemsFromTransitiveProjectReferences;
-      _GetCopyToOutputDirectoryItemsFromThisProject
+      _PopulateCommonStateForGetCopyToOutputDirectoryItems
     </GetCopyToOutputDirectoryItemsDependsOn>
 
     <!--
@@ -4458,7 +4455,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target
     Name="_GetCopyToOutputDirectoryItemsFromTransitiveProjectReferences"
-    DependsOnTargets="_PopulateCommonStateForGetCopyToOutputDirectoryItems">
+    DependsOnTargets="_PopulateCommonStateForGetCopyToOutputDirectoryItems"
+    Returns="@(_TransitiveItemsToCopyToOutputDirectory)">
 
     <!-- Get items from child projects first. -->
     <MSBuild
@@ -4481,18 +4479,22 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         "EmbeddedResource" to "_OutputItemTypeEmbeddedResourceItems"
      -->
     <AssignTargetPath Files="@(_OutputItemTypeContentItems);@(_OutputItemTypeNoneItems);@(_OutputItemTypeEmbeddedResourceItems)" RootFolder="$(MSBuildProjectDirectory)">
-      <Output TaskParameter="AssignedFiles" ItemName="_AllChildProjectItemsWithTargetPath" />
+      <Output TaskParameter="AssignedFiles" ItemName="_OutputItemTypeTransitiveItems" />
     </AssignTargetPath>
 
     <!-- Target outputs must be full paths because they will be consumed by a different project. -->
     <ItemGroup>
-      <_TransitiveItemsToCopyToOutputDirectoryAlways KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_AllChildProjectItemsWithTargetPath->'%(FullPath)')" Condition="'%(_AllChildProjectItemsWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
-      <_TransitiveItemsToCopyToOutputDirectory       KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_AllChildProjectItemsWithTargetPath->'%(FullPath)')" Condition="'%(_AllChildProjectItemsWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
+      <_TransitiveItemsToCopyToOutputDirectory   KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_AllChildProjectItemsWithTargetPath->'%(FullPath)')" Condition="'%(_AllChildProjectItemsWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
+      <_TransitiveItemsToCopyToOutputDirectory   KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_AllChildProjectItemsWithTargetPath->'%(FullPath)')" Condition="'%(_AllChildProjectItemsWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
+
+      <_TransitiveItemsToCopyToOutputDirectory   KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_OutputItemTypeTransitiveItems->'%(FullPath)')" Condition="'%(_OutputItemTypeTransitiveItems.CopyToOutputDirectory)'=='Always'"/>
+      <_TransitiveItemsToCopyToOutputDirectory   KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_OutputItemTypeTransitiveItems->'%(FullPath)')" Condition="'%(_OutputItemTypeTransitiveItems.CopyToOutputDirectory)'=='PreserveNewest'"/>
     </ItemGroup>
 
     <!-- Remove items which we will never again use - they just sit around taking up memory otherwise -->
     <ItemGroup>
       <_AllChildProjectItemsWithTargetPath       Remove="@(_AllChildProjectItemsWithTargetPath)"/>
+      <_OutputItemTypeTransitiveItems            Remove="@(_OutputItemTypeTransitiveItems)"/>
       <_OutputItemTypeContentItems               Remove="@(_OutputItemTypeContentItems)"/>
       <_OutputItemTypeNoneItems                  Remove="@(_OutputItemTypeNoneItems)"/>
       <_OutputItemTypeEmbeddedResourceItems      Remove="@(_OutputItemTypeEmbeddedResourceItems)"/>
@@ -4503,15 +4505,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
       Name="_GetCopyToOutputDirectoryItemsFromThisProject"
       DependsOnTargets="AssignTargetPaths;_PopulateCommonStateForGetCopyToOutputDirectoryItems"
-      Returns="@(_ThisProjectItemsToCopyToOutputDirectoryAlways);@(_ThisProjectItemsToCopyToOutputDirectory)">
+      Returns="@(_ThisProjectItemsToCopyToOutputDirectory)">
 
     <ItemGroup>
-      <_ThisProjectItemsToCopyToOutputDirectoryAlways KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(ContentWithTargetPath->'%(FullPath)')" Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
+      <_ThisProjectItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(ContentWithTargetPath->'%(FullPath)')" Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
       <_ThisProjectItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(ContentWithTargetPath->'%(FullPath)')" Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
     </ItemGroup>
 
     <ItemGroup>
-      <_ThisProjectItemsToCopyToOutputDirectoryAlways KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(EmbeddedResource->'%(FullPath)')" Condition="'%(EmbeddedResource.CopyToOutputDirectory)'=='Always'"/>
+      <_ThisProjectItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(EmbeddedResource->'%(FullPath)')" Condition="'%(EmbeddedResource.CopyToOutputDirectory)'=='Always'"/>
       <_ThisProjectItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(EmbeddedResource->'%(FullPath)')" Condition="'%(EmbeddedResource.CopyToOutputDirectory)'=='PreserveNewest'"/>
     </ItemGroup>
 
@@ -4524,12 +4526,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </AssignTargetPath>
 
     <ItemGroup>
-      <_ThisProjectItemsToCopyToOutputDirectoryAlways KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_CompileItemsToCopyWithTargetPath)" Condition="'%(_CompileItemsToCopyWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
+      <_ThisProjectItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_CompileItemsToCopyWithTargetPath)" Condition="'%(_CompileItemsToCopyWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
       <_ThisProjectItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_CompileItemsToCopyWithTargetPath)" Condition="'%(_CompileItemsToCopyWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
     </ItemGroup>
 
     <ItemGroup>
-      <_ThisProjectItemsToCopyToOutputDirectoryAlways KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_NoneWithTargetPath->'%(FullPath)')" Condition="'%(_NoneWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
+      <_ThisProjectItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_NoneWithTargetPath->'%(FullPath)')" Condition="'%(_NoneWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
       <_ThisProjectItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_NoneWithTargetPath->'%(FullPath)')" Condition="'%(_NoneWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
     </ItemGroup>
 
@@ -4541,16 +4543,37 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       KeepDuplicateOutputs=" '$(MSBuildDisableGetCopyToOutputDirectoryItemsOptimization)' == '' "
       DependsOnTargets="$(GetCopyToOutputDirectoryItemsDependsOn)">
 
+    <!-- Compose the content items as the union between transitive content items and content items from this project. -->
+    <!-- Use CallTarget to avoid breaking targets that hook right before GetCopyToOutputDirectoryItems but after _GetCopyToOutputDirectoryItemsFromTransitiveProjectReferences and _GetCopyToOutputDirectoryItemsFromThisProject -->
+    <CallTarget Targets="_GetCopyToOutputDirectoryItemsFromTransitiveProjectReferences">
+      <Output TaskParameter="TargetOutputs" ItemName="_TransitiveItemsToCopyToOutputDirectory" />
+    </CallTarget>
+
+    <CallTarget Targets="_GetCopyToOutputDirectoryItemsFromThisProject">
+      <Output TaskParameter="TargetOutputs" ItemName="_ThisProjectItemsToCopyToOutputDirectory" />
+    </CallTarget>
+
     <ItemGroup>
-      <_SourceItemsToCopyToOutputDirectoryAlways           Include="@(_TransitiveItemsToCopyToOutputDirectoryAlways);@(_ThisProjectItemsToCopyToOutputDirectoryAlways)"/>
-      <_SourceItemsToCopyToOutputDirectory                 Include="@(_TransitiveItemsToCopyToOutputDirectory);@(_ThisProjectItemsToCopyToOutputDirectory)"/>
-      <AllItemsFullPathWithTargetPath                      Include="@(_SourceItemsToCopyToOutputDirectoryAlways->'%(FullPath)');@(_SourceItemsToCopyToOutputDirectory->'%(FullPath)')"/>
+      <_TransitiveItemsToCopyToOutputDirectoryAlways               KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_TransitiveItemsToCopyToOutputDirectory->'%(FullPath)')" Condition="'%(_TransitiveItemsToCopyToOutputDirectory.CopyToOutputDirectory)'=='Always'"/>
+      <_TransitiveItemsToCopyToOutputDirectoryPreserveNewest       KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_TransitiveItemsToCopyToOutputDirectory->'%(FullPath)')" Condition="'%(_TransitiveItemsToCopyToOutputDirectory.CopyToOutputDirectory)'=='PreserveNewest'"/>
+
+      <_ThisProjectItemsToCopyToOutputDirectoryAlways              KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_ThisProjectItemsToCopyToOutputDirectory->'%(FullPath)')" Condition="'%(_ThisProjectItemsToCopyToOutputDirectory.CopyToOutputDirectory)'=='Always'"/>
+      <_ThisProjectItemsToCopyToOutputDirectoryPreserveNewest      KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_ThisProjectItemsToCopyToOutputDirectory->'%(FullPath)')" Condition="'%(_ThisProjectItemsToCopyToOutputDirectory.CopyToOutputDirectory)'=='PreserveNewest'"/>
+
+      <!-- Append the items from this project last so that they will be copied last. -->
+      <_SourceItemsToCopyToOutputDirectoryAlways                   Include="@(_TransitiveItemsToCopyToOutputDirectoryAlways);@(_ThisProjectItemsToCopyToOutputDirectoryAlways)"/>
+      <_SourceItemsToCopyToOutputDirectory                         Include="@(_TransitiveItemsToCopyToOutputDirectoryPreserveNewest);@(_ThisProjectItemsToCopyToOutputDirectoryPreserveNewest)"/>
+
+      <AllItemsFullPathWithTargetPath                              Include="@(_SourceItemsToCopyToOutputDirectoryAlways->'%(FullPath)');@(_SourceItemsToCopyToOutputDirectory->'%(FullPath)')"/>
 
       <!-- Empty intermediate items to release memory -->
-      <_TransitiveItemsToCopyToOutputDirectoryAlways       Remove="@(_TransitiveItemsToCopyToOutputDirectoryAlways)"/>
-      <_TransitiveItemsToCopyToOutputDirectory             Remove="@(_TransitiveItemsToCopyToOutputDirectory)"/>
-      <_ThisProjectItemsToCopyToOutputDirectoryAlways      Remove="@(_ThisProjectItemsToCopyToOutputDirectoryAlways)"/>
-      <_ThisProjectItemsToCopyToOutputDirectory            Remove="@(_ThisProjectItemsToCopyToOutputDirectory)"/>
+      <_TransitiveItemsToCopyToOutputDirectoryAlways               Remove="@(_TransitiveItemsToCopyToOutputDirectoryAlways)"/>
+      <_TransitiveItemsToCopyToOutputDirectoryPreserveNewest       Remove="@(_TransitiveItemsToCopyToOutputDirectoryPreserveNewest)"/>
+      <_TransitiveItemsToCopyToOutputDirectory                     Remove="@(_TransitiveItemsToCopyToOutputDirectory)"/>
+
+      <_ThisProjectItemsToCopyToOutputDirectoryAlways              Remove="@(_ThisProjectItemsToCopyToOutputDirectoryAlways)"/>
+      <_ThisProjectItemsToCopyToOutputDirectoryPreserveNewest      Remove="@(_ThisProjectItemsToCopyToOutputDirectoryPreserveNewest)"/>
+      <_ThisProjectItemsToCopyToOutputDirectory                    Remove="@(_ThisProjectItemsToCopyToOutputDirectory)"/>
     </ItemGroup>
 
   </Target>
