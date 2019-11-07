@@ -91,7 +91,27 @@ stages:
                 /p:TeamName=MSBuild
                 /p:DotNetPublishUsingPipelines=true
       displayName: Build
-      condition: succeeded()
+      condition: and(succeeded(), not(startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/')))
+      
+    - script: eng/CIBuild.cmd
+                -configuration $(BuildConfiguration)
+                -officialBuildId $(Build.BuildNumber)
+                -officialSkipApplyOptimizationData $(SkipApplyOptimizationData)
+                /p:RepositoryName=$(Build.Repository.Name)
+                /p:VisualStudioIbcSourceBranchName=master
+                /p:VisualStudioDropAccessToken=$(System.AccessToken)
+                /p:VisualStudioDropName=$(VisualStudio.DropName)
+                /p:DotNetSignType=$(SignType)
+                /p:DotNetPublishToBlobFeed=true
+                /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
+                /p:DotNetPublishBlobFeedUrl=https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
+                /p:PublishToSymbolServer=true
+                /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
+                /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
+                /p:TeamName=MSBuild
+                /p:DotNetPublishUsingPipelines=true
+      displayName: Exp-Build
+      condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/'))
 
     # Publish OptProf configuration files
     - task: ms-vscs-artifact.build-tasks.artifactDropTask-1.artifactDropTask@0
