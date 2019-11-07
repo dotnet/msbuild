@@ -1677,7 +1677,7 @@
       </trans-unit>
       <trans-unit id="ShallowCloneNotAllowed">
         <source>A shallow clone of this object cannot be created.</source>
-        <target state="translated">このオブジェクトの浅い複製を作成できません。</target>
+        <target state="translated">このオブジェクトの浅いクローンを作成できません。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Ein unechter Klon dieses Objekts kann nicht erstellt werden.</target>

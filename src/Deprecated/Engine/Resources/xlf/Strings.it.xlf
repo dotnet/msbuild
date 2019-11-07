@@ -1677,7 +1677,7 @@
       </trans-unit>
       <trans-unit id="ShallowCloneNotAllowed">
         <source>A shallow clone of this object cannot be created.</source>
-        <target state="translated">Non è possibile creare un duplicato superficiale dei riferimenti di questo oggetto.</target>
+        <target state="translated">Non è possibile creare un clone superficiale dei riferimenti di questo oggetto.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Ein unechter Klon dieses Objekts kann nicht erstellt werden.</target>

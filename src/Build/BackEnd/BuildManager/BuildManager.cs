@@ -19,7 +19,6 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
@@ -370,8 +369,6 @@ namespace Microsoft.Build.Execution
                 // Check for build in progress.
                 RequireState(BuildManagerState.Idle, "BuildInProgress");
 
-                MSBuildEventSource.Log.BuildStart();
-
                 if (BuildParameters.DumpOpportunisticInternStats)
                 {
                     OpportunisticIntern.EnableStatisticsGathering();
@@ -459,8 +456,6 @@ namespace Microsoft.Build.Execution
                     ShutdownLoggingService(loggingService);
                     throw;
                 }
-
-                MSBuildEventSource.Log.BuildStop();
 
                 return loggingService;
             }
