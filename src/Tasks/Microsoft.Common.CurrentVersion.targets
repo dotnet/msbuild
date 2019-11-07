@@ -63,7 +63,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <AvailablePlatforms Condition="'$(VisualStudioVersion)' != '' and '$(VisualStudioVersion)' > '10.0'">Any CPU,x86,x64</AvailablePlatforms>
   </PropertyGroup>
 
-  <!-- Import depends on if it is .NETCore. Imports for .NETFramework is an upper set of that for .NETCore-->
+  <!-- Import depends on if it is .NETCore. Imports for .NETFramework is a superset of that for .NETCore-->
   <Import Project="Microsoft.NETFramework.props" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' or '$(TargetFrameworkIdentifier)' == 'Silverlight'"/>
   <Import Project="Microsoft.NET.props" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework' and '$(TargetFrameworkIdentifier)' != 'Silverlight'"/>
 
