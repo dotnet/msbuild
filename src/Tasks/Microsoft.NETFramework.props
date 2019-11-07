@@ -43,7 +43,4 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
    <Import Project="$(NetFrameworkPropsPath)" />
 
-   <!--Import props that are common for both full framework and core-->
-   <Import Project="$(MSBuildToolsPath)\Microsoft.NET.props" />
-
 </Project>

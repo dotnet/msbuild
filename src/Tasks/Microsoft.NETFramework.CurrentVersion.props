@@ -126,4 +126,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportAfter\*" Condition="'$(ImportByWildcardAfterMicrosoftNetFrameworkProps)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportAfter')"/>
   <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftNetFrameworkProps)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportAfter')"/>
 
+  <!--Import props that are common for both full framework and core-->
+  <Import Project="$(MSBuildToolsPath)\Microsoft.NET.props" />
+
 </Project>
