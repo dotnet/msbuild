@@ -72,7 +72,7 @@ namespace Microsoft.Build.Tasks
         {
             if (!Uri.TryCreate(SourceUrl, UriKind.Absolute, out Uri uri))
             {
-                Log.LogErrorFromResources("DownloadFile.ErrorInvalidUrl", SourceUrl);
+                Log.LogErrorWithCodeFromResources("DownloadFile.ErrorInvalidUrl", SourceUrl);
                 return false;
             }
 
@@ -98,10 +98,11 @@ namespace Microsoft.Build.Tasks
                         Log.LogWarningWithCodeFromResources("DownloadFile.Retrying", SourceUrl, retryAttemptCount + 1, RetryDelayMilliseconds, actualException.Message);
 
                         Thread.Sleep(RetryDelayMilliseconds);
+
                     }
                     else
                     {
-                        Log.LogErrorFromResources("DownloadFile.ErrorDownloading", SourceUrl, actualException.Message);
+                        Log.LogErrorWithCodeFromResources("DownloadFile.ErrorDownloading", SourceUrl, actualException.Message);
                     }
                 }
             }
@@ -138,7 +139,7 @@ namespace Microsoft.Build.Tasks
 
                     if (!TryGetFileName(response, out string filename))
                     {
-                        Log.LogErrorFromResources("DownloadFile.ErrorUnknownFileName", SourceUrl, nameof(DestinationFileName));
+                        Log.LogErrorWithCodeFromResources("DownloadFile.ErrorUnknownFileName", SourceUrl, nameof(DestinationFileName));
                         return;
                     }
 
