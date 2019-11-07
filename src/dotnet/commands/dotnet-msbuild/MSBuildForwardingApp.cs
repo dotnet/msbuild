@@ -51,13 +51,16 @@ namespace Microsoft.DotNet.Tools.MSBuild
                 msbuildPath);
         }
 
+        public void EnvironmentVariable(string name, string value)
+        {
+            _forwardingAppWithoutLogging.EnvironmentVariable(name, value);
+        }
+
         public ProcessStartInfo GetProcessStartInfo()
         {
-            var ret = _forwardingAppWithoutLogging.GetProcessStartInfo();
+            EnvironmentVariable(TelemetrySessionIdEnvironmentVariableName, Telemetry.CurrentSessionId);
 
-            ret.Environment[TelemetrySessionIdEnvironmentVariableName] = Telemetry.CurrentSessionId;
-
-            return ret;
+            return _forwardingAppWithoutLogging.GetProcessStartInfo();
         }
 
         public virtual int Execute()

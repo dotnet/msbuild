@@ -46,6 +46,11 @@ namespace Microsoft.DotNet.Cli.Utils
                 .GetProcessStartInfo();
         }
 
+        public void EnvironmentVariable(string name, string value)
+        {
+            _forwardingApp.WithEnvironmentVariable(name, value);
+        }
+
         public int Execute()
         {
             return GetProcessStartInfo().Execute();

@@ -72,12 +72,20 @@ namespace Microsoft.DotNet.Tools.Test
 
             bool noRestore = parsedTest.HasOption("--no-restore") || parsedTest.HasOption("--no-build");
 
-            return new TestCommand(
+            TestCommand testCommand = new TestCommand(
                 msbuildArgs,
                 parsedTest.OptionValuesToBeForwarded(),
                 parsedTest.Arguments,
                 noRestore,
                 msbuildPath);
+
+            var rootVariableName = Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)";
+            if (Environment.GetEnvironmentVariable(rootVariableName) == null)
+            {
+                testCommand.EnvironmentVariable(rootVariableName, Path.GetDirectoryName(new Muxer().MuxerPath));
+            }
+
+            return testCommand;
         }
 
         private static string GetDefaultVerbosity(AppliedOption options)

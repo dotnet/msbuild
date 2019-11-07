@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Cli.Utils
             _depsFile = depsFile;
             _runtimeConfig = runtimeConfig;
             _additionalProbingPath = additionalProbingPath;
-            _environmentVariables = environmentVariables;
+            _environmentVariables = environmentVariables ?? new Dictionary<string, string>();
 
             var allArgs = new List<string>();
             allArgs.Add("exec");
@@ -80,12 +80,9 @@ namespace Microsoft.DotNet.Cli.Utils
                 UseShellExecute = false
             };
 
-            if (_environmentVariables != null)
+            foreach (var entry in _environmentVariables)
             {
-                foreach (var entry in _environmentVariables)
-                {
-                    processInfo.Environment[entry.Key] = entry.Value;
-                }
+                processInfo.Environment[entry.Key] = entry.Value;
             }
 
             return processInfo;
@@ -93,8 +90,6 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public ForwardingAppImplementation WithEnvironmentVariable(string name, string value)
         {
-            _environmentVariables = _environmentVariables ?? new Dictionary<string, string>();
-
             _environmentVariables.Add(name, value);
 
             return this;
