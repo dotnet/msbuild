@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Shouldly;
+using MSBuildConstants = Microsoft.Build.Tasks.MSBuildConstants;
 
 namespace Microsoft.Build.UnitTests
 {

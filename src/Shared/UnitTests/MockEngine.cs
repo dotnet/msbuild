@@ -39,6 +39,7 @@ namespace Microsoft.Build.UnitTests
         private readonly ProjectCollection _projectCollection = new ProjectCollection();
         private readonly bool _logToConsole;
         private readonly ConcurrentDictionary<object, object> _objectCache = new ConcurrentDictionary<object, object>();
+        private readonly ConcurrentQueue<BuildErrorEventArgs> _errorEvents = new ConcurrentQueue<BuildErrorEventArgs>();
 
         internal MockEngine() : this(false)
         {
@@ -49,6 +50,8 @@ namespace Microsoft.Build.UnitTests
         internal int Warnings { get; set; }
 
         internal int Errors { get; set; }
+
+        public BuildErrorEventArgs[] ErrorEvents => _errorEvents.ToArray();
 
         internal MockLogger MockLogger { get; }
 
@@ -67,6 +70,8 @@ namespace Microsoft.Build.UnitTests
 
         public void LogErrorEvent(BuildErrorEventArgs eventArgs)
         {
+            _errorEvents.Enqueue(eventArgs);
+
             string message = string.Empty;
 
             if (!string.IsNullOrEmpty(eventArgs.File))

@@ -336,16 +336,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;средство ведения журнала&gt;   Использовать это средство ведения журнала для регистрации событий MSBuild. Чтобы указать
+        <target state="translated">  -logger:&lt;logger&gt;   Использовать это средство ведения журнала для регистрации событий MSBuild. Чтобы указать
                      несколько средств ведения журнала, укажите каждое из них отдельно.
-                     Синтаксис &lt;средства ведения журнала&gt;:
-                       [&lt;класс&gt;,]&lt;сборка&gt;[,&lt;настройки&gt;][;&lt;параметры&gt;]
-                     Синтаксис &lt;класса средства ведения журнала&gt;:
-                       [&lt;частичное или полное пространство имен&gt;.]&lt;имя класса средства ведения журнала&gt;
-                     Синтаксис &lt;сборки средства ведения журнала&gt;:
-                       {&lt;имя сборки&gt;[,&lt;strong name&gt;] | &lt;файл сборки&gt;}
+                     Синтаксис &lt;logger&gt;:
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
+                     Синтаксис &lt;logger class&gt;:
+                       [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
+                     Синтаксис &lt;logger assembly&gt;:
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Параметры средства ведения журнала указывают, как MSBuild создает средство ведения журнала.
-                     &lt;Параметры средства ведения журнала&gt; являются необязательными и передаются
+                     Параметры &lt;logger parameters&gt; являются необязательными и передаются
                      средству ведения журнала в том виде, в котором были введены. (Краткая форма: -l)
                      Примеры:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
@@ -447,7 +447,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                             многопроцессорного. Этот стиль ведения журнала включен по умолчанию.
                         ForceConsoleColor--использовать ANSI-цвета в консоли, даже если
                             она не поддерживает их
-                        Verbosity--переопределяет параметр -verbosity для этого
+                        Verbosity--переопределяет параметр -verbosity (уровень детализации) для этого
                             журнала.
                      Пример:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
@@ -606,19 +606,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  -distributedLogger:&lt;центральное средство ведения журнала&gt;*&lt;средство ведения журнала для перенаправления&gt;
-                     Использовать это средство ведения журнала для регистрации событий MSBuild, присоединив
+        <target state="translated">  -distributedLogger:&lt;central logger&gt;*&lt;forwarding logger&gt;
+                     Использовать это средство ведения журнала для регистрации событий MSBuild, подключив
                      другой экземпляр средства ведения журнала к каждому узлу. Чтобы указать
                      несколько средств ведения журнала, укажите каждое из них отдельно.
-                     (Краткая форма -dl)
-                     Синтаксис &lt;средства ведения журнала&gt;:
-                       [&lt;класс&gt;,]&lt;сборка&gt;[,&lt;настройки&gt;][;&lt;параметры&gt;]
-                     Синтаксис &lt;класса средства ведения журнала&gt;:
-                       [&lt;частичное или полное пространство имен&gt;.]&lt;имя класса средства ведения журнала&gt;
-                     Синтаксис &lt;сборки средства ведения журнала&gt;:
-                       {&lt;имя сборки&gt;[,&lt;strong name&gt;] | &lt;файл сборки&gt;}
+                     (Краткая форма: -dl)
+                     Синтаксис &lt;logger&gt;:
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
+                     Синтаксис &lt;logger class&gt;:
+                       [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
+                     Синтаксис &lt;logger assembly&gt;:
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Параметры средства ведения журнала указывают, как MSBuild создает средство ведения журнала.
-                     &lt;Параметры средства ведения журнала&gt; являются необязательными и передаются
+                     Параметры &lt;logger parameters&gt; являются необязательными и передаются
                      средству ведения журнала в том виде, в котором были введены. (Краткая форма: -l)
                      Примеры:
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
@@ -799,7 +799,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                             По умолчанию дополнения в файл журнала не вносятся.
                         Encoding--задает кодировку файла,
                             например UTF-8, Юникод или ASCII
-                     По умолчанию параметр детализации имеет значение "Детализированный".
+                     По умолчанию уровень детализации имеет значение detailed (подробный).
                      Примеры:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8

@@ -1143,7 +1143,7 @@
       </trans-unit>
       <trans-unit id="InvalidVerbosity">
         <source>MSB4103: "{0}" is not a valid logger verbosity level.</source>
-        <target state="translated">MSB4103: "{0}"은(는) 로거의 자세한 정도로 알맞지 않습니다.</target>
+        <target state="translated">MSB4103: "{0}"은(는) 로거의 세부 정보 표시로 알맞지 않습니다.</target>
         <note>{StrBegin="MSB4103: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4103: "{0}" ist kein gültiger Ausführlichkeitsgrad für die Protokollierung.</target>
@@ -2293,7 +2293,7 @@
       </trans-unit>
       <trans-unit id="DeferredMessagesAvailiable">
         <source>Some messages did not display because they were not associated with any ProjectStarted events. Use diagnostic verbosity to view these messages.</source>
-        <target state="translated">ProjectStarted 이벤트와 연결되지 않은 일부 메시지가 표시되지 않았습니다. 이 메시지를 보려면 자세한 정도로 diagnostic을 사용하십시오.</target>
+        <target state="translated">ProjectStarted 이벤트와 연결되지 않은 일부 메시지가 표시되지 않았습니다. 이러한 메시지를 보려면 세부 정보 표시로 diagnostic을 사용하세요.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Einige Meldungen wurden nicht angezeigt, weil sie keinem ProjectStarted-Ereignis zugeordnet sind. Verwenden Sie den Ausführlichkeitsgrad "diagnostic", um diese Meldungen anzuzeigen.</target>
