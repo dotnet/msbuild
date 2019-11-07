@@ -6,7 +6,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-This file contains .net framework specific properties, items and targets. They are factored into a Microsoft.NETFramework.targets and Microsoft.NetFramework.props
+This file contains .NET-specific properties, and items. This file is imported for .NET Core, .NET Standard, and .NET Framework projects.
 these two files are used to encapsulate the multi-targeting and framework specific build process.
 
 Copyright (C) Microsoft Corporation. All rights reserved.
