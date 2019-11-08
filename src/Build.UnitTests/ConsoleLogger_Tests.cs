@@ -560,7 +560,6 @@ namespace Microsoft.Build.UnitTests
 
                 if (expectedMessageType.Equals("message"))
                 {
-
                     console.ToString().ShouldMatch($@"<{expectedColor}><cyan>\d\d:\d\d:\d\d\.\d\d\d\s+\d+><reset color>{Regex.Escape(file)}\({lineNumber}\): {subcategory} {expectedMessageType} {code}: {message} \(TaskId:\d+\){Environment.NewLine}<reset color>");
                 }
                 else
