@@ -11,6 +11,11 @@ trigger:
 #   SkipApplyOptimizationData: false
 
 variables:
+  - name: SourceBranch
+    value: $(IbcSourceBranchName)
+  - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/') }}:
+    - name: SourceBranch
+      value: master
   - name: _DotNetArtifactsCategory
     value: .NETCore
   - name: _DotNetValidationArtifactsCategory
@@ -78,7 +83,7 @@ stages:
                 -officialBuildId $(Build.BuildNumber)
                 -officialSkipApplyOptimizationData $(SkipApplyOptimizationData)
                 /p:RepositoryName=$(Build.Repository.Name)
-                /p:VisualStudioIbcSourceBranchName=$(IbcSourceBranchName)
+                /p:VisualStudioIbcSourceBranchName=$(SourceBranch)
                 /p:VisualStudioDropAccessToken=$(System.AccessToken)
                 /p:VisualStudioDropName=$(VisualStudio.DropName)
                 /p:DotNetSignType=$(SignType)
