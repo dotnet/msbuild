@@ -80,10 +80,6 @@ namespace Microsoft.DotNet.Tools.MSBuild
             {
                 var newEventName = $"msbuild/{TargetFrameworkTelemetryEventName}";
                 Dictionary<string, string> maskedProperties = new Dictionary<string, string>();
-                if (args.Properties.TryGetValue(TargetFrameworkVersionTelemetryPropertyKey, out string targetFrameworkVersionValue))
-                {
-                    maskedProperties.Add(TargetFrameworkVersionTelemetryPropertyKey, Sha256Hasher.HashWithNormalizedCasing(targetFrameworkVersionValue));
-                }
 
                 foreach (var key in new[] {
                     TargetFrameworkVersionTelemetryPropertyKey,

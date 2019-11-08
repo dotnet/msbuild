@@ -243,6 +243,17 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             //  Flow the TEST_PACKAGES environment variable to the child process
             psi.Environment["TEST_PACKAGES"] = RepoDirectoriesProvider.TestPackages;
+
+            // Set DOTNET_ROOT to ensure sub process find the same host fxr
+            string dotnetDirectoryPath = Path.GetDirectoryName(RepoDirectoriesProvider.DotnetUnderTest);
+            if (System.Environment.Is64BitProcess)
+            {
+                psi.Environment.Add("DOTNET_ROOT", dotnetDirectoryPath);
+            }
+            else
+            {
+                psi.Environment.Add("DOTNET_ROOT(x86)", dotnetDirectoryPath);
+            }
         }
 
         private void AddDotnetToolPathToAvoidSettingPermanentEnvInBuildMachineOnWindows()
