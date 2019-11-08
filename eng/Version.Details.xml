@@ -41,13 +41,17 @@
       <Uri>https://github.com/microsoft/msbuild</Uri>
       <Sha>d6c92f91b6453c4f409ee9b345b780775a545d62</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.FSharp.Compiler" Version="10.7.0-beta.19460.5">
-      <Uri>https://github.com/dotnet/fsharp</Uri>
-      <Sha>e6bb0f12d5de504c819938a8f06fc46698b595c7</Sha>
+    <Dependency Name="Microsoft.Build.Localization" Version="16.4.0-preview-19528-01">
+      <Uri>https://github.com/microsoft/msbuild</Uri>
+      <Sha>3745451f472cbee0abf70e3080ae4a5d0c95fcf7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Compilers" Version="3.4.0-beta1-19456-03">
+    <Dependency Name="Microsoft.FSharp.Compiler" Version="10.7.0-beta.19525.3">
+      <Uri>https://github.com/dotnet/fsharp</Uri>
+      <Sha>da3ca86d2608d5753f6fc8e0595778ff6f407af1</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.NETCore.Compilers" Version="3.4.0-beta3-19524-06">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>3c865821f2864393a0ff7fe22c92ded6d51a546c</Sha>
+      <Sha>5a9c28432b9d18639fe54e62033bb8629ee11cf7</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="5.0.0-alpha1.19555.3">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
@@ -69,9 +73,9 @@
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
       <Sha>c1f6915918b82c096bbd666bd9c18528f1f70630</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.3.0-preview-20190911-02">
+    <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.3.0">
       <Uri>https://github.com/microsoft/vstest</Uri>
-      <Sha>32a75bd117876d8ad9c023cd0029df97412d1706</Sha>
+      <Sha>55e7e45431c9c05656c999b902686e7402664573</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Sdk.Web" Version="5.0.100-alpha.1.19555.2">
       <Uri>https://github.com/aspnet/websdk</Uri>
