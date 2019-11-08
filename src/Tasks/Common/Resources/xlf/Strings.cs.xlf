@@ -82,11 +82,6 @@
         <target state="translated">NETSDK1001: Je potřeba zadat alespoň jednu možnou cílovou architekturu.</target>
         <note>{StrBegin="NETSDK1001: "}</note>
       </trans-unit>
-      <trans-unit id="CannotCreateReadyToRunImagesForLibProjects">
-        <source>NETSDK1108: ReadyToRun compilation will be skipped because it is only supported for executable projects.</source>
-        <target state="translated">NETSDK1108: Kompilace ReadyToRun bude přeskočena, protože je podporována pouze u spustitelných projektů.</target>
-        <note>{StrBegin="NETSDK1108: "}</note>
-      </trans-unit>
       <trans-unit id="CannotEmbedClsidMapIntoComhost">
         <source>NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
         <target state="translated">NETSDK1092: CLSIDMap se nedá vložit do hostitele COM, protože přidávání prostředků vyžaduje, aby se sestavení provedlo na Windows (bez Nano Serveru).</target>

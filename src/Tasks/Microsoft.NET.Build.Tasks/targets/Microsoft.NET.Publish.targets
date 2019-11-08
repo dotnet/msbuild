@@ -91,9 +91,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="'$(PublishSingleFile)' == 'true' And '$(_IsExecutable)' != 'true'"
                  ResourceName="CannotHaveSingleFileWithoutExecutable" />
 
-    <NETSdkWarning Condition="'$(PublishReadyToRun)' == 'true' And '$(_IsExecutable)' != 'true'"
-                 ResourceName="CannotCreateReadyToRunImagesForLibProjects" />
-
     <PropertyGroup>
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
       <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
@@ -211,7 +208,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="CreateReadyToRunImages"
-          Condition="'$(_TargetFrameworkVersionWithoutV)' >= '3.0' And '$(PublishReadyToRun)' == 'true' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_IsExecutable)' == 'true'"
+          Condition="'$(_TargetFrameworkVersionWithoutV)' >= '3.0' And '$(PublishReadyToRun)' == 'true' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
           DependsOnTargets="_PrepareForReadyToRunCompilation;
                             _CreateR2RImages;
                             _CreateR2RSymbols">
