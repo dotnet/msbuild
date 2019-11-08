@@ -362,7 +362,7 @@ namespace Microsoft.Build.UnitTests
 
             ItemDictionary<ProjectItemInstance> itemBag = new ItemDictionary<ProjectItemInstance>();
 
-            // Dummy project instance to own the items. 
+            // Dummy project instance to own the items.
             ProjectRootElement xml = ProjectRootElement.Create();
             xml.FullPath = @"c:\abc\foo.proj";
 

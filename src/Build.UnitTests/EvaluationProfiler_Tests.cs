@@ -32,10 +32,10 @@ namespace Microsoft.Build.Engine.UnitTests
         <appname>HelloWorldCS</appname>
     </PropertyGroup>
 
-    <ItemDefinitionGroup>  
-        <CSFile>  
-            <encoding>utf8</encoding>  
-        </CSFile>        
+    <ItemDefinitionGroup>
+        <CSFile>
+            <encoding>utf8</encoding>
+        </CSFile>
     </ItemDefinitionGroup>
 
     <ItemGroup>
