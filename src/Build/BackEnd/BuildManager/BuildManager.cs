@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
@@ -102,7 +103,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Set of active nodes in the system.
         /// </summary>
-        private readonly HashSet<NGen<int>> _activeNodes;
+        private readonly ConcurrentDictionary<int, byte> _activeNodes;
 
         /// <summary>
         /// Event signalled when all nodes have shutdown.
@@ -262,7 +263,7 @@ namespace Microsoft.Build.Execution
             _buildSubmissions = new Dictionary<int, BuildSubmission>();
             _graphBuildSubmissions = new Dictionary<int, GraphBuildSubmission>();
             _noActiveSubmissionsEvent = new AutoResetEvent(true);
-            _activeNodes = new HashSet<NGen<int>>();
+            _activeNodes = new ConcurrentDictionary<int, byte>();
             _noNodesActiveEvent = new AutoResetEvent(true);
             _nodeIdToKnownConfigurations = new Dictionary<NGen<int>, HashSet<NGen<int>>>();
             _unnamedProjectInstanceToNames = new Dictionary<ProjectInstance, string>();
@@ -1789,8 +1790,8 @@ namespace Microsoft.Build.Execution
         private void HandleNodeShutdown(int node, NodeShutdown shutdownPacket)
         {
             _shuttingDown = true;
-            ErrorUtilities.VerifyThrow(_activeNodes.Contains(node), "Unexpected shutdown from node {0} which shouldn't exist.", node);
-            _activeNodes.Remove(node);
+            ErrorUtilities.VerifyThrow(_activeNodes.Keys.Contains(node), "Unexpected shutdown from node {0} which shouldn't exist.", node);
+            _activeNodes.TryRemove(node, out _);
 
             if (shutdownPacket.Reason != NodeShutdownReason.Requested)
             {
@@ -1924,24 +1925,34 @@ namespace Microsoft.Build.Execution
 
                     case ScheduleActionType.CreateNode:
                         var newNodes = new List<NodeInfo>();
-
-                        for (int i = 0; i < response.NumberOfNodesToCreate; i++)
+                        GetNodeConfiguration();
+                        try
                         {
-                            NodeInfo createdNode = _nodeManager.CreateNode(GetNodeConfiguration(), response.RequiredNodeType);
-
-                            if (null != createdNode)
+                            Parallel.For(0, response.NumberOfNodesToCreate, i =>
                             {
-                                _noNodesActiveEvent.Reset();
-                                _activeNodes.Add(createdNode.NodeId);
-                                newNodes.Add(createdNode);
-                                ErrorUtilities.VerifyThrow(_activeNodes.Count != 0, "Still 0 nodes after asking for a new node.  Build cannot proceed.");
-                            }
-                            else
-                            {
-                                BuildEventContext buildEventContext = new BuildEventContext(0, Scheduler.VirtualNode, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-                                ((IBuildComponentHost)this).LoggingService.LogError(buildEventContext, new BuildEventFileInfo(String.Empty), "UnableToCreateNode", response.RequiredNodeType.ToString("G"));
+                                NodeInfo createdNode = _nodeManager.CreateNode(GetNodeConfiguration(), response.RequiredNodeType);
 
-                                throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnableToCreateNode", response.RequiredNodeType.ToString("G")));
+                                if (createdNode != null)
+                                {
+                                    _noNodesActiveEvent.Reset();
+                                    _activeNodes.TryAdd(createdNode.NodeId, 0);
+                                    newNodes.Add(createdNode);
+                                    ErrorUtilities.VerifyThrow(_activeNodes.Count != 0, "Still 0 nodes after asking for a new node.  Build cannot proceed.");
+                                }
+                                else
+                                {
+                                    BuildEventContext buildEventContext = new BuildEventContext(0, Scheduler.VirtualNode, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                                    ((IBuildComponentHost)this).LoggingService.LogError(buildEventContext, new BuildEventFileInfo(String.Empty), "UnableToCreateNode", response.RequiredNodeType.ToString("G"));
+
+                                    throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnableToCreateNode", response.RequiredNodeType.ToString("G")));
+                                }
+                            });
+                        }
+                        catch (AggregateException e)
+                        {
+                            foreach (Exception ex in e.InnerExceptions)
+                            {
+                                throw ex;
                             }
                         }
 
