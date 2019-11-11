@@ -122,11 +122,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ImplicitlyExpandDesignTimeFacades Condition="'$(ImplicitlyExpandDesignTimeFacades)' == '' and ('$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(TargetingClr2Framework)' != 'true' and '$(TargetFrameworkVersion)' != 'v4.0')">true</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
 
+  <!--Import props that are common for both full framework and core.
+    And before the ImportAfter\* , so users can override it-->
+  <Import Project="$(MSBuildToolsPath)\Microsoft.NET.props" />
 
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportAfter\*" Condition="'$(ImportByWildcardAfterMicrosoftNetFrameworkProps)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportAfter')"/>
   <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftNetFrameworkProps)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportAfter')"/>
-
-  <!--Import props that are common for both full framework and core-->
-  <Import Project="$(MSBuildToolsPath)\Microsoft.NET.props" />
 
 </Project>
