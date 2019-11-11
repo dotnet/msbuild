@@ -137,14 +137,18 @@ namespace Microsoft.NET.Build.Tasks
             var frameworks = new List<RuntimeConfigFramework>();
             if (projectContext.RuntimeFrameworks == null || projectContext.RuntimeFrameworks.Length == 0)
             {
-                //  If there are no RuntimeFrameworks (which would be set in the ProcessFrameworkReferences task based
-                //  on FrameworkReference items), then use package resolved from MicrosoftNETPlatformLibrary for
-                //  the runtimeconfig
-                RuntimeConfigFramework framework = new RuntimeConfigFramework();
-                framework.Name = projectContext.PlatformLibrary.Name;
-                framework.Version = projectContext.PlatformLibrary.Version.ToNormalizedString();
+                // If the project is not targetting .NET Core, it will not have any platform library (and is marked as non-FrameworkDependent).
+                if (projectContext.PlatformLibrary != null)
+                {
+                    //  If there are no RuntimeFrameworks (which would be set in the ProcessFrameworkReferences task based
+                    //  on FrameworkReference items), then use package resolved from MicrosoftNETPlatformLibrary for
+                    //  the runtimeconfig
+                    RuntimeConfigFramework framework = new RuntimeConfigFramework();
+                    framework.Name = projectContext.PlatformLibrary.Name;
+                    framework.Version = projectContext.PlatformLibrary.Version.ToNormalizedString();
 
-                frameworks.Add(framework);
+                    frameworks.Add(framework);
+                }
             }
             else
             {
