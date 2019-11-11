@@ -46,7 +46,7 @@ Intermediate Language (IL) code in an assembly with a \f[I]dll\f[R] extension.
 .IP \[bu] 2
 \f[I].deps.json\f[R] file that includes all of the dependencies of the project.
 .IP \[bu] 2
-\f[I].runtime.config.json\f[R] file that specifies the shared runtime that the application expects, as well as other configuration options for the runtime (for example, garbage collection type).
+\f[I].runtimeconfig.json\f[R] file that specifies the shared runtime that the application expects, as well as other configuration options for the runtime (for example, garbage collection type).
 .IP \[bu] 2
 The application\[cq]s dependencies, which are copied from the NuGet cache into the output folder.
 .PP
@@ -88,7 +88,7 @@ Prints out a short help for the command.
 \f[C]--manifest <PATH_TO_MANIFEST_FILE>\f[R]
 .PP
 Specifies one or several target manifests to use to trim the set of packages published with the app.
-The manifest file is part of the output of the \f[C]dotnet store\f[R].
+The manifest file is part of the output of the \f[C]dotnet store\f[R] command.
 To specify multiple manifests, add a \f[C]--manifest\f[R] option for each manifest.
 This option is available starting with .NET Core 2.0 SDK.
 .PP
@@ -156,7 +156,7 @@ Prints out a short help for the command.
 \f[C]--manifest <PATH_TO_MANIFEST_FILE>\f[R]
 .PP
 Specifies one or several target manifests to use to trim the set of packages published with the app.
-The manifest file is part of the output of the \f[C]dotnet store\f[R].
+The manifest file is part of the output of the \f[C]dotnet store\f[R] command.
 To specify multiple manifests, add a \f[C]--manifest\f[R] option for each manifest.
 This option is available starting with .NET Core 2.0 SDK.
 .PP
@@ -214,7 +214,7 @@ Prints out a short help for the command.
 \f[C]--manifest <PATH_TO_MANIFEST_FILE>\f[R]
 .PP
 Specifies one or several target manifests to use to trim the set of packages published with the app.
-The manifest file is part of the output of the \f[C]dotnet store\f[R].
+The manifest file is part of the output of the \f[C]dotnet store\f[R] command.
 To specify multiple manifests, add a \f[C]--manifest\f[R] option for each manifest.
 This option is available starting with .NET Core 2.0 SDK.
 .PP

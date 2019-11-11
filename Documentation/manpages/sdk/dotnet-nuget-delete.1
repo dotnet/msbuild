@@ -4,11 +4,11 @@
 .hy
 .SH dotnet nuget delete
 .PP
+\f[B]This topic applies to: \[OK]\f[R] .NET Core 1.x SDK and later versions
 .SH NAME
 .PP
 \f[C]dotnet nuget delete\f[R] - Deletes or unlists a package from the server.
 .SH SYNOPSIS
-.SS .NET Core 2.x
 .IP
 .nf
 \f[C]
@@ -17,17 +17,6 @@ dotnet nuget delete [<PACKAGE_NAME> <PACKAGE_VERSION>] [--force-english-output] 
 dotnet nuget delete [-h|--help]
 \f[R]
 .fi
-.SS .NET Core 1.x
-.IP
-.nf
-\f[C]
-dotnet nuget delete [<PACKAGE_NAME> <PACKAGE_VERSION>] [--force-english-output] [-k|--api-key] [--non-interactive]
-    [-s|--source]
-dotnet nuget delete [-h|--help]
-\f[R]
-.fi
-.PP
-   *   *   *   *   *
 .SH DESCRIPTION
 .PP
 The \f[C]dotnet nuget delete\f[R] command deletes or unlists a package from the server.
@@ -46,7 +35,6 @@ Name/ID of the package to delete.
 Version of the package to delete.
 .RE
 .SH OPTIONS
-.SS .NET Core 2.x
 .IP \[bu] 2
 \f[B]\f[CB]--force-english-output\f[B]\f[R]
 .RS 2
@@ -93,41 +81,6 @@ Specifies the server URL.
 Supported URLs for nuget.org include \f[C]https://www.nuget.org\f[R], \f[C]https://www.nuget.org/api/v3\f[R], and \f[C]https://www.nuget.org/api/v2/package\f[R].
 For private feeds, replace the host name (for example, \f[C]%hostname%/api/v3\f[R]).
 .RE
-.SS .NET Core 1.x
-.IP \[bu] 2
-\f[B]\f[CB]--force-english-output\f[B]\f[R]
-.RS 2
-.PP
-Forces the application to run using an invariant, English-based culture.
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]-h|--help\f[B]\f[R]
-.RS 2
-.PP
-Prints out a short help for the command.
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]-k|--api-key <API_KEY>\f[B]\f[R]
-.RS 2
-.PP
-The API key for the server.
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]--non-interactive\f[B]\f[R]
-.RS 2
-.PP
-Doesn\[cq]t prompt for user input or confirmations.
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]-s|--source <SOURCE>\f[B]\f[R]
-.RS 2
-.PP
-Specifies the server URL.
-Supported URLs for nuget.org include \f[C]https://www.nuget.org\f[R], \f[C]https://www.nuget.org/api/v3\f[R], and \f[C]https://www.nuget.org/api/v2/package\f[R].
-For private feeds, replace the host name (for example, \f[C]%hostname%/api/v3\f[R]).
-.RE
-.PP
-   *   *   *   *   *
 .SH EXAMPLES
 .IP \[bu] 2
 Deletes version 1.0 of package \f[C]Microsoft.AspNetCore.Mvc\f[R]:

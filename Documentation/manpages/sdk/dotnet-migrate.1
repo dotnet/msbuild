@@ -4,9 +4,10 @@
 .hy
 .SH dotnet migrate
 .PP
+\f[B]This article applies to: \[OK]\f[R] .NET Core 1.x SDK \f[B]\[OK]\f[R] .NET Core 2.x SDK
 .SH NAME
 .PP
-\f[C]dotnet migrate\f[R] - Migrates a Preview 2 .NET Core project to a .NET Core SDK 1.0 project.
+\f[C]dotnet migrate\f[R] - Migrates a Preview 2 .NET Core project to a .NET Core SDK-style project.
 .SH SYNOPSIS
 .IP
 .nf
@@ -17,7 +18,7 @@ dotnet migrate [-h|--help]
 .fi
 .SH DESCRIPTION
 .PP
-The \f[C]dotnet migrate\f[R] command migrates a valid Preview 2 \f[I]project.json\f[R]-based project to a valid .NET Core SDK 1.0 \f[I]csproj\f[R] project.
+The \f[C]dotnet migrate\f[R] command migrates a valid Preview 2 \f[I]project.json\f[R]-based project to a valid .NET Core SDK-style \f[I]csproj\f[R] project.
 .PP
 By default, the command migrates the root project and any project references that the root project contains.
 This behavior is disabled using the \f[C]--skip-project-references\f[R] option at runtime.
@@ -41,6 +42,8 @@ If you use the \f[C]--report-file <REPORT_FILE>\f[R] option, the output is saved
 The \f[C]dotnet migrate\f[R] command only supports valid Preview 2 \f[I]project.json\f[R]-based projects.
 This means that you cannot use it to migrate DNX or Preview 1 \f[I]project.json\f[R]-based projects directly to MSBuild/csproj projects.
 You first need to manually migrate the project to a Preview 2 \f[I]project.json\f[R]-based project and then use the \f[C]dotnet migrate\f[R] command to migrate the project.
+.PP
+The \f[C]dotnet migrate\f[R] command is no longer available starting with .NET Core 3.0 SDK.
 .SS Arguments
 .PP
 \f[C]PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR\f[R]
