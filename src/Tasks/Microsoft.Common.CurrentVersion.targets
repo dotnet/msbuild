@@ -65,7 +65,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!-- Import depends on if it is .NETCore. Imports for .NETFramework is a superset of that for .NETCore-->
   <Import Project="Microsoft.NETFramework.props" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' or '$(TargetFrameworkIdentifier)' == 'Silverlight'"/>
-  <Import Project="Microsoft.NET.props" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework' and '$(TargetFrameworkIdentifier)' != 'Silverlight'"/>
+  <Import Project="Microsoft.NET.props" Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' or '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"/>
 
   <PropertyGroup>
     <!-- Yield optimization properties -->
