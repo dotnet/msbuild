@@ -275,7 +275,7 @@ Windows:
 .IP
 .nf
 \f[C]
-\[at]powershell -NoProfile -ExecutionPolicy unrestricted -Command \[dq][Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; &([scriptblock]::Create((Invoke-WebRequest -useb \[aq]https://dot.net/v1/dotnet-install.ps1\[aq]))) <additional install-script args>\[dq]
+\[at]powershell -NoProfile -ExecutionPolicy unrestricted -Command \[dq][Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; &([scriptblock]::Create((Invoke-WebRequest -UseBasicParsing \[aq]https://dot.net/v1/dotnet-install.ps1\[aq]))) <additional install-script args>\[dq]
 \f[R]
 .fi
 .PP

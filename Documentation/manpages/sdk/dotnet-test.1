@@ -123,7 +123,8 @@ If the specified directory doesn\[cq]t exist, it\[cq]s created.
 .PP
 \f[C]-s|--settings <SETTINGS_FILE>\f[R]
 .PP
-Settings to use when running tests.
+The \f[C].runsettings\f[R] file to use for running the tests.
+Configure unit tests by using a \f[C].runsettings\f[R] file.
 .PP
 \f[C]-t|--list-tests\f[R]
 .PP
@@ -201,7 +202,8 @@ If the specified directory doesn\[cq]t exist, it\[cq]s created.
 .PP
 \f[C]-s|--settings <SETTINGS_FILE>\f[R]
 .PP
-Settings to use when running tests.
+The \f[C].runsettings\f[R] file to use for running the tests.
+Configure unit tests by using a \f[C].runsettings\f[R] file.
 .PP
 \f[C]-t|--list-tests\f[R]
 .PP
@@ -254,7 +256,8 @@ Directory in which to find the binaries to run.
 .PP
 \f[C]-s|--settings <SETTINGS_FILE>\f[R]
 .PP
-Settings to use when running tests.
+The \f[C].runsettings\f[R] file to use for running the tests.
+Configure unit tests by using a \f[C].runsettings\f[R] file.
 .PP
 \f[C]-t|--list-tests\f[R]
 .PP
@@ -278,7 +281,7 @@ Run the tests in the \f[C]test1\f[R] project:
 .PP
 Run the tests in the project in the current directory and generate a test results file in the trx format:
 .PP
-\f[C]dotnet test --logger:trx\f[R]
+\f[C]dotnet test --logger trx\f[R]
 .SS Filter option details
 .PP
 \f[C]--filter <EXPRESSION>\f[R]

@@ -35,9 +35,9 @@ By default, the restoration of dependencies and tools are executed in parallel.
 .PP
 .PP
 To restore the dependencies, NuGet needs the feeds where the packages are located.
-Feeds are usually provided via the \f[I]NuGet.config\f[R] configuration file.
+Feeds are usually provided via the \f[I]nuget.config\f[R] configuration file.
 A default configuration file is provided when the CLI tools are installed.
-You specify additional feeds by creating your own \f[I]NuGet.config\f[R] file in the project directory.
+You specify additional feeds by creating your own \f[I]nuget.config\f[R] file in the project directory.
 You also specify additional feeds per invocation at a command prompt.
 .PP
 For dependencies, you specify where the restored packages are placed during the restore operation using the \f[C]--packages\f[R] argument.
@@ -45,11 +45,33 @@ If not specified, the default NuGet package cache is used, which is found in the
 For example, \f[I]/home/user1\f[R] on Linux or \f[I]C:1\f[R] on Windows.
 .PP
 For project-specific tooling, \f[C]dotnet restore\f[R] first restores the package in which the tool is packed, and then proceeds to restore the tool\[cq]s dependencies as specified in its project file.
+.SS nuget.config differences
 .PP
-The behavior of the \f[C]dotnet restore\f[R] command is affected by some of the settings in the \f[I]Nuget.Config\f[R] file, if present.
-For example, setting the \f[C]globalPackagesFolder\f[R] in \f[I]NuGet.Config\f[R] places the restored NuGet packages in the specified folder.
+The behavior of the \f[C]dotnet restore\f[R] command is affected by the settings in the \f[I]nuget.config\f[R] file, if present.
+For example, setting the \f[C]globalPackagesFolder\f[R] in \f[I]nuget.config\f[R] places the restored NuGet packages in the specified folder.
 This is an alternative to specifying the \f[C]--packages\f[R] option on the \f[C]dotnet restore\f[R] command.
-For more information, see the NuGet.Config reference.
+For more information, see the nuget.config reference.
+.PP
+There are three specific settings that \f[C]dotnet restore\f[R] ignores:
+.IP \[bu] 2
+bindingRedirects
+.RS 2
+.PP
+Binding redirects don\[cq]t work with \f[C]<PackageReference>\f[R] elements and .NET Core only supports \f[C]<PackageReference>\f[R] elements for NuGet packages.
+.RE
+.IP \[bu] 2
+solution
+.RS 2
+.PP
+This setting is Visual Studio specific and doesn\[cq]t apply to .NET Core.
+\&.NET Core doesn\[cq]t use a \f[C]packages.config\f[R] file and instead uses \f[C]<PackageReference>\f[R] elements for NuGet packages.
+.RE
+.IP \[bu] 2
+trustedSigners
+.RS 2
+.PP
+This setting isn\[cq]t applicable as NuGet doesn\[cq]t yet support cross-platform verification of trusted packages.
+.RE
 .SS Implicit \f[C]dotnet restore\f[R]
 .PP
 Starting with .NET Core 2.0, \f[C]dotnet restore\f[R] is run implicitly if necessary when you issue the following commands:
@@ -83,7 +105,7 @@ Optional path to the project file to restore.
 .PP
 \f[C]--configfile <FILE>\f[R]
 .PP
-The NuGet configuration file (\f[I]NuGet.config\f[R]) to use for the restore operation.
+The NuGet configuration file (\f[I]nuget.config\f[R]) to use for the restore operation.
 .PP
 \f[C]--disable-parallel\f[R]
 .PP
@@ -124,13 +146,14 @@ Provide multiple RIDs by specifying this option multiple times.
 \f[C]-s|--source <SOURCE>\f[R]
 .PP
 Specifies a NuGet package source to use during the restore operation.
-This setting overrides all of the sources specified in the \f[I]NuGet.config\f[R] files.
+This setting overrides all of the sources specified in the \f[I]nuget.config\f[R] files.
 Multiple sources can be provided by specifying this option multiple times.
 .PP
 \f[C]--verbosity <LEVEL>\f[R]
 .PP
 Sets the verbosity level of the command.
 Allowed values are \f[C]q[uiet]\f[R], \f[C]m[inimal]\f[R], \f[C]n[ormal]\f[R], \f[C]d[etailed]\f[R], and \f[C]diag[nostic]\f[R].
+Default value is \f[C]minimal\f[R].
 .PP
 \f[C]--interactive\f[R]
 .PP
@@ -140,7 +163,7 @@ Since .NET Core 2.1.400.
 .PP
 \f[C]--configfile <FILE>\f[R]
 .PP
-The NuGet configuration file (\f[I]NuGet.config\f[R]) to use for the restore operation.
+The NuGet configuration file (\f[I]nuget.config\f[R]) to use for the restore operation.
 .PP
 \f[C]--disable-parallel\f[R]
 .PP
@@ -176,13 +199,14 @@ Provide multiple RIDs by specifying this option multiple times.
 \f[C]-s|--source <SOURCE>\f[R]
 .PP
 Specifies a NuGet package source to use during the restore operation.
-This overrides all of the sources specified in the \f[I]NuGet.config\f[R] files.
+This overrides all of the sources specified in the \f[I]nuget.config\f[R] files, effectively reading the \f[I]nuget.config\f[R] file as if the \f[C]<packageSource>\f[R] element was not there.
 Multiple sources can be provided by specifying this option multiple times.
 .PP
 \f[C]--verbosity <LEVEL>\f[R]
 .PP
 Sets the verbosity level of the command.
 Allowed values are \f[C]q[uiet]\f[R], \f[C]m[inimal]\f[R], \f[C]n[ormal]\f[R], \f[C]d[etailed]\f[R], and \f[C]diag[nostic]\f[R].
+The default is \f[C]minimal\f[R].
 .PP
    *   *   *   *   *
 .SH EXAMPLES
@@ -203,6 +227,6 @@ Restore the dependencies and tools for the project in the current directory usin
 .PP
 \f[C]dotnet restore -s c:\[rs]packages\[rs]mypackages -s c:\[rs]packages\[rs]myotherpackages\f[R]
 .PP
-Restore dependencies and tools for the project in the current directory and shows only minimal output:
+Restore dependencies and tools for the project in the current directory showing detailed output:
 .PP
-\f[C]dotnet restore --verbosity minimal\f[R]
+\f[C]dotnet restore --verbosity detailed\f[R]
