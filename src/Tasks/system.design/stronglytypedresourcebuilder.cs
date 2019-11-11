@@ -267,7 +267,7 @@ namespace Microsoft.Build.Tasks
                 throw new ArgumentNullException(nameof(resxFile));
             }
 
-#if FEATURE_RESX_RESOURCE_READER
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
             // Read the resources from a ResX file into a dictionary - name & type name
             Dictionary<String, ResourceData> resourceList = new Dictionary<String, ResourceData>(StringComparer.InvariantCultureIgnoreCase);
             using (ResXResourceReader rr = new ResXResourceReader(resxFile))
