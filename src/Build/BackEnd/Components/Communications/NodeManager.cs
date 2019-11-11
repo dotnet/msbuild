@@ -79,6 +79,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool _componentShutdown;
 
+        private static readonly Object nodeIdLock = new Object();
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -331,23 +333,27 @@ namespace Microsoft.Build.BackEnd
                 return InvalidNodeId;
             }
 
-            // Are there any free slots on this provider?
-            if (nodeProvider.AvailableNodes == 0)
-            {
-                return InvalidNodeId;
-            }
-
             // Assign a global ID to the node we are about to create.
             int nodeId = InvalidNodeId;
 
-            if (nodeProvider is NodeProviderInProc)
+            lock (nodeIdLock)
             {
-                nodeId = _inprocNodeId;
-            }
-            else
-            {
-                nodeId = _nextNodeId;
-                _nextNodeId++;
+                // Are there any free slots on this provider?
+                if (nodeProvider.AvailableNodes == 0)
+                {
+                    return InvalidNodeId;
+                }
+                else if (nodeProvider is NodeProviderInProc)
+                {
+                    ((NodeProviderInProc)nodeProvider)._nodeAttemptInProgress = true;
+                    nodeId = _inprocNodeId;
+                }
+                else if (nodeProvider is NodeProviderOutOfProc)
+                {
+                    ((NodeProviderOutOfProc)nodeProvider)._nodeAttemptsInProgress++;
+                    nodeId = _nextNodeId;
+                    _nextNodeId++;
+                }
             }
 
             NodeConfiguration configToSend = nodeConfiguration.Clone();
@@ -359,6 +365,18 @@ namespace Microsoft.Build.BackEnd
             if (!createdNode)
             {
                 return InvalidNodeId;
+            }
+
+            lock(nodeIdLock)
+            {
+                if (nodeProvider is NodeProviderInProc)
+                {
+                    ((NodeProviderInProc)nodeProvider)._nodeAttemptInProgress = false;
+                }
+                else if (nodeProvider is NodeProviderOutOfProc)
+                {
+                    ((NodeProviderOutOfProc)nodeProvider)._nodeAttemptsInProgress--;
+                }
             }
 
             _nodeIdToProvider.Add(nodeId, nodeProvider);

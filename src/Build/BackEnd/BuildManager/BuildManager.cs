@@ -1924,7 +1924,7 @@ namespace Microsoft.Build.Execution
                         break;
 
                     case ScheduleActionType.CreateNode:
-                        var newNodes = new List<NodeInfo>();
+                        var newNodes = new ConcurrentBag<NodeInfo>();
                         GetNodeConfiguration();
                         try
                         {

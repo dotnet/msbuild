@@ -79,6 +79,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool _exclusiveOperatingEnvironment = false;
 
+        public bool _nodeAttemptInProgress = false;
+
         #endregion
 
         #region Constructor
@@ -115,7 +117,7 @@ namespace Microsoft.Build.BackEnd
         {
             get
             {
-                if (_inProcNodeId != InvalidInProcNodeId)
+                if (_inProcNodeId != InvalidInProcNodeId || _nodeAttemptInProgress)
                 {
                     return 0;
                 }

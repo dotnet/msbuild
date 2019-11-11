@@ -20,6 +20,8 @@ using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 using System.Threading.Tasks;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+using System.Collections.Concurrent;
+using System.Linq;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -29,6 +31,8 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal abstract class NodeProviderOutOfProcBase
     {
+        private static readonly Object createNodeLock = new object();
+
         /// <summary>
         /// The maximum number of bytes to write
         /// </summary>
@@ -52,7 +56,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Keeps track of the processes we've already checked for nodes so we don't check them again.
         /// </summary>
-        private HashSet<string> _processesToIgnore = new HashSet<string>();
+        private ConcurrentBag<string> _processesToIgnore = new ConcurrentBag<string>();
 
         /// <summary>
         /// Delegate used to tell the node provider that a context has terminated.
@@ -88,7 +92,7 @@ namespace Microsoft.Build.BackEnd
         protected void ShutdownConnectedNodes(List<NodeContext> contextsToShutDown, bool enableReuse)
         {
             // Send the build completion message to the nodes, causing them to shutdown or reset.
-            _processesToIgnore.Clear();
+            _processesToIgnore = new ConcurrentBag<string>();
 
             foreach (NodeContext nodeContext in contextsToShutDown)
             {
@@ -188,12 +192,15 @@ namespace Microsoft.Build.BackEnd
                     _processesToIgnore.Add(nodeLookupKey);
 
                     // Attempt to connect to each process in turn.
-                    Stream nodeStream = TryConnectToProcess(nodeProcess.Id, 0 /* poll, don't wait for connections */, hostHandshake, clientHandshake);
-                    if (nodeStream != null)
+                    lock (createNodeLock)
                     {
-                        // Connection successful, use this node.
-                        CommunicationsUtilities.Trace("Successfully connected to existed node {0} which is PID {1}", nodeId, nodeProcess.Id);
-                        return new NodeContext(nodeId, nodeProcess.Id, nodeStream, factory, terminateNode);
+                        Stream nodeStream = TryConnectToProcess(nodeProcess.Id, 0 /* poll, don't wait for connections */, hostHandshake, clientHandshake);
+                        if (nodeStream != null)
+                        {
+                            // Connection successful, use this node.
+                            CommunicationsUtilities.Trace("Successfully connected to existed node {0} which is PID {1}", nodeId, nodeProcess.Id);
+                            return new NodeContext(nodeId, nodeProcess.Id, nodeStream, factory, terminateNode);
+                        }
                     }
                 }
             }
@@ -229,10 +236,13 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 #endif
-
-                // Create the node process
-                int msbuildProcessId = LaunchNode(msbuildLocation, commandLineArgs);
-                _processesToIgnore.Add(GetProcessesToIgnoreKey(hostHandshake, clientHandshake, msbuildProcessId));
+                int msbuildProcessId = -1;
+                lock (createNodeLock)
+                {
+                    // Create the node process
+                    msbuildProcessId = LaunchNode(msbuildLocation, commandLineArgs);
+                    _processesToIgnore.Add(GetProcessesToIgnoreKey(hostHandshake, clientHandshake, msbuildProcessId));
+                }
 
                 // Note, when running under IMAGEFILEEXECUTIONOPTIONS registry key to debug, the process ID
                 // gotten back from CreateProcess is that of the debugger, which causes this to try to connect

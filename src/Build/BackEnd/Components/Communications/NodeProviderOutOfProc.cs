@@ -37,6 +37,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private Dictionary<int, NodeContext> _nodeContexts;
 
+        public int _nodeAttemptsInProgress = 0;
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -63,7 +65,7 @@ namespace Microsoft.Build.BackEnd
         {
             get
             {
-                return ComponentHost.BuildParameters.MaxNodeCount - _nodeContexts.Count;
+                return ComponentHost.BuildParameters.MaxNodeCount - _nodeContexts.Count - _nodeAttemptsInProgress;
             }
         }
 
