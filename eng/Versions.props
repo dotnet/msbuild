@@ -17,6 +17,7 @@
   <PropertyGroup>
     <VersionPrefix>16.4.0</VersionPrefix>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
+    <DotNetFinalVersionKind>release</DotNetFinalVersionKind>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
