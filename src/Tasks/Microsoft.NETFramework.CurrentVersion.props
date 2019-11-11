@@ -87,8 +87,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
              When a new windows SDK revs they will inplace update the location pointed to by this property. When a new sdk is release this target will have to be
              revised along with another toolsversion. -->
 
-    <TargetFrameworkSDKToolsDirectory Condition=" '$(TargetFrameworkSDKToolsDirectory)' == '' ">$(SDK40ToolsPath)</TargetFrameworkSDKToolsDirectory>
-
     <TargetedRuntimeVersion Condition="'$(TargetedRuntimeVersion)' == '' and ('$(TargetingClr2Framework)' == 'true')">v2.0.50727</TargetedRuntimeVersion>
     <TargetedRuntimeVersion Condition="'$(TargetedRuntimeVersion)' == ''">v$(MSBuildRuntimeVersion)</TargetedRuntimeVersion>
 
@@ -100,14 +98,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <PropertyGroup>
     <Prefer32Bit Condition="'$(Prefer32Bit)' == ''">false</Prefer32Bit>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="('$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(TargetingClr2Framework)' != 'true' and '$(TargetFrameworkVersion)' != 'v4.0') or '$(TargetFrameworkIdentifier)' == '.NETCoreApp' or '$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <HighEntropyVA Condition="'$(HighEntropyVA)' == ''">true</HighEntropyVA>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <HighEntropyVA Condition="'$(HighEntropyVA)' == ''">false</HighEntropyVA>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -132,6 +122,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ImplicitlyExpandDesignTimeFacades Condition="'$(ImplicitlyExpandDesignTimeFacades)' == '' and ('$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(TargetingClr2Framework)' != 'true' and '$(TargetFrameworkVersion)' != 'v4.0')">true</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
 
+  <!--Import props that are common for both full framework and core.
+    And before the ImportAfter\* , so users can override it-->
+  <Import Project="$(MSBuildToolsPath)\Microsoft.NET.props" />
 
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportAfter\*" Condition="'$(ImportByWildcardAfterMicrosoftNetFrameworkProps)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportAfter')"/>
   <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftNetFrameworkProps)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.props\ImportAfter')"/>
