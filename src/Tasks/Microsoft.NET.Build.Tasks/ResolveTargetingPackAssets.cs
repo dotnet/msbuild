@@ -214,7 +214,7 @@ namespace Microsoft.NET.Build.Tasks
 
             reference.SetMetadata(MetadataKeys.ExternallyResolved, "true");
             reference.SetMetadata(MetadataKeys.Private, "false");
-            reference.SetMetadata(MetadataKeys.NuGetPackageId, targetingPack.GetMetadata(MetadataKeys.PackageName));
+            reference.SetMetadata(MetadataKeys.PackageName, targetingPack.GetMetadata(MetadataKeys.PackageName));
             reference.SetMetadata(MetadataKeys.NuGetPackageVersion, targetingPack.GetMetadata(MetadataKeys.PackageVersion));
 
             reference.SetMetadata("FrameworkReferenceName", targetingPack.ItemSpec);

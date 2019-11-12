@@ -62,7 +62,6 @@ namespace Microsoft.NET.Build.Tasks
 
         // Package assets
         public const string NuGetIsFrameworkReference = "NuGetIsFrameworkReference";
-        public const string NuGetPackageId = "NuGetPackageId";
         public const string NuGetPackageVersion = "NuGetPackageVersion";
         public const string NuGetSourceType = "NuGetSourceType";
         public const string PathInPackage = "PathInPackage";

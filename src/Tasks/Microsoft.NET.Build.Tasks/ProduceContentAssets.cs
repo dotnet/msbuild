@@ -149,7 +149,7 @@ namespace Microsoft.NET.Build.Tasks
             var contentFileDeps = ContentFileDependencies ?? Enumerable.Empty<ITaskItem>();
             var contentFileGroups = contentFileDeps
                 .Where(f => !ProduceOnlyPreprocessorFiles || IsPreprocessorFile(f))
-                .GroupBy(t => t.GetMetadata(MetadataKeys.NuGetPackageId));
+                .GroupBy(t => t.GetMetadata(MetadataKeys.PackageName));
             foreach (var grouping in contentFileGroups)
             {
                 // Is there an asset with our exact language? If so, we use that. Otherwise we'll simply collect "any" assets.
@@ -198,7 +198,7 @@ namespace Microsoft.NET.Build.Tasks
             string resolvedPath = contentFile.ItemSpec;
             string pathToFinalAsset = resolvedPath;
             string ppOutputPath = contentFile.GetMetadata(MetadataKeys.PPOutputPath);
-            string packageName = contentFile.GetMetadata(MetadataKeys.NuGetPackageId);
+            string packageName = contentFile.GetMetadata(MetadataKeys.PackageName);
             string packageVersion = contentFile.GetMetadata(MetadataKeys.NuGetPackageVersion);
 
             if (!string.IsNullOrEmpty(ppOutputPath))
@@ -225,7 +225,7 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     var item = new TaskItem(pathToFinalAsset);
                     item.SetMetadata("TargetPath", outputPath);
-                    item.SetMetadata(MetadataKeys.NuGetPackageId, packageName);
+                    item.SetMetadata(MetadataKeys.PackageName, packageName);
                     item.SetMetadata(MetadataKeys.NuGetPackageVersion, packageVersion);
 
                     _copyLocalItems.Add(item);
@@ -241,7 +241,7 @@ namespace Microsoft.NET.Build.Tasks
             if (!string.Equals(buildAction, "none", StringComparison.OrdinalIgnoreCase))
             {
                 var item = new TaskItem(pathToFinalAsset);
-                item.SetMetadata(MetadataKeys.NuGetPackageId, packageName);
+                item.SetMetadata(MetadataKeys.PackageName, packageName);
                 item.SetMetadata(MetadataKeys.NuGetPackageVersion, packageVersion);
 
                 // We'll put additional metadata on the item so we can convert it back to the real item group in our targets

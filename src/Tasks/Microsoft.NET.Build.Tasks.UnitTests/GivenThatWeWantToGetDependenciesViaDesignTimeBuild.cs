@@ -1152,7 +1152,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 itemSpec: "Packages\\MyPackage\\1.5.0\\AnAssembly.dll",
                 metadata: new Dictionary<string, string>
                 {
-                    { "NuGetPackageId", "MyPackage" },
+                    { "PackageName", "MyPackage" },
                     { "NuGetPackageVersion", "1.5.0" }
                 });
 
@@ -1226,7 +1226,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 itemSpec: "Packages\\MyPackage\\1.5.0\\AlphaAssembly.dll",
                 metadata: new Dictionary<string, string>
                 {
-                    { "NuGetPackageId", "MyPackage" },
+                    { "PackageName", "MyPackage" },
                     { "NuGetPackageVersion", "1.5.0" }
                 });
 
@@ -1234,7 +1234,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 itemSpec: "Packages\\MyPackage\\1.5.0\\BetaAssembly.dll",
                 metadata: new Dictionary<string, string>
                 {
-                    { "NuGetPackageId", "MyPackage" },
+                    { "PackageName", "MyPackage" },
                     { "NuGetPackageVersion", "1.5.0" },
                     { "Facade", "false" }
                 });
@@ -1243,7 +1243,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 itemSpec: "Packages\\MyPackage\\1.5.0\\GammaAssembly.dll",
                 metadata: new Dictionary<string, string>
                 {
-                    { "NuGetPackageId", "MyPackage" },
+                    { "PackageName", "MyPackage" },
                     { "NuGetPackageVersion", "1.5.0" },
                     { "Facade", "true" }
                 });

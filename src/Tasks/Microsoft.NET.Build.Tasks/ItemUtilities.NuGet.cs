@@ -14,9 +14,8 @@ namespace Microsoft.NET.Build.Tasks
             string packageName = item.GetMetadata(MetadataKeys.PackageName);
             string packageVersion = item.GetMetadata(MetadataKeys.PackageVersion);
 
-            if (string.IsNullOrEmpty(packageName) || string.IsNullOrEmpty(packageVersion))
+            if (string.IsNullOrEmpty(packageVersion))
             {
-                packageName = item.GetMetadata(MetadataKeys.NuGetPackageId);
                 packageVersion = item.GetMetadata(MetadataKeys.NuGetPackageVersion);
             }
 

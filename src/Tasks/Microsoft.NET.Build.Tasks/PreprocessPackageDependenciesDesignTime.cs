@@ -209,7 +209,7 @@ namespace Microsoft.NET.Build.Tasks
             var existingReferenceItemDependencies = new List<ITaskItem>();
             foreach (var reference in References)
             {
-                var packageName = reference.GetMetadata(MetadataKeys.NuGetPackageId);
+                var packageName = reference.GetMetadata(MetadataKeys.PackageName);
                 var packageVersion = reference.GetMetadata(MetadataKeys.NuGetPackageVersion);
 
                 // This is not a "pre-resolved" assembly; skip it.

@@ -1261,7 +1261,7 @@ namespace Microsoft.NET.Build.Tasks
             private void WriteItem(string itemSpec, LockFileTargetLibrary package)
             {
                 WriteItem(itemSpec);
-                WriteMetadata(MetadataKeys.NuGetPackageId, package.Name);
+                WriteMetadata(MetadataKeys.PackageName, package.Name);
                 WriteMetadata(MetadataKeys.NuGetPackageVersion, package.Version.ToNormalizedString());
             }
 

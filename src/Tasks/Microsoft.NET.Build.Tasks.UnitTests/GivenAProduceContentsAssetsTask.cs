@@ -169,14 +169,14 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             var item = copyLocalItems.Where(t => t.ItemSpec.EndsWith(assetWritePath)).First();
             item.GetMetadata("TargetPath").Should().Be("samplepp.output.txt");
-            item.GetMetadata(MetadataKeys.NuGetPackageId).Should().Be("LibA");
+            item.GetMetadata(MetadataKeys.PackageName).Should().Be("LibA");
             item.GetMetadata(MetadataKeys.NuGetPackageVersion).Should().Be("1.2.3");
 
             for (int i = 1; i < 3; i++)
             {
                 item = copyLocalItems.Where(t => t.ItemSpec.EndsWith(contentFiles[i])).First();
                 item.GetMetadata("TargetPath").Should().Be(Path.Combine("output", contentFiles[i]));
-                item.GetMetadata(MetadataKeys.NuGetPackageId).Should().Be("LibA");
+                item.GetMetadata(MetadataKeys.PackageName).Should().Be("LibA");
                 item.GetMetadata(MetadataKeys.NuGetPackageVersion).Should().Be("1.2.3");
             }
 
@@ -243,17 +243,17 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             var item = contentItems.Where(t => t.ItemSpec.EndsWith(assetWritePath)).First();
             item.GetMetadata("ProcessedItemType").Should().Be("Content");
-            item.GetMetadata(MetadataKeys.NuGetPackageId).Should().Be(packageId);
+            item.GetMetadata(MetadataKeys.PackageName).Should().Be(packageId);
             item.GetMetadata(MetadataKeys.NuGetPackageVersion).Should().Be(packageVersion);
 
             item = contentItems.Where(t => t.ItemSpec.EndsWith(contentFiles[1])).First();
             item.GetMetadata("ProcessedItemType").Should().Be("EmbeddedResource");
-            item.GetMetadata(MetadataKeys.NuGetPackageId).Should().Be(packageId);
+            item.GetMetadata(MetadataKeys.PackageName).Should().Be(packageId);
             item.GetMetadata(MetadataKeys.NuGetPackageVersion).Should().Be(packageVersion);
 
             item = contentItems.Where(t => t.ItemSpec.EndsWith(contentFiles[2])).First();
             item.GetMetadata("ProcessedItemType").Should().Be("Content");
-            item.GetMetadata(MetadataKeys.NuGetPackageId).Should().Be(packageId);
+            item.GetMetadata(MetadataKeys.PackageName).Should().Be(packageId);
             item.GetMetadata(MetadataKeys.NuGetPackageVersion).Should().Be(packageVersion);
 
             // not added to content items
@@ -373,7 +373,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var contentItems = task.ProcessedContentItems;
             contentItems.Count().Should().Be(3);
             contentItems.All(t => t.GetMetadata("ProcessedItemType") == "Content").Should().BeTrue();
-            contentItems.All(t => t.GetMetadata(MetadataKeys.NuGetPackageId) == packageId).Should().BeTrue();
+            contentItems.All(t => t.GetMetadata(MetadataKeys.PackageName) == packageId).Should().BeTrue();
             contentItems.All(t => t.GetMetadata(MetadataKeys.NuGetPackageVersion) == packageVersion).Should().BeTrue();
         }
 
@@ -417,7 +417,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             contentItems.First().ItemSpec
                 .Should().Be(Path.Combine(PackageRootDirectory, "LibA", "1.2.3", contentFiles[0]));
             contentItems.First().GetMetadata("ProcessedItemType").Should().Be("Content");
-            contentItems.First().GetMetadata(MetadataKeys.NuGetPackageId).Should().Be(packageId);
+            contentItems.First().GetMetadata(MetadataKeys.PackageName).Should().Be(packageId);
             contentItems.First().GetMetadata(MetadataKeys.NuGetPackageVersion).Should().Be(packageVersion);
         }
 
@@ -466,7 +466,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 item.ItemSpec.Should().Be(
                     Path.Combine(PackageRootDirectory, "LibA", "1.2.3", contentFiles[i+1]));
                 item.GetMetadata("ProcessedItemType").Should().Be("Content");
-                item.GetMetadata(MetadataKeys.NuGetPackageId).Should().Be(packageId);
+                item.GetMetadata(MetadataKeys.PackageName).Should().Be(packageId);
                 item.GetMetadata(MetadataKeys.NuGetPackageVersion).Should().Be(packageVersion);
             }
         }
@@ -488,7 +488,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 itemSpec: Path.Combine(PackageRootDirectory, packageId, packageVersion, path),
                 metadata: new Dictionary<string, string>
                 {
-                    { MetadataKeys.NuGetPackageId, packageId },
+                    { MetadataKeys.PackageName, packageId },
                     { MetadataKeys.NuGetPackageVersion, packageVersion },
                     { MetadataKeys.PPOutputPath, ppOutputPath },
                     { MetadataKeys.CodeLanguage, codeLanguage },
