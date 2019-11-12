@@ -18,6 +18,8 @@ variables:
       value: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
     - name: _DotNetPublishToBlobFeed
       value: true
+  - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+    - group: DotNet-CLI-SDLValidation-Params
 
 stages:
 - stage: build
@@ -208,3 +210,15 @@ stages:
   - template: /eng/common/templates/post-build/post-build.yml
     parameters:
       enableSymbolValidation: false
+      SDLValidationParameters:
+        enable: true
+        params: ' -SourceToolsList @("policheck","credscan")
+        -TsaInstanceURL $(_TsaInstanceURL)
+        -TsaProjectName $(_TsaProjectName)
+        -TsaNotificationEmail $(_TsaNotificationEmail)
+        -TsaCodebaseAdmin $(_TsaCodebaseAdmin)
+        -TsaBugAreaPath $(_TsaBugAreaPath)
+        -TsaIterationPath $(_TsaIterationPath)
+        -TsaRepositoryName "dotnet-sdk"
+        -TsaCodebaseName "dotnet-sdk"
+        -TsaPublish $True'
