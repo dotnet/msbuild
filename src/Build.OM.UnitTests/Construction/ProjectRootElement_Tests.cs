@@ -901,14 +901,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Build a solution file that can't be accessed
         /// </summary>
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Security classes are not supported on Unix
+
         public void SolutionCanNotBeOpened()
         {
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                // Security classes are not supported on Unix
-                return;
-            }
-
+            
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string solutionFile = null;
@@ -1037,12 +1034,9 @@ Project(""{";
         /// Open lots of projects concurrently to try to trigger problems
         /// </summary>
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]  //This test is platform specific for Windows
         public void ConcurrentProjectOpenAndCloseThroughProject()
         {
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                return; // TODO: This test hangs on Linux. Investigate
-            }
 
             int iterations = 500;
             string[] paths = ObjectModelHelpers.GetTempFiles(iterations);
