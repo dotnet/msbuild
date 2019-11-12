@@ -17,7 +17,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/sdk -->
-    <MicrosoftNETSdkPackageVersion>3.1.100-preview3.19561.2</MicrosoftNETSdkPackageVersion>
+    <MicrosoftNETSdkPackageVersion>3.1.100-preview3.19561.3</MicrosoftNETSdkPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/Microsoft/msbuild -->
