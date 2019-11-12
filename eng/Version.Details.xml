@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.AspNetCore.Analyzers" Version="3.1.0-preview3.19552.1">
+    <Dependency Name="Microsoft.AspNetCore.Analyzers" Version="5.0.0-alpha1.19555.3">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
-      <Sha>507379d642c0fb9b17913cfa3e316c52c1163373</Sha>
+      <Sha>d4f7a199c7616a6e2c3374c33587d65d83882904</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Components.Analyzers" Version="3.1.0-preview3.19552.1">
+    <Dependency Name="Microsoft.AspNetCore.Components.Analyzers" Version="5.0.0-alpha1.19555.3">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
-      <Sha>507379d642c0fb9b17913cfa3e316c52c1163373</Sha>
+      <Sha>d4f7a199c7616a6e2c3374c33587d65d83882904</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Mvc.Analyzers" Version="3.1.0-preview3.19552.1">
+    <Dependency Name="Microsoft.AspNetCore.Mvc.Analyzers" Version="5.0.0-alpha1.19555.3">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
-      <Sha>507379d642c0fb9b17913cfa3e316c52c1163373</Sha>
+      <Sha>d4f7a199c7616a6e2c3374c33587d65d83882904</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Mvc.Api.Analyzers" Version="3.1.0-preview3.19552.1">
+    <Dependency Name="Microsoft.AspNetCore.Mvc.Api.Analyzers" Version="5.0.0-alpha1.19555.3">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
-      <Sha>507379d642c0fb9b17913cfa3e316c52c1163373</Sha>
+      <Sha>d4f7a199c7616a6e2c3374c33587d65d83882904</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Web.Xdt" Version="3.0.0" Pinned="true">
       <Uri>https://github.com/aspnet/xdt</Uri>
@@ -23,9 +23,9 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19502.6">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="5.0.0-beta.19561.8">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>f4823f5c2c1f95e85bb595f533b17afc71924dd6</Sha>
+      <Sha>4fd4ceae13d9305a5868bd1c11409c89905f5aa1</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

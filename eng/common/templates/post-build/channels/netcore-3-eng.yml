@@ -4,18 +4,18 @@ parameters:
   publishInstallersAndChecksums: false
 
 stages:
-- stage: NetCore_Dev31_Publish
+- stage: NetCore_3_Tools_Publish
   dependsOn: validate
   variables:
     - template: ../common-variables.yml
-  displayName: .NET Core 3.1 Dev Publishing
+  displayName: .NET 3 Tools Publishing
   jobs:
   - template: ../setup-maestro-vars.yml
 
   - job: publish_symbols
     displayName: Symbol Publishing
     dependsOn: setupMaestroVars
-    condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', variables.PublicDevRelease_31_Channel_Id))
+    condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', variables.NetCore_3_Tools_Channel_Id))
     variables:
       - group: DotNet-Symbol-Server-Pats
     pool:
@@ -35,7 +35,7 @@ stages:
 
       # This is necessary whenever we want to publish/restore to an AzDO private feed
       # Since sdk-task.ps1 tries to restore packages we need to do this authentication here
-      # otherwise it'll complain about accessing a private feed.
+      # otherwise there will be authentication failures when accessing a private feed hosted in a different org.
       - task: NuGetAuthenticate@0
         displayName: 'Authenticate to AzDO Feeds'
 
@@ -60,8 +60,9 @@ stages:
 
       - template: ../../steps/publish-logs.yml
         parameters:
-          StageLabel: 'Channel_Net_Core_31_Dev'
+          StageLabel: 'Channel_Net_3_Tools'
           JobLabel: 'SymbolPublishing'
+
 
   - job: publish_assets
     displayName: Publish Assets
@@ -71,7 +72,7 @@ stages:
         value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.BARBuildId'] ]
       - name: IsStableBuild
         value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.IsStableBuild'] ]
-    condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', variables.PublicDevRelease_31_Channel_Id))
+    condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', variables.NetCore_3_Tools_Channel_Id))
     pool:
       vmImage: 'windows-2019'
     steps:
@@ -133,20 +134,19 @@ stages:
             /p:InstallersAzureAccountKey=$(dotnetcli-storage-key)
             /p:ChecksumsTargetStaticFeed=$(ChecksumsBlobFeedUrl)
             /p:ChecksumsAzureAccountKey=$(dotnetclichecksums-storage-key)
-            /p:PublishToAzureDevOpsNuGetFeeds=true
-            /p:AzureDevOpsStaticShippingFeed='https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet3.1/nuget/v3/index.json'
+            /p:AzureDevOpsStaticShippingFeed='https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json'
             /p:AzureDevOpsStaticShippingFeedKey='$(dn-bot-dnceng-artifact-feeds-rw)'
-            /p:AzureDevOpsStaticTransportFeed='https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet3.1-transport/nuget/v3/index.json'
+            /p:AzureDevOpsStaticTransportFeed='https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json'
             /p:AzureDevOpsStaticTransportFeedKey='$(dn-bot-dnceng-artifact-feeds-rw)'
-            /p:AzureDevOpsStaticSymbolsFeed='https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet3.1-symbols/nuget/v3/index.json'
+            /p:AzureDevOpsStaticSymbolsFeed='https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng-symbols/nuget/v3/index.json'
             /p:AzureDevOpsStaticSymbolsFeedKey='$(dn-bot-dnceng-artifact-feeds-rw)'
             ${{ parameters.artifactsPublishingAdditionalParameters }}
 
       - template: ../../steps/publish-logs.yml
         parameters:
-          StageLabel: 'Channel_Net_Core_31_Dev'
+          StageLabel: 'Channel_Net_3_Tools'
           JobLabel: 'AssetPublishing'
 
       - template: ../../steps/promote-build.yml
         parameters:
-          ChannelId: ${{ variables.PublicDevRelease_31_Channel_Id }}
+          ChannelId: ${{ variables.NetCore_3_Tools_Channel_Id }}

@@ -4,18 +4,18 @@ parameters:
   publishInstallersAndChecksums: false
 
 stages:
-- stage: NetCore_Dev31_Publish
+- stage: NetCore_Tools_Latest_Publish
   dependsOn: validate
   variables:
     - template: ../common-variables.yml
-  displayName: .NET Core 3.1 Dev Publishing
+  displayName: .NET Tools - Latest Publishing
   jobs:
   - template: ../setup-maestro-vars.yml
 
   - job: publish_symbols
     displayName: Symbol Publishing
     dependsOn: setupMaestroVars
-    condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', variables.PublicDevRelease_31_Channel_Id))
+    condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', variables.NetCore_Tools_Latest_Channel_Id))
     variables:
       - group: DotNet-Symbol-Server-Pats
     pool:
@@ -60,7 +60,7 @@ stages:
 
       - template: ../../steps/publish-logs.yml
         parameters:
-          StageLabel: 'Channel_Net_Core_31_Dev'
+          StageLabel: 'Channel_Net_Tools_Latest'
           JobLabel: 'SymbolPublishing'
 
   - job: publish_assets
@@ -71,7 +71,7 @@ stages:
         value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.BARBuildId'] ]
       - name: IsStableBuild
         value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.IsStableBuild'] ]
-    condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', variables.PublicDevRelease_31_Channel_Id))
+    condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', variables.NetCore_Tools_Latest_Channel_Id))
     pool:
       vmImage: 'windows-2019'
     steps:
@@ -133,20 +133,19 @@ stages:
             /p:InstallersAzureAccountKey=$(dotnetcli-storage-key)
             /p:ChecksumsTargetStaticFeed=$(ChecksumsBlobFeedUrl)
             /p:ChecksumsAzureAccountKey=$(dotnetclichecksums-storage-key)
-            /p:PublishToAzureDevOpsNuGetFeeds=true
-            /p:AzureDevOpsStaticShippingFeed='https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet3.1/nuget/v3/index.json'
+            /p:AzureDevOpsStaticShippingFeed='https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json'
             /p:AzureDevOpsStaticShippingFeedKey='$(dn-bot-dnceng-artifact-feeds-rw)'
-            /p:AzureDevOpsStaticTransportFeed='https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet3.1-transport/nuget/v3/index.json'
+            /p:AzureDevOpsStaticTransportFeed='https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json'
             /p:AzureDevOpsStaticTransportFeedKey='$(dn-bot-dnceng-artifact-feeds-rw)'
-            /p:AzureDevOpsStaticSymbolsFeed='https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet3.1-symbols/nuget/v3/index.json'
+            /p:AzureDevOpsStaticSymbolsFeed='https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng-symbols/nuget/v3/index.json'
             /p:AzureDevOpsStaticSymbolsFeedKey='$(dn-bot-dnceng-artifact-feeds-rw)'
             ${{ parameters.artifactsPublishingAdditionalParameters }}
 
       - template: ../../steps/publish-logs.yml
         parameters:
-          StageLabel: 'Channel_Net_Core_31_Dev'
+          StageLabel: 'Channel_Net_Tools_Latest'
           JobLabel: 'AssetPublishing'
 
       - template: ../../steps/promote-build.yml
         parameters:
-          ChannelId: ${{ variables.PublicDevRelease_31_Channel_Id }}
+          ChannelId: ${{ variables.NetCore_Tools_Latest_Channel_Id }}
