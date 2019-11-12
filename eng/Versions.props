@@ -70,15 +70,15 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/corefx -->
-    <SystemCodeDomPackageVersion>4.7.0-preview3.19561.4</SystemCodeDomPackageVersion>
-    <SystemTextEncodingCodePagesPackageVersion>4.7.0-preview3.19561.4</SystemTextEncodingCodePagesPackageVersion>
-    <SystemSecurityCryptographyProtectedDataPackageVersion>4.7.0-preview3.19561.4</SystemSecurityCryptographyProtectedDataPackageVersion>
-    <SystemResourcesExtensionsPackageVersion>4.7.0-preview3.19561.4</SystemResourcesExtensionsPackageVersion>
+    <SystemCodeDomPackageVersion>4.7.0-preview3.19561.8</SystemCodeDomPackageVersion>
+    <SystemTextEncodingCodePagesPackageVersion>4.7.0-preview3.19561.8</SystemTextEncodingCodePagesPackageVersion>
+    <SystemSecurityCryptographyProtectedDataPackageVersion>4.7.0-preview3.19561.8</SystemSecurityCryptographyProtectedDataPackageVersion>
+    <SystemResourcesExtensionsPackageVersion>4.7.0-preview3.19561.8</SystemResourcesExtensionsPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/core-setup -->
-    <MicrosoftNETCoreAppRefPackageVersion>3.1.0-preview3.19561.5</MicrosoftNETCoreAppRefPackageVersion>
-    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>3.1.0-preview3.19561.5</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
+    <MicrosoftNETCoreAppRefPackageVersion>3.1.0-preview3.19561.7</MicrosoftNETCoreAppRefPackageVersion>
+    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>3.1.0-preview3.19561.7</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
     <MicrosoftNETCoreAppRuntimePackageVersion>$(MicrosoftNETCoreAppRuntimewinx64PackageVersion)</MicrosoftNETCoreAppRuntimePackageVersion>
   </PropertyGroup>
   <PropertyGroup>
