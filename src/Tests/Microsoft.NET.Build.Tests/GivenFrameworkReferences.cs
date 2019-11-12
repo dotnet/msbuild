@@ -1067,7 +1067,7 @@ namespace FrameworkReferenceTest
                                                         "ResolvedFileToPublish", GetValuesCommand.ValueType.Item)
             {
                 DependsOnTargets = "ComputeFilesToPublish",
-                MetadataNames = { "PackageName", "IsTrimmable" },
+                MetadataNames = { "NuGetPackageId", "IsTrimmable" },
             };
 
             command.Execute().Should().Pass();
@@ -1075,7 +1075,7 @@ namespace FrameworkReferenceTest
                         select new
                         {
                             Identity = item.value,
-                            PackageName = item.metadata["PackageName"],
+                            PackageName = item.metadata["NuGetPackageId"],
                             IsTrimmable = item.metadata["IsTrimmable"]
                         };
 

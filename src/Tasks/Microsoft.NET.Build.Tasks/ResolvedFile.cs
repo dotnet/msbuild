@@ -76,7 +76,7 @@ namespace Microsoft.NET.Build.Tasks
                 throw new InvalidOperationException($"Unrecognized AssetType '{assetType}' for {SourcePath}");
             }
 
-            PackageName = item.GetMetadata(MetadataKeys.PackageName);
+            PackageName = item.GetMetadata(MetadataKeys.NuGetPackageId);
 
             PackageVersion = item.GetMetadata(MetadataKeys.NuGetPackageVersion);
             if (string.IsNullOrEmpty(PackageVersion))

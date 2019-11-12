@@ -44,7 +44,7 @@ namespace Microsoft.NET.Build.Tasks
                 resolvedFrameworkReference.SetMetadata(MetadataKeys.IsImplicitlyDefined, frameworkReference.GetMetadata(MetadataKeys.IsImplicitlyDefined));
 
                 resolvedFrameworkReference.SetMetadata("TargetingPackPath", targetingPack.GetMetadata(MetadataKeys.Path));
-                resolvedFrameworkReference.SetMetadata("TargetingPackName", targetingPack.GetMetadata(MetadataKeys.PackageName));
+                resolvedFrameworkReference.SetMetadata("TargetingPackName", targetingPack.GetMetadata(MetadataKeys.NuGetPackageId));
                 resolvedFrameworkReference.SetMetadata("TargetingPackVersion", targetingPack.GetMetadata(MetadataKeys.PackageVersion));
                 resolvedFrameworkReference.SetMetadata("Profile", targetingPack.GetMetadata("Profile"));
 
@@ -52,7 +52,7 @@ namespace Microsoft.NET.Build.Tasks
                 if (resolvedRuntimePacks.TryGetValue(frameworkReference.ItemSpec, out runtimePack))
                 {
                     resolvedFrameworkReference.SetMetadata("RuntimePackPath", runtimePack.GetMetadata(MetadataKeys.PackageDirectory));
-                    resolvedFrameworkReference.SetMetadata("RuntimePackName", runtimePack.GetMetadata(MetadataKeys.PackageName));
+                    resolvedFrameworkReference.SetMetadata("RuntimePackName", runtimePack.GetMetadata(MetadataKeys.NuGetPackageId));
                     resolvedFrameworkReference.SetMetadata("RuntimePackVersion", runtimePack.GetMetadata(MetadataKeys.PackageVersion));
                 }
 

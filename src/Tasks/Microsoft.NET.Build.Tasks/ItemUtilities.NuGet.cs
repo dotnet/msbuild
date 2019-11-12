@@ -11,7 +11,7 @@ namespace Microsoft.NET.Build.Tasks
     {
         public static PackageIdentity GetPackageIdentity(ITaskItem item)
         {
-            string packageName = item.GetMetadata(MetadataKeys.PackageName);
+            string packageName = item.GetMetadata(MetadataKeys.NuGetPackageId);
             string packageVersion = item.GetMetadata(MetadataKeys.PackageVersion);
 
             if (string.IsNullOrEmpty(packageVersion))

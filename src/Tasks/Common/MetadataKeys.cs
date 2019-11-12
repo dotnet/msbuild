@@ -12,7 +12,6 @@ namespace Microsoft.NET.Build.Tasks
         public const string FileGroup = "FileGroup";
         public const string Path = "Path";
         public const string ResolvedPath = "ResolvedPath";
-        public const string PackageName = "PackageName";
         public const string PackageVersion = "PackageVersion";
         public const string IsImplicitlyDefined = "IsImplicitlyDefined";
         public const string IsTopLevelDependency = "IsTopLevelDependency";
@@ -62,6 +61,7 @@ namespace Microsoft.NET.Build.Tasks
 
         // Package assets
         public const string NuGetIsFrameworkReference = "NuGetIsFrameworkReference";
+        public const string NuGetPackageId = "NuGetPackageId";
         public const string NuGetPackageVersion = "NuGetPackageVersion";
         public const string NuGetSourceType = "NuGetSourceType";
         public const string PathInPackage = "PathInPackage";
