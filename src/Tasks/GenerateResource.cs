@@ -27,7 +27,7 @@ using System.Xml;
 using System.Runtime.InteropServices;
 using System.Configuration;
 using System.Security;
-#if FEATURE_RESX_RESOURCE_READER
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
 using System.ComponentModel.Design;
 #endif
 #if FEATURE_APPDOMAIN
@@ -3011,7 +3011,7 @@ namespace Microsoft.Build.Tasks
                         // On full framework, the default is to use the longstanding
                         // deserialize/reserialize approach. On Core, always use the new
                         // preserialized approach.
-#if FEATURE_RESX_RESOURCE_READER
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
                         if (!_usePreserializedResources)
                         {
                             ResXResourceReader resXReader = null;
@@ -3050,7 +3050,7 @@ namespace Microsoft.Build.Tasks
                         break;
 
                     case Format.Binary:
-#if FEATURE_RESX_RESOURCE_READER
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
                         ReadResources(reader, new ResourceReader(filename), filename); // closes reader for us
                         break;
 #else
@@ -3318,7 +3318,7 @@ namespace Microsoft.Build.Tasks
                     break;
 
                 case Format.XML:
-#if FEATURE_RESX_RESOURCE_READER
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
                     WriteResources(reader, new ResXResourceWriter(filename)); // closes writer for us
 #else
                     _logger.LogError(format.ToString() + " not supported on .NET Core MSBuild");
@@ -3527,7 +3527,7 @@ namespace Microsoft.Build.Tasks
             return provider != null;
         }
 
-#if FEATURE_RESX_RESOURCE_READER
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
         /// <summary>
         /// Read resources from an XML or binary format file
         /// </summary>
@@ -3546,7 +3546,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
         }
-#endif // FEATURE_RESX_RESOURCE_READER
+#endif // FEATURE_RESXREADER_LIVEDESERIALIZATION
 
         /// <summary>
         /// Read resources from a text format file
