@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -26,7 +27,7 @@ namespace Microsoft.Build.UnitTests
 
                 bool successfulExit;
                 string output = RunnerUtilities.ExecMSBuild(projectFilePath + " /v:diag", out successfulExit);
-                Assert.True(successfulExit);
+                successfulExit.ShouldBeTrue(output);
 
                 string dllPath = Path.Combine(dir.Path, TaskDllFileName);
 
@@ -46,7 +47,7 @@ namespace Microsoft.Build.UnitTests
 
                 bool successfulExit;
                 string output = RunnerUtilities.ExecMSBuild(projectFilePath + " /v:diag /p:AssemblyPath=" + newTaskDllPath, out successfulExit);
-                Assert.True(successfulExit);
+                successfulExit.ShouldBeTrue(output);
 
                 CheckIfCorrectAssemblyLoaded(output, newTaskDllPath);
             }
@@ -66,16 +67,16 @@ namespace Microsoft.Build.UnitTests
             var newTaskDllPath = Path.Combine(temporaryDirectory, TaskDllFileName);
             var newDependencyDllPath = Path.Combine(temporaryDirectory, DependencyDllFileName);
 
-            Assert.True(File.Exists(originalTaskDllPath));
-            Assert.True(File.Exists(originalDependencyDllPath));
+            File.Exists(originalTaskDllPath).ShouldBeTrue();
+            File.Exists(originalDependencyDllPath).ShouldBeTrue();
 
             if (copy)
             {
                 File.Copy(originalTaskDllPath, newTaskDllPath);
                 File.Copy(originalDependencyDllPath, newDependencyDllPath);
 
-                Assert.True(File.Exists(newTaskDllPath));
-                Assert.True(File.Exists(newDependencyDllPath));
+                File.Exists(newTaskDllPath).ShouldBeTrue();
+                File.Exists(newDependencyDllPath).ShouldBeTrue();
             }
             else
             {
@@ -83,10 +84,10 @@ namespace Microsoft.Build.UnitTests
                 File.Move(originalDependencyDllPath, newDependencyDllPath);
 
 
-                Assert.True(File.Exists(newTaskDllPath));
-                Assert.True(File.Exists(newDependencyDllPath));
-                Assert.False(File.Exists(originalTaskDllPath));
-                Assert.False(File.Exists(originalDependencyDllPath));
+                File.Exists(newTaskDllPath).ShouldBeTrue();
+                File.Exists(newDependencyDllPath).ShouldBeTrue();
+                File.Exists(originalTaskDllPath).ShouldBeFalse();
+                File.Exists(originalDependencyDllPath).ShouldBeFalse();
             }
 
             return temporaryDirectory;
@@ -98,11 +99,11 @@ namespace Microsoft.Build.UnitTests
 
             if (expectedSuccess)
             {
-                Assert.Contains(successfulMessage, scriptOutput, StringComparison.OrdinalIgnoreCase);
+                scriptOutput.ShouldContain(successfulMessage, Case.Insensitive);
             }
             else
             {
-                Assert.DoesNotContain(successfulMessage, scriptOutput, StringComparison.OrdinalIgnoreCase);
+                scriptOutput.ShouldNotContain(successfulMessage, Case.Insensitive);
             }
         }
     }
