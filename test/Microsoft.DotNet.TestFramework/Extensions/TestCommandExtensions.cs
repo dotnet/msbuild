@@ -20,6 +20,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return subject;
         }
 
+        public static TCommand WithoutSettingDotnetRootEnvironmentVariable<TCommand>(this TCommand subject) where TCommand : TestCommand
+        {
+            subject.SetDotnetRootEnvironmentVariable = false;
+
+            return subject;
+        }
+
         public static TCommand WithWorkingDirectory<TCommand>(this TCommand subject, DirectoryInfo workingDirectory) where TCommand : TestCommand
         {
             subject.WorkingDirectory = workingDirectory.FullName;
@@ -31,6 +38,14 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         {
             subject.Environment.Add(name, value);
             
+            return subject;
+        }
+
+        public static TCommand WithRemovingEnvironmentVariable<TCommand>(this TCommand subject, params string[] names)
+            where TCommand : TestCommand
+        {
+            subject.EnvironmentToRemove.AddRange(names);
+
             return subject;
         }
         

@@ -26,12 +26,15 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         public int TimeoutMiliseconds { get; set; } = Timeout.Infinite;
 
         public Dictionary<string, string> Environment { get; } = new Dictionary<string, string>();
+        public List<string> EnvironmentToRemove { get; } = new List<string>();
 
         public event DataReceivedEventHandler ErrorDataReceived;
 
         public event DataReceivedEventHandler OutputDataReceived;
 
         public string WorkingDirectory { get; set; }
+
+        public bool SetDotnetRootEnvironmentVariable { get; set; } = true;
 
         public TestCommand(string command)
         {
@@ -147,6 +150,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             RemoveCliGeneratedEnvironmentVariablesFrom(psi);
 
+            RemoveEnvironmentVariablesTo(psi);
             AddEnvironmentVariablesTo(psi);
 
             AddWorkingDirectoryTo(psi);
@@ -225,7 +229,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             }
         }
 
-        
+        private void RemoveEnvironmentVariablesTo(ProcessStartInfo psi)
+        {
+            foreach (var name in EnvironmentToRemove)
+            {
+                psi.Environment.Remove(name);
+            }
+        }
 
         private void AddEnvironmentVariablesTo(ProcessStartInfo psi)
         {
@@ -244,15 +254,18 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             //  Flow the TEST_PACKAGES environment variable to the child process
             psi.Environment["TEST_PACKAGES"] = RepoDirectoriesProvider.TestPackages;
 
-            // Set DOTNET_ROOT to ensure sub process find the same host fxr
-            string dotnetDirectoryPath = Path.GetDirectoryName(RepoDirectoriesProvider.DotnetUnderTest);
-            if (System.Environment.Is64BitProcess)
+            if (SetDotnetRootEnvironmentVariable)
             {
-                psi.Environment.Add("DOTNET_ROOT", dotnetDirectoryPath);
-            }
-            else
-            {
-                psi.Environment.Add("DOTNET_ROOT(x86)", dotnetDirectoryPath);
+                // Set DOTNET_ROOT to ensure sub process find the same host fxr
+                string dotnetDirectoryPath = Path.GetDirectoryName(RepoDirectoriesProvider.DotnetUnderTest);
+                if (System.Environment.Is64BitProcess)
+                {
+                    psi.Environment.Add("DOTNET_ROOT", dotnetDirectoryPath);
+                }
+                else
+                {
+                    psi.Environment.Add("DOTNET_ROOT(x86)", dotnetDirectoryPath);
+                }
             }
         }
 
