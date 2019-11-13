@@ -17,13 +17,13 @@
       <Uri>https://github.com/dotnet/sdk</Uri>
       <Sha>14721ab65e7903c55c8ea1bdf9b9a2d9c686856b</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="16.4.0-preview-19529-02">
+    <Dependency Name="Microsoft.Build" Version="16.4.0">
       <Uri>https://github.com/microsoft/msbuild</Uri>
-      <Sha>0c507a29b6d59340ef5221f66df5d953c1049ba1</Sha>
+      <Sha>e901037fe1815eae17424f860412d0b967d09461</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build.Localization" Version="16.4.0-preview-19529-02">
+    <Dependency Name="Microsoft.Build.Localization" Version="16.4.0-preview-19561-07">
       <Uri>https://github.com/microsoft/msbuild</Uri>
-      <Sha>0c507a29b6d59340ef5221f66df5d953c1049ba1</Sha>
+      <Sha>e901037fe1815eae17424f860412d0b967d09461</Sha>
     </Dependency>
     <Dependency Name="Microsoft.FSharp.Compiler" Version="10.7.0-beta.19556.5">
       <Uri>https://github.com/dotnet/fsharp</Uri>
