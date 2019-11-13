@@ -2,6 +2,10 @@
 
 Utility to update dotnet-cli documentation from https://github.com/dotnet/docs.
 
+## Docker Usage
+
+If docker is installed, then simply execute `run_docker.sh` to update manpages.
+
 ## Prerequisites
 
 * Unix OS
