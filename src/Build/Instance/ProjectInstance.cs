@@ -2035,9 +2035,15 @@ namespace Microsoft.Build.Execution
             else
             {
                 int solutionVersion;
-                int visualStudioVersion;
-                SolutionFile.GetSolutionFileAndVisualStudioMajorVersions(projectFile, out solutionVersion, out visualStudioVersion);
-
+                int visualStudioVersion = 0;
+                if (FileUtilities.IsSolutionFilterFilename(projectFile))
+                {
+                    solutionVersion = 16;
+                }
+                else
+                {
+                    SolutionFile.GetSolutionFileAndVisualStudioMajorVersions(projectFile, out solutionVersion, out visualStudioVersion);
+                }
                 // If we get to this point, it's because it's a valid version.  Map the solution version 
                 // to the equivalent MSBuild ToolsVersion, and unless it's Dev10 or newer, spawn the old 
                 // engine to generate the solution wrapper.  
@@ -2064,7 +2070,7 @@ namespace Microsoft.Build.Execution
 
                     string toolsVersionToUse = Utilities.GenerateToolsVersionToUse(
                         explicitToolsVersion: null,
-                        toolsVersionFromProject: toolsVersion,
+                        toolsVersionFromProject: FileUtilities.IsSolutionFilterFilename(projectFile) ? MSBuildConstants.CurrentToolsVersion : toolsVersion,
                         getToolset: buildParameters.GetToolset,
                         defaultToolsVersion: Constants.defaultSolutionWrapperProjectToolsVersion,
                         usingDifferentToolsVersionFromProjectFile: out _);

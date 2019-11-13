@@ -637,6 +637,11 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private static bool WouldProjectBuild(SolutionFile solutionFile, string selectedSolutionConfiguration, ProjectInSolution project, ProjectConfigurationInSolution projectConfiguration)
         {
+            if (!solutionFile.IsFiltered(project.RelativePath))
+            {
+                return false;
+            }
+
             if (projectConfiguration == null)
             {
                 if (project.ProjectType == SolutionProjectType.WebProject)

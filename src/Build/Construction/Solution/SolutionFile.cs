@@ -8,6 +8,8 @@ using System.IO;
 using System.Text;
 using System.Globalization;
 using System.Security;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
@@ -19,6 +21,7 @@ using ExceptionUtilities = Microsoft.Build.Shared.ExceptionHandling;
 using System.Collections.ObjectModel;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using System.Linq.Expressions;
 
 namespace Microsoft.Build.Construction
 {
@@ -86,7 +89,7 @@ namespace Microsoft.Build.Construction
         #endregion
         #region Member data
         private string _solutionFile;                 // Could be absolute or relative path to the .SLN file.
-        private string _solutionFilterFile;
+        private HashSet<string> _solutionFilter;     // The project files to include in loading the solution.
         private bool _parsingForConversionOnly;      // Are we parsing this solution to get project reference data during
                                                      // conversion, or in preparation for actually building the solution?
 
@@ -199,13 +202,36 @@ namespace Microsoft.Build.Construction
                 ErrorUtilities.VerifyThrowInternalRooted(value);
                 if (FileUtilities.IsSolutionFilterFilename(value))
                 {
-                    _solutionFilterFile = value;
-                    _solutionFile = value.Substring(0, value.Length - 1);
+                    using (JsonDocument text = JsonDocument.Parse(File.ReadAllText(value)))
+                    {
+                        try
+                        {
+                            JsonElement solution = text.RootElement.GetProperty("solution");
+                            _solutionFile = solution.GetProperty("path").GetString();
+                            _solutionFilter = new HashSet<string>(NativeMethodsShared.IsLinux ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
+                            foreach (JsonElement project in solution.GetProperty("projects").EnumerateArray())
+                            {
+                                _solutionFilter.Add(project.GetString());
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                                (
+                                    false /* just throw the exception */,
+                                    "SubCategoryForSolutionParsingErrors",
+                                    new BuildEventFileInfo(value),
+                                    "SolutionFilterFileInvalid",
+                                    slnFileMinUpgradableVersion,
+                                    slnFileMaxVersion
+                                );
+                        }
+                    }
                 }
                 else
                 {
                     _solutionFile = value;
-                    _solutionFilterFile = FileSystems.Default.FileExists(value + "f") ? value + "f" : null;
+                    _solutionFilter = null;
                 }
             }
         }
@@ -228,6 +254,11 @@ namespace Microsoft.Build.Construction
         #endregion
 
         #region Methods
+
+        internal bool IsFiltered(string projectFile)
+        {
+            return _solutionFilter == null || _solutionFilter.Contains(projectFile);
+        }
 
         /// <summary>
         /// This method takes a path to a solution file, parses the projects and project dependencies
@@ -272,13 +303,10 @@ namespace Microsoft.Build.Construction
             solutionVersion = 0;
             visualStudioMajorVersion = 0;
 
-            // Solutions can be passed as either a solution or a solution filter or truncated list of what projects to build.
-            string realSolutionFile = FileUtilities.IsSolutionFilterFilename(solutionFile) ? solutionFile.Substring(0, solutionFile.Length - 1) : solutionFile;
-
             try
             {
                 // Open the file
-                fileStream = File.OpenRead(realSolutionFile);
+                fileStream = File.OpenRead(solutionFile);
                 reader = new StreamReader(fileStream, Encoding.GetEncoding(0)); // HIGHCHAR: If solution files have no byte-order marks, then assume ANSI rather than ASCII.
 
                 // Read first 4 lines of the solution file. 
@@ -304,7 +332,7 @@ namespace Microsoft.Build.Construction
                                 (
                                     false /* just throw the exception */,
                                     "SubCategoryForSolutionParsingErrors",
-                                    new BuildEventFileInfo(realSolutionFile),
+                                    new BuildEventFileInfo(solutionFile),
                                     "SolutionParseVersionMismatchError",
                                     slnFileMinUpgradableVersion,
                                     slnFileMaxVersion
@@ -318,7 +346,7 @@ namespace Microsoft.Build.Construction
                             (
                                 solutionVersion >= slnFileMinUpgradableVersion,
                                 "SubCategoryForSolutionParsingErrors",
-                                new BuildEventFileInfo(realSolutionFile),
+                                new BuildEventFileInfo(solutionFile),
                                 "SolutionParseVersionMismatchError",
                                 slnFileMinUpgradableVersion,
                                 slnFileMaxVersion
@@ -352,7 +380,7 @@ namespace Microsoft.Build.Construction
                 (
                     false /* just throw the exception */,
                     "SubCategoryForSolutionParsingErrors",
-                    new BuildEventFileInfo(realSolutionFile),
+                    new BuildEventFileInfo(solutionFile),
                     "SolutionParseNoHeaderError"
                  );
         }
@@ -445,55 +473,16 @@ namespace Microsoft.Build.Construction
 
             ParseFileHeader();
 
-            HashSet<string> slnFilter = null;
-            if (_solutionFilterFile != null)
-            {
-                slnFilter = new HashSet<string>();
-                string filterFile = File.ReadAllText(_solutionFilterFile);
-                int projectsInd = filterFile.IndexOf('[', filterFile.IndexOf("\"projects\":"));
-                bool inQuote = false;
-                StringBuilder sb = null;
-                if (projectsInd == -1)
-                {
-                    throw new InvalidDataException("Solution filter file is incorrectly formatted.");
-                }
-                while (filterFile.Length > projectsInd && (filterFile[projectsInd] != ']' || inQuote))
-                {
-                    if (filterFile[projectsInd] == '"')
-                    {
-                        inQuote = !inQuote;
-                        if (inQuote)
-                        {
-                            sb = new StringBuilder();
-                        }
-                        else
-                        {
-                            slnFilter.Add(Regex.Unescape(sb.ToString()));
-                        }
-                    }
-                    else if (inQuote)
-                    {
-                        sb.Append(filterFile[projectsInd]);
-                    }
-                    projectsInd++;
-                }
-                if (projectsInd == filterFile.Length)
-                {
-                    throw new InvalidDataException("Solution filter file is incorrectly formatted.");
-                }
-            }
-
             string str;
-            HashSet<string> guidFilter = new HashSet<string>();
             while ((str = ReadLine()) != null)
             {
                 if (str.StartsWith("Project(", StringComparison.Ordinal))
                 {
-                    ParseProject(str, slnFilter, guidFilter);
+                    ParseProject(str);
                 }
                 else if (str.StartsWith("GlobalSection(NestedProjects)", StringComparison.Ordinal))
                 {
-                    ParseNestedProjects(guidFilter);
+                    ParseNestedProjects();
                 }
                 else if (str.StartsWith("GlobalSection(SolutionConfigurationPlatforms)", StringComparison.Ordinal))
                 {
@@ -685,7 +674,7 @@ namespace Microsoft.Build.Construction
         ///  EndProject
         /// 
         /// </summary>
-        private void ParseProject(string firstLine, HashSet<string> slnFilter, HashSet<string> guidFilter)
+        private void ParseProject(string firstLine)
         {
             ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(firstLine), "ParseProject() got a null firstLine!");
             ErrorUtilities.VerifyThrow(SolutionReader != null, "ParseProject() got a null reader!");
@@ -750,20 +739,13 @@ namespace Microsoft.Build.Construction
             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(line != null, "SubCategoryForSolutionParsingErrors",
                 new BuildEventFileInfo(FullPath), "SolutionParseProjectEofError", proj.ProjectName);
 
-            if (slnFilter == null || slnFilter.Contains(proj.RelativePath))
+            // Add the project to the collection
+            AddProjectToSolution(proj);
+            // If the project is an etp project then parse the etp project file 
+            // to get the projects contained in it.
+            if (IsEtpProjectFile(proj.RelativePath))
             {
-                // Add the project to the collection
-                AddProjectToSolution(proj);
-                // If the project is an etp project then parse the etp project file 
-                // to get the projects contained in it.
-                if (IsEtpProjectFile(proj.RelativePath))
-                {
-                    ParseEtpProject(proj);
-                }
-            }
-            else if (slnFilter != null)
-            {
-                guidFilter.Add(proj.ProjectGuid);
+                ParseEtpProject(proj);
             }
         } // ParseProject()
 
@@ -1241,7 +1223,7 @@ namespace Microsoft.Build.Construction
         /// Read nested projects section.
         /// This is required to find a unique name for each project's target
         /// </summary>
-        internal void ParseNestedProjects(HashSet<string> guidFilter)
+        internal void ParseNestedProjects()
         {
             do
             {
@@ -1263,7 +1245,7 @@ namespace Microsoft.Build.Construction
                 string projectGuid = match.Groups["PROPERTYNAME"].Value.Trim();
                 string parentProjectGuid = match.Groups["PROPERTYVALUE"].Value.Trim();
 
-                if (!_projects.TryGetValue(projectGuid, out ProjectInSolution proj) && !guidFilter.Contains(projectGuid))
+                if (!_projects.TryGetValue(projectGuid, out ProjectInSolution proj))
                 {
                     ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(proj != null, "SubCategoryForSolutionParsingErrors",
                        new BuildEventFileInfo(FullPath, _currentLineNumber, 0), "SolutionParseNestedProjectUndefinedError", projectGuid, parentProjectGuid);

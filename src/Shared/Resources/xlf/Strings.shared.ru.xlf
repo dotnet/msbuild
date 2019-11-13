@@ -65,6 +65,11 @@
         <target state="translated">Длина пути {0} превышает максимально допустимую в ОС. Символов в полном имени файла должно быть не больше {1}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SolutionFilterFileInvalid">
+        <source>Unexpected solution filter file format.</source>
+        <target state="new">Unexpected solution filter file format.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
         <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
         <target state="translated">MSB4132: версия инструментов "{0}" не распознана. Доступные версии инструментов: {1}.</target>

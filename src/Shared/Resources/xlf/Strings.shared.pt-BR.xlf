@@ -65,6 +65,11 @@
         <target state="translated">Caminho: {0} excede o limite máximo do caminho do SO. O nome do arquivo totalmente qualificado deve ter menos de {1} caracteres.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SolutionFilterFileInvalid">
+        <source>Unexpected solution filter file format.</source>
+        <target state="new">Unexpected solution filter file format.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
         <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
         <target state="translated">MSB4132: A versão das ferramentas "{0}" não é reconhecida. As versões das ferramentas disponíveis são {1}.</target>

@@ -65,6 +65,11 @@
         <target state="translated">Cesta: {0} překračuje maximální limit pro cestu k OS. Plně kvalifikovaný název souboru musí být kratší než {1} znaků.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SolutionFilterFileInvalid">
+        <source>Unexpected solution filter file format.</source>
+        <target state="new">Unexpected solution filter file format.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
         <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
         <target state="translated">MSB4132: Verze nástrojů {0} je neznámá. Dostupné verze nástrojů jsou {1}.</target>

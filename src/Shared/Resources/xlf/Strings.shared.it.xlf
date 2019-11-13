@@ -65,6 +65,11 @@
         <target state="translated">Il percorso {0} supera il limite massimo dei percorsi del sistema operativo. Il nome completo del file deve essere composto da meno di {1}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SolutionFilterFileInvalid">
+        <source>Unexpected solution filter file format.</source>
+        <target state="new">Unexpected solution filter file format.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
         <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
         <target state="translated">MSB4132: versione degli strumenti "{0}" non riconosciuta. Le versioni disponibili sono {1}.</target>

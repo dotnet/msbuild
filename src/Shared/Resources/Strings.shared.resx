@@ -235,6 +235,9 @@
   <data name="UnrecognizedSolutionComment" UESanitized="false" Visibility="Public">
     <value>Unrecognized solution version "{0}", attempting to continue.</value>
   </data>
+  <data name="SolutionFilterFileInvalid" UESanitized="false" Visibility="Public">
+    <value>Unexpected solution filter file format.</value>
+  </data>
   <data name="SubCategoryForSolutionParsingErrors" UESanitized="false" Visibility="Public">
     <value>Solution file</value>
     <comment>UE: this fragment is used to describe errors found while parsing solution files. For example, if a normal error is

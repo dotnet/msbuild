@@ -65,6 +65,11 @@
         <target state="translated">Yol: {0}, işletim sisteminin en yüksek yol sınırını aşıyor. Tam dosya adı en fazla {1} karakter olmalıdır.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SolutionFilterFileInvalid">
+        <source>Unexpected solution filter file format.</source>
+        <target state="new">Unexpected solution filter file format.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
         <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
         <target state="translated">MSB4132: Araçlar sürümü "{0}" tanınmıyor. Kullanılabilir araç sürümleri şunlardır: {1}.</target>

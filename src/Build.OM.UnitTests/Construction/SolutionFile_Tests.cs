@@ -17,6 +17,15 @@ namespace Microsoft.Build.UnitTests.Construction
     public class SolutionFile_Tests
     {
         /// <summary>
+        /// Test that a solution filter file is parsed correctly.
+        /// </summary>
+        [Fact]
+        public void ParseSolutionFilter()
+        {
+
+        }
+
+        /// <summary>
         /// Test that a project with the C++ project guid and an extension of vcproj is seen as invalid.
         /// </summary>
         [Fact]
