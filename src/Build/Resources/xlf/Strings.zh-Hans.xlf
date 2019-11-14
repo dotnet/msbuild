@@ -82,6 +82,11 @@
         <target state="translated">MSB4255: 以下输入结果缓存文件不存在:“{0}”</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionFormat">
+        <source>Version string was not in a correct format.</source>
+        <target state="new">Version string was not in a correct format.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
         <source>Logging verbosity is set to: {0}.</source>
         <target state="translated">日志记录详细程度设置为: {0}。</target>

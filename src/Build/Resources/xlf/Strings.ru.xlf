@@ -82,6 +82,11 @@
         <target state="translated">MSB4255: следующие входные файлы кэша результатов не существуют: "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionFormat">
+        <source>Version string was not in a correct format.</source>
+        <target state="new">Version string was not in a correct format.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
         <source>Logging verbosity is set to: {0}.</source>
         <target state="translated">Уровень детализации журнала: {0}.</target>
