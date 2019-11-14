@@ -82,6 +82,11 @@
         <target state="translated">MSB4255: 다음 입력 결과 캐시 파일이 존재하지 않습니다. "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionFormat">
+        <source>Version string was not in a correct format.</source>
+        <target state="new">Version string was not in a correct format.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
         <source>Logging verbosity is set to: {0}.</source>
         <target state="translated">로깅의 세부 정보 표시가 {0}(으)로 설정되었습니다.</target>

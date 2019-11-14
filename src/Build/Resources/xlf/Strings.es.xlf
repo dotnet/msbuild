@@ -82,6 +82,11 @@
         <target state="translated">MSB4255: Los siguientes archivos de caché de resultados de entrada no existen: "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionFormat">
+        <source>Version string was not in a correct format.</source>
+        <target state="new">Version string was not in a correct format.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
         <source>Logging verbosity is set to: {0}.</source>
         <target state="translated">El nivel de detalle de registro está establecido en {0}.</target>
