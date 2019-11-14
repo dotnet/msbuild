@@ -87,7 +87,7 @@
       <_Stage0SdksFolder>$(DOTNET_INSTALL_DIR)\sdk\$(NETCoreSdkVersion)\Sdks</_Stage0SdksFolder>
     </PropertyGroup>
     <ItemGroup>
-      <LayoutFile Include="@(None)" Condition="'%(None.PackagePath)' != ''">
+      <LayoutFile Include="@(None)" Condition="'%(None.PackagePath)' != '' and '%(None.PackagePath)' != 'Icon.png'">
         <TargetPath>%(None.PackagePath)\%(None.RecursiveDir)%(None.Filename)%(None.Extension)</TargetPath>
       </LayoutFile>
       <PackFile Include="$(_NugetBuildTasksPackPath)\**\*" Exclude="$(_NugetBuildTasksPackPath)\*" />
