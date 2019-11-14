@@ -655,14 +655,7 @@ namespace Microsoft.Build.Internal
         /// <returns>Base Handshake</returns>
         private static long GetBaseHandshakeForContext(TaskHostContext hostContext)
         {
-            string salt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
-
-            long nodeHandshakeSalt = 0;
-
-            if (!string.IsNullOrEmpty(salt))
-            {
-                nodeHandshakeSalt = GetHandshakeHashCode(salt);
-            }
+            long salt = GetHandshakeHashCode(Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") + FileUtilities.ExecutingAssemblyPath);
 
             //FileVersionHash (32 bits) is shifted 8 bits to avoid session ID collision
             //hostContext (4 bits) is shifted just after the FileVersionHash
@@ -670,7 +663,7 @@ namespace Microsoft.Build.Internal
             //the most significant byte (leftmost 8 bits) will get zero'd out to avoid connecting to older builds.
             //| masked out | nodeHandshakeSalt | hostContext |              fileVersionHash             | SessionID
             //  0000 0000     0000 0000 0000        0000        0000 0000 0000 0000 0000 0000 0000 0000   0000 0000
-            long baseHandshake = (nodeHandshakeSalt << 44) | ((long)hostContext << 40) | ((long)FileVersionHash << 8);
+            long baseHandshake = (salt << 44) | ((long)hostContext << 40) | ((long)FileVersionHash << 8);
             return baseHandshake;
         }
 
