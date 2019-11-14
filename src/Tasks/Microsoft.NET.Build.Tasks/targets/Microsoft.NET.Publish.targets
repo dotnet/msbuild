@@ -856,7 +856,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_FilesToBundle Include="@(_ResolvedFileToPublishPreserveNewest)" 
                       Condition="'%(_ResolvedFileToPublishPreserveNewest.ExcludeFromSingleFile)' != 'true'"/>
       <_FilesToBundle Include="@(_ResolvedFileToPublishAlways)" 
-                      Condition="'%(_ResolvedFileToPublishPreserveNewest.ExcludeFromSingleFile)' != 'true'"/>
+                      Condition="'%(_ResolvedFileToPublishAlways.ExcludeFromSingleFile)' != 'true'"/>
     </ItemGroup>
 
   </Target>
