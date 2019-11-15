@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>.NET Test Driver</source>
+        <target state="translated">.NET Test Driver</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Test Driver for the .NET Platform</source>
+        <target state="translated">.NET Platform 用テスト ドライバー</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Run test(s), without displaying Microsoft Testplatform banner</source>
+        <target state="translated">Microsoft Testplatform バナーを表示せずにテストを実行する</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSettingsFile">
+        <source>SETTINGS_FILE</source>
+        <target state="translated">SETTINGS_FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSettingsDescription">
+        <source>The settings file to use when running tests.</source>
+        <target state="translated">テスト実行時に使用する設定ファイル。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdListTestsDescription">
+        <source>List the discovered tests instead of running the tests.</source>
+        <target state="translated">テストを実行する代わりに、検出されたテストを一覧表示します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdTestCaseFilterExpression">
+        <source>EXPRESSION</source>
+        <target state="translated">EXPRESSION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdTestCaseFilterDescription">
+        <source>Run tests that match the given expression.
+                                        Examples:
+                                        Run tests with priority set to 1: --filter "Priority = 1"
+                                        Run a test with the specified full name: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
+                                        Run tests that contain the specified name: --filter "FullyQualifiedName~Namespace.Class"
+                                        See https://aka.ms/vstest-filtering for more information on filtering support.
+                                        </source>
+        <target state="translated">指定された式に一致するテストを実行します。
+                                        例:
+                                        優先度を 1 に設定してテストを実行する: --filter "Priority = 1"
+                                        指定したフル ネームでテストを実行する: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
+                                        指定した名前を含むテストを実行する: --filter "FullyQualifiedName~Namespace.Class"
+                                        フィルタリング サポートの詳細は、https://aka.ms/vstest-filtering をご覧ください。
+                                        </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdTestAdapterPathDescription">
+        <source>The path to the custom adapters to use for the test run.</source>
+        <target state="translated">テストの実行に使用するカスタム アダプターへのパス。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdLoggerOption">
+        <source>LOGGER</source>
+        <target state="translated">LOGGER</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdLoggerDescription">
+        <source>The logger to use for test results.
+                                        Examples:
+                                        Log in trx format using a unique file name: --logger trx
+                                        Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
+                                        See https://aka.ms/vstest-report for more information on logger arguments.</source>
+        <target state="translated">テスト結果に使用するロガー。
+                                        例:
+                                        一意のファイル名を使用する trx 形式のログ: --logger trx
+                                        指定されたファイル名を使用する trx 形式のログ: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
+                                        ロガーの引数に関する詳細情報は、https://aka.ms/vstest-report を参照してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutputDir">
+        <source>OUTPUT_DIR</source>
+        <target state="translated">OUTPUT_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutputDescription">
+        <source>The output directory to place built artifacts in.</source>
+        <target state="translated">ビルド成果物を配置する出力ディレクトリ。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPathToLogFile">
+        <source>LOG_FILE</source>
+        <target state="translated">LOG_FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPathTologFileDescription">
+        <source>Enable verbose logging to the specified file.</source>
+        <target state="translated">指定したファイルに対する詳細ロギングを有効にします。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoBuildDescription">
+        <source>Do not build the project before testing. Implies --no-restore.</source>
+        <target state="translated">テストする前にプロジェクトをビルドしないでください。--no-restore を意味します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdTestAdapterPath">
+        <source>ADAPTER_PATH</source>
+        <target state="translated">ADAPTER_PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdResultsDirectoryDescription">
+        <source>The directory where the test results will be placed.
+The specified directory will be created if it does not exist.</source>
+        <target state="translated">テスト結果が配置されるディレクトリ。
+指定したディレクトリが存在しない場合は、作成されます。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPathToResultsDirectory">
+        <source>RESULTS_DIR</source>
+        <target state="translated">RESULTS_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IgnoredArgumentsMessage">
+        <source>The following arguments have been ignored : "{0}"</source>
+        <target state="new">The following arguments have been ignored : "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunSettingsArgumentsDescription">
+        <source>
+
+RunSettings arguments:
+  Arguments to pass as RunSettings configurations. Arguments are specified as '[name]=[value]' pairs after "-- " (note the space after --). 
+  Use a space to separate multiple '[name]=[value]' pairs.
+  See https://aka.ms/vstest-runsettings-arguments for more information on RunSettings arguments.
+  Example: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</source>
+        <target state="translated">
+
+RunSettings 引数:
+  RunSettings 構成として渡す引数。引数は、"-- " の後に '[name]=[value]' のペアとして指定します (-- の後のスペースを入れることにご注意ください)。
+  複数の [name] =[value] ペアを区切るにはスペースを使用します。
+  RunSettings 引数関する詳細は、https://aka.ms/vstest-runsettings-arguments をご覧ください。
+  例: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="cmdCollectFriendlyName">
+        <source>DATA_COLLECTOR_NAME</source>
+        <target state="translated">DATA_COLLECTOR_NAME</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="cmdCollectDescription">
+        <source>The friendly name of the data collector to use for the test run.
+                                        More info here: https://aka.ms/vstest-collect</source>
+        <target state="translated">テストの実行に使用するデータ コレクターのフレンドリ名。
+                                        詳細情報: https://aka.ms/vstest-collect</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdBlameDescription">
+        <source>Run the tests in blame mode. This option is helpful in isolating a problematic test causing the test host to crash.
+Outputs a 'Sequence.xml' file in the current directory that captures the order of execution of test before the crash.</source>
+        <target state="translated">変更履歴モードでテストを実行します。このオプションは、テスト ホストのクラッシュの原因となる問題のあるテストを分離する場合に役立ちます。
+現在のディレクトリに、クラッシュする前のテスト実行順序をキャプチャした出力ファイル 'Sequence.xml' が作成されます。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to run tests for. The target framework must also be specified in the project file.</source>
+        <target state="translated">テストを実行する対象のターゲット フレームワーク。ターゲット フレームワークはプロジェクト ファイルでも指定する必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to use for running tests. The default for most projects is 'Debug'.</source>
+        <target state="translated">テストの実行に使用する構成。ほとんどのプロジェクトで、既定値は 'Debug' です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to test for.</source>
+        <target state="translated">テスト対象のターゲット ランタイム。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

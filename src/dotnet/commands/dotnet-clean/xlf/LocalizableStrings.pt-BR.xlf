@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>.NET Clean Command</source>
+        <target state="translated">Comando Clean do .NET</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Command to clean previously generated build outputs.</source>
+        <target state="translated">Comando para limpar saídas de build geradas anteriormente.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="translated">Não exibe a faixa de inicialização ou a mensagem de direitos autorais.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutputDir">
+        <source>OUTPUT_DIR</source>
+        <target state="translated">OUTPUT_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutputDirDescription">
+        <source>The directory containing the build artifacts to clean.</source>
+        <target state="translated">O diretório que contém os artefatos de build a serem limpos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to clean for. The target framework must also be specified in the project file.</source>
+        <target state="translated">A estrutura de destino para a qual a limpeza ocorrerá. A estrutura de destino também precisa ser especificada no arquivo de projeto.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to clean for.</source>
+        <target state="translated">O runtime de destino para o qual a limpeza ocorrerá.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to clean for. The default for most projects is 'Debug'.</source>
+        <target state="translated">A configuração para a qual a limpeza ocorrerá. O padrão para a maioria dos projetos é 'Debug'.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

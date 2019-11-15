@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppDescription">
+        <source>Stores the specified assemblies for the .NET Platform. By default, these will be optimized for the target runtime and framework.</source>
+        <target state="translated">.NET 플랫폼에 대해 지정된 어셈블리를 저장합니다. 기본적으로 대상 런타임 및 프레임워크에 대해 최적화됩니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutputOption">
+        <source>OUTPUT_DIR</source>
+        <target state="translated">OUTPUT_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutputOptionDescription">
+        <source>The output directory to store the given assemblies in.</source>
+        <target state="translated">지정된 어셈블리를 저장할 출력 디렉터리입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkVersionOption">
+        <source>FRAMEWORK_VERSION</source>
+        <target state="translated">FRAMEWORK_VERSION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkVersionOptionDescription">
+        <source>The Microsoft.NETCore.App package version that will be used to run the assemblies.</source>
+        <target state="translated">어셈블리를 실행하는 데 사용되는 Microsoft.NETCore.App 패키지 버전입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IntermediateWorkingDirOption">
+        <source>WORKING_DIR</source>
+        <target state="translated">WORKING_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IntermediateWorkingDirOptionDescription">
+        <source>The working directory used by the command to execute.</source>
+        <target state="translated">실행할 명령에서 사용하는 작업 디렉터리입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IntermediateDirExists">
+        <source>Intermediate working directory {0} already exists. Remove {0} or specify another directory with -w.</source>
+        <target state="translated">중간 작업 디렉터리 {0}이(가) 이미 있습니다. {0}을(를) 제거하거나 -w를 포함하는 다른 디렉터리를 지정하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipOptimizationOptionDescription">
+        <source>Skip the optimization phase.</source>
+        <target state="translated">최적화 단계를 건너뜁니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectManifest">
+        <source>PROJECT_MANIFEST</source>
+        <target state="translated">PROJECT_MANIFEST</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectManifestDescription">
+        <source>The XML file that contains the list of packages to be stored.</source>
+        <target state="translated">저장될 패키지 목록을 포함하는 XML 파일입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipSymbolsOptionDescription">
+        <source>Skip creating symbol files which can be used for profiling the optimized assemblies.</source>
+        <target state="translated">최적화된 어셈블리 프로파일링에 대해 사용할 수 있는 기호 파일 만들기를 건너뜁니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyManifests">
+        <source>Specify at least one manifest with --manifest.</source>
+        <target state="translated">--manifest가 포함된 매니페스트를 하나 이상 지정하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to store packages for. The target framework has to be specified in the project file.</source>
+        <target state="translated">패키지를 저장할 대상 프레임워크입니다. 대상 프레임워크는 프로젝트 파일에서 지정해야 합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to store packages for.</source>
+        <target state="translated">패키지를 저장할 대상 런타임입니다.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

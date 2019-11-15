@@ -1,0 +1,167 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ru" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="LastArgumentMultiValueError">
+        <source>The last argument '{0}' accepts multiple values. No more argument can be added.</source>
+        <target state="translated">Последний аргумент "{0}" принимает несколько значений. Добавить дополнительные аргументы нельзя.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedValueForOptionError">
+        <source>Unexpected value '{0}' for option '{1}'</source>
+        <target state="translated">Непредвиденное значение "{0}" для параметра "{1}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedArgumentError">
+        <source>Unrecognized {0} '{1}'</source>
+        <target state="translated">Нераспознанное значение {0} "{1}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResponseFileNotFoundError">
+        <source>Response file '{0}' doesn't exist.</source>
+        <target state="translated">Файл ответов "{0}" не существует.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShowHelpInfo">
+        <source>Show command line help.</source>
+        <target state="translated">Показать справку командной строки.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShowVersionInfo">
+        <source>Show version information</source>
+        <target state="translated">Показать информацию о версии</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShowHintInfo">
+        <source>Specify --{0} for a list of available options and commands.</source>
+        <target state="translated">Укажите --{0} для вывода списка доступных параметров и команд.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageHeader">
+        <source>Usage:</source>
+        <target state="translated">Использование:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageArgumentsToken">
+        <source> [arguments]</source>
+        <target state="translated"> [аргументы]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageArgumentsHeader">
+        <source>Arguments:</source>
+        <target state="translated">Аргументы:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageOptionsToken">
+        <source> [options]</source>
+        <target state="translated"> [параметры]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageOptionsHeader">
+        <source>Options:</source>
+        <target state="translated">Параметры:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandToken">
+        <source> [command]</source>
+        <target state="translated"> [команда]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandsHeader">
+        <source>Commands:</source>
+        <target state="translated">Команды:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandsDetailHelp">
+        <source>Use "{0} [command] --help" for more information about a command.</source>
+        <target state="translated">Используйте синтаксис "{0} [команда] --help" для получения дополнительной информации о команде.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandArgs">
+        <source> [args]</source>
+        <target state="translated"> [аргументы]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandAdditionalArgs">
+        <source> [[--] &lt;additional arguments&gt;...]]</source>
+        <target state="translated"> [[--] &lt;дополнительные аргументы&gt;...]]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandsAdditionalArgsHeader">
+        <source>Additional Arguments:</source>
+        <target state="translated">Дополнительные аргументы:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidTemplateError">
+        <source>Invalid template pattern '{0}'</source>
+        <target state="translated">Недопустимая схема шаблона "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildAdditionalArgsHelpText">
+        <source>Any extra options that should be passed to MSBuild. See 'dotnet msbuild -h' for available options.</source>
+        <target state="translated">Все дополнительные параметры, которые следует передать в MSBuild. Для получения сведений о доступных параметрах см. "dotnet msbuild -h".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionRequiresSingleValueWhichIsMissing">
+        <source>Required value for option '{0}' was not provided.</source>
+        <target state="translated">Не указано обязательное значение параметра "{0}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandAcceptsOnlyOneArgument">
+        <source>Command '{0}' only accepts a single argument but {1} were provided.</source>
+        <target state="translated">Команда "{0}" принимает только один аргумент, но указано несколько аргументов: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandAcceptsOnlyOneSubcommand">
+        <source>Command '{0}' only accepts a single subcommand but multiple were provided: {1}</source>
+        <target state="translated">Команда "{0}" принимает только одну подкоманду, но указано несколько подкоманд: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileDoesNotExist">
+        <source>File does not exist: {0}</source>
+        <target state="translated">Файл не существует: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoArgumentsAllowed">
+        <source>Arguments not allowed for option: {0}</source>
+        <target state="translated">Аргументы для параметра не допускаются: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionAcceptsOnlyOneArgument">
+        <source>Option '{0}' only accepts a single argument but {1} were provided.</source>
+        <target state="translated">Параметр "{0}" принимает только один аргумент, но указано несколько аргументов: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentMissingForCommand">
+        <source>Required argument missing for command: {0}</source>
+        <target state="translated">Отсутствует обязательный аргумент для команды: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentMissingForOption">
+        <source>Required argument missing for option: {0}</source>
+        <target state="translated">Отсутствует обязательный аргумент для параметра: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredCommandWasNotProvided">
+        <source>Required command was not provided.</source>
+        <target state="translated">Обязательная команда не указана.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedArgument">
+        <source>Argument '{0}' not recognized. Must be one of: {1}</source>
+        <target state="translated">Аргумент "{0}" не распознан. Он должен быть одним из следующих: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedCommandOrArgument">
+        <source>Unrecognized command or argument '{0}'</source>
+        <target state="translated">Нераспознанная команда или аргумент "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedOption">
+        <source>Option '{0}' not recognized. Must be one of: {1}</source>
+        <target state="translated">Параметр "{0}" не распознан. Он должен быть одним из следующих: {1}</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>Add a NuGet package reference to the project.</source>
+        <target state="translated">Projeye bir NuGet paketi başvurusu ekleyin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Command to add package reference</source>
+        <target state="translated">Paket başvurusu ekleme komutu</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageReference">
+        <source>Specify one package reference to add.</source>
+        <target state="translated">Eklenecek tek bir paket başvurusu belirtin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFrameworkDescription">
+        <source>Add the reference only when targeting a specific framework.</source>
+        <target state="translated">Başvuruyu yalnızca belirli bir çerçeveyi hedeflerken ekler.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoRestoreDescription">
+        <source>Add the reference without performing restore preview and compatibility check.</source>
+        <target state="translated">Başvuruyu, geri yükleme önizlemesi ve uyumluluk denetimi gerçekleştirmeden ekler.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSourceDescription">
+        <source>The NuGet package source to use during the restore.</source>
+        <target state="translated">Geri yükleme sırasında kullanılacak NuGet paketi kaynağı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPackageDirectoryDescription">
+        <source>The directory to restore packages to.</source>
+        <target state="translated">Paketlerin geri yükleneceği dizin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdVersionDescription">
+        <source>The version of the package to add.</source>
+        <target state="translated">Eklenecek paketin sürümü.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdDGFileException">
+        <source>Unable to create dependency graph file for project '{0}'. Cannot add package reference.</source>
+        <target state="translated">'{0}' projesi için bağımlılık grafiği dosyası oluşturulamadı. Paket başvurusu eklenemiyor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdVersion">
+        <source>VERSION</source>
+        <target state="translated">SÜRÜM</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFramework">
+        <source>FRAMEWORK</source>
+        <target state="translated">ÇERÇEVE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSource">
+        <source>SOURCE</source>
+        <target state="translated">SOURCE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPackageDirectory">
+        <source>PACKAGE_DIR</source>
+        <target state="translated">PACKAGE_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPackageDescription">
+        <source>The package reference to add.</source>
+        <target state="translated">Eklenecek paket başvurusu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPackage">
+        <source>PACKAGE_NAME</source>
+        <target state="translated">PACKAGE_NAME</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdDGFileIOException">
+        <source>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Clear the temp directory and try again.</source>
+        <target state="translated">'{0}' projesi için geçici dosya oluşturulamıyor. Paket başvurusu eklenemiyor. Geçici dizini temizleyin ve yeniden deneyin.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

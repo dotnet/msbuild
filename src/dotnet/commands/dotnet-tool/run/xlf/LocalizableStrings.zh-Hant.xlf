@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CannotFindCommandName">
+        <source>Cannot find a tool in the manifest file that has a command named '{0}'.</source>
+        <target state="translated">在資訊清單中找不到有名稱 '{0}' 命令的工具。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Run local tool.</source>
+        <target state="translated">執行本機工具。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandNameArgumentDescription">
+        <source>The command name of the tool to run.</source>
+        <target state="translated">要執行的工具命令名稱。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandNameArgumentName">
+        <source>COMMAND_NAME</source>
+        <target state="translated">COMMAND_NAME</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOneCommandName">
+        <source>Specify one command name to run.</source>
+        <target state="translated">請指定一個要執行的命令名稱。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppDescription">
+        <source>Publisher for the .NET Platform</source>
+        <target state="translated">.NET 플랫폼용 게시자입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="translated">시작 배너 또는 저작권 메시지를 표시하지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOption">
+        <source>FRAMEWORK</source>
+        <target state="translated">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to publish for. The target framework has to be specified in the project file.</source>
+        <target state="translated">게시할 대상 프레임워크입니다. 대상 프레임워크는 프로젝트 파일에서 지정해야 합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoSelfContainedOptionDescription">
+        <source>Publish your application as a framework dependent application without the .NET Core runtime. A supported .NET Core runtime must be installed to run your application.</source>
+        <target state="translated">.NET Core 런타임 없이 애플리케이션을 프레임워크 종속 애플리케이션으로 게시합니다. 애플리케이션을 실행하려면 지원되는 .NET Core 런타임을 설치해야 합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutputOption">
+        <source>OUTPUT_DIR</source>
+        <target state="translated">OUTPUT_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutputOptionDescription">
+        <source>The output directory to place the published artifacts in.</source>
+        <target state="translated">게시된 아티팩트를 배치할 출력 디렉터리입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestOption">
+        <source>MANIFEST</source>
+        <target state="translated">MANIFEST</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestOptionDescription">
+        <source>The path to a target manifest file that contains the list of packages to be excluded from the publish step.</source>
+        <target state="translated">게시 단계에서 제외할 패키지 목록이 들어 있는 대상 매니페스트 파일의 경로입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoBuildOptionDescription">
+        <source>Do not build the project before publishing. Implies --no-restore.</source>
+        <target state="translated">게시하기 전에 프로젝트를 빌드하지 않습니다. 복원 없음을 의미합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to publish for. This is used when creating a self-contained deployment.
+The default is to publish a framework-dependent application.</source>
+        <target state="translated">게시할 대상 런타임입니다. 자체 포함 배포를 만들 때 사용됩니다.
+기본값은 프레임워크 종속 애플리케이션을 게시하는 것입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
+        <target state="translated">게시할 구성입니다. 대부분의 프로젝트에서 기본값은 'Debug'입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainAndNoSelfContainedConflict">
+        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
+        <target state="translated">'--self-contained' 옵션과 '--no-self-contained' 옵션이 서로 충돌합니다. 해당 옵션 중 하나만 지정하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionDescription">
+        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</source>
+        <target state="translated">런타임은 대상 컴퓨터에 설치할 필요가 없으므로 애플리케이션과 함께 .NET Core 런타임을 게시합니다.
+런타임 식별자가 지정된 경우 기본값은 'true'입니다.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

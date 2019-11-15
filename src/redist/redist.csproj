@@ -16,6 +16,7 @@
   <Import Project="targets\GenerateLayout.targets" />
   <Import Project="targets\GenerateArchive.targets" />
   <Import Project="targets\OverlaySdkOnLKG.targets" />
+  <Import Project="targets\MSBuildExtensions.targets" />
 
   <ItemGroup>
     <PackageReference Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksPackageVersion)" />
@@ -30,12 +31,13 @@
     <PackageReference Include="System.CodeDom" Version="$(SystemCodeDomPackageVersion)" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="$(SystemTextEncodingCodePagesPackageVersion)" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="$(SystemSecurityCryptographyProtectedDataPackageVersion)" />
+    <PackageReference Include="System.Resources.Extensions" Version="$(SystemResourcesExtensionsPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\tool_msbuild\tool_msbuild.csproj" />
-    <ProjectReference Include="..\tool_cli\tool_cli.csproj" />
     <ProjectReference Include="..\tool_nuget\tool_nuget.csproj" />
+    <ProjectReference Include="..\dotnet\dotnet.csproj" />
   </ItemGroup>
 
   <ItemGroup>

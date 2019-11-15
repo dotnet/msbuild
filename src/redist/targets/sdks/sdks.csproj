@@ -9,8 +9,6 @@
 
   <ItemGroup>
     <PackageReference Include="$(DependencyPackageName)" Version="$(DependencyPackageVersion)" />
-    <PackageReference Condition="'$(DependencyPackageName)' == 'Microsoft.NET.Sdk.Web'" Include="Microsoft.NET.Sdk" Version="$(MicrosoftNETSdkPackageVersion)" />
-    <PackageReference Condition="'$(DependencyPackageName)' == 'Microsoft.NET.Sdk.Web'" Include="Microsoft.NET.Sdk.Razor" Version="$(MicrosoftNETSdkRazorPackageVersion)" />
   </ItemGroup>
 
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

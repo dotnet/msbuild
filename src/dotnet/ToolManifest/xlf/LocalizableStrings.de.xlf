@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="de" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CannotFindAManifestFile">
+        <source>Cannot find a manifest file.
+For a list of locations searched, specify the "-d" option before the tool name.</source>
+        <target state="translated">Es wurde keine Manifestdatei gefunden.
+Eine Liste der durchsuchten Speicherorte erhalten Sie, indem Sie vor dem Toolnamen die Option "-d" angeben.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotFindPackageIdInManifest">
+        <source>Cannot find a package with the package id {0} in the manifest file.</source>
+        <target state="translated">In der Manifestdatei wurde kein Paket mit der Paket-ID {0} gefunden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ListOfSearched">
+        <source>The list of searched paths:
+{0}</source>
+        <target state="translated">Die Liste der durchsuchten Pfade:
+{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestHasMarkOfTheWeb">
+        <source>File {0} came from another computer and might be blocked to help protect this computer. For more information, including how to unblock, see https://aka.ms/motw</source>
+        <target state="translated">Die Datei "{0}" stammt von einem anderen Computer und wurde möglicherweise zum Schutz dieses Computers blockiert. Weitere Informationen zum Aufheben der Sperre und zu anderen Aktionen finden Sie unter https://aka.ms/motw.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPackageIdCollision">
+        <source>Cannot add package. Manifest file already contains version {0} of the package {1}. Uninstall/install or edit manifest file {2} to specify the new version {3}.</source>
+        <target state="translated">Das Paket kann nicht hinzugefügt werden. Die Manifestdatei enthält bereits Version {0} des Pakets "{1}". Deinstallieren/installieren oder bearbeiten Sie die Manifestdatei "{2}", um die neue Version {3} anzugeben.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MultipleSamePackageId">
+        <source>More than one entry exists for package(s): {0}.</source>
+        <target state="translated">Für diese Pakete ist mehr als ein Eintrag vorhanden: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedTypeInJson">
+        <source>Expected a {0} for property '{1}'.</source>
+        <target state="translated">Erwartet wurde "{0}" für die Eigenschaft "{1}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionIsInvalid">
+        <source>Version {0} is invalid.</source>
+        <target state="translated">Version {0} ist ungültig.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FieldCommandsIsMissing">
+        <source>Missing 'commands' entry.</source>
+        <target state="translated">Eintrag "commands" fehlt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidManifestFilePrefix">
+        <source>Invalid manifest file. Path {0}:
+{1}</source>
+        <target state="translated">Ungültige Manifestdatei. Pfad "{0}":
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InPackage">
+        <source>In package {0}:
+{1}</source>
+        <target state="translated">Im Paket "{0}":
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestVersionHigherThanSupported">
+        <source>Manifest version is {0}. This manifest may not be supported in this SDK version that can support up to manifest version {1}.</source>
+        <target state="translated">Die Manifestversion lautet {0}. Dieses Manifest wird in dieser SDK-Version möglicherweise nicht unterstützt. Das SDK unterstützt Manifestversionen bis Version {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestVersion0">
+        <source>Manifest version 0 is not supported.</source>
+        <target state="translated">Die Manifestversion 0 wird nicht unterstützt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolMissingVersion">
+        <source>Missing 'version' entry.</source>
+        <target state="translated">Eintrag "version" fehlt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="JsonParsingError">
+        <source>Json parsing error in file {0} : {1}</source>
+        <target state="translated">JSON-Analysefehler in der Datei "{0}": {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestMissingIsRoot">
+        <source>Missing 'isRoot' entry.</source>
+        <target state="translated">Eintrag "isRoot" fehlt.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
