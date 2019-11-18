@@ -102,19 +102,6 @@ jobs:
               -ci
               -restore
               -test
-              -projects $(Build.SourcesDirectory)\src\Tests\Microsoft.NET.Build.NonHelix.Tests\Microsoft.NET.Build.NonHelix.Tests.csproj
-              /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\TestInNonHelix.binlog
-        displayName: Run Tests that cannot run in Helix
-        env:
-            TestFullMSBuild: 'true'
-            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-            HelixAccessToken: ''
-      - powershell: eng\common\build.ps1
-              -configuration $(_BuildConfig)
-              -prepareMachine
-              -ci
-              -restore
-              -test
               -projects $(Build.SourcesDirectory)\src\Tests\UnitTests.proj
               /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\TestInHelix.binlog
               /p:_CustomHelixTargetQueue=${{ parameters.helixTargetQueue }}

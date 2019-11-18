@@ -14,7 +14,6 @@
 
   <ItemGroup>
     <SDKCustomXUnitProject Include="**\*.Tests.csproj"/>
-    <SDKCustomXUnitProject Remove="**\*.NonHelix.Tests.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(HelixAccessToken)' == '' ">
