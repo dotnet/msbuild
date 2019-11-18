@@ -163,7 +163,7 @@
       </trans-unit>
       <trans-unit id="Copy.ErrorIfLinkFailsSetWithoutLinkOption">
         <source>MSB3892: ErrorIfLinkFails requires UseHardlinksIfPossible or UseSymbolicLinksIfPossible to be set.</source>
-        <target state="new">MSB3892: ErrorIfLinkFails requires UseHardlinksIfPossible or UseSymbolicLinksIfPossible to be set.</target>
+        <target state="translated">MSB3892: ErrorIfLinkFails vyžaduje, aby byly nastavené UseHardlinksIfPossible nebo UseSymbolicLinksIfPossible.</target>
         <note>{StrBegin="MSB3892: "} LOCALIZATION: Do not localize "ErrorIfLinkFails", "UseHardLinksIfPossible", or "UseSymbolicLinksIfPossible".</note>
       </trans-unit>
       <trans-unit id="Copy.ExactlyOneTypeOfDestination">
@@ -183,7 +183,7 @@
       </trans-unit>
       <trans-unit id="Copy.LinkFailed">
         <source>MSB3893: Could not use a link to copy "{0}" to "{1}".</source>
-        <target state="new">MSB3893: Could not use a link to copy "{0}" to "{1}".</target>
+        <target state="translated">MSB3893: Nedá se použít odkaz pro kopírování {0} do {1}.</target>
         <note>{StrBegin="MSB3893: "} LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
       <trans-unit id="Copy.RetryingAsFileCopy">
@@ -981,7 +981,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
         <source>MSB3824: In order to build with .NET Core, resource inputs must be in .txt or .resx format.</source>
-        <target state="new">MSB3824: In order to build with .NET Core, resource inputs must be in .txt or .resx format.</target>
+        <target state="translated">MSB3824: Aby bylo možné provést sestavení pomocí .NET Core, musí být vstupy prostředků ve formátu .txt nebo .resx.</target>
         <note>{StrBegin="MSB3824: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.InputDoesntExist">
@@ -1041,7 +1041,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.CorruptOutput">
         <source>Output file "{0}" is possibly corrupt and will be deleted and recreated.</source>
-        <target state="needs-review-translation">MSB3555: Výstupní soubor {0} je zřejmě poškozen.</target>
+        <target state="translated">Výstupní soubor {0} je pravděpodobně poškozený a bude odstraněn a znovu vytvořen.</target>
         <note />
       </trans-unit>
       <trans-unit id="GenerateResource.OnlyStringsSupported">
@@ -1066,7 +1066,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.DeleteCorruptOutputFailed">
         <source>MSB3560: Could not delete the possibly corrupt output file "{0}". {1}</source>
-        <target state="needs-review-translation">MSB3560: Nelze odstranit výstupní soubor {0}, který by mohl být poškozen. {1}</target>
+        <target state="translated">MSB3560: Nelze odstranit výstupní soubor {0}, který by mohl být poškozen. {1}</target>
         <note>{StrBegin="MSB3560: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ObsoleteStringsTag">
@@ -1708,7 +1708,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoRedistAssembliesToGenerateExclusionList">
         <source>MSB3256: No assemblies were read in from the redist lists. A TargetFramework profile exclusion list could not be generated. </source>
-        <target state="translated">MSB3256: Ze seznamů redistribuce nebyla přečtena žádná sestavení. Nelze vygenerovat seznam vyloučení profilu TargetFramework. </target>
+        <target state="translated">MSB3256: Ze seznamů redistribučního balíčku nebyla přečtena žádná sestavení. Nelze vygenerovat seznam vyloučení profilu TargetFramework. </target>
         <note>{StrBegin="MSB3256: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.PrimaryReferenceOutsideOfFramework">
@@ -1728,7 +1728,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoProfilesFound">
         <source>MSB3260: Could not find any target framework profile redist files in the FullFrameworkFolders locations.</source>
-        <target state="translated">MSB3260: V umístěních uvedených v parametru FullFrameworkFolders nelze najít žádné soubory redistribuce profilu cílové architektury.</target>
+        <target state="translated">MSB3260: V umístěních uvedených v parametru FullFrameworkFolders nelze najít žádné soubory redistribučního balíčku profilu cílové architektury.</target>
         <note>{StrBegin="MSB3260: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FrameworkDirectoryOnProfiles">
@@ -1931,7 +1931,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.RemappedReference">
         <source>Due to a remapping entry in the currently targeted framework redist list, reference "{0}" was remapped to "{1}".</source>
-        <target state="translated">Na základě položky pro změnu mapování v redistribučním seznamu aktuálního cílového rozhraní byl odkaz {0} přemapován na odkaz {1}.</target>
+        <target state="translated">Na základě položky pro změnu mapování v seznamu redistribučního balíčku aktuálního cílového rozhraní byl odkaz {0} přemapován na odkaz {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnificationByFrameworkRetarget">
@@ -1991,7 +1991,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.TargetFrameworkRedistLogHeader">
         <source>Redist List File Paths:</source>
-        <target state="translated">Cesty k souborům v seznamu redistribuce:</target>
+        <target state="translated">Cesty k souborům v seznamu redistribučního balíčku:</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.TargetFrameworkExclusionListLogHeader">
@@ -2006,7 +2006,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
-        <target state="translated">Název redistribuce v elementu FileList v souboru seznamu redistribuce {0} má hodnotu Null nebo je prázdný. Název redistribuce nesmí mít hodnotu Null ani nesmí být prázdný.</target>
+        <target state="translated">Název redistribučního balíčku v elementu FileList v souboru seznamu redistribučního balíčku {0} má hodnotu Null nebo je prázdný. Název redistribučního balíčku nesmí mít hodnotu Null ani nesmí být prázdný.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
@@ -2595,7 +2595,7 @@
       </trans-unit>
       <trans-unit id="XslTransform.PrecompiledXsltError">
         <source>MSB3705: XslCompiledDllPath is not supported when building with .NET Core.</source>
-        <target state="new">MSB3705: XslCompiledDllPath is not supported when building with .NET Core.</target>
+        <target state="translated">MSB3705: XslCompiledDllPath se při sestavování pomocí .NET Core nepodporuje.</target>
         <note>{StrBegin="MSB3705: "}</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">
@@ -3020,7 +3020,7 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.ExpandRedistFrom">
         <source>Looking for redist files under "{0}".</source>
-        <target state="translated">Probíhá hledání souborů pro redistribuci v rámci {0}.</target>
+        <target state="translated">Probíhá hledání souborů redistribučního balíčku v rámci {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.NotExpanding">
@@ -3035,17 +3035,17 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.AddingRedistFile">
         <source>Adding file "{0}" from redist folder with target path "{1}".</source>
-        <target state="translated">Probíhá přidání souboru {0} ze složky pro redistribuci s cílovou cestou {1}.</target>
+        <target state="translated">Probíhá přidání souboru {0} ze složky redistribučního balíčku s cílovou cestou {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.ConflictRedistSameSDK">
         <source>There was a conflict between two redist files going to the same target path "{0}" within the "{1}" SDK. Choosing "{2}" over "{3}" because it was resolved first.</source>
-        <target state="translated">V rámci sady SDK {1} došlo ke konfliktu mezi dvěma soubory pro redistribuci, které oba směřují do stejné cílové cesty {0}. Bude upřednostněn soubor {2} před souborem {3}, protože byl vyřešen jako první.</target>
+        <target state="translated">V rámci sady SDK {1} došlo ke konfliktu mezi dvěma soubory redistribučního balíčku, které oba směřují do stejné cílové cesty {0}. Bude upřednostněn soubor {2} před souborem {3}, protože byl vyřešen jako první.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.ConflictRedistDifferentSDK">
         <source>There was a conflict between two files from the redist folder files going to the same target path "{0}" between the "{1}" and "{2}" SDKs. Choosing "{3}" over "{4}" because it was resolved first.</source>
-        <target state="translated">Došlo ke konfliktu mezi dvěma soubory ze složky pro redistribuci, které oba směřují do stejné cílové cesty {0}. K tomuto konfliktu došlo mezi sadami SDK {1} a {2}. Bude upřednostněn soubor {3} před souborem {4}, protože byl vyřešen jako první.</target>
+        <target state="translated">Došlo ke konfliktu mezi dvěma soubory ze složky redistribučního balíčku, které oba směřují do stejné cílové cesty {0}. K tomuto konfliktu došlo mezi sadami SDK {1} a {2}. Bude upřednostněn soubor {3} před souborem {4}, protože byl vyřešen jako první.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.ConflictReferenceSameSDK">
@@ -3100,12 +3100,12 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.CannotHaveEmptyTargetConfiguration">
         <source>MSB3797: The targeted configuration for the resolved sdk reference "{0}" was empty. Cannot find reference or redist files without a targeted configuration.</source>
-        <target state="translated">MSB3797: Cílová konfigurace pro odkaz na převedenou sadu SDK {0} je prázdná. Bez určení cílové konfigurace nelze nalézt odkazy nebo soubory pro redistribuci.</target>
+        <target state="translated">MSB3797: Cílová konfigurace pro odkaz na převedenou sadu SDK {0} je prázdná. Bez určení cílové konfigurace nelze nalézt odkazy nebo soubory redistribučního balíčku.</target>
         <note>{StrBegin="MSB3797: "}</note>
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.CannotHaveEmptyTargetArchitecture">
         <source>MSB3798: The targeted architecture for the resolved sdk reference "{0}" was empty. Cannot find reference or redist files without a targeted architecture.</source>
-        <target state="translated">MSB3798: Cílová architektura pro vyřešený odkaz na sadu SDK {0} je prázdná. Bez určení cílové architektury nelze nalézt odkazy nebo soubory pro redistribuci.</target>
+        <target state="translated">MSB3798: Cílová architektura pro vyřešený odkaz na sadu SDK {0} je prázdná. Bez určení cílové architektury nelze nalézt odkazy nebo soubory redistribučního balíčku.</target>
         <note>{StrBegin="MSB3798: "}</note>
       </trans-unit>
       <trans-unit id="FindInvalidProjectReferences.WarnWhenVersionIsIncompatible">
@@ -3144,9 +3144,9 @@
         <note>{StrBegin="MSB3492: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
-        <source>MSB3493: Skipping write to file "{0}" because content would not change.</source>
-        <target state="translated">MSB3493: Zápis do souboru {0} se přeskočí, protože obsah by se nezměnil.</target>
-        <note>{StrBegin="MSB3493: "}</note>
+        <source>Skipping write to file "{0}" because content would not change.</source>
+        <target state="needs-review-translation">MSB3493: Zápis do souboru {0} se přeskočí, protože obsah by se nezměnil.</target>
+        <note />
       </trans-unit>
       <trans-unit id="Telemetry.IllegalEventDataString">
         <source>The property "{0}" in the telemetry event data property list "{1}" is malformed.  Please only pass in a semicolon-delimited list of constant string values separated by "=", e.g., "Property1=Value1;Property2=Value2".</source>

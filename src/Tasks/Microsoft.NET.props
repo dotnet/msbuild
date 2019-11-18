@@ -1,0 +1,44 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.NET.props
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+This file contains .NET-specific properties, and items. This file is imported for .NET Core, .NET Standard, and .NET Framework projects.
+these two files are used to encapsulate the multi-targeting and framework specific build process.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!--
+    ============================================================
+                                        GetToolPaths
+    Get the paths for the .NET Framework and .NET Core tools and sdk tools directories.
+    This does not need to be a target since all of the values are availiable at project evaluation time.
+    ============================================================
+    -->
+  <PropertyGroup>
+    <TargetFrameworkSDKToolsDirectory Condition=" '$(TargetFrameworkSDKToolsDirectory)' == '' ">$(SDK40ToolsPath)</TargetFrameworkSDKToolsDirectory>
+  </PropertyGroup>
+
+  <!--
+    ============================================================
+                                        SetHighEntropyVA
+    Set HighEntropyVA according to the TargetFramework 
+    ============================================================
+    -->
+
+  <PropertyGroup Condition="('$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(TargetingClr2Framework)' != 'true' and '$(TargetFrameworkVersion)' != 'v4.0') or '$(TargetFrameworkIdentifier)' == '.NETCoreApp' or '$(TargetFrameworkIdentifier)' == '.NETStandard'">
+    <HighEntropyVA Condition="'$(HighEntropyVA)' == ''">true</HighEntropyVA>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <HighEntropyVA Condition="'$(HighEntropyVA)' == ''">false</HighEntropyVA>
+  </PropertyGroup>
+
+</Project>

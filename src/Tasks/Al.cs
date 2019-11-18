@@ -21,10 +21,10 @@ namespace Microsoft.Build.Tasks
         Microsoft (R) Assembly Linker version 7.10.2175
         for Microsoft (R) .NET Framework version 1.2
         Copyright (C) Microsoft Corporation 2001-2015. All rights reserved.
-        
+
         Usage: al [options] [sources]
         Options: ('/out' must be specified)
-        
+
           /? or /help               Display this usage message
           @<filename>               Read response file for more options
           /algid:<id>               Algorithm used to hash files (in hexadecimal)
@@ -58,7 +58,7 @@ namespace Microsoft.Build.Tasks
           /v[ersion]:<version>      Version (use * to auto-generate remaining numbers)
           /win32icon:<filename>     Use this icon for the output
           /win32res:<filename>      Specifies the Win32 resource file
-        
+
         Sources: (at least one source input is required)
           <filename>[,<targetfile>] add file to assembly
           /embed[resource]:<filename>[,<name>[,Private]]
@@ -171,9 +171,9 @@ namespace Microsoft.Build.Tasks
             get => (string)Bag[nameof(Platform)];
         }
 
-        // Map explicit platform of "AnyCPU" or the default platform (null or ""), since it is commonly understood in the 
-        // managed build process to be equivalent to "AnyCPU", to platform "AnyCPU32BitPreferred" if the Prefer32Bit 
-        // property is set. 
+        // Map explicit platform of "AnyCPU" or the default platform (null or ""), since it is commonly understood in the
+        // managed build process to be equivalent to "AnyCPU", to platform "AnyCPU32BitPreferred" if the Prefer32Bit
+        // property is set.
         internal string PlatformWith32BitPreference
         {
             get
@@ -297,7 +297,7 @@ namespace Microsoft.Build.Tasks
         {
             string pathToTool = null;
 
-            // If COMPLUS_InstallRoot\COMPLUS_Version are set (the dogfood world), we want to find it there, instead of 
+            // If COMPLUS_InstallRoot\COMPLUS_Version are set (the dogfood world), we want to find it there, instead of
             // the SDK, which may or may not be installed. The following will look there.
             if (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("COMPLUS_InstallRoot")) || !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("COMPLUS_Version")))
             {
@@ -360,7 +360,7 @@ namespace Microsoft.Build.Tasks
                 new[] { "LogicalName", "TargetFile", "Access" }
             );
 
-            // It's a good idea for the response file to be the very last switch passed, just 
+            // It's a good idea for the response file to be the very last switch passed, just
             // from a predictability perspective.  This is also consistent with the compiler
             // tasks (Csc, etc.)
             if (ResponseFiles != null)
@@ -376,7 +376,7 @@ namespace Microsoft.Build.Tasks
         {
             if (Culture != null)
             {
-                // This allows subsequent tasks in the build process to know what culture each satellite 
+                // This allows subsequent tasks in the build process to know what culture each satellite
                 // assembly is associated with.
                 OutputAssembly?.SetMetadata("Culture", Culture);
             }

@@ -42,6 +42,7 @@ folder InstallDir:\MSBuild\Current\Bin
   file source=$(X86BinPath)Microsoft.CSharp.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.CSharp.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.CSharp.targets
+  file source=$(X86BinPath)Microsoft.Net.props
   file source=$(X86BinPath)Microsoft.NetFramework.CurrentVersion.props
   file source=$(X86BinPath)Microsoft.NetFramework.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.NetFramework.props
@@ -182,6 +183,7 @@ folder InstallDir:\MSBuild\Current\Bin\amd64
   file source=$(X86BinPath)Microsoft.CSharp.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.CSharp.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.CSharp.targets
+  file source=$(X86BinPath)Microsoft.Net.props
   file source=$(X86BinPath)Microsoft.NetFramework.CurrentVersion.props
   file source=$(X86BinPath)Microsoft.NetFramework.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.NetFramework.props

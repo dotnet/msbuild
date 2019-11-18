@@ -18,7 +18,7 @@ namespace Microsoft.Build.Engine.UnitTests
         private string _altDirectoryStart = new string(MSBuildConstants.ForwardSlash[0], 2);
 
         //below are the legacy regex used before explcitly checking these patterns to reduce allocations
-        
+
         // regular expression used to match file-specs comprising exactly "<drive letter>:" (with no trailing characters)
         internal static readonly Regex DrivePattern = new Regex(@"^[A-Za-z]:$", RegexOptions.Compiled);
 

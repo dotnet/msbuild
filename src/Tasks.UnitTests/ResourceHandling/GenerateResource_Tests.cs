@@ -222,7 +222,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Resources to ResX
         /// </summary>
-#if FEATURE_RESX_RESOURCE_READER
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
         [Fact]
 #else
         [Fact (Skip = "ResGen.exe not supported on .NET Core MSBuild")]
@@ -269,7 +269,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Resources to Text
         /// </summary>
-#if FEATURE_RESX_RESOURCE_READER
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
         [Fact]
 #else
         [Fact(Skip = "ResGen.exe not supported on .NET Core MSBuild")]
@@ -898,7 +898,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Text to ResX
         /// </summary>
-#if FEATURE_RESX_RESOURCE_READER
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
         [Fact]
 #else
         [Fact(Skip = "Writing to XML not supported on .net core")]
@@ -930,7 +930,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Round trip from resx to resources to resx with the same blobs
         /// </summary>
-#if FEATURE_RESX_RESOURCE_READER
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
         [Fact]
 #else
         [Fact(Skip = "ResGen.exe not supported on.NET Core MSBuild")]
@@ -976,7 +976,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Round trip from text to resources to text with the same blobs
         /// </summary>
-#if FEATURE_RESX_RESOURCE_READER
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
         [Fact]
 #else
         [Fact(Skip = "ResGen.exe not supported on.NET Core MSBuild")]
@@ -3538,7 +3538,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 File.SetLastWriteTime(dll.Path, DateTime.Now - TimeSpan.FromDays(30));
 
                 var referenceItem = new TaskItem(dll.Path);
-                referenceItem.SetMetadata(ItemMetadataNames.fusionName, "System.Resources.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51");
+                referenceItem.SetMetadata(Tasks.ItemMetadataNames.fusionName, "System.Resources.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51");
 
                 t.References = new ITaskItem[] {
                     referenceItem
@@ -3925,7 +3925,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
             // All MSBuilds should be able to use the new resource codepaths
             yield return new object[] { true };
 
-#if FEATURE_RESX_RESOURCE_READER
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
             // But the old get-live-objects codepath is supported only on full framework.
             yield return new object[] { false };
 #endif

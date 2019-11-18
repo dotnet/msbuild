@@ -66,7 +66,7 @@ namespace Microsoft.Build.UnitTests
                 SetUpFileLoggerAndLogMessage("logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
                 VerifyFileContent(log, "message here");
 
-                
+
                 byte[] content = ReadRawBytes(log);
                 Assert.Equal((byte)109, content[0]); // 'm'
             }

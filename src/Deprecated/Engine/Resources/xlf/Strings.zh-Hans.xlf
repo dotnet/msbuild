@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../Strings.resx" build-num="-1944534404">
+  <file datatype="xml" source-language="en" target-language="zh-HANS" original="../Strings.resx" build-num="-1944534404">
     <header>
       <count-group name="BlackBox wordcount">
         <count count-type="x-wordCount">4013</count>
@@ -1143,7 +1143,7 @@
       </trans-unit>
       <trans-unit id="InvalidVerbosity">
         <source>MSB4103: "{0}" is not a valid logger verbosity level.</source>
-        <target state="translated">MSB4103: “{0}”不是有效的记录器详细级别。</target>
+        <target state="translated">MSB4103: "{0}" 不是有效的记录器详细程度。</target>
         <note>{StrBegin="MSB4103: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4103: "{0}" ist kein gültiger Ausführlichkeitsgrad für die Protokollierung.</target>
@@ -2293,7 +2293,7 @@
       </trans-unit>
       <trans-unit id="DeferredMessagesAvailiable">
         <source>Some messages did not display because they were not associated with any ProjectStarted events. Use diagnostic verbosity to view these messages.</source>
-        <target state="translated">某些消息未显示，因为它们未与任何 ProjectStarted 事件关联。请在诊断详细信息中查看这些消息。</target>
+        <target state="translated">某些消息未显示，因为它们未与任何 ProjectStarted 事件关联。请在诊断详细程度中查看这些消息。</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Einige Meldungen wurden nicht angezeigt, weil sie keinem ProjectStarted-Ereignis zugeordnet sind. Verwenden Sie den Ausführlichkeitsgrad "diagnostic", um diese Meldungen anzuzeigen.</target>

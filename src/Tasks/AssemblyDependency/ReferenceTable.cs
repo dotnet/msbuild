@@ -9,11 +9,14 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
-using Microsoft.Build.Eventing;
+
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
+#if (!STANDALONEBUILD)
+using Microsoft.Internal.Performance;
+#endif
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
@@ -1340,7 +1343,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void RemoveReferencesMarkedForExclusion(bool removeOnlyNoWarning, string subsetName)
         {
-            MSBuildEventSource.Log.RarRemoveReferencesMarkedForExclusionStart();
+#if (!STANDALONEBUILD)
+            using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildRARRemoveFromExclusionListBegin, CodeMarkerEvent.perfMSBuildRARRemoveFromExclusionListEnd))
+#endif
             {
                 // Create a table which will contain the references which are not in the black list
                 var goodReferences = new Dictionary<AssemblyNameExtension, Reference>(AssemblyNameComparer.GenericComparer);
@@ -1427,7 +1432,6 @@ namespace Microsoft.Build.Tasks
 
                 // Replace the references table with the list only containing good references.
                 References = goodReferences;
-                MSBuildEventSource.Log.RarRemoveReferencesMarkedForExclusionStop();
             }
         }
 
@@ -1594,7 +1598,9 @@ namespace Microsoft.Build.Tasks
             List<Exception> exceptions
         )
         {
-            MSBuildEventSource.Log.RarComputeClosureStart();
+#if (!STANDALONEBUILD)
+            using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildRARComputeClosureBegin, CodeMarkerEvent.perfMSBuildRARComputeClosureEnd))
+#endif
             {
                 References.Clear();
                 _externallyResolvedPrimaryReferences.Clear();
@@ -1605,7 +1611,6 @@ namespace Microsoft.Build.Tasks
 
                 ComputeClosure();
             }
-            MSBuildEventSource.Log.RarComputeClosureStop();
         }
 
         /// <summary>

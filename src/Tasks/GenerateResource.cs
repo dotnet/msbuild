@@ -2,43 +2,47 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.CodeDom;
-using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
-#if FEATURE_RESX_RESOURCE_READER
-using System.ComponentModel.Design;
-#endif
-using System.Configuration;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Resources;
 using System.Resources.Extensions;
 using System.Reflection;
-using System.Runtime.InteropServices;
-#if FEATURE_APPDOMAIN
-using System.Runtime.Remoting;
-#endif
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Runtime.Versioning;
-using System.Security;
-using System.Text;
-using System.Xml;
-using System.Xml.Linq;
 
-using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Tasks.ResourceHandling;
-using Microsoft.Build.Utilities;
 #if FEATURE_COM_INTEROP
 using Microsoft.Win32;
 #endif
+using System.CodeDom;
+using System.CodeDom.Compiler;
+using System.Xml;
+using System.Runtime.InteropServices;
+using System.Configuration;
+using System.Security;
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
+using System.ComponentModel.Design;
+#endif
+#if FEATURE_APPDOMAIN
+using System.Runtime.Remoting;
+#endif
+
+#if (!STANDALONEBUILD)
+using Microsoft.Internal.Performance;
+#endif
+using System.Runtime.Versioning;
+
+using Microsoft.Build.Utilities;
+using System.Xml.Linq;
+using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Tasks.ResourceHandling;
 
 namespace Microsoft.Build.Tasks
 {
@@ -664,7 +668,9 @@ namespace Microsoft.Build.Tasks
         public override bool Execute()
         {
             bool outOfProcExecutionSucceeded = true;
-            MSBuildEventSource.Log.GenerateResourceOverallStart();
+#if (!STANDALONEBUILD)
+            using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildGenerateResourceBegin, CodeMarkerEvent.perfMSBuildGenerateResourceEnd))
+#endif
             {
                 // If we're extracting ResW files from assemblies (instead of building resources),
                 // our Sources can contain PDB's, pictures, and other non-DLL's.  Prune that list.
@@ -916,8 +922,6 @@ namespace Microsoft.Build.Tasks
 
                 RecordFilesWritten();
             }
-
-            MSBuildEventSource.Log.GenerateResourceOverallStop();
 
             return !Log.HasLoggedErrors && outOfProcExecutionSucceeded;
         }
@@ -3007,7 +3011,7 @@ namespace Microsoft.Build.Tasks
                         // On full framework, the default is to use the longstanding
                         // deserialize/reserialize approach. On Core, always use the new
                         // preserialized approach.
-#if FEATURE_RESX_RESOURCE_READER
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
                         if (!_usePreserializedResources)
                         {
                             ResXResourceReader resXReader = null;
@@ -3046,7 +3050,7 @@ namespace Microsoft.Build.Tasks
                         break;
 
                     case Format.Binary:
-#if FEATURE_RESX_RESOURCE_READER
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
                         ReadResources(reader, new ResourceReader(filename), filename); // closes reader for us
                         break;
 #else
@@ -3314,7 +3318,7 @@ namespace Microsoft.Build.Tasks
                     break;
 
                 case Format.XML:
-#if FEATURE_RESX_RESOURCE_READER
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
                     WriteResources(reader, new ResXResourceWriter(filename)); // closes writer for us
 #else
                     _logger.LogError(format.ToString() + " not supported on .NET Core MSBuild");
@@ -3353,12 +3357,12 @@ namespace Microsoft.Build.Tasks
             {
                 if (!_usePreserializedResources)
                 {
-                    _logger.LogErrorFromResources("GenerateResource.PreserializedResourcesRequiresProperty");
+                    _logger.LogErrorWithCodeFromResources("GenerateResource.PreserializedResourcesRequiresProperty");
                 }
 
                 if (!HaveSystemResourcesExtensionsReference)
                 {
-                    _logger.LogErrorFromResources("GenerateResource.PreserializedResourcesRequiresExtensions");
+                    _logger.LogErrorWithCodeFromResources("GenerateResource.PreserializedResourcesRequiresExtensions");
                 }
 
                 // one of the above should have been logged as we would have used preserialized writer otherwise.
@@ -3523,7 +3527,7 @@ namespace Microsoft.Build.Tasks
             return provider != null;
         }
 
-#if FEATURE_RESX_RESOURCE_READER
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
         /// <summary>
         /// Read resources from an XML or binary format file
         /// </summary>
@@ -3542,7 +3546,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
         }
-#endif // FEATURE_RESX_RESOURCE_READER
+#endif // FEATURE_RESXREADER_LIVEDESERIALIZATION
 
         /// <summary>
         /// Read resources from a text format file

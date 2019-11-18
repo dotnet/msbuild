@@ -655,14 +655,14 @@ namespace Microsoft.Build.Internal
         /// <returns>Base Handshake</returns>
         private static long GetBaseHandshakeForContext(TaskHostContext hostContext)
         {
-            string salt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
+            // Use the directory, rather than the full path, because this is in Shared and may
+            // be compiled into several different assemblies. We also want to make sure
+            // MSBuildTaskHost.exe gets the same path as MSBuild.exe/Microsoft.Build.dll.
+            string msbuildDirectory = Path.GetDirectoryName(FileUtilities.ExecutingAssemblyPath);
+            string salt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") + msbuildDirectory;
+            long nodeHandshakeSalt = GetHandshakeHashCode(salt);
 
-            long nodeHandshakeSalt = 0;
-
-            if (!string.IsNullOrEmpty(salt))
-            {
-                nodeHandshakeSalt = GetHandshakeHashCode(salt);
-            }
+            Trace("MSBUILDNODEHANDSHAKESALT=\"{0}\", msbuildDirectory=\"{1}\", hostContext={2}, FileVersionHash={3}", Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT"), msbuildDirectory, hostContext, FileVersionHash);
 
             //FileVersionHash (32 bits) is shifted 8 bits to avoid session ID collision
             //hostContext (4 bits) is shifted just after the FileVersionHash

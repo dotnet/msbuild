@@ -148,7 +148,7 @@ namespace Microsoft.Build.Execution
         {
             ErrorUtilities.VerifyThrowArgumentNull(result, nameof(result));
 
-            // We verify that we got results from the same configuration, but not necessarily the same request, because we are 
+            // We verify that we got results from the same configuration, but not necessarily the same request, because we are
             // rather flexible in how users are allowed to submit multiple requests for the same configuration.  In this case, the
             // request id of the result will match the first request, even though it will contain results for all requests (including
             // this one.)

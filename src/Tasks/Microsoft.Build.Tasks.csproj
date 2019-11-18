@@ -60,6 +60,10 @@
       <Link>CanonicalError.cs</Link>
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\Constants.cs">
+      <Link>Constants.cs</Link>
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="AssemblyDependency\AssemblyMetadata.cs" />
     <Compile Include="ConvertToAbsolutePath.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -748,6 +752,9 @@
     <Content Include="Microsoft.Common.tasks">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Microsoft.NET.props">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Microsoft.NETFramework.CurrentVersion.props">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -829,6 +836,9 @@
     <DataFile Include="Microsoft.NETFramework.targets" />
     <DataFile Include="Microsoft.NETFramework.CurrentVersion.targets" />
     <DataFile Include="Microsoft.NETFramework.props">
+      <SubType>Designer</SubType>
+    </DataFile>
+    <DataFile Include="Microsoft.NET.props">
       <SubType>Designer</SubType>
     </DataFile>
     <DataFile Include="Microsoft.NETFramework.CurrentVersion.props">

@@ -2790,6 +2790,77 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal("True", result);
         }
 
+        [Theory]
+        [InlineData("NotAVersion")]
+        [InlineData("1.2.3.4.5")]
+        [InlineData("1,2,3,4")]
+        public void PropertyFunctionVersionComparisonsFailsWithInvalidArguments(string badVersion)
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+            string expectedMessage = ResourceUtilities.GetResourceString("InvalidVersionFormat");
+
+            AssertThrows($"$([MSBuild]::VersionGreaterThan('{badVersion}', '1.0.0'))");
+            AssertThrows($"$([MSBuild]::VersionGreaterThan('1.0.0', '{badVersion}'))");
+
+            AssertThrows($"$([MSBuild]::VersionGreaterThanOrEquals('{badVersion}', '1.0.0'))");
+            AssertThrows($"$([MSBuild]::VersionGreaterThanOrEquals('1.0.0', '{badVersion}'))");
+
+            AssertThrows($"$([MSBuild]::VersionLessThan('{badVersion}', '1.0.0'))");
+            AssertThrows($"$([MSBuild]::VersionLessThan('1.0.0', '{badVersion}'))");
+
+            AssertThrows($"$([MSBuild]::VersionLessThanOrEquals('{badVersion}', '1.0.0'))");
+            AssertThrows($"$([MSBuild]::VersionLessThanOrEquals('1.0.0', '{badVersion}'))");
+
+            AssertThrows($"$([MSBuild]::VersionEquals('{badVersion}', '1.0.0'))");
+            AssertThrows($"$([MSBuild]::VersionEquals('1.0.0', '{badVersion}'))");
+
+            AssertThrows($"$([MSBuild]::VersionNotEquals('{badVersion}', '1.0.0'))");
+            AssertThrows($"$([MSBuild]::VersionNotEquals('1.0.0', '{badVersion}'))");
+
+            void AssertThrows(string expression)
+            {
+                var ex = Assert.Throws<InvalidProjectFileException>(
+                    () => expander.ExpandPropertiesLeaveTypedAndEscaped(
+                        expression,
+                        ExpanderOptions.ExpandProperties,
+                        MockElementLocation.Instance));
+
+                Assert.Contains(expectedMessage, ex.Message);
+            }
+        }
+
+        [Theory]
+        [InlineData("v1.0", "2.1", -1)]
+        [InlineData("3.2", "3.14-pre", -1)]
+        [InlineData("3+metadata", "3.0", 0)]
+        [InlineData("2.1", "2.1.0", 0)]
+        [InlineData("v1.2.3-pre+metadata", "1.2.3.0", 0)]
+        [InlineData("3.14", "3.2", 1)]
+        [InlineData("42.43.44.45", "42.43.44.5", 1)]
+        public void PropertyFunctionVersionComparisons(string a, string b, int expectedSign)
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            AssertSuccess(expectedSign >  0, $"$([MSBuild]::VersionGreaterThan('{a}', '{b}'))");
+            AssertSuccess(expectedSign >= 0, $"$([MSBuild]::VersionGreaterThanOrEquals('{a}', '{b}'))");
+            AssertSuccess(expectedSign <  0, $"$([MSBuild]::VersionLessThan('{a}', '{b}'))");
+            AssertSuccess(expectedSign <= 0, $"$([MSBuild]::VersionLessThanOrEquals('{a}', '{b}'))");
+            AssertSuccess(expectedSign == 0, $"$([MSBuild]::VersionEquals('{a}', '{b}'))");
+            AssertSuccess(expectedSign != 0, $"$([MSBuild]::VersionNotEquals('{a}', '{b}'))");
+
+            void AssertSuccess(bool expected, string expression)
+            {
+                bool actual = (bool)expander.ExpandPropertiesLeaveTypedAndEscaped(
+                    expression,
+                    ExpanderOptions.ExpandProperties,
+                    MockElementLocation.Instance);
+
+                Assert.Equal(expected, actual);
+            }
+        }
+
         /// <summary>
         /// Expand property function that calls a method with an enum parameter
         /// </summary>

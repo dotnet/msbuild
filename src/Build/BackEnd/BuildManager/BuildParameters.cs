@@ -459,9 +459,9 @@ namespace Microsoft.Build.Execution
         /// Enables or disables legacy threading semantics
         /// </summary>
         /// <remarks>
-        /// Legacy threading semantics indicate that if a submission is to be built  
+        /// Legacy threading semantics indicate that if a submission is to be built
         /// only on the in-proc node and the submission is executed synchronously, then all of its
-        /// requests will be built on the thread which invoked the build rather than a 
+        /// requests will be built on the thread which invoked the build rather than a
         /// thread owned by the BuildManager.
         /// </remarks>
         public bool LegacyThreadingSemantics { get; set; }
@@ -529,7 +529,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// A list of warnings to treat as errors.  To treat all warnings as errors, set this to an empty <see cref="HashSet{String}"/>.  
+        /// A list of warnings to treat as errors.  To treat all warnings as errors, set this to an empty <see cref="HashSet{String}"/>.
         /// </summary>
         public ISet<string> WarningsAsErrors { get; set; }
 
@@ -547,7 +547,7 @@ namespace Microsoft.Build.Execution
         /// Returns all of the toolsets.
         /// </summary>
         /// <comments>
-        /// toolsetProvider.Toolsets is already a readonly collection. 
+        /// toolsetProvider.Toolsets is already a readonly collection.
         /// </comments>
         public ICollection<Toolset> Toolsets => _toolsetProvider.Toolsets;
 
@@ -567,7 +567,7 @@ namespace Microsoft.Build.Execution
         public bool SaveOperatingEnvironment { get; set; } = true;
 
         /// <summary>
-        /// Shutdown the inprocess node when the build finishes. By default this is false 
+        /// Shutdown the inprocess node when the build finishes. By default this is false
         /// since visual studio needs to keep the inprocess node around after the build finishes.
         /// </summary>
         public bool ShutdownInProcNodeOnBuildFinish
@@ -938,7 +938,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Helper to avoid doing an expensive disk check for MSBuild.exe when
         /// we already checked in a previous build.
-        /// This File.Exists otherwise can show up in profiles when there's a lot of 
+        /// This File.Exists otherwise can show up in profiles when there's a lot of
         /// design time builds going on.
         /// </summary>
         private static bool CheckMSBuildExeExistsAt(string path)

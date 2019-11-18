@@ -163,7 +163,7 @@
       </trans-unit>
       <trans-unit id="Copy.ErrorIfLinkFailsSetWithoutLinkOption">
         <source>MSB3892: ErrorIfLinkFails requires UseHardlinksIfPossible or UseSymbolicLinksIfPossible to be set.</source>
-        <target state="new">MSB3892: ErrorIfLinkFails requires UseHardlinksIfPossible or UseSymbolicLinksIfPossible to be set.</target>
+        <target state="translated">MSB3892: Element ErrorIfLinkFails wymaga ustawienia wartości UseHardlinksIfPossible lub UseSymbolicLinksIfPossible.</target>
         <note>{StrBegin="MSB3892: "} LOCALIZATION: Do not localize "ErrorIfLinkFails", "UseHardLinksIfPossible", or "UseSymbolicLinksIfPossible".</note>
       </trans-unit>
       <trans-unit id="Copy.ExactlyOneTypeOfDestination">
@@ -183,7 +183,7 @@
       </trans-unit>
       <trans-unit id="Copy.LinkFailed">
         <source>MSB3893: Could not use a link to copy "{0}" to "{1}".</source>
-        <target state="new">MSB3893: Could not use a link to copy "{0}" to "{1}".</target>
+        <target state="translated">MSB3893: Nie można użyć linku w celu skopiowania ścieżki „{0}” do ścieżki „{1}”.</target>
         <note>{StrBegin="MSB3893: "} LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
       <trans-unit id="Copy.RetryingAsFileCopy">
@@ -731,7 +731,7 @@
       </trans-unit>
       <trans-unit id="GenerateBootstrapper.PackageHomeSiteMissing">
         <source>MSB3164: No 'HomeSite' attribute has been provided for '{0}', so the package will be published to the same location as the bootstrapper.</source>
-        <target state="translated">MSB3164: Nie podano atrybutu 'HomeSite' dla elementu '{0}', dlatego pakiet zostanie opublikowany w tej samej lokalizacji co program inicjujący.</target>
+        <target state="translated">MSB3164: Nie podano atrybutu „HomeSite” dla elementu „{0}”, dlatego pakiet zostanie opublikowany w tej samej lokalizacji co program inicjujący.</target>
         <note>{StrBegin="MSB3164: "}</note>
       </trans-unit>
       <trans-unit id="GenerateBootstrapper.PackageValidation">
@@ -981,7 +981,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
         <source>MSB3824: In order to build with .NET Core, resource inputs must be in .txt or .resx format.</source>
-        <target state="new">MSB3824: In order to build with .NET Core, resource inputs must be in .txt or .resx format.</target>
+        <target state="translated">MSB3824: Aby kompilować przy użyciu platformy .NET Core, dane wejściowe zasobów muszą być w formacie txt lub resx.</target>
         <note>{StrBegin="MSB3824: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.InputDoesntExist">
@@ -1041,7 +1041,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.CorruptOutput">
         <source>Output file "{0}" is possibly corrupt and will be deleted and recreated.</source>
-        <target state="needs-review-translation">MSB3555: Plik wyjściowy „{0}” jest prawdopodobnie uszkodzony.</target>
+        <target state="translated">Plik wyjściowy „{0}” jest prawdopodobnie uszkodzony. Zostanie on usunięty i utworzony ponownie.</target>
         <note />
       </trans-unit>
       <trans-unit id="GenerateResource.OnlyStringsSupported">
@@ -1066,7 +1066,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.DeleteCorruptOutputFailed">
         <source>MSB3560: Could not delete the possibly corrupt output file "{0}". {1}</source>
-        <target state="needs-review-translation">MSB3560: Nie można usunąć pliku wyjściowego „{0}”, który jest prawdopodobnie uszkodzony. {1}</target>
+        <target state="translated">MSB3560: Nie można usunąć pliku wyjściowego „{0}”, który jest prawdopodobnie uszkodzony. {1}</target>
         <note>{StrBegin="MSB3560: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ObsoleteStringsTag">
@@ -1991,7 +1991,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.TargetFrameworkRedistLogHeader">
         <source>Redist List File Paths:</source>
-        <target state="translated">Ścieżki do plików z listy ponownej dystrybucji:</target>
+        <target state="translated">Ścieżki do plików listy redystrybucyjnej:</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.TargetFrameworkExclusionListLogHeader">
@@ -2595,7 +2595,7 @@
       </trans-unit>
       <trans-unit id="XslTransform.PrecompiledXsltError">
         <source>MSB3705: XslCompiledDllPath is not supported when building with .NET Core.</source>
-        <target state="new">MSB3705: XslCompiledDllPath is not supported when building with .NET Core.</target>
+        <target state="translated">MSB3705: Element XslCompiledDllPath nie jest obsługiwany podczas kompilowania przy użyciu platformy .NET Core.</target>
         <note>{StrBegin="MSB3705: "}</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">
@@ -3144,9 +3144,9 @@
         <note>{StrBegin="MSB3492: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
-        <source>MSB3493: Skipping write to file "{0}" because content would not change.</source>
-        <target state="translated">MSB3493: Pomijanie zapisu w pliku „{0}”, ponieważ jego zawartość nie uległaby zmianie.</target>
-        <note>{StrBegin="MSB3493: "}</note>
+        <source>Skipping write to file "{0}" because content would not change.</source>
+        <target state="needs-review-translation">MSB3493: Pomijanie zapisu w pliku „{0}”, ponieważ jego zawartość nie uległaby zmianie.</target>
+        <note />
       </trans-unit>
       <trans-unit id="Telemetry.IllegalEventDataString">
         <source>The property "{0}" in the telemetry event data property list "{1}" is malformed.  Please only pass in a semicolon-delimited list of constant string values separated by "=", e.g., "Property1=Value1;Property2=Value2".</source>

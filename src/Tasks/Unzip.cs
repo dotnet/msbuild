@@ -65,7 +65,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e)
             {
-                Log.LogErrorFromResources("Unzip.ErrorCouldNotCreateDestinationDirectory", DestinationFolder.ItemSpec, e.Message);
+                Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotCreateDestinationDirectory", DestinationFolder.ItemSpec, e.Message);
 
                 return false;
             }
@@ -78,7 +78,7 @@ namespace Microsoft.Build.Tasks
                 {
                     if (!FileSystems.Default.FileExists(sourceFile.ItemSpec))
                     {
-                        Log.LogErrorFromResources("Unzip.ErrorFileDoesNotExist", sourceFile.ItemSpec);
+                        Log.LogErrorWithCodeFromResources("Unzip.ErrorFileDoesNotExist", sourceFile.ItemSpec);
                         continue;
                     }
 
@@ -108,7 +108,7 @@ namespace Microsoft.Build.Tasks
                     catch (Exception e)
                     {
                         // Should only be thrown if the archive could not be opened (Access denied, corrupt file, etc)
-                        Log.LogErrorFromResources("Unzip.ErrorCouldNotOpenFile", sourceFile.ItemSpec, e.Message);
+                        Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotOpenFile", sourceFile.ItemSpec, e.Message);
                     }
                 }
             }

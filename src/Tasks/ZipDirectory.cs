@@ -33,7 +33,7 @@ namespace Microsoft.Build.Tasks
 
             if (!sourceDirectory.Exists)
             {
-                Log.LogErrorFromResources("ZipDirectory.ErrorDirectoryDoesNotExist", sourceDirectory.FullName);
+                Log.LogErrorWithCodeFromResources("ZipDirectory.ErrorDirectoryDoesNotExist", sourceDirectory.FullName);
                 return false;
             }
 
@@ -47,7 +47,7 @@ namespace Microsoft.Build.Tasks
                 {
                     if (!Overwrite)
                     {
-                        Log.LogErrorFromResources("ZipDirectory.ErrorFileExists", destinationFile.FullName);
+                        Log.LogErrorWithCodeFromResources("ZipDirectory.ErrorFileExists", destinationFile.FullName);
 
                         return false;
                     }
@@ -58,7 +58,7 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (Exception e)
                     {
-                        Log.LogErrorFromResources("ZipDirectory.ErrorFailed", sourceDirectory.FullName, destinationFile.FullName, e.Message);
+                        Log.LogErrorWithCodeFromResources("ZipDirectory.ErrorFailed", sourceDirectory.FullName, destinationFile.FullName, e.Message);
 
                         return false;
                     }
@@ -71,7 +71,7 @@ namespace Microsoft.Build.Tasks
                 }
                 catch (Exception e)
                 {
-                    Log.LogErrorFromResources("ZipDirectory.ErrorFailed", sourceDirectory.FullName, destinationFile.FullName, e.Message);
+                    Log.LogErrorWithCodeFromResources("ZipDirectory.ErrorFailed", sourceDirectory.FullName, destinationFile.FullName, e.Message);
                 }
             }
             finally

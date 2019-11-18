@@ -14,7 +14,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Tasks;
 using Xunit;
-using Microsoft.Build.Shared;
+using ItemMetadataNames = Microsoft.Build.Tasks.ItemMetadataNames;
 
 namespace Microsoft.Build.UnitTests
 {

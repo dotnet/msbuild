@@ -19,7 +19,6 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
@@ -370,8 +369,6 @@ namespace Microsoft.Build.Execution
                 // Check for build in progress.
                 RequireState(BuildManagerState.Idle, "BuildInProgress");
 
-                MSBuildEventSource.Log.BuildStart();
-
                 if (BuildParameters.DumpOpportunisticInternStats)
                 {
                     OpportunisticIntern.EnableStatisticsGathering();
@@ -459,8 +456,6 @@ namespace Microsoft.Build.Execution
                     ShutdownLoggingService(loggingService);
                     throw;
                 }
-
-                MSBuildEventSource.Log.BuildStop();
 
                 return loggingService;
             }
@@ -1999,7 +1994,7 @@ namespace Microsoft.Build.Execution
                      * These exceptions will have their stack logged on the commandline as an unexpected failure. If a logger author wants the logger
                      * to fail gracefully then can catch an exception and log a LoggerException. This has the same effect of stopping the build but it logs only
                      * the exception error message rather than the whole stack trace.
-                     * 
+                     *
                      * If any other exception happened and logging is not completed, then go ahead and complete it now since this is the last place to do it.
                      * Otherwise the submission would remain uncompleted, potentially causing hangs (EndBuild waiting on all BuildSubmissions, users waiting on BuildSubmission, or expecting a callback, etc)
                     */

@@ -1801,6 +1801,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION: {0} is an enum value of LoggerVerbosity.
     </comment>
   </data>
+  <data name="InvalidVersionFormat" xml:space="preserve">
+    <value>Version string was not in a correct format.</value>
+  </data>
   <!--
         The engine message bucket is: MSB4001 - MSB4999
 

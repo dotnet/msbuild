@@ -163,7 +163,7 @@
       </trans-unit>
       <trans-unit id="Copy.ErrorIfLinkFailsSetWithoutLinkOption">
         <source>MSB3892: ErrorIfLinkFails requires UseHardlinksIfPossible or UseSymbolicLinksIfPossible to be set.</source>
-        <target state="new">MSB3892: ErrorIfLinkFails requires UseHardlinksIfPossible or UseSymbolicLinksIfPossible to be set.</target>
+        <target state="translated">MSB3892: ErrorIfLinkFails exige que UseHardlinksIfPossible ou UseSymbolicLinksIfPossible sejam definidos.</target>
         <note>{StrBegin="MSB3892: "} LOCALIZATION: Do not localize "ErrorIfLinkFails", "UseHardLinksIfPossible", or "UseSymbolicLinksIfPossible".</note>
       </trans-unit>
       <trans-unit id="Copy.ExactlyOneTypeOfDestination">
@@ -183,7 +183,7 @@
       </trans-unit>
       <trans-unit id="Copy.LinkFailed">
         <source>MSB3893: Could not use a link to copy "{0}" to "{1}".</source>
-        <target state="new">MSB3893: Could not use a link to copy "{0}" to "{1}".</target>
+        <target state="translated">MSB3893: Não foi possível usar um link para copiar "{0}" para "{1}".</target>
         <note>{StrBegin="MSB3893: "} LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
       <trans-unit id="Copy.RetryingAsFileCopy">
@@ -981,7 +981,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
         <source>MSB3824: In order to build with .NET Core, resource inputs must be in .txt or .resx format.</source>
-        <target state="new">MSB3824: In order to build with .NET Core, resource inputs must be in .txt or .resx format.</target>
+        <target state="translated">MSB3824: Para compilar com o .NET Core, as entradas de recurso devem estar em formato .txt ou .resx.</target>
         <note>{StrBegin="MSB3824: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.InputDoesntExist">
@@ -1041,7 +1041,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.CorruptOutput">
         <source>Output file "{0}" is possibly corrupt and will be deleted and recreated.</source>
-        <target state="needs-review-translation">MSB3555: É possível que o arquivo de saída "{0}" esteja corrompido.</target>
+        <target state="translated">O arquivo de saída "{0}" está possivelmente corrompido e será excluído e recriado.</target>
         <note />
       </trans-unit>
       <trans-unit id="GenerateResource.OnlyStringsSupported">
@@ -1066,7 +1066,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.DeleteCorruptOutputFailed">
         <source>MSB3560: Could not delete the possibly corrupt output file "{0}". {1}</source>
-        <target state="needs-review-translation">MSB3560: Não foi possível excluir o arquivo de saída provavelmente corrompido "{0}". {1}</target>
+        <target state="translated">MSB3560: Não foi possível excluir o arquivo de saída provavelmente corrompido "{0}". {1}</target>
         <note>{StrBegin="MSB3560: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ObsoleteStringsTag">
@@ -1708,7 +1708,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoRedistAssembliesToGenerateExclusionList">
         <source>MSB3256: No assemblies were read in from the redist lists. A TargetFramework profile exclusion list could not be generated. </source>
-        <target state="translated">MSB3256: Não foi possível encontrar assemblies lidos das listas redist. Não foi possível gerar uma lista de exclusões de perfil TargetFramework. </target>
+        <target state="translated">MSB3256: Não foi possível encontrar assemblies lidos das listas de pacote redistribuível. Não foi possível gerar uma lista de exclusões de perfil TargetFramework. </target>
         <note>{StrBegin="MSB3256: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.PrimaryReferenceOutsideOfFramework">
@@ -1728,7 +1728,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoProfilesFound">
         <source>MSB3260: Could not find any target framework profile redist files in the FullFrameworkFolders locations.</source>
-        <target state="translated">MSB3260: Não foi encontrado nenhum arquivo redist de perfil de estrutura de destino nos locais FullFrameworkFolders.</target>
+        <target state="translated">MSB3260: Não foi encontrado nenhum arquivo do pacote redistribuível de perfil de estrutura de destino nos locais FullFrameworkFolders.</target>
         <note>{StrBegin="MSB3260: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FrameworkDirectoryOnProfiles">
@@ -1931,7 +1931,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.RemappedReference">
         <source>Due to a remapping entry in the currently targeted framework redist list, reference "{0}" was remapped to "{1}".</source>
-        <target state="translated">Devido a uma entrada de remapeamento na lista redist do framework de destino atual, a referência "{0}" foi remapeada para "{1}".</target>
+        <target state="translated">Devido a uma entrada de remapeamento na lista de pacote redistribuível do framework de destino atual, a referência "{0}" foi remapeada para "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnificationByFrameworkRetarget">
@@ -1991,7 +1991,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.TargetFrameworkRedistLogHeader">
         <source>Redist List File Paths:</source>
-        <target state="translated">Caminhos de Arquivo da Lista Redist:</target>
+        <target state="translated">Caminhos de Arquivo da Lista de Pacote Redistribuível:</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.TargetFrameworkExclusionListLogHeader">
@@ -2006,7 +2006,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
-        <target state="translated">O arquivo da lista redist "{0}" tem um nome Redist nulo ou vazio no elemento FileList. Verifique se o Nome Redist não é nulo ou vazio.</target>
+        <target state="translated">O arquivo da lista de pacote redistribuível "{0}" tem um nome de Pacote Redistribuível nulo ou vazio no elemento FileList. Verifique se o Nome do Pacote Redistribuível não é nulo ou vazio.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
@@ -2595,7 +2595,7 @@
       </trans-unit>
       <trans-unit id="XslTransform.PrecompiledXsltError">
         <source>MSB3705: XslCompiledDllPath is not supported when building with .NET Core.</source>
-        <target state="new">MSB3705: XslCompiledDllPath is not supported when building with .NET Core.</target>
+        <target state="translated">MSB3705: Não há suporte para XslCompiledDllPath ao compilar com o .NET Core.</target>
         <note>{StrBegin="MSB3705: "}</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">
@@ -3020,7 +3020,7 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.ExpandRedistFrom">
         <source>Looking for redist files under "{0}".</source>
-        <target state="translated">Procurando por arquivos redist em "{0}".</target>
+        <target state="translated">Procurando por arquivos do pacote redistribuível em "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.NotExpanding">
@@ -3035,17 +3035,17 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.AddingRedistFile">
         <source>Adding file "{0}" from redist folder with target path "{1}".</source>
-        <target state="translated">Adicionando arquivo "{0}" a partir da pasta redist com caminho de destino "{1}".</target>
+        <target state="translated">Adicionando arquivo "{0}" a partir da pasta do pacote redistribuível com caminho de destino "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.ConflictRedistSameSDK">
         <source>There was a conflict between two redist files going to the same target path "{0}" within the "{1}" SDK. Choosing "{2}" over "{3}" because it was resolved first.</source>
-        <target state="translated">Houve um conflito entre dois arquivos redist com o mesmo caminho de destino "{0}" no SDK "{1}". Escolhendo "{2}" em vez de "{3}" porque foi resolvido primeiro.</target>
+        <target state="translated">Houve um conflito entre dois arquivos do pacote redistribuível com o mesmo caminho de destino "{0}" no SDK "{1}". Escolhendo "{2}" em vez de "{3}" porque foi resolvido primeiro.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.ConflictRedistDifferentSDK">
         <source>There was a conflict between two files from the redist folder files going to the same target path "{0}" between the "{1}" and "{2}" SDKs. Choosing "{3}" over "{4}" because it was resolved first.</source>
-        <target state="translated">Houve um conflito entre dois arquivos da pasta redist com o mesmo caminho de destino "{0}" entre os SDKs "{1}" e "{2}". Escolhendo "{3}" em vez de "{4}" porque foi resolvido primeiro.</target>
+        <target state="translated">Houve um conflito entre dois arquivos da pasta do pacote redistribuível com o mesmo caminho de destino "{0}" entre os SDKs "{1}" e "{2}". Escolhendo "{3}" em vez de "{4}" porque foi resolvido primeiro.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.ConflictReferenceSameSDK">
@@ -3100,12 +3100,12 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.CannotHaveEmptyTargetConfiguration">
         <source>MSB3797: The targeted configuration for the resolved sdk reference "{0}" was empty. Cannot find reference or redist files without a targeted configuration.</source>
-        <target state="translated">MSB3797: A configuração de destino para a referência de sdk resolvida "{0}" estava vazia. Não é possível localizar arquivos de referência ou redist sem uma configuração de destino.</target>
+        <target state="translated">MSB3797: A configuração de destino para a referência de sdk resolvida "{0}" estava vazia. Não é possível localizar arquivos de referência ou do pacote redistribuível sem uma configuração de destino.</target>
         <note>{StrBegin="MSB3797: "}</note>
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.CannotHaveEmptyTargetArchitecture">
         <source>MSB3798: The targeted architecture for the resolved sdk reference "{0}" was empty. Cannot find reference or redist files without a targeted architecture.</source>
-        <target state="translated">MSB3798: A arquitetura de destino para a referência de sdk resolvida "{0}" estava vazia. Não é possível localizar arquivos de referência ou redist sem uma arquitetura de destino.</target>
+        <target state="translated">MSB3798: A arquitetura de destino para a referência de sdk resolvida "{0}" estava vazia. Não é possível localizar arquivos de referência ou do pacote redistribuível sem uma arquitetura de destino.</target>
         <note>{StrBegin="MSB3798: "}</note>
       </trans-unit>
       <trans-unit id="FindInvalidProjectReferences.WarnWhenVersionIsIncompatible">
@@ -3144,9 +3144,9 @@
         <note>{StrBegin="MSB3492: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
-        <source>MSB3493: Skipping write to file "{0}" because content would not change.</source>
-        <target state="translated">MSB3493: ignorando a gravação no arquivo "{0}" porque o conteúdo não foi alterado.</target>
-        <note>{StrBegin="MSB3493: "}</note>
+        <source>Skipping write to file "{0}" because content would not change.</source>
+        <target state="needs-review-translation">MSB3493: ignorando a gravação no arquivo "{0}" porque o conteúdo não foi alterado.</target>
+        <note />
       </trans-unit>
       <trans-unit id="Telemetry.IllegalEventDataString">
         <source>The property "{0}" in the telemetry event data property list "{1}" is malformed.  Please only pass in a semicolon-delimited list of constant string values separated by "=", e.g., "Property1=Value1;Property2=Value2".</source>

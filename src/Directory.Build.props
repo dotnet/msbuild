@@ -11,6 +11,10 @@
 
   <!-- Override project defaults provided by Repo toolset -->
   <PropertyGroup>
+    <!-- Ensure that compiler errors emit full paths so that files
+         can be correctly annotated in GitHub. -->
+    <GenerateFullPaths>true</GenerateFullPaths>
+
     <!-- Do not mangle paths for test assemblies, because Shoudly assertions want actual on-disk paths. -->
     <DeterministicSourcePaths Condition="'$(IsTestProject)' == 'true'">false</DeterministicSourcePaths>
 

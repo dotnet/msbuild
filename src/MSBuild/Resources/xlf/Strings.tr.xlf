@@ -802,7 +802,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                             Varsayılan: günlük dosyasının sonuna eklenmez.
                         Encoding--Dosyanın kodlamasını belirtir; örneğin, 
                             UTF-8, Unicode veya ASCII
-                     Varsayılan verbosity ayarı Detailed'dır.
+                     Varsayılan ayrıntı düzeyi ayarı Detailed'dır.
                      Örnekler:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8

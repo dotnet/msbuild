@@ -8,6 +8,7 @@ parameters:
     enable: false
     continueOnError: false
     params: ''
+    artifactNames: ''
 
   # These parameters let the user customize the call to sdk-task.ps1 for publishing
   # symbols & general artifacts as well as for signing validation
@@ -94,12 +95,13 @@ stages:
       parameters:
         additionalParameters: ${{ parameters.SDLValidationParameters.params }}
         continueOnError: ${{ parameters.SDLValidationParameters.continueOnError }}
+        artifactNames: ${{ parameters.SDLValidationParameters.artifactNames }}
 
 - template: \eng\common\templates\post-build\channels\netcore-dev-5.yml
   parameters:
-    symbolPublishingAdditionalParameters: ${{ parameters.symbolPublishingAdditionalParameters }}
     artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
     publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
+    symbolPublishingAdditionalParameters: ${{ parameters.symbolPublishingAdditionalParameters }}
 
 - template: \eng\common\templates\post-build\channels\netcore-dev-31.yml
   parameters:
@@ -107,23 +109,23 @@ stages:
     artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
     publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
 
-- template: \eng\common\templates\post-build\channels\netcore-tools-latest.yml
+- template: \eng\common\templates\post-build\channels\netcore-eng-latest.yml
   parameters:
     symbolPublishingAdditionalParameters: ${{ parameters.symbolPublishingAdditionalParameters }}
     artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
     publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
 
-- template: \eng\common\templates\post-build\channels\netcore-tools-validation.yml
+- template: \eng\common\templates\post-build\channels\netcore-eng-validation.yml
   parameters:
     artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
     publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
 
-- template: \eng\common\templates\post-build\channels\netcore-3-tools-validation.yml
+- template: \eng\common\templates\post-build\channels\netcore-3-eng-validation.yml
   parameters:
     artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
     publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
 
-- template: \eng\common\templates\post-build\channels\netcore-3-tools.yml
+- template: \eng\common\templates\post-build\channels\netcore-3-eng.yml
   parameters:
     symbolPublishingAdditionalParameters: ${{ parameters.symbolPublishingAdditionalParameters }}
     artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
@@ -141,7 +143,20 @@ stages:
     artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
     publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
 
+- template: \eng\common\templates\post-build\channels\netcore-blazor-31-features.yml
+  parameters:
+    artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
+    publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
+    symbolPublishingAdditionalParameters: ${{ parameters.symbolPublishingAdditionalParameters }}
+
 - template: \eng\common\templates\post-build\channels\netcore-internal-30.yml
   parameters:
-    symbolPublishingAdditionalParameters: ${{ parameters.symbolPublishingAdditionalParameters }}
     artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
+    publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
+    symbolPublishingAdditionalParameters: ${{ parameters.symbolPublishingAdditionalParameters }}
+
+- template: \eng\common\templates\post-build\channels\general-testing.yml
+  parameters:
+    artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
+    publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
+    symbolPublishingAdditionalParameters: ${{ parameters.symbolPublishingAdditionalParameters }}
