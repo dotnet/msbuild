@@ -2,47 +2,43 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Resources;
-using System.Resources.Extensions;
-using System.Reflection;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-#if FEATURE_COM_INTEROP
-using Microsoft.Win32;
-#endif
 using System.CodeDom;
 using System.CodeDom.Compiler;
-using System.Xml;
-using System.Runtime.InteropServices;
-using System.Configuration;
-using System.Security;
+using System.Collections;
+using System.Collections.Generic;
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
 using System.ComponentModel.Design;
 #endif
+using System.Configuration;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Resources;
+using System.Resources.Extensions;
+using System.Reflection;
+using System.Runtime.InteropServices;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
 #endif
-
-#if (!STANDALONEBUILD)
-using Microsoft.Internal.Performance;
-#endif
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Versioning;
-
-using Microsoft.Build.Utilities;
+using System.Security;
+using System.Text;
+using System.Xml;
 using System.Xml.Linq;
+
+using Microsoft.Build.Eventing;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.ResourceHandling;
+using Microsoft.Build.Utilities;
+#if FEATURE_COM_INTEROP
+using Microsoft.Win32;
+#endif
 
 namespace Microsoft.Build.Tasks
 {
@@ -668,9 +664,7 @@ namespace Microsoft.Build.Tasks
         public override bool Execute()
         {
             bool outOfProcExecutionSucceeded = true;
-#if (!STANDALONEBUILD)
-            using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildGenerateResourceBegin, CodeMarkerEvent.perfMSBuildGenerateResourceEnd))
-#endif
+            MSBuildEventSource.Log.GenerateResourceOverallStart();
             {
                 // If we're extracting ResW files from assemblies (instead of building resources),
                 // our Sources can contain PDB's, pictures, and other non-DLL's.  Prune that list.
@@ -922,6 +916,8 @@ namespace Microsoft.Build.Tasks
 
                 RecordFilesWritten();
             }
+
+            MSBuildEventSource.Log.GenerateResourceOverallStop();
 
             return !Log.HasLoggedErrors && outOfProcExecutionSucceeded;
         }
