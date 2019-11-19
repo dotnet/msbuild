@@ -488,7 +488,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 </Project>";
 
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents);
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
             logger.AssertLogContains("[foo: ]");
         }
 
@@ -513,7 +513,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 </Project>";
 
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents);
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
             logger.AssertLogContains("[foo: ]");
         }
 
@@ -554,7 +554,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       </Target>
                     </Project>";
 
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents);
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
             logger.AssertLogContains("[foo: ]");
         }
 
@@ -595,7 +595,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       </Target>
                     </Project>";
 
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents);
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
             logger.AssertLogContains("[foo: ]");
         }
 #endif

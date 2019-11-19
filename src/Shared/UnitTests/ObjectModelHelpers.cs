@@ -701,10 +701,11 @@ namespace Microsoft.Build.UnitTests
         /// <returns></returns>
         internal static MockLogger BuildProjectExpectSuccess
             (
-            string projectContents
+            string projectContents,
+            ITestOutputHelper testOutputHelper = null
             )
         {
-            MockLogger logger = new MockLogger();
+            MockLogger logger = new MockLogger(testOutputHelper);
             BuildProjectExpectSuccess(projectContents, logger);
             return logger;
         }
@@ -716,8 +717,7 @@ namespace Microsoft.Build.UnitTests
             )
         {
             Project project = CreateInMemoryProject(projectContents, logger: null); // logger is null so we take care of loggers ourselves
-            bool success = project.Build(loggers);
-            Assert.True(success);
+            project.Build(loggers).ShouldBeTrue();
         }
 
         /// <summary>
