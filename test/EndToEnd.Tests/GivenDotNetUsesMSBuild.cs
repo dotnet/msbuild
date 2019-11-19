@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         {
             string projectDirectory = TestAssets.CreateTestDirectory().FullName;
 
-            string newArgs = "console -f netcoreapp3.0 --debug:ephemeral-hive --no-restore";
+            string newArgs = "console --debug:ephemeral-hive --no-restore";
             new NewCommandShim()
                 .WithWorkingDirectory(projectDirectory)
                 .Execute(newArgs)
@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
 
             new RestoreCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .Execute("/p:SkipInvalidConfigurations=true")
+                .Execute()
                 .Should().Pass();
 
             new BuildCommand()

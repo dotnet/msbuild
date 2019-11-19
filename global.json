@@ -1,11 +1,11 @@
 {
-  "__comment": "There are currently some tests that are creating 3.0 projects due to lagging templates and the 3.0 runtime version in stage 0 is the 3.0 preview below.",
+  "__comment": "There are currently some tests that are creating 3.1 projects due to lagging templates and the 3.0 runtime version in stage 0 is the 3.1 preview below.",
   "tools": {
-    "dotnet": "5.0.100-alpha1-014915",
+    "dotnet": "5.0.100-alpha1-015738",
     "runtimes": {
       "dotnet": [
         "$(MicrosoftNETCoreAppRuntimePackageVersion)",
-        "3.0.0-rc1-19456-20"
+        "3.1.0-preview1.19506.1"
       ]
     }
   },
