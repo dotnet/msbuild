@@ -3,7 +3,8 @@
   <Import Project="Sdk.targets" Sdk="Microsoft.DotNet.Arcade.Sdk" />
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'
-                          and $(MicrosoftNETCoreAppRefPackageVersion.StartsWith('$(_TargetFrameworkVersionWithoutV)'))">
+                          and $(MicrosoftNETCoreAppRefPackageVersion.StartsWith('$(_TargetFrameworkVersionWithoutV)'))
+                          and '$(MSBuildProjectName)' != 'toolset-tasks'">
     <FrameworkReference
         Update="Microsoft.NETCore.App" 
         TargetingPackVersion="$(MicrosoftNETCoreAppRefPackageVersion)"
