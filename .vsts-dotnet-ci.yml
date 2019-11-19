@@ -10,7 +10,7 @@ jobs:
     vmImage: 'windows-2019'
   steps:
   - task: BatchScript@1
-    displayName: cibuild.cmd
+    displayName: cibuild_bootstrapped_msbuild.cmd
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
   - task: PublishTestResults@2
@@ -54,7 +54,7 @@ jobs:
     vmImage: 'windows-2019'
   steps:
   - task: BatchScript@1
-    displayName: cibuild.cmd
+    displayName: cibuild_bootstrapped_msbuild.cmd
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
       arguments: '-msbuildEngine dotnet'

@@ -7,6 +7,10 @@ Param(
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
+# Ensure that static state in tools is aware that this is
+# a CI scenario
+$ci = $true
+
 . $PSScriptRoot\common\tools.ps1
 
 Set-StrictMode -Version 2.0
@@ -79,6 +83,7 @@ try {
   {
     $buildToolPath = Join-Path $bootstrapRoot "net472\MSBuild\Current\Bin\MSBuild.exe"
     $buildToolCommand = "";
+    $buildToolFramework = "net472"
 
     if ($configuration -eq "Debug-MONO" -or $configuration -eq "Release-MONO")
     {
@@ -91,6 +96,7 @@ try {
   {
     $buildToolPath = $dotnetExePath
     $buildToolCommand = Join-Path $bootstrapRoot "netcoreapp2.1\MSBuild\MSBuild.dll"
+    $buildToolFramework = "netcoreapp2.1"
   }
 
   # Use separate artifacts folder for stage 2
@@ -103,7 +109,7 @@ try {
     Move-Item -Path $ArtifactsDir -Destination $Stage1Dir -Force
   }
 
-  $buildTool = @{ Path = $buildToolPath; Command = $buildToolCommand }
+  $buildTool = @{ Path = $buildToolPath; Command = $buildToolCommand; Tool = $msbuildEngine; Framework = $buildToolFramework }
   $global:_BuildTool = $buildTool
 
   # turn vbcscompiler back on to save on time. It speeds up the build considerably
