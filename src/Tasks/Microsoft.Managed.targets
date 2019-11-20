@@ -46,9 +46,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
    </ItemGroup>
 
    <!-- Item copied from Microsoft.Common.Currentversion.targets   -->
- <PropertyGroup>
+  <PropertyGroup>
     <_RecursiveTargetForContentCopying>GetCopyToOutputDirectoryItems</_RecursiveTargetForContentCopying>
-    <_RecursiveTargetForContentCopying Condition=" '$(MSBuildCopyContentTransitively)' == 'false' ">_GetCopyToOutputDirectoryItemsFromThisProject </_RecursiveTargetForContentCopying>
+    <_RecursiveTargetForContentCopying Condition=" '$(MSBuildCopyContentTransitively)' == 'false' ">_GetCopyToOutputDirectoryItemsFromThisProject</_RecursiveTargetForContentCopying>
   </PropertyGroup>
 
   <!--

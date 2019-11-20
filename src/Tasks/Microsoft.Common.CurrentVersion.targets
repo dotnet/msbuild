@@ -4439,7 +4439,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
      -->
     <_RecursiveTargetForContentCopying>GetCopyToOutputDirectoryItems</_RecursiveTargetForContentCopying>
     <!-- Enforce 1 level deep content copying by replacing the recursive content target with the target that retrieves the content for the current project only. -->
-    <_RecursiveTargetForContentCopying Condition=" '$(MSBuildCopyContentTransitively)' == 'false' ">_GetCopyToOutputDirectoryItemsFromThisProject </_RecursiveTargetForContentCopying>
+    <_RecursiveTargetForContentCopying Condition=" '$(MSBuildCopyContentTransitively)' == 'false' ">_GetCopyToOutputDirectoryItemsFromThisProject</_RecursiveTargetForContentCopying>
   </PropertyGroup>
 
   <Target Name="_PopulateCommonStateForGetCopyToOutputDirectoryItems">
@@ -4473,7 +4473,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     </MSBuild>
 
-    <!-- Projects opting in for 1-level transitive content copying will have to replace OutputItemType metadata from ProjectReference items like so:
+    <!-- Projects opting in for 1-level content copying will have to replace OutputItemType metadata from ProjectReference items like so:
         "Content" to "_OutputItemTypeContentItems"
         "None" to "_OutputItemTypeNoneItems"
         "EmbeddedResource" to "_OutputItemTypeEmbeddedResourceItems"
@@ -4544,7 +4544,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       DependsOnTargets="$(GetCopyToOutputDirectoryItemsDependsOn)">
 
     <!-- Compose the content items as the union between transitive content items and content items from this project. -->
-    <!-- Use CallTarget to avoid breaking targets that hook right before GetCopyToOutputDirectoryItems but after _GetCopyToOutputDirectoryItemsFromTransitiveProjectReferences and _GetCopyToOutputDirectoryItemsFromThisProject -->
+    <!-- Use CallTarget to avoid breaking targets that hook right before GetCopyToOutputDirectoryItems but expect to run after _GetCopyToOutputDirectoryItemsFromTransitiveProjectReferences and _GetCopyToOutputDirectoryItemsFromThisProject -->
     <CallTarget Targets="_GetCopyToOutputDirectoryItemsFromTransitiveProjectReferences">
       <Output TaskParameter="TargetOutputs" ItemName="_TransitiveItemsToCopyToOutputDirectory" />
     </CallTarget>
