@@ -125,7 +125,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 //  Get the path of the targeting pack in the targeting pack root (e.g. dotnet/ref)
                 TaskItem targetingPack = new TaskItem(knownFrameworkReference.Name);
-                targetingPack.SetMetadata(MetadataKeys.PackageName, knownFrameworkReference.TargetingPackName);
+                targetingPack.SetMetadata(MetadataKeys.NuGetPackageId, knownFrameworkReference.TargetingPackName);
                 targetingPack.SetMetadata(MetadataKeys.PackageConflictPreferredPackages, string.Join(";", preferredPackages));
 
                 string targetingPackVersion = null;
@@ -304,7 +304,7 @@ namespace Microsoft.NET.Build.Tasks
                     if (runtimePacks != null)
                     {
                         TaskItem runtimePackItem = new TaskItem(runtimePackName);
-                        runtimePackItem.SetMetadata(MetadataKeys.PackageName, runtimePackName);
+                        runtimePackItem.SetMetadata(MetadataKeys.NuGetPackageId, runtimePackName);
                         runtimePackItem.SetMetadata(MetadataKeys.PackageVersion, runtimePackVersion);
                         runtimePackItem.SetMetadata(MetadataKeys.FrameworkName, knownFrameworkReference.Name);
                         runtimePackItem.SetMetadata(MetadataKeys.RuntimeIdentifier, runtimePackRuntimeIdentifier);
