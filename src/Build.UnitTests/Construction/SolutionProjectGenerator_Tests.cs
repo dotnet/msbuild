@@ -61,6 +61,127 @@ namespace Microsoft.Build.UnitTests.Construction
         }
 
         /// <summary>
+        /// Test that a solution filter file excludes projects not covered by its list of projects or their dependencies.
+        /// </summary>
+        [Fact]
+        public void SolutionFilterFiltersFiles()
+        {
+            if (FrameworkLocationHelper.PathToDotNetFrameworkV35 == null)
+            {
+                // ".NET Framework 3.5 is required to be installed for this test, but it is not installed.");
+                return;
+            }
+
+            string baseDirectory = Guid.NewGuid().ToString("N");
+
+            string solutionFileContents =
+                @"
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio Version 16
+                    VisualStudioVersion = 16.0.29326.124
+                    MinimumVisualStudioVersion = 10.0.40219.1
+                    Project('{ 9A19103F - 16F7 - 4668 - BE54 - 9A1E7A4F7556}') = 'SimpleProject', 'SimpleProject\SimpleProject.csproj', '{ 79B5EBA6 - 5D27 - 4976 - BC31 - 14422245A59A}'
+                    EndProject
+                    Project('{9A19103F-16F7-4668-BE54-9A1E7A4F7556}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{8EFCCA22-9D51-4268-90F7-A595E11FCB2D}'
+                    EndProject
+                    Project('{9A19103F-16F7-4668-BE54-9A1E7A4F7556}') = 'ClassLibrary2', 'ClassLibrary2\ClassLibrary2.csproj', '{06A4DD1B-5027-41EF-B72F-F586A5A83EA5}'
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug | Any CPU = Debug | Any CPU
+                            Release | Any CPU = Release | Any CPU
+                            EndGlobalSection
+                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                            { 79B5EBA6 - 5D27 - 4976 - BC31 - 14422245A59A}.Debug | Any CPU.ActiveCfg = Debug | Any CPU
+                            { 79B5EBA6 - 5D27 - 4976 - BC31 - 14422245A59A}.Debug | Any CPU.Build.0 = Debug | Any CPU
+                            { 79B5EBA6 - 5D27 - 4976 - BC31 - 14422245A59A}.Release | Any CPU.ActiveCfg = Release | Any CPU
+                            { 79B5EBA6 - 5D27 - 4976 - BC31 - 14422245A59A}.Release | Any CPU.Build.0 = Release | Any CPU
+                            { 8EFCCA22 - 9D51 - 4268 - 90F7 - A595E11FCB2D}.Debug | Any CPU.ActiveCfg = Debug | Any CPU
+                            { 8EFCCA22 - 9D51 - 4268 - 90F7 - A595E11FCB2D}.Debug | Any CPU.Build.0 = Debug | Any CPU
+                            { 8EFCCA22 - 9D51 - 4268 - 90F7 - A595E11FCB2D}.Release | Any CPU.ActiveCfg = Release | Any CPU
+                            { 8EFCCA22 - 9D51 - 4268 - 90F7 - A595E11FCB2D}.Release | Any CPU.Build.0 = Release | Any CPU
+                            { 06A4DD1B - 5027 - 41EF - B72F - F586A5A83EA5}.Debug | Any CPU.ActiveCfg = Debug | Any CPU
+                            { 06A4DD1B - 5027 - 41EF - B72F - F586A5A83EA5}.Debug | Any CPU.Build.0 = Debug | Any CPU
+                            { 06A4DD1B - 5027 - 41EF - B72F - F586A5A83EA5}.Release | Any CPU.ActiveCfg = Release | Any CPU
+                            { 06A4DD1B - 5027 - 41EF - B72F - F586A5A83EA5}.Release | Any CPU.Build.0 = Release | Any CPU
+                        EndGlobalSection
+                        GlobalSection(SolutionProperties) = preSolution
+                            HideSolutionNode = FALSE
+                        EndGlobalSection
+                        GlobalSection(ExtensibilityGlobals) = postSolution
+                            SolutionGuid = { DE7234EC - 0C4D - 4070 - B66A - DCF1B4F0CFEF}
+                        EndGlobalSection
+                    EndGlobal
+                ".Replace('\'', '"');
+            string solutionFilePath = FileUtilities.GetTemporaryFile(".sln");
+            File.WriteAllText(solutionFilePath, solutionFileContents);
+            string solutionFilterFileContents = @"
+                {
+                  'solution': {
+                    'path': '".Replace('\'', '"') + solutionFilePath.Replace("\\", "\\\\") + @"',
+                    'projects': [
+                      'SimpleProject\\SimpleProject.csproj'
+                    ]
+                    }
+                }
+                ".Replace('\'', '"');
+            string solutionFilterFilePath = FileUtilities.GetTemporaryFile(".slnf");
+            File.WriteAllText(solutionFilterFilePath, solutionFilterFileContents);
+            ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"SimpleProject\\SimpleProject.csproj"), @"
+            <Project Sdk = 'Microsoft.NET.Sdk'>
+                <PropertyGroup>
+                    <OutputType> Exe </OutputType>
+                 <TargetFramework> netcoreapp2.2 </TargetFramework>
+                  </PropertyGroup>
+                  <PropertyGroup Condition = ''$(Configuration)|$(Platform)'=='Debug|AnyCPU''>
+                     <PlatformTarget> x86 </PlatformTarget>
+                   </PropertyGroup>
+                    <Target Name=""MyTarget"" DependsOnTargets=""DynamicTraversalTarget"">
+                        <Warning Text=""Message from MyTarget"" />
+                    </Target>
+                   <ItemGroup>
+                     <ProjectReference Include = '..\ClassLibrary1\ClassLibrary1.csproj'/>
+                    </ItemGroup>
+                  </Project>
+            ".Replace('\'', '"'));
+            ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"ClassLibrary1\\ClassLibrary1.csproj"), @"
+            <Project Sdk='Microsoft.NET.Sdk'>
+                <PropertyGroup>
+                  <TargetFramework> netstandard2.0 </TargetFramework>
+                </PropertyGroup>
+                <Target Name=""DynamicTraversalTarget"">
+                    <Warning Text=""Message from MyTarget"" />
+                </Target>
+            </Project>
+            ".Replace('\'', '"'));
+            ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"ClassLibrary2\\ClassLibrary2.csproj"), @"
+            <Project Sdk='Microsoft.NET.Sdk'>
+                <PropertyGroup>
+                  <TargetFramework> netstandard2.0 </TargetFramework>
+                </PropertyGroup>
+            </Project>
+            ".Replace('\'', '"'));
+            SolutionFile solution = SolutionFile.Parse(solutionFilterFilePath);
+
+            ILoggingService mockLogger = CreateMockLoggingService();
+            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "3.5", _buildEventContext, mockLogger);
+            Assert.Equal(2, instances.Length);
+
+            // Check that dependencies are built, and non-dependencies in the .sln are not.
+            MockEngine mockEngine = new MockEngine();
+            string[] targetsToBuild = new[] { "MyTarget" };
+            MockLogger logger = new MockLogger(output);
+            foreach (ProjectInstance pi in instances)
+            {
+                pi.Build(targetsToBuild, new List<ILogger> { logger }).ShouldBeTrue("Should dynamically find ClassLibrary1");
+            }
+
+            mockEngine.AssertLogContains("ClassLibrary1.csproj");
+            mockEngine.AssertLogContains("SimpleProject.csproj");
+            mockEngine.AssertLogDoesntContain("ClassLibrary2.csproj");
+        }
+
+        /// <summary>
         /// Verify the AddNewErrorWarningMessageElement method
         /// </summary>
         [Fact]

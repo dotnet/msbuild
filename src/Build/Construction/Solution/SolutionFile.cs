@@ -202,6 +202,8 @@ namespace Microsoft.Build.Construction
                 ErrorUtilities.VerifyThrowInternalRooted(value);
                 if (FileUtilities.IsSolutionFilterFilename(value))
                 {
+                    //string c = File.ReadAllText(value);
+                    //File.WriteAllText(@"C:\Users\namytelk\Desktop\newFile2.txt", c);
                     using (JsonDocument text = JsonDocument.Parse(File.ReadAllText(value)))
                     {
                         try
@@ -255,7 +257,7 @@ namespace Microsoft.Build.Construction
 
         #region Methods
 
-        internal bool IsFiltered(string projectFile)
+        public bool IsFiltered(string projectFile)
         {
             return _solutionFilter == null || _solutionFilter.Contains(projectFile);
         }
