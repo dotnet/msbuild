@@ -41,13 +41,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     1,
                     Directory.GetCurrentDirectory(),
                     null,
-#if FEATURE_THREAD_CULTURE
                     Thread.CurrentThread.CurrentCulture,
                     Thread.CurrentThread.CurrentUICulture,
-#else
-                    CultureInfo.CurrentCulture,
-                    CultureInfo.CurrentCulture,
-#endif
 #if FEATURE_APPDOMAIN
                     null,
 #endif
@@ -73,13 +68,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     1,
                     Directory.GetCurrentDirectory(),
                     null,
-#if FEATURE_THREAD_CULTURE
                     Thread.CurrentThread.CurrentCulture,
                     Thread.CurrentThread.CurrentUICulture,
-#else
-                    CultureInfo.CurrentCulture,
-                    CultureInfo.CurrentCulture,
-#endif
 #if FEATURE_APPDOMAIN
                     null,
 #endif
@@ -105,13 +95,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     1,
                     Directory.GetCurrentDirectory(),
                     null,
-#if FEATURE_THREAD_CULTURE
                     Thread.CurrentThread.CurrentCulture,
                     Thread.CurrentThread.CurrentUICulture,
-#else
-                    CultureInfo.CurrentCulture,
-                    CultureInfo.CurrentCulture,
-#endif
 #if FEATURE_APPDOMAIN
                     null,
 #endif
@@ -139,13 +124,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     1,
                     Directory.GetCurrentDirectory(),
                     null,
-#if FEATURE_THREAD_CULTURE
                     Thread.CurrentThread.CurrentCulture,
                     Thread.CurrentThread.CurrentUICulture,
-#else
-                    CultureInfo.CurrentCulture,
-                    CultureInfo.CurrentCulture,
-#endif
 #if FEATURE_APPDOMAIN
                     null,
 #endif
@@ -171,13 +151,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 1,
                 Directory.GetCurrentDirectory(),
                 null,
-#if FEATURE_THREAD_CULTURE
                 Thread.CurrentThread.CurrentCulture,
                 Thread.CurrentThread.CurrentUICulture,
-#else
-                CultureInfo.CurrentCulture,
-                CultureInfo.CurrentCulture,
-#endif
 #if FEATURE_APPDOMAIN
                 null,
 #endif
@@ -192,13 +167,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 1,
                 Directory.GetCurrentDirectory(),
                 null,
-#if FEATURE_THREAD_CULTURE
                 Thread.CurrentThread.CurrentCulture,
                 Thread.CurrentThread.CurrentUICulture,
-#else
-                CultureInfo.CurrentCulture,
-                CultureInfo.CurrentCulture,
-#endif
 #if FEATURE_APPDOMAIN
                 null,
 #endif
@@ -215,13 +185,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 1,
                 Directory.GetCurrentDirectory(),
                 null,
-#if FEATURE_THREAD_CULTURE
                 Thread.CurrentThread.CurrentCulture,
                 Thread.CurrentThread.CurrentUICulture,
-#else
-                CultureInfo.CurrentCulture,
-                CultureInfo.CurrentCulture,
-#endif
 #if FEATURE_APPDOMAIN
                 null,
 #endif
@@ -243,13 +208,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 1,
                 Directory.GetCurrentDirectory(),
                 null,
-#if FEATURE_THREAD_CULTURE
                 Thread.CurrentThread.CurrentCulture,
                 Thread.CurrentThread.CurrentUICulture,
-#else
-                CultureInfo.CurrentCulture,
-                CultureInfo.CurrentCulture,
-#endif
 #if FEATURE_APPDOMAIN
                 null,
 #endif
@@ -272,13 +232,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 1,
                 Directory.GetCurrentDirectory(),
                 null,
-#if FEATURE_THREAD_CULTURE
                 Thread.CurrentThread.CurrentCulture,
                 Thread.CurrentThread.CurrentUICulture,
-#else
-                CultureInfo.CurrentCulture,
-                CultureInfo.CurrentCulture,
-#endif
 #if FEATURE_APPDOMAIN
                 null,
 #endif
@@ -297,7 +252,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(config.TaskName, deserializedConfig.TaskName);
 #if FEATURE_ASSEMBLY_LOADFROM
-            Assert.Equal(config.TaskLocation, config.TaskLocation);
+            Assert.Equal(config.TaskLocation, deserializedConfig.TaskLocation);
 #endif
             Assert.Null(deserializedConfig.TaskParameters);
         }
@@ -312,13 +267,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 1,
                 Directory.GetCurrentDirectory(),
                 null,
-#if FEATURE_THREAD_CULTURE
                 Thread.CurrentThread.CurrentCulture,
                 Thread.CurrentThread.CurrentUICulture,
-#else
-                CultureInfo.CurrentCulture,
-                CultureInfo.CurrentCulture,
-#endif
 #if FEATURE_APPDOMAIN
                 null,
 #endif
@@ -337,7 +287,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(config.TaskName, deserializedConfig.TaskName);
 #if FEATURE_ASSEMBLY_LOADFROM
-            Assert.Equal(config.TaskLocation, config.TaskLocation);
+            Assert.Equal(config.TaskLocation, deserializedConfig.TaskLocation);
 #endif
             Assert.NotNull(deserializedConfig.TaskParameters);
             Assert.Equal(config.TaskParameters.Count, deserializedConfig.TaskParameters.Count);
@@ -376,7 +326,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(config.TaskName, deserializedConfig.TaskName);
 #if FEATURE_ASSEMBLY_LOADFROM
-            Assert.Equal(config.TaskLocation, config.TaskLocation);
+            Assert.Equal(config.TaskLocation, deserializedConfig.TaskLocation);
 #endif
             Assert.NotNull(deserializedConfig.TaskParameters);
             Assert.Equal(config.TaskParameters.Count, deserializedConfig.TaskParameters.Count);
@@ -396,13 +346,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 1,
                 Directory.GetCurrentDirectory(),
                 null,
-#if FEATURE_THREAD_CULTURE
                 Thread.CurrentThread.CurrentCulture,
                 Thread.CurrentThread.CurrentUICulture,
-#else
-                CultureInfo.CurrentCulture,
-                CultureInfo.CurrentCulture,
-#endif
 #if FEATURE_APPDOMAIN
                 null,
 #endif
@@ -421,7 +366,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(config.TaskName, deserializedConfig.TaskName);
 #if FEATURE_ASSEMBLY_LOADFROM
-            Assert.Equal(config.TaskLocation, config.TaskLocation);
+            Assert.Equal(config.TaskLocation, deserializedConfig.TaskLocation);
 #endif
             Assert.NotNull(deserializedConfig.TaskParameters);
             Assert.Equal(config.TaskParameters.Count, deserializedConfig.TaskParameters.Count);
@@ -440,13 +385,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 1,
                 Directory.GetCurrentDirectory(),
                 null,
-#if FEATURE_THREAD_CULTURE
                 Thread.CurrentThread.CurrentCulture,
                 Thread.CurrentThread.CurrentUICulture,
-#else
-                CultureInfo.CurrentCulture,
-                CultureInfo.CurrentCulture,
-#endif
 #if FEATURE_APPDOMAIN
                 null,
 #endif
@@ -465,7 +405,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(config.TaskName, deserializedConfig.TaskName);
 #if FEATURE_ASSEMBLY_LOADFROM
-            Assert.Equal(config.TaskLocation, config.TaskLocation);
+            Assert.Equal(config.TaskLocation, deserializedConfig.TaskLocation);
 #endif
             Assert.NotNull(deserializedConfig.TaskParameters);
             Assert.Equal(config.TaskParameters.Count, deserializedConfig.TaskParameters.Count);
