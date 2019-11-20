@@ -736,6 +736,8 @@ namespace Microsoft.Build.BackEnd
             WorkUnitResultCode resultCode = WorkUnitResultCode.Success;
             WorkUnitActionCode actionCode = WorkUnitActionCode.Continue;
 
+            TaskLoggingHelper resultLog = null;
+
             if (!taskExecutionHost.SetTaskParameters(_taskNode.ParametersForBuild))
             {
                 // The task cannot be initialized.
@@ -755,8 +757,9 @@ namespace Microsoft.Build.BackEnd
                     if (taskType == typeof(MSBuild))
                     {
                         MSBuild msbuildTask = host.TaskInstance as MSBuild;
-                        ErrorUtilities.VerifyThrow(msbuildTask != null, "Unexpected MSBuild internal task.");
 
+                        ErrorUtilities.VerifyThrow(msbuildTask != null, "Unexpected MSBuild internal task.");
+                        
                         var undeclaredProjects = GetUndeclaredProjects(msbuildTask);
 
                         if (undeclaredProjects != null && undeclaredProjects.Count != 0)
@@ -787,6 +790,7 @@ namespace Microsoft.Build.BackEnd
                             }
                             finally
                             {
+                                resultLog = msbuildTask.Log;
                                 _targetBuilderCallback.ExitMSBuildCallbackState();
                             }
                         }
@@ -795,6 +799,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         CallTarget callTargetTask = host.TaskInstance as CallTarget;
                         taskResult = await callTargetTask.ExecuteInternal();
+                        resultLog = callTargetTask.Log;
                     }
                     else
                     {
@@ -935,6 +940,14 @@ namespace Microsoft.Build.BackEnd
                     {
                         ErrorUtilities.ThrowInternalErrorUnreachable();
                     }
+                }
+
+                // A task that returned false should have logged an error, otherwise log that as an error
+                if (taskReturned && !taskResult && resultLog != null && !resultLog.HasLoggedErrors)
+                {
+                    taskLoggingContext.LogError(new BuildEventFileInfo(_targetChildInstance.Location),
+                        "TaskReturnedFalseButDidNotLogError",
+                        _taskNode.Name);
                 }
 
                 // If the task returned attempt to gather its outputs.  If gathering outputs fails set the taskResults
