@@ -3,11 +3,11 @@
   <ProductDependencies>
     <Dependency Name="Microsoft.NETCore.App.Ref" Version="3.1.0">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>93ee64d467eeccd7006e370e78cf6dae31c1f3e2</Sha>
+      <Sha>c16a31965d1ff8c4564d420610e2991265e77501</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Runtime.win-x64" Version="3.1.0">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>93ee64d467eeccd7006e370e78cf6dae31c1f3e2</Sha>
+      <Sha>c16a31965d1ff8c4564d420610e2991265e77501</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.1.100-rtm.19570.4">
       <Uri>https://github.com/dotnet/cli</Uri>
