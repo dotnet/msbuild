@@ -173,7 +173,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        public IDictionary<string, string> GetGlobalProperties()
+        public IReadOnlyDictionary<string, string> GetGlobalProperties()
         {
             return GlobalProperties;
         }

@@ -13,7 +13,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Gets the global properties for the current project.
         /// </summary>
-        /// <returns>An <see cref="IDictionary{String, String}" /> containing the global properties of the current project.</returns>
-        IDictionary<string, string> GetGlobalProperties();
+        /// <returns>An <see cref="IReadOnlyDictionary{String, String}" /> containing the global properties of the current project.</returns>
+        IReadOnlyDictionary<string, string> GetGlobalProperties();
     }
 }
