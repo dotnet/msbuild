@@ -155,6 +155,11 @@
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
     </note>
       </trans-unit>
+      <trans-unit id="TaskReturnedFalseButDidNotLogError">
+        <source>MSB4132: Build failed because the "{0}" task returned false but did not log an error.</source>
+        <target state="new">MSB4132: Build failed because the "{0}" task returned false but did not log an error.</target>
+        <note>{StrBegin="MSB4132: "}</note>
+      </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
         <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
         <target state="translated">MSB4254: a task MSBuild está criando projetos "{0}" que não estão especificados no item ProjectReference. Nos builds isolados isso provavelmente significa que as referências não estão explicitamente especificadas como um item ProjectReference em "{1}"</target>
