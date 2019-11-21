@@ -195,7 +195,7 @@ namespace Microsoft.Build.Framework
     }
     public partial interface IBuildEngine6 : Microsoft.Build.Framework.IBuildEngine, Microsoft.Build.Framework.IBuildEngine2, Microsoft.Build.Framework.IBuildEngine3, Microsoft.Build.Framework.IBuildEngine4, Microsoft.Build.Framework.IBuildEngine5
     {
-        System.Collections.Generic.Dictionary<string, string> GetGlobalProperties();
+        System.Collections.Generic.IDictionary<string, string> GetGlobalProperties();
     }
     public partial interface ICancelableTask : Microsoft.Build.Framework.ITask
     {

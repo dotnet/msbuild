@@ -652,8 +652,8 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets the global properties for the current project.
         /// </summary>
-        /// <returns>A <see cref="Dictionary{String, String}" /> containing the global properties of the current project.</returns>
-        public Dictionary<string, string> GetGlobalProperties()
+        /// <returns>An <see cref="IDictionary{String, String}" /> containing the global properties of the current project.</returns>
+        public IDictionary<string, string> GetGlobalProperties()
         {
             return _requestEntry.RequestConfiguration.GlobalProperties.ToDictionary();
         }
