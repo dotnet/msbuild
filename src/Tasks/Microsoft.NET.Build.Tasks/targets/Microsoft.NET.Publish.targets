@@ -121,8 +121,79 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="CopyFilesToPublishDirectory"
-          DependsOnTargets="_CopyResolvedFilesToPublishPreserveNewest;
+          DependsOnTargets="_IncrementalCleanPublishDirectory;
+                            _CopyResolvedFilesToPublishPreserveNewest;
                             _CopyResolvedFilesToPublishAlways" />
+
+
+  <!-- TODO:
+            - OK for writes file to be in the publish dir?
+            - Make clean file name a hash of the dir
+            - Ensure clean file doesn't have more than is actually written
+    -->
+  
+  <!--
+    ============================================================
+                                        _IncrementalCleanPublishDirectory
+
+    Remove files that were produced in a prior build but weren't produced in the current build.
+    ============================================================
+    -->
+  <Target Name="_IncrementalCleanPublishDirectory"
+          DependsOnTargets="_GetCurrentAndPriorPublishFileWrites">
+
+    <!-- Subtract list of files produced in the prior publish from list of files produced in this publish. -->
+    <ItemGroup>
+      <_OrphanFileWrites Include="@(_PriorPublishFileWrites)" Exclude="@(ResolvedFileToPublish)"/>
+    </ItemGroup>
+
+    <!-- Delete the orphaned files. -->
+    <Delete
+        Files="@(_OrphanFileWrites)"
+        TreatErrorsAsWarnings="true">
+      <Output TaskParameter="DeletedFiles" ItemName="_OrphanFilesDeleted"/>
+    </Delete>
+    
+    <!-- Write new list of current files back to clean file. -->
+    <WriteLinesToFile
+        File="$(PublishDir)$(PublishCleanFile)"
+        Lines="@(ResolvedFileToPublish->'$(PublishDir)%(RelativePath)')"
+        Overwrite="true"
+        Condition="'$(PublishSingleFile)' != 'true'"/>
+  </Target>
+
+  <!--
+    ============================================================
+                                        _GetPriorPublishFileWrites
+    Get the list of files written in the previous publish and the list of files to be written in this publish.
+    ============================================================
+    -->
+  <Target Name="_GetCurrentAndPriorPublishFileWrites" >
+    <PropertyGroup>
+      <PublishCleanFile Condition="'$(PublishCleanFile)'==''">CleanFile.txt</PublishCleanFile>
+    </PropertyGroup>
+    
+    <!-- Read in writes made by prior publish. -->
+    <ReadLinesFromFile File="$(PublishDir)$(PublishCleanFile)"> <!-- TODO put this somewhere besides the publish dir -->
+      <Output TaskParameter="Lines" ItemName="_UnfilteredPriorPublishFileWrites"/>
+    </ReadLinesFromFile>
+  
+    <!-- Find all files in the final output directory. -->
+    <FindUnderPath Path="$(PublishDir)" Files="@(_UnfilteredPriorPublishFileWrites)" UpdateToAbsolutePaths="true">
+      <Output TaskParameter="InPath" ItemName="_PriorPublishFileWritesInOuput"/>
+    </FindUnderPath>
+    
+    <!-- Remove duplicates from files produced in the previous publish. -->
+    <RemoveDuplicates Inputs="@(_PriorPublishFileWritesInOuput)" >
+      <Output TaskParameter="Filtered" ItemName="_PriorPublishFileWrites"/>
+    </RemoveDuplicates>
+  
+    <!--TODO add single file case-->
+    <!-- Remove duplicates from the files produced in this publish-->
+    <RemoveDuplicates Inputs="@(ResolvedFileToPublish->'$(PublishDir)%(RelativePath)')" Condition="'$(PublishSingleFile)' != 'true'" >
+      <Output TaskParameter="Filtered" ItemName="_CurrentPublishFileWrites"/>
+    </RemoveDuplicates>
+  </Target>
 
   <!--
     ============================================================
@@ -136,7 +207,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="_ComputeResolvedFilesToPublishTypes"
           Inputs="@(_ResolvedFileToPublishPreserveNewest)"
           Outputs="@(_ResolvedFileToPublishPreserveNewest->'$(PublishDir)%(RelativePath)')">
-
+    
     <ItemGroup>
       <_ResolvedUnbundledFileToPublishPreserveNewest 
                     Include="@(_ResolvedFileToPublishPreserveNewest)" 
