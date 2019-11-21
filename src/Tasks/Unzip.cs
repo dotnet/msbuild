@@ -132,7 +132,7 @@ namespace Microsoft.Build.Tasks
                 FileInfo destinationPath = new FileInfo(Path.Combine(destinationDirectory.FullName, zipArchiveEntry.FullName));
 
                 // Zip archives can have directory entries listed explicitly.
-                // If this entry is a directory we should create the it and move to the next entry.
+                // If this entry is a directory we should create it and move to the next entry.
                 if (Path.GetFileName(destinationPath.FullName).Length == 0)
                 {
                     // The entry is a directory
