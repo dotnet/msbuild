@@ -185,7 +185,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 "TaskName",
                 @"c:\MyTasks\MyTask.dll",
                 null,
-                    null);
+                null);
 
             IDictionary<string, object> parameters = new Dictionary<string, object>();
             TaskHostConfiguration config3 = new TaskHostConfiguration(
@@ -204,7 +204,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 "TaskName",
                 @"c:\MyTasks\MyTask.dll",
                 parameters,
-                    null);
+                null);
 
             IDictionary<string, object> parameters2 = new Dictionary<string, object>();
             parameters2.Add("Text", "Hello!");
@@ -228,7 +228,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 "TaskName",
                 @"c:\MyTasks\MyTask.dll",
                 parameters2,
-                    null);
+                null);
         }
 
         /// <summary>
