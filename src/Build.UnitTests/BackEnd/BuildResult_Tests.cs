@@ -10,8 +10,9 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
+using Shouldly;
 using Xunit;
-
+using Xunit.Sdk;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 namespace Microsoft.Build.UnitTests.BackEnd
@@ -19,10 +20,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
     public class BuildResult_Tests
     {
         private int _nodeRequestId;
+        TestOutputHelper _output;
 
         public BuildResult_Tests()
         {
             _nodeRequestId = 1;
+            _output = new TestOutputHelper();
         }
 
         [Fact]
@@ -345,6 +348,27 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(result["omega"].ResultCode, deserializedResult["omega"].ResultCode);
             Assert.True(TranslationHelpers.CompareExceptions(result["omega"].Exception, deserializedResult["omega"].Exception));
             Assert.True(TranslationHelpers.CompareCollections(result["omega"].Items, deserializedResult["omega"].Items, TaskItemComparer.Instance));
+        }
+
+        [Fact]
+        public void TaskReturnsFailureButDoesNotLogErrorShouldCauseBuildFailure()
+        {
+
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                var proj1 = env.CreateFile("project1.csproj", @"
+                <Project>
+                    <UsingTask TaskName = ""ReturnFailureWithoutLoggingErrorTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <Target Name='Build'>
+                        <ReturnFailureWithoutLoggingErrorTask/>
+                    </Target>
+                </Project>");
+                MockLogger logger = new MockLogger(_output);
+                BuildResult result = Helpers.BuildProjectFileUsingBuildManager(proj1.Path, logger);
+
+                result.OverallResult.ShouldBe(BuildResultCode.Failure);
+                logger.AssertLogContains("MSB4132");
+            }
         }
 
         private BuildRequest CreateNewBuildRequest(int configurationId, string[] targets)
