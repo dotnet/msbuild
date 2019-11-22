@@ -18,12 +18,12 @@
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/core-setup -->
     <MicrosoftNETCoreAppRefPackageVersion>3.0.0</MicrosoftNETCoreAppRefPackageVersion>
-    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>3.0.2-servicing-19571-02</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
+    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>3.0.2-servicing-19571-04</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
     <MicrosoftNETCoreAppRuntimePackageVersion>$(MicrosoftNETCoreAppRuntimewinx64PackageVersion)</MicrosoftNETCoreAppRuntimePackageVersion>
-    <MicrosoftDotNetPlatformAbstractionsPackageVersion>3.0.2-servicing-19571-02</MicrosoftDotNetPlatformAbstractionsPackageVersion>
-    <MicrosoftExtensionsDependencyModelPackageVersion>3.0.2-servicing-19571-02</MicrosoftExtensionsDependencyModelPackageVersion>
-    <MicrosoftNETCoreDotNetHostResolverPackageVersion>3.0.2-servicing-19571-02</MicrosoftNETCoreDotNetHostResolverPackageVersion>
-    <MicrosoftNETHostModelVersion>3.0.2-servicing-19571-02</MicrosoftNETHostModelVersion>
+    <MicrosoftDotNetPlatformAbstractionsPackageVersion>3.0.2-servicing-19571-04</MicrosoftDotNetPlatformAbstractionsPackageVersion>
+    <MicrosoftExtensionsDependencyModelPackageVersion>3.0.2-servicing-19571-04</MicrosoftExtensionsDependencyModelPackageVersion>
+    <MicrosoftNETCoreDotNetHostResolverPackageVersion>3.0.2-servicing-19571-04</MicrosoftNETCoreDotNetHostResolverPackageVersion>
+    <MicrosoftNETHostModelVersion>3.0.2-servicing-19571-04</MicrosoftNETHostModelVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore -->
