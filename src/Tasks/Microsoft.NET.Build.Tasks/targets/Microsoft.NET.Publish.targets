@@ -124,13 +124,6 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="_IncrementalCleanPublishDirectory;
                             _CopyResolvedFilesToPublishPreserveNewest;
                             _CopyResolvedFilesToPublishAlways" />
-
-
-  <!-- TODO:
-            - OK for writes file to be in the publish dir?
-            - Make clean file name a hash of the dir
-            - Ensure clean file doesn't have more than is actually written
-    -->
   
   <!--
     ============================================================
@@ -144,7 +137,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Subtract list of files produced in the prior publish from list of files produced in this publish. -->
     <ItemGroup>
-      <_OrphanFileWrites Include="@(_PriorPublishFileWrites)" Exclude="@(ResolvedFileToPublish)"/>
+      <_OrphanFileWrites Include="@(_PriorPublishFileWrites)" Exclude="@(_CurrentPublishFileWrites)"/>
     </ItemGroup>
 
     <!-- Delete the orphaned files. -->
@@ -156,25 +149,27 @@ Copyright (c) .NET Foundation. All rights reserved.
     
     <!-- Write new list of current files back to clean file. -->
     <WriteLinesToFile
-        File="$(PublishDir)$(PublishCleanFile)"
-        Lines="@(ResolvedFileToPublish->'$(PublishDir)%(RelativePath)')"
-        Overwrite="true"
-        Condition="'$(PublishSingleFile)' != 'true'"/>
+        File="$(IntermediateOutputPath)$(PublishCleanFile)"
+        Lines="@(_CurrentPublishFileWrites)" 
+        Overwrite="true"/>  
   </Target>
 
   <!--
     ============================================================
-                                        _GetPriorPublishFileWrites
+                                        _GetCurrentAndPriorPublishFileWrites
     Get the list of files written in the previous publish and the list of files to be written in this publish.
     ============================================================
     -->
   <Target Name="_GetCurrentAndPriorPublishFileWrites" >
+    <Hash ItemstoHash="$(PublishDir)">
+      <Output TaskParameter="HashResult" PropertyName="PublishDirHash" />
+    </Hash>
     <PropertyGroup>
-      <PublishCleanFile Condition="'$(PublishCleanFile)'==''">CleanFile.txt</PublishCleanFile>
+      <PublishCleanFile Condition="'$(PublishCleanFile)'==''">.$(PublishDirHash).txt</PublishCleanFile>
     </PropertyGroup>
     
     <!-- Read in writes made by prior publish. -->
-    <ReadLinesFromFile File="$(PublishDir)$(PublishCleanFile)"> <!-- TODO put this somewhere besides the publish dir -->
+    <ReadLinesFromFile File="$(IntermediateOutputPath)$(PublishCleanFile)">
       <Output TaskParameter="Lines" ItemName="_UnfilteredPriorPublishFileWrites"/>
     </ReadLinesFromFile>
   
@@ -187,10 +182,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RemoveDuplicates Inputs="@(_PriorPublishFileWritesInOuput)" >
       <Output TaskParameter="Filtered" ItemName="_PriorPublishFileWrites"/>
     </RemoveDuplicates>
-  
-    <!--TODO add single file case-->
+
+    <ItemGroup>
+      <_CurrentPublishFileWritesUnfiltered Include="@(ResolvedFileToPublish->'$(PublishDir)%(RelativePath)')" Condition="'$(PublishSingleFile)' != 'true'"/>
+      <_CurrentPublishFileWritesUnfiltered Include="@(ResolvedFileToPublish->'$(PublishDir)%(RelativePath)')" 
+                                           Condition="'$(PublishSingleFile)' == 'true' And '%(ResolvedFileToPublish.ExcludeFromSingleFile)' == 'true'"/>
+      <_CurrentPublishFileWritesUnfiltered Include="$(PublishDir)$(AssemblyName)$(_NativeExecutableExtension)" Condition="'$(PublishSingleFile)' == 'true'"/>
+      <_CurrentPublishFileWritesUnfiltered Include="$(PublishDir)$(ProjectDepsFileName)" Condition="'$(GenerateDependencyFile)' == 'true' And '$(_UseBuildDependencyFile)' != 'true'"/>
+    </ItemGroup>
+
     <!-- Remove duplicates from the files produced in this publish-->
-    <RemoveDuplicates Inputs="@(ResolvedFileToPublish->'$(PublishDir)%(RelativePath)')" Condition="'$(PublishSingleFile)' != 'true'" >
+    <RemoveDuplicates Inputs="@(_CurrentPublishFileWritesUnfiltered)" >
       <Output TaskParameter="Filtered" ItemName="_CurrentPublishFileWrites"/>
     </RemoveDuplicates>
   </Target>
@@ -207,7 +209,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="_ComputeResolvedFilesToPublishTypes"
           Inputs="@(_ResolvedFileToPublishPreserveNewest)"
           Outputs="@(_ResolvedFileToPublishPreserveNewest->'$(PublishDir)%(RelativePath)')">
-    
+
     <ItemGroup>
       <_ResolvedUnbundledFileToPublishPreserveNewest 
                     Include="@(_ResolvedFileToPublishPreserveNewest)" 
