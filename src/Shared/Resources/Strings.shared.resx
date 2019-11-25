@@ -235,9 +235,6 @@
   <data name="UnrecognizedSolutionComment" UESanitized="false" Visibility="Public">
     <value>Unrecognized solution version "{0}", attempting to continue.</value>
   </data>
-  <data name="SolutionFilterFileInvalid" UESanitized="false" Visibility="Public">
-    <value>Unexpected solution filter file format.</value>
-  </data>
   <data name="SubCategoryForSolutionParsingErrors" UESanitized="false" Visibility="Public">
     <value>Solution file</value>
     <comment>UE: this fragment is used to describe errors found while parsing solution files. For example, if a normal error is
@@ -265,10 +262,22 @@
     <value>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</value>
     <comment></comment>
   </data>
+  <data name="JsonParsingError" UESanitized="false" Visibility="Public">
+    <value>MSB5025: Json in solution filter file "{0}" incorrectly formatted.</value>
+    <comment>{StrBegin="MSB: 5025"}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="MissingSolutionError" UESanitized="false" Visibility="Public">
+    <value>MSB5026: The file at "{0}" does not exist.</value>
+    <comment>{StrBegin="MSB: 5026"}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="ProjectDoesNotExist" UESanitized="false" Visibility="Public">
+    <value>MSB5027: There is no project file at "{0}" or it is an absolute path instead of a relative path from the solution file.</value>
+    <comment>{StrBegin="MSB: 5027"}UE: The project filename is provided separately to loggers.</comment>
+  </data>
   <!--
         The shared message bucket is: MSB5001 - MSB5999
 
-        Next message code should be MSB5025
+        Next message code should be MSB5028
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>

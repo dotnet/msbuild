@@ -202,30 +202,63 @@ namespace Microsoft.Build.Construction
                 ErrorUtilities.VerifyThrowInternalRooted(value);
                 if (FileUtilities.IsSolutionFilterFilename(value))
                 {
-                    using (JsonDocument text = JsonDocument.Parse(File.ReadAllText(value)))
+
+                    try
                     {
-                        try
+                        using (JsonDocument text = JsonDocument.Parse(File.ReadAllText(value)))
                         {
                             JsonElement solution = text.RootElement.GetProperty("solution");
                             _solutionFile = solution.GetProperty("path").GetString();
+                            if (!File.Exists(_solutionFile))
+                            {
+                                throw new FileLoadException(_solutionFile);
+                            }
                             _solutionFilter = new HashSet<string>(NativeMethodsShared.IsLinux ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
                             foreach (JsonElement project in solution.GetProperty("projects").EnumerateArray())
                             {
+                                if (!File.Exists(Path.Combine(Path.GetDirectoryName(_solutionFile), project.GetString())) && !File.Exists(project.GetString()))
+                                {
+                                    throw new NullReferenceException(project.GetString());
+                                }
                                 _solutionFilter.Add(project.GetString());
                             }
                         }
-                        catch (Exception)
-                        {
-                            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
-                                (
-                                    false /* just throw the exception */,
-                                    "SubCategoryForSolutionParsingErrors",
-                                    new BuildEventFileInfo(value),
-                                    "SolutionFilterFileInvalid",
-                                    slnFileMinUpgradableVersion,
-                                    slnFileMaxVersion
-                                );
-                        }
+                    }
+                    catch (NullReferenceException e)
+                    {
+                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                            (
+                                false /* just throw the exception */,
+                                "SubCategoryForSolutionParsingErrors",
+                                new BuildEventFileInfo(e.Message),
+                                "ProjectDoesNotExist",
+                                slnFileMinUpgradableVersion,
+                                slnFileMaxVersion
+                            );
+                    }
+                    catch (FileLoadException e)
+                    {
+                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                            (
+                                false /* just throw the exception */,
+                                "SubCategoryForSolutionParsingErrors",
+                                new BuildEventFileInfo(e.Message),
+                                "MissingSolutionError",
+                                slnFileMinUpgradableVersion,
+                                slnFileMaxVersion
+                            );
+                    }
+                    catch (JsonException)
+                    {
+                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                            (
+                                false /* just throw the exception */,
+                                "SubCategoryForSolutionParsingErrors",
+                                new BuildEventFileInfo(value),
+                                "JsonParsingError",
+                                slnFileMinUpgradableVersion,
+                                slnFileMaxVersion
+                            );
                     }
                 }
                 else
