@@ -637,6 +637,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private static bool WouldProjectBuild(SolutionFile solutionFile, string selectedSolutionConfiguration, ProjectInSolution project, ProjectConfigurationInSolution projectConfiguration)
         {
+            // If the solution filter does not contain this project, do not build it.
             if (!solutionFile.IsFiltered(project.RelativePath))
             {
                 return false;
@@ -756,6 +757,7 @@ namespace Microsoft.Build.Construction
         private void EvaluateAndAddProjects(List<ProjectInSolution> projectsInOrder, List<ProjectInstance> projectInstances, ProjectInstance traversalInstance, string selectedSolutionConfiguration)
         {
             // Now add all of the per-project items, targets and metaprojects.
+            int projectsBuilt = 0;
             foreach (ProjectInSolution project in projectsInOrder)
             {
                 project.ProjectConfigurations.TryGetValue(selectedSolutionConfiguration, out ProjectConfigurationInSolution projectConfiguration);
@@ -764,6 +766,7 @@ namespace Microsoft.Build.Construction
                     // Project wouldn't build, so omit it from further processing.
                     continue;
                 }
+                projectsBuilt++;
 
                 bool canBuildDirectly = CanBuildDirectly(traversalInstance, project, projectConfiguration);
 
@@ -790,6 +793,20 @@ namespace Microsoft.Build.Construction
                     ProjectInstance metaproject = CreateMetaproject(traversalInstance, project, projectConfiguration);
                     projectInstances.Add(metaproject);
                 }
+            }
+
+            // If no projects were built even though there were projects to build and there is a filter file, it is likely the filter file was improperly made, and files were erroneously filtered out.
+            if (projectsBuilt == 0 && projectsInOrder.Count > 0 && _solutionFile.IsFiltered("\\"))
+            {
+                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                    (
+                        false /* just throw the exception */,
+                        "SubCategoryForSolutionParsingErrors",
+                        null,
+                        "SolutionFilterFileInvalid",
+                        null,
+                        null
+                    );
             }
 
             // Add any other targets specified by the user that were not already added
