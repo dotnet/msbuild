@@ -45,7 +45,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 resolvedFrameworkReference.SetMetadata("TargetingPackPath", targetingPack.GetMetadata(MetadataKeys.Path));
                 resolvedFrameworkReference.SetMetadata("TargetingPackName", targetingPack.GetMetadata(MetadataKeys.NuGetPackageId));
-                resolvedFrameworkReference.SetMetadata("TargetingPackVersion", targetingPack.GetMetadata(MetadataKeys.PackageVersion));
+                resolvedFrameworkReference.SetMetadata("TargetingPackVersion", targetingPack.GetMetadata(MetadataKeys.NuGetPackageVersion));
                 resolvedFrameworkReference.SetMetadata("Profile", targetingPack.GetMetadata("Profile"));
 
                 ITaskItem runtimePack;
@@ -53,7 +53,7 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     resolvedFrameworkReference.SetMetadata("RuntimePackPath", runtimePack.GetMetadata(MetadataKeys.PackageDirectory));
                     resolvedFrameworkReference.SetMetadata("RuntimePackName", runtimePack.GetMetadata(MetadataKeys.NuGetPackageId));
-                    resolvedFrameworkReference.SetMetadata("RuntimePackVersion", runtimePack.GetMetadata(MetadataKeys.PackageVersion));
+                    resolvedFrameworkReference.SetMetadata("RuntimePackVersion", runtimePack.GetMetadata(MetadataKeys.NuGetPackageVersion));
                 }
 
                 resolvedFrameworkReferences.Add(resolvedFrameworkReference);

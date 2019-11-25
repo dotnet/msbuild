@@ -138,7 +138,7 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     targetingPackVersion = knownFrameworkReference.TargetingPackVersion;
                 }
-                targetingPack.SetMetadata(MetadataKeys.PackageVersion, targetingPackVersion);
+                targetingPack.SetMetadata(MetadataKeys.NuGetPackageVersion, targetingPackVersion);
                 targetingPack.SetMetadata("TargetingPackFormat", knownFrameworkReference.TargetingPackFormat);
                 targetingPack.SetMetadata("TargetFramework", knownFrameworkReference.TargetFramework.GetShortFolderName());
                 targetingPack.SetMetadata(MetadataKeys.RuntimeFrameworkName, knownFrameworkReference.RuntimeFrameworkName);
@@ -305,7 +305,7 @@ namespace Microsoft.NET.Build.Tasks
                     {
                         TaskItem runtimePackItem = new TaskItem(runtimePackName);
                         runtimePackItem.SetMetadata(MetadataKeys.NuGetPackageId, runtimePackName);
-                        runtimePackItem.SetMetadata(MetadataKeys.PackageVersion, runtimePackVersion);
+                        runtimePackItem.SetMetadata(MetadataKeys.NuGetPackageVersion, runtimePackVersion);
                         runtimePackItem.SetMetadata(MetadataKeys.FrameworkName, knownFrameworkReference.Name);
                         runtimePackItem.SetMetadata(MetadataKeys.RuntimeIdentifier, runtimePackRuntimeIdentifier);
                         runtimePackItem.SetMetadata(MetadataKeys.IsTrimmable, isTrimmable);

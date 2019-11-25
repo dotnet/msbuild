@@ -45,7 +45,7 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             assetInfo.PackageName = item.GetMetadata(MetadataKeys.NuGetPackageId);
-            assetInfo.PackageVersion = item.GetMetadata(MetadataKeys.PackageVersion);
+            assetInfo.PackageVersion = item.GetMetadata(MetadataKeys.NuGetPackageVersion);
             assetInfo.PackageRuntimeIdentifier = item.GetMetadata(MetadataKeys.RuntimeIdentifier);
 
             return assetInfo;

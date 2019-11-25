@@ -123,10 +123,6 @@ namespace Microsoft.NET.Build.Tasks
             var packageName = referencePath.GetMetadata(MetadataKeys.NuGetPackageId);
 
             var packageVersion = referencePath.GetMetadata(MetadataKeys.NuGetPackageVersion);
-            if (string.IsNullOrEmpty(packageVersion))
-            {
-                packageVersion = referencePath.GetMetadata(MetadataKeys.PackageVersion);
-            }
 
             var pathInPackage = referencePath.GetMetadata(MetadataKeys.PathInPackage);
 

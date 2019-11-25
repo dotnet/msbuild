@@ -45,7 +45,7 @@ namespace Microsoft.NET.Build.Tasks
             foreach (var item in Items)
             {
                 string packageName = item.GetMetadata(MetadataKeys.NuGetPackageId);
-                string packageVersion = item.GetMetadata(MetadataKeys.PackageVersion);
+                string packageVersion = item.GetMetadata(MetadataKeys.NuGetPackageVersion);
 
                 if (string.IsNullOrEmpty(packageName) || string.IsNullOrEmpty(packageVersion)
                     || !string.IsNullOrEmpty(item.GetMetadata(MetadataKeys.PackageDirectory)))
