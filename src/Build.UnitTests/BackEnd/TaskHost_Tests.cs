@@ -634,6 +634,78 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 #endif
 
+        /// <summary>
+        /// Verifies that tasks can get global properties.
+        /// </summary>
+        [Fact]
+        public void TasksCanGetGlobalProperties()
+        {
+            string projectFileContents = @"
+<Project>
+  <UsingTask TaskName='test' TaskFactory='RoslynCodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll'>
+    <Task>
+      <Code><![CDATA[
+        var globalProperties = ((IBuildEngine6)BuildEngine).GetGlobalProperties();
+
+        Log.LogMessage(""Global properties:"");
+        foreach (var item in globalProperties)
+        {
+            Log.LogMessage($""{item.Key}: '{item.Value}'"");
+        }
+      ]]></Code>
+    </Task>
+  </UsingTask>
+  <Target Name='Build'>
+      <test/>
+  </Target>
+</Project>";
+
+            Dictionary<string, string> globalProperties = new Dictionary<string, string>
+            {
+                ["Property1"] = "Value_%",
+                ["Property2"] = "Value_$",
+                ["Property3"] = "Value_@",
+                ["Property4"] = "Value_'",
+                ["Property5"] = "Value_;",
+                ["Property6"] = "Value_?",
+                ["Property7"] = "Value_*",
+            };
+
+            MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents, globalProperties);
+
+            foreach (var item in globalProperties)
+            {
+                mockLogger.AssertLogContains($"{item.Key}: '{item.Value}'");
+            }
+        }
+
+        /// <summary>
+        /// Verifies that if the user specifies no global properties, tasks get back an empty collection.
+        /// </summary>
+        [Fact]
+        public void TasksGetNoGlobalPropertiesIfNoneSpecified()
+        {
+            string projectFileContents = @"
+<Project>
+  <UsingTask TaskName='test' TaskFactory='RoslynCodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll'>
+    <Task>
+      <Code><![CDATA[
+        var globalProperties = ((IBuildEngine6)BuildEngine).GetGlobalProperties();
+
+        Log.LogMessage($""Global property count: {globalProperties.Count}"");
+      ]]></Code>
+    </Task>
+  </UsingTask>
+  <Target Name='Build'>
+      <test/>
+  </Target>
+</Project>";
+
+            MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
+
+            mockLogger.AssertLogContains("Global property count: 0");
+        }
+
         #region Helper Classes
 
         /// <summary>
