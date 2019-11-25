@@ -732,6 +732,7 @@ namespace Microsoft.Build.BackEnd
             UpdateContinueOnError(bucket, taskHost);
 
             bool taskResult = false;
+            bool isMSBuildTask = false;
 
             WorkUnitResultCode resultCode = WorkUnitResultCode.Success;
             WorkUnitActionCode actionCode = WorkUnitActionCode.Continue;
@@ -759,6 +760,7 @@ namespace Microsoft.Build.BackEnd
                         ErrorUtilities.VerifyThrow(msbuildTask != null, "Unexpected MSBuild internal task.");
                         
                         var undeclaredProjects = GetUndeclaredProjects(msbuildTask);
+                        isMSBuildTask = true;
 
                         if (undeclaredProjects != null && undeclaredProjects.Count != 0)
                         {
@@ -939,7 +941,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // A task that returned false should have logged an error, otherwise log that as an error
-                if (taskReturned && !taskResult && !taskLoggingContext.HasLoggedErrors)
+                if (!isMSBuildTask && taskReturned && !taskResult && !taskLoggingContext.HasLoggedErrors)
                 {
                     taskLoggingContext.LogError(new BuildEventFileInfo(_targetChildInstance.Location),
                         "TaskReturnedFalseButDidNotLogError",
