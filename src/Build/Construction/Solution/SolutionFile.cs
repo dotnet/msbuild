@@ -202,8 +202,6 @@ namespace Microsoft.Build.Construction
                 ErrorUtilities.VerifyThrowInternalRooted(value);
                 if (FileUtilities.IsSolutionFilterFilename(value))
                 {
-                    //string c = File.ReadAllText(value);
-                    //File.WriteAllText(@"C:\Users\namytelk\Desktop\newFile2.txt", c);
                     using (JsonDocument text = JsonDocument.Parse(File.ReadAllText(value)))
                     {
                         try

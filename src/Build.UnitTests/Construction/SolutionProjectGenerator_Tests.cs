@@ -60,6 +60,25 @@ namespace Microsoft.Build.UnitTests.Construction
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }
 
+        [Fact]
+        public void SolutionFilterFiltersFiles2()
+        {
+            ProjectRootElement projectXml = ProjectRootElement.Create();
+            ProjectTargetElement target = projectXml.AddTarget("Build");
+            projectXml.DefaultTargets = "Build";
+            projectXml.ToolsVersion = ObjectModelHelpers.MSBuildDefaultToolsVersion;
+            Project project = new Project(projectXml);
+
+            ProjectRootElement projectXml2 = ProjectRootElement.Create();
+            ProjectTargetElement target2 = projectXml2.AddTarget("Build2");
+            projectXml2.DefaultTargets = "Build2";
+            projectXml2.ToolsVersion = ObjectModelHelpers.MSBuildDefaultToolsVersion;
+            Project project2 = new Project(projectXml2);
+            target2.DependsOnTargets = target.Name;
+
+            SolutionFile sln = new SolutionFile();
+        }
+
         /// <summary>
         /// Test that a solution filter file excludes projects not covered by its list of projects or their dependencies.
         /// </summary>
@@ -72,113 +91,167 @@ namespace Microsoft.Build.UnitTests.Construction
                 return;
             }
 
-            string baseDirectory = Guid.NewGuid().ToString("N");
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);              
+                TransientTestFolder classLib1Folder = testEnvironment.CreateFolder(Path.Combine(folder.Path, "ClassLibrary1"), createFolder: true);
+                TransientTestFolder classLib1SubFolder = testEnvironment.CreateFolder(Path.Combine(classLib1Folder.Path, "ClassLibrary1"), createFolder: true);
+                TransientTestFile classLibrary1 = testEnvironment.CreateFile(classLib1SubFolder, "ClassLibrary1.csproj",
+                    @"<Project>
+                <PropertyGroup>
+                 <TargetFramework>netstandard2.0</TargetFramework>
+                  </PropertyGroup>
+                  <Target Name=""ClassLibrary1Target"">
+                      <Message Text=""ClassLibrary1Built""/>
+                  </Target>
+                  </Project>
+                    ");
+                TransientTestFile classLibrary1Sol = testEnvironment.CreateFile(classLib1Folder, "ClassLibrary1.sln",
+                    @"
 
-            string solutionFileContents =
-                @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29326.124
+MinimumVisualStudioVersion = 10.0.40219.1
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary1"", """ + classLibrary1.Path + @""", ""{F74EEDAF-57E3-42F3-8BF2-CE9C77D9EFFD}""
+EndProject
+Global
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|Any CPU = Debug|Any CPU
+        Release|Any CPU = Release|Any CPU
+        EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+        {F74EEDAF-57E3-42F3-8BF2-CE9C77D9EFFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {F74EEDAF-57E3-42F3-8BF2-CE9C77D9EFFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {F74EEDAF-57E3-42F3-8BF2-CE9C77D9EFFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {F74EEDAF-57E3-42F3-8BF2-CE9C77D9EFFD}.Release|Any CPU.Build.0 = Release|Any CPU
+EndGlobalSection
+    GlobalSection(SolutionProperties) = preSolution
+        HideSolutionNode = FALSE
+    EndGlobalSection
+    GlobalSection(ExtensibilityGlobals) = postSolution
+        SolutionGuid = {413DCADB-23DF-4FD4-96FD-7CD04FE4B083}
+                EndGlobalSection
+            EndGlobal
+");
+                TransientTestFolder classLib2Folder = testEnvironment.CreateFolder(Path.Combine(folder.Path, "ClassLibrary2"), createFolder: true);
+                TransientTestFolder classLib2SubFolder = testEnvironment.CreateFolder(Path.Combine(classLib2Folder.Path, "ClassLibrary2"), createFolder: true);
+                TransientTestFile classLibrary2 = testEnvironment.CreateFile(classLib2SubFolder, "ClassLibrary2.csproj",
+                    @"<Project>
+                <PropertyGroup>
+                 <TargetFramework>netstandard2.0</TargetFramework>
+                  </PropertyGroup>
+                  <Target Name=""ClassLibrary2Target"">
+                      <Message Text=""ClassLibrary2Built""/>
+                  </Target>
+                  </Project>
+                    ");
+                TransientTestFile classLibrary2Sol = testEnvironment.CreateFile(classLib2Folder, "ClassLibrary2.sln",
+                    @"
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29326.124
+MinimumVisualStudioVersion = 10.0.40219.1
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary2"", """ + classLibrary2.Path + @""", ""{09403DA8-0B85-4D32-B8A2-0B369A19D608}""
+EndProject
+Global
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|Any CPU = Debug|Any CPU
+        Release|Any CPU = Release|Any CPU
+        EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+        {09403DA8-0B85-4D32-B8A2-0B369A19D608}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {09403DA8-0B85-4D32-B8A2-0B369A19D608}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {09403DA8-0B85-4D32-B8A2-0B369A19D608}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {09403DA8-0B85-4D32-B8A2-0B369A19D608}.Release|Any CPU.Build.0 = Release|Any CPU
+EndGlobalSection
+    GlobalSection(SolutionProperties) = preSolution
+        HideSolutionNode = FALSE
+    EndGlobalSection
+    GlobalSection(ExtensibilityGlobals) = postSolution
+        SolutionGuid = {09403DA8-0B85-4D32-B8A2-0B369A19D608}
+                EndGlobalSection
+            EndGlobal
+");
+                TransientTestFolder simpleProjectFolder = testEnvironment.CreateFolder(Path.Combine(folder.Path, "SimpleProject"), createFolder: true);
+                TransientTestFolder simpleProjectSubFolder = testEnvironment.CreateFolder(Path.Combine(simpleProjectFolder.Path, "SimpleProject"), createFolder: true);
+                TransientTestFile simpleProject = testEnvironment.CreateFile(simpleProjectSubFolder, "SimpleProject.csproj",
+                    @"<Project>
+                <PropertyGroup>
+                    <OutputType>Exe</OutputType>
+                 <TargetFramework>netcoreapp2.2</TargetFramework>
+                  </PropertyGroup>
+                  <Target Name=""SimpleProjectTarget"">
+                      <Message Text=""SimpleProjectBuilt""/>
+                  </Target>
+                   <ItemGroup>
+                     <ProjectReference Include = """ + classLibrary1.Path + @""" />
+                    </ItemGroup>
+                  </Project>
+                    ");
+                TransientTestFile solutionFile = testEnvironment.CreateFile(simpleProjectFolder, "SimpleProject.sln",
+                    @"
                     Microsoft Visual Studio Solution File, Format Version 12.00
                     # Visual Studio Version 16
                     VisualStudioVersion = 16.0.29326.124
                     MinimumVisualStudioVersion = 10.0.40219.1
-                    Project('{ 9A19103F - 16F7 - 4668 - BE54 - 9A1E7A4F7556}') = 'SimpleProject', 'SimpleProject\SimpleProject.csproj', '{ 79B5EBA6 - 5D27 - 4976 - BC31 - 14422245A59A}'
+                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""SimpleProject"", """ + simpleProject.Path + @""", ""{79B5EBA6-5D27-4976-BC31-14422245A59A}""
                     EndProject
-                    Project('{9A19103F-16F7-4668-BE54-9A1E7A4F7556}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{8EFCCA22-9D51-4268-90F7-A595E11FCB2D}'
+                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""ClassLibrary1"", """ + classLibrary1.Path + @""", ""{8EFCCA22-9D51-4268-90F7-A595E11FCB2D}""
                     EndProject
-                    Project('{9A19103F-16F7-4668-BE54-9A1E7A4F7556}') = 'ClassLibrary2', 'ClassLibrary2\ClassLibrary2.csproj', '{06A4DD1B-5027-41EF-B72F-F586A5A83EA5}'
+                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""ClassLibrary2"", """ + classLibrary2.Path + @""", ""{06A4DD1B-5027-41EF-B72F-F586A5A83EA5}""
                     EndProject
                     Global
                         GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                            Debug | Any CPU = Debug | Any CPU
-                            Release | Any CPU = Release | Any CPU
+                            Debug|Any CPU = Debug|Any CPU
+                            Release|Any CPU = Release|Any CPU
                             EndGlobalSection
                         GlobalSection(ProjectConfigurationPlatforms) = postSolution
-                            { 79B5EBA6 - 5D27 - 4976 - BC31 - 14422245A59A}.Debug | Any CPU.ActiveCfg = Debug | Any CPU
-                            { 79B5EBA6 - 5D27 - 4976 - BC31 - 14422245A59A}.Debug | Any CPU.Build.0 = Debug | Any CPU
-                            { 79B5EBA6 - 5D27 - 4976 - BC31 - 14422245A59A}.Release | Any CPU.ActiveCfg = Release | Any CPU
-                            { 79B5EBA6 - 5D27 - 4976 - BC31 - 14422245A59A}.Release | Any CPU.Build.0 = Release | Any CPU
-                            { 8EFCCA22 - 9D51 - 4268 - 90F7 - A595E11FCB2D}.Debug | Any CPU.ActiveCfg = Debug | Any CPU
-                            { 8EFCCA22 - 9D51 - 4268 - 90F7 - A595E11FCB2D}.Debug | Any CPU.Build.0 = Debug | Any CPU
-                            { 8EFCCA22 - 9D51 - 4268 - 90F7 - A595E11FCB2D}.Release | Any CPU.ActiveCfg = Release | Any CPU
-                            { 8EFCCA22 - 9D51 - 4268 - 90F7 - A595E11FCB2D}.Release | Any CPU.Build.0 = Release | Any CPU
-                            { 06A4DD1B - 5027 - 41EF - B72F - F586A5A83EA5}.Debug | Any CPU.ActiveCfg = Debug | Any CPU
-                            { 06A4DD1B - 5027 - 41EF - B72F - F586A5A83EA5}.Debug | Any CPU.Build.0 = Debug | Any CPU
-                            { 06A4DD1B - 5027 - 41EF - B72F - F586A5A83EA5}.Release | Any CPU.ActiveCfg = Release | Any CPU
-                            { 06A4DD1B - 5027 - 41EF - B72F - F586A5A83EA5}.Release | Any CPU.Build.0 = Release | Any CPU
+                            {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                            {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                            {79B5EBA6-5D27-4976-BC31-14422245A59A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                            {79B5EBA6-5D27-4976-BC31-14422245A59A}.Release|Any CPU.Build.0 = Release|Any CPU
+                            {8EFCCA22-9D51-4268-90F7-A595E11FCB2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                            {8EFCCA22-9D51-4268-90F7-A595E11FCB2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                            {8EFCCA22-9D51-4268-90F7-A595E11FCB2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                            {8EFCCA22-9D51-4268-90F7-A595E11FCB2D}.Release|Any CPU.Build.0 = Release|Any CPU
+                            {06A4DD1B-5027-41EF-B72F-F586A5A83EA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                            {06A4DD1B-5027-41EF-B72F-F586A5A83EA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                            {06A4DD1B-5027-41EF-B72F-F586A5A83EA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                            {06A4DD1B-5027-41EF-B72F-F586A5A83EA5}.Release|Any CPU.Build.0 = Release|Any CPU
                         EndGlobalSection
                         GlobalSection(SolutionProperties) = preSolution
                             HideSolutionNode = FALSE
                         EndGlobalSection
                         GlobalSection(ExtensibilityGlobals) = postSolution
-                            SolutionGuid = { DE7234EC - 0C4D - 4070 - B66A - DCF1B4F0CFEF}
+                            SolutionGuid = {DE7234EC-0C4D-4070-B66A-DCF1B4F0CFEF}
                         EndGlobalSection
                     EndGlobal
-                ".Replace('\'', '"');
-            string solutionFilePath = FileUtilities.GetTemporaryFile(".sln");
-            File.WriteAllText(solutionFilePath, solutionFileContents);
-            string solutionFilterFileContents = @"
+                ");
+                TransientTestFile filterFile = testEnvironment.CreateFile(folder, "solutionFilter.slnf",
+                    @"
                 {
-                  'solution': {
-                    'path': '".Replace('\'', '"') + solutionFilePath.Replace("\\", "\\\\") + @"',
-                    'projects': [
-                      'SimpleProject\\SimpleProject.csproj'
+                  ""solution"": {
+                    ""path"": """ + solutionFile.Path.Replace("\\", "\\\\") + @""",
+                    ""projects"": [
+                      """ + simpleProject.Path.Replace("\\", "\\\\") + @"""
                     ]
                     }
                 }
-                ".Replace('\'', '"');
-            string solutionFilterFilePath = FileUtilities.GetTemporaryFile(".slnf");
-            File.WriteAllText(solutionFilterFilePath, solutionFilterFileContents);
-            ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"SimpleProject\\SimpleProject.csproj"), @"
-            <Project Sdk = 'Microsoft.NET.Sdk'>
-                <PropertyGroup>
-                    <OutputType> Exe </OutputType>
-                 <TargetFramework> netcoreapp2.2 </TargetFramework>
-                  </PropertyGroup>
-                  <PropertyGroup Condition = ''$(Configuration)|$(Platform)'=='Debug|AnyCPU''>
-                     <PlatformTarget> x86 </PlatformTarget>
-                   </PropertyGroup>
-                    <Target Name=""MyTarget"" DependsOnTargets=""DynamicTraversalTarget"">
-                        <Warning Text=""Message from MyTarget"" />
-                    </Target>
-                   <ItemGroup>
-                     <ProjectReference Include = '..\ClassLibrary1\ClassLibrary1.csproj'/>
-                    </ItemGroup>
-                  </Project>
-            ".Replace('\'', '"'));
-            ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"ClassLibrary1\\ClassLibrary1.csproj"), @"
-            <Project Sdk='Microsoft.NET.Sdk'>
-                <PropertyGroup>
-                  <TargetFramework> netstandard2.0 </TargetFramework>
-                </PropertyGroup>
-                <Target Name=""DynamicTraversalTarget"">
-                    <Warning Text=""Message from MyTarget"" />
-                </Target>
-            </Project>
-            ".Replace('\'', '"'));
-            ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"ClassLibrary2\\ClassLibrary2.csproj"), @"
-            <Project Sdk='Microsoft.NET.Sdk'>
-                <PropertyGroup>
-                  <TargetFramework> netstandard2.0 </TargetFramework>
-                </PropertyGroup>
-            </Project>
-            ".Replace('\'', '"'));
-            SolutionFile solution = SolutionFile.Parse(solutionFilterFilePath);
+                ");
+                SolutionFile solution = SolutionFile.Parse(filterFile.Path);
+                ILoggingService mockLogger = CreateMockLoggingService();
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, mockLogger);
+                instances.ShouldHaveSingleItem();
 
-            ILoggingService mockLogger = CreateMockLoggingService();
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "3.5", _buildEventContext, mockLogger);
-            Assert.Equal(2, instances.Length);
-
-            // Check that dependencies are built, and non-dependencies in the .sln are not.
-            MockEngine mockEngine = new MockEngine();
-            string[] targetsToBuild = new[] { "MyTarget" };
-            MockLogger logger = new MockLogger(output);
-            foreach (ProjectInstance pi in instances)
-            {
-                pi.Build(targetsToBuild, new List<ILogger> { logger }).ShouldBeTrue("Should dynamically find ClassLibrary1");
+                // Check that dependencies are built, and non-dependencies in the .sln are not.
+                MockLogger logger = new MockLogger(output);
+                instances[0].Build(targets: null, new List<ILogger> { logger }).ShouldBeTrue(logger.FullLog);
+                logger.AssertLogContains(new string[] { "ClassLibrary1.csproj" });
+                logger.AssertLogContains(new string[] { "SimpleProject.csproj" });
+                logger.AssertLogDoesntContain("ClassLibrary2.csproj");
             }
-
-            mockEngine.AssertLogContains("ClassLibrary1.csproj");
-            mockEngine.AssertLogContains("SimpleProject.csproj");
-            mockEngine.AssertLogDoesntContain("ClassLibrary2.csproj");
         }
 
         /// <summary>
