@@ -149,7 +149,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     
     <!-- Write new list of current files back to clean file. -->
     <WriteLinesToFile
-        File="$(IntermediateOutputPath)$(PublishCleanFile)"
+        File="$(IntermediateOutputPath)$(_PublishCleanFile)"
         Lines="@(_CurrentPublishFileWrites)" 
         Overwrite="true"/>  
   </Target>
@@ -162,18 +162,18 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <Target Name="_GetCurrentAndPriorPublishFileWrites" >
     <PropertyGroup>
-      <NormalizedPublishDir>$([MSBuild]::NormalizeDirectory($(PublishDir)))</NormalizedPublishDir>
+      <_NormalizedPublishDir>$([MSBuild]::NormalizeDirectory($(PublishDir)))</_NormalizedPublishDir>
     </PropertyGroup>
     
-    <Hash ItemstoHash="$(NormalizedPublishDir)">
-      <Output TaskParameter="HashResult" PropertyName="NormalizedPublishDirHash" />
+    <Hash ItemstoHash="$(_NormalizedPublishDir)">
+      <Output TaskParameter="HashResult" PropertyName="_NormalizedPublishDirHash" />
     </Hash>
     <PropertyGroup>
-      <PublishCleanFile Condition="'$(PublishCleanFile)'==''">.$(NormalizedPublishDirHash.Substring(0, 10)).txt</PublishCleanFile>
+      <_PublishCleanFile Condition="'$(PublishCleanFile)'==''">PublishOutputs.$(_NormalizedPublishDirHash.Substring(0, 10)).txt</_PublishCleanFile>
     </PropertyGroup>
     
     <!-- Read in writes made by prior publish. -->
-    <ReadLinesFromFile File="$(IntermediateOutputPath)$(PublishCleanFile)">
+    <ReadLinesFromFile File="$(IntermediateOutputPath)$(_PublishCleanFile)">
       <Output TaskParameter="Lines" ItemName="_UnfilteredPriorPublishFileWrites"/>
     </ReadLinesFromFile>
 
@@ -182,7 +182,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ConvertToAbsolutePath>
   
     <!-- Find all files in the final output directory. -->
-    <FindUnderPath Path="$(NormalizedPublishDir)" Files="@(_UnfilteredAbsolutePriorPublishFileWrites)" UpdateToAbsolutePaths="true">
+    <FindUnderPath Path="$(_NormalizedPublishDir)" Files="@(_UnfilteredAbsolutePriorPublishFileWrites)" UpdateToAbsolutePaths="true">
       <Output TaskParameter="InPath" ItemName="_PriorPublishFileWritesInOuput"/>
     </FindUnderPath>
     
@@ -192,11 +192,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     </RemoveDuplicates>
 
     <ItemGroup>
-      <_CurrentPublishFileWritesUnfiltered Include="@(ResolvedFileToPublish->'$(NormalizedPublishDir)%(RelativePath)')" Condition="'$(PublishSingleFile)' != 'true'"/>
-      <_CurrentPublishFileWritesUnfiltered Include="@(ResolvedFileToPublish->'$(NormalizedPublishDir)%(RelativePath)')" 
+      <_CurrentPublishFileWritesUnfiltered Include="@(ResolvedFileToPublish->'$(_NormalizedPublishDir)%(RelativePath)')" Condition="'$(PublishSingleFile)' != 'true'"/>
+      <_CurrentPublishFileWritesUnfiltered Include="@(ResolvedFileToPublish->'$(_NormalizedPublishDir)%(RelativePath)')" 
                                            Condition="'$(PublishSingleFile)' == 'true' And '%(ResolvedFileToPublish.ExcludeFromSingleFile)' == 'true'"/>
-      <_CurrentPublishFileWritesUnfiltered Include="$(NormalizedPublishDir)$(AssemblyName)$(_NativeExecutableExtension)" Condition="'$(PublishSingleFile)' == 'true'"/>
-      <_CurrentPublishFileWritesUnfiltered Include="$(NormalizedPublishDir)$(ProjectDepsFileName)" Condition="'$(GenerateDependencyFile)' == 'true' And '$(PublishSingleFile)' != 'true'"/>
+      <_CurrentPublishFileWritesUnfiltered Include="$(_NormalizedPublishDir)$(AssemblyName)$(_NativeExecutableExtension)" Condition="'$(PublishSingleFile)' == 'true'"/>
+      <_CurrentPublishFileWritesUnfiltered Include="$(_NormalizedPublishDir)$(ProjectDepsFileName)" Condition="'$(GenerateDependencyFile)' == 'true' And '$(PublishSingleFile)' != 'true'"/>
     </ItemGroup>
 
     <ConvertToAbsolutePath Paths="@(_CurrentPublishFileWritesUnfiltered)">

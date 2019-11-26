@@ -176,7 +176,7 @@ namespace Microsoft.NET.Publish.Tests
             newCommand.WorkingDirectory = testDir.Path;
             newCommand.Execute("new", "mvc", "-n", assetName).Should().Pass();
 
-            var expectedRegularFiles = new string[] { ".dll", ".deps.json", ".runtimeconfig.json", ".views.dll", ".views.pdb" }
+            var expectedRegularFiles = new string[] { ".dll", ".deps.json", ".runtimeconfig.json", ".Views.dll", ".Views.pdb" }
                 .Select(ending => assetName + ending);
             var expectedSingleFiles = new string[] { ".pdb", ".exe" }.Select(ending => assetName + ending)
                 .Concat(new string[] { "appsettings.json", "appsettings.Development.json", "web.config" });
