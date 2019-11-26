@@ -356,6 +356,7 @@ namespace Microsoft.Build.Utilities
         public Microsoft.Build.Utilities.TaskLoggingHelper Log { get { throw null; } }
         protected System.Resources.ResourceManager TaskResources { get { throw null; } set { } }
         public abstract bool Execute();
+        public static implicit operator System.Threading.Tasks.Task (Microsoft.Build.Utilities.Task v) { throw null; }
     }
     public sealed partial class TaskItem : System.MarshalByRefObject, Microsoft.Build.Framework.ITaskItem, Microsoft.Build.Framework.ITaskItem2
     {
