@@ -216,8 +216,7 @@ namespace Microsoft.Build.Construction
                                 "SubCategoryForSolutionParsingErrors",
                                 new BuildEventFileInfo(_solutionFile),
                                 "MissingSolutionError",
-                                slnFileMinUpgradableVersion,
-                                slnFileMaxVersion
+                                _solutionFile
                             );
                         }
                         _solutionFilter = new HashSet<string>(NativeMethodsShared.IsLinux ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
@@ -231,8 +230,7 @@ namespace Microsoft.Build.Construction
                                     "SubCategoryForSolutionParsingErrors",
                                     new BuildEventFileInfo(project.GetString()),
                                     "ProjectDoesNotExist",
-                                    slnFileMinUpgradableVersion,
-                                    slnFileMaxVersion
+                                    project.GetString()
                                 );
                             }
                             _solutionFilter.Add(project.GetString());
@@ -247,8 +245,7 @@ namespace Microsoft.Build.Construction
                             new BuildEventFileInfo(value),
                             e,
                             "JsonParsingError",
-                            slnFileMinUpgradableVersion,
-                            slnFileMaxVersion
+                            value
                         );
                     }
                 }
