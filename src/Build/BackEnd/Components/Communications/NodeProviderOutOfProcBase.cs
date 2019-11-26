@@ -20,6 +20,7 @@ using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 using System.Threading.Tasks;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+using Task = System.Threading.Tasks.Task;
 
 namespace Microsoft.Build.BackEnd
 {
