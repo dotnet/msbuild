@@ -1,8 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Resources;
-
+using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Utilities
@@ -132,6 +133,11 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <returns>true, if successful</returns>
         public abstract bool Execute();
+
+        public static implicit operator System.Threading.Tasks.Task(Task v)
+        {
+            throw new NotImplementedException();
+        }
 
         #endregion
     }

@@ -25,6 +25,7 @@ using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
+using Task = Microsoft.Build.Utilities.Task;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -941,11 +942,16 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // A task that returned false should have logged an error, otherwise log that as an error
-                if (!isMSBuildTask && taskReturned && !taskResult && !taskLoggingContext.HasLoggedErrors)
+                if(host.TaskInstance is Task)
                 {
-                    taskLoggingContext.LogError(new BuildEventFileInfo(_targetChildInstance.Location),
-                        "TaskReturnedFalseButDidNotLogError",
-                        _taskNode.Name);
+                    Task taskThatRan = host.TaskInstance as Task;
+
+                    if (!isMSBuildTask && taskReturned && !taskResult && taskThatRan.Log.HasLoggedErrors)
+                    {
+                        taskLoggingContext.LogError(new BuildEventFileInfo(_targetChildInstance.Location),
+                            "TaskReturnedFalseButDidNotLogError",
+                            _taskNode.Name);
+                    }
                 }
 
                 // If the task returned attempt to gather its outputs.  If gathering outputs fails set the taskResults
