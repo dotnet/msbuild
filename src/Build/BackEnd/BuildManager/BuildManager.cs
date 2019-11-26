@@ -103,7 +103,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Set of active nodes in the system.
         /// </summary>
-        private readonly ConcurrentDictionary<int, byte> _activeNodes;
+        private readonly HashSet<NGen<int>> _activeNodes;
 
         /// <summary>
         /// Event signalled when all nodes have shutdown.
@@ -263,7 +263,7 @@ namespace Microsoft.Build.Execution
             _buildSubmissions = new Dictionary<int, BuildSubmission>();
             _graphBuildSubmissions = new Dictionary<int, GraphBuildSubmission>();
             _noActiveSubmissionsEvent = new AutoResetEvent(true);
-            _activeNodes = new ConcurrentDictionary<int, byte>();
+            _activeNodes = new HashSet<NGen<int>>();
             _noNodesActiveEvent = new AutoResetEvent(true);
             _nodeIdToKnownConfigurations = new Dictionary<NGen<int>, HashSet<NGen<int>>>();
             _unnamedProjectInstanceToNames = new Dictionary<ProjectInstance, string>();
@@ -1790,8 +1790,8 @@ namespace Microsoft.Build.Execution
         private void HandleNodeShutdown(int node, NodeShutdown shutdownPacket)
         {
             _shuttingDown = true;
-            ErrorUtilities.VerifyThrow(_activeNodes.Keys.Contains(node), "Unexpected shutdown from node {0} which shouldn't exist.", node);
-            _activeNodes.TryRemove(node, out _);
+            ErrorUtilities.VerifyThrow(_activeNodes.Contains(node), "Unexpected shutdown from node {0} which shouldn't exist.", node);
+            _activeNodes.Remove(node);
 
             if (shutdownPacket.Reason != NodeShutdownReason.Requested)
             {
@@ -1897,6 +1897,54 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Handles creating new nodes.
+        /// </summary>
+        /// <param name="response">Details of how to make the nodes (the number, type, and so on).</param>
+        private void CreateNodes(ScheduleResponse response)
+        {
+            var newNodes = new ConcurrentBag<NodeInfo>();
+            GetNodeConfiguration();
+            try
+            {
+                Parallel.For(0, response.NumberOfNodesToCreate, i =>
+                {
+                    NodeInfo createdNode = _nodeManager.CreateNode(GetNodeConfiguration(), response.RequiredNodeType);
+
+                    if (createdNode != null)
+                    {
+                        _noNodesActiveEvent.Reset();
+                        newNodes.Add(createdNode);
+                        ErrorUtilities.VerifyThrow(newNodes.Count != 0, "Still 0 nodes after asking for a new node.  Build cannot proceed.");
+                    }
+                    else
+                    {
+                        BuildEventContext buildEventContext = new BuildEventContext(0, Scheduler.VirtualNode, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                        ((IBuildComponentHost)this).LoggingService.LogError(buildEventContext, new BuildEventFileInfo(String.Empty), "UnableToCreateNode", response.RequiredNodeType.ToString("G"));
+
+                        throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnableToCreateNode", response.RequiredNodeType.ToString("G")));
+                    }
+                });
+            }
+            catch (AggregateException e)
+            {
+                foreach (Exception ex in e.InnerExceptions)
+                {
+                    throw ex;
+                }
+            }
+            finally
+            {
+                foreach (NodeInfo ni in newNodes)
+                {
+                    _activeNodes.Add(ni.NodeId);
+                }
+            }
+
+            IEnumerable<ScheduleResponse> newResponses = _scheduler.ReportNodesCreated(newNodes);
+            PerformSchedulingActions(newResponses);
+        }
+
+        /// <summary>
         /// Carries out the actions specified by the scheduler.
         /// </summary>
         private void PerformSchedulingActions(IEnumerable<ScheduleResponse> responses)
@@ -1924,41 +1972,7 @@ namespace Microsoft.Build.Execution
                         break;
 
                     case ScheduleActionType.CreateNode:
-                        var newNodes = new ConcurrentBag<NodeInfo>();
-                        GetNodeConfiguration();
-                        try
-                        {
-                            Parallel.For(0, response.NumberOfNodesToCreate, i =>
-                            {
-                                NodeInfo createdNode = _nodeManager.CreateNode(GetNodeConfiguration(), response.RequiredNodeType);
-
-                                if (createdNode != null)
-                                {
-                                    _noNodesActiveEvent.Reset();
-                                    _activeNodes.TryAdd(createdNode.NodeId, 0);
-                                    newNodes.Add(createdNode);
-                                    ErrorUtilities.VerifyThrow(_activeNodes.Count != 0, "Still 0 nodes after asking for a new node.  Build cannot proceed.");
-                                }
-                                else
-                                {
-                                    BuildEventContext buildEventContext = new BuildEventContext(0, Scheduler.VirtualNode, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-                                    ((IBuildComponentHost)this).LoggingService.LogError(buildEventContext, new BuildEventFileInfo(String.Empty), "UnableToCreateNode", response.RequiredNodeType.ToString("G"));
-
-                                    throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnableToCreateNode", response.RequiredNodeType.ToString("G")));
-                                }
-                            });
-                        }
-                        catch (AggregateException e)
-                        {
-                            foreach (Exception ex in e.InnerExceptions)
-                            {
-                                throw ex;
-                            }
-                        }
-
-                        IEnumerable<ScheduleResponse> newResponses = _scheduler.ReportNodesCreated(newNodes);
-                        PerformSchedulingActions(newResponses);
-
+                        CreateNodes(response);
                         break;
 
                     case ScheduleActionType.Schedule:
