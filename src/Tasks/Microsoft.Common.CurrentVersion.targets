@@ -1104,7 +1104,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <PropertyGroup>
-    <PrepareForBuildDependsOn>GetFrameworkPaths;GetReferenceAssemblyPaths;AssignLinkMetadata</PrepareForBuildDependsOn>
+    <PrepareForBuildDependsOn>$(PrepareForBuildDependsOn);GetFrameworkPaths;GetReferenceAssemblyPaths;AssignLinkMetadata</PrepareForBuildDependsOn>
   </PropertyGroup>
   <Target
       Name="PrepareForBuild"
@@ -2765,6 +2765,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <PropertyGroup>
     <PrepareResourcesDependsOn>
+      $(PrepareResourcesDependsOn);
       PrepareResourceNames;
       ResGen;
       CompileLicxFiles
