@@ -205,60 +205,51 @@ namespace Microsoft.Build.Construction
 
                     try
                     {
-                        using (JsonDocument text = JsonDocument.Parse(File.ReadAllText(value)))
+                        using JsonDocument text = JsonDocument.Parse(File.ReadAllText(value));
+                        JsonElement solution = text.RootElement.GetProperty("solution");
+                        _solutionFile = solution.GetProperty("path").GetString();
+                        if (!File.Exists(_solutionFile))
                         {
-                            JsonElement solution = text.RootElement.GetProperty("solution");
-                            _solutionFile = solution.GetProperty("path").GetString();
-                            if (!File.Exists(_solutionFile))
-                            {
-                                throw new FileLoadException(_solutionFile);
-                            }
-                            _solutionFilter = new HashSet<string>(NativeMethodsShared.IsLinux ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
-                            foreach (JsonElement project in solution.GetProperty("projects").EnumerateArray())
-                            {
-                                if (!File.Exists(Path.Combine(Path.GetDirectoryName(_solutionFile), project.GetString())) && !File.Exists(project.GetString()))
-                                {
-                                    throw new NullReferenceException(project.GetString());
-                                }
-                                _solutionFilter.Add(project.GetString());
-                            }
-                        }
-                    }
-                    catch (NullReferenceException e)
-                    {
-                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
                             (
                                 false /* just throw the exception */,
                                 "SubCategoryForSolutionParsingErrors",
-                                new BuildEventFileInfo(e.Message),
-                                "ProjectDoesNotExist",
-                                slnFileMinUpgradableVersion,
-                                slnFileMaxVersion
-                            );
-                    }
-                    catch (FileLoadException e)
-                    {
-                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
-                            (
-                                false /* just throw the exception */,
-                                "SubCategoryForSolutionParsingErrors",
-                                new BuildEventFileInfo(e.Message),
+                                new BuildEventFileInfo(_solutionFile),
                                 "MissingSolutionError",
                                 slnFileMinUpgradableVersion,
                                 slnFileMaxVersion
                             );
+                        }
+                        _solutionFilter = new HashSet<string>(NativeMethodsShared.IsLinux ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
+                        foreach (JsonElement project in solution.GetProperty("projects").EnumerateArray())
+                        {
+                            if (!File.Exists(Path.Combine(Path.GetDirectoryName(_solutionFile), project.GetString())) && !File.Exists(project.GetString()))
+                            {
+                                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                                (
+                                    false /* just throw the exception */,
+                                    "SubCategoryForSolutionParsingErrors",
+                                    new BuildEventFileInfo(project.GetString()),
+                                    "ProjectDoesNotExist",
+                                    slnFileMinUpgradableVersion,
+                                    slnFileMaxVersion
+                                );
+                            }
+                            _solutionFilter.Add(project.GetString());
+                        }
                     }
-                    catch (JsonException)
+                    catch (JsonException e)
                     {
                         ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
-                            (
-                                false /* just throw the exception */,
-                                "SubCategoryForSolutionParsingErrors",
-                                new BuildEventFileInfo(value),
-                                "JsonParsingError",
-                                slnFileMinUpgradableVersion,
-                                slnFileMaxVersion
-                            );
+                        (
+                            false /* just throw the exception */,
+                            "SubCategoryForSolutionParsingErrors",
+                            new BuildEventFileInfo(value),
+                            e,
+                            "JsonParsingError",
+                            slnFileMinUpgradableVersion,
+                            slnFileMaxVersion
+                        );
                     }
                 }
                 else
