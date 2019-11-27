@@ -176,7 +176,7 @@ namespace Microsoft.Build
             }
 
             string result = s_si.InterningToString(candidate);
-#if _DEBUG
+#if DEBUG
             string expected = candidate.ExpensiveConvertToString();
             if (!String.Equals(result, expected))
             {

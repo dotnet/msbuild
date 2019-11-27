@@ -547,7 +547,7 @@ namespace Microsoft.Build.Tasks
             {
                 StringBuilder runtimeVersion;
                 uint hresult;
-#if _DEBUG
+#if DEBUG
                 // Just to make sure and exercise the code that doubles the size
                 // every time GetRequestedRuntimeInfo fails due to insufficient buffer size.
                 int bufferLength = 1;
