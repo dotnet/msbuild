@@ -436,6 +436,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     e.BuildEventContext = _taskLoggingContext.BuildEventContext;
                     _taskLoggingContext.LoggingService.LogBuildEvent(e);
+                    _taskLoggingContext.HasLoggedErrors = true;
                 }
             }
         }

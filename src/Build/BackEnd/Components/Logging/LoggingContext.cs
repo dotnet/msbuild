@@ -109,7 +109,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
         }
 
-        internal bool HasLoggedErrors { get { return _hasLoggedErrors; } }
+        internal bool HasLoggedErrors { get { return _hasLoggedErrors; } set { _hasLoggedErrors = value; } }
 
         /// <summary>
         ///  Helper method to create a message build event from a string resource and some parameters
