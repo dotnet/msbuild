@@ -116,22 +116,22 @@
         <Version>1.0.0</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
-      <!--<BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-portable-v1">
+      <BaseTestPackageProject Include="src/Assets/TestPackages/dotnet-portable-v1">
         <Name>dotnet-portable</Name>
         <ProjectName>dotnet-portable-v1.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
         <Version>1.0.0</Version>
         <Clean>True</Clean>
-      </BaseTestPackageProject>-->
-      <!--<BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-portable-v1-prefercli">
+      </BaseTestPackageProject>
+      <BaseTestPackageProject Include="src/Assets/TestPackages/dotnet-portable-v1-prefercli">
         <Name>dotnet-portable</Name>
         <ProjectName>dotnet-portable-v1-prefercli.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
         <Version>1.0.0</Version>
         <Clean>True</Clean>
-      </BaseTestPackageProject>-->
+      </BaseTestPackageProject>
       <BaseTestPackageProject Include="src/Assets/TestPackages/dotnet-fallbackfoldertool">
         <Name>dotnet-fallbackfoldertool</Name>
         <ProjectName>dotnet-fallbackfoldertool.csproj</ProjectName>

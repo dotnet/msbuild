@@ -148,6 +148,8 @@ namespace Microsoft.DotNet.Tests
             var testInstance = _testAssetsManager.CopyTestAsset("AppWithDepOnToolWithOutputName")
                 .WithSource();
 
+            NuGetConfigWriter.Write(testInstance.Path, TestContext.Current.TestPackages);
+
             new BuildCommand(Log, testInstance.Path)
                 .Execute()
                 .Should().Pass();
@@ -195,12 +197,14 @@ namespace Microsoft.DotNet.Tests
                                     randomPackageName);
 
 
-            new PackCommand(Log, toolWithRandPkgNameDir.FullName)
-                .Execute($"-o", "\"{pkgsDir.FullName}\"", "/p:version=1.0.0")
+            new DotnetCommand(Log)
+                .WithWorkingDirectory(toolWithRandPkgNameDir.FullName)
+                .Execute("pack", "-o", pkgsDir.FullName, "/p:version=1.0.0")
                 .Should().Pass();
 
-            new RestoreCommand(Log, appWithDepOnToolDir.FullName)
-                .Execute($"--source", "\"{pkgsDir.FullName}\"")
+            new DotnetCommand(Log)
+                .WithWorkingDirectory(appWithDepOnToolDir.FullName)
+                .Execute("restore", "--source", pkgsDir.FullName)
                 .Should().Pass();
 
             new DotnetCommand(Log)
