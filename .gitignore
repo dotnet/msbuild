@@ -22,3 +22,21 @@ obj/
 *.binlog
 
 sdk.sln.DotSettings.user
+
+# Debian and python stuff
+*.dsc
+*.tar.gz
+*.build
+*.changes
+*.deb
+*.pyc
+*.pyo
+
+# OSX Packaging temp files
+*.pkg
+
+# OS X Device Services Store
+.DS_Store
+
+# CMake generated files
+cmake/

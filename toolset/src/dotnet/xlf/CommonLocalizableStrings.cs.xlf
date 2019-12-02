@@ -1,0 +1,944 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="cs" original="../CommonLocalizableStrings.resx">
+    <body>
+      <trans-unit id="CommandInteractiveOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">Umožňuje, aby se příkaz zastavil a počkal na vstup nebo akci uživatele (například na dokončení ověření).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindAnyProjectInDirectory">
+        <source>Could not find any project in `{0}`.</source>
+        <target state="translated">V {0} se nenašel žádný projekt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathOSXBashManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">Adresář nástrojů {0} se v tuto chvíli nenachází v proměnné prostředí PATH.
+Pokud používáte bash, můžete ho přidat do profilu tak, že spustíte následující příkaz:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+Pokud ho chcete přidat do aktuální relace, slouží k tomuto tento příkaz:
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathOSXZshManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using zsh, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+And run `zsh -l` to make it available for current session.
+
+You can only add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">Adresář nástrojů {0} se aktuálně nenachází v proměnné prostředí PATH.
+Pokud používáte zsh, můžete si ho přidat do profilu tak, že spustíte následující příkaz:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
+# Přidání nástrojů .NET Core SDK
+export PATH="$PATH:{0}"
+EOF
+
+Pak ho spuštěním příkazu zsh -l zpřístupněte pro aktuální relaci.
+
+Pokud ho chcete přidat do aktuální relace, slouží k tomuto tento příkaz:
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOneProjectInDirectory">
+        <source>Found more than one project in `{0}`. Specify which one to use.</source>
+        <target state="translated">V {0} se našlo několik projektů. Vyberte, který z nich chcete použít.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectAlreadyHasAreference">
+        <source>Project already has a reference to `{0}`.</source>
+        <target state="translated">Projekt už obsahuje odkaz na {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectReferenceCouldNotBeFound">
+        <source>Project reference `{0}` could not be found.</source>
+        <target state="translated">Nenašel se odkaz na projekt {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectReferenceRemoved">
+        <source>Project reference `{0}` removed.</source>
+        <target state="translated">Odkaz na projekt {0} byl odebrán.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Project">
+        <source>Project</source>
+        <target state="translated">Projekt</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectFile">
+        <source>Project file</source>
+        <target state="translated">Soubor projektu</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Reference">
+        <source>Reference</source>
+        <target state="translated">Odkaz</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectReference">
+        <source>Project reference</source>
+        <target state="translated">Odkaz na projekt</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReference">
+        <source>Package reference</source>
+        <target state="translated">Odkaz na balíček</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="P2P">
+        <source>Project to Project</source>
+        <target state="translated">Z projektu na projekt</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="P2PReference">
+        <source>Project to Project reference</source>
+        <target state="translated">Odkaz mezi projekty</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Package">
+        <source>Package</source>
+        <target state="translated">Balíček</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Solution">
+        <source>Solution</source>
+        <target state="translated">Řešení</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionFile">
+        <source>Solution file</source>
+        <target state="translated">Soubor řešení</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Executable">
+        <source>Executable</source>
+        <target state="translated">Ke spuštění</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Library">
+        <source>Library</source>
+        <target state="translated">Knihovna</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Program">
+        <source>Program</source>
+        <target state="translated">Program</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Application">
+        <source>Application</source>
+        <target state="translated">Aplikace</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceAddedToTheProject">
+        <source>Reference `{0}` added to the project.</source>
+        <target state="translated">Odkaz na {0} byl přidán do projektu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Add">
+        <source>Add</source>
+        <target state="translated">Přidat</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Remove">
+        <source>Remove</source>
+        <target state="translated">Odebrat</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Delete">
+        <source>Delete</source>
+        <target state="translated">Odstranit</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Update">
+        <source>Update</source>
+        <target state="translated">Aktualizovat</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="New">
+        <source>New</source>
+        <target state="translated">Nový</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="List">
+        <source>List</source>
+        <target state="translated">Seznam</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Load">
+        <source>Load</source>
+        <target state="translated">Načíst</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Save">
+        <source>Save</source>
+        <target state="translated">Uložit</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Find">
+        <source>Find</source>
+        <target state="translated">Najít</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Error">
+        <source>Error</source>
+        <target state="translated">Chyba</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Warning">
+        <source>Warning</source>
+        <target state="translated">Upozornění</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="File">
+        <source>File</source>
+        <target state="translated">Soubor</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Directory">
+        <source>Directory</source>
+        <target state="translated">Adresář</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Type">
+        <source>Type</source>
+        <target state="translated">Typ</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Value">
+        <source>Value</source>
+        <target state="translated">Hodnota</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Group">
+        <source>Group</source>
+        <target state="translated">Skupina</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAddedToY">
+        <source>{0} added to {1}.</source>
+        <target state="translated">Položka {0} byla přidána do {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XRemovedFromY">
+        <source>{0} removed from {1}.</source>
+        <target state="translated">Položka {0} byla odebrána z {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XDeletedFromY">
+        <source>{0} deleted from {1}.</source>
+        <target state="translated">Položka {0} byla odstraněna z {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XSuccessfullyUpdated">
+        <source>{0} successfully updated.</source>
+        <target state="translated">Položka {0} byla úspěšně aktualizována.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XIsInvalid">
+        <source>{0} is invalid.</source>
+        <target state="translated">Položka {0} není platná.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XYFoundButInvalid">
+        <source>{0} `{1}` found but is invalid.</source>
+        <target state="translated">Položka {0} {1} byl nalezena, ale není platná.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XFoundButInvalid">
+        <source>`{0}` found but is invalid.</source>
+        <target state="translated">Položka {0} byla nalezena, ale není platná.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OperationInvalid">
+        <source>Operation is invalid.</source>
+        <target state="translated">Operace není platná.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OperationXInvalid">
+        <source>Operation {0} is invalid.</source>
+        <target state="translated">Operace {0} není platná.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XNotFound">
+        <source>{0} not found.</source>
+        <target state="translated">Položka {0} se nenašla.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XOrYNotFound">
+        <source>{0} or {1} not found.</source>
+        <target state="translated">Položka {0} nebo {1} se nenašla.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XOrYNotFoundInZ">
+        <source>{0} or {1} not found in `{2}`.</source>
+        <target state="translated">Položka {0} nebo {1} se nenašla v {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileNotFound">
+        <source>File `{0}` not found.</source>
+        <target state="translated">Soubor {0} se nenašel.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XDoesNotExist">
+        <source>{0} does not exist.</source>
+        <target state="translated">{0} neexistuje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XYDoesNotExist">
+        <source>{0} `{1}` does not exist.</source>
+        <target state="translated">{0} {1} neexistuje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOneXFound">
+        <source>More than one {0} found.</source>
+        <target state="translated">Našlo se více položek {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAlreadyContainsY">
+        <source>{0} already contains {1}.</source>
+        <target state="translated">{0} už obsahuje {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAlreadyContainsYZ">
+        <source>{0} already contains {1} `{2}`.</source>
+        <target state="translated">{0} už obsahuje {1} {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAlreadyHasY">
+        <source>{0} already has {1}.</source>
+        <target state="translated">{0} už má {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAlreadyHasYZ">
+        <source>{0} already has {1} `{2}`.</source>
+        <target state="translated">{0} už má {1} {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XWasNotExpected">
+        <source>{0} was not expected.</source>
+        <target state="translated">Položka {0} nebyla očekávána.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XNotProvided">
+        <source>{0} not provided.</source>
+        <target state="translated">Položka {0} nebyla zadána.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOne">
+        <source>Specify at least one {0}.</source>
+        <target state="translated">Zadejte aspoň jednu položku {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotConnectWithTheServer">
+        <source>Could not connect with the server.</source>
+        <target state="translated">Není možné se připojit k serveru.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentIsInvalid">
+        <source>Required argument {0} is invalid.</source>
+        <target state="translated">Požadovaný argument {0} není platný.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionIsInvalid">
+        <source>Option {0} is invalid.</source>
+        <target state="translated">Možnost {0} není platná.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentIsInvalid">
+        <source>Argument {0} is invalid.</source>
+        <target state="translated">Argument {0} není platný.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentNotPassed">
+        <source>Required argument {0} was not provided.</source>
+        <target state="translated">Požadovaný argument {0} nebyl zadán.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindProjectOrDirectory">
+        <source>Could not find project or directory `{0}`.</source>
+        <target state="translated">Nenašel se projekt ani adresář {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FoundInvalidProject">
+        <source>Found a project `{0}` but it is invalid.</source>
+        <target state="translated">Projekt {0} se našel, ale není platný.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidProject">
+        <source>Invalid project `{0}`.</source>
+        <target state="translated">Projekt {0} není platný.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindSolutionIn">
+        <source>Specified solution file {0} does not exist, or there is no solution file in the directory.</source>
+        <target state="translated">Zadaný soubor řešení {0} neexistuje nebo v adresáři není soubor řešení.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindSolutionOrDirectory">
+        <source>Could not find solution or directory `{0}`.</source>
+        <target state="translated">Nenašlo se řešení ani adresář {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionDoesNotExist">
+        <source>Specified solution file {0} does not exist, or there is no solution file in the directory.</source>
+        <target state="translated">Zadaný soubor řešení {0} neexistuje nebo v adresáři není soubor řešení.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceIsInvalid">
+        <source>Reference `{0}` is invalid.</source>
+        <target state="translated">Odkaz na {0} není platný.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOneReferenceToAdd">
+        <source>You must specify at least one reference to add.</source>
+        <target state="translated">Musíte zadat aspoň jeden odkaz, který chcete přidat.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceDoesNotExist">
+        <source>Package reference `{0}` does not exist.</source>
+        <target state="translated">Odkaz na balíček {0} neexistuje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceIsInvalid">
+        <source>Package reference `{0}` is invalid.</source>
+        <target state="translated">Odkaz na balíček {0} není platný.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOnePackageReferenceToAdd">
+        <source>You must specify at least one package to add.</source>
+        <target state="translated">Musíte zadat aspoň jeden balíček, který chcete přidat.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceAddedToTheProject">
+        <source>Package reference `{0}` added to the project.</source>
+        <target state="translated">Odkaz na balíček {0} byl přidán do projektu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectAlreadyHasAPackageReference">
+        <source>Project {0} already has a reference `{1}`.</source>
+        <target state="translated">Projekt {0} už obsahuje odkaz na {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PleaseSpecifyVersion">
+        <source>Specify a version of the package.</source>
+        <target state="translated">Zadejte verzi balíčku.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectDoesNotExist">
+        <source>Project `{0}` does not exist.</source>
+        <target state="translated">Projekt {0} neexistuje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectIsInvalid">
+        <source>Project `{0}` is invalid.</source>
+        <target state="translated">Projekt {0} není platný.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOneProjectToAdd">
+        <source>You must specify at least one project to add.</source>
+        <target state="translated">Musíte zadat aspoň jeden projekt, který chcete přidat.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectAddedToTheSolution">
+        <source>Project `{0}` added to the solution.</source>
+        <target state="translated">Projekt {0} byl přidán do řešení.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceNotFoundInTheProject">
+        <source>Specified reference {0} does not exist in project {1}.</source>
+        <target state="translated">Zadaný odkaz {0} v projektu {1} neexistuje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceRemoved">
+        <source>Reference `{0}` deleted from the project.</source>
+        <target state="translated">Odkaz na {0} byl z projektu odstraněn.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOneReferenceToRemove">
+        <source>You must specify at least one reference to remove.</source>
+        <target state="translated">Musíte zadat aspoň jeden odkaz, který chcete odebrat.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceDeleted">
+        <source>Reference `{0}` deleted.</source>
+        <target state="translated">Odkaz na {0} byl odstraněn.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceNotFoundInTheProject">
+        <source>Package reference `{0}` could not be found in the project.</source>
+        <target state="translated">Odkaz na balíček {0} se v projektu nenašel.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceRemoved">
+        <source>Reference `{0}` deleted from the project.</source>
+        <target state="translated">Odkaz na {0} byl z projektu odstraněn.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOnePackageReferenceToRemove">
+        <source>You must specify at least one package reference to remove.</source>
+        <target state="translated">Musíte zadat aspoň jeden odkaz na balíček, který chcete odebrat.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceDeleted">
+        <source>Package reference `{0}` deleted.</source>
+        <target state="translated">Odkaz na balíček {0} byl odstraněn.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectNotFoundInTheSolution">
+        <source>Project `{0}` could not be found in the solution.</source>
+        <target state="translated">Projekt {0} se v řešení nenašel.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectRemoved">
+        <source>Project `{0}` removed from solution.</source>
+        <target state="translated">Projekt {0} byl z řešení odebrán.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOneProjectToRemove">
+        <source>You must specify at least one project to remove.</source>
+        <target state="translated">Musíte zadat aspoň jeden projekt, který chcete odebrat.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectDeleted">
+        <source>Project `{0}` deleted from solution.</source>
+        <target state="translated">Projekt {0} byl z řešení odstraněn.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoReferencesFound">
+        <source>There are no {0} references in project {1}.</source>
+        <target state="translated">V projektu {1} nejsou žádné odkazy na {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoProjectsFound">
+        <source>No projects found in the solution.</source>
+        <target state="translated">V řešení se nenašly žádné projekty.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PleaseSpecifyNewVersion">
+        <source>Specify new version of the package.</source>
+        <target state="translated">Zadejte novou verzi balíčku.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PleaseSpecifyWhichPackageToUpdate">
+        <source>Specify which package to update.</source>
+        <target state="translated">Zadejte, který balíček chcete aktualizovat.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NothingToUpdate">
+        <source>Nothing to update.</source>
+        <target state="translated">Nic k aktualizaci.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EverythingUpToDate">
+        <source>Everything is already up-to-date.</source>
+        <target state="translated">Všechno je aktuální.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageVersionUpdatedTo">
+        <source>Version of package `{0}` updated to `{1}`.</source>
+        <target state="translated">Verze balíčku {0} byla aktualizována na {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageVersionUpdated">
+        <source>Version of package `{0}` updated.</source>
+        <target state="translated">Verze balíčku {0} byla aktualizována.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotUpdateTheVersion">
+        <source>Could not update the version of the package `{0}`.</source>
+        <target state="translated">Verzi balíčku {0} není možné aktualizovat.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCreatedSuccessfully">
+        <source>The template {0} created successfully. run "dotnet restore" to get started!</source>
+        <target state="translated">Šablona {0} se úspěšně vytvořila. Začněte spuštěním příkazu dotnet restore!</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInstalledSuccesfully">
+        <source>The template {0} installed successfully. You can use "dotnet new {0}" to get started with the new template.</source>
+        <target state="translated">Šablona {0} byla úspěšně nainstalována. Pokud chcete začít novou šablonou, použijte příkaz dotnet new {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCreateError">
+        <source>Template {0} could not be created. Error returned was: {1}.</source>
+        <target state="translated">Šablonu {0} se nepodařilo vytvořit. Vrácená chyba: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInstallError">
+        <source>Template {0} could not be installed. Error returned was: {1}.</source>
+        <target state="translated">Šablonu {0} se nepodařilo nainstalovat. Vrácená chyba: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifiedNameExists">
+        <source>Specified name {0} already exists. Specify a different name.</source>
+        <target state="translated">Zadaný název {0} už existuje. Zadejte jiný název.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifiedAliasExists">
+        <source>Specified alias {0} already exists. Specify a different alias.</source>
+        <target state="translated">Zadaný alias {0} už existuje. Zadejte jiný alias.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MandatoryParameterMissing">
+        <source>Mandatory parameter {0} missing for template {1}. </source>
+        <target state="translated">Chybí povinný parametr {0} pro šablonu {1}. </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectReferenceOneOrMore">
+        <source>Project reference(s)</source>
+        <target state="translated">Odkaz(y) na projekt</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredCommandNotPassed">
+        <source>Required command was not provided.</source>
+        <target state="translated">Požadovaný příkaz nebyl zadán.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOneSolutionInDirectory">
+        <source>Found more than one solution file in {0}. Specify which one to use.</source>
+        <target state="translated">V {0} se našlo několik souborů řešení. Vyberte, který z nich chcete použít.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionAlreadyContainsProject">
+        <source>Solution {0} already contains project {1}.</source>
+        <target state="translated">Řešení {0} už obsahuje projekt {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentsProjectOrSolutionDescription">
+        <source>The project or solution to operation on. If a file is not specified, the current directory is searched.</source>
+        <target state="translated">Použitý projekt nebo řešení. Pokud není soubor zadaný, prohledá se aktuální adresář.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFramework">
+        <source>FRAMEWORK</source>
+        <target state="translated">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectNotCompatibleWithFrameworks">
+        <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Review the project you are trying to add and verify that is compatible with the following targets:</source>
+        <target state="translated">Projekt {0} není možné přidat, protože cílové platformy obou projektů nejsou kompatibilní. Zkontrolujte projekt, který se pokoušíte přidat, a ověřte jeho kompatibilitu s následujícími cíli:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectDoesNotTargetFramework">
+        <source>Project `{0}` does not target framework `{1}`.</source>
+        <target state="translated">Projekt {0} není určený pro cílovou architekturu {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCouldNotBeEvaluated">
+        <source>Project `{0}` could not be evaluated. Evaluation failed with following error:
+{1}.</source>
+        <target state="translated">Projekt {0} se nepodařilo vyhodnotit. Vyhodnocení selhalo s následující chybou:
+{1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedProjectType">
+        <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Contact your SDK provider for support.</source>
+        <target state="translated">Projekt {0} má neznámý typ projektu a nelze ho přidat do souboru řešení. O podporu požádejte poskytovatele sady SDK.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidSolutionFormatString">
+        <source>Invalid solution `{0}`. {1}.</source>
+        <target state="translated">Neplatné řešení {0}. {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidProjectWithExceptionMessage">
+        <source>Invalid project `{0}`. {1}.</source>
+        <target state="translated">Neplatný projekt {0}. {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VerbosityOptionDescription">
+        <source>Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
+        <target state="translated">Nastavuje úroveň podrobností MSBuild. Povolené hodnoty jsou q [tichý], m [minimální], n [normální], d [podrobný] a diag [diagnostický].</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdVersionSuffixDescription">
+        <source>Set the value of the $(VersionSuffix) property to use when building the project.</source>
+        <target state="translated">Nastavuje hodnotu vlastnosti $(VersionSuffix), která se má použít při sestavování projektu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShowHelpDescription">
+        <source>Show command line help.</source>
+        <target state="translated">Zobrazí nápovědu příkazového řádku.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoRestoreDescription">
+        <source>Do not restore the project before building.</source>
+        <target state="translated">Neobnoví projekt před sestavením.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectRemovedFromTheSolution">
+        <source>Project `{0}` removed from the solution.</source>
+        <target state="translated">Projekt {0} byl z řešení odebrán.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsInvalidXml">
+        <source>Invalid XML: {0}</source>
+        <target state="translated">Neplatné XML: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathLinuxNeedLogout">
+        <source>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</source>
+        <target state="translated">Právě jste nainstalovali sadu .NET Core SDK, bude proto nutné před spuštěním nainstalovaného nástroje se odhlásit nebo restartovat relaci.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathOSXNeedReopen">
+        <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
+        <target state="translated">Právě jste nainstalovali sadu .NET Core SDK, bude proto nutné před spuštěním nainstalovaného nástroje znovu otevřít terminál.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathWindowsNeedReopen">
+        <source>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
+        <target state="translated">Právě jste nainstalovali sadu .NET Core SDK, bude proto nutné před spuštěním nainstalovaného nástroje znovu otevřít okno příkazového řádku.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMissingCommandName">
+        <source>Tool defines a command with a missing name setting.</source>
+        <target state="translated">Nástroj definuje příkaz s chybějícím nastavením názvu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMissingEntryPoint">
+        <source>Command '{0}' is missing an entry point setting.</source>
+        <target state="translated">V příkazu {0} chybí nastavení vstupního bodu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsInvalidCommandName">
+        <source>Command '{0}' contains one or more of the following invalid characters: {1}.</source>
+        <target state="translated">Příkaz {0} obsahuje minimálně jeden neplatný znak: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMoreThanOneCommand">
+        <source>More than one command is defined for the tool.</source>
+        <target state="translated">Pro nástroj je definovaných více příkazů.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsUnsupportedRunner">
+        <source>Command '{0}' uses unsupported runner '{1}'."</source>
+        <target state="translated">Příkaz {0} používá nepodporovaný spouštěč {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPackageConflictPackageId">
+        <source>Tool '{0}' (version '{1}') is already installed.</source>
+        <target state="translated">Nástroj {0} (verze {1}) je už nainstalovaný.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShellShimConflict">
+        <source>Command '{0}' conflicts with an existing command from another tool.</source>
+        <target state="translated">Příkaz {0} koliduje s existujícím příkazem jiného nástroje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCreateShimForEmptyExecutablePath">
+        <source>Cannot create shell shim for an empty executable path.</source>
+        <target state="translated">Pro prázdnou cestu ke spustitelnému souboru nelze vytvořit překrytí prostředí.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCreateShimForEmptyCommand">
+        <source>Cannot create shell shim for an empty command.</source>
+        <target state="translated">Pro prázdný příkaz nelze vytvořit překrytí prostředí.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToRetrieveToolConfiguration">
+        <source>Failed to retrieve tool configuration: {0}</source>
+        <target state="translated">Nepodařilo se načíst konfiguraci nástroje: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathLinuxManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">Adresář nástrojů {0} se v tuto chvíli nenachází v proměnné prostředí PATH.
+Pokud používáte bash, můžete ho přidat do profilu tak, že spustíte následující příkaz:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+Pokud ho chcete přidat do aktuální relace, slouží k tomuto tento příkaz:
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathWindowsManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+
+You can add the directory to the PATH by running the following command:
+
+setx PATH "%PATH%;{0}"
+</source>
+        <target state="translated">Adresář nástrojů {0} není momentálně v proměnné prostředí PATH.
+
+Tento adresář přidáte do proměnné PATH spuštěním následujícího příkazu:
+
+setx PATH "%PATH%;{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToCreateShellShim">
+        <source>Failed to create tool shim for command '{0}': {1}</source>
+        <target state="translated">Pro příkaz {0} se nepodařilo vytvořit překrytí nástroje: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToRemoveShellShim">
+        <source>Failed to remove tool shim for command '{0}': {1}</source>
+        <target state="translated">Pro příkaz {0} se nepodařilo odebrat překrytí nástroje: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedSettingShimPermissions">
+        <source>Failed to set user executable permissions for shell shim: {0}</source>
+        <target state="translated">Pro překrytí prostředí se nepodařilo nastavit oprávnění uživatele ke spouštění: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToInstallToolPackage">
+        <source>Failed to install tool package '{0}': {1}</source>
+        <target state="translated">Nepodařilo se nainstalovat balíček nástroje {0}: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToUninstallToolPackage">
+        <source>Failed to uninstall tool package '{0}': {1}</source>
+        <target state="translated">Nepodařilo se odinstalovat balíček nástroje {0}: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnMaxWidthMustBeGreaterThanZero">
+        <source>Column maximum width must be greater than zero.</source>
+        <target state="translated">Maximální šířka sloupce musí být větší než nula.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingToolEntryPointFile">
+        <source>Entry point file '{0}' for command '{1}' was not found in the package.</source>
+        <target state="translated">Soubor vstupního bodu {0} pro příkaz {1} nebyl v balíčku nalezen.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingToolSettingsFile">
+        <source>Settings file 'DotnetToolSettings.xml' was not found in the package.</source>
+        <target state="translated">Soubor s nastavením DotnetToolSettings.xml nebyl v balíčku nalezen.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToFindStagedToolPackage">
+        <source>Failed to find staged tool package '{0}'.</source>
+        <target state="translated">Nepodařilo se najít připravený balíček nástroje {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">
+        <source>The command name '{0}' cannot begin with a leading dot (.).</source>
+        <target state="translated">Název příkazu {0} nemůže začínat úvodní tečkou (.).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsHigher">
+        <source>Format version is higher than supported. This tool may not be supported in this SDK version. Update your SDK.</source>
+        <target state="translated">Verze formátu je vyšší, než se podporuje. Tento nástroj se možná v této verzi SDK nepodporuje. Aktualizujte sadu SDK.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsMalformed">
+        <source>Format version is malformed. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
+        <target state="translated">Verze formátu je chybně vytvořená. Tento nástroj se možná v této verzi SDK nepodporuje. Obraťte se na autora nástroje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsMissing">
+        <source>Format version is missing. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
+        <target state="translated">Verze formátu chybí. Tento nástroj se možná v této verzi SDK nepodporuje. Obraťte se na autora nástroje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToSetToolsPathEnvironmentVariable">
+        <source>Failed to add '{0}' to the PATH environment variable. Add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
+        <target state="translated">Nepovedlo se přidat adresář {0} do proměnné prostředí PATH. Přidejte tento adresář do proměnné PATH, abyste mohli používat nástroje nainstalované pomocí dotnet tool install.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOnePackagedShimAvailable">
+        <source>More than one packaged shim is available: {0}.</source>
+        <target state="translated">Je k dispozici více než jedno zabalené překrytí: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToReadNuGetLockFile">
+        <source>Failed to read NuGet LockFile for tool package '{0}': {1}</source>
+        <target state="translated">Nepovedlo se přečíst soubor LockFile NuGet pro balíček nástroje {0}: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectArgumentName">
+        <source>PROJECT</source>
+        <target state="translated">PROJECT</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectArgumentDescription">
+        <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
+        <target state="translated">Soubor projektu, s kterým se má pracovat. Pokud soubor není zadaný, příkaz ho bude hledat v aktuálním adresáři.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LevelArgumentName">
+        <source>LEVEL</source>
+        <target state="translated">LEVEL</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkArgumentName">
+        <source>FRAMEWORK</source>
+        <target state="translated">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeIdentifierArgumentName">
+        <source>RUNTIME_IDENTIFIER</source>
+        <target state="translated">RUNTIME_IDENTIFIER</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationArgumentName">
+        <source>CONFIGURATION</source>
+        <target state="translated">CONFIGURATION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionSuffixArgumentName">
+        <source>VERSION_SUFFIX</source>
+        <target state="translated">VERSION_SUFFIX</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionOrProjectArgumentDescription">
+        <source>The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.</source>
+        <target state="translated">Soubor projektu nebo řešení, se kterým se má operace provést. Pokud soubor není zadaný, příkaz ho bude hledat v aktuálním adresáři.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionOrProjectArgumentName">
+        <source>PROJECT | SOLUTION</source>
+        <target state="translated">PROJEKT | ŘEŠENÍ</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

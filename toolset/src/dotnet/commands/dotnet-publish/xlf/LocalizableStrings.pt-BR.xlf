@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppDescription">
+        <source>Publisher for the .NET Platform</source>
+        <target state="translated">Editor para a Plataforma .NET</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="translated">Não exibe a faixa de inicialização ou a mensagem de direitos autorais.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOption">
+        <source>FRAMEWORK</source>
+        <target state="translated">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to publish for. The target framework has to be specified in the project file.</source>
+        <target state="translated">A estrutura de destino da publicação. A estrutura de destino precisa ser especificada no arquivo de projeto.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoSelfContainedOptionDescription">
+        <source>Publish your application as a framework dependent application without the .NET Core runtime. A supported .NET Core runtime must be installed to run your application.</source>
+        <target state="translated">Publique o seu aplicativo como um aplicativo dependente de estrutura sem o runtime do .NET Core. Um runtime do .NET Core com suporte precisa ser instalado para executar o aplicativo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutputOption">
+        <source>OUTPUT_DIR</source>
+        <target state="translated">OUTPUT_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutputOptionDescription">
+        <source>The output directory to place the published artifacts in.</source>
+        <target state="translated">O diretório de saída no qual os artefatos publicados serão colocados.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestOption">
+        <source>MANIFEST</source>
+        <target state="translated">MANIFEST</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestOptionDescription">
+        <source>The path to a target manifest file that contains the list of packages to be excluded from the publish step.</source>
+        <target state="translated">O caminho para um arquivo de manifesto de destino que contém a lista de pacotes a serem excluídos da etapa de publicação.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoBuildOptionDescription">
+        <source>Do not build the project before publishing. Implies --no-restore.</source>
+        <target state="translated">Não compile o projeto antes de publicar. Implica em --no-restore.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to publish for. This is used when creating a self-contained deployment.
+The default is to publish a framework-dependent application.</source>
+        <target state="translated">O runtime de destino a ser publicado. Isto é usado quando estiver criando um deployment auto-contido.
+O padrão é publicar uma aplicação dependente de framework.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
+        <target state="translated">A configuração para a qual a publicação ocorrerá. O padrão para a maioria dos projetos é 'Debug'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainAndNoSelfContainedConflict">
+        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
+        <target state="translated">As opções '--self-contained' e '--no-self-contained' são conflitantes entre si. Especifique apenas uma das opções.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionDescription">
+        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</source>
+        <target state="translated">Publica o runtime do .NET Core com sua aplicação para que o mesmo não precise estar instalado na máquina de destino.
+O padrão é 'verdadeiro' se um identificador de runtime for especificado.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

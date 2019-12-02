@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="fr" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>.NET Core NuGet Package Packer</source>
+        <target state="translated">Compresseur de package NuGet .NET Core</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>pack for msbuild</source>
+        <target state="translated">compresser pour msbuild</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="translated">N'affiche pas la bannière de démarrage ni le message de copyright.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutputDir">
+        <source>OUTPUT_DIR</source>
+        <target state="translated">OUTPUT_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutputDirDescription">
+        <source>The output directory to place built packages in.</source>
+        <target state="translated">Répertoire de sortie dans lequel placer les packages générés.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoBuildOptionDescription">
+        <source>Do not build the project before packing. Implies --no-restore.</source>
+        <target state="translated">Ne pas générer le projet avant la compression. Implique --no-restore.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdIncludeSymbolsDescription">
+        <source>Include packages with symbols in addition to regular packages in output directory.</source>
+        <target state="translated">Incluez les packages avec des symboles en plus des packages classiques dans le répertoire de sortie.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdIncludeSourceDescription">
+        <source>Include PDBs and source files. Source files go into the 'src' folder in the resulting nuget package.</source>
+        <target state="translated">Incluez les fichiers PDB et les fichiers sources. Les fichiers sources vont dans le dossier 'src' du package NuGet résultant.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdServiceableDescription">
+        <source>Set the serviceable flag in the package. See https://aka.ms/nupkgservicing for more information.</source>
+        <target state="translated">Définissez l'indicateur de maintenance dans le package. Pour plus d'informations, consultez https://aka.ms/nupkgservicing.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdArgumentProject">
+        <source>PROJECT</source>
+        <target state="translated">PROJECT</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdArgumentDescription">
+        <source>The project to pack, defaults to the project file in the current directory. Can be a path to any project file</source>
+        <target state="translated">Projet à compresser, par défaut le fichier projet dans le répertoire actif. Il peut s'agir d'un chemin vers n'importe quel fichier projet</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to use for building the package. The default for most projects is 'Debug'.</source>
+        <target state="translated">Configuration à utiliser pour la génération du package. La valeur par défaut pour la plupart des projets est 'Debug'.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,545 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" original="src/dotnet/CommonLocalizableStrings.resx">
+    <body>
+      <group id="src/dotnet/CommonLocalizableStrings.resx" />
+      <trans-unit id="CouldNotFindAnyProjectInDirectory">
+        <source>Could not find any project in `{0}`.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOneProjectInDirectory">
+        <source>Found more than one project in `{0}`. Please specify which one to use.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectAlreadyHasAreference">
+        <source>Project already has a reference to `{0}`.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectReferenceCouldNotBeFound">
+        <source>Project reference `{0}` could not be found.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectReferenceRemoved">
+        <source>Project reference `{0}` removed.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="Project">
+        <source>Project</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectFile">
+        <source>Project file</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="Reference">
+        <source>Reference</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectReference">
+        <source>Project reference</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReference">
+        <source>Package reference</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="P2P">
+        <source>Project to Project</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="P2PReference">
+        <source>Project to Project reference</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="Package">
+        <source>Package</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="Solution">
+        <source>Solution</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionFile">
+        <source>Solution file</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="Executable">
+        <source>Executable</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="Library">
+        <source>Library</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="Program">
+        <source>Program</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="Application">
+        <source>Application</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceDoesNotExist">
+        <source>Reference {0} does not exist.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceAddedToTheProject">
+        <source>Reference `{0}` added to the project.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="Add">
+        <source>Add</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="Remove">
+        <source>Remove</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="Delete">
+        <source>Delete</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="Update">
+        <source>Update</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="New">
+        <source>New</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="List">
+        <source>List</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="Load">
+        <source>Load</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="Save">
+        <source>Save</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="Find">
+        <source>Find</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="Error">
+        <source>Error</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="Warning">
+        <source>Warning</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="File">
+        <source>File</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="Directory">
+        <source>Directory</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="Type">
+        <source>Type</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="Value">
+        <source>Value</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="Group">
+        <source>Group</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAddedToY">
+        <source>{0} added to {1}.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="XRemovedFromY">
+        <source>{0} removed from {1}.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="XDeletedFromY">
+        <source>{0} deleted from {1}.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="XSuccessfullyUpdated">
+        <source>{0} successfully updated.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="XIsInvalid">
+        <source>{0} is invalid.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="XYFoundButInvalid">
+        <source>{0} `{1}` found but is invalid.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="XFoundButInvalid">
+        <source>`{0}` found but is invalid.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="OperationInvalid">
+        <source>Operation is invalid.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="OperationXInvalid">
+        <source>Operation {0} is invalid.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="XNotFound">
+        <source>{0} not found.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="XOrYNotFound">
+        <source>{0} or {1} not found.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="XOrYNotFoundInZ">
+        <source>{0} or {1} not found in `{2}`.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileNotFound">
+        <source>File `{0}` not found.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="XDoesNotExist">
+        <source>{0} does not exist.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="XYDoesNotExist">
+        <source>{0} `{1}` does not exist.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOneXFound">
+        <source>More than one {0} found.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAlreadyContainsY">
+        <source>{0} already contains {1}.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAlreadyContainsYZ">
+        <source>{0} already contains {1} `{2}`.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAlreadyHasY">
+        <source>{0} already has {1}.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAlreadyHasYZ">
+        <source>{0} already has {1} `{2}`.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="XWasNotExpected">
+        <source>{0} was not expected.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="XNotProvided">
+        <source>{0} not provided.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOne">
+        <source>Please specify at least one {0}.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotConnectWithTheServer">
+        <source>Could not connect with the server.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentIsInvalid">
+        <source>Required argument {0} is invalid.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionIsInvalid">
+        <source>Option {0} is invalid.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentIsInvalid">
+        <source>Argument {0} is invalid.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentNotPassed">
+        <source>Required argument {0} was not provided.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindProjectOrDirectory">
+        <source>Could not find project or directory `{0}`.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="FoundInvalidProject">
+        <source>Found a project `{0}` but it is invalid.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidProject">
+        <source>Invalid project `{0}`.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindSolutionIn">
+        <source>Specified solution file {0} does not exist, or there is no solution file in the directory.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindSolutionOrDirectory">
+        <source>Could not find solution or directory `{0}`.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionDoesNotExist">
+        <source>Specified solution file {0} does not exist, or there is no solution file in the directory.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceIsInvalid">
+        <source>Reference `{0}` is invalid.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOneReferenceToAdd">
+        <source>You must specify at least one reference to add.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectAlreadyHasAReference">
+        <source>Project {0} already has a reference `{1}`.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceDoesNotExist">
+        <source>Package reference `{0}` does not exist.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceIsInvalid">
+        <source>Package reference `{0}` is invalid.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOnePackageReferenceToAdd">
+        <source>You must specify at least one package to add.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceAddedToTheProject">
+        <source>Package reference `{0}` added to the project.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectAlreadyHasAPackageReference">
+        <source>Project {0} already has a reference `{1}`.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="PleaseSpecifyVersion">
+        <source>Please specify a version of the package.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectDoesNotExist">
+        <source>Project `{0}` does not exist.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectIsInvalid">
+        <source>Project `{0}` is invalid.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOneProjectToAdd">
+        <source>You must specify at least one project to add.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectAddedToTheSolution">
+        <source>Project `{0}` added to the solution.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceNotFoundInTheProject">
+        <source>Specified reference {0} does not exist in project {1}.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceRemoved">
+        <source>Reference `{0}` deleted from the project.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOneReferenceToRemove">
+        <source>You must specify at least one reference to remove.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceDeleted">
+        <source>Reference `{0}` deleted.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceNotFoundInTheProject">
+        <source>Package reference `{0}` could not be found in the project.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceRemoved">
+        <source>Reference `{0}` deleted from the project.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOnePackageReferenceToRemove">
+        <source>You must specify at least one package reference to remove.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceDeleted">
+        <source>Package reference `{0}` deleted.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectNotFoundInTheSolution">
+        <source>Project `{0}` could not be found in the solution.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectRemoved">
+        <source>Project `{0}` removed from solution.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOneProjectToRemove">
+        <source>You must specify at least one project to remove.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectDeleted">
+        <source>Project `{0}` deleted from solution.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoReferencesFound">
+        <source>There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoProjectsFound">
+        <source>No projects found in the solution.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="PleaseSpecifyNewVersion">
+        <source>Please specify new version of the package.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="PleaseSpecifyWhichPackageToUpdate">
+        <source>Please specify which package to update.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="NothingToUpdate">
+        <source>Nothing to update.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="EverythingUpToDate">
+        <source>Everything is already up-to-date.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageVersionUpdatedTo">
+        <source>Version of package `{0}` updated to `{1}`.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageVersionUpdated">
+        <source>Version of package `{0}` updated.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotUpdateTheVersion">
+        <source>Could not update the version of the package `{0}`.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCreatedSuccessfully">
+        <source>The template {0} created successfully. Please run "dotnet restore" to get started!</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInstalledSuccesfully">
+        <source>The template {0} installed successfully. You can use "dotnet new {0}" to get started with the new template.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCreateError">
+        <source>Template {0} could not be created. Error returned was: {1}.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInstallError">
+        <source>Template {0} could not be installed. Error returned was: {1}.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifiedNameExists">
+        <source>Specified name {0} already exists. Please specify a different name.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifiedAliasExists">
+        <source>Specified alias {0} already exists. Please specify a different alias.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="MandatoryParameterMissing">
+        <source>Mandatory parameter {0} missing for template {1}. </source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectReferenceOneOrMore">
+        <source>Project reference(s)</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredCommandNotPassed">
+        <source>Required command was not provided.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOneSolutionInDirectory">
+        <source>Found more than one solution file in {0}. Please specify which one to use.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionAlreadyContainsProject">
+        <source>Solution {0} already contains project {1}.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentsProjectOrSolutionDescription">
+        <source>The project or solution to operation on. If a file is not specified, the current directory is searched.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFramework">
+        <source>FRAMEWORK</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectNotCompatibleWithFrameworks">
+        <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectDoesNotTargetFramework">
+        <source>Project `{0}` does not target framework `{1}`.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCouldNotBeEvaluated">
+        <source>Project `{0}` could not be evaluated. Evaluation failed with following error:
+{1}.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="UnsupportedProjectType">
+        <source>Unsupported project type. Please check with your sdk provider.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidSolutionFormatString">
+        <source>Invalid solution `{0}`. {1}.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ArgumentsProjectDescription">
+        <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentsSolutionDescription">
+        <source>Solution file to operate on. If not specified, the command will search the current directory for one.</source>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSlnFile">
+        <source>SLN_FILE</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdProjectFile">
+        <source>PROJECT</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="InvalidProjectWithExceptionMessage">
+        <source>Invalid project `{0}`. {1}.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="VerbosityOptionDescription">
+        <source>Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependent app.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="CmdVersionSuffixDescription">
+        <source>Defines the value for the $(VersionSuffix) property in the project.</source>
+        <note></note>
+      </trans-unit>
+      <trans-unit id="ShowHelpDescription">
+        <source>Show help information.</source>
+        <note></note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

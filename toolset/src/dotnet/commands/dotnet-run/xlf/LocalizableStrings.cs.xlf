@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>.NET Run Command</source>
+        <target state="translated">Příkaz rozhraní .NET pro spuštění</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Command used to run .NET apps</source>
+        <target state="translated">Příkaz používaný ke spuštění aplikací .NET</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionFrameworkDescription">
+        <source>Build and run the app using the specified framework. The framework has to be specified in the project file. </source>
+        <target state="translated">K sestavení a spuštění aplikace se použije určená platforma. Tato platforma musí být zadaná v souboru projektu. </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionProjectDescription">
+        <source>The path to the project file to run (defaults to the current directory if there is only one project).</source>
+        <target state="translated">Cesta ke spouštěnému souboru projektu (výchozí je aktuální adresář, pokud existuje jenom jeden projekt)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotConvertToBoolean">
+        <source>Could not convert the value of property '{0}' to a boolean.</source>
+        <target state="translated">Hodnotu vlastnosti {0} nejde převést na logickou hodnotu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotConvertToString">
+        <source>Could not convert the value of property '{0}' to a string.</source>
+        <target state="translated">Hodnotu vlastnosti {0} nejde převést na řetězec.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandException">
+        <source>The build failed. Fix the build errors and run again.</source>
+        <target state="translated">Sestavení se nepovedlo. Opravte v sestavení chyby a spusťte ho znovu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandAdditionalArgsHelpText">
+        <source>Arguments passed to the application that is being run.</source>
+        <target state="translated">Argumenty předané spouštěné aplikaci.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionNoBuildDescription">
+        <source>Do not build the project before running. Implies --no-restore.</source>
+        <target state="translated">Nesestavujte projekt, dokud ho nespustíte. Implikuje možnost --no-restore.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
+        <source>Unable to run your project
+Your project targets multiple frameworks. Specify which framework to run using '{0}'.</source>
+        <target state="translated">Projekt nelze spustit.
+Cílem projektu je více architektur. Pomocí parametru {0} určete, která architektura se má spustit.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionUnableToRun">
+        <source>Unable to run your project.
+Ensure you have a runnable project type and ensure '{0}' supports this project.
+A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
+The current {1} is '{2}'.</source>
+        <target state="translated">Projekt nelze spustit.
+Ověřte prosím, že máte spustitelný typ projektu, a zajistěte, aby tento projekt podporoval {0}.
+Cílem spustitelného projektu by mělo být TFM (například netcoreapp2.0) a jeho OutputType by měl být Exe.
+Aktuální {1} je {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionNoProjects">
+        <source>Couldn't find a project to run. Ensure a project exists in {0}, or pass the path to the project using {1}.</source>
+        <target state="translated">Projekt, který se má spustit, se nenašel. Ověřte, že projekt existuje v {0}, nebo pomocí parametru {1} předejte cestu k projektu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionMultipleProjects">
+        <source>Specify which project file to use because {0} contains more than one project file.</source>
+        <target state="translated">Určete, který soubor projektu se má použít, protože {0} obsahuje více než jeden soubor projektu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionLaunchProfileDescription">
+        <source>The name of the launch profile (if any) to use when launching the application.</source>
+        <target state="translated">Název profilu spuštění (pokud existuje), který se má použít při spuštění aplikace.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionNoLaunchProfileDescription">
+        <source>Do not attempt to use launchSettings.json to configure the application.</source>
+        <target state="translated">Ke konfiguraci aplikace nepoužívejte launchSettings.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionCouldNotLocateALaunchSettingsFile">
+        <source>The specified launch profile could not be located.</source>
+        <target state="translated">Zadaný profil spuštění se nenašel.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionCouldNotApplyLaunchSettings">
+        <source>The launch profile "{0}" could not be applied.
+{1}</source>
+        <target state="translated">Profil spuštění {0} se nedá použít.
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DefaultLaunchProfileDisplayName">
+        <source>(Default)</source>
+        <target state="translated">(výchozí)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsingLaunchSettingsFromMessage">
+        <source>Using launch settings from {0}...</source>
+        <target state="translated">Použití nastavení spuštění z {0}...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LaunchProfileIsNotAJsonObject">
+        <source>A profile with the specified name could not be found or is not a valid JSON object.</source>
+        <target state="translated">Profil se zadaným názvem se nenašel nebo nepředstavuje platný objekt JSON.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LaunchProfileHandlerCannotBeLocated">
+        <source>The launch profile type '{0}' is not supported.</source>
+        <target state="translated">Typ profilu spuštění {0} se nepodporuje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsableLaunchProfileCannotBeLocated">
+        <source>A usable launch profile could not be located.</source>
+        <target state="translated">Nenašel se použitelný profil spuštění.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedExceptionProcessingLaunchSettings">
+        <source>An unexpected exception occurred while processing launch settings:
+{0}</source>
+        <target state="translated">Při zpracování nastavení spuštění došlo k neočekávané výjimce:
+{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LaunchProfilesCollectionIsNotAJsonObject">
+        <source>The 'profiles' property of the launch settings document is not a JSON object.</source>
+        <target state="translated">Vlastnost profiles v dokumentu nastavení spuštění není objektem JSON.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DeserializationExceptionMessage">
+        <source>An error was encountered when reading launchSettings.json.
+{0}</source>
+        <target state="translated">Při načítání launchSettings.json došlo k chybě.
+{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandSpecifiecFileIsNotAValidProject">
+        <source>'{0}' is not a valid project file.</source>
+        <target state="translated">{0} není platný soubor projektu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to run for. The default for most projects is 'Debug'.</source>
+        <target state="translated">Konfigurace pro spuštění. Výchozí možností pro většinu projektů je Debug.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to run for. The target framework must also be specified in the project file.</source>
+        <target state="translated">Cílová architektura pro spuštění. Cílová architektura musí být určená také v souboru projektu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to run for.</source>
+        <target state="translated">Cílový modul runtime pro běh</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ValueMustBeAnObject">
+        <source>The property '{0}' must be an object if it is specified.</source>
+        <target state="translated">Vlastnost {0} musí být objektem, pokud je zadána.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

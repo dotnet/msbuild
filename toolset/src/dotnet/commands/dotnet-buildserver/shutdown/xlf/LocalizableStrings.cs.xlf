@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CommandDescription">
+        <source>Shuts down build servers that are started from dotnet. By default, all servers are shut down.</source>
+        <target state="translated">Vypne buildovací servery spuštěné z dotnetu. Ve výchozím nastavení jsou vypnuté všechny servery.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildOptionDescription">
+        <source>Shut down the MSBuild build server.</source>
+        <target state="translated">Vypne buildovací server MSBuild.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VBCSCompilerOptionDescription">
+        <source>Shut down the VB/C# compiler build server.</source>
+        <target state="translated">Vypne buildovací server kompilátoru VB/C#.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RazorOptionDescription">
+        <source>Shut down the Razor build server.</source>
+        <target state="translated">Vypne buildovací server Razor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShuttingDownServer">
+        <source>Shutting down {0}...</source>
+        <target state="translated">Vypíná se {0}...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShutDownSucceeded">
+        <source>{0} shut down successfully.</source>
+        <target state="translated">Vypnutí serveru {0} proběhlo úspěšně.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShutDownFailed">
+        <source>{0} failed to shut down: {1}</source>
+        <target state="translated">Nepovedlo se vypnout server {0}: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShuttingDownServerWithPid">
+        <source>Shutting down {0} (process {1})...</source>
+        <target state="translated">Vypíná se {0} (proces {1})...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShutDownSucceededWithPid">
+        <source>{0} (process {1}) shut down successfully.</source>
+        <target state="translated">{0} (proces {1}) se úspěšně vypnul.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShutDownFailedWithPid">
+        <source>{0} (process {1}) failed to shut down: {2}</source>
+        <target state="translated">Nepovedlo se vypnout {0} (proces {1}): {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoServersToShutdown">
+        <source>No build servers are running.</source>
+        <target state="translated">Nejsou spuštěné žádné buildovací servery.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

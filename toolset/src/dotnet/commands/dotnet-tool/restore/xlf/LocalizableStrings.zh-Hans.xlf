@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CommandDescription">
+        <source>Restore tools defined in the local tool manifest.</source>
+        <target state="translated">还原本地工具清单中定义的工具。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidPackageWarning">
+        <source>Warning: tool package '{0}' is invalid, contact tool author:
+{1}</source>
+        <target state="translated">警告: 工具包“{0}”无效。请联系工具作者:
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoToolsWereRestored">
+        <source>No tools were restored.</source>
+        <target state="translated">未还原任何工具。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdColumn">
+        <source>Package Id</source>
+        <target state="translated">包 ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionColumn">
+        <source>Version</source>
+        <target state="translated">版本</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandsColumn">
+        <source>Commands</source>
+        <target state="translated">命令</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionDescription">
+        <source>Add an additional NuGet package source to use during installation.</source>
+        <target state="translated">添加其他要在安装期间使用的 NuGet 包源。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionName">
+        <source>SOURCE</source>
+        <target state="translated">SOURCE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionDescription">
+        <source>The NuGet configuration file to use.</source>
+        <target state="translated">要使用的 NuGet 配置文件。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionName">
+        <source>FILE</source>
+        <target state="translated">FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionDescription">
+        <source>The version of the tool package to install.</source>
+        <target state="translated">要安装的工具包版本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionName">
+        <source>VERSION</source>
+        <target state="translated">VERSION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageFailedToRestore">
+        <source>Package "{0}" failed to restore, due to {1}</source>
+        <target state="translated">包“{0}”无法还原，因为 {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RestoreFailed">
+        <source>Restore failed.</source>
+        <target state="translated">还原失败。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandsMismatch">
+        <source>The command {0} specified in the tool manifest file is not contained in the package with Package Id {1}. The commands contained in the package are {2}.</source>
+        <target state="translated">包 ID 为 {1} 的包中不包含工具清单文件中指定的命令 {0}。包中包含的命令为 {2}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionDescription">
+        <source>Path to the manifest file.</source>
+        <target state="translated">清单文件的路径。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RestoreSuccessful">
+        <source>Tool '{0}' (version '{1}') was restored. Available commands: {2}</source>
+        <target state="translated">工具“{0}”(版本“{1}”)已还原。可用的命令: {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalToolsRestoreWasSuccessful">
+        <source>Restore was successful.</source>
+        <target state="translated">还原成功。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackagesCommandNameCollisionConclusion">
+        <source>Command names conflict. Command names are case insensitive.
+{0}</source>
+        <target state="translated">命令名称冲突。命令名称不区分大小写。
+{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackagesCommandNameCollisionForOnePackage">
+        <source>A command "{0}" in package "{1}"</source>
+        <target state="translated">包“{1}”中的命令“{0}”</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RestorePartiallyFailed">
+        <source>Restore partially failed.</source>
+        <target state="translated">还原部分失败。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

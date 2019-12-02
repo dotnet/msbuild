@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="es" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>.NET dependency restorer</source>
+        <target state="translated">Restaurador de dependencia de .NET</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>restore for msbuild</source>
+        <target state="translated">restore para MSBuild</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdArgument">
+        <source>PROJECT</source>
+        <target state="translated">PROYECTO</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdArgumentDescription">
+        <source>Optional path to a project file or MSBuild arguments.</source>
+        <target state="translated">Ruta de acceso opcional a un archivo de proyecto o argumentos de MSBuild.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSourceOption">
+        <source>SOURCE</source>
+        <target state="translated">ORIGEN</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSourceOptionDescription">
+        <source>The NuGet package source to use for the restore.</source>
+        <target state="translated">El origen de un paquete de NuGet para usarlo para la restauración.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPackagesOption">
+        <source>PACKAGES_DIR</source>
+        <target state="translated">PACKAGES_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPackagesOptionDescription">
+        <source>The directory to restore packages to.</source>
+        <target state="translated">El directorio en el que se restauran paquetes.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdDisableParallelOptionDescription">
+        <source>Prevent restoring multiple projects in parallel.</source>
+        <target state="translated">Evite la restauración de varios proyectos en paralelo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdConfigFileOption">
+        <source>FILE</source>
+        <target state="translated">FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdConfigFileOptionDescription">
+        <source>The NuGet configuration file to use.</source>
+        <target state="translated">Archivo de configuración de NuGet que debe usarse.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoCacheOptionDescription">
+        <source>Do not cache packages and http requests.</source>
+        <target state="translated">Indica que no se almacenen en caché los paquetes ni las solicitudes HTTP.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdIgnoreFailedSourcesOptionDescription">
+        <source>Treat package source failures as warnings.</source>
+        <target state="translated">Indica que los errores de origen de paquete se traten como advertencias.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoDependenciesOptionDescription">
+        <source>Do not restore project-to-project references and only restore the specified project.</source>
+        <target state="translated">No restaure referencias de proyecto a proyecto y restaure solo el proyecto especificado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdRuntimeOption">
+        <source>RUNTIME_IDENTIFIER</source>
+        <target state="translated">ID_DEL_ENTORNO_DE_TIEMPO_DE_EJECUCIÓN</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdRuntimeOptionDescription">
+        <source>The target runtime to restore packages for.</source>
+        <target state="translated">El tiempo de ejecución de destino para el que se restauran los paquetes.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdForceRestoreOptionDescription">
+        <source>Force all dependencies to be resolved even if the last restore was successful.
+This is equivalent to deleting project.assets.json.</source>
+        <target state="translated">Fuerce la resolución de todas las dependencias aunque la última restauración se haya realizado correctamente.
+Esta acción es equivalente a eliminar project.assets.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdLockedModeOptionDescription">
+        <source>Don't allow updating project lock file.</source>
+        <target state="translated">No permite actualizar el archivo de bloqueo del proyecto.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdLockFilePathOption">
+        <source>LOCK_FILE_PATH</source>
+        <target state="translated">LOCK_FILE_PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdLockFilePathOptionDescription">
+        <source>Output location where project lock file is written. By default, this is 'PROJECT_ROOT\packages.lock.json'.</source>
+        <target state="translated">Destino de salida donde se escribe el archivo de bloqueo del proyecto. De forma predeterminada, esto es "PROJECT_ROOT\packages.lock.json".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdReevaluateOptionDescription">
+        <source>Forces restore to reevaluate all dependencies even if a lock file already exists.</source>
+        <target state="translated">Fuerza la restauración para volver a evaluar todas las dependencias aunque ya exista un archivo de bloqueo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdUseLockFileOptionDescription">
+        <source>Enables project lock file to be generated and used with restore.</source>
+        <target state="translated">Habilita la generación del archivo de bloqueo del proyecto y su uso con la restauración.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

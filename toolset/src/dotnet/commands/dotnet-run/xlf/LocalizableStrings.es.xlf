@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="es" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>.NET Run Command</source>
+        <target state="translated">Comando Run de .NET</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Command used to run .NET apps</source>
+        <target state="translated">Comando para ejecutar aplicaciones de .NET</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionFrameworkDescription">
+        <source>Build and run the app using the specified framework. The framework has to be specified in the project file. </source>
+        <target state="translated">Compila y ejecuta la aplicación con la plataforma especificada. La plataforma se debe especificar en el archivo de proyecto. </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionProjectDescription">
+        <source>The path to the project file to run (defaults to the current directory if there is only one project).</source>
+        <target state="translated">Ruta de acceso al archivo del proyecto que debe ejecutarse (si solo hay un proyecto, es el directorio actual de forma predeterminada).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotConvertToBoolean">
+        <source>Could not convert the value of property '{0}' to a boolean.</source>
+        <target state="translated">No se pudo convertir el valor de la propiedad "{0}" en un booleano.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotConvertToString">
+        <source>Could not convert the value of property '{0}' to a string.</source>
+        <target state="translated">No se pudo convertir el valor de la propiedad "{0}" en una cadena.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandException">
+        <source>The build failed. Fix the build errors and run again.</source>
+        <target state="translated">No se pudo llevar a cabo la compilación. Corrija los errores de compilación y vuelva a ejecutar el proyecto.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandAdditionalArgsHelpText">
+        <source>Arguments passed to the application that is being run.</source>
+        <target state="translated">Argumentos que se pasan a la aplicación en ejecución.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionNoBuildDescription">
+        <source>Do not build the project before running. Implies --no-restore.</source>
+        <target state="translated">No compile el proyecto antes de ejecutarlo. Implica --no-restore.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
+        <source>Unable to run your project
+Your project targets multiple frameworks. Specify which framework to run using '{0}'.</source>
+        <target state="translated">No se puede ejecutar el proyecto
+Su proyecto tiene como destino varias plataformas. Especifique la que quiere usar mediante "{0}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionUnableToRun">
+        <source>Unable to run your project.
+Ensure you have a runnable project type and ensure '{0}' supports this project.
+A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
+The current {1} is '{2}'.</source>
+        <target state="translated">No se puede ejecutar el proyecto.
+Asegúrese de tener un tipo de proyecto ejecutable y asegúrese de que "{0}" admita este proyecto.
+Un proyecto ejecutable debe tener como destino un TFM ejecutable (por ejemplo, netcoreapp2.0) y tener OutputType "Exe".
+El actual {1} es "{2}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionNoProjects">
+        <source>Couldn't find a project to run. Ensure a project exists in {0}, or pass the path to the project using {1}.</source>
+        <target state="translated">No se ha podido encontrar un proyecto para ejecutar. Asegúrese de que exista uno en {0} o pase la ruta de acceso al proyecto mediante {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionMultipleProjects">
+        <source>Specify which project file to use because {0} contains more than one project file.</source>
+        <target state="translated">{0} contiene más de un archivo de proyecto. Especifique cuál desea usar.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionLaunchProfileDescription">
+        <source>The name of the launch profile (if any) to use when launching the application.</source>
+        <target state="translated">El nombre del perfil de inicio (si lo hay) que se usará al iniciar la aplicación.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionNoLaunchProfileDescription">
+        <source>Do not attempt to use launchSettings.json to configure the application.</source>
+        <target state="translated">No intente usar launchSettings.json para configurar la aplicación.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionCouldNotLocateALaunchSettingsFile">
+        <source>The specified launch profile could not be located.</source>
+        <target state="translated">No se ha podido encontrar el perfil de inicio especificado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionCouldNotApplyLaunchSettings">
+        <source>The launch profile "{0}" could not be applied.
+{1}</source>
+        <target state="translated">No se ha podido aplicar el perfil de inicio "{0}".
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DefaultLaunchProfileDisplayName">
+        <source>(Default)</source>
+        <target state="translated">(Predeterminada)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsingLaunchSettingsFromMessage">
+        <source>Using launch settings from {0}...</source>
+        <target state="translated">Usando la configuración de inicio de {0}...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LaunchProfileIsNotAJsonObject">
+        <source>A profile with the specified name could not be found or is not a valid JSON object.</source>
+        <target state="translated">No se ha encontrado ningún perfil con el nombre especificado o el que se ha encontrado no es un objeto JSON válido.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LaunchProfileHandlerCannotBeLocated">
+        <source>The launch profile type '{0}' is not supported.</source>
+        <target state="translated">No se admite el tipo de perfil de inicio "{0}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsableLaunchProfileCannotBeLocated">
+        <source>A usable launch profile could not be located.</source>
+        <target state="translated">No se ha podido encontrar un perfil de inicio que se pueda usar.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedExceptionProcessingLaunchSettings">
+        <source>An unexpected exception occurred while processing launch settings:
+{0}</source>
+        <target state="translated">Excepción inesperada al procesar la configuración de inicio:
+{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LaunchProfilesCollectionIsNotAJsonObject">
+        <source>The 'profiles' property of the launch settings document is not a JSON object.</source>
+        <target state="translated">La propiedad "profiles" del documento de configuración de inicio no es un objeto JSON.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DeserializationExceptionMessage">
+        <source>An error was encountered when reading launchSettings.json.
+{0}</source>
+        <target state="translated">Se produjo un error al leer launchSettings.json.
+{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandSpecifiecFileIsNotAValidProject">
+        <source>'{0}' is not a valid project file.</source>
+        <target state="translated">"{0}" no es un archivo de proyecto válido.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to run for. The default for most projects is 'Debug'.</source>
+        <target state="translated">La configuración para la que se ejecuta. El valor predeterminado para la mayoría de los proyectos es "Debug".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to run for. The target framework must also be specified in the project file.</source>
+        <target state="translated">La plataforma de destino para la que se ejecuta. La plataforma de destino se debe especificar en el archivo de proyecto.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to run for.</source>
+        <target state="translated">El entorno de ejecución de destino en el que se ejecuta.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ValueMustBeAnObject">
+        <source>The property '{0}' must be an object if it is specified.</source>
+        <target state="translated">La propiedad "{0}" debe ser un objeto si se especifica.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
