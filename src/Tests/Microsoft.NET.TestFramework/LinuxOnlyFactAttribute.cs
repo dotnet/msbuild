@@ -4,15 +4,15 @@
 using Microsoft.DotNet.PlatformAbstractions;
 using Xunit;
 
-namespace Microsoft.DotNet.Tools.Test.Utilities
+namespace Microsoft.NET.TestFramework
 {
-    public class MacOsOnlyFactAttribute : FactAttribute
+    public class LinuxOnlyFactAttribute : FactAttribute
     {
-        public MacOsOnlyFactAttribute()
+        public LinuxOnlyFactAttribute()
         {
-            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Darwin)
+            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Linux)
             {
-                this.Skip = "This test requires macos to run";
+                this.Skip = "This test requires linux to run";
             }
         }
     }

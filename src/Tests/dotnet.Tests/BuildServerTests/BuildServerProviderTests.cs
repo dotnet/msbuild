@@ -12,14 +12,22 @@ using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Utilities;
 using Moq;
 using Xunit;
+using Xunit.Abstractions;
 using LocalizableStrings = Microsoft.DotNet.BuildServer.LocalizableStrings;
 
 namespace Microsoft.DotNet.Tests.BuildServerTests
 {
-    public class BuildServerProviderTests
+    public class BuildServerProviderTests : SdkTest
     {
+        public BuildServerProviderTests(ITestOutputHelper log) : base(log)
+        {
+
+        }
+
         [Fact]
         public void GivenMSBuildFlagItYieldsMSBuild()
         {

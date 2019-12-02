@@ -16,7 +16,7 @@ using Xunit;
 using Parser = Microsoft.DotNet.Cli.Parser;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Uninstall.LocalizableStrings;
 using Microsoft.DotNet.ToolManifest;
-
+using Microsoft.NET.TestFramework.Utilities;
 
 namespace Microsoft.DotNet.Tests.Commands.Tool
 {

@@ -6,13 +6,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
-using Microsoft.DotNet.BuildServer;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.TestFramework;
-using Microsoft.DotNet.Tools.BuildServer;
-using Microsoft.DotNet.Tools.BuildServer.Shutdown;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Moq;
@@ -20,12 +16,20 @@ using Xunit;
 using Parser = Microsoft.DotNet.Cli.Parser;
 using CommandLocalizableStrings = Microsoft.DotNet.BuildServer.LocalizableStrings;
 using LocalizableStrings = Microsoft.DotNet.Tools.BuildServer.Shutdown.LocalizableStrings;
-using TestBuildServerCommand = Microsoft.DotNet.Tools.Test.Utilities.BuildServerCommand;
-
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Utilities;
+using Microsoft.NET.TestFramework.Commands;
+using Microsoft.DotNet.BuildServer;
+using Xunit.Abstractions;
 namespace Microsoft.DotNet.Tests.Commands
 {
-    public class BuildServerShutdownCommandTests : TestBase
+    public class BuildServerShutdownCommandTests : SdkTest
     {
+        public BuildServerShutdownCommandTests(ITestOutputHelper log) : base(log)
+        {
+        }
+
         private readonly BufferedReporter _reporter = new BufferedReporter();
 
         [Fact]
@@ -165,14 +169,14 @@ namespace Microsoft.DotNet.Tests.Commands
         public void GivenARunningRazorServerItShutsDownSuccessfully()
         {
             var pipeName = Path.GetRandomFileName();
-            var pidDirectory = TestAssets.CreateTestDirectory(identifier: "pidDirectory").FullName;
+            
+            var pidDirectory = _testAssetsManager.CreateTestDirectory(identifier: "pidDirectory").Path;
 
-            var testInstance = TestAssets.Get("TestRazorApp")
-                .CreateInstance()
-                .WithSourceFiles();
+            var testInstance = _testAssetsManager
+                .CopyTestAsset("TestRazorApp")
+                .WithSource();
 
-            new BuildCommand()
-                .WithWorkingDirectory(testInstance.Root)
+            new BuildCommand(Log, testInstance.TestRoot)
                 .WithEnvironmentVariable(BuildServerProvider.PidFileDirectoryVariableName, pidDirectory)
                 .Execute($"/p:_RazorBuildServerPipeName={pipeName}")
                 .Should()
@@ -184,10 +188,10 @@ namespace Microsoft.DotNet.Tests.Commands
             var pidFile = RazorPidFile.Read(new FilePath(files.First()));
             pidFile.PipeName.Should().Be(pipeName);
 
-            new TestBuildServerCommand()
-                .WithWorkingDirectory(testInstance.Root)
+            new BuildServerCommand(Log)
+                .WithWorkingDirectory(testInstance.TestRoot)
                 .WithEnvironmentVariable(BuildServerProvider.PidFileDirectoryVariableName, pidDirectory)
-                .ExecuteWithCapturedOutput("shutdown --razor")
+                .Execute("shutdown", "--razor")
                 .Should()
                 .Pass()
                 .And
@@ -198,14 +202,14 @@ namespace Microsoft.DotNet.Tests.Commands
                         pidFile.ProcessId));
         }
 
-        private BuildServerShutdownCommand CreateCommand(
+        private Tools.BuildServer.Shutdown.BuildServerShutdownCommand CreateCommand(
             string options = "",
             IBuildServerProvider serverProvider = null,
             IEnumerable<IBuildServer> buildServers = null,
             ServerEnumerationFlags expectedFlags = ServerEnumerationFlags.None)
         {
             ParseResult result = Parser.Instance.Parse("dotnet build-server shutdown " + options);
-            return new BuildServerShutdownCommand(
+            return new Tools.BuildServer.Shutdown.BuildServerShutdownCommand(
                 options: result["dotnet"]["build-server"]["shutdown"],
                 result: result,
                 serverProvider: serverProvider,

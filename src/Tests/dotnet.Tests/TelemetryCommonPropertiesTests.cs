@@ -9,11 +9,17 @@ using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Configurer;
 using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
+using Microsoft.NET.TestFramework;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Tests
 {
-    public class TelemetryCommonPropertiesTests : TestBase
+    public class TelemetryCommonPropertiesTests : SdkTest
     {
+        public TelemetryCommonPropertiesTests(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void TelemetryCommonPropertiesShouldContainIfItIsInDockerOrNot()
         {

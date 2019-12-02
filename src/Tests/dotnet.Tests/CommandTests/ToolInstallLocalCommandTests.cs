@@ -24,7 +24,7 @@ using NuGet.Versioning;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Install.LocalizableStrings;
 using Microsoft.DotNet.ToolManifest;
 using NuGet.Frameworks;
-
+using Microsoft.NET.TestFramework.Utilities;
 
 namespace Microsoft.DotNet.Tests.Commands.Tool
 {

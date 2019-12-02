@@ -8,7 +8,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.InternalAbstractions;
 using Xunit;
@@ -17,16 +16,16 @@ using Microsoft.Build.Construction;
 using System.Linq;
 using Microsoft.Build.Evaluation;
 using System.Xml.Linq;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 
 namespace Microsoft.DotNet.Tests
 {
-    public class PackagedCommandTests : TestBase
+    public class PackagedCommandTests : SdkTest
     {
-        private readonly ITestOutputHelper _output;
-
-        public PackagedCommandTests(ITestOutputHelper output)
+        public PackagedCommandTests(ITestOutputHelper log) : base(log)
         {
-            _output = output;
         }
 
         [Theory]
@@ -34,25 +33,18 @@ namespace Microsoft.DotNet.Tests
         [InlineData("AppWithToolDependency")]
         public void TestProjectToolIsAvailableThroughDriver(string appName)
         {
-            var testInstance = TestAssets.Get(appName)
-                .CreateInstance()
-                .WithSourceFiles()
-                .WithNuGetConfig(RepoDirectoriesProvider.TestPackages);
+            var testInstance = _testAssetsManager.CopyTestAsset(appName)
+                .WithSource();
 
-            // restore again now that the project has changed
-            new RestoreCommand()
-                .WithWorkingDirectory(testInstance.Root)
+            NuGetConfigWriter.Write(testInstance.Path, TestContext.Current.TestPackages);
+
+            new BuildCommand(Log, testInstance.Path)
                 .Execute()
                 .Should().Pass();
 
-            new BuildCommand()
-                .WithProjectDirectory(testInstance.Root)
+            new DotnetCommand(Log, "portable")
+                .WithWorkingDirectory(testInstance.Path)
                 .Execute()
-                .Should().Pass();
-
-            new PortableCommand()
-                .WithWorkingDirectory(testInstance.Root)
-                .ExecuteWithCapturedOutput()
                 .Should().HaveStdOutContaining("Hello Portable World!")
                      .And.NotHaveStdErr()
                      .And.Pass();
@@ -63,10 +55,10 @@ namespace Microsoft.DotNet.Tests
         [InlineData(false)]
         public void IfPreviousVersionOfSharedFrameworkIsInstalled_ToolsTargetingItRun(bool toolPrefersCLIRuntime)
         {
-            var testInstance = TestAssets.Get("AppWithToolDependency")
-                .CreateInstance(identifier: toolPrefersCLIRuntime ? "preferCLIRuntime" : "")
-                .WithSourceFiles()
-                .WithNuGetConfig(RepoDirectoriesProvider.TestPackages);
+            var testInstance = _testAssetsManager.CopyTestAsset("AppWithToolDependency", identifier: toolPrefersCLIRuntime ? "preferCLIRuntime" : "")
+                .WithSource();
+
+            NuGetConfigWriter.Write(testInstance.Path, TestContext.Current.TestPackages);
 
             testInstance = testInstance.WithProjectChanges(project =>
             {
@@ -80,15 +72,12 @@ namespace Microsoft.DotNet.Tests
                     toolPrefersCLIRuntime ? "dotnet-portable-v1-prefercli" : "dotnet-portable-v1";
             });
 
-            testInstance = testInstance.WithRestoreFiles();
-
-            new BuildCommand()
-                .WithProjectDirectory(testInstance.Root)
+            new BuildCommand(Log, testInstance.Path)
                 .Execute()
                 .Should().Pass();
 
-            var result = new DotnetCommand()
-                .WithWorkingDirectory(testInstance.Root)
+            var result = new DotnetCommand(Log)
+                .WithWorkingDirectory(testInstance.Path)
                 .Execute(toolPrefersCLIRuntime ? "portable-v1-prefercli" : "portable-v1");
 
             result.Should().Pass()
@@ -101,10 +90,10 @@ namespace Microsoft.DotNet.Tests
         {
             string toolName = "dotnet-portable-v1";
 
-            var testInstance = TestAssets.Get("AppWithToolDependency")
-                .CreateInstance()
-                .WithSourceFiles()
-                .WithNuGetConfig(RepoDirectoriesProvider.TestPackages);
+            var testInstance = _testAssetsManager.CopyTestAsset("AppWithToolDependency")
+                .WithSource();
+
+            NuGetConfigWriter.Write(testInstance.Path, TestContext.Current.TestPackages);
 
             string projectFolder = null;
 
@@ -140,10 +129,13 @@ namespace Microsoft.DotNet.Tests
                                           toolName);
 
 
-            testInstance = testInstance.WithRestoreFiles();
-
-            var result = new DotnetCommand()
-                    .WithWorkingDirectory(testInstance.Root)
+            new RestoreCommand(Log, testInstance.Path)
+                .Execute()
+                .Should()
+                .Pass();
+            
+            var result = new DotnetCommand(Log)
+                    .WithWorkingDirectory(testInstance.Path)
                     .Execute("portable-v1");
 
             result.Should().Pass()
@@ -153,19 +145,16 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void CanInvokeToolWhosePackageNameIsDifferentFromDllName()
         {
-            var testInstance = TestAssets.Get("AppWithDepOnToolWithOutputName")
-                .CreateInstance()
-                .WithSourceFiles()
-                .WithRestoreFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset("AppWithDepOnToolWithOutputName")
+                .WithSource();
 
-            new BuildCommand()
-                .WithProjectDirectory(testInstance.Root)
+            new BuildCommand(Log, testInstance.Path)
                 .Execute()
                 .Should().Pass();
 
-            new GenericCommand("tool-with-output-name")
-                .WithWorkingDirectory(testInstance.Root)
-                .ExecuteWithCapturedOutput()
+            new DotnetCommand(Log)
+                .WithWorkingDirectory(testInstance.Path)
+                .Execute("tool-with-output-name")
                 .Should().HaveStdOutContaining("Tool with output name!")
                      .And.NotHaveStdErr()
                      .And.Pass();
@@ -174,13 +163,12 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void ItShowsErrorWhenToolIsNotRestored()
         {
-            var testInstance = TestAssets.Get("NonRestoredTestProjects", "AppWithNonExistingToolDependency")
-                .CreateInstance()
-                .WithSourceFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset("AppWithNonExistingToolDependency", testAssetSubdirectory: "NonRestoredTestProjects")
+                .WithSource();
 
-            new TestCommand("dotnet")
-                .WithWorkingDirectory(testInstance.Root)
-                .ExecuteWithCapturedOutput("nonexistingtool")
+            new DotnetCommand(Log)
+                .WithWorkingDirectory(testInstance.Path)
+                .Execute("nonexistingtool")
                 .Should().Fail()
                     .And.HaveStdErrContaining(string.Format(LocalizableStrings.NoExecutableFoundMatchingCommand, "dotnet-nonexistingtool"));
         }
@@ -188,43 +176,36 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void ItRunsToolRestoredToSpecificPackageDir()
         {
-            var testInstance = TestAssets.Get("NonRestoredTestProjects", "ToolWithRandomPackageName")
-                .CreateInstance()
-                .WithSourceFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset("ToolWithRandomPackageName", testAssetSubdirectory: "NonRestoredTestProjects")
+                .WithSource();
 
-            var appWithDepOnToolDir = testInstance.Root.Sub("AppWithDepOnTool");
-            var toolWithRandPkgNameDir = testInstance.Root.Sub("ToolWithRandomPackageName");
-            var pkgsDir = testInstance.Root.CreateSubdirectory("pkgs");
+            var appWithDepOnToolDir = new DirectoryInfo(testInstance.Path).Sub("AppWithDepOnTool");
+            var toolWithRandPkgNameDir = new DirectoryInfo(testInstance.Path).Sub("ToolWithRandomPackageName");
+            var pkgsDir = new DirectoryInfo(testInstance.Path).CreateSubdirectory("pkgs");
 
             // 3ebdd4f1-a194-470a-b01a-4515672791d1
             //                         ^-- index = 24
             string randomPackageName = Guid.NewGuid().ToString().Substring(24);
 
             // TODO: This is a workaround for https://github.com/dotnet/cli/issues/5020
-            SetGeneratedPackageName(appWithDepOnToolDir.GetFile("AppWithDepOnTool.csproj"),
+            SetGeneratedPackageName(appWithDepOnToolDir.File("AppWithDepOnTool.csproj"),
                                     randomPackageName);
 
-            SetGeneratedPackageName(toolWithRandPkgNameDir.GetFile("ToolWithRandomPackageName.csproj"),
+            SetGeneratedPackageName(toolWithRandPkgNameDir.File("ToolWithRandomPackageName.csproj"),
                                     randomPackageName);
 
-            new RestoreCommand()
-                .WithWorkingDirectory(toolWithRandPkgNameDir)
-                .Execute()
-                .Should().Pass();
 
-            new PackCommand()
-                .WithWorkingDirectory(toolWithRandPkgNameDir)
+            new PackCommand(Log, toolWithRandPkgNameDir.FullName)
                 .Execute($"-o \"{pkgsDir.FullName}\" /p:version=1.0.0")
                 .Should().Pass();
 
-            new RestoreCommand()
-                .WithWorkingDirectory(appWithDepOnToolDir)
+            new RestoreCommand(Log, appWithDepOnToolDir.FullName)
                 .Execute($"--source \"{pkgsDir.FullName}\"")
                 .Should().Pass();
 
-            new TestCommand("dotnet")
-                .WithWorkingDirectory(appWithDepOnToolDir)
-                .ExecuteWithCapturedOutput("randompackage")
+            new DotnetCommand(Log)
+                .WithWorkingDirectory(appWithDepOnToolDir.FullName)
+                .Execute("randompackage")
                 .Should().Pass()
                 .And.HaveStdOutContaining("Hello World from tool!")
                 .And.NotHaveStdErr();
@@ -233,41 +214,33 @@ namespace Microsoft.DotNet.Tests
         [Fact(Skip="https://github.com/dotnet/cli/issues/9688")]
         public void ToolsCanAccessDependencyContextProperly()
         {
-            var testInstance = TestAssets.Get("DependencyContextFromTool")
-                .CreateInstance()
-                .WithSourceFiles()
-                .WithRestoreFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset("DependencyContextFromTool")
+                .WithSource()
+                .Restore(Log);
 
-            new DependencyContextTestCommand(RepoDirectoriesProvider.DotnetUnderTest)
-                .WithWorkingDirectory(testInstance.Root)
-                .Execute("")
+            new DotnetCommand(Log, "dependency-context-test")
+                .WithWorkingDirectory(testInstance.Path)
+                .Execute()
                 .Should().Pass();
         }
 
         [Fact]
         public void TestProjectDependencyIsNotAvailableThroughDriver()
         {
-            var testInstance = TestAssets.Get("AppWithDirectDep")
-                .CreateInstance()
-                .WithSourceFiles()
-                .WithNuGetConfig(RepoDirectoriesProvider.TestPackages);
+            var testInstance = _testAssetsManager.CopyTestAsset("AppWithDirectDep")
+                .WithSource();
 
-            // restore again now that the project has changed
-            new RestoreCommand()
-                .WithWorkingDirectory(testInstance.Root)
-                .Execute()
-                .Should().Pass();
+            NuGetConfigWriter.Write(testInstance.Path, TestContext.Current.TestPackages);
 
-            new BuildCommand()
-                .WithWorkingDirectory(testInstance.Root)
+            new BuildCommand(Log, testInstance.Path)
                 .Execute()
                 .Should().Pass();
 
             var currentDirectory = Directory.GetCurrentDirectory();
 
-            CommandResult result = new HelloCommand()
-                .WithWorkingDirectory(testInstance.Root)
-                .ExecuteWithCapturedOutput();
+            CommandResult result = new DotnetCommand(Log, "hello")
+                .WithWorkingDirectory(testInstance.Path)
+                .Execute();
 
             result.StdErr.Should().Contain(string.Format(LocalizableStrings.NoExecutableFoundMatchingCommand, "dotnet-hello"));
             
@@ -280,85 +253,6 @@ namespace Microsoft.DotNet.Tests
             var p = ProjectRootElement.Open(project.FullName, new ProjectCollection(), true);
             p.AddProperty(propertyName, packageName);
             p.Save();
-        }
-
-        class HelloCommand : DotnetCommand
-        {
-            public HelloCommand()
-            {
-            }
-
-            public override CommandResult Execute(string args = "")
-            {
-                args = $"hello {args}";
-                return base.Execute(args);
-            }
-
-            public override CommandResult ExecuteWithCapturedOutput(string args = "")
-            {
-                args = $"hello {args}";
-                return base.ExecuteWithCapturedOutput(args);
-            }
-        }
-
-        class PortableCommand : DotnetCommand
-        {
-            public PortableCommand()
-            {
-            }
-
-            public override CommandResult Execute(string args = "")
-            {
-                args = $"portable {args}";
-                return base.Execute(args);
-            }
-
-            public override CommandResult ExecuteWithCapturedOutput(string args = "")
-            {
-                args = $"portable {args}";
-                return base.ExecuteWithCapturedOutput(args);
-            }
-        }
-
-        class GenericCommand : DotnetCommand
-        {
-            private readonly string _commandName;
-
-            public GenericCommand(string commandName)
-            {
-                _commandName = commandName;
-            }
-
-            public override CommandResult Execute(string args = "")
-            {
-                args = $"{_commandName} {args}";
-                return base.Execute(args);
-            }
-
-            public override CommandResult ExecuteWithCapturedOutput(string args = "")
-            {
-                args = $"{_commandName} {args}";
-                return base.ExecuteWithCapturedOutput(args);
-            }
-        }
-
-        class DependencyContextTestCommand : DotnetCommand
-        {
-            public DependencyContextTestCommand(string dotnetUnderTest) : base(dotnetUnderTest)
-            {
-            }
-
-            public override CommandResult Execute(string path)
-            {
-                var args = $"dependency-context-test {path}";
-                return base.Execute(args);
-            }
-
-            public override CommandResult ExecuteWithCapturedOutput(string path)
-            {
-                var args = $"dependency-context-test {path}";
-                return base.ExecuteWithCapturedOutput(args);
-            }
         }
     }
 }

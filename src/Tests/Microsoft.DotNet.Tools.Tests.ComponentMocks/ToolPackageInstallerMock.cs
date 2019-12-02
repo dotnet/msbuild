@@ -9,10 +9,8 @@ using System.Transactions;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
-using Microsoft.DotNet.Tools;
-using Microsoft.DotNet.Tools.Test.Utilities;
-using Microsoft.DotNet.Tools.Tests.Utilities;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using Microsoft.NET.TestFramework.Utilities;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tests.ComponentMocks

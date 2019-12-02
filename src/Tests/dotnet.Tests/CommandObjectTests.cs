@@ -9,16 +9,14 @@ using Xunit.Abstractions;
 using FluentAssertions;
 using Microsoft.DotNet.CommandFactory;
 using LocalizableStrings = Microsoft.DotNet.Cli.Utils.LocalizableStrings;
+using Microsoft.NET.TestFramework;
 
 namespace Microsoft.DotNet.Tests
 {
-    public class CommandObjectTests : TestBase
+    public class CommandObjectTests : SdkTest
     {
-        ITestOutputHelper _output;
-
-        public CommandObjectTests(ITestOutputHelper output)
+        public CommandObjectTests(ITestOutputHelper output) : base(output)
         {
-            _output = output;
         }
 
         [Fact]

@@ -11,6 +11,14 @@
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
   <PropertyGroup>
+    <!-- PackageReference to xunit defaults IsTestProject to true, which we don't want for TestFramework
+         If IsTestProject is true, then Arcade automatically adds a reference to Microsoft.NET.Test.Sdk,
+         which sets the OutputType to Exe, which is what we use to determine whether a project should
+         have the common Program.cs included.  We don't want that in this project to avoid type conflicts
+         with the actual test projects that reference it.
+    -->
+    <IsTestProject>false</IsTestProject>
+    
     <TargetFramework>$(SdkTargetFramework)</TargetFramework>
   </PropertyGroup>
 
@@ -22,6 +30,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Cli\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
+    <ProjectReference Include="..\..\Cli\Microsoft.DotNet.InternalAbstractions\Microsoft.DotNet.InternalAbstractions.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,10 +42,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="BuildTestPackages.targets" />
     <None Include="SetupTestRoot.targets" />
   </ItemGroup>
 
   <Import Project="SetupTestRoot.targets" />
+  <Import Project="BuildTestPackages.targets" />
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 

@@ -15,6 +15,7 @@ using Microsoft.DotNet.Tools.Tests.ComponentMocks;
 using Microsoft.DotNet.Tools.Tool.Restore;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using Microsoft.NET.TestFramework.Utilities;
 using Microsoft.TemplateEngine.Cli;
 using NuGet.Frameworks;
 using NuGet.Versioning;

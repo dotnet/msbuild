@@ -14,7 +14,7 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.Extensions.DependencyModel.Tests
 {
-    internal class FileSystemMockBuilder
+    public class FileSystemMockBuilder
     {
         private readonly List<Action> _actions = new List<Action>();
         private MockFileSystemModel _mockFileSystemModel;
@@ -52,7 +52,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
         /// Create a platform dependent Temporary directory path and use it to avoid further misinterpretation in
         /// later tests. Like "c:/home vs /home". Instead always use Path.Combine(TemporaryDirectory, "home")
         /// </summary>
-        internal FileSystemMockBuilder UseCurrentSystemTemporaryDirectory()
+        public FileSystemMockBuilder UseCurrentSystemTemporaryDirectory()
         {
             TemporaryFolder = Path.GetTempPath();
             return this;

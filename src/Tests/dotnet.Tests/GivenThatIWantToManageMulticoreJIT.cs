@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information. 
 
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using System;
 using System.IO;
@@ -11,30 +10,31 @@ using Xunit;
 using Xunit.Abstractions;
 using FluentAssertions;
 using Microsoft.DotNet.PlatformAbstractions;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 
 namespace Microsoft.DotNet.Tests
 {
-    public class GivenThatIWantToManageMulticoreJIT : TestBase
+    public class GivenThatIWantToManageMulticoreJIT : SdkTest
     {
-        ITestOutputHelper _output;
         private const string OptimizationProfileFileName = "dotnet";
         
-        public GivenThatIWantToManageMulticoreJIT(ITestOutputHelper output)
+        public GivenThatIWantToManageMulticoreJIT(ITestOutputHelper log) : base(log)
         {
-            _output = output;
         }
 
         [Fact]
         public void WhenInvokedThenDotnetWritesOptimizationDataToTheProfileRoot()
         {
-            var testDirectory = TestAssets.CreateTestDirectory();
+            var testDirectory = _testAssetsManager.CreateTestDirectory();
             var testStartTime = GetTruncatedDateTime();
                         
-            new TestCommand("dotnet")
-                .WithUserProfileRoot(testDirectory.FullName)
-                .ExecuteWithCapturedOutput("--help");
+            new DotnetCommand(Log)
+                .WithUserProfileRoot(testDirectory.Path)
+                .Execute("--help");
 
-            var optimizationProfileFilePath = GetOptimizationProfileFilePath(testDirectory.FullName);
+            var optimizationProfileFilePath = GetOptimizationProfileFilePath(testDirectory.Path);
 
             new FileInfo(optimizationProfileFilePath)
                 .Should().Exist("Because dotnet CLI creates it after each run")
@@ -45,15 +45,15 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void WhenInvokedWithMulticoreJitDisabledThenDotnetDoesNotWriteOptimizationDataToTheProfileRoot()
         {
-            var testDirectory = TestAssets.CreateTestDirectory();
+            var testDirectory = _testAssetsManager.CreateTestDirectory();
             var testStartTime = GetTruncatedDateTime();
                         
-            new TestCommand("dotnet")
-                .WithUserProfileRoot(testDirectory.FullName)
+            new DotnetCommand(Log)
+                .WithUserProfileRoot(testDirectory.Path)
                 .WithEnvironmentVariable("DOTNET_DISABLE_MULTICOREJIT", "1")
-                .ExecuteWithCapturedOutput("--help");
+                .Execute("--help");
 
-            var optimizationProfileFilePath = GetOptimizationProfileFilePath(testDirectory.FullName);
+            var optimizationProfileFilePath = GetOptimizationProfileFilePath(testDirectory.Path);
 
             File.Exists(optimizationProfileFilePath)
                 .Should().BeFalse("Because multicore JIT is disabled");
@@ -99,10 +99,7 @@ namespace Microsoft.DotNet.Tests
 
         private static string GetDotnetVersion()
         {
-            return new TestCommand("dotnet")
-                .ExecuteWithCapturedOutput("--version" )
-                .StdOut
-                .Trim();
+            return TestContext.Current.ToolsetUnderTest.SdkVersion;
         }
         
         private static DateTime GetTruncatedDateTime()

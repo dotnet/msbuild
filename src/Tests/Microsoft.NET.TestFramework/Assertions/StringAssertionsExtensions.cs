@@ -2,17 +2,31 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Globalization;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using FluentAssertions.Primitives;
 
-namespace Microsoft.DotNet.Tools.Test.Utilities
+namespace Microsoft.NET.TestFramework.Assertions
 {
     public static class StringAssertionsExtensions
     {
         private static string NormalizeLineEndings(string s)
         {
             return s.Replace("\r\n", "\n");
+        }
+
+        static bool IsLocalized()
+        {
+            for (var culture = CultureInfo.CurrentUICulture; !culture.Equals(CultureInfo.InvariantCulture); culture = culture.Parent)
+            {
+                if (culture.Name == "en")
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public static AndConstraint<StringAssertions> BeVisuallyEquivalentTo(this StringAssertions assertions, string expected, string because = "", params object[] becauseArgs)
@@ -27,7 +41,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public static AndConstraint<StringAssertions> BeVisuallyEquivalentToIfNotLocalized(this StringAssertions assertions, string expected, string because = "", params object[] becauseArgs)
         {
-            if (!DotnetUnderTest.IsLocalized())
+            if (!IsLocalized())
             {
                 return BeVisuallyEquivalentTo(assertions, expected, because, becauseArgs);
             }
@@ -47,7 +61,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public static AndConstraint<StringAssertions> ContainVisuallySameFragmentIfNotLocalized(this StringAssertions assertions, string expected, string because = "", params object[] becauseArgs)
         {
-            if (!DotnetUnderTest.IsLocalized())
+            if (!IsLocalized())
             {
                 return ContainVisuallySameFragment(assertions, expected, because, becauseArgs);
             }

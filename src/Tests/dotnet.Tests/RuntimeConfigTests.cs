@@ -5,15 +5,20 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using FluentAssertions;
-using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Tests
 {
-    public class RuntimeConfigTests : TestBase
+    public class RuntimeConfigTests : SdkTest
     {
+        public RuntimeConfigTests(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         void ParseBasicRuntimeConfig()
         {
@@ -121,9 +126,9 @@ namespace Microsoft.DotNet.Tests
             runtimeConfig.IsPortable.Should().BeTrue();
         }
 
-        private static string GetTempPath([CallerMemberName] string callingMethod = null)
+        private string GetTempPath([CallerMemberName] string callingMethod = null)
         {
-            return Path.Combine(TestAssets.CreateTestDirectory(callingMethod).FullName, Path.GetTempFileName());
+            return Path.Combine(_testAssetsManager.CreateTestDirectory(callingMethod).Path, Path.GetTempFileName());
         }
 
         private const string Basic =
@@ -230,5 +235,6 @@ namespace Microsoft.DotNet.Tests
   ""runtimeOptions"": {
   }
 }";
+
     }
 }

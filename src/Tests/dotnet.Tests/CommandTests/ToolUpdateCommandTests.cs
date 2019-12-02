@@ -10,6 +10,7 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using Parser = Microsoft.DotNet.Cli.Parser;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Update.LocalizableStrings;
+using Microsoft.NET.TestFramework.Utilities;
 
 namespace Microsoft.DotNet.Tests.Commands.Tool
 {

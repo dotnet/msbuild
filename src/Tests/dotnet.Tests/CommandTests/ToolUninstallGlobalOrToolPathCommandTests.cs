@@ -23,6 +23,7 @@ using Parser = Microsoft.DotNet.Cli.Parser;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Uninstall.LocalizableStrings;
 using InstallLocalizableStrings = Microsoft.DotNet.Tools.Tool.Install.LocalizableStrings;
 using Microsoft.DotNet.ShellShim;
+using Microsoft.NET.TestFramework.Utilities;
 
 namespace Microsoft.DotNet.Tests.Commands.Tool
 {

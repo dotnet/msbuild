@@ -8,11 +8,17 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using FluentAssertions;
 using NuGet.Frameworks;
+using Microsoft.NET.TestFramework;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Tests
 {
-    public class BundledTargetFrameworkTests : TestBase
+    public class BundledTargetFrameworkTests : SdkTest
     {
+        public BundledTargetFrameworkTests(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void VersionCommandDisplaysCorrectVersion()
         {

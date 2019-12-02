@@ -6,33 +6,36 @@ using System.IO;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
-using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Xunit;
-
+using Xunit.Abstractions;
 using LocalizableStrings = Microsoft.DotNet.Cli.Utils.LocalizableStrings;
 
 namespace Microsoft.DotNet.Tests
 {
-    public class GivenThatDotNetRunsCommands : TestBase
+    public class GivenThatDotNetRunsCommands : SdkTest
     {
+        public GivenThatDotNetRunsCommands(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void UnresolvedPlatformReferencesFailAsExpected()
         {
-            var testInstance = TestAssets.Get("NonRestoredTestProjects", "TestProjectWithUnresolvedPlatformDependency")
-                            .CreateInstance()
-                            .WithSourceFiles()
-                            .Root.FullName;
+            var testInstance = _testAssetsManager.CopyTestAsset("TestProjectWithUnresolvedPlatformDependency", testAssetSubdirectory: "NonRestoredTestProjects")
+                            .WithSource();
 
-            new RestoreCommand()
-                .WithWorkingDirectory(testInstance)
-                .ExecuteWithCapturedOutput("/p:SkipInvalidConfigurations=true")
+            new RestoreCommand(Log, testInstance.Path)
+                .Execute("/p:SkipInvalidConfigurations=true")
                 .Should()
                 .Fail();
 
-            new DotnetCommand()
-                .WithWorkingDirectory(testInstance)
-                .ExecuteWithCapturedOutput("crash")
+            new DotnetCommand(Log)
+                .WithWorkingDirectory(testInstance.Path)
+                .Execute("crash")
                 .Should().Fail()
                      .And.HaveStdErrContaining(string.Format(LocalizableStrings.NoExecutableFoundMatchingCommand, "dotnet-crash"));
         }
@@ -42,10 +45,10 @@ namespace Microsoft.DotNet.Tests
         [InlineData(null)]
         public void GivenAMissingHomeVariableItPrintsErrorMessage(string value)
         {
-            new TestCommand("dotnet")
+            new DotnetCommand(Log)
                 .WithEnvironmentVariable(CliFolderPathCalculator.PlatformHomeVariableName, value)
-                .WithEnvironmentVariable(RepoDirectoriesProvider.DotnetHomeVariableName, "")
-                .ExecuteWithCapturedOutput("--help")
+                .WithEnvironmentVariable(CliFolderPathCalculator.DotnetHomeVariableName, "")
+                .Execute("--help")
                 .Should()
                 .Fail()
                 .And
@@ -55,11 +58,11 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void GivenASpecifiedDotnetCliHomeVariableItPrintsUsageMessage()
         {
-            var home = TestAssets.CreateTestDirectory(identifier: "DOTNET_HOME").FullName;
+            var home = _testAssetsManager.CreateTestDirectory(identifier: "DOTNET_HOME").Path;
 
-            new TestCommand("dotnet")
+            new DotnetCommand(Log)
                 .WithEnvironmentVariable(CliFolderPathCalculator.DotnetHomeVariableName, home)
-                .ExecuteWithCapturedOutput("-d help")
+                .Execute("-d help")
                 .Should()
                 .Pass()
                 .And

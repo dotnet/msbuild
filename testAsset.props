@@ -4,7 +4,7 @@
   </PropertyGroup>
   <Import Condition=" '$(VersionPropsIsImported)' == '' " Project="eng/Versions.props" />
   <PropertyGroup>
-    <RestorePackagesPath Condition=" '$(RestorePackagesPath)' == '' ">$(RepoRoot).nuget/packages</RestorePackagesPath>
+    <RestorePackagesPath Condition=" '$(RestorePackagesPath)' == '' ">$(RepoRoot)/artifacts/.nuget/packages</RestorePackagesPath>
     <!--<RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources);$(RepoRoot)/artifacts/tmp/$(Configuration)/test/packages</RestoreAdditionalProjectSources>-->
 
     <NoPackageAnalysis>true</NoPackageAnalysis>

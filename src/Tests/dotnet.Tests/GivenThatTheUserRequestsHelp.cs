@@ -4,12 +4,19 @@
 using System;
 using FluentAssertions;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Commands;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace dotnet.Tests
 {
-    public class GivenThatTheUserRequestsHelp
+    public class GivenThatTheUserRequestsHelp : SdkTest
     {
+        public GivenThatTheUserRequestsHelp(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Theory]
         [InlineData("-h")]
         [InlineData("add -h")]
@@ -34,8 +41,8 @@ namespace dotnet.Tests
         [InlineData("test -h")]
         public void TheResponseIsNotAnError(string commandLine)
         {
-            var result = new DotnetCommand()
-                .ExecuteWithCapturedOutput(commandLine);
+            var result = new DotnetCommand(Log)
+                .Execute(commandLine);
 
             result.ExitCode.Should().Be(0);
         }

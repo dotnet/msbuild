@@ -4,15 +4,15 @@
 using Microsoft.DotNet.PlatformAbstractions;
 using Xunit;
 
-namespace Microsoft.DotNet.Tools.Test.Utilities
+namespace Microsoft.NET.TestFramework
 {
-    public class LinuxOnlyFactAttribute : FactAttribute
+    public class UnixOnlyFactAttribute : FactAttribute
     {
-        public LinuxOnlyFactAttribute()
+        public UnixOnlyFactAttribute()
         {
-            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Linux)
+            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
             {
-                this.Skip = "This test requires linux to run";
+                this.Skip = "This test requires Unix to run";
             }
         }
     }

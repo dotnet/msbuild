@@ -1,11 +1,37 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Test">
+
   <PropertyGroup>
-    <TestPackagesBuildDir>$(TestOutputDir)/packagesBuild/</TestPackagesBuildDir>
+    <TestPackagesDir>$(ArtifactsTmpDir)testpackages/</TestPackagesDir>
   </PropertyGroup>
 
+  <Target Name="PrepareTests"
+          DependsOnTargets="SetupTestPackageProjectData;
+                            CreateTestAssetPackageNuPkgs"
+          BeforeTargets="Build">
+  </Target>
+
+  <Target Name="CreateTestAssetPackageNuPkgs"
+          DependsOnTargets="SetupTestPackageProjectData;"
+          Inputs="@(CreateTestAssetPackageNuPkgsInput)"
+          Outputs="@(CreateTestAssetPackageNuPkgsOutput)">
+    <MakeDir Directories="$(TestPackagesDir)" Condition="!Exists('$(TestPackagesDir)')"/>
+
+    <MSBuild
+      BuildInParallel="False"
+      Projects="%(TestPackageProject.ProjectPath)"
+      Targets="Restore"
+      RemoveProperties="TargetFramework" />
+
+    <MSBuild
+      BuildInParallel="False"
+      Projects="%(TestPackageProject.ProjectPath)"
+      Properties="PackageOutputPath=$(TestPackagesDir);%(TestPackageProject.MsbuildArgs);Version=%(TestPackageProject.Version)"
+      Targets="Pack"
+      RemoveProperties="TargetFramework" />
+  </Target>
+
   <Target Name="SetupTestPackageProjectData"
-          DependsOnTargets="SetupTestPackageProjectFrameworks">
+        DependsOnTargets="SetupTestPackageProjectFrameworks">
     <ItemGroup>
       <CreateTestAssetPackageNuPkgsInput Include="%(TestPackageProject.ProjectDir)/**/*" />
       <CreateTestAssetPackageNuPkgsOutput Include="%(TestPackageProject.PackageOutput)" />
@@ -22,7 +48,7 @@
 
   <Target Name="SetupTestPackageProjectBaseData">
     <ItemGroup>
-      <BaseTestPackageProject Include="TestAssets/TestPackages/PackageWithFakeNativeDep"
+      <BaseTestPackageProject Include="src/Assets/TestPackages/PackageWithFakeNativeDep"
                               Condition=" '$(OS)' == 'Windows_NT' " >
         <Name>PackageWithFakeNativeDep</Name>
         <ProjectName>PackageWithFakeNativeDep.csproj</ProjectName>
@@ -31,7 +57,7 @@
         <Version>1.0.0</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
-      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-dependency-context-test">
+      <BaseTestPackageProject Include="src/Assets/TestPackages/dotnet-dependency-context-test">
         <Name>dotnet-dependency-context-test</Name>
         <ProjectName>dotnet-dependency-context-test.csproj</ProjectName>
         <IsTool>True</IsTool>
@@ -48,7 +74,7 @@
         <Version>$(Version)</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>-->
-      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-desktop-binding-redirects"
+      <BaseTestPackageProject Include="src/Assets/TestPackages/dotnet-desktop-binding-redirects"
                               Condition=" '$(OS)' == 'Windows_NT' ">
         <Name>dotnet-desktop-binding-redirects</Name>
         <ProjectName>dotnet-desktop-binding-redirects.csproj</ProjectName>
@@ -58,7 +84,7 @@
         <Version>$(Version)</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
-      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-hello/v1/dotnet-hello">
+      <BaseTestPackageProject Include="src/Assets/TestPackages/dotnet-hello/v1/dotnet-hello">
         <Name>dotnet-hello</Name>
         <ProjectName>dotnet-hello.csproj</ProjectName>
         <IsTool>True</IsTool>
@@ -66,7 +92,7 @@
         <Version>1.0.0</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
-      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-hello/v2/dotnet-hello">
+      <BaseTestPackageProject Include="src/Assets/TestPackages/dotnet-hello/v2/dotnet-hello">
         <Name>dotnet-hello</Name>
         <ProjectName>dotnet-hello.csproj</ProjectName>
         <IsTool>True</IsTool>
@@ -82,7 +108,7 @@
         <Version>1.0.0</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>-->
-      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-portable">
+      <BaseTestPackageProject Include="src/Assets/TestPackages/dotnet-portable">
         <Name>dotnet-portable</Name>
         <ProjectName>dotnet-portable.csproj</ProjectName>
         <IsTool>True</IsTool>
@@ -106,7 +132,7 @@
         <Version>1.0.0</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>-->
-      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-fallbackfoldertool">
+      <BaseTestPackageProject Include="src/Assets/TestPackages/dotnet-fallbackfoldertool">
         <Name>dotnet-fallbackfoldertool</Name>
         <ProjectName>dotnet-fallbackfoldertool.csproj</ProjectName>
         <IsTool>True</IsTool>
@@ -114,7 +140,7 @@
         <Version>1.0.0</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
-      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-prefercliruntime">
+      <BaseTestPackageProject Include="src/Assets/TestPackages/dotnet-prefercliruntime">
         <Name>dotnet-prefercliruntime</Name>
         <ProjectName>dotnet-prefercliruntime.csproj</ProjectName>
         <IsTool>True</IsTool>
@@ -122,7 +148,7 @@
         <Version>1.0.0</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
-      <BaseTestPackageProject Include="TestAssets/TestPackages/ToolWithOutputName">
+      <BaseTestPackageProject Include="src/Assets/TestPackages/ToolWithOutputName">
         <Name>dotnet-tool-with-output-name</Name>
         <ProjectName>ToolWithOutputName.csproj</ProjectName>
         <NuPkgName>ToolWithOutputName</NuPkgName>
@@ -139,7 +165,6 @@
       <BaseTestPackageProject>
         <ProjectDir>$(RepoRoot)%(Identity)/</ProjectDir>
         <PackageOutput>$(TestPackagesDir)/%(NuPkgName).%(Version).nupkg</PackageOutput>
-        <OutputPath>$(TestPackagesBuildDir)%(Identity)/bin/$(Configuration)/</OutputPath>
       </BaseTestPackageProject>
 
       <BaseTestPackageProject>
@@ -152,5 +177,6 @@
     <BaseTestPackageProject>
       <NuPkgName>%(Name)</NuPkgName>
     </BaseTestPackageProject>
-  </ItemDefinitionGroup>  
+  </ItemDefinitionGroup>
+
 </Project>

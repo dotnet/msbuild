@@ -7,12 +7,19 @@ using System.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Tests.Commands
 {
-    public class CompleteCommandTests : TestBase
+    public class CompleteCommandTests : SdkTest
     {
+        public CompleteCommandTests(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void GivenOnlyDotnetItSuggestsTopLevelCommandsAndOptions()
         {

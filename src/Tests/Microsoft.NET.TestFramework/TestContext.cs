@@ -15,6 +15,8 @@ namespace Microsoft.NET.TestFramework
 
         public string TestAssetsDirectory { get; set; }
 
+        public string TestPackages { get; set; }
+
         public string NuGetCachePath { get; set; }
 
         public string NuGetFallbackFolder { get; set; }
@@ -80,7 +82,7 @@ namespace Microsoft.NET.TestFramework
             if (Directory.Exists(Path.Combine(AppContext.BaseDirectory, "Assets")))
             {
                 runAsTool = true;
-                testContext.TestAssetsDirectory = Path.Combine(AppContext.BaseDirectory, "Assets", "TestProjects");
+                testContext.TestAssetsDirectory = Path.Combine(AppContext.BaseDirectory, "Assets");
             }
             else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_AS_TOOL")))
             {
@@ -89,7 +91,7 @@ namespace Microsoft.NET.TestFramework
                 //  variable instead of packing the test, and installing it as a global tool.
                 runAsTool = true;
                 
-                testContext.TestAssetsDirectory = FindFolderInTree(Path.Combine("src", "Assets", "TestProjects"), AppContext.BaseDirectory);
+                testContext.TestAssetsDirectory = FindFolderInTree(Path.Combine("src", "Assets"), AppContext.BaseDirectory);
             }
 
             string repoRoot = null;
@@ -125,7 +127,7 @@ namespace Microsoft.NET.TestFramework
                 // * $(RepoRoot)/artifacts/bin/Tests/$(MSBuildProjectName)/$(Configuration)
                 testContext.TestExecutionDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "tmp", repoConfiguration));
 
-                testContext.TestAssetsDirectory = FindFolderInTree(Path.Combine("src", "Assets", "TestProjects"), AppContext.BaseDirectory);
+                testContext.TestAssetsDirectory = FindFolderInTree(Path.Combine("src", "Assets"), AppContext.BaseDirectory);
             }
 
             string artifactsDir = Environment.GetEnvironmentVariable("DOTNET_SDK_ARTIFACTS_DIR");
@@ -139,6 +141,8 @@ namespace Microsoft.NET.TestFramework
                 testContext.NuGetFallbackFolder = Path.Combine(artifactsDir, ".nuget", "NuGetFallbackFolder");
                 testContext.NuGetExePath = Path.Combine(artifactsDir, ".nuget", $"nuget{Constants.ExeSuffix}");
                 testContext.NuGetCachePath = Path.Combine(artifactsDir, ".nuget", "packages");
+
+                testContext.TestPackages = Path.Combine(artifactsDir, "tmp", repoConfiguration, "testpackages");
             }
             else
             {

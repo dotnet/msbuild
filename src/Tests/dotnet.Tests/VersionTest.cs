@@ -11,23 +11,32 @@ using Xunit;
 using FluentAssertions;
 using System.Reflection;
 using System.Linq;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Xunit.Abstractions;
+
 
 namespace Microsoft.DotNet.Tests
 {
-    public class GivenDotnetSdk : TestBase
+    public class GivenDotnetSdk : SdkTest
     {
+        public GivenDotnetSdk(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void VersionCommandDisplaysCorrectVersion()
         {
-            var assemblyMetadata = typeof(TestAssetInstanceExtensions).Assembly
+            var assemblyMetadata = typeof(GivenDotnetSdk).Assembly
                 .GetCustomAttributes(typeof(AssemblyMetadataAttribute))
                 .Cast<AssemblyMetadataAttribute>()
                 .ToDictionary(a => a.Key, a => a.Value);
 
             var expectedVersion = assemblyMetadata["SdkVersion"];
 
-            CommandResult result = new DotnetCommand()
-                    .ExecuteWithCapturedOutput("--version");
+            CommandResult result = new DotnetCommand(Log)
+                    .Execute("--version");
 
             result.Should().Pass();
             result.StdOut.Trim().Should().Be(expectedVersion);

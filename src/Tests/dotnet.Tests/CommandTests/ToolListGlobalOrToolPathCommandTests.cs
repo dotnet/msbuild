@@ -20,6 +20,7 @@ using NuGet.Versioning;
 using Xunit;
 using Parser = Microsoft.DotNet.Cli.Parser;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.List.LocalizableStrings;
+using Microsoft.NET.TestFramework.Utilities;
 
 namespace Microsoft.DotNet.Tests.Commands.Tool
 {

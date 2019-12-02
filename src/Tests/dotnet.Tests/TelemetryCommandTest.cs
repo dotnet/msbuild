@@ -9,10 +9,12 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using System.Collections.Generic;
 using System;
 using Xunit;
+using Microsoft.NET.TestFramework;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Tests
 {
-    public class TelemetryCommandTests : TestBase
+    public class TelemetryCommandTests : SdkTest
     {
         private readonly FakeRecordEventNameTelemetry _fakeTelemetry;
 
@@ -20,7 +22,7 @@ namespace Microsoft.DotNet.Tests
 
         public IDictionary<string, string> Properties { get; set; }
 
-        public TelemetryCommandTests()
+        public TelemetryCommandTests(ITestOutputHelper log) : base(log)
         {
             _fakeTelemetry = new FakeRecordEventNameTelemetry();
             TelemetryEventEntry.Subscribe(_fakeTelemetry.TrackEvent);

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli.Utils;
 
-namespace Microsoft.DotNet.Tools.Test.Utilities
+namespace Microsoft.NET.TestFramework.Utilities
 {
     public class BufferedReporter : IReporter
     {

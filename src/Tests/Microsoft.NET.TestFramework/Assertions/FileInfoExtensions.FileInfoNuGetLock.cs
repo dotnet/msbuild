@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NuGet.Common;
 
-namespace Microsoft.DotNet.Tools.Test.Utilities
+namespace Microsoft.NET.TestFramework.Assertions
 {
     public static partial class FileInfoExtensions
     {

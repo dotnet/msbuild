@@ -32,6 +32,12 @@ namespace Microsoft.NET.TestFramework.Commands
             return this;
         }
 
+        public TestCommand WithWorkingDirectory(string workingDirectory)
+        {
+            WorkingDirectory = workingDirectory;
+            return this;
+        }
+
         private SdkCommandSpec CreateCommandSpec(IEnumerable<string> args)
         {
             var commandSpec = CreateCommand(args);

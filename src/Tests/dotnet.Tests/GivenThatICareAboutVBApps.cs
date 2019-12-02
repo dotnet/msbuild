@@ -4,33 +4,29 @@
 using System;
 using System.IO;
 using FluentAssertions;
-using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Tests
 {
-    public class GivenThatICareAboutVBApps : TestBase
+    public class GivenThatICareAboutVBApps : SdkTest
     {
-        private TestAssetInstance _testInstance;
-
-        public GivenThatICareAboutVBApps()
+        public GivenThatICareAboutVBApps(ITestOutputHelper log) : base(log)
         {
-            _testInstance = TestAssets.Get("VBTestApp")
-                            .CreateInstance()
-                            .WithSourceFiles();
-
-            new RestoreCommand()
-                .WithWorkingDirectory(_testInstance.Root)
-                .Execute()
-                .Should().Pass();
         }
+
 
         [Fact]
         public void ICanBuildVBApps()
         {
-            new BuildCommand()
-                .WithWorkingDirectory(_testInstance.Root)
+            var testInstance = _testAssetsManager.CopyTestAsset("VBTestApp")
+                .WithSource();
+
+            new BuildCommand(Log, testInstance.Path)
                 .Execute()
                 .Should().Pass();
         }
@@ -38,31 +34,36 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void ICanRunVBApps()
         {
-            new RunCommand()
-                .WithWorkingDirectory(_testInstance.Root)
-                .Execute()
+            var testInstance = _testAssetsManager.CopyTestAsset("VBTestApp")
+                .WithSource();
+
+            new DotnetCommand(Log)
+                .WithWorkingDirectory(testInstance.Path)
+                .Execute("run")
                 .Should().Pass();
         }
 
         [Fact]
         public void ICanPublicAndRunVBApps()
         {
-            new PublishCommand()
-                .WithWorkingDirectory(_testInstance.Root)
+            var testInstance = _testAssetsManager.CopyTestAsset("VBTestApp")
+                .WithSource();
+
+            new PublishCommand(Log, testInstance.Path)
                 .Execute()
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
             var outputDll = Path.Combine(
-                _testInstance.Root.FullName,
+                testInstance.Path,
                 "bin",
                 configuration,
                 "netcoreapp3.0",
                 "publish",
                 "VBTestApp.dll");
 
-            new DotnetCommand()
-                .ExecuteWithCapturedOutput(outputDll)
+            new DotnetCommand(Log)
+                .Execute(outputDll)
                 .Should().Pass()
                          .And.HaveStdOutContaining("Hello World");
         }

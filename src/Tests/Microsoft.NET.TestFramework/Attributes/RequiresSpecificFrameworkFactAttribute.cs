@@ -3,13 +3,13 @@
 
 using Xunit;
 
-namespace Microsoft.DotNet.Tools.Test.Utilities
+namespace Microsoft.NET.TestFramework
 {
     public class RequiresSpecificFrameworkFactAttribute : FactAttribute
     {
         public RequiresSpecificFrameworkFactAttribute(string framework)
         {
-            if (!EnvironmentInfo.HasSharedFramework(framework))
+            if (!EnvironmentInfo.SupportsTargetFramework(framework))
             {
                 this.Skip = $"This test requires a shared framework that isn't present: {framework}";
             }

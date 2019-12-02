@@ -6,12 +6,18 @@ using System.Collections.Generic;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Tests
 {
-    public class PrintableTableTests : TestBase
+    public class PrintableTableTests : SdkTest
     {
+        public PrintableTableTests(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void GivenNoColumnsItPrintsNoLines()
         {

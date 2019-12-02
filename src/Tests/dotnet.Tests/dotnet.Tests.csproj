@@ -8,8 +8,6 @@
     <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
-    <!--<PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
-    <AssetTargetFallback>$(AssetTargetFallback);netstandardapp1.5;dotnet5.4;portable-net451+win8</AssetTargetFallback>-->
     
     <!-- Use layout folder for the output folder, to support in-process tests which expect to be running
          on a valid layout. -->
@@ -132,7 +130,7 @@
   </Target>
 
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.Utilities\Microsoft.DotNet.Tools.Tests.Utilities.csproj" />
+    <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.ComponentMocks\Microsoft.DotNet.Tools.Tests.ComponentMocks.csproj" />
     <ProjectReference Include="..\..\cli\dotnet\dotnet.csproj" />
     <ProjectReference Include="..\..\cli\Microsoft.DotNet.Cli.Sln.Internal\Microsoft.DotNet.Cli.Sln.Internal.csproj" />

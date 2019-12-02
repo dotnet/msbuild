@@ -17,6 +17,7 @@ using Microsoft.DotNet.Tools.Tool.Restore;
 using Microsoft.DotNet.Tools.Tool.Update;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using Microsoft.NET.TestFramework.Utilities;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 using Xunit;
