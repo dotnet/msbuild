@@ -5,10 +5,6 @@
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>b275b18fd7014d67078e2477f693301ea04e6549</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.App.Ref" Version="3.1.1-servicing.19576.7">
-      <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>3175a035df26e4082ad5513be661400ce722d0f5</Sha>
-    </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Runtime.win-x64" Version="3.1.1-servicing.19576.7">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>3175a035df26e4082ad5513be661400ce722d0f5</Sha>
@@ -38,6 +34,11 @@
     <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.1.0-rtm.19573.3">
       <Uri>https://github.com/aspnet/AspNetCore</Uri>
       <Sha>c31f51e5c778dc817862d0c932e7cfe9223d4899</Sha>
+    </Dependency>
+    <!-- Keep this dependency at the bottom of ProductDependencies, else it will be picked as the parent for CoherentParentDependencies -->
+    <Dependency Name="Microsoft.NETCore.App.Ref" Version="3.1.0" Pinned="true">
+      <Uri>https://github.com/dotnet/core-setup</Uri>
+      <Sha>65f04fb6db7a5e198d05dbebd5c4ad21eb018f89</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
