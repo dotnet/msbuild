@@ -196,11 +196,11 @@ namespace Microsoft.DotNet.Tests
 
 
             new PackCommand(Log, toolWithRandPkgNameDir.FullName)
-                .Execute($"-o \"{pkgsDir.FullName}\" /p:version=1.0.0")
+                .Execute($"-o", "\"{pkgsDir.FullName}\"", "/p:version=1.0.0")
                 .Should().Pass();
 
             new RestoreCommand(Log, appWithDepOnToolDir.FullName)
-                .Execute($"--source \"{pkgsDir.FullName}\"")
+                .Execute($"--source", "\"{pkgsDir.FullName}\"")
                 .Should().Pass();
 
             new DotnetCommand(Log)

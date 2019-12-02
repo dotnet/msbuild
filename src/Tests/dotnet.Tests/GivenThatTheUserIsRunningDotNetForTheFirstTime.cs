@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Tests
                 var command = dotnetFirstTime.Setup(log, testAssets, testName: "Dotnet_first_time_experience_tests");
 
                 FirstDotnetNonVerbUseCommandResult = command.Execute("--info");
-                FirstDotnetVerbUseCommandResult = command.Execute("new --debug:ephemeral-hive");
+                FirstDotnetVerbUseCommandResult = command.Execute("new", "--debug:ephemeral-hive");
 
                 TestDirectory = dotnetFirstTime.TestDirectory;
                 NugetFallbackFolder = dotnetFirstTime.NugetFallbackFolder;
@@ -157,7 +157,7 @@ namespace Microsoft.DotNet.Tests
             // for machineid and docker cache files
             command = command.WithEnvironmentVariable("DOTNET_CLI_TELEMETRY_OPTOUT", "true");
 
-            command.Execute("internal-reportinstallsuccess test").Should().Pass();
+            command.Execute("internal-reportinstallsuccess", "test").Should().Pass();
 
             var homeFolder = dotnetFirstTime.NugetFallbackFolder.Parent;
             homeFolder.Should().NotExist();
@@ -170,9 +170,9 @@ namespace Microsoft.DotNet.Tests
 
             var command = dotnetFirstTime.Setup(Log, _testAssetsManager);
 
-            command.Execute("internal-reportinstallsuccess test").Should().Pass();
+            command.Execute("internal-reportinstallsuccess", "test").Should().Pass();
 
-            var result = command.Execute("new --debug:ephemeral-hive");
+            var result = command.Execute("new", "--debug:ephemeral-hive");
 
             var expectedVersion = GetDotnetVersion();
 
@@ -193,9 +193,9 @@ namespace Microsoft.DotNet.Tests
             var command = dotnetFirstTime.Setup(Log, _testAssetsManager);
 
 
-            command.Execute("internal-reportinstallsuccess test").Should().Pass();
+            command.Execute("internal-reportinstallsuccess", "test").Should().Pass();
 
-            command.Execute("new --debug:ephemeral-hive");
+            command.Execute("new", "--debug:ephemeral-hive");
         }
 
         [LinuxOnlyFact]
@@ -209,7 +209,7 @@ namespace Microsoft.DotNet.Tests
 
             command = command.WithEnvironmentVariable("DOTNET_DISABLE_MULTICOREJIT", "true");
 
-            command.Execute("internal-reportinstallsuccess test").Should().Pass();
+            command.Execute("internal-reportinstallsuccess", "test").Should().Pass();
 
             File.Exists(profiled).Should().BeTrue();
             File.ReadAllText(profiled).Should().Be(
@@ -227,7 +227,7 @@ namespace Microsoft.DotNet.Tests
 
             command = command.WithEnvironmentVariable("DOTNET_DISABLE_MULTICOREJIT", "true");
 
-            command.Execute("internal-reportinstallsuccess test").Should().Pass();
+            command.Execute("internal-reportinstallsuccess", "test").Should().Pass();
 
             File.Exists(pathsd).Should().BeTrue();
             File.ReadAllText(pathsd).Should().Be(CliFolderPathCalculator.ToolsShimPathInUnix.PathWithTilde);

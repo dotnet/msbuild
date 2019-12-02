@@ -122,10 +122,7 @@ namespace Microsoft.NET.TestFramework
             }
             else
             {
-                // This is dependent on the current artifacts layout:
-                // * $(RepoRoot)/artifacts/tmp/$Configuration)
-                // * $(RepoRoot)/artifacts/bin/Tests/$(MSBuildProjectName)/$(Configuration)
-                testContext.TestExecutionDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "tmp", repoConfiguration));
+                testContext.TestExecutionDirectory = (Path.Combine(FindFolderInTree("artifacts", AppContext.BaseDirectory), "tmp", repoConfiguration));
 
                 testContext.TestAssetsDirectory = FindFolderInTree(Path.Combine("src", "Assets"), AppContext.BaseDirectory);
             }

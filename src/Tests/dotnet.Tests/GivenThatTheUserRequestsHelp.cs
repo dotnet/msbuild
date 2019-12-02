@@ -42,7 +42,7 @@ namespace dotnet.Tests
         public void TheResponseIsNotAnError(string commandLine)
         {
             var result = new DotnetCommand(Log)
-                .Execute(commandLine);
+                .Execute(commandLine.Split());
 
             result.ExitCode.Should().Be(0);
         }

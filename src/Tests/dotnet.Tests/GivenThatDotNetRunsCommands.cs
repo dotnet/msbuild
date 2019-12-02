@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Tests
 
             new DotnetCommand(Log)
                 .WithEnvironmentVariable(CliFolderPathCalculator.DotnetHomeVariableName, home)
-                .Execute("-d help")
+                .Execute("-d", "help")
                 .Should()
                 .Pass()
                 .And
