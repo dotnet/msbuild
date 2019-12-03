@@ -7,7 +7,7 @@ namespace Microsoft.Build.Eventing
     /// <summary>
     /// This captures information of how various key methods of building with MSBuild ran.
     /// </summary>
-    [EventSource(Name = "Microsoft-Build")]
+    [EventSource(Name = "Microsoft-VisualStudio-Common")]
     internal sealed class MSBuildEventSource : EventSource
     {
         /// <summary>
