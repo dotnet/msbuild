@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NETCore.App.Ref" Version="3.1.0">
-      <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>c16a31965d1ff8c4564d420610e2991265e77501</Sha>
-    </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Runtime.win-x64" Version="3.1.0">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>c16a31965d1ff8c4564d420610e2991265e77501</Sha>
+      <Sha>4e1bb23ca12cfe3de0b7e834872ed7327377d420</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.1.100-rtm.19570.4">
+    <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.1.101-servicing.19572.3">
       <Uri>https://github.com/dotnet/cli</Uri>
-      <Sha>fb03f1a77a04bf2db2b6aba9f1f65a1316320e9a</Sha>
+      <Sha>0e5712bd568bb17296171cf7f6bc31ecf414b0c0</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Sdk" Version="3.1.100-rtm.19568.4">
       <Uri>https://github.com/dotnet/sdk</Uri>
@@ -33,14 +29,14 @@
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>82f2e2541478e239dc4b04f231e90dc2b3dcb422</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Razor" Version="3.1.0">
+    <Dependency Name="Microsoft.NET.Sdk.Razor" Version="3.1.1-servicing.19575.9">
       <Uri>https://github.com/aspnet/AspNetCore-Tooling</Uri>
-      <Sha>806f68f84d7ecf341811e317810f9aea0e1a862e</Sha>
+      <Sha>5a489a79189da32e5046c3eeda5f80c4e1258cb8</Sha>
     </Dependency>
     <!-- For coherency purposes, this version should be gated by the version of wpf routed via core setup -->
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.1.0-rtm.19568.6" CoherentParentDependency="Microsoft.NETCore.App.Runtime.win-x64">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.1.0-rtm.19570.2" CoherentParentDependency="Microsoft.NETCore.App.Runtime.win-x64">
       <Uri>https://github.com/dotnet/wpf</Uri>
-      <Sha>7aac1f7396bfc03177b1fc85b7d4e49b5222b102</Sha>
+      <Sha>67636428e8671ea15833016b462691530225035c</Sha>
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="5.4.0-rtm.6292">
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
@@ -50,9 +46,9 @@
       <Uri>https://github.com/microsoft/vstest</Uri>
       <Sha>55e7e45431c9c05656c999b902686e7402664573</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.1.100-rtm.19570.3">
+    <Dependency Name="Microsoft.NET.Sdk.Web" Version="3.1.100-rtm.19575.2">
       <Uri>https://github.com/aspnet/websdk</Uri>
-      <Sha>bce20c8642d2f723578458a989a933a6202dc711</Sha>
+      <Sha>72a4eb78f1aa8af48f6fd7441fccea38639d9d6d</Sha>
     </Dependency>
     <Dependency Name="ILLink.Tasks" Version="0.1.6-prerelease.19380.1">
       <Uri>https://github.com/mono/linker</Uri>
@@ -73,6 +69,11 @@
     <Dependency Name="System.Resources.Extensions" Version="4.7.0" CoherentParentDependency="Microsoft.NETCore.App.Runtime.win-x64">
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
+    </Dependency>
+    <!-- Keep this dependency at the bottom of ProductDependencies, else it will be picked as the parent for CoherentParentDependencies -->
+    <Dependency Name="Microsoft.NETCore.App.Ref" Version="3.1.0" Pinned="true">
+      <Uri>https://github.com/dotnet/core-setup</Uri>
+      <Sha>65f04fb6db7a5e198d05dbebd5c4ad21eb018f89</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
