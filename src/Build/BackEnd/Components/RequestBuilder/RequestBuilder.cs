@@ -1081,7 +1081,10 @@ namespace Microsoft.Build.BackEnd
             // Build the targets
             BuildResult result = await _targetBuilder.BuildTargets(_projectLoggingContext, _requestEntry, this, allTargets, _requestEntry.RequestConfiguration.BaseLookup, _cancellationTokenSource.Token);
 
-            MSBuildEventSource.Log.BuildProjectStop(_requestEntry.RequestConfiguration.ProjectFullPath, allTargets);
+            if (MSBuildEventSource.Log.IsEnabled())
+            {
+                MSBuildEventSource.Log.BuildProjectStop(_requestEntry.RequestConfiguration.ProjectFullPath, allTargets.Aggregate((f, s) => f + ", " + s));
+            }
 
             return result;
         }
