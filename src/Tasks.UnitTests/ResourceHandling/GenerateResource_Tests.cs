@@ -3538,7 +3538,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 File.SetLastWriteTime(dll.Path, DateTime.Now - TimeSpan.FromDays(30));
 
                 var referenceItem = new TaskItem(dll.Path);
-                referenceItem.SetMetadata(Tasks.ItemMetadataNames.fusionName, "System.Resources.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51");
+                referenceItem.SetMetadata(ItemMetadataNames.fusionName, "System.Resources.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51");
 
                 t.References = new ITaskItem[] {
                     referenceItem
