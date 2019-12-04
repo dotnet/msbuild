@@ -100,14 +100,14 @@
         <Version>2.0.0</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
-      <!--<BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-outputsframeworkversion/dotnet-outputsframeworkversion-netcoreapp1.0">
+      <BaseTestPackageProject Include="src/Assets/TestPackages/dotnet-outputsframeworkversion/dotnet-outputsframeworkversion-netcoreapp1.0">
         <Name>dotnet-outputsframeworkversion-netcoreapp1.0</Name>
         <ProjectName>dotnet-outputsframeworkversion-netcoreapp1.0.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
         <Version>1.0.0</Version>
         <Clean>True</Clean>
-      </BaseTestPackageProject>-->
+      </BaseTestPackageProject>
       <BaseTestPackageProject Include="src/Assets/TestPackages/dotnet-portable">
         <Name>dotnet-portable</Name>
         <ProjectName>dotnet-portable.csproj</ProjectName>

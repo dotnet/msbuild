@@ -16,19 +16,6 @@ namespace Microsoft.NET.TestFramework.Assertions
             return s.Replace("\r\n", "\n");
         }
 
-        static bool IsLocalized()
-        {
-            for (var culture = CultureInfo.CurrentUICulture; !culture.Equals(CultureInfo.InvariantCulture); culture = culture.Parent)
-            {
-                if (culture.Name == "en")
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
         public static AndConstraint<StringAssertions> BeVisuallyEquivalentTo(this StringAssertions assertions, string expected, string because = "", params object[] becauseArgs)
         {
             Execute.Assertion
@@ -41,7 +28,7 @@ namespace Microsoft.NET.TestFramework.Assertions
 
         public static AndConstraint<StringAssertions> BeVisuallyEquivalentToIfNotLocalized(this StringAssertions assertions, string expected, string because = "", params object[] becauseArgs)
         {
-            if (!IsLocalized())
+            if (!TestContext.IsLocalized())
             {
                 return BeVisuallyEquivalentTo(assertions, expected, because, becauseArgs);
             }
@@ -61,7 +48,7 @@ namespace Microsoft.NET.TestFramework.Assertions
 
         public static AndConstraint<StringAssertions> ContainVisuallySameFragmentIfNotLocalized(this StringAssertions assertions, string expected, string because = "", params object[] becauseArgs)
         {
-            if (!IsLocalized())
+            if (!TestContext.IsLocalized())
             {
                 return ContainVisuallySameFragment(assertions, expected, because, becauseArgs);
             }

@@ -22,7 +22,8 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             get
             {
-                return _capture?.GetStringBuilder()?.ToString();
+                //  Trim newlines at end of output (since there will always be one since we only write with WriteLine)
+                return _capture?.GetStringBuilder()?.ToString()?.TrimEnd('\r', '\n');
             }
         }
 
@@ -79,16 +80,14 @@ namespace Microsoft.DotNet.Cli.Utils
 
             // Flush anything else when the stream is closed
             // Which should only happen if someone used console.Write
-            WriteBuilder();
+            if (_builder.Length > 0)
+            {
+                WriteBuilder();
+            }
         }
 
         private void WriteBuilder()
         {
-            if (_builder.Length == 0)
-            {
-                return;
-            }
-
             WriteLine(_builder.ToString());
             _builder.Clear();
         }

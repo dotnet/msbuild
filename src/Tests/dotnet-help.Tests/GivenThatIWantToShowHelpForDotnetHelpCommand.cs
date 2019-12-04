@@ -5,10 +5,14 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using FluentAssertions;
 using HelpActual = Microsoft.DotNet.Tools.Help;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Help.Tests
 {
-    public class GivenThatIWantToShowHelpForDotnetHelpCommand : TestBase
+    public class GivenThatIWantToShowHelpForDotnetHelpCommand : SdkTest
     {
         private const string HelpText =
 @"Usage: dotnet help [options] <COMMAND_NAME>
@@ -19,6 +23,10 @@ Arguments:
 Options:
   -h, --help   Show command line help.";
 
+        public GivenThatIWantToShowHelpForDotnetHelpCommand(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Theory]
         [InlineData("--help")]
         [InlineData("-h")]
@@ -26,8 +34,8 @@ Options:
         [InlineData("/?")]
         public void WhenHelpOptionIsPassedToDotnetHelpCommandItPrintsUsage(string helpArg)
         {
-            var cmd = new HelpCommand()
-                .ExecuteWithCapturedOutput($"{helpArg}");
+            var cmd = new DotnetCommand(Log, "help")
+                .Execute($"{helpArg}");
             cmd.Should().Pass();
             cmd.StdOut.Should().ContainVisuallySameFragmentIfNotLocalized(HelpText);
         }

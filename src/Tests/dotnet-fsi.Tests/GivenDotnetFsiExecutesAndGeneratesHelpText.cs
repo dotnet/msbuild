@@ -7,15 +7,23 @@ using FluentAssertions;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using System.Linq;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.Fsi.Tests
 {
-    public class GivenDotnetFsiExecutesAndGeneratesHelpText : TestBase
+    public class GivenDotnetFsiExecutesAndGeneratesHelpText : SdkTest
     {
+        public GivenDotnetFsiExecutesAndGeneratesHelpText(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void ItRuns()
         {
-            new FsiCommand()
+            new DotnetCommand(Log, "fsi")
                 .Execute("--help")
                 .Should().Pass();
         }

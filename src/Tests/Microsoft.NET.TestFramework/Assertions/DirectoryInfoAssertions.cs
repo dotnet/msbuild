@@ -101,6 +101,32 @@ namespace Microsoft.NET.TestFramework.Assertions
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
 
+        public AndConstraint<DirectoryInfoAssertions> BeEmpty()
+        {
+            Execute.Assertion.ForCondition(!_dirInfo.EnumerateFileSystemInfos().Any())
+                .FailWith($"The directory {_dirInfo.FullName} is not empty.");
+
+            return new AndConstraint<DirectoryInfoAssertions>(this);
+        }
+
+        public AndConstraint<DirectoryInfoAssertions> NotBeEmpty()
+        {
+            Execute.Assertion.ForCondition(_dirInfo.EnumerateFileSystemInfos().Any())
+                .FailWith($"The directory {_dirInfo.FullName} is empty.");
+
+            return new AndConstraint<DirectoryInfoAssertions>(this);
+        }
+
+        public AndConstraint<DirectoryInfoAssertions> NotExist(string because = "", params object[] reasonArgs)
+        {
+            Execute.Assertion
+                .ForCondition(_dirInfo.Exists == false)
+                .BecauseOf(because, reasonArgs)
+                .FailWith($"Expected directory {_dirInfo.FullName} to not exist, but it does.");
+
+            return new AndConstraint<DirectoryInfoAssertions>(this);
+        }
+
         public AndConstraint<DirectoryInfoAssertions> NotHaveSubDirectories(params string[] notExpectedSubdirectories)
         {
             notExpectedSubdirectories = notExpectedSubdirectories ?? Array.Empty<string>();

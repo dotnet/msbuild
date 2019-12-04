@@ -8,10 +8,14 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using FluentAssertions;
 using HelpActual = Microsoft.DotNet.Tools.Help;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Help.Tests
 {
-    public class GivenThatIWantToShowHelpForDotnetCommand : TestBase
+    public class GivenThatIWantToShowHelpForDotnetCommand : SdkTest
     {
         private const string HelpText =
 @"Usage: dotnet [runtime-options] [path-to-application] [arguments]
@@ -71,6 +75,10 @@ Additional commands from bundled tools:
 
 Run 'dotnet [command] --help' for more information on a command.";
 
+        public GivenThatIWantToShowHelpForDotnetCommand(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Theory]
         [InlineData("--help")]
         [InlineData("-h")]
@@ -78,8 +86,8 @@ Run 'dotnet [command] --help' for more information on a command.";
         [InlineData("/?")]
         public void WhenHelpOptionIsPassedToDotnetItPrintsUsage(string helpArg)
         {
-            var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput($"{helpArg}");
+            var cmd = new DotnetCommand(Log)
+                .Execute(helpArg);
             cmd.Should().Pass();
             cmd.StdOut.Should().ContainVisuallySameFragmentIfNotLocalized(HelpText);
         }
@@ -87,8 +95,8 @@ Run 'dotnet [command] --help' for more information on a command.";
         [Fact]
         public void WhenHelpCommandIsPassedToDotnetItPrintsUsage()
         {
-            var cmd = new HelpCommand()
-                .ExecuteWithCapturedOutput();
+            var cmd = new DotnetCommand(Log, "help")
+                .Execute();
             cmd.Should().Pass();
             cmd.StdOut.Should().ContainVisuallySameFragmentIfNotLocalized(HelpText);
         }
@@ -96,8 +104,8 @@ Run 'dotnet [command] --help' for more information on a command.";
         [Fact]
         public void WhenInvalidCommandIsPassedToDotnetHelpItPrintsError()
         {
-          var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput("help invalid");
+          var cmd = new DotnetCommand(Log)
+                .Execute("help", "invalid");
 
           cmd.Should().Fail();
           cmd.StdErr.Should().Contain(string.Format(Tools.Help.LocalizableStrings.CommandDoesNotExist, "invalid"));
@@ -109,8 +117,8 @@ Run 'dotnet [command] --help' for more information on a command.";
         [InlineData("parse")]
         public void WhenCommandWithoutDocLinkIsPassedToDotnetHelpItPrintsError(string command)
         {
-          var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput($"help {command}");
+          var cmd = new DotnetCommand(Log)
+                .Execute($"help", command);
 
           cmd.Should().Fail();
           cmd.StdErr.Should().Contain(string.Format(Tools.Help.LocalizableStrings.CommandDoesNotExist, command));

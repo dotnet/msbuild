@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Commands;
 using System.Reflection;
+using System.Globalization;
 
 namespace Microsoft.NET.TestFramework
 {
@@ -230,6 +231,19 @@ namespace Microsoft.NET.TestFramework
   }
 }");
             }
+        }
+
+        public static bool IsLocalized()
+        {
+            for (var culture = CultureInfo.CurrentUICulture; !culture.Equals(CultureInfo.InvariantCulture); culture = culture.Parent)
+            {
+                if (culture.Name == "en")
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

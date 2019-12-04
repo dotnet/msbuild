@@ -9,9 +9,9 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 
-namespace Microsoft.DotNet.TestFramework
+namespace Microsoft.NET.TestFramework
 {
-    public class TestAssetKinds
+    public class TestAssetSubdirectories
     {
         public static string DesktopTestProjects = "DesktopTestProjects";
 
