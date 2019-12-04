@@ -169,7 +169,7 @@ namespace Microsoft.Build.BackEnd
             {
                 var candidateProcesses = GetPossibleRunningNodes(msbuildLocation);
 
-                CommunicationsUtilities.Trace("Attempting to connect to each existing msbuild.exe process in turn to establish node {0}...", nodeId);
+                CommunicationsUtilities.Trace("Attempting to connect to each existing {1} process in turn to establish node {0}...", nodeId, Path.GetFileName(msbuildLocation));
                 foreach (Process nodeProcess in candidateProcesses)
                 {
                     if (nodeProcess.Id == Process.GetCurrentProcess().Id)
@@ -475,7 +475,7 @@ namespace Microsoft.Build.BackEnd
                     throw new NodeFailedToLaunchException(ex);
                 }
 
-                CommunicationsUtilities.Trace("Successfully launched msbuild.exe node with PID {0}", process.Id);
+                CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", process.Id, exeName);
                 return process.Id;
             }
             else
@@ -533,7 +533,7 @@ namespace Microsoft.Build.BackEnd
                     NativeMethodsShared.CloseHandle(processInfo.hThread);
                 }
 
-                CommunicationsUtilities.Trace("Successfully launched msbuild.exe node with PID {0}", childProcessId);
+                CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", childProcessId, exeName);
                 return childProcessId;
             }
         }
