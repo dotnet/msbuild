@@ -169,7 +169,7 @@ namespace Microsoft.Build.BackEnd
             {
                 var candidateProcesses = GetPossibleRunningNodes(msbuildLocation);
 
-                CommunicationsUtilities.Trace("Attempting to connect to each existing {1} process in turn to establish node {0}...", nodeId, Path.GetFileName(msbuildLocation));
+                CommunicationsUtilities.Trace("Attempting to connect to each existing {1} process in turn to establish node {0}...", nodeId, string.IsNullOrEmpty(msbuildLocation) ? "msbuild.exe" : Path.GetFileName(msbuildLocation));
                 foreach (Process nodeProcess in candidateProcesses)
                 {
                     if (nodeProcess.Id == Process.GetCurrentProcess().Id)
