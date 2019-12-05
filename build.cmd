@@ -1,6 +1,6 @@
 @echo off
 set CACHEDMSBUILDDEBUGONSTART=%MSBUILDDEBUGONSTART%
-if %MSBUILDDEBUGONSTART% == 0 goto build
+if defined MSBUILDDEBUGONSTART goto build
 set /p ans=Did you mean to have MSBUILDDEBUGONSTART equal %MSBUILDDEBUGONSTART%? (y/n) 
 if %ans% == y goto build
 set MSBUILDDEBUGONSTART=0
