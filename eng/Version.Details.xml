@@ -3,17 +3,17 @@
   <ProductDependencies>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19577.5">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19603.16">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>99c6b59a8afff97fe891341b39abe985f1d3c565</Sha>
+      <Sha>8e47254f93b276c974968aff83222f89ec3931ed</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Helix.Sdk" Version="2.0.0-beta.19577.5">
+    <Dependency Name="Microsoft.DotNet.Helix.Sdk" Version="2.0.0-beta.19603.16">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>99c6b59a8afff97fe891341b39abe985f1d3c565</Sha>
+      <Sha>8e47254f93b276c974968aff83222f89ec3931ed</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.SignTool" Version="1.0.0-beta.19577.5">
+    <Dependency Name="Microsoft.DotNet.SignTool" Version="1.0.0-beta.19603.16">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>99c6b59a8afff97fe891341b39abe985f1d3c565</Sha>
+      <Sha>8e47254f93b276c974968aff83222f89ec3931ed</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.HostModel" Version="3.1.0">
       <Uri>https://github.com/dotnet/core-setup</Uri>
