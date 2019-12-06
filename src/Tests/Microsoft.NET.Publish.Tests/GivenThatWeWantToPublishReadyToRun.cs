@@ -13,9 +13,9 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Publish.Tests
 {
-    public class GivenThatWeWantToRunCrossgen : SdkTest
+    public class GivenThatWeWantToPublishReadyToRun : SdkTest
     {
-        public GivenThatWeWantToRunCrossgen(ITestOutputHelper log) : base(log)
+        public GivenThatWeWantToPublishReadyToRun(ITestOutputHelper log) : base(log)
         {
         }
 
@@ -225,7 +225,53 @@ namespace Microsoft.NET.Publish.Tests
                 .And.HaveStdOutContainingIgnoreCase("NETSDK1095");
         }
 
-        private TestProject CreateTestProjectForR2RTesting(string ridToUse, string mainProjectName, string referenceProjectName)
+
+        [Theory]
+        [InlineData("netcoreapp3.0")]
+        public void It_can_publish_readytorun_for_library_projects(string targetFramework)
+        {
+            TestLibProjectPublishing_Internal("LibraryProject1", false, targetFramework);
+        }
+
+        [Theory]
+        [InlineData("netcoreapp3.0")]
+        public void It_can_publish_readytorun_for_selfcontained_library_projects(string targetFramework)
+        {
+            TestLibProjectPublishing_Internal("LibraryProject2", true, targetFramework);
+        }
+
+        private void TestLibProjectPublishing_Internal(string projectName, bool isSelfContained, string targetFramework)
+        {
+            var testProject = CreateTestProjectForR2RTesting(
+                EnvironmentInfo.GetCompatibleRid(targetFramework),
+                projectName,
+                "ClassLib",
+                isExeProject: false);
+
+            testProject.AdditionalProperties["PublishReadyToRun"] = "True";
+            if (isSelfContained)
+                testProject.AdditionalProperties["SelfContained"] = "True";
+
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
+            publishCommand.Execute().Should().Pass();
+
+            DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory(
+                targetFramework,
+                "Debug",
+                testProject.RuntimeIdentifier);
+
+            DoesImageHaveR2RInfo(Path.Combine(publishDirectory.FullName, $"{projectName}.dll")).Should().BeTrue();
+            DoesImageHaveR2RInfo(Path.Combine(publishDirectory.FullName, "ClassLib.dll")).Should().BeTrue();
+
+            if (isSelfContained)
+                publishDirectory.Should().HaveFile("System.Private.CoreLib.dll");
+            else
+                publishDirectory.Should().NotHaveFile("System.Private.CoreLib.dll");
+        }
+
+        private TestProject CreateTestProjectForR2RTesting(string ridToUse, string mainProjectName, string referenceProjectName, bool isExeProject = true)
         {
             var referenceProject = new TestProject()
             {
@@ -239,7 +285,7 @@ public class Classlib
 {
     public string Func()
     {
-        return ""Hello from a netcoreapp2.0.!"";
+        return ""Hello from a netcoreapp3.0.!"";
     }
 }";
 
@@ -247,7 +293,7 @@ public class Classlib
             {
                 Name = mainProjectName,
                 TargetFrameworks = "netcoreapp3.0",
-                IsExe = true,
+                IsExe = isExeProject,
                 IsSdkProject = true,
                 RuntimeIdentifier = ridToUse,
                 ReferencedProjects = { referenceProject },
