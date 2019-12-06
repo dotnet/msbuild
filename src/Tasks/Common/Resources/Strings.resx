@@ -536,10 +536,6 @@ The following are names of parameters or literal values and should not be transl
   <data name="ReadyToRunCompilationHasWarnings_Info" xml:space="preserve">
     <value>Some ReadyToRun compilations emitted warnings, indicating potential missing dependencies. Missing dependencies could potentially cause runtime failures. To show the warnings, set the PublishReadyToRunShowWarnings property to true.</value>
   </data>
-  <data name="CannotCreateReadyToRunImagesForLibProjects" xml:space="preserve">
-    <value>NETSDK1108: ReadyToRun compilation will be skipped because it is only supported for executable projects.</value>
-    <comment>{StrBegin="NETSDK1108: "}</comment>
-  </data>
   <data name="RuntimeListNotFound" xml:space="preserve">
     <value>NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET Core team here: https://aka.ms/dotnet-sdk-issue.</value>
     <comment>{StrBegin="NETSDK1109: "}</comment>

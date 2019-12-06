@@ -82,11 +82,6 @@
         <target state="translated">NETSDK1001: Geben Sie mindestens ein mögliches Zielframework an.</target>
         <note>{StrBegin="NETSDK1001: "}</note>
       </trans-unit>
-      <trans-unit id="CannotCreateReadyToRunImagesForLibProjects">
-        <source>NETSDK1108: ReadyToRun compilation will be skipped because it is only supported for executable projects.</source>
-        <target state="translated">NETSDK1108: Die ReadyToRun-Kompilierung wird übersprungen, weil sie nur für ausführbare Projekte unterstützt wird.</target>
-        <note>{StrBegin="NETSDK1108: "}</note>
-      </trans-unit>
       <trans-unit id="CannotEmbedClsidMapIntoComhost">
         <source>NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
         <target state="translated">NETSDK1092: CLSIDMap kann auf dem COM-Host nicht eingebettet werden, weil für das Hinzufügen von Ressourcen eine Ausführung des Builds unter Windows erforderlich ist (Nano Server ausgeschlossen).</target>
