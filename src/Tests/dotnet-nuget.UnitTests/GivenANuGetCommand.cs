@@ -5,17 +5,22 @@ using System.Collections.Generic;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.Tools.NuGet;
 using Moq;
 using NuGet.Frameworks;
 using Xunit;
+using Microsoft.NET.TestFramework;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Tools.Run.Tests
 {
-    public class GivenANuGetCommand : TestBase
+    public class GivenANuGetCommand : SdkTest
     {
+        public GivenANuGetCommand(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Theory]
         [InlineData(new[] { "push", "foo.1.0.0.nupkg" }, 0)]
         [InlineData(new[] { "push", "foo.1.0.0.nupkg", "-k", "12345678-1234-1234-1234-123456789012" }, 0)]
