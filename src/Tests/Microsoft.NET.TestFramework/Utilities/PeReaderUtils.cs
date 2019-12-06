@@ -7,7 +7,7 @@ using System.Linq;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 
-namespace Microsoft.DotNet.Tools.Test.Utilities
+namespace Microsoft.NET.TestFramework.Utilities
 {
     public static class PeReaderUtils
     {

@@ -63,6 +63,23 @@ namespace Microsoft.NET.TestFramework.Assertions
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
 
+        public AndConstraint<DirectoryInfoAssertions> HaveFilesMatching(
+            string expectedFilesSearchPattern,
+            SearchOption searchOption,
+            string because = "",
+            params object[] reasonArgs)
+        {
+            var matchingFileExists = _dirInfo.EnumerateFiles(expectedFilesSearchPattern, searchOption).Any();
+
+            Execute.Assertion
+                .ForCondition(matchingFileExists == true)
+                .BecauseOf(because, reasonArgs)
+                .FailWith("Expected directory {0} to contain files matching {1}, but no matching file exists.",
+                    _dirInfo.FullName, expectedFilesSearchPattern);
+
+            return new AndConstraint<DirectoryInfoAssertions>(this);
+        }
+
         public AndConstraint<DirectoryInfoAssertions> NotHaveFiles(IEnumerable<string> expectedFiles)
         {
             foreach (var expectedFile in expectedFiles)
