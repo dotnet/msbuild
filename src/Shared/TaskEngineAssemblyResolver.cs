@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Globalization;
 
-#if !FEATURE_ASSEMBLY_LOADFROM
+#if FEATURE_ASSEMBLYLOADCONTEXT
 using System.Runtime.Loader;
 #endif
 using Microsoft.Build.Shared;
