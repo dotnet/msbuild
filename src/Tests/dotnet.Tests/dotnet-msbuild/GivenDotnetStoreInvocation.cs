@@ -6,7 +6,6 @@ using Microsoft.DotNet.Tools.Store;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Microsoft.DotNet.Tools.Tests.Utilities;
 using Xunit;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests

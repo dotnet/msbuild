@@ -4,7 +4,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.DotNet.Tools.Tests.Utilities
+namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     public static class TestPathUtilities
     {

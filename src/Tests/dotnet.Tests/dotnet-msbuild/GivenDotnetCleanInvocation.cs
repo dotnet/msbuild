@@ -7,7 +7,6 @@ using Xunit;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using Microsoft.DotNet.Tools.Tests.Utilities;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {

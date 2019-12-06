@@ -7,7 +7,6 @@ using FluentAssertions;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools.Publish;
-using Microsoft.DotNet.Tools.Tests.Utilities;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -8,7 +8,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Microsoft.DotNet.Tools.Tests.Utilities;
+
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {

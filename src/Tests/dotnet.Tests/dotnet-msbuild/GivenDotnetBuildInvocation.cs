@@ -5,7 +5,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Tools.Build;
 using FluentAssertions;
-using Microsoft.DotNet.Tools.Tests.Utilities;
 using Xunit;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests

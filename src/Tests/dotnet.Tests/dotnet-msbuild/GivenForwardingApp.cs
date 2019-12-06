@@ -7,6 +7,7 @@ using System.Text;
 using Xunit;
 using FluentAssertions;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -19,7 +20,7 @@ namespace Microsoft.DotNet.Cli
                 .GetProcessStartInfo().FileName.Should().Be("dotnet.exe");
         }
 
-        [NonWindowsOnlyFact]
+        [UnixOnlyFact]
         public void DotnetIsExecuted()
         {
             new ForwardingApp("<apppath>", new string[0])

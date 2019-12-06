@@ -2,51 +2,49 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.List.Package.Tests
 {
-    public class GivenDotnetListPackage : TestBase
+    public class GivenDotnetListPackage : SdkTest
     {
-        private readonly ITestOutputHelper _output;
-
-        public GivenDotnetListPackage(ITestOutputHelper output)
+        public GivenDotnetListPackage(ITestOutputHelper output) : base(output)
         {
-            _output = output;
         }
 
         [Fact]
         public void RequestedAndResolvedVersionsMatch()
         {
             var testAsset = "TestAppSimple";
-            var projectDirectory = TestAssets
-                .Get(testAsset)
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset(testAsset)
+                .WithSource()
+                .Path;
 
             var packageName = "Newtonsoft.Json";
             var packageVersion = "9.0.1";
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"add package {packageName} --version {packageVersion}");
+                .Execute("add", "package", packageName, "--version", packageVersion);
             cmd.Should().Pass();
 
-            new RestoreCommand()
-                .WithWorkingDirectory(projectDirectory)
+            new RestoreCommand(Log, projectDirectory)
                 .Execute()
                 .Should()
                 .Pass()
                 .And.NotHaveStdErr();
 
-            new ListPackageCommand()
-                .WithPath(projectDirectory)
+            new ListPackageCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
                 .Execute()
                 .Should()
                 .Pass()
@@ -58,23 +56,20 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         public void ItListsAutoReferencedPackages()
         {
             var testAsset = "TestAppSimple";
-            var projectDirectory = TestAssets
-                .Get(testAsset)
-                .CreateInstance()
-                .WithSourceFiles()
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset(testAsset)
+                .WithSource()
                 .WithProjectChanges(ChangeTargetFrameworkTo2_1)
-                .Root
-                .FullName;
+                .Path;
 
-            new RestoreCommand()
-                .WithWorkingDirectory(projectDirectory)
+            new RestoreCommand(Log, projectDirectory)
                 .Execute()
                 .Should()
                 .Pass()
                 .And.NotHaveStdErr();
 
-            new ListPackageCommand()
-                .WithPath(projectDirectory)
+            new ListPackageCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
                 .Execute()
                 .Should()
                 .Pass()
@@ -94,22 +89,19 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         public void ItRunOnSolution()
         {
             var sln = "TestAppWithSlnAndSolutionFolders";
-            var projectDirectory = TestAssets
-                .Get(sln)
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset(sln)
+                .WithSource()
+                .Path;
 
-            new RestoreCommand()
-                .WithWorkingDirectory(projectDirectory)
+            new RestoreCommand(Log, Path.Combine(projectDirectory, "App.sln"))
                 .Execute()
                 .Should()
                 .Pass()
                 .And.NotHaveStdErr();
 
-            new ListPackageCommand()
-                .WithPath(projectDirectory)
+            new ListPackageCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
                 .Execute()
                 .Should()
                 .Pass()
@@ -121,15 +113,13 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         public void AssetsPathExistsButNotRestored()
         {
             var testAsset = "NewtonSoftDependentProject";
-            var projectDirectory = TestAssets
-                .Get(testAsset)
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset(testAsset)
+                .WithSource()
+                .Path;
 
-            new ListPackageCommand()
-                .WithPath(projectDirectory)
+            new ListPackageCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
                 .Execute()
                 .Should()
                 .Pass()
@@ -140,30 +130,27 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         public void ItListsTransitivePackage()
         {
             var testAsset = "NewtonSoftDependentProject";
-            var projectDirectory = TestAssets
-                .Get(testAsset)
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset(testAsset)
+                .WithSource()
+                .Path;
 
-            new RestoreCommand()
-                .WithWorkingDirectory(projectDirectory)
+            new RestoreCommand(Log, projectDirectory)
                 .Execute()
                 .Should()
                 .Pass()
                 .And.NotHaveStdErr();
 
-            new ListPackageCommand()
-                .WithPath(projectDirectory)
+            new ListPackageCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
                 .Execute()
                 .Should()
                 .Pass()
                 .And.NotHaveStdErr()
                 .And.NotHaveStdOutContaining("System.IO.FileSystem");
 
-            new ListPackageCommand()
-                .WithPath(projectDirectory)
+            new ListPackageCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
                 .Execute(args:"--include-transitive")
                 .Should()
                 .Pass()
@@ -181,15 +168,12 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         public void ItListsValidFrameworks(string args, string shouldInclude, string shouldntInclude)
         {
             var testAsset = "MSBuildAppWithMultipleFrameworks";
-            var projectDirectory = TestAssets
-                .Get(testAsset)
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset(testAsset)
+                .WithSource()
+                .Path;
 
-            new RestoreCommand()
-                .WithWorkingDirectory(projectDirectory)
+            new RestoreCommand(Log, projectDirectory)
                 .Execute()
                 .Should()
                 .Pass()
@@ -197,9 +181,9 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
 
             if (shouldntInclude == null)
             {
-                new ListPackageCommand()
-                    .WithPath(projectDirectory)
-                    .Execute(args)
+                new ListPackageCommand(Log)
+                    .WithWorkingDirectory(projectDirectory)
+                    .Execute(args.Split(' ', options: StringSplitOptions.RemoveEmptyEntries))
                     .Should()
                     .Pass()
                     .And.NotHaveStdErr()
@@ -207,9 +191,9 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
             }
             else
             {
-                new ListPackageCommand()
-                    .WithPath(projectDirectory)
-                    .Execute(args)
+                new ListPackageCommand(Log)
+                    .WithWorkingDirectory(projectDirectory)
+                    .Execute(args.Split(' ', options: StringSplitOptions.RemoveEmptyEntries))
                     .Should()
                     .Pass()
                     .And.NotHaveStdErr()
@@ -223,22 +207,19 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         public void ItDoesNotAcceptInvalidFramework()
         {
             var testAsset = "MSBuildAppWithMultipleFrameworks";
-            var projectDirectory = TestAssets
-                .Get(testAsset)
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset(testAsset)
+                .WithSource()
+                .Path;
 
-            new RestoreCommand()
-                .WithWorkingDirectory(projectDirectory)
+            new RestoreCommand(Log, projectDirectory)
                 .Execute()
                 .Should()
                 .Pass();
 
-            new ListPackageCommand()
-                .WithPath(projectDirectory)
-                .Execute("--framework invalid")
+            new ListPackageCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
+                .Execute("--framework", "invalid")
                 .Should()
                 .Fail();
         }
@@ -247,22 +228,19 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         public void ItListsFSharpProject()
         {
             var testAsset = "FSharpTestAppSimple";
-            var projectDirectory = TestAssets
-                .Get(testAsset)
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset(testAsset)
+                .WithSource()
+                .Path;
 
-            new RestoreCommand()
-                .WithWorkingDirectory(projectDirectory)
+            new RestoreCommand(Log, projectDirectory)
                 .Execute()
                 .Should()
                 .Pass()
                 .And.NotHaveStdErr();
 
-            new ListPackageCommand()
-                .WithPath(projectDirectory)
+            new ListPackageCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
                 .Execute()
                 .Should()
                 .Pass()

@@ -6,9 +6,8 @@ using System.IO;
 using Microsoft.DotNet.Tools.MSBuild;
 using FluentAssertions;
 using Xunit;
-using static Microsoft.DotNet.Tools.Test.Utilities.DirectoryInfoExtensions;
-using WindowsOnlyFactAttribute = Microsoft.DotNet.Tools.Test.Utilities.WindowsOnlyFactAttribute;
-using NonWindowsOnlyFactAttribute = Microsoft.DotNet.Tools.Test.Utilities.NonWindowsOnlyFactAttribute;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -22,7 +21,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 .GetProcessStartInfo().FileName.Should().Be("dotnet.exe");
         }
 
-        [NonWindowsOnlyFact]
+        [UnixOnlyFact]
         public void DotnetIsExecuted()
         {
             var msbuildPath = "<msbuildpath>";

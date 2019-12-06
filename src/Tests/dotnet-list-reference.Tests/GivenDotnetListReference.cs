@@ -5,14 +5,18 @@ using FluentAssertions;
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Msbuild.Tests.Utilities;
 using System;
 using System.IO;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.List.Reference.Tests
 {
-    public class GivenDotnetListReference : TestBase
+    public class GivenDotnetListReference : SdkTest
     {
         private const string ListReferenceCommandHelpText = @"Usage: dotnet list <PROJECT | SOLUTION> reference [options]
 
@@ -47,12 +51,16 @@ Commands:
         const string FrameworkNetCoreApp10Arg = "-f netcoreapp1.0";
         const string ConditionFrameworkNetCoreApp10 = "== 'netcoreapp1.0'";
 
+        public GivenDotnetListReference(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Theory]
         [InlineData("--help")]
         [InlineData("-h")]
         public void WhenHelpOptionIsPassedItPrintsUsage(string helpArg)
         {
-            var cmd = new ListReferenceCommand().Execute(helpArg);
+            var cmd = new ListReferenceCommand(Log).Execute(helpArg);
             cmd.Should().Pass();
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListProjectReferenceCommandHelpText);
         }
@@ -62,8 +70,8 @@ Commands:
         [InlineData("unknownCommandName")]
         public void WhenNoCommandIsPassedItPrintsError(string commandName)
         {
-            var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput($"list {commandName}");
+            var cmd = new DotnetCommand(Log)
+                .Execute("list", commandName);
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(CommonLocalizableStrings.RequiredCommandNotPassed);
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListCommandHelpText);
@@ -72,8 +80,7 @@ Commands:
         [Fact]
         public void WhenTooManyArgumentsArePassedItPrintsError()
         {
-            var cmd = new ListReferenceCommand()
-                    .WithProject("one two three")
+            var cmd = new DotnetCommand(Log, "list one two three reference".Split())
                     .Execute("proj.csproj");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().BeVisuallyEquivalentTo($@"{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "two")}
@@ -87,10 +94,10 @@ Commands:
         {
             var setup = Setup();
 
-            var cmd = new ListReferenceCommand()
-                    .WithWorkingDirectory(setup.TestRoot)
+            var cmd = new ListReferenceCommand(Log)
                     .WithProject(projName)
-                    .Execute($"\"{setup.ValidRefCsprojPath}\"");
+                    .WithWorkingDirectory(setup.TestRoot)
+                    .Execute(setup.ValidRefCsprojPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindProjectOrDirectory, projName));
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListReferenceCommandHelpText);
@@ -102,10 +109,10 @@ Commands:
             string projName = "Broken/Broken.csproj";
             var setup = Setup();
 
-            var cmd = new ListReferenceCommand()
-                    .WithWorkingDirectory(setup.TestRoot)
+            var cmd = new ListReferenceCommand(Log)
                     .WithProject(projName)
-                    .Execute($"\"{setup.ValidRefCsprojPath}\"");
+                    .WithWorkingDirectory(setup.TestRoot)                    
+                    .Execute(setup.ValidRefCsprojPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.ProjectIsInvalid, "Broken/Broken.csproj"));
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListReferenceCommandHelpText);
@@ -117,9 +124,9 @@ Commands:
             var setup = Setup();
 
             var workingDir = Path.Combine(setup.TestRoot, "MoreThanOne");
-            var cmd = new ListReferenceCommand()
+            var cmd = new ListReferenceCommand(Log)
                     .WithWorkingDirectory(workingDir)
-                    .Execute($"\"{setup.ValidRefCsprojRelToOtherProjPath}\"");
+                    .Execute(setup.ValidRefCsprojRelToOtherProjPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneProjectInDirectory, workingDir + Path.DirectorySeparatorChar));
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListReferenceCommandHelpText);
@@ -130,9 +137,9 @@ Commands:
         {
             var setup = Setup();
 
-            var cmd = new ListReferenceCommand()
+            var cmd = new ListReferenceCommand(Log)
                     .WithWorkingDirectory(setup.TestRoot)
-                    .Execute($"\"{setup.ValidRefCsprojPath}\"");
+                    .Execute(setup.ValidRefCsprojPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, setup.TestRoot + Path.DirectorySeparatorChar));
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListReferenceCommandHelpText);
@@ -141,9 +148,9 @@ Commands:
         [Fact]
         public void WhenNoProjectReferencesArePresentInTheProjectItPrintsError()
         {
-            var lib = NewLib();
+            var lib = NewLib(_testAssetsManager.CreateTestDirectory().Path);
 
-            var cmd = new ListReferenceCommand()
+            var cmd = new ListReferenceCommand(Log)
                 .WithProject(lib.CsProjPath)
                 .Execute();
             cmd.Should().Pass();
@@ -158,11 +165,13 @@ Commands:
 {new string('-', OutputText.Length)}
 ..\ref\ref.csproj";
 
-            var lib = NewLib("lib");
-            string ref1 = NewLib("ref").CsProjPath;
+            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+
+            var lib = NewLib(testDirectory, "lib");
+            string ref1 = NewLib(testDirectory, "ref").CsProjPath;
             AddValidRef(ref1, lib);
 
-            var cmd = new ListReferenceCommand()
+            var cmd = new ListReferenceCommand(Log)
                 .WithProject(lib.CsProjPath)
                 .Execute();
             cmd.Should().Pass();
@@ -179,16 +188,18 @@ Commands:
 ..\ref2\ref2.csproj
 ..\ref3\ref3.csproj";
 
-            var lib = NewLib("lib");
-            string ref1 = NewLib("ref1").CsProjPath;
-            string ref2 = NewLib("ref2").CsProjPath;
-            string ref3 = NewLib("ref3").CsProjPath;
+            var testDir = _testAssetsManager.CreateTestDirectory().Path;
+
+            var lib = NewLib(testDir, "lib");
+            string ref1 = NewLib(testDir, "ref1").CsProjPath;
+            string ref2 = NewLib(testDir, "ref2").CsProjPath;
+            string ref3 = NewLib(testDir, "ref3").CsProjPath;
 
             AddValidRef(ref1, lib);
             AddValidRef(ref2, lib);
             AddValidRef(ref3, lib);
 
-            var cmd = new ListReferenceCommand()
+            var cmd = new ListReferenceCommand(Log)
                 .WithProject(lib.CsProjPath)
                 .Execute();
             cmd.Should().Pass();
@@ -198,28 +209,22 @@ Commands:
         private TestSetup Setup([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(Setup), string identifier = "")
         {
             return new TestSetup(
-                TestAssets.Get(TestSetup.TestGroup, TestSetup.ProjectName)
-                    .CreateInstance(callingMethod: callingMethod, identifier: identifier)
-                    .WithSourceFiles()
-                    .Root
-                    .FullName);
+                _testAssetsManager.CopyTestAsset(TestSetup.ProjectName, callingMethod: callingMethod, identifier: identifier, testAssetSubdirectory: TestSetup.TestGroup)
+                    .WithSource()
+                    .Path);
         }
 
-        private ProjDir NewDir(string testProjectName = "temp", [System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(NewDir), string identifier = "")
+        private ProjDir NewLib(string basePath, string testProjectName = "temp")
         {
-            return new ProjDir(TestAssets.CreateTestDirectory(testProjectName: testProjectName, callingMethod: callingMethod, identifier: identifier).FullName);
-        }
+            var dir = new ProjDir(Path.Combine(basePath, testProjectName));
 
-        private ProjDir NewLib(string testProjectName = "temp", [System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(NewDir), string identifier = "")
-        {
-            var dir = NewDir(testProjectName: testProjectName, callingMethod: callingMethod, identifier: identifier);
+            Directory.CreateDirectory(dir.Path);
 
             try
             {
-                string newArgs = $"classlib -o \"{dir.Path}\" --debug:ephemeral-hive --no-restore";
-                new NewCommandShim()
+                new DotnetCommand(Log, "new", "classlib", "-o", dir.Path, "--debug:ephemeral-hive", "--no-restore")
                     .WithWorkingDirectory(dir.Path)
-                    .ExecuteWithCapturedOutput(newArgs)
+                    .Execute()
                 .Should().Pass();
             }
             catch (System.ComponentModel.Win32Exception e)
@@ -232,9 +237,8 @@ Commands:
 
         private void AddValidRef(string path, ProjDir proj)
         {
-            new AddReferenceCommand()
-                .WithProject(proj.CsProjPath)
-                .Execute($"\"{path}\"")
+            new DotnetCommand(Log, "add", proj.CsProjPath, "reference")
+                .Execute(path)
                 .Should().Pass();
         }
     }
