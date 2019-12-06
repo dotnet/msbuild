@@ -350,27 +350,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.True(TranslationHelpers.CompareCollections(result["omega"].Items, deserializedResult["omega"].Items, TaskItemComparer.Instance));
         }
 
-        [Fact]
-        public void TaskReturnsFailureButDoesNotLogErrorShouldCauseBuildFailure()
-        {
-
-            using (TestEnvironment env = TestEnvironment.Create())
-            {
-                var proj1 = env.CreateFile("project1.csproj", @"
-                <Project>
-                    <UsingTask TaskName = ""ReturnFailureWithoutLoggingErrorTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
-                    <Target Name='Build'>
-                        <ReturnFailureWithoutLoggingErrorTask/>
-                    </Target>
-                </Project>");
-                MockLogger logger = new MockLogger(_output);
-                BuildResult result = Helpers.BuildProjectFileUsingBuildManager(proj1.Path, logger);
-
-                result.OverallResult.ShouldBe(BuildResultCode.Failure);
-                logger.AssertLogContains("MSB4132");
-            }
-        }
-
         private BuildRequest CreateNewBuildRequest(int configurationId, string[] targets)
         {
             return new BuildRequest(1 /* submissionId */, _nodeRequestId++, configurationId, targets, null, BuildEventContext.Invalid, null);

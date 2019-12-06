@@ -262,5 +262,25 @@ namespace Microsoft.Build.Engine.UnitTests
                 </Target>
             </Project>";
         }
+
+        [Fact]
+        public void TaskReturnsFailureButDoesNotLogErrorShouldCauseBuildFailure()
+        {
+
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
+                <Project>
+                    <UsingTask TaskName = ""ReturnFailureWithoutLoggingErrorTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <Target Name='Build'>
+                        <ReturnFailureWithoutLoggingErrorTask/>
+                    </Target>
+                </Project>");
+
+                MockLogger logger = proj.BuildProjectExpectFailure();
+
+                logger.AssertLogContains("MSB4132");
+            }
+        }
     }
 }
