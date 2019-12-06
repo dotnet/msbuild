@@ -99,14 +99,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     SelfContained was not an option in .NET Core SDK 1.0. 
     Default SelfContained based on the RuntimeIdentifier, so projects don't have to explicitly set SelfContained.
     This avoids a breaking change from 1.0 behavior.
+
+    Due to https://github.com/dotnet/sdk/issues/4012 we decided to disable UseAppHost to be the default on mac
     -->
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(HasRuntimeOutput)' == 'true'">
     <SelfContained Condition="'$(SelfContained)' == '' and '$(RuntimeIdentifier)' != ''">true</SelfContained>
     <SelfContained Condition="'$(SelfContained)' == ''">false</SelfContained>
+    <_OnOsx>$(NETCoreSdkRuntimeIdentifier.StartsWith('osx'))</_OnOsx>
     <UseAppHost Condition="'$(UseAppHost)' == '' and
                            ('$(SelfContained)' == 'true' or
                             ('$(RuntimeIdentifier)' != '' and '$(_TargetFrameworkVersionWithoutV)' >= '2.1') or
-                            '$(_TargetFrameworkVersionWithoutV)' >= '3.0')">true</UseAppHost>
+                            ('$(_TargetFrameworkVersionWithoutV)' >= '3.0' and $(_OnOsx) != 'true'))">true</UseAppHost>
     <UseAppHost Condition="'$(UseAppHost)' == ''">false</UseAppHost>
   </PropertyGroup>
 

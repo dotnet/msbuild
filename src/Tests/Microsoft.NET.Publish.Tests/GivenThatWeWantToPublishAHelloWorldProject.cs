@@ -15,6 +15,7 @@ using System.Runtime.CompilerServices;
 using System;
 using Microsoft.Extensions.DependencyModel;
 using Xunit.Abstractions;
+using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
 
 namespace Microsoft.NET.Publish.Tests
 {
