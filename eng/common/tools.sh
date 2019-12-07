@@ -220,6 +220,8 @@ function InstallDotNet {
           Write-PipelineTelemetryError -category 'InitializeToolset' "Failed to install dotnet SDK from custom location '$runtimeSourceFeed' (exit code '$exit_code')."
           ExitWithExitCode $exit_code
         }
+      else
+        ExitWithExitCode $exit_code
       fi
     fi
   }
