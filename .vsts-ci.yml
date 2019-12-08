@@ -1,6 +1,7 @@
 trigger:
 - master
 - release/*
+- internal/release/*
 
 variables:
   - name: teamName
