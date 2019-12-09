@@ -8,41 +8,46 @@ using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.PlatformAbstractions;
-using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using LocalizableStrings = Microsoft.DotNet.Tools.Publish.LocalizableStrings;
 using System.Runtime.CompilerServices;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.Publish.Tests
 {
-    public class GivenDotnetPublishPublishesProjects : TestBase
+    public class GivenDotnetPublishPublishesProjects : SdkTest
     {
+        public GivenDotnetPublishPublishesProjects(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void ItPublishesARunnablePortableApp()
         {
             var testAppName = "MSBuildTestApp";
-            var testInstance = TestAssets.Get(testAppName)
-                            .CreateInstance()
-                            .WithSourceFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                            .WithSource();
 
-            var testProjectDirectory = testInstance.Root.FullName;
+            var testProjectDirectory = testInstance.Path;
 
-            new RestoreCommand()
-                .WithWorkingDirectory(testProjectDirectory)
+            new RestoreCommand(Log, testProjectDirectory)
                 .Execute()
                 .Should().Pass();
 
-            new PublishCommand()
+            new DotnetPublishCommand(Log)
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--framework netcoreapp3.0")
+                .Execute("--framework", "netcoreapp3.0")
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
             var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp3.0", "publish", $"{testAppName}.dll");
 
-            new DotnetCommand()
-                .ExecuteWithCapturedOutput(outputDll)
+            new DotnetCommand(Log)
+                .Execute(outputDll)
                 .Should().Pass()
                          .And.HaveStdOutContaining("Hello World");
         }
@@ -51,32 +56,30 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         public void ItImplicitlyRestoresAProjectWhenPublishing()
         {
             var testAppName = "MSBuildTestApp";
-            var testInstance = TestAssets.Get(testAppName)
-                            .CreateInstance()
-                            .WithSourceFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                            .WithSource();
 
-            var testProjectDirectory = testInstance.Root.FullName;
+            var testProjectDirectory = testInstance.Path;
 
-            new PublishCommand()
+            new DotnetPublishCommand(Log)
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--framework netcoreapp3.0")
+                .Execute("--framework", "netcoreapp3.0")
                 .Should().Pass();
         }
 
         [Fact]
         public void ItCanPublishAMultiTFMProjectWithImplicitRestore()
         {
-            var testInstance = TestAssets.Get(
-                    TestAssetKinds.DesktopTestProjects,
-                    "NETFrameworkReferenceNETStandard20")
-                .CreateInstance()
-                .WithSourceFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset(
+                    "NETFrameworkReferenceNETStandard20",
+                    testAssetSubdirectory: TestAssetSubdirectories.DesktopTestProjects)
+                .WithSource();
 
-            string projectDirectory = Path.Combine(testInstance.Root.FullName, "MultiTFMTestApp");
+            string projectDirectory = Path.Combine(testInstance.Path, "MultiTFMTestApp");
 
-            new PublishCommand()
+            new DotnetPublishCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .Execute("--framework netcoreapp3.0")
+                .Execute("--framework", "netcoreapp3.0")
                 .Should().Pass();
         }
 
@@ -84,15 +87,14 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         public void ItDoesNotImplicitlyRestoreAProjectWhenPublishingWithTheNoRestoreOption()
         {
             var testAppName = "MSBuildTestApp";
-            var testInstance = TestAssets.Get(testAppName)
-                            .CreateInstance()
-                            .WithSourceFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                            .WithSource();
 
-            var testProjectDirectory = testInstance.Root.FullName;
+            var testProjectDirectory = testInstance.Path;
 
-            new PublishCommand()
+            new DotnetPublishCommand(Log)
                 .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput("--framework netcoreapp3.0 --no-restore")
+                .Execute("--framework", "netcoreapp3.0", "--no-restore")
                 .Should().Fail()
                 .And.HaveStdOutContaining("project.assets.json");
         }
@@ -109,8 +111,8 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var outputProgram = Path.Combine(outputDirectory.FullName, $"{testAppName}{Constants.ExeSuffix}");
 
-            new TestCommand(outputProgram)
-                .ExecuteWithCapturedOutput()
+            new RunExeCommand(Log, outputProgram)
+                .Execute()
                 .Should().Pass()
                      .And.HaveStdOutContaining("Hello World");
         }
@@ -134,10 +136,8 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var outputProgram = Path.Combine(outputDirectory.FullName, $"{testAppName}{Constants.ExeSuffix}");
 
-            var command = new TestCommand(outputProgram);
-            command.Environment[Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)"] =
-                Path.GetDirectoryName(RepoDirectoriesProvider.DotnetUnderTest);
-            command.ExecuteWithCapturedOutput()
+            var command = new RunExeCommand(Log, outputProgram);
+            command.Execute()
                 .Should()
                 .Pass()
                 .And
@@ -161,8 +161,8 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 $"{testAppName}.runtimeconfig.json",
             });
 
-            new DotnetCommand()
-                .ExecuteWithCapturedOutput(Path.Combine(outputDirectory.FullName, $"{testAppName}.dll"))
+            new DotnetCommand(Log)
+                .Execute(Path.Combine(outputDirectory.FullName, $"{testAppName}.dll"))
                 .Should().Pass()
                      .And.HaveStdOutContaining("Hello World");
         }
@@ -175,39 +175,34 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var testAppName = "MSBuildTestApp";
             var rid = EnvironmentInfo.GetCompatibleRid();
 
-            var testInstance = TestAssets.Get(testAppName)
-                .CreateInstance($"PublishApp_{rid ?? "none"}_{args ?? "none"}")
-                .WithSourceFiles()
-                .WithRestoreFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName, identifier: args)
+                .WithSource();
 
-            var testProjectDirectory = testInstance.Root;
+            var testProjectDirectory = testInstance.Path;
 
-            new PublishCommand()
+            new DotnetPublishCommand(Log)
                 .WithRuntime(rid)
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute(args)
+                .Execute(args.Split())
                 .Should().Fail()
                     .And.HaveStdErrContaining(LocalizableStrings.SelfContainAndNoSelfContainedConflict);
         }
 
         private DirectoryInfo PublishApp(string testAppName, string rid, string args = null, [CallerMemberName] string callingMethod = "")
         {
-            var testInstance = TestAssets.Get(testAppName)
-                .CreateInstance(callingMethod: callingMethod, identifier: $"{rid ?? "none"}_{args ?? "none"}")
-                .WithSourceFiles()
-                .WithRestoreFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName, callingMethod: callingMethod, identifier: $"{rid ?? "none"}_{args ?? "none"}")
+                .WithSource();
 
-            var testProjectDirectory = testInstance.Root;
+            var testProjectDirectory = testInstance.Path;
 
-            new PublishCommand()
+            new DotnetPublishCommand(Log)
                 .WithRuntime(rid)
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute(args ?? "")
+                .Execute(args?.Split() ?? Array.Empty<string>())
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
-            return testProjectDirectory
-                    .GetDirectory("bin", configuration, "netcoreapp3.0", rid ?? "", "publish");
+            return new DirectoryInfo(Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp3.0", rid ?? "", "publish"));
         }
 
         [Fact]
@@ -216,30 +211,23 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             string dir = "pkgs";
             string args = $"--packages {dir}";
 
-            var testInstance = TestAssets.Get("TestAppSimple")
-                .CreateInstance()
-                .WithSourceFiles();
-            var rootDir = testInstance.Root;
+            var testInstance = _testAssetsManager.CopyTestAsset("TestAppSimple")
+                .WithSource()
+                .Restore(Log);
 
-            new RestoreCommand()
-                .WithWorkingDirectory(rootDir)
-                .Execute(args)
-                .Should()
-                .Pass();
+            var rootDir = testInstance.Path;
 
-            new PublishCommand()
+            new DotnetPublishCommand(Log)
                 .WithWorkingDirectory(rootDir)
-                .ExecuteWithCapturedOutput("--no-restore")
+                .Execute("--no-restore")
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            var outputProgram = rootDir
-                .GetDirectory("bin", configuration, "netcoreapp3.0", "publish", $"{rootDir.Name}.dll")
-                .FullName;
+            var outputProgram = Path.Combine(rootDir, "bin", configuration, "netcoreapp3.0", "publish", $"TestAppSimple.dll");
 
-            new TestCommand(outputProgram)
-                .ExecuteWithCapturedOutput()
+            new DotnetCommand(Log, outputProgram)
+                .Execute()
                 .Should().Pass()
                      .And.HaveStdOutContaining("Hello World");
         }
@@ -247,16 +235,15 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         [Fact]
         public void ItFailsToPublishWithNoBuildIfNotPreviouslyBuilt()
         {
-            var testInstance = TestAssets.Get("TestAppSimple")
-                .CreateInstance()
-                .WithSourceFiles()
-                .WithRestoreFiles(); // note implicit restore here
+            var testInstance = _testAssetsManager.CopyTestAsset("TestAppSimple")
+                .WithSource()
+                .Restore(Log);
 
-            var rootPath = testInstance.Root;
+            var rootPath = testInstance.Path;
 
-            new PublishCommand()
+            new DotnetPublishCommand(Log)
                 .WithWorkingDirectory(rootPath)
-                .ExecuteWithCapturedOutput("--no-build")
+                .Execute("--no-build")
                 .Should()
                 .Fail()
                 .And.HaveStdOutContaining("MSB3030"); // "Could not copy ___ because it was not found."
@@ -267,35 +254,31 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         [InlineData(true)]
         public void ItPublishesSuccessfullyWithNoBuildIfPreviouslyBuilt(bool selfContained)
         {
-            var testInstance = TestAssets.Get("TestAppSimple")
-                .CreateInstance(nameof(ItPublishesSuccessfullyWithNoBuildIfPreviouslyBuilt) + selfContained)
-                .WithSourceFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset("TestAppSimple", identifier: selfContained.ToString())
+                .WithSource();
 
-            var rootPath = testInstance.Root;
+            var rootPath = testInstance.Path;
 
             var rid = selfContained ? EnvironmentInfo.GetCompatibleRid() : "";
-            var ridArg = selfContained ? $"-r {rid}" : "";
+            var ridArgs = selfContained ? $"-r {rid}".Split() : Array.Empty<string>();
 
-            new BuildCommand()
-                .WithWorkingDirectory(rootPath)
-                .ExecuteWithCapturedOutput(ridArg)
+            new DotnetBuildCommand(Log, rootPath)
+                .Execute(ridArgs)
                 .Should()
                 .Pass();
 
-            new PublishCommand()
+            new DotnetPublishCommand(Log, "--no-build")
                 .WithWorkingDirectory(rootPath)
-                .ExecuteWithCapturedOutput($"{ridArg} --no-build")
+                .Execute(ridArgs)
                 .Should()
                 .Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            var outputProgram = rootPath
-                .GetDirectory("bin", configuration, "netcoreapp3.0", rid, "publish", $"{rootPath.Name}.dll")
-                .FullName;
+            var outputProgram = Path.Combine(rootPath, "bin", configuration, "netcoreapp3.0", rid, "publish", $"TestAppSimple.dll");
 
-            new TestCommand(outputProgram)
-                .ExecuteWithCapturedOutput()
+            new DotnetCommand(Log, outputProgram)
+                .Execute()
                 .Should()
                 .Pass()
                 .And.HaveStdOutContaining("Hello World");
@@ -304,21 +287,19 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         [Fact]
         public void ItFailsToPublishWithNoBuildIfPreviouslyBuiltWithoutRid()
         {
-            var testInstance = TestAssets.Get("TestAppSimple")
-                .CreateInstance()
-                .WithSourceFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset("TestAppSimple")
+                .WithSource();
 
-            var rootPath = testInstance.Root;
+            var rootPath = testInstance.Path;
 
-            new BuildCommand()
-                .WithWorkingDirectory(rootPath)
-                .ExecuteWithCapturedOutput()
+            new BuildCommand(Log, rootPath)
+                .Execute()
                 .Should()
                 .Pass();
 
-            new PublishCommand()
+            new DotnetPublishCommand(Log)
                 .WithWorkingDirectory(rootPath)
-                .ExecuteWithCapturedOutput("-r win-x64 --no-build")
+                .Execute("-r", "win-x64", "--no-build")
                 .Should()
                 .Fail();
         }
@@ -326,18 +307,16 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         [Fact]
         public void DotnetPublishDoesNotPrintCopyrightInfo()
         {
-            var testInstance = TestAssets.Get("MSBuildTestApp")
-                .CreateInstance()
-                .WithSourceFiles()
-                .WithRestoreFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset("MSBuildTestApp")
+                .WithSource();
 
-            var cmd = new PublishCommand()
-               .WithWorkingDirectory(testInstance.Root)
-               .ExecuteWithCapturedOutput("--nologo");
+            var cmd = new DotnetPublishCommand(Log)
+               .WithWorkingDirectory(testInstance.Path)
+               .Execute("--nologo");
 
             cmd.Should().Pass();
 
-            if (!DotnetUnderTest.IsLocalized())
+            if (!TestContext.IsLocalized())
             {
                 cmd.Should().NotHaveStdOutContaining("Copyright (C) Microsoft Corporation. All rights reserved.");
             }
