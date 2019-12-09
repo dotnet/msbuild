@@ -146,6 +146,17 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             };
 
             RemoveCliGeneratedEnvironmentVariablesFrom(psi);
+            
+            // Set DOTNET_ROOT to ensure sub process find the same host fxr
+            string dotnetDirectoryPath = new RepoDirectoriesProvider().DotnetRoot;
+            if (System.Environment.Is64BitProcess)
+            {
+                psi.Environment.Add("DOTNET_ROOT", dotnetDirectoryPath);
+            }
+            else
+            {
+                psi.Environment.Add("DOTNET_ROOT(x86)", dotnetDirectoryPath);
+            }
 
             AddEnvironmentVariablesTo(psi);
 

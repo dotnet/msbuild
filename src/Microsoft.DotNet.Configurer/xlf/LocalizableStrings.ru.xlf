@@ -27,12 +27,12 @@ Write your first app: https://aka.ms/first-net-core-app
         <note />
       </trans-unit>
       <trans-unit id="FirstTimeMessageWelcome">
-        <source>Welcome to .NET Core 3.0!
+        <source>Welcome to .NET Core {0}!
 ---------------------
-SDK Version: {0}</source>
-        <target state="translated">Добро пожаловать в .NET Core 3.0.
+SDK Version: {1}</source>
+        <target state="translated">Вас приветствует .NET Core {0}!
 ---------------------
-Версия пакета SDK: {0}</target>
+Версия пакета SDK: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="TelemetryMessage">

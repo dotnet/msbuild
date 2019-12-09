@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="translated">要為其進行發行的目標架構。該架構必須在專案檔中指定。</target>
+        <target state="translated">要為其進行發佈的目標架構。該架構必須在專案檔中指定。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoSelfContainedOptionDescription">
@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>The output directory to place the published artifacts in.</source>
-        <target state="translated">放置發行之成品的輸出目錄。</target>
+        <target state="translated">放置發佈之成品的輸出目錄。</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOption">
@@ -44,12 +44,12 @@
       </trans-unit>
       <trans-unit id="ManifestOptionDescription">
         <source>The path to a target manifest file that contains the list of packages to be excluded from the publish step.</source>
-        <target state="translated">目標資訊清單檔案的路徑，其包含要從發行步驟中排除的套件清單。</target>
+        <target state="translated">目標資訊清單檔案的路徑，其包含要從發佈步驟中排除的套件清單。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildOptionDescription">
         <source>Do not build the project before publishing. Implies --no-restore.</source>
-        <target state="translated">請勿在執行之前建置專案。提示：-no-restore。</target>
+        <target state="translated">請勿在發佈之前建置專案。提示：-no-restore。</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
@@ -61,7 +61,7 @@ The default is to publish a framework-dependent application.</source>
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
-        <target state="translated">要為其進行發行的組態。大部分的專案預設為「偵錯」。</target>
+        <target state="translated">要為其進行發佈的組態。大部分的專案預設為「偵錯」。</target>
         <note />
       </trans-unit>
       <trans-unit id="SelfContainAndNoSelfContainedConflict">

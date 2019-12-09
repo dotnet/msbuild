@@ -214,4 +214,7 @@ Outputs a 'Sequence.xml' file in the current directory that captures the order o
   <data name="CmdNoLogo" xml:space="preserve">
     <value>Run test(s), without displaying Microsoft Testplatform banner</value>
   </data>
+  <data name="IgnoredArgumentsMessage" xml:space="preserve">
+    <value>The following arguments have been ignored : "{0}"</value>
+  </data>
 </root>

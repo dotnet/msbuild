@@ -27,12 +27,12 @@ Kullanılabilen komutları görmek için 'dotnet --help' komutunu kullanın veya
         <note />
       </trans-unit>
       <trans-unit id="FirstTimeMessageWelcome">
-        <source>Welcome to .NET Core 3.0!
+        <source>Welcome to .NET Core {0}!
 ---------------------
-SDK Version: {0}</source>
-        <target state="translated">.NET Core 3.0'a Hoş Geldiniz!
+SDK Version: {1}</source>
+        <target state="translated">.NET Core {0} sürümüne hoş geldiniz!
 ---------------------
-SDK Sürümü: {0}</target>
+SDK Sürümü: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="TelemetryMessage">
