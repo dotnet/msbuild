@@ -1,10 +1,10 @@
 @echo off
-set CACHEDMSBUILDDEBUGONSTART=%MSBUILDDEBUGONSTART%
-if defined MSBUILDDEBUGONSTART goto build
-set /p ans=Did you mean to have MSBUILDDEBUGONSTART equal %MSBUILDDEBUGONSTART%? (y/n) 
-if %ans% == y goto build
+setlocal
+if defined MSBUILDDEBUGONSTART_HARD goto build
+if not defined MSBUILDDEBUGONSTART goto build
+if %MSBUILDDEBUGONSTART% == 0 goto build
 set MSBUILDDEBUGONSTART=
+echo To debug the build, define a value for MSBUILDDEBUGONSTART_HARD.
 :build
 powershell -NoLogo -NoProfile -ExecutionPolicy ByPass -Command "& """%~dp0eng\common\build.ps1""" -build -restore %*"
-set MSBUILDDEBUGONSTART=%CACHEDMSBUILDDEBUGONSTART%
 exit /b %ErrorLevel%
