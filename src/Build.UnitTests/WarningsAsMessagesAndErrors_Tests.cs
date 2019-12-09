@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
@@ -11,6 +12,13 @@ namespace Microsoft.Build.Engine.UnitTests
     {
         private const string ExpectedEventMessage = "03767942CDB147B98D0ECDBDE1436DA3";
         private const string ExpectedEventCode = "0BF68998";
+
+        ITestOutputHelper _output;
+
+        public WarningsAsMessagesAndErrorsTests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
 
         [Fact]
         public void TreatAllWarningsAsErrors()
@@ -28,7 +36,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void TreatWarningsAsErrorsWhenBuildingSameProjectMultipleTimes()
         {
-            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            using (TestEnvironment testEnvironment = TestEnvironment.Create(_output))
             {
                 TransientTestProjectWithFiles project2 = testEnvironment.CreateTestProjectWithFiles($@"
                 <Project xmlns=""msbuildnamespace"">
@@ -122,7 +130,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void TreatWarningsAsMessagesWhenBuildingSameProjectMultipleTimes()
         {
-            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            using (TestEnvironment testEnvironment = TestEnvironment.Create(_output))
             {
                 TransientTestProjectWithFiles project2 = testEnvironment.CreateTestProjectWithFiles($@"
                 <Project xmlns=""msbuildnamespace"">
@@ -267,7 +275,7 @@ namespace Microsoft.Build.Engine.UnitTests
         public void TaskReturnsFailureButDoesNotLogErrorShouldCauseBuildFailure()
         {
 
-            using (TestEnvironment env = TestEnvironment.Create())
+            using (TestEnvironment env = TestEnvironment.Create(_output))
             {
                 TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
                 <Project>
