@@ -6,11 +6,15 @@ using System.IO;
 using FluentAssertions;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.Remove.Package.Tests
 {
-    public class GivenDotnetRemovePackage : TestBase
+    public class GivenDotnetRemovePackage : SdkTest
     {
         private const string HelpText = @"Usage: dotnet remove <PROJECT> package [options] <PACKAGE_NAME>
 
@@ -34,12 +38,16 @@ Commands:
   package <PACKAGE_NAME>     Remove a NuGet package reference from the project.
   reference <PROJECT_PATH>   Remove a project-to-project reference from the project.";
 
+        public GivenDotnetRemovePackage(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Theory]
         [InlineData("--help")]
         [InlineData("-h")]
         public void WhenHelpOptionIsPassedItPrintsUsage(string helpArg)
         {
-            var cmd = new DotnetCommand().ExecuteWithCapturedOutput($"remove package {helpArg}");
+            var cmd = new DotnetCommand(Log).Execute($"remove", "package", helpArg);
             cmd.Should().Pass();
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
@@ -49,8 +57,8 @@ Commands:
         [InlineData("unknownCommandName")]
         public void WhenNoCommandIsPassedItPrintsError(string commandName)
         {
-            var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput($"remove {commandName}");
+            var cmd = new DotnetCommand(Log)
+                .Execute("remove", commandName);
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(CommonLocalizableStrings.RequiredCommandNotPassed);
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(RemoveCommandHelpText);
@@ -59,23 +67,20 @@ Commands:
         [Fact]
         public void WhenReferencedPackageIsPassedItGetsRemoved()
         {
-            var projectDirectory = TestAssets
-                .Get("TestAppSimple")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppSimple")
+                .WithSource().Path;
 
             var packageName = "Newtonsoft.Json";
-            var add = new DotnetCommand()
+            var add = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"add package {packageName}");
+                .Execute("add", "package", packageName);
             add.Should().Pass();
           
 
-            var remove = new DotnetCommand()
+            var remove = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"remove package {packageName}");
+                .Execute($"remove", "package", packageName);
 
             remove.Should().Pass();
             remove.StdOut.Should().Contain($"Removing PackageReference for package '{packageName}' from project '{projectDirectory + Path.DirectorySeparatorChar}TestAppSimple.csproj'.");
