@@ -3,7 +3,7 @@
     "dotnet": "3.0.101",
     "runtimes": {
       "dotnet": [
-        "$(MicrosoftNETCoreAppRuntimePackageVersion)"
+        "$(MicrosoftNETCoreAppInternalPackageVersion)"
       ]
     }
   },
