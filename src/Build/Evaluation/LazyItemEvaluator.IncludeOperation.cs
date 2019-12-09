@@ -98,7 +98,10 @@ namespace Microsoft.Build.Evaluation
                         }
 
                         string[] includeSplitFilesEscaped;
-                        MSBuildEventSource.Log.ExpandGlobStart(_rootDirectory, glob, excludePatternsForGlobs);
+                        if (MSBuildEventSource.Log.IsEnabled())
+                        {
+                            MSBuildEventSource.Log.ExpandGlobStart(_rootDirectory, glob, excludePatternsForGlobs.ToList().Aggregate((f, s) => f + ", " + s));
+                        }
                         using (_lazyEvaluator._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
                         {
                             includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
@@ -107,7 +110,10 @@ namespace Microsoft.Build.Evaluation
                                 excludePatternsForGlobs
                             );
                         }
-                        MSBuildEventSource.Log.ExpandGlobStop(_rootDirectory, glob, excludePatternsForGlobs);
+                        if (MSBuildEventSource.Log.IsEnabled())
+                        {
+                            MSBuildEventSource.Log.ExpandGlobStop(_rootDirectory, glob, excludePatternsForGlobs.ToList().Aggregate((f, s) => f + ", " + s));
+                        }
 
                         foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
                         {

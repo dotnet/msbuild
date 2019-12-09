@@ -7,7 +7,7 @@ namespace Microsoft.Build.Eventing
     /// <summary>
     /// This captures information of how various key methods of building with MSBuild ran.
     /// </summary>
-    [EventSource(Name = "Microsoft-VisualStudio-Common")]
+    [EventSource(Name = "Microsoft-Build")]
     internal sealed class MSBuildEventSource : EventSource
     {
         /// <summary>
@@ -64,7 +64,7 @@ namespace Microsoft.Build.Eventing
         /// <param name="projectPath">Filename of the project being built.</param>
         /// <param name="targets">Names of the targets that built.</param>
         [Event(6)]
-        public void BuildProjectStop(string projectPath, string[] targets)
+        public void BuildProjectStop(string projectPath, string targets)
         {
             WriteEvent(6, projectPath, targets);
         }
@@ -228,7 +228,7 @@ namespace Microsoft.Build.Eventing
         /// <param name="glob">Pattern, possibly with wildcard(s) to be expanded.</param>
         /// <param name="excludedPatterns">Patterns not to expand.</param>
         [Event(41)]
-        public void ExpandGlobStart(string rootDirectory, string glob, ISet<string> excludedPatterns)
+        public void ExpandGlobStart(string rootDirectory, string glob, string excludedPatterns)
         {
             WriteEvent(41, rootDirectory, glob, excludedPatterns);
         }
@@ -237,7 +237,7 @@ namespace Microsoft.Build.Eventing
         /// <param name="glob">Pattern, possibly with wildcard(s) to be expanded.</param>
         /// <param name="excludedPatterns">Patterns not to expand.</param>
         [Event(42)]
-        public void ExpandGlobStop(string rootDirectory, string glob, ISet<string> excludedPatterns)
+        public void ExpandGlobStop(string rootDirectory, string glob, string excludedPatterns)
         {
             WriteEvent(42, rootDirectory, glob, excludedPatterns);
         }
