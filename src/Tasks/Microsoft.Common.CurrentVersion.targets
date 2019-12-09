@@ -4472,9 +4472,22 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         SkipNonexistentTargets="true"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
 
-      <Output TaskParameter="TargetOutputs" ItemName="_AllChildProjectItemsWithTargetPath"/>
+      <Output TaskParameter="TargetOutputs" ItemName="_UnfilteredAllChildProjectItemsWithTargetPath"/>
 
     </MSBuild>
+    
+    <!-- Filter out dependency items that could overwrite referencer content -->
+    <CreateItem Include="@(_UnfilteredAllChildProjectItemsWithTargetPath)"  AdditionalMetadata="ParentContent=%(ContentWithTargetPath.Identity)">
+        <Output TaskParameter="Include" ItemName="_FilteredChildProjectItemsWithTargetPath"/>
+    </CreateItem>
+    <ItemGroup>
+      <_ParentChildContentDuplicates Include="@(_FilteredChildProjectItemsWithTargetPath)" Condition="'%(_FilteredChildProjectItemsWithTargetPath.TargetPath)'=='%(ParentContent)'" />
+      <_FilteredChildProjectItemsWithTargetPath Remove="@(_ParentChildContentDuplicates)" />
+      <_FilteredChildProjectItemsWithTargetPath>
+        <ParentContent></ParentContent> <!-- Remove unnecessary metadata -->
+      </_FilteredChildProjectItemsWithTargetPath>
+      <_AllChildProjectItemsWithTargetPath Include="@(_FilteredChildProjectItemsWithTargetPath->Distinct())" />
+    </ItemGroup>
 
     <!-- Target outputs must be full paths because they will be consumed by a different project. -->
     <ItemGroup>
@@ -4484,7 +4497,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Remove items which we will never again use - they just sit around taking up memory otherwise -->
     <ItemGroup>
-      <_AllChildProjectItemsWithTargetPath       Remove="@(_AllChildProjectItemsWithTargetPath)"/>
+      <_AllChildProjectItemsWithTargetPath            Remove="@(_AllChildProjectItemsWithTargetPath)"/>
+      <_UnfilteredAllChildProjectItemsWithTargetPath  Remove="@(_UnfilteredAllChildProjectItemsWithTargetPath)"/>
+      <_FilteredChildProjectItemsWithTargetPath       Remove="@(_FilteredChildProjectItemsWithTargetPath)"/>
+      <_ParentChildContentDuplicates                  Remove="@(_ParentChildContentDuplicates)"/>
     </ItemGroup>
 
     <!-- Copy paste _GetCopyToOutputDirectoryItemsFromThisProject but keep the items that came from other projects via ProjectReference's OutputItemType metadata -->
