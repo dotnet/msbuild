@@ -1064,7 +1064,7 @@
     </comment>
   </data>
   <data name="TaskReturnedFalseButDidNotLogError">
-    <value>MSB4132: Build failed because the "{0}" task returned false but did not log an error.</value>
+    <value>MSB4132: The "{0}" task returned false but did not log an error.</value>
     <comment>{StrBegin="MSB4132: "}</comment>
   </data>
   <data name="LoggerCreationError" UESanitized="true" Visibility="Public">

@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -940,7 +941,9 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                // A task that returned false should have logged an error, otherwise log that as an error
+                // When a task fails it must log an error. If a task fails to do so,
+                // that is logged as an error. MSBuild tasks are an exception because
+                // errors are not logged directly from them, but the tasks spawned by them.
                 if (!isMSBuildTask && taskReturned && !taskResult && !taskLoggingContext.HasLoggedErrors)
                 {
                     taskLoggingContext.LogError(new BuildEventFileInfo(_targetChildInstance.Location),

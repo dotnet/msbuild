@@ -157,8 +157,8 @@
     </note>
       </trans-unit>
       <trans-unit id="TaskReturnedFalseButDidNotLogError">
-        <source>MSB4132: Build failed because the "{0}" task returned false but did not log an error.</source>
-        <target state="new">MSB4132: Build failed because the "{0}" task returned false but did not log an error.</target>
+        <source>MSB4132: The "{0}" task returned false but did not log an error.</source>
+        <target state="new">MSB4132: The "{0}" task returned false but did not log an error.</target>
         <note>{StrBegin="MSB4132: "}</note>
       </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
