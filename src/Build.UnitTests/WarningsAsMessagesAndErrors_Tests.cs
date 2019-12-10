@@ -272,7 +272,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        public void TaskReturnsFailureButDoesNotLogErrorShouldCauseBuildFailure()
+        public void TaskReturnsFailureButDoesNotLogError_ShouldCauseBuildFailure()
         {
 
             using (TestEnvironment env = TestEnvironment.Create(_output))
@@ -282,6 +282,90 @@ namespace Microsoft.Build.Engine.UnitTests
                     <UsingTask TaskName = ""ReturnFailureWithoutLoggingErrorTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
                     <Target Name='Build'>
                         <ReturnFailureWithoutLoggingErrorTask/>
+                    </Target>
+                </Project>");
+
+                MockLogger logger = proj.BuildProjectExpectFailure();
+
+                logger.AssertLogContains("MSB4132");
+            }
+        }
+
+        [Fact]
+        public void TaskReturnsFailureButDoesNotLogError_ContinueOnError_WarnAndContinue()
+        {
+
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
+                <Project>
+                    <UsingTask TaskName = ""ReturnFailureWithoutLoggingErrorTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <Target Name='Build'>
+                        <ReturnFailureWithoutLoggingErrorTask
+                            ContinueOnError=""WarnAndContinue""/>
+                    </Target>
+                </Project>");
+
+                MockLogger logger = proj.BuildProjectExpectSuccess();
+
+                logger.AssertLogContains("MSB4132");
+            }
+        }
+
+        [Fact]
+        public void TaskReturnsFailureButDoesNotLogError_ContinueOnError_True()
+        {
+
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
+                <Project>
+                    <UsingTask TaskName = ""ReturnFailureWithoutLoggingErrorTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <Target Name='Build'>
+                        <ReturnFailureWithoutLoggingErrorTask
+                            ContinueOnError=""true""/>
+                    </Target>
+                </Project>");
+
+                MockLogger logger = proj.BuildProjectExpectSuccess();
+
+                logger.AssertLogContains("MSB4132");
+            }
+        }
+
+        [Fact]
+        public void TaskReturnsFailureButDoesNotLogError_ContinueOnError_ErrorAndStop()
+        {
+
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
+                <Project>
+                    <UsingTask TaskName = ""ReturnFailureWithoutLoggingErrorTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <Target Name='Build'>
+                        <ReturnFailureWithoutLoggingErrorTask
+                            ContinueOnError=""ErrorAndStop""/>
+                    </Target>
+                </Project>");
+
+                MockLogger logger = proj.BuildProjectExpectFailure();
+
+                logger.AssertLogContains("MSB4132");
+            }
+        }
+
+        [Fact]
+        public void TaskReturnsFailureButDoesNotLogError_ContinueOnError_False()
+        {
+
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
+                <Project>
+                    <UsingTask TaskName = ""ReturnFailureWithoutLoggingErrorTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <Target Name='Build'>
+                        <ReturnFailureWithoutLoggingErrorTask
+                            ContinueOnError=""false""/>
                     </Target>
                 </Project>");
 
