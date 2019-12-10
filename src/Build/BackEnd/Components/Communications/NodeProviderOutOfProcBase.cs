@@ -110,7 +110,7 @@ namespace Microsoft.Build.BackEnd
             // INodePacketFactory
             INodePacketFactory factory = new NodePacketFactory();
 
-            List<Process> nodeProcesses = GetPossibleRunningNodes().Item2;
+            List<Process> nodeProcesses = GetPossibleRunningNodes().nodeProcesses;
 
             // Find proper MSBuildTaskHost executable name
             string msbuildtaskhostExeName = NodeProviderOutOfProcTaskHost.TaskHostNameForClr2TaskHost;
@@ -167,12 +167,10 @@ namespace Microsoft.Build.BackEnd
             // Try to connect to idle nodes if node reuse is enabled.
             if (_componentHost.BuildParameters.EnableNodeReuse)
             {
-                Tuple<string, List<Process>> candidateProcessTuple = GetPossibleRunningNodes(msbuildLocation);
-                string expectedProcessName = candidateProcessTuple.Item1;
-                List<Process> candidateProcesses = candidateProcessTuple.Item2;
+                (string expectedProcessName, List<Process> processes) runningNodesTuple = GetPossibleRunningNodes(msbuildLocation);
 
-                CommunicationsUtilities.Trace("Attempting to connect to each existing {1} process in turn to establish node {0}...", nodeId, expectedProcessName);
-                foreach (Process nodeProcess in candidateProcesses)
+                CommunicationsUtilities.Trace("Attempting to connect to each existing {1} process in turn to establish node {0}...", nodeId, runningNodesTuple.expectedProcessName);
+                foreach (Process nodeProcess in runningNodesTuple.processes)
                 {
                     if (nodeProcess.Id == Process.GetCurrentProcess().Id)
                     {
@@ -263,7 +261,7 @@ namespace Microsoft.Build.BackEnd
         /// Item 1 is the name of the process being searched for.
         /// Item 2 is the list of processes themselves.
         /// </returns>
-        private Tuple<string, List<Process>> GetPossibleRunningNodes(string msbuildLocation = null)
+        private (string expectedProcessName, List<Process> nodeProcesses) GetPossibleRunningNodes(string msbuildLocation = null)
         {
             if (String.IsNullOrEmpty(msbuildLocation))
             {
@@ -277,7 +275,7 @@ namespace Microsoft.Build.BackEnd
             // Trivial sort to try to prefer most recently used nodes
             nodeProcesses.Sort((left, right) => left.Id - right.Id);
 
-            return new Tuple<string, List<Process>>(expectedProcessName, nodeProcesses);
+            return (expectedProcessName, nodeProcesses);
         }
 
         /// <summary>
