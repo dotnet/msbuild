@@ -24,7 +24,7 @@ namespace Microsoft.NET.TestFramework.Commands
             return ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(Arguments);
         }
 
-        public ICommand ToCommand()
+        public Command ToCommand()
         {
             var process = new Process()
             {

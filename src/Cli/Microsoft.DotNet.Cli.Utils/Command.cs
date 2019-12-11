@@ -29,6 +29,10 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public CommandResult Execute()
         {
+            return Execute(_ => { });
+        }
+        public CommandResult Execute(Action<Process> processStarted)
+        {
             Reporter.Verbose.WriteLine(string.Format(
                 LocalizableStrings.RunningFileNameArguments,
                 _process.StartInfo.FileName,
@@ -50,6 +54,10 @@ namespace Microsoft.DotNet.Cli.Utils
                 using (var reaper = new ProcessReaper(_process))
                 {
                     _process.Start();
+                    if (processStarted != null)
+                    {
+                        processStarted(_process);
+                    }
                     reaper.NotifyProcessStarted();
 
                     Reporter.Verbose.WriteLine(string.Format(

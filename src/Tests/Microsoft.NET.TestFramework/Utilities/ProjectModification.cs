@@ -3,7 +3,7 @@
 
 using System.Xml.Linq;
 
-namespace Microsoft.DotNet.Tools.Test.Utilities
+namespace Microsoft.NET.TestFramework.Utilities
 {
     public static class ProjectModification
     {

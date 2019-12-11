@@ -4,31 +4,44 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Xunit.Abstractions;
 using Xunit.Sdk;
 
 namespace Microsoft.DotNet.Cli.Run.Tests
 {
-    public class GivenDotnetRunIsInterrupted : TestBase
+    public class GivenDotnetRunIsInterrupted : SdkTest
     {
         private const int WaitTimeout = 30000;
+
+        public GivenDotnetRunIsInterrupted(ITestOutputHelper log) : base(log)
+        {
+        }
 
         // This test is Unix only for the same reason that CoreFX does not test Console.CancelKeyPress on Windows
         // See https://github.com/dotnet/corefx/blob/a10890f4ffe0fadf090c922578ba0e606ebdd16c/src/System.Console/tests/CancelKeyPress.Unix.cs#L63-L67
         [UnixOnlyFact]
         public void ItIgnoresSIGINT()
         {
-            var asset = TestAssets.Get("TestAppThatWaits")
-                .CreateInstance()
-                .WithSourceFiles();
+            var asset = _testAssetsManager.CopyTestAsset("TestAppThatWaits")
+                .WithSource();
 
-            var command = new RunCommand()
-                .WithWorkingDirectory(asset.Root.FullName);
+            var command = new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(asset.Path);
 
             bool killed = false;
-            command.OutputDataReceived += (s, e) =>
+
+            Process testProcess = null;
+
+            command.ProcessStartedHandler = p => { testProcess = p; };
+
+            command.CommandOutputHandler = line =>
             {
                 if (killed)
                 {
@@ -40,14 +53,14 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 // will inherit the current process group from the `dotnet test` process that is running this test.
                 // We would need to fork(), setpgid(), and then execve() to break out of the current group and that is
                 // too complex for a simple unit test.
-                NativeMethods.Posix.kill(command.CurrentProcess.Id, NativeMethods.Posix.SIGINT).Should().Be(0); // dotnet run
-                NativeMethods.Posix.kill(Convert.ToInt32(e.Data), NativeMethods.Posix.SIGINT).Should().Be(0);   // TestAppThatWaits
+                NativeMethods.Posix.kill(testProcess.Id, NativeMethods.Posix.SIGINT).Should().Be(0); // dotnet run
+                NativeMethods.Posix.kill(Convert.ToInt32(line), NativeMethods.Posix.SIGINT).Should().Be(0);   // TestAppThatWaits
 
                 killed = true;
             };
 
             command
-                .ExecuteWithCapturedOutput()
+                .Execute()
                 .Should()
                 .ExitWith(42)
                 .And
@@ -59,30 +72,33 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         [UnixOnlyFact]
         public void ItPassesSIGTERMToChild()
         {
-            var asset = TestAssets.Get("TestAppThatWaits")
-                .CreateInstance()
-                .WithSourceFiles();
+            var asset = _testAssetsManager.CopyTestAsset("TestAppThatWaits")
+                .WithSource();
 
-            var command = new RunCommand()
-                .WithWorkingDirectory(asset.Root.FullName);
+            var command = new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(asset.Path);
 
             bool killed = false;
             Process child = null;
-            command.OutputDataReceived += (s, e) =>
+
+            Process testProcess = null;
+            command.ProcessStartedHandler = p => { testProcess = p; };
+
+            command.CommandOutputHandler = line =>
             {
                 if (killed)
                 {
                     return;
                 }
 
-                child = Process.GetProcessById(Convert.ToInt32(e.Data));
-                NativeMethods.Posix.kill(command.CurrentProcess.Id, NativeMethods.Posix.SIGTERM).Should().Be(0);
+                child = Process.GetProcessById(Convert.ToInt32(line));
+                NativeMethods.Posix.kill(testProcess.Id, NativeMethods.Posix.SIGTERM).Should().Be(0);
 
                 killed = true;
             };
 
             command
-                .ExecuteWithCapturedOutput()
+                .Execute()
                 .Should()
                 .ExitWith(43)
                 .And
@@ -100,34 +116,46 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         [WindowsOnlyFact]
         public void ItTerminatesTheChildWhenKilled()
         {
-            var asset = TestAssets.Get("TestAppThatWaits")
-                .CreateInstance()
-                .WithSourceFiles();
+            var asset = _testAssetsManager.CopyTestAsset("TestAppThatWaits")
+                .WithSource();
 
-            var command = new RunCommand()
-                .WithWorkingDirectory(asset.Root.FullName);
+            var command = new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(asset.Path);
 
             bool killed = false;
             Process child = null;
-            command.OutputDataReceived += (s, e) =>
+            Process testProcess = null;
+            command.ProcessStartedHandler = p => { testProcess = p; };
+
+            command.CommandOutputHandler = line =>
             {
                 if (killed)
                 {
                     return;
                 }
 
-                child = Process.GetProcessById(Convert.ToInt32(e.Data));
-                command.CurrentProcess.Kill();
+                child = Process.GetProcessById(Convert.ToInt32(line));
+                testProcess.Kill();
 
                 killed = true;
             };
 
+            //  As of porting these tests to dotnet/sdk, it's unclear if the below is still needed
             // A timeout is required to prevent the `Process.WaitForExit` call to hang if `dotnet run` failed to terminate the child on Windows.
             // This is because `Process.WaitForExit()` hangs waiting for the process launched by `dotnet run` to close the redirected I/O pipes (which won't happen).
-            command.TimeoutMiliseconds = WaitTimeout;
+            //command.TimeoutMiliseconds = WaitTimeout;
+
+            //Task.Delay(TimeSpan.FromMilliseconds(WaitTimeout)).ContinueWith(t =>
+            //{
+            //    if (!killed)
+            //    {
+            //        testProcess.Kill();
+            //    }
+            //});
+
 
             command
-                .ExecuteWithCapturedOutput()
+                .Execute()
                 .Should()
                 .ExitWith(-1);
 
