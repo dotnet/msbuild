@@ -129,7 +129,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
                                         _IncrementalCleanPublishDirectory
 
-    Remove files that were produced in a prior build but weren't produced in the current build.
+    Remove files that were produced in a prior publish but weren't produced in the current publish.
     ============================================================
     -->
   <Target Name="_IncrementalCleanPublishDirectory"
@@ -195,7 +195,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_CurrentPublishFileWritesUnfiltered Include="@(ResolvedFileToPublish->'$(_NormalizedPublishDir)%(RelativePath)')" Condition="'$(PublishSingleFile)' != 'true'"/>
       <_CurrentPublishFileWritesUnfiltered Include="@(ResolvedFileToPublish->'$(_NormalizedPublishDir)%(RelativePath)')" 
                                            Condition="'$(PublishSingleFile)' == 'true' And '%(ResolvedFileToPublish.ExcludeFromSingleFile)' == 'true'"/>
-      <_CurrentPublishFileWritesUnfiltered Include="$(_NormalizedPublishDir)$(AssemblyName)$(_NativeExecutableExtension)" Condition="'$(PublishSingleFile)' == 'true'"/>
+      <_CurrentPublishFileWritesUnfiltered Include="$(_NormalizedPublishDir)$(AssemblyName)$(_NativeExecutableExtension)" Condition="'$(UseAppHost)' == 'true'"/>
       <_CurrentPublishFileWritesUnfiltered Include="$(_NormalizedPublishDir)$(ProjectDepsFileName)" Condition="'$(GenerateDependencyFile)' == 'true' And '$(PublishSingleFile)' != 'true'"/>
     </ItemGroup>
 
