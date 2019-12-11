@@ -288,7 +288,6 @@ namespace Microsoft.Build.Evaluation
                     interactive);
 
                 evaluator.Evaluate(loggingService, buildEventContext);
-                MSBuildEventSource.Log.EvaluateStop(root.ProjectFileLocation.File);
             }
         }
 
@@ -775,6 +774,8 @@ namespace Microsoft.Build.Evaluation
                     _data.FinishEvaluation();
                     MSBuildEventSource.Log.EvaluatePass5Stop(projectFile);
                 }
+                MSBuildEventSource.Log.EvaluateStop(projectFile, _itemGroupElements.Count, _usingTaskElements.Count, activeTargetsByEvaluationOrder.Count);
+
             }
 
             ErrorUtilities.VerifyThrow(_evaluationProfiler.IsEmpty(), "Evaluation profiler stack is not empty.");
@@ -784,6 +785,9 @@ namespace Microsoft.Build.Evaluation
                 ProjectFile = projectFile,
                 ProfilerResult = _evaluationProfiler.ProfiledResult
             });
+
+            _itemGroupElements.Count
+                ; _usingTaskElements.Count;activeTargetsByEvaluationOrder.Count
         }
 
         /// <summary>

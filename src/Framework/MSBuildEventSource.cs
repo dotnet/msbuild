@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 
 namespace Microsoft.Build.Eventing
@@ -191,10 +192,13 @@ namespace Microsoft.Build.Eventing
         }
 
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        /// <param name="items">Count of the number of items.</param>
+        /// <param name="usingTasks">Count of the number of using tasks.</param>
+        /// <param name="targets">Count of the number of targets evaluated.</param>
         [Event(24)]
-        public void EvaluateStop(string projectFile)
+        public void EvaluateStop(string projectFile, int items, int usingTasks, int targets)
         {
-            WriteEvent(24, projectFile);
+            WriteEvent(24, projectFile, items, usingTasks, targets);
         }
 
         [Event(25)]
@@ -361,6 +365,35 @@ namespace Microsoft.Build.Eventing
             WriteEvent(46, commandLine);
         }
 
+        internal void GenerateProfilerReportStart(string fileToLog)
+        {
+            WriteEvent(47, fileToLog);
+        }
+
+        internal void GenerateProfilerReportStop(string fileToLog)
+        {
+            WriteEvent(48, fileToLog);
+        }
+
+        internal void NodeCommunicationStart(string packet)
+        {
+            WriteEvent(49, packet);
+        }
+
+        internal void NodeCommunicationStop(byte[] packetData)
+        {
+            WriteEvent(50, packetData);
+        }
+
+        internal void ReduceMemoryUsageStart(ulong memoryInUse, ulong memoryUseLimit)
+        {
+            WriteEvent(51, memoryInUse, memoryUseLimit);
+        }
+
+        internal void ReduceMemoryUsageStop(ulong memoryInUse, ulong memoryUseLimit)
+        {
+            WriteEvent(52, memoryInUse, memoryUseLimit);
+        }
         #endregion
     }
 }

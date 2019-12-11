@@ -10,6 +10,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
@@ -841,6 +842,11 @@ namespace Microsoft.Build.BackEnd
 
                     // See how much memory we are using and compart that to our limit.
                     ulong memoryInUse = memoryStatus.TotalVirtual - memoryStatus.AvailableVirtual;
+                    bool enterLoop = memoryInUse > memoryUseLimit || _debugForceCaching;
+                    if (enterLoop)
+                    {
+                        MSBuildEventSource.Log.ReduceMemoryUsageStart(memoryInUse, memoryUseLimit);
+                    }
                     while ((memoryInUse > memoryUseLimit) || _debugForceCaching)
                     {
                         TraceEngine(
@@ -867,6 +873,10 @@ namespace Microsoft.Build.BackEnd
                         memoryStatus = NativeMethodsShared.GetMemoryStatus();
                         memoryInUse = memoryStatus.TotalVirtual - memoryStatus.AvailableVirtual;
                         TraceEngine("Memory usage now at {0}", memoryInUse);
+                    }
+                    if (enterLoop)
+                    {
+                        MSBuildEventSource.Log.ReduceMemoryUsageStop(memoryInUse, memoryUseLimit);
                     }
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))

@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Security;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
@@ -280,6 +281,7 @@ namespace Microsoft.Build.Logging
         /// </remarks>
         private void GenerateProfilerReport()
         {
+            MSBuildEventSource.Log.GenerateProfilerReportStart(FileToLog);
             try
             {
                 Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("WritingProfilerReport", FileToLog));
@@ -309,6 +311,10 @@ namespace Microsoft.Build.Logging
             catch (SecurityException ex)
             {
                 Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ErrorWritingProfilerReport", ex.Message));
+            }
+            finally
+            {
+                MSBuildEventSource.Log.GenerateProfilerReportStop(FileToLog);
             }
         }
     }

@@ -20,6 +20,7 @@ using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 using System.Threading.Tasks;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+using Microsoft.Build.Eventing;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -718,6 +719,7 @@ namespace Microsoft.Build.BackEnd
             /// <param name="packet">The packet to send.</param>
             public void SendData(INodePacket packet)
             {
+                MSBuildEventSource.Log.NodeCommunicationStart(packet.ToString());
                 MemoryStream writeStream = new MemoryStream();
                 ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(writeStream);
                 try
@@ -920,8 +922,10 @@ namespace Microsoft.Build.BackEnd
                     CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in ReadAndRoutPacket: {0}", e);
                     _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
                     Close();
+                    MSBuildEventSource.Log.NodeCommunicationStop(packetData);
                     return false;
                 }
+                MSBuildEventSource.Log.NodeCommunicationStop(packetData);
                 return true;
             }
 
