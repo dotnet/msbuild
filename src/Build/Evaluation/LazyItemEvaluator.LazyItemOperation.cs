@@ -5,8 +5,10 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Microsoft.Build.Evaluation
@@ -92,7 +94,94 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            protected void DecorateItemsWithMetadata(ImmutableList<I> items, ImmutableList<ProjectMetadataElement> metadata)
+            [DebuggerDisplay(@"{DebugString()}")]
+            protected readonly struct ItemBatchingContext
+            {
+                public I OperationItem { get; }
+                private Dictionary<string, IItem> ReferencedItems { get; }
+
+                public ItemBatchingContext(I operationItem, Dictionary<string, IItem> referencedItems = null)
+                {
+                    OperationItem = operationItem;
+
+                    ReferencedItems = referencedItems != null && referencedItems.Count == 0
+                        ? null
+                        : referencedItems;
+                }
+
+                public IMetadataTable GetMetadataTable()
+                {
+                    // todo avoid this by adding a generic type constraint that items must also be metadata tables
+                    ErrorUtilities.VerifyThrow(OperationItem is IMetadataTable, "OperationItem is assumed to be an IMetadataTable.");
+
+                    return ReferencedItems == null
+                        ? (IMetadataTable) OperationItem
+                        : new ItemOperationMetadataTable(OperationItem, ReferencedItems);
+                }
+
+                private string DebugString()
+                {
+                    var referencedItemsString = ReferencedItems == null
+                        ? "none"
+                        : string.Join(";", ReferencedItems.Select(kvp => $"{kvp.Key} : {kvp.Value.EvaluatedInclude}"));
+
+                    return $"{OperationItem.Key} : {OperationItem.EvaluatedInclude}; ReferencedItems: {referencedItemsString}";
+                }
+            }
+
+            private class ItemOperationMetadataTable : IMetadataTable
+            {
+                private readonly IItem _operationItem;
+                private readonly Dictionary<string, IItem> _referencedItems;
+
+                public ItemOperationMetadataTable(IItem operationItem, Dictionary<string, IItem> referencedItems)
+                {
+                    ErrorUtilities.VerifyThrow(
+                        referencedItems.Comparer == StringComparer.OrdinalIgnoreCase,
+                        "MSBuild assumes case insensitive item name comparison");
+
+                    _operationItem = operationItem;
+                    _referencedItems = referencedItems;
+                }
+
+                public string GetEscapedValue(string name)
+                {
+                    return ((IMetadataTable) _operationItem).GetEscapedValue(name);
+                }
+
+                public string GetEscapedValue(string itemType, string name)
+                {
+                    return RouteCall(itemType, name, (t, it, n) => t.GetEscapedValue(it, n));
+                }
+
+                public string GetEscapedValueIfPresent(string itemType, string name)
+                {
+                    return RouteCall(itemType, name, (t, it, n) => t.GetEscapedValueIfPresent(it, n));
+                }
+
+                private string RouteCall(string itemType, string name, Func<IMetadataTable, string, string, string> func)
+                {
+                    if (itemType == null || itemType.Equals(_operationItem.Key, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return func((IMetadataTable) _operationItem, itemType, name);
+                    }
+                    else if (_referencedItems.ContainsKey(itemType))
+                    {
+                        var item = _referencedItems[itemType];
+
+                        // todo avoid this by adding a generic type constraint that items must also be metadata tables
+                        ErrorUtilities.VerifyThrow(item is IMetadataTable, "all items are assumed to be IMetadataTable");
+
+                        return func((IMetadataTable) item, itemType, name);
+                    }
+                    else
+                    {
+                        return string.Empty;
+                    }
+                }
+            }
+
+            protected void DecorateItemsWithMetadata(IEnumerable<ItemBatchingContext> itemBatchingContexts, ImmutableList<ProjectMetadataElement> metadata)
             {
                 if (metadata.Count > 0)
                 {
@@ -162,9 +251,9 @@ namespace Microsoft.Build.Evaluation
 
                     if (needToProcessItemsIndividually)
                     {
-                        foreach (I item in items)
+                        foreach (var itemContext in itemBatchingContexts)
                         {
-                            _expander.Metadata = item;
+                            _expander.Metadata = itemContext.GetMetadataTable();
 
                             foreach (var metadataElement in metadata)
                             {
@@ -175,7 +264,7 @@ namespace Microsoft.Build.Evaluation
 
                                 string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, metadataExpansionOptions, metadataElement.Location);
 
-                                item.SetMetadata(metadataElement, FileUtilities.MaybeAdjustFilePath(evaluatedValue, metadataElement.ContainingProject.DirectoryPath));
+                                itemContext.OperationItem.SetMetadata(metadataElement, FileUtilities.MaybeAdjustFilePath(evaluatedValue, metadataElement.ContainingProject.DirectoryPath));
                             }
                         }
 
@@ -227,7 +316,7 @@ namespace Microsoft.Build.Evaluation
                         // This is valuable in the case where one item element evaluates to
                         // many items (either by semicolon or wildcards)
                         // and that item also has the same piece/s of metadata for each item.
-                        _itemFactory.SetMetadata(metadataList, items);
+                        _itemFactory.SetMetadata(metadataList, itemBatchingContexts.Select(i => i.OperationItem));
 
                         // End of legal area for metadata expressions.
                         _expander.Metadata = null;
