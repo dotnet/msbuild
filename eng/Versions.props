@@ -78,6 +78,7 @@
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/core-setup -->
     <MicrosoftNETCoreAppRefPackageVersion>3.1.0</MicrosoftNETCoreAppRefPackageVersion>
+    <MicrosoftNETCoreAppInternalPackageVersion>3.1.0-rtm.19571.5</MicrosoftNETCoreAppInternalPackageVersion>
     <MicrosoftNETCoreAppRuntimewinx64PackageVersion>3.1.0</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
     <MicrosoftNETCoreAppRuntimePackageVersion>$(MicrosoftNETCoreAppRuntimewinx64PackageVersion)</MicrosoftNETCoreAppRuntimePackageVersion>
   </PropertyGroup>
