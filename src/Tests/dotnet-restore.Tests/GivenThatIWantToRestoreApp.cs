@@ -9,33 +9,37 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using FluentAssertions;
 using System.Linq;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Restore.Test
 {
-    public class GivenThatIWantToRestoreApp : TestBase
+    public class GivenThatIWantToRestoreApp : SdkTest
     {
-        private static string RepoRootNuGetConfig = Path.Combine(RepoDirectoriesProvider.RepoRoot, "NuGet.config");
+        public GivenThatIWantToRestoreApp(ITestOutputHelper log) : base(log)
+        {
+        }
 
         [Fact]
         public void ItRestoresAppToSpecificDirectory()
         {
-            var rootPath = TestAssets.CreateTestDirectory().FullName;
+            var rootPath = _testAssetsManager.CreateTestDirectory().Path;
 
             string dir = "pkgs";
             string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));
 
             var sln = "TestAppWithSlnAndSolutionFolders";
-            var projectDirectory = TestAssets
-                .Get(sln)
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset(sln)
+                .WithSource()
+                .Path;
 
-            string args = $"--configfile {RepoRootNuGetConfig} --packages \"{fullPath}\"";
-            new RestoreCommand()
+            string[] args = new[] { "--packages", fullPath };
+            new DotnetRestoreCommand(Log)
                  .WithWorkingDirectory(projectDirectory)
-                 .ExecuteWithCapturedOutput(args)
+                 .Execute(args)
                  .Should()
                  .Pass()
                  .And.NotHaveStdErr();
@@ -47,22 +51,22 @@ namespace Microsoft.DotNet.Restore.Test
         [Fact]
         public void ItRestoresLibToSpecificDirectory()
         {
-            var rootPath = TestAssets.CreateTestDirectory().FullName;
+            var rootPath = _testAssetsManager.CreateTestDirectory().Path;
 
             string dir = "pkgs";
             string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));
 
-            string newArgs = $"classlib -o \"{rootPath}\" --no-restore";
-            new NewCommandShim()
+            string [] newArgs = new[] { "classlib", "-o", rootPath, "--no-restore" };
+            new DotnetCommand(Log, "new")
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)
                 .Should()
                 .Pass();
 
-            string args = $"--configfile {RepoRootNuGetConfig} --packages \"{dir}\"";
-            new RestoreCommand()
+            string[] args = new[] { "--packages", dir };
+            new DotnetRestoreCommand(Log)
                 .WithWorkingDirectory(rootPath)
-                .ExecuteWithCapturedOutput(args)
+                .Execute(args)
                 .Should()
                 .Pass()
                 .And.NotHaveStdErr();
@@ -74,19 +78,18 @@ namespace Microsoft.DotNet.Restore.Test
         [Fact]
         public void ItRestoresTestAppToSpecificDirectory()
         {
-            var rootPath = TestAssets.Get("VSTestCore")
-                .CreateInstance()
-                .WithSourceFiles()
+            var rootPath = _testAssetsManager.CopyTestAsset("VSTestCore")
+                .WithSource()
                 .WithVersionVariables()
-                .Root.FullName;
+                .Path;
 
             string dir = "pkgs";
             string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));
 
-            string args = $"--configfile {RepoRootNuGetConfig} --packages \"{dir}\"";
-            new RestoreCommand()
+            string[] args = new[] { "--packages", dir };
+            new DotnetRestoreCommand(Log)
                 .WithWorkingDirectory(rootPath)
-                .ExecuteWithCapturedOutput(args)
+                .Execute(args)
                 .Should()
                 .Pass()
                 .And.NotHaveStdErr();
@@ -98,22 +101,22 @@ namespace Microsoft.DotNet.Restore.Test
         [Fact]
         public void ItRestoresWithTheSpecifiedVerbosity()
         {
-            var rootPath = TestAssets.CreateTestDirectory().FullName;
+            var rootPath = _testAssetsManager.CreateTestDirectory().Path;
 
             string dir = "pkgs";
             string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));
 
-            string newArgs = $"console -o \"{rootPath}\" --no-restore";
-            new NewCommandShim()
+            string[] newArgs = new[] { "console", "-o", rootPath, "--no-restore" };
+            new DotnetCommand(Log, "new")
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)
                 .Should()
                 .Pass();
 
-            string args = $"--configfile {RepoRootNuGetConfig} --packages \"{dir}\" --verbosity quiet";
-            new RestoreCommand()
+            string[] args = new[] { "--packages", dir, "--verbosity",  "quiet" };
+            new DotnetRestoreCommand(Log)
                  .WithWorkingDirectory(rootPath)
-                 .ExecuteWithCapturedOutput(args)
+                 .Execute(args)
                  .Should()
                  .Pass()
                  .And.NotHaveStdErr()
