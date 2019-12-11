@@ -6,40 +6,41 @@ using Xunit;
 using System;
 using System.IO;
 using FluentAssertions;
-using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.VSTest.Tests
 {
-    public class VSTestTests : TestBase
+    public class VSTestTests : SdkTest
     {
+        public VSTestTests(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void TestsFromAGivenContainerShouldRunWithExpectedOutput()
         {
             var testAppName = "VSTestCore";
-            var testRoot = TestAssets.Get(testAppName)
-                .CreateInstance()
-                .WithSourceFiles()
-                .WithRestoreFiles()
+            var testRoot = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource()
                 .WithVersionVariables()
-                .Root;
+                .Path;
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            new BuildCommand()
-                .WithWorkingDirectory(testRoot)
+            new BuildCommand(Log, testRoot)
                 .Execute()
                 .Should().Pass();
 
-            var outputDll = testRoot
-                .GetDirectory("bin", configuration, "netcoreapp3.0")
-                .GetFile($"{testAppName}.dll");
-
-            var argsForVstest = $"\"{outputDll.FullName}\" --logger:console;verbosity=normal";
+            var outputDll = Path.Combine(testRoot, "bin", configuration, "netcoreapp3.0", $"{testAppName}.dll");
 
             // Call vstest
-            var result = new VSTestCommand().ExecuteWithCapturedOutput(argsForVstest);
-            if (!DotnetUnderTest.IsLocalized())
+            var result = new DotnetVSTestCommand(Log)
+                .Execute(outputDll, "--logger:console;verbosity=normal");
+            if (!TestContext.IsLocalized())
             {
                 result.StdOut
                     .Should().Contain("Total tests: 2")
