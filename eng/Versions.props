@@ -13,7 +13,7 @@
   <!-- Production Dependencies -->
   <PropertyGroup>
     <!-- "Stage 0" from https://github.com/dotnet/core-sdk -->
-    <DotNetCoreSdkLKGVersion>3.1.100</DotNetCoreSdkLKGVersion>
+    <DotNetCoreSdkLKGVersion>3.1.200-preview-014770</DotNetCoreSdkLKGVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/core-setup -->
