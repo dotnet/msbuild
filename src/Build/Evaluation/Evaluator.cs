@@ -785,9 +785,6 @@ namespace Microsoft.Build.Evaluation
                 ProjectFile = projectFile,
                 ProfilerResult = _evaluationProfiler.ProfiledResult
             });
-
-            _itemGroupElements.Count
-                ; _usingTaskElements.Count;activeTargetsByEvaluationOrder.Count
         }
 
         /// <summary>
