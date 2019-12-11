@@ -19,6 +19,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -515,13 +516,12 @@ namespace Microsoft.Build.CommandLine
             ConsoleCancelEventHandler cancelHandler = Console_CancelKeyPress;
             try
             {
-#if (!STANDALONEBUILD)
-                // Enable CodeMarkers for MSBuild.exe
-                CodeMarkers.Instance.InitPerformanceDll(CodeMarkerApp.MSBUILDPERF,  String.Format(CultureInfo.InvariantCulture, @"Software\Microsoft\MSBuild\{0}", MSBuildConstants.CurrentProductVersion));
-#endif
-#if MSBUILDENABLEVSPROFILING 
-                string startMSBuildExe = String.Format(CultureInfo.CurrentCulture, "Running MSBuild.exe with command line {0}", commandLine);
-                DataCollection.CommentMarkProfile(8800, startMSBuildExe);
+#if FEATURE_GET_COMMANDLINE
+                MSBuildEventSource.Log.MSBuildExeStart(commandLine);
+#else
+                if (MSBuildEventSource.Log.IsEnabled()) {
+                    MSBuildEventSource.Log.MSBuildExeStop(string.Join(" ", commandLine));
+                }
 #endif
                 Console.CancelKeyPress += cancelHandler;
 
@@ -800,9 +800,13 @@ namespace Microsoft.Build.CommandLine
 
                 // Wait for any pending cancel, so that we get any remaining messages
                 s_cancelComplete.WaitOne();
-#if (!STANDALONEBUILD)
-                // Turn off codemarkers
-                CodeMarkers.Instance.UninitializePerformanceDLL(CodeMarkerApp.MSBUILDPERF);
+
+#if FEATURE_GET_COMMANDLINE
+                MSBuildEventSource.Log.MSBuildExeStop(commandLine);
+#else
+                if (MSBuildEventSource.Log.IsEnabled()) {
+                    MSBuildEventSource.Log.MSBuildExeStop(string.Join(" ", commandLine));
+                }
 #endif
             }
             /**********************************************************************************************************************

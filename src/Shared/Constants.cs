@@ -4,12 +4,7 @@
 using System;
 using System.IO;
 
-// This file is compiled into both Microsoft.Build.Framework and Microsoft.Build.Tasks which can cause collisions.
-#if MICROSOFT_BUILD_TASKS
-namespace Microsoft.Build.Tasks
-#else
 namespace Microsoft.Build.Shared
-#endif
 {
     /// <summary>
     /// Constants that we want to be shareable across all our assemblies.
