@@ -1,10 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Internal;
@@ -15,7 +12,7 @@ namespace Microsoft.Build.Evaluation
 {
 
     /// <summary>
-    /// Represents the elements of an item specification string and 
+    /// Represents the elements of an item specification string (e.g. Include="*.cs;foo;@(i)") and 
     /// provides some operations over them (like matching items against a given ItemSpec)
     /// </summary>
     internal class ItemSpec<P, I>
@@ -168,7 +165,7 @@ namespace Microsoft.Build.Evaluation
             string evaluatedInclude = item.EvaluatedInclude;
             foreach (ItemFragment fragment in Fragments)
             {
-                if (fragment.MatchCount(evaluatedInclude) > 0)
+                if (fragment.IsMatch(evaluatedInclude))
                     return true;
             }
 
@@ -229,7 +226,7 @@ namespace Microsoft.Build.Evaluation
 
                     foreach (var referencedItem in itemExpression.ReferencedItems)
                     {
-                        yield return referencedItem.ItemSpecFragment;
+                        yield return referencedItem.ItemAsValueFragment.ItemSpecFragment;
                     }
                 }
                 else
@@ -238,7 +235,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
         }
-		
+        
         public override string ToString()
         {
             return ItemSpecString;
@@ -302,7 +299,12 @@ namespace Microsoft.Build.Evaluation
         /// <returns>The number of times the <param name="itemToMatch"></param> appears in this fragment</returns>
         public virtual int MatchCount(string itemToMatch)
         {
-            return FileMatcher.IsMatch(itemToMatch) ? 1 : 0;
+            return IsMatch(itemToMatch) ? 1 : 0;
+        }
+
+        public virtual bool IsMatch(string itemToMatch)
+        {
+            return FileMatcher.IsMatch(itemToMatch);
         }
 
         public virtual IMSBuildGlob ToMSBuildGlob()
@@ -337,6 +339,18 @@ namespace Microsoft.Build.Evaluation
         }
     }
 
+    internal readonly struct ReferencedItem
+    {
+        public IItem Item { get; }
+        public ValueFragment ItemAsValueFragment { get; }
+
+        public ReferencedItem(IItem item, ValueFragment itemAsValueFragment)
+        {
+            Item = item;
+            ItemAsValueFragment = itemAsValueFragment;
+        }
+    }
+
     internal class ItemExpressionFragment<P, I> : ItemFragment
         where P : class, IProperty
         where I : class, IItem
@@ -346,8 +360,9 @@ namespace Microsoft.Build.Evaluation
         private readonly ItemSpec<P, I> _containingItemSpec;
         private Expander<P, I> _expander;
 
-        private IList<ValueFragment> _referencedItems;
-        public IList<ValueFragment> ReferencedItems
+        private List<ReferencedItem> _referencedItems;
+
+        public List<ReferencedItem> ReferencedItems
         {
             get
             {
@@ -382,7 +397,13 @@ namespace Microsoft.Build.Evaluation
         public override int MatchCount(string itemToMatch)
         {
 
-            return ReferencedItems.Count(v => v.MatchCount(itemToMatch) > 0);
+            return ReferencedItems.Count(v => v.ItemAsValueFragment.MatchCount(itemToMatch) > 0);
+        }
+
+        public override bool IsMatch(string itemToMatch)
+        {
+
+            return ReferencedItems.Any(v => v.ItemAsValueFragment.IsMatch(itemToMatch));
         }
 
         public override IMSBuildGlob ToMSBuildGlob()
@@ -392,7 +413,7 @@ namespace Microsoft.Build.Evaluation
 
         protected override IMSBuildGlob CreateMsBuildGlob()
         {
-            return new CompositeGlob(ReferencedItems.Select(i => i.ToMSBuildGlob()));
+            return new CompositeGlob(ReferencedItems.Select(i => i.ItemAsValueFragment.ToMSBuildGlob()));
         }
 
         private bool InitReferencedItemsIfNecessary()
@@ -412,7 +433,7 @@ namespace Microsoft.Build.Evaluation
                     false /* do not include null expansion results */,
                     out throwaway,
                     out itemsFromCapture);
-                _referencedItems = itemsFromCapture.Select(i => new ValueFragment(i.Key, ProjectDirectory)).ToList();
+                _referencedItems = itemsFromCapture.Select(i => new ReferencedItem(i.Value, new ValueFragment(i.Key, ProjectDirectory))).ToList();
 
                 return true;
             }

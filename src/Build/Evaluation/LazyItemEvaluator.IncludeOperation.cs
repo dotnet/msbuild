@@ -144,7 +144,7 @@ namespace Microsoft.Build.Evaluation
 
             protected override void MutateItems(ImmutableList<I> items)
             {
-                DecorateItemsWithMetadata(items, _metadata);
+                DecorateItemsWithMetadata(items.Select(i => new ItemBatchingContext(i)), _metadata);
             }
 
             protected override void SaveItems(ImmutableList<I> items, ImmutableList<ItemData>.Builder listBuilder)

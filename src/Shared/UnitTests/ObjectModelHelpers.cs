@@ -420,11 +420,14 @@ namespace Microsoft.Build.UnitTests
 
         internal static void AssertItemHasMetadata(Dictionary<string, string> expected, TestItem item)
         {
-            Assert.Equal(expected.Keys.Count, item.DirectMetadataCount);
+            expected ??= new Dictionary<string, string>();
+
+            item.DirectMetadataCount.ShouldBe(expected.Keys.Count);
 
             foreach (var key in expected.Keys)
             {
-                Assert.Equal(expected[key], item.GetMetadataValue(key));
+                item.GetMetadataValue(key).ShouldBe(expected[key]);
+
             }
         }
 
