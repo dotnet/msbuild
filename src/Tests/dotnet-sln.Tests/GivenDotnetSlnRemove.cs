@@ -5,15 +5,19 @@ using FluentAssertions;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using System;
 using System.IO;
 using System.Linq;
 using System.Text;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.Sln.Remove.Tests
 {
-    public class GivenDotnetSlnRemove : TestBase
+    public class GivenDotnetSlnRemove : SdkTest
     {
         private const string HelpText = @"Usage: dotnet sln <SLN_FILE> remove [options] <PROJECT_PATH>
 
@@ -252,13 +256,17 @@ Global
 EndGlobal
 ";
 
+        public GivenDotnetSlnRemove(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Theory]
         [InlineData("--help")]
         [InlineData("-h")]
         public void WhenHelpOptionIsPassedItPrintsUsage(string helpArg)
         {
-            var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput($"sln remove {helpArg}");
+            var cmd = new DotnetCommand(Log)
+                .Execute($"sln", "remove", helpArg);
             cmd.Should().Pass();
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
@@ -266,8 +274,8 @@ EndGlobal
         [Fact]
         public void WhenTooManyArgumentsArePassedItPrintsError()
         {
-            var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput("sln one.sln two.sln three.sln remove");
+            var cmd = new DotnetCommand(Log)
+                .Execute("sln", "one.sln", "two.sln", "three.sln", "remove");
             cmd.Should().Fail();
             cmd.StdErr.Should().BeVisuallyEquivalentTo($@"{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "two.sln")}
 {string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "three.sln")}
@@ -279,8 +287,8 @@ EndGlobal
         [InlineData("unknownCommandName")]
         public void WhenNoCommandIsPassedItPrintsError(string commandName)
         {
-            var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput($"sln {commandName}");
+            var cmd = new DotnetCommand(Log)
+                .Execute($"sln", commandName);
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(CommonLocalizableStrings.RequiredCommandNotPassed);
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(SlnCommandHelpText);
@@ -294,8 +302,8 @@ EndGlobal
         [InlineData("ihaveinvalidchar\\acters")]
         public void WhenNonExistingSolutionIsPassedItPrintsErrorAndUsage(string solutionName)
         {
-            var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput($"sln {solutionName} remove p.csproj");
+            var cmd = new DotnetCommand(Log)
+                .Execute($"sln", solutionName, "remove", "p.csproj");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindSolutionOrDirectory, solutionName));
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
@@ -304,17 +312,15 @@ EndGlobal
         [Fact]
         public void WhenInvalidSolutionIsPassedItPrintsErrorAndUsage()
         {
-            var projectDirectory = TestAssets
-                .Get("InvalidSolution")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("InvalidSolution")
+                .WithSource()
+                .Path;
 
             var projectToRemove = Path.Combine("Lib", "Lib.csproj");
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"sln InvalidSolution.sln remove {projectToRemove}");
+                .Execute($"sln", "InvalidSolution.sln", "remove", projectToRemove);
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.InvalidSolutionFormatString, "InvalidSolution.sln", LocalizableStrings.FileHeaderMissingError));
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
@@ -323,18 +329,16 @@ EndGlobal
         [Fact]
         public void WhenInvalidSolutionIsFoundRemovePrintsErrorAndUsage()
         {
-            var projectDirectory = TestAssets
-                .Get("InvalidSolution")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("InvalidSolution")
+                .WithSource()
+                .Path;
 
             var solutionPath = Path.Combine(projectDirectory, "InvalidSolution.sln");
             var projectToRemove = Path.Combine("Lib", "Lib.csproj");
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"sln remove {projectToRemove}");
+                .Execute($"sln", "remove", projectToRemove);
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.InvalidSolutionFormatString, solutionPath, LocalizableStrings.FileHeaderMissingError));
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
@@ -343,16 +347,14 @@ EndGlobal
         [Fact]
         public void WhenNoProjectIsPassedItPrintsErrorAndUsage()
         {
-            var projectDirectory = TestAssets
-                .Get("TestAppWithSlnAndCsprojFiles")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndCsprojFiles")
+                .WithSource()
+                .Path;
 
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput(@"sln App.sln remove");
+                .Execute(@"sln", "App.sln", "remove");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(CommonLocalizableStrings.SpecifyAtLeastOneProjectToRemove);
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
@@ -361,17 +363,15 @@ EndGlobal
         [Fact]
         public void WhenNoSolutionExistsInTheDirectoryRemovePrintsErrorAndUsage()
         {
-            var projectDirectory = TestAssets
-                .Get("TestAppWithSlnAndCsprojFiles")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndCsprojFiles")
+                .WithSource()
+                .Path;
 
             var solutionPath = Path.Combine(projectDirectory, "App");
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(solutionPath)
-                .ExecuteWithCapturedOutput(@"sln remove App.csproj");
+                .Execute(@"sln", "remove", "App.csproj");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.SolutionDoesNotExist, solutionPath + Path.DirectorySeparatorChar));
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
@@ -380,17 +380,15 @@ EndGlobal
         [Fact]
         public void WhenMoreThanOneSolutionExistsInTheDirectoryItPrintsErrorAndUsage()
         {
-            var projectDirectory = TestAssets
-                .Get("TestAppWithMultipleSlnFiles")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithMultipleSlnFiles")
+                .WithSource()
+                .Path;
 
             var projectToRemove = Path.Combine("Lib", "Lib.csproj");
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"sln remove {projectToRemove}");
+                .Execute($"sln", "remove", projectToRemove);
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneSolutionInDirectory, projectDirectory + Path.DirectorySeparatorChar));
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
@@ -399,18 +397,16 @@ EndGlobal
         [Fact]
         public void WhenPassedAReferenceNotInSlnItPrintsStatus()
         {
-            var projectDirectory = TestAssets
-                .Get("TestAppWithSlnAndExistingCsprojReferences")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndExistingCsprojReferences")
+                .WithSource()
+                .Path;
 
             var solutionPath = Path.Combine(projectDirectory, "App.sln");
             var contentBefore = File.ReadAllText(solutionPath);
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput("sln remove referenceDoesNotExistInSln.csproj");
+                .Execute("sln", "remove", "referenceDoesNotExistInSln.csproj");
             cmd.Should().Pass();
             cmd.StdOut.Should().Be(string.Format(CommonLocalizableStrings.ProjectNotFoundInTheSolution, "referenceDoesNotExistInSln.csproj"));
             File.ReadAllText(solutionPath)
@@ -420,21 +416,19 @@ EndGlobal
         [Fact]
         public void WhenPassedAReferenceItRemovesTheReferenceButNotOtherReferences()
         {
-            var projectDirectory = TestAssets
-                .Get("TestAppWithSlnAndExistingCsprojReferences")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndExistingCsprojReferences")
+                .WithSource()
+                .Path;
 
             var solutionPath = Path.Combine(projectDirectory, "App.sln");
             SlnFile slnFile = SlnFile.Read(solutionPath);
             slnFile.Projects.Count.Should().Be(2);
 
             var projectToRemove = Path.Combine("Lib", "Lib.csproj");
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"sln remove {projectToRemove}");
+                .Execute($"sln", "remove", projectToRemove);
             cmd.Should().Pass();
             cmd.StdOut.Should().Be(string.Format(CommonLocalizableStrings.ProjectRemovedFromTheSolution, projectToRemove));
 
@@ -446,20 +440,18 @@ EndGlobal
         [Fact]
         public void WhenSolutionItemsExistInFolderParentFoldersAreNotRemoved()
         {
-            var projectDirectory = TestAssets
-                .Get("SlnFileWithSolutionItemsInNestedFolders")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("SlnFileWithSolutionItemsInNestedFolders")
+                .WithSource()
+                .Path;
 
             var solutionPath = Path.Combine(projectDirectory, "App.sln");
             SlnFile slnFile = SlnFile.Read(solutionPath);
 
             var projectToRemove = Path.Combine("ConsoleApp1", "ConsoleApp1.csproj");
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"sln remove {projectToRemove}");
+                .Execute($"sln", "remove", projectToRemove);
             cmd.Should().Pass();
             cmd.StdOut.Should().Be(string.Format(CommonLocalizableStrings.ProjectRemovedFromTheSolution, projectToRemove));
 
@@ -472,21 +464,19 @@ EndGlobal
         [Fact]
         public void WhenDuplicateReferencesArePresentItRemovesThemAll()
         {
-            var projectDirectory = TestAssets
-                .Get("TestAppWithSlnAndDuplicateProjectReferences")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndDuplicateProjectReferences")
+                .WithSource()
+                .Path;
 
             var solutionPath = Path.Combine(projectDirectory, "App.sln");
             SlnFile slnFile = SlnFile.Read(solutionPath);
             slnFile.Projects.Count.Should().Be(3);
 
             var projectToRemove = Path.Combine("Lib", "Lib.csproj");
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"sln remove {projectToRemove}");
+                .Execute($"sln", "remove", projectToRemove);
             cmd.Should().Pass();
 
             string outputText = string.Format(CommonLocalizableStrings.ProjectRemovedFromTheSolution, projectToRemove);
@@ -501,21 +491,19 @@ EndGlobal
         [Fact]
         public void WhenPassedMultipleReferencesAndOneOfThemDoesNotExistItRemovesTheOneThatExists()
         {
-            var projectDirectory = TestAssets
-                .Get("TestAppWithSlnAndExistingCsprojReferences")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndExistingCsprojReferences")
+                .WithSource()
+                .Path;
 
             var solutionPath = Path.Combine(projectDirectory, "App.sln");
             SlnFile slnFile = SlnFile.Read(solutionPath);
             slnFile.Projects.Count.Should().Be(2);
 
             var projectToRemove = Path.Combine("Lib", "Lib.csproj");
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"sln remove idontexist.csproj {projectToRemove} idontexisteither.csproj");
+                .Execute($"sln", "remove", "idontexist.csproj", projectToRemove, "idontexisteither.csproj");
             cmd.Should().Pass();
 
             string outputText = $@"{string.Format(CommonLocalizableStrings.ProjectNotFoundInTheSolution, "idontexist.csproj")}
@@ -532,21 +520,19 @@ EndGlobal
         [Fact]
         public void WhenReferenceIsRemovedBuildConfigsAreAlsoRemoved()
         {
-            var projectDirectory = TestAssets
-                .Get("TestAppWithSlnAndCsprojToRemove")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndCsprojToRemove")
+                .WithSource()
+                .Path;
 
             var solutionPath = Path.Combine(projectDirectory, "App.sln");
             SlnFile slnFile = SlnFile.Read(solutionPath);
             slnFile.Projects.Count.Should().Be(2);
 
             var projectToRemove = Path.Combine("Lib", "Lib.csproj");
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"sln remove {projectToRemove}");
+                .Execute($"sln", "remove", projectToRemove);
             cmd.Should().Pass();
 
             File.ReadAllText(solutionPath)
@@ -556,20 +542,18 @@ EndGlobal
         [Fact]
         public void WhenDirectoryContainingProjectIsGivenProjectIsRemoved()
         {
-            var projectDirectory = TestAssets
-                .Get("TestAppWithSlnAndCsprojToRemove")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndCsprojToRemove")
+                .WithSource()
+                .Path;
 
             var solutionPath = Path.Combine(projectDirectory, "App.sln");
             SlnFile slnFile = SlnFile.Read(solutionPath);
             slnFile.Projects.Count.Should().Be(2);
 
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput("sln remove Lib");
+                .Execute("sln", "remove", "Lib");
             cmd.Should().Pass();
 
             File.ReadAllText(solutionPath)
@@ -579,17 +563,15 @@ EndGlobal
         [Fact]
         public void WhenDirectoryContainsNoProjectsItCancelsWholeOperation()
         {
-            var projectDirectory = TestAssets
-                .Get("TestAppWithSlnAndCsprojToRemove")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndCsprojToRemove")
+                .WithSource()
+                .Path;
             var directoryToRemove = "Empty";
 
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"sln remove {directoryToRemove}");
+                .Execute($"sln", "remove", directoryToRemove);
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(
                 string.Format(
@@ -601,17 +583,15 @@ EndGlobal
         [Fact]
         public void WhenDirectoryContainsMultipleProjectsItCancelsWholeOperation()
         {
-            var projectDirectory = TestAssets
-                .Get("TestAppWithSlnAndCsprojToRemove")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndCsprojToRemove")
+                .WithSource()
+                .Path;
             var directoryToRemove = "Multiple";
 
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"sln remove {directoryToRemove}");
+                .Execute($"sln", "remove", directoryToRemove);
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(
                 string.Format(
@@ -623,31 +603,29 @@ EndGlobal
         [Fact]
         public void WhenReferenceIsRemovedSlnBuilds()
         {
-            var projectDirectory = TestAssets
-                .Get("TestAppWithSlnAndCsprojToRemove")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndCsprojToRemove")
+                .WithSource()
+                .Path;
 
             var solutionPath = Path.Combine(projectDirectory, "App.sln");
             SlnFile slnFile = SlnFile.Read(solutionPath);
             slnFile.Projects.Count.Should().Be(2);
 
             var projectToRemove = Path.Combine("Lib", "Lib.csproj");
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"sln remove {projectToRemove}");
+                .Execute($"sln", "remove", projectToRemove);
             cmd.Should().Pass();
 
-            new DotnetCommand()
+            new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .Execute($"restore App.sln")
+                .Execute($"restore", "App.sln")
                 .Should().Pass();
 
-            new DotnetCommand()
+            new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .Execute("build App.sln --configuration Release")
+                .Execute("build", "App.sln", "--configuration", "Release")
                 .Should().Pass();
 
             var reasonString = "should be built in release mode, otherwise it means build configurations are missing from the sln file";
@@ -664,17 +642,15 @@ EndGlobal
         [Fact]
         public void WhenProjectIsRemovedSolutionHasUTF8BOM()
         {
-            var projectDirectory = TestAssets
-                .Get("TestAppWithSlnAndCsprojToRemove")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndCsprojToRemove")
+                .WithSource()
+                .Path;
 
             var projectToRemove = Path.Combine("Lib", "Lib.csproj");
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"sln App.sln remove {projectToRemove}");
+                .Execute($"sln", "App.sln", "remove", projectToRemove);
             cmd.Should().Pass();
 
             var preamble = Encoding.UTF8.GetPreamble();
@@ -690,12 +666,10 @@ EndGlobal
         [Fact]
         public void WhenFinalReferenceIsRemovedEmptySectionsAreRemoved()
         {
-            var projectDirectory = TestAssets
-                .Get("TestAppWithSlnAndCsprojToRemove")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndCsprojToRemove")
+                .WithSource()
+                .Path;
 
             var solutionPath = Path.Combine(projectDirectory, "App.sln");
             SlnFile slnFile = SlnFile.Read(solutionPath);
@@ -703,32 +677,30 @@ EndGlobal
 
             var appPath = Path.Combine("App", "App.csproj");
             var libPath = Path.Combine("Lib", "Lib.csproj");
-            var projectsToRemove = $"{libPath} {appPath}";
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"sln remove {projectsToRemove}");
+                .Execute($"sln", "remove", libPath, appPath);
             cmd.Should().Pass();
 
-            File.ReadAllText(solutionPath)
-                .Should().BeVisuallyEquivalentTo(ExpectedSlnContentsAfterRemoveAllProjects);
+            var solutionContents = File.ReadAllText(solutionPath);
+
+            solutionContents.Should().BeVisuallyEquivalentTo(ExpectedSlnContentsAfterRemoveAllProjects);
         }
 
         [Fact]
         public void WhenNestedProjectIsRemovedItsSolutionFoldersAreRemoved()
         {
-            var projectDirectory = TestAssets
-                .Get("TestAppWithSlnAndCsprojInSubDirToRemove")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndCsprojInSubDirToRemove")
+                .WithSource()
+                .Path;
 
             var solutionPath = Path.Combine(projectDirectory, "App.sln");
 
             var projectToRemove = Path.Combine("src", "NotLastProjInSrc", "NotLastProjInSrc.csproj");
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"sln remove {projectToRemove}");
+                .Execute($"sln", "remove", projectToRemove);
             cmd.Should().Pass();
 
             File.ReadAllText(solutionPath)
@@ -738,19 +710,17 @@ EndGlobal
         [Fact]
         public void WhenFinalNestedProjectIsRemovedSolutionFoldersAreRemoved()
         {
-            var projectDirectory = TestAssets
-                .Get("TestAppWithSlnAndLastCsprojInSubDirToRemove")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndLastCsprojInSubDirToRemove")
+                .WithSource()
+                .Path;
 
             var solutionPath = Path.Combine(projectDirectory, "App.sln");
 
             var projectToRemove = Path.Combine("src", "Lib", "Lib.csproj");
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"sln remove {projectToRemove}");
+                .Execute($"sln", "remove", projectToRemove);
             cmd.Should().Pass();
 
             File.ReadAllText(solutionPath)
@@ -760,19 +730,17 @@ EndGlobal
         [Fact]
         public void WhenProjectIsRemovedThenDependenciesOnProjectAreAlsoRemoved()
         {
-            var projectDirectory = TestAssets
-                .Get("TestAppWithSlnProjectDependencyToRemove")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnProjectDependencyToRemove")
+                .WithSource()
+                .Path;
 
             var solutionPath = Path.Combine(projectDirectory, "App.sln");
 
             var projectToRemove = Path.Combine("Second", "Second.csproj");
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput($"sln remove {projectToRemove}");
+                .Execute($"sln", "remove", projectToRemove);
             cmd.Should().Pass();
 
             File.ReadAllText(solutionPath)

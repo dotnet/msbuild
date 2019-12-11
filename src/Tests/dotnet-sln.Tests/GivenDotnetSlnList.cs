@@ -5,15 +5,19 @@ using FluentAssertions;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using System;
 using System.IO;
 using System.Linq;
 using Xunit;
+using Xunit.Abstractions;
 using CommandLocalizableStrings = Microsoft.DotNet.Tools.Sln.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli.Sln.List.Tests
 {
-    public class GivenDotnetSlnList : TestBase
+    public class GivenDotnetSlnList : SdkTest
     {
         private const string HelpText = @"Usage: dotnet sln <SLN_FILE> list [options]
 
@@ -36,13 +40,17 @@ Commands:
   list                    List all projects in a solution file.
   remove <PROJECT_PATH>   Remove one or more projects from a solution file.";
 
+        public GivenDotnetSlnList(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Theory]
         [InlineData("--help")]
         [InlineData("-h")]
         public void WhenHelpOptionIsPassedItPrintsUsage(string helpArg)
         {
-            var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput($"sln list {helpArg}");
+            var cmd = new DotnetCommand(Log)
+                .Execute($"sln", "list", helpArg);
             cmd.Should().Pass();
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
@@ -52,8 +60,8 @@ Commands:
         [InlineData("unknownCommandName")]
         public void WhenNoCommandIsPassedItPrintsError(string commandName)
         {
-            var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput($"sln {commandName}");
+            var cmd = new DotnetCommand(Log)
+                .Execute($"sln", commandName);
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(CommonLocalizableStrings.RequiredCommandNotPassed);
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(SlnCommandHelpText);
@@ -62,8 +70,8 @@ Commands:
         [Fact]
         public void WhenTooManyArgumentsArePassedItPrintsError()
         {
-            var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput("sln one.sln two.sln three.sln list");
+            var cmd = new DotnetCommand(Log)
+                .Execute("sln", "one.sln", "two.sln", "three.sln", "list");
             cmd.Should().Fail();
             cmd.StdErr.Should().BeVisuallyEquivalentTo($@"{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "two.sln")}
 {string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "three.sln")}");
@@ -77,8 +85,8 @@ Commands:
         [InlineData("ihaveinvalidchar\\acters")]
         public void WhenNonExistingSolutionIsPassedItPrintsErrorAndUsage(string solutionName)
         {
-            var cmd = new DotnetCommand()
-                .ExecuteWithCapturedOutput($"sln {solutionName} list");
+            var cmd = new DotnetCommand(Log)
+                .Execute($"sln", solutionName, "list");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindSolutionOrDirectory, solutionName));
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
@@ -87,16 +95,14 @@ Commands:
         [Fact]
         public void WhenInvalidSolutionIsPassedItPrintsErrorAndUsage()
         {
-            var projectDirectory = TestAssets
-                .Get("InvalidSolution")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("InvalidSolution")
+                .WithSource()
+                .Path;
             
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput("sln InvalidSolution.sln list");
+                .Execute("sln", "InvalidSolution.sln", "list");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.InvalidSolutionFormatString, "InvalidSolution.sln", LocalizableStrings.FileHeaderMissingError));
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
@@ -105,17 +111,15 @@ Commands:
         [Fact]
         public void WhenInvalidSolutionIsFoundListPrintsErrorAndUsage()
         {
-            var projectDirectory = TestAssets
-                .Get("InvalidSolution")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("InvalidSolution")
+                .WithSource()
+                .Path;
 
             var solutionFullPath = Path.Combine(projectDirectory, "InvalidSolution.sln");
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput("sln list");
+                .Execute("sln", "list");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.InvalidSolutionFormatString, solutionFullPath, LocalizableStrings.FileHeaderMissingError));
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
@@ -124,17 +128,15 @@ Commands:
         [Fact]
         public void WhenNoSolutionExistsInTheDirectoryListPrintsErrorAndUsage()
         {
-            var projectDirectory = TestAssets
-                .Get("TestAppWithSlnAndCsprojFiles")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndCsprojFiles")
+                .WithSource()
+                .Path;
 
             var solutionDir = Path.Combine(projectDirectory, "App");
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(solutionDir)
-                .ExecuteWithCapturedOutput("sln list");
+                .Execute("sln", "list");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.SolutionDoesNotExist, solutionDir + Path.DirectorySeparatorChar));
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
@@ -143,16 +145,14 @@ Commands:
         [Fact]
         public void WhenMoreThanOneSolutionExistsInTheDirectoryItPrintsErrorAndUsage()
         {
-            var projectDirectory = TestAssets
-                .Get("TestAppWithMultipleSlnFiles")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithMultipleSlnFiles")
+                .WithSource()
+                .Path;
 
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput("sln list");
+                .Execute("sln", "list");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneSolutionInDirectory, projectDirectory + Path.DirectorySeparatorChar));
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
@@ -161,16 +161,14 @@ Commands:
         [Fact]
         public void WhenNoProjectsArePresentInTheSolutionItPrintsANoProjectMessage()
         {
-            var projectDirectory = TestAssets
-                .Get("TestAppWithEmptySln")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithEmptySln")
+                .WithSource()
+                .Path;
 
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput("sln list");
+                .Execute("sln", "list");
             cmd.Should().Pass();
             cmd.StdOut.Should().Be(CommonLocalizableStrings.NoProjectsFound);
         }
@@ -183,16 +181,14 @@ Commands:
 {Path.Combine("App", "App.csproj")}
 {Path.Combine("Lib", "Lib.csproj")}";
 
-            var projectDirectory = TestAssets
-                .Get("TestAppWithSlnAndExistingCsprojReferences")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndExistingCsprojReferences")
+                .WithSource()
+                .Path;
 
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput("sln list");
+                .Execute("sln", "list");
             cmd.Should().Pass();
             cmd.StdOut.Should().BeVisuallyEquivalentTo(expectedOutput);
         }
@@ -205,20 +201,18 @@ Commands:
 {Path.Combine("App", "App.csproj")}
 {Path.Combine("Lib", "Lib.csproj")}";
 
-            var projectDirectory = TestAssets
-                .Get("TestAppWithSlnAndExistingCsprojReferences")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root
-                .FullName;
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndExistingCsprojReferences")
+                .WithSource()
+                .Path;
 
             var slnFileName = Path.Combine(projectDirectory, "App.sln");
             var attributes = File.GetAttributes(slnFileName);
             File.SetAttributes(slnFileName, attributes | FileAttributes.ReadOnly);
             
-            var cmd = new DotnetCommand()
+            var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .ExecuteWithCapturedOutput("sln list");
+                .Execute("sln", "list");
             cmd.Should().Pass();
             cmd.StdOut.Should().BeVisuallyEquivalentTo(expectedOutput);
         }

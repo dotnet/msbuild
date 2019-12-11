@@ -120,6 +120,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Tools.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-msbuild.Tests", "src\Tests\dotnet-msbuild.Tests\dotnet-msbuild.Tests.csproj", "{8FB015CE-1900-41EE-8E68-C222CE1B8561}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-sln.Tests", "src\Tests\dotnet-sln.Tests\dotnet-sln.Tests.csproj", "{5D421BE2-66A9-43FC-877C-620ACED021EB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -250,6 +252,10 @@ Global
 		{8FB015CE-1900-41EE-8E68-C222CE1B8561}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8FB015CE-1900-41EE-8E68-C222CE1B8561}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8FB015CE-1900-41EE-8E68-C222CE1B8561}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D421BE2-66A9-43FC-877C-620ACED021EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D421BE2-66A9-43FC-877C-620ACED021EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D421BE2-66A9-43FC-877C-620ACED021EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D421BE2-66A9-43FC-877C-620ACED021EB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -292,6 +298,7 @@ Global
 		{C5F191E5-BF2E-4A7A-AE1D-E2393AAA6F99} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{99334000-EBF8-44D9-90D0-BE998ED3FE60} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{8FB015CE-1900-41EE-8E68-C222CE1B8561} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
+		{5D421BE2-66A9-43FC-877C-620ACED021EB} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB8F26CE-4DE6-433F-B32A-79183020BBD6}
