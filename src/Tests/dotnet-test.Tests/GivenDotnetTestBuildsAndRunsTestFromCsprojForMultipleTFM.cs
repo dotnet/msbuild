@@ -3,40 +3,47 @@
 
 using Microsoft.DotNet.Tools.Test.Utilities;
 using FluentAssertions;
-using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Cli.Utils;
 using System.IO;
 using System;
 using Xunit;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.Test.Tests
 {
-    public class GivenDotnetTestBuildsAndRunsTestFromCsprojForMultipleTFM : TestBase
+    public class GivenDotnetTestBuildsAndRunsTestFromCsprojForMultipleTFM : SdkTest
     {
+        public GivenDotnetTestBuildsAndRunsTestFromCsprojForMultipleTFM(ITestOutputHelper log) : base(log)
+        {
+        }
+
+        private readonly string[] ConsoleLoggerOutputNormal = new[] { "--logger", "console;verbosity=normal" };
+
         [WindowsOnlyFact]
         public void MStestMultiTFM()
         {
-            var testProjectDirectory = TestAssets.Get("VSTestMulti")
-                .CreateInstance("1")
-                .WithSourceFiles()
+            var testProjectDirectory = _testAssetsManager.CopyTestAsset("VSTestMulti", identifier: "1")
+                .WithSource()
                 .WithVersionVariables()
-                .WithNuGetConfig(RepoDirectoriesProvider.TestPackages)
-                .Root;
+                .Path;
+
+            NuGetConfigWriter.Write(testProjectDirectory, TestContext.Current.TestPackages);
 
             var runtime = EnvironmentInfo.GetCompatibleRid();
 
-            new RestoreCommand()
+            new DotnetRestoreCommand(Log, "-r", runtime)
                 .WithWorkingDirectory(testProjectDirectory)
-                .WithRuntime(runtime)
                 .Execute()
                 .Should().Pass();
 
-            var result = new DotnetTestCommand()
+            var result = new DotnetTestCommand(Log, "-r", runtime)
                 .WithWorkingDirectory(testProjectDirectory)
-                .WithRuntime(runtime)
-                .ExecuteWithCapturedOutput(TestBase.ConsoleLoggerOutputNormal);
+                .Execute(ConsoleLoggerOutputNormal);
 
-            if (!DotnetUnderTest.IsLocalized())
+            if (!TestContext.IsLocalized())
             {
                 result.StdOut
                     .Should().Contain("Total tests: 3")
@@ -56,27 +63,25 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         {
             // Copy XunitMulti project in output directory of project dotnet-test.Tests
             string testAppName = "XunitMulti";
-            var testInstance = TestAssets.Get(testAppName)
-                            .CreateInstance("2")
-                            .WithSourceFiles()
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName, identifier: "2")
+                            .WithSource()
                             .WithVersionVariables();
 
-            var testProjectDirectory = testInstance.Root.FullName;
+            var testProjectDirectory = testInstance.Path;
 
             // Restore project XunitMulti
-            new RestoreCommand()
-                .WithWorkingDirectory(testProjectDirectory)
+            new RestoreCommand(Log, testProjectDirectory)
                 .Execute()
                 .Should()
                 .Pass();
 
             // Call test
-            CommandResult result = new DotnetTestCommand()
+            CommandResult result = new DotnetTestCommand(Log)
                                        .WithWorkingDirectory(testProjectDirectory)
-                                       .ExecuteWithCapturedOutput(TestBase.ConsoleLoggerOutputNormal);
+                                       .Execute(ConsoleLoggerOutputNormal);
 
             // Verify
-            if (!DotnetUnderTest.IsLocalized())
+            if (!TestContext.IsLocalized())
             {
                 // for target framework net46
                 result.StdOut.Should().Contain("Total tests: 3");
@@ -99,14 +104,13 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         {
             // Copy XunitMulti project in output directory of project dotnet-test.Tests
             string testAppName = "XunitMulti";
-            var testInstance = TestAssets.Get(testAppName)
-                            .CreateInstance("3")
-                            .WithSourceFiles()
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName, identifier: "3")
+                            .WithSource()
                             .WithVersionVariables();
 
-            var testProjectDirectory = testInstance.Root.FullName;
+            var testProjectDirectory = testInstance.Path;
 
-             string resultsDirectory = Path.Combine(testProjectDirectory, "RD");
+            string resultsDirectory = Path.Combine(testProjectDirectory, "RD");
 
             // Delete resultsDirectory if it exist
             if (Directory.Exists(resultsDirectory))
@@ -115,9 +119,9 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             }
 
             // Call test
-            CommandResult result = new DotnetTestCommand()
+            CommandResult result = new DotnetTestCommand(Log, ConsoleLoggerOutputNormal)
                                        .WithWorkingDirectory(testProjectDirectory)
-                                       .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --collect \"Code Coverage\" --results-directory {resultsDirectory}");
+                                       .Execute("--collect", "Code Coverage", "--results-directory", resultsDirectory);
 
             // Verify
             DirectoryInfo d = new DirectoryInfo(resultsDirectory);
@@ -128,17 +132,16 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         [Fact]
         public void ItCanTestAMultiTFMProjectWithImplicitRestore()
         {
-            var testInstance = TestAssets.Get(
-                    TestAssetKinds.DesktopTestProjects,
-                    "MultiTFMXunitProject")
-                .CreateInstance()
-                .WithSourceFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset(
+                    "MultiTFMXunitProject",
+                    testAssetSubdirectory: TestAssetSubdirectories.DesktopTestProjects)
+                .WithSource();
 
-            string projectDirectory = Path.Combine(testInstance.Root.FullName, "XUnitProject");
+            string projectDirectory = Path.Combine(testInstance.Path, "XUnitProject");
 
-            new DotnetTestCommand()
+            new DotnetTestCommand(Log, ConsoleLoggerOutputNormal)
                .WithWorkingDirectory(projectDirectory)
-               .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --framework netcoreapp3.0")
+               .Execute("--framework", "netcoreapp3.0")
                .Should().Pass();
         }
     }

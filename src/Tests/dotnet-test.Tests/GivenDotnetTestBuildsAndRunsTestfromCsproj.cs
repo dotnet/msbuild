@@ -4,7 +4,6 @@
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using FluentAssertions;
-using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Cli.Utils;
 using System.IO;
 using System;
@@ -15,23 +14,34 @@ using System.Xml.Linq;
 using System.Reflection;
 using dotnet.Tests;
 using System.Runtime.InteropServices;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Xunit.Abstractions;
+using Microsoft.NET.TestFramework.Utilities;
 
 namespace Microsoft.DotNet.Cli.Test.Tests
 {
-    public class GivenDotnettestBuildsAndRunsTestfromCsproj : TestBase
+    public class GivenDotnettestBuildsAndRunsTestfromCsproj : SdkTest
     {
+        public GivenDotnettestBuildsAndRunsTestfromCsproj(ITestOutputHelper log) : base(log)
+        {
+        }
+
+        private readonly string [] ConsoleLoggerOutputNormal = new[] { "--logger", "console;verbosity=normal" };
+
         [Fact]
         public void MSTestSingleTFM()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("3");
 
             // Call test
-            CommandResult result = new DotnetTestCommand()
+            CommandResult result = new DotnetTestCommand(Log)
                                         .WithWorkingDirectory(testProjectDirectory)
-                                        .ExecuteWithCapturedOutput(TestBase.ConsoleLoggerOutputNormal);
+                                        .Execute(ConsoleLoggerOutputNormal);
 
             // Verify
-            if (!DotnetUnderTest.IsLocalized())
+            if (!TestContext.IsLocalized())
             {
                 result.StdOut.Should().Contain("Total tests: 2");
                 result.StdOut.Should().Contain("Passed: 1");
@@ -47,18 +57,17 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         public void ItImplicitlyRestoresAProjectWhenTesting()
         {
             string testAppName = "VSTestCore";
-            var testInstance = TestAssets.Get(testAppName)
-                            .CreateInstance()
-                            .WithSourceFiles()
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                            .WithSource()
                             .WithVersionVariables();
 
-            var testProjectDirectory = testInstance.Root.FullName;
+            var testProjectDirectory = testInstance.Path;
 
-            CommandResult result = new DotnetTestCommand()
+            CommandResult result = new DotnetTestCommand(Log)
                                         .WithWorkingDirectory(testProjectDirectory)
-                                        .ExecuteWithCapturedOutput(TestBase.ConsoleLoggerOutputNormal);
+                                        .Execute(ConsoleLoggerOutputNormal);
 
-            if (!DotnetUnderTest.IsLocalized())
+            if (!TestContext.IsLocalized())
             {
                 result.StdOut.Should().Contain("Total tests: 2");
                 result.StdOut.Should().Contain("Passed: 1");
@@ -76,16 +85,15 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         public void ItDoesNotImplicitlyRestoreAProjectWhenTestingWithTheNoRestoreOption()
         {
             string testAppName = "VSTestCore";
-            var testInstance = TestAssets.Get(testAppName)
-                            .CreateInstance()
-                            .WithSourceFiles()
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                            .WithSource()
                             .WithVersionVariables();
 
-            var testProjectDirectory = testInstance.Root.FullName;
+            var testProjectDirectory = testInstance.Path;
 
-            new DotnetTestCommand()
+            new DotnetTestCommand(Log)
                 .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --no-restore /p:IsTestProject=true")
+                .Execute(ConsoleLoggerOutputNormal.Concat(new[] { "--no-restore", "/p:IsTestProject=true" }))
                 .Should().Fail()
                 .And.HaveStdOutContaining("project.assets.json");
         }
@@ -94,16 +102,15 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         public void ItDoesNotRunTestsIfThereIsNoIsTestProject()
         {
             string testAppName = "VSTestCore";
-            var testInstance = TestAssets.Get(testAppName)
-                            .CreateInstance()
-                            .WithSourceFiles()
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                            .WithSource()
                             .WithVersionVariables();
 
-            var testProjectDirectory = testInstance.Root.FullName;
+            var testProjectDirectory = testInstance.Path;
 
-            new DotnetTestCommand()
+            new DotnetTestCommand(Log, ConsoleLoggerOutputNormal)
                 .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --no-restore /p:IsTestProject=''")
+                .Execute("--no-restore", "/p:IsTestProject=''")
                 .Should().Pass();
         }
 
@@ -112,27 +119,25 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         {
             // Copy XunitCore project in output directory of project dotnet-vstest.Tests
             string testAppName = "XunitCore";
-            var testInstance = TestAssets.Get(testAppName)
-                            .CreateInstance("4")
-                            .WithSourceFiles()
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName, identifier: "4")
+                            .WithSource()
                             .WithVersionVariables();
 
-            var testProjectDirectory = testInstance.Root.FullName;
+            var testProjectDirectory = testInstance.Path;
 
             // Restore project XunitCore
-            new RestoreCommand()
-                .WithWorkingDirectory(testProjectDirectory)
+            new RestoreCommand(Log, testProjectDirectory)
                 .Execute()
                 .Should()
                 .Pass();
 
             // Call test
-            CommandResult result = new DotnetTestCommand()
+            CommandResult result = new DotnetTestCommand(Log)
                                         .WithWorkingDirectory(testProjectDirectory)
-                                        .ExecuteWithCapturedOutput(TestBase.ConsoleLoggerOutputNormal);
+                                        .Execute(ConsoleLoggerOutputNormal);
 
             // Verify
-            if (!DotnetUnderTest.IsLocalized())
+            if (!TestContext.IsLocalized())
             {
                 result.StdOut.Should().Contain("Total tests: 2");
                 result.StdOut.Should().Contain("Passed: 1");
@@ -147,18 +152,17 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         [Fact]
         public void GivenAFailingTestItDisplaysFailureDetails()
         {
-            var testInstance = TestAssets.Get("XunitCore")
-                .CreateInstance()
-                .WithSourceFiles()
+            var testInstance = _testAssetsManager.CopyTestAsset("XunitCore")
+                .WithSource()
                 .WithVersionVariables();
 
-            var result = new DotnetTestCommand()
-                .WithWorkingDirectory(testInstance.Root.FullName)
-                .ExecuteWithCapturedOutput();
+            var result = new DotnetTestCommand(Log)
+                .WithWorkingDirectory(testInstance.Path)
+                .Execute();
 
             result.ExitCode.Should().Be(1);
 
-            if (!DotnetUnderTest.IsLocalized())
+            if (!TestContext.IsLocalized())
             {
                 result.StdOut.Should().Contain("X TestNamespace.VSTestXunitTests.VSTestXunitFailTest");
                 result.StdOut.Should().Contain("Total tests: 2");
@@ -182,12 +186,13 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             }
 
             // Call test with logger enable
-            CommandResult result = new DotnetTestCommand()
+            CommandResult result = new DotnetTestCommand(Log)
                                        .WithWorkingDirectory(testProjectDirectory)
-                                       .ExecuteWithCapturedOutput("--logger \"trx;logfilename=custom.trx\" --logger console;verbosity=normal -- RunConfiguration.ResultsDirectory=" + trxLoggerDirectory);
+                                       .Execute("--logger", "trx;logfilename=custom.trx", "--logger",
+                                            "console;verbosity=normal", "--", "RunConfiguration.ResultsDirectory=" + trxLoggerDirectory);
 
             // Verify
-            if (!DotnetUnderTest.IsLocalized())
+            if (!TestContext.IsLocalized())
             {
                 // We append current date time to trx file name, hence modifying this check
                 Assert.True(Directory.EnumerateFiles(trxLoggerDirectory, trxFileNamePattern).Any());
@@ -203,7 +208,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             }
         }
 
-        [Fact(Skip="https://github.com/microsoft/vstest/issues/2202")]
+        [Fact]
         public void TestWillNotBuildTheProjectIfNoBuildArgsIsGiven()
         {
             // Copy and restore VSTestCore project in output directory of project dotnet-vstest.Tests
@@ -214,12 +219,12 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             expectedError = "The test source file " + "\"" + expectedError + "\"" + " provided was not found.";
 
             // Call test
-            CommandResult result = new DotnetTestCommand()
+            CommandResult result = new DotnetTestCommand(Log)
                                        .WithWorkingDirectory(testProjectDirectory)
-                                       .ExecuteWithCapturedOutput("--no-build -v:m");
+                                       .Execute("--no-build", "-v:m");
 
             // Verify
-            if (!DotnetUnderTest.IsLocalized())
+            if (!TestContext.IsLocalized())
             {
                 result.StdOut.Should().NotContain("Restore");
                 //  https://github.com/dotnet/sdk/issues/3684
@@ -246,9 +251,9 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             }
 
             // Call test with trx logger enabled and results directory explicitly specified.
-            CommandResult result = new DotnetTestCommand()
+            CommandResult result = new DotnetTestCommand(Log)
                                        .WithWorkingDirectory(testProjectDirectory)
-                                       .ExecuteWithCapturedOutput("--logger trx -r \"" + trxLoggerDirectory + "\"");
+                                       .Execute("--logger", "trx", "-r", trxLoggerDirectory);
 
             // Verify
             String[] trxFiles = Directory.GetFiles(trxLoggerDirectory, "*.trx");
@@ -277,9 +282,10 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             }
 
             // Call test with logger enable
-            CommandResult result = new DotnetTestCommand()
+            CommandResult result = new DotnetTestCommand(Log)
                                        .WithWorkingDirectory(testProjectDirectory)
-                                       .ExecuteWithCapturedOutput("--logger \"trx;logfilename=custom.trx\" -- RunConfiguration.ResultsDirectory=" + trxLoggerDirectory);
+                                       .Execute("--logger", "trx;logfilename=custom.trx", "--",
+                                                "RunConfiguration.ResultsDirectory=" + trxLoggerDirectory);
 
             // Verify
             // We append current date time to trx file name, hence modifying this check
@@ -296,43 +302,41 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         public void ItBuildsAndTestsAppWhenRestoringToSpecificDirectory()
         {
             // Creating folder with name short name "RestoreTest" to avoid PathTooLongException
-            var rootPath = TestAssets.Get("VSTestCore")
-                .CreateInstance("8")
-                .WithSourceFiles()
+            var rootPath = _testAssetsManager.CopyTestAsset("VSTestCore", identifier: "8")
+                .WithSource()
                 .WithVersionVariables()
-                .Root.FullName;
+                .Path;
 
             
             string pkgDir;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                // Moving pkgs folder on top to avoid PathTooLongException
-                pkgDir = Path.Combine(RepoDirectoriesProvider.TestWorkingFolder, "pkgs");
-            }
-            else
+            //if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            //{
+            //    // Moving pkgs folder on top to avoid PathTooLongException
+            //    pkgDir = Path.Combine(RepoDirectoriesProvider.TestWorkingFolder, "pkgs");
+            //}
+            //else
             {
                 pkgDir = Path.Combine(rootPath, "pkgs");
             }
 
-            string args = $"--packages \"{pkgDir}\"";
-            new RestoreCommand()
+            new DotnetRestoreCommand(Log)
                 .WithWorkingDirectory(rootPath)
-                .Execute(args)
+                .Execute("--packages", pkgDir)
                 .Should()
                 .Pass();
 
-            new BuildCommand()
+            new DotnetBuildCommand(Log)
                 .WithWorkingDirectory(rootPath)
-                .ExecuteWithCapturedOutput("--no-restore")
+                .Execute("--no-restore")
                 .Should()
                 .Pass()
                 .And.NotHaveStdErr();
 
-            CommandResult result = new DotnetTestCommand()
+            CommandResult result = new DotnetTestCommand(Log, ConsoleLoggerOutputNormal)
                                         .WithWorkingDirectory(rootPath)
-                                        .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --no-restore");
+                                        .Execute("--no-restore");
 
-            if (!DotnetUnderTest.IsLocalized())
+            if (!TestContext.IsLocalized())
             {
                 result.StdOut.Should().Contain("Total tests: 2");
                 result.StdOut.Should().Contain("Passed: 1");
@@ -351,12 +355,12 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("9");
 
             // Call test
-            CommandResult result = new DotnetTestCommand()
+            CommandResult result = new DotnetTestCommand(Log)
                                         .WithWorkingDirectory(testProjectDirectory)
-                                        .ExecuteWithCapturedOutput("-v q");
+                                        .Execute("-v", "q");
 
             // Verify
-            if (!DotnetUnderTest.IsLocalized())
+            if (!TestContext.IsLocalized())
             {
                 result.StdOut.Should().Contain("Total tests: 2");
                 result.StdOut.Should().Contain("Passed: 1");
@@ -371,24 +375,23 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         [Fact]
         public void ItTestsWithTheSpecifiedRuntimeOption()
         {
-            var testInstance = TestAssets.Get("XunitCore")
-                            .CreateInstance()
-                            .WithSourceFiles()
+            var testInstance = _testAssetsManager.CopyTestAsset("XunitCore")
+                            .WithSource()
                             .WithVersionVariables();
 
-            var rootPath = testInstance.Root.FullName;
+            var rootPath = testInstance.Path;
             var rid = EnvironmentInfo.GetCompatibleRid();
 
-            new BuildCommand()
+            new DotnetBuildCommand(Log)
                 .WithWorkingDirectory(rootPath)
-                .ExecuteWithCapturedOutput($"--runtime {rid}")
+                .Execute("--runtime", rid)
                 .Should()
                 .Pass()
                 .And.NotHaveStdErr();
 
-            var result = new DotnetTestCommand()
+            var result = new DotnetTestCommand(Log, ConsoleLoggerOutputNormal)
                 .WithWorkingDirectory(rootPath)
-                .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --no-build --runtime {rid}");
+                .Execute("--no-build", "--runtime", rid);
 
             result
                 .Should()
@@ -396,7 +399,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 .And
                 .HaveStdOutContaining(rid);
 
-            if (!DotnetUnderTest.IsLocalized())
+            if (!TestContext.IsLocalized())
             {
                 result.StdOut.Should().Contain("Total tests: 2");
                 result.StdOut.Should().Contain("Passed: 1");
@@ -413,12 +416,12 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("14");
 
             // Call test with logger enable
-            CommandResult result = new DotnetTestCommand()
+            CommandResult result = new DotnetTestCommand(Log)
                                        .WithWorkingDirectory(testProjectDirectory)
-                                       .ExecuteWithCapturedOutput("--nologo");
+                                       .Execute("--nologo");
 
             // Verify
-            if (!DotnetUnderTest.IsLocalized())
+            if (!TestContext.IsLocalized())
             {
                 result.StdOut.Should().NotContain("Microsoft (R) Test Execution Command Line Tool Version");
                 result.StdOut.Should().Contain("Total tests: 2");
@@ -443,17 +446,17 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             var settingsPath =Path.Combine(AppContext.BaseDirectory, "CollectCodeCoverage.runsettings");
 
             // Call test
-            CommandResult result = new DotnetTestCommand()
+            CommandResult result = new DotnetTestCommand(Log)
                                         .WithWorkingDirectory(testProjectDirectory)
-                                        .ExecuteWithCapturedOutput(
-                                            "--settings " + settingsPath
-                                            + " --results-directory " + resultsDirectory);
+                                        .Execute(
+                                            "--settings", settingsPath,
+                                            "--results-directory", resultsDirectory);
 
             File.WriteAllText(Path.Combine(testProjectDirectory, "output.txt"),
                                 result.StdOut + Environment.NewLine + result.StdErr);
 
             // Verify test results
-            if (!DotnetUnderTest.IsLocalized())
+            if (!TestContext.IsLocalized())
             {
                 result.StdOut.Should().Contain("Total tests: 2");
                 result.StdOut.Should().Contain("Passed: 1");
@@ -482,14 +485,14 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             }
 
             // Call test
-            CommandResult result = new DotnetTestCommand()
+            CommandResult result = new DotnetTestCommand(Log)
                                         .WithWorkingDirectory(testProjectDirectory)
-                                        .ExecuteWithCapturedOutput(
-                                            "--collect \"Code Coverage\" "
-                                            + "--results-directory " + resultsDirectory);
+                                        .Execute(
+                                            "--collect", "Code Coverage",
+                                            "--results-directory", resultsDirectory);
 
             // Verify test results
-            if (!DotnetUnderTest.IsLocalized())
+            if (!TestContext.IsLocalized())
             {
                 result.StdOut.Should().Contain("Total tests: 2");
                 result.StdOut.Should().Contain("Passed: 1");
@@ -510,14 +513,14 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("13");
 
             // Call test
-            CommandResult result = new DotnetTestCommand()
+            CommandResult result = new DotnetTestCommand(Log)
                                         .WithWorkingDirectory(testProjectDirectory)
-                                        .ExecuteWithCapturedOutput(
-                                            "--collect \"Code Coverage\" "
-                                            + "--filter VSTestPassTest");
+                                        .Execute(
+                                            "--collect", "Code Coverage",
+                                            "--filter", "VSTestPassTest");
 
             // Verify test results
-            if (!DotnetUnderTest.IsLocalized())
+            if (!TestContext.IsLocalized())
             {
                 result.StdOut.Should().Contain("No code coverage data available. Code coverage is currently supported only on Windows.");
                 result.StdOut.Should().Contain("Total tests: 1");
@@ -532,21 +535,20 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         public void ItShouldNotShowImportantMessage()
         {
             string testAppName = "VSTestCore";
-            var testInstance = TestAssets.Get(testAppName)
-                .CreateInstance()
-                .WithSourceFiles()
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource()
                 .WithVersionVariables()
                 .WithProjectChanges(ProjectModification.AddDisplayMessageBeforeVsTestToProject);
 
-            var testProjectDirectory = testInstance.Root.FullName;
+            var testProjectDirectory = testInstance.Path;
 
             // Call test
-            CommandResult result = new DotnetTestCommand()
+            CommandResult result = new DotnetTestCommand(Log)
                 .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput();
+                .Execute();
 
             // Verify
-            if (!DotnetUnderTest.IsLocalized())
+            if (!TestContext.IsLocalized())
             {
                 result.StdOut.Should().NotContain("Important text");
             }
@@ -558,21 +560,20 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         public void ItShouldShowImportantMessageWhenInteractiveFlagIsPassed()
         {
             string testAppName = "VSTestCore";
-            var testInstance = TestAssets.Get(testAppName)
-                .CreateInstance()
-                .WithSourceFiles()
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource()
                 .WithVersionVariables()
                 .WithProjectChanges(ProjectModification.AddDisplayMessageBeforeVsTestToProject);
 
-            var testProjectDirectory = testInstance.Root.FullName;
+            var testProjectDirectory = testInstance.Path;
 
             // Call test
-            CommandResult result = new DotnetTestCommand()
+            CommandResult result = new DotnetTestCommand(Log)
                 .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput("--interactive");
+                .Execute("--interactive");
 
             // Verify
-            if (!DotnetUnderTest.IsLocalized())
+            if (!TestContext.IsLocalized())
             {
                 result.StdOut.Should().Contain("Important text");
             }
@@ -585,16 +586,14 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Copy VSTestCore project in output directory of project dotnet-vstest.Tests
             string testAppName = "VSTestCore";
 
-            var testInstance = TestAssets.Get(testAppName)
-                            .CreateInstance(callingMethod)
-                            .WithSourceFiles()
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName, callingMethod: callingMethod)
+                            .WithSource()
                             .WithVersionVariables();
 
-            var testProjectDirectory = testInstance.Root.FullName;
+            var testProjectDirectory = testInstance.Path;
 
             // Restore project VSTestCore
-            new RestoreCommand()
-                .WithWorkingDirectory(testProjectDirectory)
+            new RestoreCommand(Log, testProjectDirectory)
                 .Execute()
                 .Should()
                 .Pass();
