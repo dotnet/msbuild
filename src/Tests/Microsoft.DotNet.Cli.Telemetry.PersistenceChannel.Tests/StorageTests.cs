@@ -7,7 +7,9 @@ using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Extensibility.Implementation;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework;
 using Xunit;
+using Xunit.Abstractions;
 using IChannelTelemetry = Microsoft.ApplicationInsights.Channel.ITelemetry;
 
 namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
@@ -22,8 +24,12 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
     ///     Therefore those UnitTests just doesn't mock the file system. Every unit test in <see cref="StorageTests" />
     ///     reads and writes files to/from the disk.
     /// </remarks>
-    public class StorageTests : TestBase
+    public class StorageTests : SdkTest
     {
+        public StorageTests(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void EnqueuedContentIsEqualToPeekedContent()
         {
@@ -191,9 +197,9 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
             return firstTransmission;
         }
 
-        private static string GetTemporaryPath([CallerMemberName] string callingMethod = null)
+        private string GetTemporaryPath([CallerMemberName] string callingMethod = null)
         {
-            return TestAssets.CreateTestDirectory(callingMethod).FullName;
+            return _testAssetsManager.CreateTestDirectory(callingMethod).Path;
         }
     }
 }

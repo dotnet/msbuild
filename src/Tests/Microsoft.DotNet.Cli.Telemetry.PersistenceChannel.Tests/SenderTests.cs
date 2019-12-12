@@ -4,12 +4,14 @@ using System.Net;
 using System.Threading;
 using FluentAssertions;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework;
 using Moq;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
 {
-    public class SenderTests
+    public class SenderTests : SdkTest
     {
         private int _deleteCount;
 
@@ -19,7 +21,7 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
 
         private SenderUnderTest Sender { get; }
 
-        public SenderTests()
+        public SenderTests(ITestOutputHelper log) : base(log)
         {
             StorageBaseMock = new Mock<BaseStorageService>();
             TransmissionMock = new Mock<StorageTransmission>(string.Empty, new Uri("http://some/url"), new byte[] { },
@@ -168,9 +170,9 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
             }
         }
 
-        private static StorageService CreateStorageService()
+        private StorageService CreateStorageService()
         {
-            string tempPath = Path.Combine(TempRoot.Root, "TestStorageService", Path.GetTempFileName());
+            string tempPath = Path.Combine(_testAssetsManager.CreateTestDirectory("TestStorageService").Path, Path.GetTempFileName());
             StorageService storageService = new StorageService();
             storageService.Init(tempPath);
             return storageService;
