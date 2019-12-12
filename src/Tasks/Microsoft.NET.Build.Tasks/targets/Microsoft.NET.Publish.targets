@@ -442,6 +442,12 @@ Copyright (c) .NET Foundation. All rights reserved.
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
 
+      <!-- Copy generated COM References. -->
+      <ResolvedFileToPublish Include="@(ReferenceComWrappersToCopyLocal)">
+        <RelativePath>@(ReferenceComWrappersToCopyLocal->'%(Filename)%(Extension)')</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+
       <!-- Copy the resolved copy local publish assets. -->
       <ResolvedFileToPublish Include="@(_ResolvedCopyLocalPublishAssets)">
         <RelativePath>%(_ResolvedCopyLocalPublishAssets.DestinationSubDirectory)%(Filename)%(Extension)</RelativePath>
