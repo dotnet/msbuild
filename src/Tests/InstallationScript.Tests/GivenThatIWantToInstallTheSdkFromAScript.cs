@@ -10,18 +10,26 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using System.Collections.Generic;
-
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.InstallationScript.Tests
 {
-    public class GivenThatIWantToInstallTheSdkFromAScript : TestBase
+    public class GivenThatIWantToInstallTheSdkFromAScript : SdkTest
     {
-        private static string InstallationScriptTestsJsonFile = Path.Combine(RepoDirectoriesProvider.RepoRoot, "TestAssets", "InstallationScriptTests", "InstallationScriptTests.json").ToString();
+        public GivenThatIWantToInstallTheSdkFromAScript(ITestOutputHelper log) : base(log)
+        {
+        }
 
         [Fact]
         public void WhenJsonFileIsPassedToInstallScripts()
         {
-            var args = new List<string> { "-dryrun", "-jsonfile", InstallationScriptTestsJsonFile };
+            var installationScriptTestsJsonFile = Path.Combine(_testAssetsManager.TestAssetsRoot,
+                "InstallationScriptTests", "InstallationScriptTests.json");
+
+            var args = new List<string> { "-dryrun", "-jsonfile", installationScriptTestsJsonFile };
 
             var commandResult = CreateInstallCommand(args)
                             .CaptureStdOut()
@@ -176,11 +184,12 @@ namespace Microsoft.DotNet.InstallationScript.Tests
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 path = "powershell.exe";
-                finalArgs = "-ExecutionPolicy Bypass -NoProfile -NoLogo -Command \"" + Path.Combine(RepoDirectoriesProvider.RepoRoot, "scripts", "obtain", "dotnet-install.ps1") + " " + ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args) + "\"";
+                finalArgs = "-ExecutionPolicy Bypass -NoProfile -NoLogo -Command \"" +
+                    Path.Combine(TestContext.GetRepoRoot(), "scripts", "obtain", "dotnet-install.ps1") + " " + ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args) + "\"";
             }
             else
             {
-                path = Path.Combine(RepoDirectoriesProvider.RepoRoot, "scripts", "obtain", "dotnet-install.sh");
+                path = Path.Combine(TestContext.GetRepoRoot(), "scripts", "obtain", "dotnet-install.sh");
                 finalArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args);
             }
 
