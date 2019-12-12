@@ -4,33 +4,35 @@
 using System.IO;
 using FluentAssertions;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.Utils.Tests
 {
-    public class GivenAppThrowingException : TestBase
+    public class GivenAppThrowingException : SdkTest
     {
+        public GivenAppThrowingException(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [RequiresSpecificFrameworkFact("netcoreapp1.1")]
         public void ItShowsStackTraceWhenRun()
         {
-            var root = TestAssets.Get("NonRestoredTestProjects", "AppThrowingException")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root;
+            var root = _testAssetsManager.CopyTestAsset("AppThrowingException", testAssetSubdirectory: TestAssetSubdirectories.NonRestoredTestProjects)
+                .WithSource()
+                .Path;
 
-            var appRoot = Path.Combine(root.FullName, "App");
-
-            new RestoreCommand()
-                .WithWorkingDirectory(appRoot)
-                .Execute()
-                .Should().Pass();
+            var appRoot = Path.Combine(root, "App");
 
             string msg1 = "Unhandled Exception: AppThrowing.MyException: "
                 + "Exception of type 'AppThrowing.MyException' was thrown.";
             string msg2 = "at AppThrowing.MyException.Main(String[] args)";
-            new DotnetCommand()
+            new DotnetCommand(Log)
                 .WithWorkingDirectory(appRoot)
-                .ExecuteWithCapturedOutput("run")
+                .Execute("run")
                 .Should().Fail()
                          .And.HaveStdErrContaining(msg1)
                          .And.HaveStdErrContaining(msg2);
@@ -39,37 +41,30 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         [RequiresSpecificFrameworkFact("netcoreapp1.1")]
         public void ItShowsStackTraceWhenRunAsTool()
         {
-            var root = TestAssets.Get("NonRestoredTestProjects", "AppThrowingException")
-                .CreateInstance()
-                .WithSourceFiles()
-                .Root;
+            var root = _testAssetsManager.CopyTestAsset("AppThrowingException", testAssetSubdirectory: TestAssetSubdirectories.NonRestoredTestProjects)
+                .WithSource()
+                .Path;
 
-            var appRoot = Path.Combine(root.FullName, "App");
+            var appRoot = Path.Combine(root, "App");
 
-            new RestoreCommand()
+            new DotnetPackCommand(Log)
                 .WithWorkingDirectory(appRoot)
-                .Execute()
-                .Should().Pass();
-
-            new PackCommand()
-                .WithWorkingDirectory(appRoot)
-                .Execute("-o ../pkgs")
+                .Execute("-o", "../pkgs")
                 .Should()
                 .Pass();
 
-            var appWithToolDepRoot = Path.Combine(root.FullName, "AppDependingOnOtherAsTool");
+            var appWithToolDepRoot = Path.Combine(root, "AppDependingOnOtherAsTool");
 
-            new RestoreCommand()
-                .WithWorkingDirectory(appWithToolDepRoot)
+            new RestoreCommand(Log, appWithToolDepRoot)
                 .Execute()
                 .Should().Pass();
 
             string msg1 = "Unhandled Exception: AppThrowing.MyException: "
                 + "Exception of type 'AppThrowing.MyException' was thrown.";
             string msg2 = "at AppThrowing.MyException.Main(String[] args)";
-            new DotnetCommand()
+            new DotnetCommand(Log)
                 .WithWorkingDirectory(appWithToolDepRoot)
-                .ExecuteWithCapturedOutput("throwingtool")
+                .Execute("throwingtool")
                 .Should().Fail()
                          .And.HaveStdErrContaining(msg1)
                          .And.HaveStdErrContaining(msg2);

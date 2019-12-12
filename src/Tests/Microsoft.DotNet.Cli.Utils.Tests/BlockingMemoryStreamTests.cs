@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
-    public class BlockingMemoryStreamTests : TestBase
+    public class BlockingMemoryStreamTests
     {
         /// <summary>
         /// Tests reading a bigger buffer than what is available.

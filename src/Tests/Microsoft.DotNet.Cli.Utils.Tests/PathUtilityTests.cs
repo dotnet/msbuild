@@ -3,11 +3,12 @@
 
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework;
 using Xunit;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
-    public class PathUtilityTests : TestBase
+    public class PathUtilityTests
     {
         /// <summary>
         /// Tests that PathUtility.GetRelativePath treats drive references as case insensitive on Windows.

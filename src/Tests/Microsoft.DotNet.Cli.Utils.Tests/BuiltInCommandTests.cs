@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
-    public class BuiltInCommandTests : TestBase
+    public class BuiltInCommandTests
     {
         /// <summary>
         /// Tests that BuiltInCommand.Execute returns the correct exit code and a

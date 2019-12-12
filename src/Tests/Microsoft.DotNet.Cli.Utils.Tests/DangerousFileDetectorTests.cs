@@ -7,17 +7,25 @@ using System.IO;
 using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Microsoft.Win32.SafeHandles;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.Utils.Tests
 {
-    public class DangerousFileDetectorTests : TestBase
+    public class DangerousFileDetectorTests : SdkTest
     {
+        public DangerousFileDetectorTests(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [WindowsOnlyFact]
         public void ItShouldDetectFileWithMarkOfTheWeb()
         {
-            var testFile = Path.Combine(TestAssets.CreateTestDirectory().FullName, Path.GetRandomFileName());
+            var testFile = Path.Combine(_testAssetsManager.CreateTestDirectory().Path, Path.GetRandomFileName());
             
             File.WriteAllText(testFile, string.Empty);
             AlternateStream.WriteAlternateStream(
@@ -31,15 +39,15 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         [Fact]
         public void WhenThereIsNoFileItReturnsFalse()
         {
-            var testFile = Path.Combine(TestAssets.CreateTestDirectory().FullName, Path.GetRandomFileName());
+            var testFile = Path.Combine(_testAssetsManager.CreateTestDirectory().Path, Path.GetRandomFileName());
 
             new DangerousFileDetector().IsDangerous(testFile).Should().BeFalse();
         }
 
-        [NonWindowsOnlyFact]
+        [UnixOnlyFact]
         public void WhenRunOnNonWindowsReturnFalse()
         {
-            var testFile = Path.Combine(TestAssets.CreateTestDirectory().FullName, Path.GetRandomFileName());
+            var testFile = Path.Combine(_testAssetsManager.CreateTestDirectory().Path, Path.GetRandomFileName());
             File.WriteAllText(testFile, string.Empty);
 
             new DangerousFileDetector().IsDangerous(testFile).Should().BeFalse();

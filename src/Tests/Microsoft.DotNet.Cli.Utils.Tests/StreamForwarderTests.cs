@@ -7,12 +7,20 @@ using System.IO;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace StreamForwarderTests
 {
-    public class StreamForwarderTests : TestBase
+    public class StreamForwarderTests : SdkTest
     {
+        public StreamForwarderTests(ITestOutputHelper log) : base(log)
+        {
+        }
+
         public static IEnumerable<object[]> ForwardingTheoryVariations
         {
             get
@@ -108,24 +116,6 @@ namespace StreamForwarderTests
 
             var captured = forwarder.CapturedOutput;
             Assert.Equal(expectedCaptured, captured);
-        }
-
-        private string SetupTestProject()
-        {
-
-            var testPath = TestAssets.Get("OutputStandardOutputAndError")
-                                        .CreateInstance()
-                                        .WithRestoreFiles()
-                                        .Root.FullName;
-
-            var buildCommand = new BuildCommand()
-                .WithProjectFile(new FileInfo(Path.Combine(testPath, "project.json")))
-                .Execute();
-                
-            var buildOutputExe = "OutputStandardOutputAndError" + Constants.ExeSuffix;
-            var buildOutputPath = Path.Combine(testPath, "bin/Debug/netcoreapp1.0", buildOutputExe);
-
-            return buildOutputPath;
         }
     }
 }
