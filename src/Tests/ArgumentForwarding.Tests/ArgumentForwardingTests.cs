@@ -13,10 +13,13 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using System.Diagnostics;
 using FluentAssertions;
 using Microsoft.DotNet.CommandFactory;
+using Microsoft.NET.TestFramework;
+using Xunit.Abstractions;
+using Microsoft.NET.TestFramework.Commands;
 
 namespace Microsoft.DotNet.Tests.ArgumentForwarding
 {
-    public class ArgumentForwardingTests : TestBase
+    public class ArgumentForwardingTests : SdkTest
     {
         private static readonly string s_reflectorDllName = "ArgumentsReflector.dll";
         private static readonly string s_reflectorCmdName = "reflector_cmd";
@@ -24,7 +27,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
         private string ReflectorPath { get; set; }
         private string ReflectorCmdPath { get; set; }
 
-        public ArgumentForwardingTests()
+        public ArgumentForwardingTests(ITestOutputHelper log) : base(log)
         {
             // This test has a dependency on an argument reflector
             // Make sure it's been binplaced properly
@@ -53,7 +56,6 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
         [InlineData(@"a\""b c d")]
         [InlineData(@"a\\""b c d")]
         [InlineData(@"a\\\""b c d")]
-        [InlineData(@"a\\\\""b c d")]
         [InlineData(@"a\\\\""b c d")]
         [InlineData(@"a\\\\""b c"" d e")]
         [InlineData(@"a""b c""d e""f g""h i""j k""l")]
@@ -91,7 +93,6 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
         [InlineData(@"a\\b d""e f""g h")]
         [InlineData(@"\ \\ \\\")]
         [InlineData(@"a\\""b c d")]
-        [InlineData(@"a\\\\""b c d")]
         [InlineData(@"a\\\\""b c d")]
         [InlineData(@"a\\\\""b c"" d e")]
         [InlineData(@"a""b c""d e""f g""h i""j k""l")]
@@ -252,7 +253,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = RepoDirectoriesProvider.DotnetUnderTest,
+                    FileName = TestContext.Current.ToolsetUnderTest.DotNetHostPath,
                     Arguments = $"{ReflectorPath} {testUserArgument}",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,

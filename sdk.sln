@@ -122,6 +122,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-msbuild.Tests", "src
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-sln.Tests", "src\Tests\dotnet-sln.Tests\dotnet-sln.Tests.csproj", "{5D421BE2-66A9-43FC-877C-620ACED021EB}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArgumentsReflector", "src\Tests\ArgumentsReflector\ArgumentsReflector.csproj", "{587A6639-FA2A-498C-8FA2-F77925DB732B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArgumentForwarding.Tests", "src\Tests\ArgumentForwarding.Tests\ArgumentForwarding.Tests.csproj", "{2D8AA9EA-3013-47DE-B2DD-E074F67467ED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -256,6 +260,14 @@ Global
 		{5D421BE2-66A9-43FC-877C-620ACED021EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D421BE2-66A9-43FC-877C-620ACED021EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D421BE2-66A9-43FC-877C-620ACED021EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{587A6639-FA2A-498C-8FA2-F77925DB732B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{587A6639-FA2A-498C-8FA2-F77925DB732B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{587A6639-FA2A-498C-8FA2-F77925DB732B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{587A6639-FA2A-498C-8FA2-F77925DB732B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D8AA9EA-3013-47DE-B2DD-E074F67467ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D8AA9EA-3013-47DE-B2DD-E074F67467ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D8AA9EA-3013-47DE-B2DD-E074F67467ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D8AA9EA-3013-47DE-B2DD-E074F67467ED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -299,6 +311,8 @@ Global
 		{99334000-EBF8-44D9-90D0-BE998ED3FE60} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{8FB015CE-1900-41EE-8E68-C222CE1B8561} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{5D421BE2-66A9-43FC-877C-620ACED021EB} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
+		{587A6639-FA2A-498C-8FA2-F77925DB732B} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
+		{2D8AA9EA-3013-47DE-B2DD-E074F67467ED} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB8F26CE-4DE6-433F-B32A-79183020BBD6}
