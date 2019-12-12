@@ -130,6 +130,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EndToEnd.Tests", "src\Tests
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InstallationScript.Tests", "src\Tests\InstallationScript.Tests\InstallationScript.Tests.csproj", "{1552D0BB-6B8D-400E-A9B4-F58C0BA1C903}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Cli.Sln.Internal.Tests", "src\Tests\Microsoft.DotNet.Cli.Sln.Internal.Tests\Microsoft.DotNet.Cli.Sln.Internal.Tests.csproj", "{82D910C3-A5E2-41F0-A142-F4F2D770CB59}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -280,6 +282,10 @@ Global
 		{1552D0BB-6B8D-400E-A9B4-F58C0BA1C903}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1552D0BB-6B8D-400E-A9B4-F58C0BA1C903}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1552D0BB-6B8D-400E-A9B4-F58C0BA1C903}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82D910C3-A5E2-41F0-A142-F4F2D770CB59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82D910C3-A5E2-41F0-A142-F4F2D770CB59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82D910C3-A5E2-41F0-A142-F4F2D770CB59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82D910C3-A5E2-41F0-A142-F4F2D770CB59}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -327,6 +333,7 @@ Global
 		{2D8AA9EA-3013-47DE-B2DD-E074F67467ED} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{A0EFB2CB-517F-4746-902E-D0EBEFFBD89B} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{1552D0BB-6B8D-400E-A9B4-F58C0BA1C903} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
+		{82D910C3-A5E2-41F0-A142-F4F2D770CB59} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB8F26CE-4DE6-433F-B32A-79183020BBD6}

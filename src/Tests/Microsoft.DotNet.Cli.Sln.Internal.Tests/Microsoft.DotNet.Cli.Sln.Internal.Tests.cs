@@ -6,13 +6,16 @@ using System.IO;
 using FluentAssertions;
 using Xunit;
 using Microsoft.DotNet.Cli.Sln.Internal;
-using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using System.Runtime.CompilerServices;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.Sln.Internal.Tests
 {
-    public class GivenAnSlnFile : TestBase
+    public class GivenAnSlnFile : SdkTest
     {
         private const string SolutionModified = @"
 Microsoft Visual Studio Solution File, Format Version 14.00
@@ -97,10 +100,14 @@ Global
 EndGlobal
 ";
 
+        public GivenAnSlnFile(ITestOutputHelper log) : base(log)
+        {
+        }
+
         private string CreateFile([CallerMemberName] string callerName = null)
         {
-            var folder = TestAssets.CreateTestDirectory(callingMethod: callerName, testProjectName: "tempfile");
-            var filename = Path.Combine(folder.FullName, Guid.NewGuid().ToString() + ".tmp");
+            var folder = _testAssetsManager.CreateTestDirectory(testName: callerName);
+            var filename = Path.Combine(folder.Path, Guid.NewGuid().ToString() + ".tmp");
             using (new FileStream(filename, FileMode.CreateNew)) { }
             return filename;
         }
