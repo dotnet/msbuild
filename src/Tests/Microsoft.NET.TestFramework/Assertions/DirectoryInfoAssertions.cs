@@ -90,6 +90,16 @@ namespace Microsoft.NET.TestFramework.Assertions
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
 
+        public AndConstraint<DirectoryInfoAssertions> NotHaveFilesMatching(string expectedFilesSearchPattern, SearchOption searchOption)
+        {
+            var matchingFileCount = _dirInfo.EnumerateFiles(expectedFilesSearchPattern, searchOption).Count();
+            Execute.Assertion.ForCondition(matchingFileCount == 0)
+                .FailWith("Found {0} files that should not exist in directory {1}. No file matching {2} should exist.",
+                    matchingFileCount, _dirInfo.FullName, expectedFilesSearchPattern);
+            return new AndConstraint<DirectoryInfoAssertions>(this);
+        }
+
+
         public AndConstraint<DirectoryInfoAssertions> HaveDirectory(string expectedDir)
         {
             var dir = _dirInfo.EnumerateDirectories(expectedDir, SearchOption.TopDirectoryOnly).SingleOrDefault();

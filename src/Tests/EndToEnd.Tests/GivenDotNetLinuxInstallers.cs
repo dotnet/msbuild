@@ -4,12 +4,20 @@
 using System;
 using System.IO;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Tests.EndToEnd
 {
-    public class GivenDotNetLinuxInstallers
+    public class GivenDotNetLinuxInstallers : SdkTest
     {
+        public GivenDotNetLinuxInstallers(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void ItHasExpectedDependencies()
         {
@@ -53,8 +61,8 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             // Homepage: https://dotnet.github.io/core
             // Description: Microsoft .NET Core SDK - 2.1.104
 
-            new TestCommand("dpkg")
-                .ExecuteWithCapturedOutput($"--info {installerFile}")
+            new RunExeCommand(Log, "dpkg")
+                .Execute("--info", installerFile)
                 .Should().Pass()
                     .And.HaveStdOutMatching(@"Depends:.*\s?dotnet-runtime-\d+(\.\d+){2}")
                     .And.HaveStdOutMatching(@"Depends:.*\s?aspnetcore-store-\d+(\.\d+){2}");
@@ -73,8 +81,8 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             // rpmlib(PayloadFilesHavePrefix) <= 4.0-1
             // rpmlib(CompressedFileNames) <= 3.0.4-1
 
-            new TestCommand("rpm")
-                .ExecuteWithCapturedOutput($"-qpR {installerFile}")
+            new RunExeCommand(Log, "rpm")
+                .Execute("-qpR", installerFile)
                 .Should().Pass()
                     .And.HaveStdOutMatching(@"dotnet-runtime-\d+(\.\d+){2} >= \d+(\.\d+){2}")
                     .And.HaveStdOutMatching(@"aspnetcore-store-\d+(\.\d+){2} >= \d+(\.\d+){2}");
