@@ -1599,6 +1599,10 @@ namespace Microsoft.Build.Construction
                 XmlDocument.Save(projectWriter);
             }
 
+            if (DateTime.Now.CompareTo(_lastWriteTimeWhenRead) > 0)
+            {
+                _lastWriteTimeWhenRead = DateTime.Now;
+            }
             _versionOnDisk = Version;
         }
 
