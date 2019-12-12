@@ -9,14 +9,21 @@ using System.Reflection.PortableExecutable;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using FluentAssertions;
 using Xunit;
+using Microsoft.NET.TestFramework;
+using Xunit.Abstractions;
+using Microsoft.NET.TestFramework.Utilities;
 
 namespace Microsoft.DotNet.Tests
 {
     /// <summary>
     /// Static analysis of assemblies to make sure that they are crossgened.
     /// </summary>
-    public class CrossgenTests : TestBase
+    public class CrossgenTests : SdkTest
     {
+        public CrossgenTests(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact(Skip = "This coverage needs to be in core-sdk, which is where crossgen is applied")]
         public void CLI_SDK_assemblies_must_be_crossgened()
         {
