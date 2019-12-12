@@ -111,6 +111,18 @@ namespace Microsoft.Build.BackEnd
         private readonly bool _debugForceCaching;
 
         /// <summary>
+        /// Determines the acceptable fraction of virtual memory we can use.
+        /// </summary>
+        private int memoryLimitFractionIndex = 0;
+
+        /// <summary>
+        /// The acceptable fractions of virtual memory, depending on our previous success at clearing memory. ** This is designed to prevent
+        /// something similar to thrasing as we try to clear memory, clear only a very small amount of memory, and trigger more expensive
+        /// operations in trying to clear that small amount of memory. **
+        /// </summary>
+        private double[] memoryLimitFraction = { 0.8, 0.9, 0.95, 1.0 };
+
+        /// <summary>
         /// Constructor
         /// </summary>
         internal BuildRequestEngine()
@@ -837,10 +849,11 @@ namespace Microsoft.Build.BackEnd
                     // The minimum limit must be no more than 80% of the virtual memory limit to reduce the chances of a single unfortunately
                     // large project resulting in allocations which exceed available VM space between calls to this function.  This situation
                     // is more likely on 32-bit machines where VM space is only 2 gigs.
-                    ulong memoryUseLimit = Convert.ToUInt64(memoryStatus.TotalVirtual * 0.8);
+                    ulong memoryUseLimit = Convert.ToUInt64(memoryStatus.TotalVirtual * memoryLimitFraction[memoryLimitFractionIndex]);
 
                     // See how much memory we are using and compart that to our limit.
                     ulong memoryInUse = memoryStatus.TotalVirtual - memoryStatus.AvailableVirtual;
+                    ulong previousMemory = memoryInUse;
                     while ((memoryInUse > memoryUseLimit) || _debugForceCaching)
                     {
                         TraceEngine(
@@ -867,6 +880,13 @@ namespace Microsoft.Build.BackEnd
                         memoryStatus = NativeMethodsShared.GetMemoryStatus();
                         memoryInUse = memoryStatus.TotalVirtual - memoryStatus.AvailableVirtual;
                         TraceEngine("Memory usage now at {0}", memoryInUse);
+                    }
+
+                    // Less than 2% of the virtual memory that had previous been allocated was cleared; try to increase the amount of acceptable virtual memory.
+                    if ((previousMemory - memoryInUse) / previousMemory < 0.02)
+                    {
+                        memoryLimitFractionIndex++;
+                        // We should not go beyond the end of memoryLimitFraction because if exceed 1.0 * AvailableVirtual, the system will throw an error on its own.
                     }
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
