@@ -395,7 +395,7 @@ Commands:
             string contentBefore = proj.CsProjContent();
             var cmd = new DotnetCommand(Log, "add", proj.CsProjName, "reference")
                     .WithWorkingDirectory(proj.Path)
-                    .Execute($"\"{setup.LibCsprojRelPath}\"");
+                    .Execute(setup.LibCsprojRelPath);
             cmd.Should().Pass();
             cmd.StdOut.Should().Be(string.Format(CommonLocalizableStrings.ProjectAlreadyHasAreference, @"..\Lib\Lib.csproj"));
             proj.CsProjContent().Should().BeEquivalentTo(contentBefore);

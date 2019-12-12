@@ -22,8 +22,11 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private bool _running = false;
 
-        public Command(Process process)
+        private bool _trimTrailingNewlines = false;
+
+        public Command(Process process, bool trimtrailingNewlines = false)
         {
+            _trimTrailingNewlines = trimtrailingNewlines;
             _process = process ?? throw new ArgumentNullException(nameof(process));
         }
 
@@ -114,7 +117,7 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             ThrowIfRunning();
             EnsureStdOut();
-            _stdOut.Capture();
+            _stdOut.Capture(_trimTrailingNewlines);
             return this;
         }
 
@@ -122,7 +125,7 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             ThrowIfRunning();
             EnsureStdErr();
-            _stdErr.Capture();
+            _stdErr.Capture(_trimTrailingNewlines);
             return this;
         }
 

@@ -30,7 +30,7 @@ namespace Microsoft.NET.TestFramework.Commands
             {
                 StartInfo = ToProcessStartInfo()
             };
-            var ret = new Command(process);
+            var ret = new Command(process, trimtrailingNewlines: true);
             return ret;
         }
 

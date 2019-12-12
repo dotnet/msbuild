@@ -17,21 +17,27 @@ namespace Microsoft.DotNet.Cli.Utils
         private StringBuilder _builder;
         private StringWriter _capture;
         private Action<string> _writeLine;
+        private bool _trimTrailingCapturedNewline;
 
         public string CapturedOutput
         {
             get
             {
-                //  Trim newlines at end of output (since there will always be one since we only write with WriteLine)
-                return _capture?.GetStringBuilder()?.ToString()?.TrimEnd('\r', '\n');
+                var capture = _capture?.GetStringBuilder()?.ToString();
+                if (_trimTrailingCapturedNewline)
+                {
+                    capture = capture?.TrimEnd('\r', '\n');
+                }
+                return capture;
             }
         }
 
-        public StreamForwarder Capture()
+        public StreamForwarder Capture(bool trimTrailingNewline = false)
         {
             ThrowIfCaptureSet();
 
             _capture = new StringWriter();
+            _trimTrailingCapturedNewline = trimTrailingNewline;
 
             return this;
         }
