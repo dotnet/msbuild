@@ -46,6 +46,22 @@ namespace Microsoft.NET.Publish.Tests
                .CopyTestAsset(TestProjectName)
                .WithSource();
 
+            // Create the following content:
+            //  <TestRoot>/SmallNameDir/This is a directory with a really long name for one that only contains a small file/.word
+            //
+            // This content is not checked in to the test assets, but generated during test execution
+            // in order to circumvent certain issues like: 
+            // Git Clone: Cannot clone files with long names on Windows if long file name support is not enabled
+            // Nuget Pack: By default ignores files starting with "."
+            string longDirPath = Path.Combine(testAsset.TestRoot,
+                                              "SmallNameDir",
+                                              "This is a directory with a really long name for one that only contains a small file");
+            Directory.CreateDirectory(longDirPath);
+            using (var writer = File.CreateText(Path.Combine(longDirPath, ".word")))
+            {
+                writer.Write("World!");
+            }
+
             return new PublishCommand(Log, testAsset.TestRoot);
         }
 
