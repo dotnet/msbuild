@@ -121,8 +121,93 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="CopyFilesToPublishDirectory"
-          DependsOnTargets="_CopyResolvedFilesToPublishPreserveNewest;
+          DependsOnTargets="_IncrementalCleanPublishDirectory;
+                            _CopyResolvedFilesToPublishPreserveNewest;
                             _CopyResolvedFilesToPublishAlways" />
+  
+  <!--
+    ============================================================
+                                        _IncrementalCleanPublishDirectory
+
+    Remove files that were produced in a prior publish but weren't produced in the current publish.
+    ============================================================
+    -->
+  <Target Name="_IncrementalCleanPublishDirectory"
+          DependsOnTargets="_GetCurrentAndPriorPublishFileWrites">
+
+    <!-- Subtract list of files produced in the prior publish from list of files produced in this publish. -->
+    <ItemGroup>
+      <_OrphanPublishFileWrites Include="@(_PriorPublishFileWrites)" Exclude="@(_CurrentPublishFileWrites)"/>
+    </ItemGroup>
+
+    <!-- Delete the orphaned files. -->
+    <Delete
+        Files="@(_OrphanPublishFileWrites)"
+        TreatErrorsAsWarnings="true">
+      <Output TaskParameter="DeletedFiles" ItemName="_OrphanFilesDeleted"/>
+    </Delete>
+    
+    <!-- Write new list of current files back to clean file. -->
+    <WriteLinesToFile
+        File="$(IntermediateOutputPath)$(_PublishCleanFile)"
+        Lines="@(_CurrentPublishFileWrites)" 
+        Overwrite="true"/>  
+  </Target>
+
+  <!--
+    ============================================================
+                                        _GetCurrentAndPriorPublishFileWrites
+    Get the list of files written in the previous publish and the list of files to be written in this publish.
+    ============================================================
+    -->
+  <Target Name="_GetCurrentAndPriorPublishFileWrites" >
+    <PropertyGroup>
+      <_NormalizedPublishDir>$([MSBuild]::NormalizeDirectory($(PublishDir)))</_NormalizedPublishDir>
+    </PropertyGroup>
+    
+    <Hash ItemstoHash="$(_NormalizedPublishDir)">
+      <Output TaskParameter="HashResult" PropertyName="_NormalizedPublishDirHash" />
+    </Hash>
+    <PropertyGroup>
+      <_PublishCleanFile Condition="'$(PublishCleanFile)'==''">PublishOutputs.$(_NormalizedPublishDirHash.Substring(0, 10)).txt</_PublishCleanFile>
+    </PropertyGroup>
+    
+    <!-- Read in writes made by prior publish. -->
+    <ReadLinesFromFile File="$(IntermediateOutputPath)$(_PublishCleanFile)">
+      <Output TaskParameter="Lines" ItemName="_UnfilteredPriorPublishFileWrites"/>
+    </ReadLinesFromFile>
+
+    <ConvertToAbsolutePath Paths="@(_UnfilteredPriorPublishFileWrites)">
+      <Output TaskParameter="AbsolutePaths" ItemName="_UnfilteredAbsolutePriorPublishFileWrites"/>
+    </ConvertToAbsolutePath>
+  
+    <!-- Find all files in the final output directory. -->
+    <FindUnderPath Path="$(_NormalizedPublishDir)" Files="@(_UnfilteredAbsolutePriorPublishFileWrites)" UpdateToAbsolutePaths="true">
+      <Output TaskParameter="InPath" ItemName="_PriorPublishFileWritesInOuput"/>
+    </FindUnderPath>
+    
+    <!-- Remove duplicates from files produced in the previous publish. -->
+    <RemoveDuplicates Inputs="@(_PriorPublishFileWritesInOuput)" >
+      <Output TaskParameter="Filtered" ItemName="_PriorPublishFileWrites"/>
+    </RemoveDuplicates>
+
+    <ItemGroup>
+      <_CurrentPublishFileWritesUnfiltered Include="@(ResolvedFileToPublish->'$(_NormalizedPublishDir)%(RelativePath)')" Condition="'$(PublishSingleFile)' != 'true'"/>
+      <_CurrentPublishFileWritesUnfiltered Include="@(ResolvedFileToPublish->'$(_NormalizedPublishDir)%(RelativePath)')" 
+                                           Condition="'$(PublishSingleFile)' == 'true' And '%(ResolvedFileToPublish.ExcludeFromSingleFile)' == 'true'"/>
+      <_CurrentPublishFileWritesUnfiltered Include="$(_NormalizedPublishDir)$(AssemblyName)$(_NativeExecutableExtension)" Condition="'$(UseAppHost)' == 'true'"/>
+      <_CurrentPublishFileWritesUnfiltered Include="$(_NormalizedPublishDir)$(ProjectDepsFileName)" Condition="'$(GenerateDependencyFile)' == 'true' And '$(PublishSingleFile)' != 'true'"/>
+    </ItemGroup>
+
+    <ConvertToAbsolutePath Paths="@(_CurrentPublishFileWritesUnfiltered)">
+      <Output TaskParameter="AbsolutePaths" ItemName="_CurrentAbsolutePublishFileWritesUnfiltered"/>
+    </ConvertToAbsolutePath>
+
+    <!-- Remove duplicates from the files produced in this publish-->
+    <RemoveDuplicates Inputs="@(_CurrentAbsolutePublishFileWritesUnfiltered)" >
+      <Output TaskParameter="Filtered" ItemName="_CurrentPublishFileWrites"/>
+    </RemoveDuplicates>
+  </Target>
 
   <!--
     ============================================================
