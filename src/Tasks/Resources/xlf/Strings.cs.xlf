@@ -2006,7 +2006,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
-        <target state="translated">Název redistribučního balíčku v elementu FileList v souboru seznamu redistribučního balíčku {0} má hodnotu Null nebo je prázdný. Název redistribučního balíčku nesmí mít hodnotu Null ani nesmí být prázdný.</target>
+        <target state="translated">Název redistribučního balíčku v elementu FileList v souboru seznamu redistribučního balíčku {0} je null nebo prázdný. Název redistribučního balíčku nesmí být null ani prázdný.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
@@ -3035,7 +3035,7 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.AddingRedistFile">
         <source>Adding file "{0}" from redist folder with target path "{1}".</source>
-        <target state="translated">Probíhá přidání souboru {0} ze složky redistribučního balíčku s cílovou cestou {1}.</target>
+        <target state="translated">Přidává se soubor {0} ze složky redistribučního balíčku s cílovou cestou {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.ConflictRedistSameSDK">
@@ -3105,7 +3105,7 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.CannotHaveEmptyTargetArchitecture">
         <source>MSB3798: The targeted architecture for the resolved sdk reference "{0}" was empty. Cannot find reference or redist files without a targeted architecture.</source>
-        <target state="translated">MSB3798: Cílová architektura pro vyřešený odkaz na sadu SDK {0} je prázdná. Bez určení cílové architektury nelze nalézt odkazy nebo soubory redistribučního balíčku.</target>
+        <target state="translated">MSB3798: Cílová architektura pro vyřešený odkaz na sadu SDK {0} je prázdná. Bez určení cílové architektury se nedají najít odkazy ani soubory redistribučního balíčku.</target>
         <note>{StrBegin="MSB3798: "}</note>
       </trans-unit>
       <trans-unit id="FindInvalidProjectReferences.WarnWhenVersionIsIncompatible">
@@ -3145,7 +3145,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
         <source>Skipping write to file "{0}" because content would not change.</source>
-        <target state="needs-review-translation">MSB3493: Zápis do souboru {0} se přeskočí, protože obsah by se nezměnil.</target>
+        <target state="translated">Zápis do souboru {0} se přeskočí, protože obsah by se nezměnil.</target>
         <note />
       </trans-unit>
       <trans-unit id="Telemetry.IllegalEventDataString">

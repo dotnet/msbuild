@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="InvalidVersionFormat">
         <source>Version string was not in a correct format.</source>
-        <target state="new">Version string was not in a correct format.</target>
+        <target state="translated">La cadena de versión no tenía el formato correcto.</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">

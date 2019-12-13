@@ -2006,7 +2006,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
-        <target state="translated">В файле списка "{0}" имя распространяемого пакета в элементе FileList имеет пустое значение или значение NULL. Убедитесь, что имя распространяемого пакета (Redist Name) не пусто и не равно NULL.</target>
+        <target state="translated">В файле списка распространяемых пакетов "{0}" имя распространяемого пакета в элементе FileList имеет пустое значение или значение NULL. Убедитесь, что имя распространяемого пакета (Redist Name) не пусто и не равно NULL.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
@@ -3105,7 +3105,7 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.CannotHaveEmptyTargetArchitecture">
         <source>MSB3798: The targeted architecture for the resolved sdk reference "{0}" was empty. Cannot find reference or redist files without a targeted architecture.</source>
-        <target state="translated">MSB3798: целевая архитектура для разрешенной ссылки на пакет SDK "{0}" была пустой. Без целевой архитектуры невозможно найти ссылку или файлы распространяемого пакета.</target>
+        <target state="translated">MSB3798: целевая архитектура для разрешенной ссылки на пакет SDK "{0}" не была указана. Без указания целевой архитектуры невозможно найти ссылку или файлы распространяемого пакета.</target>
         <note>{StrBegin="MSB3798: "}</note>
       </trans-unit>
       <trans-unit id="FindInvalidProjectReferences.WarnWhenVersionIsIncompatible">
@@ -3145,7 +3145,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
         <source>Skipping write to file "{0}" because content would not change.</source>
-        <target state="needs-review-translation">MSB3493: пропускается запись в файл "{0}", так как содержимое не изменяется.</target>
+        <target state="translated">Пропускается запись в файл "{0}", так как содержимое не изменяется.</target>
         <note />
       </trans-unit>
       <trans-unit id="Telemetry.IllegalEventDataString">

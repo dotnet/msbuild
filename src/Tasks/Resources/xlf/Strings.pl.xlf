@@ -2006,7 +2006,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
-        <target state="translated">Plik listy redystrybucyjnej „{0}” ma pustą lub zerową wartość nazwy Redist w elemencie FileList. Upewnij się, że nazwa Redist nie ma wartości null i nie jest pusta.</target>
+        <target state="translated">Plik z listą pakietów redystrybucyjnych „{0}” ma nazwę Redist równą null lub pustą w elemencie FileList. Upewnij się, że nazwa Redist nie ma wartości null ani nie jest pusta.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
@@ -3035,7 +3035,7 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.AddingRedistFile">
         <source>Adding file "{0}" from redist folder with target path "{1}".</source>
-        <target state="translated">Dodawanie pliku „{0}” z folderu redystrybucyjnego do ścieżki docelowej „{1}”.</target>
+        <target state="translated">Dodawanie pliku „{0}” z folderu pakietu redystrybucyjnego do ścieżki docelowej „{1}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.ConflictRedistSameSDK">
@@ -3105,7 +3105,7 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.CannotHaveEmptyTargetArchitecture">
         <source>MSB3798: The targeted architecture for the resolved sdk reference "{0}" was empty. Cannot find reference or redist files without a targeted architecture.</source>
-        <target state="translated">MSB3798: Architektura docelowa rozpoznanego odwołania zestawu SDK „{0}” była pusta. Nie można odnaleźć plików referencyjnych lub redystrybucyjnych bez architektury docelowej.</target>
+        <target state="translated">MSB3798: Architektura docelowa rozpoznanego odwołania zestawu SDK „{0}” była pusta. Nie można odnaleźć plików referencyjnych lub plików pakietu redystrybucyjnego bez architektury docelowej.</target>
         <note>{StrBegin="MSB3798: "}</note>
       </trans-unit>
       <trans-unit id="FindInvalidProjectReferences.WarnWhenVersionIsIncompatible">
@@ -3145,7 +3145,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
         <source>Skipping write to file "{0}" because content would not change.</source>
-        <target state="needs-review-translation">MSB3493: Pomijanie zapisu w pliku „{0}”, ponieważ jego zawartość nie uległaby zmianie.</target>
+        <target state="translated">Pomijanie zapisu w pliku „{0}”, ponieważ jego zawartość nie uległaby zmianie.</target>
         <note />
       </trans-unit>
       <trans-unit id="Telemetry.IllegalEventDataString">
