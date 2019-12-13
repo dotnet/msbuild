@@ -252,8 +252,6 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
 
-                testEnvironment.CreateFile(folder, "foo.txt", "C197675A3CC64CAA80680128CF4578C9");
-
                 DownloadFile downloadFile = new DownloadFile
                 {
                     BuildEngine = _mockEngine,
@@ -264,7 +262,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                         {
                             Headers =
                             {
-                                LastModified = DateTimeOffset.UtcNow
+                                LastModified = DateTimeOffset.UtcNow.AddDays(-1)
                             }
                         },
                         RequestMessage = new HttpRequestMessage(HttpMethod.Get, "http://success/foo.txt")
@@ -272,6 +270,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                     SkipUnchangedFiles = true,
                     SourceUrl = "http://success/foo.txt"
                 };
+
+                testEnvironment.CreateFile(folder, "foo.txt", "C197675A3CC64CAA80680128CF4578C9");
 
                 downloadFile.Execute().ShouldBeTrue();
 
