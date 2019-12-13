@@ -19,7 +19,7 @@
     -->
     <IsTestProject>false</IsTestProject>
     
-    <TargetFramework>$(SdkTargetFramework)</TargetFramework>
+    <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
