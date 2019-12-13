@@ -216,6 +216,7 @@ namespace Microsoft.Build.Construction
                                 "SubCategoryForSolutionParsingErrors",
                                 new BuildEventFileInfo(_solutionFile),
                                 "MissingSolutionError",
+                                value,
                                 _solutionFile
                             );
                         }
@@ -229,8 +230,10 @@ namespace Microsoft.Build.Construction
                                     false /* just throw the exception */,
                                     "SubCategoryForSolutionParsingErrors",
                                     new BuildEventFileInfo(project.GetString()),
-                                    "ProjectDoesNotExist",
-                                    project.GetString()
+                                    "FilteredProjectDoesNotExist",
+                                    value,
+                                    project.GetString(),
+                                    _solutionFile
                                 );
                             }
                             _solutionFilter.Add(project.GetString());
@@ -521,6 +524,31 @@ namespace Microsoft.Build.Construction
                 {
                     // No other section types to process at this point, so just ignore the line
                     // and continue.
+                }
+            }
+
+            if (_solutionFilter != null)
+            {
+                foreach (string project in _solutionFilter)
+                {
+                    HashSet<string> projectNamesInOrder = new HashSet<string>(_projectsInOrder.Count);
+                    for (int a = 0; a < _projectsInOrder.Count; a++)
+                    {
+                        projectNamesInOrder.Add(_projectsInOrder[a].ProjectName);
+                    }
+                    if (!projectNamesInOrder.Contains(project))
+                    {
+                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                        (
+                            false /* just throw the exception */,
+                            "SubCategoryForSolutionParsingErrors",
+                            new BuildEventFileInfo(project),
+                            "FilterContainsProjectNotInSolution",
+                            _solutionFilter,
+                            project,
+                            _solutionFile
+                        );
+                    }
                 }
             }
 
