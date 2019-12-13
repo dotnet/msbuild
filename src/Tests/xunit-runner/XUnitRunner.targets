@@ -1,0 +1,82 @@
+<Project>
+  <PropertyGroup>
+    <SDKCustomXUnitPublishTargetFramework Condition="'$(SDKCustomXUnitPublishTargetFramework)' == ''">netcoreapp2.1</SDKCustomXUnitPublishTargetFramework>
+    <SDKCustomXUnitRuntimeTargetFramework Condition="'$(SDKCustomXUnitRuntimeTargetFramework)' == ''">netcoreapp2.0</SDKCustomXUnitRuntimeTargetFramework>
+
+    <SDKCustomXUnitRunnerVersion Condition="'$(SDKCustomXUnitRunnerVersion)' == ''">2.4.1</SDKCustomXUnitRunnerVersion>
+
+    <_SDKCustomXUnitPublishTargetsPath>$(MSBuildThisFileDirectory)XUnitPublish.targets</_SDKCustomXUnitPublishTargetsPath>
+
+    <SDKCustomXUnitArguments Condition="'$(SDKCustomXUnitArguments)' == ''">-nocolor</SDKCustomXUnitArguments>
+
+    <TaskTargetFramework>netcoreapp3.0</TaskTargetFramework>
+    <TaskTargetFramework Condition="'$(MSBuildRuntimeType)' != 'Core'">net472</TaskTargetFramework>
+
+    <SDKHelixCustomSdkTaskDll>$(ArtifactsDir)\bin\HelixTasks\$(Configuration)\$(TaskTargetFramework)\HelixTasks.dll</SDKHelixCustomSdkTaskDll>
+  </PropertyGroup>
+
+  <UsingTask TaskName="SDKCustomCreateXUnitWorkItems" AssemblyFile="$(SDKHelixCustomSdkTaskDll)" />
+  <UsingTask TaskName="TarGzFileCreateFromDirectory" AssemblyFile="$(SDKHelixCustomSdkTaskDll)" />
+
+  <Choose>
+    <When Condition="$(HelixTargetQueue.ToLowerInvariant().Contains('windows'))">
+      <PropertyGroup>
+        <IsPosixShell>false</IsPosixShell>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <IsPosixShell>true</IsPosixShell>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
+  <Target Name="RestoreSDKCustomXUnitProjects"
+          Condition="'@(SDKCustomXUnitProject)' != ''"
+          BeforeTargets="Restore"
+          Outputs="%(SDKCustomXUnitProject.Identity)%(SDKCustomXUnitProject.TargetFramework)%(SDKCustomXUnitProject.RuntimeTargetFramework)%(SDKCustomXUnitProject.AdditionalProperties)">
+    <MSBuild Projects="%(SDKCustomXUnitProject.Identity)"
+             Targets="Restore"
+             Properties="CustomAfterMicrosoftCommonTargets=$(_SDKCustomXUnitPublishTargetsPath);%(SDKCustomXUnitProject.AdditionalProperties)">
+    </MSBuild>
+  </Target>
+
+  <Target Name="BuildSDKCustomXUnitProjects"
+          Condition="'@(SDKCustomXUnitProject)' != ''"
+          BeforeTargets="CoreBuild"
+          Outputs="%(SDKCustomXUnitProject.Identity)%(SDKCustomXUnitProject.TargetFramework)%(SDKCustomXUnitProject.RuntimeTargetFramework)%(SDKCustomXUnitProject.AdditionalProperties)">
+    <PropertyGroup>
+      <_CurrentSDKCustomXUnitProject>%(SDKCustomXUnitProject.Identity)</_CurrentSDKCustomXUnitProject>
+      <_CurrentPublishTargetFramework>%(SDKCustomXUnitProject.TargetFramework)</_CurrentPublishTargetFramework>
+      <_CurrentPublishTargetFramework Condition="'$(_CurrentPublishTargetFramework)' == ''">$(SDKCustomXUnitPublishTargetFramework)</_CurrentPublishTargetFramework>
+      <_CurrentRuntimeTargetFramework>%(SDKCustomXUnitProject.RuntimeTargetFramework)</_CurrentRuntimeTargetFramework>
+      <_CurrentRuntimeTargetFramework Condition="'$(_CurrentRuntimeTargetFramework)' == ''">$(SDKCustomXUnitRuntimeTargetFramework)</_CurrentRuntimeTargetFramework>
+      <_CurrentAdditionalProperties>%(SDKCustomXUnitProject.AdditionalProperties)</_CurrentAdditionalProperties>
+    </PropertyGroup>
+    <MSBuild Projects="$(_CurrentSDKCustomXUnitProject)" Targets="PublishWithOutput" Properties="CustomAfterMicrosoftCommonTargets=$(_SDKCustomXUnitPublishTargetsPath);TargetFramework=$(_CurrentPublishTargetFramework);$(_CurrentAdditionalProperties)">
+      <Output TaskParameter="TargetOutputs" PropertyName="_PublishOutputDir" />
+    </MSBuild>
+    <MSBuild Projects="$(_CurrentSDKCustomXUnitProject)" Targets="GetTargetPath" Properties="CustomAfterMicrosoftCommonTargets=$(_SDKCustomXUnitPublishTargetsPath);TargetFramework=$(_CurrentPublishTargetFramework);$(_CurrentAdditionalProperties)">
+      <Output TaskParameter="TargetOutputs" PropertyName="_TargetPath" />
+    </MSBuild>
+
+    <ItemGroup>
+      <SDKCustomXUnitProject Condition="'%(Identity)' == '$(_CurrentSDKCustomXUnitProject)'">
+        <PublishDirectory>$(_PublishOutputDir)</PublishDirectory>
+        <TargetPath>$(_TargetPath)</TargetPath>
+        <PublishTargetFramework>$(_CurrentPublishTargetFramework)</PublishTargetFramework>
+        <RuntimeTargetFramework>$(_CurrentRuntimeTargetFramework)</RuntimeTargetFramework>
+      </SDKCustomXUnitProject>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="CreateSDKCustomXUnitWorkItems"
+          Condition="'@(SDKCustomXUnitProject)' != ''"
+          BeforeTargets="CoreTest">
+
+    <SDKCustomCreateXUnitWorkItems XUnitProjects="@(SDKCustomXUnitProject)" IsPosixShell="$(IsPosixShell)" XUnitArguments="$(SDKCustomXUnitArguments)" XUnitWorkItemTimeout="$(XUnitWorkItemTimeout)">
+      <Output TaskParameter="XUnitWorkItems" ItemName="HelixWorkItem"/>
+    </SDKCustomCreateXUnitWorkItems>
+  </Target>
+
+</Project>

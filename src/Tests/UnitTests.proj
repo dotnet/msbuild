@@ -1,0 +1,97 @@
+<Project Sdk="Microsoft.DotNet.Helix.Sdk">
+
+  <PropertyGroup>
+    <HelixType>test/product/</HelixType>
+    <Creator Condition="'$(BUILD_BUILDNUMBER)' != ''">sdk-dev</Creator>
+
+    <IncludeDotNetCli>false</IncludeDotNetCli>
+
+    <EnableAzurePipelinesReporter Condition="'$(BUILD_BUILDNUMBER)' != ''">true</EnableAzurePipelinesReporter>
+
+    <EnableXUnitReporter>true</EnableXUnitReporter>
+    <XUnitWorkItemTimeout>2:00:00</XUnitWorkItemTimeout>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SDKCustomXUnitProject Include="**\*.Tests.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(HelixAccessToken)' == '' ">
+    <HelixTargetQueue Include="$(_CustomHelixTargetQueue)"/>
+  </ItemGroup>
+
+  <Import Project="xunit-runner\XUnitRunner.targets" />
+
+  <!-- need to be a target in order to have IsPosixShell available  -->
+  <Target Name="CopyHelixFiles" AfterTargets="Publish">
+
+    <ItemGroup>
+      <BuiltSdks Include="$(RepoRoot)\artifacts\bin\$(Configuration)\Sdks\**\*.*"/>
+
+      <!-- All the following files are just to get full framework msbuild while avoid to duplicated arcade logic by copying
+      arcade and run it -->
+      <Engfolder Include="$(RepoRoot)\eng\**\*.*"/>
+      <DotToolsFolder Include="$(RepoRoot)\.tools\**\*.*"/>
+      <GlobalJson Include="$(RepoRoot)\global.json"/>
+      <!-- Get full framework msbuild end -->
+
+      <!-- Files in testExecutionDirectory to prevent environment interference -->
+      <TestExecutionDirectoryFiles Include="$(ArtifactsTmpDir)NuGet.config"/>
+      <TestExecutionDirectoryFiles Include="$(ArtifactsTmpDir)Directory.Build.props"/>
+      <TestExecutionDirectoryFiles Include="$(ArtifactsTmpDir)Directory.Build.targets"/>
+
+      <FilesInHelixRoot Include="$(RepoRoot)\artifacts\tmp\$(Configuration)\NuGet.config"/>
+      <FilesInHelixRoot Condition="'$(OS)' == 'Windows_NT'" Include="$(RepoRoot)\build\RunTestsOnHelix.cmd"/>
+      <FilesInHelixRoot Condition="'$(OS)' != 'Windows_NT'" Include="$(RepoRoot)\build\RunTestsOnHelix.sh"/>
+    </ItemGroup>
+
+    <PropertyGroup>
+      <HelixPayloadOnHost>$(RepoRoot)\artifacts\tmp\Helixpayload</HelixPayloadOnHost>
+    </PropertyGroup>
+
+    <Copy SourceFiles="@(Engfolder)" DestinationFiles="@(Engfolder->'$(HelixPayloadOnHost)\eng\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(GlobalJson)" DestinationFiles="@(GlobalJson->'$(HelixPayloadOnHost)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(DotToolsFolder)" DestinationFiles="@(DotToolsFolder->'$(HelixPayloadOnHost)\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <Copy SourceFiles="@(FilesInHelixRoot)" DestinationFiles="@(FilesInHelixRoot->'$(HelixPayloadOnHost)\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <Copy SourceFiles="@(TestExecutionDirectoryFiles)" DestinationFiles="@(TestExecutionDirectoryFiles->'$(HelixPayloadOnHost)\TestExecutionDirectoryFiles\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+
+  <Target Name="AppendHelixPreCommand" AfterTargets="AddXUnitReporter" DependsOnTargets="CopyHelixFiles">
+    <PropertyGroup>
+      <HelixPreCommands Condition="!$(IsPosixShell)">call %HELIX_CORRELATION_PAYLOAD%\t\RunTestsOnHelix.cmd $(TestFullMSBuild);$(HelixPreCommands)</HelixPreCommands>
+      <HelixPreCommands Condition="$(IsPosixShell)">. $HELIX_CORRELATION_PAYLOAD/t/RunTestsOnHelix.sh;$(HelixPreCommands)</HelixPreCommands>
+      <HelixStage0Targz>$(RepoRoot)\artifacts\tmp\HelixStage0.tar.gz</HelixStage0Targz>
+    </PropertyGroup>
+
+    <TarGzFileCreateFromDirectory
+        Condition="'$(OS)' != 'Windows_NT'"
+        SourceDirectory="$(RepoRoot)\.dotnet"
+        DestinationArchive="$(HelixStage0Targz)"
+        OverwriteDestination="true"/>
+
+    <ItemGroup>
+      <HelixCorrelationPayload Include="$(HelixPayloadOnHost)">
+        <PayloadDirectory>$(HelixPayloadOnHost)</PayloadDirectory>
+        <Destination>t</Destination>
+      </HelixCorrelationPayload>
+
+      <HelixCorrelationPayload Condition="'$(OS)' != 'Windows_NT'" Include="$(HelixStage0Targz)">
+        <Destination>d</Destination>
+      </HelixCorrelationPayload>
+
+      <HelixCorrelationPayload Condition="'$(OS)' == 'Windows_NT'" Include="$(RepoRoot)\.dotnet">
+        <PayloadDirectory>$(RepoRoot)\.dotnet</PayloadDirectory>
+        <Destination>d</Destination>
+      </HelixCorrelationPayload>
+
+      <HelixCorrelationPayload Include="$(RepoRoot)\artifacts\bin\$(Configuration)\Sdks">
+        <PayloadDirectory>$(RepoRoot)\artifacts\bin\$(Configuration)\Sdks</PayloadDirectory>
+        <Destination>s</Destination>
+      </HelixCorrelationPayload>
+
+    </ItemGroup>
+  </Target>
+</Project>

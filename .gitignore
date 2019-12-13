@@ -22,3 +22,6 @@ obj/
 *.binlog
 
 sdk.sln.DotSettings.user
+
+# Helix payload
+.dotnet.payload
