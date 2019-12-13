@@ -72,7 +72,7 @@
       <_NETStandardLibraryNETFrameworkPath>$(NuGetPackageRoot)netstandard.library.netframework\$(NETStandardLibraryNETFrameworkVersion)\build</_NETStandardLibraryNETFrameworkPath>
     </PropertyGroup>
     <ItemGroup>
-      <LayoutFile Include="@(None)" Condition="'%(None.PackagePath)' != ''">
+      <LayoutFile Include="@(None)" Condition="'%(None.PackagePath)' != '' and '%(None.PackagePath)' != 'Icon.png'">
         <TargetPath>%(None.PackagePath)\%(None.RecursiveDir)%(None.Filename)%(None.Extension)</TargetPath>
       </LayoutFile>
       <NetStandardNetFxFile Include="$(_NETStandardLibraryNETFrameworkPath)\**\*" Exclude="$(_NETStandardLibraryNETFrameworkPath)\**\*.props;$(_NETStandardLibraryNETFrameworkPath)\**\*.targets" />
