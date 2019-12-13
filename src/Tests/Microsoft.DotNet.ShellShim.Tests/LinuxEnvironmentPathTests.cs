@@ -9,6 +9,8 @@ using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Utilities;
 using Moq;
 using Xunit;
 
@@ -16,7 +18,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
 {
     public class LinuxEnvironmentPathTests
     {
-        [NonWindowsOnlyFact]
+        [UnixOnlyFact]
         public void GivenPathNotSetItPrintsManualInstructions()
         {
             var reporter = new BufferedReporter();
@@ -42,7 +44,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
                     toolsPath.Path));
         }
 
-        [NonWindowsOnlyFact]
+        [UnixOnlyFact]
         public void GivenPathNotSetAndProfileExistsItPrintsLogoutMessage()
         {
             var reporter = new BufferedReporter();
@@ -68,7 +70,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
             reporter.Lines.Should().Equal(CommonLocalizableStrings.EnvironmentPathLinuxNeedLogout);
         }
 
-        [NonWindowsOnlyTheory]
+        [UnixOnlyTheory]
         [InlineData("/home/user/.dotnet/tools")]
         [InlineData("~/.dotnet/tools")]
         public void GivenPathSetItPrintsNothing(string toolsDirectoryOnPath)
@@ -93,7 +95,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
             reporter.Lines.Should().BeEmpty();
         }
 
-        [NonWindowsOnlyFact]
+        [UnixOnlyFact]
         public void GivenPathSetItDoesNotAddPathToEnvironment()
         {
             var reporter = new BufferedReporter();
@@ -122,7 +124,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
                 .Be(false);
         }
 
-        [NonWindowsOnlyFact]
+        [UnixOnlyFact]
         public void GivenPathNotSetItAddsToEnvironment()
         {
             var reporter = new BufferedReporter();

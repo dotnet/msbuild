@@ -6,6 +6,8 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Utilities;
 using Moq;
 using Xunit;
 
@@ -13,7 +15,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
 {
     public class OsxZshEnvironmentPathInstructionTests
     {
-        [NonWindowsOnlyFact]
+        [UnixOnlyFact]
         public void GivenPathNotSetItPrintsManualInstructions()
         {
             BufferedReporter reporter = new BufferedReporter();
@@ -44,7 +46,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
                     toolsPath.Path));
         }
 
-        [NonWindowsOnlyTheory]
+        [UnixOnlyTheory]
         [InlineData("/home/user/.dotnet/tools")]
         public void GivenPathSetItPrintsNothing(string toolsDirectoryOnPath)
         {
@@ -69,7 +71,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
             reporter.Lines.Should().BeEmpty();
         }
 
-        [NonWindowsOnlyTheory]
+        [UnixOnlyTheory]
         [InlineData("~/.dotnet/tools")]
         public void GivenPathSetItPrintsInstruction(string toolsDirectoryOnPath)
         {

@@ -12,25 +12,26 @@ using System.Transactions;
 using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.Tools.Tests.ComponentMocks;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.ShellShim.Tests
 {
-    public class ShellShimRepositoryTests : TestBase
+    public class ShellShimRepositoryTests : SdkTest
     {
-        private readonly ITestOutputHelper _output;
-        private Lazy<FilePath> _reusedHelloWorldExecutableDll = new Lazy<FilePath>(() => MakeHelloWorldExecutableDll("reused"));
+        private Lazy<FilePath> _reusedHelloWorldExecutableDll;
 
-        public ShellShimRepositoryTests(ITestOutputHelper output)
+        public ShellShimRepositoryTests(ITestOutputHelper output) : base(output)
         {
-            _output = output;
+            _reusedHelloWorldExecutableDll = new Lazy<FilePath>(() => MakeHelloWorldExecutableDll("reused"));
         }
 
         [Fact]
@@ -101,7 +102,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         public void GivenAnExecutablePathDirectoryThatDoesNotExistItCanGenerateShimFile()
         {
             var outputDll = _reusedHelloWorldExecutableDll.Value;
-            var testFolder = TestAssets.CreateTestDirectory().FullName;
+            var testFolder = _testAssetsManager.CreateTestDirectory().Path;
             var extraNonExistDirectory = Path.GetRandomFileName();
             var shellShimRepository = new ShellShimRepository(new DirectoryPath(Path.Combine(testFolder, extraNonExistDirectory)), GetAppHostTemplateFromStage2());
             var shellCommandName = nameof(ShellShimRepositoryTests) + Path.GetRandomFileName();
@@ -443,18 +444,20 @@ namespace Microsoft.DotNet.ShellShim.Tests
                 };
             }
 
-            _output.WriteLine($"Launching '{processStartInfo.FileName} {processStartInfo.Arguments}'");
+            Log.WriteLine($"Launching '{processStartInfo.FileName} {processStartInfo.Arguments}'");
             processStartInfo.WorkingDirectory = cleanFolderUnderTempRoot;
 
             var environmentProvider = new EnvironmentProvider();
             processStartInfo.EnvironmentVariables["PATH"] = environmentProvider.GetEnvironmentVariable("PATH");
             if (Environment.Is64BitProcess)
             {
-                processStartInfo.EnvironmentVariables["DOTNET_ROOT"] = Path.GetDirectoryName(RepoDirectoriesProvider.DotnetUnderTest);
+                processStartInfo.EnvironmentVariables["DOTNET_ROOT"] =
+                    TestContext.Current.ToolsetUnderTest.DotNetRoot;
             }
             else
             {
-                processStartInfo.EnvironmentVariables["DOTNET_ROOT(x86)"] = Path.GetDirectoryName(RepoDirectoriesProvider.DotnetUnderTest);
+                processStartInfo.EnvironmentVariables["DOTNET_ROOT(x86)"] =
+                    TestContext.Current.ToolsetUnderTest.DotNetRoot;
             }
 
             processStartInfo.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
@@ -467,12 +470,11 @@ namespace Microsoft.DotNet.ShellShim.Tests
         private static string GetAppHostTemplateFromStage2()
         {
             var stage2AppHostTemplateDirectory =
-                new DirectoryInfo(RepoDirectoriesProvider.SdkFolderUnderTest)
-                .GetDirectory("AppHostTemplate").FullName;
+                Path.Combine(TestContext.Current.ToolsetUnderTest.SdkFolderUnderTest, "AppHostTemplate");
             return stage2AppHostTemplateDirectory;
         }
 
-        private static FilePath MakeHelloWorldExecutableDll(string instanceName = null)
+        private FilePath MakeHelloWorldExecutableDll(string instanceName = null)
         {
             const string testAppName = "TestAppSimple";
             const string emptySpaceToTestSpaceInPath = " ";
@@ -483,24 +485,26 @@ namespace Microsoft.DotNet.ShellShim.Tests
                 instanceName = testAppName + emptySpaceToTestSpaceInPath + directoryNamePostFix;
             }
 
-            TestAssetInstance testInstance = TestAssets.Get(testAppName)
-                .CreateInstance(instanceName)
-                .WithRestoreFiles()
-                .WithBuildFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName, callingMethod: instanceName)
+                .WithSource();
+
+            new BuildCommand(Log, testInstance.TestRoot)
+                .Execute()
+                .Should()
+                .Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            FileInfo outputDll = testInstance.Root.GetDirectory("bin", configuration)
+            var outputDirectory = new DirectoryInfo(Path.Combine(testInstance.Path, "bin", configuration))
                 .EnumerateDirectories()
-                .Single()
-                .GetFile($"{testAppName}.dll");
+                .Single();
 
-            return new FilePath(outputDll.FullName);
+            return new FilePath(Path.Combine(outputDirectory.FullName, $"{testAppName}.dll"));
         }
 
         private string GetNewCleanFolderUnderTempRoot([CallerMemberName] string callingMethod = null, string identifier = "")
         {
-            return TestAssets.CreateTestDirectory(callingMethod: callingMethod, identifier: "cleanfolder" + identifier + Path.GetRandomFileName()).FullName;
+            return _testAssetsManager.CreateTestDirectory(testName: callingMethod, identifier: "cleanfolder" + identifier + Path.GetRandomFileName()).Path;
         }
 
         private ShellShimRepository GetShellShimRepositoryWithMockMaker(string pathToShim)

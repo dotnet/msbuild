@@ -7,6 +7,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework.Utilities;
 using Moq;
 using Xunit;
 

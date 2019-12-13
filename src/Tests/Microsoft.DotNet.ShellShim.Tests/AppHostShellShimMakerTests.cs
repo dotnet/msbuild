@@ -7,12 +7,18 @@ using FluentAssertions;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.HostModel.AppHost;
+using Microsoft.NET.TestFramework;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.ShellShim.Tests
 {
-    public class AppHostShellShimMakerTests : TestBase
+    public class AppHostShellShimMakerTests : SdkTest
     {
         const ushort WindowsGUISubsystem = 0x2;
+
+        public AppHostShellShimMakerTests(ITestOutputHelper log) : base(log)
+        {
+        }
 
         [WindowsOnlyFact]
         public void WhenCallWithWpfDllItCanCreateShimWithWindowsGraphicalUserInterfaceBitSet()
@@ -22,7 +28,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
             BinaryUtils.GetWindowsGraphicalUserInterfaceBit(shimPath).Should().Be(WindowsGUISubsystem);
         }
 
-        [NonWindowsOnlyFact]
+        [UnixOnlyFact]
         public void GivenNonWindowsMachineWhenCallWithWpfDllItCanCreateShimWithoutThrow()
         {
             Action a = () => CreateApphostAndReturnShimPath();
@@ -33,7 +39,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         {
             var tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             Directory.CreateDirectory(tempDirectory);
-            var appHostShellShimMaker = new AppHostShellShimMaker(Path.Combine(RepoDirectoriesProvider.SdkFolderUnderTest, "AppHostTemplate"));
+            var appHostShellShimMaker = new AppHostShellShimMaker(Path.Combine(TestContext.Current.ToolsetUnderTest.SdkFolderUnderTest, "AppHostTemplate"));
             string shimPath = Path.Combine(tempDirectory, Path.GetRandomFileName());
 
             appHostShellShimMaker.CreateApphostShellShim(
