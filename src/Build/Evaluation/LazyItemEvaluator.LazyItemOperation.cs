@@ -48,16 +48,21 @@ namespace Microsoft.Build.Evaluation
 
             protected EngineFileUtilities EngineFileUtilities => _lazyEvaluator.EngineFileUtilities;
 
-            public virtual void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            public void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
                 MSBuildEventSource.Log.ApplyLazyItemOperationsStart(_itemElement.ItemType);
                 using (_lazyEvaluator._evaluationProfiler.TrackElement(_itemElement))
                 {
-                    var items = SelectItems(listBuilder, globsToIgnore);
-                    MutateItems(items);
-                    SaveItems(items, listBuilder);
+                    ApplyImpl(listBuilder, globsToIgnore);
                 }
                 MSBuildEventSource.Log.ApplyLazyItemOperationsStop(_itemElement.ItemType);
+            }
+
+            protected virtual void ApplyImpl(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            {
+                var items = SelectItems(listBuilder, globsToIgnore);
+                MutateItems(items);
+                SaveItems(items, listBuilder);
             }
 
             /// <summary>
