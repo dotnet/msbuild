@@ -290,7 +290,7 @@ namespace Microsoft.Build.Tasks
                    && destinationFile.Exists
                    && destinationFile.Length == response.Content.Headers.ContentLength
                    && response.Content.Headers.LastModified.HasValue
-                   && destinationFile.LastWriteTimeUtc < response.Content.Headers.LastModified.Value.UtcDateTime;
+                   && destinationFile.LastWriteTimeUtc > response.Content.Headers.LastModified.Value.UtcDateTime;
         }
     }
 }
