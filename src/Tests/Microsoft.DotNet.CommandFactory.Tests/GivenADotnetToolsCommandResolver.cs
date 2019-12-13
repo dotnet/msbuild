@@ -6,20 +6,20 @@ using FluentAssertions;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using Microsoft.DotNet.CommandFactory;
+using Microsoft.NET.TestFramework;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Tests
 {
 
-    public class GivenADotnetToolsCommandResolver : TestBase
+    public class GivenADotnetToolsCommandResolver : SdkTest
     {
         private readonly DotnetToolsCommandResolver _dotnetToolsCommandResolver;
 
-        // Assets are placed during build of this project
-        private static string GetDotnetToolPath() => Path.Combine(RepoDirectoriesProvider.SdkFolderUnderTest, "DotnetTools");
-
-        public GivenADotnetToolsCommandResolver()
+        public GivenADotnetToolsCommandResolver(ITestOutputHelper log) : base(log)
         {
-            _dotnetToolsCommandResolver = new DotnetToolsCommandResolver(GetDotnetToolPath());
+            var dotnetToolPath = Path.Combine(TestContext.Current.ToolsetUnderTest.SdkFolderUnderTest, "DotnetTools");
+            _dotnetToolsCommandResolver = new DotnetToolsCommandResolver(dotnetToolPath);
         }
 
         [Fact]

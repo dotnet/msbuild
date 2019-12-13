@@ -11,16 +11,20 @@ using Microsoft.DotNet.CommandFactory;
 using Microsoft.DotNet.ToolManifest;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools.Test.Utilities;
-using Microsoft.DotNet.Tools.Tests.Utilities;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.Utilities;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Tests
 {
-    public class GivenALocalToolsCommandResolver : TestBase
+    public class GivenALocalToolsCommandResolver : SdkTest
     {
         private const string ManifestFilename = "dotnet-tools.json";
         private readonly string _testDirectoryRoot;
@@ -28,7 +32,7 @@ namespace Microsoft.DotNet.Tests
         private readonly LocalToolsResolverCache _localToolsResolverCache;
         private readonly IFileSystem _fileSystem;
 
-        public GivenALocalToolsCommandResolver()
+        public GivenALocalToolsCommandResolver(ITestOutputHelper log) : base(log)
         {
             _fileSystem = new FileSystemMockBuilder().UseCurrentSystemTemporaryDirectory().Build();
             _nugetGlobalPackagesFolder = new DirectoryPath(NuGetGlobalPackagesFolder.GetLocation());

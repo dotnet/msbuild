@@ -6,25 +6,31 @@ using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.TestFramework;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.Frameworks;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
 using Xunit;
-using Microsoft.DotNet.Tools.Tests.Utilities;
 using Microsoft.DotNet.CommandFactory;
 using LocalizableStrings = Microsoft.DotNet.CommandFactory.LocalizableStrings;
 using Microsoft.DotNet.Tools.MSBuild;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Tests
 {
-    public class GivenAProjectToolsCommandResolver : TestBase
+    public class GivenAProjectToolsCommandResolver : SdkTest
     {
         private static readonly NuGetFramework s_toolPackageFramework =
-            NuGetFrameworks.NetCoreApp22;
+            FrameworkConstants.CommonFrameworks.NetCoreApp22;
 
         private const string TestProjectName = "AppWithToolDependency";
+
+        public GivenAProjectToolsCommandResolver(ITestOutputHelper log) : base(log)
+        {
+        }
 
         [Fact]
         public void ItReturnsNullWhenCommandNameIsNull()
@@ -65,13 +71,13 @@ namespace Microsoft.DotNet.Tests
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
-            var projectDirectory = TestAssets.CreateTestDirectory();
+            var projectDirectory = _testAssetsManager.CreateTestDirectory();
 
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "command",
                 CommandArguments = new string[] { "" },
-                ProjectDirectory = projectDirectory.Root.FullName
+                ProjectDirectory = projectDirectory.Path
             };
 
             var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
@@ -84,16 +90,15 @@ namespace Microsoft.DotNet.Tests
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
-            var testInstance = TestAssets.Get(TestProjectName)
-                .CreateInstance()
-                .WithSourceFiles()
-                .WithRestoreFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset(TestProjectName)
+                .WithSource()
+                .Restore(Log);
 
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "nonexistent-command",
                 CommandArguments = null,
-                ProjectDirectory = testInstance.Root.FullName
+                ProjectDirectory = testInstance.Path
             };
 
             var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
@@ -106,16 +111,15 @@ namespace Microsoft.DotNet.Tests
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
-            var testInstance = TestAssets.Get(TestProjectName)
-                .CreateInstance()
-                .WithSourceFiles()
-                .WithRestoreFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset(TestProjectName)
+                .WithSource()
+                .Restore(Log);
 
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "dotnet-portable",
                 CommandArguments = null,
-                ProjectDirectory = testInstance.Root.FullName
+                ProjectDirectory = testInstance.Path
             };
 
             var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
@@ -134,16 +138,15 @@ namespace Microsoft.DotNet.Tests
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
-            var testInstance = TestAssets.Get(TestProjectName)
-                .CreateInstance()
-                .WithSourceFiles()
-                .WithRestoreFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset(TestProjectName)
+                .WithSource()
+                .Restore(Log);
 
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "dotnet-portable",
                 CommandArguments = new[] { "arg with space" },
-                ProjectDirectory = testInstance.Root.FullName
+                ProjectDirectory = testInstance.Path
             };
 
             var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
@@ -157,16 +160,15 @@ namespace Microsoft.DotNet.Tests
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
-            var testInstance = TestAssets.Get(TestProjectName)
-                .CreateInstance()
-                .WithSourceFiles()
-                .WithRestoreFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset(TestProjectName)
+                .WithSource()
+                .Restore(Log);
 
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "dotnet-portable",
                 CommandArguments = null,
-                ProjectDirectory = testInstance.Root.FullName
+                ProjectDirectory = testInstance.Path
             };
 
             var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
@@ -182,16 +184,15 @@ namespace Microsoft.DotNet.Tests
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
-            var testInstance = TestAssets.Get(TestProjectName)
-                .CreateInstance()
-                .WithSourceFiles()
-                .WithRestoreFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset(TestProjectName)
+                .WithSource()
+                .Restore(Log);
 
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "dotnet-prefercliruntime",
                 CommandArguments = null,
-                ProjectDirectory = testInstance.Root.FullName
+                ProjectDirectory = testInstance.Path
             };
 
             var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
@@ -207,20 +208,19 @@ namespace Microsoft.DotNet.Tests
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
-            var testInstance = TestAssets.Get(TestProjectName)
-                .CreateInstance()
-                .WithSourceFiles()
+            var testInstance = _testAssetsManager.CopyTestAsset(TestProjectName)
+                .WithSource()
                 .WithRepoGlobalPackages()
-                .WithRestoreFiles();
+                .Restore(Log);
 
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "dotnet-portable",
                 CommandArguments = null,
-                ProjectDirectory = testInstance.Root.FullName
+                ProjectDirectory = testInstance.Path
             };
 
-            var nugetPackagesRoot = RepoDirectoriesProvider.TestGlobalPackagesFolder;
+            var nugetPackagesRoot = TestContext.Current.TestGlobalPackagesFolder;
 
             var toolPathCalculator = new ToolPathCalculator(nugetPackagesRoot);
 
@@ -251,14 +251,13 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void GenerateDepsJsonMethodDoesntOverwriteWhenDepsFileAlreadyExists()
         {
-            var testInstance = TestAssets.Get(TestProjectName)
-                .CreateInstance()
-                .WithSourceFiles()
+            var testInstance = _testAssetsManager.CopyTestAsset(TestProjectName)
+                .WithSource()
                 .WithRepoGlobalPackages()
-                .WithRestoreFiles();
+                .Restore(Log);
 
 
-            var toolPathCalculator = new ToolPathCalculator(RepoDirectoriesProvider.TestGlobalPackagesFolder);
+            var toolPathCalculator = new ToolPathCalculator(TestContext.Current.TestGlobalPackagesFolder);
 
             var lockFilePath = toolPathCalculator.GetLockFilePath(
                 "dotnet-portable",
@@ -288,16 +287,15 @@ namespace Microsoft.DotNet.Tests
         {
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
-            var testInstance = TestAssets.Get(TestProjectName)
-                .CreateInstance()
-                .WithSourceFiles()
-                .WithRestoreFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset(TestProjectName)
+                .WithSource()
+                .Restore(Log);
 
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "dotnet-portable",
                 CommandArguments = null,
-                ProjectDirectory = testInstance.Root.FullName
+                ProjectDirectory = testInstance.Path
             };
 
             var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
@@ -310,83 +308,84 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void ItFindsToolsLocatedInTheNuGetFallbackFolder()
         {
-            var testInstance = TestAssets.Get("AppWithFallbackFolderToolDependency")
-                .CreateInstance("NF") // use shorter name since path could be too long
-                .WithSourceFiles()
-                .WithNuGetConfig(RepoDirectoriesProvider.TestPackages);
-            var testProjectDirectory = testInstance.Root.FullName;
+            var testInstance = _testAssetsManager.CopyTestAsset("AppWithFallbackFolderToolDependency")
+                .WithSource();
+
+            var testProjectDirectory = testInstance.Path;
             var fallbackFolder = Path.Combine(testProjectDirectory, "fallbackFolder");
+
+            var nugetConfig = UseNuGetConfigWithFallbackFolder(testInstance, fallbackFolder, TestContext.Current.TestPackages);
 
             PopulateFallbackFolder(testProjectDirectory, fallbackFolder);
 
-            var nugetConfig = UseNuGetConfigWithFallbackFolder(testInstance, fallbackFolder);
-
-            new RestoreCommand()
+            new DotnetRestoreCommand(Log)
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute($"--configfile {nugetConfig}")
+                .Execute()
                 .Should()
                 .Pass();
 
-            new DotnetCommand()
-            .WithWorkingDirectory(testProjectDirectory)
-            .Execute($"fallbackfoldertool").Should().Pass();
+            new DotnetCommand(Log)
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute($"fallbackfoldertool").Should().Pass();
         }
 
         [Fact]
         public void ItShowsAnErrorWhenTheToolDllIsNotFound()
         {
-            var testInstance = TestAssets.Get("AppWithFallbackFolderToolDependency")
-                .CreateInstance("DN") // use shorter name since path could be too long
-                .WithSourceFiles()
-                .WithNuGetConfig(RepoDirectoriesProvider.TestPackages);
-            var testProjectDirectory = testInstance.Root.FullName;
+            var testInstance = _testAssetsManager.CopyTestAsset("AppWithFallbackFolderToolDependency")
+                .WithSource();
+            var testProjectDirectory = testInstance.Path;
             var fallbackFolder = Path.Combine(testProjectDirectory, "fallbackFolder");
             var nugetPackages = Path.Combine(testProjectDirectory, "nugetPackages");
 
+            var nugetConfig = UseNuGetConfigWithFallbackFolder(testInstance, fallbackFolder, TestContext.Current.TestPackages);
+
             PopulateFallbackFolder(testProjectDirectory, fallbackFolder);
 
-            var nugetConfig = UseNuGetConfigWithFallbackFolder(testInstance, fallbackFolder);
-
-            new RestoreCommand()
+            new DotnetRestoreCommand(Log)
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute($"--configfile {nugetConfig} /p:RestorePackagesPath={nugetPackages}")
+                .Execute($"/p:RestorePackagesPath={nugetPackages}")
                 .Should()
                 .Pass();
 
             // We need to run the tool once to generate the deps.json
             // otherwise we end up with a different error message.
 
-            new DotnetCommand()
+            new DotnetCommand(Log)
             .WithWorkingDirectory(testProjectDirectory)
-            .Execute($"fallbackfoldertool /p:RestorePackagesPath={nugetPackages}").Should().Pass();
+            .Execute("fallbackfoldertool", $"/p:RestorePackagesPath={nugetPackages}").Should().Pass();
 
             Directory.Delete(Path.Combine(fallbackFolder, "dotnet-fallbackfoldertool"), true);
 
-            new DotnetCommand()
+            new DotnetCommand(Log)
             .WithWorkingDirectory(testProjectDirectory)
-            .Execute($"fallbackfoldertool /p:RestorePackagesPath={nugetPackages}")
+            .Execute("fallbackfoldertool", $"/p:RestorePackagesPath={nugetPackages}")
             .Should().Fail().And.NotHaveStdOutContaining(string.Format(LocalizableStrings.CommandAssembliesNotFound, "dotnet-fallbackfoldertool"));
         }
 
         private void PopulateFallbackFolder(string testProjectDirectory, string fallbackFolder)
         {
             var nugetConfigPath = Path.Combine(testProjectDirectory, "NuGet.Config");
-            new RestoreCommand()
+            new DotnetRestoreCommand(Log)
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute($"--configfile {nugetConfigPath} --packages {fallbackFolder}")
+                .Execute("--packages", fallbackFolder)
                 .Should()
                 .Pass();
 
             Directory.Delete(Path.Combine(fallbackFolder, ".tools"), true);
         }
 
-        private string UseNuGetConfigWithFallbackFolder(TestAssetInstance testInstance, string fallbackFolder)
+        private string UseNuGetConfigWithFallbackFolder(TestAsset testInstance, string fallbackFolder, string testPackagesSource)
         {
-            var nugetConfig = testInstance.Root.GetFile("NuGet.Config").FullName;
+            var nugetConfig = Path.Combine(testInstance.Path, "NuGet.Config");
+            
             File.WriteAllText(
                 nugetConfig,
                 $@"<?xml version=""1.0"" encoding=""utf-8""?>
                 <configuration>
+                  <packageSources>
+                    <add key=""{Guid.NewGuid().ToString()}"" value=""{testPackagesSource}"" />
+                  </packageSources>
                   <fallbackPackageFolders>
                         <add key=""MachineWide"" value=""{fallbackFolder}""/>
                     </fallbackPackageFolders>
@@ -410,7 +409,7 @@ namespace Microsoft.DotNet.Tests
         {
             //  When using the product, the ToolDepsJsonGeneratorProject property is used to get this path, but for testing
             //  we'll hard code the path inside the SDK since we don't have a project to evaluate here
-            return Path.Combine(RepoDirectoriesProvider.SdkFolderUnderTest, "Sdks", "Microsoft.NET.Sdk", "targets", "GenerateDeps", "GenerateDeps.proj");
+            return Path.Combine(TestContext.Current.ToolsetUnderTest.SdksPath, "Microsoft.NET.Sdk", "targets", "GenerateDeps", "GenerateDeps.proj");
         }
     }
 }

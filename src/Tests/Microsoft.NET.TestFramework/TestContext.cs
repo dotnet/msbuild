@@ -18,6 +18,10 @@ namespace Microsoft.NET.TestFramework
 
         public string TestPackages { get; set; }
 
+        //  For tests which want the global packages folder isolated in the repo, but
+        //  can share it with other tests
+        public string TestGlobalPackagesFolder { get; set; }
+
         public string NuGetCachePath { get; set; }
 
         public string NuGetFallbackFolder { get; set; }
@@ -71,6 +75,10 @@ namespace Microsoft.NET.TestFramework
 
         public static void Initialize(TestCommandLine commandLine)
         {
+            //  Show verbose debugging output for tests
+            CommandContext.SetVerbose(true);
+            Reporter.Reset();
+
             Environment.SetEnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0");
 
             //  Reset this environment variable so that if the dotnet under test is different than the
@@ -134,6 +142,8 @@ namespace Microsoft.NET.TestFramework
                 artifactsDir = Path.Combine(repoRoot, "artifacts");
             }
 
+            testContext.TestGlobalPackagesFolder = Path.Combine(artifactsDir, ".nuget", "packages");
+
             if (repoRoot != null)
             {
                 testContext.NuGetFallbackFolder = Path.Combine(artifactsDir, ".nuget", "NuGetFallbackFolder");
@@ -160,7 +170,21 @@ namespace Microsoft.NET.TestFramework
 
             testContext.ToolsetUnderTest = ToolsetInfo.Create(repoRoot, artifactsDir, repoConfiguration, commandLine);
 
+            //  Important to set this before below code which ends up calling through TestContext.Current, which would
+            //  result in infinite recursion / stack overflow if TestContext.Current wasn't set
             TestContext.Current = testContext;
+
+            //  Set up test hooks for in-process tests
+            Environment.SetEnvironmentVariable(
+                DotNet.Cli.Utils.Constants.MSBUILD_EXE_PATH,
+                Path.Combine(testContext.ToolsetUnderTest.SdkFolderUnderTest, "MSBuild.dll"));
+
+            Environment.SetEnvironmentVariable(
+                "MSBuildSDKsPath",
+                Path.Combine(testContext.ToolsetUnderTest.SdksPath));
+
+            DotNet.Cli.Utils.MSBuildForwardingAppWithoutLogging.MSBuildExtensionsPathTestHook =
+                testContext.ToolsetUnderTest.SdkFolderUnderTest;
         }
 
         public static string GetRepoRoot()

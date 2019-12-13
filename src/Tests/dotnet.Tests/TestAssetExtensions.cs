@@ -34,5 +34,17 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 }
             });
         }
+
+        //  For tests which want the global packages folder isolated in the repo, but
+        //  can share it with other tests
+        public static TestAsset WithRepoGlobalPackages(this TestAsset testAsset)
+        {
+            return testAsset.WithProjectChanges(project =>
+            {
+                var ns = project.Root.Name.Namespace;
+                project.Root.Element(ns + "PropertyGroup")
+                    .Add(new XElement(ns + "RestorePackagesPath", TestContext.Current.TestGlobalPackagesFolder));
+            });
+        }
     }
 }

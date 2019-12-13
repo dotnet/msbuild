@@ -5,25 +5,25 @@ using System;
 using System.IO;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
-using Microsoft.DotNet.Tools.Tests.Utilities;
 using Microsoft.DotNet.CommandFactory;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Tests
 {
-    public class GivenAProjectDependencyCommandResolver : TestBase
+    public class GivenAProjectDependencyCommandResolver : SdkTest
     {
-        private TestAssetInstance MSBuildTestProjectInstance;
-
         private string _configuration;
 
-        public GivenAProjectDependencyCommandResolver()
+        public GivenAProjectDependencyCommandResolver(ITestOutputHelper log) : base(log)
         {
             Environment.SetEnvironmentVariable(
                 Constants.MSBUILD_EXE_PATH,
-                Path.Combine(RepoDirectoriesProvider.SdkFolderUnderTest, "MSBuild.dll"));
+                Path.Combine(TestContext.Current.ToolsetUnderTest.SdkFolderUnderTest, "MSBuild.dll"));
 
             _configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
         }
@@ -31,16 +31,15 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void ItReturnsACommandSpecWhenToolIsInAProjectRef()
         {
-            MSBuildTestProjectInstance =
-                TestAssets.Get("TestAppWithProjDepTool")
-                    .CreateInstance()
-                    .WithSourceFiles()
-                    .WithNuGetConfig(RepoDirectoriesProvider.TestPackages);
+            var testAsset =
+                _testAssetsManager.CopyTestAsset("TestAppWithProjDepTool")
+                    .WithSource();
 
-            new BuildCommand()
-                .WithProjectDirectory(MSBuildTestProjectInstance.Root)
-                .WithConfiguration(_configuration)
-                .Execute()
+            NuGetConfigWriter.Write(testAsset.Path, TestContext.Current.TestPackages);
+
+            new DotnetBuildCommand(Log)
+                .WithWorkingDirectory(testAsset.Path)
+                .Execute("--configuration", _configuration)
                 .Should().Pass();
 
             var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
@@ -49,8 +48,8 @@ namespace Microsoft.DotNet.Tests
             {
                 CommandName = "dotnet-portable",
                 Configuration = _configuration,
-                ProjectDirectory = MSBuildTestProjectInstance.Root.FullName,
-                Framework = NuGetFrameworks.NetCoreApp30
+                ProjectDirectory = testAsset.Path,
+                Framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp30
             };
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
@@ -67,16 +66,15 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void ItPassesDepsfileArgToHostWhenReturningACommandSpecForMSBuildProject()
         {
-            MSBuildTestProjectInstance =
-                TestAssets.Get("TestAppWithProjDepTool")
-                    .CreateInstance()
-                    .WithSourceFiles()
-                    .WithNuGetConfig(RepoDirectoriesProvider.TestPackages);
+            var testAsset =
+                _testAssetsManager.CopyTestAsset("TestAppWithProjDepTool")
+                    .WithSource();
 
-            new BuildCommand()
-                .WithProjectDirectory(MSBuildTestProjectInstance.Root)
-                .WithConfiguration(_configuration)
-                .Execute()
+            NuGetConfigWriter.Write(testAsset.Path, TestContext.Current.TestPackages);
+
+            new DotnetBuildCommand(Log)
+                .WithWorkingDirectory(testAsset.Path)
+                .Execute("--configuration", _configuration)
                 .Should().Pass();
 
             var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
@@ -85,8 +83,8 @@ namespace Microsoft.DotNet.Tests
             {
                 CommandName = "dotnet-portable",
                 Configuration = _configuration,
-                ProjectDirectory = MSBuildTestProjectInstance.Root.FullName,
-                Framework = NuGetFrameworks.NetCoreApp30
+                ProjectDirectory = testAsset.Path,
+                Framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp30
             };
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
@@ -99,12 +97,16 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void ItReturnsNullWhenCommandNameDoesNotExistInProjectDependenciesForMSBuildProject()
         {
-            MSBuildTestProjectInstance =
-                TestAssets.Get("TestAppWithProjDepTool")
-                    .CreateInstance()
-                    .WithSourceFiles()
-                    .WithNuGetConfig(RepoDirectoriesProvider.TestPackages)
-                    .WithRestoreFiles();
+            var testAsset =
+                _testAssetsManager.CopyTestAsset("TestAppWithProjDepTool")
+                    .WithSource();
+
+            NuGetConfigWriter.Write(testAsset.Path, TestContext.Current.TestPackages);
+
+            new RestoreCommand(Log, testAsset.TestRoot)
+                .Execute()
+                .Should()
+                .Pass();
 
             var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
 
@@ -112,8 +114,9 @@ namespace Microsoft.DotNet.Tests
             {
                 CommandName = "nonexistent-command",
                 CommandArguments = null,
-                ProjectDirectory = MSBuildTestProjectInstance.Root.FullName,
-                Framework = NuGetFrameworks.NetCoreApp30
+                ProjectDirectory = testAsset.Path,
+                Framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp30
+
             };
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
@@ -124,38 +127,42 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void ItSetsDepsfileToOutputInCommandspecForMSBuild()
         {
-            var testInstance = TestAssets
-                    .Get("TestAppWithProjDepTool")
-                    .CreateInstance()
-                    .WithSourceFiles()
-                    .WithNuGetConfig(RepoDirectoriesProvider.TestPackages)
-                    .WithRestoreFiles();
+            var testAsset =
+                _testAssetsManager.CopyTestAsset("TestAppWithProjDepTool")
+                    .WithSource();
+
+            NuGetConfigWriter.Write(testAsset.Path, TestContext.Current.TestPackages);
+
+            new RestoreCommand(Log, testAsset.TestRoot)
+                .Execute()
+                .Should()
+                .Pass();
 
             var projectDependenciesCommandResolver = SetupProjectDependenciesCommandResolver();
 
-            var outputDir = testInstance.Root.GetDirectory("out");
+            var outputDir = Path.Combine(testAsset.Path, "out");
 
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "dotnet-portable",
                 Configuration = "Debug",
-                ProjectDirectory = testInstance.Root.FullName,
-                Framework = NuGetFrameworks.NetCoreApp30,
-                OutputPath = outputDir.FullName
+                ProjectDirectory = testAsset.Path,
+                Framework = NuGet.Frameworks.FrameworkConstants.CommonFrameworks.NetCoreApp30,
+                OutputPath = outputDir
             };
 
-            new BuildCommand()
-                .WithWorkingDirectory(testInstance.Root)
-                .Execute($"-o {outputDir.FullName}")
+            new DotnetBuildCommand(Log)
+                .WithWorkingDirectory(testAsset.Path)
+                .Execute($"-o", outputDir)
                 .Should()
                 .Pass();
 
             var result = projectDependenciesCommandResolver.Resolve(commandResolverArguments);
 
-            var depsFilePath = outputDir.GetFile("TestAppWithProjDepTool.deps.json");
+            var depsFilePath = Path.Combine(outputDir, "TestAppWithProjDepTool.deps.json");
 
             result.Should().NotBeNull();
-            result.Args.Should().Contain($"--depsfile {depsFilePath.FullName}");
+            result.Args.Should().Contain($"--depsfile {depsFilePath}");
         }
 
         private ProjectDependenciesCommandResolver SetupProjectDependenciesCommandResolver(
@@ -164,7 +171,7 @@ namespace Microsoft.DotNet.Tests
         {
             Environment.SetEnvironmentVariable(
                 Constants.MSBUILD_EXE_PATH,
-                Path.Combine(RepoDirectoriesProvider.SdkFolderUnderTest, "MSBuild.dll"));
+                Path.Combine(TestContext.Current.ToolsetUnderTest.SdkFolderUnderTest, "MSBuild.dll"));
 
             environment = environment ?? new EnvironmentProvider();
 

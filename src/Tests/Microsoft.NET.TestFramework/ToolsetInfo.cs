@@ -35,7 +35,12 @@ namespace Microsoft.NET.TestFramework
             }
         }
 
-        public string SdksPath { get; private set; }
+        Lazy<string> _sdkFolderUnderTest;
+
+        public string SdkFolderUnderTest => _sdkFolderUnderTest.Value;
+
+        Lazy<string> _sdksPath;
+        public string SdksPath => _sdksPath.Value;
 
         public string MicrosoftNETBuildExtensionsPathOverride { get; set; }
 
@@ -48,6 +53,9 @@ namespace Microsoft.NET.TestFramework
             DotNetRoot = dotNetRoot;
 
             DotNetHostPath = Path.Combine(dotNetRoot, $"dotnet{Constants.ExeSuffix}");
+
+            _sdkFolderUnderTest = new Lazy<string>(() => Path.Combine(DotNetRoot, "sdk", SdkVersion));
+            _sdksPath = new Lazy<string>(() => Path.Combine(SdkFolderUnderTest, "Sdks"));
         }
 
         private void InitSdkVersion()
@@ -66,8 +74,6 @@ namespace Microsoft.NET.TestFramework
             }
 
             _sdkVersion = result.StdOut.Trim();
-
-            SdksPath = Path.Combine(DotNetRoot, "sdk", _sdkVersion, "Sdks");
         }
 
         public string GetMicrosoftNETBuildExtensionsPath()
