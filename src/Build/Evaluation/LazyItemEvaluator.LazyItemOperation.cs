@@ -181,7 +181,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            protected void DecorateItemsWithMetadata(IEnumerable<ItemBatchingContext> itemBatchingContexts, ImmutableList<ProjectMetadataElement> metadata)
+            protected void DecorateItemsWithMetadata(IEnumerable<ItemBatchingContext> itemBatchingContexts, ImmutableList<ProjectMetadataElement> metadata, bool? needToExpandMetadata = null)
             {
                 if (metadata.Count > 0)
                 {
@@ -214,42 +214,9 @@ namespace Microsoft.Build.Evaluation
                     // Prior to lazy evaluation ExpanderOptions.ExpandAll was used.
                     const ExpanderOptions metadataExpansionOptions = ExpanderOptions.ExpandAll;
 
-                    List<string> values = new List<string>(metadata.Count * 2);
+                    needToExpandMetadata ??= NeedToExpandMetadataForEachItem(metadata, out _);
 
-                    foreach (var metadataElement in metadata)
-                    {
-                        values.Add(metadataElement.Value);
-                        values.Add(metadataElement.Condition);
-                    }
-
-                    ItemsAndMetadataPair itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(values);
-
-                    bool needToProcessItemsIndividually = false;
-
-                    if (itemsAndMetadataFound.Metadata != null && itemsAndMetadataFound.Metadata.Values.Count > 0)
-                    {
-                        // If there is bare metadata of any kind, and the Include involved an item list, we should
-                        // run items individually, as even non-built-in metadata might differ between items
-
-                        if (_referencedItemLists.Count >= 0)
-                        {
-                            needToProcessItemsIndividually = true;
-                        }
-                        else
-                        {
-                            // If there is bare built-in metadata, we must always run items individually, as that almost
-                            // always differs between items.
-
-                            // UNDONE: When batching is implemented for real, we need to make sure that
-                            // item definition metadata is included in all metadata operations during evaluation
-                            if (itemsAndMetadataFound.Metadata.Values.Count > 0)
-                            {
-                                needToProcessItemsIndividually = true;
-                            }
-                        }
-                    }
-
-                    if (needToProcessItemsIndividually)
+                    if (needToExpandMetadata.Value)
                     {
                         foreach (var itemContext in itemBatchingContexts)
                         {
@@ -322,6 +289,46 @@ namespace Microsoft.Build.Evaluation
                         _expander.Metadata = null;
                     }
                 }
+            }
+
+            protected bool NeedToExpandMetadataForEachItem(ImmutableList<ProjectMetadataElement> metadata, out ItemsAndMetadataPair itemsAndMetadataFound)
+            {
+                List<string> values = new List<string>(metadata.Count * 2);
+
+                foreach (var metadataElement in metadata)
+                {
+                    values.Add(metadataElement.Value);
+                    values.Add(metadataElement.Condition);
+                }
+
+                itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(values);
+
+                bool needToExpandMetadataForEachItem = false;
+
+                if (itemsAndMetadataFound.Metadata != null && itemsAndMetadataFound.Metadata.Values.Count > 0)
+                {
+                    // If there is bare metadata of any kind, and the Include involved an item list, we should
+                    // run items individually, as even non-built-in metadata might differ between items
+
+                    if (_referencedItemLists.Count >= 0)
+                    {
+                        needToExpandMetadataForEachItem = true;
+                    }
+                    else
+                    {
+                        // If there is bare built-in metadata, we must always run items individually, as that almost
+                        // always differs between items.
+
+                        // UNDONE: When batching is implemented for real, we need to make sure that
+                        // item definition metadata is included in all metadata operations during evaluation
+                        if (itemsAndMetadataFound.Metadata.Values.Count > 0)
+                        {
+                            needToExpandMetadataForEachItem = true;
+                        }
+                    }
+                }
+
+                return needToExpandMetadataForEachItem;
             }
         }
     }
