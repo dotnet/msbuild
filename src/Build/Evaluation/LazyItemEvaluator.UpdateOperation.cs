@@ -22,7 +22,7 @@ namespace Microsoft.Build.Evaluation
 
             delegate bool ItemSpecMatchesItem(ItemSpec<P, I> itemSpec, I item);
 
-            public override void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            protected override void ApplyImpl(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
                 if (!_conditionResult)
                 {
