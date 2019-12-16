@@ -212,8 +212,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                       UserRuntimeAssemblies="@(UserRuntimeAssembly)"
                       ResolvedRuntimeTargetsFiles="@(RuntimeTargetsCopyLocalItems)"
                       IsSelfContained="$(SelfContained)"
-                      IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)">
-    </GenerateDepsFile>
+                      IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)"
+                      RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"/>
 
     <ItemGroup>
       <!-- Do this in an ItemGroup instead of as an output parameter of the GenerateDepsFile task so that it still gets added to the item set

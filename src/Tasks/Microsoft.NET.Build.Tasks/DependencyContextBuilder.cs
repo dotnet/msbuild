@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyModel;
 using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
+using NuGet.RuntimeModel;
 using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tasks
@@ -36,6 +37,7 @@ namespace Microsoft.NET.Build.Tasks
         private string _runtimeIdentifier;
         private bool _isPortable;
         private HashSet<string> _usedLibraryNames;
+        private readonly RuntimeGraph _runtimeGraph;
 
         private Dictionary<ReferenceInfo, string> _referenceLibraryNames;
 
@@ -44,10 +46,11 @@ namespace Microsoft.NET.Build.Tasks
 
         private const string NetCorePlatformLibrary = "Microsoft.NETCore.App";
 
-        public DependencyContextBuilder(SingleProjectInfo mainProjectInfo, ProjectContext projectContext, bool includeRuntimeFileVersions)
+        public DependencyContextBuilder(SingleProjectInfo mainProjectInfo, ProjectContext projectContext, bool includeRuntimeFileVersions, RuntimeGraph runtimeGraph)
         {
             _mainProjectInfo = mainProjectInfo;
             _includeRuntimeFileVersions = includeRuntimeFileVersions;
+            _runtimeGraph = runtimeGraph;
 
             var libraryLookup = new LockFileLookup(projectContext.LockFile);
 
@@ -322,19 +325,34 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
-
             var targetInfo = new TargetInfo(
                 _dotnetFrameworkName,
                 _runtimeIdentifier,
                 runtimeSignature: string.Empty,
                 _isPortable);
 
+            // Compute the runtime fallback graph 
+            // 
+            // If the input RuntimeGraph is empty, or we're not compiling
+            // for a specific RID, then an runtime fallback graph is empty
+            //
+            // Otherwise, it is the set of all runtimes compatible with (inheriting)
+            // the target runtime-identifier.
+
+            var runtimeFallbackGraph =
+                (_runtimeGraph == null || _runtimeIdentifier == null) ? 
+                    new RuntimeFallbacks[] { } :
+                    _runtimeGraph.Runtimes
+                        .Select(runtimeDict => _runtimeGraph.ExpandRuntime(runtimeDict.Key))
+                        .Where(expansion => expansion.Contains(_runtimeIdentifier))
+                        .Select(expansion => new RuntimeFallbacks(expansion.First(), expansion.Skip(1))); // ExpandRuntime return runtime itself as first item.
+
             return new DependencyContext(
-                targetInfo,
-                _compilationOptions ?? CompilationOptions.Default,
-                compilationLibraries,
-                runtimeLibraries,
-                new RuntimeFallbacks[] { });
+            targetInfo,
+            _compilationOptions ?? CompilationOptions.Default,
+            compilationLibraries,
+            runtimeLibraries,
+            runtimeFallbackGraph);
         }
 
         private RuntimeLibrary GetProjectRuntimeLibrary()

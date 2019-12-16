@@ -936,7 +936,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                       ResolvedRuntimeTargetsFiles="@(RuntimeTargetsCopyLocalItems)"
                       UserRuntimeAssemblies="@(UserRuntimeAssembly)"
                       IsSelfContained="$(SelfContained)"
-                      IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)"/>
+                      IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)"
+                      RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"/>
 
     <ItemGroup>
       <_FilesToBundle Include="$(PublishDepsFilePath)" Condition="'$(PublishSingleFile)' == 'true'">

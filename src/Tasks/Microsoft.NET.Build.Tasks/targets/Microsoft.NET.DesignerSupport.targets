@@ -67,6 +67,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ResolvedNuGetFiles="@(NativeCopyLocalItems);@(ResourceCopyLocalItems);@(RuntimeCopyLocalItems)"
       ResolvedRuntimeTargetsFiles="@(RuntimeTargetsCopyLocalItems)"
       TargetFramework="$(TargetFrameworkMoniker)"
+      RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
       />
 
     <ItemGroup>
