@@ -163,6 +163,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="'$(Language)' == 'C++' and $(EnableComHosting) == 'true'"
                  ResourceName="NoSupportCppEnableComHosting" />
 
+    <NETSdkError Condition="'$(Language)' == 'C++' and $(SelfContained) == 'true'"
+                 ResourceName="NoSupportCppSelfContained" />
+
   </Target>
 
   <Target Name="_CheckForNETCoreSdkIsPreview"

@@ -584,4 +584,8 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1120: C++/CLI projects targeting .NET Core require a target framework of at least 'netcoreapp3.1'.</value>
     <comment>{StrBegin="NETSDK1120: "}</comment>
   </data>
+  <data name="NoSupportCppSelfContained" xml:space="preserve">
+    <value>NETSDK1121: C++/CLI projects targeting .NET Core cannot use SelfContained=true.</value>
+    <comment>{StrBegin="NETSDK1121: "}</comment>
+  </data>
 </root>
