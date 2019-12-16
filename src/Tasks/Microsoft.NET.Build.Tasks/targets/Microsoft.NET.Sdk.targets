@@ -49,6 +49,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <UserRuntimeConfig Condition=" '$(UserRuntimeConfig)' == '' ">$(MSBuildProjectDirectory)/runtimeconfig.template.json</UserRuntimeConfig>
     <GenerateSatelliteAssembliesForCore Condition=" '$(GenerateSatelliteAssembliesForCore)' == '' and '$(MSBuildRuntimeType)' == 'Core' ">true</GenerateSatelliteAssembliesForCore>
     <ComputeNETCoreBuildOutputFiles Condition=" '$(ComputeNETCoreBuildOutputFiles)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">true</ComputeNETCoreBuildOutputFiles>
+    <_GenerateRuntimeConfigurationPropertyInputsCache Condition="'$(_GenerateRuntimeConfigurationPropertyInputsCache)' == ''">$(IntermediateOutputPath)$(MSBuildProjectName).genruntimeconfig.cache</_GenerateRuntimeConfigurationPropertyInputsCache>
+    <_GenerateRuntimeConfigurationPropertyInputsCache>$([MSBuild]::NormalizePath($(MSBuildProjectDirectory), $(_GenerateRuntimeConfigurationPropertyInputsCache)))</_GenerateRuntimeConfigurationPropertyInputsCache>
   </PropertyGroup>
 
   <ItemGroup>
@@ -222,6 +224,34 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
+  <!-- To achieve incremental build with property change. When any property changes, WriteOnlyWhenDifferent will be triggered to write cache file.
+  And the cache file's timestamp will be later, and it then triggers the incremental build.-->
+  <Target Name="_GenerateRuntimeConfigurationFilesInputCache" DependsOnTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <GenerateRuntimeConfigurationFilesInputs Include="$(_GenerateRuntimeConfigurationPropertyInputsCache)" />
+
+      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(TargetFramework)"/>
+      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(RuntimeIdentifier)"/>
+      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(RollForward)"/>
+      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(AdditionalProbingPath)"/>
+      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(SelfContained)"/>
+    </ItemGroup>
+
+    <Hash ItemsToHash="@(_GenerateRuntimeConfigurationPropertyInputsCacheToHash)">
+      <Output TaskParameter="HashResult" PropertyName="_GenerateRuntimeConfigurationPropertyInputsCacheHash" />
+    </Hash>
+
+    <WriteLinesToFile
+      Lines="$(_GenerateRuntimeConfigurationPropertyInputsCacheHash)"
+      File="$(_GenerateRuntimeConfigurationPropertyInputsCache)"
+      Overwrite="True"
+      WriteOnlyWhenDifferent="True" />
+
+    <ItemGroup>
+      <FileWrites Include="$(_GenerateRuntimeConfigurationPropertyInputsCache)" />
+    </ItemGroup>
+  </Target>
+
   <!--
     ============================================================
                                         GenerateBuildRuntimeConfigurationFiles
@@ -231,7 +261,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="GenerateBuildRuntimeConfigurationFiles"
-          DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary"
+          DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary;_GenerateRuntimeConfigurationFilesInputCache"
           BeforeTargets="CopyFilesToOutputDirectory"
           Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'"
           Inputs="@(GenerateRuntimeConfigurationFilesInputs)"
@@ -540,7 +570,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="_ComputeNETCoreBuildOutputFiles"
-          DependsOnTargets="_GetAppHostPaths;_GetComHostPaths;_GetIjwHostPaths"
+          DependsOnTargets="_GetAppHostPaths;_GetComHostPaths;_GetIjwHostPaths;GenerateBuildRuntimeConfigurationFiles"
           BeforeTargets="AssignTargetPaths"
           Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true'">
 
