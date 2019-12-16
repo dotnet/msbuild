@@ -8,6 +8,8 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.CommandFactory;
 using System.Linq;
+using Xunit.Abstractions;
+using Microsoft.NET.TestFramework.Commands;
 
 namespace Microsoft.DotNet.Tools.Tool.Install
 {
@@ -22,10 +24,12 @@ namespace Microsoft.DotNet.Tools.Tool.Install
         private readonly IReporter _reporter;
         private readonly IReporter _errorReporter;
         private readonly IEnumerable<string> _additionalRestoreArguments;
+        private readonly ITestOutputHelper _log;
 
-        public Stage2ProjectRestorer(IReporter reporter = null,
+        public Stage2ProjectRestorer(ITestOutputHelper log, IReporter reporter = null,
             IEnumerable<string> additionalRestoreArguments = null)
         {
+            _log = log;
             _additionalRestoreArguments = additionalRestoreArguments;
             _reporter = reporter ?? Reporter.Output;
             _errorReporter = reporter ?? Reporter.Error;
@@ -57,8 +61,8 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             }
 
             var command =
-                new DotnetCommand().
-                ExecuteWithCapturedOutput(GetSameProductionCommandArguments(argsToPassToRestore));
+                new DotnetRestoreCommand(_log).
+                Execute(argsToPassToRestore);
 
             if (!string.IsNullOrWhiteSpace(command.StdOut) && (_reporter != null))
             {
@@ -74,12 +78,6 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             {
                 throw new ToolPackageException(LocalizableStrings.ToolInstallationRestoreFailed);
             }
-        }
-
-        private static string GetSameProductionCommandArguments(List<string> argsToPassToRestore)
-        {
-            return CommandFactoryUsingResolver.Create("dotnet",
-                new[] { "restore" }.Concat(argsToPassToRestore)).CommandArgs;
         }
     }
 }

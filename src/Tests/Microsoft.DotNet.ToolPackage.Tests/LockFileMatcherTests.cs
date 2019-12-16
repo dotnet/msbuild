@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Microsoft.DotNet.ToolPackage.Tests
 {
-    public class LockFileMatcherTests : TestBase
+    public class LockFileMatcherTests
     {
         [Theory]
         [InlineData("tools/netcoreapp1.1/any/tool.dll", "tool.dll", true)]

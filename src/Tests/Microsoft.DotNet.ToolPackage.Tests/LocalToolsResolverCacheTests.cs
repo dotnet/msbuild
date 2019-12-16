@@ -11,14 +11,20 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using Microsoft.NET.TestFramework;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.ToolPackage.Tests
 {
-    public class LocalToolsResolverCacheTests : TestBase
+    public class LocalToolsResolverCacheTests : SdkTest
     {
+        public LocalToolsResolverCacheTests(ITestOutputHelper log) : base(log)
+        {
+        }
+
         private static
             (DirectoryPath nuGetGlobalPackagesFolder,
             LocalToolsResolverCache localToolsResolverCache) Setup()

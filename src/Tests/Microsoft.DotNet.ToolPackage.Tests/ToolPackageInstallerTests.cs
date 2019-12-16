@@ -23,10 +23,15 @@ using NuGet.Versioning;
 using Xunit;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Install.LocalizableStrings;
 using System.Runtime.CompilerServices;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Xunit.Abstractions;
+using Microsoft.NET.TestFramework.Utilities;
 
 namespace Microsoft.DotNet.ToolPackage.Tests
 {
-    public class ToolPackageInstallerTests : TestBase
+    public class ToolPackageInstallerTests : SdkTest
     {
         [Theory]
         [InlineData(false)]
@@ -637,14 +642,14 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             var surrogate = char.ConvertFromUtf32(int.Parse("2A601", NumberStyles.HexNumber));
             string nonAscii = "ab Ṱ̺̺̕o 田中さん åä," + surrogate;
 
-            var root = TestAssets.CreateTestDirectory(testProjectName: nonAscii, identifier: "root");
+            var root = _testAssetsManager.CreateTestDirectory(testName: nonAscii, identifier: "root");
             var reporter = new BufferedReporter();
             var fileSystem = new FileSystemWrapper();
-            var store = new ToolPackageStoreAndQuery(new DirectoryPath(root.FullName));
+            var store = new ToolPackageStoreAndQuery(new DirectoryPath(root.Path));
             WriteNugetConfigFileToPointToTheFeed(fileSystem, nugetConfigPath);
             var installer = new ToolPackageInstaller(
                 store: store,
-                projectRestorer: new Stage2ProjectRestorer(reporter),
+                projectRestorer: new Stage2ProjectRestorer(Log, reporter),
                 tempProject: GetUniqueTempProjectPathEachTest(),
                 offlineFeed: new DirectoryPath("does not exist"));
 
@@ -683,7 +688,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             uninstaller.Uninstall(package.PackageDirectory);
         }
 
-        [NonWindowsOnlyTheory]
+        [UnixOnlyTheory]
         [InlineData(false)]
         [InlineData(true)]
         // repro https://github.com/dotnet/cli/issues/10101
@@ -863,7 +868,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             };
         }
 
-        private static (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller, IToolPackageUninstaller, BufferedReporter, IFileSystem
+        private (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller, IToolPackageUninstaller, BufferedReporter, IFileSystem
             ) Setup(
                 bool useMock,
                 List<MockFeed> feeds = null,
@@ -872,7 +877,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 FilePath? writeLocalFeedToNugetConfig = null,
                 [CallerMemberName] string callingMethod = "")
         {
-            var root = new DirectoryPath(TestAssets.CreateTestDirectory("root", callingMethod, identifier: useMock.ToString()).FullName);
+            var root = new DirectoryPath(_testAssetsManager.CreateTestDirectory(callingMethod, identifier: useMock.ToString()).Path);
             var reporter = new BufferedReporter();
 
             IFileSystem fileSystem;
@@ -907,7 +912,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 storeQuery = toolPackageStore;
                 installer = new ToolPackageInstaller(
                     store: store,
-                    projectRestorer: new Stage2ProjectRestorer(reporter),
+                    projectRestorer: new Stage2ProjectRestorer(Log, reporter),
                     tempProject: tempProject ?? GetUniqueTempProjectPathEachTest(),
                     offlineFeed: offlineFeed ?? new DirectoryPath("does not exist"));
                 uninstaller = new ToolPackageUninstaller(store);
@@ -924,8 +929,23 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             fileSystem.Directory.CreateDirectory(filePath.Value.GetDirectoryPath().Value);
 
-            fileSystem.File.WriteAllText(filePath.Value.Value, NuGetConfig.Format(
+            fileSystem.File.WriteAllText(filePath.Value.Value, FormatNuGetConfig(
                 localFeedPath: GetTestLocalFeedPath()));
+        }
+
+        public static string FormatNuGetConfig(string localFeedPath)
+        {
+            const string template = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+<packageSources>
+<!--To inherit the global NuGet package sources remove the <clear/> line below -->
+<clear />
+<add key=""Test Source"" value=""{0}"" />
+<add key=""api.nuget.org"" value=""https://api.nuget.org/v3/index.json"" />
+<add key=""dotnet-core"" value=""https://dotnet.myget.org/F/dotnet-core/api/v3/index.json"" />
+</packageSources>
+</configuration>";
+            return string.Format(template, localFeedPath);
         }
 
         private static FilePath GenerateRandomNugetConfigFilePath()
@@ -946,5 +966,9 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         private readonly string _testTargetframework = BundledTargetFramework.GetTargetFrameworkMoniker();
         private const string TestPackageVersion = "1.0.4";
         private static readonly PackageId TestPackageId = new PackageId("global.tool.console.demo");
+
+        public ToolPackageInstallerTests(ITestOutputHelper log) : base(log)
+        {
+        }
     }
 }

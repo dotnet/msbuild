@@ -13,11 +13,12 @@ using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Xunit;
 using NuGet.Versioning;
-using Microsoft.DotNet.Tools.Tests.Utilities;
+using Microsoft.NET.TestFramework.Utilities;
+using Microsoft.NET.TestFramework;
 
 namespace Microsoft.DotNet.ToolPackage.Tests
 {
-    public class ToolPackageInstallToManagedLocationInstaller : TestBase
+    public class ToolPackageInstallToManagedLocationInstaller
     {
         [Theory]
         [InlineData(false)]
@@ -149,10 +150,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     Path.GetRandomFileName() + " " + Path.GetRandomFileName());
             Directory.CreateDirectory(tempPathForNugetConfigWithWhiteSpace);
 
-            NuGetConfig.Write(
-                directory: tempPathForNugetConfigWithWhiteSpace,
-                configname: nugetConfigName,
-                localFeedPath: GetTestLocalFeedPath());
+            NuGetConfigWriter.Write(tempPathForNugetConfigWithWhiteSpace, GetTestLocalFeedPath());
 
             return new FilePath(Path.GetFullPath(Path.Combine(tempPathForNugetConfigWithWhiteSpace, nugetConfigName)));
         }

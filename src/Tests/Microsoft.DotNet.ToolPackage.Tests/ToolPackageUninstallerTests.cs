@@ -18,10 +18,13 @@ using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Versioning;
 using Xunit;
+using Microsoft.NET.TestFramework.Utilities;
+using Microsoft.NET.TestFramework;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.ToolPackage.Tests
 {
-    public class ToolPackageUninstallerTests : TestBase
+    public class ToolPackageUninstallerTests : SdkTest
     {
         [Theory]
         //  https://github.com/dotnet/sdk/issues/3684
@@ -77,14 +80,14 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             };
         }
 
-        private static (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller, IToolPackageUninstaller, BufferedReporter, IFileSystem
+        private (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller, IToolPackageUninstaller, BufferedReporter, IFileSystem
             ) Setup(
                 bool useMock,
                 List<MockFeed> feeds = null,
                 FilePath? tempProject = null,
                 DirectoryPath? offlineFeed = null)
         {
-            var root = new DirectoryPath(TestAssets.CreateTestDirectory("root").FullName);
+            var root = new DirectoryPath(_testAssetsManager.CreateTestDirectory("root").Path);
             var reporter = new BufferedReporter();
 
             IFileSystem fileSystem;
@@ -138,5 +141,9 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         private readonly string _testTargetframework = BundledTargetFramework.GetTargetFrameworkMoniker();
         private const string TestPackageVersion = "1.0.4";
         private static readonly PackageId TestPackageId = new PackageId("global.tool.console.demo.with.shim");
+
+        public ToolPackageUninstallerTests(ITestOutputHelper log) : base(log)
+        {
+        }
     }
 }
