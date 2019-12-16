@@ -17,7 +17,7 @@
     <UserRuntimeConfig>$(MSBuildThisFileDirectory)Common\runtimeconfig.template.json</UserRuntimeConfig>
   </PropertyGroup>
   
-  <ItemGroup Condition="'$(IsTestProject)' == 'true' AND '$(OutputType)' == 'Exe'">
+  <ItemGroup Condition="'$(IsTestProject)' == 'true' AND '$(OutputType)' == 'Exe' AND '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <Compile Include="$(MSBuildThisFileDirectory)Common\Program.cs" />
   </ItemGroup>
 
