@@ -12,7 +12,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 namespace Microsoft.Build.UnitTests.BackEnd
@@ -20,12 +19,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
     public class BuildResult_Tests
     {
         private int _nodeRequestId;
-        ITestOutputHelper _output;
 
-        public BuildResult_Tests(ITestOutputHelper output)
+        public BuildResult_Tests()
         {
             _nodeRequestId = 1;
-            _output = output;
         }
 
         [Fact]

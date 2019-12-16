@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -307,6 +308,8 @@ namespace Microsoft.Build.Engine.UnitTests
                 </Project>");
 
                 MockLogger logger = proj.BuildProjectExpectSuccess();
+
+                logger.ErrorCount.ShouldBe(1);
 
                 logger.AssertLogContains("MSB4132");
             }
