@@ -10,6 +10,7 @@ using NuGet.RuntimeModel;
 using NuGet.ProjectModel;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -122,7 +123,22 @@ namespace Microsoft.NET.Build.Tasks
 
         private void WriteDepsFile(string depsFilePath)
         {
-            LockFile lockFile = new LockFileCache(this).GetLockFile(AssetsFilePath);
+            ProjectContext projectContext;
+            if (AssetsFilePath == null)
+            {
+                projectContext = null;
+            }
+            else
+            {
+                LockFile lockFile = new LockFileCache(this).GetLockFile(AssetsFilePath);
+                projectContext = lockFile.CreateProjectContext(
+                 NuGetUtils.ParseFrameworkName(TargetFramework),
+                 RuntimeIdentifier,
+                 PlatformLibraryName,
+                 RuntimeFrameworks,
+                 IsSelfContained);
+            }
+
             CompilationOptions compilationOptions = CompilationOptionsConverter.ConvertFrom(CompilerOptions);
 
             SingleProjectInfo mainProject = SingleProjectInfo.Create(
@@ -138,8 +154,13 @@ namespace Microsoft.NET.Build.Tasks
             IEnumerable<ReferenceInfo> referenceAssemblyInfos =
                 ReferenceInfo.CreateReferenceInfos(ReferenceAssemblies);
 
+            // If there is a generated asset file. The projectContext will have project reference.
+            // So remove it from directReferences to avoid duplication
+            var projectReferenceExistedInProjectContext = projectContext != null;
             IEnumerable<ReferenceInfo> directReferences =
-                ReferenceInfo.CreateDirectReferenceInfos(ReferencePaths, ReferenceSatellitePaths, isUserRuntimeAssembly);
+                ReferenceInfo.CreateDirectReferenceInfos(ReferencePaths,
+                    ReferenceSatellitePaths,
+                    projectReferenceExistedInProjectContext, isUserRuntimeAssembly);
 
             IEnumerable<ReferenceInfo> dependencyReferences =
                 ReferenceInfo.CreateDependencyReferenceInfos(ReferenceDependencyPaths, ReferenceSatellitePaths, isUserRuntimeAssembly);
@@ -150,30 +171,38 @@ namespace Microsoft.NET.Build.Tasks
             IEnumerable<RuntimePackAssetInfo> runtimePackAssets =
                 IsSelfContained ? RuntimePackAssets.Select(item => RuntimePackAssetInfo.FromItem(item)) : Enumerable.Empty<RuntimePackAssetInfo>();
 
-            ProjectContext projectContext = lockFile.CreateProjectContext(
-                NuGetUtils.ParseFrameworkName(TargetFramework),
-                RuntimeIdentifier,
-                PlatformLibraryName,
-                RuntimeFrameworks,
-                IsSelfContained);
+            DependencyContextBuilder builder;
+            if (projectContext != null)
+            {
+				// Generate the RID-fallback for self-contained builds.
+	            //
+	            // In order to support loading components with RID-specific assets, 
+	            // the AssemblyDependencyResolver requires a RID fallback graph.
+	            // The component itself should not carry the RID fallback graph with it, because
+	            // it would need to carry graph of all the RIDs and needs updates for newer RIDs.
+	            // For framework dependent apps, the RID fallback graph comes from the core framework Microsoft.NETCore.App, 
+	            // so there is no need to write it into the app.
+	            // If self-contained apps, the (applicable subset of) RID fallback graph needs to be written to the deps.json manifest.
+	            //
+	            // If a RID-graph is provided to the DependencyContextBuilder, it generates a RID-fallback 
+	            // graph with respect to the target RuntimeIdentifier.
 
-            // Generate the RID-fallback for self-contained builds.
-            //
-            // In order to support loading components with RID-specific assets, 
-            // the AssemblyDependencyResolver requires a RID fallback graph.
-            // The component itself should not carry the RID fallback graph with it, because
-            // it would need to carry graph of all the RIDs and needs updates for newer RIDs.
-            // For framework dependent apps, the RID fallback graph comes from the core framework Microsoft.NETCore.App, 
-            // so there is no need to write it into the app.
-            // If self-contained apps, the (applicable subset of) RID fallback graph needs to be written to the deps.json manifest.
-            //
-            // If a RID-graph is provided to the DependencyContextBuilder, it generates a RID-fallback 
-            // graph with respect to the target RuntimeIdentifier.
+	            RuntimeGraph runtimeGraph =
+	                IsSelfContained ? new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath) : null;
 
-            RuntimeGraph runtimeGraph =
-                IsSelfContained ? new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath) : null;
-
-            var builder = new DependencyContextBuilder(mainProject, projectContext, IncludeRuntimeFileVersions, runtimeGraph);
+            	builder = new DependencyContextBuilder(mainProject, projectContext, IncludeRuntimeFileVersions, runtimeGraph);
+            }
+            else
+            {
+                builder = new DependencyContextBuilder(
+                    mainProject,
+                    IncludeRuntimeFileVersions,
+                    RuntimeFrameworks,
+                    isSelfContained: IsSelfContained,
+                    platformLibraryName: PlatformLibraryName,
+                    runtimeIdentifier: RuntimeIdentifier,
+                    targetFramework: TargetFramework);
+            }
 
             builder = builder
                 .WithMainProjectInDepsFile(IncludeMainProject)
