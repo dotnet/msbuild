@@ -79,7 +79,7 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (fragment is ValueFragment)
                     {
-                        string value = ((ValueFragment)fragment).ItemSpecFragment;
+                        string value = ((ValueFragment)fragment).TextFragment;
 
                         if (excludeTester == null ||
                             !excludeTester.Value(EscapingUtilities.UnescapeAll(value)))
@@ -90,7 +90,7 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (fragment is GlobFragment)
                     {
-                        string glob = ((GlobFragment)fragment).ItemSpecFragment;
+                        string glob = ((GlobFragment)fragment).TextFragment;
 
                         if (excludePatternsForGlobs == null)
                         {

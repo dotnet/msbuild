@@ -527,7 +527,7 @@ namespace Microsoft.Build.Evaluation
         {
             builder.ItemSpec = new ItemSpec<P, I>(itemSpec, _outerExpander, itemSpecLocation, rootDirectory);
 
-            foreach (ItemFragment fragment in builder.ItemSpec.Fragments)
+            foreach (ItemSpecFragment fragment in builder.ItemSpec.Fragments)
             {
                 if (fragment is ItemSpec<P, I>.ItemExpressionFragment itemExpression)
                 {
