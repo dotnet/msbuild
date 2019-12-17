@@ -266,7 +266,7 @@ namespace Microsoft.NET.Build.Tasks
                     packagesToDownload.Add(packageToDownload);
 
                     appHostItem.SetMetadata(MetadataKeys.NuGetPackageId, hostPackName);
-                    appHostItem.SetMetadata(MetadataKeys.PackageVersion, appHostPackVersion);
+                    appHostItem.SetMetadata(MetadataKeys.NuGetPackageVersion, appHostPackVersion);
                 }
 
                 appHostItem.SetMetadata(MetadataKeys.PathInPackage, hostRelativePathInPackage);

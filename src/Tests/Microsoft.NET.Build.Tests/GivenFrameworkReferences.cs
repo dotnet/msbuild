@@ -1012,9 +1012,9 @@ namespace FrameworkReferenceTest
     <ItemGroup>
       <LinesToWrite Include=`RuntimeFramework%09%(RuntimeFramework.Identity)%09%(RuntimeFramework.Version)`/>
       <LinesToWrite Include=`PackageDownload%09%(PackageDownload.Identity)%09%(PackageDownload.Version)`/>
-      <LinesToWrite Include=`TargetingPack%09%(TargetingPack.Identity)%09%(TargetingPack.PackageVersion)`/>
-      <LinesToWrite Include=`RuntimePack%09%(RuntimePack.Identity)%09%(RuntimePack.PackageVersion)`/>
-      <LinesToWrite Include=`AppHostPack%09%(AppHostPack.Identity)%09%(AppHostPack.PackageVersion)`/>
+      <LinesToWrite Include=`TargetingPack%09%(TargetingPack.Identity)%09%(TargetingPack.NuGetPackageVersion)`/>
+      <LinesToWrite Include=`RuntimePack%09%(RuntimePack.Identity)%09%(RuntimePack.NuGetPackageVersion)`/>
+      <LinesToWrite Include=`AppHostPack%09%(AppHostPack.Identity)%09%(AppHostPack.NuGetPackageVersion)`/>
     </ItemGroup>
     <WriteLinesToFile File=`$(OutputPath)resolvedversions.txt`
                       Lines=`@(LinesToWrite)`

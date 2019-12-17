@@ -12,12 +12,7 @@ namespace Microsoft.NET.Build.Tasks
         public static PackageIdentity GetPackageIdentity(ITaskItem item)
         {
             string packageName = item.GetMetadata(MetadataKeys.NuGetPackageId);
-            string packageVersion = item.GetMetadata(MetadataKeys.PackageVersion);
-
-            if (string.IsNullOrEmpty(packageVersion))
-            {
-                packageVersion = item.GetMetadata(MetadataKeys.NuGetPackageVersion);
-            }
+            string packageVersion = item.GetMetadata(MetadataKeys.NuGetPackageVersion);
 
             if (string.IsNullOrEmpty(packageName) || string.IsNullOrEmpty(packageVersion))
             {
