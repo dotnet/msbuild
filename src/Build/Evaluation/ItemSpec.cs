@@ -103,15 +103,13 @@ namespace Microsoft.Build.Evaluation
                 {
                     _expander = _containingItemSpec.Expander;
 
-                    List<Pair<string, I>> itemsFromCapture;
-                    bool throwaway;
                     _expander.ExpandExpressionCapture(
                         Capture,
                         _containingItemSpec.ItemSpecLocation,
                         ExpanderOptions.ExpandItems,
-                        false /* do not include null expansion results */,
-                        out throwaway,
-                        out itemsFromCapture);
+                        includeNullEntries: false,
+                        isTransformExpression: out _,
+                        itemsFromCapture: out var itemsFromCapture);
                     _referencedItems =
                         itemsFromCapture.Select(i => new ReferencedItem(i.Value, new ValueFragment(i.Key, ProjectDirectory))).ToList();
 
@@ -198,12 +196,11 @@ namespace Microsoft.Build.Evaluation
                 foreach (var splitEscaped in splitsEscaped)
                 {
                     // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
-                    bool isItemListExpression;
                     var itemReferenceFragment = ProcessItemExpression(
                         splitEscaped,
                         itemSpecLocation,
                         projectDirectory,
-                        out isItemListExpression);
+                        out var isItemListExpression);
 
                     if (isItemListExpression)
                     {
@@ -305,7 +302,7 @@ namespace Microsoft.Build.Evaluation
         /// </param>
         public IEnumerable<ItemSpecFragment> FragmentsMatchingItem(string itemToMatch, out int matches)
         {
-            var result = new List<ItemSpecFragment>(Fragments.Count());
+            var result = new List<ItemSpecFragment>(Fragments.Count);
             matches = 0;
 
             foreach (var fragment in Fragments)
@@ -343,10 +340,8 @@ namespace Microsoft.Build.Evaluation
                 {
                     yield return fragment.TextFragment;
                 }
-                else if (fragment is ItemExpressionFragment)
+                else if (fragment is ItemExpressionFragment itemExpression)
                 {
-                    var itemExpression = (ItemExpressionFragment) fragment;
-
                     foreach (var referencedItem in itemExpression.ReferencedItems)
                     {
                         yield return referencedItem.ItemAsValueFragment.TextFragment;
@@ -401,18 +396,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         // not a Lazy to reduce memory
-        protected virtual IMSBuildGlob MsBuildGlob
-        {
-            get
-            {
-                if (_msbuildGlob == null)
-                {
-                    _msbuildGlob = CreateMsBuildGlob();
-                }
-
-                return _msbuildGlob;
-            }
-        }
+        protected virtual IMSBuildGlob MsBuildGlob => _msbuildGlob ??= CreateMsBuildGlob();
 
         protected ItemSpecFragment(string textFragment, string projectDirectory)
         {

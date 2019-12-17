@@ -83,8 +83,7 @@ namespace Microsoft.Build.Evaluation
 
             private IList<I> GetReferencedItems(string itemType, ImmutableHashSet<string> globsToIgnore)
             {
-                LazyItemList itemList;
-                if (_referencedItemLists.TryGetValue(itemType, out itemList))
+                if (_referencedItemLists.TryGetValue(itemType, out var itemList))
                 {
                     return itemList.GetMatchedItems(globsToIgnore);
                 }
@@ -163,13 +162,13 @@ namespace Microsoft.Build.Evaluation
                 {
                     if (itemType == null || itemType.Equals(_operationItem.Key, StringComparison.OrdinalIgnoreCase))
                     {
-                        return getEscapedValueFunc((IMetadataTable) _operationItem, itemType, name);
+                        return getEscapedValueFunc(_operationItem, itemType, name);
                     }
                     else if (_capturedItems.ContainsKey(itemType))
                     {
                         var item = _capturedItems[itemType];
 
-                        return getEscapedValueFunc((IMetadataTable) item, itemType, name);
+                        return getEscapedValueFunc(item, itemType, name);
                     }
                     else
                     {
