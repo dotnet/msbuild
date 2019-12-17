@@ -6,13 +6,20 @@ using Xunit;
 using System;
 using System.IO;
 using FluentAssertions;
-using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.MSBuild.IntegrationTests
 {
-    public class GivenDotnetInvokesMSBuild : TestBase
+    public class GivenDotnetInvokesMSBuild : SdkTest
     {
+        public GivenDotnetInvokesMSBuild(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Theory]
         [InlineData("build")]
         [InlineData("clean")]
@@ -22,12 +29,11 @@ namespace Microsoft.DotNet.Cli.MSBuild.IntegrationTests
         [InlineData("test")]
         public void When_dotnet_command_invokes_msbuild_Then_env_vars_and_m_are_passed(string command)
         {
-            var testInstance = TestAssets.Get("MSBuildIntegration")
-                .CreateInstance(identifier: command)
-                .WithSourceFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset("MSBuildIntegration", identifier: command)
+                .WithSource();
 
-            new DotnetCommand()
-                .WithWorkingDirectory(testInstance.Root)
+            new DotnetCommand(Log)
+                .WithWorkingDirectory(testInstance.Path)
                 .Execute(command)
                 .Should().Pass();
         }
@@ -39,13 +45,12 @@ namespace Microsoft.DotNet.Cli.MSBuild.IntegrationTests
         [InlineData("publish")]
         public void When_dotnet_command_invokes_msbuild_with_no_args_verbosity_is_set_to_minimum(string command)
         {
-            var testInstance = TestAssets.Get("MSBuildIntegration")
-                .CreateInstance(identifier: command)
-                .WithSourceFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset("MSBuildIntegration", identifier: command)
+                .WithSource();
 
-            var cmd = new DotnetCommand()
-                .WithWorkingDirectory(testInstance.Root)
-                .ExecuteWithCapturedOutput(command);
+            var cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(testInstance.Path)
+                .Execute(command);
 
             cmd.Should().Pass();
 
@@ -61,13 +66,12 @@ namespace Microsoft.DotNet.Cli.MSBuild.IntegrationTests
         [InlineData("publish")]
         public void When_dotnet_command_invokes_msbuild_with_diag_verbosity_Then_arg_is_passed(string command)
         {
-            var testInstance = TestAssets.Get("MSBuildIntegration")
-                .CreateInstance(identifier: command)
-                .WithSourceFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset("MSBuildIntegration", identifier: command)
+                .WithSource();
 
-            var cmd = new DotnetCommand()
-                .WithWorkingDirectory(testInstance.Root)
-                .ExecuteWithCapturedOutput($"{command} -v diag");
+            var cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(testInstance.Path)
+                .Execute(command, "-v", "diag");
 
             cmd.Should().Pass();
 
@@ -77,13 +81,12 @@ namespace Microsoft.DotNet.Cli.MSBuild.IntegrationTests
         [Fact]
         public void When_dotnet_test_invokes_msbuild_with_no_args_verbosity_is_set_to_quiet()
         {
-            var testInstance = TestAssets.Get("MSBuildIntegration")
-                .CreateInstance()
-                .WithSourceFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset("MSBuildIntegration")
+                .WithSource();
 
-            var cmd = new DotnetCommand()
-                .WithWorkingDirectory(testInstance.Root)
-                .ExecuteWithCapturedOutput("test");
+            var cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(testInstance.Path)
+                .Execute("test");
 
             cmd.Should().Pass();
             cmd.StdOut.Should().NotContain("Message with high importance");
@@ -92,13 +95,12 @@ namespace Microsoft.DotNet.Cli.MSBuild.IntegrationTests
         [Fact]
         public void When_dotnet_msbuild_command_is_invoked_with_non_msbuild_switch_Then_it_fails()
         {
-            var testInstance = TestAssets.Get("MSBuildIntegration")
-                .CreateInstance()
-                .WithSourceFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset("MSBuildIntegration")
+                .WithSource();
 
-            var cmd = new DotnetCommand()
-                .WithWorkingDirectory(testInstance.Root)
-                .ExecuteWithCapturedOutput($"msbuild -v diag");
+            var cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(testInstance.Path)
+                .Execute("msbuild", "-v", "diag");
 
             cmd.ExitCode.Should().NotBe(0);
         }
@@ -106,14 +108,13 @@ namespace Microsoft.DotNet.Cli.MSBuild.IntegrationTests
         [Fact]
         public void When_MSBuildSDKsPath_is_set_by_env_var_then_it_is_not_overridden()
         {
-            var testInstance = TestAssets.Get("MSBuildIntegration")
-                .CreateInstance()
-                .WithSourceFiles();
+            var testInstance = _testAssetsManager.CopyTestAsset("MSBuildIntegration")
+                .WithSource();
 
-            var cmd = new DotnetCommand()
-                .WithWorkingDirectory(testInstance.Root)
+            var cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(testInstance.Path)
                 .WithEnvironmentVariable("MSBuildSDKsPath", "AnyString")
-                .ExecuteWithCapturedOutput($"msbuild");
+                .Execute($"msbuild");
 
             cmd.ExitCode.Should().NotBe(0);
 
