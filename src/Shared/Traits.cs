@@ -90,6 +90,12 @@ namespace Microsoft.Build.Utilities
     internal class EscapeHatches
     {
         /// <summary>
+        /// https://github.com/microsoft/msbuild/pull/4975 started expanding qualified metadata in Update operations. Before they'd expand to empty strings.
+        /// This escape hatch turns back the old empty string behavior.
+        /// </summary>
+        public readonly bool DoNotExpandQualifiedMetadataInUpdateOperation = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDoNotExpandQualifiedMetadataInUpdateOperation"));
+
+        /// <summary>
         /// Force whether Project based evaluations should evaluate elements with false conditions.
         /// </summary>
         public readonly bool? EvaluateElementsWithFalseConditionInProjectEvaluation = ParseNullableBoolFromEnvironmentVariable("MSBUILDEVALUATEELEMENTSWITHFALSECONDITIONINPROJECTEVALUATION");

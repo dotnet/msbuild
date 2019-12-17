@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.Build.Construction;
 using System.Collections.Immutable;
 using System.Linq;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -51,7 +52,9 @@ namespace Microsoft.Build.Evaluation
                     // then all items are updated and matching is not necessary
                     matchItemspec = (itemSpec, item) => new MatchResult(true, null);
                 }
-                else if (ItemSpecContainsItemReferences(_itemSpec) && QualifiedMetadataReferencesExist(_metadata, out needToExpandMetadataForEachItem))
+                else if (ItemSpecContainsItemReferences(_itemSpec)
+                         && QualifiedMetadataReferencesExist(_metadata, out needToExpandMetadataForEachItem)
+                         && !Traits.Instance.EscapeHatches.DoNotExpandQualifiedMetadataInUpdateOperation)
                 {
                     var itemReferenceFragments = _itemSpec.Fragments.OfType<ItemSpec<P,I>.ItemExpressionFragment>().ToArray();
                     var nonItemReferenceFragments = _itemSpec.Fragments.Where(f => !(f is ItemSpec<P,I>.ItemExpressionFragment)).ToArray();
