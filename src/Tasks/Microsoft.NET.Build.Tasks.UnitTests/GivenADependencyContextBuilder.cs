@@ -325,7 +325,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             void CheckRuntimeFallbacks(string runtimeIdentifier, int fallbackCount)
             {
                 projectContext.LockFileTarget.RuntimeIdentifier = runtimeIdentifier;
-                var dependencyContextBuilder = new DependencyContextBuilder(mainProject, projectContext, includeRuntimeFileVersions: false, runtimeGraph);
+                var dependencyContextBuilder = new DependencyContextBuilder(mainProject, includeRuntimeFileVersions: false, runtimeGraph, projectContext);
                 var runtimeFallbacks = dependencyContextBuilder.Build().RuntimeGraph;
 
                 runtimeFallbacks
