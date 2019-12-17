@@ -110,9 +110,6 @@ namespace Microsoft.Build.Evaluation
 
                 public IMetadataTable GetMetadataTable()
                 {
-                    // todo avoid this by adding a generic type constraint that items must also be metadata tables
-                    ErrorUtilities.VerifyThrow(OperationItem is IMetadataTable, "OperationItem is assumed to be an IMetadataTable.");
-
                     return CapturedItems == null
                         ? (IMetadataTable) OperationItem
                         : new ItemOperationMetadataTable(OperationItem, CapturedItems);
