@@ -140,6 +140,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.MSBuildSdk
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.ToolPackage.Tests", "src\Tests\Microsoft.DotNet.ToolPackage.Tests\Microsoft.DotNet.ToolPackage.Tests.csproj", "{3D20D19D-74FB-4A43-B78C-B0AF90A696A0}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Tools.Tests.Utilities.Tests", "src\Tests\Microsoft.DotNet.Tools.Tests.Utilities.Tests\Microsoft.DotNet.Tools.Tests.Utilities.Tests.csproj", "{BE6B9618-2262-4FF7-B762-FB97A7A1A0B8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -310,6 +312,10 @@ Global
 		{3D20D19D-74FB-4A43-B78C-B0AF90A696A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3D20D19D-74FB-4A43-B78C-B0AF90A696A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3D20D19D-74FB-4A43-B78C-B0AF90A696A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE6B9618-2262-4FF7-B762-FB97A7A1A0B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE6B9618-2262-4FF7-B762-FB97A7A1A0B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE6B9618-2262-4FF7-B762-FB97A7A1A0B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE6B9618-2262-4FF7-B762-FB97A7A1A0B8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -362,6 +368,7 @@ Global
 		{FE88C711-9AFF-484F-B5E2-80D13FB82C2F} = {22AB674F-ED91-4FBC-BFEE-8A1E82F9F05E}
 		{0AE2AB83-1F0D-4E04-9C8D-5C35CE97FDDC} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{3D20D19D-74FB-4A43-B78C-B0AF90A696A0} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
+		{BE6B9618-2262-4FF7-B762-FB97A7A1A0B8} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB8F26CE-4DE6-433F-B32A-79183020BBD6}
