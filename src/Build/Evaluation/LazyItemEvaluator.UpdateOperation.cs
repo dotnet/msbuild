@@ -24,16 +24,16 @@ namespace Microsoft.Build.Evaluation
             readonly struct MatchResult
             {
                 public bool IsMatch { get; }
-                public Dictionary<string, IItem> MatchedItemsFromReferencedItemTypes { get; }
+                public Dictionary<string, I> CapturedItemsFromReferencedItemTypes { get; }
 
-                public MatchResult(bool isMatch, Dictionary<string, IItem> matchedItemsFromReferencedItemTypes)
+                public MatchResult(bool isMatch, Dictionary<string, I> capturedItemsFromReferencedItemTypes)
                 {
                     IsMatch = isMatch;
-                    MatchedItemsFromReferencedItemTypes = matchedItemsFromReferencedItemTypes;
+                    CapturedItemsFromReferencedItemTypes = capturedItemsFromReferencedItemTypes;
                 }
             }
 
-            delegate MatchResult ItemSpecMatchesItem(ItemSpec<P, I> itemSpec, I item);
+            delegate MatchResult ItemSpecMatchesItem(ItemSpec<P, I> itemSpec, I itemToMatch);
 
             protected override void ApplyImpl(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
@@ -53,13 +53,13 @@ namespace Microsoft.Build.Evaluation
                 }
                 else if (ItemSpecContainsItemReferences(_itemSpec) && QualifiedMetadataReferencesExist(_metadata, out needToExpandMetadataForEachItem))
                 {
-                    var itemReferenceFragments = _itemSpec.Fragments.OfType<ItemExpressionFragment<P, I>>().ToArray();
-                    var nonItemReferenceFragments = _itemSpec.Fragments.Where(f => !(f is ItemExpressionFragment<P, I>)).ToArray();
+                    var itemReferenceFragments = _itemSpec.Fragments.OfType<ItemSpec<P,I>.ItemExpressionFragment>().ToArray();
+                    var nonItemReferenceFragments = _itemSpec.Fragments.Where(f => !(f is ItemSpec<P,I>.ItemExpressionFragment)).ToArray();
 
                     matchItemspec = (itemSpec, item) =>
                     {
                         var isMatch = nonItemReferenceFragments.Any(f => f.IsMatch(item.EvaluatedInclude));
-                        Dictionary<string, IItem> matchedItemsFromReferencedItemTypes = null;
+                        Dictionary<string, I> capturedItemsFromReferencedItemTypes = null;
 
                         foreach (var itemReferenceFragment in itemReferenceFragments)
                         {
@@ -69,14 +69,14 @@ namespace Microsoft.Build.Evaluation
                                 {
                                     isMatch = true;
 
-                                    matchedItemsFromReferencedItemTypes ??= new Dictionary<string, IItem>(StringComparer.OrdinalIgnoreCase);
+                                    capturedItemsFromReferencedItemTypes ??= new Dictionary<string, I>(StringComparer.OrdinalIgnoreCase);
 
-                                    matchedItemsFromReferencedItemTypes[referencedItem.Item.Key] = referencedItem.Item;
+                                    capturedItemsFromReferencedItemTypes[referencedItem.Item.Key] = referencedItem.Item;
                                 }
                             }
                         }
 
-                        return new MatchResult(isMatch, matchedItemsFromReferencedItemTypes);
+                        return new MatchResult(isMatch, capturedItemsFromReferencedItemTypes);
                     };
                 }
                 else
@@ -84,7 +84,7 @@ namespace Microsoft.Build.Evaluation
                     matchItemspec = (itemSpec, item) => new MatchResult(itemSpec.MatchesItem(item), null);
                 }
 
-                var matchedItems = ImmutableList.CreateBuilder<ItemBatchingContext>();
+                var itemsToUpdate = ImmutableList.CreateBuilder<ItemBatchingContext>();
 
                 for (int i = 0; i < listBuilder.Count; i++)
                 {
@@ -100,11 +100,11 @@ namespace Microsoft.Build.Evaluation
                         var clonedItemData = listBuilder[i].Clone(_itemFactory, _itemElement);
                         listBuilder[i] = clonedItemData;
 
-                        matchedItems.Add(new ItemBatchingContext(clonedItemData.Item, matchResult.MatchedItemsFromReferencedItemTypes));
+                        itemsToUpdate.Add(new ItemBatchingContext(clonedItemData.Item, matchResult.CapturedItemsFromReferencedItemTypes));
                     }
                 }
 
-                DecorateItemsWithMetadata(matchedItems.ToImmutableList(), _metadata, needToExpandMetadataForEachItem);
+                DecorateItemsWithMetadata(itemsToUpdate.ToImmutableList(), _metadata, needToExpandMetadataForEachItem);
             }
 
             private bool QualifiedMetadataReferencesExist(ImmutableList<ProjectMetadataElement> metadata, out bool? needToExpandMetadataForEachItem)
@@ -129,7 +129,7 @@ namespace Microsoft.Build.Evaluation
 
             private static bool ItemSpecContainsItemReferences(ItemSpec<P, I> itemSpec)
             {
-                return itemSpec.Fragments.Any(f => f is ItemExpressionFragment<P, I>);
+                return itemSpec.Fragments.Any(f => f is ItemSpec<P,I>.ItemExpressionFragment);
             }
 
             private static bool ItemspecContainsASingleItemReference(ItemSpec<P, I> itemSpec, string referencedItemType)
@@ -139,7 +139,7 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                var itemExpressionFragment = itemSpec.Fragments[0] as ItemExpressionFragment<P, I>;
+                var itemExpressionFragment = itemSpec.Fragments[0] as ItemSpec<P,I>.ItemExpressionFragment;
                 if (itemExpressionFragment == null)
                 {
                     return false;

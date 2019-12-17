@@ -529,8 +529,7 @@ namespace Microsoft.Build.Evaluation
 
             foreach (ItemFragment fragment in builder.ItemSpec.Fragments)
             {
-                ItemExpressionFragment<P, I> itemExpression = fragment as ItemExpressionFragment<P, I>;
-                if (itemExpression != null)
+                if (fragment is ItemSpec<P, I>.ItemExpressionFragment itemExpression)
                 {
                     AddReferencedItemLists(builder, itemExpression.Capture);
                 }

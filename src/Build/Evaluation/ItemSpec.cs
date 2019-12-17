@@ -17,7 +17,7 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal class ItemSpec<P, I>
         where P : class, IProperty
-        where I : class, IItem
+        where I : class, IItem, IMetadataTable
     {
         public string ItemSpecString { get; }
 
@@ -132,7 +132,7 @@ namespace Microsoft.Build.Evaluation
             return fragments;
         }
 
-        private ItemExpressionFragment<P, I> ProcessItemExpression(string expression, IElementLocation elementLocation, string projectDirectory, out bool isItemListExpression)
+        private ItemExpressionFragment ProcessItemExpression(string expression, IElementLocation elementLocation, string projectDirectory, out bool isItemListExpression)
         {
             isItemListExpression = false;
 
@@ -151,7 +151,7 @@ namespace Microsoft.Build.Evaluation
 
             isItemListExpression = true;
 
-            return new ItemExpressionFragment<P, I>(capture, expression, this, projectDirectory);
+            return new ItemExpressionFragment(capture, expression, this, projectDirectory);
         }
 
         /// <summary>
@@ -220,9 +220,9 @@ namespace Microsoft.Build.Evaluation
                 {
                     yield return fragment.ItemSpecFragment;
                 }
-                else if (fragment is ItemExpressionFragment<P, I>)
+                else if (fragment is ItemExpressionFragment)
                 {
-                    var itemExpression = (ItemExpressionFragment<P, I>) fragment;
+                    var itemExpression = (ItemExpressionFragment) fragment;
 
                     foreach (var referencedItem in itemExpression.ReferencedItems)
                     {
@@ -240,6 +240,107 @@ namespace Microsoft.Build.Evaluation
         {
             return ItemSpecString;
         }
+
+        internal readonly struct ReferencedItem
+        {
+            public I Item { get; }
+            public ValueFragment ItemAsValueFragment { get; }
+
+            public ReferencedItem(I item, ValueFragment itemAsValueFragment)
+            {
+                Item = item;
+                ItemAsValueFragment = itemAsValueFragment;
+            }
+        }
+
+        internal class ItemExpressionFragment : ItemFragment
+        {
+        public ExpressionShredder.ItemExpressionCapture Capture { get; }
+
+        private readonly ItemSpec<P, I> _containingItemSpec;
+        private Expander<P, I> _expander;
+
+        private List<ReferencedItem> _referencedItems;
+
+        public List<ReferencedItem> ReferencedItems
+        {
+            get
+            {
+                InitReferencedItemsIfNecessary();
+                return _referencedItems;
+            }
+        }
+
+        private IMSBuildGlob _msbuildGlob;
+        protected override IMSBuildGlob MsBuildGlob
+        {
+            get
+            {
+                if (InitReferencedItemsIfNecessary() || _msbuildGlob == null)
+                {
+                    _msbuildGlob = CreateMsBuildGlob();
+                }
+
+                return _msbuildGlob;
+            }
+        }
+
+        public ItemExpressionFragment(ExpressionShredder.ItemExpressionCapture capture, string itemSpecFragment, ItemSpec<P, I> containingItemSpec, string projectDirectory)
+            : base(itemSpecFragment, projectDirectory)
+        {
+            Capture = capture;
+
+            _containingItemSpec = containingItemSpec;
+            _expander = _containingItemSpec.Expander;
+        }
+
+        public override int MatchCount(string itemToMatch)
+        {
+
+            return ReferencedItems.Count(v => v.ItemAsValueFragment.MatchCount(itemToMatch) > 0);
+        }
+
+        public override bool IsMatch(string itemToMatch)
+        {
+
+            return ReferencedItems.Any(v => v.ItemAsValueFragment.IsMatch(itemToMatch));
+        }
+
+        public override IMSBuildGlob ToMSBuildGlob()
+        {
+            return MsBuildGlob;
+        }
+
+        protected override IMSBuildGlob CreateMsBuildGlob()
+        {
+            return new CompositeGlob(ReferencedItems.Select(i => i.ItemAsValueFragment.ToMSBuildGlob()));
+        }
+
+        private bool InitReferencedItemsIfNecessary()
+        {
+            // cache referenced items as long as the expander does not change
+            // reference equality works for now since the expander cannot mutate its item state (hopefully it stays that way)
+            if (_referencedItems == null || _expander != _containingItemSpec.Expander)
+            {
+                _expander = _containingItemSpec.Expander;
+
+                List<Pair<string, I>> itemsFromCapture;
+                bool throwaway;
+                _expander.ExpandExpressionCapture(
+                    Capture,
+                    _containingItemSpec.ItemSpecLocation,
+                    ExpanderOptions.ExpandItems,
+                    false /* do not include null expansion results */,
+                    out throwaway,
+                    out itemsFromCapture);
+                _referencedItems = itemsFromCapture.Select(i => new ReferencedItem(i.Value, new ValueFragment(i.Key, ProjectDirectory))).ToList();
+
+                return true;
+            }
+
+            return false;
+        }
+    }
     }
 
     internal abstract class ItemFragment
@@ -336,109 +437,6 @@ namespace Microsoft.Build.Evaluation
         public GlobFragment(string itemSpecFragment, string projectDirectory)
             : base(itemSpecFragment, projectDirectory)
         {
-        }
-    }
-
-    internal readonly struct ReferencedItem
-    {
-        public IItem Item { get; }
-        public ValueFragment ItemAsValueFragment { get; }
-
-        public ReferencedItem(IItem item, ValueFragment itemAsValueFragment)
-        {
-            Item = item;
-            ItemAsValueFragment = itemAsValueFragment;
-        }
-    }
-
-    internal class ItemExpressionFragment<P, I> : ItemFragment
-        where P : class, IProperty
-        where I : class, IItem
-    {
-        public ExpressionShredder.ItemExpressionCapture Capture { get; }
-
-        private readonly ItemSpec<P, I> _containingItemSpec;
-        private Expander<P, I> _expander;
-
-        private List<ReferencedItem> _referencedItems;
-
-        public List<ReferencedItem> ReferencedItems
-        {
-            get
-            {
-                InitReferencedItemsIfNecessary();
-                return _referencedItems;
-            }
-        }
-
-        private IMSBuildGlob _msbuildGlob;
-        protected override IMSBuildGlob MsBuildGlob
-        {
-            get
-            {
-                if (InitReferencedItemsIfNecessary() || _msbuildGlob == null)
-                {
-                    _msbuildGlob = CreateMsBuildGlob();
-                }
-
-                return _msbuildGlob;
-            }
-        }
-
-        public ItemExpressionFragment(ExpressionShredder.ItemExpressionCapture capture, string itemSpecFragment, ItemSpec<P, I> containingItemSpec, string projectDirectory)
-            : base(itemSpecFragment, projectDirectory)
-        {
-            Capture = capture;
-
-            _containingItemSpec = containingItemSpec;
-            _expander = _containingItemSpec.Expander;
-        }
-
-        public override int MatchCount(string itemToMatch)
-        {
-
-            return ReferencedItems.Count(v => v.ItemAsValueFragment.MatchCount(itemToMatch) > 0);
-        }
-
-        public override bool IsMatch(string itemToMatch)
-        {
-
-            return ReferencedItems.Any(v => v.ItemAsValueFragment.IsMatch(itemToMatch));
-        }
-
-        public override IMSBuildGlob ToMSBuildGlob()
-        {
-            return MsBuildGlob;
-        }
-
-        protected override IMSBuildGlob CreateMsBuildGlob()
-        {
-            return new CompositeGlob(ReferencedItems.Select(i => i.ItemAsValueFragment.ToMSBuildGlob()));
-        }
-
-        private bool InitReferencedItemsIfNecessary()
-        {
-            // cache referenced items as long as the expander does not change
-            // reference equality works for now since the expander cannot mutate its item state (hopefully it stays that way)
-            if (_referencedItems == null || _expander != _containingItemSpec.Expander)
-            {
-                _expander = _containingItemSpec.Expander;
-
-                List<Pair<string, I>> itemsFromCapture;
-                bool throwaway;
-                _expander.ExpandExpressionCapture(
-                    Capture,
-                    _containingItemSpec.ItemSpecLocation,
-                    ExpanderOptions.ExpandItems,
-                    false /* do not include null expansion results */,
-                    out throwaway,
-                    out itemsFromCapture);
-                _referencedItems = itemsFromCapture.Select(i => new ReferencedItem(i.Value, new ValueFragment(i.Key, ProjectDirectory))).ToList();
-
-                return true;
-            }
-
-            return false;
         }
     }
 }
