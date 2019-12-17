@@ -279,7 +279,7 @@ namespace Microsoft.Build.Construction
 
         #region Methods
 
-        public bool IsFiltered(string projectFile)
+        public bool ProjectShouldBuild(string projectFile)
         {
             return _solutionFilter == null || _solutionFilter.Contains(projectFile);
         }

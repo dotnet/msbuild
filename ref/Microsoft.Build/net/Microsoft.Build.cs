@@ -457,8 +457,8 @@ namespace Microsoft.Build.Construction
         public System.Collections.Generic.IReadOnlyList<Microsoft.Build.Construction.SolutionConfigurationInSolution> SolutionConfigurations { get { throw null; } }
         public string GetDefaultConfigurationName() { throw null; }
         public string GetDefaultPlatformName() { throw null; }
-        public bool IsFiltered(string projectFile) { throw null; }
         public static Microsoft.Build.Construction.SolutionFile Parse(string solutionFile) { throw null; }
+        public bool ProjectShouldBuild(string projectFile) { throw null; }
     }
     public enum SolutionProjectType
     {

@@ -158,8 +158,8 @@ namespace Microsoft.Build.UnitTests.Construction
                         }
                     }");
                 SolutionFile sp = SolutionFile.Parse(slnf.Path);
-                Assert.True(sp.IsFiltered(Path.Combine("src", Path.GetFileName(microsoftBuild.Path))) && sp.IsFiltered(Path.Combine("src", Path.GetFileName(tasksUnitTests.Path))));
-                Assert.False(sp.IsFiltered(Path.Combine("src", Path.GetFileName(commandLineUnitTests.Path))) || sp.IsFiltered(Path.Combine("src", Path.GetFileName(msbuild.Path))) || sp.IsFiltered(Path.Combine("src", "notAProject.csproj")));
+                Assert.True(sp.ProjectShouldBuild(Path.Combine("src", Path.GetFileName(microsoftBuild.Path))) && sp.ProjectShouldBuild(Path.Combine("src", Path.GetFileName(tasksUnitTests.Path))));
+                Assert.False(sp.ProjectShouldBuild(Path.Combine("src", Path.GetFileName(commandLineUnitTests.Path))) || sp.ProjectShouldBuild(Path.Combine("src", Path.GetFileName(msbuild.Path))) || sp.ProjectShouldBuild(Path.Combine("src", "notAProject.csproj")));
             }
         }
 
