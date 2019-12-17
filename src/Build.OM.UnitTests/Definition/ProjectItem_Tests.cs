@@ -2452,6 +2452,48 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataC, items[4]);
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void EscapeHatchTurnsOffQualifiedMetadataExpansionInUpdateOperation(bool doNotExpandQualifiedMetadataInUpdateOperation)
+        {
+            using var env = TestEnvironment.Create();
+
+            if (doNotExpandQualifiedMetadataInUpdateOperation)
+            {
+                env.SetEnvironmentVariable("MSBuildDoNotExpandQualifiedMetadataInUpdateOperation", "non empty value");
+            }
+
+            string content = @"
+                              <from Include='a'>
+                                  <m1>updated contents</m1>
+                              </from>
+
+                              <to Include='a'>
+                                  <m1>original contents</m1>
+                              </to>
+
+                              <to Update='@(from)'>
+                                  <m1>%(from.m1)</m1>
+                              </to>";
+
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content, true);
+
+            var expectedMetadataA = doNotExpandQualifiedMetadataInUpdateOperation
+                ? new Dictionary<string, string>
+                {
+                    {"m1", string.Empty}
+                }
+                : new Dictionary<string, string>
+                {
+                    {"m1", "updated contents"}
+                };
+
+            items[1].ItemType.ShouldBe("to");
+
+            ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataA, items[1]);
+        }
+
         [Fact]
         public void UpdateFromReferencedItemShouldBeCaseInsensitive()
         {
