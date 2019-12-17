@@ -64,14 +64,8 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test that a solution filter file excludes projects not covered by its list of projects or their dependencies.
         /// </summary>
         [Fact]
-        public void SolutionFilterFiltersFiles()
+        public void SolutionFilterFiltersProjects()
         {
-            if (FrameworkLocationHelper.PathToDotNetFrameworkV35 == null)
-            {
-                // ".NET Framework 3.5 is required to be installed for this test, but it is not installed.");
-                return;
-            }
-
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
                 TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);              
@@ -79,9 +73,6 @@ namespace Microsoft.Build.UnitTests.Construction
                 TransientTestFolder classLibSubFolder = testEnvironment.CreateFolder(Path.Combine(classLibFolder.Path, "ClassLibrary"), createFolder: true);
                 TransientTestFile classLibrary = testEnvironment.CreateFile(classLibSubFolder, "ClassLibrary.csproj",
                     @"<Project>
-                <PropertyGroup>
-                 <TargetFramework>netstandard2.0</TargetFramework>
-                  </PropertyGroup>
                   <Target Name=""ClassLibraryTarget"">
                       <Message Text=""ClassLibraryBuilt""/>
                   </Target>
@@ -118,10 +109,6 @@ EndGlobalSection
                 TransientTestFolder simpleProjectSubFolder = testEnvironment.CreateFolder(Path.Combine(simpleProjectFolder.Path, "SimpleProject"), createFolder: true);
                 TransientTestFile simpleProject = testEnvironment.CreateFile(simpleProjectSubFolder, "SimpleProject.csproj",
                     @"<Project DefaultTargets=""SimpleProjectTarget"">
-                <PropertyGroup>
-                    <OutputType>Exe</OutputType>
-                 <TargetFramework>netcoreapp2.2</TargetFramework>
-                  </PropertyGroup>
                   <Target Name=""SimpleProjectTarget"">
                       <Message Text=""SimpleProjectBuilt""/>
                   </Target>
@@ -182,7 +169,7 @@ EndGlobalSection
 
                 // Check that dependencies are built, and non-dependencies in the .sln are not.
                 MockLogger logger = new MockLogger(output);
-                instances[0].Build(targets: null, new List<ILogger> { logger }).ShouldBeTrue(logger.FullLog);
+                instances[0].Build(targets: null, new List<ILogger> { logger }).ShouldBeTrue();
                 logger.AssertLogContains(new string[] { "SimpleProjectBuilt" });
                 logger.AssertLogDoesntContain("ClassLibraryBuilt");
             }

@@ -202,7 +202,6 @@ namespace Microsoft.Build.Construction
                 ErrorUtilities.VerifyThrowInternalRooted(value);
                 if (FileUtilities.IsSolutionFilterFilename(value))
                 {
-
                     try
                     {
                         using JsonDocument text = JsonDocument.Parse(File.ReadAllText(value));
@@ -215,7 +214,7 @@ namespace Microsoft.Build.Construction
                                 false /* just throw the exception */,
                                 "SubCategoryForSolutionParsingErrors",
                                 new BuildEventFileInfo(_solutionFile),
-                                "MissingSolutionError",
+                                "SolutionFilterMissingSolutionError",
                                 value,
                                 _solutionFile
                             );
@@ -230,7 +229,7 @@ namespace Microsoft.Build.Construction
                                     false /* just throw the exception */,
                                     "SubCategoryForSolutionParsingErrors",
                                     new BuildEventFileInfo(project.GetString()),
-                                    "FilteredProjectDoesNotExist",
+                                    "SolutionFilterFilteredProjectDoesNotExist",
                                     value,
                                     project.GetString(),
                                     _solutionFile
@@ -247,7 +246,7 @@ namespace Microsoft.Build.Construction
                             "SubCategoryForSolutionParsingErrors",
                             new BuildEventFileInfo(value),
                             e,
-                            "JsonParsingError",
+                            "SolutionFilterJsonParsingError",
                             value
                         );
                     }
@@ -279,7 +278,7 @@ namespace Microsoft.Build.Construction
 
         #region Methods
 
-        public bool ProjectShouldBuild(string projectFile)
+        internal bool ProjectShouldBuild(string projectFile)
         {
             return _solutionFilter == null || _solutionFilter.Contains(projectFile);
         }
@@ -529,21 +528,21 @@ namespace Microsoft.Build.Construction
 
             if (_solutionFilter != null)
             {
-                HashSet<string> projectNamesInOrder = new HashSet<string>(_projectsInOrder.Count);
+                HashSet<string> projectPaths = new HashSet<string>(_projectsInOrder.Count, NativeMethodsShared.IsLinux ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
                 for (int a = 0; a < _projectsInOrder.Count; a++)
                 {
-                    projectNamesInOrder.Add(_projectsInOrder[a].RelativePath);
+                    projectPaths.Add(_projectsInOrder[a].RelativePath);
                 }
                 foreach (string project in _solutionFilter)
                 {
-                    if (!projectNamesInOrder.Contains(project))
+                    if (!projectPaths.Contains(project))
                     {
                         ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
                         (
                             false /* just throw the exception */,
                             "SubCategoryForSolutionParsingErrors",
                             new BuildEventFileInfo(project),
-                            "FilterContainsProjectNotInSolution",
+                            "SolutionFilterFilterContainsProjectNotInSolution",
                             _solutionFilter,
                             project,
                             _solutionFile

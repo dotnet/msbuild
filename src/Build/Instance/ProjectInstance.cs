@@ -2038,6 +2038,7 @@ namespace Microsoft.Build.Execution
                 int visualStudioVersion = 0;
                 if (FileUtilities.IsSolutionFilterFilename(projectFile))
                 {
+                    // TODO: parse file to get accurate solution version
                     solutionVersion = 16;
                 }
                 else

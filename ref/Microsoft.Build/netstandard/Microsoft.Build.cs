@@ -458,7 +458,6 @@ namespace Microsoft.Build.Construction
         public string GetDefaultConfigurationName() { throw null; }
         public string GetDefaultPlatformName() { throw null; }
         public static Microsoft.Build.Construction.SolutionFile Parse(string solutionFile) { throw null; }
-        public bool ProjectShouldBuild(string projectFile) { throw null; }
     }
     public enum SolutionProjectType
     {

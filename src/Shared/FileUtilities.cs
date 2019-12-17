@@ -954,8 +954,8 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// This method returns true if the specified filename is a solution file (.sln), otherwise
-        /// it returns false.
+        /// This method returns true if the specified filename is a solution file (.sln) or solution filter
+        /// file (.slnf); otherwise, it returns false.
         /// </summary>
         internal static bool IsSolutionFilename(string filename)
         {
