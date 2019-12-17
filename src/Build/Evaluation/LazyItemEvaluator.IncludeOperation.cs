@@ -60,12 +60,12 @@ namespace Microsoft.Build.Evaluation
 
                 foreach (var fragment in _itemSpec.Fragments)
                 {
-                    if (fragment is ItemExpressionFragment<P, I>)
+                    if (fragment is ItemSpec<P, I>.ItemExpressionFragment itemReferenceFragment)
                     {
                         // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
                         bool throwaway;
                         var itemsFromExpression = _expander.ExpandExpressionCaptureIntoItems(
-                            ((ItemExpressionFragment<P, I>)fragment).Capture, _evaluatorData, _itemFactory, ExpanderOptions.ExpandItems,
+                            itemReferenceFragment.Capture, _evaluatorData, _itemFactory, ExpanderOptions.ExpandItems,
                             false /* do not include null expansion results */, out throwaway, _itemElement.IncludeLocation);
 
                         if (excludeTester != null)

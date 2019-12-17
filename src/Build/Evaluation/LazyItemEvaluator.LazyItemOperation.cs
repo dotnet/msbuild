@@ -98,15 +98,15 @@ namespace Microsoft.Build.Evaluation
             protected readonly struct ItemBatchingContext
             {
                 public I OperationItem { get; }
-                private Dictionary<string, IItem> ReferencedItems { get; }
+                private Dictionary<string, I> CapturedItems { get; }
 
-                public ItemBatchingContext(I operationItem, Dictionary<string, IItem> referencedItems = null)
+                public ItemBatchingContext(I operationItem, Dictionary<string, I> capturedItems = null)
                 {
                     OperationItem = operationItem;
 
-                    ReferencedItems = referencedItems != null && referencedItems.Count == 0
+                    CapturedItems = capturedItems != null && capturedItems.Count == 0
                         ? null
-                        : referencedItems;
+                        : capturedItems;
                 }
 
                 public IMetadataTable GetMetadataTable()
@@ -114,39 +114,39 @@ namespace Microsoft.Build.Evaluation
                     // todo avoid this by adding a generic type constraint that items must also be metadata tables
                     ErrorUtilities.VerifyThrow(OperationItem is IMetadataTable, "OperationItem is assumed to be an IMetadataTable.");
 
-                    return ReferencedItems == null
+                    return CapturedItems == null
                         ? (IMetadataTable) OperationItem
-                        : new ItemOperationMetadataTable(OperationItem, ReferencedItems);
+                        : new ItemOperationMetadataTable(OperationItem, CapturedItems);
                 }
 
                 private string DebugString()
                 {
-                    var referencedItemsString = ReferencedItems == null
+                    var referencedItemsString = CapturedItems == null
                         ? "none"
-                        : string.Join(";", ReferencedItems.Select(kvp => $"{kvp.Key} : {kvp.Value.EvaluatedInclude}"));
+                        : string.Join(";", CapturedItems.Select(kvp => $"{kvp.Key} : {kvp.Value.EvaluatedInclude}"));
 
-                    return $"{OperationItem.Key} : {OperationItem.EvaluatedInclude}; ReferencedItems: {referencedItemsString}";
+                    return $"{OperationItem.Key} : {OperationItem.EvaluatedInclude}; CapturedItems: {referencedItemsString}";
                 }
             }
 
             private class ItemOperationMetadataTable : IMetadataTable
             {
-                private readonly IItem _operationItem;
-                private readonly Dictionary<string, IItem> _referencedItems;
+                private readonly I _operationItem;
+                private readonly Dictionary<string, I> _capturedItems;
 
-                public ItemOperationMetadataTable(IItem operationItem, Dictionary<string, IItem> referencedItems)
+                public ItemOperationMetadataTable(I operationItem, Dictionary<string, I> capturedItems)
                 {
                     ErrorUtilities.VerifyThrow(
-                        referencedItems.Comparer == StringComparer.OrdinalIgnoreCase,
+                        capturedItems.Comparer == StringComparer.OrdinalIgnoreCase,
                         "MSBuild assumes case insensitive item name comparison");
 
                     _operationItem = operationItem;
-                    _referencedItems = referencedItems;
+                    _capturedItems = capturedItems;
                 }
 
                 public string GetEscapedValue(string name)
                 {
-                    return ((IMetadataTable) _operationItem).GetEscapedValue(name);
+                    return _operationItem.GetEscapedValue(name);
                 }
 
                 public string GetEscapedValue(string itemType, string name)
@@ -159,20 +159,17 @@ namespace Microsoft.Build.Evaluation
                     return RouteCall(itemType, name, (t, it, n) => t.GetEscapedValueIfPresent(it, n));
                 }
 
-                private string RouteCall(string itemType, string name, Func<IMetadataTable, string, string, string> func)
+                private string RouteCall(string itemType, string name, Func<IMetadataTable, string, string, string> getEscapedValueFunc)
                 {
                     if (itemType == null || itemType.Equals(_operationItem.Key, StringComparison.OrdinalIgnoreCase))
                     {
-                        return func((IMetadataTable) _operationItem, itemType, name);
+                        return getEscapedValueFunc((IMetadataTable) _operationItem, itemType, name);
                     }
-                    else if (_referencedItems.ContainsKey(itemType))
+                    else if (_capturedItems.ContainsKey(itemType))
                     {
-                        var item = _referencedItems[itemType];
+                        var item = _capturedItems[itemType];
 
-                        // todo avoid this by adding a generic type constraint that items must also be metadata tables
-                        ErrorUtilities.VerifyThrow(item is IMetadataTable, "all items are assumed to be IMetadataTable");
-
-                        return func((IMetadataTable) item, itemType, name);
+                        return getEscapedValueFunc((IMetadataTable) item, itemType, name);
                     }
                     else
                     {
