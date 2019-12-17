@@ -89,7 +89,6 @@ namespace Microsoft.Build.UnitTests.Construction
                     ");
                 TransientTestFile classLibrary1Sol = testEnvironment.CreateFile(classLibFolder, "ClassLibrary.sln",
                     @"
-
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29326.124
@@ -115,7 +114,6 @@ EndGlobalSection
                 EndGlobalSection
             EndGlobal
 ");
-
                 TransientTestFolder simpleProjectFolder = testEnvironment.CreateFolder(Path.Combine(folder.Path, "SimpleProject"), createFolder: true);
                 TransientTestFolder simpleProjectSubFolder = testEnvironment.CreateFolder(Path.Combine(simpleProjectFolder.Path, "SimpleProject"), createFolder: true);
                 TransientTestFile simpleProject = testEnvironment.CreateFile(simpleProjectSubFolder, "SimpleProject.csproj",

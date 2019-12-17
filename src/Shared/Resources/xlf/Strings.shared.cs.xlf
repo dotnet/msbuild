@@ -32,14 +32,24 @@
         <target state="translated">{0} ({1},{2})</target>
         <note>A file location to be embedded in a string.</note>
       </trans-unit>
+      <trans-unit id="FilterContainsProjectNotInSolution">
+        <source>MSB5028: Solution filter file at "{0}" includes project "{1}" that is not in the solution file at "{2}".</source>
+        <target state="new">MSB5028: Solution filter file at "{0}" includes project "{1}" that is not in the solution file at "{2}".</target>
+        <note>{StrBegin="MSB: 5028"}UE: The project filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="FilteredProjectDoesNotExist">
+        <source>MSB5027: The solution filter file at "{0}" specifies that there is a project file at "{1}" relative to "{2}", but that project file was not found.</source>
+        <target state="new">MSB5027: The solution filter file at "{0}" specifies that there is a project file at "{1}" relative to "{2}", but that project file was not found.</target>
+        <note>{StrBegin="MSB: 5027"}UE: The project filename is provided separately to loggers.</note>
+      </trans-unit>
       <trans-unit id="JsonParsingError">
-        <source>MSB5025: Json in solution filter file "{0}" incorrectly formatted.</source>
-        <target state="new">MSB5025: Json in solution filter file "{0}" incorrectly formatted.</target>
+        <source>MSB5025: Json in solution filter file "{0}" is incorrectly formatted.</source>
+        <target state="new">MSB5025: Json in solution filter file "{0}" is incorrectly formatted.</target>
         <note>{StrBegin="MSB: 5025"}UE: The solution filename is provided separately to loggers.</note>
       </trans-unit>
       <trans-unit id="MissingSolutionError">
-        <source>MSB5026: The file at "{0}" does not exist.</source>
-        <target state="new">MSB5026: The file at "{0}" does not exist.</target>
+        <source>MSB5026: The solution filter file at "{0}" specifies there will be a solution file at "{1}", but that file does not exist.</source>
+        <target state="new">MSB5026: The solution filter file at "{0}" specifies there will be a solution file at "{1}", but that file does not exist.</target>
         <note>{StrBegin="MSB: 5026"}UE: The solution filename is provided separately to loggers.</note>
       </trans-unit>
       <trans-unit id="ModifyingTaskHostEnvironmentHeader">
@@ -69,11 +79,6 @@
         <source>MSBuild is expecting a valid "{0}" object.</source>
         <target state="translated">Nástroj MSBuild očekává platný objekt {0}.</target>
         <note />
-      </trans-unit>
-      <trans-unit id="ProjectDoesNotExist">
-        <source>MSB5027: There is no project file at "{0}" or it is an absolute path instead of a relative path from the solution file.</source>
-        <target state="new">MSB5027: There is no project file at "{0}" or it is an absolute path instead of a relative path from the solution file.</target>
-        <note>{StrBegin="MSB: 5027"}UE: The project filename is provided separately to loggers.</note>
       </trans-unit>
       <trans-unit id="Shared.PathTooLong">
         <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>

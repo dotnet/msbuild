@@ -529,13 +529,13 @@ namespace Microsoft.Build.Construction
 
             if (_solutionFilter != null)
             {
+                HashSet<string> projectNamesInOrder = new HashSet<string>(_projectsInOrder.Count);
+                for (int a = 0; a < _projectsInOrder.Count; a++)
+                {
+                    projectNamesInOrder.Add(_projectsInOrder[a].RelativePath);
+                }
                 foreach (string project in _solutionFilter)
                 {
-                    HashSet<string> projectNamesInOrder = new HashSet<string>(_projectsInOrder.Count);
-                    for (int a = 0; a < _projectsInOrder.Count; a++)
-                    {
-                        projectNamesInOrder.Add(_projectsInOrder[a].ProjectName);
-                    }
                     if (!projectNamesInOrder.Contains(project))
                     {
                         ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
