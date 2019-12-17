@@ -49,7 +49,7 @@ namespace Microsoft.Build.Evaluation
                     return builder;
                 }
 
-                var globs = _itemSpec.Fragments.OfType<GlobFragment>().Select(g => g.ItemSpecFragment);
+                var globs = _itemSpec.Fragments.OfType<GlobFragment>().Select(g => g.TextFragment);
 
                 builder.UnionWith(globs);
 
