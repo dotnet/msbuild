@@ -2006,7 +2006,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
-        <target state="translated">可再发行程序包列表文件“{0}”在 FileList 元素中具有 null 或空的 Redist 名称。请确保可再发行程序包名称不为 null 或空值。</target>
+        <target state="translated">可再发行程序包列表文件“{0}”在 FileList 元素中具有 null 或空的可再发行程序包名称。请确保可再发行程序包名称不为 null 或空值。</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
@@ -3105,7 +3105,7 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.CannotHaveEmptyTargetArchitecture">
         <source>MSB3798: The targeted architecture for the resolved sdk reference "{0}" was empty. Cannot find reference or redist files without a targeted architecture.</source>
-        <target state="translated">MSB3798: 已解析的 SDK 引用“{0}”的目标体系结构为空。在没有目标体系结构的情况下无法找到引用或可再发行程序包文件。</target>
+        <target state="translated">MSB3798: 已解析的 SDK 引用“{0}”的目标体系结构为空。如果没有目标体系结构，则找不到引用或可再发行程序包文件。</target>
         <note>{StrBegin="MSB3798: "}</note>
       </trans-unit>
       <trans-unit id="FindInvalidProjectReferences.WarnWhenVersionIsIncompatible">
@@ -3145,7 +3145,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
         <source>Skipping write to file "{0}" because content would not change.</source>
-        <target state="needs-review-translation">MSB3493: 跳过写入到文件“{0}”，因为内容不会改变。</target>
+        <target state="translated">跳过写入到文件“{0}”，因为内容不会改变。</target>
         <note />
       </trans-unit>
       <trans-unit id="Telemetry.IllegalEventDataString">

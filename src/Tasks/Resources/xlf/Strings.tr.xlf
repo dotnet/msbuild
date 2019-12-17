@@ -3035,7 +3035,7 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.AddingRedistFile">
         <source>Adding file "{0}" from redist folder with target path "{1}".</source>
-        <target state="translated">"{1}" hedef yolu ile yeniden dağıtım klasöründen "{0}" dosyası ekleniyor.</target>
+        <target state="translated">"{1}" hedef yolundaki yeniden dağıtım klasöründen "{0}" dosyası ekleniyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.ConflictRedistSameSDK">
@@ -3105,7 +3105,7 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.CannotHaveEmptyTargetArchitecture">
         <source>MSB3798: The targeted architecture for the resolved sdk reference "{0}" was empty. Cannot find reference or redist files without a targeted architecture.</source>
-        <target state="translated">MSB3798: Çözümlenen "{0}" SDK başvurusunun hedeflenen mimarisi boştu. Hedeflenen bir mimari olmadan başvuru veya yeniden dağıtım dosyaları bulunamaz.</target>
+        <target state="translated">MSB3798: Çözümlenen "{0}" SDK başvurusunun hedeflenen mimarisi boştu. Hedeflenen mimari olmadan başvuru veya yeniden dağıtım dosyaları bulunamaz.</target>
         <note>{StrBegin="MSB3798: "}</note>
       </trans-unit>
       <trans-unit id="FindInvalidProjectReferences.WarnWhenVersionIsIncompatible">
@@ -3145,7 +3145,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
         <source>Skipping write to file "{0}" because content would not change.</source>
-        <target state="needs-review-translation">MSB3493: İçerik değiştirilemediği için "{0}" dosyası üzerine yazma işlemi atlanacak.</target>
+        <target state="translated">İçerik değişmeyeceğinden "{0}" dosyası üzerine yazma işlemi atlanacak.</target>
         <note />
       </trans-unit>
       <trans-unit id="Telemetry.IllegalEventDataString">

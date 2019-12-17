@@ -368,7 +368,7 @@
       </trans-unit>
       <trans-unit id="FileHash.FileNotFound">
         <source>MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</source>
-        <target state="translated">MSB3954: '{0}' 파일이 존재하지 않거나 액세스할 수 없어서 이 파일에 대한 해시를 계산하지 못했습니다.</target>
+        <target state="translated">MSB3954: '{0}' 파일이 존재하지 않거나 액세스할 수 없어서 이 파일에 대한 해시를 컴퓨팅하지 못했습니다.</target>
         <note>{StrBegin="MSB3954: "}</note>
       </trans-unit>
       <trans-unit id="FileHash.UnrecognizedHashAlgorithm">
@@ -2006,7 +2006,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
-        <target state="translated">재배포 목록 파일 "{0}"의 FileList 요소에 null이거나 빈 재배포 가능 패키지 이름이 있습니다. 재배포 이름이 null이거나 비어 있지 않은지 확인하세요.</target>
+        <target state="translated">재배포 가능 패키지 목록 파일 "{0}"의 FileList 요소에 null이거나 비어 있는 재배포 가능 패키지 이름이 있습니다. 재배포 가능 패키지 이름이 null이거나 비어 있지 않도록 하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
@@ -3145,7 +3145,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
         <source>Skipping write to file "{0}" because content would not change.</source>
-        <target state="needs-review-translation">MSB3493: 콘텐츠가 변경되지 않아 "{0}" 파일에 쓰기를 건너뜁니다.</target>
+        <target state="translated">콘텐츠가 변경되지 않아 "{0}" 파일에 쓰기를 건너뜁니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Telemetry.IllegalEventDataString">
