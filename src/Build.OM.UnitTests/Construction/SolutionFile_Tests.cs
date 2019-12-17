@@ -152,8 +152,8 @@ namespace Microsoft.Build.UnitTests.Construction
                       ""solution"": {
                         ""path"": """ + sln.Path.Replace("\\", "\\\\") + @""",
                         ""projects"": [
-                          """ + Path.Combine("src", Path.GetFileName(microsoftBuild.Path)) + @""",
-                          """ + Path.Combine("src", Path.GetFileName(tasksUnitTests.Path)) + @"""
+                          """ + Path.Combine("src", Path.GetFileName(microsoftBuild.Path)).Replace("\\", "\\\\") + @""",
+                          """ + Path.Combine("src", Path.GetFileName(tasksUnitTests.Path)).Replace("\\", "\\\\") + @"""
                         ]
                         }
                     }");
