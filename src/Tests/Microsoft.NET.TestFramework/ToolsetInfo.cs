@@ -62,9 +62,8 @@ namespace Microsoft.NET.TestFramework
         {
             var logger = new StringTestLogger();
             var command = new DotnetCommand(logger, "--version");
-            var testDirectory = TestDirectory.Create(Path.Combine(TestContext.Current.TestExecutionDirectory, "sdkversion"));
 
-            command.WorkingDirectory = testDirectory.Path;
+            command.WorkingDirectory = TestContext.Current.TestExecutionDirectory;
 
             var result = command.Execute();
 
