@@ -441,10 +441,14 @@ namespace Microsoft.Build.BackEnd
 
             string exeName = msbuildLocation;
 
-#if RUNTIME_TYPE_NETCORE
-            // Run the child process with the same host as the currently-running process.
-            exeName = GetCurrentHost();
-            commandLineArgs = "\"" + msbuildLocation + "\" " + commandLineArgs;
+#if RUNTIME_TYPE_NETCORE || MONO
+            // Mono automagically uses the current mono, to execute a managed assembly
+            if (!NativeMethodsShared.IsMono)
+            {
+                // Run the child process with the same host as the currently-running process.
+                exeName = GetCurrentHost();
+                commandLineArgs = "\"" + msbuildLocation + "\" " + commandLineArgs;
+            }
 #endif
 
             if (!NativeMethodsShared.IsWindows)
@@ -546,7 +550,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-#if RUNTIME_TYPE_NETCORE
+#if RUNTIME_TYPE_NETCORE || MONO
         private static string CurrentHost;
 #endif
 
@@ -556,7 +560,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>The full path to the executable hosting the current process, or null if running on Full Framework on Windows.</returns>
         private static string GetCurrentHost()
         {
-#if RUNTIME_TYPE_NETCORE
+#if RUNTIME_TYPE_NETCORE || MONO
             if (CurrentHost == null)
             {
                 using (Process currentProcess = Process.GetCurrentProcess())
