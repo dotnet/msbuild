@@ -247,10 +247,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// By default our logMode is Asynchronous. We do this
         /// because we are hoping it will make the system 
         /// more responsive when there are a large number of logging messages
-        /// Note: Mono has issues with TPL Dataflow implementation,
-        /// so use synchronous version
         /// </summary>
-        private LoggerMode _logMode = NativeMethodsShared.IsMono ? LoggerMode.Synchronous : LoggerMode.Asynchronous;
+        private LoggerMode _logMode = LoggerMode.Asynchronous;
 
         #endregion
 

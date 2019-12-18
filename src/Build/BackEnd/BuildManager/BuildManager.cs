@@ -2232,19 +2232,9 @@ namespace Microsoft.Build.Execution
         {
             int cpuCount = _buildParameters.MaxNodeCount;
 
-            // Mono has issues with TPL Dataflow implementation,
-            // so use synchronous version
-            LoggerMode loggerMode;
-            if (NativeMethodsShared.IsMono)
-            {
-                loggerMode = LoggerMode.Synchronous;
-            }
-            else
-            {
-                loggerMode = cpuCount == 1 && _buildParameters.UseSynchronousLogging
-                    ? LoggerMode.Synchronous
-                    : LoggerMode.Asynchronous;
-            }
+            LoggerMode loggerMode = cpuCount == 1 && _buildParameters.UseSynchronousLogging
+                                        ? LoggerMode.Synchronous
+                                        : LoggerMode.Asynchronous;
 
             ILoggingService loggingService = LoggingService.CreateLoggingService(loggerMode,
                 1 /*This logging service is used for the build manager and the inproc node, therefore it should have the first nodeId*/);
