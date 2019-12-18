@@ -327,8 +327,8 @@ namespace Microsoft.Build.BackEnd
             {
                 nodeStream.Connect(timeout);
 
-#if !MONO && !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                if (NativeMethodsShared.IsWindows)
+#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+                if (NativeMethodsShared.IsWindows && !NativeMethodsShared.IsMono)
                 {
                     // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
                     // been faked up with ACLs that would let us attach to it.  It could then issue fake build requests back to
