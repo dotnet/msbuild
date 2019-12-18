@@ -19,9 +19,9 @@
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>6fab00563d09dca0d2b777a4f0dbda59d19c8546</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="5.4.0-preview.3.6271">
+    <Dependency Name="NuGet.Build.Tasks" Version="5.5.0-preview.1.6330">
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
-      <Sha>c1f6915918b82c096bbd666bd9c18528f1f70630</Sha>
+      <Sha>6f7be0986028256f05c894eac2f7816c85611984</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
