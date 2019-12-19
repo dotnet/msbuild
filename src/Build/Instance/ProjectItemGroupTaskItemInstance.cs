@@ -41,6 +41,10 @@ namespace Microsoft.Build.Execution
         private string _remove;
 
         /// <summary>
+        /// The list of metadata Remove should match on.
+        /// </summary>
+        private string _matchOnMetadata;
+
         /// The list of metadata to keep.
         /// </summary>
         private string _keepMetadata;
@@ -79,6 +83,11 @@ namespace Microsoft.Build.Execution
         /// Location of the remove, if any
         /// </summary>
         private ElementLocation _removeLocation;
+
+        /// <summary>
+        /// Location of matchOnMetadata, if any
+        /// </summary>
+        private ElementLocation _matchOnMetadataLocation;
 
         /// <summary>
         /// Location of keepMetadata, if any
@@ -123,6 +132,7 @@ namespace Microsoft.Build.Execution
             string include,
             string exclude,
             string remove,
+            string matchOnMetadata,
             string keepMetadata,
             string removeMetadata,
             string keepDuplicates,
@@ -131,6 +141,7 @@ namespace Microsoft.Build.Execution
             ElementLocation includeLocation,
             ElementLocation excludeLocation,
             ElementLocation removeLocation,
+            ElementLocation matchOnMetadataLocation,
             ElementLocation keepMetadataLocation,
             ElementLocation removeMetadataLocation,
             ElementLocation keepDuplicatesLocation,
@@ -152,6 +163,7 @@ namespace Microsoft.Build.Execution
             _include = include;
             _exclude = exclude;
             _remove = remove;
+            _matchOnMetadata = matchOnMetadata;
             _keepMetadata = keepMetadata;
             _removeMetadata = removeMetadata;
             _keepDuplicates = keepDuplicates;
@@ -160,6 +172,7 @@ namespace Microsoft.Build.Execution
             _includeLocation = includeLocation;
             _excludeLocation = excludeLocation;
             _removeLocation = removeLocation;
+            _matchOnMetadataLocation = matchOnMetadataLocation;
             _keepMetadataLocation = keepMetadataLocation;
             _removeMetadataLocation = removeMetadataLocation;
             _keepDuplicatesLocation = keepDuplicatesLocation;
@@ -182,6 +195,7 @@ namespace Microsoft.Build.Execution
             _include = that._include;
             _exclude = that._exclude;
             _remove = that._remove;
+            _matchOnMetadata = that._matchOnMetadata;
             _keepMetadata = that._keepMetadata;
             _removeMetadata = that._removeMetadata;
             _keepDuplicates = that._keepDuplicates;
@@ -227,6 +241,16 @@ namespace Microsoft.Build.Execution
             [DebuggerStepThrough]
             get
             { return _remove; }
+        }
+
+        /// <summary>
+        /// Unevaluated MatchOnMetadata value
+        /// </summary>
+        public string MatchOnMetadata
+        {
+            [DebuggerStepThrough]
+            get
+            { return _matchOnMetadata; }
         }
 
         /// <summary>
@@ -325,6 +349,16 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Location of the matchOnMetadata attribute, if any
+        /// </summary>
+        public ElementLocation MatchOnMetadataLocation
+        {
+            [DebuggerStepThrough]
+            get
+            { return _matchOnMetadataLocation; }
+        }
+
+        /// <summary>
         /// Location of the keepMetadata attribute, if any
         /// </summary>
         public ElementLocation KeepMetadataLocation
@@ -378,6 +412,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _include);
             translator.Translate(ref _exclude);
             translator.Translate(ref _remove);
+            translator.Translate(ref _matchOnMetadata);
             translator.Translate(ref _keepMetadata);
             translator.Translate(ref _removeMetadata);
             translator.Translate(ref _keepDuplicates);

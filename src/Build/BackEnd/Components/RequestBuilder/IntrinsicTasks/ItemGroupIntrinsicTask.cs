@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Microsoft.Build.Collections;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using Microsoft.Build.Execution;
@@ -82,6 +83,8 @@ namespace Microsoft.Build.BackEnd
                         {
                             HashSet<string> keepMetadata = null;
                             HashSet<string> removeMetadata = null;
+                            HashSet<string> matchOnMetadata = null;
+
                             if (!String.IsNullOrEmpty(child.KeepMetadata))
                             {
                                 var keepMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.KeepMetadata, ExpanderOptions.ExpandAll, child.KeepMetadataLocation).ToList();
@@ -100,6 +103,15 @@ namespace Microsoft.Build.BackEnd
                                 }
                             }
 
+                            if (!String.IsNullOrEmpty(child.MatchOnMetadata))
+                            {
+                                var matchOnMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.MatchOnMetadata, ExpanderOptions.ExpandAll, child.MatchOnMetadataLocation).ToList();
+                                if (matchOnMetadataEvaluated.Count > 0)
+                                {
+                                    matchOnMetadata = new HashSet<string>(matchOnMetadataEvaluated);
+                                }
+                            }
+
                             if ((child.Include.Length != 0) ||
                                 (child.Exclude.Length != 0))
                             {
@@ -109,7 +121,7 @@ namespace Microsoft.Build.BackEnd
                             else if (child.Remove.Length != 0)
                             {
                                 // It's a remove -- we're "removing" items from the world
-                                ExecuteRemove(child, bucket);
+                                ExecuteRemove(child, bucket, matchOnMetadata);
                             }
                             else
                             {
@@ -216,7 +228,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="child">The item specification to evaluate and remove.</param>
         /// <param name="bucket">The batching bucket.</param>
-        private void ExecuteRemove(ProjectItemGroupTaskItemInstance child, ItemBucket bucket)
+        /// <param name="matchOnMetadata"></param>
+        private void ExecuteRemove(ProjectItemGroupTaskItemInstance child, ItemBucket bucket, HashSet<string> matchOnMetadata)
         {
             ICollection<ProjectItemInstance> group = bucket.Lookup.GetItems(child.ItemType);
             if (group == null)
@@ -225,7 +238,17 @@ namespace Microsoft.Build.BackEnd
                 return;
             }
 
-            List<ProjectItemInstance> itemsToRemove = FindItemsMatchingSpecification(group, child.Remove, child.RemoveLocation, bucket.Expander);
+            List<ProjectItemInstance> itemsToRemove = null;
+
+            if (matchOnMetadata == null)
+            {
+                itemsToRemove = FindItemsMatchingSpecification(group, child.Remove, child.RemoveLocation, bucket.Expander);
+            }
+            else
+            {
+                //todo see if FindItemsMatchingSpecification and FindItemsUsingMatchOnMetadata can be nicely merged into one
+                itemsToRemove = FindItemsUsingMatchOnMetadata(group, child, bucket, matchOnMetadata);
+            }
 
             if (itemsToRemove != null)
             {
@@ -237,6 +260,44 @@ namespace Microsoft.Build.BackEnd
 
                 bucket.Lookup.RemoveItems(itemsToRemove);
             }
+        }
+
+        private List<ProjectItemInstance> FindItemsUsingMatchOnMetadata(
+            ICollection<ProjectItemInstance> items,
+            ProjectItemGroupTaskItemInstance child,
+            ItemBucket bucket,
+            HashSet<string> matchOnMetadata)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(matchOnMetadata, nameof(matchOnMetadata));
+
+            var itemSpec = new ItemSpec<ProjectPropertyInstance, ProjectItemInstance>(child.Remove, bucket.Expander, child.RemoveLocation, Project.Directory, true);
+
+            // todo create OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem resource
+            ErrorUtilities.VerifyThrowInvalidOperation(
+                itemSpec.Fragments.Count == 1
+                && itemSpec.Fragments.First() is ItemSpec<ProjectPropertyInstance, ProjectItemInstance>.ItemExpressionFragment,
+                "OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem",
+                child.RemoveLocation,
+                child.Remove);
+
+            var itemFragment = itemSpec.Fragments.First() as ItemSpec<ProjectPropertyInstance, ProjectItemInstance>.ItemExpressionFragment;
+
+            var itemsToRemove = new List<ProjectItemInstance>();
+
+            foreach (var item in items)
+            {
+                foreach (var referencedItem in itemFragment.ReferencedItems)
+                {
+                    if (matchOnMetadata.All(
+                            m =>
+                                item.GetMetadataValue(m).Equals(referencedItem.Item.GetMetadataValue(m))))
+                    {
+                        itemsToRemove.Add(item);
+                    }
+                }
+            }
+
+            return itemsToRemove;
         }
 
         /// <summary>

@@ -457,6 +457,7 @@ namespace Microsoft.Build.Evaluation
                     itemElement.Include,
                     itemElement.Exclude,
                     itemElement.Remove,
+                    itemElement.MatchOnMetadata,
                     itemElement.KeepMetadata,
                     itemElement.RemoveMetadata,
                     itemElement.KeepDuplicates,
@@ -465,6 +466,7 @@ namespace Microsoft.Build.Evaluation
                     itemElement.IncludeLocation,
                     itemElement.ExcludeLocation,
                     itemElement.RemoveLocation,
+                    itemElement.MatchOnMetadataLocation,
                     itemElement.KeepMetadataLocation,
                     itemElement.RemoveMetadataLocation,
                     itemElement.KeepDuplicatesLocation,
@@ -2048,7 +2050,7 @@ namespace Microsoft.Build.Evaluation
                             }
 
                             ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "ImportedProjectNotFound",
-								      importFileUnescaped, importExpressionEscaped);
+                                      importFileUnescaped, importExpressionEscaped);
                         }
                         else
                         {

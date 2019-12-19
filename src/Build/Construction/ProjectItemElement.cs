@@ -167,6 +167,23 @@ namespace Microsoft.Build.Construction
             }
         }
 
+        public string MatchOnMetadata
+        {
+            [DebuggerStepThrough]
+            get
+            {
+                return GetAttributeValue(XMakeAttributes.matchOnMetadata);
+            }
+
+            set
+            {
+                //todo: create resources OM_NoMatchOnMetadataOutsideTargetsOrProject and OM_MatchOnMetadataOnlyApplicableToRemoveItems
+                ErrorUtilities.VerifyThrowInvalidOperation(Parent == null || Parent.Parent is ProjectTargetElement || Parent.Parent is ProjectRootElement, "OM_NoMatchOnMetadataOutsideTargetsOrProject");
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || RemoveMetadata.Length != 0, "OM_MatchOnMetadataOnlyApplicableToRemoveItems", ElementName, XMakeAttributes.matchOnMetadata);
+                SetOrRemoveAttribute(XMakeAttributes.matchOnMetadata, value, "Set item MatchOnMetadata {0}", value);
+            }
+        }
+
         /// <summary>
         /// Gets or sets the KeepMetadata value.
         /// Returns empty string if it is not present.
@@ -258,6 +275,11 @@ namespace Microsoft.Build.Construction
         /// Location of the update attribute
         /// </summary>
         public ElementLocation UpdateLocation => GetAttributeLocation(XMakeAttributes.update);
+
+        /// <summary>
+        /// Location of the matchOnMetadata attribute
+        /// </summary>
+        public ElementLocation MatchOnMetadataLocation => GetAttributeLocation(XMakeAttributes.matchOnMetadata);
 
         /// <summary>
         /// Location of the keepMetadata attribute

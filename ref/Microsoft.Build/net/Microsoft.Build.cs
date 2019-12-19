@@ -147,6 +147,8 @@ namespace Microsoft.Build.Construction
         public Microsoft.Build.Construction.ElementLocation KeepDuplicatesLocation { get { throw null; } }
         public string KeepMetadata { get { throw null; } set { } }
         public Microsoft.Build.Construction.ElementLocation KeepMetadataLocation { get { throw null; } }
+        public string MatchOnMetadata { get { throw null; } set { } }
+        public Microsoft.Build.Construction.ElementLocation MatchOnMetadataLocation { get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectMetadataElement> Metadata { get { throw null; } }
         public string Remove { get { throw null; } set { } }
         public Microsoft.Build.Construction.ElementLocation RemoveLocation { get { throw null; } }
@@ -1182,6 +1184,8 @@ namespace Microsoft.Build.Execution
         public string KeepMetadata { get { throw null; } }
         public Microsoft.Build.Construction.ElementLocation KeepMetadataLocation { get { throw null; } }
         public Microsoft.Build.Construction.ElementLocation Location { get { throw null; } }
+        public string MatchOnMetadata { get { throw null; } }
+        public Microsoft.Build.Construction.ElementLocation MatchOnMetadataLocation { get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Execution.ProjectItemGroupTaskMetadataInstance> Metadata { get { throw null; } }
         public string Remove { get { throw null; } }
         public Microsoft.Build.Construction.ElementLocation RemoveLocation { get { throw null; } }
