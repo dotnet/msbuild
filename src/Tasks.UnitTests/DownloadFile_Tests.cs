@@ -246,6 +246,26 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         [Fact]
+        public void RetryOnTimeout()
+        {
+            // Http timeouts manifest as "OperationCanceledExceptions" from the handler
+            CancellationTokenSource timeout = new CancellationTokenSource();
+            timeout.Cancel();
+            DownloadFile downloadFile = new DownloadFile()
+            {
+                BuildEngine = _mockEngine,
+                HttpMessageHandler = new MockHttpMessageHandler((message, token) => throw new OperationCanceledException(timeout.Token)),
+                Retries = 1,
+                RetryDelayMilliseconds = 100,
+                SourceUrl = "http://notfound/foo.txt"
+            };
+
+            downloadFile.Execute().ShouldBeFalse(() => _mockEngine.Log);
+
+            _mockEngine.Log.ShouldContain("MSB3923", () => _mockEngine.Log);
+        }
+
+        [Fact]
         public void SkipUnchangedFiles()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
