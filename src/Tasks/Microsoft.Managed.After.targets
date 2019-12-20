@@ -39,12 +39,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          Include="$([MSBuild]::Escape('$(MSBuildProjectDirectory)\$(MSBuildProjectName)*_wpftmp$(MSBuildProjectExtension)'))" />
    </ItemGroup>
 
-   <!-- Item copied from Microsoft.Common.Currentversion.targets   -->
-  <PropertyGroup>
-    <_RecursiveTargetForContentCopying>GetCopyToOutputDirectoryItems</_RecursiveTargetForContentCopying>
-    <_RecursiveTargetForContentCopying Condition=" '$(MSBuildCopyContentTransitively)' == 'false' ">_GetCopyToOutputDirectoryItemsFromThisProject</_RecursiveTargetForContentCopying>
-  </PropertyGroup>
-
   <!--
     Properties for extension of ProjectReferenceTargets.
     Append any current value which may have been provided in a Directory.Build.props since the intent was likely to append, not prepend.
