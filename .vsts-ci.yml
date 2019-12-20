@@ -55,47 +55,6 @@ stages:
               _SignType: real
               _Test: ''
 
-  - ${{ if ne(variables['System.TeamProject'], 'public') }}:
-    - template: /eng/build.yml
-      parameters:
-        agentOs: Windows_Perf_Helix
-        pool:
-          name: Hosted VS2017
-        strategy:
-          matrix:
-            Build_Release:
-              _BuildConfig: Release
-              _PublishType: none
-              _SignType: test
-              _DotNetPublishToBlobFeed: false
-
-  - ${{ if ne(variables['System.TeamProject'], 'public') }}:
-    - template: /eng/build.yml
-      parameters:
-        agentOs: Windows_Perf_Helix_Fullframework
-        pool:
-          name: Hosted VS2017
-        strategy:
-          matrix:
-            Build_Release:
-              _BuildConfig: Release
-              _PublishType: none
-              _SignType: test
-              _DotNetPublishToBlobFeed: false
-
-    - template: /eng/build.yml
-      parameters:
-        agentOs: Linux_Perf_Helix
-        pool:
-          name: Hosted Ubuntu 1604
-        strategy:
-          matrix:
-            Build_Release:
-              _BuildConfig: Release
-              _PublishType: none
-              _SignType: test
-              _DotNetPublishToBlobFeed: false
-
   - ${{ if eq(variables['System.TeamProject'], 'public') }}:
     - template: /eng/build.yml
       parameters:
@@ -223,3 +182,47 @@ stages:
         -TsaRepositoryName "dotnet-sdk"
         -TsaCodebaseName "dotnet-sdk"
         -TsaPublish $True'
+
+- stage: helix_tests
+  displayName: controlled environment performance tests
+  dependsOn: build
+  condition: and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'))
+  jobs:
+  - template: /eng/build.yml
+    parameters:
+      agentOs: Windows_Perf_Helix
+      pool:
+        name: Hosted VS2017
+      strategy:
+        matrix:
+          Build_Release:
+            _BuildConfig: Release
+            _PublishType: none
+            _SignType: test
+            _DotNetPublishToBlobFeed: false
+
+  - template: /eng/build.yml
+    parameters:
+      agentOs: Windows_Perf_Helix_Fullframework
+      pool:
+        name: Hosted VS2017
+      strategy:
+        matrix:
+          Build_Release:
+            _BuildConfig: Release
+            _PublishType: none
+            _SignType: test
+            _DotNetPublishToBlobFeed: false
+
+  - template: /eng/build.yml
+    parameters:
+      agentOs: Linux_Perf_Helix
+      pool:
+        name: Hosted Ubuntu 1604
+      strategy:
+        matrix:
+          Build_Release:
+            _BuildConfig: Release
+            _PublishType: none
+            _SignType: test
+            _DotNetPublishToBlobFeed: false
