@@ -17,6 +17,90 @@ namespace Microsoft.Build.UnitTests.Construction
     public class SolutionFile_Tests
     {
         /// <summary>
+        /// Test that a project invalid project nestings is seen as invalid.
+        /// </summary>
+        [Fact]
+        public void ParseInvalidProjectNesting()
+        {
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string solutionFileContents =
+                    @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26124.0
+MinimumVisualStudioVersion = 15.0.26124.0
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""tempCode"", ""tempCode.csproj"", ""{933E47E9-37B5-4AB3-AD1C-0E48043575D7}""
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{933E47E9-37B5-4AB3-AD1C-0E48043575D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+	EndGlobalSection
+        GlobalSection(NestedProjects) = preSolution
+                {933E47E9-37B5-4AB3-AD1C-0E48043575D7} = {933E47E9-37B5-4AB3-AD1C-0E48043575D7}
+        EndGlobalSection
+EndGlobal";
+                ParseSolutionHelper(solutionFileContents);
+                Assert.True(false, "Should not get here");
+            }
+           );
+        }
+
+        /// <summary>
+        /// Test that a project invalid project nestings is seen as invalid.
+        /// </summary>
+        [Fact]
+        public void ParseInvalidProjectNesting2()
+        {
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string solutionFileContents =
+                    @"
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26124.0
+MinimumVisualStudioVersion = 15.0.26124.0
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""tempCode"", ""tempCode.csproj"", ""{933E47E9-37B5-4AB3-AD1C-0E48043575D7}""
+EndProject
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""tempCode2"", ""tempCode2.csproj\tempCode2.csproj"", ""{F9E4B8FC-A2F0-4C3D-BD39-F6F6659780F5}""
+EndProject
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""tempCode3"", ""tempCode3\tempCode3.csproj"", ""{C14FE65B-8DAC-4597-B4F8-534B5F1DF263}""
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{933E47E9-37B5-4AB3-AD1C-0E48043575D7} = {F9E4B8FC-A2F0-4C3D-BD39-F6F6659780F5}
+                {F9E4B8FC-A2F0-4C3D-BD39-F6F6659780F5} = {C14FE65B-8DAC-4597-B4F8-534B5F1DF263}
+                {C14FE65B-8DAC-4597-B4F8-534B5F1DF263} = {933E47E9-37B5-4AB3-AD1C-0E48043575D7}
+	EndGlobalSection
+EndGlobal
+";
+                ParseSolutionHelper(solutionFileContents);
+                Assert.True(false, "Should not get here");
+            }
+           );
+        }
+        
+        /// <summary>
         /// Test that a project with the C++ project guid and an extension of vcproj is seen as invalid.
         /// </summary>
         [Fact]

@@ -65,6 +65,11 @@
         <target state="translated">Ścieżka: {0} przekracza limit maksymalnej długości ścieżki w systemie operacyjnym. W pełni kwalifikowana nazwa pliku musi się składać z mniej niż {1} znaków.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SolutionContainsCyclicallyNestedProjectFiles">
+        <source>MSB5025: Nested project section in solution file {0} has a circular nesting.</source>
+        <target state="new">MSB5025: Nested project section in solution file {0} has a circular nesting.</target>
+        <note>{StrBegin="MSB5025: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
         <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
         <target state="translated">MSB4132: Wersja narzędzi „{0}” nie została rozpoznana. Dostępne wersje narzędzi to {1}.</target>

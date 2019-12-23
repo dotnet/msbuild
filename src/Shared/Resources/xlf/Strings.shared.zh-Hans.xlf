@@ -65,6 +65,11 @@
         <target state="translated">路径: {0} 超过 OS 最大路径限制。完全限定的文件名必须少于 {1} 个字符。</target>
         <note />
       </trans-unit>
+      <trans-unit id="SolutionContainsCyclicallyNestedProjectFiles">
+        <source>MSB5025: Nested project section in solution file {0} has a circular nesting.</source>
+        <target state="new">MSB5025: Nested project section in solution file {0} has a circular nesting.</target>
+        <note>{StrBegin="MSB5025: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
         <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
         <target state="translated">MSB4132: 无法识别工具版本“{0}”。可用的工具版本为 {1}。</target>

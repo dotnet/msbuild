@@ -65,6 +65,11 @@
         <target state="translated">경로: {0}은(는) OS 최대 경로 제한을 초과합니다. 정규화된 파일 이름은 {1}자 이하여야 합니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SolutionContainsCyclicallyNestedProjectFiles">
+        <source>MSB5025: Nested project section in solution file {0} has a circular nesting.</source>
+        <target state="new">MSB5025: Nested project section in solution file {0} has a circular nesting.</target>
+        <note>{StrBegin="MSB5025: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
         <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
         <target state="translated">MSB4132: 도구 버전 "{0}"을(를) 인식할 수 없습니다. 사용할 수 있는 도구 버전은 {1}입니다.</target>

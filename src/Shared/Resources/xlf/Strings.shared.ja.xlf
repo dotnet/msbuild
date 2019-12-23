@@ -65,6 +65,11 @@
         <target state="translated">パス: {0} は OS のパスの上限を越えています。完全修飾のファイル名は {1} 文字以下にする必要があります。</target>
         <note />
       </trans-unit>
+      <trans-unit id="SolutionContainsCyclicallyNestedProjectFiles">
+        <source>MSB5025: Nested project section in solution file {0} has a circular nesting.</source>
+        <target state="new">MSB5025: Nested project section in solution file {0} has a circular nesting.</target>
+        <note>{StrBegin="MSB5025: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
         <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
         <target state="translated">MSB4132: ツール バージョン "{0}" が認識されません。使用可能なツール バージョンは {1} です。</target>
