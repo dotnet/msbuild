@@ -1211,6 +1211,50 @@ namespace Microsoft.Build.Construction
 
                 proj.ParentProjectGuid = parentProjectGuid;
             } while (true);
+
+            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(TestForCyclicalNesting(), "SubCategoryForSolutionParsingErrors",
+                new BuildEventFileInfo(FullPath, _currentLineNumber, 0), "SolutionContainsCyclicallyNestedProjectFiles", _solutionFile);
+        }
+
+        private bool TestForCyclicalNesting()
+        {
+            int[] parents = new int[_projectsInOrder.Count];
+            for (int a = 0; a < _projectsInOrder.Count; a++) {
+                parents[a] = -1;
+            }
+            for (int a = 0; a < _projectsInOrder.Count; a++) {
+                if (!DFS(parents, a))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // -2 indicates that there is no cycle among ancestors. -1 indicates that it has not yet been checked.
+        private bool DFS(int[] parents, int ind) {
+            string parentGuid = _projectsInOrder[ind].ParentProjectGuid;
+            if (parentGuid == null)
+            {
+                parents[ind] = -2;
+                return true;
+            }
+            int parent = _projectsInOrder.IndexOf(_projects[parentGuid]);
+            if (parents[parent] == -2)
+            {
+                parents[ind] = -2;
+                return true;
+            }
+            else if (parents[parent] == -1)
+            {
+                parents[ind] = parent;
+                if (DFS(parents, parent))
+                {
+                    parents[ind] = -2;
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>

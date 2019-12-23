@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -208,6 +208,10 @@
     <value>MSB5023: Error parsing the nested project section in solution file. A project with the GUID "{0}" is listed as being nested under project "{1}", but does not exist in the solution.</value>
     <comment>{StrBegin="MSB5023: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
+  <data name="SolutionParseNestedProjectUndefinedError" Visibility="Public">
+    <value>MSB5025: Nested project section in solution file {0} has a circular nesting.</value>
+    <comment>{StrBegin="MSB5025: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
   <data name="SolutionParseNoHeaderError" UESanitized="false" Visibility="Public">
     <value>MSB5010: No file format header found.</value>
     <comment>{StrBegin="MSB5010: "}UE: The solution filename is provided separately to loggers.</comment>
@@ -265,7 +269,7 @@
   <!--
         The shared message bucket is: MSB5001 - MSB5999
 
-        Next message code should be MSB5025
+        Next message code should be MSB5026
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
