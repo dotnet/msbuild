@@ -361,6 +361,18 @@ namespace Microsoft.Build.Eventing
             WriteEvent(46, commandLine);
         }
 
+        [Event(47)]
+        public void ExecuteTaskStart(string taskName)
+        {
+            WriteEvent(47, taskName);
+        }
+
+        [Event(48)]
+        public void ExecuteTaskStop(string taskName)
+        {
+            WriteEvent(48, taskName);
+        }
+
         #endregion
     }
 }
