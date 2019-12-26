@@ -2061,6 +2061,64 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
+        [InlineData("", "[v0][]")] // empty does nothing
+        [InlineData(" ", "[v0][]")] // whitespace does nothing
+        [InlineData("/p:p1=v1", "[v1][]")]   // simple case
+        [InlineData("/p:p1=v1 /p:p2=\"v2a v2b\"", "[v1][v2a v2b]")] // split quoted values correctly
+        [InlineData("/p:p1=\"username is %username%\"", "[username is %username%][]")] // expand env vars, like for response file content
+        public void ArgumentsPulledFromEnvironmentVariable(string value, string expected)
+        {
+            try
+            {
+                Environment.SetEnvironmentVariable("_MSBUILD_", value);
+
+                string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+
+  <Target Name=""Build"">
+    <Message Text=""[$(p1)][$(p2)]"" />
+  </Target>
+
+</Project>");
+
+                expected = Environment.ExpandEnvironmentVariables(expected);
+                string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, null, new string[] { "/p:p1=v0" } );
+
+                logContents.ShouldContain(expected);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("_MSBUILD_", "");
+            }
+        }
+
+        [Theory]
+        [InlineData("/invalidflag=invalid")]
+        [InlineData("/p=\"quotes not closed")]
+        public void ArgumentsPulledFromEnvironmentVariable_Bad(string value)
+        {
+            try
+            {
+                Environment.SetEnvironmentVariable("_MSBUILD_", value);
+
+                using (TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create())
+                {
+                    var testProject = testEnvironment.CreateFile("test.proj", ObjectModelHelpers.CleanupFileContents(@"
+                <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                    <Target Name=""Build""/>
+                </Project>"));
+
+                    string output = RunnerUtilities.ExecMSBuild($"\"{testProject.Path}\"", out var success, _output);
+
+                    success.ShouldBeFalse(output);
+                }
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("_MSBUILD_", "");
+            }
+        }
+
+        [Theory]
         [InlineData("/interactive")]
         [InlineData("/p:NuGetInteractive=true")]
         [InlineData("/interactive /p:NuGetInteractive=true")]
