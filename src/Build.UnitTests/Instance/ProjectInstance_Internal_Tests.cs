@@ -8,6 +8,7 @@ using System.Linq;
 using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -691,10 +692,16 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
         public static IEnumerable<object[]> ProjectInstanceHasEvaluationIdTestData()
         {
-            // from file
+            // from file (new)
             yield return new ProjectInstanceFactory[]
             {
                 (f, xml, c) => new ProjectInstance(f, null, null, c)
+            };
+
+            // from file (factory method)
+            yield return new ProjectInstanceFactory[]
+            {
+                (f, xml, c) => ProjectInstance.FromFile(f, new ProjectOptions { ProjectCollection = c })
             };
 
             // from Project
@@ -709,10 +716,16 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 (f, xml, c) => new ProjectInstance(f, null, null, c).DeepCopy()
             };
 
-            // from ProjectRootElement
+            // from ProjectRootElement (new)
             yield return new ProjectInstanceFactory[]
             {
-                (f, xml, c) => new ProjectInstance(xml, null, null, c).DeepCopy()
+                (f, xml, c) => new ProjectInstance(xml, null, null, c)
+            };
+
+            // from ProjectRootElement (factory method)
+            yield return new ProjectInstanceFactory[]
+            {
+                (f, xml, c) => ProjectInstance.FromProjectRootElement(xml, new ProjectOptions { ProjectCollection = c })
             };
 
             // from translated project instance
