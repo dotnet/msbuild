@@ -2061,29 +2061,36 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData("", "[v0][]")] // empty does nothing
-        [InlineData(" ", "[v0][]")] // whitespace does nothing
-        [InlineData("   /p:p1=v1a  /p:p1=v1b   ", "[v1b][]")]   // simple case, override order, lead/trail whitespace
-        [InlineData("/p:p1=v1 /p:p2=\"v2a v2b\"", "[v1][v2a v2b]")] // split quoted values correctly
+        [InlineData("", "[v0a][][v3][v4]")] // empty does nothing
+        [InlineData(" ", "[v0a][][v3][v4]")] // whitespace does nothing
+        [InlineData("   /p:p1=v1a  /p:p1=v1b   ", "[v1b][][v3][v4]")]   // simple case, override order, lead/trail whitespace
+        [InlineData("/p:p1=v1 /p:p2=\"v2a v2b\"", "[v1][v2a v2b][v3][v4]")] // split quoted values correctly
         [InlineData("/p:p1=\"username is %username%\"", "[username is %username%][]")] // expand env vars, like for response file content
         public void ArgumentsPulledFromEnvironmentVariable(string value, string expected)
         {
+            expected = Environment.ExpandEnvironmentVariables(expected);
+
             try
             {
                 Environment.SetEnvironmentVariable("_MSBUILD_", value);
 
-                string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                using (TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create())
+                {
+                    var testProject = testEnvironment.CreateFile("test.proj", ObjectModelHelpers.CleanupFileContents(@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                      <Target Name=""Build"">
+                        <Message Text=""[$(p1)][$(p2)][$(p3)][$(p4)]"" />
+                      </Target>
+                    </Project>"));
 
-  <Target Name=""Build"">
-    <Message Text=""[$(p1)][$(p2)]"" />
-  </Target>
+                    // pass a property by response file to ensure that it is lower in precedence
+                    var responseFile = testEnvironment.CreateFile("my.rsp", "/p:p1=v0b /p:p3=v3");
 
-</Project>");
+                    // pass a property to msbuild.exe to ensure that it is lower in precedence
+                    string output = RunnerUtilities.ExecMSBuild($"\"{testProject.Path}\" @\"{responseFile.Path}\" /p:p1=v0a /p:p4=v4", out bool success, _output);
 
-                expected = Environment.ExpandEnvironmentVariables(expected);
-                string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, null, new string[] { "/p:p1=v0" } );
-
-                logContents.ShouldContain(expected);
+                    success.ShouldBeTrue(output);
+                    output.ShouldContain(expected);
+                }
             }
             finally
             {
