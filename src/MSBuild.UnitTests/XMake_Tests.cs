@@ -2063,7 +2063,7 @@ namespace Microsoft.Build.UnitTests
         [Theory]
         [InlineData("", "[v0][]")] // empty does nothing
         [InlineData(" ", "[v0][]")] // whitespace does nothing
-        [InlineData("/p:p1=v1", "[v1][]")]   // simple case
+        [InlineData("   /p:p1=v1a  /p:p1=v1b   ", "[v1b][]")]   // simple case, override order, lead/trail whitespace
         [InlineData("/p:p1=v1 /p:p2=\"v2a v2b\"", "[v1][v2a v2b]")] // split quoted values correctly
         [InlineData("/p:p1=\"username is %username%\"", "[username is %username%][]")] // expand env vars, like for response file content
         public void ArgumentsPulledFromEnvironmentVariable(string value, string expected)
