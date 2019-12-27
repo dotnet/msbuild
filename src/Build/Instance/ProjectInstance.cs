@@ -1247,7 +1247,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         IItemDefinition<ProjectMetadataInstance> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.AddItemDefinition(string itemType)
         {
-            ProjectItemDefinitionInstance itemDefinitionInstance = new ProjectItemDefinitionInstance(this, itemType);
+            ProjectItemDefinitionInstance itemDefinitionInstance = new ProjectItemDefinitionInstance(itemType);
 
             _itemDefinitions.Add(itemDefinitionInstance);
 
@@ -2703,7 +2703,7 @@ namespace Microsoft.Build.Execution
 
             foreach (ProjectItemDefinition definition in data.ItemDefinitions.Values)
             {
-                _itemDefinitions.Add(new ProjectItemDefinitionInstance(this, definition));
+                _itemDefinitions.Add(new ProjectItemDefinitionInstance(definition));
             }
         }
 

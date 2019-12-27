@@ -1,16 +1,15 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
-using System.Collections.Generic;
-using System;
-using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.Execution
 {
@@ -38,7 +37,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <param name="projectInstance">The project instance to which this item definition belongs.</param>
         /// <param name="itemType">The type of item this definition object represents.</param>
-        internal ProjectItemDefinitionInstance(ProjectInstance projectInstance, string itemType)
+        internal ProjectItemDefinitionInstance(string itemType)
         {
             ErrorUtilities.VerifyThrowArgumentNull(itemType, "itemType");
 
@@ -52,8 +51,8 @@ namespace Microsoft.Build.Execution
         /// Assumes that the itemType string originated in a ProjectItemDefinitionElement and therefore
         /// was already validated.
         /// </remarks>
-        internal ProjectItemDefinitionInstance(ProjectInstance projectInstance, ProjectItemDefinition itemDefinition)
-            : this(projectInstance, itemDefinition.ItemType)
+        internal ProjectItemDefinitionInstance(ProjectItemDefinition itemDefinition)
+            : this(itemDefinition.ItemType)
         {
             if (itemDefinition.MetadataCount > 0)
             {
