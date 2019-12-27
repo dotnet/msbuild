@@ -71,8 +71,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SolutionContainsCyclicallyNestedProjectFiles">
-        <source>MSB5025: Nested project section in solution file {0} has a circular nesting.</source>
-        <target state="new">MSB5025: Nested project section in solution file {0} has a circular nesting.</target>
+        <source>MSB5025: Nested project section in solution file "{0}" has a circular nesting.</source>
+        <target state="new">MSB5025: Nested project section in solution file "{0}" has a circular nesting.</target>
         <note>{StrBegin="MSB5025: "}UE: The solution filename is provided separately to loggers.</note>
       </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
