@@ -1222,8 +1222,8 @@ namespace Microsoft.Build.Construction
             for (int a = 0; a < _projectsInOrder.Count; a++) {
                 parents[a] = -1;
             }
-            for (int a = 0; a < _projectsInOrder.Count; a++) {
-                if (!DFS(parents, a))
+            for (int i = 0; i < _projectsInOrder.Count; i++) {
+                if (!DepthFirstSearch(parents, i))
                 {
                     return false;
                 }
@@ -1232,25 +1232,26 @@ namespace Microsoft.Build.Construction
         }
 
         // -2 indicates that there is no cycle among ancestors. -1 indicates that it has not yet been checked.
-        private bool DFS(int[] parents, int ind) {
-            string parentGuid = _projectsInOrder[ind].ParentProjectGuid;
+        private bool DepthFirstSearch(int[] parents, int index)
+        {
+            string parentGuid = _projectsInOrder[index].ParentProjectGuid;
             if (parentGuid == null)
             {
-                parents[ind] = -2;
+                parents[index] = -2;
                 return true;
             }
             int parent = _projectsInOrder.IndexOf(_projects[parentGuid]);
             if (parents[parent] == -2)
             {
-                parents[ind] = -2;
+                parents[index] = -2;
                 return true;
             }
             else if (parents[parent] == -1)
             {
-                parents[ind] = parent;
-                if (DFS(parents, parent))
+                parents[index] = parent;
+                if (DepthFirstSearch(parents, parent))
                 {
-                    parents[ind] = -2;
+                    parents[index] = -2;
                     return true;
                 }
             }

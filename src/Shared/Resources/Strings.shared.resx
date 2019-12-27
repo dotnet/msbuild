@@ -209,7 +209,7 @@
     <comment>{StrBegin="MSB5023: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
   <data name="SolutionContainsCyclicallyNestedProjectFiles" Visibility="Public">
-    <value>MSB5025: Nested project section in solution file {0} has a circular nesting.</value>
+    <value>MSB5025: Nested project section in solution file "{0}" has a circular nesting.</value>
     <comment>{StrBegin="MSB5025: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
   <data name="SolutionParseNoHeaderError" UESanitized="false" Visibility="Public">
