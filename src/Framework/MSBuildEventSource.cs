@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Diagnostics.Tracing;
+using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Microsoft.Build.Eventing
 {
@@ -10,6 +12,13 @@ namespace Microsoft.Build.Eventing
     [EventSource(Name = "Microsoft-Build")]
     internal sealed class MSBuildEventSource : EventSource
     {
+        [DllImport("kernel32.dll")]
+        private static extern long GetThreadTimes(IntPtr threadHandle, out long creationTime,
+             out long exitTime, out long kernelTime, out long userTime);
+
+        [DllImport("kernel32.dll")]
+        private static extern IntPtr GetCurrentThread();
+
         /// <summary>
         /// define the singleton instance of the event source
         /// </summary>
@@ -368,9 +377,23 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(48)]
-        public void ExecuteTaskStop(string taskName)
+        public void ExecuteTaskStop(string taskName, string nanosecondsElapsed)
         {
-            WriteEvent(48, taskName);
+            WriteEvent(48, taskName, nanosecondsElapsed);
+        }
+
+        #endregion
+
+        #region Non-Events
+        [NonEvent]
+        public static long GetThreadTime()
+        {
+            long kernelTime, userTime;
+            if (!Convert.ToBoolean(GetThreadTimes(GetCurrentThread(), out _, out _, out kernelTime, out userTime)))
+            {
+                return -1;
+            }
+            return (kernelTime + userTime) / 10;
         }
 
         #endregion

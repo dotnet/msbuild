@@ -2,18 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
@@ -326,7 +322,12 @@ namespace Microsoft.Build.BackEnd
                 WorkUnitResult aggregateResult = new WorkUnitResult();
 
                 // Some tests do not provide an actual taskNode; checking if _taskNode == null prevents those tests from failing.
-                MSBuildEventSource.Log.ExecuteTaskStart(_taskNode == null ? null : _taskNode.Name);
+                long startTime = -1;
+                if (MSBuildEventSource.Log.IsEnabled())
+                {
+                    startTime = MSBuildEventSource.GetThreadTime();
+                    MSBuildEventSource.Log.ExecuteTaskStart(_taskNode == null ? null : _taskNode.Name);
+                }
                 // Loop through each of the batch buckets and execute them one at a time
                 for (int i = 0; i < buckets.Count; i++)
                 {
@@ -341,8 +342,11 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
                 // Some tests do not provide an actual taskNode; checking if _taskNode == null prevents those tests from failing.
-                MSBuildEventSource.Log.ExecuteTaskStop(_taskNode == null ? null : _taskNode.Name);
-
+                if (MSBuildEventSource.Log.IsEnabled())
+                {
+                    long endTime = MSBuildEventSource.GetThreadTime();
+                    MSBuildEventSource.Log.ExecuteTaskStop(_taskNode == null ? null : _taskNode.Name, startTime == -1 || endTime == -1 ? null : string.Empty + (endTime - startTime));
+                }
                 taskResult = aggregateResult;
             }
             finally
