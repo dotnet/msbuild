@@ -95,7 +95,7 @@ namespace Microsoft.Build.Tasks
                 }
                 catch (OperationCanceledException e) when (e.CancellationToken == cancellationToken)
                 {
-                    // This task is being cancelled, exit the loop
+                    // This task is being cancelled. Exit the loop.
                     break;
                 }
                 catch (Exception e)
