@@ -268,6 +268,13 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        /// <summary>
+        /// The <see cref="BuildEventContext" /> of the currently executing task, if any.
+        /// Used to correlate a project's build with the parent MSBuild task that spawned it.
+        /// Note that it's not exhaustive and won't be set if a build is spawned via
+        /// IBuildEngine* APIs, but since those are uncommon we still get a good correlation
+        /// in the common case.
+        /// </summary>
         public BuildEventContext CurrentMSBuildTask { get; set; }
 
         /// <summary>
