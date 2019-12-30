@@ -797,6 +797,62 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Assert.Throws<InternalErrorException>(() => projectInstance.AddTarget("a", "1==1", "inputs", "outputs", "returns", "keepDuplicateOutputs", "dependsOnTargets", "beforeTargets", "afterTargets", true));
         }
 
+        [Theory]
+        [InlineData(false, ProjectLoadSettings.Default)]
+        [InlineData(false, ProjectLoadSettings.RecordDuplicateButNotCircularImports)]
+        [InlineData(true, ProjectLoadSettings.Default)]
+        [InlineData(true, ProjectLoadSettings.RecordDuplicateButNotCircularImports)]
+        public void GetImportsAndImportsIncludingDuplicates(bool useDirectConstruction, ProjectLoadSettings projectLoadSettings)
+        {
+            try
+            {
+                string projectFileContent = @"
+                    <Project>
+                        <Import Project='{0}'/>
+                        <Import Project='{1}'/>
+                        <Import Project='{0}'/>
+                    </Project>";
+
+                string import1Content = @"
+                    <Project>
+                        <Import Project='{0}'/>
+                        <Import Project='{1}'/>
+                    </Project>";
+
+                string import2Content = @"<Project />";
+                string import3Content = @"<Project />";
+
+                string import2Path = ObjectModelHelpers.CreateFileInTempProjectDirectory("import2.targets", import2Content);
+                string import3Path = ObjectModelHelpers.CreateFileInTempProjectDirectory("import3.targets", import3Content);
+
+                import1Content = string.Format(import1Content, import2Path, import3Path);
+                string import1Path = ObjectModelHelpers.CreateFileInTempProjectDirectory("import1.targets", import1Content);
+
+                projectFileContent = string.Format(projectFileContent, import1Path, import2Path);
+
+                ProjectCollection projectCollection = new ProjectCollection();
+                BuildParameters buildParameters = new BuildParameters(projectCollection) { ProjectLoadSettings = projectLoadSettings };
+                BuildEventContext buildEventContext = new BuildEventContext(0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+
+                ProjectRootElement rootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)));
+                ProjectInstance projectInstance = useDirectConstruction
+                    ? new ProjectInstance(rootElement, globalProperties: null, toolsVersion: null, buildParameters, projectCollection.LoggingService, buildEventContext, sdkResolverService: null, 0)
+                    : new Project(rootElement, globalProperties: null, toolsVersion: null, projectCollection, projectLoadSettings).CreateProjectInstance();
+
+                string[] expectedImports = new string[] { import1Path, import2Path, import3Path };
+                string[] expectedImportsIncludingDuplicates = projectLoadSettings.HasFlag(ProjectLoadSettings.RecordDuplicateButNotCircularImports)
+                    ? new string[] { import1Path, import2Path, import3Path, import2Path, import1Path }
+                    : expectedImports;
+
+                Helpers.AssertListsValueEqual(expectedImports, projectInstance.Imports.ToList());
+                Helpers.AssertListsValueEqual(expectedImportsIncludingDuplicates, projectInstance.ImportsIncludingDuplicates.ToList());
+            }
+            finally
+            {
+                ObjectModelHelpers.DeleteTempProjectDirectory();
+            }
+        }
+
         /// <summary>
         /// Create a ProjectInstance from provided project content
         /// </summary>

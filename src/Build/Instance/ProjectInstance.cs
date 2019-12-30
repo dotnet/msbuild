@@ -1882,7 +1882,7 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// Translate the project instance to or from a stream.
-        /// Only translates global properties, properties, items, imports, and mutability.
+        /// Only translates global properties, properties, items, and mutability.
         /// </summary>
         void ITranslatable.Translate(ITranslator translator)
         {
@@ -1919,16 +1919,13 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _isImmutable);
             translator.Translate(ref _evaluationId);
 
-            translator.Translate(ref _imports);
-            Imports = _imports.AsReadOnly();
-
-            translator.Translate(ref _importsIncludingDuplicates);
-            ImportsIncludingDuplicates = _importsIncludingDuplicates.AsReadOnly();
-
             translator.TranslateDictionary(
                 ref _itemDefinitions,
                 ProjectItemDefinitionInstance.FactoryForDeserialization,
                 capacity => new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(capacity, MSBuildNameIgnoreCaseComparer.Default));
+
+            // ignore _imports/Imports. Only used by public API users, not nodes
+            // ignore _importsIncludingDuplicates/ImportsIncludingDuplicates. Only used by public API users, not nodes
         }
 
         private void TranslateToolsetSpecificState(ITranslator translator)
@@ -2638,18 +2635,26 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void CreateImportSnapshot(Evaluation.Project.Data data)
         {
-            _imports = new List<string>(data.ImportClosure.Count);
+            _imports = new List<string>(data.ImportClosure.Count - 1 /* outer project */);
             foreach (var resolvedImport in data.ImportClosure)
             {
-                _imports.Add(resolvedImport.ImportedProject.FullPath);
+                // Exclude outer project itself
+                if (resolvedImport.ImportingElement != null)
+                {
+                    _imports.Add(resolvedImport.ImportedProject.FullPath);
+                }
             }
 
             Imports = _imports.AsReadOnly();
 
-            _importsIncludingDuplicates = new List<string>(data.ImportClosureWithDuplicates.Count);
+            _importsIncludingDuplicates = new List<string>(data.ImportClosureWithDuplicates.Count - 1 /* outer project */);
             foreach (var resolvedImport in data.ImportClosureWithDuplicates)
             {
-                _importsIncludingDuplicates.Add(resolvedImport.ImportedProject.FullPath);
+                // Exclude outer project itself
+                if (resolvedImport.ImportingElement != null)
+                {
+                    _importsIncludingDuplicates.Add(resolvedImport.ImportedProject.FullPath);
+                }
             }
 
             ImportsIncludingDuplicates = _importsIncludingDuplicates.AsReadOnly();
