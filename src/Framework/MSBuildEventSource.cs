@@ -377,9 +377,9 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(48)]
-        public void ExecuteTaskStop(string taskName, string nanosecondsElapsed)
+        public void ExecuteTaskStop(string taskName, string millisecondsElapsed)
         {
-            WriteEvent(48, taskName, nanosecondsElapsed);
+            WriteEvent(48, taskName, millisecondsElapsed);
         }
 
         #endregion
@@ -393,7 +393,7 @@ namespace Microsoft.Build.Eventing
             {
                 return -1;
             }
-            return (kernelTime + userTime) / 10;
+            return (kernelTime + userTime) / 10000;
         }
 
         #endregion

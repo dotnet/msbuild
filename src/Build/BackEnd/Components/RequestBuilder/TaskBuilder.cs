@@ -326,7 +326,7 @@ namespace Microsoft.Build.BackEnd
                 if (MSBuildEventSource.Log.IsEnabled())
                 {
                     startTime = MSBuildEventSource.GetThreadTime();
-                    MSBuildEventSource.Log.ExecuteTaskStart(_taskNode == null ? null : _taskNode.Name);
+                    MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name);
                 }
                 // Loop through each of the batch buckets and execute them one at a time
                 for (int i = 0; i < buckets.Count; i++)
@@ -345,7 +345,8 @@ namespace Microsoft.Build.BackEnd
                 if (MSBuildEventSource.Log.IsEnabled())
                 {
                     long endTime = MSBuildEventSource.GetThreadTime();
-                    MSBuildEventSource.Log.ExecuteTaskStop(_taskNode == null ? null : _taskNode.Name, startTime == -1 || endTime == -1 ? null : string.Empty + (endTime - startTime));
+                    TimeSpan time = TimeSpan.FromMilliseconds(startTime == -1 || endTime == -1 ? -1 : endTime - startTime);
+                    MSBuildEventSource.Log.ExecuteTaskStop(_taskNode?.Name, time.TotalMilliseconds == -1 ? null : string.Empty + time.Duration().Milliseconds);
                 }
                 taskResult = aggregateResult;
             }
