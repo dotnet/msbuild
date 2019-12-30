@@ -22,10 +22,8 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         public void ParseInvalidProjectNesting()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
-            {
-                string solutionFileContents =
-                    @"
+            string solutionFileContents =
+                @"
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26124.0
@@ -51,10 +49,7 @@ Global
                 {933E47E9-37B5-4AB3-AD1C-0E48043575D7} = {933E47E9-37B5-4AB3-AD1C-0E48043575D7}
         EndGlobalSection
 EndGlobal";
-                ParseSolutionHelper(solutionFileContents);
-                Assert.True(false, "Should not get here");
-            }
-           );
+            Shouldly.Should.Throw<InvalidProjectFileException>(() => ParseSolutionHelper(solutionFileContents));
         }
 
         /// <summary>
@@ -63,10 +58,8 @@ EndGlobal";
         [Fact]
         public void ParseInvalidProjectNesting2()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
-            {
-                string solutionFileContents =
-                    @"
+            string solutionFileContents =
+                @"
 
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
@@ -94,10 +87,7 @@ Global
 	EndGlobalSection
 EndGlobal
 ";
-                ParseSolutionHelper(solutionFileContents);
-                Assert.True(false, "Should not get here");
-            }
-           );
+            Shouldly.Should.Throw<InvalidProjectFileException>(() => ParseSolutionHelper(solutionFileContents));
         }
         
         /// <summary>

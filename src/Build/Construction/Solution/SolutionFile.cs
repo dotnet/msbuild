@@ -1212,18 +1212,18 @@ namespace Microsoft.Build.Construction
                 proj.ParentProjectGuid = parentProjectGuid;
             } while (true);
 
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(TestForCyclicalNesting(), "SubCategoryForSolutionParsingErrors",
+            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(ContainsNoCyclicalNesting(), "SubCategoryForSolutionParsingErrors",
                 new BuildEventFileInfo(FullPath, _currentLineNumber, 0), "SolutionContainsCyclicallyNestedProjectFiles", _solutionFile);
         }
 
-        private bool TestForCyclicalNesting()
+        private bool ContainsNoCyclicalNesting()
         {
             int[] parents = new int[_projectsInOrder.Count];
             for (int a = 0; a < _projectsInOrder.Count; a++) {
                 parents[a] = -1;
             }
             for (int i = 0; i < _projectsInOrder.Count; i++) {
-                if (!DepthFirstSearch(parents, i))
+                if (!AncestorsContainNoCycle(parents, i))
                 {
                     return false;
                 }
@@ -1232,7 +1232,7 @@ namespace Microsoft.Build.Construction
         }
 
         // -2 indicates that there is no cycle among ancestors. -1 indicates that it has not yet been checked.
-        private bool DepthFirstSearch(int[] parents, int index)
+        private bool AncestorsContainNoCycle(int[] parents, int index)
         {
             string parentGuid = _projectsInOrder[index].ParentProjectGuid;
             if (parentGuid == null)
@@ -1249,7 +1249,7 @@ namespace Microsoft.Build.Construction
             else if (parents[parent] == -1)
             {
                 parents[index] = parent;
-                if (DepthFirstSearch(parents, parent))
+                if (AncestorsContainNoCycle(parents, parent))
                 {
                     parents[index] = -2;
                     return true;
