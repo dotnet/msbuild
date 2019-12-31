@@ -3,8 +3,7 @@
 
 using System;
 using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
+using System.Linq;
 
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
@@ -1428,54 +1427,22 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 Project project = new Project(projectFile2);
-                var logger = new MSBuildTaskIdLogger();
+                var logger = new MockLogger();
 
                 Assert.True(project.Build(logger));
 
-                var text = logger.Text;
-                var taskId = Regex.Match(text, @"TaskId=(\d+)").Groups[1].Value;
-                var parentTaskId = Regex.Match(text, @"ParentTaskId=(\d+)").Groups[1].Value;
-                Assert.Equal(taskId, parentTaskId);
+                var expectedTaskId = logger.TaskStartedEvents.First(t => t.TaskName == "MSBuild").BuildEventContext.TaskId;
+                var actualTaskId = logger.ProjectStartedEvents
+                    .Where(p => p.ParentProjectBuildEventContext != null && p.ParentProjectBuildEventContext.TaskId > 0)
+                    .First()
+                    .ParentProjectBuildEventContext.TaskId;
+
+                Assert.Equal(expectedTaskId, actualTaskId);
             }
             finally
             {
                 File.Delete(projectFile1);
                 File.Delete(projectFile2);
-            }
-        }
-
-        private class MSBuildTaskIdLogger : ILogger
-        {
-            public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Diagnostic;
-            public string Parameters { get; set; }
-            private StringBuilder stringBuilder = new StringBuilder();
-            public string Text => stringBuilder.ToString();
-
-            public void Initialize(IEventSource eventSource)
-            {
-                eventSource.TaskStarted += EventSource_TaskStarted;
-                eventSource.ProjectStarted += EventSource_ProjectStarted;
-            }
-
-            private void EventSource_TaskStarted(object sender, TaskStartedEventArgs e)
-            {
-                if (e.TaskName == "MSBuild")
-                {
-                    stringBuilder.AppendLine($"TaskId={e.BuildEventContext.TaskId}");
-                }
-            }
-
-            private void EventSource_ProjectStarted(object sender, ProjectStartedEventArgs e)
-            {
-                var parent = e.ParentProjectBuildEventContext;
-                if (parent != null && parent.TaskId > 0)
-                {
-                    stringBuilder.AppendLine($"ParentTaskId={parent.TaskId}");
-                }
-            }
-
-            public void Shutdown()
-            {
             }
         }
     }
