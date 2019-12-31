@@ -3,15 +3,14 @@
 
 using System;
 using System.IO;
-using System.Reflection;
-using System.Collections;
+using System.Text;
+using System.Text.RegularExpressions;
+
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using System.Text.RegularExpressions;
 
-using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -1407,6 +1406,77 @@ namespace Microsoft.Build.UnitTests
 
             // 2nd invocation of t_missing should fail the build resulting in target not found error (MSB4057)
             logger.FullLog.ShouldContain("MSB4057");
+        }
+
+        [Fact]
+        public void MSBuildTaskPassesTaskIdToSpawnedBuilds()
+        {
+            string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
+                <Project>
+                    <Target Name=`Build`>
+                        <Message Text=`test`/>
+                    </Target>
+                </Project>");
+
+            string projectFile2 = ObjectModelHelpers.CreateTempFileOnDisk(@"
+                <Project>
+                    <Target Name=`Build`>
+                        <MSBuild Projects=`" + projectFile1 + @"` Targets=`Build` />
+                    </Target>	
+                </Project>");
+
+            try
+            {
+                Project project = new Project(projectFile2);
+                var logger = new MSBuildTaskIdLogger();
+
+                Assert.True(project.Build(logger));
+
+                var text = logger.Text;
+                var taskId = Regex.Match(text, @"TaskId=(\d+)").Groups[1].Value;
+                var parentTaskId = Regex.Match(text, @"ParentTaskId=(\d+)").Groups[1].Value;
+                Assert.Equal(taskId, parentTaskId);
+            }
+            finally
+            {
+                File.Delete(projectFile1);
+                File.Delete(projectFile2);
+            }
+        }
+
+        private class MSBuildTaskIdLogger : ILogger
+        {
+            public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Diagnostic;
+            public string Parameters { get; set; }
+            private StringBuilder stringBuilder = new StringBuilder();
+            public string Text => stringBuilder.ToString();
+
+            public void Initialize(IEventSource eventSource)
+            {
+                eventSource.TaskStarted += EventSource_TaskStarted;
+                eventSource.ProjectStarted += EventSource_ProjectStarted;
+            }
+
+            private void EventSource_TaskStarted(object sender, TaskStartedEventArgs e)
+            {
+                if (e.TaskName == "MSBuild")
+                {
+                    stringBuilder.AppendLine($"TaskId={e.BuildEventContext.TaskId}");
+                }
+            }
+
+            private void EventSource_ProjectStarted(object sender, ProjectStartedEventArgs e)
+            {
+                var parent = e.ParentProjectBuildEventContext;
+                if (parent != null && parent.TaskId > 0)
+                {
+                    stringBuilder.AppendLine($"ParentTaskId={parent.TaskId}");
+                }
+            }
+
+            public void Shutdown()
+            {
+            }
         }
     }
 }
