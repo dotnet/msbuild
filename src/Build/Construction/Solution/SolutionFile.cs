@@ -120,6 +120,13 @@ namespace Microsoft.Build.Construction
 
         #endregion
 
+        private enum SearchState
+        {
+            AncestorsContainNoCycles,
+            Unchecked,
+            Checked
+        }
+
         #region Properties
 
         /// <summary>
@@ -1218,9 +1225,9 @@ namespace Microsoft.Build.Construction
 
         private bool ContainsNoCyclicalNesting()
         {
-            int[] parents = new int[_projectsInOrder.Count];
+            SearchState[] parents = new SearchState[_projectsInOrder.Count];
             for (int a = 0; a < _projectsInOrder.Count; a++) {
-                parents[a] = -1;
+                parents[a] = SearchState.Unchecked;
             }
             for (int i = 0; i < _projectsInOrder.Count; i++) {
                 if (!AncestorsContainNoCycle(parents, i))
@@ -1231,27 +1238,26 @@ namespace Microsoft.Build.Construction
             return true;
         }
 
-        // -2 indicates that there is no cycle among ancestors. -1 indicates that it has not yet been checked.
-        private bool AncestorsContainNoCycle(int[] parents, int index)
+        private bool AncestorsContainNoCycle(SearchState[] parents, int index)
         {
             string parentGuid = _projectsInOrder[index].ParentProjectGuid;
             if (parentGuid == null)
             {
-                parents[index] = -2;
+                parents[index] = SearchState.AncestorsContainNoCycles;
                 return true;
             }
             int parent = _projectsInOrder.IndexOf(_projects[parentGuid]);
-            if (parents[parent] == -2)
+            if (parents[parent] == SearchState.AncestorsContainNoCycles)
             {
-                parents[index] = -2;
+                parents[index] = SearchState.AncestorsContainNoCycles;
                 return true;
             }
-            else if (parents[parent] == -1)
+            else if (parents[parent] == SearchState.Unchecked)
             {
-                parents[index] = parent;
+                parents[index] = SearchState.Checked;
                 if (AncestorsContainNoCycle(parents, parent))
                 {
-                    parents[index] = -2;
+                    parents[index] = SearchState.AncestorsContainNoCycles;
                     return true;
                 }
             }
