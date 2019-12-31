@@ -186,6 +186,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         {
             try
             {
+                Thread.CurrentThread.Name = "MSBuild SDK Resolver";
+
                 while (true)
                 {
                     WaitHandle[] handles = new WaitHandle[] { ShutdownEvent, _requestReceivedEvent };
