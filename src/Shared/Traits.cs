@@ -124,6 +124,23 @@ namespace Microsoft.Build.Utilities
             }
         }
 
+        private bool? _logTaskInputs;
+        public bool LogTaskInputs
+        {
+            get
+            {
+                if (_logTaskInputs == null)
+                {
+                    _logTaskInputs = Environment.GetEnvironmentVariable("MSBUILDLOGTASKINPUTS") == "1";
+                }
+                return _logTaskInputs.Value;
+            }
+            set
+            {
+                _logTaskInputs = value;
+            }
+        }
+
         /// <summary>
         /// Read information only once per file per ResolveAssemblyReference invocation.
         /// </summary>
