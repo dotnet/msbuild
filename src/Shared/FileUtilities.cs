@@ -754,7 +754,11 @@ namespace Microsoft.Build.Shared
         {
             try
             {
-                File.Delete(FixFilePath(path));
+                path = FixFilePath(path);
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
