@@ -1445,5 +1445,53 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(projectFile2);
             }
         }
+
+        [Fact]
+        public void CustomTaskWithBuildProjectFilePassesTaskId()
+        {
+            string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk($@"
+                <Project>
+                    <UsingTask TaskName=`{nameof(BuildProjectFileTask)}` AssemblyFile =`{typeof(BuildProjectFileTask).Assembly.Location}` />
+                    <Target Name=`Build`>
+                        <{nameof(BuildProjectFileTask)} Project=`$(MSBuildThisFileFullPath)` Targets=`Other` />
+                    </Target>
+                    <Target Name=`Other`>
+                        <Message Text=`test`/>
+                    </Target>
+                </Project>");
+
+            try
+            {
+                Project project = new Project(projectFile1);
+                var logger = new MockLogger();
+
+                Assert.True(project.Build(logger));
+
+                var expectedTaskId = logger.TaskStartedEvents.First(t => t.TaskName == nameof(BuildProjectFileTask)).BuildEventContext.TaskId;
+                var actualTaskId = logger.ProjectStartedEvents
+                    .Where(p => p.ParentProjectBuildEventContext != null && p.ParentProjectBuildEventContext.TaskId > 0)
+                    .First()
+                    .ParentProjectBuildEventContext.TaskId;
+
+                Assert.Equal(expectedTaskId, actualTaskId);
+            }
+            finally
+            {
+                File.Delete(projectFile1);
+            }
+        }
+    }
+
+    public class BuildProjectFileTask : Task
+    {
+        public string Project { get; set; }
+        public string[] Targets { get; set; }
+
+        public override bool Execute()
+        {
+            this.BuildEngine.BuildProjectFile(Project, Targets, null, null);
+
+            return true;
+        }
     }
 }
