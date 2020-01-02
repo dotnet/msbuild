@@ -1750,6 +1750,99 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
+        public void KeepWithItemReferenceOnNonmatchingMetadata()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                    <Target Name='t'>
+                        <ItemGroup>
+                            <I1 Include='a1' a='1' b='a'/>
+                            <I1 Include='b1' a='2' b='x'/>
+                            <I1 Include='c1' a='3' b='y'/>
+                            <I1 Include='d1' a='4' b='b'/>
+
+                            <I2 Include='a2' c='x' d='c'/>
+                            <I2 Include='b2' c='2' d='x'/>
+                            <I2 Include='c2' c='3' d='Y'/>
+                            <I2 Include='d2' c='y' d='d'/>
+
+                            <I2 Remove='@(I1)' MatchOnMetadata='e;f;g' />
+                        </ItemGroup>
+                    </Target></Project>");
+            IntrinsicTask task = CreateIntrinsicTask(content);
+            Lookup lookup = LookupHelpers.CreateEmptyLookup();
+            ExecuteTask(task, lookup);
+
+            var items = lookup.GetItems("I2");
+
+            items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "a2", "b2", "c2", "d2" });
+
+            items.ElementAt(0).GetMetadataValue("c").ShouldBe("x");
+            items.ElementAt(1).GetMetadataValue("c").ShouldBe("2");
+            items.ElementAt(2).GetMetadataValue("c").ShouldBe("3");
+            items.ElementAt(3).GetMetadataValue("c").ShouldBe("y");
+            items.ElementAt(0).GetMetadataValue("d").ShouldBe("c");
+            items.ElementAt(1).GetMetadataValue("d").ShouldBe("x");
+            items.ElementAt(2).GetMetadataValue("d").ShouldBe("Y");
+            items.ElementAt(3).GetMetadataValue("d").ShouldBe("d");
+        }
+
+        [Fact]
+        public void FailWithMultipleItemReferenceOnMatchingMetadata()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                    <Target Name='t'>
+                        <ItemGroup>
+                            <I1 Include='a1' M1='1' M2='a'/>
+                            <I1 Include='b1' M1='2' M2='x'/>
+                            <I1 Include='c1' M1='3' M2='y'/>
+                            <I1 Include='d1' M1='4' M2='b'/>
+
+                            <I2 Include='a2' M1='x' m2='c'/>
+                            <I2 Include='b2' M1='2' m2='x'/>
+                            <I2 Include='c2' M1='3' m2='Y'/>
+                            <I2 Include='d2' M1='y' m2='d'/>
+
+                            <I3 Include='a3' M1='1' m2='b'/>
+                            <I3 Include='b3' M1='x' m2='a'/>
+                            <I3 Include='c3' M1='3' m2='2'/>
+                            <I3 Include='d3' M1='y' m2='d'/>
+
+                            <I3 Remove='@(I1);@(I2)' MatchOnMetadata='M1;m2' />
+                        </ItemGroup>
+                    </Target></Project>");
+            IntrinsicTask task = CreateIntrinsicTask(content);
+            Lookup lookup = LookupHelpers.CreateEmptyLookup();
+            Assert.ThrowsAny<InternalErrorException>(() => ExecuteTask(task, lookup));
+        }
+
+        [Fact]
+        public void FailWithMetadataItemReferenceOnMatchingMetadata()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                    <Target Name='t'>
+                        <ItemGroup>
+                            <I1 Include='a1' M1='1' M2='a'/>
+                            <I1 Include='b1' M1='2' M2='x'/>
+                            <I1 Include='c1' M1='3' M2='y'/>
+                            <I1 Include='d1' M1='4' M2='b'/>
+
+                            <I2 Include='a2' M1='x' m2='c'/>
+                            <I2 Include='b2' M1='2' m2='x'/>
+                            <I2 Include='c2' M1='3' m2='Y'/>
+                            <I2 Include='d2' M1='y' m2='d'/>
+
+                            <I2 Remove='%(I1.M1)' MatchOnMetadata='M1;m2' />
+                        </ItemGroup>
+                    </Target></Project>");
+            IntrinsicTask task = CreateIntrinsicTask(content);
+            Lookup lookup = LookupHelpers.CreateEmptyLookup();
+            Assert.ThrowsAny<InternalErrorException>(() => ExecuteTask(task, lookup));
+        }
+
+        [Fact]
         public void RemoveItemOutsideTarget()
         {
             // <ItemGroup>

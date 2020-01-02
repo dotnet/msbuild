@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -83,6 +85,19 @@ namespace Microsoft.Build.Evaluation
             public override bool IsMatch(string itemToMatch)
             {
                 return ReferencedItems.Any(v => v.ItemAsValueFragment.IsMatch(itemToMatch));
+            }
+
+            public override bool IsMatchOnMetadata(IItem itemToMatch, ImmutableList<string> metadata)
+            {
+                foreach (var referencedItem in ReferencedItems)
+                {
+                    if (metadata.All(m =>
+                            itemToMatch.GetMetadataValue(m).Equals(referencedItem.Item.GetMetadataValue(m)) && !referencedItem.Item.GetMetadataValue(m).Equals(string.Empty)))
+                    {
+                        return true;
+                    }
+                }
+                return false;
             }
 
             public override IMSBuildGlob ToMSBuildGlob()
@@ -293,6 +308,25 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        ///     Return true if any of the given <paramref name="metadata" /> matches the metadata on <paramref name="item" />
+        /// </summary>
+        /// <param name="item">The item to attempt to find a match for based on matching metadata</param>
+        /// <param name="metadata">Names of metadata to look for matches for</param>
+        /// <returns></returns>
+        public bool MatchesItemOnMetadata(IItem item, ImmutableList<string> metadata)
+        {
+            foreach (var fragment in Fragments)
+            {
+                if (fragment.IsMatchOnMetadata(item, metadata))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         ///     Return the fragments that match against the given <paramref name="itemToMatch" />
         /// </summary>
         /// <param name="itemToMatch">The item to match.</param>
@@ -418,6 +452,11 @@ namespace Microsoft.Build.Evaluation
         public virtual bool IsMatch(string itemToMatch)
         {
             return FileMatcher.IsMatch(itemToMatch);
+        }
+
+        public virtual bool IsMatchOnMetadata(IItem itemToMatch, ImmutableList<string> metadata)
+        {
+            return false;
         }
 
         public virtual IMSBuildGlob ToMSBuildGlob()

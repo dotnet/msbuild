@@ -290,7 +290,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (matchOnMetadata.All(
                             m =>
-                                item.GetMetadataValue(m).Equals(referencedItem.Item.GetMetadataValue(m))))
+                                item.GetMetadataValue(m).Equals(referencedItem.Item.GetMetadataValue(m)) && !item.GetMetadataValue(m).Equals(string.Empty)))
                     {
                         itemsToRemove.Add(item);
                     }
