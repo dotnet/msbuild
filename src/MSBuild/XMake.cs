@@ -3519,13 +3519,14 @@ namespace Microsoft.Build.CommandLine
 
             foreach (var distributedLoggerRecord in distributedLoggerRecords)
             {
-                if (distributedLoggerRecord.CentralLogger is INodeLogger nodeLogger)
+                var centralLogger = distributedLoggerRecord.CentralLogger;
+                if (centralLogger is INodeLogger nodeLogger)
                 {
                     nodeLogger.Initialize(replayEventSource, cpuCount);
                 }
-                else
+                else if (centralLogger != null)
                 {
-                    distributedLoggerRecord.CentralLogger.Initialize(replayEventSource);
+                    centralLogger.Initialize(replayEventSource);
                 }
             }
 
@@ -3558,7 +3559,11 @@ namespace Microsoft.Build.CommandLine
 
             foreach (var distributedLoggerRecord in distributedLoggerRecords)
             {
-                distributedLoggerRecord.CentralLogger.Shutdown();
+                var centralLogger = distributedLoggerRecord.CentralLogger;
+                if (centralLogger != null)
+                {
+                    centralLogger.Shutdown();
+                }
             }
         }
 
