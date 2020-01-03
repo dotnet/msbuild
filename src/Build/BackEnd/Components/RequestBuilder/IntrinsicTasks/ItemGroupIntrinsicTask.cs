@@ -272,28 +272,21 @@ namespace Microsoft.Build.BackEnd
 
             var itemSpec = new ItemSpec<ProjectPropertyInstance, ProjectItemInstance>(child.Remove, bucket.Expander, child.RemoveLocation, Project.Directory, true);
 
-            // todo create OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem resource
-            ErrorUtilities.VerifyThrowInvalidOperation(
+            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
                 itemSpec.Fragments.Count == 1
                 && itemSpec.Fragments.First() is ItemSpec<ProjectPropertyInstance, ProjectItemInstance>.ItemExpressionFragment,
+                new BuildEventFileInfo(string.Empty),
                 "OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem",
                 child.RemoveLocation,
                 child.Remove);
-
-            var itemFragment = itemSpec.Fragments.First() as ItemSpec<ProjectPropertyInstance, ProjectItemInstance>.ItemExpressionFragment;
 
             var itemsToRemove = new List<ProjectItemInstance>();
 
             foreach (var item in items)
             {
-                foreach (var referencedItem in itemFragment.ReferencedItems)
+                if (itemSpec.MatchesItemOnMetadata(item, matchOnMetadata))
                 {
-                    if (matchOnMetadata.All(
-                            m =>
-                                item.GetMetadataValue(m).Equals(referencedItem.Item.GetMetadataValue(m)) && !item.GetMetadataValue(m).Equals(string.Empty)))
-                    {
-                        itemsToRemove.Add(item);
-                    }
+                    itemsToRemove.Add(item);
                 }
             }
 

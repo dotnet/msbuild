@@ -87,12 +87,13 @@ namespace Microsoft.Build.Evaluation
                 return ReferencedItems.Any(v => v.ItemAsValueFragment.IsMatch(itemToMatch));
             }
 
-            public override bool IsMatchOnMetadata(IItem itemToMatch, ImmutableList<string> metadata)
+            public override bool IsMatchOnMetadata(IItem item, IEnumerable<string> metadata)
             {
                 foreach (var referencedItem in ReferencedItems)
                 {
-                    if (metadata.All(m =>
-                            itemToMatch.GetMetadataValue(m).Equals(referencedItem.Item.GetMetadataValue(m)) && !referencedItem.Item.GetMetadataValue(m).Equals(string.Empty)))
+                    var nonEmptyMetadata = metadata.Where(m => !item.GetMetadataValue(m).Equals(string.Empty) || !referencedItem.Item.GetMetadataValue(m).Equals(string.Empty));
+                    if (nonEmptyMetadata.Count() != 0 && nonEmptyMetadata.All(
+                            m => item.GetMetadataValue(m).Equals(referencedItem.Item.GetMetadataValue(m))))
                     {
                         return true;
                     }
@@ -313,7 +314,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="item">The item to attempt to find a match for based on matching metadata</param>
         /// <param name="metadata">Names of metadata to look for matches for</param>
         /// <returns></returns>
-        public bool MatchesItemOnMetadata(IItem item, ImmutableList<string> metadata)
+        public bool MatchesItemOnMetadata(IItem item, IEnumerable<string> metadata)
         {
             foreach (var fragment in Fragments)
             {
@@ -454,7 +455,7 @@ namespace Microsoft.Build.Evaluation
             return FileMatcher.IsMatch(itemToMatch);
         }
 
-        public virtual bool IsMatchOnMetadata(IItem itemToMatch, ImmutableList<string> metadata)
+        public virtual bool IsMatchOnMetadata(IItem itemToMatch, IEnumerable<string> metadata)
         {
             return false;
         }

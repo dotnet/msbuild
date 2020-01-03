@@ -1750,6 +1750,50 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
+        public void RemoveWithItemReferenceOnMatchingMetadataReferences()
+        {
+            // <PropertyGroup>
+            //     <p0>v0</p0>
+            // </PropertyGroup>
+            string content = ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                    <Target Name='t'>
+                        <ItemGroup>
+                            <Meta2 Include='M2'/>
+                            <Meta2 Include='g'/>
+
+                            <I1 Include='a1' v0='1' M2='a'/>
+                            <I1 Include='b1' v0='2' M2='x'/>
+                            <I1 Include='c1' v0='3' M2='y'/>
+                            <I1 Include='d1' v0='4' M2='b'/>
+
+                            <I2 Include='a2' v0='x' m2='c'/>
+                            <I2 Include='b2' v0='2' m2='x'/>
+                            <I2 Include='c2' v0='3' m2='Y'/>
+                            <I2 Include='d2' v0='y' m2='d'/>
+
+                            <I2 Remove='@(I1)' MatchOnMetadata='$(p0);@(Meta2)' />
+                        </ItemGroup>
+                    </Target></Project>");
+
+            IntrinsicTask task = CreateIntrinsicTask(content);
+            PropertyDictionary<ProjectPropertyInstance> properties = GeneratePropertyGroup();
+            Lookup lookup = LookupHelpers.CreateLookup(properties);
+            ExecuteTask(task, lookup);
+
+            var items = lookup.GetItems("I2");
+
+            items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "a2", "c2", "d2" });
+
+            items.ElementAt(0).GetMetadataValue("v0").ShouldBe("x");
+            items.ElementAt(0).GetMetadataValue("M2").ShouldBe("c");
+            items.ElementAt(1).GetMetadataValue("v0").ShouldBe("3");
+            items.ElementAt(1).GetMetadataValue("M2").ShouldBe("Y");
+            items.ElementAt(2).GetMetadataValue("v0").ShouldBe("y");
+            items.ElementAt(2).GetMetadataValue("M2").ShouldBe("d");
+        }
+
+        [Fact]
         public void KeepWithItemReferenceOnNonmatchingMetadata()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
@@ -1814,7 +1858,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </Target></Project>");
             IntrinsicTask task = CreateIntrinsicTask(content);
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
-            Assert.ThrowsAny<InternalErrorException>(() => ExecuteTask(task, lookup));
+            Assert.ThrowsAny<InvalidProjectFileException>(() => ExecuteTask(task, lookup));
         }
 
         [Fact]
@@ -1839,7 +1883,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </Target></Project>");
             IntrinsicTask task = CreateIntrinsicTask(content);
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
-            Assert.ThrowsAny<InternalErrorException>(() => ExecuteTask(task, lookup));
+            Assert.ThrowsAny<InvalidProjectFileException>(() => ExecuteTask(task, lookup));
         }
 
         [Fact]
