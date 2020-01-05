@@ -1102,7 +1102,8 @@ namespace Microsoft.Build.CommandLine
                     projectCollection.UnloadProject(project);
                     success = true;
                 }
-                else
+
+                if (!preprocessOnly)
                 {
                     BuildParameters parameters = new BuildParameters(projectCollection);
 
