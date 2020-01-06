@@ -555,6 +555,7 @@ namespace Microsoft.Build.CommandLine
                 bool enableNodeReuse = false;
 #endif
                 TextWriter preprocessWriter = null;
+                TextWriter targetsWriter = null;
                 bool detailedSummary = false;
                 ISet<string> warningsAsErrors = null;
                 ISet<string> warningsAsMessages = null;
@@ -588,6 +589,7 @@ namespace Microsoft.Build.CommandLine
                         ref cpuCount,
                         ref enableNodeReuse,
                         ref preprocessWriter,
+                        ref targetsWriter,
                         ref detailedSummary,
                         ref warningsAsErrors,
                         ref warningsAsMessages,
@@ -651,6 +653,7 @@ namespace Microsoft.Build.CommandLine
                                     cpuCount,
                                     enableNodeReuse,
                                     preprocessWriter,
+                                    targetsWriter,
                                     detailedSummary,
                                     warningsAsErrors,
                                     warningsAsMessages,
@@ -959,6 +962,7 @@ namespace Microsoft.Build.CommandLine
             int cpuCount,
             bool enableNodeReuse,
             TextWriter preprocessWriter,
+            TextWriter targetsWriter,
             bool detailedSummary,
             ISet<string> warningsAsErrors,
             ISet<string> warningsAsMessages,
@@ -1056,6 +1060,7 @@ namespace Microsoft.Build.CommandLine
                 ToolsetDefinitionLocations toolsetDefinitionLocations = ToolsetDefinitionLocations.Default;
 
                 bool preprocessOnly = preprocessWriter != null && !FileUtilities.IsSolutionFilename(projectFile);
+                bool targetsOnly = targetsWriter != null && !FileUtilities.IsSolutionFilename(projectFile);
 
                 projectCollection = new ProjectCollection
                 (
@@ -1103,7 +1108,17 @@ namespace Microsoft.Build.CommandLine
                     success = true;
                 }
 
-                if (!preprocessOnly)
+                if (targetsOnly)
+                {
+                    Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
+
+                    project.SaveLogicalProject(targetsWriter);
+
+                    projectCollection.UnloadProject(project);
+                    success = true;
+                }
+
+                if (!preprocessOnly && !targetsOnly)
                 {
                     BuildParameters parameters = new BuildParameters(projectCollection);
 
@@ -2012,6 +2027,7 @@ namespace Microsoft.Build.CommandLine
             ref int cpuCount,
             ref bool enableNodeReuse,
             ref TextWriter preprocessWriter,
+            ref TextWriter targetsWriter,
             ref bool detailedSummary,
             ref ISet<string> warningsAsErrors,
             ref ISet<string> warningsAsMessages,
@@ -2127,6 +2143,7 @@ namespace Microsoft.Build.CommandLine
                                                                ref cpuCount,
                                                                ref enableNodeReuse,
                                                                ref preprocessWriter,
+                                                               ref targetsWriter,
                                                                ref detailedSummary,
                                                                ref warningsAsErrors,
                                                                ref warningsAsMessages,
@@ -2168,6 +2185,13 @@ namespace Microsoft.Build.CommandLine
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Preprocess))
                     {
                         preprocessWriter = ProcessPreprocessSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Preprocess]);
+                    }
+
+                    // determine what if any writer to print targets to
+                    targetsWriter = null;
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Targets))
+                    {
+                        targetsWriter = ProcessTargetsSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Targets]);
                     }
 
                     detailedSummary = commandLineSwitches.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.DetailedSummary);
@@ -2327,6 +2351,25 @@ namespace Microsoft.Build.CommandLine
                 catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {
                     CommandLineSwitchException.Throw("InvalidPreprocessPath", parameters[parameters.Length - 1], ex.Message);
+                }
+            }
+
+            return writer;
+        }
+
+        internal static TextWriter ProcessTargetsSwitch(string[] parameters)
+        {
+            TextWriter writer = Console.Out;
+
+            if (parameters.Length > 0)
+            {
+                try
+                {
+                    writer = FileUtilities.OpenWrite(parameters[parameters.Length - 1], append: false);
+                }
+                catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
+                {
+                    CommandLineSwitchException.Throw("InvalidTargetsPath", parameters[parameters.Length - 1], ex.Message);
                 }
             }
 

@@ -1268,6 +1268,7 @@ namespace Microsoft.Build.UnitTests
                                         1,
                                         true,
                                         new StringWriter(),
+                                        new StringWriter(),
                                         false,
                                         warningsAsErrors: null,
                                         warningsAsMessages: null,
