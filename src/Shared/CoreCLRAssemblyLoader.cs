@@ -34,10 +34,14 @@ namespace Microsoft.Build.Shared
                     return assembly;
                 }
 
-
                 var contextForAssemblyPath = new MSBuildLoadContext(fullPath);
 
                 assembly = contextForAssemblyPath.LoadFromAssemblyPath(fullPath);
+
+                if (assembly != null)
+                {
+                    _pathsToAssemblies[fullPath] = assembly;
+                }
 
                 return assembly;
             }
