@@ -787,6 +787,22 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
+  <data name="HelpMessage_37_TargetsSwitch" Visibility="Public">
+    <value>  -targets[:file]
+                     Prints a list of available targets without executing the
+                     actual build process. By default the output is written to
+                     the console window. If the path to an output file
+                     is provided that will be used instead.
+                     (Short form: -ts)
+                     Example:
+                       -ts:out.txt
+    </value>
+    <comment>
+      LOCALIZATION: "MSBuild" should not be localized.
+      LOCALIZATION: "-targets" and "-ts" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </comment>
+  </data>
   <data name="InvalidConfigurationFile" Visibility="Public">
     <value>MSBUILD : Configuration error MSB1043: The application could not start. {0}</value>
     <comment>

@@ -3706,6 +3706,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_24_NodeReuse"));
 #endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_25_PreprocessSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_37_TargetsSwitch"));
 
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_26_DetailedSummarySwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_31_RestoreSwitch"));
