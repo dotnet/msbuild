@@ -79,15 +79,16 @@ namespace Microsoft.Build.Shared
             }
 
             // If the Assembly is provided via a file path, the following rules are used to load the assembly:
-            // - if the simple name of the assembly exists in the same folder as msbuild.exe, then that assembly gets loaded, indifferent of the user specified path
-            // - otherwise, the assembly from the user specified path is loaded, if it exists.
+            // - the assembly from the user specified path is loaded, if it exists, into the custom ALC, or
+            // - if the simple name of the assembly exists in the same folder as msbuild.exe, then that assembly gets loaded
+            //   into the default ALC (so it's shared with other uses).
 
             var assemblyNameInExecutableDirectory = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory,
                 assemblyName.Name);
 
             if (FileSystems.Default.FileExists(assemblyNameInExecutableDirectory))
             {
-                return LoadFromAssemblyPath(assemblyNameInExecutableDirectory);
+                return AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyNameInExecutableDirectory);
             }
 
             return null;
