@@ -1112,7 +1112,7 @@ namespace Microsoft.Build.CommandLine
                 {
                     Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
 
-                    project.SaveLogicalProject(targetsWriter);
+                    project.PrintTargets(targetsWriter);
 
                     projectCollection.UnloadProject(project);
                     success = true;
