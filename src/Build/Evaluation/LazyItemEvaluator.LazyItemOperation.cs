@@ -103,7 +103,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     OperationItem = operationItem;
 
-                    CapturedItems = capturedItems != null && capturedItems.Count == 0
+                    CapturedItems = capturedItems == null || capturedItems.Count == 0
                         ? null
                         : capturedItems;
                 }
