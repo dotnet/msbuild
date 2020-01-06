@@ -3559,11 +3559,7 @@ namespace Microsoft.Build.CommandLine
 
             foreach (var distributedLoggerRecord in distributedLoggerRecords)
             {
-                var centralLogger = distributedLoggerRecord.CentralLogger;
-                if (centralLogger != null)
-                {
-                    centralLogger.Shutdown();
-                }
+                distributedLoggerRecord.CentralLogger?.Shutdown();
             }
         }
 
