@@ -25,6 +25,7 @@ using System.IO;
 using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Linq;
+using System.Text.Json;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
@@ -2034,17 +2035,34 @@ namespace Microsoft.Build.Execution
             // we should be generating a 4.0+ or a 3.5-style wrapper project based on the version of the solution. 
             else
             {
-                int solutionVersion;
-                int visualStudioVersion = 0;
+                string solutionFile = string.Empty;
                 if (FileUtilities.IsSolutionFilterFilename(projectFile))
                 {
-                    // TODO: parse file to get accurate solution version
-                    solutionVersion = 16;
+                    try
+                    {
+                        using JsonDocument text = JsonDocument.Parse(File.ReadAllText(projectFile));
+                        JsonElement solution = text.RootElement.GetProperty("solution");
+                        solutionFile = solution.GetProperty("path").GetString();
+                    }
+                    catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
+                    {
+                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                        (
+                            false, /* Just throw the exception */
+                            "SubCategoryForSolutionParsingErrors",
+                            new BuildEventFileInfo(projectFile),
+                            e,
+                            "SolutionFilterJsonParsingError",
+                            projectFile
+                        );
+                    }
                 }
                 else
                 {
-                    SolutionFile.GetSolutionFileAndVisualStudioMajorVersions(projectFile, out solutionVersion, out visualStudioVersion);
+                    solutionFile = projectFile;
                 }
+                SolutionFile.GetSolutionFileAndVisualStudioMajorVersions(projectFile, out int solutionVersion, out int visualStudioVersion);
+
                 // If we get to this point, it's because it's a valid version.  Map the solution version 
                 // to the equivalent MSBuild ToolsVersion, and unless it's Dev10 or newer, spawn the old 
                 // engine to generate the solution wrapper.  
