@@ -89,9 +89,9 @@ namespace Microsoft.Build.Execution
 
         private List<string> _initialTargets;
 
-        private List<string> _imports;
+        private List<string> _importPaths;
 
-        private List<string> _importsIncludingDuplicates;
+        private List<string> _importPathsIncludingDuplicates;
 
         /// <summary>
         /// The global properties evaluation occurred with.
@@ -335,10 +335,10 @@ namespace Microsoft.Build.Execution
             this.DefaultTargets.Add("Build");
             this.TaskRegistry = projectToInheritFrom.TaskRegistry;
             _isImmutable = projectToInheritFrom._isImmutable;
-            _imports = projectToInheritFrom._imports;
-            Imports = _imports.AsReadOnly();
-            _importsIncludingDuplicates = projectToInheritFrom._importsIncludingDuplicates;
-            ImportsIncludingDuplicates = _importsIncludingDuplicates.AsReadOnly();
+            _importPaths = projectToInheritFrom._importPaths;
+            ImportPaths = _importPaths.AsReadOnly();
+            _importPathsIncludingDuplicates = projectToInheritFrom._importPathsIncludingDuplicates;
+            ImportPathsIncludingDuplicates = _importPathsIncludingDuplicates.AsReadOnly();
 
             this.EvaluatedItemElements = new List<ProjectItemElement>();
 
@@ -432,7 +432,7 @@ namespace Microsoft.Build.Execution
             this.CreateGlobalPropertiesSnapshot(data);
             this.CreateEnvironmentVariablePropertiesSnapshot(environmentVariableProperties);
             this.CreateTargetsSnapshot(data);
-            this.CreateImportSnapshot(data);
+            this.CreateImportsSnapshot(data);
 
             this.Toolset = data.Toolset; // UNDONE: This isn't immutable, should be cloned or made immutable; it currently has a pointer to project collection
             this.SubToolsetVersion = data.SubToolsetVersion;
@@ -524,10 +524,10 @@ namespace Microsoft.Build.Execution
                 _targets = that._targets;
                 _itemDefinitions = that._itemDefinitions;
                 _explicitToolsVersionSpecified = that._explicitToolsVersionSpecified;
-                _imports = that._imports;
-                Imports = _imports.AsReadOnly();
-                _importsIncludingDuplicates = that._importsIncludingDuplicates;
-                ImportsIncludingDuplicates = _importsIncludingDuplicates.AsReadOnly();
+                _importPaths = that._importPaths;
+                ImportPaths = _importPaths.AsReadOnly();
+                _importPathsIncludingDuplicates = that._importPathsIncludingDuplicates;
+                ImportPathsIncludingDuplicates = _importPathsIncludingDuplicates.AsReadOnly();
 
                 this.EvaluatedItemElements = that.EvaluatedItemElements;
 
@@ -791,12 +791,12 @@ namespace Microsoft.Build.Execution
         /// This does not include projects that were never imported because a condition on an Import element was false.
         /// The outer ProjectRootElement that maps to this project instance itself is not included.
         /// </summary>
-        public IReadOnlyList<string> Imports { get; private set; }
+        public IReadOnlyList<string> ImportPaths { get; private set; }
 
         /// <summary>
         /// This list will contain duplicate imports if an import is imported multiple times. However, only the first import was used in evaluation.
         /// </summary>
-        public IReadOnlyList<string> ImportsIncludingDuplicates { get; private set; }
+        public IReadOnlyList<string> ImportPathsIncludingDuplicates { get; private set; }
 
         /// <summary>
         /// DefaultTargets specified in the project, or
@@ -1390,7 +1390,7 @@ namespace Microsoft.Build.Execution
             int versionEvaluated,
             SdkResult sdkResult)
         {
-            _imports.Add(import.FullPath);
+            _importPaths.Add(import.FullPath);
             ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this).RecordImportWithDuplicates(importElement, import, versionEvaluated);
         }
 
@@ -1399,7 +1399,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.RecordImportWithDuplicates(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated)
         {
-            _importsIncludingDuplicates.Add(import.FullPath);
+            _importPathsIncludingDuplicates.Add(import.FullPath);
         }
 
         /// <summary>
@@ -1924,8 +1924,8 @@ namespace Microsoft.Build.Execution
                 ProjectItemDefinitionInstance.FactoryForDeserialization,
                 capacity => new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(capacity, MSBuildNameIgnoreCaseComparer.Default));
 
-            // ignore _imports/Imports. Only used by public API users, not nodes
-            // ignore _importsIncludingDuplicates/ImportsIncludingDuplicates. Only used by public API users, not nodes
+            // ignore _importPaths/ImportPaths. Only used by public API users, not nodes
+            // ignore _importPathsIncludingDuplicates/ImportPathsIncludingDuplicates. Only used by public API users, not nodes
         }
 
         private void TranslateToolsetSpecificState(ITranslator translator)
@@ -2512,10 +2512,10 @@ namespace Microsoft.Build.Execution
             _items = new ItemDictionary<ProjectItemInstance>();
             _actualTargets = new RetrievableEntryHashSet<ProjectTargetInstance>(StringComparer.OrdinalIgnoreCase);
             _targets = new ObjectModel.ReadOnlyDictionary<string, ProjectTargetInstance>(_actualTargets);
-            _imports = new List<string>();
-            Imports = _imports.AsReadOnly();
-            _importsIncludingDuplicates = new List<string>();
-            ImportsIncludingDuplicates = _importsIncludingDuplicates.AsReadOnly();
+            _importPaths = new List<string>();
+            ImportPaths = _importPaths.AsReadOnly();
+            _importPathsIncludingDuplicates = new List<string>();
+            ImportPathsIncludingDuplicates = _importPathsIncludingDuplicates.AsReadOnly();
             _globalProperties = new PropertyDictionary<ProjectPropertyInstance>((globalProperties == null) ? 0 : globalProperties.Count);
             _environmentVariableProperties = buildParameters.EnvironmentPropertiesInternal;
             _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(MSBuildNameIgnoreCaseComparer.Default);
@@ -2631,33 +2631,33 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Create various import snapshots
+        /// Create various imports snapshots
         /// </summary>
-        private void CreateImportSnapshot(Evaluation.Project.Data data)
+        private void CreateImportsSnapshot(Evaluation.Project.Data data)
         {
-            _imports = new List<string>(data.ImportClosure.Count - 1 /* outer project */);
+            _importPaths = new List<string>(data.ImportClosure.Count - 1 /* outer project */);
             foreach (var resolvedImport in data.ImportClosure)
             {
                 // Exclude outer project itself
                 if (resolvedImport.ImportingElement != null)
                 {
-                    _imports.Add(resolvedImport.ImportedProject.FullPath);
+                    _importPaths.Add(resolvedImport.ImportedProject.FullPath);
                 }
             }
 
-            Imports = _imports.AsReadOnly();
+            ImportPaths = _importPaths.AsReadOnly();
 
-            _importsIncludingDuplicates = new List<string>(data.ImportClosureWithDuplicates.Count - 1 /* outer project */);
+            _importPathsIncludingDuplicates = new List<string>(data.ImportClosureWithDuplicates.Count - 1 /* outer project */);
             foreach (var resolvedImport in data.ImportClosureWithDuplicates)
             {
                 // Exclude outer project itself
                 if (resolvedImport.ImportingElement != null)
                 {
-                    _importsIncludingDuplicates.Add(resolvedImport.ImportedProject.FullPath);
+                    _importPathsIncludingDuplicates.Add(resolvedImport.ImportedProject.FullPath);
                 }
             }
 
-            ImportsIncludingDuplicates = _importsIncludingDuplicates.AsReadOnly();
+            ImportPathsIncludingDuplicates = _importPathsIncludingDuplicates.AsReadOnly();
         }
 
         /// <summary>

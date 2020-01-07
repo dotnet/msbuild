@@ -802,7 +802,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         [InlineData(false, ProjectLoadSettings.RecordDuplicateButNotCircularImports)]
         [InlineData(true, ProjectLoadSettings.Default)]
         [InlineData(true, ProjectLoadSettings.RecordDuplicateButNotCircularImports)]
-        public void GetImportsAndImportsIncludingDuplicates(bool useDirectConstruction, ProjectLoadSettings projectLoadSettings)
+        public void GetImportPathsAndImportPathsIncludingDuplicates(bool useDirectConstruction, ProjectLoadSettings projectLoadSettings)
         {
             try
             {
@@ -839,13 +839,13 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                     ? new ProjectInstance(rootElement, globalProperties: null, toolsVersion: null, buildParameters, projectCollection.LoggingService, buildEventContext, sdkResolverService: null, 0)
                     : new Project(rootElement, globalProperties: null, toolsVersion: null, projectCollection, projectLoadSettings).CreateProjectInstance();
 
-                string[] expectedImports = new string[] { import1Path, import2Path, import3Path };
-                string[] expectedImportsIncludingDuplicates = projectLoadSettings.HasFlag(ProjectLoadSettings.RecordDuplicateButNotCircularImports)
+                string[] expectedImportPaths = new string[] { import1Path, import2Path, import3Path };
+                string[] expectedImportPathsIncludingDuplicates = projectLoadSettings.HasFlag(ProjectLoadSettings.RecordDuplicateButNotCircularImports)
                     ? new string[] { import1Path, import2Path, import3Path, import2Path, import1Path }
-                    : expectedImports;
+                    : expectedImportPaths;
 
-                Helpers.AssertListsValueEqual(expectedImports, projectInstance.Imports.ToList());
-                Helpers.AssertListsValueEqual(expectedImportsIncludingDuplicates, projectInstance.ImportsIncludingDuplicates.ToList());
+                Helpers.AssertListsValueEqual(expectedImportPaths, projectInstance.ImportPaths.ToList());
+                Helpers.AssertListsValueEqual(expectedImportPathsIncludingDuplicates, projectInstance.ImportPathsIncludingDuplicates.ToList());
             }
             finally
             {
