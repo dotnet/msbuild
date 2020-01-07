@@ -215,10 +215,10 @@ namespace Microsoft.NET.Build.Tasks
             reference.SetMetadata(MetadataKeys.ExternallyResolved, "true");
             reference.SetMetadata(MetadataKeys.Private, "false");
             reference.SetMetadata(MetadataKeys.NuGetPackageId, targetingPack.GetMetadata(MetadataKeys.NuGetPackageId));
-            reference.SetMetadata(MetadataKeys.NuGetPackageVersion, targetingPack.GetMetadata(MetadataKeys.PackageVersion));
+            reference.SetMetadata(MetadataKeys.NuGetPackageVersion, targetingPack.GetMetadata(MetadataKeys.NuGetPackageVersion));
 
             reference.SetMetadata("FrameworkReferenceName", targetingPack.ItemSpec);
-            reference.SetMetadata("FrameworkReferenceVersion", targetingPack.GetMetadata(MetadataKeys.PackageVersion));
+            reference.SetMetadata("FrameworkReferenceVersion", targetingPack.GetMetadata(MetadataKeys.NuGetPackageVersion));
             
             return reference;
         }

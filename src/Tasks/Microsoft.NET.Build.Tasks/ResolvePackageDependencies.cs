@@ -196,7 +196,7 @@ namespace Microsoft.NET.Build.Tasks
                     var fileItem = new TaskItem(fileKey);
                     fileItem.SetMetadata(MetadataKeys.Path, file);
                     fileItem.SetMetadata(MetadataKeys.NuGetPackageId, packageName);
-                    fileItem.SetMetadata(MetadataKeys.PackageVersion, packageVersion);
+                    fileItem.SetMetadata(MetadataKeys.NuGetPackageVersion, packageVersion);
 
                     string resolvedPath = ResolveFilePath(file, resolvedPackagePath);
                     fileItem.SetMetadata(MetadataKeys.ResolvedPath, resolvedPath ?? string.Empty);
@@ -348,7 +348,7 @@ namespace Microsoft.NET.Build.Tasks
                         // NOTE: the path provided for framework assemblies is the name of the framework reference
                         item.SetMetadata("FrameworkAssembly", filePath);
                         item.SetMetadata(MetadataKeys.NuGetPackageId, package.Name);
-                        item.SetMetadata(MetadataKeys.PackageVersion, package.Version.ToNormalizedString());
+                        item.SetMetadata(MetadataKeys.NuGetPackageVersion, package.Version.ToNormalizedString());
                     }
 
                     foreach (var property in properties)

@@ -191,6 +191,15 @@ namespace Microsoft.NET.TestFramework
             }
 
             var ret = new ToolsetInfo(dotnetRoot);
+            
+            // if (!string.IsNullOrWhiteSpace(commandLine.MSBuildSDKsPath))
+            // {
+            //     ret.SdksPath = commandLine.MSBuildSDKsPath;
+            // }
+            // else if (repoRoot != null)
+            // {
+            //     ret.SdksPath = Path.Combine(repoArtifactsDir, "bin", configuration, "Sdks");
+            // }
 
             if (!string.IsNullOrEmpty(commandLine.FullFrameworkMSBuildPath))
             {

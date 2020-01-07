@@ -35,8 +35,8 @@ sdk.sln.DotSettings.user
 # OSX Packaging temp files
 *.pkg
 
-# OS X Device Services Store
-.DS_Store
-
 # CMake generated files
 cmake/
+
+# Helix payload
+.dotnet.payload

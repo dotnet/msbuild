@@ -33,6 +33,7 @@ stages:
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
           name: NetCoreInternal-Pool
           queue: buildpool.windows.10.amd64.vs2017
+      helixTargetQueue: Windows.10.Amd64.ClientRS5.VS2019.BT.Open
       strategy:
         matrix:
           ${{ if eq(variables['System.TeamProject'], 'public') }}:
@@ -52,47 +53,6 @@ stages:
               _SignType: real
               _Test: ''
 
-  - ${{ if ne(variables['System.TeamProject'], 'public') }}:
-    - template: /eng/build.yml
-      parameters:
-        agentOs: Windows_Perf_Helix
-        pool:
-          name: Hosted VS2017
-        strategy:
-          matrix:
-            Build_Release:
-              _BuildConfig: Release
-              _PublishType: none
-              _SignType: test
-              _DotNetPublishToBlobFeed: false
-
-  - ${{ if ne(variables['System.TeamProject'], 'public') }}:
-    - template: /eng/build.yml
-      parameters:
-        agentOs: Windows_Perf_Helix_Fullframework
-        pool:
-          name: Hosted VS2017
-        strategy:
-          matrix:
-            Build_Release:
-              _BuildConfig: Release
-              _PublishType: none
-              _SignType: test
-              _DotNetPublishToBlobFeed: false
-
-    - template: /eng/build.yml
-      parameters:
-        agentOs: Linux_Perf_Helix
-        pool:
-          name: Hosted Ubuntu 1604
-        strategy:
-          matrix:
-            Build_Release:
-              _BuildConfig: Release
-              _PublishType: none
-              _SignType: test
-              _DotNetPublishToBlobFeed: false
-
   - ${{ if eq(variables['System.TeamProject'], 'public') }}:
     - template: /eng/build.yml
       parameters:
@@ -100,6 +60,7 @@ stages:
         pool:
           name: NetCorePublic-Pool
           queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
+        helixTargetQueue: Windows.10.Amd64.ClientRS5.VS2019.BT.Open
         strategy:
           matrix:
             Build_Debug:
@@ -130,6 +91,7 @@ stages:
         pool:
           name: NetCorePublic-Pool
           queue: BuildPool.Ubuntu.1604.Amd64.Open
+        helixTargetQueue: Ubuntu.1604.Amd64.Open
         strategy:
           matrix:
             Build_Debug:
@@ -146,6 +108,7 @@ stages:
         agentOs: Darwin
         pool:
           name: Hosted macOS
+        helixTargetQueue: OSX.1014.Amd64.Open
         strategy:
           matrix:
             Build_Debug:
@@ -208,3 +171,47 @@ stages:
   - template: /eng/common/templates/post-build/post-build.yml
     parameters:
       enableSymbolValidation: false
+
+- stage: helix_tests
+  displayName: controlled environment performance tests
+  dependsOn: build
+  condition: ne(variables['System.TeamProject'], 'public')
+  jobs:
+  - template: /eng/build.yml
+    parameters:
+      agentOs: Windows_Perf_Helix
+      pool:
+        name: Hosted VS2017
+      strategy:
+        matrix:
+          Build_Release:
+            _BuildConfig: Release
+            _PublishType: none
+            _SignType: test
+            _DotNetPublishToBlobFeed: false
+
+  - template: /eng/build.yml
+    parameters:
+      agentOs: Windows_Perf_Helix_Fullframework
+      pool:
+        name: Hosted VS2017
+      strategy:
+        matrix:
+          Build_Release:
+            _BuildConfig: Release
+            _PublishType: none
+            _SignType: test
+            _DotNetPublishToBlobFeed: false
+
+  - template: /eng/build.yml
+    parameters:
+      agentOs: Linux_Perf_Helix
+      pool:
+        name: Hosted Ubuntu 1604
+      strategy:
+        matrix:
+          Build_Release:
+            _BuildConfig: Release
+            _PublishType: none
+            _SignType: test
+            _DotNetPublishToBlobFeed: false

@@ -127,7 +127,7 @@ namespace Microsoft.NET.TestFramework
             }
             else if (runAsTool)
             {
-                testContext.TestExecutionDirectory = Path.Combine(Path.GetTempPath(), "dotnetSdkTests");
+                testContext.TestExecutionDirectory = Path.Combine(Path.GetTempPath(),"dotnetSdkTests", Path.GetRandomFileName());
             }
             else
             {
@@ -135,6 +135,8 @@ namespace Microsoft.NET.TestFramework
 
                 testContext.TestAssetsDirectory = FindFolderInTree(Path.Combine("src", "Assets"), AppContext.BaseDirectory);
             }
+
+            Directory.CreateDirectory(testContext.TestExecutionDirectory);
 
             string artifactsDir = Environment.GetEnvironmentVariable("DOTNET_SDK_ARTIFACTS_DIR");
             if (string.IsNullOrEmpty(artifactsDir) && !string.IsNullOrEmpty(repoRoot))
