@@ -654,7 +654,6 @@ namespace Microsoft.Build.Execution
         /// <returns></returns>
         public static ProjectInstance FromFile(string file, ProjectOptions options)
         {
-            // string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, EvaluationContext evaluationContext
             return new ProjectInstance(
                 file,
                 options.GlobalProperties,
@@ -672,7 +671,6 @@ namespace Microsoft.Build.Execution
         /// <param name="options">The <see cref="ProjectOptions"/> to use.</param>
         public static ProjectInstance FromProjectRootElement(ProjectRootElement rootElement, ProjectOptions options)
         {
-            // ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, EvaluationContext evaluationContext
             return new ProjectInstance(
                 rootElement,
                 options.GlobalProperties,
