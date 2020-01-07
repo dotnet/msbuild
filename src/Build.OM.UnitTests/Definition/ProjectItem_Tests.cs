@@ -2179,7 +2179,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             string content = 
                 @"<Project>
                     <PropertyGroup>
-                        <p0>v0</p0>
+                        <Meta1>v0</Meta1>
                     </PropertyGroup>
                     <ItemGroup>
                         <Meta2 Include='M2'/>

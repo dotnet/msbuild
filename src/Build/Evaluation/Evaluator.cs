@@ -2050,7 +2050,7 @@ namespace Microsoft.Build.Evaluation
                             }
 
                             ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "ImportedProjectNotFound",
-                                      importFileUnescaped, importExpressionEscaped);
+                                                                      importFileUnescaped, importExpressionEscaped);
                         }
                         else
                         {

@@ -296,8 +296,6 @@ namespace Microsoft.Build.Evaluation
 
                 itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(values);
 
-                bool needToExpandMetadataForEachItem = false;
-
                 if (itemsAndMetadataFound.Metadata != null && itemsAndMetadataFound.Metadata.Values.Count > 0)
                 {
                     // If there is bare metadata of any kind, and the Include involved an item list, we should
@@ -305,7 +303,7 @@ namespace Microsoft.Build.Evaluation
 
                     if (_referencedItemLists.Count >= 0)
                     {
-                        needToExpandMetadataForEachItem = true;
+                        return true;
                     }
                     else
                     {
@@ -316,12 +314,12 @@ namespace Microsoft.Build.Evaluation
                         // item definition metadata is included in all metadata operations during evaluation
                         if (itemsAndMetadataFound.Metadata.Values.Count > 0)
                         {
-                            needToExpandMetadataForEachItem = true;
+                            return true;
                         }
                     }
                 }
 
-                return needToExpandMetadataForEachItem;
+                return false;
             }
         }
     }

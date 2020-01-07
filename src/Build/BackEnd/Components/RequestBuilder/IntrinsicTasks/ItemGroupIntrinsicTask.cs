@@ -280,17 +280,7 @@ namespace Microsoft.Build.BackEnd
                 child.RemoveLocation,
                 child.Remove);
 
-            var itemsToRemove = new List<ProjectItemInstance>();
-
-            foreach (var item in items)
-            {
-                if (itemSpec.MatchesItemOnMetadata(item, matchOnMetadata))
-                {
-                    itemsToRemove.Add(item);
-                }
-            }
-
-            return itemsToRemove;
+            return items.Where(item => itemSpec.MatchesItemOnMetadata(item, matchOnMetadata)).ToList();
         }
 
         /// <summary>

@@ -536,14 +536,11 @@ namespace Microsoft.Build.Evaluation
                         AddItemReferences(matchOnMetadataSplit, operationBuilder, itemElement.MatchOnMetadataLocation);
                     }
                     
-                    if (metadataPatterns != null)
+                    foreach (string metadata in metadataPatterns)
                     {
-                        foreach (string metadata in metadataPatterns)
-                        {
-                            string metadataExpanded = _expander.ExpandIntoStringLeaveEscaped(metadata, ExpanderOptions.ExpandPropertiesAndItems, itemElement.MatchOnMetadataLocation);
-                            var metadataSplits = ExpressionShredder.SplitSemiColonSeparatedList(metadataExpanded);
-                            operationBuilder.MatchOnMetadata.AddRange(metadataSplits);
-                        }
+                        string metadataExpanded = _expander.ExpandIntoStringLeaveEscaped(metadata, ExpanderOptions.ExpandPropertiesAndItems, itemElement.MatchOnMetadataLocation);
+                        var metadataSplits = ExpressionShredder.SplitSemiColonSeparatedList(metadataExpanded);
+                        operationBuilder.MatchOnMetadata.AddRange(metadataSplits);
                     }
                 }
             }
