@@ -1123,6 +1123,8 @@ namespace Microsoft.Build.Execution
         public bool EvaluateCondition(string condition) { throw null; }
         public string ExpandString(string unexpandedValue) { throw null; }
         public Microsoft.Build.Execution.ProjectInstance FilteredCopy(Microsoft.Build.Execution.RequestedProjectState filter) { throw null; }
+        public static Microsoft.Build.Execution.ProjectInstance FromFile(string file, Microsoft.Build.Definition.ProjectOptions options) { throw null; }
+        public static Microsoft.Build.Execution.ProjectInstance FromProjectRootElement(Microsoft.Build.Construction.ProjectRootElement rootElement, Microsoft.Build.Definition.ProjectOptions options) { throw null; }
         public static string GetEvaluatedItemIncludeEscaped(Microsoft.Build.Execution.ProjectItemDefinitionInstance item) { throw null; }
         public static string GetEvaluatedItemIncludeEscaped(Microsoft.Build.Execution.ProjectItemInstance item) { throw null; }
         public System.Collections.Generic.ICollection<Microsoft.Build.Execution.ProjectItemInstance> GetItems(string itemType) { throw null; }
