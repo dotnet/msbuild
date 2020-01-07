@@ -872,7 +872,7 @@ namespace Microsoft.Build.UnitTests.Construction
         }
 
         /// <summary>
-        /// Tests the parsing of a very basic .SLN file with three independent projects.
+        /// Tests the parsing of a very basic .SLN file with four independent projects.
         /// </summary>
         [Fact]
         public void BasicSolution()
@@ -886,6 +886,8 @@ namespace Microsoft.Build.UnitTests.Construction
                 Project('{F184B08F-C81C-45F6-A57F-5ABD9991F28F}') = 'vbClassLibrary', 'vbClassLibrary\vbClassLibrary.vbproj', '{BA333A76-4511-47B8-8DF4-CA51C303AD0B}'
                 EndProject
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{DEBCE986-61B9-435E-8018-44B9EF751655}'
+                EndProject
+                Project('{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}') = 'cpsFsProject', 'cpsFsProject\ProjectFileName.fsproj', '{9200923E-1814-4E76-A677-C61E4896D67F}'
                 EndProject
                 Global
                     GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -905,6 +907,10 @@ namespace Microsoft.Build.UnitTests.Construction
                         {DEBCE986-61B9-435E-8018-44B9EF751655}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
                         {DEBCE986-61B9-435E-8018-44B9EF751655}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
                         {DEBCE986-61B9-435E-8018-44B9EF751655}.Release|AnyCPU.Build.0 = Release|AnyCPU
+                        {9200923E-1814-4E76-A677-C61E4896D67F}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+                        {9200923E-1814-4E76-A677-C61E4896D67F}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+                        {9200923E-1814-4E76-A677-C61E4896D67F}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+                        {9200923E-1814-4E76-A677-C61E4896D67F}.Release|AnyCPU.Build.0 = Release|AnyCPU
                     EndGlobalSection
                     GlobalSection(SolutionProperties) = preSolution
                         HideSolutionNode = FALSE
@@ -914,7 +920,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
-            Assert.Equal(3, solution.ProjectsInOrder.Count);
+            Assert.Equal(4, solution.ProjectsInOrder.Count);
 
             Assert.Equal(SolutionProjectType.KnownToBeMSBuildFormat, solution.ProjectsInOrder[0].ProjectType);
             Assert.Equal("ConsoleApplication1", solution.ProjectsInOrder[0].ProjectName);
@@ -939,6 +945,14 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Empty(solution.ProjectsInOrder[2].Dependencies);
             Assert.Null(solution.ProjectsInOrder[2].ParentProjectGuid);
             Assert.Equal("ClassLibrary1", solution.ProjectsInOrder[2].GetUniqueProjectName());
+
+            Assert.Equal(SolutionProjectType.KnownToBeMSBuildFormat, solution.ProjectsInOrder[3].ProjectType);
+            Assert.Equal("cpsFsProject", solution.ProjectsInOrder[3].ProjectName);
+            Assert.Equal(@"cpsFsProject\ProjectFileName.fsproj", solution.ProjectsInOrder[3].RelativePath);
+            Assert.Equal("{9200923E-1814-4E76-A677-C61E4896D67F}", solution.ProjectsInOrder[3].ProjectGuid);
+            Assert.Empty(solution.ProjectsInOrder[3].Dependencies);
+            Assert.Null(solution.ProjectsInOrder[3].ParentProjectGuid);
+            Assert.Equal("cpsFsProject", solution.ProjectsInOrder[3].GetUniqueProjectName());
         }
 
         /// <summary>
