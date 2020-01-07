@@ -1101,6 +1101,8 @@ namespace Microsoft.Build.Execution
         public int EvaluationId { get { throw null; } set { } }
         public string FullPath { get { throw null; } }
         public System.Collections.Generic.IDictionary<string, string> GlobalProperties { get { throw null; } }
+        public System.Collections.Generic.IReadOnlyList<string> ImportPaths { get { throw null; } }
+        public System.Collections.Generic.IReadOnlyList<string> ImportPathsIncludingDuplicates { get { throw null; } }
         public System.Collections.Generic.List<string> InitialTargets { get { throw null; } }
         public bool IsImmutable { get { throw null; } }
         public System.Collections.Generic.IDictionary<string, Microsoft.Build.Execution.ProjectItemDefinitionInstance> ItemDefinitions { get { throw null; } }
