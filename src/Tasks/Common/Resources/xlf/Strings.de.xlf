@@ -436,6 +436,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1117: Keine Unterstützung für die Veröffentlichung des C++-/CLI-Projekts für .NET Core.</target>
         <note>{StrBegin="NETSDK1117: "}</note>
       </trans-unit>
+      <trans-unit id="NoSupportCppSelfContained">
+        <source>NETSDK1121: C++/CLI projects targeting .NET Core cannot use SelfContained=true.</source>
+        <target state="new">NETSDK1121: C++/CLI projects targeting .NET Core cannot use SelfContained=true.</target>
+        <note>{StrBegin="NETSDK1121: "}</note>
+      </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>
         <target state="translated">NETSDK1053: Die Paketierung als Tool unterstützt keine eigenständige Bereitstellung.</target>
