@@ -54,13 +54,13 @@ namespace Microsoft.NET.Build.Tasks
         public static IEnumerable<ReferenceInfo> CreateDirectReferenceInfos(
             IEnumerable<ITaskItem> referencePaths,
             IEnumerable<ITaskItem> referenceSatellitePaths,
-            bool projectReferenceExistedInProjectContext,
+            bool projectContextHasProjectReferences,
             Func<ITaskItem, bool> isRuntimeAssembly)
         {
 
             bool filterOutProjectReferenceIfInProjectContextAlready(ITaskItem referencePath)
             {
-                return (projectReferenceExistedInProjectContext ? !IsProjectReference(referencePath) : true);
+                return (projectContextHasProjectReferences ? !IsProjectReference(referencePath) : true);
             }
 
             IEnumerable<ITaskItem> directReferencePaths = referencePaths

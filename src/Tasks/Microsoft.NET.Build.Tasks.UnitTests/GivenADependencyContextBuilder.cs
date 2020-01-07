@@ -52,7 +52,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 ReferenceInfo.CreateDirectReferenceInfos(
                     referencePaths ?? new ITaskItem[] { },
                     referenceSatellitePaths ?? new ITaskItem[] { },
-                    projectReferenceExistedInProjectContext: false,
+                    projectContextHasProjectReferences: false,
                     i => true);
 
             ProjectContext projectContext = lockFile.CreateProjectContext(

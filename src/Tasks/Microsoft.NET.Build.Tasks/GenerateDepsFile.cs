@@ -156,11 +156,11 @@ namespace Microsoft.NET.Build.Tasks
 
             // If there is a generated asset file. The projectContext will have project reference.
             // So remove it from directReferences to avoid duplication
-            var projectReferenceExistedInProjectContext = projectContext != null;
+            var projectContextHasProjectReferences = projectContext != null;
             IEnumerable<ReferenceInfo> directReferences =
                 ReferenceInfo.CreateDirectReferenceInfos(ReferencePaths,
                     ReferenceSatellitePaths,
-                    projectReferenceExistedInProjectContext, isUserRuntimeAssembly);
+                    projectContextHasProjectReferences, isUserRuntimeAssembly);
 
             IEnumerable<ReferenceInfo> dependencyReferences =
                 ReferenceInfo.CreateDependencyReferenceInfos(ReferenceDependencyPaths, ReferenceSatellitePaths, isUserRuntimeAssembly);

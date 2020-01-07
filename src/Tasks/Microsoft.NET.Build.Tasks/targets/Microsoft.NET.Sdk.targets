@@ -226,7 +226,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- To achieve incremental build with property change. When any property changes, WriteOnlyWhenDifferent will be triggered to write cache file.
   And the cache file's timestamp will be later, and it then triggers the incremental build.-->
-  <Target Name="_GenerateRuntimeConfigurationFilesInputCache" DependsOnTargets="ResolveAssemblyReferences">
+  <Target Name="_GenerateRuntimeConfigurationFilesInputCache" DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary">
     <ItemGroup>
       <GenerateRuntimeConfigurationFilesInputs Include="$(_GenerateRuntimeConfigurationPropertyInputsCache)" />
 
@@ -235,6 +235,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(RollForward)"/>
       <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(AdditionalProbingPath)"/>
       <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(SelfContained)"/>
+      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(EnableDynamicLoading)"/>
     </ItemGroup>
 
     <Hash ItemsToHash="@(_GenerateRuntimeConfigurationPropertyInputsCacheToHash)">
@@ -261,7 +262,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <Target Name="GenerateBuildRuntimeConfigurationFiles"
-          DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary;_GenerateRuntimeConfigurationFilesInputCache"
+          DependsOnTargets="_GenerateRuntimeConfigurationFilesInputCache"
           BeforeTargets="CopyFilesToOutputDirectory"
           Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'"
           Inputs="@(GenerateRuntimeConfigurationFilesInputs)"
@@ -570,7 +571,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="_ComputeNETCoreBuildOutputFiles"
-          DependsOnTargets="_GetAppHostPaths;_GetComHostPaths;_GetIjwHostPaths;GenerateBuildRuntimeConfigurationFiles"
+          DependsOnTargets="_GetAppHostPaths;_GetComHostPaths;_GetIjwHostPaths"
           BeforeTargets="AssignTargetPaths"
           Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true'">
 
