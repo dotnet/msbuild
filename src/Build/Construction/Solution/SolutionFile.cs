@@ -9,7 +9,6 @@ using System.Text;
 using System.Globalization;
 using System.Security;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
@@ -21,7 +20,6 @@ using ExceptionUtilities = Microsoft.Build.Shared.ExceptionHandling;
 using System.Collections.ObjectModel;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using System.Linq.Expressions;
 
 namespace Microsoft.Build.Construction
 {
@@ -207,11 +205,10 @@ namespace Microsoft.Build.Construction
                         using JsonDocument text = JsonDocument.Parse(File.ReadAllText(value));
                         JsonElement solution = text.RootElement.GetProperty("solution");
                         _solutionFile = solution.GetProperty("path").GetString();
-                        if (!File.Exists(_solutionFile))
+                        if (!FileSystems.Default.FileExists(_solutionFile))
                         {
                             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
                             (
-                                false /* just throw the exception */,
                                 "SubCategoryForSolutionParsingErrors",
                                 new BuildEventFileInfo(_solutionFile),
                                 "SolutionFilterMissingSolutionError",
@@ -219,14 +216,13 @@ namespace Microsoft.Build.Construction
                                 _solutionFile
                             );
                         }
-                        _solutionFilter = new HashSet<string>(NativeMethodsShared.IsLinux ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
+                        _solutionFilter = new HashSet<string>(NativeMethodsShared.OSUsesCaseSensitivePaths ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
                         foreach (JsonElement project in solution.GetProperty("projects").EnumerateArray())
                         {
-                            if (!File.Exists(Path.Combine(Path.GetDirectoryName(_solutionFile), project.GetString())) && !File.Exists(project.GetString()))
+                            if (!FileSystems.Default.FileExists(Path.Combine(Path.GetDirectoryName(_solutionFile), project.GetString())) && !File.Exists(project.GetString()))
                             {
                                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
                                 (
-                                    false /* just throw the exception */,
                                     "SubCategoryForSolutionParsingErrors",
                                     new BuildEventFileInfo(project.GetString()),
                                     "SolutionFilterFilteredProjectDoesNotExist",
@@ -238,11 +234,11 @@ namespace Microsoft.Build.Construction
                             _solutionFilter.Add(project.GetString());
                         }
                     }
-                    catch (JsonException e)
+                    catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
                     {
                         ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
                         (
-                            false /* just throw the exception */,
+                            false, /* Just throw the exception */
                             "SubCategoryForSolutionParsingErrors",
                             new BuildEventFileInfo(value),
                             e,
@@ -353,7 +349,6 @@ namespace Microsoft.Build.Construction
                         {
                             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
                                 (
-                                    false /* just throw the exception */,
                                     "SubCategoryForSolutionParsingErrors",
                                     new BuildEventFileInfo(solutionFile),
                                     "SolutionParseVersionMismatchError",
@@ -401,7 +396,6 @@ namespace Microsoft.Build.Construction
             // Didn't find the header in lines 1-4, so the solution file is invalid.
             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
                 (
-                    false /* just throw the exception */,
                     "SubCategoryForSolutionParsingErrors",
                     new BuildEventFileInfo(solutionFile),
                     "SolutionParseNoHeaderError"
@@ -528,10 +522,10 @@ namespace Microsoft.Build.Construction
 
             if (_solutionFilter != null)
             {
-                HashSet<string> projectPaths = new HashSet<string>(_projectsInOrder.Count, NativeMethodsShared.IsLinux ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
-                for (int a = 0; a < _projectsInOrder.Count; a++)
+                HashSet<string> projectPaths = new HashSet<string>(_projectsInOrder.Count, NativeMethodsShared.OSUsesCaseSensitivePaths ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
+                foreach (ProjectInSolution project in _projectsInOrder)
                 {
-                    projectPaths.Add(_projectsInOrder[a].RelativePath);
+                    projectPaths.Add(project.RelativePath);
                 }
                 foreach (string project in _solutionFilter)
                 {
@@ -539,7 +533,6 @@ namespace Microsoft.Build.Construction
                     {
                         ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
                         (
-                            false /* just throw the exception */,
                             "SubCategoryForSolutionParsingErrors",
                             new BuildEventFileInfo(project),
                             "SolutionFilterFilterContainsProjectNotInSolution",

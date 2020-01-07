@@ -7,6 +7,7 @@ using System.IO;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Exceptions;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.Construction
@@ -29,7 +30,7 @@ namespace Microsoft.Build.UnitTests.Construction
                     ]
                     }
                 }
-                ")]
+                ", "MSBuild.SolutionFilterFilteredProjectDoesNotExist")]
         [InlineData(@"
                 {
                   ""solution"": {
@@ -42,7 +43,7 @@ namespace Microsoft.Build.UnitTests.Construction
                     ]
                     }
                 }
-                ")]
+                ", "MSBuild.SolutionFilterJsonParsingError")]
         [InlineData(@"
                 [{
                   ""solution"": {
@@ -55,7 +56,7 @@ namespace Microsoft.Build.UnitTests.Construction
                     ]
                     }
                 }]
-                ")]
+                ", "MSBuild.SolutionFilterJsonParsingError")]
         [InlineData(@"
                 {
                   ""solution"": {
@@ -68,7 +69,7 @@ namespace Microsoft.Build.UnitTests.Construction
                     ]
                     }
                 }
-                ")]
+                ", "MSBuild.SolutionFilterJsonParsingError")]
         [InlineData(@"
                 {
                   ""solution"": {
@@ -81,16 +82,17 @@ namespace Microsoft.Build.UnitTests.Construction
                     ]
                     }
                 }
-                ")]
-        public void InvalidSolutionFilters(string slnfValue)
+                ", "MSBuild.SolutionFilterMissingSolutionError")]
+        public void InvalidSolutionFilters(string slnfValue, string exceptionReason)
         {
             Assert.False(File.Exists("C:\\notAPath2\\MSBuild.Dev.sln"));
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
                 TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
                 TransientTestFile sln = testEnvironment.CreateFile(folder, "Dev.sln");
-                TransientTestFile slnf = testEnvironment.CreateFile(folder, "Dev.sln", slnfValue.Replace(@"C:\\notAPath\\MSBuild.Dev.sln", sln.Path.Replace("\\", "\\\\")));
-                Shouldly.Should.Throw<InvalidProjectFileException>(() => { SolutionFile sf = SolutionFile.Parse(slnf.Path); });
+                TransientTestFile slnf = testEnvironment.CreateFile(folder, "Dev.slnf", slnfValue.Replace(@"C:\\notAPath\\MSBuild.Dev.sln", sln.Path.Replace("\\", "\\\\")));
+                InvalidProjectFileException e = Should.Throw<InvalidProjectFileException>(() => SolutionFile.Parse(slnf.Path));
+                e.HelpKeyword.ShouldBe(exceptionReason);
             }
         }
 

@@ -78,33 +78,7 @@ namespace Microsoft.Build.UnitTests.Construction
                   </Target>
                   </Project>
                     ");
-                TransientTestFile classLibrary1Sol = testEnvironment.CreateFile(classLibFolder, "ClassLibrary.sln",
-                    @"
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29326.124
-MinimumVisualStudioVersion = 10.0.40219.1
-Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary"", """ + classLibrary.Path + @""", ""{F74EEDAF-57E3-42F3-8BF2-CE9C77D9EFFD}""
-EndProject
-Global
-    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-        Debug|Any CPU = Debug|Any CPU
-        Release|Any CPU = Release|Any CPU
-        EndGlobalSection
-    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-        {F74EEDAF-57E3-42F3-8BF2-CE9C77D9EFFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-        {F74EEDAF-57E3-42F3-8BF2-CE9C77D9EFFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-        {F74EEDAF-57E3-42F3-8BF2-CE9C77D9EFFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-        {F74EEDAF-57E3-42F3-8BF2-CE9C77D9EFFD}.Release|Any CPU.Build.0 = Release|Any CPU
-EndGlobalSection
-    GlobalSection(SolutionProperties) = preSolution
-        HideSolutionNode = FALSE
-    EndGlobalSection
-    GlobalSection(ExtensibilityGlobals) = postSolution
-        SolutionGuid = {413DCADB-23DF-4FD4-96FD-7CD04FE4B083}
-                EndGlobalSection
-            EndGlobal
-");
+
                 TransientTestFolder simpleProjectFolder = testEnvironment.CreateFolder(Path.Combine(folder.Path, "SimpleProject"), createFolder: true);
                 TransientTestFolder simpleProjectSubFolder = testEnvironment.CreateFolder(Path.Combine(simpleProjectFolder.Path, "SimpleProject"), createFolder: true);
                 TransientTestFile simpleProject = testEnvironment.CreateFile(simpleProjectSubFolder, "SimpleProject.csproj",
@@ -120,9 +94,9 @@ EndGlobalSection
                     # Visual Studio Version 16
                     VisualStudioVersion = 16.0.29326.124
                     MinimumVisualStudioVersion = 10.0.40219.1
-                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""SimpleProject"", """ + simpleProject.Path + @""", ""{79B5EBA6-5D27-4976-BC31-14422245A59A}""
+                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""SimpleProject"", """ + Path.Combine("SimpleProject", "SimpleProject.csproj") + @""", ""{79B5EBA6-5D27-4976-BC31-14422245A59A}""
                     EndProject
-                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""ClassLibrary"", """ + classLibrary.Path + @""", ""{8EFCCA22-9D51-4268-90F7-A595E11FCB2D}""
+                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""ClassLibrary"", """ + Path.Combine("..", "ClassLibrary", "ClassLibrary", "ClassLibrary.csproj") + @""", ""{8EFCCA22-9D51-4268-90F7-A595E11FCB2D}""
                     EndProject
                     Global
                         GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -157,7 +131,7 @@ EndGlobalSection
                   ""solution"": {
                     ""path"": """ + solutionFile.Path.Replace("\\", "\\\\") + @""",
                     ""projects"": [
-                      """ + simpleProject.Path.Replace("\\", "\\\\") + @"""
+                      """ + Path.Combine("SimpleProject", "SimpleProject.csproj").Replace("\\", "\\\\") + @"""
                     ]
                     }
                 }
