@@ -204,7 +204,7 @@ namespace Microsoft.Build.Construction
                     {
                         using JsonDocument text = JsonDocument.Parse(File.ReadAllText(value));
                         JsonElement solution = text.RootElement.GetProperty("solution");
-                        _solutionFile = solution.GetProperty("path").GetString();
+                        _solutionFile = Path.GetFullPath(solution.GetProperty("path").GetString());
                         if (!FileSystems.Default.FileExists(_solutionFile))
                         {
                             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile

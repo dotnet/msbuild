@@ -2138,14 +2138,14 @@ namespace Microsoft.Build.Execution
             // we should be generating a 4.0+ or a 3.5-style wrapper project based on the version of the solution. 
             else
             {
-                string solutionFile = string.Empty;
+                string solutionFile = projectFile;
                 if (FileUtilities.IsSolutionFilterFilename(projectFile))
                 {
                     try
                     {
                         using JsonDocument text = JsonDocument.Parse(File.ReadAllText(projectFile));
                         JsonElement solution = text.RootElement.GetProperty("solution");
-                        solutionFile = solution.GetProperty("path").GetString();
+                        solutionFile = Path.GetFullPath(solution.GetProperty("path").GetString());
                     }
                     catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
                     {
@@ -2160,11 +2160,7 @@ namespace Microsoft.Build.Execution
                         );
                     }
                 }
-                else
-                {
-                    solutionFile = projectFile;
-                }
-                SolutionFile.GetSolutionFileAndVisualStudioMajorVersions(projectFile, out int solutionVersion, out int visualStudioVersion);
+                SolutionFile.GetSolutionFileAndVisualStudioMajorVersions(solutionFile, out int solutionVersion, out int visualStudioVersion);
 
                 // If we get to this point, it's because it's a valid version.  Map the solution version 
                 // to the equivalent MSBuild ToolsVersion, and unless it's Dev10 or newer, spawn the old 
