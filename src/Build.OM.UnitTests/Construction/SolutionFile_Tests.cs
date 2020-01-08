@@ -78,13 +78,6 @@ namespace Microsoft.Build.UnitTests.Construction
                 TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
                 TransientTestFile sln = testEnvironment.CreateFile(folder, "Dev.sln");
                 TransientTestFile slnf = testEnvironment.CreateFile(folder, "Dev.slnf", slnfValue.Replace(@"C:\\notAPath\\MSBuild.Dev.sln", sln.Path.Replace("\\", "\\\\")));
-                try
-                {
-                    SolutionFile.Parse(slnf.Path);
-                } catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                }
                 InvalidProjectFileException e = Should.Throw<InvalidProjectFileException>(() => SolutionFile.Parse(slnf.Path));
                 e.HelpKeyword.ShouldBe(exceptionReason);
             }
