@@ -13,6 +13,7 @@ using Xunit;
 using System.Xml.Linq;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.ProjectConstruction;
+using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -58,7 +59,7 @@ namespace Microsoft.NET.Publish.Tests
                 $"{testProject.Name}.runtimeconfig.json"
             };
 
-            if (tfm == "netcoreapp3.0")
+            if (tfm == "netcoreapp3.0" && RuntimeEnvironment.OperatingSystemPlatform != Platform.Darwin)
             {
                 files.Add($"{testProject.Name}{Constants.ExeSuffix}");
             }

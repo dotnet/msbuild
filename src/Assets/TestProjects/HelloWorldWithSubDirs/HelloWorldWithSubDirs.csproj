@@ -9,9 +9,13 @@
     <Content Include="$(MSBuildThisFileDirectory)\SmallNameDir\**\*.*" >
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Content Include="$(MSBuildThisFileDirectory)\Signature.stamp" >
+    <Content Include="$(MSBuildThisFileDirectory)\Signature.Newest.Stamp" >
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <ExcludeFromSingleFile>$(ExcludeContent)</ExcludeFromSingleFile>
+      <ExcludeFromSingleFile>$(ExcludeNewest)</ExcludeFromSingleFile>
+    </Content>
+    <Content Include="$(MSBuildThisFileDirectory)\Signature.Always.Stamp" >
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      <ExcludeFromSingleFile>$(ExcludeAlways)</ExcludeFromSingleFile>
     </Content>
   </ItemGroup>
 

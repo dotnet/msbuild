@@ -1,26 +1,16 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
-  
-  <PropertyGroup Condition="'$(CopyrightNetFoundation)' != ''">
-    <Copyright>$(CopyrightNetFoundation)</Copyright>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-  </PropertyGroup>
 
   <PropertyGroup>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <LangVersion>Latest</LangVersion>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-    <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
     <IsShippingPackage>false</IsShippingPackage>
-
-    <!-- Workaround for https://github.com/NuGet/NuGet.Client/pull/3016 -->
-    <NoWarn>$(NoWarn);NU5131</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
-    <DebugType>embedded</DebugType>
-    <ExcludeFromSourceBuild>true</ExcludeFromSourceBuild>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GenerateProgramFile>false</GenerateProgramFile>
     <TestRunnerAdditionalArguments>-parallel none</TestRunnerAdditionalArguments>
@@ -29,15 +19,5 @@
   <PropertyGroup>
     <SdkLayoutDirectory>$(ArtifactsBinDir)$(Configuration)\dotnetLayout</SdkLayoutDirectory>
   </PropertyGroup>
-
-  <Target Name="OverrideSymbolsOutput" BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
-          Condition="'$(DebugType)' != 'embedded'">
-
-    <ItemGroup>
-      <_DebugSymbolsOutputPath Remove="@(_DebugSymbolsOutputPath)" />
-      <_DebugSymbolsOutputPath Include="@(_DebugSymbolsIntermediatePath->'$(ArtifactsSymStoreDirectory)$(MSBuildProjectName)\$(TargetFramework.ToLowerInvariant())\%(Filename)%(Extension)')" />
-    </ItemGroup>
-    
-  </Target>
 
 </Project>
