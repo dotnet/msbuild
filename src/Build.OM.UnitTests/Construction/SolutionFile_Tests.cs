@@ -22,19 +22,6 @@ namespace Microsoft.Build.UnitTests.Construction
                 {
                   ""solution"": {
                     ""path"": ""C:\\notAPath\\MSBuild.Dev.sln"",
-                    ""projects"": [
-                      ""src\\Build\\Microsoft.Build.csproj"",
-                      ""src\\Framework\\Microsoft.Build.Framework.csproj"",
-                      ""src\\MSBuild\\MSBuild.csproj"",
-                      ""src\\Tasks.UnitTests\\Microsoft.Build.Tasks.UnitTests.csproj""
-                    ]
-                    }
-                }
-                ", "MSBuild.SolutionFilterFilteredProjectDoesNotExist")]
-        [InlineData(@"
-                {
-                  ""solution"": {
-                    ""path"": ""C:\\notAPath\\MSBuild.Dev.sln"",
                     ""projects2"": [
                       ""src\\Build\\Microsoft.Build.csproj"",
                       ""src\\Framework\\Microsoft.Build.Framework.csproj"",
@@ -91,6 +78,13 @@ namespace Microsoft.Build.UnitTests.Construction
                 TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
                 TransientTestFile sln = testEnvironment.CreateFile(folder, "Dev.sln");
                 TransientTestFile slnf = testEnvironment.CreateFile(folder, "Dev.slnf", slnfValue.Replace(@"C:\\notAPath\\MSBuild.Dev.sln", sln.Path.Replace("\\", "\\\\")));
+                try
+                {
+                    SolutionFile.Parse(slnf.Path);
+                } catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
                 InvalidProjectFileException e = Should.Throw<InvalidProjectFileException>(() => SolutionFile.Parse(slnf.Path));
                 e.HelpKeyword.ShouldBe(exceptionReason);
             }

@@ -219,18 +219,6 @@ namespace Microsoft.Build.Construction
                         _solutionFilter = new HashSet<string>(NativeMethodsShared.OSUsesCaseSensitivePaths ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
                         foreach (JsonElement project in solution.GetProperty("projects").EnumerateArray())
                         {
-                            if (!FileSystems.Default.FileExists(Path.Combine(Path.GetDirectoryName(_solutionFile), project.GetString())) && !File.Exists(project.GetString()))
-                            {
-                                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
-                                (
-                                    "SubCategoryForSolutionParsingErrors",
-                                    new BuildEventFileInfo(project.GetString()),
-                                    "SolutionFilterFilteredProjectDoesNotExist",
-                                    value,
-                                    project.GetString(),
-                                    _solutionFile
-                                );
-                            }
                             _solutionFilter.Add(project.GetString());
                         }
                     }
