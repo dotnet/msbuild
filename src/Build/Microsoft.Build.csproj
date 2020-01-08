@@ -162,6 +162,7 @@
     <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectItemDefinitionLink.cs" />
     <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectItemLink.cs" />
     <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectLink.cs" />
+    <Compile Include="Evaluation\PropertyTrackingEvaluatorDataWrapper.cs" />
     <Compile Include="Graph\GraphBuilder.cs" />
     <Compile Include="Graph\ParallelWorkSet.cs" />
     <Compile Include="Graph\ProjectInterpretation.cs" />

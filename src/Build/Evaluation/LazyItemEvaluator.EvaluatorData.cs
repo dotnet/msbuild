@@ -124,6 +124,14 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
+            public PropertyDictionary<ProjectPropertyInstance> EnvironmentVariablePropertiesDictionary
+            {
+                get
+                {
+                    return _wrappedData.EnvironmentVariablePropertiesDictionary;
+                }
+            }
+
             public ISet<string> GlobalPropertiesToTreatAsLocal
             {
                 get
@@ -292,12 +300,12 @@ namespace Microsoft.Build.Evaluation
                 _wrappedData.RecordImportWithDuplicates(importElement, import, versionEvaluated);
             }
 
-            public P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped, P predecessor)
+            public P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped)
             {
-                return _wrappedData.SetProperty(propertyElement, evaluatedValueEscaped, predecessor);
+                return _wrappedData.SetProperty(propertyElement, evaluatedValueEscaped);
             }
 
-            public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved)
+            public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false)
             {
                 return _wrappedData.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved);
             }
