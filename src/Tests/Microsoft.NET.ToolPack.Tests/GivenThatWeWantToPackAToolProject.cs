@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 using System;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.PlatformAbstractions;
+using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
 
 namespace Microsoft.NET.ToolPack.Tests
 {
@@ -153,12 +154,15 @@ namespace Microsoft.NET.ToolPack.Tests
                "RunCommand",
                GetValuesCommand.ValueType.Property);
 
-            getValuesCommand.Execute();
-            string runCommandPath = getValuesCommand.GetValues().Single();
-            Path.GetExtension(runCommandPath)
-                .Should().Be(extension);
-            File.Exists(runCommandPath).Should()
-                .BeTrue("run command should be apphost executable (for WinExe) to debug. But it will not be packed");
+            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Darwin)
+            {
+                getValuesCommand.Execute();
+                string runCommandPath = getValuesCommand.GetValues().Single();
+                Path.GetExtension(runCommandPath)
+                    .Should().Be(extension);
+                File.Exists(runCommandPath).Should()
+                    .BeTrue("run command should be apphost executable (for WinExe) to debug. But it will not be packed");
+            }
         }
 
         [Theory]

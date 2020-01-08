@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -9,6 +10,7 @@ using System.Reflection.PortableExecutable;
 using System.Text.RegularExpressions;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -24,7 +26,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Theory]
+        [PlatformSpecificTheory(Platform.Windows, Platform.Linux, Platform.FreeBSD)]
         [InlineData("netcoreapp3.0")]
         public void It_builds_a_runnable_apphost_by_default(string targetFramework)
         {
@@ -63,11 +65,47 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("Hello World!");
         }
 
+        [PlatformSpecificFact(Platform.Darwin)]
+        public void It_builds_a_runnable_apphost_if_opt_in_on_mac()
+        {
+            var targetFramework = "netcoreapp3.0";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld", identifier: targetFramework)
+                .WithSource()
+                .WithTargetFramework(targetFramework);
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            buildCommand
+                .Execute(new string[] {
+                    "/restore", "/p:UseAppHost=true",
+                })
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
+            var hostExecutable = $"HelloWorld{Constants.ExeSuffix}";
+
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                hostExecutable,
+                "HelloWorld.dll",
+                "HelloWorld.pdb",
+                "HelloWorld.deps.json",
+                "HelloWorld.runtimeconfig.dev.json",
+                "HelloWorld.runtimeconfig.json",
+            });
+        }
+
         [Theory]
         [InlineData("netcoreapp2.1")]
         [InlineData("netcoreapp2.2")]
-        public void It_does_not_build_with_an_apphost_by_default_before_netcoreapp_3(string targetFramework)
+        [InlineData("netcoreapp3.0")] // only on macOS
+        public void It_does_not_build_with_an_apphost_by_default_before_netcoreapp_3_or_macOs(string targetFramework)
         {
+            if (targetFramework == "netcoreapp3.0" && RuntimeEnvironment.OperatingSystemPlatform != Platform.Darwin)
+            {
+                return;
+            }
+
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: targetFramework)
                 .WithSource()
@@ -230,6 +268,9 @@ namespace Microsoft.NET.Build.Tests
                 IsSdkProject = true,
                 IsExe = true,
             };
+            
+            // enable generating apphost even on macOS
+            testProject.AdditionalProperties.Add("UseApphost", "true");
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
