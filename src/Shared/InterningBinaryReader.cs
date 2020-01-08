@@ -20,7 +20,7 @@ namespace Microsoft.Build
         /// <summary>
         /// The maximum size, in bytes, to read at once.
         /// </summary>
-#if _DEBUG
+#if DEBUG
         private const int MaxCharsBuffer = 10;
 #else
         private const int MaxCharsBuffer = 20000;

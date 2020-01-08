@@ -36,7 +36,7 @@ namespace Microsoft.Build.CommandLine
 #if CLR2COMPATIBILITY
         IBuildEngine3
 #else
-        IBuildEngine5
+        IBuildEngine6
 #endif
     {
         /// <summary>
@@ -438,6 +438,19 @@ namespace Microsoft.Build.CommandLine
                 EventName = eventName,
                 Properties = properties == null ? new Dictionary<string, string>() : new Dictionary<string, string>(properties),
             });
+        }
+
+        #endregion
+
+        #region IBuildEngine6 Implementation
+
+        /// <summary>
+        /// Gets the global properties for the current project.
+        /// </summary>
+        /// <returns>An <see cref="IReadOnlyDictionary{String, String}" /> containing the global properties of the current project.</returns>
+        public IReadOnlyDictionary<string, string> GetGlobalProperties()
+        {
+            return new Dictionary<string, string>(_currentConfiguration.GlobalProperties);
         }
 
         #endregion

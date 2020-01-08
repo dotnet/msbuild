@@ -1,9 +1,10 @@
 #! /bin/bash
 
-configuration="debug"
+configuration="Debug"
 host_type="core"
 build_stage1=true
 properties=
+extra_properties=
 
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -39,22 +40,42 @@ RepoRoot="$ScriptRoot/.."
 ArtifactsDir="$RepoRoot/artifacts"
 Stage1Dir="$RepoRoot/stage1"
 
+. "$ScriptRoot/common/tools.sh"
+InitializeDotNetCli true
+
+if [ $host_type = "mono" ] ; then
+  export _InitializeBuildTool="msbuild"
+  export _InitializeBuildToolCommand=""
+  export _InitializeBuildToolFramework="net472"
+
+  configuration="$configuration-MONO"
+  extra_properties=" /p:DeterministicSourcePaths=false"
+fi
+
 if [[ $build_stage1 == true ]];
 then
-	/bin/bash "$ScriptRoot/common/build.sh" --restore --build --ci /p:CreateBootstrap=true $properties
+	/bin/bash "$ScriptRoot/common/build.sh" --restore --build --ci --configuration $configuration /p:CreateBootstrap=true $properties $extra_properties || exit $?
 fi
 
 bootstrapRoot="$Stage1Dir/bin/bootstrap"
 
 if [ $host_type = "core" ]
 then
-  . "$ScriptRoot/common/tools.sh"
-
-  InitializeDotNetCli true
-
   _InitializeBuildTool="$_InitializeDotNetCli/dotnet"
   _InitializeBuildToolCommand="$bootstrapRoot/netcoreapp2.1/MSBuild/MSBuild.dll"
   _InitializeBuildToolFramework="netcoreapp2.1"
+elif [ $host_type = "mono" ]
+then
+  export _InitializeBuildTool="mono"
+  export _InitializeBuildToolCommand="$bootstrapRoot/net472/MSBuild/Current/Bin/MSBuild.dll"
+  export _InitializeBuildToolFramework="net472"
+
+  # FIXME: remove this once we move to a newer version of Arcade with a fix for $MonoTool
+  # https://github.com/dotnet/arcade/commit/f6f14c169ba19cd851120e0d572cd1c5619205b3
+  export MonoTool=`which mono`
+
+  extn_path="$bootstrapRoot/net472/MSBuild/Current/Bin/Extensions"
+  extra_properties=" /p:MSBuildExtensionsPath=$extn_path /p:MSBuildExtensionsPath32=$extn_path /p:MSBuildExtensionsPath64=$extn_path /p:DeterministicSourcePaths=false /m:1"
 else
   echo "Unsupported hostType ($host_type)"
   exit 1
@@ -73,5 +94,4 @@ export DOTNET_HOST_PATH="$_InitializeDotNetCli/dotnet"
 # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
 # - Do run tests
 # - Don't try to create a bootstrap deployment
-. "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false /p:CreateBootstrap=false $properties
-
+. "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties

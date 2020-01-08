@@ -2006,7 +2006,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
-        <target state="translated">O arquivo da lista de pacote redistribuível "{0}" tem um nome de Pacote Redistribuível nulo ou vazio no elemento FileList. Verifique se o Nome do Pacote Redistribuível não é nulo ou vazio.</target>
+        <target state="translated">O arquivo da lista de pacote redistribuível "{0}" tem um nome de Pacote Redistribuível nulo ou vazio no elemento FileList. Verifique se o Nome do Pacote Redistribuível não é nulo nem está vazio.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
@@ -3035,7 +3035,7 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.AddingRedistFile">
         <source>Adding file "{0}" from redist folder with target path "{1}".</source>
-        <target state="translated">Adicionando arquivo "{0}" a partir da pasta do pacote redistribuível com caminho de destino "{1}".</target>
+        <target state="translated">Adicionando o arquivo "{0}" da pasta de pacote redistribuível com o caminho de destino "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.ConflictRedistSameSDK">
@@ -3105,7 +3105,7 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.CannotHaveEmptyTargetArchitecture">
         <source>MSB3798: The targeted architecture for the resolved sdk reference "{0}" was empty. Cannot find reference or redist files without a targeted architecture.</source>
-        <target state="translated">MSB3798: A arquitetura de destino para a referência de sdk resolvida "{0}" estava vazia. Não é possível localizar arquivos de referência ou do pacote redistribuível sem uma arquitetura de destino.</target>
+        <target state="translated">MSB3798: A arquitetura de destino da referência do SDK resolvida "{0}" estava vazia. Não é possível localizar arquivos de referência ou de pacote redistribuível sem uma arquitetura de destino.</target>
         <note>{StrBegin="MSB3798: "}</note>
       </trans-unit>
       <trans-unit id="FindInvalidProjectReferences.WarnWhenVersionIsIncompatible">
@@ -3145,7 +3145,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
         <source>Skipping write to file "{0}" because content would not change.</source>
-        <target state="needs-review-translation">MSB3493: ignorando a gravação no arquivo "{0}" porque o conteúdo não foi alterado.</target>
+        <target state="translated">Ignorando a gravação no arquivo "{0}" porque o conteúdo não seria alterado.</target>
         <note />
       </trans-unit>
       <trans-unit id="Telemetry.IllegalEventDataString">

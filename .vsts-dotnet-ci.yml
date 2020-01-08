@@ -10,7 +10,7 @@ jobs:
     vmImage: 'windows-2019'
   steps:
   - task: BatchScript@1
-    displayName: cibuild.cmd
+    displayName: cibuild_bootstrapped_msbuild.cmd
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
   - task: PublishTestResults@2
@@ -54,7 +54,7 @@ jobs:
     vmImage: 'windows-2019'
   steps:
   - task: BatchScript@1
-    displayName: cibuild.cmd
+    displayName: cibuild_bootstrapped_msbuild.cmd
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
       arguments: '-msbuildEngine dotnet'
@@ -202,3 +202,41 @@ jobs:
     continueOnError: true
     condition: always()
 
+- job: MonoOnMac
+  displayName: "macOS Mono"
+  pool:
+    vmImage: 'macOS-10.14'
+  steps:
+  # https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops&tabs=yaml#mono
+  - bash: |
+      SYMLINK=6_4_2
+      MONOPREFIX=/Library/Frameworks/Mono.framework/Versions/$SYMLINK
+      echo "##vso[task.setvariable variable=DYLD_FALLBACK_LIBRARY_PATH;]$MONOPREFIX/lib:/lib:/usr/lib:$DYLD_LIBRARY_FALLBACK_PATH"
+      echo "##vso[task.setvariable variable=PKG_CONFIG_PATH;]$MONOPREFIX/lib/pkgconfig:$MONOPREFIX/share/pkgconfig:$PKG_CONFIG_PATH"
+      echo "##vso[task.setvariable variable=PATH;]$MONOPREFIX/bin:$PATH"
+    displayName: Use Mono 6.4.2
+  - bash: 'eng/cibuild_bootstrapped_msbuild.sh --host_type mono /p:SuppressLicenseValidation=true'
+    displayName: CI Build
+  - task: PublishTestResults@2
+    displayName: Publish Mono Test Results
+    inputs:
+      testRunTitle: 'macOS Mono'
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/TestResults/Debug-MONO/*UnitTests*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
+    continueOnError: true
+    condition: always()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
+    inputs:
+      PathtoPublish: 'artifacts/log'
+      ArtifactName: 'MonoOnMac build logs'
+    condition: always()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: TestResults'
+    inputs:
+      PathtoPublish: 'artifacts/TestResults'
+      ArtifactName: 'MonoOnMac test logs'
+    continueOnError: true
+    condition: always()

@@ -33,7 +33,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IBuildEngine5
+        IBuildEngine6
     {
         /// <summary>
         /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set. 
@@ -643,6 +643,19 @@ namespace Microsoft.Build.BackEnd
 
                 _taskLoggingContext.LoggingService.LogTelemetry(_taskLoggingContext.BuildEventContext, eventName, properties);
             }
+        }
+
+        #endregion
+
+        #region IBuildEngine6 Members
+
+        /// <summary>
+        /// Gets the global properties for the current project.
+        /// </summary>
+        /// <returns>An <see cref="IReadOnlyDictionary{String, String}" /> containing the global properties of the current project.</returns>
+        public IReadOnlyDictionary<string, string> GetGlobalProperties()
+        {
+            return _requestEntry.RequestConfiguration.GlobalProperties.ToDictionary();
         }
 
         #endregion

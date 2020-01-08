@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
@@ -162,7 +164,7 @@ namespace Microsoft.Build.Tasks
                     Log.LogErrorWithCodeFromResources("AssignCulture.CannotExtractCulture", Files[i].ItemSpec, e.Message);
                     retValue = false;
                 }
-#if _DEBUG
+#if DEBUG
                 catch (Exception e)
                 {
                     Debug.Assert(false, "Unexpected exception in AssignCulture.Execute. " + 

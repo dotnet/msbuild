@@ -115,7 +115,7 @@ namespace Microsoft.Build.Tasks
                         Log.LogErrorWithCodeFromResources("General.InvalidAssemblyName", Assemblies[i], ex.Message);
                         taskReturnValue = false;
                     }
-#if _DEBUG
+#if DEBUG
                     catch (Exception e)
                     {
                         Debug.Assert(false, "Unexpected exception in AssemblyRegistration.Execute. " + 

@@ -110,7 +110,7 @@ namespace Microsoft.Build.BackEnd
             // INodePacketFactory
             INodePacketFactory factory = new NodePacketFactory();
 
-            List<Process> nodeProcesses = GetPossibleRunningNodes();
+            List<Process> nodeProcesses = GetPossibleRunningNodes().nodeProcesses;
 
             // Find proper MSBuildTaskHost executable name
             string msbuildtaskhostExeName = NodeProviderOutOfProcTaskHost.TaskHostNameForClr2TaskHost;
@@ -167,10 +167,10 @@ namespace Microsoft.Build.BackEnd
             // Try to connect to idle nodes if node reuse is enabled.
             if (_componentHost.BuildParameters.EnableNodeReuse)
             {
-                var candidateProcesses = GetPossibleRunningNodes(msbuildLocation);
+                (string expectedProcessName, List<Process> processes) runningNodesTuple = GetPossibleRunningNodes(msbuildLocation);
 
-                CommunicationsUtilities.Trace("Attempting to connect to each existing msbuild.exe process in turn to establish node {0}...", nodeId);
-                foreach (Process nodeProcess in candidateProcesses)
+                CommunicationsUtilities.Trace("Attempting to connect to each existing {1} process in turn to establish node {0}...", nodeId, runningNodesTuple.expectedProcessName);
+                foreach (Process nodeProcess in runningNodesTuple.processes)
                 {
                     if (nodeProcess.Id == Process.GetCurrentProcess().Id)
                     {
@@ -253,7 +253,15 @@ namespace Microsoft.Build.BackEnd
             return null;
         }
 
-        private List<Process> GetPossibleRunningNodes(string msbuildLocation = null)
+        /// <summary>
+        /// Finds processes named after either msbuild or msbuildtaskhost.
+        /// </summary>
+        /// <param name="msbuildLocation"></param>
+        /// <returns>
+        /// Item 1 is the name of the process being searched for.
+        /// Item 2 is the list of processes themselves.
+        /// </returns>
+        private (string expectedProcessName, List<Process> nodeProcesses) GetPossibleRunningNodes(string msbuildLocation = null)
         {
             if (String.IsNullOrEmpty(msbuildLocation))
             {
@@ -267,7 +275,7 @@ namespace Microsoft.Build.BackEnd
             // Trivial sort to try to prefer most recently used nodes
             nodeProcesses.Sort((left, right) => left.Id - right.Id);
 
-            return nodeProcesses;
+            return (expectedProcessName, nodeProcesses);
         }
 
         /// <summary>
@@ -475,7 +483,7 @@ namespace Microsoft.Build.BackEnd
                     throw new NodeFailedToLaunchException(ex);
                 }
 
-                CommunicationsUtilities.Trace("Successfully launched msbuild.exe node with PID {0}", process.Id);
+                CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", process.Id, exeName);
                 return process.Id;
             }
             else
@@ -533,7 +541,7 @@ namespace Microsoft.Build.BackEnd
                     NativeMethodsShared.CloseHandle(processInfo.hThread);
                 }
 
-                CommunicationsUtilities.Trace("Successfully launched msbuild.exe node with PID {0}", childProcessId);
+                CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", childProcessId, exeName);
                 return childProcessId;
             }
         }

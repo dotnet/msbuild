@@ -1095,6 +1095,8 @@ namespace Microsoft.Build.Execution
         public int EvaluationId { get { throw null; } set { } }
         public string FullPath { get { throw null; } }
         public System.Collections.Generic.IDictionary<string, string> GlobalProperties { get { throw null; } }
+        public System.Collections.Generic.IReadOnlyList<string> ImportPaths { get { throw null; } }
+        public System.Collections.Generic.IReadOnlyList<string> ImportPathsIncludingDuplicates { get { throw null; } }
         public System.Collections.Generic.List<string> InitialTargets { get { throw null; } }
         public bool IsImmutable { get { throw null; } }
         public System.Collections.Generic.IDictionary<string, Microsoft.Build.Execution.ProjectItemDefinitionInstance> ItemDefinitions { get { throw null; } }
@@ -1121,6 +1123,8 @@ namespace Microsoft.Build.Execution
         public bool EvaluateCondition(string condition) { throw null; }
         public string ExpandString(string unexpandedValue) { throw null; }
         public Microsoft.Build.Execution.ProjectInstance FilteredCopy(Microsoft.Build.Execution.RequestedProjectState filter) { throw null; }
+        public static Microsoft.Build.Execution.ProjectInstance FromFile(string file, Microsoft.Build.Definition.ProjectOptions options) { throw null; }
+        public static Microsoft.Build.Execution.ProjectInstance FromProjectRootElement(Microsoft.Build.Construction.ProjectRootElement rootElement, Microsoft.Build.Definition.ProjectOptions options) { throw null; }
         public static string GetEvaluatedItemIncludeEscaped(Microsoft.Build.Execution.ProjectItemDefinitionInstance item) { throw null; }
         public static string GetEvaluatedItemIncludeEscaped(Microsoft.Build.Execution.ProjectItemInstance item) { throw null; }
         public System.Collections.Generic.ICollection<Microsoft.Build.Execution.ProjectItemInstance> GetItems(string itemType) { throw null; }

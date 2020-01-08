@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
@@ -248,6 +249,7 @@ namespace Microsoft.Build.Shared
         /// 
         /// This type represents a combination of a type filter and an assemblyInfo object.
         /// </summary>
+        [DebuggerDisplay("Types in {_assemblyLoadInfo} matching {_isDesiredType}")]
         private class AssemblyInfoToLoadedTypes
         {
             /// <summary>

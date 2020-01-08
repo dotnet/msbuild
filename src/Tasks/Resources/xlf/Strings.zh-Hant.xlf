@@ -2006,7 +2006,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
-        <target state="translated">可轉散發套件清單檔 "{0}" 在 FileList 項目中的可轉散發套件名稱為 null 或空白。請確認可轉散發名稱不為 null 或空白。</target>
+        <target state="translated">可轉散發套件清單檔 "{0}" 在 FileList 項目中的 Redist 名稱為 null 或空白。請確認 Redist 名稱不為 null 或空白。</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
@@ -3145,7 +3145,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
         <source>Skipping write to file "{0}" because content would not change.</source>
-        <target state="needs-review-translation">MSB3493: 因為內容不會變更，所以會跳過寫入檔案 "{0}"。</target>
+        <target state="translated">因為內容不會變更，所以正在跳過寫入檔案 "{0}" 的作業。</target>
         <note />
       </trans-unit>
       <trans-unit id="Telemetry.IllegalEventDataString">

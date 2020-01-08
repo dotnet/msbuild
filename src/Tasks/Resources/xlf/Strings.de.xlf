@@ -2006,7 +2006,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
-        <target state="translated">Der redist-Name im FileList-Element der redist-Listendatei "{0}" ist NULL oder leer. Vergewissern Sie sich, dass der redist-Name nicht NULL oder leer ist.</target>
+        <target state="translated">Der Redist-Name im FileList-Element der Redistributable-Listendatei "{0}" ist NULL oder leer. Vergewissern Sie sich, dass der Redist-Name nicht NULL oder leer ist.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
@@ -3035,7 +3035,7 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.AddingRedistFile">
         <source>Adding file "{0}" from redist folder with target path "{1}".</source>
-        <target state="translated">Datei "{0}" aus redist-Ordner mit Zielpfad "{1}" wird hinzugefügt.</target>
+        <target state="translated">Datei "{0}" aus Redistributable-Ordner mit Zielpfad "{1}" wird hinzugefügt.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.ConflictRedistSameSDK">
@@ -3145,7 +3145,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
         <source>Skipping write to file "{0}" because content would not change.</source>
-        <target state="needs-review-translation">MSB3493: Das Schreiben in die Datei "{0}" wird übersprungen, weil sich der Inhalt dadurch nicht ändert.</target>
+        <target state="translated">Das Schreiben in die Datei "{0}" wird übersprungen, weil sich der Inhalt dadurch nicht ändert.</target>
         <note />
       </trans-unit>
       <trans-unit id="Telemetry.IllegalEventDataString">

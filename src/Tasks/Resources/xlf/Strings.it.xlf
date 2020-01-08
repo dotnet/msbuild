@@ -2006,7 +2006,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
-        <target state="translated">Il file di elenco di pacchetti ridistribuibili "{0}" include un nome di pacchetto ridistribuibile Null o vuoto nell'elemento FileList. Verificare che il nome di pacchetto ridistribuibile non sia Null o vuoto.</target>
+        <target state="translated">Il file di elenco di pacchetti ridistribuibili "{0}" include un nome di Redist Null o vuoto nell'elemento FileList. Verificare che il nome di Redist non sia Null o vuoto.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
@@ -3145,7 +3145,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
         <source>Skipping write to file "{0}" because content would not change.</source>
-        <target state="needs-review-translation">MSB3493: l'operazione di scrittura nel file "{0}" non è stata eseguita perché non avrebbe comportato la modifica del contenuto.</target>
+        <target state="translated">L'operazione di scrittura nel file "{0}" non è stata eseguita perché non avrebbe comportato la modifica del contenuto.</target>
         <note />
       </trans-unit>
       <trans-unit id="Telemetry.IllegalEventDataString">

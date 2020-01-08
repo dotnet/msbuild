@@ -7,11 +7,12 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
 using Shouldly;
 using Xunit;
@@ -114,6 +115,45 @@ namespace Microsoft.Build.UnitTests.Definition
                 project.ReevaluateIfNecessary();
 
                 _resolver.ResolvedCalls["foo"].ShouldBe(2);
+            }
+            finally
+            {
+                EvaluationContext.TestOnlyHookOnCreate = null;
+            }
+        }
+
+        [Theory]
+        [InlineData(EvaluationContext.SharingPolicy.Shared)]
+        [InlineData(EvaluationContext.SharingPolicy.Isolated)]
+        public void ProjectInstanceShouldRespectSharingPolicy(EvaluationContext.SharingPolicy policy)
+        {
+            try
+            {
+                var seenContexts = new HashSet<EvaluationContext>();
+
+                EvaluationContext.TestOnlyHookOnCreate = c => seenContexts.Add(c);
+
+                var collection = _env.CreateProjectCollection().Collection;
+
+                var context = EvaluationContext.Create(policy);
+
+                const int numIterations = 10;
+                for (int i = 0; i < numIterations; i++)
+                {
+                    ProjectInstance.FromProjectRootElement(
+                        ProjectRootElement.Create(),
+                        new ProjectOptions
+                        {
+                            ProjectCollection = collection,
+                            EvaluationContext = context,
+                            LoadSettings = ProjectLoadSettings.IgnoreMissingImports
+                        });
+                }
+
+                int expectedNumContexts = policy == EvaluationContext.SharingPolicy.Shared ? 1 : numIterations;
+
+                seenContexts.Count.ShouldBe(expectedNumContexts);
+                seenContexts.ShouldAllBe(c => c.Policy == policy);
             }
             finally
             {

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -691,10 +692,16 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
         public static IEnumerable<object[]> ProjectInstanceHasEvaluationIdTestData()
         {
-            // from file
+            // from file (new)
             yield return new ProjectInstanceFactory[]
             {
                 (f, xml, c) => new ProjectInstance(f, null, null, c)
+            };
+
+            // from file (factory method)
+            yield return new ProjectInstanceFactory[]
+            {
+                (f, xml, c) => ProjectInstance.FromFile(f, new ProjectOptions { ProjectCollection = c })
             };
 
             // from Project
@@ -709,10 +716,16 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 (f, xml, c) => new ProjectInstance(f, null, null, c).DeepCopy()
             };
 
-            // from ProjectRootElement
+            // from ProjectRootElement (new)
             yield return new ProjectInstanceFactory[]
             {
-                (f, xml, c) => new ProjectInstance(xml, null, null, c).DeepCopy()
+                (f, xml, c) => new ProjectInstance(xml, null, null, c)
+            };
+
+            // from ProjectRootElement (factory method)
+            yield return new ProjectInstanceFactory[]
+            {
+                (f, xml, c) => ProjectInstance.FromProjectRootElement(xml, new ProjectOptions { ProjectCollection = c })
             };
 
             // from translated project instance
@@ -795,6 +808,62 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectInstance projectInstance = new ProjectInstance(rootElement);
 
             Assert.Throws<InternalErrorException>(() => projectInstance.AddTarget("a", "1==1", "inputs", "outputs", "returns", "keepDuplicateOutputs", "dependsOnTargets", "beforeTargets", "afterTargets", true));
+        }
+
+        [Theory]
+        [InlineData(false, ProjectLoadSettings.Default)]
+        [InlineData(false, ProjectLoadSettings.RecordDuplicateButNotCircularImports)]
+        [InlineData(true, ProjectLoadSettings.Default)]
+        [InlineData(true, ProjectLoadSettings.RecordDuplicateButNotCircularImports)]
+        public void GetImportPathsAndImportPathsIncludingDuplicates(bool useDirectConstruction, ProjectLoadSettings projectLoadSettings)
+        {
+            try
+            {
+                string projectFileContent = @"
+                    <Project>
+                        <Import Project='{0}'/>
+                        <Import Project='{1}'/>
+                        <Import Project='{0}'/>
+                    </Project>";
+
+                string import1Content = @"
+                    <Project>
+                        <Import Project='{0}'/>
+                        <Import Project='{1}'/>
+                    </Project>";
+
+                string import2Content = @"<Project />";
+                string import3Content = @"<Project />";
+
+                string import2Path = ObjectModelHelpers.CreateFileInTempProjectDirectory("import2.targets", import2Content);
+                string import3Path = ObjectModelHelpers.CreateFileInTempProjectDirectory("import3.targets", import3Content);
+
+                import1Content = string.Format(import1Content, import2Path, import3Path);
+                string import1Path = ObjectModelHelpers.CreateFileInTempProjectDirectory("import1.targets", import1Content);
+
+                projectFileContent = string.Format(projectFileContent, import1Path, import2Path);
+
+                ProjectCollection projectCollection = new ProjectCollection();
+                BuildParameters buildParameters = new BuildParameters(projectCollection) { ProjectLoadSettings = projectLoadSettings };
+                BuildEventContext buildEventContext = new BuildEventContext(0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+
+                ProjectRootElement rootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)));
+                ProjectInstance projectInstance = useDirectConstruction
+                    ? new ProjectInstance(rootElement, globalProperties: null, toolsVersion: null, buildParameters, projectCollection.LoggingService, buildEventContext, sdkResolverService: null, 0)
+                    : new Project(rootElement, globalProperties: null, toolsVersion: null, projectCollection, projectLoadSettings).CreateProjectInstance();
+
+                string[] expectedImportPaths = new string[] { import1Path, import2Path, import3Path };
+                string[] expectedImportPathsIncludingDuplicates = projectLoadSettings.HasFlag(ProjectLoadSettings.RecordDuplicateButNotCircularImports)
+                    ? new string[] { import1Path, import2Path, import3Path, import2Path, import1Path }
+                    : expectedImportPaths;
+
+                Helpers.AssertListsValueEqual(expectedImportPaths, projectInstance.ImportPaths.ToList());
+                Helpers.AssertListsValueEqual(expectedImportPathsIncludingDuplicates, projectInstance.ImportPathsIncludingDuplicates.ToList());
+            }
+            finally
+            {
+                ObjectModelHelpers.DeleteTempProjectDirectory();
+            }
         }
 
         /// <summary>
