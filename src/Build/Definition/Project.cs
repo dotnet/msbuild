@@ -3961,6 +3961,11 @@ namespace Microsoft.Build.Evaluation
             public PropertyDictionary<ProjectPropertyInstance> GlobalPropertiesDictionary { get; }
 
             /// <summary>
+            /// A dictionary of all of the properties read from environment variables during evaluation.
+            /// </summary>
+            public PropertyDictionary<ProjectPropertyInstance> EnvironmentVariablePropertiesDictionary => this.Project.ProjectCollection.EnvironmentProperties;
+
+            /// <summary>
             /// List of names of the properties that, while global, are still treated as overridable 
             /// </summary>
             public ISet<string> GlobalPropertiesToTreatAsLocal => _globalPropertiesToTreatAsLocal ?? (_globalPropertiesToTreatAsLocal =
@@ -4334,7 +4339,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Sets a property which is not derived from Xml.
             /// </summary>
-            public ProjectProperty SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved)
+            public ProjectProperty SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false)
             {
                 ProjectProperty property = ProjectProperty.Create(Project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved);
                 Properties.Set(property);
@@ -4346,13 +4351,10 @@ namespace Microsoft.Build.Evaluation
 
             /// <summary>
             /// Sets a property derived from Xml.
-            /// Predecessor is any immediately previous property that was overridden by this one during evaluation.
-            /// This would include all properties with the same name that lie above in the logical
-            /// project file, and whose conditions evaluated to true.
-            /// If there are none above this is null.
             /// </summary>
-            public ProjectProperty SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped, ProjectProperty predecessor)
+            public ProjectProperty SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped)
             {
+                ProjectProperty predecessor = GetProperty(propertyElement.Name);
                 ProjectProperty property = ProjectProperty.Create(Project, propertyElement, evaluatedValueEscaped, predecessor);
                 Properties.Set(property);
 
