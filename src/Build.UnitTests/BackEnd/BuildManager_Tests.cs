@@ -944,6 +944,68 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[errormessage]");
         }
 
+        [Fact]
+        public void DeferredMessageShouldGetLogged()
+        {
+            string contents = CleanupFileContents(@"
+              <Project>
+                 <Target Name='Build'>
+                     <Message Text='[Message]' Importance='high'/>
+                     <Warning Text='[Warn]'/>	
+                </Target>
+              </Project>
+            ");
+
+            MockLogger logger;
+
+            const string highMessage = "deferred[High]";
+            const string normalMessage = "deferred[Normal]";
+            const string lowMessage = "deferred[Low]";
+
+            using (var buildManagerSession = new Helpers.BuildManagerSession(
+                _env,
+                deferredMessages: new[]
+                {
+                    new BuildManager.DeferredBuildMessage(highMessage, MessageImportance.High),
+                    new BuildManager.DeferredBuildMessage(normalMessage, MessageImportance.Normal),
+                    new BuildManager.DeferredBuildMessage(lowMessage, MessageImportance.Low)
+                }))
+            {
+                var result = buildManagerSession.BuildProjectFile(_env.CreateFile("build.proj", contents).Path);
+
+                result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+                logger = buildManagerSession.Logger;
+            }
+
+            logger.AssertLogContains("[Warn]");
+            logger.AssertLogContains("[Message]");
+
+            logger.AssertLogContains(highMessage);
+            logger.AssertLogContains(normalMessage);
+            logger.AssertLogContains(lowMessage);
+
+            var deferredMessages = logger.BuildMessageEvents.Where(e => e.Message.StartsWith("deferred")).ToArray();
+
+            deferredMessages.Length.ShouldBe(3);
+
+            deferredMessages[0].Message.ShouldBe(highMessage);
+            deferredMessages[0].Importance.ShouldBe(MessageImportance.High);
+            deferredMessages[1].Message.ShouldBe(normalMessage);
+            deferredMessages[1].Importance.ShouldBe(MessageImportance.Normal);
+            deferredMessages[2].Message.ShouldBe(lowMessage);
+            deferredMessages[2].Importance.ShouldBe(MessageImportance.Low);
+
+            logger.BuildStartedEvents.Count.ShouldBe(1);
+            logger.BuildFinishedEvents.Count.ShouldBe(1);
+            logger.ProjectStartedEvents.Count.ShouldBe(1);
+            logger.ProjectFinishedEvents.Count.ShouldBe(1);
+            logger.TargetStartedEvents.Count.ShouldBe(1);
+            logger.TargetFinishedEvents.Count.ShouldBe(1);
+            logger.TaskStartedEvents.Count.ShouldBe(2);
+            logger.TaskFinishedEvents.Count.ShouldBe(2);
+        }
+
         /// <summary>
         /// A build with a message, error and warning, verify that 
         /// we only get errors, warnings, and project started and finished when OnlyLogCriticalEvents is true
