@@ -70,11 +70,6 @@
         <target state="new">MSB5028: Solution filter file at "{0}" includes project "{1}" that is not in the solution file at "{2}".</target>
         <note>{StrBegin="MSB5028: "}UE: The project filename is provided separately to loggers.</note>
       </trans-unit>
-      <trans-unit id="SolutionFilterFilteredProjectDoesNotExist">
-        <source>MSB5027: The solution filter file at "{0}" specifies that there is a project file at "{1}" relative to "{2}", but that project file was not found.</source>
-        <target state="new">MSB5027: The solution filter file at "{0}" specifies that there is a project file at "{1}" relative to "{2}", but that project file was not found.</target>
-        <note>{StrBegin="MSB5027: "}UE: The project filename is provided separately to loggers.</note>
-      </trans-unit>
       <trans-unit id="SolutionFilterJsonParsingError">
         <source>MSB5025: Json in solution filter file "{0}" is incorrectly formatted.</source>
         <target state="new">MSB5025: Json in solution filter file "{0}" is incorrectly formatted.</target>
