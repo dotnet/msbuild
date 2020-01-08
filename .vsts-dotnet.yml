@@ -150,7 +150,7 @@ stages:
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: symbols'
       inputs:
-        PathtoPublish: 'artifacts\bin\**\*.pdb'
+        PathtoPublish: 'artifacts\bin'
         ArtifactName: symbols
       condition: succeededOrFailed()
 
