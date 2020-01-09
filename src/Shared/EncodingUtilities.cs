@@ -148,5 +148,38 @@ namespace Microsoft.Build.Shared
                 return StartsWithPreamble(stream);
             }
         }
+
+        /// <summary>
+        /// Checks to see if a string can be encoded in a specified code page.
+        /// </summary>
+        /// <remarks>Internal for testing purposes.</remarks>
+        /// <param name="codePage">Code page for encoding.</param>
+        /// <param name="stringToEncode">String to encode.</param>
+        /// <returns>True if the string can be encoded in the specified code page.</returns>
+        internal static bool CanEncodeString(int codePage, string stringToEncode)
+        {
+            // We have a System.String that contains some characters. Get a lossless representation
+            // in byte-array form.
+            var unicodeEncoding = new UnicodeEncoding();
+            var unicodeBytes = unicodeEncoding.GetBytes(stringToEncode);
+
+            // Create an Encoding using the desired code page, but throws if there's a
+            // character that can't be represented.
+            var systemEncoding = Encoding.GetEncoding(codePage, EncoderFallback.ExceptionFallback,
+                DecoderFallback.ExceptionFallback);
+
+            try
+            {
+                var oemBytes = Encoding.Convert(unicodeEncoding, systemEncoding, unicodeBytes);
+
+                // If Convert didn't throw, we can represent everything in the desired encoding.
+                return true;
+            }
+            catch (EncoderFallbackException)
+            {
+                // If a fallback encoding was attempted, we need to go to Unicode.
+                return false;
+            }
+        }
     }
 }
