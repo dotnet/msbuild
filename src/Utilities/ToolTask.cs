@@ -1365,7 +1365,30 @@ namespace Microsoft.Build.Utilities
                     }
                     else
                     {
-                        File.AppendAllText(_temporaryBatchFile, commandLineCommands, EncodingUtilities.CurrentSystemOemEncoding);
+
+                        Encoding encoding;
+
+                        if (Traits.Instance.EscapeHatches.AvoidUnicodeWhenWritingToolTaskBatch)
+                        {
+                            encoding = EncodingUtilities.CurrentSystemOemEncoding;
+                        }
+                        else
+                        {
+                            encoding = EncodingUtilities.BatchFileEncoding(commandLineCommands + _temporaryBatchFile, EncodingUtilities.UseUtf8Detect);
+
+                            if (encoding.CodePage != EncodingUtilities.CurrentSystemOemEncoding.CodePage)
+                            {
+                                // cmd.exe reads the first line in the console CP, 
+                                // which for a new console (as here) is OEMCP
+                                // this string should ideally always be ASCII
+                                // and the same in any OEMCP.
+                                File.AppendAllText(_temporaryBatchFile,
+                                                   $@"%SystemRoot%\System32\chcp.com {encoding.CodePage}>nul{Environment.NewLine}",
+                                                   EncodingUtilities.CurrentSystemOemEncoding);
+                            }
+                        }
+
+                        File.AppendAllText(_temporaryBatchFile, commandLineCommands, encoding);
 
                         string batchFileForCommandLine = _temporaryBatchFile;
 
