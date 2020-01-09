@@ -736,19 +736,19 @@ namespace Microsoft.Build.UnitTests
         [InlineData("ts")]
         public void TargetsSwitchIdentificationTests(string @switch)
         {
-            Assert.True(CommandLineSwitches.IsParameterizedSwitch(
+            CommandLineSwitches.IsParameterizedSwitch(
                 @switch,
                 out var parameterizedSwitch,
                 out var duplicateSwitchErrorMessage,
                 out var multipleParametersAllowed,
                 out var missingParametersErrorMessage,
                 out var unquoteParameters,
-                out var emptyParametersAllowed));
-            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.Targets, parameterizedSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
-            Assert.False(multipleParametersAllowed);
-            Assert.Null(missingParametersErrorMessage);
-            Assert.True(unquoteParameters);
+                out var emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.Targets);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldBeNull();
+            unquoteParameters.ShouldBeTrue();
         }
 
         [Fact]
