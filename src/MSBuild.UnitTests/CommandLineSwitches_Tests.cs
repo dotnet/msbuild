@@ -749,6 +749,7 @@ namespace Microsoft.Build.UnitTests
             multipleParametersAllowed.ShouldBeFalse();
             missingParametersErrorMessage.ShouldBeNull();
             unquoteParameters.ShouldBeTrue();
+            emptyParametersAllowed.ShouldBeFalse();
         }
 
         [Fact]
