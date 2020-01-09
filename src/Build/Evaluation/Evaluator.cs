@@ -205,7 +205,6 @@ namespace Microsoft.Build.Evaluation
 
             // Wrap the IEvaluatorData<> object passed in.
             data = new PropertyTrackingEvaluatorDataWrapper<P, I, M, D>(data, _evaluationLoggingContext, Traits.Instance.LogPropertyTracking);
-            data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
             _evaluationContext = evaluationContext ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
 
             // Create containers for the evaluation results
