@@ -5,9 +5,9 @@
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\cli\dotnet\dotnet.csproj" />
-    <ProjectReference Include="..\..\cli\Microsoft.DotNet.Configurer\Microsoft.DotNet.Configurer.csproj" />
-    <ProjectReference Include="..\..\cli\Microsoft.DotNet.InternalAbstractions\Microsoft.DotNet.InternalAbstractions.csproj" />
+    <ProjectReference Include="..\..\Cli\dotnet\dotnet.csproj" />
+    <ProjectReference Include="..\..\Cli\Microsoft.DotNet.Configurer\Microsoft.DotNet.Configurer.csproj" />
+    <ProjectReference Include="..\..\Cli\Microsoft.DotNet.InternalAbstractions\Microsoft.DotNet.InternalAbstractions.csproj" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.ComponentMocks\Microsoft.DotNet.Tools.Tests.ComponentMocks.csproj" />
   </ItemGroup>
