@@ -198,7 +198,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void CreateTemporaryBatchFile()
         {
-            var encoding = BatchFileEncoding(Command + WorkingDirectory);
+            var encoding = BatchFileEncoding(Command + WorkingDirectory, UseUtf8Encoding);
 
             // Temporary file with the extension .Exec.bat
             _batchFile = FileUtilities.GetTemporaryFile(".exec.cmd");
@@ -657,7 +657,7 @@ namespace Microsoft.Build.Tasks
         /// Why not always UTF-8? Because tools don't always handle it well. See
         /// https://github.com/Microsoft/msbuild/issues/397
         /// </remarks>
-        private Encoding BatchFileEncoding(string contents)
+        private static Encoding BatchFileEncoding(string contents, string encodingSpecification)
         {
             if (!NativeMethodsShared.IsWindows)
             {
@@ -675,7 +675,7 @@ namespace Microsoft.Build.Tasks
                 defaultEncoding = EncodingUtilities.Utf8WithoutBom;
             }
 
-            string useUtf8 = string.IsNullOrEmpty(UseUtf8Encoding) ? EncodingUtilities.UseUtf8Detect : UseUtf8Encoding;
+            string useUtf8 = string.IsNullOrEmpty(encodingSpecification) ? EncodingUtilities.UseUtf8Detect : encodingSpecification;
 
 #if FEATURE_OSVERSION
             // UTF8 is only supported in Windows 7 (6.1) or greater.
