@@ -14,6 +14,8 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class EncodingUtilities
     {
+        internal static readonly Encoding Utf8WithoutBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+
         private static Encoding s_currentOemEncoding;
 
         internal const string UseUtf8Always = "ALWAYS";

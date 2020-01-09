@@ -646,7 +646,6 @@ namespace Microsoft.Build.Tasks
 
         #endregion
 
-        private static readonly Encoding s_utf8WithoutBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
 
         /// <summary>
         /// Find the encoding for the batch file.
@@ -662,7 +661,7 @@ namespace Microsoft.Build.Tasks
         {
             if (!NativeMethodsShared.IsWindows)
             {
-                return s_utf8WithoutBom;
+                return EncodingUtilities.Utf8WithoutBom;
             }
 
             var defaultEncoding = EncodingUtilities.CurrentSystemOemEncoding;
@@ -673,7 +672,7 @@ namespace Microsoft.Build.Tasks
             // See https://github.com/Microsoft/msbuild/issues/4268
             if (defaultEncoding is UTF8Encoding e && e.GetPreamble().Length > 0)
             {
-                defaultEncoding = s_utf8WithoutBom;
+                defaultEncoding = EncodingUtilities.Utf8WithoutBom;
             }
 
             string useUtf8 = string.IsNullOrEmpty(UseUtf8Encoding) ? EncodingUtilities.UseUtf8Detect : UseUtf8Encoding;
@@ -691,14 +690,14 @@ namespace Microsoft.Build.Tasks
             switch (useUtf8.ToUpperInvariant())
             {
                 case EncodingUtilities.UseUtf8Always:
-                    return s_utf8WithoutBom;
+                    return EncodingUtilities.Utf8WithoutBom;
                 case EncodingUtilities.UseUtf8Never:
                 case EncodingUtilities.UseUtf8System:
                     return defaultEncoding;
                 default:
                     return EncodingUtilities.CanEncodeString(defaultEncoding.CodePage, contents)
                         ? defaultEncoding
-                        : s_utf8WithoutBom;
+                        : EncodingUtilities.Utf8WithoutBom;
             }
         }
     }
