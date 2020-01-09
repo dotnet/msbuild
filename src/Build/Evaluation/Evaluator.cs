@@ -205,6 +205,7 @@ namespace Microsoft.Build.Evaluation
 
             // Wrap the IEvaluatorData<> object passed in.
             data = new PropertyTrackingEvaluatorDataWrapper<P, I, M, D>(data, _evaluationLoggingContext, Traits.Instance.LogPropertyTracking);
+            data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
             _evaluationContext = evaluationContext ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
 
             // Create containers for the evaluation results
@@ -298,7 +299,7 @@ namespace Microsoft.Build.Evaluation
                 loggingService,
                 buildEventContext);
 
-            evaluator.Evaluate(loggingService, buildEventContext);
+            evaluator.Evaluate();
             MSBuildEventSource.Log.EvaluateStop(root.ProjectFileLocation.File);
         }
 
@@ -586,7 +587,7 @@ namespace Microsoft.Build.Evaluation
         /// Do the evaluation.
         /// Called by the static helper method.
         /// </summary>
-        private void Evaluate(ILoggingService loggingService, BuildEventContext buildEventContext)
+        private void Evaluate()
         {
             string projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
             using (_evaluationProfiler.TrackPass(EvaluationPass.TotalEvaluation))
@@ -613,11 +614,6 @@ namespace Microsoft.Build.Evaluation
                         SetBuiltInProperty(ReservedPropertyNames.interactive, "true");
                     }
                 }
-
-                projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
-
-                _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, projectFile);
-                _data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
 
                 _evaluationLoggingContext.LogProjectEvaluationStarted();
 
