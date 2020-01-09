@@ -6,6 +6,13 @@ using System.Runtime.InteropServices;
 
 namespace COMServer
 {
+    // User defined attribute on types. Ensure that user defined
+    // attributes don't break us from parsing metadata.
+    public class UserDefinedAttribute : Attribute
+    {
+    }
+
+    [UserDefined]
     [ComVisible(true)]
     [Guid("17B6329E-B025-4FC7-A854-97D34600C5A6")]
     public class Class1
@@ -25,6 +32,7 @@ namespace COMServer
     [Guid("D88137C9-9B6F-4B46-AA3D-55791BF906EE")]
     public class Class4
     {
+        [UserDefined]
         [ComVisible(true)]
         [Guid("D88137C9-9B6F-4B46-AA3D-55791BF906ED")]
         public class Class5
