@@ -756,6 +756,9 @@
     <Compile Include="..\Shared\TypeLoader.cs">
       <Link>SharedUtilities\TypeLoader.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\MSBuildLoadContext.cs" Condition="'$(TargetFrameworkIdentifier)'!='.NETFramework'">
+      <Link>SharedUtilities\MSBuildLoadContext.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\VisualStudioConstants.cs">
       <Link>VisualStudioConstants.cs</Link>
     </Compile>
