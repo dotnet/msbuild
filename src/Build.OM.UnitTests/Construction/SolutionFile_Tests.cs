@@ -7,6 +7,7 @@ using System.IO;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Exceptions;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.Construction
@@ -16,6 +17,72 @@ namespace Microsoft.Build.UnitTests.Construction
     /// </summary>
     public class SolutionFile_Tests
     {
+        [Theory]
+        [InlineData(@"
+                {
+                  ""solution"": {
+                    ""path"": ""C:\\notAPath\\MSBuild.Dev.sln"",
+                    ""projects2"": [
+                      ""src\\Build\\Microsoft.Build.csproj"",
+                      ""src\\Framework\\Microsoft.Build.Framework.csproj"",
+                      ""src\\MSBuild\\MSBuild.csproj"",
+                      ""src\\Tasks.UnitTests\\Microsoft.Build.Tasks.UnitTests.csproj""
+                    ]
+                    }
+                }
+                ", "MSBuild.SolutionFilterJsonParsingError")]
+        [InlineData(@"
+                [{
+                  ""solution"": {
+                    ""path"": ""C:\\notAPath\\MSBuild.Dev.sln"",
+                    ""projects"": [
+                      ""src\\Build\\Microsoft.Build.csproj"",
+                      ""src\\Framework\\Microsoft.Build.Framework.csproj"",
+                      ""src\\MSBuild\\MSBuild.csproj"",
+                      ""src\\Tasks.UnitTests\\Microsoft.Build.Tasks.UnitTests.csproj""
+                    ]
+                    }
+                }]
+                ", "MSBuild.SolutionFilterJsonParsingError")]
+        [InlineData(@"
+                {
+                  ""solution"": {
+                    ""path"": ""C:\\notAPath\\MSBuild.Dev.sln"",
+                    ""projects"": [
+                      {""path"": ""src\\Build\\Microsoft.Build.csproj""},
+                      {""path"": ""src\\Framework\\Microsoft.Build.Framework.csproj""},
+                      {""path"": ""src\\MSBuild\\MSBuild.csproj""},
+                      {""path"": ""src\\Tasks.UnitTests\\Microsoft.Build.Tasks.UnitTests.csproj""}
+                    ]
+                    }
+                }
+                ", "MSBuild.SolutionFilterJsonParsingError")]
+        [InlineData(@"
+                {
+                  ""solution"": {
+                    ""path"": ""C:\\notAPath2\\MSBuild.Dev.sln"",
+                    ""projects"": [
+                      {""path"": ""src\\Build\\Microsoft.Build.csproj""},
+                      {""path"": ""src\\Framework\\Microsoft.Build.Framework.csproj""},
+                      {""path"": ""src\\MSBuild\\MSBuild.csproj""},
+                      {""path"": ""src\\Tasks.UnitTests\\Microsoft.Build.Tasks.UnitTests.csproj""}
+                    ]
+                    }
+                }
+                ", "MSBuild.SolutionFilterMissingSolutionError")]
+        public void InvalidSolutionFilters(string slnfValue, string exceptionReason)
+        {
+            Assert.False(File.Exists("C:\\notAPath2\\MSBuild.Dev.sln"));
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
+                TransientTestFile sln = testEnvironment.CreateFile(folder, "Dev.sln");
+                TransientTestFile slnf = testEnvironment.CreateFile(folder, "Dev.slnf", slnfValue.Replace(@"C:\\notAPath\\MSBuild.Dev.sln", sln.Path.Replace("\\", "\\\\")));
+                InvalidProjectFileException e = Should.Throw<InvalidProjectFileException>(() => SolutionFile.Parse(slnf.Path));
+                e.HelpKeyword.ShouldBe(exceptionReason);
+            }
+        }
+
         /// <summary>
         /// Test that a project with the C++ project guid and an extension of vcproj is seen as invalid.
         /// </summary>
