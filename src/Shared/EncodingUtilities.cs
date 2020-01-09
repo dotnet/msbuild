@@ -16,6 +16,11 @@ namespace Microsoft.Build.Shared
     {
         private static Encoding s_currentOemEncoding;
 
+        internal const string UseUtf8Always = "ALWAYS";
+        internal const string UseUtf8Never = "NEVER";
+        internal const string UseUtf8Detect = "DETECT";
+        internal const string UseUtf8System = "SYSTEM";
+
         /// <summary>
         /// Get the current system locale code page, OEM version. OEM code pages are used for console-based input/output
         /// for historical reasons.

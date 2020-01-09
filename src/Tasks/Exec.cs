@@ -43,11 +43,6 @@ namespace Microsoft.Build.Tasks
 
         #region Fields
 
-        private const string UseUtf8Always = "ALWAYS";
-        private const string UseUtf8Never = "NEVER";
-        private const string UseUtf8Detect = "DETECT";
-        private const string UseUtf8System = "SYSTEM";
-
         // Are the encodings for StdErr and StdOut streams valid
         private bool _encodingParametersValid = true;
         private string _workingDirectory;
@@ -681,7 +676,7 @@ namespace Microsoft.Build.Tasks
                 defaultEncoding = s_utf8WithoutBom;
             }
 
-            string useUtf8 = string.IsNullOrEmpty(UseUtf8Encoding) ? UseUtf8Detect : UseUtf8Encoding;
+            string useUtf8 = string.IsNullOrEmpty(UseUtf8Encoding) ? EncodingUtilities.UseUtf8Detect : UseUtf8Encoding;
 
 #if FEATURE_OSVERSION
             // UTF8 is only supported in Windows 7 (6.1) or greater.
@@ -689,16 +684,16 @@ namespace Microsoft.Build.Tasks
 
             if (Environment.OSVersion.Version < windows7)
             {
-                useUtf8 = UseUtf8Never;
+                useUtf8 = EncodingUtilities.UseUtf8Never;
             }
 #endif
 
             switch (useUtf8.ToUpperInvariant())
             {
-                case UseUtf8Always:
+                case EncodingUtilities.UseUtf8Always:
                     return s_utf8WithoutBom;
-                case UseUtf8Never:
-                case UseUtf8System:
+                case EncodingUtilities.UseUtf8Never:
+                case EncodingUtilities.UseUtf8System:
                     return defaultEncoding;
                 default:
                     return EncodingUtilities.CanEncodeString(defaultEncoding.CodePage, contents)
