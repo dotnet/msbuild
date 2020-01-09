@@ -198,7 +198,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void CreateTemporaryBatchFile()
         {
-            var encoding = BatchFileEncoding(Command + WorkingDirectory, UseUtf8Encoding);
+            var encoding = EncodingUtilities.BatchFileEncoding(Command + WorkingDirectory, UseUtf8Encoding);
 
             // Temporary file with the extension .Exec.bat
             _batchFile = FileUtilities.GetTemporaryFile(".exec.cmd");
@@ -645,60 +645,5 @@ namespace Microsoft.Build.Tasks
         protected override MessageImportance StandardOutputLoggingImportance => MessageImportance.High;
 
         #endregion
-
-
-        /// <summary>
-        /// Find the encoding for the batch file.
-        /// </summary>
-        /// <remarks>
-        /// The "best" encoding is the current OEM encoding, unless it's not capable of representing
-        /// the characters we plan to put in the file. If it isn't, we can fall back to UTF-8.
-        ///
-        /// Why not always UTF-8? Because tools don't always handle it well. See
-        /// https://github.com/Microsoft/msbuild/issues/397
-        /// </remarks>
-        private static Encoding BatchFileEncoding(string contents, string encodingSpecification)
-        {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return EncodingUtilities.Utf8WithoutBom;
-            }
-
-            var defaultEncoding = EncodingUtilities.CurrentSystemOemEncoding;
-
-            // When Windows is configured to use UTF-8 by default, the above returns
-            // a UTF-8-with-BOM encoding, which cmd.exe can't interpret. Force the no-BOM
-            // encoding if the returned encoding would have emitted one (preamble is nonempty).
-            // See https://github.com/Microsoft/msbuild/issues/4268
-            if (defaultEncoding is UTF8Encoding e && e.GetPreamble().Length > 0)
-            {
-                defaultEncoding = EncodingUtilities.Utf8WithoutBom;
-            }
-
-            string useUtf8 = string.IsNullOrEmpty(encodingSpecification) ? EncodingUtilities.UseUtf8Detect : encodingSpecification;
-
-#if FEATURE_OSVERSION
-            // UTF8 is only supported in Windows 7 (6.1) or greater.
-            var windows7 = new Version(6, 1);
-
-            if (Environment.OSVersion.Version < windows7)
-            {
-                useUtf8 = EncodingUtilities.UseUtf8Never;
-            }
-#endif
-
-            switch (useUtf8.ToUpperInvariant())
-            {
-                case EncodingUtilities.UseUtf8Always:
-                    return EncodingUtilities.Utf8WithoutBom;
-                case EncodingUtilities.UseUtf8Never:
-                case EncodingUtilities.UseUtf8System:
-                    return defaultEncoding;
-                default:
-                    return EncodingUtilities.CanEncodeString(defaultEncoding.CodePage, contents)
-                        ? defaultEncoding
-                        : EncodingUtilities.Utf8WithoutBom;
-            }
-        }
     }
 }
