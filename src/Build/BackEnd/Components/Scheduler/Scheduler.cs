@@ -1873,7 +1873,7 @@ namespace Microsoft.Build.BackEnd
 
             string ConcatenateGlobalProperties(BuildRequestConfiguration configuration)
             {
-                return string.Join(";", configuration.GlobalProperties.GetCopyOnReadEnumerable().Select(p => $"{p.Name}={p.EvaluatedValue}"));
+                return string.Join("; ", configuration.GlobalProperties.Select<ProjectPropertyInstance, string>(p => $"{p.Name}={p.EvaluatedValue}"));
             }
         }
 
