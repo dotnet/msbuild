@@ -1037,9 +1037,9 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
     </note>
       </trans-unit>
       <trans-unit id="InvalidTargetsPath">
-        <source>MSBUILD : error MSB1047: File to print targets to is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1047: File to print targets to is not valid. {0}</target>
-        <note>{StrBegin="MSBUILD : error MSB1047: "}</note>
+        <source>MSBUILD : error MSB1059: Targets could not be printed. {0}</source>
+        <target state="new">MSBUILD : error MSB1059: Targets could not be printed. {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
       <trans-unit id="InvalidToolsVersionError">
         <source>MSBUILD : error MSB1040: ToolsVersion is not valid. {0}</source>
