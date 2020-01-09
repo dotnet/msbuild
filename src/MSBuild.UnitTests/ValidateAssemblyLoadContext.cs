@@ -16,8 +16,11 @@ namespace Microsoft.Build.UnitTests
         {
             var thisLoadContext = AssemblyLoadContext.GetLoadContext(typeof(ValidateAssemblyLoadContext).Assembly);
 
-            // Check by name because this always reports false, presumably due to ALC shenanigans:
-            // if (thisLoadContext is MSBuildLoadContext context)
+            // The straightforward implementation of this check:
+            //   if (thisLoadContext is MSBuildLoadContext context)
+            // fails here because MSBuildLoadContext (in this test assembly) is from MSBuild.exe via
+            // IVT, but the one that actually gets used for task isolation is in Microsoft.Build.dll.
+            // This probably doesn't need to be how it is forever: https://github.com/microsoft/msbuild/issues/5041
             if (thisLoadContext.GetType().FullName == typeof(MSBuildLoadContext).FullName)
             {
 #if NETCOREAPP && !NETCOREAPP2_1 // TODO: enable this functionality when targeting .NET Core 3.0+
