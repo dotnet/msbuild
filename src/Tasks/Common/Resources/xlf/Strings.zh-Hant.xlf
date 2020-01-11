@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../Strings.resx">
     <body>
       <trans-unit id="AddResourceWithNonIntegerResource">
         <source>NETSDK1076: AddResource can only be used with integer resource types.</source>
@@ -99,7 +99,7 @@
       </trans-unit>
       <trans-unit id="CannotFindIjwhost">
         <source>NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.1 or higher when targeting Windows.</source>
-        <target state="new">NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.1 or higher when targeting Windows.</target>
+        <target state="translated">NETSDK1114: 找不到 .NET Core IJW 主機。目標為 Windows 時，只能在 .NET Core 3.1 或更高版本上使用 .NET Core IJW 主機。</target>
         <note>{StrBegin="NETSDK1114: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
@@ -114,22 +114,22 @@
       </trans-unit>
       <trans-unit id="CannotHaveSelfContainedWithoutRuntimeIdentifier">
         <source>NETSDK1031: It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</source>
-        <target state="translated">NETSDK1031: 不支援在未指定 RuntimeIdentifier 的情況下，建置或發行獨立的應用程式。請指定 RuntimeIdentifier，或將 SelfContained 設為 False。</target>
+        <target state="translated">NETSDK1031: 不支援在未指定 RuntimeIdentifier 的情況下，建置或發佈獨立的應用程式。請指定 RuntimeIdentifier，或將 SelfContained 設為 False。</target>
         <note>{StrBegin="NETSDK1031: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutRuntimeIdentifier">
         <source>NETSDK1097: It is not supported to publish an application to a single-file without specifying a RuntimeIdentifier. Please either specify a RuntimeIdentifier or set PublishSingleFile to false.</source>
-        <target state="translated">NETSDK1097: 不支援在未指定 RuntimeIdentifier 的情況下，將應用程式發行到單一檔案。請指定 RuntimeIdentifier，或將 PublishSingleFile 設為 False。</target>
+        <target state="translated">NETSDK1097: 不支援在未指定 RuntimeIdentifier 的情況下，將應用程式發佈到單一檔案。請指定 RuntimeIdentifier，或將 PublishSingleFile 設為 False。</target>
         <note>{StrBegin="NETSDK1097: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutAppHost">
         <source>NETSDK1098: Applications published to a single-file are required to use the application host. Please either set PublishSingleFile to false or set UseAppHost to true.</source>
-        <target state="translated">NETSDK1098: 發行到單一檔案的應用程式必須使用應用程式主機。請將 PublishSingleFile 設為 false，或將 UseAppHost 設為 true。</target>
+        <target state="translated">NETSDK1098: 發佈到單一檔案的應用程式必須使用應用程式主機。請將 PublishSingleFile 設為 false，或將 UseAppHost 設為 true。</target>
         <note>{StrBegin="NETSDK1098: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutExecutable">
         <source>NETSDK1099: Publishing to a single-file is only supported for executable applications.</source>
-        <target state="translated">NETSDK1099: 只有可執行應用程式支援發行到單一檔案。</target>
+        <target state="translated">NETSDK1099: 只有可執行應用程式支援發佈到單一檔案。</target>
         <note>{StrBegin="NETSDK1099: "}</note>
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentifierAndVersion">
@@ -224,7 +224,7 @@
       </trans-unit>
       <trans-unit id="CppRequiresTFMVersion31">
         <source>NETSDK1120: C++/CLI projects targeting .NET Core require a target framework of at least 'netcoreapp3.1'.</source>
-        <target state="new">NETSDK1120: C++/CLI projects targeting .NET Core require a target framework of at least 'netcoreapp3.1'.</target>
+        <target state="translated">NETSDK1120: 以 .NET Core 為目標的 C++/CLI 專案需要至少 'netcoreapp3.1' 的目標 Framework。</target>
         <note>{StrBegin="NETSDK1120: "}</note>
       </trans-unit>
       <trans-unit id="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21">
@@ -393,7 +393,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="NETFrameworkWithoutUsingNETSdkDefaults">
         <source>NETSDK1115: The current .NET SDK does not support .NET Framework without using .NET SDK Defaults. It is likely due to a mismatch between C++/CLI project CLRSupport property and TargetFramework.</source>
-        <target state="new">NETSDK1115: The current .NET SDK does not support .NET Framework without using .NET SDK Defaults. It is likely due to a mismatch between C++/CLI project CLRSupport property and TargetFramework.</target>
+        <target state="translated">NETSDK1115: 目前的 .NET SDK 不支援在不使用 .NET SDK 預設的情形下使用 .NET Framework。這可能是因為 C++/CLI 專案 CLRSupport 屬性與 TargetFramework 不相符所致。</target>
         <note>{StrBegin="NETSDK1115: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
@@ -418,23 +418,28 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="NoSupportCppEnableComHosting">
         <source>NETSDK1119: C++/CLI projects targeting .NET Core cannot use EnableComHosting=true.</source>
-        <target state="new">NETSDK1119: C++/CLI projects targeting .NET Core cannot use EnableComHosting=true.</target>
+        <target state="translated">NETSDK1119: 以 .NET Core 為目標的 C++/CLI 專案無法使用 EnableComHosting=true。</target>
         <note>{StrBegin="NETSDK1119: "}</note>
       </trans-unit>
       <trans-unit id="NoSupportCppNonDynamicLibraryDotnetCore">
         <source>NETSDK1116: C++/CLI projects targeting .NET Core must be dynamic libraries.</source>
-        <target state="new">NETSDK1116: C++/CLI projects targeting .NET Core must be dynamic libraries.</target>
+        <target state="translated">NETSDK1116: 以 .NET Core 為目標的 C++/CLI 專案必須是動態程式庫。</target>
         <note>{StrBegin="NETSDK1116: "}</note>
       </trans-unit>
       <trans-unit id="NoSupportCppPackDotnetCore">
         <source>NETSDK1118: C++/CLI projects targeting .NET Core cannot be packed.</source>
-        <target state="new">NETSDK1118: C++/CLI projects targeting .NET Core cannot be packed.</target>
+        <target state="translated">NETSDK1118: 無法封裝以 .NET Core 為目標的 C++/CLI 專案。</target>
         <note>{StrBegin="NETSDK1118: "}</note>
       </trans-unit>
       <trans-unit id="NoSupportCppPublishDotnetCore">
         <source>NETSDK1117: Does not support publish of C++/CLI project targeting dotnet core.</source>
-        <target state="new">NETSDK1117: Does not support publish of C++/CLI project targeting dotnet core.</target>
+        <target state="translated">NETSDK1117: 不支援發佈以 dotnet 核心為目標的 C++/CLI 專案。</target>
         <note>{StrBegin="NETSDK1117: "}</note>
+      </trans-unit>
+      <trans-unit id="NoSupportCppSelfContained">
+        <source>NETSDK1121: C++/CLI projects targeting .NET Core cannot use SelfContained=true.</source>
+        <target state="new">NETSDK1121: C++/CLI projects targeting .NET Core cannot use SelfContained=true.</target>
+        <note>{StrBegin="NETSDK1121: "}</note>
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>
@@ -473,7 +478,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="ReadyToRunCompilationFailed">
         <source>NETSDK1096: Optimizing assemblies for performance failed. You can either exclude the failing assemblies from being optimized, or set the PublishReadyToRun property to false.</source>
-        <target state="translated">NETSDK1096: 最佳化組件的效能失敗。您可以排除失敗的組件不予最佳化，或將 ReadyToRun 屬性設定為 false。</target>
+        <target state="translated">NETSDK1096: 最佳化組件的效能失敗。您可以排除失敗的組件不予最佳化，或將 PublishReadyToRun 屬性設定為 false。</target>
         <note>{StrBegin="NETSDK1096: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunCompilationHasWarnings_Info">

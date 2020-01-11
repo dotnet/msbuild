@@ -19,9 +19,9 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>8019c079ce8174845107e13eb4ddf3582bb10cd0</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="5.4.0-preview.3.6271">
+    <Dependency Name="NuGet.Build.Tasks" Version="5.5.0-preview.2.6355">
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
-      <Sha>c1f6915918b82c096bbd666bd9c18528f1f70630</Sha>
+      <Sha>cb402b5a3340ab5b2605ecc72de7f70aaac95344</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

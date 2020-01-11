@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../Strings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANS" original="../Strings.resx">
     <body>
       <trans-unit id="AddResourceWithNonIntegerResource">
         <source>NETSDK1076: AddResource can only be used with integer resource types.</source>
@@ -99,7 +99,7 @@
       </trans-unit>
       <trans-unit id="CannotFindIjwhost">
         <source>NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.1 or higher when targeting Windows.</source>
-        <target state="new">NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.1 or higher when targeting Windows.</target>
+        <target state="translated">NETSDK1114: 找不到 .NET Core IJW 主机。仅当面向 Windows 时，.NET Core IJW 主机才在 .NET Core 3.1 或更高版本上可用。</target>
         <note>{StrBegin="NETSDK1114: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
@@ -224,7 +224,7 @@
       </trans-unit>
       <trans-unit id="CppRequiresTFMVersion31">
         <source>NETSDK1120: C++/CLI projects targeting .NET Core require a target framework of at least 'netcoreapp3.1'.</source>
-        <target state="new">NETSDK1120: C++/CLI projects targeting .NET Core require a target framework of at least 'netcoreapp3.1'.</target>
+        <target state="translated">NETSDK1120: 面向 .NET Core 的 C++/CLI 项目要求目标框架至少为 "netcoreapp 3.1"。</target>
         <note>{StrBegin="NETSDK1120: "}</note>
       </trans-unit>
       <trans-unit id="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21">
@@ -393,7 +393,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="NETFrameworkWithoutUsingNETSdkDefaults">
         <source>NETSDK1115: The current .NET SDK does not support .NET Framework without using .NET SDK Defaults. It is likely due to a mismatch between C++/CLI project CLRSupport property and TargetFramework.</source>
-        <target state="new">NETSDK1115: The current .NET SDK does not support .NET Framework without using .NET SDK Defaults. It is likely due to a mismatch between C++/CLI project CLRSupport property and TargetFramework.</target>
+        <target state="translated">NETSDK1115: 未使用 .NET SDK 默认设置的情况下，当前 .NET SDK 不支持 .NET Framework。很可能是因为 C++/CLI 项目的 CLRSupport 属性和 TargetFramework 之间存在不匹配情况。</target>
         <note>{StrBegin="NETSDK1115: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
@@ -418,23 +418,28 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="NoSupportCppEnableComHosting">
         <source>NETSDK1119: C++/CLI projects targeting .NET Core cannot use EnableComHosting=true.</source>
-        <target state="new">NETSDK1119: C++/CLI projects targeting .NET Core cannot use EnableComHosting=true.</target>
+        <target state="translated">NETSDK1119: 面向 .NET Core 的 C++/CLI 项目不能使用 EnableComHosting=true。</target>
         <note>{StrBegin="NETSDK1119: "}</note>
       </trans-unit>
       <trans-unit id="NoSupportCppNonDynamicLibraryDotnetCore">
         <source>NETSDK1116: C++/CLI projects targeting .NET Core must be dynamic libraries.</source>
-        <target state="new">NETSDK1116: C++/CLI projects targeting .NET Core must be dynamic libraries.</target>
+        <target state="translated">NETSDK1116: 面向 .NET Core 的 C++/CLI 项目必须是动态库。</target>
         <note>{StrBegin="NETSDK1116: "}</note>
       </trans-unit>
       <trans-unit id="NoSupportCppPackDotnetCore">
         <source>NETSDK1118: C++/CLI projects targeting .NET Core cannot be packed.</source>
-        <target state="new">NETSDK1118: C++/CLI projects targeting .NET Core cannot be packed.</target>
+        <target state="translated">NETSDK1118: 无法打包面向 .NET Core 的 C++/CLI 项目。</target>
         <note>{StrBegin="NETSDK1118: "}</note>
       </trans-unit>
       <trans-unit id="NoSupportCppPublishDotnetCore">
         <source>NETSDK1117: Does not support publish of C++/CLI project targeting dotnet core.</source>
-        <target state="new">NETSDK1117: Does not support publish of C++/CLI project targeting dotnet core.</target>
+        <target state="translated">NETSDK1117: 不支持面向 dotnet core 的 C++/CLI 项目发布。</target>
         <note>{StrBegin="NETSDK1117: "}</note>
+      </trans-unit>
+      <trans-unit id="NoSupportCppSelfContained">
+        <source>NETSDK1121: C++/CLI projects targeting .NET Core cannot use SelfContained=true.</source>
+        <target state="new">NETSDK1121: C++/CLI projects targeting .NET Core cannot use SelfContained=true.</target>
+        <note>{StrBegin="NETSDK1121: "}</note>
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>

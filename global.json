@@ -1,6 +1,6 @@
 {
   "tools": {
-    "dotnet": "5.0.100-alpha1-015580",
+    "dotnet": "5.0.100-alpha.1.20060.5",
     "vs-opt": {
       "version": "15.9"
     }

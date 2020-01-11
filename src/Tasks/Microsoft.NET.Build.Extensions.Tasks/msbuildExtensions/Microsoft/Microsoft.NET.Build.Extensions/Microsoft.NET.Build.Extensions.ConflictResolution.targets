@@ -25,7 +25,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_HandlePackageFileConflicts"
           BeforeTargets="$(_HandlePackageFileConflictsBefore)"
           AfterTargets="$(_HandlePackageFileConflictsAfter)"
-          DependsOnTargets="GetFrameworkPaths;GetReferenceAssemblyPaths">
+          DependsOnTargets="GetFrameworkPaths;GetReferenceAssemblyPaths"
+          Condition="'@(Reference)' != '' Or '@(ReferenceCopyLocalPaths)' != ''">
     <ResolvePackageFileConflicts References="@(Reference)"
                                  ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
                                  PlatformManifests="@(PackageConflictPlatformManifests)"
