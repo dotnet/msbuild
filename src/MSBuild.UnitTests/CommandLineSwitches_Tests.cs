@@ -31,9 +31,9 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches.ParameterlessSwitch parameterlessSwitch;
             string duplicateSwitchErrorMessage;
 
-            Assert.False(CommandLineSwitches.IsParameterlessSwitch("bogus", out parameterlessSwitch, out duplicateSwitchErrorMessage));
-            Assert.Equal(CommandLineSwitches.ParameterlessSwitch.Invalid, parameterlessSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
+            CommandLineSwitches.IsParameterlessSwitch("bogus", out parameterlessSwitch, out duplicateSwitchErrorMessage).ShouldBeFalse();
+            parameterlessSwitch.ShouldBe(CommandLineSwitches.ParameterlessSwitch.Invalid);
+            duplicateSwitchErrorMessage.ShouldBeNull();
 
             CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
             bool multipleParametersAllowed;
@@ -41,12 +41,12 @@ namespace Microsoft.Build.UnitTests
             bool unquoteParameters;
             bool emptyParametersAllowed;
 
-            Assert.False(CommandLineSwitches.IsParameterizedSwitch("bogus", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
-            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.Invalid, parameterizedSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
-            Assert.False(multipleParametersAllowed);
-            Assert.Null(missingParametersErrorMessage);
-            Assert.False(unquoteParameters);
+            CommandLineSwitches.IsParameterizedSwitch("bogus", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed).ShouldBeFalse();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.Invalid);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldBeNull();
+            unquoteParameters.ShouldBeFalse();
         }
 
         [Theory]
@@ -58,9 +58,9 @@ namespace Microsoft.Build.UnitTests
         [InlineData("?")]
         public void HelpSwitchIdentificationTests(string help)
         {
-            Assert.True(CommandLineSwitches.IsParameterlessSwitch(help, out CommandLineSwitches.ParameterlessSwitch parameterlessSwitch, out string duplicateSwitchErrorMessage));
-            Assert.Equal(CommandLineSwitches.ParameterlessSwitch.Help, parameterlessSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
+            CommandLineSwitches.IsParameterlessSwitch(help, out CommandLineSwitches.ParameterlessSwitch parameterlessSwitch, out string duplicateSwitchErrorMessage).ShouldBeTrue();
+            parameterlessSwitch.ShouldBe(CommandLineSwitches.ParameterlessSwitch.Help);
+            duplicateSwitchErrorMessage.ShouldBeNull();
         }
 
         [Theory]
@@ -72,9 +72,9 @@ namespace Microsoft.Build.UnitTests
         [InlineData("Ver")]
         public void VersionSwitchIdentificationTests(string version)
         {
-            Assert.True(CommandLineSwitches.IsParameterlessSwitch(version, out CommandLineSwitches.ParameterlessSwitch parameterlessSwitch, out string duplicateSwitchErrorMessage));
-            Assert.Equal(CommandLineSwitches.ParameterlessSwitch.Version, parameterlessSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
+            CommandLineSwitches.IsParameterlessSwitch(version, out CommandLineSwitches.ParameterlessSwitch parameterlessSwitch, out string duplicateSwitchErrorMessage).ShouldBeTrue();
+            parameterlessSwitch.ShouldBe(CommandLineSwitches.ParameterlessSwitch.Version);
+            duplicateSwitchErrorMessage.ShouldBeNull();
         }
 
         [Theory]
@@ -83,9 +83,9 @@ namespace Microsoft.Build.UnitTests
         [InlineData("NoLogo")]
         public void NoLogoSwitchIdentificationTests(string nologo)
         {
-            Assert.True(CommandLineSwitches.IsParameterlessSwitch(nologo, out CommandLineSwitches.ParameterlessSwitch parameterlessSwitch, out string duplicateSwitchErrorMessage));
-            Assert.Equal(CommandLineSwitches.ParameterlessSwitch.NoLogo, parameterlessSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
+            CommandLineSwitches.IsParameterlessSwitch(nologo, out CommandLineSwitches.ParameterlessSwitch parameterlessSwitch, out string duplicateSwitchErrorMessage).ShouldBeTrue();
+            parameterlessSwitch.ShouldBe(CommandLineSwitches.ParameterlessSwitch.NoLogo);
+            duplicateSwitchErrorMessage.ShouldBeNull();
         }
 
         [Theory]
@@ -97,9 +97,9 @@ namespace Microsoft.Build.UnitTests
         [InlineData("NoAutoRsp")]
         public void NoAutoResponseSwitchIdentificationTests(string noautoresponse)
         {
-            Assert.True(CommandLineSwitches.IsParameterlessSwitch(noautoresponse, out CommandLineSwitches.ParameterlessSwitch parameterlessSwitch, out string duplicateSwitchErrorMessage));
-            Assert.Equal(CommandLineSwitches.ParameterlessSwitch.NoAutoResponse, parameterlessSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
+            CommandLineSwitches.IsParameterlessSwitch(noautoresponse, out CommandLineSwitches.ParameterlessSwitch parameterlessSwitch, out string duplicateSwitchErrorMessage).ShouldBeTrue();
+            parameterlessSwitch.ShouldBe(CommandLineSwitches.ParameterlessSwitch.NoAutoResponse);
+            duplicateSwitchErrorMessage.ShouldBeNull();
         }
 
         [Theory]
@@ -114,9 +114,9 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches.ParameterlessSwitch parameterlessSwitch;
             string duplicateSwitchErrorMessage;
 
-            Assert.True(CommandLineSwitches.IsParameterlessSwitch(noconsolelogger, out parameterlessSwitch, out duplicateSwitchErrorMessage));
-            Assert.Equal(CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger, parameterlessSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
+            CommandLineSwitches.IsParameterlessSwitch(noconsolelogger, out parameterlessSwitch, out duplicateSwitchErrorMessage).ShouldBeTrue();
+            parameterlessSwitch.ShouldBe(CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger);
+            duplicateSwitchErrorMessage.ShouldBeNull();
         }
 
         [Theory]
@@ -130,9 +130,9 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches.ParameterlessSwitch parameterlessSwitch;
             string duplicateSwitchErrorMessage;
 
-            Assert.True(CommandLineSwitches.IsParameterlessSwitch(filelogger, out parameterlessSwitch, out duplicateSwitchErrorMessage));
-            Assert.Equal(CommandLineSwitches.ParameterlessSwitch.FileLogger, parameterlessSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
+            CommandLineSwitches.IsParameterlessSwitch(filelogger, out parameterlessSwitch, out duplicateSwitchErrorMessage).ShouldBeTrue();
+            parameterlessSwitch.ShouldBe(CommandLineSwitches.ParameterlessSwitch.FileLogger);
+            duplicateSwitchErrorMessage.ShouldBeNull();
         }
 
         [Theory]
@@ -146,9 +146,9 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches.ParameterlessSwitch parameterlessSwitch;
             string duplicateSwitchErrorMessage;
 
-            Assert.True(CommandLineSwitches.IsParameterlessSwitch(distributedfilelogger, out parameterlessSwitch, out duplicateSwitchErrorMessage));
-            Assert.Equal(CommandLineSwitches.ParameterlessSwitch.DistributedFileLogger, parameterlessSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
+            CommandLineSwitches.IsParameterlessSwitch(distributedfilelogger, out parameterlessSwitch, out duplicateSwitchErrorMessage).ShouldBeTrue();
+            parameterlessSwitch.ShouldBe(CommandLineSwitches.ParameterlessSwitch.DistributedFileLogger);
+            duplicateSwitchErrorMessage.ShouldBeNull();
         }
 
         [Theory]
@@ -165,12 +165,12 @@ namespace Microsoft.Build.UnitTests
             bool unquoteParameters;
             bool emptyParametersAllowed;
 
-            Assert.True(CommandLineSwitches.IsParameterizedSwitch(fileloggerparameters, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
-            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters, parameterizedSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
-            Assert.False(multipleParametersAllowed);
-            Assert.NotNull(missingParametersErrorMessage);
-            Assert.True(unquoteParameters);
+            CommandLineSwitches.IsParameterizedSwitch(fileloggerparameters, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldNotBeNull();
+            unquoteParameters.ShouldBeTrue();
         }
 
 #if FEATURE_NODE_REUSE
@@ -188,12 +188,12 @@ namespace Microsoft.Build.UnitTests
             bool unquoteParameters;
             bool emptyParametersAllowed;
 
-            Assert.True(CommandLineSwitches.IsParameterizedSwitch(nodereuse, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
-            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.NodeReuse, parameterizedSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
-            Assert.False(multipleParametersAllowed);
-            Assert.NotNull(missingParametersErrorMessage);
-            Assert.True(unquoteParameters);
+            CommandLineSwitches.IsParameterizedSwitch(nodereuse, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.NodeReuse);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldNotBeNull();
+            unquoteParameters.ShouldBeTrue();
         }
 #endif
 
@@ -238,12 +238,12 @@ namespace Microsoft.Build.UnitTests
             bool unquoteParameters;
             bool emptyParametersAllowed;
 
-            Assert.True(CommandLineSwitches.IsParameterizedSwitch(ignoreprojectextensions, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
-            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions, parameterizedSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
-            Assert.True(multipleParametersAllowed);
-            Assert.NotNull(missingParametersErrorMessage);
-            Assert.True(unquoteParameters);
+            CommandLineSwitches.IsParameterizedSwitch(ignoreprojectextensions, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeTrue();
+            missingParametersErrorMessage.ShouldNotBeNull();
+            unquoteParameters.ShouldBeTrue();
         }
 
         [Theory]
@@ -261,12 +261,12 @@ namespace Microsoft.Build.UnitTests
             bool unquoteParameters;
             bool emptyParametersAllowed;
 
-            Assert.True(CommandLineSwitches.IsParameterizedSwitch(target, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
-            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.Target, parameterizedSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
-            Assert.True(multipleParametersAllowed);
-            Assert.NotNull(missingParametersErrorMessage);
-            Assert.True(unquoteParameters);
+            CommandLineSwitches.IsParameterizedSwitch(target, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.Target);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeTrue();
+            missingParametersErrorMessage.ShouldNotBeNull();
+            unquoteParameters.ShouldBeTrue();
         }
 
         [Theory]
@@ -284,12 +284,12 @@ namespace Microsoft.Build.UnitTests
             bool unquoteParameters;
             bool emptyParametersAllowed;
 
-            Assert.True(CommandLineSwitches.IsParameterizedSwitch(property, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
-            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.Property, parameterizedSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
-            Assert.True(multipleParametersAllowed);
-            Assert.NotNull(missingParametersErrorMessage);
-            Assert.True(unquoteParameters);
+            CommandLineSwitches.IsParameterizedSwitch(property, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.Property);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeTrue();
+            missingParametersErrorMessage.ShouldNotBeNull();
+            unquoteParameters.ShouldBeTrue();
         }
 
         [Theory]
@@ -307,12 +307,12 @@ namespace Microsoft.Build.UnitTests
             bool unquoteParameters;
             bool emptyParametersAllowed;
 
-            Assert.True(CommandLineSwitches.IsParameterizedSwitch(logger, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
-            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.Logger, parameterizedSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
-            Assert.False(multipleParametersAllowed);
-            Assert.NotNull(missingParametersErrorMessage);
-            Assert.False(unquoteParameters);
+            CommandLineSwitches.IsParameterizedSwitch(logger, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.Logger);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldNotBeNull();
+            unquoteParameters.ShouldBeFalse();
         }
 
         [Theory]
@@ -330,12 +330,12 @@ namespace Microsoft.Build.UnitTests
             bool unquoteParameters;
             bool emptyParametersAllowed;
 
-            Assert.True(CommandLineSwitches.IsParameterizedSwitch(verbosity, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
-            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.Verbosity, parameterizedSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
-            Assert.False(multipleParametersAllowed);
-            Assert.NotNull(missingParametersErrorMessage);
-            Assert.True(unquoteParameters);
+            CommandLineSwitches.IsParameterizedSwitch(verbosity, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.Verbosity);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldNotBeNull();
+            unquoteParameters.ShouldBeTrue();
         }
 
         [Theory]
@@ -349,9 +349,9 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches.ParameterlessSwitch parameterlessSwitch;
             string duplicateSwitchErrorMessage;
-            Assert.True(CommandLineSwitches.IsParameterlessSwitch(detailedsummary, out parameterlessSwitch, out duplicateSwitchErrorMessage));
-            Assert.Equal(CommandLineSwitches.ParameterlessSwitch.DetailedSummary, parameterlessSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
+            CommandLineSwitches.IsParameterlessSwitch(detailedsummary, out parameterlessSwitch, out duplicateSwitchErrorMessage).ShouldBeTrue();
+            parameterlessSwitch.ShouldBe(CommandLineSwitches.ParameterlessSwitch.DetailedSummary);
+            duplicateSwitchErrorMessage.ShouldBeNull();
         }
 
         [Theory]
@@ -368,12 +368,12 @@ namespace Microsoft.Build.UnitTests
             bool unquoteParameters;
             bool emptyParametersAllowed;
 
-            Assert.True(CommandLineSwitches.IsParameterizedSwitch(maxcpucount, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
-            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.MaxCPUCount, parameterizedSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
-            Assert.False(multipleParametersAllowed);
-            Assert.NotNull(missingParametersErrorMessage);
-            Assert.True(unquoteParameters);
+            CommandLineSwitches.IsParameterizedSwitch(maxcpucount, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.MaxCPUCount);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldNotBeNull();
+            unquoteParameters.ShouldBeTrue();
         }
 
 #if FEATURE_XML_SCHEMA_VALIDATION
@@ -393,12 +393,12 @@ namespace Microsoft.Build.UnitTests
             bool unquoteParameters;
             bool emptyParametersAllowed;
 
-            Assert.True(CommandLineSwitches.IsParameterizedSwitch(validate, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
-            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.Validate, parameterizedSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
-            Assert.False(multipleParametersAllowed);
-            Assert.Null(missingParametersErrorMessage);
-            Assert.True(unquoteParameters);
+            CommandLineSwitches.IsParameterizedSwitch(validate, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.Validate);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldBeNull();
+            unquoteParameters.ShouldBeTrue();
         }
 #endif
 
@@ -414,12 +414,12 @@ namespace Microsoft.Build.UnitTests
             bool unquoteParameters;
             bool emptyParametersAllowed;
 
-            Assert.True(CommandLineSwitches.IsParameterizedSwitch(preprocess, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
-            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.Preprocess, parameterizedSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
-            Assert.False(multipleParametersAllowed);
-            Assert.Null(missingParametersErrorMessage);
-            Assert.True(unquoteParameters);
+            CommandLineSwitches.IsParameterizedSwitch(preprocess, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.Preprocess);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldBeNull();
+            unquoteParameters.ShouldBeTrue();
         }
 
         [Theory]
@@ -436,13 +436,13 @@ namespace Microsoft.Build.UnitTests
             bool unquoteParameters;
             bool emptyParametersAllowed;
 
-            Assert.True(CommandLineSwitches.IsParameterizedSwitch(isolateprojects, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
-            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.IsolateProjects, parameterizedSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
-            Assert.False(multipleParametersAllowed);
-            Assert.Null(missingParametersErrorMessage);
-            Assert.True(unquoteParameters);
-            Assert.False(emptyParametersAllowed);
+            CommandLineSwitches.IsParameterizedSwitch(isolateprojects, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.IsolateProjects);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldBeNull();
+            unquoteParameters.ShouldBeTrue();
+            emptyParametersAllowed.ShouldBeFalse();
         }
 
         [Theory]
@@ -459,13 +459,13 @@ namespace Microsoft.Build.UnitTests
             bool unquoteParameters;
             bool emptyParametersAllowed;
 
-            Assert.True(CommandLineSwitches.IsParameterizedSwitch(graph, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
-            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.GraphBuild, parameterizedSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
-            Assert.False(multipleParametersAllowed);
-            Assert.Null(missingParametersErrorMessage);
-            Assert.True(unquoteParameters);
-            Assert.False(emptyParametersAllowed);
+            CommandLineSwitches.IsParameterizedSwitch(graph, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.GraphBuild);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldBeNull();
+            unquoteParameters.ShouldBeTrue();
+            emptyParametersAllowed.ShouldBeFalse();
         }
 
         [Fact]
