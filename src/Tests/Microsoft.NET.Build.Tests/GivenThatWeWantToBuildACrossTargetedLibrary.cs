@@ -25,8 +25,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("CrossTargeting")
-                .WithSource()
-                .Restore(Log, "NetStandardAndNetCoreApp");
+                .WithSource();
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "NetStandardAndNetCoreApp");
 
@@ -54,8 +53,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("CrossTargeting")
-                .WithSource()
-                .Restore(Log, "DesktopAndNetStandard");
+                .WithSource();
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "DesktopAndNetStandard");
 
@@ -120,7 +118,7 @@ namespace Microsoft.NET.Build.Tests
 
             var command = new GetValuesCommand(Log, testAsset.TestRoot, "", valueName: "RuntimeIdentifiers");
             command.DependsOnTargets = "GetAllRuntimeIdentifiers";
-            command.Execute().Should().Pass();
+            command.ExecuteWithoutRestore().Should().Pass();
             command.GetValues().Should().BeEquivalentTo(expectedCombination.Split(';'));
         }
     }

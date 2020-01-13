@@ -272,6 +272,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="CompileTimeAssemblies" ItemName="ResolvedCompileFileDefinitions" />
       <Output TaskParameter="TransitiveProjectReferences" ItemName="_TransitiveProjectReferences" />
       <Output TaskParameter="PackageFolders" ItemName="AssetsFilePackageFolder" />
+      <Output TaskParameter="PackageDependencies" ItemName="PackageDependencies" />
     </ResolvePackageAssets>
 
     <ItemGroup Condition="'$(UseAppHostFromAssetsFile)' == 'true'">
@@ -523,7 +524,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
   -->
   <Target Name="ResolveLockFileCopyLocalFiles"
-          DependsOnTargets="ResolvePackageAssets">
+          DependsOnTargets="ResolvePackageAssets;RunProduceContentAssets">
 
     <ItemGroup>
       <_ResolvedCopyLocalBuildAssets Include="@(RuntimeCopyLocalItems)"
@@ -537,6 +538,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_ResolvedCopyLocalBuildAssets Include="@(RuntimeTargetsCopyLocalItems)"
                                      Condition="'%(RuntimeTargetsCopyLocalItems.CopyLocal)' == 'true'" />
 
+      <ReferenceCopyLocalPaths Include="@(_ContentCopyLocalItems)" />
       <ReferenceCopyLocalPaths Include="@(_ResolvedCopyLocalBuildAssets)"
                                Condition="'$(CopyLocalLockFileAssemblies)' == 'true'" />
     </ItemGroup>

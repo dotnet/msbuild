@@ -99,8 +99,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                  FormatArguments="$([MSBuild]::Escape('$(TargetFramework)'))" />
   </Target>
 
+  <UsingTask TaskName="AllowEmptyTelemetry" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
   <Target Name="_CollectTargetFrameworkForTelemetry" AfterTargets="_CheckForUnsupportedTargetFramework">
-    <Telemetry EventName="targetframeworkeval" EventData="TargetFrameworkVersion=$([MSBuild]::Escape('$(TargetFrameworkMoniker)'))" />
+    <AllowEmptyTelemetry EventName="targetframeworkeval" EventData="TargetFrameworkVersion=$([MSBuild]::Escape('$(TargetFrameworkMoniker)'));RuntimeIdentifier=$(RuntimeIdentifier);SelfContained=$(SelfContained);UseApphost=$(UseApphost);OutputType=$(OutputType)" />
   </Target>
 
   <!--
@@ -130,6 +132,15 @@ Copyright (c) .NET Foundation. All rights reserved.
       />
   </Target>
 
+  <!--
+    Trigger an error if C++ project targeting a lower version of .NET Core than 3.1.
+  -->
+  <Target Name="_CheckForUnsupportedCppNETCoreVersion" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;Restore;CollectPackageReferences">
+    <NETSdkError Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_TargetFrameworkVersionWithoutV)' &lt; '3.1' and '$(Language)' == 'C++'"
+                 ResourceName="CppRequiresTFMVersion31"
+      />
+  </Target>
+
   <PropertyGroup  Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(NETStandardMaximumVersion)' == ''">
     <NETStandardMaximumVersion>2.1</NETStandardMaximumVersion>
   </PropertyGroup>
@@ -143,6 +154,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       />    
   </Target>
 
+  <Target Name="_CheckForUnsupportedTargetFrameworkAndFeatureCombination" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;Restore;CollectPackageReferences"
+        Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+
+    <NETSdkError Condition="'$(UsingNETSdkDefaults)' != 'true'"
+                 ResourceName="NETFrameworkWithoutUsingNETSdkDefaults" />
+  </Target>
 
   <!-- Exclude files from OutputPath and IntermediateOutputPath from default item globs.  Use the value
        of these properties before the TargetFramework is appended, so that if these values are specified
@@ -156,7 +173,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultItemExcludes>$(DefaultItemExcludes);$(IntermediateOutputPath)/**</DefaultItemExcludes>
   </PropertyGroup>
 
-  <PropertyGroup>
+  <!-- Projects which don't use Microsoft.NET.Sdk will typically define the OutputPath directly (usually in a
+       Configuration-specific PropertyGroup), so in that case we won't append to it by default. -->
+  <PropertyGroup Condition="'$(UsingNETSdkDefaults)' == 'true'">
     <AppendTargetFrameworkToOutputPath Condition="'$(AppendTargetFrameworkToOutputPath)' == ''">true</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 

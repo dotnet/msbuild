@@ -13,6 +13,7 @@ using Xunit;
 using System.Xml.Linq;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.ProjectConstruction;
+using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -39,8 +40,7 @@ namespace Microsoft.NET.Publish.Tests
             testProject.PackageReferences.Add(new TestPackageReference("System.Spatial", "5.8.3"));
             testProject.AdditionalProperties.Add("SatelliteResourceLanguages", "en-US;it;fr");
 
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
             var publishResult = publishCommand.Execute();
@@ -59,7 +59,7 @@ namespace Microsoft.NET.Publish.Tests
                 $"{testProject.Name}.runtimeconfig.json"
             };
 
-            if (tfm == "netcoreapp3.0")
+            if (tfm == "netcoreapp3.0" && RuntimeEnvironment.OperatingSystemPlatform != Platform.Darwin)
             {
                 files.Add($"{testProject.Name}{Constants.ExeSuffix}");
             }
@@ -79,8 +79,7 @@ namespace Microsoft.NET.Publish.Tests
 
             testProject.PackageReferences.Add(new TestPackageReference("System.Spatial", "5.8.3"));
 
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
             var publishResult = publishCommand.Execute();

@@ -2,6 +2,7 @@
 using System.IO;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -80,15 +81,23 @@ namespace Microsoft.NET.Publish.Tests
             Log.WriteLine("Contents of PublishItemsOutputGroup dumped to '{0}'.", testOutputDir.FullName);
 
             // Since no RID was specified the output group should only contain framework dependent output
-            testOutputDir.Should().HaveFile($"{testProject.Name}{Constants.ExeSuffix}");
+            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Darwin)
+            {
+                testOutputDir.Should().HaveFile($"{testProject.Name}{Constants.ExeSuffix}");
+            }
+
             testOutputDir.Should().HaveFile($"{testProject.Name}.deps.json");
             testOutputDir.Should().NotHaveFiles(FrameworkAssemblies);
 
             var testKeyOutputDir = new DirectoryInfo(Path.Combine(testAsset.Path, testProject.Name, "TestOutput_Key"));
             Log.WriteLine("PublishItemsOutputGroup key items dumped to '{0}'.", testKeyOutputDir.FullName);
 
-            // Verify the only key item is the exe
-            testKeyOutputDir.Should().OnlyHaveFiles(new List<string>() { $"{testProject.Name}{Constants.ExeSuffix}" });
+            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Darwin)
+            {
+                // Verify the only key item is the exe
+                testKeyOutputDir.Should()
+                    .OnlyHaveFiles(new List<string>() {$"{testProject.Name}{Constants.ExeSuffix}"});
+            }
         }
 
         private TestProject SetupProject()

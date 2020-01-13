@@ -24,7 +24,7 @@ namespace Microsoft.NET.TestFramework.Commands
             Log = log;
         }
 
-        protected abstract SdkCommandSpec CreateCommand(string[] args);
+        protected abstract SdkCommandSpec CreateCommand(IEnumerable<string> args);
 
         public TestCommand WithEnvironmentVariable(string name, string value)
         {
@@ -32,7 +32,7 @@ namespace Microsoft.NET.TestFramework.Commands
             return this;
         }
 
-        private SdkCommandSpec CreateCommandSpec(string[] args)
+        private SdkCommandSpec CreateCommandSpec(IEnumerable<string> args)
         {
             var commandSpec = CreateCommand(args);
             foreach (var kvp in _environment)
@@ -62,6 +62,12 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public CommandResult Execute(params string[] args)
         {
+            IEnumerable<string> enumerableArgs = args;
+            return Execute(enumerableArgs);
+        }
+
+        public virtual CommandResult Execute(IEnumerable<string> args)
+        { 
             var command = CreateCommandSpec(args)
                 .ToCommand()
                 .CaptureStdOut()

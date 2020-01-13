@@ -536,10 +536,6 @@ The following are names of parameters or literal values and should not be transl
   <data name="ReadyToRunCompilationHasWarnings_Info" xml:space="preserve">
     <value>Some ReadyToRun compilations emitted warnings, indicating potential missing dependencies. Missing dependencies could potentially cause runtime failures. To show the warnings, set the PublishReadyToRunShowWarnings property to true.</value>
   </data>
-  <data name="CannotCreateReadyToRunImagesForLibProjects" xml:space="preserve">
-    <value>NETSDK1108: ReadyToRun compilation will be skipped because it is only supported for executable projects.</value>
-    <comment>{StrBegin="NETSDK1108: "}</comment>
-  </data>
   <data name="RuntimeListNotFound" xml:space="preserve">
     <value>NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET Core team here: https://aka.ms/dotnet-sdk-issue.</value>
     <comment>{StrBegin="NETSDK1109: "}</comment>
@@ -559,5 +555,37 @@ The following are names of parameters or literal values and should not be transl
   <data name="AppHostCreationFailedWithRetry" xml:space="preserve">
     <value>NETSDK1113: Failed to create apphost (attempt {0} out of {1}): {2}</value>
     <comment>{StrBegin="NETSDK1113: "}</comment>
+  </data>
+  <data name="CannotFindIjwhost" xml:space="preserve">
+    <value>NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.1 or higher when targeting Windows.</value>
+    <comment>{StrBegin="NETSDK1114: "}</comment>
+  </data>
+  <data name="NETFrameworkWithoutUsingNETSdkDefaults" xml:space="preserve">
+    <value>NETSDK1115: The current .NET SDK does not support .NET Framework without using .NET SDK Defaults. It is likely due to a mismatch between C++/CLI project CLRSupport property and TargetFramework.</value>
+    <comment>{StrBegin="NETSDK1115: "}</comment>
+  </data>
+  <data name="NoSupportCppNonDynamicLibraryDotnetCore" xml:space="preserve">
+    <value>NETSDK1116: C++/CLI projects targeting .NET Core must be dynamic libraries.</value>
+    <comment>{StrBegin="NETSDK1116: "}</comment>
+  </data>
+  <data name="NoSupportCppPublishDotnetCore" xml:space="preserve">
+    <value>NETSDK1117: Does not support publish of C++/CLI project targeting dotnet core.</value>
+    <comment>{StrBegin="NETSDK1117: "}</comment>
+  </data>
+  <data name="NoSupportCppPackDotnetCore" xml:space="preserve">
+    <value>NETSDK1118: C++/CLI projects targeting .NET Core cannot be packed.</value>
+    <comment>{StrBegin="NETSDK1118: "}</comment>
+  </data>
+  <data name="NoSupportCppEnableComHosting" xml:space="preserve">
+    <value>NETSDK1119: C++/CLI projects targeting .NET Core cannot use EnableComHosting=true.</value>
+    <comment>{StrBegin="NETSDK1119: "}</comment>
+  </data>
+  <data name="CppRequiresTFMVersion31" xml:space="preserve">
+    <value>NETSDK1120: C++/CLI projects targeting .NET Core require a target framework of at least 'netcoreapp3.1'.</value>
+    <comment>{StrBegin="NETSDK1120: "}</comment>
+  </data>
+  <data name="NoSupportCppSelfContained" xml:space="preserve">
+    <value>NETSDK1121: C++/CLI projects targeting .NET Core cannot use SelfContained=true.</value>
+    <comment>{StrBegin="NETSDK1121: "}</comment>
   </data>
 </root>

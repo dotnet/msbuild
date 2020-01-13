@@ -17,6 +17,8 @@
     <NoWarn>$(NoWarn);NU5123</NoWarn>
     
     <GenerateProgramFile>false</GenerateProgramFile>
+    
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
 </Project>

@@ -13,6 +13,7 @@ using System.Xml.Linq;
 using Xunit.Abstractions;
 using System.Collections.Generic;
 using Microsoft.NET.TestFramework.ProjectConstruction;
+using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -43,8 +44,7 @@ namespace Microsoft.NET.Publish.Tests
                     itemGroup.Add(new XElement(ns + "PackageReference", new XAttribute("Include", "NEWTONSOFT.Json"),
                                                                         new XAttribute("Version", "9.0.1"),
                                                                         new XAttribute("PrivateAssets", "All")));
-                })
-                .Restore(Log);
+                });
 
             var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute();
@@ -61,7 +61,7 @@ namespace Microsoft.NET.Publish.Tests
                 "HelloWorld.runtimeconfig.json"
             };
 
-            if (shouldIncludeExecutable)
+            if (shouldIncludeExecutable && RuntimeEnvironment.OperatingSystemPlatform != Platform.Darwin)
             {
                 expectedFiles.Add("HelloWorld" + EnvironmentInfo.ExecutableExtension);
             }
@@ -89,8 +89,7 @@ namespace Microsoft.NET.Publish.Tests
                     itemGroup.Add(new XElement(ns + "PackageReference", new XAttribute("Include", "Newtonsoft.Json"),
                                                                         new XAttribute("Version", "9.0.1"),
                                                                         new XAttribute("Publish", "false")));
-                })
-                .Restore(Log);
+                });
 
             var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute();
@@ -107,7 +106,7 @@ namespace Microsoft.NET.Publish.Tests
                 "HelloWorld.runtimeconfig.json"
             };
 
-            if (shouldIncludeExecutable)
+            if (shouldIncludeExecutable && RuntimeEnvironment.OperatingSystemPlatform != Platform.Darwin)
             {
                 expectedFiles.Add("HelloWorld" + EnvironmentInfo.ExecutableExtension);
             }
@@ -136,8 +135,7 @@ namespace Microsoft.NET.Publish.Tests
                                                                         new XAttribute("Version", "9.0.1"),
                                                                         new XAttribute("PrivateAssets", "All"),
                                                                         new XAttribute("Publish", "true")));
-                })
-                .Restore(Log);
+                });
 
             var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
             var publishResult = publishCommand.Execute();
@@ -160,7 +158,7 @@ namespace Microsoft.NET.Publish.Tests
                 expectedFiles.Add("System.Runtime.Serialization.Primitives.dll");
             }
 
-            if (shouldIncludeExecutable)
+            if (shouldIncludeExecutable && RuntimeEnvironment.OperatingSystemPlatform != Platform.Darwin)
             {
                 expectedFiles.Add("HelloWorld" + EnvironmentInfo.ExecutableExtension);
             }
@@ -192,8 +190,7 @@ namespace Microsoft.NET.Publish.Tests
 
             testProject.ReferencedProjects.Add(testLibraryProject);
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 

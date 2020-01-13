@@ -24,6 +24,13 @@ namespace Microsoft.NET.Build.Tasks
             return result;
         }
 
+        public static bool HasMetadataValue(this ITaskItem item, string name)
+        {
+            string value = item.GetMetadata(name);
+
+            return !string.IsNullOrEmpty(value);
+        }
+
         public static bool HasMetadataValue(this ITaskItem item, string name, string expectedValue)
         {
             string value = item.GetMetadata(name);

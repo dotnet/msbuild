@@ -16,9 +16,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_PublishProfileDesignerFolder Condition="'$(AppDesignerFolder)' != ''">$(AppDesignerFolder)</_PublishProfileDesignerFolder>
     <_PublishProfileDesignerFolder Condition="'$(_PublishProfileDesignerFolder)' == ''">Properties</_PublishProfileDesignerFolder>
     <_PublishProfileRootFolder Condition="'$(_PublishProfileRootFolder)' == ''">$(MSBuildProjectDirectory)\$(_PublishProfileDesignerFolder)\PublishProfiles\</_PublishProfileRootFolder>
-    <PublishProfile Condition="'$(PublishProfile)' ==''">FileSystem</PublishProfile>
-    <PublishProfileName Condition="'$(PublishProfileName)' == ''">$([System.IO.Path]::GetFileNameWithoutExtension($(PublishProfile)))</PublishProfileName>
-    <PublishProfileFullPath Condition="'$(PublishProfileFullPath)' == ''">$(_PublishProfileRootFolder)$(PublishProfileName).pubxml</PublishProfileFullPath>
+    <PublishProfileName Condition="'$(PublishProfileName)' == '' and '$(PublishProfile)' != ''">$([System.IO.Path]::GetFileNameWithoutExtension($(PublishProfile)))</PublishProfileName>
+    <PublishProfileFullPath Condition="'$(PublishProfileFullPath)' == '' and '$(PublishProfileName)' != ''">$(_PublishProfileRootFolder)$(PublishProfileName).pubxml</PublishProfileFullPath>
     <WebPublishProfileFile Condition="'$(WebPublishProfileFile)' == '' and Exists('$(PublishProfileFullPath)')">$(PublishProfileFullPath)</WebPublishProfileFile>
 
     <!-- If the publish profile doesn't exist, mark as not imported.

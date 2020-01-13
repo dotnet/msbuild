@@ -386,8 +386,7 @@ namespace Microsoft.NET.Build.Tests
                     XElement itemGroup = new XElement(ns + "ItemGroup");
                     project.Root.Add(itemGroup);
                     itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", testProject.Name + ".cs")));
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             var projectFolder = Path.Combine(testAsset.TestRoot, testProject.Name);
 
@@ -441,8 +440,7 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary")
                 .WithSource()
-                .WithProjectChanges(projectChanges)
-                .Restore(Log, relativePath: "TestLibrary");
+                .WithProjectChanges(projectChanges);
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
@@ -514,8 +512,7 @@ namespace Microsoft.NET.Build.Tests
                     var itemGroup = new XElement(ns + "ItemGroup");
                     project.Root.Add(itemGroup);
                     itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", @"**\*.cs")));
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -552,8 +549,7 @@ namespace Microsoft.NET.Build.Tests
                     project.Root.Add(itemGroup);
                     itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", @"**\*.cs")));
                     itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", @"DuplicateCompileItems.cs")));
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -598,8 +594,7 @@ namespace Microsoft.NET.Build.Tests
                     //  Use non-standard casing for the explicit package reference to verify that comparison is case-insensitive
                     itemGroup.Add(new XElement(ns + "PackageReference",
                         new XAttribute("Include", "netstandard.Library"), new XAttribute("Version", "1.6.1")));
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -708,8 +703,7 @@ namespace Microsoft.NET.Build.Tests
             string explicitPackageVersion = "2.0.3";
             testProject.PackageReferences.Add(new TestPackageReference("Microsoft.NETCore.App", explicitPackageVersion));
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: disableImplicitFrameworkReferences.ToString())
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: disableImplicitFrameworkReferences.ToString());
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -750,8 +744,7 @@ public class Class1
     }
 }";
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 

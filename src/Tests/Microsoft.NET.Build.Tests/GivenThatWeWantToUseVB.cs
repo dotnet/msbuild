@@ -13,6 +13,7 @@ using Xunit.Abstractions;
 using Xunit;
 using System;
 using System.IO;
+using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 
 namespace Microsoft.NET.Build.Tests
@@ -85,8 +86,7 @@ namespace Microsoft.NET.Build.Tests
             };
 
             var testAsset = _testAssetsManager
-                .CreateTestProject(testProject, identifier: targetFramework + isExe, targetExtension: ".vbproj")
-                .Restore(Log, testProject.Name);
+                .CreateTestProject(testProject, identifier: targetFramework + isExe, targetExtension: ".vbproj");
 
             var buildCommand = new GetValuesCommand(
                 Log,
@@ -133,15 +133,14 @@ namespace Microsoft.NET.Build.Tests
                     });
 
                 case ("netcoreapp3.0", true):
-                    return (VBRuntime.Referenced, new[]
+                    return (VBRuntime.Referenced, AssertionHelper.AppendApphostOnNonMacOS("HelloWorld", new[]
                     {
                         "HelloWorld.dll",
                         "HelloWorld.pdb",
-                        "HelloWorld" + EnvironmentInfo.ExecutableExtension,
                         "HelloWorld.runtimeconfig.json",
                         "HelloWorld.runtimeconfig.dev.json",
                         "HelloWorld.deps.json",
-                    });
+                    }));
 
                 case ("netcoreapp3.0", false):
                    return (VBRuntime.Referenced, new[]
@@ -181,7 +180,7 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyFact(Skip="https://github.com/dotnet/sdk/issues/3678")]
         public void It_builds_a_vb_wpf_app()
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;

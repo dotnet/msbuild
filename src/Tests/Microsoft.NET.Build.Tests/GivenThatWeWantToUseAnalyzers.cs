@@ -25,7 +25,7 @@ namespace Microsoft.NET.Build.Tests
         [Theory]
         [InlineData("C#", "AppWithLibrary")]
         [InlineData("VB", "AppWithLibraryVB")]
-        [InlineData("F#", "AppWithLibraryFS")]
+        [InlineData("F#", "AppWithLibraryFS", Skip = "https://github.com/dotnet/coreclr/issues/27275")]
         public void It_resolves_analyzers_correctly(string language, string testAssetName)
         {
             var asset = _testAssetsManager
@@ -42,8 +42,7 @@ namespace Microsoft.NET.Build.Tests
                             new XElement(ns + "PackageReference",
                                 new XAttribute("Include", "Microsoft.CodeQuality.Analyzers"),
                                 new XAttribute("Version", "2.6.0"))));
-                })
-                .Restore(Log, relativePath: "TestApp");
+                });
 
             var command = new GetValuesCommand(
                 Log,

@@ -99,14 +99,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     SelfContained was not an option in .NET Core SDK 1.0. 
     Default SelfContained based on the RuntimeIdentifier, so projects don't have to explicitly set SelfContained.
     This avoids a breaking change from 1.0 behavior.
+
+    Due to https://github.com/dotnet/sdk/issues/4012 we decided to disable UseAppHost to be the default on mac
     -->
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(HasRuntimeOutput)' == 'true'">
     <SelfContained Condition="'$(SelfContained)' == '' and '$(RuntimeIdentifier)' != ''">true</SelfContained>
     <SelfContained Condition="'$(SelfContained)' == ''">false</SelfContained>
+    <_OnOsx>$(NETCoreSdkRuntimeIdentifier.StartsWith('osx'))</_OnOsx>
     <UseAppHost Condition="'$(UseAppHost)' == '' and
                            ('$(SelfContained)' == 'true' or
                             ('$(RuntimeIdentifier)' != '' and '$(_TargetFrameworkVersionWithoutV)' >= '2.1') or
-                            '$(_TargetFrameworkVersionWithoutV)' >= '3.0')">true</UseAppHost>
+                            ('$(_TargetFrameworkVersionWithoutV)' >= '3.0' and $(_OnOsx) != 'true'))">true</UseAppHost>
     <UseAppHost Condition="'$(UseAppHost)' == ''">false</UseAppHost>
   </PropertyGroup>
 
@@ -114,10 +117,13 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(DefaultAppHostRuntimeIdentifier)' == '' and
                             '$(RuntimeIdentifier)' == '' and
                             (('$(UseAppHost)' == 'true' and '$(ProjectDepsFilePath)' == '') or
-                            ('$(EnableComHosting)' == 'true' and '$(_IsExecutable)' != 'true'))">
+                            ('$(EnableComHosting)' == 'true' and '$(_IsExecutable)' != 'true') or
+                            '$(UseIJWHost)' == 'true')">
     <DefaultAppHostRuntimeIdentifier>$(NETCoreSdkRuntimeIdentifier)</DefaultAppHostRuntimeIdentifier>
     <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and '$(PlatformTarget)' == 'x64'">win-x64</DefaultAppHostRuntimeIdentifier>
     <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and '$(PlatformTarget)' == 'x86'">win-x86</DefaultAppHostRuntimeIdentifier>
+    <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and '$(PlatformTarget)' == 'ARM'">win-arm</DefaultAppHostRuntimeIdentifier>
+    <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and '$(PlatformTarget)' == 'ARM64'">win-arm64</DefaultAppHostRuntimeIdentifier>
   </PropertyGroup>
 
   <Target Name="_CheckForUnsupportedAppHostUsage"
@@ -151,13 +157,29 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </Target>
 
+  <Target Name="_CheckForLanguageAndFeatureCombinationSupport"
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform;ProcessFrameworkReferences">
+
+    <NETSdkError Condition="'$(Language)' == 'C++' and $(OutputType) != 'library' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
+                 ResourceName="NoSupportCppNonDynamicLibraryDotnetCore" />
+
+    <NETSdkError Condition="'$(Language)' == 'C++' and $(EnableComHosting) == 'true'"
+                 ResourceName="NoSupportCppEnableComHosting" />
+
+    <NETSdkError Condition="'$(Language)' == 'C++' and $(SelfContained) == 'true'"
+                 ResourceName="NoSupportCppSelfContained" />
+
+  </Target>
+
   <Target Name="_CheckForNETCoreSdkIsPreview"
           BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
           Condition=" '$(_NETCoreSdkIsPreview)' == 'true' AND '$(SuppressNETCoreSdkPreviewMessage)' != 'true' ">
     <ShowPreviewMessage />
   </Target>
 
-  <PropertyGroup>
+  <!-- Projects which don't use Microsoft.NET.Sdk will typically define the OutputPath directly (usually in a
+       Configuration-specific PropertyGroup), so in that case we won't append to it by default. -->
+  <PropertyGroup Condition="'$(UsingNETSdkDefaults)' == 'true'">
     <!-- Projects can opt out of having the RID appended to the output path by setting this to false. -->
     <AppendRuntimeIdentifierToOutputPath Condition="'$(AppendRuntimeIdentifierToOutputPath)' == ''">true</AppendRuntimeIdentifierToOutputPath>
   </PropertyGroup>
@@ -174,6 +196,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <OutputPath>$(OutputPath)$(RuntimeIdentifier)\</OutputPath>
   </PropertyGroup>
 
+  <UsingTask TaskName="Microsoft.NET.Build.Tasks.GetDefaultPlatformTargetForNetFramework"
+           AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+
   <!-- 
     Switch our default .NETFramework CPU architecture choice back to AnyCPU before 
     compiling the exe if no copy-local native dependencies were resolved from NuGet 
@@ -182,11 +208,14 @@ Copyright (c) .NET Foundation. All rights reserved.
           AfterTargets="ResolvePackageAssets"
           BeforeTargets="CoreCompile"
           Condition="'$(_UsingDefaultPlatformTarget)' == 'true' and
-                     '$(_UsingDefaultRuntimeIdentifier)' == 'true' and
-                     '@(NativeCopyLocalItems)' == ''">
-    <PropertyGroup>
-      <PlatformTarget>AnyCPU</PlatformTarget>
-    </PropertyGroup>
+                     '$(_UsingDefaultRuntimeIdentifier)' == 'true'">
+
+    <GetDefaultPlatformTargetForNetFramework PackageDependencies="@(PackageDependencies)"
+                                             NativeCopyLocalItems="@(NativeCopyLocalItems)">
+
+      <Output TaskParameter="DefaultPlatformTarget" PropertyName="PlatformTarget" />
+      
+    </GetDefaultPlatformTargetForNetFramework>
   </Target>
 
 </Project>

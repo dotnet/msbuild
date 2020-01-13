@@ -3,17 +3,25 @@
   <ProductDependencies>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19463.3">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="5.0.0-beta.20061.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>7b731032220c21a3ed0021c72757b1f3122579b2</Sha>
+      <Sha>b1f4549e88a136ed8ae657a39f8316b98b9bf80a</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.SignTool" Version="1.0.0-beta.19463.3">
+    <Dependency Name="Microsoft.DotNet.Helix.Sdk" Version="5.0.0-beta.20061.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>7b731032220c21a3ed0021c72757b1f3122579b2</Sha>
+      <Sha>b1f4549e88a136ed8ae657a39f8316b98b9bf80a</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.HostModel" Version="3.0.0-preview9-19407-10">
-      <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>88e391bb71d5659c28fdb23434752cab6878cc06</Sha>
+    <Dependency Name="Microsoft.DotNet.SignTool" Version="5.0.0-beta.20061.1">
+      <Uri>https://github.com/dotnet/arcade</Uri>
+      <Sha>b1f4549e88a136ed8ae657a39f8316b98b9bf80a</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.NET.HostModel" Version="5.0.0-alpha.1.20061.3">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>afc21e51af60a4d2cb11a1081fb38b1e3a8df0a2</Sha>
+    </Dependency>
+    <Dependency Name="NuGet.Build.Tasks" Version="5.5.0-preview.2.6355">
+      <Uri>https://github.com/NuGet/NuGet.Client</Uri>
+      <Sha>cb402b5a3340ab5b2605ecc72de7f70aaac95344</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

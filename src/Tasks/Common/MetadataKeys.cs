@@ -12,8 +12,6 @@ namespace Microsoft.NET.Build.Tasks
         public const string FileGroup = "FileGroup";
         public const string Path = "Path";
         public const string ResolvedPath = "ResolvedPath";
-        public const string PackageName = "PackageName";
-        public const string PackageVersion = "PackageVersion";
         public const string IsImplicitlyDefined = "IsImplicitlyDefined";
         public const string IsTopLevelDependency = "IsTopLevelDependency";
         public const string AllowExplicitVersion = "AllowExplicitVersion";
@@ -24,7 +22,9 @@ namespace Microsoft.NET.Build.Tasks
         public const string TargetFrameworkMoniker = "TargetFrameworkMoniker";
         public const string FrameworkName = "FrameworkName";
         public const string FrameworkVersion = "FrameworkVersion";
-        public const string IsTrimmable = "IsTrimmable";
+        public const string IsTrimmable = "IsTrimmable"; 
+        public const string RuntimeFrameworkName = "RuntimeFrameworkName";
+        public const string RuntimePackRuntimeIdentifiers = "RuntimePackRuntimeIdentifiers";
 
         // SDK Metadata
         public const string SDKPackageItemSpec = "SDKPackageItemSpec";
@@ -98,5 +98,7 @@ namespace Microsoft.NET.Build.Tasks
         // The DestinationSubPath is the path to the asset, relative to the destination folder.
         public const string DestinationSubPath = "DestinationSubPath";
         public const string AssetType = "AssetType";
+
+        public const string ReferenceOnly = "ReferenceOnly";  
     }
 }

@@ -88,8 +88,7 @@ namespace Microsoft.NET.Build.Tests
                 IsExe = true
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -140,8 +139,7 @@ namespace Microsoft.NET.Build.Tests
 
             var extraArgs = extraMSBuildArguments?.Split(' ') ?? Array.Empty<string>();
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, testIdentifier)
-                .Restore(Log, testProject.Name, extraArgs);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testIdentifier);
 
             NuGetConfigWriter.Write(testAsset.TestRoot, NuGetConfigWriter.DotnetCoreBlobFeed);
 
@@ -218,7 +216,7 @@ namespace Microsoft.NET.Build.Tests
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
-            var result = buildCommand.Execute($"/p:RuntimeIdentifier={runtimeIdentifier}");
+            var result = buildCommand.ExecuteWithoutRestore($"/p:RuntimeIdentifier={runtimeIdentifier}");
 
             if (allowMismatch)
             {
@@ -243,8 +241,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
 
             var getValuesCommand = new GetValuesCommand(Log, testAsset.TestRoot,
                 "netcoreapp2.1", "TargetDefinitions", GetValuesCommand.ValueType.Item)
@@ -352,8 +349,7 @@ public static class Program
                                 new XAttribute("Version", dependency.Item2)));
                         }
                     }
-                })
-                .Restore(Log, project.Name);
+                });
 
             string projectFolder = Path.Combine(testAsset.Path, project.Name);
 
@@ -416,8 +412,7 @@ public static class Program
                             new XAttribute("Version", dependency.Item2)));
                     }
 
-                })
-                .Restore(Log, project.Name);
+                });
 
             string projectFolder = Path.Combine(testAsset.Path, project.Name);
 
@@ -442,6 +437,52 @@ public static class Program
             }
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_generates_rid_fallback_graph(bool isSelfContained)
+        {
+            var targetFramework = "netcoreapp3.0";
+            var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            TestProject project = new TestProject()
+            {
+                Name = "NetCore2App",
+                TargetFrameworks = targetFramework,
+                IsExe = true,
+                IsSdkProject = true,
+                RuntimeIdentifier = runtimeIdentifier
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(project);
+            string projectFolder = Path.Combine(testAsset.Path, project.Name);
+
+            var buildCommand = new BuildCommand(Log, projectFolder);
+
+            buildCommand
+                .Execute($"/p:SelfContained={isSelfContained}")
+                .Should()
+                .Pass();
+
+            string outputFolder = buildCommand.GetOutputDirectory(project.TargetFrameworks, runtimeIdentifier: runtimeIdentifier).FullName;
+
+            using var depsJsonFileStream = File.OpenRead(Path.Combine(outputFolder, $"{project.Name}.deps.json"));
+            var dependencyContext = new DependencyContextJsonReader().Read(depsJsonFileStream);
+            var runtimeFallbackGraph = dependencyContext.RuntimeGraph;
+            if (isSelfContained)
+            {
+                runtimeFallbackGraph.Should().NotBeEmpty();
+                runtimeFallbackGraph
+                    .Any(runtimeFallback => !runtimeFallback.Runtime.Equals(runtimeIdentifier) && !runtimeFallback.Fallbacks.Contains(runtimeIdentifier))
+                    .Should()
+                    .BeFalse();
+            }
+            else
+            {
+                runtimeFallbackGraph.Should().BeEmpty();
+            }
+        }
+
         [Fact]
         public void There_are_no_conflicts_when_targeting_netcoreapp_1_1()
         {
@@ -453,8 +494,7 @@ public static class Program
                 IsExe = true
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -496,8 +536,7 @@ public static class Program
                         var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
                         propertyGroup.Element(ns + "TargetFramework").Name += "s";
                     }
-                })
-                .Restore(Log, testProject.Name);
+                });
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             publishCommand
@@ -526,8 +565,7 @@ public static class Program
 
             string[] extraArgs = new[] { "/p:TargetFramework=NETCOREAPP1.1" };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
-                .Restore(Log, testProject.Name, extraArgs);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -575,8 +613,7 @@ public static class Program
 
             testProject.ReferencedProjects.Add(referencedProject);
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -626,8 +663,7 @@ class Program
             testProject.PackageReferences.Add(new TestPackageReference("ContentFilesExample", "1.0.2"));
 
             var testAsset = _testAssetsManager
-                .CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+                .CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -655,8 +691,7 @@ class Program
             testProject.PackageReferences.Add(new TestPackageReference("System.Reflection", "4.3.0"));
 
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -677,8 +712,7 @@ class Program
                 IsExe = true
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
-                .Restore(Log, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
             string testDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
 
@@ -710,8 +744,7 @@ class Program
             };
 
             var testAsset = _testAssetsManager
-                .CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+                .CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
@@ -738,8 +771,7 @@ class Program
             };
 
             var testAsset = _testAssetsManager
-                .CreateTestProject(testProject)
-                .Restore(Log, testProject.Name);
+                .CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 

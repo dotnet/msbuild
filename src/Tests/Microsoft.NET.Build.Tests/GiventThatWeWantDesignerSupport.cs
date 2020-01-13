@@ -46,8 +46,7 @@ namespace Microsoft.NET.Build.Tests
             };
 
             var asset = _testAssetsManager
-                .CreateTestProject(project, identifier: targetFramework)
-                .Restore(Log, project.Name);
+                .CreateTestProject(project, identifier: targetFramework);
 
             var command = new GetValuesCommand(
                 Log, 

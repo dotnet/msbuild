@@ -34,7 +34,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new BuildCommand(Log, Path.Combine(asset.Path, ProjectName));
 
             command
-                .Execute("/restore")
+                .Execute()
                 .Should()
                 .Pass();
         }
@@ -51,7 +51,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new BuildCommand(Log, Path.Combine(asset.Path, ProjectName));
 
             command
-                .Execute("/restore")
+                .Execute()
                 .Should()
                 .Fail()
                 .And
@@ -71,7 +71,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new BuildCommand(Log, Path.Combine(asset.Path, ProjectName));
 
             command
-                .Execute("/restore")
+                .Execute()
                 .Should()
                 .Pass();
         }
@@ -89,14 +89,14 @@ namespace Microsoft.NET.Build.Tests
             var command = new BuildCommand(Log, Path.Combine(asset.Path, ProjectName));
 
             command
-                .Execute("/restore")
+                .Execute()
                 .Should()
                 .Fail()
                 .And
                 .HaveStdOutContaining(Strings.WindowsDesktopFrameworkRequiresWindows);
         }
 
-        [PlatformSpecificFact(Platform.Linux, Platform.Darwin, Platform.FreeBSD)]
+        [Fact]
         public void It_does_not_download_desktop_targeting_packs_on_unix()
         {
             const string ProjectName = "NoDownloadTargetingPackTest";
@@ -104,7 +104,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = ProjectName,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = "netcoreapp5.0",
                 IsSdkProject = true,
                 IsExe = true,
             };
@@ -116,7 +116,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new BuildCommand(Log, Path.Combine(asset.Path, ProjectName));
 
             command
-                .Execute("/restore")
+                .Execute()
                 .Should()
                 .Pass();
 
@@ -145,7 +145,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new PublishCommand(Log, Path.Combine(asset.Path, ProjectName));
 
             command
-                .Execute("/restore")
+                .Execute()
                 .Should()
                 .Pass();
 

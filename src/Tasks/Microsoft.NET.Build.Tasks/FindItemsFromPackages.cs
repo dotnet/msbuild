@@ -13,7 +13,7 @@ namespace Microsoft.NET.Build.Tasks
     /// set of Packages.
     /// </summary>
     /// <remarks>
-    /// Both Items and Packages are expected to have ('PackageName' and 'PackageVersion)' or ('NuGetPackageId' and 'NuGetPackageVersion')
+    /// Both Items and Packages are expected to have 'NuGetPackageId' and 'NuGetPackageVersion'
     /// metadata properties to use for the matching.
     /// </remarks>
     public sealed class FindItemsFromPackages : TaskBase

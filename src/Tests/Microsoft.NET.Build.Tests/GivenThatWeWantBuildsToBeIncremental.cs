@@ -27,8 +27,7 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: targetFramework)
                 .WithSource()
-                .WithTargetFramework(targetFramework)
-                .Restore(Log);
+                .WithTargetFramework(targetFramework);
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework).FullName;
@@ -51,8 +50,7 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: targetFramework)
                 .WithSource()
-                .WithTargetFramework(targetFramework)
-                .Restore(Log);
+                .WithTargetFramework(targetFramework);
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework).FullName;

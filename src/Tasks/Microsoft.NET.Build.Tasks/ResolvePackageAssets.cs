@@ -222,6 +222,9 @@ namespace Microsoft.NET.Build.Tasks
         [Output]
         public ITaskItem[] ApphostsForShimRuntimeIdentifiers { get; private set; }
 
+        [Output]
+        public ITaskItem[] PackageDependencies { get; private set; }
+
         /// <summary>
         /// Messages from the assets file.
         /// These are logged directly and therefore not returned to the targets (note private here).
@@ -275,7 +278,7 @@ namespace Microsoft.NET.Build.Tasks
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         private const int CacheFormatSignature = ('P' << 0) | ('K' << 8) | ('G' << 16) | ('A' << 24);
-        private const int CacheFormatVersion = 9;
+        private const int CacheFormatVersion = 10;
         private static readonly Encoding TextEncoding = Encoding.UTF8;
         private const int SettingsHashLength = 256 / 8;
         private HashAlgorithm CreateSettingsHash() => SHA256.Create();
@@ -305,6 +308,7 @@ namespace Microsoft.NET.Build.Tasks
                 FrameworkAssemblies = reader.ReadItemGroup();
                 FrameworkReferences = reader.ReadItemGroup();
                 NativeLibraries = reader.ReadItemGroup();
+                PackageDependencies = reader.ReadItemGroup();
                 PackageFolders = reader.ReadItemGroup();
                 ResourceAssemblies = reader.ReadItemGroup();
                 RuntimeAssemblies = reader.ReadItemGroup();
@@ -768,7 +772,8 @@ namespace Microsoft.NET.Build.Tasks
                 WriteItemGroup(WriteFrameworkAssemblies);
                 WriteItemGroup(WriteFrameworkReferences);
                 WriteItemGroup(WriteNativeLibraries);
-                WriteItemGroup(WritePackageFolders);
+                WriteItemGroup(WritePackageDependencies);
+                WriteItemGroup(WritePackageFolders);                
                 WriteItemGroup(WriteResourceAssemblies);
                 WriteItemGroup(WriteRuntimeAssemblies);
                 WriteItemGroup(WriteRuntimeTargets);
@@ -1091,6 +1096,17 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
+            private void WritePackageDependencies()
+            {
+                foreach (var library in _runtimeTarget.Libraries)
+                {
+                    if (library.IsPackage())
+                    {
+                        WriteItem(library.Name);
+                    }
+                }
+            }
+
             private void WriteResourceAssemblies()
             {
                 WriteItems(
@@ -1229,8 +1245,6 @@ namespace Microsoft.NET.Build.Tasks
                         string itemSpec = _packageResolver.ResolvePackageAssetPath(library, asset.Path);
                         WriteItem(itemSpec, library);
                         WriteMetadata(MetadataKeys.PathInPackage, asset.Path);
-                        WriteMetadata(MetadataKeys.PackageName, library.Name);
-                        WriteMetadata(MetadataKeys.PackageVersion, library.Version.ToString().ToLowerInvariant());
 
                         writeMetadata?.Invoke(library, asset);
                     }

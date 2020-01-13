@@ -28,13 +28,12 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/coreclr/issues/27275")]
         public void It_builds_the_library_successfully()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibraryFS")
-                .WithSource()
-                .Restore(Log, relativePath: "TestLibrary");
+                .WithSource();
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
@@ -53,13 +52,12 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/coreclr/issues/27275")]
         public void It_builds_the_library_twice_in_a_row()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibraryFS")
-                .WithSource()
-                .Restore(Log, relativePath: "TestLibrary");
+                .WithSource();
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
@@ -98,8 +96,6 @@ namespace Microsoft.NET.Build.Tests
                 testAsset.WithProjectChanges(projectChanges);
             }
 
-            testAsset.Restore(log, relativePath: "TestLibrary");
-
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
             var getValuesCommand = new GetValuesCommand(log, libraryProjectDirectory,
@@ -131,7 +127,7 @@ namespace Microsoft.NET.Build.Tests
 
             var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
             buildCommand
-                .Execute()
+                .ExecuteWithoutRestore()
                 .Should()
                 .Fail();
         }
@@ -158,7 +154,7 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
         }
 
-        [Theory]
+        [Theory(Skip = "https://github.com/dotnet/coreclr/issues/27275")]
         [InlineData("Debug", "DEBUG")]
         [InlineData("Release", "RELEASE")]
         [InlineData("CustomConfiguration", "CUSTOMCONFIGURATION")]
@@ -167,8 +163,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibraryFS", "ImplicitConfigurationConstantsFS", configuration)
-                .WithSource()
-                .Restore(Log, relativePath: "TestLibrary");
+                .WithSource();
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
@@ -188,7 +183,7 @@ namespace Microsoft.NET.Build.Tests
             definedConstants.Should().BeEquivalentTo(new[] { expectedDefine, "TRACE", "NETSTANDARD", "NETSTANDARD1_6" });
         }
 
-        [Theory]
+        [Theory(Skip = "https://github.com/dotnet/coreclr/issues/27275")]
         [InlineData("netstandard1.6", new[] { "NETSTANDARD", "NETSTANDARD1_6" }, false)]
         [InlineData("net45", new[] { "NETFRAMEWORK", "NET45" }, true)]
         [InlineData("net461", new[] { "NETFRAMEWORK", "NET461" }, true)]
@@ -235,8 +230,7 @@ namespace Microsoft.NET.Build.Tests
                         shouldCompile = true;
                         targetFrameworkProperties.Single().SetValue(targetFramework);
                     }
-                })
-                .Restore(Log, relativePath: "TestLibrary");
+                });
 
             if (buildOnlyOnWindows && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
