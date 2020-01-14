@@ -149,7 +149,17 @@ namespace Microsoft.Build.Logging
 
         private void LogInitialInfo()
         {
+            LogMessage("Process=" + Process.GetCurrentProcess().MainModule.FileName);
+            LogMessage("MSBuildExePath=" + BuildEnvironmentHelper.Instance.CurrentMSBuildExePath);
+            LogMessage("CommandLine=" + Environment.CommandLine);
+            LogMessage("CurrentDirectory=" + Environment.CurrentDirectory);
             LogMessage("BinLogFilePath=" + FilePath);
+
+            var assemblyInformationalVersion = typeof(BinaryLogger).Assembly.GetCustomAttributes<AssemblyInformationalVersionAttribute>().FirstOrDefault();
+            if (assemblyInformationalVersion != null)
+            {
+                LogMessage("AssemblyInformationalVersion=" + assemblyInformationalVersion.InformationalVersion);
+            }
         }
 
         private void LogMessage(string text)

@@ -90,11 +90,6 @@ namespace Microsoft.Build.Utilities
     internal class EscapeHatches
     {
         /// <summary>
-        /// Do not log command line information to build loggers. Useful to unbreak people who parse the msbuild log and who are unwilling to change their code.
-        /// </summary>
-        public readonly bool DoNotSendDeferredMessagesToBuildManager = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildDoNotSendDeferredMessagesToBuildManager"));
-
-        /// <summary>
         /// Force whether Project based evaluations should evaluate elements with false conditions.
         /// </summary>
         public readonly bool? EvaluateElementsWithFalseConditionInProjectEvaluation = ParseNullableBoolFromEnvironmentVariable("MSBUILDEVALUATEELEMENTSWITHFALSECONDITIONINPROJECTEVALUATION");
