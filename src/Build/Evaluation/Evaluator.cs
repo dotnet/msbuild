@@ -203,8 +203,12 @@ namespace Microsoft.Build.Evaluation
                 buildEventContext,
                 string.IsNullOrEmpty(projectRootElement.ProjectFileLocation.File) ? "(null)" : projectRootElement.ProjectFileLocation.File);
 
-            // Wrap the IEvaluatorData<> object passed in.
-            data = new PropertyTrackingEvaluatorDataWrapper<P, I, M, D>(data, _evaluationLoggingContext, Traits.Instance.LogPropertyTracking);
+            // If someone sets the 'MsBuildLogPropertyTracking' environment variable to a non-zero value, wrap property accesses for event reporting.
+            if (Traits.Instance.LogPropertyTracking > 0)
+            {
+                // Wrap the IEvaluatorData<> object passed in.
+                data = new PropertyTrackingEvaluatorDataWrapper<P, I, M, D>(data, _evaluationLoggingContext, Traits.Instance.LogPropertyTracking);
+            }
             _evaluationContext = evaluationContext ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
 
             // Create containers for the evaluation results
@@ -1337,7 +1341,34 @@ namespace Microsoft.Build.Evaluation
 
                 _expander.UsedUninitializedProperties.CurrentlyEvaluatingPropertyElementName = null;
 
-                _data.SetProperty(propertyElement, evaluatedValue);
+                P property = _data.SetProperty(propertyElement, evaluatedValue);
+
+                if (Traits.Instance.LogPropertyTracking == 0)
+                {
+                    P predecessor = _data.GetProperty(propertyElement.Name);
+
+                    if (predecessor != null)
+                    {
+                        LogPropertyReassignment(predecessor, property, propertyElement.Location.LocationString);
+                    }
+                }
+            }
+        }
+
+        private void LogPropertyReassignment(P predecessor, P property, string location)
+        {
+            string newValue = property.EvaluatedValue;
+            string oldValue = predecessor?.EvaluatedValue;
+
+            if (newValue != oldValue)
+            {
+                _evaluationLoggingContext.LogComment(
+                    MessageImportance.Low,
+                    "PropertyReassignment",
+                    property.Name,
+                    newValue,
+                    oldValue,
+                    location);
             }
         }
 
