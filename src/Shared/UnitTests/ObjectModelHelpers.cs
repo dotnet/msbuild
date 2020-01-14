@@ -1869,8 +1869,7 @@ namespace Microsoft.Build.UnitTests
                 TestEnvironment env,
                 BuildParameters buildParametersPrototype = null,
                 bool enableNodeReuse = false,
-                bool shutdownInProcNode = true,
-                IEnumerable<BuildManager.DeferredBuildMessage> deferredMessages = null)
+                bool shutdownInProcNode = true)
             {
                 _env = env;
 
@@ -1887,7 +1886,7 @@ namespace Microsoft.Build.UnitTests
                 actualBuildParameters.EnableNodeReuse = enableNodeReuse;
 
                 _buildManager = new BuildManager();
-                _buildManager.BeginBuild(actualBuildParameters, deferredMessages);
+                _buildManager.BeginBuild(actualBuildParameters);
             }
 
             public BuildResult BuildProjectFile(string projectFile, string[] entryTargets = null)
