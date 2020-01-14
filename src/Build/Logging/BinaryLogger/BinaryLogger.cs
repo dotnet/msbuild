@@ -33,8 +33,10 @@ namespace Microsoft.Build.Logging
         // version 7:
         //   - Include ProjectStartedEventArgs.GlobalProperties
         // version 8:
+        //   - This was used in a now-reverted change but is the same as 9.
+        // version 9:
         //   - new record kinds: EnvironmentVariableRead, PropertyReassignment, UninitializedPropertyRead
-        internal const int FileFormatVersion = 8;
+        internal const int FileFormatVersion = 9;
 
         private Stream stream;
         private BinaryWriter binaryWriter;

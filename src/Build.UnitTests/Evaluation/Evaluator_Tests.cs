@@ -4514,7 +4514,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void VerifyPropertyTrackingLoggingDefault()
         {
-            // Having nothing defined should default to only logging reassignments
+            // Having nothing defined should default to nothing being logged.
             this.VerifyPropertyTrackingLoggingScenario(
                 null,
                 logger =>
@@ -4532,7 +4532,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<PropertyReassignmentEventArgs>()
-                        .ShouldContain(r => r.PropertyName == "Prop2" && r.PreviousValue == "Value1" && r.NewValue == "Value2");
+                        .ShouldBeEmpty();
 
                     logger
                         .AllBuildEvents
