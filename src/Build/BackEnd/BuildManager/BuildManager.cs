@@ -27,6 +27,7 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Utilities;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
@@ -400,6 +401,8 @@ namespace Microsoft.Build.Execution
 
                 var loggingService = InitializeLoggingService();
 
+                LogExecutionContext(loggingService);
+
                 InitializeCaches();
 
                 _taskHostNodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.TaskHostNodeManager) as INodeManager;
@@ -503,6 +506,32 @@ namespace Microsoft.Build.Execution
 
                     _buildParameters.ProjectRootElementCache.DiscardImplicitReferences();
                 }
+            }
+        }
+
+        private void LogExecutionContext(ILoggingService loggingService)
+        {
+            if (Traits.Instance.EscapeHatches.DoNotLogExecutionDetailsInBuildManagerBeginBuild)
+            {
+                return;
+            }
+
+            LogComment("Process", Process.GetCurrentProcess().MainModule?.FileName ?? string.Empty);
+
+            LogComment("CommandLine", Environment.CommandLine);
+
+            LogComment("MSBExePath", BuildEnvironmentHelper.Instance.CurrentMSBuildExePath);
+
+            LogComment("MSBVersion", ProjectCollection.DisplayVersion);
+
+            LogComment("CurrentDirectory", Environment.CurrentDirectory);
+
+            void LogComment(string resourceName, string arg)
+            {
+                loggingService.LogCommentFromText(
+                    BuildEventContext.Invalid,
+                    MessageImportance.Low,
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(resourceName, arg));
             }
         }
 

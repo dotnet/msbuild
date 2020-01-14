@@ -62,6 +62,16 @@
       request a target to build itself (perhaps via a chain of other targets)
     </note>
       </trans-unit>
+      <trans-unit id="CommandLine">
+        <source>Command line arguments = "{0}"</source>
+        <target state="new">Command line arguments = "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CurrentDirectory">
+        <source>Current directory = "{0}"</source>
+        <target state="new">Current directory = "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
         <target state="translated">MSB4257: Zadaný výstupní soubor mezipaměti pro výsledky je prázdný.</target>
@@ -94,6 +104,16 @@
       LOCALIZATION: {0} is an enum value of LoggerVerbosity.
     </note>
       </trans-unit>
+      <trans-unit id="MSBExePath">
+        <source>MSBuild executable path = "{0}"</source>
+        <target state="new">MSBuild executable path = "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBVersion">
+        <source>MSBuild version = "{0}"</source>
+        <target state="new">MSBuild version = "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">Metaprojekt {0} byl vygenerován.</target>
@@ -115,6 +135,11 @@
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">Metoda {0} se nedá zavolat s kolekcí, která obsahuje prázdné cílové názvy nebo názvy null.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Process">
+        <source>Process = "{0}"</source>
+        <target state="new">Process = "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">

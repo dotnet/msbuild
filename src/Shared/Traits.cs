@@ -90,6 +90,11 @@ namespace Microsoft.Build.Utilities
     internal class EscapeHatches
     {
         /// <summary>
+        /// Do not log execution context at start of build. Useful for not breaking people who parse the msbuild log and who are unwilling to change their code.
+        /// </summary>
+        public readonly bool DoNotLogExecutionDetailsInBuildManagerBeginBuild = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDoNotLogExecutionDetailsInBuildManagerBeginBuild"));
+
+        /// <summary>
         /// Force whether Project based evaluations should evaluate elements with false conditions.
         /// </summary>
         public readonly bool? EvaluateElementsWithFalseConditionInProjectEvaluation = ParseNullableBoolFromEnvironmentVariable("MSBUILDEVALUATEELEMENTSWITHFALSECONDITIONINPROJECTEVALUATION");

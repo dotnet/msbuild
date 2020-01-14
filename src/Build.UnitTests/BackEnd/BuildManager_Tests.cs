@@ -945,6 +945,45 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// A simple successful build.
+        /// </summary>
+        [Fact]
+        public void BuildManagerShouldLogExecutionContext()
+        {
+            string contents = CleanupFileContents(@"
+<Project>
+ <Target Name='test'>
+    <Message Warning='[warning]'/>
+    <Message Text='[hello]' Importance='High'/>
+ </Target>
+</Project>
+");
+            BuildRequestData data = GetBuildRequestData(contents);
+            BuildResult result = _buildManager.Build(_parameters, data);
+            Assert.Equal(BuildResultCode.Success, result.OverallResult);
+
+            _logger.AssertLogContains("Process = ");
+            _logger.AssertLogContains("MSBuild executable path = ");
+            _logger.AssertLogContains("Command line arguments = ");
+            _logger.AssertLogContains("Current directory = ");
+            _logger.AssertLogContains("MSBuild version = ");
+
+            _logger.AssertLogContains("[warning]");
+            _logger.AssertLogContains("[hello]");
+
+            _logger.WarningCount.ShouldBe(1);
+
+            _logger.BuildStartedEvents.Count.ShouldBe(1);
+            _logger.BuildFinishedEvents.Count.ShouldBe(1);
+            _logger.ProjectStartedEvents.Count.ShouldBe(1);
+            _logger.ProjectFinishedEvents.Count.ShouldBe(1);
+            _logger.TargetStartedEvents.Count.ShouldBe(1);
+            _logger.TargetFinishedEvents.Count.ShouldBe(1);
+            _logger.TaskStartedEvents.Count.ShouldBe(2);
+            _logger.TaskFinishedEvents.Count.ShouldBe(2);
+        }
+
+        /// <summary>
         /// A build with a message, error and warning, verify that 
         /// we only get errors, warnings, and project started and finished when OnlyLogCriticalEvents is true
         /// </summary>
