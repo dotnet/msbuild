@@ -82,7 +82,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Log property tracking information.
         /// </summary>
-        public readonly int LogPropertyTracking = ParseIntFromEnvironmentVariableOrDefault("MsBuildLogPropertyTracking", 1); // Default to logging only property reassignments.
+        public readonly int LogPropertyTracking = ParseIntFromEnvironmentVariableOrDefault("MsBuildLogPropertyTracking", 0); // Default to logging nothing via the property tracker.
 
         private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
         {
