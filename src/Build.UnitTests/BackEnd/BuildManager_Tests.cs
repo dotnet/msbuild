@@ -953,7 +953,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = CleanupFileContents(@"
 <Project>
  <Target Name='test'>
-    <Message Warning='[warning]'/>
+    <Warning Text='[warning]'/>
     <Message Text='[hello]' Importance='High'/>
  </Target>
 </Project>

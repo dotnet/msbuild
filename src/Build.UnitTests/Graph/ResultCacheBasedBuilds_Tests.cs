@@ -67,7 +67,7 @@ namespace Microsoft.Build.Graph.UnitTests
             result.OverallResult.ShouldBe(BuildResultCode.Failure);
 
             _logger.FullLog.ShouldContain("MSB4256:");
-            _logger.AllBuildEvents.Count.ShouldBe(4);
+            _logger.AllBuildEvents.Count.ShouldBe(9);
             _logger.ErrorCount.ShouldBe(1);
         }
 
@@ -556,7 +556,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
             result.OverallResult.ShouldBe(BuildResultCode.Failure);
 
-            _logger.AllBuildEvents.Count.ShouldBe(4);
+            _logger.AllBuildEvents.Count.ShouldBe(9);
             _logger.Errors.First().Message.ShouldContain("MSB4255:");
             _logger.Errors.First().Message.ShouldContain("FileDoesNotExist1");
             _logger.Errors.First().Message.ShouldContain("FileDoesNotExist2");
