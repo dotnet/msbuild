@@ -27,7 +27,7 @@ namespace Microsoft.Build.Tasks
 
                 // it's important to normalize the path as it may contain two slashes
                 // see https://github.com/microsoft/msbuild/issues/4335 for details.
-                appConfigFile = Path.GetFullPath(appConfigFile);
+                appConfigFile = FileUtilities.NormalizePath(appConfigFile);
 
                 reader = XmlReader.Create(appConfigFile, readerSettings);
                 Read(reader);
