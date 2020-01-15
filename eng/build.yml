@@ -54,19 +54,35 @@ jobs:
                   /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
                   /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
                   /p:DotNetPublishUsingPipelines=$(_PublishUsingPipelines)
-                  /p:PB_PublishType=$(_PublishType)
 
     steps:
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
+      - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+        - task: PowerShell@2
+          displayName: Setup Private Feeds Credentials
+          inputs:
+            filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+            arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+          env:
+            Token: $(dn-bot-dnceng-artifact-feeds-rw)
       - script: build.cmd
                   -pack -publish -ci -test
                   -Configuration $(BuildConfig)
                   -Architecture $(BuildArchitecture)
                   $(_PublishArgs)
                   $(_OfficialBuildIdArgs)
+                  $(_InternalRuntimeDownloadArgs)
         displayName: Build
 
     - ${{ if eq(parameters.agentOs, 'Linux') }}:
+      - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+          - task: Bash@3
+            displayName: Setup Private Feeds Credentials
+            inputs:
+              filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.sh
+              arguments: $(Build.SourcesDirectory)/NuGet.config $Token
+            env:
+              Token: $(dn-bot-dnceng-artifact-feeds-rw)
       - script: ./build.sh
                   --pack --publish --ci --test
                   --configuration $(BuildConfig)
@@ -74,12 +90,22 @@ jobs:
                   --architecture $(BuildArchitecture)
                   $(LinuxPortable)
                   $(RuntimeId)
+                  $(_InternalRuntimeDownloadArgs)
         displayName: Build
 
     - ${{ if eq(parameters.agentOs, 'Darwin') }}:
+      - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+          - task: Bash@3
+            displayName: Setup Private Feeds Credentials
+            inputs:
+              filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.sh
+              arguments: $(Build.SourcesDirectory)/NuGet.config $Token
+            env:
+              Token: $(dn-bot-dnceng-artifact-feeds-rw)
       - script: ./build.sh
                   --pack --publish --ci --test
                   --configuration $(BuildConfig)
+                  $(_InternalRuntimeDownloadArgs)
         displayName: Build
 
     - ${{ if and(eq(parameters.enablePublishBuildAssets, true), ne(parameters.enablePublishUsingPipelines, 'true'), eq(parameters.runAsPublic, 'false'), ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
