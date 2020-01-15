@@ -152,13 +152,12 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var testAppName = "MSBuildTestApp";
             var outputDirectory = PublishApp(testAppName, rid: null, args: args);
 
-            outputDirectory.Should().OnlyHaveFiles(new[] {
-                $"{testAppName}{Constants.ExeSuffix}",
+            outputDirectory.Should().OnlyHaveFiles(AssertionHelper.AppendApphostOnNonMacOS(testAppName, new[] {
                 $"{testAppName}.dll",
                 $"{testAppName}.pdb",
                 $"{testAppName}.deps.json",
                 $"{testAppName}.runtimeconfig.json",
-            });
+            }));
 
             new DotnetCommand()
                 .ExecuteWithCapturedOutput(Path.Combine(outputDirectory.FullName, $"{testAppName}.dll"))
