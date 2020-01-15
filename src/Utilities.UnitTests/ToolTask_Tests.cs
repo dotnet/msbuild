@@ -822,13 +822,14 @@ namespace Microsoft.Build.UnitTests
             task.Execute();
 
             File.Exists(output.Path).ShouldBeTrue();
-            if (expectNormalizationToANSI)
+            if (NativeMethodsShared.IsUnixLike // treat all UNIXy OSes as capable of UTF-8 everywhere
+                || !expectNormalizationToANSI)
             {
-                File.ReadAllText(output.Path).ShouldContain("lol");
+                File.ReadAllText(output.Path).ShouldContain("łoł");
             }
             else
             {
-                File.ReadAllText(output.Path).ShouldContain("łoł");
+                File.ReadAllText(output.Path).ShouldContain("lol");
             }
         }
 
