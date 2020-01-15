@@ -99,7 +99,7 @@
       </trans-unit>
       <trans-unit id="CannotFindIjwhost">
         <source>NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.1 or higher when targeting Windows.</source>
-        <target state="new">NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.1 or higher when targeting Windows.</target>
+        <target state="translated">NETSDK1114: .NET Core IJW ホストが見つかりません。Windows がターゲットの場合、.NET Core IJW ホストを利用できるのは .NET Core 3.1 以上の場合のみです。</target>
         <note>{StrBegin="NETSDK1114: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
@@ -114,22 +114,22 @@
       </trans-unit>
       <trans-unit id="CannotHaveSelfContainedWithoutRuntimeIdentifier">
         <source>NETSDK1031: It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</source>
-        <target state="translated">NETSDK1031: RuntimeIdentifier を指定せずに自己完結型アプリケーションをビルドおよび発行することはサポートされていません。RuntimeIdentifier を指定するか SelfContained を false に設定してください。</target>
+        <target state="translated">NETSDK1031: RuntimeIdentifier を指定せずに自己完結型アプリケーションをビルドおよび公開することはサポートされていません。RuntimeIdentifier を指定するか SelfContained を false に設定してください。</target>
         <note>{StrBegin="NETSDK1031: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutRuntimeIdentifier">
         <source>NETSDK1097: It is not supported to publish an application to a single-file without specifying a RuntimeIdentifier. Please either specify a RuntimeIdentifier or set PublishSingleFile to false.</source>
-        <target state="translated">NETSDK1097: RuntimeIdentifier を指定せずにアプリケーションを単一ファイルに発行することはサポートされていません。RuntimeIdentifier を指定するか、PublishSingleFile を false に設定してください。</target>
+        <target state="translated">NETSDK1097: RuntimeIdentifier を指定せずにアプリケーションを単一ファイルに公開することはサポートされていません。RuntimeIdentifier を指定するか、PublishSingleFile を false に設定してください。</target>
         <note>{StrBegin="NETSDK1097: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutAppHost">
         <source>NETSDK1098: Applications published to a single-file are required to use the application host. Please either set PublishSingleFile to false or set UseAppHost to true.</source>
-        <target state="translated">NETSDK1098: 単一ファイルに発行されたアプリケーションでは、アプリケーション ホストを使用する必要があります。PublishSingleFile を false に設定するか、UseAppHost を true に設定してください。</target>
+        <target state="translated">NETSDK1098: 単一ファイルに公開されたアプリケーションでは、アプリケーション ホストを使用する必要があります。PublishSingleFile を false に設定するか、UseAppHost を true に設定してください。</target>
         <note>{StrBegin="NETSDK1098: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutExecutable">
         <source>NETSDK1099: Publishing to a single-file is only supported for executable applications.</source>
-        <target state="translated">NETSDK1099: 単一ファイルへの発行は実行可能アプリケーションに対してのみサポートされています。</target>
+        <target state="translated">NETSDK1099: 単一ファイルへの公開は実行可能アプリケーションに対してのみサポートされています。</target>
         <note>{StrBegin="NETSDK1099: "}</note>
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentifierAndVersion">
@@ -224,7 +224,7 @@
       </trans-unit>
       <trans-unit id="CppRequiresTFMVersion31">
         <source>NETSDK1120: C++/CLI projects targeting .NET Core require a target framework of at least 'netcoreapp3.1'.</source>
-        <target state="new">NETSDK1120: C++/CLI projects targeting .NET Core require a target framework of at least 'netcoreapp3.1'.</target>
+        <target state="translated">NETSDK1120: .NET Core をターゲットとする C++/CLI プロジェクトには、少なくとも 'netcoreapp 3.1' のターゲット フレームワークが必要です。</target>
         <note>{StrBegin="NETSDK1120: "}</note>
       </trans-unit>
       <trans-unit id="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21">
@@ -370,7 +370,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
         <source>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead. To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish. Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore. For more information, see https://aka.ms/dotnet-runtime-patch-selection.</source>
-        <target state="translated">NETSDK1061: プロジェクトは {0} バージョン {1} を使用して復元されましたが、現在の設定では、バージョン {2} が代わりに使用されます。この問題を解決するには、復元およびこれ以降の操作 (ビルドや発行など) で同じ設定を使用していることをご確認ください。通常この問題は、ビルドや発行の実行時に RuntimeIdentifier プロパティを設定したが、復元時には設定していない場合に発生することがあります。詳しくは、https://aka.ms/dotnet-runtime-patch-selection を参照してください。</target>
+        <target state="translated">NETSDK1061: プロジェクトは {0} バージョン {1} を使用して復元されましたが、現在の設定では、バージョン {2} が代わりに使用されます。この問題を解決するには、復元およびこれ以降の操作 (ビルドや公開など) で同じ設定を使用していることをご確認ください。通常この問題は、ビルドや公開の実行時に RuntimeIdentifier プロパティを設定したが、復元時には設定していない場合に発生することがあります。詳しくは、https://aka.ms/dotnet-runtime-patch-selection を参照してください。</target>
         <note>{StrBegin="NETSDK1061: "}
 {0} - Package Identifier for platform package
 {1} - Restored version of platform package
@@ -393,7 +393,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="NETFrameworkWithoutUsingNETSdkDefaults">
         <source>NETSDK1115: The current .NET SDK does not support .NET Framework without using .NET SDK Defaults. It is likely due to a mismatch between C++/CLI project CLRSupport property and TargetFramework.</source>
-        <target state="new">NETSDK1115: The current .NET SDK does not support .NET Framework without using .NET SDK Defaults. It is likely due to a mismatch between C++/CLI project CLRSupport property and TargetFramework.</target>
+        <target state="translated">NETSDK1115: 現在の .NET SDK では、.NET SDK の既定値を使用せずに .NET Framework をサポートすることはできません。これは、C++/CLI プロジェクトの CLRSupport プロパティと TargetFramework の間の不一致が原因と考えられます。</target>
         <note>{StrBegin="NETSDK1115: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
@@ -418,23 +418,28 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="NoSupportCppEnableComHosting">
         <source>NETSDK1119: C++/CLI projects targeting .NET Core cannot use EnableComHosting=true.</source>
-        <target state="new">NETSDK1119: C++/CLI projects targeting .NET Core cannot use EnableComHosting=true.</target>
+        <target state="translated">NETSDK1119: .NET Core をターゲットとする C++/CLI プロジェクトでは EnableComHosting=true を使用できません。</target>
         <note>{StrBegin="NETSDK1119: "}</note>
       </trans-unit>
       <trans-unit id="NoSupportCppNonDynamicLibraryDotnetCore">
         <source>NETSDK1116: C++/CLI projects targeting .NET Core must be dynamic libraries.</source>
-        <target state="new">NETSDK1116: C++/CLI projects targeting .NET Core must be dynamic libraries.</target>
+        <target state="translated">NETSDK1116: .NET Core をターゲットとする C++/CLI プロジェクトは、ダイナミック ライブラリである必要があります。</target>
         <note>{StrBegin="NETSDK1116: "}</note>
       </trans-unit>
       <trans-unit id="NoSupportCppPackDotnetCore">
         <source>NETSDK1118: C++/CLI projects targeting .NET Core cannot be packed.</source>
-        <target state="new">NETSDK1118: C++/CLI projects targeting .NET Core cannot be packed.</target>
+        <target state="translated">NETSDK1118: .NET Core をターゲットとする C++/CLI プロジェクトはパックできません。</target>
         <note>{StrBegin="NETSDK1118: "}</note>
       </trans-unit>
       <trans-unit id="NoSupportCppPublishDotnetCore">
         <source>NETSDK1117: Does not support publish of C++/CLI project targeting dotnet core.</source>
-        <target state="new">NETSDK1117: Does not support publish of C++/CLI project targeting dotnet core.</target>
+        <target state="translated">NETSDK1117: .NET Core をターゲットとする C++/CLI プロジェクトの発行をサポートしていません。</target>
         <note>{StrBegin="NETSDK1117: "}</note>
+      </trans-unit>
+      <trans-unit id="NoSupportCppSelfContained">
+        <source>NETSDK1121: C++/CLI projects targeting .NET Core cannot use SelfContained=true.</source>
+        <target state="new">NETSDK1121: C++/CLI projects targeting .NET Core cannot use SelfContained=true.</target>
+        <note>{StrBegin="NETSDK1121: "}</note>
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>

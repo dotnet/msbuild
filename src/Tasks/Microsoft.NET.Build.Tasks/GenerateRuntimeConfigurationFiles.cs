@@ -92,28 +92,72 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
-            LockFile lockFile = new LockFileCache(this).GetLockFile(AssetsFilePath);
-            ProjectContext projectContext = lockFile.CreateProjectContext(
-                NuGetUtils.ParseFrameworkName(TargetFrameworkMoniker),
-                RuntimeIdentifier,
-                PlatformLibraryName,
-                RuntimeFrameworks,
-                IsSelfContained);
-
-            WriteRuntimeConfig(projectContext);
-
-            if (writeDevRuntimeConfig)
+            if (AssetsFilePath == null)
             {
-                WriteDevRuntimeConfig(projectContext);
+                var isFrameworkDependent = LockFileExtensions.IsFrameworkDependent(
+                    RuntimeFrameworks,
+                    IsSelfContained,
+                    RuntimeIdentifier,
+                    string.IsNullOrWhiteSpace(PlatformLibraryName));
+
+                if (isFrameworkDependent != true)
+                {
+                    throw new ArgumentException(
+                        $"{nameof(DependencyContextBuilder)} Does not support non FrameworkDependent without asset file. " +
+                        $"runtimeFrameworks: {string.Join(",", RuntimeFrameworks.Select(r => r.ItemSpec))} " +
+                        $"isSelfContained: {IsSelfContained} " +
+                        $"runtimeIdentifier: {RuntimeIdentifier} " +
+                        $"platformLibraryName: {PlatformLibraryName}");
+                }
+
+                if (PlatformLibraryName != null)
+                {
+                    throw new ArgumentException(
+                        "Does not support non null PlatformLibraryName(TFM < 3) without asset file.");
+                }
+
+                WriteRuntimeConfig(
+                    RuntimeFrameworks.Select(r => new ProjectContext.RuntimeFramework(r)).ToArray(),
+                    null,
+                    isFrameworkDependent: true, new List<LockFileItem>());
+            }
+            else
+            {
+                LockFile lockFile = new LockFileCache(this).GetLockFile(AssetsFilePath);
+
+                ProjectContext projectContext = lockFile.CreateProjectContext(
+                    NuGetUtils.ParseFrameworkName(TargetFrameworkMoniker),
+                    RuntimeIdentifier,
+                    PlatformLibraryName,
+                    RuntimeFrameworks,
+                    IsSelfContained);
+
+                WriteRuntimeConfig(projectContext.RuntimeFrameworks,
+                    projectContext.PlatformLibrary,
+                    projectContext.IsFrameworkDependent,
+                    projectContext.LockFile.PackageFolders);
+
+                if (writeDevRuntimeConfig)
+                {
+                    WriteDevRuntimeConfig(projectContext.LockFile.PackageFolders);
+                }
             }
         }
 
-        private void WriteRuntimeConfig(ProjectContext projectContext)
+        private void WriteRuntimeConfig(
+            ProjectContext.RuntimeFramework[] runtimeFrameworks,
+            LockFileTargetLibrary platformLibrary,
+            bool isFrameworkDependent,
+            IList<LockFileItem> packageFolders)
         {
             RuntimeConfig config = new RuntimeConfig();
             config.RuntimeOptions = new RuntimeOptions();
 
-            AddFrameworks(config.RuntimeOptions, projectContext);
+            AddFrameworks(
+                config.RuntimeOptions,
+                runtimeFrameworks,
+                platformLibrary,
+                isFrameworkDependent);
             AddUserRuntimeOptions(config.RuntimeOptions);
 
             // HostConfigurationOptions are added after AddUserRuntimeOptions so if there are
@@ -123,37 +167,44 @@ namespace Microsoft.NET.Build.Tasks
 
             if (WriteAdditionalProbingPathsToMainConfig)
             {
-                AddAdditionalProbingPaths(config.RuntimeOptions, projectContext);
+                AddAdditionalProbingPaths(config.RuntimeOptions, packageFolders);
             }
 
             WriteToJsonFile(RuntimeConfigPath, config);
             _filesWritten.Add(new TaskItem(RuntimeConfigPath));
         }
 
-        private void AddFrameworks(RuntimeOptions runtimeOptions, ProjectContext projectContext)
+        private void AddFrameworks(RuntimeOptions runtimeOptions,
+                                   ProjectContext.RuntimeFramework[] runtimeFrameworks,
+                                   LockFileTargetLibrary lockFilePlatformLibrary,
+                                   bool isFrameworkDependent)
         {
             runtimeOptions.Tfm = TargetFramework;
 
             var frameworks = new List<RuntimeConfigFramework>();
-            if (projectContext.RuntimeFrameworks == null || projectContext.RuntimeFrameworks.Length == 0)
+            if (runtimeFrameworks == null || runtimeFrameworks.Length == 0)
             {
-                //  If there are no RuntimeFrameworks (which would be set in the ProcessFrameworkReferences task based
-                //  on FrameworkReference items), then use package resolved from MicrosoftNETPlatformLibrary for
-                //  the runtimeconfig
-                RuntimeConfigFramework framework = new RuntimeConfigFramework();
-                framework.Name = projectContext.PlatformLibrary.Name;
-                framework.Version = projectContext.PlatformLibrary.Version.ToNormalizedString();
+                // If the project is not targetting .NET Core, it will not have any platform library (and is marked as non-FrameworkDependent).
+                if (lockFilePlatformLibrary != null)
+                {
+                    //  If there are no RuntimeFrameworks (which would be set in the ProcessFrameworkReferences task based
+                    //  on FrameworkReference items), then use package resolved from MicrosoftNETPlatformLibrary for
+                    //  the runtimeconfig
+                    RuntimeConfigFramework framework = new RuntimeConfigFramework();
+                    framework.Name = lockFilePlatformLibrary.Name;
+                    framework.Version = lockFilePlatformLibrary.Version.ToNormalizedString();
 
-                frameworks.Add(framework);
+                    frameworks.Add(framework);
+                }
             }
             else
             {
                 HashSet<string> usedFrameworkNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                foreach (var platformLibrary in projectContext.RuntimeFrameworks)
+                foreach (var platformLibrary in runtimeFrameworks)
                 {
-                    if (projectContext.RuntimeFrameworks.Length > 1 &&
+                    if (runtimeFrameworks.Length > 1 &&
                         platformLibrary.Name.Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase) &&
-                        projectContext.IsFrameworkDependent)
+                        isFrameworkDependent)
                     {
                         //  If there are multiple runtime frameworks, then exclude Microsoft.NETCore.App,
                         //  as a workaround for https://github.com/dotnet/core-setup/issues/4947
@@ -178,7 +229,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
-            if (projectContext.IsFrameworkDependent)
+            if (isFrameworkDependent)
             {
                 runtimeOptions.RollForward = RollForward;
 
@@ -266,18 +317,18 @@ namespace Microsoft.NET.Build.Tasks
             return new JValue(valueString);
         }
 
-        private void WriteDevRuntimeConfig(ProjectContext projectContext)
+        private void WriteDevRuntimeConfig(IList<LockFileItem> packageFolders)
         {
             RuntimeConfig devConfig = new RuntimeConfig();
             devConfig.RuntimeOptions = new RuntimeOptions();
 
-            AddAdditionalProbingPaths(devConfig.RuntimeOptions, projectContext);
+            AddAdditionalProbingPaths(devConfig.RuntimeOptions, packageFolders);
 
             WriteToJsonFile(RuntimeConfigDevPath, devConfig);
             _filesWritten.Add(new TaskItem(RuntimeConfigDevPath));
         }
 
-        private void AddAdditionalProbingPaths(RuntimeOptions runtimeOptions, ProjectContext projectContext)
+        private void AddAdditionalProbingPaths(RuntimeOptions runtimeOptions, IList<LockFileItem> packageFolders)
         {
             if (runtimeOptions.AdditionalProbingPaths == null)
             {
@@ -293,7 +344,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
-            foreach (var packageFolder in projectContext.LockFile.PackageFolders)
+            foreach (var packageFolder in packageFolders)
             {
                 // DotNetHost doesn't handle additional probing paths with a trailing slash
                 runtimeOptions.AdditionalProbingPaths.Add(EnsureNoTrailingDirectorySeparator(packageFolder.Path));

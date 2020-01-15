@@ -127,6 +127,21 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining(Strings.CppRequiresTFMVersion31);
         }
 
+        [FullMSBuildOnlyFact]
+        public void When_run_with_selfcontained_It_fails_with_error_message()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
+                .WithSource();
+
+            new BuildCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest"))
+                .Execute("-p:Platform=x64", "-p:selfcontained=true", "-p:RuntimeIdentifier=win-x64")
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining(Strings.NoSupportCppSelfContained);
+        }
+
         private void ChangeTargetFramework(string projectPath, XDocument project, string targetFramework)
         {
             if (Path.GetExtension(projectPath) == ".vcxproj")

@@ -11,11 +11,13 @@ using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
+using NuGet.RuntimeModel;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests
 {
@@ -50,6 +52,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 ReferenceInfo.CreateDirectReferenceInfos(
                     referencePaths ?? new ITaskItem[] { },
                     referenceSatellitePaths ?? new ITaskItem[] { },
+                    projectContextHasProjectReferences: false,
                     i => true);
 
             ProjectContext projectContext = lockFile.CreateProjectContext(
@@ -64,7 +67,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 resolvedNuGetFiles = Array.Empty<ResolvedFile>();
             }
 
-            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext, includeRuntimeFileVersions: false)
+            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, includeRuntimeFileVersions: false, runtimeGraph: null, projectContext: projectContext)
                 .WithDirectReferences(directReferences)
                 .WithCompilationOptions(compilationOptions)
                 .WithResolvedNuGetFiles((ResolvedFile[]) resolvedNuGetFiles)
@@ -261,7 +264,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 useCompilationOptions ? CreateCompilationOptions() :
                 null;
 
-            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext, includeRuntimeFileVersions: false)
+            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, includeRuntimeFileVersions: false, runtimeGraph: null, projectContext: projectContext)
                 .WithReferenceAssemblies(ReferenceInfo.CreateReferenceInfos(referencePaths))
                 .WithCompilationOptions(compilationOptions)
                 .Build();
@@ -287,6 +290,60 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     debugType: "portable",
                     emitEntryPoint: true,
                     generateXmlDocumentation: true);
+        }
+
+        [Fact]
+        public void ItCanGenerateTheRuntimeFallbackGraph()
+        {
+            string mainProjectName = "simple.dependencies";
+            LockFile lockFile = TestLockFiles.GetLockFile(mainProjectName);
+
+            SingleProjectInfo mainProject = SingleProjectInfo.Create(
+                "/usr/Path",
+                mainProjectName,
+                ".dll",
+                "1.0.0",
+                new ITaskItem[] { });
+
+            ProjectContext projectContext = lockFile.CreateProjectContext(
+                FrameworkConstants.CommonFrameworks.NetCoreApp10,
+                runtime: null,
+                platformLibraryName: Constants.DefaultPlatformLibrary,
+                runtimeFrameworks: null,
+                isSelfContained: true);
+
+            var runtimeGraph = new RuntimeGraph(
+                new RuntimeDescription []
+                {
+                    new RuntimeDescription("os-arch", new string [] { "os", "base" }),
+                    new RuntimeDescription("new_os-arch", new string [] { "os-arch", "os", "base" }),
+                    new RuntimeDescription("os-new_arch", new string [] { "os-arch", "os", "base" }),
+                    new RuntimeDescription("new_os-new_arch", new string [] { "new_os-arch", "os-new_arch", "os-arch", "os", "base" }),
+                    new RuntimeDescription("os-another_arch", new string [] { "os", "base" })
+                });
+
+            void CheckRuntimeFallbacks(string runtimeIdentifier, int fallbackCount)
+            {
+                projectContext.LockFileTarget.RuntimeIdentifier = runtimeIdentifier;
+                var dependencyContextBuilder = new DependencyContextBuilder(mainProject, includeRuntimeFileVersions: false, runtimeGraph, projectContext);
+                var runtimeFallbacks = dependencyContextBuilder.Build().RuntimeGraph;
+
+                runtimeFallbacks
+                    .Count()
+                    .Should()
+                    .Be(fallbackCount);
+
+                runtimeFallbacks
+                    .Any(runtimeFallback => !runtimeFallback.Runtime.Equals(runtimeIdentifier) && !runtimeFallback.Fallbacks.Contains(runtimeIdentifier))
+                    .Should()
+                    .BeFalse();
+            }
+
+            CheckRuntimeFallbacks("os-arch", 4);
+            CheckRuntimeFallbacks("new_os-arch", 2);
+            CheckRuntimeFallbacks("os-new_arch", 2);
+            CheckRuntimeFallbacks("new_os-new_arch", 1);
+            CheckRuntimeFallbacks("unrelated_os-unknown_arch", 0);
         }
     }
 }

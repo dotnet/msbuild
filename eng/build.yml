@@ -262,6 +262,7 @@ jobs:
         Contents: |	
          log/$(_BuildConfig)/**/*	
          TestResults/$(_BuildConfig)/**/*	
+         SymStore/$(_BuildConfig)/**/*
         TargetFolder: '$(Build.ArtifactStagingDirectory)'	
       continueOnError: true	
       condition: always()
