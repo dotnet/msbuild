@@ -1505,7 +1505,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>An equivalent project (a project with the same global properties and tools version) is already present in the project collection, with the path "{0}". To load an equivalent into this project collection, unload this project first.</value>
   </data>
   <data name="OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem">
-    <value>Removing with MatchOnMetadata only supports one referenced item.</value>
+    <value>Removing with MatchOnMetadata only supports one referenced item and one metadata value.</value>
   </data>
   <data name="OM_ProjectWasNotLoaded">
     <value>The project provided was not loaded in the collection.</value>

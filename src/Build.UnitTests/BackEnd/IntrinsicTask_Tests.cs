@@ -1730,7 +1730,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                             <I2 Include='c2' M1='3' m2='Y'/>
                             <I2 Include='d2' M1='y' m2='d'/>
 
-                            <I2 Remove='@(I1)' MatchOnMetadata='M1;m2' />
+                            <I2 Remove='@(I1)' MatchOnMetadata='M1' />
                         </ItemGroup>
                     </Target></Project>");
             IntrinsicTask task = CreateIntrinsicTask(content);
@@ -1739,18 +1739,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var items = lookup.GetItems("I2");
 
-            items.Select(i => i.EvaluatedInclude).ShouldBe(new []{"a2", "c2", "d2"});
+            items.Select(i => i.EvaluatedInclude).ShouldBe(new []{"a2", "d2"});
 
             items.ElementAt(0).GetMetadataValue("M1").ShouldBe("x");
             items.ElementAt(0).GetMetadataValue("M2").ShouldBe("c");
-            items.ElementAt(1).GetMetadataValue("M1").ShouldBe("3");
-            items.ElementAt(1).GetMetadataValue("M2").ShouldBe("Y");
-            items.ElementAt(2).GetMetadataValue("M1").ShouldBe("y");
-            items.ElementAt(2).GetMetadataValue("M2").ShouldBe("d");
+            items.ElementAt(1).GetMetadataValue("M1").ShouldBe("y");
+            items.ElementAt(1).GetMetadataValue("M2").ShouldBe("d");
         }
 
         [Fact]
-        public void RemoveWithItemReferenceOnMatchingMetadataReferences()
+        public void RemoveWithItemReferenceOnMatchingMetadataPropertyReferences()
         {
             // <PropertyGroup>
             //     <p0>v0</p0>
@@ -1759,8 +1757,43 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                     <Target Name='t'>
                         <ItemGroup>
+                            <I1 Include='a1' v0='1' M2='a'/>
+                            <I1 Include='b1' v0='2' M2='x'/>
+                            <I1 Include='c1' v0='3' M2='y'/>
+                            <I1 Include='d1' v0='4' M2='b'/>
+
+                            <I2 Include='a2' v0='x' m2='c'/>
+                            <I2 Include='b2' v0='2' m2='x'/>
+                            <I2 Include='c2' v0='3' m2='Y'/>
+                            <I2 Include='d2' v0='y' m2='d'/>
+
+                            <I2 Remove='@(I1)' MatchOnMetadata='$(p0)' />
+                        </ItemGroup>
+                    </Target></Project>");
+
+            IntrinsicTask task = CreateIntrinsicTask(content);
+            PropertyDictionary<ProjectPropertyInstance> properties = GeneratePropertyGroup();
+            Lookup lookup = LookupHelpers.CreateLookup(properties);
+            ExecuteTask(task, lookup);
+
+            var items = lookup.GetItems("I2");
+
+            items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "a2", "d2" });
+
+            items.ElementAt(0).GetMetadataValue("v0").ShouldBe("x");
+            items.ElementAt(0).GetMetadataValue("M2").ShouldBe("c");
+            items.ElementAt(1).GetMetadataValue("v0").ShouldBe("y");
+            items.ElementAt(1).GetMetadataValue("M2").ShouldBe("d");
+        }
+
+        [Fact]
+        public void RemoveWithItemReferenceOnMatchingMetadataItemReferences()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                    <Target Name='t'>
+                        <ItemGroup>
                             <Meta2 Include='M2'/>
-                            <Meta2 Include='g'/>
 
                             <I1 Include='a1' v0='1' M2='a'/>
                             <I1 Include='b1' v0='2' M2='x'/>
@@ -1772,7 +1805,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                             <I2 Include='c2' v0='3' m2='Y'/>
                             <I2 Include='d2' v0='y' m2='d'/>
 
-                            <I2 Remove='@(I1)' MatchOnMetadata='$(p0);@(Meta2)' />
+                            <I2 Remove='@(I1)' MatchOnMetadata='@(Meta2)' />
                         </ItemGroup>
                     </Target></Project>");
 
@@ -1810,7 +1843,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                             <I2 Include='c2' c='3' d='Y'/>
                             <I2 Include='d2' c='y' d='d'/>
 
-                            <I2 Remove='@(I1)' MatchOnMetadata='e;f;g' />
+                            <I2 Remove='@(I1)' MatchOnMetadata='e' />
                         </ItemGroup>
                     </Target></Project>");
             IntrinsicTask task = CreateIntrinsicTask(content);
@@ -1829,6 +1862,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
             items.ElementAt(1).GetMetadataValue("d").ShouldBe("x");
             items.ElementAt(2).GetMetadataValue("d").ShouldBe("Y");
             items.ElementAt(3).GetMetadataValue("d").ShouldBe("d");
+        }
+
+        [Fact]
+        public void FailWithMatchingMultipleMetadata()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                    <Target Name='t'>
+                        <ItemGroup>
+                            <I1 Include='a1' M1='1' M2='a'/>
+                            <I1 Include='b1' M1='2' M2='x'/>
+                            <I1 Include='c1' M1='3' M2='y'/>
+                            <I1 Include='d1' M1='4' M2='b'/>
+
+                            <I2 Include='a2' M1='x' m2='c'/>
+                            <I2 Include='b2' M1='2' m2='x'/>
+                            <I2 Include='c2' M1='3' m2='Y'/>
+                            <I2 Include='d2' M1='y' m2='d'/>
+
+                            <I2 Remove='@(I1)' MatchOnMetadata='M1;M2' />
+                        </ItemGroup>
+                    </Target></Project>");
+            IntrinsicTask task = CreateIntrinsicTask(content);
+            Lookup lookup = LookupHelpers.CreateEmptyLookup();
+            Assert.ThrowsAny<InvalidProjectFileException>(() => ExecuteTask(task, lookup));
         }
 
         [Fact]
@@ -1853,7 +1911,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                             <I3 Include='c3' M1='3' m2='2'/>
                             <I3 Include='d3' M1='y' m2='d'/>
 
-                            <I3 Remove='@(I1);@(I2)' MatchOnMetadata='M1;m2' />
+                            <I3 Remove='@(I1);@(I2)' MatchOnMetadata='M1' />
                         </ItemGroup>
                     </Target></Project>");
             IntrinsicTask task = CreateIntrinsicTask(content);
@@ -1878,7 +1936,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                             <I2 Include='c2' M1='3' m2='Y'/>
                             <I2 Include='d2' M1='y' m2='d'/>
 
-                            <I2 Remove='%(I1.M1)' MatchOnMetadata='M1;m2' />
+                            <I2 Remove='%(I1.M1)' MatchOnMetadata='M1' />
                         </ItemGroup>
                     </Target></Project>");
             IntrinsicTask task = CreateIntrinsicTask(content);

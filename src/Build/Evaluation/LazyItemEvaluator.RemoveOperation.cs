@@ -28,7 +28,8 @@ namespace Microsoft.Build.Evaluation
                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
                     _matchOnMetadata.IsEmpty || (!_matchOnMetadata.IsEmpty
                     && _itemSpec.Fragments.Count == 1
-                    && _itemSpec.Fragments.First() is ItemSpec<ProjectProperty, ProjectItem>.ItemExpressionFragment),
+                    && _itemSpec.Fragments.First() is ItemSpec<ProjectProperty, ProjectItem>.ItemExpressionFragment)
+                    && _matchOnMetadata.Count() == 1,
                     new BuildEventFileInfo(string.Empty),
                     "OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem");
 

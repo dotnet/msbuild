@@ -112,8 +112,8 @@
     </note>
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem">
-        <source>Removing with MatchOnMetadata only supports one referenced item.</source>
-        <target state="new">Removing with MatchOnMetadata only supports one referenced item.</target>
+        <source>Removing with MatchOnMetadata only supports one referenced item and one metadata value.</source>
+        <target state="new">Removing with MatchOnMetadata only supports one referenced item and one metadata value.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">

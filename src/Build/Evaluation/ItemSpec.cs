@@ -91,9 +91,7 @@ namespace Microsoft.Build.Evaluation
             {
                 foreach (var referencedItem in ReferencedItems)
                 {
-                    var nonEmptyMetadata = metadata.Where(m => !item.GetMetadataValue(m).Equals(string.Empty) || !referencedItem.Item.GetMetadataValue(m).Equals(string.Empty));
-                    if (nonEmptyMetadata.Count() != 0 && nonEmptyMetadata.All(
-                            m => item.GetMetadataValue(m).Equals(referencedItem.Item.GetMetadataValue(m))))
+                    if (metadata.All(m => item.GetMetadataValue(m).Equals(referencedItem.Item.GetMetadataValue(m)) && !item.GetMetadataValue(m).Equals(string.Empty)))
                     {
                         return true;
                     }
