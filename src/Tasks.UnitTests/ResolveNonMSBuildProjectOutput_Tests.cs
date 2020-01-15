@@ -10,12 +10,20 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
     sealed public class ResolveNonMSBuildProjectOutput_Tests
     {
         private const string attributeProject = "Project";
+
+        private readonly ITestOutputHelper _output;
+
+        public ResolveNonMSBuildProjectOutput_Tests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
 
         static internal ITaskItem CreateReferenceItem(string itemSpec, string projectGuid, string package, string name)
         {
@@ -170,7 +178,7 @@ namespace Microsoft.Build.UnitTests
 
             string xmlString = CreatePregeneratedPathDoc(pregenOutputs);
 
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             ResolveNonMSBuildProjectOutput rvpo = new ResolveNonMSBuildProjectOutput();
             rvpo.GetAssemblyName = pretendGetAssemblyName;
             rvpo.BuildEngine = engine;
@@ -332,14 +340,14 @@ namespace Microsoft.Build.UnitTests
             taskItems[0] = new TaskItem("projectReference");
             taskItems[0].SetMetadata(attributeProject, "{invalid guid}");
 
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             rvpo.BuildEngine = engine;
             Assert.True(rvpo.VerifyProjectReferenceItems(taskItems, false /* treat problems as warnings */));
             Assert.Equal(1, engine.Warnings);
             Assert.Equal(0, engine.Errors);
             engine.AssertLogContains("MSB3107");
 
-            engine = new MockEngine();
+            engine = new MockEngine(_output);
             rvpo.BuildEngine = engine;
             Assert.False(rvpo.VerifyProjectReferenceItems(taskItems, true /* treat problems as errors */));
             Assert.Equal(0, engine.Warnings);
