@@ -31,9 +31,9 @@
       <Uri>https://github.com/dotnet/corefx</Uri>
       <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.1.1-servicing.19615.10">
-      <Uri>https://dev.azure.com/dnceng/internal/_git/aspnet-AspNetCore</Uri>
-      <Sha>e276c8174b8bfdeb70efceafa81c75f8badbc8db</Sha>
+    <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.1.2-servicing.20065.6">
+      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Sha>36e79022bebf4974a3352a6e1dcc869ae67997fe</Sha>
     </Dependency>
     <!-- Keep this dependency at the bottom of ProductDependencies, else it will be picked as the parent for CoherentParentDependencies -->
     <Dependency Name="Microsoft.NETCore.App.Ref" Version="3.1.0" Pinned="true">
