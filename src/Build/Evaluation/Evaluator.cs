@@ -1819,7 +1819,7 @@ namespace Microsoft.Build.Evaluation
             bool atleastOneImportIgnored = false;
             bool atleastOneImportEmpty = false;
             imports = new List<ProjectRootElement>();
-
+            List<ProjectRootElement> streamImports = new List<ProjectRootElement>();
             foreach (string importExpressionEscapedItem in ExpressionShredder.SplitSemiColonSeparatedList(importExpressionEscaped))
             {
                 string[] importFilesEscaped = null;
@@ -1988,6 +1988,11 @@ namespace Microsoft.Build.Evaluation
                                 _lastModifiedProject = importedProjectElement;
                             }
 
+                            if (importedProjectElement.StreamTime != null && importedProjectElement.StreamTime > _lastModifiedProject.LastWriteTimeWhenRead)
+                            {
+                                streamImports.Add(importedProjectElement);
+                            }
+
                             if (_logProjectImportedEvents)
                             {
                                 ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
@@ -2113,7 +2118,22 @@ namespace Microsoft.Build.Evaluation
                     // can store the unescaped value. The only purpose of escaping is to 
                     // avoid undesired splitting or expansion.
                     _importsSeen.Add(importFileUnescaped, importElement);
-                } 
+                }
+
+                DateTime mostRecentTime = File.GetLastWriteTime(_lastModifiedProject.FullPath);
+                foreach (ProjectRootElement import in streamImports)
+                {
+                    DateTime importTime = File.GetLastWriteTime(import.FullPath);
+                    if (importTime > mostRecentTime)
+                    {
+                        mostRecentTime = importTime;
+                        _lastModifiedProject = import;
+                    }
+                    else
+                    {
+                        import.StreamTime = null;
+                    }
+                }
             }
 
             if (imports.Count > 0)
