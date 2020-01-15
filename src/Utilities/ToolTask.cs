@@ -1362,6 +1362,8 @@ namespace Microsoft.Build.Utilities
                         File.AppendAllText(_temporaryBatchFile, "#!/bin/sh\n"); // first line for UNIX is ANSI
                         // This is a hack..!
                         File.AppendAllText(_temporaryBatchFile, AdjustCommandsForOperatingSystem(commandLineCommands), EncodingUtilities.CurrentSystemOemEncoding);
+
+                        commandLineCommands = $"\"{_temporaryBatchFile}\"";
                     }
                     else
                     {
