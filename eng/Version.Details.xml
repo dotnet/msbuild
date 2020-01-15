@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NETCore.App.Runtime.win-x64" Version="3.1.1">
-      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-core-setup</Uri>
-      <Sha>a1388f194c30cb21b36b75982962cb5e35954e4e</Sha>
+    <Dependency Name="Microsoft.NETCore.App.Runtime.win-x64" Version="3.1.2">
+      <Uri>https://github.com/dotnet/core-setup</Uri>
+      <Sha>193fb40ae0a6fb0a2ecd63cb63db0a95719dbe8d</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.App.Internal" Version="3.1.1-servicing.19608.4" CoherentParentDependency="Microsoft.NETCore.App.Runtime.win-x64">
-      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-core-setup</Uri>
-      <Sha>a1388f194c30cb21b36b75982962cb5e35954e4e</Sha>
+    <Dependency Name="Microsoft.NETCore.App.Internal" Version="3.1.2-servicing.20064.3">
+      <Uri>https://github.com/dotnet/core-setup</Uri>
+      <Sha>193fb40ae0a6fb0a2ecd63cb63db0a95719dbe8d</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.1.102-servicing.20064.4">
       <Uri>https://github.com/dotnet/cli</Uri>
