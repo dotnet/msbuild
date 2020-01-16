@@ -275,7 +275,7 @@ namespace Microsoft.Build.BackEnd
             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
                 itemSpec.Fragments.Count == 1
                 && itemSpec.Fragments.First() is ItemSpec<ProjectPropertyInstance, ProjectItemInstance>.ItemExpressionFragment
-                && matchOnMetadata.Count() == 1,
+                && matchOnMetadata.Count == 1,
                 new BuildEventFileInfo(string.Empty),
                 "OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem",
                 child.RemoveLocation,

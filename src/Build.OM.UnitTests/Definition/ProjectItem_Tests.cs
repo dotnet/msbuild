@@ -2158,7 +2158,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 <I2 Include='c2' M1='3' m2='Y'/>
                 <I2 Include='d2' M1='y' m2='d'/>
 
-                <I2 Remove='@(I1)' MatchOnMetadata='M1'/>");
+                <I2 Remove='@(I1)' MatchOnMetadata='m1'/>");
 
             var project = ObjectModelHelpers.CreateInMemoryProject(content);
             var items = project.ItemsIgnoringCondition.Where(i => i.ItemType.Equals("I2"));
@@ -2172,7 +2172,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
-        public void RemoveWithItemReferenceOnMatchingMetadataPropertyReferences()
+        public void RemoveWithPropertyReferenceInMatchOnMetadata()
         {
             string content = 
                 @"<Project>
@@ -2210,7 +2210,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
-        public void RemoveWithItemReferenceOnMatchingMetadataItemReferences()
+        public void RemoveWithItemReferenceInMatchOnMetadata()
         {
             string content =
                 @"<Project>

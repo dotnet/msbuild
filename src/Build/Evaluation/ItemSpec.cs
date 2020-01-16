@@ -89,14 +89,8 @@ namespace Microsoft.Build.Evaluation
 
             public override bool IsMatchOnMetadata(IItem item, IEnumerable<string> metadata)
             {
-                foreach (var referencedItem in ReferencedItems)
-                {
-                    if (metadata.All(m => item.GetMetadataValue(m).Equals(referencedItem.Item.GetMetadataValue(m)) && !item.GetMetadataValue(m).Equals(string.Empty)))
-                    {
-                        return true;
-                    }
-                }
-                return false;
+                return ReferencedItems.Any(referencedItem =>
+                    metadata.All(m => item.GetMetadataValue(m).Equals(referencedItem.Item.GetMetadataValue(m)) && !item.GetMetadataValue(m).Equals(string.Empty)));
             }
 
             public override IMSBuildGlob ToMSBuildGlob()

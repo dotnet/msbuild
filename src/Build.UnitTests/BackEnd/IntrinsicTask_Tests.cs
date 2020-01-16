@@ -1730,7 +1730,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                             <I2 Include='c2' M1='3' m2='Y'/>
                             <I2 Include='d2' M1='y' m2='d'/>
 
-                            <I2 Remove='@(I1)' MatchOnMetadata='M1' />
+                            <I2 Remove='@(I1)' MatchOnMetadata='m1' />
                         </ItemGroup>
                     </Target></Project>");
             IntrinsicTask task = CreateIntrinsicTask(content);
@@ -1748,7 +1748,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        public void RemoveWithItemReferenceOnMatchingMetadataPropertyReferences()
+        public void RemoveWithPropertyReferenceInMatchOnMetadata()
         {
             // <PropertyGroup>
             //     <p0>v0</p0>
@@ -1787,7 +1787,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        public void RemoveWithItemReferenceOnMatchingMetadataItemReferences()
+        public void RemoveWithItemReferenceInMatchOnMetadata()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
