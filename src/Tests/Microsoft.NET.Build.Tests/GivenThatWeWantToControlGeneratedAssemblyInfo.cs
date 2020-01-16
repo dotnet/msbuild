@@ -349,6 +349,65 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
+        [Fact]
+        public void It_includes_assembly_metadata()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource()
+                .WithTargetFramework("netstandard2.0")
+                .WithProjectChanges((path, project) =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    project.Root.Add(
+                        new XElement(ns + "ItemGroup",
+                            new XElement(ns + "AssemblyMetadata",
+                                new XAttribute("Include", "MetadataKey"),
+                                new XAttribute("Value", "MetadataValue"))));
+                });
+
+            new RestoreCommand(Log, testAsset.TestRoot).Execute().Should().Pass();
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            buildCommand.Execute().Should().Pass();
+
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netstandard2.0").FullName, "HelloWorld.dll");
+            var info = AssemblyInfo.Get(assemblyPath);
+
+            AssemblyInfo.Get(assemblyPath)["AssemblyMetadataAttribute"].Should().Be("MetadataKey:MetadataValue");
+        }
+
+        [Fact]
+        public void It_respects_out_out_of_assembly_metadata()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource()
+                .WithTargetFramework("netstandard2.0")
+                .WithProjectChanges((path, project) =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    project.Root.Add(
+                        new XElement(ns + "PropertyGroup",
+                            new XElement(ns + "GenerateAssemblyMetadataAttributes", "false")),
+                        new XElement(ns + "ItemGroup",
+                            new XElement(ns + "AssemblyMetadata",
+                                new XAttribute("Include", "MetadataKey"),
+                                new XAttribute("Value", "MetadataValue"))));
+                });
+
+            new RestoreCommand(Log, testAsset.TestRoot).Execute().Should().Pass();
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            buildCommand.Execute().Should().Pass();
+
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netstandard2.0").FullName, "HelloWorld.dll");
+
+            Assert.False(AssemblyInfo.Get(assemblyPath).ContainsKey("AssemblyMetadataAttribute"));
+        }
+
         [Theory]
         [InlineData(false, false, false)]
         [InlineData(true, false, true)]
@@ -434,7 +493,6 @@ namespace Microsoft.NET.Build.Tests
             var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(testTestProject.TargetFrameworks).FullName, testTestProject.Name + ".dll");
 
             AssemblyInfo.Get(assemblyPath)["UserSecretsIdAttribute"].Should().Be("SecretsIdValue");
-
         }
     }
 }
