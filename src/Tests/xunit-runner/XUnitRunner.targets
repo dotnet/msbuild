@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
-    <SDKCustomXUnitPublishTargetFramework Condition="'$(SDKCustomXUnitPublishTargetFramework)' == ''">netcoreapp2.1</SDKCustomXUnitPublishTargetFramework>
-    <SDKCustomXUnitRuntimeTargetFramework Condition="'$(SDKCustomXUnitRuntimeTargetFramework)' == ''">netcoreapp2.0</SDKCustomXUnitRuntimeTargetFramework>
+    <SDKCustomXUnitPublishTargetFramework Condition="'$(SDKCustomXUnitPublishTargetFramework)' == ''">$(SdkTargetFramework)</SDKCustomXUnitPublishTargetFramework>
+    <SDKCustomXUnitRuntimeTargetFramework Condition="'$(SDKCustomXUnitRuntimeTargetFramework)' == ''">$(SdkTargetFramework)</SDKCustomXUnitRuntimeTargetFramework>
 
     <SDKCustomXUnitRunnerVersion Condition="'$(SDKCustomXUnitRunnerVersion)' == ''">2.4.1</SDKCustomXUnitRunnerVersion>
 
