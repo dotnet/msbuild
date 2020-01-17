@@ -8,18 +8,18 @@ variables:
     value: Roslyn-Project-System
   - name: _DotNetArtifactsCategory
     value: Toolset
-  - ${{ if eq(variables['System.TeamProject'], 'public') }}:
+  - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
     - name: PB_PublishBlobFeedKey
-      value:
+      value: ''
     - name: PB_PublishBlobFeedUrl
-      value:
+      value: ''
     - name: _DotNetPublishToBlobFeed
       value: false
     - name: _PublishUsingPipelines
       value: false
     - name: _PublishType
       value: none
-  - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+  - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     - name: PB_PublishBlobFeedUrl
       value: https://dotnetfeed.blob.core.windows.net/dotnet-toolset/index.json
     - name: _DotNetPublishToBlobFeed
@@ -30,6 +30,14 @@ variables:
       value: blob
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     - group: DotNet-CLI-SDLValidation-Params
+  - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+    - group: DotNet-MSRC-Storage
+    - name: _InternalRuntimeDownloadArgs
+      value: /p:DotNetRuntimeSourceFeed=https://dotnetclimsrc.blob.core.windows.net/dotnet
+             /p:DotNetRuntimeSourceFeedKey=$(dotnetclimsrc-read-sas-token-base64)
+  - ${{ if eq(variables['System.TeamProject'], 'public') }}:
+    - name: _InternalRuntimeDownloadArgs
+      value: ''
 
 stages:
 - stage: build
@@ -41,7 +49,7 @@ stages:
         name: Hosted VS2017
       strategy:
         matrix:
-          ${{ if eq(variables['System.TeamProject'], 'public') }}:
+          ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
             Build_Debug_x86:
               _BuildConfig: Debug
               _BuildArchitecture: x86
@@ -49,7 +57,7 @@ stages:
             _BuildConfig: Release
             _BuildArchitecture: x64
 
-  - ${{ if eq(variables['System.TeamProject'], 'public') }}:
+  - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
     - template: /eng/build.yml
       parameters:
         agentOs: Linux
