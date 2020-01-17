@@ -23,7 +23,8 @@ namespace Microsoft.NET.Publish.Tests
         private const string PublishSingleFile = "/p:PublishSingleFile=true";
         private const string FrameworkDependent = "/p:SelfContained=false";
         private const string IncludePdb = "/p:IncludeSymbolsInSingleFile=true";
-        private const string ExcludeContent = "/p:ExcludeContent=true";
+        private const string ExcludeNewest = "/p:ExcludeNewest=true";
+        private const string ExcludeAlways = "/p:ExcludeAlways=true";
         private const string DontUseAppHost = "/p:UseAppHost=false";
         private const string ReadyToRun = "/p:PublishReadyToRun=true";
         private const string ReadyToRunWithSymbols = "/p:PublishReadyToRunEmitSymbols=true";
@@ -32,7 +33,8 @@ namespace Microsoft.NET.Publish.Tests
         private readonly string SingleFile = $"{TestProjectName}{Constants.ExeSuffix}";
         private readonly string PdbFile = $"{TestProjectName}.pdb";
         private readonly string NiPdbFile = $"{TestProjectName}.ni.pdb";
-        private const string ContentFile = "Signature.stamp";
+        private const string NewestContent = "Signature.Newest.Stamp";
+        private const string AlwaysContent = "Signature.Always.Stamp";
 
         public GivenThatWeWantToPublishASingleFileApp(ITestOutputHelper log) : base(log)
         {
@@ -43,6 +45,22 @@ namespace Microsoft.NET.Publish.Tests
             var testAsset = _testAssetsManager
                .CopyTestAsset(TestProjectName)
                .WithSource();
+
+            // Create the following content:
+            //  <TestRoot>/SmallNameDir/This is a directory with a really long name for one that only contains a small file/.word
+            //
+            // This content is not checked in to the test assets, but generated during test execution
+            // in order to circumvent certain issues like: 
+            // Git Clone: Cannot clone files with long names on Windows if long file name support is not enabled
+            // Nuget Pack: By default ignores files starting with "."
+            string longDirPath = Path.Combine(testAsset.TestRoot,
+                                              "SmallNameDir",
+                                              "This is a directory with a really long name for one that only contains a small file");
+            Directory.CreateDirectory(longDirPath);
+            using (var writer = File.CreateText(Path.Combine(longDirPath, ".word")))
+            {
+                writer.Write("World!");
+            }
 
             return new PublishCommand(Log, testAsset.TestRoot);
         }
@@ -173,16 +191,18 @@ namespace Microsoft.NET.Publish.Tests
                 .OnlyHaveFiles(expectedFiles);
         }
 
-        [Fact]
-        public void It_generates_a_single_file_excluding_content()
+        [Theory]
+        [InlineData(ExcludeNewest, NewestContent)]
+        [InlineData(ExcludeAlways, AlwaysContent)]
+        public void It_generates_a_single_file_excluding_content(string exclusion, string content)
         {
             var publishCommand = GetPublishCommand();
             publishCommand
-                .Execute(PublishSingleFile, RuntimeIdentifier, ExcludeContent)
+                .Execute(PublishSingleFile, RuntimeIdentifier, exclusion)
                 .Should()
                 .Pass();
 
-            string[] expectedFiles = { SingleFile, PdbFile, ContentFile };
+            string[] expectedFiles = { SingleFile, PdbFile, content };
             GetPublishDirectory(publishCommand)
                 .Should()
                 .OnlyHaveFiles(expectedFiles);

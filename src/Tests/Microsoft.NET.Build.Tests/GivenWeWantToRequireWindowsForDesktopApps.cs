@@ -96,7 +96,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining(Strings.WindowsDesktopFrameworkRequiresWindows);
         }
 
-        [PlatformSpecificFact(Platform.Linux, Platform.Darwin, Platform.FreeBSD)]
+        [Fact]
         public void It_does_not_download_desktop_targeting_packs_on_unix()
         {
             const string ProjectName = "NoDownloadTargetingPackTest";
@@ -104,7 +104,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = ProjectName,
-                TargetFrameworks = "netcoreapp3.1",
+                TargetFrameworks = "netcoreapp5.0",
                 IsSdkProject = true,
                 IsExe = true,
             };

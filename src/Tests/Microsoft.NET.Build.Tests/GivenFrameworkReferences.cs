@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Xml.Linq;
 using FluentAssertions;
-using Microsoft.Build.Construction;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -15,7 +12,6 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -24,6 +20,19 @@ namespace Microsoft.NET.Build.Tests
         public GivenFrameworkReferences(ITestOutputHelper log) : base(log)
         {
         }
+
+        private const string FrameworkReferenceEmptyProgramSource = @"
+using System;
+
+namespace FrameworkReferenceTest
+{
+    public class Program
+    {
+        public static void Main(string [] args)
+        {
+        }
+    }
+}";
 
         //  Tests in this class are currently Core MSBuild only, as they check for PackageDownload items,
         //  which are currently only used in Core MSBuild
@@ -41,18 +50,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.FrameworkReferences.Add("Microsoft.ASPNETCORE.App");
             testProject.FrameworkReferences.Add("Microsoft.WindowsDesktop.App");
 
-            testProject.SourceFiles.Add("Program.cs", @"
-using System;
-
-namespace FrameworkReferenceTest
-{
-    public class Program
-    {
-        public static void Main(string [] args)
-        {
-        }
-    }
-}");
+            testProject.SourceFiles.Add("Program.cs", FrameworkReferenceEmptyProgramSource);
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -73,6 +71,82 @@ namespace FrameworkReferenceTest
             runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App", "Microsoft.WindowsDesktop.App");
         }
 
+        [CoreMSBuildOnlyTheory]
+        [InlineData("netcoreapp3.0", false)]
+        [InlineData("netcoreapp3.1", true)]
+        public void Multiple_frameworks_are_written_to_runtimeconfig_for_self_contained_apps(string tfm, bool shouldHaveIncludedFrameworks)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "MultipleFrameworkReferenceTest",
+                TargetFrameworks = tfm,
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            // Specifying RID makes the produced app self-contained.
+            testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
+
+            if (tfm == "netcoreapp3.1")
+            {
+                testProject.FrameworkReferences.Add("Microsoft.ASPNETCORE.App");
+            }
+
+            testProject.SourceFiles.Add("Program.cs", FrameworkReferenceEmptyProgramSource);
+
+            TestAsset testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            DirectoryInfo outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+
+            string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.RuntimeIdentifier, testProject.Name + ".runtimeconfig.json");
+            List<string> includedFrameworkNames = GetIncludedFrameworks(runtimeConfigFile);
+            if (shouldHaveIncludedFrameworks)
+            {
+                includedFrameworkNames.Should().BeEquivalentTo("Microsoft.NETCore.App", "Microsoft.AspNetCore.App");
+            }
+            else
+            {
+                includedFrameworkNames.Should().BeEmpty();
+            }
+        }
+
+        [CoreMSBuildOnlyFact]
+        public void ForceGenerateRuntimeConfigurationFiles_works_even_on_netFramework_tfm()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "NETFrameworkTFMTest",
+                TargetFrameworks = "net472",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            testProject.SourceFiles.Add("Program.cs", FrameworkReferenceEmptyProgramSource);
+            testProject.AdditionalProperties.Add("GenerateRuntimeConfigurationFiles", "true");
+
+            TestAsset testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            DirectoryInfo outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+            string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
+            Assert.True(File.Exists(runtimeConfigFile), $"Expected to generate runtime config file '{runtimeConfigFile}'");
+        }
+
         [CoreMSBuildAndWindowsOnlyFact]
         public void DuplicateFrameworksAreNotWrittenToRuntimeConfigWhenThereAreDifferentProfiles()
         {
@@ -87,18 +161,7 @@ namespace FrameworkReferenceTest
             testProject.FrameworkReferences.Add("Microsoft.WindowsDesktop.App.WPF");
             testProject.FrameworkReferences.Add("Microsoft.WindowsDesktop.App.WindowsForms");
 
-            testProject.SourceFiles.Add("Program.cs", @"
-using System;
-
-namespace FrameworkReferenceTest
-{
-    public class Program
-    {
-        public static void Main(string [] args)
-        {
-        }
-    }
-}");
+            testProject.SourceFiles.Add("Program.cs", FrameworkReferenceEmptyProgramSource);
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -926,6 +989,16 @@ namespace FrameworkReferenceTest
             }
         }
 
+        private List<string> GetIncludedFrameworks(string runtimeConfigPath)
+        {
+            JObject runtimeConfig = ReadRuntimeConfig(runtimeConfigPath);
+
+            var runtimeFrameworksList = (JArray)runtimeConfig["runtimeOptions"]["includedFrameworks"];
+            return runtimeFrameworksList == null
+                ? new List<string>()
+                : runtimeFrameworksList.Select(element => ((JValue)element["name"]).Value<string>()).ToList();
+        }
+
         private ResolvedVersionInfo GetResolvedVersions(TestProject testProject,
             Action<XDocument> projectChanges = null,
             [CallerMemberName] string callingMethod = null,
@@ -968,9 +1041,9 @@ namespace FrameworkReferenceTest
     <ItemGroup>
       <LinesToWrite Include=`RuntimeFramework%09%(RuntimeFramework.Identity)%09%(RuntimeFramework.Version)`/>
       <LinesToWrite Include=`PackageDownload%09%(PackageDownload.Identity)%09%(PackageDownload.Version)`/>
-      <LinesToWrite Include=`TargetingPack%09%(TargetingPack.Identity)%09%(TargetingPack.PackageVersion)`/>
-      <LinesToWrite Include=`RuntimePack%09%(RuntimePack.Identity)%09%(RuntimePack.PackageVersion)`/>
-      <LinesToWrite Include=`AppHostPack%09%(AppHostPack.Identity)%09%(AppHostPack.PackageVersion)`/>
+      <LinesToWrite Include=`TargetingPack%09%(TargetingPack.Identity)%09%(TargetingPack.NuGetPackageVersion)`/>
+      <LinesToWrite Include=`RuntimePack%09%(RuntimePack.Identity)%09%(RuntimePack.NuGetPackageVersion)`/>
+      <LinesToWrite Include=`AppHostPack%09%(AppHostPack.Identity)%09%(AppHostPack.NuGetPackageVersion)`/>
     </ItemGroup>
     <WriteLinesToFile File=`$(OutputPath)resolvedversions.txt`
                       Lines=`@(LinesToWrite)`
@@ -1023,7 +1096,7 @@ namespace FrameworkReferenceTest
                                                         "ResolvedFileToPublish", GetValuesCommand.ValueType.Item)
             {
                 DependsOnTargets = "ComputeFilesToPublish",
-                MetadataNames = { "PackageName", "IsTrimmable" },
+                MetadataNames = { "NuGetPackageId", "IsTrimmable" },
             };
 
             command.Execute().Should().Pass();
@@ -1031,7 +1104,7 @@ namespace FrameworkReferenceTest
                         select new
                         {
                             Identity = item.value,
-                            PackageName = item.metadata["PackageName"],
+                            PackageName = item.metadata["NuGetPackageId"],
                             IsTrimmable = item.metadata["IsTrimmable"]
                         };
 

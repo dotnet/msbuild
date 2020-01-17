@@ -349,8 +349,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 fileDefns.Count().Should().Be(1);
                 fileDefns.First().GetMetadata(MetadataKeys.Type).Should().Be(pair.Value);
                 fileDefns.First().GetMetadata(MetadataKeys.Path).Should().Be(pair.Key);
-                fileDefns.First().GetMetadata(MetadataKeys.PackageName).Should().Be("LibB");
-                fileDefns.First().GetMetadata(MetadataKeys.PackageVersion).Should().Be("1.2.3");
+                fileDefns.First().GetMetadata(MetadataKeys.NuGetPackageId).Should().Be("LibB");
+                fileDefns.First().GetMetadata(MetadataKeys.NuGetPackageVersion).Should().Be("1.2.3");
                 fileDefns.First().GetMetadata(MetadataKeys.ResolvedPath)
                     .Should().Be(Path.Combine(_packageRoot, "LibB", "1.2.3", "path", 
                         pair.Key.Replace('/', Path.DirectorySeparatorChar)));

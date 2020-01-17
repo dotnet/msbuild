@@ -1245,8 +1245,6 @@ namespace Microsoft.NET.Build.Tasks
                         string itemSpec = _packageResolver.ResolvePackageAssetPath(library, asset.Path);
                         WriteItem(itemSpec, library);
                         WriteMetadata(MetadataKeys.PathInPackage, asset.Path);
-                        WriteMetadata(MetadataKeys.PackageName, library.Name);
-                        WriteMetadata(MetadataKeys.PackageVersion, library.Version.ToString().ToLowerInvariant());
 
                         writeMetadata?.Invoke(library, asset);
                     }

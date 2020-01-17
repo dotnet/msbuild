@@ -327,7 +327,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var publishDir = publishCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: rid);
             publishDir.Should().HaveFile("System.IO.Compression.ZipFile.dll");
-            GivenThatWeWantToRunCrossgen.DoesImageHaveR2RInfo(publishDir.File("TestWeb.Views.dll").FullName);
+            GivenThatWeWantToPublishReadyToRun.DoesImageHaveR2RInfo(publishDir.File("TestWeb.Views.dll").FullName);
         }
 
         private static bool DoesImageHaveMethod(string path, string methodNameToCheck)

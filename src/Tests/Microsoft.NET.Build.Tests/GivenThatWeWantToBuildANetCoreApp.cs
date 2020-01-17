@@ -437,6 +437,52 @@ public static class Program
             }
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_generates_rid_fallback_graph(bool isSelfContained)
+        {
+            var targetFramework = "netcoreapp3.0";
+            var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            TestProject project = new TestProject()
+            {
+                Name = "NetCore2App",
+                TargetFrameworks = targetFramework,
+                IsExe = true,
+                IsSdkProject = true,
+                RuntimeIdentifier = runtimeIdentifier
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(project);
+            string projectFolder = Path.Combine(testAsset.Path, project.Name);
+
+            var buildCommand = new BuildCommand(Log, projectFolder);
+
+            buildCommand
+                .Execute($"/p:SelfContained={isSelfContained}")
+                .Should()
+                .Pass();
+
+            string outputFolder = buildCommand.GetOutputDirectory(project.TargetFrameworks, runtimeIdentifier: runtimeIdentifier).FullName;
+
+            using var depsJsonFileStream = File.OpenRead(Path.Combine(outputFolder, $"{project.Name}.deps.json"));
+            var dependencyContext = new DependencyContextJsonReader().Read(depsJsonFileStream);
+            var runtimeFallbackGraph = dependencyContext.RuntimeGraph;
+            if (isSelfContained)
+            {
+                runtimeFallbackGraph.Should().NotBeEmpty();
+                runtimeFallbackGraph
+                    .Any(runtimeFallback => !runtimeFallback.Runtime.Equals(runtimeIdentifier) && !runtimeFallback.Fallbacks.Contains(runtimeIdentifier))
+                    .Should()
+                    .BeFalse();
+            }
+            else
+            {
+                runtimeFallbackGraph.Should().BeEmpty();
+            }
+        }
+
         [Fact]
         public void There_are_no_conflicts_when_targeting_netcoreapp_1_1()
         {

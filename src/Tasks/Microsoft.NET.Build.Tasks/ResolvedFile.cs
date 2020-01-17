@@ -77,16 +77,8 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             PackageName = item.GetMetadata(MetadataKeys.NuGetPackageId);
-            if (string.IsNullOrEmpty(PackageName))
-            {
-                PackageName = item.GetMetadata(MetadataKeys.PackageName);
-            }
 
             PackageVersion = item.GetMetadata(MetadataKeys.NuGetPackageVersion);
-            if (string.IsNullOrEmpty(PackageVersion))
-            {
-                PackageVersion = item.GetMetadata(MetadataKeys.PackageVersion);
-            }
 
             PathInPackage = item.GetMetadata(MetadataKeys.PathInPackage);
 

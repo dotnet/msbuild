@@ -349,7 +349,7 @@ namespace Microsoft.NET.Build.Tests
                 return command;
             }
         }
-
+        
         [Fact]
         public void It_includes_internals_visible_to()
         {
@@ -366,8 +366,6 @@ namespace Microsoft.NET.Build.Tests
                             new XElement(ns + "InternalsVisibleTo",
                                 new XAttribute("Include", "Tests"))));
                 });
-
-            new RestoreCommand(Log, testAsset.TestRoot).Execute().Should().Pass();
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand.Execute().Should().Pass();
@@ -396,8 +394,6 @@ namespace Microsoft.NET.Build.Tests
                                 new XAttribute("Include", "Tests"))));
                 });
 
-            new RestoreCommand(Log, testAsset.TestRoot).Execute().Should().Pass();
-
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand.Execute().Should().Pass();
 
@@ -423,8 +419,6 @@ namespace Microsoft.NET.Build.Tests
                                 new XAttribute("Include", "Tests"),
                                 new XAttribute("Key", "00240000048000009400000006020000002400005253413100040000010001001d3e6bbb36e11ea61ceff6e1022b23dd779fc6230838db2d25a2c7c8433b3fcf86b16c25b281fc3db1027c0675395e7d0548e6add88b6a811962bf958101fa9e243b1618313bee11f5e3b3fefda7b1d1226311b6cc2d07e87ff893ba6890b20082df34a0aac14b605b8be055e81081a626f8c69e9ed4bbaa4eae9f94a35accd2"))));
                 });
-
-            new RestoreCommand(Log, testAsset.TestRoot).Execute().Should().Pass();
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand.Execute().Should().Pass();
@@ -453,14 +447,65 @@ namespace Microsoft.NET.Build.Tests
                                 new XAttribute("Include", "Tests"))));
                 });
 
-            new RestoreCommand(Log, testAsset.TestRoot).Execute().Should().Pass();
-
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand.Execute().Should().Pass();
 
             var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netstandard2.0").FullName, "HelloWorld.dll");
 
             AssemblyInfo.Get(assemblyPath)["InternalsVisibleToAttribute"].Should().Be("Tests, PublicKey=00240000048000009400000006020000002400005253413100040000010001001d3e6bbb36e11ea61ceff6e1022b23dd779fc6230838db2d25a2c7c8433b3fcf86b16c25b281fc3db1027c0675395e7d0548e6add88b6a811962bf958101fa9e243b1618313bee11f5e3b3fefda7b1d1226311b6cc2d07e87ff893ba6890b20082df34a0aac14b605b8be055e81081a626f8c69e9ed4bbaa4eae9f94a35accd2");
+        }
+
+        public void It_includes_assembly_metadata()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource()
+                .WithTargetFramework("netstandard2.0")
+                .WithProjectChanges((path, project) =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    project.Root.Add(
+                        new XElement(ns + "ItemGroup",
+                            new XElement(ns + "AssemblyMetadata",
+                                new XAttribute("Include", "MetadataKey"),
+                                new XAttribute("Value", "MetadataValue"))));
+                });
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            buildCommand.Execute().Should().Pass();
+
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netstandard2.0").FullName, "HelloWorld.dll");
+
+            AssemblyInfo.Get(assemblyPath)["AssemblyMetadataAttribute"].Should().Be("MetadataKey:MetadataValue");
+        }
+
+        [Fact]
+        public void It_respects_out_out_of_assembly_metadata()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource()
+                .WithTargetFramework("netstandard2.0")
+                .WithProjectChanges((path, project) =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    project.Root.Add(
+                        new XElement(ns + "PropertyGroup",
+                            new XElement(ns + "GenerateAssemblyMetadataAttributes", "false")),
+                        new XElement(ns + "ItemGroup",
+                            new XElement(ns + "AssemblyMetadata",
+                                new XAttribute("Include", "MetadataKey"),
+                                new XAttribute("Value", "MetadataValue"))));
+                });
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            buildCommand.Execute().Should().Pass();
+
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netstandard2.0").FullName, "HelloWorld.dll");
+
+            Assert.False(AssemblyInfo.Get(assemblyPath).ContainsKey("AssemblyMetadataAttribute"));
         }
 
         [Theory]

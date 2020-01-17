@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Microsoft.Build.Framework;
 using Microsoft.Extensions.DependencyModel;
 using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
+using NuGet.RuntimeModel;
 using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tasks
@@ -26,16 +28,17 @@ namespace Microsoft.NET.Build.Tasks
         private string _referenceAssembliesPath;
         private Dictionary<PackageIdentity, string> _filteredPackages;
         private bool _includeMainProjectInDepsFile = true;
-        private Dictionary<string, DependencyLibrary> _dependencyLibraries;
-        private Dictionary<string, List<LibraryDependency>> _libraryDependencies;
-        private List<string> _mainProjectDependencies;
-        private HashSet<PackageIdentity> _packagesToBeFiltered;
-        private bool _isFrameworkDependent;
-        private string _platformLibrary;
-        private string _dotnetFrameworkName;
-        private string _runtimeIdentifier;
-        private bool _isPortable;
-        private HashSet<string> _usedLibraryNames;
+        private readonly Dictionary<string, DependencyLibrary> _dependencyLibraries;
+        private readonly Dictionary<string, List<LibraryDependency>> _libraryDependencies;
+        private readonly List<string> _mainProjectDependencies;
+        private readonly HashSet<PackageIdentity> _packagesToBeFiltered;
+        private readonly bool _isFrameworkDependent;
+        private readonly string _platformLibrary;
+        private readonly string _dotnetFrameworkName;
+        private readonly string _runtimeIdentifier;
+        private readonly bool _isPortable;
+        private readonly HashSet<string> _usedLibraryNames;
+        private readonly RuntimeGraph _runtimeGraph;
 
         private Dictionary<ReferenceInfo, string> _referenceLibraryNames;
 
@@ -44,10 +47,11 @@ namespace Microsoft.NET.Build.Tasks
 
         private const string NetCorePlatformLibrary = "Microsoft.NETCore.App";
 
-        public DependencyContextBuilder(SingleProjectInfo mainProjectInfo, ProjectContext projectContext, bool includeRuntimeFileVersions)
+        public DependencyContextBuilder(SingleProjectInfo mainProjectInfo, bool includeRuntimeFileVersions, RuntimeGraph runtimeGraph, ProjectContext projectContext)
         {
             _mainProjectInfo = mainProjectInfo;
             _includeRuntimeFileVersions = includeRuntimeFileVersions;
+            _runtimeGraph = runtimeGraph;
 
             var libraryLookup = new LockFileLookup(projectContext.LockFile);
 
@@ -88,6 +92,48 @@ namespace Microsoft.NET.Build.Tasks
             _isPortable = projectContext.IsPortable;
 
             _usedLibraryNames = new HashSet<string>(_dependencyLibraries.Keys, StringComparer.OrdinalIgnoreCase);
+        }
+
+        public DependencyContextBuilder(
+            SingleProjectInfo mainProjectInfo,
+            bool includeRuntimeFileVersions,
+            ITaskItem[] runtimeFrameworks,
+            string runtimeIdentifier,
+            bool isSelfContained,
+            string platformLibraryName,
+            string targetFramework)
+        {
+            _mainProjectInfo = mainProjectInfo;
+            _includeRuntimeFileVersions = includeRuntimeFileVersions;
+
+            _isFrameworkDependent = LockFileExtensions.IsFrameworkDependent(
+                runtimeFrameworks,
+                isSelfContained,
+                runtimeIdentifier,
+                string.IsNullOrWhiteSpace(platformLibraryName));
+
+            _isPortable = _isFrameworkDependent && string.IsNullOrEmpty(_runtimeIdentifier);
+
+            if (_isFrameworkDependent != true || _isPortable != true)
+            {
+                throw new ArgumentException(
+                    $"{nameof(DependencyContextBuilder)} Does not support non FrameworkDependent without assetfile. " +
+                    $"runtimeFrameworks: {string.Join(",", runtimeFrameworks.Select(r => r.ItemSpec))} " +
+                    $"isSelfContained: {isSelfContained} " +
+                    $"runtimeIdentifier: {runtimeIdentifier} " +
+                    $"platformLibraryName: {platformLibraryName}");
+            }
+
+            _platformLibrary = platformLibraryName;
+            _dotnetFrameworkName = targetFramework;
+            _runtimeIdentifier = runtimeIdentifier;
+
+            _dependencyLibraries = new Dictionary<string, DependencyLibrary>();
+            _libraryDependencies = new Dictionary<string, List<LibraryDependency>>();
+            _mainProjectDependencies = new List<string>();
+            _packagesToBeFiltered = null;
+
+            _usedLibraryNames = new HashSet<string>();
         }
 
         private bool IncludeCompilationLibraries => _compilationOptions != null;
@@ -322,19 +368,34 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
-
             var targetInfo = new TargetInfo(
                 _dotnetFrameworkName,
                 _runtimeIdentifier,
                 runtimeSignature: string.Empty,
                 _isPortable);
 
+            // Compute the runtime fallback graph 
+            // 
+            // If the input RuntimeGraph is empty, or we're not compiling
+            // for a specific RID, then an runtime fallback graph is empty
+            //
+            // Otherwise, it is the set of all runtimes compatible with (inheriting)
+            // the target runtime-identifier.
+
+            var runtimeFallbackGraph =
+                (_runtimeGraph == null || _runtimeIdentifier == null) ? 
+                    new RuntimeFallbacks[] { } :
+                    _runtimeGraph.Runtimes
+                        .Select(runtimeDict => _runtimeGraph.ExpandRuntime(runtimeDict.Key))
+                        .Where(expansion => expansion.Contains(_runtimeIdentifier))
+                        .Select(expansion => new RuntimeFallbacks(expansion.First(), expansion.Skip(1))); // ExpandRuntime return runtime itself as first item.
+
             return new DependencyContext(
-                targetInfo,
-                _compilationOptions ?? CompilationOptions.Default,
-                compilationLibraries,
-                runtimeLibraries,
-                new RuntimeFallbacks[] { });
+            targetInfo,
+            _compilationOptions ?? CompilationOptions.Default,
+            compilationLibraries,
+            runtimeLibraries,
+            runtimeFallbackGraph);
         }
 
         private RuntimeLibrary GetProjectRuntimeLibrary()

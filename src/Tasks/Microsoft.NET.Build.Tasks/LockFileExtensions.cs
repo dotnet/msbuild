@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Build.Framework;
 using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
@@ -61,12 +62,17 @@ namespace Microsoft.NET.Build.Tasks
             var lockFileTarget = lockFile.GetTargetAndThrowIfNotFound(framework, runtime);
 
             LockFileTargetLibrary platformLibrary = lockFileTarget.GetLibrary(platformLibraryName);
-            bool isFrameworkDependent = (platformLibrary != null || runtimeFrameworks?.Any() == true) &&
-                (!isSelfContained || string.IsNullOrEmpty(lockFileTarget.RuntimeIdentifier));
+            bool isFrameworkDependent = IsFrameworkDependent(runtimeFrameworks, isSelfContained, lockFileTarget.RuntimeIdentifier, platformLibrary != null);
 
             return new ProjectContext(lockFile, lockFileTarget, platformLibrary,
                 runtimeFrameworks?.Select(i => new ProjectContext.RuntimeFramework(i))?.ToArray(),
                 isFrameworkDependent);
+        }
+
+        public static bool IsFrameworkDependent(ITaskItem[] runtimeFrameworks, bool isSelfContained, string runtimeIdentifier, bool hasPlatformLibrary)
+        {
+            return (hasPlatformLibrary || runtimeFrameworks?.Any() == true) &&
+                (!isSelfContained || string.IsNullOrEmpty(runtimeIdentifier));
         }
 
         public static LockFileTargetLibrary GetLibrary(this LockFileTarget lockFileTarget, string libraryName)

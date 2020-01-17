@@ -167,8 +167,8 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             assetItem.SetMetadata(MetadataKeys.AssetType, assetType);
-            assetItem.SetMetadata(MetadataKeys.PackageName, runtimePack.GetMetadata(MetadataKeys.PackageName));
-            assetItem.SetMetadata(MetadataKeys.PackageVersion, runtimePack.GetMetadata(MetadataKeys.PackageVersion));
+            assetItem.SetMetadata(MetadataKeys.NuGetPackageId, runtimePack.GetMetadata(MetadataKeys.NuGetPackageId));
+            assetItem.SetMetadata(MetadataKeys.NuGetPackageVersion, runtimePack.GetMetadata(MetadataKeys.NuGetPackageVersion));
             assetItem.SetMetadata(MetadataKeys.RuntimeIdentifier, runtimeIdentifier);
             assetItem.SetMetadata(MetadataKeys.IsTrimmable, runtimePack.GetMetadata(MetadataKeys.IsTrimmable));
 

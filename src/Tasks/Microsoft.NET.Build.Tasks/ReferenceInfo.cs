@@ -54,10 +54,17 @@ namespace Microsoft.NET.Build.Tasks
         public static IEnumerable<ReferenceInfo> CreateDirectReferenceInfos(
             IEnumerable<ITaskItem> referencePaths,
             IEnumerable<ITaskItem> referenceSatellitePaths,
+            bool projectContextHasProjectReferences,
             Func<ITaskItem, bool> isRuntimeAssembly)
         {
+
+            bool filterOutProjectReferenceIfInProjectContextAlready(ITaskItem referencePath)
+            {
+                return (projectContextHasProjectReferences ? !IsProjectReference(referencePath) : true);
+            }
+
             IEnumerable<ITaskItem> directReferencePaths = referencePaths
-                .Where(r => !IsProjectReference(r) && !IsNuGetReference(r) && isRuntimeAssembly(r));
+                .Where(r => filterOutProjectReferenceIfInProjectContextAlready(r) && !IsNuGetReference(r) && isRuntimeAssembly(r));
 
             return CreateFilteredReferenceInfos(directReferencePaths, referenceSatellitePaths);
         }
@@ -121,16 +128,8 @@ namespace Microsoft.NET.Build.Tasks
             string version = GetVersion(referencePath);
 
             var packageName = referencePath.GetMetadata(MetadataKeys.NuGetPackageId);
-            if (string.IsNullOrEmpty(packageName))
-            {
-                packageName = referencePath.GetMetadata(MetadataKeys.PackageName);
-            }
 
             var packageVersion = referencePath.GetMetadata(MetadataKeys.NuGetPackageVersion);
-            if (string.IsNullOrEmpty(packageVersion))
-            {
-                packageVersion = referencePath.GetMetadata(MetadataKeys.PackageVersion);
-            }
 
             var pathInPackage = referencePath.GetMetadata(MetadataKeys.PathInPackage);
 

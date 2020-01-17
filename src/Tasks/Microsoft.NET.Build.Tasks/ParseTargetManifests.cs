@@ -55,8 +55,8 @@ namespace Microsoft.NET.Build.Tasks
                     string packageVersion = storeEntry.Key.Version.ToNormalizedString();
 
                     TaskItem item = new TaskItem($"{packageName}/{packageVersion}");
-                    item.SetMetadata(MetadataKeys.PackageName, packageName);
-                    item.SetMetadata(MetadataKeys.PackageVersion, packageVersion);
+                    item.SetMetadata(MetadataKeys.NuGetPackageId, packageName);
+                    item.SetMetadata(MetadataKeys.NuGetPackageVersion, packageVersion);
                     item.SetMetadata(MetadataKeys.RuntimeStoreManifestNames, storeEntry.Value.ToString());
 
                     resultPackages.Add(item);
