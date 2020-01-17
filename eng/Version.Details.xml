@@ -52,6 +52,10 @@
       <Uri>https://github.com/dotnet/sdk</Uri>
       <Sha>b3cf8ef9e7df8d9cb28b3545ce1f85f548deca75</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.NETCore.App.Internal" Version="3.1.2-servicing.20067.1">
+      <Uri>https://github.com/dotnet/core-setup</Uri>
+      <Sha>76cc488b8c942815d8b4bfe1de803b916667fe37</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.DotNet.Cli.CommandLine" Version="1.0.0-preview.19208.1">
       <Uri>https://github.com/dotnet/CliCommandLineParser</Uri>
       <Sha>0e89c2116ad28e404ba56c14d1c3f938caa25a01</Sha>
