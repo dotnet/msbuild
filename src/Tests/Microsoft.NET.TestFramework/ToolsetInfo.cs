@@ -60,19 +60,31 @@ namespace Microsoft.NET.TestFramework
 
         private void InitSdkVersion()
         {
-            var logger = new StringTestLogger();
-            var command = new DotnetCommand(logger, "--version");
-
-            command.WorkingDirectory = TestContext.Current.TestExecutionDirectory;
-
-            var result = command.Execute();
-
-            if (result.ExitCode != 0)
+            //  If using full framework MSBuild, then running a command tries to get the SdkVersion in order to set the
+            //  DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR environment variable.  So turn that off when getting the SDK version
+            //  in order to avoid stack overflow
+            string oldFullFrameworkMSBuildPath = FullFrameworkMSBuildPath;
+            try
             {
-                throw new Exception("Failed to get dotnet version" + Environment.NewLine + logger.ToString());
-            }
+                FullFrameworkMSBuildPath = null;
+                var logger = new StringTestLogger();
+                var command = new DotnetCommand(logger, "--version");
 
-            _sdkVersion = result.StdOut.Trim();
+                command.WorkingDirectory = TestContext.Current.TestExecutionDirectory;
+
+                var result = command.Execute();
+
+                if (result.ExitCode != 0)
+                {
+                    throw new Exception("Failed to get dotnet version" + Environment.NewLine + logger.ToString());
+                }
+
+                _sdkVersion = result.StdOut.Trim();
+            }
+            finally
+            {
+                FullFrameworkMSBuildPath = oldFullFrameworkMSBuildPath;
+            }
         }
 
         public string GetMicrosoftNETBuildExtensionsPath()
