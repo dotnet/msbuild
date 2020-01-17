@@ -5,6 +5,10 @@
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>65f04fb6db7a5e198d05dbebd5c4ad21eb018f89</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.NETCore.App.Internal" Version="3.1.2-servicing.20067.4">
+      <Uri>https://github.com/dotnet/core-setup</Uri>
+      <Sha>916b5cba268e1e1e803243004f4276cf40b2dda8</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.1.200-preview.20059.1">
       <Uri>https://github.com/dotnet/cli</Uri>
       <Sha>cbf29e13514ba9d3be54eff7ccfe4b9df93e581b</Sha>
