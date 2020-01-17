@@ -18,16 +18,20 @@
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/core-setup -->
     <MicrosoftNETCoreAppRefPackageVersion>3.1.0</MicrosoftNETCoreAppRefPackageVersion>
-    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>3.1.0</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
+    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>3.1.2</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
     <MicrosoftNETCoreAppRuntimePackageVersion>$(MicrosoftNETCoreAppRuntimewinx64PackageVersion)</MicrosoftNETCoreAppRuntimePackageVersion>
-    <MicrosoftDotNetPlatformAbstractionsPackageVersion>3.1.0</MicrosoftDotNetPlatformAbstractionsPackageVersion>
-    <MicrosoftExtensionsDependencyModelPackageVersion>3.1.0</MicrosoftExtensionsDependencyModelPackageVersion>
-    <MicrosoftNETCoreDotNetHostResolverPackageVersion>3.1.0</MicrosoftNETCoreDotNetHostResolverPackageVersion>
-    <MicrosoftNETHostModelVersion>3.1.0</MicrosoftNETHostModelVersion>
+    <MicrosoftDotNetPlatformAbstractionsPackageVersion>3.1.2</MicrosoftDotNetPlatformAbstractionsPackageVersion>
+    <MicrosoftExtensionsDependencyModelPackageVersion>3.1.2</MicrosoftExtensionsDependencyModelPackageVersion>
+    <MicrosoftNETCoreDotNetHostResolverPackageVersion>3.1.2</MicrosoftNETCoreDotNetHostResolverPackageVersion>
+    <MicrosoftNETHostModelVersion>3.1.2</MicrosoftNETHostModelVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!-- Dependencies from https://github.com/dotnet/corefx -->
+    <SystemTextJsonPackageVersion>4.7.1</SystemTextJsonPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore -->
-    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>3.1.0-rtm.19566.1</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
+    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>3.1.2-servicing.20065.6</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/microsoft/msbuild -->
@@ -38,12 +42,12 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/sdk -->
-    <MicrosoftNETSdkPackageVersion>3.1.200-preview.20059.2</MicrosoftNETSdkPackageVersion>
+    <MicrosoftNETSdkPackageVersion>3.1.100-rtm.19568.4</MicrosoftNETSdkPackageVersion>
     <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/templating -->
-    <MicrosoftTemplateEngineCliPackageVersion>3.1.1-servicing.19605.2</MicrosoftTemplateEngineCliPackageVersion>
+    <MicrosoftTemplateEngineCliPackageVersion>3.1.2-servicing.20064.1</MicrosoftTemplateEngineCliPackageVersion>
     <MicrosoftTemplateEngineAbstractionsPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineAbstractionsPackageVersion>
     <MicrosoftTemplateEngineCliLocalizationPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineCliLocalizationPackageVersion>
     <MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>
