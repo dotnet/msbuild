@@ -14,7 +14,7 @@ function InitializeCustomSDKToolset {
   InstallDotNetSharedFramework "1.1.2"
   InstallDotNetSharedFramework "2.1.0"
   InstallDotNetSharedFramework "2.2.8"
-  InstallDotNetSharedFramework "3.1.0-preview1.19506.1"
+  InstallDotNetSharedFramework "3.1.0"
 }
 
 # Installs additional shared frameworks for testing purposes
