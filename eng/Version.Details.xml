@@ -5,6 +5,10 @@
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>65f04fb6db7a5e198d05dbebd5c4ad21eb018f89</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.NETCore.App.Internal" Version="3.1.2-servicing.20067.4">
+      <Uri>https://github.com/dotnet/core-setup</Uri>
+      <Sha>916b5cba268e1e1e803243004f4276cf40b2dda8</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.DotNet.Cli.Runtime" Version="3.1.200-preview.20059.1">
       <Uri>https://github.com/dotnet/cli</Uri>
       <Sha>cbf29e13514ba9d3be54eff7ccfe4b9df93e581b</Sha>
@@ -29,14 +33,14 @@
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>d2bd58c62f9104d66f415141a1a27b665c78690c</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Razor" Version="3.1.0">
-      <Uri>https://github.com/aspnet/AspNetCore-Tooling</Uri>
-      <Sha>29036777e7cd2172a81c45c69e0dc257e8b8184e</Sha>
+    <Dependency Name="Microsoft.NET.Sdk.Razor" Version="3.1.2">
+      <Uri>https://github.com/dotnet/aspnetcore-tooling</Uri>
+      <Sha>2dab42e151ea8020a75cdaaa8c46bf5d9093b8c0</Sha>
     </Dependency>
     <!-- For coherency purposes, this version should be gated by the version of wpf routed via core setup -->
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.1.0-rtm.19565.1" CoherentParentDependency="Microsoft.NETCore.App.Runtime.win-x64">
-      <Uri>https://github.com/dotnet/wpf</Uri>
-      <Sha>427fa56aed34cbbc5096aa6137e748054905507d</Sha>
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.1.0-rtm.19605.7" CoherentParentDependency="Microsoft.NETCore.App.Runtime.win-x64">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
+      <Sha>a8e48616c8d8e56469a456eb1ee263268316b827</Sha>
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="5.5.0-preview.2.6355">
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
