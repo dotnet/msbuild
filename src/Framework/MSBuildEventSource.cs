@@ -12,13 +12,6 @@ namespace Microsoft.Build.Eventing
     [EventSource(Name = "Microsoft-Build")]
     internal sealed class MSBuildEventSource : EventSource
     {
-        [DllImport("kernel32.dll")]
-        private static extern long GetThreadTimes(IntPtr threadHandle, out long creationTime,
-             out long exitTime, out long kernelTime, out long userTime);
-
-        [DllImport("kernel32.dll")]
-        private static extern IntPtr GetCurrentThread();
-
         /// <summary>
         /// define the singleton instance of the event source
         /// </summary>
@@ -371,31 +364,28 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(47)]
-        public void ExecuteTaskStart(string taskName)
+        public void ExecuteTaskStart(string taskName, int taskID)
         {
-            WriteEvent(47, taskName);
+            WriteEvent(47, taskName, taskID);
         }
 
         [Event(48)]
-        public void ExecuteTaskStop(string taskName, string millisecondsElapsed)
+        public void ExecuteTaskStop(string taskName, int taskID)
         {
-            WriteEvent(48, taskName, millisecondsElapsed);
+            WriteEvent(48, taskName, taskID);
         }
 
-        #endregion
-
-        #region Non-Events
-        [NonEvent]
-        public static long GetThreadTime()
+        [Event(49)]
+        public void ExecuteTaskYieldStart(string taskName, int taskID)
         {
-            long kernelTime, userTime;
-            if (!Convert.ToBoolean(GetThreadTimes(GetCurrentThread(), out _, out _, out kernelTime, out userTime)))
-            {
-                return -1;
-            }
-            return (kernelTime + userTime) / 10000;
+            WriteEvent(49, taskName, taskID);
         }
 
+        [Event(50)]
+        public void ExecuteTaskYieldStop(string taskName, int taskID)
+        {
+            WriteEvent(50, taskName, taskID);
+        }
         #endregion
     }
 }

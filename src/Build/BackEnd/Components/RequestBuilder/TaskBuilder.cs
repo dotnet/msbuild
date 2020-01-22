@@ -316,21 +316,20 @@ namespace Microsoft.Build.BackEnd
                 // Only create a hash table if there are more than one bucket as this is the only time a property can be overridden
                 if (buckets.Count > 1)
                 {
-                    lookupHash = lookupHash ?? new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+                    lookupHash ??= new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
                 }
 
                 WorkUnitResult aggregateResult = new WorkUnitResult();
 
-                // Some tests do not provide an actual taskNode; checking if _taskNode == null prevents those tests from failing.
-                long startTime = -1;
-                if (MSBuildEventSource.Log.IsEnabled())
-                {
-                    startTime = MSBuildEventSource.GetThreadTime();
-                    MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name);
-                }
                 // Loop through each of the batch buckets and execute them one at a time
                 for (int i = 0; i < buckets.Count; i++)
                 {
+                    // Some tests do not provide an actual taskNode; checking if _taskNode == null prevents those tests from failing.
+                    if (MSBuildEventSource.Log.IsEnabled())
+                    {
+                        TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
+                        MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
+                    }
                     // Execute the batch bucket, pass in which bucket we are executing so that we know when to get a new taskId for the bucket.
                     taskResult = await ExecuteBucket(taskHost, (ItemBucket)buckets[i], mode, lookupHash);
 
@@ -340,14 +339,14 @@ namespace Microsoft.Build.BackEnd
                     {
                         break;
                     }
+                    // Some tests do not provide an actual taskNode; checking if _taskNode == null prevents those tests from failing.
+                    if (MSBuildEventSource.Log.IsEnabled())
+                    {
+                        TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
+                        MSBuildEventSource.Log.ExecuteTaskStop(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
+                    }
                 }
-                // Some tests do not provide an actual taskNode; checking if _taskNode == null prevents those tests from failing.
-                if (MSBuildEventSource.Log.IsEnabled())
-                {
-                    long endTime = MSBuildEventSource.GetThreadTime();
-                    TimeSpan time = TimeSpan.FromMilliseconds(startTime == -1 || endTime == -1 ? -1 : endTime - startTime);
-                    MSBuildEventSource.Log.ExecuteTaskStop(_taskNode?.Name, time.TotalMilliseconds == -1 ? null : string.Empty + time.Duration().Milliseconds);
-                }
+                
                 taskResult = aggregateResult;
             }
             finally
