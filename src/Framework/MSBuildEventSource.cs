@@ -386,6 +386,18 @@ namespace Microsoft.Build.Eventing
         {
             WriteEvent(50, taskName, taskID);
         }
+
+        [Event(51)]
+        public void ExecuteTaskReacquireStart(string taskName, int taskID)
+        {
+            WriteEvent(51, taskName, taskID);
+        }
+
+        [Event(52)]
+        public void ExecuteTaskReacquireStop(string taskName, int taskID)
+        {
+            WriteEvent(52, taskName, taskID);
+        }
         #endregion
     }
 }
