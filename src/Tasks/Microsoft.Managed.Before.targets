@@ -1,0 +1,24 @@
+﻿<!--
+***********************************************************************************************
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+This file defines common build logic for all managed languaged: C#, VisualBasic, F#
+It is imported before the common targets have been imported.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project>
+   <!--
+        We are doing a cross-targeting build if there is a non-empty list of target frameworks specified
+        and there is no current target framework being built individually. In that case, a multitargeting
+        project file like Microsoft.<language>.CrossTargeting.targets gets imported.
+   -->
+   <PropertyGroup Condition="'$(TargetFrameworks)' != '' and '$(TargetFramework)' == ''">
+      <IsCrossTargetingBuild>true</IsCrossTargetingBuild>
+   </PropertyGroup>
+
+</Project>

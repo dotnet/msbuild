@@ -156,11 +156,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <Import Project="$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportBefore\*" Condition="'$(ImportByWildcardBefore40MicrosoftNetFrameworkProps)' == 'true' and exists('$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.props\ImportBefore')"/>
   </ImportGroup> 
 
-  <Import Project="$(MSBuildToolsPath)\Microsoft.Managed.targets" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Managed.Before.targets" />
 
   <Import Project="$(VisualBasicTargetsPath)" />
-  
-  <!-- Really should be imported right after Microsoft.NETFramework.props, but because Microsoft.VisualBasic.targets imports 
+
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Managed.After.targets" />
+
+  <!-- Really should be imported right after Microsoft.NETFramework.props, but because Microsoft.VisualBasic.targets imports
        Microsoft.Common.targets from the current directory rather than using MSBuildToolsPath (which would redirect to our
        targets), and Microsoft.Common.targets does likewise with Microsoft.NETFramework.props, we're stuck doing it this 
        way instead. --> 

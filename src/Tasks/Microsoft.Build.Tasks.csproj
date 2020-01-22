@@ -708,6 +708,12 @@
     <Content Include="Microsoft.Managed.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Microsoft.Managed.Before.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Microsoft.Managed.After.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Microsoft.CSharp.CurrentVersion.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -841,6 +847,8 @@
       <SubType>Designer</SubType>
     </DataFile>
     <DataFile Include="Microsoft.Managed.targets" />
+    <DataFile Include="Microsoft.Managed.Before.targets" />
+    <DataFile Include="Microsoft.Managed.After.targets" />
     <DataFile Include="Microsoft.CSharp.targets" />
     <DataFile Include="Microsoft.CSharp.CurrentVersion.targets" />
     <DataFile Include="Microsoft.CSharp.CrossTargeting.targets" />

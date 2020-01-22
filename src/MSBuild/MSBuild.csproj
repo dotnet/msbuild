@@ -293,6 +293,8 @@
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.tasks" TargetFramework="%(_TargetFrameworks.Identity)" />
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Managed.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Managed.Before.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Managed.After.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.CSharp.CrossTargeting.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.CSharp.CurrentVersion.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.CSharp.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
