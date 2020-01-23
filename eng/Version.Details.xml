@@ -38,13 +38,13 @@
       <Sha>2dab42e151ea8020a75cdaaa8c46bf5d9093b8c0</Sha>
     </Dependency>
     <!-- For coherency purposes, this version should be gated by the version of wpf routed via core setup -->
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.1.0-rtm.19605.7" CoherentParentDependency="Microsoft.NETCore.App.Runtime.win-x64">
-      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
-      <Sha>a8e48616c8d8e56469a456eb1ee263268316b827</Sha>
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="3.1.0-rtm.19565.1" CoherentParentDependency="Microsoft.NETCore.App.Runtime.win-x64">
+      <Uri>https://github.com/dotnet/wpf</Uri>
+      <Sha>427fa56aed34cbbc5096aa6137e748054905507d</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="5.5.0-preview.2.6355">
+    <Dependency Name="NuGet.Build.Tasks" Version="5.5.0-preview.3.6392">
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
-      <Sha>cb402b5a3340ab5b2605ecc72de7f70aaac95344</Sha>
+      <Sha>31852f3254dd31c862798f99bd0639133b23fd03</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.3.0">
       <Uri>https://github.com/microsoft/vstest</Uri>
