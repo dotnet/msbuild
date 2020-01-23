@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Microsoft.Build.Globbing;
@@ -102,8 +103,20 @@ namespace Microsoft.Build.Evaluation
                 }
                 else
                 {
-                    throw new NotImplementedException();
+                    return ReferencedItems.Any(referencedItem =>
+                        metadata.All(m => !item.GetMetadataValue(m).Equals(string.Empty) && NormalizePathMetadata(item.GetMetadataValue(m)).Equals(NormalizePathMetadata(referencedItem.Item.GetMetadataValue(m)))));
                 }
+            }
+
+            private string NormalizePathMetadata(string orig)
+            {
+                var normalized = FileUtilities.NormalizePath(orig).TrimTrailingSlashes();
+                if (Directory.Exists(Path.GetTempPath().ToUpper()) && Directory.Exists(Path.GetTempPath().ToLower()))
+                {
+                    // File system is not case sensitive
+                    normalized = normalized.ToUpper();
+                }
+                return normalized;
             }
 
             public override IMSBuildGlob ToMSBuildGlob()

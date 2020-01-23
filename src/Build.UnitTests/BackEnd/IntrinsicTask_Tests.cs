@@ -21,6 +21,7 @@ using Shouldly;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using Xunit;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -1779,6 +1780,59 @@ namespace Microsoft.Build.UnitTests.BackEnd
             items.ElementAt(0).GetMetadataValue("M2").ShouldBe("c");
             items.ElementAt(1).GetMetadataValue("M1").ShouldBe("y");
             items.ElementAt(1).GetMetadataValue("M2").ShouldBe("d");
+        }
+
+        [Fact]
+        public void RemoveWithItemReferenceOnFilePathMatchingMetadata()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                    <Target Name='t'>
+                        <ItemGroup>
+                            <I1 Include='a1' M1='foo.txt\' M2='a'/>
+                            <I1 Include='b1' M1='foo/bar.cs' M2='x'/>
+                            <I1 Include='c1' M1='foo/bar.vb' M2='y'/>
+                            <I1 Include='d1' M1='foo\foo\foo' M2='b'/>
+
+                            <I2 Include='a2' M1='FOO.TXT' m2='c'/>
+                            <I2 Include='b2' M1='foo/bar.txt' m2='x'/>
+                            <I2 Include='c2' M1='/foo/BAR.vb\\/' m2='Y'/>
+                            <I2 Include='d2' M1='foo/foo/foo/' m2='d'/>
+
+                            <I2 Remove='@(I1)' MatchOnMetadata='m1' MatchOnMetadataOptions='PathLike' />
+                        </ItemGroup>
+                    </Target></Project>");
+            IntrinsicTask task = CreateIntrinsicTask(content);
+            Lookup lookup = LookupHelpers.CreateEmptyLookup();
+            ExecuteTask(task, lookup);
+
+            var items = lookup.GetItems("I2");
+
+            if (FileSystemIsCaseSensitive())
+            {
+                items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "a2", "b2", "c2" });
+
+                items.ElementAt(0).GetMetadataValue("M1").ShouldBe(@"FOO.TXT");
+                items.ElementAt(0).GetMetadataValue("M2").ShouldBe("c");
+                items.ElementAt(1).GetMetadataValue("M1").ShouldBe("foo/bar.txt");
+                items.ElementAt(1).GetMetadataValue("M2").ShouldBe("x");
+                items.ElementAt(2).GetMetadataValue("M1").ShouldBe(@"/foo/BAR.vb\\/");
+                items.ElementAt(2).GetMetadataValue("M2").ShouldBe("Y");
+            }
+            else
+            {
+                items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "b2", "c2" });
+
+                items.ElementAt(0).GetMetadataValue("M1").ShouldBe("foo/bar.txt");
+                items.ElementAt(0).GetMetadataValue("M2").ShouldBe("x");
+                items.ElementAt(1).GetMetadataValue("M1").ShouldBe(@"/foo/BAR.vb\\/");
+                items.ElementAt(1).GetMetadataValue("M2").ShouldBe("Y");
+            }
+        }
+
+        private bool FileSystemIsCaseSensitive()
+        {
+            return !(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
         }
 
         [Fact]

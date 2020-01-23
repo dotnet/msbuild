@@ -1534,6 +1534,15 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse">
     <value>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</value>
   </data>
+  <data name="OM_NoMatchOnMetadataOutsideTargetsOrProject">
+    <value>MatchOnMetadata cannot be used outside of targets of projects</value>
+  </data>
+  <data name="OM_MatchOnMetadataOnlyApplicableToRemoveItems">
+    <value>MatchOnMetadata is only applicable to remove items</value>
+  </data>
+  <data name="OM_MatchOnMetadataOptionsOnlyApplicableToItemsWithMatchOnMetadata">
+    <value>MatchOnMetadataOptions is only applicable to remove items with MatchOnMetadata</value>
+  </data>
   <!-- #################################################################################################-->
   <!-- ############################## Execution-model-related strings #################################-->
   <!-- #################################################################################################-->

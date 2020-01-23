@@ -252,7 +252,6 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                //todo see if FindItemsMatchingSpecification and FindItemsUsingMatchOnMetadata can be nicely merged into one
                 itemsToRemove = FindItemsUsingMatchOnMetadata(group, child, bucket, matchOnMetadata, matchingOptions);
             }
 

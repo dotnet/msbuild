@@ -177,7 +177,6 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                //todo: create resources OM_NoMatchOnMetadataOutsideTargetsOrProject and OM_MatchOnMetadataOnlyApplicableToRemoveItems
                 ErrorUtilities.VerifyThrowInvalidOperation(Parent == null || Parent.Parent is ProjectTargetElement || Parent.Parent is ProjectRootElement, "OM_NoMatchOnMetadataOutsideTargetsOrProject");
                 ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || RemoveMetadata.Length != 0, "OM_MatchOnMetadataOnlyApplicableToRemoveItems", ElementName, XMakeAttributes.matchOnMetadata);
                 SetOrRemoveAttribute(XMakeAttributes.matchOnMetadata, value, "Set item MatchOnMetadata {0}", value);
@@ -194,9 +193,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                //todo: create resources OM_NoMatchOnMetadataOptionsOutsideTargetsOrProject and OM_MatchOnMetadataOptionsOnlyApplicableToRemoveItems
-                ErrorUtilities.VerifyThrowInvalidOperation(Parent == null || Parent.Parent is ProjectTargetElement || Parent.Parent is ProjectRootElement, "OM_NoMatchOnMetadataOptionsOutsideTargetsOrProject");
-                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || RemoveMetadata.Length != 0, "OM_MatchOnMetadataOptionsOnlyApplicableToRemoveItems", ElementName, XMakeAttributes.matchOnMetadataOptions);
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || MatchOnMetadata.Length != 0, "OM_MatchOnMetadataOptionsOnlyApplicableToItemsWithMatchOnMetadata", ElementName, XMakeAttributes.matchOnMetadataOptions);
                 SetOrRemoveAttribute(XMakeAttributes.matchOnMetadataOptions, value, "Set item MatchOnMetadataOptions {0}", value);
             }
         }
