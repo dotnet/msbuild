@@ -545,6 +545,12 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
+            operationBuilder.MatchOnMetadataOptions = MatchOnMetadataOptions.CaseSensitive;
+            if (Enum.TryParse(itemElement.MatchOnMetadataOptions, out MatchOnMetadataOptions options))
+            {
+                operationBuilder.MatchOnMetadataOptions = options;
+            }
+
             return new RemoveOperation(operationBuilder, this);
         }
 

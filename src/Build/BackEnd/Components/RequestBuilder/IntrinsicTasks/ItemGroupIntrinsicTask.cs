@@ -84,6 +84,7 @@ namespace Microsoft.Build.BackEnd
                             HashSet<string> keepMetadata = null;
                             HashSet<string> removeMetadata = null;
                             HashSet<string> matchOnMetadata = null;
+                            MatchOnMetadataOptions matchOnMetadataOptions = MatchOnMetadataOptions.CaseSensitive;
 
                             if (!String.IsNullOrEmpty(child.KeepMetadata))
                             {
@@ -112,6 +113,11 @@ namespace Microsoft.Build.BackEnd
                                 }
                             }
 
+                            if (Enum.TryParse(child.MatchOnMetadataOptions, out MatchOnMetadataOptions options))
+                            {
+                                matchOnMetadataOptions = options;
+                            }
+
                             if ((child.Include.Length != 0) ||
                                 (child.Exclude.Length != 0))
                             {
@@ -121,7 +127,7 @@ namespace Microsoft.Build.BackEnd
                             else if (child.Remove.Length != 0)
                             {
                                 // It's a remove -- we're "removing" items from the world
-                                ExecuteRemove(child, bucket, matchOnMetadata);
+                                ExecuteRemove(child, bucket, matchOnMetadata, matchOnMetadataOptions);
                             }
                             else
                             {
@@ -229,7 +235,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="child">The item specification to evaluate and remove.</param>
         /// <param name="bucket">The batching bucket.</param>
         /// <param name="matchOnMetadata"></param>
-        private void ExecuteRemove(ProjectItemGroupTaskItemInstance child, ItemBucket bucket, HashSet<string> matchOnMetadata)
+        private void ExecuteRemove(ProjectItemGroupTaskItemInstance child, ItemBucket bucket, HashSet<string> matchOnMetadata, MatchOnMetadataOptions matchingOptions)
         {
             ICollection<ProjectItemInstance> group = bucket.Lookup.GetItems(child.ItemType);
             if (group == null)
@@ -247,7 +253,7 @@ namespace Microsoft.Build.BackEnd
             else
             {
                 //todo see if FindItemsMatchingSpecification and FindItemsUsingMatchOnMetadata can be nicely merged into one
-                itemsToRemove = FindItemsUsingMatchOnMetadata(group, child, bucket, matchOnMetadata);
+                itemsToRemove = FindItemsUsingMatchOnMetadata(group, child, bucket, matchOnMetadata, matchingOptions);
             }
 
             if (itemsToRemove != null)
@@ -266,7 +272,8 @@ namespace Microsoft.Build.BackEnd
             ICollection<ProjectItemInstance> items,
             ProjectItemGroupTaskItemInstance child,
             ItemBucket bucket,
-            HashSet<string> matchOnMetadata)
+            HashSet<string> matchOnMetadata,
+            MatchOnMetadataOptions options)
         {
             ErrorUtilities.VerifyThrowArgumentNull(matchOnMetadata, nameof(matchOnMetadata));
 
@@ -281,7 +288,7 @@ namespace Microsoft.Build.BackEnd
                 child.RemoveLocation,
                 child.Remove);
 
-            return items.Where(item => itemSpec.MatchesItemOnMetadata(item, matchOnMetadata)).ToList();
+            return items.Where(item => itemSpec.MatchesItemOnMetadata(item, matchOnMetadata, options)).ToList();
         }
 
         /// <summary>

@@ -14,11 +14,13 @@ namespace Microsoft.Build.Evaluation
         class RemoveOperation : LazyItemOperation
         {
             readonly ImmutableList<string> _matchOnMetadata;
+            readonly MatchOnMetadataOptions _matchOnMetadataOptions;
 
             public RemoveOperation(RemoveOperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
                 : base(builder, lazyEvaluator)
             {
                 _matchOnMetadata = builder.MatchOnMetadata.ToImmutable();
+                _matchOnMetadataOptions = builder.MatchOnMetadataOptions;
             }
 
             // todo port the self referencing matching optimization (e.g. <I Remove="@(I)">) from Update to Remove as well. Ideally make one mechanism for both. https://github.com/Microsoft/msbuild/issues/2314
@@ -36,7 +38,8 @@ namespace Microsoft.Build.Evaluation
                 var items = ImmutableHashSet.CreateBuilder<I>();
                 foreach (ItemData item in listBuilder)
                 {
-                    if ((_matchOnMetadata.IsEmpty && _itemSpec.MatchesItem(item.Item)) || (!_matchOnMetadata.IsEmpty && _itemSpec.MatchesItemOnMetadata(item.Item, _matchOnMetadata)))
+                    if ((_matchOnMetadata.IsEmpty && _itemSpec.MatchesItem(item.Item)) ||
+                        (!_matchOnMetadata.IsEmpty && _itemSpec.MatchesItemOnMetadata(item.Item, _matchOnMetadata, _matchOnMetadataOptions)))
                         items.Add(item.Item);
                 }
 
@@ -69,13 +72,23 @@ namespace Microsoft.Build.Evaluation
                 return builder;
             }
         }
+
         class RemoveOperationBuilder : OperationBuilder
         {
             public ImmutableList<string>.Builder MatchOnMetadata { get; } = ImmutableList.CreateBuilder<string>();
+
+            public MatchOnMetadataOptions MatchOnMetadataOptions { get; set; }
 
             public RemoveOperationBuilder(ProjectItemElement itemElement, bool conditionResult) : base(itemElement, conditionResult)
             {
             }
         }
+    }
+
+    public enum MatchOnMetadataOptions
+    {
+        CaseSensitive,
+        CaseInsensitive,
+        PathLike
     }
 }

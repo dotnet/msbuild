@@ -149,6 +149,8 @@ namespace Microsoft.Build.Construction
         public Microsoft.Build.Construction.ElementLocation KeepMetadataLocation { get { throw null; } }
         public string MatchOnMetadata { get { throw null; } set { } }
         public Microsoft.Build.Construction.ElementLocation MatchOnMetadataLocation { get { throw null; } }
+        public string MatchOnMetadataOptions { get { throw null; } set { } }
+        public Microsoft.Build.Construction.ElementLocation MatchOnMetadataOptionsLocation { get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectMetadataElement> Metadata { get { throw null; } }
         public string Remove { get { throw null; } set { } }
         public Microsoft.Build.Construction.ElementLocation RemoveLocation { get { throw null; } }
@@ -505,6 +507,12 @@ namespace Microsoft.Build.Evaluation
         public Microsoft.Build.Construction.ProjectItemElement ItemElement { get { throw null; } }
         public Microsoft.Build.Globbing.IMSBuildGlob MsBuildGlob { get { throw null; } set { } }
         public System.Collections.Generic.IEnumerable<string> Removes { get { throw null; } set { } }
+    }
+    public enum MatchOnMetadataOptions
+    {
+        CaseInsensitive = 1,
+        CaseSensitive = 0,
+        PathLike = 2,
     }
     [System.FlagsAttribute]
     public enum NewProjectFileOptions
@@ -1186,6 +1194,8 @@ namespace Microsoft.Build.Execution
         public Microsoft.Build.Construction.ElementLocation Location { get { throw null; } }
         public string MatchOnMetadata { get { throw null; } }
         public Microsoft.Build.Construction.ElementLocation MatchOnMetadataLocation { get { throw null; } }
+        public string MatchOnMetadataOptions { get { throw null; } }
+        public Microsoft.Build.Construction.ElementLocation MatchOnMetadataOptionsLocation { get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Execution.ProjectItemGroupTaskMetadataInstance> Metadata { get { throw null; } }
         public string Remove { get { throw null; } }
         public Microsoft.Build.Construction.ElementLocation RemoveLocation { get { throw null; } }

@@ -45,6 +45,11 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private string _matchOnMetadata;
 
+        /// <summary>
+        /// The options for MatchOnMetadata.
+        /// </summary>
+        private string _matchOnMetadataOptions;
+
         /// The list of metadata to keep.
         /// </summary>
         private string _keepMetadata;
@@ -90,6 +95,11 @@ namespace Microsoft.Build.Execution
         private ElementLocation _matchOnMetadataLocation;
 
         /// <summary>
+        /// Location of metadataMatchingSchema, if any
+        /// </summary>
+        private ElementLocation _matchOnMetadataOptionsLocation;
+
+        /// <summary>
         /// Location of keepMetadata, if any
         /// </summary>
         private ElementLocation _keepMetadataLocation;
@@ -133,6 +143,7 @@ namespace Microsoft.Build.Execution
             string exclude,
             string remove,
             string matchOnMetadata,
+            string matchOnMetadataOptions,
             string keepMetadata,
             string removeMetadata,
             string keepDuplicates,
@@ -142,6 +153,7 @@ namespace Microsoft.Build.Execution
             ElementLocation excludeLocation,
             ElementLocation removeLocation,
             ElementLocation matchOnMetadataLocation,
+            ElementLocation matchOnMetadataOptionsLocation,
             ElementLocation keepMetadataLocation,
             ElementLocation removeMetadataLocation,
             ElementLocation keepDuplicatesLocation,
@@ -164,6 +176,7 @@ namespace Microsoft.Build.Execution
             _exclude = exclude;
             _remove = remove;
             _matchOnMetadata = matchOnMetadata;
+            _matchOnMetadataOptions = matchOnMetadataOptions;
             _keepMetadata = keepMetadata;
             _removeMetadata = removeMetadata;
             _keepDuplicates = keepDuplicates;
@@ -173,6 +186,7 @@ namespace Microsoft.Build.Execution
             _excludeLocation = excludeLocation;
             _removeLocation = removeLocation;
             _matchOnMetadataLocation = matchOnMetadataLocation;
+            _matchOnMetadataOptionsLocation = matchOnMetadataOptionsLocation;
             _keepMetadataLocation = keepMetadataLocation;
             _removeMetadataLocation = removeMetadataLocation;
             _keepDuplicatesLocation = keepDuplicatesLocation;
@@ -196,6 +210,7 @@ namespace Microsoft.Build.Execution
             _exclude = that._exclude;
             _remove = that._remove;
             _matchOnMetadata = that._matchOnMetadata;
+            _matchOnMetadataOptions = that._matchOnMetadataOptions;
             _keepMetadata = that._keepMetadata;
             _removeMetadata = that._removeMetadata;
             _keepDuplicates = that._keepDuplicates;
@@ -251,6 +266,16 @@ namespace Microsoft.Build.Execution
             [DebuggerStepThrough]
             get
             { return _matchOnMetadata; }
+        }
+
+        /// <summary>
+        /// Unevaluated MatchOnMetadataOptions value
+        /// </summary>
+        public string MatchOnMetadataOptions
+        {
+            [DebuggerStepThrough]
+            get
+            { return _matchOnMetadataOptions; }
         }
 
         /// <summary>
@@ -359,6 +384,16 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Location of the matchOnMetadataOptions attribute, if any
+        /// </summary>
+        public ElementLocation MatchOnMetadataOptionsLocation
+        {
+            [DebuggerStepThrough]
+            get
+            { return _matchOnMetadataOptionsLocation; }
+        }
+
+        /// <summary>
         /// Location of the keepMetadata attribute, if any
         /// </summary>
         public ElementLocation KeepMetadataLocation
@@ -413,6 +448,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _exclude);
             translator.Translate(ref _remove);
             translator.Translate(ref _matchOnMetadata);
+            translator.Translate(ref _matchOnMetadataOptions);
             translator.Translate(ref _keepMetadata);
             translator.Translate(ref _removeMetadata);
             translator.Translate(ref _keepDuplicates);

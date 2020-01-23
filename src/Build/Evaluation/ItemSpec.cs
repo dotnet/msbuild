@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -87,10 +88,22 @@ namespace Microsoft.Build.Evaluation
                 return ReferencedItems.Any(v => v.ItemAsValueFragment.IsMatch(itemToMatch));
             }
 
-            public override bool IsMatchOnMetadata(IItem item, IEnumerable<string> metadata)
+            public override bool IsMatchOnMetadata(IItem item, IEnumerable<string> metadata, MatchOnMetadataOptions options)
             {
-                return ReferencedItems.Any(referencedItem =>
-                    metadata.All(m => item.GetMetadataValue(m).Equals(referencedItem.Item.GetMetadataValue(m)) && !item.GetMetadataValue(m).Equals(string.Empty)));
+                if (options.Equals(MatchOnMetadataOptions.CaseSensitive))
+                {
+                    return ReferencedItems.Any(referencedItem =>
+                        metadata.All(m => item.GetMetadataValue(m).Equals(referencedItem.Item.GetMetadataValue(m)) && !item.GetMetadataValue(m).Equals(string.Empty)));
+                }
+                else if (options.Equals(MatchOnMetadataOptions.CaseInsensitive))
+                {
+                    return ReferencedItems.Any(referencedItem =>
+                        metadata.All(m => item.GetMetadataValue(m).ToUpper().Equals(referencedItem.Item.GetMetadataValue(m).ToUpper()) && !item.GetMetadataValue(m).Equals(string.Empty)));
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
             }
 
             public override IMSBuildGlob ToMSBuildGlob()
@@ -306,11 +319,11 @@ namespace Microsoft.Build.Evaluation
         /// <param name="item">The item to attempt to find a match for based on matching metadata</param>
         /// <param name="metadata">Names of metadata to look for matches for</param>
         /// <returns></returns>
-        public bool MatchesItemOnMetadata(IItem item, IEnumerable<string> metadata)
+        public bool MatchesItemOnMetadata(IItem item, IEnumerable<string> metadata, MatchOnMetadataOptions options)
         {
             foreach (var fragment in Fragments)
             {
-                if (fragment.IsMatchOnMetadata(item, metadata))
+                if (fragment.IsMatchOnMetadata(item, metadata, options))
                 {
                     return true;
                 }
@@ -447,7 +460,7 @@ namespace Microsoft.Build.Evaluation
             return FileMatcher.IsMatch(itemToMatch);
         }
 
-        public virtual bool IsMatchOnMetadata(IItem itemToMatch, IEnumerable<string> metadata)
+        public virtual bool IsMatchOnMetadata(IItem itemToMatch, IEnumerable<string> metadata, MatchOnMetadataOptions options)
         {
             return false;
         }
