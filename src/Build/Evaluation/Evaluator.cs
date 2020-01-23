@@ -172,6 +172,11 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private ProjectRootElement _lastModifiedProject;
 
+        /// <summary>
+        /// Keeps track of the FullPaths of ProjectRootElements that may have been modified as a stream.
+        /// </summary>
+        private StringBuilder _streamImports;
+
         private readonly bool _interactive;
 
         /// <summary>
@@ -231,6 +236,7 @@ namespace Microsoft.Build.Evaluation
             {
                 _lastModifiedProject = projectRootElement;
             }
+            _streamImports = new StringBuilder();
         }
 
         /// <summary>
@@ -1819,7 +1825,6 @@ namespace Microsoft.Build.Evaluation
             bool atleastOneImportIgnored = false;
             bool atleastOneImportEmpty = false;
             imports = new List<ProjectRootElement>();
-            List<ProjectRootElement> streamImports = new List<ProjectRootElement>();
             foreach (string importExpressionEscapedItem in ExpressionShredder.SplitSemiColonSeparatedList(importExpressionEscaped))
             {
                 string[] importFilesEscaped = null;
@@ -1990,7 +1995,7 @@ namespace Microsoft.Build.Evaluation
 
                             if (importedProjectElement.StreamTime != null && importedProjectElement.StreamTime > _lastModifiedProject.LastWriteTimeWhenRead)
                             {
-                                streamImports.Add(importedProjectElement);
+                                _streamImports.Append(";").Append(importedProjectElement.FullPath);
                             }
 
                             if (_logProjectImportedEvents)
@@ -2118,21 +2123,6 @@ namespace Microsoft.Build.Evaluation
                     // can store the unescaped value. The only purpose of escaping is to 
                     // avoid undesired splitting or expansion.
                     _importsSeen.Add(importFileUnescaped, importElement);
-                }
-
-                DateTime mostRecentTime = File.GetLastWriteTime(_lastModifiedProject.FullPath);
-                foreach (ProjectRootElement import in streamImports)
-                {
-                    DateTime importTime = File.GetLastWriteTime(import.FullPath);
-                    if (importTime > mostRecentTime)
-                    {
-                        mostRecentTime = importTime;
-                        _lastModifiedProject = import;
-                    }
-                    else
-                    {
-                        import.StreamTime = null;
-                    }
                 }
             }
 
@@ -2391,8 +2381,8 @@ namespace Microsoft.Build.Evaluation
                 P newValue = _data.SetProperty(
                     Constants.MSBuildAllProjectsPropertyName,
                     oldValue == null
-                        ? _lastModifiedProject.FullPath
-                        : $"{_lastModifiedProject.FullPath};{oldValue.EvaluatedValue}",
+                        ? _lastModifiedProject.FullPath + _streamImports.ToString()
+                        : $"{_lastModifiedProject.FullPath}{_streamImports.ToString()};{oldValue.EvaluatedValue}",
                     isGlobalProperty: false,
                     mayBeReserved: false);
 
