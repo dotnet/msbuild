@@ -4170,6 +4170,9 @@ namespace Microsoft.Build.Evaluation
             {
                 switch (value)
                 {
+                    case double d:
+                        arg0 = Convert.ToInt32(d);
+                        return arg0 == d;
                     case int i:
                         arg0 = i;
                         return true;
@@ -4178,6 +4181,22 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 arg0 = 0;
+                return false;
+            }
+
+            private static bool TryConvertToDouble(object value, out double arg)
+            {
+                if (value is double unboxed)
+                {
+                    arg = unboxed;
+                    return true;
+                }
+                else if (value is string str && double.TryParse(str, out arg))
+                {
+                    return true;
+                }
+
+                arg = 0;
                 return false;
             }
 
@@ -4217,15 +4236,8 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                if (args[0] is string value0 &&
-                    args[1] is string value1 &&
-                    double.TryParse(value0, out arg0) &&
-                    double.TryParse(value1, out arg1))
-                {
-                    return true;
-                }
-
-                return false;
+                return TryConvertToDouble(args[0], out arg0) &&
+                       TryConvertToDouble(args[1], out arg1);
             }
 
             private static bool TryGetArgs(object[] args, out int arg0, out string arg1)
@@ -4238,11 +4250,9 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                var value0 = args[0] as string;
                 arg1 = args[1] as string;
-                if (value0 != null &&
-                    arg1 != null &&
-                    int.TryParse(value0, out arg0))
+                if (TryConvertToInt(args[0], out arg0) &&
+                    arg1 != null)
                 {
                     return true;
                 }
