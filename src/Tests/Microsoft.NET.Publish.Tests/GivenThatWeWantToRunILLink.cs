@@ -5,7 +5,9 @@ using System.Xml.Linq;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using FluentAssertions;
+using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.Extensions.DependencyModel;
+using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -389,6 +391,28 @@ namespace Microsoft.NET.Publish.Tests
             project.Root.Elements(ns + "ItemGroup")
                 .Where(ig => ig.Elements(ns + "TrimmerRootDescriptor").Any())
                 .First().Remove();
+        }
+
+        [Fact]
+        public void It_warns_when_targetting_netcoreapp_2_x()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "ConsoleApp",
+                TargetFrameworks = "netcoreapp2.2",
+                IsSdkProject = true,
+                IsExe = true,
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            publishCommand.Execute($"/p:PublishTrimmed=true")
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining(Strings.PublishTrimmedRequiresVersion30);
         }
 
         private void EnableNonFrameworkTrimming(XDocument project)

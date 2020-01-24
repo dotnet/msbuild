@@ -28,6 +28,7 @@ namespace Microsoft.NET.Publish.Tests
         private const string DontUseAppHost = "/p:UseAppHost=false";
         private const string ReadyToRun = "/p:PublishReadyToRun=true";
         private const string ReadyToRunWithSymbols = "/p:PublishReadyToRunEmitSymbols=true";
+        private const string UseAppHost = "/p:UseAppHost=true";
 
         private readonly string RuntimeIdentifier = $"/p:RuntimeIdentifier={RuntimeEnvironment.GetRuntimeIdentifier()}";
         private readonly string SingleFile = $"{TestProjectName}{Constants.ExeSuffix}";
@@ -98,7 +99,7 @@ namespace Microsoft.NET.Publish.Tests
         {
             var testProject = new TestProject()
             {
-                Name = "SingleFileClassLib",
+                Name = "ClassLib",
                 TargetFrameworks = "netstandard2.0",
                 IsSdkProject = true,
                 IsExe = false,
@@ -112,7 +113,55 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining(Strings.CannotHaveSingleFileWithoutExecutable);
+                .HaveStdOutContaining(Strings.CannotHaveSingleFileWithoutExecutable)
+                .And
+                .NotHaveStdOutContaining(Strings.CanOnlyHaveSingleFileWithNetCoreApp);
+        }
+
+        [Fact]
+        public void It_errors_when_targetting_netstandard()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "NetStandardExe",
+                TargetFrameworks = "netstandard2.0",
+                IsSdkProject = true,
+                IsExe = true,
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            publishCommand.Execute(PublishSingleFile, RuntimeIdentifier, UseAppHost)
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining(Strings.CanOnlyHaveSingleFileWithNetCoreApp)
+                .And
+                .NotHaveStdOutContaining(Strings.CannotHaveSingleFileWithoutExecutable);
+        }
+
+        [Fact]
+        public void It_errors_when_targetting_netcoreapp_2_x()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "ConsoleApp",
+                TargetFrameworks = "netcoreapp2.2",
+                IsSdkProject = true,
+                IsExe = true,
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            publishCommand.Execute(PublishSingleFile, RuntimeIdentifier)
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining(Strings.PublishSingleFileRequiresVersion30);
         }
 
         [Fact]

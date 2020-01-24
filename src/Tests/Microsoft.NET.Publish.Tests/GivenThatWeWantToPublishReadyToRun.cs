@@ -4,6 +4,7 @@ using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
 using FluentAssertions;
+using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -225,6 +226,28 @@ namespace Microsoft.NET.Publish.Tests
                 .And.HaveStdOutContainingIgnoreCase("NETSDK1095");
         }
 
+        [Fact]
+        public void It_warns_when_targetting_netcoreapp_2_x()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "ConsoleApp",
+                TargetFrameworks = "netcoreapp2.2",
+                IsSdkProject = true,
+                IsExe = true,
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            publishCommand.Execute($"/p:PublishReadyToRun=true",
+                                   $"/p:RuntimeIdentifier={DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier()}")
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining(Strings.PublishReadyToRunRequiresVersion30);
+        }
 
         [Theory]
         [InlineData("netcoreapp3.0")]
