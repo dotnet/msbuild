@@ -442,13 +442,15 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             var files = new List<string>();
             BuildPackages(settings, null, null, files, null);
 
+            List<string> packagePaths = new List<string>() { invariantPath };
+            packagePaths.AddRange(Util.AdditionalPackagePaths.Select(p => Util.AddTrailingChar(p.ToLowerInvariant(), System.IO.Path.DirectorySeparatorChar)));
+
             foreach (string file in files)
             {
-                List<string> packagePaths = new List<string>() { invariantPath };
-                packagePaths.AddRange(Util.AdditionalPackagePaths.Select(p => Util.AddTrailingChar(p.ToLowerInvariant(), System.IO.Path.DirectorySeparatorChar)));
+                string folder = System.IO.Path.GetDirectoryName(file);
+
                 foreach (string packagePath in packagePaths)
                 {
-                    string folder = System.IO.Path.GetDirectoryName(file);
                     if (folder.Length >= packagePath.Length && folder.Substring(0, packagePath.Length).ToLowerInvariant().CompareTo(packagePath) == 0)
                     {
                         string relPath = folder.Substring(packagePath.Length);
