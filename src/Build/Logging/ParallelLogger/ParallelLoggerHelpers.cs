@@ -213,7 +213,7 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void RemoveProjectStartedEvent(BuildEventContext e)
         {
             ProjectStartedEventMinimumFields startedEvent = GetProjectStartedEvent(e);
-            // Only remove the project from the event list if it is in the list, and no errors have occured in the project
+            // Only remove the project from the event list if it is in the list, and no errors have occurred in the project
             if (startedEvent != null && !startedEvent.ErrorInProject)
             {
                 _projectStartedEvents.Remove(e);
@@ -226,7 +226,7 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void RemoveTargetStartedEvent(BuildEventContext e)
         {
             TargetStartedEventMinimumFields startedEvent = GetTargetStartedEvent(e);
-            // Only remove the project from the event list if it is in the list, and no errors have occured in the project
+            // Only remove the project from the event list if it is in the list, and no errors have occurred in the project
             if (startedEvent != null && !startedEvent.ErrorInTarget)
             {
                 _targetStartedEvents.Remove(e);
