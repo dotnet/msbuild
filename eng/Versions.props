@@ -25,7 +25,7 @@
     <PlatformAbstractionsVersion>2.0.0</PlatformAbstractionsVersion>
     <SystemDiagnosticsFileVersionInfoVersion>4.0.0</SystemDiagnosticsFileVersionInfoVersion>
     <SystemReflectionMetadataVersion>1.5.0</SystemReflectionMetadataVersion>
-    <MicrosoftDotNetSignToolVersion>5.0.0-beta.20073.17</MicrosoftDotNetSignToolVersion>
+    <MicrosoftDotNetSignToolVersion>5.0.0-beta.20074.5</MicrosoftDotNetSignToolVersion>
   </PropertyGroup>
   <!-- Get .NET Framework reference assemblies from NuGet packages -->
   <PropertyGroup>
