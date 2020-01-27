@@ -749,6 +749,33 @@ namespace Microsoft.Build.Tasks
         public string Text { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+    public partial class WinMDExp : Microsoft.Build.Tasks.ToolTaskExtension
+    {
+        public WinMDExp() { }
+        public string AssemblyUnificationPolicy { get { throw null; } set { } }
+        public string DisabledWarnings { get { throw null; } set { } }
+        public string InputDocumentationFile { get { throw null; } set { } }
+        public string InputPDBFile { get { throw null; } set { } }
+        public string OutputDocumentationFile { get { throw null; } set { } }
+        public string OutputPDBFile { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public string OutputWindowsMetadataFile { get { throw null; } set { } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] References { get { throw null; } set { } }
+        public string SdkToolsPath { get { throw null; } set { } }
+        protected override System.Text.Encoding StandardErrorEncoding { get { throw null; } }
+        protected override System.Text.Encoding StandardOutputEncoding { get { throw null; } }
+        protected override string ToolName { get { throw null; } }
+        public bool TreatWarningsAsErrors { get { throw null; } set { } }
+        protected override bool UseNewLineSeparatorInResponseFile { get { throw null; } }
+        public bool UTF8Output { get { throw null; } set { } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public string WinMDModule { get { throw null; } set { } }
+        protected internal override void AddResponseFileCommands(Microsoft.Build.Tasks.CommandLineBuilderExtension commandLine) { }
+        protected override string GenerateFullPathToTool() { throw null; }
+        protected override bool SkipTaskExecution() { throw null; }
+        protected override bool ValidateParameters() { throw null; }
+    }
     public partial class WriteCodeFragment : Microsoft.Build.Tasks.TaskExtension
     {
         public WriteCodeFragment() { }
