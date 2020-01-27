@@ -2381,8 +2381,8 @@ namespace Microsoft.Build.Evaluation
                 P newValue = _data.SetProperty(
                     Constants.MSBuildAllProjectsPropertyName,
                     oldValue == null
-                        ? _lastModifiedProject.FullPath + semicolon + string.Join(semicolon, _streamImports)
-                        : $"{_lastModifiedProject.FullPath};{string.Join(semicolon, _streamImports)};{oldValue.EvaluatedValue}",
+                        ? _lastModifiedProject.FullPath + semicolon + string.Join(semicolon, _streamImports.ToArray())
+                        : $"{_lastModifiedProject.FullPath};{string.Join(semicolon, _streamImports.ToArray())};{oldValue.EvaluatedValue}",
                     isGlobalProperty: false,
                     mayBeReserved: false);
 
