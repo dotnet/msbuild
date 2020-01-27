@@ -226,7 +226,6 @@ namespace Microsoft.Build.Construction
     public partial class ProjectRootElement : Microsoft.Build.Construction.ProjectElementContainer
     {
         internal ProjectRootElement() { }
-        public System.Nullable<System.DateTime> StreamTime;
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectChooseElement> ChooseElements { get { throw null; } }
         public override string Condition { get { throw null; } set { } }
         public override Microsoft.Build.Construction.ElementLocation ConditionLocation { get { throw null; } }

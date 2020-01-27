@@ -175,7 +175,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Keeps track of the FullPaths of ProjectRootElements that may have been modified as a stream.
         /// </summary>
-        private StringBuilder _streamImports;
+        private List<string> _streamImports;
 
         private readonly bool _interactive;
 
@@ -236,7 +236,7 @@ namespace Microsoft.Build.Evaluation
             {
                 _lastModifiedProject = projectRootElement;
             }
-            _streamImports = new StringBuilder();
+            _streamImports = new List<string>();
         }
 
         /// <summary>
@@ -1995,7 +1995,7 @@ namespace Microsoft.Build.Evaluation
 
                             if (importedProjectElement.StreamTime != null && importedProjectElement.StreamTime > _lastModifiedProject.LastWriteTimeWhenRead)
                             {
-                                _streamImports.Append(";").Append(importedProjectElement.FullPath);
+                                _streamImports.Add(importedProjectElement.FullPath);
                             }
 
                             if (_logProjectImportedEvents)
@@ -2377,12 +2377,12 @@ namespace Microsoft.Build.Evaluation
             if (_lastModifiedProject != null)
             {
                 P oldValue = _data.GetProperty(Constants.MSBuildAllProjectsPropertyName);
-
+                string semicolon = ";";
                 P newValue = _data.SetProperty(
                     Constants.MSBuildAllProjectsPropertyName,
                     oldValue == null
-                        ? _lastModifiedProject.FullPath + _streamImports.ToString()
-                        : $"{_lastModifiedProject.FullPath}{_streamImports.ToString()};{oldValue.EvaluatedValue}",
+                        ? _lastModifiedProject.FullPath + semicolon + string.Join(semicolon, _streamImports)
+                        : $"{_lastModifiedProject.FullPath};{string.Join(semicolon, _streamImports)};{oldValue.EvaluatedValue}",
                     isGlobalProperty: false,
                     mayBeReserved: false);
 
