@@ -1533,6 +1533,10 @@ namespace Microsoft.Build.Construction
                 if (fileInfo != null)
                 {
                     _lastWriteTimeWhenRead = fileInfo.LastWriteTime;
+                    if (_lastWriteTimeWhenRead > StreamTime)
+                    {
+                        StreamTime = null;
+                    }
                 }
 
                 _versionOnDisk = Version;
@@ -2058,6 +2062,10 @@ namespace Microsoft.Build.Construction
                 }
 
                 _lastWriteTimeWhenRead = FileUtilities.GetFileInfoNoThrow(fullPath).LastWriteTime;
+                if (StreamTime < _lastWriteTimeWhenRead)
+                {
+                    StreamTime = null;
+                }
             }
             catch (Exception ex)
             {

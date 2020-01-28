@@ -1996,6 +1996,7 @@ namespace Microsoft.Build.Evaluation
                             if (importedProjectElement.StreamTime != null && importedProjectElement.StreamTime > _lastModifiedProject.LastWriteTimeWhenRead)
                             {
                                 _streamImports.Add(importedProjectElement.FullPath);
+                                importedProjectElement.StreamTime = null;
                             }
 
                             if (_logProjectImportedEvents)
@@ -2377,12 +2378,12 @@ namespace Microsoft.Build.Evaluation
             if (_lastModifiedProject != null)
             {
                 P oldValue = _data.GetProperty(Constants.MSBuildAllProjectsPropertyName);
-                string semicolon = ";";
+                string streamImports = string.Join(";", _streamImports.ToArray());
                 P newValue = _data.SetProperty(
                     Constants.MSBuildAllProjectsPropertyName,
                     oldValue == null
-                        ? _lastModifiedProject.FullPath + semicolon + string.Join(semicolon, _streamImports.ToArray())
-                        : $"{_lastModifiedProject.FullPath};{string.Join(semicolon, _streamImports.ToArray())};{oldValue.EvaluatedValue}",
+                        ? $"{_lastModifiedProject.FullPath};{streamImports}"
+                        : $"{_lastModifiedProject.FullPath};{streamImports};{oldValue.EvaluatedValue}",
                     isGlobalProperty: false,
                     mayBeReserved: false);
 
