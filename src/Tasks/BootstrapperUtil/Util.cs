@@ -156,7 +156,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             {
                 if (s_additionalPackagePaths == null)
                 {
-                    s_additionalPackagePaths = new List<string>();
+                    List<string> additionalPackagePaths = new List<string>();
                     RegistryKey bootstrapperBaseRegKey = Registry.LocalMachine.OpenSubKey(BOOTSTRAPPER_REGISTRY_PATH_BASE);
                     if (bootstrapperBaseRegKey == null)
                     {
@@ -175,12 +175,14 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                                     string path = (string)additionalPackagePathsRegKey.GetValue(key);
                                     if (!string.IsNullOrEmpty(path))
                                     {
-                                        s_additionalPackagePaths.Add(path);
+                                        additionalPackagePaths.Add(path);
                                     }
                                 }
                             }
                         }
                     }
+
+                    s_additionalPackagePaths = new List<string>(additionalPackagePaths);
                 }
 
                 return s_additionalPackagePaths;
