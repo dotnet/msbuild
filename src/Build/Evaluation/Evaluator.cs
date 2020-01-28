@@ -1345,6 +1345,12 @@ namespace Microsoft.Build.Evaluation
                 {
                     P predecessor = _data.GetProperty(propertyElement.Name);
                     P property = _data.SetProperty(propertyElement, evaluatedValue);
+
+                    if (predecessor != null)
+                    {
+                        LogPropertyReassignment(predecessor, property, propertyElement.Location.LocationString);
+                    }
+                }
                 else
                 {
                     _data.SetProperty(propertyElement, evaluatedValue);
