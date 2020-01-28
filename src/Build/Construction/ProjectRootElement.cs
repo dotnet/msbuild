@@ -1590,7 +1590,7 @@ namespace Microsoft.Build.Construction
                 XmlDocument.Save(projectWriter);
             }
 
-            StreamTime = DateTime.Now;
+            StreamTime = DateTime.Now.ToLocalTime();
             _versionOnDisk = Version;
         }
 
