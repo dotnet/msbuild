@@ -142,9 +142,6 @@ namespace Microsoft.NET.TestFramework
             //  (especially if we're trying to run on full Framework MSBuild)
             command.Environment[DotNet.Cli.Utils.Constants.MSBUILD_EXE_PATH] = "";
 
-            command.Environment["MSBuildSDKsPath"] = "";
-
-
         }
 
         public SdkCommandSpec CreateCommandForTarget(string target, IEnumerable<string> args)
