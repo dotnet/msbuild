@@ -346,7 +346,6 @@ namespace Microsoft.Build.BackEnd
                 IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
                 ErrorUtilities.VerifyThrow(_yieldThreadId == -1, "Cannot call Yield() while yielding.");
                 _yieldThreadId = Thread.CurrentThread.ManagedThreadId;
-                MSBuildEventSource.Log.ExecuteTaskStop(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
                 MSBuildEventSource.Log.ExecuteTaskYieldStart(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
                 builderCallback.Yield();
             }
@@ -368,7 +367,6 @@ namespace Microsoft.Build.BackEnd
                 MSBuildEventSource.Log.ExecuteTaskReacquireStart(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
                 builderCallback.Reacquire();
                 MSBuildEventSource.Log.ExecuteTaskReacquireStop(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
-                MSBuildEventSource.Log.ExecuteTaskStart(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
                 _yieldThreadId = -1;
             }
         }
