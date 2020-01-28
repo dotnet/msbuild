@@ -26,6 +26,11 @@ namespace Microsoft.Build.Shared
 
             Debug.Assert(Path.IsPathRooted(fullPath));
 
+            // Normalize because the same assembly might get loaded via
+            // multiple paths (for instance, the `build` and `buildCrossTargeting`
+            // folders in a NuGet package).
+            fullPath = FileUtilities.NormalizePath(fullPath);
+
             lock (_guard)
             {
                 Assembly assembly;
