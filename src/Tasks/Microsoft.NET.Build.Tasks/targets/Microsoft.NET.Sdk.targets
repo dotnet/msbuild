@@ -265,7 +265,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="_GenerateRuntimeConfigurationFilesInputCache"
           BeforeTargets="CopyFilesToOutputDirectory"
           Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'"
-          Inputs="@(GenerateRuntimeConfigurationFilesInputs)"
+          Inputs="@(GenerateRuntimeConfigurationFilesInputs);$(MSBuildAllProjects)"
           Outputs="$(ProjectRuntimeConfigFilePath);$(ProjectRuntimeConfigDevFilePath)">
 
     <PropertyGroup>
