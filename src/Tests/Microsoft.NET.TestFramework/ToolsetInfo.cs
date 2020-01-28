@@ -137,6 +137,14 @@ namespace Microsoft.NET.TestFramework
             {
                 command.Environment.Add("DOTNET_ROOT(x86)", DotNetRoot);
             }
+
+            //  We set this environment variable for in-process tests, but we don't want it to flow to out of process tests
+            //  (especially if we're trying to run on full Framework MSBuild)
+            command.Environment[DotNet.Cli.Utils.Constants.MSBUILD_EXE_PATH] = "";
+
+            command.Environment["MSBuildSDKsPath"] = "";
+
+
         }
 
         public SdkCommandSpec CreateCommandForTarget(string target, IEnumerable<string> args)
