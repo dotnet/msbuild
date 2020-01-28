@@ -1341,16 +1341,19 @@ namespace Microsoft.Build.Evaluation
 
                 _expander.UsedUninitializedProperties.CurrentlyEvaluatingPropertyElementName = null;
 
-                P property = _data.SetProperty(propertyElement, evaluatedValue);
-
                 if (Traits.Instance.LogPropertyTracking == 0)
                 {
                     P predecessor = _data.GetProperty(propertyElement.Name);
+                    P property = _data.SetProperty(propertyElement, evaluatedValue);
 
                     if (predecessor != null)
                     {
                         LogPropertyReassignment(predecessor, property, propertyElement.Location.LocationString);
                     }
+                }
+                else
+                {
+                    _data.SetProperty(propertyElement, evaluatedValue);
                 }
             }
         }
