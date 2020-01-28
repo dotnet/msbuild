@@ -182,7 +182,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                         }
                     }
 
-                    s_additionalPackagePaths = new List<string>(additionalPackagePaths);
+                    s_additionalPackagePaths = additionalPackagePaths;
                 }
 
                 return s_additionalPackagePaths;
