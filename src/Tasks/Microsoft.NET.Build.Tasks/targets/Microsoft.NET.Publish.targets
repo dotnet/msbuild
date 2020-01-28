@@ -1076,7 +1076,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="PublishItemsOutputGroup" DependsOnTargets="$(PublishItemsOutputGroupDependsOn)" Returns="@(PublishItemsOutputGroupOutputs)">
     <ItemGroup>
       <PublishItemsOutputGroupOutputs Condition="'$(GenerateDependencyFile)' == 'true' and '$(_UseBuildDependencyFile)' != 'true'"
-                                      Include="$(ProjectDepsFilePath)"
+                                      Include="$(PublishDepsFilePath)"
                                       TargetPath="$(ProjectDepsFileName)" />
       <PublishItemsOutputGroupOutputs Include="@(ResolvedFileToPublish->'%(FullPath)')"
                                       TargetPath="%(ResolvedFileToPublish.RelativePath)"
