@@ -1222,7 +1222,7 @@ namespace Microsoft.Build.Shared
         ///
         /// (1) The leading **\ if existing
         ///
-        /// (2) Each occurence of recursive wildcard \**\
+        /// (2) Each occurrence of recursive wildcard \**\
         /// 
         /// (3) Common filespec characters
         /// </summary>

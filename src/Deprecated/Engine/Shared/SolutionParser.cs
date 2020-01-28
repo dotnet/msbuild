@@ -85,10 +85,10 @@ namespace Microsoft.Build.BuildEngine.Shared
         // cached default platform name for GetDefaultPlatformName
         private string defaultPlatformName;
 
-        //List of warnings that occured while parsing solution
+        //List of warnings that occurred while parsing solution
         private ArrayList solutionParserWarnings = null;
 
-        //List of comments that occured while parsing solution
+        //List of comments that occurred while parsing solution
         private ArrayList solutionParserComments = null;
 
         // unit-testing only
