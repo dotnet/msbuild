@@ -42,6 +42,8 @@ namespace Microsoft.NET.TestFramework
         Lazy<string> _sdksPath;
         public string SdksPath => _sdksPath.Value;
 
+        public string CliHomePath { get; set; }
+
         public string MicrosoftNETBuildExtensionsPathOverride { get; set; }
 
         public bool ShouldUseFullFrameworkMSBuild => !string.IsNullOrEmpty(FullFrameworkMSBuildPath);
@@ -137,6 +139,8 @@ namespace Microsoft.NET.TestFramework
             {
                 command.Environment.Add("DOTNET_ROOT(x86)", DotNetRoot);
             }
+
+            command.Environment.Add("DOTNET_CLI_HOME", CliHomePath);
 
             //  We set this environment variable for in-process tests, but we don't want it to flow to out of process tests
             //  (especially if we're trying to run on full Framework MSBuild)
@@ -234,6 +238,11 @@ namespace Microsoft.NET.TestFramework
                 var buildExtensionsSdkPath = Path.Combine(sdksPath, "Microsoft.NET.Build.Extensions");
                 ret.MicrosoftNETBuildExtensionsPathOverride = Path.Combine(buildExtensionsSdkPath, "msbuildExtensions", "Microsoft", "Microsoft.NET.Build.Extensions");
             }
+
+            if (repoRoot != null)
+            {
+                ret.CliHomePath = Path.Combine(repoArtifactsDir, "bin", configuration);
+            }            
 
             return ret;
         }
