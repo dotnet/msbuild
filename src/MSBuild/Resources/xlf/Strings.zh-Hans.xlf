@@ -173,6 +173,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_37_DocsLink">
+        <source>For more detailed information access the link: https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild</source>
+        <target state="new">For more detailed information access the link: https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild</target>
+        <note />
+      </trans-unit>
       <trans-unit id="HelpMessage_3_SwitchesHeader">
         <source>Switches:            Note that you can specify switches using both
                      "-switch" and "/switch".

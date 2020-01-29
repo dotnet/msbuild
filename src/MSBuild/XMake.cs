@@ -3679,6 +3679,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_6_VersionSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_4_HelpSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_16_Examples"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_37_DocsLink"));
         }
 
         /// <summary>
