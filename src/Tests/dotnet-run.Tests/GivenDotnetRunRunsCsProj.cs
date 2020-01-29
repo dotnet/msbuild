@@ -545,7 +545,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                    .HaveStdOutContaining($"dotnet{Constants.ExeSuffix}");
         }
 
-        [Fact]
+        [PlatformSpecificFact(Platform.Windows, Platform.Linux, Platform.FreeBSD)]
         public void ItRunsWithApphost()
         {
             var testInstance = _testAssetsManager.CopyTestAsset("AppOutputsExecutablePath").WithSource();
