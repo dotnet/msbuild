@@ -2524,8 +2524,9 @@ namespace Microsoft.Build.CommandLine
 
                         // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
                         bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
+                        bool lowpriority = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority][0].Equals("true");
 
-                        shutdownReason = node.Run(nodeReuse, out nodeException);
+                        shutdownReason = node.Run(nodeReuse, lowpriority, out nodeException);
 
                         FileUtilities.ClearCacheDirectory();
                     }

@@ -120,9 +120,7 @@ namespace Microsoft.Build.BackEnd
             // want to start up just a standard MSBuild out-of-proc node.
             // Note: We need to always pass /nodeReuse to ensure the value for /nodeReuse from msbuild.rsp
             // (next to msbuild.exe) is ignored.
-            string commandLineArgs = ComponentHost.BuildParameters.EnableNodeReuse ?
-                "/nologo /nodemode:1 /nodeReuse:true" :
-                "/nologo /nodemode:1 /nodeReuse:false";
+            string commandLineArgs = $"/nologo /nodemode:1 /nodeReuse:{ComponentHost.BuildParameters.EnableNodeReuse.ToString().ToLower()} /low:{ComponentHost.BuildParameters.LowPriority.ToString().ToLower()}";
 
             // Make it here.
             CommunicationsUtilities.Trace("Starting to acquire a new or existing node to establish node ID {0}...", nodeId);
@@ -189,13 +187,10 @@ namespace Microsoft.Build.BackEnd
             // To avoid issues with mismatched priorities not shutting
             // down all the nodes on exit, we will attempt to shutdown
             // all matching notes with and without the priroity bit set.
-            // So precompute both versions of the handshake now.
-            long hostHandshake = NodeProviderOutOfProc.GetHostHandshake(nodeReuse, enableLowPriority: false);
-            long hostHandshakeWithLow = NodeProviderOutOfProc.GetHostHandshake(nodeReuse, enableLowPriority: true);
-
+            // This means we need both versions of the handshake.
             ShutdownAllNodes(
-                hostHandshake,
-                hostHandshakeWithLow,
+                NodeProviderOutOfProc.GetHostHandshake(nodeReuse, enableLowPriority: false),
+                NodeProviderOutOfProc.GetHostHandshake(nodeReuse, enableLowPriority: true),
                 NodeProviderOutOfProc.GetClientHandshake(),
                 NodeContextTerminated);
         }

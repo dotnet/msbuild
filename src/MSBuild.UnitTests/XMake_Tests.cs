@@ -1199,7 +1199,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Test that low priority builds actually executes with low priority.
+        /// Test that low priority builds actually execute with low priority.
         /// </summary>
         [Fact]
         public void LowPriorityBuild()
@@ -1208,7 +1208,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Test that normal builds executes with normal priority.
+        /// Test that normal builds execute with normal priority.
         /// </summary>
         [Fact]
         public void NormalPriorityBuild()
@@ -1224,10 +1224,9 @@ namespace Microsoft.Build.UnitTests
             string[] aggregateArguments = arguments.Union(new string[] { " /nr:false /v:diag "}).ToArray();
 
             string contents = ObjectModelHelpers.CleanupFileContents(@"
-<?xml version=""1.0"" encoding=""utf-8""?>
-<Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
- <Target Name=`Build`>
-    <Message Text='Task priority is ""$([System.Diagnostics.Process]::GetCurrentProcess().PriorityClass)""'/>
+<Project DefaultTargets=""Build"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+ <Target Name=""Build"">
+    <Message Text=""Task priority is '$([System.Diagnostics.Process]::GetCurrentProcess().PriorityClass)'""/>
  </Target>
 </Project>
 ");
@@ -1243,7 +1242,7 @@ namespace Microsoft.Build.UnitTests
 
             string logContents = ExecuteMSBuildExeExpectSuccess(contents, envsToCreate: environmentVars, arguments: aggregateArguments);
 
-            string expected = string.Format(@"Task priority is ""{0}""", expectedPrority);
+            string expected = string.Format(@"Task priority is '{0}'", expectedPrority);
             logContents.ShouldContain(expected, () => logContents);
         }
 

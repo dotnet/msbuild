@@ -817,47 +817,26 @@ namespace Microsoft.Build.UnitTests
             Assert.False(emptyParametersAllowed);
         }
 
-        [Fact]
-        public void LowPrioritySwitchIdentificationTests()
+        [Theory]
+        [InlineData("low")]
+        [InlineData("LOW")]
+        [InlineData("lowpriority")]
+        [InlineData("lowPriority")]
+        public void LowPrioritySwitchIdentificationTests(string lowpriority)
         {
-            CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
-            string duplicateSwitchErrorMessage;
-            bool multipleParametersAllowed;
-            string missingParametersErrorMessage;
-            bool unquoteParameters;
-            bool emptyParametersAllowed;
-
-            Assert.True(CommandLineSwitches.IsParameterizedSwitch("low", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
-            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.LowPriority, parameterizedSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
-            Assert.False(multipleParametersAllowed);
-            Assert.Null(missingParametersErrorMessage);
-            Assert.True(unquoteParameters);
-            Assert.False(emptyParametersAllowed);
-
-            Assert.True(CommandLineSwitches.IsParameterizedSwitch("LOW", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
-            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.LowPriority, parameterizedSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
-            Assert.False(multipleParametersAllowed);
-            Assert.Null(missingParametersErrorMessage);
-            Assert.True(unquoteParameters);
-            Assert.False(emptyParametersAllowed);
-
-            Assert.True(CommandLineSwitches.IsParameterizedSwitch("lowpriority", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
-            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.LowPriority, parameterizedSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
-            Assert.False(multipleParametersAllowed);
-            Assert.Null(missingParametersErrorMessage);
-            Assert.True(unquoteParameters);
-            Assert.False(emptyParametersAllowed);
-
-            Assert.True(CommandLineSwitches.IsParameterizedSwitch("lowPriority", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
-            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.LowPriority, parameterizedSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
-            Assert.False(multipleParametersAllowed);
-            Assert.Null(missingParametersErrorMessage);
-            Assert.True(unquoteParameters);
-            Assert.False(emptyParametersAllowed);
+            CommandLineSwitches.IsParameterizedSwitch(lowpriority,
+                out CommandLineSwitches.ParameterizedSwitch parameterizedSwitch,
+                out string duplicateSwitchErrorMessage,
+                out bool multipleParametersAllowed,
+                out string missingParametersErrorMessage,
+                out bool unquoteParameters,
+                out bool emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.LowPriority);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldBeNull();
+            unquoteParameters.ShouldBeTrue();
+            emptyParametersAllowed.ShouldBeFalse();
         }
 
 
