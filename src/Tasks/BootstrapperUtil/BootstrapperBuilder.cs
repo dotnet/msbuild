@@ -442,15 +442,24 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             var files = new List<string>();
             BuildPackages(settings, null, null, files, null);
 
+            List<string> packagePaths = new List<string>() { invariantPath };
+            packagePaths.AddRange(Util.AdditionalPackagePaths.Select(p => Util.AddTrailingChar(p.ToLowerInvariant(), System.IO.Path.DirectorySeparatorChar)));
+
             foreach (string file in files)
             {
                 string folder = System.IO.Path.GetDirectoryName(file);
-                if (folder.Substring(0, invariantPath.Length).ToLowerInvariant().CompareTo(invariantPath) == 0)
+
+                foreach (string packagePath in packagePaths)
                 {
-                    string relPath = folder.Substring(invariantPath.Length);
-                    if (!folders.Contains(relPath))
+                    if (folder.Length >= packagePath.Length && folder.Substring(0, packagePath.Length).ToLowerInvariant().CompareTo(packagePath) == 0)
                     {
-                        folders.Add(relPath);
+                        string relPath = folder.Substring(packagePath.Length);
+                        if (!folders.Contains(relPath))
+                        {
+                            folders.Add(relPath);
+                        }
+
+                        break;
                     }
                 }
             }
@@ -576,18 +585,23 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             _xmlNamespaceManager.AddNamespace(BOOTSTRAPPER_PREFIX, BOOTSTRAPPER_NAMESPACE);
 
             XmlElement rootElement = _document.CreateElement("Products", BOOTSTRAPPER_NAMESPACE);
-            string packagePath = PackagePath;
 
-            if (FileSystems.Default.DirectoryExists(packagePath))
+            List<string> packagePaths = new List<string>() { PackagePath };
+            packagePaths.AddRange(Util.AdditionalPackagePaths);
+            foreach (string packagePath in packagePaths)
             {
-                foreach (string strSubDirectory in Directory.GetDirectories(packagePath))
+                if (FileSystems.Default.DirectoryExists(packagePath))
                 {
-                    int nStartIndex = packagePath.Length;
-                    if ((strSubDirectory.ToCharArray())[nStartIndex] == System.IO.Path.DirectorySeparatorChar)
+                    foreach (string strSubDirectory in Directory.GetDirectories(packagePath))
                     {
-                        nStartIndex = nStartIndex + 1;
+                        int nStartIndex = packagePath.Length;
+                        if ((strSubDirectory.ToCharArray())[nStartIndex] == System.IO.Path.DirectorySeparatorChar)
+                        {
+                            nStartIndex = nStartIndex + 1;
+                        }
+
+                        ExploreDirectory(strSubDirectory.Substring(nStartIndex), rootElement, packagePath);
                     }
-                    ExploreDirectory(strSubDirectory.Substring(nStartIndex), rootElement);
                 }
             }
 
@@ -887,11 +901,10 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             return xmlDocument;
         }
 
-        private void ExploreDirectory(string strSubDirectory, XmlElement rootElement)
+        private void ExploreDirectory(string strSubDirectory, XmlElement rootElement, string packagePath)
         {
             try
             {
-                string packagePath = PackagePath;
                 string strSubDirectoryFullPath = System.IO.Path.Combine(packagePath, strSubDirectory);
 
                 // figure out our product file paths based on the directory full path

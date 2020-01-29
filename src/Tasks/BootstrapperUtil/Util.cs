@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using Microsoft.Win32;
@@ -17,7 +18,10 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
         private const string REGISTRY_DEFAULTPATH = "Path";
 
+        private const string BOOTSTRAPPER_REGISTRY_ADDITIONAL_PACKAGE_PATHS_KEYNAME = "AdditionalPackagePaths";
+
         private static string s_defaultPath;
+        private static List<string> s_additionalPackagePaths;
 
         public static string AddTrailingChar(string str, char ch)
         {
@@ -143,6 +147,46 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             }
 
             return Directory.GetCurrentDirectory();
+        }
+
+        // Gets the list of additional paths to inspect for packages as defined in the registry
+        public static List<string> AdditionalPackagePaths
+        {
+            get
+            {
+                if (s_additionalPackagePaths == null)
+                {
+                    List<string> additionalPackagePaths = new List<string>();
+                    RegistryKey bootstrapperBaseRegKey = Registry.LocalMachine.OpenSubKey(BOOTSTRAPPER_REGISTRY_PATH_BASE);
+                    if (bootstrapperBaseRegKey == null)
+                    {
+                        bootstrapperBaseRegKey = Registry.LocalMachine.OpenSubKey(BOOTSTRAPPER_WOW64_REGISTRY_PATH_BASE);
+                    }
+
+                    if (bootstrapperBaseRegKey != null)
+                    {
+                        RegistryKey additionalPackagePathsRegKey = bootstrapperBaseRegKey.OpenSubKey(BOOTSTRAPPER_REGISTRY_ADDITIONAL_PACKAGE_PATHS_KEYNAME);
+                        if (additionalPackagePathsRegKey != null)
+                        {
+                            foreach (string key in additionalPackagePathsRegKey.GetValueNames())
+                            {
+                                if (additionalPackagePathsRegKey.GetValueKind(key) == RegistryValueKind.String)
+                                {
+                                    string path = (string)additionalPackagePathsRegKey.GetValue(key);
+                                    if (!string.IsNullOrEmpty(path))
+                                    {
+                                        additionalPackagePaths.Add(path);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    s_additionalPackagePaths = additionalPackagePaths;
+                }
+
+                return s_additionalPackagePaths;
+            }
         }
 
         private static string ReadRegistryString(RegistryKey key, string path, string registryValue)
