@@ -91,8 +91,11 @@ namespace Microsoft.DotNet.Tests
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
             var testInstance = _testAssetsManager.CopyTestAsset(TestProjectName)
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
+
+            NuGetConfigWriter.Write(testInstance.Path, TestContext.Current.TestPackages);
+
+            testInstance.Restore(Log);
 
             var commandResolverArguments = new CommandResolverArguments()
             {
@@ -112,8 +115,11 @@ namespace Microsoft.DotNet.Tests
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
             var testInstance = _testAssetsManager.CopyTestAsset(TestProjectName)
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
+
+            NuGetConfigWriter.Write(testInstance.Path, TestContext.Current.TestPackages);
+
+            testInstance.Restore(Log);
 
             var commandResolverArguments = new CommandResolverArguments()
             {
@@ -139,8 +145,11 @@ namespace Microsoft.DotNet.Tests
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
             var testInstance = _testAssetsManager.CopyTestAsset(TestProjectName)
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
+
+            NuGetConfigWriter.Write(testInstance.Path, TestContext.Current.TestPackages);
+
+            testInstance.Restore(Log);
 
             var commandResolverArguments = new CommandResolverArguments()
             {
@@ -161,8 +170,11 @@ namespace Microsoft.DotNet.Tests
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
             var testInstance = _testAssetsManager.CopyTestAsset(TestProjectName)
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
+
+            NuGetConfigWriter.Write(testInstance.Path, TestContext.Current.TestPackages);
+
+            testInstance.Restore(Log);
 
             var commandResolverArguments = new CommandResolverArguments()
             {
@@ -185,8 +197,11 @@ namespace Microsoft.DotNet.Tests
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
             var testInstance = _testAssetsManager.CopyTestAsset(TestProjectName)
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
+
+            NuGetConfigWriter.Write(testInstance.Path, TestContext.Current.TestPackages);
+
+            testInstance.Restore(Log);
 
             var commandResolverArguments = new CommandResolverArguments()
             {
@@ -210,8 +225,11 @@ namespace Microsoft.DotNet.Tests
 
             var testInstance = _testAssetsManager.CopyTestAsset(TestProjectName)
                 .WithSource()
-                .WithRepoGlobalPackages()
-                .Restore(Log);
+                .WithRepoGlobalPackages();
+
+            NuGetConfigWriter.Write(testInstance.Path, TestContext.Current.TestPackages);
+
+            testInstance.Restore(Log);
 
             var commandResolverArguments = new CommandResolverArguments()
             {
@@ -253,9 +271,11 @@ namespace Microsoft.DotNet.Tests
         {
             var testInstance = _testAssetsManager.CopyTestAsset(TestProjectName)
                 .WithSource()
-                .WithRepoGlobalPackages()
-                .Restore(Log);
+                .WithRepoGlobalPackages();
 
+            NuGetConfigWriter.Write(testInstance.Path, TestContext.Current.TestPackages);
+
+            testInstance.Restore(Log);
 
             var toolPathCalculator = new ToolPathCalculator(TestContext.Current.TestGlobalPackagesFolder);
 
@@ -288,8 +308,11 @@ namespace Microsoft.DotNet.Tests
             var projectToolsCommandResolver = SetupProjectToolsCommandResolver();
 
             var testInstance = _testAssetsManager.CopyTestAsset(TestProjectName)
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
+
+            NuGetConfigWriter.Write(testInstance.Path, TestContext.Current.TestPackages);
+
+            testInstance.Restore(Log);
 
             var commandResolverArguments = new CommandResolverArguments()
             {
