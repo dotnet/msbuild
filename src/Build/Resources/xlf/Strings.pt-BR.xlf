@@ -117,18 +117,18 @@
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataOnlyApplicableToRemoveItems">
-        <source>MatchOnMetadata is only applicable to remove items</source>
-        <target state="new">MatchOnMetadata is only applicable to remove items</target>
+        <source>MatchOnMetadata only applies to items.</source>
+        <target state="new">MatchOnMetadata only applies to items.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataOptionsOnlyApplicableToItemsWithMatchOnMetadata">
-        <source>MatchOnMetadataOptions is only applicable to remove items with MatchOnMetadata</source>
-        <target state="new">MatchOnMetadataOptions is only applicable to remove items with MatchOnMetadata</target>
+        <source>MatchOnMetadataOptions only applies to removing items using MatchOnMetadata.</source>
+        <target state="new">MatchOnMetadataOptions only applies to removing items using MatchOnMetadata.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_NoMatchOnMetadataOutsideTargetsOrProject">
-        <source>MatchOnMetadata cannot be used outside of targets of projects</source>
-        <target state="new">MatchOnMetadata cannot be used outside of targets of projects</target>
+        <source>MatchOnMetadata cannot be used outside of targets or projects.</source>
+        <target state="new">MatchOnMetadata cannot be used outside of targets or projects.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
