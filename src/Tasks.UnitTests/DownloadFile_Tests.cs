@@ -301,7 +301,12 @@ namespace Microsoft.Build.Tasks.UnitTests
             await Task.Delay(TimeSpan.FromSeconds(1));
             runaway.IsCompleted.ShouldBeTrue("Task did not cancel");
             if (!runaway.IsCompleted)
+            {
+                // If this task isn't completed now, it never will, so we have an early return here
+                // so that the test fails rather than enter an infinite loop if the assert above doesn't
+                // throw for whatever reason.
                 return;
+            }
 
             var result = await runaway;
             result.ShouldBeFalse(() => _mockEngine.Log);
@@ -359,7 +364,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             _mockEngine.Log.ShouldContain("MSB3922", () => _mockEngine.Log);
         }
-        
+
         private class MockHttpContent : HttpContent
         {
             private readonly Func<Stream, Task> _func;
