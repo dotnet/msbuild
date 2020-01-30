@@ -637,6 +637,12 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private static bool WouldProjectBuild(SolutionFile solutionFile, string selectedSolutionConfiguration, ProjectInSolution project, ProjectConfigurationInSolution projectConfiguration)
         {
+            // If the solution filter does not contain this project, do not build it.
+            if (!solutionFile.ProjectShouldBuild(project.RelativePath))
+            {
+                return false;
+            }
+
             if (projectConfiguration == null)
             {
                 if (project.ProjectType == SolutionProjectType.WebProject)

@@ -757,7 +757,7 @@ namespace Microsoft.Build.Utilities
         private void RemoveDependenciesFromEntryIfMissing(string rootingMarker)
         {
             // In the event of incomplete tracking information (i.e. this root was not present), just continue quietly
-            // as the user could have killed the tool being tracked, or another error occured during its execution.
+            // as the user could have killed the tool being tracked, or another error occurred during its execution.
             if (DependencyTable.TryGetValue(rootingMarker, out Dictionary<string, DateTime> dependencies))
             {
                 var dependenciesWithoutMissingFiles = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
