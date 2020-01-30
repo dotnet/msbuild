@@ -145,6 +145,18 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="'$(SelfContained)' != 'true' and '$(UseAppHost)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' &lt; '2.1'"
                  ResourceName="FrameworkDependentAppHostRequiresVersion21" />
 
+    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'"
+                 ResourceName="PublishSingleFileRequiresVersion30" />
+
+    <!-- The TFM version checks for PublishReadyToRun PublishTrimmed only generate warnings in .Net core 3.1
+         because we do not want the behavior to be a breaking change compared to version 3.0 -->
+
+    <NETSdkWarning Condition="'$(PublishReadyToRun)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'"
+                   ResourceName="PublishReadyToRunRequiresVersion30" />
+
+    <NETSdkWarning Condition="'$(PublishTrimmed)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'"
+                   ResourceName="PublishTrimmedRequiresVersion30" />
+
   </Target>
 
   <Target Name="_CheckForMismatchingPlatform"

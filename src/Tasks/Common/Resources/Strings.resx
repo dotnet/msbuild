@@ -475,7 +475,7 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1092: "}</comment>
   </data>
   <data name="ProjectToolOnlySupportTFMLowerThanNetcoreapp22" xml:space="preserve">
-    <value>NETSDK1093: NETSDK1093: Project tools (DotnetCliTool) only support targeting .NET Core 2.2 and lower.</value>
+    <value>NETSDK1093: Project tools (DotnetCliTool) only support targeting .NET Core 2.2 and lower.</value>
     <comment>{StrBegin="NETSDK1093: "}</comment>
   </data>
   <data name="ReadyToRunNoValidRuntimePackageError" xml:space="preserve">
@@ -587,5 +587,21 @@ The following are names of parameters or literal values and should not be transl
   <data name="NoSupportCppSelfContained" xml:space="preserve">
     <value>NETSDK1121: C++/CLI projects targeting .NET Core cannot use SelfContained=true.</value>
     <comment>{StrBegin="NETSDK1121: "}</comment>
+  </data>
+  <data name="PublishReadyToRunRequiresVersion30" xml:space="preserve">
+    <value>NETSDK1122: ReadyToRun compilation will be skipped because it is only supported for .NET Core 3.0 or higher.</value>
+    <comment>{StrBegin="NETSDK1122: "}</comment>
+  </data>
+  <data name="PublishSingleFileRequiresVersion30" xml:space="preserve">
+    <value>NETSDK1123: Publishing an application to a single-file requires .NET Core 3.0 or higher.</value>
+    <comment>{StrBegin="NETSDK1123: "}</comment>
+  </data>
+  <data name="PublishTrimmedRequiresVersion30" xml:space="preserve">
+    <value>NETSDK1124: Trimming assemblies requires .NET Core 3.0 or higher.</value>
+    <comment>{StrBegin="NETSDK1124: "}</comment>
+  </data>
+  <data name="CanOnlyHaveSingleFileWithNetCoreApp" xml:space="preserve">
+    <value>NETSDK1125: Publishing to a single-file is only supported for netcoreapp target.</value>
+    <comment>{StrBegin="NETSDK1125: "}</comment>
   </data>
 </root>

@@ -90,6 +90,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <NETSdkError Condition="'$(PublishSingleFile)' == 'true' And '$(_IsExecutable)' != 'true'"
                  ResourceName="CannotHaveSingleFileWithoutExecutable" />
+    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' And '$(_IsExecutable)' == 'true' And '$(TargetFrameworkIdentifier)' != '.NETCoreApp'"
+                 ResourceName="CanOnlyHaveSingleFileWithNetCoreApp" />
 
     <PropertyGroup>
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
