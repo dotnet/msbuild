@@ -19,7 +19,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/3785")]
+        [FullMSBuildOnlyFact]
         public void It_builds_and_runs()
         {
             var testAsset = _testAssetsManager
@@ -52,7 +52,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("Hello, World!");
         }
 
-        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/3785")]
+        [FullMSBuildOnlyFact]
         public void Given_no_restore_It_builds_cpp_project()
         {
             var testAsset = _testAssetsManager
@@ -60,6 +60,19 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource();
 
             new BuildCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest"))
+                .Execute("-p:Platform=x64")
+                .Should()
+                .Pass();
+        }
+
+        [FullMSBuildOnlyFact]
+        public void Given_Wpf_framework_reference_It_builds_cpp_project()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("CppCliLibWithWpfFrameworkReference")
+                .WithSource();
+
+            new BuildCommand(Log, testAsset.TestRoot)
                 .Execute("-p:Platform=x64")
                 .Should()
                 .Pass();

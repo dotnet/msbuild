@@ -11,6 +11,13 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <PropertyGroup>
+    <ResolveAssemblyReferencesDependsOn>
+      $(ResolveAssemblyReferencesDependsOn);
+      _HandlePackageFileConflicts;
+    </ResolveAssemblyReferencesDependsOn>
+  </PropertyGroup>
+
   <!--
     ============================================================
                                         ResolvePackageAssets
