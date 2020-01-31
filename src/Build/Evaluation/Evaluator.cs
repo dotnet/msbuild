@@ -1993,7 +1993,7 @@ namespace Microsoft.Build.Evaluation
                                 _lastModifiedProject = importedProjectElement;
                             }
 
-                            if (importedProjectElement.StreamTime != null && importedProjectElement.StreamTime > _lastModifiedProject.LastWriteTimeWhenRead)
+                            if (importedProjectElement.StreamTime != null && importedProjectElement.StreamTime?.ToLocalTime() > _lastModifiedProject.LastWriteTimeWhenRead)
                             {
                                 _streamImports.Add(importedProjectElement.FullPath);
                                 importedProjectElement.StreamTime = null;

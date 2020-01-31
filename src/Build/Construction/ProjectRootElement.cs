@@ -617,7 +617,7 @@ namespace Microsoft.Build.Construction
         /// This can be used to see whether the file has been changed on disk
         /// by an external means.
         /// </summary>
-        public DateTime LastWriteTimeWhenRead => Link != null ? RootLink.LastWriteTimeWhenRead : _lastWriteTimeWhenRead;
+        public DateTime LastWriteTimeWhenRead => Link != null ? RootLink.LastWriteTimeWhenRead : _lastWriteTimeWhenRead.ToLocalTime();
 
         internal DateTime? StreamTime = null;
 
@@ -1532,7 +1532,7 @@ namespace Microsoft.Build.Construction
                 // come from disk.
                 if (fileInfo != null)
                 {
-                    _lastWriteTimeWhenRead = fileInfo.LastWriteTime;
+                    _lastWriteTimeWhenRead = fileInfo.LastWriteTime.ToUniversalTime();
                     if (_lastWriteTimeWhenRead > StreamTime)
                     {
                         StreamTime = null;
@@ -1590,7 +1590,7 @@ namespace Microsoft.Build.Construction
                 XmlDocument.Save(projectWriter);
             }
 
-            StreamTime = DateTime.Now.ToLocalTime();
+            StreamTime = DateTime.Now.ToUniversalTime();
             _versionOnDisk = Version;
         }
 
@@ -2061,7 +2061,7 @@ namespace Microsoft.Build.Construction
                     XmlDocument.FullPath = fullPath;
                 }
 
-                _lastWriteTimeWhenRead = FileUtilities.GetFileInfoNoThrow(fullPath).LastWriteTime;
+                _lastWriteTimeWhenRead = FileUtilities.GetFileInfoNoThrow(fullPath).LastWriteTime.ToUniversalTime();
                 if (StreamTime < _lastWriteTimeWhenRead)
                 {
                     StreamTime = null;
