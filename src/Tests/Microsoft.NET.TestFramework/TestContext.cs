@@ -104,7 +104,11 @@ namespace Microsoft.NET.TestFramework
             }
 
             string repoRoot = null;
+#if DEBUG
             string repoConfiguration = "Debug";
+#else
+            string repoConfiguration = "Release";
+#endif
 
             if (commandLine.SDKRepoPath != null)
             {
@@ -114,11 +118,11 @@ namespace Microsoft.NET.TestFramework
             {
                 repoRoot = GetRepoRoot();
 
-                if (repoRoot != null)
-                {
-                    // assumes tests are always executed from the "artifacts/bin/Tests/$MSBuildProjectFile/$Configuration" directory
-                    repoConfiguration = new DirectoryInfo(AppContext.BaseDirectory).Name;
-                }
+                //if (repoRoot != null)
+                //{
+                //    // assumes tests are always executed from the "artifacts/bin/Tests/$MSBuildProjectFile/$Configuration" directory
+                //    repoConfiguration = new DirectoryInfo(AppContext.BaseDirectory).Name;
+                //}
             }
 
             if (!string.IsNullOrEmpty(commandLine.TestExecutionDirectory))
