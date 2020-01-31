@@ -16,6 +16,7 @@ using NuGet.Versioning;
 using Microsoft.NET.TestFramework.Utilities;
 using Microsoft.NET.TestFramework;
 using Xunit.Abstractions;
+using System.Linq;
 
 namespace Microsoft.DotNet.ToolPackage.Tests
 {
@@ -36,21 +37,32 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForConfigFile(nugetConfigPath));
 
-            var nugetCacheLocation =
-                new DirectoryPath(Path.GetTempPath()).WithSubDirectories(Path.GetRandomFileName());
+            try
 
-            IToolPackage toolPackage = installer.InstallPackageToExternalManagedLocation(
-                packageId: TestPackageId,
-                versionRange: VersionRange.Parse(TestPackageVersion),
-                packageLocation : new PackageLocation(nugetConfig: nugetConfigPath),
-                targetFramework: _testTargetframework);
+            {
+                var nugetCacheLocation =
+                    new DirectoryPath(Path.GetTempPath()).WithSubDirectories(Path.GetRandomFileName());
 
-            var commands = toolPackage.Commands;
-            commands[0].Executable.Value.Should().StartWith(NuGetGlobalPackagesFolder.GetLocation());
+                IToolPackage toolPackage = installer.InstallPackageToExternalManagedLocation(
+                    packageId: TestPackageId,
+                    versionRange: VersionRange.Parse(TestPackageVersion),
+                    packageLocation: new PackageLocation(nugetConfig: nugetConfigPath),
+                    targetFramework: _testTargetframework);
 
-            fileSystem.File
-                .Exists(commands[0].Executable.Value)
-                .Should().BeTrue($"{commands[0].Executable.Value} should exist");
+                var commands = toolPackage.Commands;
+                commands[0].Executable.Value.Should().StartWith(NuGetGlobalPackagesFolder.GetLocation());
+
+                fileSystem.File
+                    .Exists(commands[0].Executable.Value)
+                    .Should().BeTrue($"{commands[0].Executable.Value} should exist");
+            }
+            finally
+            {
+                foreach (var line in reporter.Lines)
+                {
+                    Log.WriteLine(line);
+                }
+            }
         }
 
         [Theory]
