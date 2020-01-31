@@ -165,11 +165,11 @@ namespace Microsoft.DotNet.Tests.Commands
             VerifyShutdownCalls(mocks);
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/3684")]
         public void GivenARunningRazorServerItShutsDownSuccessfully()
         {
             var pipeName = Path.GetRandomFileName();
-            
+
             var pidDirectory = _testAssetsManager.CreateTestDirectory(identifier: "pidDirectory").Path;
 
             var testInstance = _testAssetsManager

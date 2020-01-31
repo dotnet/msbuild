@@ -15,11 +15,16 @@ using Xunit;
 using NuGet.Versioning;
 using Microsoft.NET.TestFramework.Utilities;
 using Microsoft.NET.TestFramework;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.ToolPackage.Tests
 {
-    public class ToolPackageInstallToManagedLocationInstaller
+    public class ToolPackageInstallToManagedLocationInstaller : SdkTest
     {
+        public ToolPackageInstallToManagedLocationInstaller(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
