@@ -181,8 +181,12 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_37_DocsLink">
-        <source>For more detailed information access the link: https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild</source>
-        <target state="new">For more detailed information access the link: https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild</target>
+        <source>For more detailed information access the link:
+                     https://docs.microsoft.com/visualstudio/msbuild/msbuild
+    </source>
+        <target state="new">For more detailed information access the link:
+                     https://docs.microsoft.com/visualstudio/msbuild/msbuild
+    </target>
         <note />
       </trans-unit>
       <trans-unit id="HelpMessage_3_SwitchesHeader">

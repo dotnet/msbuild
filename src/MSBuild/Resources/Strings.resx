@@ -788,7 +788,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </comment>
   </data>
   <data name="HelpMessage_37_DocsLink" UESanitized="false" Visibility="Public">
-    <value>For more detailed information access the link: https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild</value>
+    <value>For more detailed information access the link:
+                     https://docs.microsoft.com/visualstudio/msbuild/msbuild
+    </value>
   </data>
   <data name="InvalidConfigurationFile" Visibility="Public">
     <value>MSBUILD : Configuration error MSB1043: The application could not start. {0}</value>
