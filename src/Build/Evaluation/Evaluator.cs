@@ -237,6 +237,8 @@ namespace Microsoft.Build.Evaluation
                 _lastModifiedProject = projectRootElement;
             }
             _streamImports = new List<string>();
+            // When the imports are concatenated with a semicolon, this automatically prepends a semicolon if and only if another element is later added.
+            _streamImports.Add(string.Empty);
         }
 
         /// <summary>
@@ -2382,8 +2384,8 @@ namespace Microsoft.Build.Evaluation
                 P newValue = _data.SetProperty(
                     Constants.MSBuildAllProjectsPropertyName,
                     oldValue == null
-                        ? $"{_lastModifiedProject.FullPath};{streamImports}"
-                        : $"{_lastModifiedProject.FullPath};{streamImports};{oldValue.EvaluatedValue}",
+                        ? $"{_lastModifiedProject.FullPath}{streamImports}"
+                        : $"{_lastModifiedProject.FullPath}{streamImports};{oldValue.EvaluatedValue}",
                     isGlobalProperty: false,
                     mayBeReserved: false);
 
