@@ -53,8 +53,8 @@ namespace Microsoft.Build.Shared
             cacheDirectory = null;
         }
 
-        // TODO: assumption on file system case sensitivity: https://github.com/Microsoft/msbuild/issues/781
-        internal static readonly StringComparison PathComparison = StringComparison.OrdinalIgnoreCase;
+        internal static readonly StringComparison PathComparison = Directory.Exists(Path.GetTempPath().ToUpper()) && Directory.Exists(Path.GetTempPath().ToLower()) ?
+            StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 
         /// <summary>
         /// Copied from https://github.com/dotnet/corefx/blob/056715ff70e14712419d82d51c8c50c54b9ea795/src/Common/src/System/IO/PathInternal.Windows.cs#L61
