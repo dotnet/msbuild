@@ -731,10 +731,8 @@ namespace Microsoft.Build.UnitTests
             Assert.True(unquoteParameters);
         }
 
-        [Theory]
-        [InlineData("targets")]
-        [InlineData("ts")]
-        public void TargetsSwitchIdentificationTests(string @switch)
+        [Fact]
+        public void TargetsSwitchIdentificationTests()
         {
             CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
             string duplicateSwitchErrorMessage;
@@ -743,7 +741,14 @@ namespace Microsoft.Build.UnitTests
             bool unquoteParameters;
             bool emptyParametersAllowed;
 
-            Assert.True(CommandLineSwitches.IsParameterizedSwitch(@switch, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch("targets", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
+            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.Targets, parameterizedSwitch);
+            Assert.Null(duplicateSwitchErrorMessage);
+            Assert.False(multipleParametersAllowed);
+            Assert.Null(missingParametersErrorMessage);
+            Assert.True(unquoteParameters);
+
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch("ts", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
             Assert.Equal(CommandLineSwitches.ParameterizedSwitch.Targets, parameterizedSwitch);
             Assert.Null(duplicateSwitchErrorMessage);
             Assert.False(multipleParametersAllowed);
