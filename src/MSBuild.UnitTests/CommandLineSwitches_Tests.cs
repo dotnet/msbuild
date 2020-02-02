@@ -753,25 +753,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void TargetsSwitchParameter()
-        {
-            CommandLineSwitches switches = new CommandLineSwitches();
-            MSBuildApp.GatherCommandLineSwitches(new ArrayList() { "/targets:targets.txt" }, switches);
-
-            switches.HaveErrors().ShouldBeFalse();
-            switches[CommandLineSwitches.ParameterizedSwitch.Targets].ShouldBe(new[] { "targets.txt" });
-        }
-
-        [Fact]
-        public void TargetsSwitchDoesNotSupportMultipleOccurrences()
-        {
-            CommandLineSwitches switches = new CommandLineSwitches();
-            MSBuildApp.GatherCommandLineSwitches(new ArrayList() { "/targets /targets" }, switches);
-
-            switches.HaveErrors().ShouldBeTrue();
-        }
-
-        [Fact]
         public void IsolateProjectsSwitchIdentificationTests()
         {
             CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
