@@ -1110,12 +1110,21 @@ namespace Microsoft.Build.CommandLine
 
                 if (targetsOnly)
                 {
-                    Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
+                    try
+                    {
+                        Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
 
-                    targetsWriter.WriteLine(string.Join(Environment.NewLine, project.Targets.Keys));
+                        targetsWriter.WriteLine(string.Join(Environment.NewLine, project.Targets.Keys));
 
-                    projectCollection.UnloadProject(project);
-                    success = true;
+                        projectCollection.UnloadProject(project);
+                        success = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        var message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetsCouldNotBePrinted", ex.Message);
+                        Console.Error.WriteLine(message);
+                        success = false;
+                    }
                 }
 
                 if (!preprocessOnly && !targetsOnly)
