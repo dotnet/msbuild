@@ -2369,7 +2369,7 @@ namespace Microsoft.Build.CommandLine
                 }
                 catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {
-                    CommandLineSwitchException.Throw("InvalidTargetsPath", parameters[parameters.Length - 1], ex.Message);
+                    CommandLineSwitchException.Throw("TargetsCouldNotBePrinted", parameters[parameters.Length - 1], ex.Message);
                 }
             }
 
