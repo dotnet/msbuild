@@ -732,31 +732,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void TargetsSwitchIdentificationTests()
-        {
-            CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
-            string duplicateSwitchErrorMessage;
-            bool multipleParametersAllowed;
-            string missingParametersErrorMessage;
-            bool unquoteParameters;
-            bool emptyParametersAllowed;
-
-            Assert.True(CommandLineSwitches.IsParameterizedSwitch("targets", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
-            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.Targets, parameterizedSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
-            Assert.False(multipleParametersAllowed);
-            Assert.Null(missingParametersErrorMessage);
-            Assert.True(unquoteParameters);
-
-            Assert.True(CommandLineSwitches.IsParameterizedSwitch("ts", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
-            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.Targets, parameterizedSwitch);
-            Assert.Null(duplicateSwitchErrorMessage);
-            Assert.False(multipleParametersAllowed);
-            Assert.Null(missingParametersErrorMessage);
-            Assert.True(unquoteParameters);
-        }
-
-        [Fact]
         public void IsolateProjectsSwitchIdentificationTests()
         {
             CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
