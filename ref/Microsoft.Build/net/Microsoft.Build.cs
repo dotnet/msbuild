@@ -615,7 +615,6 @@ namespace Microsoft.Build.Evaluation
         public string GetPropertyValue(string name) { throw null; }
         public static string GetPropertyValueEscaped(Microsoft.Build.Evaluation.ProjectProperty property) { throw null; }
         public void MarkDirty() { }
-        public void PrintTargets(System.IO.TextWriter writer) { }
         public void ReevaluateIfNecessary() { }
         public void ReevaluateIfNecessary(Microsoft.Build.Evaluation.Context.EvaluationContext evaluationContext) { }
         public bool RemoveGlobalProperty(string name) { throw null; }

@@ -1417,11 +1417,6 @@ namespace Microsoft.Build.Evaluation
             implementation.SaveLogicalProject(writer);
         }
 
-        public void PrintTargets(TextWriter writer)
-        {
-            writer.WriteLine(string.Join(Environment.NewLine, Targets.Keys));
-        }
-
         /// <summary>
         /// Starts a build using this project, building the default targets.
         /// Returns true on success, false on failure.
