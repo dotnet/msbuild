@@ -1216,11 +1216,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       LOCALIZATION: {0} contains the invalid switch text.
     </note>
       </trans-unit>
-      <trans-unit id="InvalidTargetsPath">
-        <source>MSBUILD : error MSB1059: Targets could not be printed. {0}</source>
-        <target state="new">MSBUILD : error MSB1059: Targets could not be printed. {0}</target>
-        <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
-      </trans-unit>
       <trans-unit id="InvalidToolsVersionError">
         <source>MSBUILD : error MSB1040: ToolsVersion is not valid. {0}</source>
         <target state="new">MSBUILD : error MSB1040: ToolsVersion is not valid. {0}</target>
@@ -1432,6 +1427,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <note>{StrBegin="MSBUILD : error MSB1026: "}UE: This error is printed if the default schema does not exist or in the extremely unlikely event
     that an explicit schema file was passed and existed when the command line parameters were checked but was deleted from disk before this check was made.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="TargetsCouldNotBePrinted">
+        <source>MSBUILD : error MSB1059: Targets could not be printed. {0}</source>
+        <target state="new">MSBUILD : error MSB1059: Targets could not be printed. {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>
