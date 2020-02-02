@@ -43,7 +43,7 @@ namespace Microsoft.Build.Conversion
         /// <summary>
         /// This switch can occur multiple times and the 
         /// final value is the ';' delimeted concat of all the
-        /// individual occurences
+        /// individual occurrences
         /// </summary>
         SVT_MultiString,
     }

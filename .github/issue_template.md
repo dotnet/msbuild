@@ -32,7 +32,7 @@ Command line
 ```
 msbuild /bl
 ```
-### Expected  behavior
+### Expected behavior
 
 
 ### Actual behavior

@@ -59,7 +59,7 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// Returns the exception thrown during the task execution. The exception will either be
-        /// InvalidProjectException or some unexpected exception that occured in the engine code,
+        /// InvalidProjectException or some unexpected exception that occurred in the engine code,
         /// because unexpected task exceptions are converted to logged errors.
         /// </summary>
         internal Exception ThrownException
