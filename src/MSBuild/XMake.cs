@@ -1110,21 +1110,7 @@ namespace Microsoft.Build.CommandLine
 
                 if (targetsOnly)
                 {
-                    try
-                    {
-                        Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
-
-                        targetsWriter.WriteLine(string.Join(Environment.NewLine, project.Targets.Keys));
-
-                        projectCollection.UnloadProject(project);
-                        success = true;
-                    }
-                    catch (Exception ex)
-                    {
-                        var message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetsCouldNotBePrinted", ex.Message);
-                        Console.Error.WriteLine(message);
-                        success = false;
-                    }
+                    success = PrintTargets(projectFile, toolsVersion, globalProperties, targetsWriter, projectCollection);
                 }
 
                 if (!preprocessOnly && !targetsOnly)
@@ -1315,6 +1301,25 @@ namespace Microsoft.Build.CommandLine
             }
 
             return success;
+        }
+
+        private static bool PrintTargets(string projectFile, string toolsVersion, Dictionary<string, string> globalProperties, TextWriter targetsWriter, ProjectCollection projectCollection)
+        {
+            try
+            {
+                Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
+
+                targetsWriter.WriteLine(string.Join(Environment.NewLine, project.Targets.Keys));
+
+                projectCollection.UnloadProject(project);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                var message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetsCouldNotBePrinted", ex.Message);
+                Console.Error.WriteLine(message);
+                return false;
+            }
         }
 
         private static (BuildResultCode result, Exception exception) ExecuteBuild(BuildManager buildManager, BuildRequestData request)
