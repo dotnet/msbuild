@@ -743,14 +743,7 @@ namespace Microsoft.Build.UnitTests
             bool unquoteParameters;
             bool emptyParametersAllowed;
 
-            Assert.True(CommandLineSwitches.IsParameterizedSwitch(
-                @switch,
-                out parameterizedSwitch,
-                out duplicateSwitchErrorMessage,
-                out multipleParametersAllowed,
-                out missingParametersErrorMessage,
-                out unquoteParameters,
-                out emptyParametersAllowed));
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch(@switch, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
             Assert.Equal(CommandLineSwitches.ParameterizedSwitch.Targets, parameterizedSwitch);
             Assert.Null(duplicateSwitchErrorMessage);
             Assert.False(multipleParametersAllowed);
