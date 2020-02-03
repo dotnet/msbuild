@@ -17,6 +17,7 @@ using Microsoft.NET.TestFramework.Utilities;
 using Microsoft.NET.TestFramework;
 using Xunit.Abstractions;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.DotNet.ToolPackage.Tests
 {
@@ -31,17 +32,20 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         [InlineData(true)]
         public void GivenNugetConfigInstallSucceeds(bool testMockBehaviorIsInSync)
         {
-            var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
+            string testDirectory = _testAssetsManager.CreateTestDirectory(identifier: testMockBehaviorIsInSync.ToString()).Path;
+
+            var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed(testDirectory);
 
             var (store, installer, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
+                testDirectory: testDirectory,
                 feeds: GetMockFeedsForConfigFile(nugetConfigPath));
 
             try
 
             {
                 var nugetCacheLocation =
-                    new DirectoryPath(Path.GetTempPath()).WithSubDirectories(Path.GetRandomFileName());
+                    new DirectoryPath(testDirectory).WithSubDirectories(Path.GetRandomFileName());
 
                 IToolPackage toolPackage = installer.InstallPackageToExternalManagedLocation(
                     packageId: TestPackageId,
@@ -70,14 +74,17 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         [InlineData(true)]
         public void GivenNugetConfigVersionRangeInstallSucceeds(bool testMockBehaviorIsInSync)
         {
-            var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
+            string testDirectory = _testAssetsManager.CreateTestDirectory(identifier: testMockBehaviorIsInSync.ToString()).Path;
+
+            var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed(testDirectory);
 
             var (store, installer, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
+                testDirectory: testDirectory,
                 feeds: GetMockFeedsForConfigFile(nugetConfigPath));
 
             var nugetCacheLocation =
-                new DirectoryPath(Path.GetTempPath()).WithSubDirectories(Path.GetRandomFileName());
+                new DirectoryPath(testDirectory).WithSubDirectories(Path.GetRandomFileName());
 
             IToolPackage toolPackage = installer.InstallPackageToExternalManagedLocation(
                 packageId: TestPackageId,
@@ -90,10 +97,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             toolPackage.Version.Should().Be(NuGetVersion.Parse(TestPackageVersion));
         }
 
-        private static FilePath GetUniqueTempProjectPathEachTest()
+        private static FilePath GetUniqueTempProjectPathEachTest(string testDirectory)
         {
             var tempProjectDirectory =
-                new DirectoryPath(Path.GetTempPath()).WithSubDirectories(Path.GetRandomFileName());
+                new DirectoryPath(testDirectory).WithSubDirectories(Path.GetRandomFileName());
             var tempProjectPath =
                 tempProjectDirectory.WithFile(Path.GetRandomFileName() + ".csproj");
             return tempProjectPath;
@@ -122,6 +129,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
         private static (IToolPackageStore, IToolPackageInstaller, BufferedReporter, IFileSystem) Setup(
             bool useMock,
+            string testDirectory,
             List<MockFeed> feeds = null,
             FilePath? tempProject = null,
             DirectoryPath? offlineFeed = null)
@@ -151,19 +159,19 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 installer = new ToolPackageInstaller(
                     store: store,
                     projectRestorer: new ProjectRestorer(reporter),
-                    tempProject: tempProject ?? GetUniqueTempProjectPathEachTest(),
+                    tempProject: tempProject ?? GetUniqueTempProjectPathEachTest(testDirectory),
                     offlineFeed: offlineFeed ?? new DirectoryPath("does not exist"));
             }
 
             return (store, installer, reporter, fileSystem);
         }
 
-        private static FilePath WriteNugetConfigFileToPointToTheFeed()
+        private FilePath WriteNugetConfigFileToPointToTheFeed(string testDirectory)
         {
             var nugetConfigName = "nuget.config";
 
             var tempPathForNugetConfigWithWhiteSpace =
-                Path.Combine(Path.GetTempPath(),
+                Path.Combine(testDirectory,
                     Path.GetRandomFileName() + " " + Path.GetRandomFileName());
             Directory.CreateDirectory(tempPathForNugetConfigWithWhiteSpace);
 
