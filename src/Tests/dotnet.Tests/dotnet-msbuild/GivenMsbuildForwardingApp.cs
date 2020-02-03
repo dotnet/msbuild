@@ -8,11 +8,16 @@ using FluentAssertions;
 using Xunit;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
-    public class GivenMsbuildForwardingApp
+    public class GivenMsbuildForwardingApp : SdkTest
     {
+        public GivenMsbuildForwardingApp(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [WindowsOnlyFact]
         public void DotnetExeIsExecuted()
         {
@@ -71,6 +76,9 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             var envVar = "DOTNET_CLI_TELEMETRY_SESSIONID";
             var startInfo = new MSBuildForwardingApp(new string[0], msbuildPath)
                 .GetProcessStartInfo();
+
+            Log.WriteLine("StartInfo DOTNET_CLI_TELEMETRY_SESSIONID: " + startInfo.Environment[envVar]);
+            
             (startInfo.Environment[envVar] == null || Guid.TryParse(startInfo.Environment[envVar], out _))
                 .Should().BeTrue("DOTNET_CLI_TELEMETRY_SESSIONID should be null or current session id");
         }
