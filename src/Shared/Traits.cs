@@ -185,6 +185,11 @@ namespace Microsoft.Build.Utilities
         public readonly bool UseAutoRunWhenLaunchingProcessUnderCmd = Environment.GetEnvironmentVariable("MSBUILDUSERAUTORUNINCMD") == "1";
 
         /// <summary>
+        /// Disables switching codepage to UTF-8 after detection of characters that can't be represented in the current codepage.
+        /// </summary>
+        public readonly bool AvoidUnicodeWhenWritingToolTaskBatch = Environment.GetEnvironmentVariable("MSBUILDAVOIDUNICODE") == "1";
+
+        /// <summary>
         /// Workaround for https://github.com/Microsoft/vstest/issues/1503.
         /// </summary>
         public readonly bool EnsureStdOutForChildNodesIsPrimaryStdout = Environment.GetEnvironmentVariable("MSBUILDENSURESTDOUTFORTASKPROCESSES") == "1";
