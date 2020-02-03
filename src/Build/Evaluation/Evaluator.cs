@@ -1995,10 +1995,10 @@ namespace Microsoft.Build.Evaluation
                                 _lastModifiedProject = importedProjectElement;
                             }
 
-                            if (importedProjectElement.StreamTime?.ToLocalTime() > _lastModifiedProject.LastWriteTimeWhenRead)
+                            if (importedProjectElement.StreamTimeUtc?.ToLocalTime() > _lastModifiedProject.LastWriteTimeWhenRead)
                             {
                                 _streamImports.Add(importedProjectElement.FullPath);
-                                importedProjectElement.StreamTime = null;
+                                importedProjectElement.StreamTimeUtc = null;
                             }
 
                             if (_logProjectImportedEvents)

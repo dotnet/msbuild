@@ -619,7 +619,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public DateTime LastWriteTimeWhenRead => Link != null ? RootLink.LastWriteTimeWhenRead : _lastWriteTimeWhenReadUtc.ToLocalTime();
 
-        internal DateTime? StreamTime = null;
+        internal DateTime? StreamTimeUtc = null;
 
         /// <summary>
         /// This does not allow conditions, so it should not be called.
@@ -1533,9 +1533,9 @@ namespace Microsoft.Build.Construction
                 if (fileInfo != null)
                 {
                     _lastWriteTimeWhenReadUtc = fileInfo.LastWriteTimeUtc;
-                    if (_lastWriteTimeWhenReadUtc > StreamTime)
+                    if (_lastWriteTimeWhenReadUtc > StreamTimeUtc)
                     {
-                        StreamTime = null;
+                        StreamTimeUtc = null;
                     }
                 }
 
@@ -1590,7 +1590,7 @@ namespace Microsoft.Build.Construction
                 XmlDocument.Save(projectWriter);
             }
 
-            StreamTime = DateTime.UtcNow;
+            StreamTimeUtc = DateTime.UtcNow;
             _versionOnDisk = Version;
         }
 
@@ -2062,9 +2062,9 @@ namespace Microsoft.Build.Construction
                 }
 
                 _lastWriteTimeWhenReadUtc = FileUtilities.GetFileInfoNoThrow(fullPath).LastWriteTimeUtc;
-                if (StreamTime < _lastWriteTimeWhenReadUtc)
+                if (StreamTimeUtc < _lastWriteTimeWhenReadUtc)
                 {
-                    StreamTime = null;
+                    StreamTimeUtc = null;
                 }
             }
             catch (Exception ex)
