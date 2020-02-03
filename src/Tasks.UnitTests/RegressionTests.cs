@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Xunit;
 using Xunit.Abstractions;
@@ -48,7 +49,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Tests fix for https://github.com/microsoft/msbuild/issues/1479.
         /// </summary>
-        [Fact]
+        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsWindows))]
         public void AssemblyAttributesLocation()
         {
             var expectedCompileItems = "a.cs;" + Path.Combine("obj", "Debug", ".NETFramework,Version=v4.0.AssemblyAttributes.cs");
