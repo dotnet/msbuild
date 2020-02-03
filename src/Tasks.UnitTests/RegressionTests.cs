@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.UnitTests;
@@ -45,7 +46,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         /// <summary>
-        /// Fix for https://github.com/microsoft/msbuild/issues/1479.
+        /// Tests fix for https://github.com/microsoft/msbuild/issues/1479.
         /// </summary>
         [Fact]
         public void AssemblyAttributesLocation()
@@ -68,7 +69,9 @@ namespace Microsoft.Build.Tasks.UnitTests
   </Target>
 </Project>
 ");
-            Assert.True(project.Build(new MockLogger(_output)));
+            var logger = new MockLogger(_output);
+            bool result = project.Build(logger);
+            Assert.True(result, "Output:" + Environment.NewLine + logger.FullLog);
         }
     }
 }
