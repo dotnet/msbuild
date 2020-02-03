@@ -130,7 +130,7 @@ namespace Microsoft.Build.Construction
         /// This can be used to see whether the file has been changed on disk
         /// by an external means.
         /// </summary>
-        private DateTime _lastWriteTimeWhenRead;
+        private DateTime _lastWriteTimeWhenReadUtc;
 
         /// <summary>
         /// Reason it was last marked dirty; unlocalized, for debugging
@@ -617,7 +617,7 @@ namespace Microsoft.Build.Construction
         /// This can be used to see whether the file has been changed on disk
         /// by an external means.
         /// </summary>
-        public DateTime LastWriteTimeWhenRead => Link != null ? RootLink.LastWriteTimeWhenRead : _lastWriteTimeWhenRead.ToLocalTime();
+        public DateTime LastWriteTimeWhenRead => Link != null ? RootLink.LastWriteTimeWhenRead : _lastWriteTimeWhenReadUtc.ToLocalTime();
 
         internal DateTime? StreamTime = null;
 
@@ -1532,8 +1532,8 @@ namespace Microsoft.Build.Construction
                 // come from disk.
                 if (fileInfo != null)
                 {
-                    _lastWriteTimeWhenRead = fileInfo.LastWriteTime.ToUniversalTime();
-                    if (_lastWriteTimeWhenRead > StreamTime)
+                    _lastWriteTimeWhenReadUtc = fileInfo.LastWriteTimeUtc;
+                    if (_lastWriteTimeWhenReadUtc > StreamTime)
                     {
                         StreamTime = null;
                     }
@@ -1590,7 +1590,7 @@ namespace Microsoft.Build.Construction
                 XmlDocument.Save(projectWriter);
             }
 
-            StreamTime = DateTime.Now.ToUniversalTime();
+            StreamTime = DateTime.UtcNow;
             _versionOnDisk = Version;
         }
 
@@ -2061,8 +2061,8 @@ namespace Microsoft.Build.Construction
                     XmlDocument.FullPath = fullPath;
                 }
 
-                _lastWriteTimeWhenRead = FileUtilities.GetFileInfoNoThrow(fullPath).LastWriteTime.ToUniversalTime();
-                if (StreamTime < _lastWriteTimeWhenRead)
+                _lastWriteTimeWhenReadUtc = FileUtilities.GetFileInfoNoThrow(fullPath).LastWriteTimeUtc;
+                if (StreamTime < _lastWriteTimeWhenReadUtc)
                 {
                     StreamTime = null;
                 }
