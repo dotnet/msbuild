@@ -168,7 +168,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
         private FilePath WriteNugetConfigFileToPointToTheFeed(string testDirectory)
         {
-            var nugetConfigName = "nuget.config";
+            var nugetConfigName = "NuGet.Config";
 
             var tempPathForNugetConfigWithWhiteSpace =
                 Path.Combine(testDirectory,
