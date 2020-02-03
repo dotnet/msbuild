@@ -447,7 +447,9 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             public TestEnvironment(TestAssetsManager testAssets, string identifier = "", [CallerMemberName] string callingMethod = "")
             {
                 TestDirectory = new DirectoryInfo(testAssets.CreateTestDirectory(
-                    identifier: identifier,
+                    //  Add FrameworkDescription to identifier so that instances of tests running on different frameworks
+                    //  (.NET Core vs .NET Framework) don't conflict
+                    identifier: identifier + RuntimeInformation.FrameworkDescription,
                     testName: callingMethod).Path);
 
                 DeleteMinimumVSDefinedSDKVersionFile();
