@@ -2,19 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -319,7 +316,7 @@ namespace Microsoft.Build.BackEnd
                 // Only create a hash table if there are more than one bucket as this is the only time a property can be overridden
                 if (buckets.Count > 1)
                 {
-                    lookupHash = lookupHash ?? new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+                    lookupHash ??= new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
                 }
 
                 WorkUnitResult aggregateResult = new WorkUnitResult();
@@ -327,6 +324,12 @@ namespace Microsoft.Build.BackEnd
                 // Loop through each of the batch buckets and execute them one at a time
                 for (int i = 0; i < buckets.Count; i++)
                 {
+                    // Some tests do not provide an actual taskNode; checking if _taskNode == null prevents those tests from failing.
+                    if (MSBuildEventSource.Log.IsEnabled())
+                    {
+                        TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
+                        MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
+                    }
                     // Execute the batch bucket, pass in which bucket we are executing so that we know when to get a new taskId for the bucket.
                     taskResult = await ExecuteBucket(taskHost, (ItemBucket)buckets[i], mode, lookupHash);
 
@@ -336,8 +339,14 @@ namespace Microsoft.Build.BackEnd
                     {
                         break;
                     }
+                    // Some tests do not provide an actual taskNode; checking if _taskNode == null prevents those tests from failing.
+                    if (MSBuildEventSource.Log.IsEnabled())
+                    {
+                        TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
+                        MSBuildEventSource.Log.ExecuteTaskStop(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
+                    }
                 }
-
+                
                 taskResult = aggregateResult;
             }
             finally

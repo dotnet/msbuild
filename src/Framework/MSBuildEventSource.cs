@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Diagnostics.Tracing;
+using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Microsoft.Build.Eventing
 {
@@ -361,6 +363,41 @@ namespace Microsoft.Build.Eventing
             WriteEvent(46, commandLine);
         }
 
+        [Event(47)]
+        public void ExecuteTaskStart(string taskName, int taskID)
+        {
+            WriteEvent(47, taskName, taskID);
+        }
+
+        [Event(48)]
+        public void ExecuteTaskStop(string taskName, int taskID)
+        {
+            WriteEvent(48, taskName, taskID);
+        }
+
+        [Event(49)]
+        public void ExecuteTaskYieldStart(string taskName, int taskID)
+        {
+            WriteEvent(49, taskName, taskID);
+        }
+
+        [Event(50)]
+        public void ExecuteTaskYieldStop(string taskName, int taskID)
+        {
+            WriteEvent(50, taskName, taskID);
+        }
+
+        [Event(51)]
+        public void ExecuteTaskReacquireStart(string taskName, int taskID)
+        {
+            WriteEvent(51, taskName, taskID);
+        }
+
+        [Event(52)]
+        public void ExecuteTaskReacquireStop(string taskName, int taskID)
+        {
+            WriteEvent(52, taskName, taskID);
+        }
         #endregion
     }
 }
