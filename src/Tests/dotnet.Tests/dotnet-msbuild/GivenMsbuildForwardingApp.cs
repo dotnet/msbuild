@@ -77,10 +77,17 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             var startInfo = new MSBuildForwardingApp(new string[0], msbuildPath)
                 .GetProcessStartInfo();
 
-            Log.WriteLine("StartInfo DOTNET_CLI_TELEMETRY_SESSIONID: " + startInfo.Environment[envVar]);
-            
-            (startInfo.Environment[envVar] == null || Guid.TryParse(startInfo.Environment[envVar], out _))
-                .Should().BeTrue("DOTNET_CLI_TELEMETRY_SESSIONID should be null or current session id");
+            string sessionId = startInfo.Environment[envVar];
+
+            Log.WriteLine("StartInfo DOTNET_CLI_TELEMETRY_SESSIONID: " + sessionId);
+
+            //  Other in-process tests (GivenADotnetFirstTimeUseConfigurerWithStateSetup) use "test"
+            //  for session ID, so ignore if they already set it
+            if (sessionId != "test")
+            {
+                (sessionId == null || Guid.TryParse(sessionId, out _))
+                    .Should().BeTrue("DOTNET_CLI_TELEMETRY_SESSIONID should be null or current session id");
+            }
         }
 
         [Fact]
