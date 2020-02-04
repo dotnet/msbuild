@@ -180,6 +180,11 @@ namespace Microsoft.Build.Utilities
         public readonly bool DisableNuGetSdkResolver = Environment.GetEnvironmentVariable("MSBUILDDISABLENUGETSDKRESOLVER") == "1";
 
         /// <summary>
+        /// Disable AssemblyLoadContext isolation for plugins.
+        /// </summary>
+        public readonly bool UseSingleLoadContext = Environment.GetEnvironmentVariable("MSBUILDSINGLELOADCONTEXT") == "1";
+
+        /// <summary>
         /// Enables the user of autorun functionality in CMD.exe on Windows which is disabled by default in MSBuild.
         /// </summary>
         public readonly bool UseAutoRunWhenLaunchingProcessUnderCmd = Environment.GetEnvironmentVariable("MSBUILDUSERAUTORUNINCMD") == "1";
