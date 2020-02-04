@@ -400,19 +400,39 @@ namespace Microsoft.NET.Build.Tasks
             {
                 if (_targetArchitecture == Architecture.Arm)
                 {
-                    _crossgenPath = Path.Combine(_packagePath, "tools", "x86_arm", "crossgen.exe");
-                    _clrjitPath = Path.Combine(_packagePath, "runtimes", "x86_arm", "native", "clrjit.dll");
-                    _diasymreaderPath = Path.Combine(_packagePath, "runtimes", _runtimeIdentifier, "native", "Microsoft.DiaSymReader.Native.x86.dll");
+                    if (RuntimeInformation.OSArchitecture == _targetArchitecture || RuntimeInformation.OSArchitecture == Architecture.Arm64)
+                    {
+                        // We can run native arm32 bits on an arm64 host in WOW mode
+                        _crossgenPath = Path.Combine(_packagePath, "tools", "crossgen.exe");
+                        _clrjitPath = Path.Combine(_packagePath, "runtimes", _runtimeIdentifier, "native", "clrjit.dll");
+                        _diasymreaderPath = Path.Combine(_packagePath, "runtimes", _runtimeIdentifier, "native", "Microsoft.DiaSymReader.Native.arm.dll");
+                    }
+                    else
+                    {
+                        // We can use the x86-hosted crossgen compiler to target ARM
+                        _crossgenPath = Path.Combine(_packagePath, "tools", "x86_arm", "crossgen.exe");
+                        _clrjitPath = Path.Combine(_packagePath, "runtimes", "x86_arm", "native", "clrjit.dll");
+                        _diasymreaderPath = Path.Combine(_packagePath, "runtimes", _runtimeIdentifier, "native", "Microsoft.DiaSymReader.Native.x86.dll");
+                    }
                 }
                 else if (_targetArchitecture == Architecture.Arm64)
                 {
-                    // We only have 64-bit hosted compilers for ARM64.
-                    if (RuntimeInformation.OSArchitecture != Architecture.X64)
-                        return false;
+                    if (RuntimeInformation.OSArchitecture == _targetArchitecture)
+                    {
+                        _crossgenPath = Path.Combine(_packagePath, "tools", "crossgen.exe");
+                        _clrjitPath = Path.Combine(_packagePath, "runtimes", _runtimeIdentifier, "native", "clrjit.dll");
+                        _diasymreaderPath = Path.Combine(_packagePath, "runtimes", _runtimeIdentifier, "native", "Microsoft.DiaSymReader.Native.arm64.dll");
+                    }
+                    else
+                    {
+                        // We only have 64-bit hosted compilers for ARM64.
+                        if (RuntimeInformation.OSArchitecture != Architecture.X64)
+                            return false;
 
-                    _crossgenPath = Path.Combine(_packagePath, "tools", "x64_arm64", "crossgen.exe");
-                    _clrjitPath = Path.Combine(_packagePath, "runtimes", "x64_arm64", "native", "clrjit.dll");
-                    _diasymreaderPath = Path.Combine(_packagePath, "runtimes", _runtimeIdentifier, "native", "Microsoft.DiaSymReader.Native.amd64.dll");
+                        _crossgenPath = Path.Combine(_packagePath, "tools", "x64_arm64", "crossgen.exe");
+                        _clrjitPath = Path.Combine(_packagePath, "runtimes", "x64_arm64", "native", "clrjit.dll");
+                        _diasymreaderPath = Path.Combine(_packagePath, "runtimes", _runtimeIdentifier, "native", "Microsoft.DiaSymReader.Native.amd64.dll");
+                    }
                 }
                 else
                 {
