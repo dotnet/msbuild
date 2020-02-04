@@ -53,8 +53,31 @@ namespace Microsoft.Build.Shared
             cacheDirectory = null;
         }
 
-        internal static readonly StringComparison PathComparison = Directory.Exists(Path.GetTempPath().ToUpper()) && Directory.Exists(Path.GetTempPath().ToLower()) ?
-            StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        internal static readonly StringComparison PathComparison = GetIsCaseSensitive() ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+
+        /// <summary>
+        /// Determines whether the file system is case sensitive.
+        /// Copied from https://source.dot.net/#System.IO.FileSystem/Common/System/IO/PathInternal.CaseSensitivity.cs,41
+        /// </summary>
+        private static bool GetIsCaseSensitive()
+        {
+            try
+            {
+                string pathWithUpperCase = Path.Combine(Path.GetTempPath(), "CASESENSITIVETEST" + Guid.NewGuid().ToString("N"));
+                using (new FileStream(pathWithUpperCase, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 0x1000, FileOptions.DeleteOnClose))
+                {
+                    string lowerCased = pathWithUpperCase.ToLowerInvariant();
+                    return !File.Exists(lowerCased);
+                }
+            }
+            catch (Exception exc)
+            {
+                // In case something goes terribly wrong, we don't want to fail just because
+                // of a casing test, so we assume case-insensitive-but-preserving.
+                Debug.Fail("Casing test failed: " + exc);
+                return false;
+            }
+        }
 
         /// <summary>
         /// Copied from https://github.com/dotnet/corefx/blob/056715ff70e14712419d82d51c8c50c54b9ea795/src/Common/src/System/IO/PathInternal.Windows.cs#L61
