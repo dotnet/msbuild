@@ -1785,48 +1785,61 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void RemoveWithItemReferenceOnFilePathMatchingMetadata()
         {
-            string content = ObjectModelHelpers.CleanupFileContents(
-                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetCurrentDirectory(Environment.CurrentDirectory);
+                string content = ObjectModelHelpers.CleanupFileContents(
+                    $@"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                     <Target Name='t'>
                         <ItemGroup>
                             <I1 Include='a1' M1='foo.txt\' M2='a'/>
                             <I1 Include='b1' M1='foo/bar.cs' M2='x'/>
                             <I1 Include='c1' M1='foo/bar.vb' M2='y'/>
                             <I1 Include='d1' M1='foo\foo\foo' M2='b'/>
+                            <I1 Include='e1' M1='a/b/../c/./d' M2='1'/>
+                            <I1 Include='f1' M1='{ Environment.CurrentDirectory }\b\c' M2='6'/>
 
                             <I2 Include='a2' M1='FOO.TXT' m2='c'/>
                             <I2 Include='b2' M1='foo/bar.txt' m2='x'/>
                             <I2 Include='c2' M1='/foo/BAR.vb\\/' m2='Y'/>
                             <I2 Include='d2' M1='foo/foo/foo/' m2='d'/>
+                            <I2 Include='e2' M1='foo/foo/foo/' m2='c'/>
+                            <I2 Include='f2' M1='b\c' m2='e'/>
+                            <I2 Include='g2' M1='b\d\c' m2='f'/>
 
                             <I2 Remove='@(I1)' MatchOnMetadata='m1' MatchOnMetadataOptions='PathLike' />
                         </ItemGroup>
                     </Target></Project>");
-            IntrinsicTask task = CreateIntrinsicTask(content);
-            Lookup lookup = LookupHelpers.CreateEmptyLookup();
-            ExecuteTask(task, lookup);
+                IntrinsicTask task = CreateIntrinsicTask(content);
+                Lookup lookup = LookupHelpers.CreateEmptyLookup();
+                ExecuteTask(task, lookup);
 
-            var items = lookup.GetItems("I2");
+                var items = lookup.GetItems("I2");
 
-            if (FileSystemIsCaseSensitive())
-            {
-                items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "a2", "b2", "c2" });
+                if (FileSystemIsCaseSensitive())
+                {
+                    items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "a2", "b2", "c2", "g2" });
 
-                items.ElementAt(0).GetMetadataValue("M1").ShouldBe(@"FOO.TXT");
-                items.ElementAt(0).GetMetadataValue("M2").ShouldBe("c");
-                items.ElementAt(1).GetMetadataValue("M1").ShouldBe("foo/bar.txt");
-                items.ElementAt(1).GetMetadataValue("M2").ShouldBe("x");
-                items.ElementAt(2).GetMetadataValue("M1").ShouldBe(@"/foo/BAR.vb\\/");
-                items.ElementAt(2).GetMetadataValue("M2").ShouldBe("Y");
-            }
-            else
-            {
-                items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "b2", "c2" });
+                    items.ElementAt(0).GetMetadataValue("M1").ShouldBe(@"FOO.TXT");
+                    items.ElementAt(0).GetMetadataValue("M2").ShouldBe("c");
+                    items.ElementAt(1).GetMetadataValue("M1").ShouldBe("foo/bar.txt");
+                    items.ElementAt(1).GetMetadataValue("M2").ShouldBe("x");
+                    items.ElementAt(2).GetMetadataValue("M1").ShouldBe(@"/foo/BAR.vb\\/");
+                    items.ElementAt(2).GetMetadataValue("M2").ShouldBe("Y");
+                    items.ElementAt(3).GetMetadataValue("M1").ShouldBe(@"b\d\c");
+                    items.ElementAt(3).GetMetadataValue("M2").ShouldBe("f");
+                }
+                else
+                {
+                    items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "b2", "c2", "g2" });
 
-                items.ElementAt(0).GetMetadataValue("M1").ShouldBe("foo/bar.txt");
-                items.ElementAt(0).GetMetadataValue("M2").ShouldBe("x");
-                items.ElementAt(1).GetMetadataValue("M1").ShouldBe(@"/foo/BAR.vb\\/");
-                items.ElementAt(1).GetMetadataValue("M2").ShouldBe("Y");
+                    items.ElementAt(0).GetMetadataValue("M1").ShouldBe("foo/bar.txt");
+                    items.ElementAt(0).GetMetadataValue("M2").ShouldBe("x");
+                    items.ElementAt(1).GetMetadataValue("M1").ShouldBe(@"/foo/BAR.vb\\/");
+                    items.ElementAt(1).GetMetadataValue("M2").ShouldBe("Y");
+                    items.ElementAt(2).GetMetadataValue("M1").ShouldBe(@"b\d\c");
+                    items.ElementAt(2).GetMetadataValue("M2").ShouldBe("f");
+                }
             }
         }
 

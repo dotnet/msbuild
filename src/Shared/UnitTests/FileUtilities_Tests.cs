@@ -6,8 +6,10 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using Shouldly;
@@ -243,7 +245,10 @@ namespace Microsoft.Build.UnitTests
         {
             var result = FileUtilities.HasExtension(fileName, allowedExtensions);
 
-            Assert.True(result);
+            if (FileSystemIsCaseSensitive() || allowedExtensions.All(extension => fileName.Contains(extension)))
+            {
+                Assert.True(result);
+            }
         }
 
         [Theory]
@@ -283,12 +288,24 @@ namespace Microsoft.Build.UnitTests
 
                 var result = FileUtilities.HasExtension("foo.ini", new string[] { ".INI" });
 
-                Assert.True(result);
+                if (FileSystemIsCaseSensitive())
+                {
+                    Assert.False(result);
+                }
+                else
+                {
+                    Assert.True(result);
+                }
             }
             finally
             {
                 Thread.CurrentThread.CurrentCulture = currentCulture;
             }
+        }
+
+        private bool FileSystemIsCaseSensitive()
+        {
+            return !(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
         }
 
         /// <summary>

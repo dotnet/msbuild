@@ -29,6 +29,7 @@ using TargetDotNetFrameworkVersion = Microsoft.Build.Utilities.TargetDotNetFrame
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
@@ -3354,7 +3355,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             AssertProvenanceResult(expected, project, longString + "a");
         }
 
-        // todo: on xplat, split this to windows and non-windows test
         [Fact]
         public void GetItemProvenancePathMatchingShouldBeCaseInsensitive()
         {
@@ -3371,7 +3371,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Tuple.Create("A", Operation.Include, Provenance.StringLiteral, 1)
             };
 
-            AssertProvenanceResult(expected, project, "A");
+            AssertProvenanceResult(expected, project, FileSystemIsCaseSensitive() ? "a" : "A");
         }
 
 
@@ -4361,6 +4361,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.Equal("v2X", items[1].EvaluatedInclude);
             Assert.Equal("$(p)X;i3", items[1].UnevaluatedInclude);
             Assert.Equal("i3", items[2].EvaluatedInclude);
+        }
+
+        private bool FileSystemIsCaseSensitive()
+        {
+            return !(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
         }
     }
 }

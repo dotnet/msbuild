@@ -2203,15 +2203,20 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void RemoveWithItemReferenceOnFilePathMatchingMetadata()
         {
             string content = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(
-                @"<I1 Include='a1' M1='foo.txt\' M2='a'/>
+                $@"<I1 Include='a1' M1='foo.txt\' M2='a'/>
                 <I1 Include='b1' M1='foo/bar.cs' M2='x'/>
                 <I1 Include='c1' M1='foo/bar.vb' M2='y'/>
                 <I1 Include='d1' M1='foo\foo\foo' M2='b'/>
+                <I1 Include='e1' M1='a/b/../c/./d' M2='1'/>
+                <I1 Include='f1' M1='{ ObjectModelHelpers.TempProjectDir }\b\c' M2='6'/>
 
                 <I2 Include='a2' M1='FOO.TXT' m2='c'/>
                 <I2 Include='b2' M1='foo/bar.txt' m2='x'/>
                 <I2 Include='c2' M1='/foo/BAR.vb\\/' m2='Y'/>
                 <I2 Include='d2' M1='foo/foo/foo/' m2='d'/>
+                <I2 Include='e2' M1='foo/foo/foo/' m2='c'/>
+                <I2 Include='f2' M1='b\c' m2='e'/>
+                <I2 Include='g2' M1='b\d\c' m2='f'/>
 
                 <I2 Remove='@(I1)' MatchOnMetadata='m1' MatchOnMetadataOptions='PathLike' />");
 
@@ -2220,7 +2225,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             if (FileSystemIsCaseSensitive())
             {
-                items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "a2", "b2", "c2" });
+                items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "a2", "b2", "c2", "g2" });
 
                 items.ElementAt(0).GetMetadataValue("M1").ShouldBe(@"FOO.TXT");
                 items.ElementAt(0).GetMetadataValue("M2").ShouldBe("c");
@@ -2228,15 +2233,19 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 items.ElementAt(1).GetMetadataValue("M2").ShouldBe("x");
                 items.ElementAt(2).GetMetadataValue("M1").ShouldBe(@"/foo/BAR.vb\\/");
                 items.ElementAt(2).GetMetadataValue("M2").ShouldBe("Y");
+                items.ElementAt(3).GetMetadataValue("M1").ShouldBe(@"b\d\c");
+                items.ElementAt(3).GetMetadataValue("M2").ShouldBe("f");
             }
             else
             {
-                items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "b2", "c2" });
+                items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "b2", "c2", "g2" });
 
                 items.ElementAt(0).GetMetadataValue("M1").ShouldBe("foo/bar.txt");
                 items.ElementAt(0).GetMetadataValue("M2").ShouldBe("x");
                 items.ElementAt(1).GetMetadataValue("M1").ShouldBe(@"/foo/BAR.vb\\/");
                 items.ElementAt(1).GetMetadataValue("M2").ShouldBe("Y");
+                items.ElementAt(2).GetMetadataValue("M1").ShouldBe(@"b\d\c");
+                items.ElementAt(2).GetMetadataValue("M2").ShouldBe("f");
             }
         }
 
@@ -3114,15 +3123,28 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content);
 
-            Assert.Single(items);
-
-            var expectedUpdated = new Dictionary<string, string>
+            if (FileSystemIsCaseSensitive())
             {
-                {"m1", "m1_updated"},
-                {"m2", "m2_updated"},
-            };
+                var expectedUpdated = new Dictionary<string, string>
+                {
+                    {"m1", "m1_contents"},
+                    {"m2", "m2_contents"},
+                };
 
-            ObjectModelHelpers.AssertItemHasMetadata(expectedUpdated, items[0]);
+                ObjectModelHelpers.AssertItemHasMetadata(expectedUpdated, items[0]);
+            }
+            else
+            {
+                Assert.Single(items);
+
+                var expectedUpdated = new Dictionary<string, string>
+                {
+                    {"m1", "m1_updated"},
+                    {"m2", "m2_updated"},
+                };
+
+                ObjectModelHelpers.AssertItemHasMetadata(expectedUpdated, items[0]);
+            }
         }
 
         public static IEnumerable<Object[]> UpdateAndRemoveShouldWorkWithEscapedCharactersTestData
