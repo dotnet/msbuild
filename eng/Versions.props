@@ -15,7 +15,7 @@
     <MicrosoftBuildFrameworkVersion>15.4.8</MicrosoftBuildFrameworkVersion>
     <MicrosoftBuildUtilitiesCoreVersion>15.4.8</MicrosoftBuildUtilitiesCoreVersion>
     <MicrosoftExtensionsDependencyModelVersion>2.1.0-preview2-26306-03</MicrosoftExtensionsDependencyModelVersion>
-    <MicrosoftNETHostModelVersion>3.1.0</MicrosoftNETHostModelVersion>
+    <MicrosoftNETHostModelVersion>3.1.1</MicrosoftNETHostModelVersion>
     <NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-26011-01</NETStandardLibraryNETFrameworkVersion>
     <NewtonsoftJsonVersion>9.0.1</NewtonsoftJsonVersion>
     <NuGetBuildTasksPackageVersion>5.5.0-preview.2.6355</NuGetBuildTasksPackageVersion>
