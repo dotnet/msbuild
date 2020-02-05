@@ -53,13 +53,13 @@ namespace Microsoft.Build.Shared
             cacheDirectory = null;
         }
 
-        internal static readonly StringComparison PathComparison = GetIsCaseSensitive() ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+        internal static readonly StringComparison PathComparison = GetIsFileSystemCaseSensitive() ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
         /// <summary>
         /// Determines whether the file system is case sensitive.
         /// Copied from https://source.dot.net/#System.IO.FileSystem/Common/System/IO/PathInternal.CaseSensitivity.cs,41
         /// </summary>
-        private static bool GetIsCaseSensitive()
+        public static bool GetIsFileSystemCaseSensitive()
         {
             try
             {

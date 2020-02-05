@@ -1816,7 +1816,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 var items = lookup.GetItems("I2");
 
-                if (FileSystemIsCaseSensitive())
+                if (FileUtilities.GetIsFileSystemCaseSensitive())
                 {
                     items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "a2", "b2", "c2", "g2" });
 
@@ -1841,11 +1841,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     items.ElementAt(2).GetMetadataValue("M2").ShouldBe("f");
                 }
             }
-        }
-
-        private bool FileSystemIsCaseSensitive()
-        {
-            return !(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
         }
 
         [Fact]

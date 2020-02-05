@@ -2223,7 +2223,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             var project = ObjectModelHelpers.CreateInMemoryProject(content);
             var items = project.ItemsIgnoringCondition.Where(i => i.ItemType.Equals("I2"));
 
-            if (FileSystemIsCaseSensitive())
+            if (FileUtilities.GetIsFileSystemCaseSensitive())
             {
                 items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "a2", "b2", "c2", "g2" });
 
@@ -2247,11 +2247,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 items.ElementAt(2).GetMetadataValue("M1").ShouldBe(@"b\d\c");
                 items.ElementAt(2).GetMetadataValue("M2").ShouldBe("f");
             }
-        }
-
-        private bool FileSystemIsCaseSensitive()
-        {
-            return !(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
         }
 
         [Fact]
@@ -3123,7 +3118,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content);
 
-            if (FileSystemIsCaseSensitive())
+            if (FileUtilities.GetIsFileSystemCaseSensitive())
             {
                 var expectedUpdated = new Dictionary<string, string>
                 {

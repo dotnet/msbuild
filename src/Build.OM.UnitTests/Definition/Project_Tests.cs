@@ -29,7 +29,6 @@ using TargetDotNetFrameworkVersion = Microsoft.Build.Utilities.TargetDotNetFrame
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using System.Runtime.InteropServices;
 
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
@@ -3371,7 +3370,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Tuple.Create("A", Operation.Include, Provenance.StringLiteral, 1)
             };
 
-            AssertProvenanceResult(expected, project, FileSystemIsCaseSensitive() ? "a" : "A");
+            AssertProvenanceResult(expected, project, FileUtilities.GetIsFileSystemCaseSensitive() ? "a" : "A");
         }
 
 
@@ -4361,11 +4360,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.Equal("v2X", items[1].EvaluatedInclude);
             Assert.Equal("$(p)X;i3", items[1].UnevaluatedInclude);
             Assert.Equal("i3", items[2].EvaluatedInclude);
-        }
-
-        private bool FileSystemIsCaseSensitive()
-        {
-            return !(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
         }
     }
 }
