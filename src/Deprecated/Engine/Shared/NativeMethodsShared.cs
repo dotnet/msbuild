@@ -101,7 +101,7 @@ namespace Microsoft.Build.BuildEngine.Shared
 
         /// <summary>
         /// Gets the current OEM code page which is used by console apps 
-        /// (as opposed to the Windows/ANSI code page used by the normal people)
+        /// (as opposed to the Windows/ANSI code page)
         /// Basically for each ANSI code page (set in Regional settings) there's a corresponding OEM code page 
         /// that needs to be used for instance when writing to batch files
         /// </summary>

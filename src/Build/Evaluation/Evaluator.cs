@@ -172,6 +172,11 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private ProjectRootElement _lastModifiedProject;
 
+        /// <summary>
+        /// Keeps track of the FullPaths of ProjectRootElements that may have been modified as a stream.
+        /// </summary>
+        private List<string> _streamImports;
+
         private readonly bool _interactive;
 
         /// <summary>
@@ -231,6 +236,9 @@ namespace Microsoft.Build.Evaluation
             {
                 _lastModifiedProject = projectRootElement;
             }
+            _streamImports = new List<string>();
+            // When the imports are concatenated with a semicolon, this automatically prepends a semicolon if and only if another element is later added.
+            _streamImports.Add(string.Empty);
         }
 
         /// <summary>
@@ -1819,7 +1827,6 @@ namespace Microsoft.Build.Evaluation
             bool atleastOneImportIgnored = false;
             bool atleastOneImportEmpty = false;
             imports = new List<ProjectRootElement>();
-
             foreach (string importExpressionEscapedItem in ExpressionShredder.SplitSemiColonSeparatedList(importExpressionEscaped))
             {
                 string[] importFilesEscaped = null;
@@ -1988,6 +1995,12 @@ namespace Microsoft.Build.Evaluation
                                 _lastModifiedProject = importedProjectElement;
                             }
 
+                            if (importedProjectElement.StreamTimeUtc?.ToLocalTime() > _lastModifiedProject.LastWriteTimeWhenRead)
+                            {
+                                _streamImports.Add(importedProjectElement.FullPath);
+                                importedProjectElement.StreamTimeUtc = null;
+                            }
+
                             if (_logProjectImportedEvents)
                             {
                                 ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
@@ -2113,7 +2126,7 @@ namespace Microsoft.Build.Evaluation
                     // can store the unescaped value. The only purpose of escaping is to 
                     // avoid undesired splitting or expansion.
                     _importsSeen.Add(importFileUnescaped, importElement);
-                } 
+                }
             }
 
             if (imports.Count > 0)
@@ -2367,12 +2380,12 @@ namespace Microsoft.Build.Evaluation
             if (_lastModifiedProject != null)
             {
                 P oldValue = _data.GetProperty(Constants.MSBuildAllProjectsPropertyName);
-
+                string streamImports = string.Join(";", _streamImports.ToArray());
                 P newValue = _data.SetProperty(
                     Constants.MSBuildAllProjectsPropertyName,
                     oldValue == null
-                        ? _lastModifiedProject.FullPath
-                        : $"{_lastModifiedProject.FullPath};{oldValue.EvaluatedValue}",
+                        ? $"{_lastModifiedProject.FullPath}{streamImports}"
+                        : $"{_lastModifiedProject.FullPath}{streamImports};{oldValue.EvaluatedValue}",
                     isGlobalProperty: false,
                     mayBeReserved: false);
 

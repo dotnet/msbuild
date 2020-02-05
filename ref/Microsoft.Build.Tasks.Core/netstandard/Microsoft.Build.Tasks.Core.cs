@@ -653,6 +653,16 @@ namespace Microsoft.Build.Tasks
         public bool SuppressAutoClosePasswordPrompt { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+    public partial class ResolveNonMSBuildProjectOutput : Microsoft.Build.Tasks.ResolveProjectBase
+    {
+        public ResolveNonMSBuildProjectOutput() { }
+        public string PreresolvedProjectOutputs { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] ResolvedOutputPaths { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] UnresolvedProjectReferences { get { throw null; } set { } }
+        public override bool Execute() { throw null; }
+    }
     public abstract partial class ResolveProjectBase : Microsoft.Build.Tasks.TaskExtension
     {
         protected ResolveProjectBase() { }

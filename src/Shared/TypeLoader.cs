@@ -163,6 +163,8 @@ namespace Microsoft.Build.Shared
 #if !FEATURE_ASSEMBLYLOADCONTEXT
                     loadedAssembly = Assembly.UnsafeLoadFrom(assemblyLoadInfo.AssemblyFile);
 #else
+                    var baseDir = Path.GetDirectoryName(assemblyLoadInfo.AssemblyFile);
+                    s_coreClrAssemblyLoader.AddDependencyLocation(baseDir);
                     loadedAssembly = s_coreClrAssemblyLoader.LoadFromPath(assemblyLoadInfo.AssemblyFile);
 #endif
                 }
