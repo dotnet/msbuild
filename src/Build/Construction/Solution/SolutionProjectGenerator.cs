@@ -1971,10 +1971,7 @@ namespace Microsoft.Build.Construction
 
             string correctedTargetName = targetName ?? "Build";
 
-            if (traversalProject.Targets.Select(target => target.Key).Contains(correctedTargetName))
-            {
-                traversalProject.RemoveTarget(correctedTargetName);
-            }
+            traversalProject.RemoveTarget(correctedTargetName);
             ProjectTargetInstance target = traversalProject.AddTarget(correctedTargetName, string.Empty, string.Empty, outputItemAsItem, null, string.Empty, string.Empty, string.Empty, string.Empty, false /* legacy target returns behaviour */);
             AddReferencesBuildTask(target, targetName, outputItem);
         }
