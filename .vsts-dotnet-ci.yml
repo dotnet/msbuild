@@ -8,7 +8,7 @@ jobs:
   displayName: "Windows Full"
   pool:
     name: NetCorePublic-Pool
-    queue: BuildPool.Windows.10.Amd64.Open
+    queue: buildpool.windows.10.amd64.vs2019.bt.open
   steps:
   - task: BatchScript@1
     displayName: cibuild_bootstrapped_msbuild.cmd
@@ -53,7 +53,7 @@ jobs:
   displayName: "Windows Core"
   pool:
     name: NetCorePublic-Pool
-    queue: BuildPool.Windows.10.Amd64.Open
+    queue: buildpool.windows.10.amd64.vs2019.bt.open
   steps:
   - task: BatchScript@1
     displayName: cibuild_bootstrapped_msbuild.cmd
@@ -99,7 +99,7 @@ jobs:
   displayName: "Windows Full Release (no bootstrap)"
   pool:
     name: NetCorePublic-Pool
-    queue: BuildPool.Windows.10.Amd64.Open
+    queue: buildpool.windows.10.amd64.vs2019.bt.open
   steps:
   - task: BatchScript@1
     displayName: cibuild.cmd
