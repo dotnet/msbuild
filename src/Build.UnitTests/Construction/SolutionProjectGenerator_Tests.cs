@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
                 TransientTestFile sln = testEnvironment.CreateFile(folder, "MySln.sln", @"Microsoft Visual Studio Solution File, Format Version 16.00");
                 TransientTestFile targetsFile = testEnvironment.CreateFile(folder, name,
-                    @"<Project ToolsVersion=""15.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                    @"<Project>
                         <Target Name=""Build"" AfterTargets=""NonsenseTarget"">
                         </Target>
                       </Project>");
