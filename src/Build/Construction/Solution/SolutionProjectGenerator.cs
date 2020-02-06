@@ -1969,11 +1969,14 @@ namespace Microsoft.Build.Construction
                 outputItemAsItem = "@(" + outputItem + ")";
             }
 
-            if (!traversalProject.Targets.Select(target => target.Key).Contains(targetName ?? "Build"))
+            string correctedTargetName = targetName ?? "Build";
+
+            if (traversalProject.Targets.Select(target => target.Key).Contains(correctedTargetName))
             {
-                ProjectTargetInstance target = traversalProject.AddTarget(targetName ?? "Build", string.Empty, string.Empty, outputItemAsItem, null, string.Empty, string.Empty, string.Empty, string.Empty, false /* legacy target returns behaviour */);
-                AddReferencesBuildTask(target, targetName, outputItem);
+                traversalProject.RemoveTarget(correctedTargetName);
             }
+            ProjectTargetInstance target = traversalProject.AddTarget(correctedTargetName, string.Empty, string.Empty, outputItemAsItem, null, string.Empty, string.Empty, string.Empty, string.Empty, false /* legacy target returns behaviour */);
+            AddReferencesBuildTask(target, targetName, outputItem);
         }
 
         /// <summary>

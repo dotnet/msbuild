@@ -80,10 +80,7 @@ namespace Microsoft.Build.UnitTests.Construction
                       </Project>");
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(SolutionFile.Parse(sln.Path), null, null, _buildEventContext, CreateMockLoggingService());
                 instances.ShouldHaveSingleItem();
-                if (!name.Equals("name.that.does.Not.Affect.The.Build.targets"))
-                {
-                    instances[0].Targets["Build"].AfterTargets.ShouldBe("NonsenseTarget");
-                }
+                instances[0].Targets["Build"].AfterTargets.ShouldBe(string.Empty);
                 MockLogger logger = new MockLogger(output);
                 instances[0].Build(targets: null, new List<ILogger> { logger }).ShouldBeTrue();
             }
