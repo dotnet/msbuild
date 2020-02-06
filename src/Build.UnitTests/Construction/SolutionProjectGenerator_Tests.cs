@@ -61,7 +61,7 @@ namespace Microsoft.Build.UnitTests.Construction
         }
 
         /// <summary>
-        /// Test that if a before.<sln>.targets or after.<sln>.targets file has one of the default targets (Build, Clean, etc.) that it includes only the user-defined target.
+        /// Test that if a before.{sln}>.targets or after.{sln}.targets file has one of the default targets (Build, Clean, etc.) that it includes only the user-defined target.
         /// </summary>
         [Theory]
         [InlineData("before.MySln.sln.targets")]
