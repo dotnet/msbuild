@@ -82,11 +82,12 @@ namespace Microsoft.NET.Publish.Tests
 
             if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Darwin)
             {
-                // Since no RID was specified the output group should only contain framework dependent output
                 testOutputDir.Should().HaveFile($"{testProject.Name}{Constants.ExeSuffix}");
             }
 
             testOutputDir.Should().HaveFile($"{testProject.Name}.deps.json");
+
+            // Since no RID was specified the output group should not contain framework assemblies
             testOutputDir.Should().NotHaveFiles(FrameworkAssemblies);
 
             var testKeyOutputDir = new DirectoryInfo(Path.Combine(testAsset.Path, testProject.Name, "TestOutput_Key"));
