@@ -80,13 +80,14 @@ namespace Microsoft.NET.Publish.Tests
             var testOutputDir = new DirectoryInfo(Path.Combine(testAsset.Path, testProject.Name, "TestOutput"));
             Log.WriteLine("Contents of PublishItemsOutputGroup dumped to '{0}'.", testOutputDir.FullName);
 
-            // Since no RID was specified the output group should only contain framework dependent output
             if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Darwin)
             {
                 testOutputDir.Should().HaveFile($"{testProject.Name}{Constants.ExeSuffix}");
             }
 
             testOutputDir.Should().HaveFile($"{testProject.Name}.deps.json");
+
+            // Since no RID was specified the output group should not contain framework assemblies
             testOutputDir.Should().NotHaveFiles(FrameworkAssemblies);
 
             var testKeyOutputDir = new DirectoryInfo(Path.Combine(testAsset.Path, testProject.Name, "TestOutput_Key"));
@@ -97,6 +98,49 @@ namespace Microsoft.NET.Publish.Tests
                 // Verify the only key item is the exe
                 testKeyOutputDir.Should()
                     .OnlyHaveFiles(new List<string>() {$"{testProject.Name}{Constants.ExeSuffix}"});
+            }
+        }
+
+        [CoreMSBuildAndWindowsOnlyFact]
+        public void GroupPopulatedCorrectlyWithSingleFile()
+        {
+            var testProject = this.SetupProject();
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var restoreCommand = new RestoreCommand(Log, testAsset.Path, testProject.Name);
+            restoreCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var buildCommand = new BuildCommand(Log, testAsset.Path, testProject.Name);
+            buildCommand
+                .Execute("/p:RuntimeIdentifier=win-x86;DesignTimeBuild=true;PublishSingleFile=true", "/t:PublishItemsOutputGroup")
+                .Should()
+                .Pass();
+
+            var testOutputDir = new DirectoryInfo(Path.Combine(testAsset.Path, testProject.Name, "TestOutput"));
+            Log.WriteLine("Contents of PublishItemsOutputGroup dumped to '{0}'.", testOutputDir.FullName);
+
+            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Darwin)
+            {
+                testOutputDir.Should().HaveFile($"{testProject.Name}{Constants.ExeSuffix}");
+            }
+
+            // In the single file case there shouldn't be a deps.json file 
+            testOutputDir.Should().NotHaveFile($"{testProject.Name}.deps.json");
+
+            // The framework assemblies should also get bundled with the main exe
+            testOutputDir.Should().NotHaveFiles(FrameworkAssemblies);
+
+            var testKeyOutputDir = new DirectoryInfo(Path.Combine(testAsset.Path, testProject.Name, "TestOutput_Key"));
+            Log.WriteLine("PublishItemsOutputGroup key items dumped to '{0}'.", testKeyOutputDir.FullName);
+
+            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Darwin)
+            {
+                // Verify the only key item is the exe
+                testKeyOutputDir.Should()
+                    .OnlyHaveFiles(new List<string>() { $"{testProject.Name}{Constants.ExeSuffix}" });
             }
         }
 
