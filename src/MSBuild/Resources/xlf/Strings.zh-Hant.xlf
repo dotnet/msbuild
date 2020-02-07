@@ -174,12 +174,8 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_37_DocsLink">
-        <source>For more detailed information access the link:
-                     https://docs.microsoft.com/visualstudio/msbuild/msbuild
-    </source>
-        <target state="new">For more detailed information access the link:
-                     https://docs.microsoft.com/visualstudio/msbuild/msbuild
-    </target>
+        <source>For more detailed information, see https://aka.ms/msbuild/docs</source>
+        <target state="new">For more detailed information, see https://aka.ms/msbuild/docs</target>
         <note />
       </trans-unit>
       <trans-unit id="HelpMessage_3_SwitchesHeader">

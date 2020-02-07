@@ -787,10 +787,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
-  <data name="HelpMessage_37_DocsLink" UESanitized="false" Visibility="Public">
-    <value>For more detailed information access the link:
-                     https://docs.microsoft.com/visualstudio/msbuild/msbuild
-    </value>
+  <data name="HelpMessage_37_DocsLink" Visibility="Public">
+    <value>For more detailed information, see https://aka.ms/msbuild/docs</value>
   </data>
   <data name="InvalidConfigurationFile" Visibility="Public">
     <value>MSBUILD : Configuration error MSB1043: The application could not start. {0}</value>
