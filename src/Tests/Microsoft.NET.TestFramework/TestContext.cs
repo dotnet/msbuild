@@ -131,7 +131,7 @@ namespace Microsoft.NET.TestFramework
             }
             else if (runAsTool)
             {
-                testContext.TestExecutionDirectory = Path.Combine(Path.GetTempPath(),"dotnetSdkTests", Path.GetRandomFileName());
+                testContext.TestExecutionDirectory = Path.Combine(Path.GetTempPath(), "dotnetSdkTests", Path.GetRandomFileName());
             }
             else
             {
@@ -148,7 +148,14 @@ namespace Microsoft.NET.TestFramework
                 artifactsDir = Path.Combine(repoRoot, "artifacts");
             }
 
-            testContext.TestGlobalPackagesFolder = Path.Combine(artifactsDir, ".nuget", "packages");
+            if (!string.IsNullOrEmpty(artifactsDir))
+            {
+                testContext.TestGlobalPackagesFolder = Path.Combine(artifactsDir, ".nuget", "packages");
+            }
+            else
+            {
+                testContext.TestGlobalPackagesFolder = Path.Combine(testContext.TestExecutionDirectory, ".nuget", "packages");
+            }
 
             if (repoRoot != null)
             {

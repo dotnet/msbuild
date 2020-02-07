@@ -25,10 +25,5 @@
     <TestRunnerAdditionalArguments>-parallel none</TestRunnerAdditionalArguments>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <SdkLayoutDirectory>$(ArtifactsBinDir)$(Configuration)\dotnetLayout</SdkLayoutDirectory>
-  </PropertyGroup>
-
-
   <Import Project="build/GenerateResxSource.targets" />
 </Project>
