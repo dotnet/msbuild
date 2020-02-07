@@ -94,4 +94,11 @@
              RemoveProperties="TargetFramework">
     </MSBuild>
   </Target>
+
+  <Target Name="CopyAssetToPublishFolder" BeforeTargets="Publish" AfterTargets="CreateNupkgWithShimFromSource;CreateNupkgFromSource;CreateNupkgWithShimFromSource">
+    <ItemGroup>
+       <TestAssetFiles Include="$(BaseOutputPath)\TestAsset\**\*.*"/>
+    </ItemGroup>
+    <Copy SourceFiles="@(TestAssetFiles)" DestinationFiles="@(TestAssetFiles->'$(PublishDir)\TestAsset\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
 </Project>
