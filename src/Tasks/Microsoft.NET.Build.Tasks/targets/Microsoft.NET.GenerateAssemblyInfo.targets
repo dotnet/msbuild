@@ -44,9 +44,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     where CoreCompile is invoked without other potential hooks such as Compile or CoreBuild,
     etc., so we hook directly on to CoreCompile. Furthermore, we  must run *after* 
     PrepareForBuild to ensure that the intermediate directory has been created.
+
+    Targets that generate Compile items are also expected to run before
+    BeforeCompile targets (common targets convention).
    -->
   <Target Name="GenerateAssemblyInfo"
-          BeforeTargets="CoreCompile"
+          BeforeTargets="BeforeCompile;CoreCompile"
           DependsOnTargets="PrepareForBuild;CoreGenerateAssemblyInfo"
           Condition="'$(GenerateAssemblyInfo)' == 'true'" />
 
