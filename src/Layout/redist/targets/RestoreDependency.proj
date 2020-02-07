@@ -1,0 +1,47 @@
+<Project ToolsVersion="15.0" DefaultTargets="EnsureDependencyRestored;CopySdkToOutput">
+<!--
+
+  Note that the CopySdkToOutput target explicitly does NOT have Inputs and Outputs declared.
+  This is because it is supposed to overlay updated SDK items on a folder that may already
+  have different versions from a different package.  If Inputs and Outputs are declared,
+  MSBuild will skip files where a newer version already exists in the target folder, which
+  is not what we want.
+
+ -->
+
+  <Target Name="CopySdkToOutput"
+          DependsOnTargets="PrepareBundledDependencyProps;
+                            EnsureDependencyRestored;
+                            GetSdkItemsToCopy"
+          Condition="'$(SdkLayoutDirectory)' != ''"
+>
+    <Copy SourceFiles="@(SdkContent)"
+          DestinationFiles="@(SdkContent->'$(SdkLayoutDirectory)/%(RecursiveDir)%(FileName)%(Extension)')" />
+
+    <Message Text="Copied Sdk $(DependencyPackageName) from $(DependencyNuPkgPath) to $(SdkLayoutDirectory)."
+             Importance="High" />
+  </Target>
+
+  <Target Name="GetSdkItemsToCopy">
+    <ItemGroup>
+      <SdkContent Include="$(DependencyNuPkgPath)/**/*"
+                  Exclude="$(DependencyNuPkgPath)/$(DependencyPackageName).nuspec;
+                           $(DependencyNuPkgPath)/$(DependencyPackageName).$(DependencyPackageVersion).nupkg;
+                           $(DependencyNuPkgPath)/$(DependencyPackageName).$(DependencyPackageVersion).nupkg.sha512" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="EnsureDependencyRestored"
+          Condition="!Exists('$(DependencyNuPkgPath)/$(DependencyPackageName.ToLower()).nuspec')">
+    <MSbuild
+      Projects="$(MSBuildThisFileDirectory)/sdks/sdks.csproj"
+      Properties="DependencyPackageName=$(DependencyPackageName);DependencyPackageVersion=$(DependencyPackageVersion)"
+      Targets="Restore" />
+  </Target>
+
+  <Target Name="PrepareBundledDependencyProps">
+    <PropertyGroup>
+      <DependencyNuPkgPath>$(NuGetPackageRoot)/$(DependencyPackageName.ToLower())/$(DependencyPackageVersion.ToLower())</DependencyNuPkgPath>
+    </PropertyGroup>
+  </Target>
+</Project>

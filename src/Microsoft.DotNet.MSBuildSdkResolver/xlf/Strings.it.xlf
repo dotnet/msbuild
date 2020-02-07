@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="it" original="../Strings.resx">
+    <body>
+      <trans-unit id="MSBuildSDKDirectoryNotFound">
+        <source>{0} not found. Check that a recent enough .NET Core SDK is installed and/or increase the version specified in global.json.</source>
+        <target state="translated">{0} non è stato trovato. Verificare che sia installata una versione abbastanza recente di .NET Core SDK e/o aumentare la versione specificata in global.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildSmallerThanMinimumVersion">
+        <source>Version {0} of the .NET Core SDK requires at least version {1} of MSBuild. The current available version of MSBuild is {2}. Change the .NET Core SDK specified in global.json to an older version that requires the MSBuild version currently available.</source>
+        <target state="translated">La versione {0} di .NET Core SDK richiede almeno la versione {1} di MSBuild. La versione disponibile corrente di MSBuild è {2}. Modificare la versione di .NET Core SDK specificata in global.json in una meno recente che richiede la versione di MSBuild attualmente disponibile.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETCoreSDKSmallerThanMinimumRequestedVersion">
+        <source>Version {0} of the .NET Core SDK is smaller than the minimum version {1} requested. Check that a recent enough .NET Core SDK is installed, increase the minimum version specified in the project, or increase the version specified in global.json.</source>
+        <target state="translated">La versione {0} di .NET Core SDK è minore di quella minima richiesta {1}. Verificare che sia installata una versione abbastanza recente di .NET Core SDK, aumentare la versione minima specificata nel progetto oppure aumentare la versione specificata in global.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETCoreSDKSmallerThanMinimumVersionRequiredByVisualStudio">
+        <source>Version {0} of the .NET Core SDK is smaller than the minimum version {1} required by Visual Studio. Check that a recent enough .NET Core SDK is installed or increase the version specified in global.json.</source>
+        <target state="translated">La versione {0} di .NET Core SDK è minore di quella minima {1} richiesta da Visual Studio. Verificare che sia installata una versione abbastanza recente di .NET Core SDK oppure aumentare la versione specificata in global.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToLocateNETCoreSdk">
+        <source>Unable to locate the .NET Core SDK. Check that it is installed and that the version specified in global.json (if any) matches the installed version.</source>
+        <target state="translated">Non è possibile trovare .NET Core SDK. Verificare che sia installato e che l'eventuale versione specificata global.json corrisponda alla versione installata.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

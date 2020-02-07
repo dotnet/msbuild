@@ -10,7 +10,7 @@
 ###############################################################################
 *.cmd       text
 *.config    text
-*.cs        text
+*.cs        text diff=csharp
 *.csproj    text
 *.groovy    text
 *.json      text
@@ -47,3 +47,7 @@
 #   treat as binary
 ###############################################################################
 *.snk       binary
+
+*.jpg  	binary
+*.png 	binary
+*.gif 	binary

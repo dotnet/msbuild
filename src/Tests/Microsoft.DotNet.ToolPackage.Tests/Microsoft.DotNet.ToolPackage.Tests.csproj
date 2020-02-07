@@ -1,0 +1,97 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
+    <CanRunTestAsTool>false</CanRunTestAsTool>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Cli\dotnet\dotnet.csproj" />
+    <ProjectReference Include="..\..\Cli\Microsoft.DotNet.Configurer\Microsoft.DotNet.Configurer.csproj" />
+    <ProjectReference Include="..\..\Cli\Microsoft.DotNet.InternalAbstractions\Microsoft.DotNet.InternalAbstractions.csproj" />
+    <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.ComponentMocks\Microsoft.DotNet.Tools.Tests.ComponentMocks.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="DotnetToolSettingsMissing.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DotnetToolSettingsMalformed.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DotnetToolSettingsGolden.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DotnetToolSettingsMissingVersion.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DotnetToolSettingsMajorHigherVersion.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+
+    <Compile Remove="SampleGlobalTool/**" />
+    <Content Remove="SampleGlobalTool/**" />
+    <EmbeddedResource Remove="SampleGlobalTool/**" />
+    <None Remove="SampleGlobalTool/**" />
+
+    <Compile Remove="SampleGlobalToolWithShim/**" />
+    <Content Remove="SampleGlobalToolWithShim/**" />
+    <EmbeddedResource Remove="SampleGlobalToolWithShim/**" />
+    <None Remove="SampleGlobalToolWithShim/**" />
+
+    <Compile Remove="SampleGlobalToolWithDifferentCasing/**" />
+    <Content Remove="SampleGlobalToolWithDifferentCasing/**" />
+    <EmbeddedResource Remove="SampleGlobalToolWithDifferentCasing/**" />
+    <None Remove="SampleGlobalToolWithDifferentCasing/**" />
+  </ItemGroup>
+
+  <Target Name="CreateNupkgFromSource" BeforeTargets="Build">
+    <PropertyGroup>
+      <testAssetSourceRoot>$(BaseOutputPath)/TestAsset/SampleGlobalTool</testAssetSourceRoot>
+    </PropertyGroup>
+    <Copy SourceFiles="SampleGlobalTool/DotnetToolSettings.xml" DestinationFolder="$(testAssetSourceRoot)" />
+    <MSBuild BuildInParallel="False" Projects="SampleGlobalTool/consoledemo.csproj" Targets="Restore" Properties="Configuration=Release;BaseOutputPath=$(testAssetSourceRoot)/bin/;BaseIntermediateOutputPath=$(testAssetSourceRoot)/obj/;ImportDirectoryBuildProps=false;ImportDirectoryBuildTargets=false;ForceRestoreToEvaluateSeparately=1"
+             RemoveProperties="TargetFramework">
+    </MSBuild>
+    <MSBuild BuildInParallel="False" Projects="SampleGlobalTool/consoledemo.csproj" Targets="Build;Publish" Properties="Configuration=Release;BaseOutputPath=$(testAssetSourceRoot)/bin/;BaseIntermediateOutputPath=$(testAssetSourceRoot)/obj/;ImportDirectoryBuildProps=false;ImportDirectoryBuildTargets=false"
+             RemoveProperties="TargetFramework">
+    </MSBuild>
+    <MSBuild BuildInParallel="False" Projects="SampleGlobalTool/consoledemo.csproj" Targets="pack" Properties="Configuration=Release;NuspecFile=includepublish.nuspec;NuspecBasePath=$(testAssetSourceRoot);PackageOutputPath=$(OutputPath)TestAssetLocalNugetFeed;BaseIntermediateOutputPath=$(testAssetSourceRoot)/obj/;ImportDirectoryBuildProps=false;ImportDirectoryBuildTargets=false"
+             RemoveProperties="TargetFramework">
+    </MSBuild>
+  </Target>
+
+  <Target Name="CreateNupkgWithDifferentCasingFromSource" BeforeTargets="Build">
+    <PropertyGroup>
+      <testAssetSourceRoot>$(BaseOutputPath)/TestAsset/SampleGlobalToolWithDifferentCasing</testAssetSourceRoot>
+    </PropertyGroup>
+    <Copy SourceFiles="SampleGlobalToolWithDifferentCasing/DotnetToolSettings.xml" DestinationFolder="$(testAssetSourceRoot)" />
+    <MSBuild BuildInParallel="False" Projects="SampleGlobalToolWithDifferentCasing/ConsoleDemoWithCasing.csproj" Targets="Restore" Properties="Configuration=Release;BaseOutputPath=$(testAssetSourceRoot)/bin/;BaseIntermediateOutputPath=$(testAssetSourceRoot)/obj/;ImportDirectoryBuildProps=false;ImportDirectoryBuildTargets=false;ForceRestoreToEvaluateSeparately=1"
+             RemoveProperties="TargetFramework">
+    </MSBuild>
+    <MSBuild BuildInParallel="False" Projects="SampleGlobalToolWithDifferentCasing/ConsoleDemoWithCasing.csproj" Targets="Build;Publish" Properties="Configuration=Release;BaseOutputPath=$(testAssetSourceRoot)/bin/;BaseIntermediateOutputPath=$(testAssetSourceRoot)/obj/;ImportDirectoryBuildProps=false;ImportDirectoryBuildTargets=false"
+             RemoveProperties="TargetFramework">
+    </MSBuild>
+    <MSBuild BuildInParallel="False" Projects="SampleGlobalToolWithDifferentCasing/ConsoleDemoWithCasing.csproj" Targets="pack" Properties="Configuration=Release;NuspecFile=includepublish.nuspec;NuspecBasePath=$(testAssetSourceRoot);PackageOutputPath=$(OutputPath)TestAssetLocalNugetFeed;BaseIntermediateOutputPath=$(testAssetSourceRoot)/obj/;ImportDirectoryBuildProps=false;ImportDirectoryBuildTargets=false"
+             RemoveProperties="TargetFramework">
+    </MSBuild>
+  </Target>
+
+  <Target Name="CreateNupkgWithShimFromSource" BeforeTargets="Build">
+    <PropertyGroup>
+      <testAssetSourceRoot>$(BaseOutputPath)/TestAsset/SampleGlobalToolWithShim</testAssetSourceRoot>
+    </PropertyGroup>
+    <Copy SourceFiles="SampleGlobalToolWithShim/DotnetToolSettings.xml" DestinationFolder="$(testAssetSourceRoot)" />
+    <Copy SourceFiles="SampleGlobalToolWithShim/dummyshim" DestinationFolder="$(testAssetSourceRoot)" />
+    <Copy SourceFiles="SampleGlobalToolWithShim/dummyshim.exe" DestinationFolder="$(testAssetSourceRoot)" />
+    <MSBuild BuildInParallel="False" Projects="SampleGlobalToolWithShim/consoledemo.csproj" Targets="Restore" Properties="Configuration=Release;BaseOutputPath=$(testAssetSourceRoot)/bin/;BaseIntermediateOutputPath=$(testAssetSourceRoot)/obj/;ImportDirectoryBuildProps=false;ImportDirectoryBuildTargets=false;ForceRestoreToEvaluateSeparately=1"
+             RemoveProperties="TargetFramework">
+    </MSBuild>
+    <MSBuild BuildInParallel="False" Projects="SampleGlobalToolWithShim/consoledemo.csproj" Targets="Build;Publish" Properties="Configuration=Release;BaseOutputPath=$(testAssetSourceRoot)/bin/;BaseIntermediateOutputPath=$(testAssetSourceRoot)/obj/;ImportDirectoryBuildProps=false;ImportDirectoryBuildTargets=false"
+             RemoveProperties="TargetFramework">
+    </MSBuild>
+    <MSBuild BuildInParallel="False" Projects="SampleGlobalToolWithShim/consoledemo.csproj" Targets="pack" Properties="Configuration=Release;NuspecFile=includepublish.nuspec;NuspecBasePath=$(testAssetSourceRoot);PackageOutputPath=$(OutputPath)TestAssetLocalNugetFeed;BaseIntermediateOutputPath=$(testAssetSourceRoot)/obj/;ImportDirectoryBuildProps=false;ImportDirectoryBuildTargets=false"
+             RemoveProperties="TargetFramework">
+    </MSBuild>
+  </Target>
+</Project>

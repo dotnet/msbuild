@@ -8,6 +8,15 @@
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <DebugSymbols>true</DebugSymbols>
     <IsShippingPackage>false</IsShippingPackage>
+    <SdkTargetFramework>netcoreapp3.0</SdkTargetFramework>
+    <ToolsetTargetFramework>$(SdkTargetFramework)</ToolsetTargetFramework>
+
+    <!-- Disable implict package target fallback, and disable warning for when we explicitly add it (currently needed for
+         Microsoft.ApplicationInsights) -->
+    <NoWarn>$(NoWarn);NU1701</NoWarn>
+    <DisableImplicitPackageTargetFallback>true</DisableImplicitPackageTargetFallback>
+
+    <!-- <ArtifactsShippingSymbolsDir>$(ArtifactsDir)symbols\$(Configuration)\Shipping</ArtifactsShippingSymbolsDir> -->
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
@@ -16,8 +25,5 @@
     <TestRunnerAdditionalArguments>-parallel none</TestRunnerAdditionalArguments>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <SdkLayoutDirectory>$(ArtifactsBinDir)$(Configuration)\dotnetLayout</SdkLayoutDirectory>
-  </PropertyGroup>
-
+  <Import Project="build/GenerateResxSource.targets" />
 </Project>

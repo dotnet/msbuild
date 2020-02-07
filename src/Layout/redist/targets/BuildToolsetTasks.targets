@@ -1,0 +1,29 @@
+<Project>
+  <PropertyGroup>
+    <!-- Tasks are multitargeted to support building in VS and with desktop MSBuild -->
+    <TaskTargetFramework>$(SdkTargetFramework)</TaskTargetFramework>
+    <TaskTargetFramework Condition="'$(MSBuildRuntimeType)' != 'Core'">net472</TaskTargetFramework>
+
+    <ToolsetTaskDll>$(ArtifactsDir)tasks\bin\toolset-tasks\$(Configuration)\$(TaskTargetFramework)\toolset-tasks.dll</ToolsetTaskDll>
+    <ToolsetTaskProject>$(RepoRoot)src\Layout\toolset-tasks\toolset-tasks.csproj</ToolsetTaskProject>
+  </PropertyGroup>
+  <Target Name="BuildCoreSdkTasks" BeforeTargets="_CheckForInvalidConfigurationAndPlatform">
+    <!-- Use a different ArtifactsDir for this invocation so that the tasks project can be part of the solution
+         (for easy editing), but we don't hit problems with the tasks DLL being locked when we try to build the solution. -->
+
+    <MSBuild Projects="$(ToolsetTaskProject)"
+             Properties="ArtifactsDir=$(ArtifactsDir)tasks\;Phase=Restore"
+             Targets="Restore"/>
+
+    <MSBuild Projects="$(ToolsetTaskProject)"
+             Properties="ArtifactsDir=$(ArtifactsDir)tasks\"/>
+  </Target>
+
+  <UsingTask TaskName="ReplaceFileContents" AssemblyFile="$(ToolsetTaskDll)" />
+  <UsingTask TaskName="Chmod" AssemblyFile="$(ToolsetTaskDll)" />
+  <UsingTask TaskName="RemoveAssetFromDepsPackages" AssemblyFile="$(ToolsetTaskDll)" />
+  <UsingTask TaskName="ChangeEntryPointLibraryName" AssemblyFile="$(ToolsetTaskDll)"/>
+  <UsingTask TaskName="GetCurrentRuntimeInformation" AssemblyFile="$(ToolsetTaskDll)"/>
+  <UsingTask TaskName="ZipFileCreateFromDirectory" AssemblyFile="$(ToolsetTaskDll)"/>
+
+</Project>

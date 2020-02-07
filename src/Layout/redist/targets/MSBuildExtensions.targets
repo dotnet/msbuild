@@ -1,0 +1,32 @@
+<Project>
+
+  <PropertyGroup>
+    <MSBuildExtensionsPackageName>Microsoft.NET.Build.Extensions</MSBuildExtensionsPackageName>
+    <MSBuildExtensionsVersionSubfolder>Current</MSBuildExtensionsVersionSubfolder>
+    <MSBuildExtensionsSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\$(MSBuildExtensionsPackageName)</MSBuildExtensionsSourceRoot>
+  </PropertyGroup>
+
+  <Target Name="GenerateMSBuildExtensions">
+
+    <ItemGroup>
+      
+      <!-- Include MSBuild imports that are checked into repo -->
+      <MSBuildExtensionsContent Include="$(MSBuildProjectDirectory)/MSBuildImports/**/*" />
+
+      
+      <MSBuildExtensionsContent Include="$(MSBuildExtensionsSourceRoot)\msbuildExtensions\**\*.*" />
+
+      <!-- Don't include .NET Framework MS.NET.Build.Extensions tasks in CLI layout -->
+      <MSBuildExtensionsContent Remove="$(MSBuildExtensionsSourceRoot)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools\net472\**" />
+
+      <MSBuildExtensionsContent Include="$(MSBuildExtensionsSourceRoot)\msbuildExtensions-ver\**\*.*"
+                          DeploymentSubpath="$(MSBuildExtensionsVersionSubfolder)/" />
+
+
+
+
+    </ItemGroup>
+
+  </Target>
+
+</Project>

@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <ProjectGuid>{A302325B-D680-4C0E-8680-7AE283981624}</ProjectGuid>
+    <Platforms>AnyCPU;x64;x86;AdditionalPlatform</Platforms>
+    <Configurations>Debug;Release;FooBar;AdditionalConfiguration</Configurations>
+  </PropertyGroup>
+
+</Project>

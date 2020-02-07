@@ -1,0 +1,149 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
+    <CanRunTestAsTool>false</CanRunTestAsTool>
+    
+    <!-- Use layout folder for the output folder, to support in-process tests which expect to be running
+         on a valid layout. -->
+    <OutputPath>$(ArtifactsBinDir)redist\$(Configuration)</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\crossgen.Tests\**\*.cs" LinkBase="crossgen" />
+    <Compile Include="..\dotnet-add-package.Tests\**\*.cs" LinkBase="dotnet-add-package" />
+    <Compile Include="..\dotnet-add-reference.Tests\**\*.cs" LinkBase="dotnet-add-reference" />
+    <Compile Include="..\dotnet-back-compat.Tests\**\*.cs" LinkBase="dotnet-back-compat" />
+    <Compile Include="..\dotnet-build.Tests\**\*.cs" LinkBase="dotnet-build" />
+    <Compile Include="..\dotnet-clean.Tests\**\*.cs" LinkBase="dotnet-clean" />
+    <Compile Include="..\dotnet-fsi.Tests\**\*.cs" LinkBase="dotnet-fsi" />
+    <Compile Include="..\dotnet-help.Tests\**\*.cs" LinkBase="dotnet-help" />
+    <Compile Include="..\dotnet-install-tool.Tests\**\*.cs" LinkBase="dotnet-install-tool" />
+    <Compile Include="..\dotnet-list-package.Tests\**\*.cs" LinkBase="dotnet-list-package" />
+    <Compile Include="..\dotnet-list-reference.Tests\**\*.cs" LinkBase="dotnet-list-reference" />
+    <Compile Include="..\dotnet-new.Tests\**\*.cs" LinkBase="dotnet-new" />
+    <Compile Include="..\dotnet-nuget.UnitTests\**\*.cs" LinkBase="dotnet-nuget" />
+    <Compile Include="..\dotnet-pack.Tests\**\*.cs" LinkBase="dotnet-pack" />
+    <Compile Include="..\dotnet-publish.Tests\**\*.cs" LinkBase="dotnet-publish" />
+    <Compile Include="..\dotnet-remove-package.Tests\**\*.cs" LinkBase="dotnet-remove-package" />
+    <Compile Include="..\dotnet-remove-reference.Tests\**\*.cs" LinkBase="dotnet-remove-reference" />
+    <Compile Include="..\dotnet-restore.Tests\**\*.cs" LinkBase="dotnet-restore" />
+    <Compile Include="..\dotnet-run.Tests\**\*.cs" LinkBase="dotnet-run" />
+    <Compile Include="..\dotnet-store.Tests\**\*.cs" LinkBase="dotnet-store" />
+    <Compile Include="..\dotnet-test.Tests\**\*.cs" LinkBase="dotnet-test" />
+    <Compile Include="..\dotnet-vstest.Tests\**\*.cs" LinkBase="dotnet-vstest" />
+    <Compile Include="..\Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests\**\*.cs" LinkBase="Telemetry.PersistenceChannel" />
+    <Compile Include="..\Microsoft.DotNet.CommandFactory.Tests\**\*.cs" LinkBase="CommandFactory" />
+    <Compile Include="..\Microsoft.DotNet.Configurer.UnitTests\**\*.cs" LinkBase="Configurer" />
+    <Compile Include="..\Microsoft.DotNet.ShellShim.Tests\**\*.cs" LinkBase="ShellShim" />
+    
+
+    <None Include="..\Microsoft.DotNet.ShellShim.Tests\WpfBinaryTestAsssets\testwpf.dll" LinkBase="WpfBinaryTestAsssets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+
+    <None Update="CollectCodeCoverage.runsettings">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>MSTestVersion</_Parameter1>
+      <_Parameter2>$(MSTestVersion)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>MicrosoftNETTestSdkPackageVersion</_Parameter1>
+      <_Parameter2>$(MicrosoftNETTestSdkPackageVersion)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>XUnitVersion</_Parameter1>
+      <_Parameter2>$(XUnitVersion)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>SdkVersion</_Parameter1>
+      <_Parameter2>$(Version)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <!--<ItemGroup>
+    <Content Include="..\..\TestAssets\TestProjects\AppWithToolDependency\**\*">
+      <Link>TestAssets/TestProjects/AppWithToolDependency/%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="..\..\TestAssets\TestProjects\DependencyContextFromTool\**\*">
+      <Link>TestAssets/TestProjects/DependencyContextFromTool/%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>-->
+  
+  <!--<Target Name="WriteExpectedVersion"
+          BeforeTargets="BeforeBuild"
+          DependsOnTargets="PrepareForBuild">
+
+    <PropertyGroup>
+      <ExpectedVersionFileInIntermediateFolder>$(IntermediateOutputPath)ExpectedSdkVersion.txt</ExpectedVersionFileInIntermediateFolder>
+      
+      <VersionFileContent>$(DotNetCoreSdkLKGVersion)</VersionFileContent>
+      <ExistingVersionFileContent Condition=" Exists('$(ExpectedVersionFileInIntermediateFolder)') ">
+        $([System.IO.File]::ReadAllText($(ExpectedVersionFileInIntermediateFolder)))
+      </ExistingVersionFileContent>
+
+      <ShouldOverwriteVersionFile>false</ShouldOverwriteVersionFile>
+      <ShouldOverwriteVersionFile
+        Condition=" '$(ExistingVersionFileContent.Trim())' != '$(VersionFileContent.Trim())' ">true</ShouldOverwriteVersionFile>
+    </PropertyGroup>
+    
+    <WriteLinesToFile File="$(ExpectedVersionFileInIntermediateFolder)"
+                      Lines="$(VersionFileContent)"
+                      Condition=" '$(ShouldOverwriteVersionFile)' == 'true' "
+                      Overwrite="true" />
+
+    <ItemGroup>
+      <Content Include="$(ExpectedVersionFileInIntermediateFolder)" CopyToOutputDirectory="PreserveNewest" />
+      <FileWrites Include="$(ExpectedVersionFileInIntermediateFolder)" />
+    </ItemGroup>
+  </Target>-->
+
+  <Target Name="WriteExpectedTargetFrameworkMoniker" BeforeTargets="BeforeBuild" DependsOnTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ExpectedTargetFrameworkMonikerFileInIntermediateFolder>$(IntermediateOutputPath)ExpectedTargetFrameworkMoniker.txt</ExpectedTargetFrameworkMonikerFileInIntermediateFolder>
+      <VersionFileContent>$(TargetFrameworkMoniker)</VersionFileContent>
+      <ExistingVersionFileContent Condition=" Exists('$(ExpectedTargetFrameworkMonikerFileInIntermediateFolder)') ">
+        $([System.IO.File]::ReadAllText($(ExpectedTargetFrameworkMonikerFileInIntermediateFolder)))
+      </ExistingVersionFileContent>
+      <ShouldOverwriteVersionFile>false</ShouldOverwriteVersionFile>
+      <ShouldOverwriteVersionFile Condition=" '$(ExistingVersionFileContent.Trim())' != '$(VersionFileContent.Trim())' ">true</ShouldOverwriteVersionFile>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(ExpectedTargetFrameworkMonikerFileInIntermediateFolder)" Lines="$(VersionFileContent)" Condition=" '$(ShouldOverwriteVersionFile)' == 'true' " Overwrite="true" />
+    <ItemGroup>
+      <Content Include="$(ExpectedTargetFrameworkMonikerFileInIntermediateFolder)" CopyToOutputDirectory="PreserveNewest" />
+      <FileWrites Include="$(ExpectedTargetFrameworkMonikerFileInIntermediateFolder)" />
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.ComponentMocks\Microsoft.DotNet.Tools.Tests.ComponentMocks.csproj" />
+    <ProjectReference Include="..\..\Cli\dotnet\dotnet.csproj" />
+    <ProjectReference Include="..\..\Cli\Microsoft.DotNet.Cli.Sln.Internal\Microsoft.DotNet.Cli.Sln.Internal.csproj" />
+    <ProjectReference Include="..\..\Cli\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
+    <ProjectReference Include="..\Msbuild.Tests.Utilities\Msbuild.Tests.Utilities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Moq" Version="4.7.25" />
+    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)" />
+    <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" Version="$(MicrosoftDotNetCliCommandLinePackageVersion)" />
+    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
+  </ItemGroup>
+</Project>

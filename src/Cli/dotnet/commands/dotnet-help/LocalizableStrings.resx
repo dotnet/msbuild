@@ -1,0 +1,294 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Usage" xml:space="preserve">
+    <value>Usage</value>
+  </data>
+  <data name="Arguments" xml:space="preserve">
+    <value>Arguments</value>
+  </data>
+  <data name="CommandDefinition" xml:space="preserve">
+    <value>The command to execute</value>
+  </data>
+  <data name="ArgumentsDefinition" xml:space="preserve">
+    <value>Arguments to pass to the command</value>
+  </data>
+  <data name="HostOptionsDefinition" xml:space="preserve">
+    <value>Options specific to dotnet (host)</value>
+  </data>
+  <data name="OptionsDescription" xml:space="preserve">
+    <value>Options common to all commands</value>
+  </data>
+  <data name="DiagnosticsDefinition" xml:space="preserve">
+    <value>Enable diagnostic output</value>
+  </data>
+  <data name="SDKCommandUsageDescription" xml:space="preserve">
+    <value>Execute a .NET Core SDK command.</value>
+  </data>
+  <data name="ExecutionUsageDescription" xml:space="preserve">
+    <value>Execute a .NET Core application.</value>
+  </data>
+  <data name="HelpDefinition" xml:space="preserve">
+    <value>Show command line help.</value>
+  </data>
+  <data name="HostOptions" xml:space="preserve">
+    <value>Host options (passed before the command)</value>
+  </data>
+  <data name="VersionDescription" xml:space="preserve">
+    <value>Display .NET CLI Version Number</value>
+  </data>
+  <data name="InfoDescription" xml:space="preserve">
+    <value>Display .NET CLI Info</value>
+  </data>
+  <data name="Commands" xml:space="preserve">
+    <value>SDK commands</value>
+  </data>
+  <data name="NewDefinition" xml:space="preserve">
+    <value>Create a new .NET project or file.</value>
+  </data>
+  <data name="RestoreDefinition" xml:space="preserve">
+    <value>Restore dependencies specified in a .NET project.</value>
+  </data>
+  <data name="BuildDefinition" xml:space="preserve">
+    <value>Build a .NET project.</value>
+  </data>
+  <data name="PublishDefinition" xml:space="preserve">
+    <value>Publish a .NET project for deployment.</value>
+  </data>
+  <data name="RunDefinition" xml:space="preserve">
+    <value>Build and run a .NET project output.</value>
+  </data>
+  <data name="TestDefinition" xml:space="preserve">
+    <value>Run unit tests using the test runner specified in a .NET project.</value>
+  </data>
+  <data name="PackDefinition" xml:space="preserve">
+    <value>Create a NuGet package.</value>
+  </data>
+  <data name="StoreDefinition" xml:space="preserve">
+    <value>Store the specified assemblies in the runtime package store.</value>
+  </data>
+  <data name="ProjectModificationCommands" xml:space="preserve">
+    <value>Project modification commands</value>
+  </data>
+  <data name="AddDefinition" xml:space="preserve">
+    <value>Add a package or reference to a .NET project.</value>
+  </data>
+  <data name="RemoveDefinition" xml:space="preserve">
+    <value>Remove a package or reference from a .NET project.</value>
+  </data>
+  <data name="ListDefinition" xml:space="preserve">
+    <value>List project references of a .NET project.</value>
+  </data>
+  <data name="AdvancedCommands" xml:space="preserve">
+    <value>Advanced Commands</value>
+  </data>
+  <data name="NugetDefinition" xml:space="preserve">
+    <value>Provides additional NuGet commands.</value>
+  </data>
+  <data name="MsBuildDefinition" xml:space="preserve">
+    <value>Run Microsoft Build Engine (MSBuild) commands.</value>
+  </data>
+  <data name="VsTestDefinition" xml:space="preserve">
+    <value>Run Microsoft Test Engine (VSTest) commands.</value>
+  </data>
+  <data name="CleanDefinition" xml:space="preserve">
+    <value>Clean build outputs of a .NET project.</value>
+  </data>
+  <data name="SlnDefinition" xml:space="preserve">
+    <value>Modify Visual Studio solution files.</value>
+  </data>
+  <data name="CommandDoesNotExist" xml:space="preserve">
+    <value>Specified command '{0}' is not a valid SDK command. Specify a valid SDK command. For more information, run dotnet help.</value>
+  </data>
+  <data name="AppFullName" xml:space="preserve">
+    <value>.NET CLI help utility</value>
+  </data>
+  <data name="AppDescription" xml:space="preserve">
+    <value>Utility to get more detailed help about each of the SDK commands.</value>
+  </data>
+  <data name="CommandArgumentName" xml:space="preserve">
+    <value>COMMAND_NAME</value>
+  </data>
+  <data name="CommandArgumentDescription" xml:space="preserve">
+    <value>The SDK command to launch online help for.</value>
+  </data>
+  <data name="PathToApplicationDefinition" xml:space="preserve">
+    <value>The path to an application .dll file to execute.</value>
+  </data>
+  <data name="SDKVersionCommandDefinition" xml:space="preserve">
+    <value>Display .NET Core SDK version in use.</value>
+  </data>
+  <data name="SDKInfoCommandDefinition" xml:space="preserve">
+    <value>Display .NET Core information.</value>
+  </data>
+  <data name="SDKListSdksCommandDefinition" xml:space="preserve">
+    <value>Display the installed SDKs.</value>
+  </data>
+  <data name="SDKListRuntimesCommandDefinition" xml:space="preserve">
+    <value>Display the installed runtimes.</value>
+  </data>
+  <data name="SDKDiagnosticsCommandDefinition" xml:space="preserve">
+    <value>Enable diagnostic output.</value>
+  </data>
+  <data name="RunDotnetCommandHelpForMore" xml:space="preserve">
+    <value>Run 'dotnet [command] --help' for more information on a command.</value>
+  </data>
+  <data name="AdditionalProbingPathDefinition" xml:space="preserve">
+    <value>Path containing probing policy and assemblies to probe for.</value>
+  </data>
+  <data name="DepsFileDefinition" xml:space="preserve">
+    <value>Path to &lt;application&gt;.deps.json file.</value>
+  </data>
+  <data name="RuntimeConfigDefinition" xml:space="preserve">
+    <value>Path to &lt;application&gt;.runtimeconfig.json file.</value>
+  </data>
+  <data name="FxVersionDefinition" xml:space="preserve">
+    <value>Version of the installed Shared Framework to use to run the application.</value>
+  </data>
+  <data name="RollForwardDefinition" xml:space="preserve">
+    <value>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</value>
+  </data>
+  <data name="AdditionalDeps" xml:space="preserve">
+    <value>Path to additional deps.json file.</value>
+  </data>
+  <data name="ToolDefinition" xml:space="preserve">
+    <value>Install or manage tools that extend the .NET experience.</value>
+  </data>
+  <data name="BuildServerDefinition" xml:space="preserve">
+    <value>Interact with servers started by a build.</value>
+  </data>
+  <data name="FsiDefinition" xml:space="preserve">
+    <value>Start F# Interactive / execute F# scripts.</value>
+  </data>
+  <data name="DevCertsDefinition" xml:space="preserve">
+    <value>Create and manage development certificates.</value>
+  </data>
+  <data name="SqlCacheDefinition" xml:space="preserve">
+    <value>SQL Server cache command-line tools.</value>
+  </data>
+  <data name="UserSecretsDefinition" xml:space="preserve">
+    <value>Manage development user secrets.</value>
+  </data>
+  <data name="WatchDefinition" xml:space="preserve">
+    <value>Start a file watcher that runs a command when files change.</value>
+  </data>
+  <data name="AdditionalTools" xml:space="preserve">
+    <value>Additional commands from bundled tools:</value>
+  </data>
+</root>

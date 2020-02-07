@@ -1,0 +1,41 @@
+<Project ToolsVersion="14.0" DefaultTargets="Test">
+  <Target Name="OverlaySdkOnLKG" AfterTargets="Build" DependsOnTargets="GenerateLayout">
+    <PropertyGroup>
+      <RedistLayoutPath>$(BaseOutputPath)$(Configuration)\dotnet\</RedistLayoutPath>
+    </PropertyGroup>
+
+    <!-- Get stage 0 SDK version without having to duplicate the LKG SDK property between the global.json
+    and a property. -->
+    <Exec Command="$(DotnetTool) --version" ConsoleToMsbuild="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="Stage0SdkVersion"/>
+    </Exec>
+
+    <ItemGroup>
+      <OverlaySDK Include="$(_DotNetHiveRoot)/**/*" Exclude="$(_DotNetHiveRoot)sdk/**/*"/>
+      <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/Microsoft.NETCoreSdk.BundledVersions.props" />
+      <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/Microsoft.NETCoreSdk.BundledCliTools.props" />
+      <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/RuntimeIdentifierGraph.json" />
+      <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/DotnetTools/**/*" RelativeDestination="DotnetTools"/>
+      <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/AppHostTemplate/**/*" RelativeDestination="AppHostTemplate"/>
+      <ToolsetToOverlay Include="$(OutputPath)/**/*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(OverlaySDK)"
+          DestinationFiles="@(OverlaySDK->'$(RedistLayoutPath)\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <PropertyGroup>
+      <SdkOutputDirectory>$(RedistLayoutPath)/sdk/$(Version)</SdkOutputDirectory>
+    </PropertyGroup>
+
+    <Copy SourceFiles="@(OverlaySdkFilesFromStage0)"
+          DestinationFiles="@(OverlaySdkFilesFromStage0->'$(SdkOutputDirectory)\%(RelativeDestination)\%(RecursiveDir)%(Filename)%(Extension)')"/>
+
+    <Copy SourceFiles="@(ToolsetToOverlay)"
+          DestinationFiles="@(ToolsetToOverlay->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <!-- Run "dotnet new" (which will just display usage and available templates) in order to print first time
+         use message so that it doesn't interfere with tests which check the output of commands. -->
+    <Exec Command="$(RedistLayoutPath)dotnet new"
+          EnvironmentVariables="DOTNET_CLI_HOME=$(ArtifactsTmpDir)" />
+  </Target>
+</Project>

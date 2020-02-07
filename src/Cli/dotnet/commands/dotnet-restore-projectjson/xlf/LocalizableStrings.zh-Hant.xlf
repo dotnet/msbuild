@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hant" original="src/dotnet/commands/dotnet-restore-projectjson/LocalizableStrings.resx">
+    <body>
+      <group id="src/dotnet/commands/dotnet-restore-projectjson/LocalizableStrings.resx" />
+      <trans-unit id="AddMinimal">
+        <source>minimal</source>
+        <target state="translated">最小</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddRestore">
+        <source>restore</source>
+        <target state="translated">還原</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

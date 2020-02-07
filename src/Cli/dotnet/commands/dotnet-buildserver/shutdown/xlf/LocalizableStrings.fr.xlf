@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="fr" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CommandDescription">
+        <source>Shuts down build servers that are started from dotnet. By default, all servers are shut down.</source>
+        <target state="translated">Arrête les serveurs de builds démarrés à partir de dotnet. Par défaut, tous les serveurs sont arrêtés.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildOptionDescription">
+        <source>Shut down the MSBuild build server.</source>
+        <target state="translated">Arrêtez le serveur de builds MSBuild.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VBCSCompilerOptionDescription">
+        <source>Shut down the VB/C# compiler build server.</source>
+        <target state="translated">Arrêtez le serveur de builds du compilateur VB/C#.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RazorOptionDescription">
+        <source>Shut down the Razor build server.</source>
+        <target state="translated">Arrêtez le serveur de builds Razor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShuttingDownServer">
+        <source>Shutting down {0}...</source>
+        <target state="translated">Arrêt de {0}...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShutDownSucceeded">
+        <source>{0} shut down successfully.</source>
+        <target state="translated">{0} s'est arrêté correctement.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShutDownFailed">
+        <source>{0} failed to shut down: {1}</source>
+        <target state="translated">Échec de l'arrêt de {0} : {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShuttingDownServerWithPid">
+        <source>Shutting down {0} (process {1})...</source>
+        <target state="translated">Arrêt de {0} (processus {1})...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShutDownSucceededWithPid">
+        <source>{0} (process {1}) shut down successfully.</source>
+        <target state="translated">{0} (processus {1}) s'est arrêté correctement.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShutDownFailedWithPid">
+        <source>{0} (process {1}) failed to shut down: {2}</source>
+        <target state="translated">Échec de l'arrêt de {0} (processus {1}) : {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoServersToShutdown">
+        <source>No build servers are running.</source>
+        <target state="translated">Aucun serveur de builds n'est en cours d'exécution.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

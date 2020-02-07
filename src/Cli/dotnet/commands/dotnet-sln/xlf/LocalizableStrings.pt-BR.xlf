@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AddProjectSolutionFolderArgumentDescription">
+        <source>The destination solution folder path to add the projects to.</source>
+        <target state="translated">O caminho da pasta de solução de destino ao qual adicionar os projetos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppFullName">
+        <source>.NET modify solution file command</source>
+        <target state="translated">Comando para modificar o arquivo de solução do .NET</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Command to add, remove, and list projects from the solution (SLN) file.</source>
+        <target state="translated">Comando para adicionar, remover e listar projetos do arquivo de solução (SLN).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppHelpText">
+        <source>Projects to add or to remove from the solution.</source>
+        <target state="translated">Projetos a serem adicionados ou removidos da solução.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddAppFullName">
+        <source>Add one or more projects to a solution file.</source>
+        <target state="translated">Adicionar um ou mais projetos em um arquivo de solução.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InRoot">
+        <source>Place project in root of the solution, rather than creating a solution folder.</source>
+        <target state="translated">Coloque o projeto na raiz da solução, em vez de criar uma pasta da solução.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RemoveAppFullName">
+        <source>Remove one or more projects from a solution file.</source>
+        <target state="translated">Remover um ou mais projetos de um arquivo de solução.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RemoveSubcommandHelpText">
+        <source>Remove the specified project(s) from the solution. The project is not impacted.</source>
+        <target state="translated">Remove os projetos especificados da solução. O projeto não é impactado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ListAppFullName">
+        <source>List all projects in a solution file.</source>
+        <target state="translated">Listar todos os projetos em um arquivo de solução.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ListSubcommandHelpText">
+        <source>List all projects in the solution.</source>
+        <target state="translated">Listar todos os projetos na solução.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionArgumentName">
+        <source>SLN_FILE</source>
+        <target state="translated">SLN_FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionArgumentDescription">
+        <source>The solution file to operate on. If not specified, the command will search the current directory for one.</source>
+        <target state="translated">O arquivo de solução no qual a operação ocorrerá. Se não for especificado, o comando pesquisará um arquivo de solução no diretório atual.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddProjectPathArgumentName">
+        <source>PROJECT_PATH</source>
+        <target state="translated">PROJECT_PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddProjectPathArgumentDescription">
+        <source>The paths to the projects to add to the solution.</source>
+        <target state="translated">Os caminhos para os projetos a serem adicionados na solução.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RemoveProjectPathArgumentName">
+        <source>PROJECT_PATH</source>
+        <target state="translated">PROJECT_PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RemoveProjectPathArgumentDescription">
+        <source>The paths to the projects to remove from the solution.</source>
+        <target state="translated">Os caminhos dos projetos para remover da solução.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectsHeader">
+        <source>Project(s)</source>
+        <target state="translated">Projetos</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionFolderAndInRootMutuallyExclusive">
+        <source>The --solution-folder and --in-root options cannot be used together; use only one of the options.</source>
+        <target state="translated">As opções --solution-folder e --in-root não podem ser usadas juntas. Use somente uma das opções.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

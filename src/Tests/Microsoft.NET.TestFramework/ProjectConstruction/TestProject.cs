@@ -430,7 +430,11 @@ namespace {this.Name}
 
         public static bool ReferenceAssembliesAreInstalled(string targetFrameworkVersion)
         {
+#if NETFRAMEWORK
+            if (!targetFrameworkVersion.StartsWith("v"))
+#else
             if (!targetFrameworkVersion.StartsWith('v'))
+#endif
             {
                 targetFrameworkVersion = "v" + targetFrameworkVersion;
             }

@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), testAsset.props))\testAsset.props" />
+
+  <PropertyGroup>
+    <!-- netcoreapp2.2 is the maximum TFM project tools support -->
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <AssemblyName>dotnet-tool-with-output-name</AssemblyName>
+    <PackageId>ToolWithOutputName</PackageId>
+    <OutputType>Exe</OutputType>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+</Project>

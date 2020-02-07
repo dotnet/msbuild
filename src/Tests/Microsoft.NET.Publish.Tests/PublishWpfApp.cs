@@ -13,6 +13,7 @@ using System.Runtime.CompilerServices;
 using System;
 using Microsoft.Extensions.DependencyModel;
 using Xunit.Abstractions;
+using System.Linq;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -27,13 +28,18 @@ namespace Microsoft.NET.Publish.Tests
         {
             var testDir = _testAssetsManager.CreateTestDirectory();
 
-            string targetFramework = "netcoreapp5.0";
-            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
-
             var newCommand = new DotnetCommand(Log);
             newCommand.WorkingDirectory = testDir.Path;
 
             newCommand.Execute("new", "wpf").Should().Pass();
+
+            var project = XDocument.Load(Path.Combine(testDir.Path, Path.GetFileName(testDir.Path) + ".csproj"));
+            var ns = project.Root.Name.Namespace;
+            string targetFramework = project.Root.Elements(ns + "PropertyGroup")
+                .Elements(ns + "TargetFramework")
+                .Single().Value;
+
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             string mainWindowXamlCsPath = Path.Combine(testDir.Path, "MainWindow.xaml.cs");
             string csContents = File.ReadAllText(mainWindowXamlCsPath);

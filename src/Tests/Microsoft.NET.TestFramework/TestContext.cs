@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Commands;
 using System.Reflection;
+using System.Globalization;
 
 namespace Microsoft.NET.TestFramework
 {
@@ -14,6 +15,12 @@ namespace Microsoft.NET.TestFramework
         public string TestExecutionDirectory { get; set; }
 
         public string TestAssetsDirectory { get; set; }
+
+        public string TestPackages { get; set; }
+
+        //  For tests which want the global packages folder isolated in the repo, but
+        //  can share it with other tests
+        public string TestGlobalPackagesFolder { get; set; }
 
         public string NuGetCachePath { get; set; }
 
@@ -68,6 +75,10 @@ namespace Microsoft.NET.TestFramework
 
         public static void Initialize(TestCommandLine commandLine)
         {
+            //  Show verbose debugging output for tests
+            CommandContext.SetVerbose(true);
+            Reporter.Reset();
+
             Environment.SetEnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0");
 
             //  Reset this environment variable so that if the dotnet under test is different than the
@@ -80,7 +91,7 @@ namespace Microsoft.NET.TestFramework
             if (Directory.Exists(Path.Combine(AppContext.BaseDirectory, "Assets")))
             {
                 runAsTool = true;
-                testContext.TestAssetsDirectory = Path.Combine(AppContext.BaseDirectory, "Assets", "TestProjects");
+                testContext.TestAssetsDirectory = Path.Combine(AppContext.BaseDirectory, "Assets");
             }
             else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_AS_TOOL")))
             {
@@ -89,11 +100,15 @@ namespace Microsoft.NET.TestFramework
                 //  variable instead of packing the test, and installing it as a global tool.
                 runAsTool = true;
                 
-                testContext.TestAssetsDirectory = FindFolderInTree(Path.Combine("src", "Assets", "TestProjects"), AppContext.BaseDirectory);
+                testContext.TestAssetsDirectory = FindFolderInTree(Path.Combine("src", "Assets"), AppContext.BaseDirectory);
             }
 
             string repoRoot = null;
+#if DEBUG
             string repoConfiguration = "Debug";
+#else
+            string repoConfiguration = "Release";
+#endif
 
             if (commandLine.SDKRepoPath != null)
             {
@@ -103,11 +118,11 @@ namespace Microsoft.NET.TestFramework
             {
                 repoRoot = GetRepoRoot();
 
-                if (repoRoot != null)
-                {
-                    // assumes tests are always executed from the "artifacts/bin/Tests/$MSBuildProjectFile/$Configuration" directory
-                    repoConfiguration = new DirectoryInfo(AppContext.BaseDirectory).Name;
-                }
+                //if (repoRoot != null)
+                //{
+                //    // assumes tests are always executed from the "artifacts/bin/Tests/$MSBuildProjectFile/$Configuration" directory
+                //    repoConfiguration = new DirectoryInfo(AppContext.BaseDirectory).Name;
+                //}
             }
 
             if (!string.IsNullOrEmpty(commandLine.TestExecutionDirectory))
@@ -116,16 +131,13 @@ namespace Microsoft.NET.TestFramework
             }
             else if (runAsTool)
             {
-                testContext.TestExecutionDirectory = Path.Combine(Path.GetTempPath(),"dotnetSdkTests", Path.GetRandomFileName());
+                testContext.TestExecutionDirectory = Path.Combine(Path.GetTempPath(), "dotnetSdkTests", Path.GetRandomFileName());
             }
             else
             {
-                // This is dependent on the current artifacts layout:
-                // * $(RepoRoot)/artifacts/tmp/$Configuration)
-                // * $(RepoRoot)/artifacts/bin/Tests/$(MSBuildProjectName)/$(Configuration)
-                testContext.TestExecutionDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "tmp", repoConfiguration));
+                testContext.TestExecutionDirectory = (Path.Combine(FindFolderInTree("artifacts", AppContext.BaseDirectory), "tmp", repoConfiguration));
 
-                testContext.TestAssetsDirectory = FindFolderInTree(Path.Combine("src", "Assets", "TestProjects"), AppContext.BaseDirectory);
+                testContext.TestAssetsDirectory = FindFolderInTree(Path.Combine("src", "Assets"), AppContext.BaseDirectory);
             }
 
             Directory.CreateDirectory(testContext.TestExecutionDirectory);
@@ -136,11 +148,22 @@ namespace Microsoft.NET.TestFramework
                 artifactsDir = Path.Combine(repoRoot, "artifacts");
             }
 
+            if (!string.IsNullOrEmpty(artifactsDir))
+            {
+                testContext.TestGlobalPackagesFolder = Path.Combine(artifactsDir, ".nuget", "packages");
+            }
+            else
+            {
+                testContext.TestGlobalPackagesFolder = Path.Combine(testContext.TestExecutionDirectory, ".nuget", "packages");
+            }
+
             if (repoRoot != null)
             {
                 testContext.NuGetFallbackFolder = Path.Combine(artifactsDir, ".nuget", "NuGetFallbackFolder");
                 testContext.NuGetExePath = Path.Combine(artifactsDir, ".nuget", $"nuget{Constants.ExeSuffix}");
                 testContext.NuGetCachePath = Path.Combine(artifactsDir, ".nuget", "packages");
+
+                testContext.TestPackages = Path.Combine(artifactsDir, "tmp", repoConfiguration, "testpackages");
             }
             else
             {
@@ -160,7 +183,21 @@ namespace Microsoft.NET.TestFramework
 
             testContext.ToolsetUnderTest = ToolsetInfo.Create(repoRoot, artifactsDir, repoConfiguration, commandLine);
 
+            //  Important to set this before below code which ends up calling through TestContext.Current, which would
+            //  result in infinite recursion / stack overflow if TestContext.Current wasn't set
             TestContext.Current = testContext;
+
+            //  Set up test hooks for in-process tests
+            Environment.SetEnvironmentVariable(
+                DotNet.Cli.Utils.Constants.MSBUILD_EXE_PATH,
+                Path.Combine(testContext.ToolsetUnderTest.SdkFolderUnderTest, "MSBuild.dll"));
+
+            Environment.SetEnvironmentVariable(
+                "MSBuildSDKsPath",
+                Path.Combine(testContext.ToolsetUnderTest.SdksPath));
+
+            DotNet.Cli.Utils.MSBuildForwardingAppWithoutLogging.MSBuildExtensionsPathTestHook =
+                testContext.ToolsetUnderTest.SdkFolderUnderTest;
         }
 
         public static string GetRepoRoot()
@@ -231,6 +268,19 @@ namespace Microsoft.NET.TestFramework
   }
 }");
             }
+        }
+
+        public static bool IsLocalized()
+        {
+            for (var culture = CultureInfo.CurrentUICulture; !culture.Equals(CultureInfo.InvariantCulture); culture = culture.Parent)
+            {
+                if (culture.Name == "en")
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

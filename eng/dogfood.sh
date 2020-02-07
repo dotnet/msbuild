@@ -17,8 +17,10 @@ ReadGlobalVersion "dotnet"
 dotnet_sdk_version=$_ReadGlobalVersion
 
 export SDK_REPO_ROOT="$repo_root"
-export SDK_CLI_VERSION="$dotnet_sdk_version"
-export MSBuildSDKsPath="$artifacts_dir/bin/$configuration/Sdks"
-export DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR="$MSBuildSDKsPath"
-export NETCoreSdkBundledVersionsProps="$DOTNET_INSTALL_DIR/sdk/$dotnet_sdk_version/Microsoft.NETCoreSdk.BundledVersions.props"
-export MicrosoftNETBuildExtensionsTargets="$MSBuildSDKsPath/Microsoft.NET.Build.Extensions/msbuildExtensions/Microsoft/Microsoft.NET.Build.Extensions/Microsoft.NET.Build.Extensions.targets"
+
+testDotnetRoot="$artifacts_dir/bin/redist/$configuration/dotnet"
+testDotnetVersion=$(ls $testDotnetRoot/sdk)
+export DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR="$testDotnetRoot/sdk/$testDotnetVersion/Sdks"
+export MicrosoftNETBuildExtensionsTargets="$artifacts_dir/bin/$configuration/Sdks/Microsoft.NET.Build.Extensions/msbuildExtensions/Microsoft/Microsoft.NET.Build.Extensions/Microsoft.NET.Build.Extensions.targets"
+
+export PATH=$testDotnetRoot:$PATH

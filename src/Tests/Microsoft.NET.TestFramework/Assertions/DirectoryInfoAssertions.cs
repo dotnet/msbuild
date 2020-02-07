@@ -63,6 +63,23 @@ namespace Microsoft.NET.TestFramework.Assertions
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
 
+        public AndConstraint<DirectoryInfoAssertions> HaveFilesMatching(
+            string expectedFilesSearchPattern,
+            SearchOption searchOption,
+            string because = "",
+            params object[] reasonArgs)
+        {
+            var matchingFileExists = _dirInfo.EnumerateFiles(expectedFilesSearchPattern, searchOption).Any();
+
+            Execute.Assertion
+                .ForCondition(matchingFileExists == true)
+                .BecauseOf(because, reasonArgs)
+                .FailWith("Expected directory {0} to contain files matching {1}, but no matching file exists.",
+                    _dirInfo.FullName, expectedFilesSearchPattern);
+
+            return new AndConstraint<DirectoryInfoAssertions>(this);
+        }
+
         public AndConstraint<DirectoryInfoAssertions> NotHaveFiles(IEnumerable<string> expectedFiles)
         {
             foreach (var expectedFile in expectedFiles)
@@ -72,6 +89,16 @@ namespace Microsoft.NET.TestFramework.Assertions
 
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
+
+        public AndConstraint<DirectoryInfoAssertions> NotHaveFilesMatching(string expectedFilesSearchPattern, SearchOption searchOption)
+        {
+            var matchingFileCount = _dirInfo.EnumerateFiles(expectedFilesSearchPattern, searchOption).Count();
+            Execute.Assertion.ForCondition(matchingFileCount == 0)
+                .FailWith("Found {0} files that should not exist in directory {1}. No file matching {2} should exist.",
+                    matchingFileCount, _dirInfo.FullName, expectedFilesSearchPattern);
+            return new AndConstraint<DirectoryInfoAssertions>(this);
+        }
+
 
         public AndConstraint<DirectoryInfoAssertions> HaveDirectory(string expectedDir)
         {
@@ -97,6 +124,32 @@ namespace Microsoft.NET.TestFramework.Assertions
 
             Execute.Assertion.ForCondition(!extraFiles.Any())
                 .FailWith($"Following extra files are found inside directory {_dirInfo.FullName} {nl} {string.Join(nl, extraFiles)}");
+
+            return new AndConstraint<DirectoryInfoAssertions>(this);
+        }
+
+        public AndConstraint<DirectoryInfoAssertions> BeEmpty()
+        {
+            Execute.Assertion.ForCondition(!_dirInfo.EnumerateFileSystemInfos().Any())
+                .FailWith($"The directory {_dirInfo.FullName} is not empty.");
+
+            return new AndConstraint<DirectoryInfoAssertions>(this);
+        }
+
+        public AndConstraint<DirectoryInfoAssertions> NotBeEmpty()
+        {
+            Execute.Assertion.ForCondition(_dirInfo.EnumerateFileSystemInfos().Any())
+                .FailWith($"The directory {_dirInfo.FullName} is empty.");
+
+            return new AndConstraint<DirectoryInfoAssertions>(this);
+        }
+
+        public AndConstraint<DirectoryInfoAssertions> NotExist(string because = "", params object[] reasonArgs)
+        {
+            Execute.Assertion
+                .ForCondition(_dirInfo.Exists == false)
+                .BecauseOf(because, reasonArgs)
+                .FailWith($"Expected directory {_dirInfo.FullName} to not exist, but it does.");
 
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }

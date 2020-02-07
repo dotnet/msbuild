@@ -1,0 +1,19 @@
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
+  </PropertyGroup>
+  <Import Condition=" '$(VersionPropsIsImported)' == '' " Project="eng/Versions.props" />
+  <PropertyGroup>
+    <RestorePackagesPath Condition=" '$(RestorePackagesPath)' == '' ">$(RepoRoot)/artifacts/.nuget/packages</RestorePackagesPath>
+    <!--<RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources);$(RepoRoot)/artifacts/tmp/$(Configuration)/test/packages</RestoreAdditionalProjectSources>-->
+
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+
+    <EnableSourceControlManagerQueries>false</EnableSourceControlManagerQueries>
+    <EnableSourceLink>false</EnableSourceLink>
+    <DeterministicSourcePaths>false</DeterministicSourcePaths>
+
+    <!-- We have some test projects in the test assets that need this property set for them. They don't need to match arcade's version as we are actually testing the dotnet test command, so hard coding this version here. -->
+    <XUnitVersion>2.4.1-pre.build.4059</XUnitVersion>
+  </PropertyGroup>
+</Project>

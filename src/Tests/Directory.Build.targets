@@ -9,7 +9,7 @@
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>$(PackageId)</ToolCommandName>
-    <CanRunTestAsTool>true</CanRunTestAsTool>
+    <CanRunTestAsTool Condition="'$(CanRunTestAsTool)' == ''">true</CanRunTestAsTool>
 
     <!-- Put packages for tests in subfolder so we don't try to sign them -->
     <PackageOutputPath>$(PackageOutputPath)tests\</PackageOutputPath>
@@ -17,7 +17,7 @@
     <UserRuntimeConfig>$(MSBuildThisFileDirectory)Common\runtimeconfig.template.json</UserRuntimeConfig>
   </PropertyGroup>
   
-  <ItemGroup Condition="'$(IsTestProject)' == 'true' AND '$(OutputType)' == 'Exe'">
+  <ItemGroup Condition="'$(IsTestProject)' == 'true' AND '$(OutputType)' == 'Exe' AND '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <Compile Include="$(MSBuildThisFileDirectory)Common\Program.cs" />
   </ItemGroup>
 
@@ -29,12 +29,7 @@
     
   </ItemGroup>
 
-  <Target Name="LayoutSdk">
-    <MSBuild Projects="$(RepoRoot)\src\LayoutSdk\LayoutSdk.proj"
-             Targets="LayoutSdk"/>
-  </Target>
-
-  <Target Name="TestAsTool" DependsOnTargets="Pack;LayoutSdk;_InnerGetTestsToRun">
+  <Target Name="TestAsTool" DependsOnTargets="Pack;_InnerGetTestsToRun">
     <PropertyGroup>
       <TestLocalToolFolder>$(ArtifactsTmpDir)$(ToolCommandName)\</TestLocalToolFolder>
       <TestLocalToolExecutionFolder>$(ArtifactsTmpDir)$(ToolCommandName)\w</TestLocalToolExecutionFolder>
@@ -71,7 +66,7 @@
       <ResultsStdOutPath>@(TestToRun->'%(ResultsStdOutPath)')</ResultsStdOutPath>
 
       <TestArgs>-noautoreporters -noRepoInference</TestArgs>
-      <TestArgs>$(TestArgs) -dotnetPath $(SdkLayoutDirectory)\dotnet</TestArgs>
+      <TestArgs>$(TestArgs) -dotnetPath $(ArtifactsBinDir)redist\$(Configuration)\dotnet\dotnet</TestArgs>
       <TestArgs>$(TestArgs) -xml "$(ResultsXmlPath)"</TestArgs>
       <TestArgs>$(TestArgs) -html "$(ResultsHtmlPath)" $(TestRunnerAdditionalArguments)</TestArgs>
       <TestArgs>$(TestArgs) &gt; $(ResultsStdOutPath)</TestArgs>

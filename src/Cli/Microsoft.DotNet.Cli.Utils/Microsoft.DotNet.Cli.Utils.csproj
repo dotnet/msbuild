@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
+    <WarningsAsErrors>true</WarningsAsErrors>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
+    <SignAssembly>true</SignAssembly>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="**\*.resx" GenerateSource="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelPackageVersion)" />
+    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)" />
+    <PackageReference Include="NuGet.Versioning" Version="$(NuGetVersioningPackageVersion)" />
+    <PackageReference Include="NuGet.Packaging" Version="$(NuGetPackagingPackageVersion)" />
+    <!-- nuget moved all type from NuGet.Packaging.Core to NuGet.Packaging and added type forwarding in 5.0.0-rtm.5821.
+        However to allow old msbuild tasks like Arcade tasks still function without recompile, NuGet.Packaging.Core need
+        to be referenced explicitly so the NuGet.Packaging.Core.dll will be part of the SDK and be available for type forwarding -->
+    <PackageReference Include="NuGet.Packaging.Core" Version="$(NuGetPackagingPackageVersion)" />
+    <PackageReference Include="NuGet.Frameworks" Version="$(NuGetFrameworksPackageVersion)" />
+    <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelPackageVersion)" />
+    <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
+  </ItemGroup>
+
+</Project>

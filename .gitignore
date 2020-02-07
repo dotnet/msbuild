@@ -23,5 +23,20 @@ obj/
 
 sdk.sln.DotSettings.user
 
+# Debian and python stuff
+*.dsc
+*.tar.gz
+*.build
+*.changes
+*.deb
+*.pyc
+*.pyo
+
+# OSX Packaging temp files
+*.pkg
+
+# CMake generated files
+cmake/
+
 # Helix payload
 .dotnet.payload
