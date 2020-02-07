@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
     <OutputType>Exe</OutputType>
+    <CanRunTestAsTool>false</CanRunTestAsTool>
   </PropertyGroup>
 
   <ItemGroup>

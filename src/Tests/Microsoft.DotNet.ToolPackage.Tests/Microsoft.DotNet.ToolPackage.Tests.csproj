@@ -3,6 +3,7 @@
     <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
     <OutputType>Exe</OutputType>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
+    <CanRunTestAsTool>false</CanRunTestAsTool>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Cli\dotnet\dotnet.csproj" />

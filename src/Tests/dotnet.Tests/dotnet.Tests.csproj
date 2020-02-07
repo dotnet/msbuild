@@ -8,6 +8,7 @@
     <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
+    <CanRunTestAsTool>false</CanRunTestAsTool>
     
     <!-- Use layout folder for the output folder, to support in-process tests which expect to be running
          on a valid layout. -->
