@@ -307,7 +307,12 @@ namespace Microsoft.Build.Tasks.Xaml
             // generate the list of parameters in order
             if (!_switchesAdded.Contains(propertyToAdd.Name))
             {
+                _switchesAdded.Add(propertyToAdd.Name);
                 _switchOrderList.Add(propertyToAdd.Name);
+            }
+            else
+            {
+                throw new XamlParseException($"Duplicate property name '{propertyToAdd.Name}'");
             }
 
             // Inherit the Prefix from the Tool
