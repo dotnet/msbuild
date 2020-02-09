@@ -312,7 +312,7 @@ namespace Microsoft.Build.Tasks.Xaml
             }
             else
             {
-                throw new XamlParseException($"Duplicate property name '{propertyToAdd.Name}'");
+                throw new XamlParseException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("Xaml.DuplicatePropertyName", propertyToAdd.Name));
             }
 
             // Inherit the Prefix from the Tool

@@ -2528,6 +2528,11 @@
         <target state="translated">MSB3762: 참조가 작업에 전달되지 않았습니다. 적어도 mscorlib 및 Windows.Foundation에 대한 참조가 필요합니다.</target>
         <note>{StrBegin="MSB3762: "}</note>
       </trans-unit>
+      <trans-unit id="Xaml.DuplicatePropertyName">
+        <source>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</source>
+        <target state="new">MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</target>
+        <note>{StrBegin="MSB3724: "}</note>
+      </trans-unit>
       <trans-unit id="Xaml.TaskCreationFailed">
         <source>MSB3686: Unable to create Xaml task.  Compilation failed.  {0}</source>
         <target state="translated">MSB3686: XAML 작업을 만들 수 없습니다.  컴파일에 실패했습니다. {0}</target>
