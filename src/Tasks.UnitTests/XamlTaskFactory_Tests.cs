@@ -206,9 +206,10 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
                                    </ProjectSchemaDefinitions>";
                 TaskParser tp = XamlTestHelpers.LoadAndParse(incorrectXmlContents, "CL");
             }
-            catch (XamlParseException)
+            catch (XamlParseException ex)
             {
                 exceptionCaught = true;
+                Assert.Equal("MSB3724: Unable to create Xaml task.  Duplicate property name 'SameName'.", ex.Message);
             }
 
             Assert.True(exceptionCaught); // "Should have caught a XamlParseException"
