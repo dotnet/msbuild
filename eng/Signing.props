@@ -1,10 +1,5 @@
 <Project>
   <ItemGroup>
-    <!-- 
-      Suppresses code signing on this file because it causes a false-positive on SIGN001.
-    -->
-    <FileSignInfo Include="Microsoft.DotNet.Cli.Utils.resources.dll" CertificateName="None" />
-
     <!-- Dlls from packages created for tests to consume -->
     <FileSignInfo Include="dotnet-dependency-context-test.dll" CertificateName="None" />
     <FileSignInfo Include="dotnet-desktop-binding-redirects.exe" CertificateName="None" />
