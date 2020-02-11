@@ -199,7 +199,11 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
             try
             {
-                string incorrectXmlContents = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
+                string incorrectXmlContents = @"<ProjectSchemaDefinitions
+                                       xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework`
+                                       xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml`
+                                       xmlns:sys=`clr-namespace:System;assembly=mscorlib`
+                                       xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
                                      <Rule Name=`CL`>
                                        <BoolProperty Name=`SameName` Switch=`Og` ReverseSwitch=`Og-` />
                                        <BoolProperty Name=`SameName` Switch=`Og` ReverseSwitch=`Og-` />
