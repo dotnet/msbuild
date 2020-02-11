@@ -13,9 +13,12 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 {
     internal static class HelpForTemplateResolution
     {
-        public static CreationResultStatus CoordinateHelpAndUsageDisplay(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, ITelemetryLogger telemetryLogger, TemplateCreator templateCreator, string defaultLanguage)
+        public static CreationResultStatus CoordinateHelpAndUsageDisplay(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, ITelemetryLogger telemetryLogger, TemplateCreator templateCreator, string defaultLanguage, bool showUsageHelp = true)
         {
-            ShowUsageHelp(commandInput, telemetryLogger);
+            if (showUsageHelp)
+            {
+                ShowUsageHelp(commandInput, telemetryLogger);
+            }
 
             // this is just checking if there is an unambiguous group.
             // the called methods decide whether to get the default language filtered lists, based on what they're doing.

@@ -269,15 +269,15 @@ namespace Microsoft.TemplateEngine.Cli
                 {
                     _settingsLoader.Reload();
                     TemplateListResolutionResult resolutionResult = TemplateListResolver.GetTemplateResolutionResult(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
-                    HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(resolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage);
+                    HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(resolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage, showUsageHelp: false);
                 }
 
                 return installResult;
             }
 
-            //No other cases specified, we've fallen through to "Usage help + List"
+            // No other cases specified, we've fallen through to "Optional usage help + List"
             TemplateListResolutionResult templateResolutionResult = TemplateListResolver.GetTemplateResolutionResult(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
-            HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(templateResolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage);
+            HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(templateResolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage, showUsageHelp: _commandInput.IsHelpFlagSpecified);
 
             return CreationResultStatus.Success;
         }
@@ -379,7 +379,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (_commandInput.IsListFlagSpecified || _commandInput.IsHelpFlagSpecified)
             {
-                return HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(templateResolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage);
+                return HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(templateResolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage, showUsageHelp: _commandInput.IsHelpFlagSpecified);
             }
 
             TemplateInvocationAndAcquisitionCoordinator invocationCoordinator = new TemplateInvocationAndAcquisitionCoordinator(_settingsLoader, _commandInput, _templateCreator, _hostDataLoader, _telemetryLogger, _defaultLanguage, CommandName, _inputGetter);
