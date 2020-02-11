@@ -19,11 +19,6 @@ namespace Microsoft.Build.Tasks.Xaml
     internal class TaskParser
     {
         /// <summary>
-        /// The set of switches added so far.
-        /// </summary>
-        private readonly HashSet<string> _switchesAdded = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        /// <summary>
         /// The ordered list of how the switches get emitted.
         /// </summary>
         private readonly List<string> _switchOrderList = new List<string>();
@@ -305,9 +300,8 @@ namespace Microsoft.Build.Tasks.Xaml
             }
 
             // generate the list of parameters in order
-            if (!_switchesAdded.Contains(propertyToAdd.Name))
+            if (!_switchOrderList.Contains(propertyToAdd.Name))
             {
-                _switchesAdded.Add(propertyToAdd.Name);
                 _switchOrderList.Add(propertyToAdd.Name);
             }
             else
