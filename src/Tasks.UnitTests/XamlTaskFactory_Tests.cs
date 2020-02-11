@@ -17,6 +17,7 @@ using System.Globalization;
 using Microsoft.Build.Tasks.Xaml;
 using System.Xaml;
 using Xunit;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 {
@@ -209,10 +210,10 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
             catch (XamlParseException ex)
             {
                 exceptionCaught = true;
-                Assert.Equal("MSB3724: Unable to create Xaml task.  Duplicate property name 'SameName'.", ex.Message);
+                ex.Message.ShouldBe("MSB3724: Unable to create Xaml task.  Duplicate property name 'SameName'.");
             }
 
-            Assert.True(exceptionCaught); // "Should have caught a XamlParseException"
+            exceptionCaught.ShouldBeTrue(); // "Should have caught a XamlParseException"
         }
 
         /// <summary>
