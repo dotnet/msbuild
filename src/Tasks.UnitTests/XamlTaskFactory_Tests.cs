@@ -195,11 +195,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         [Fact]
         public void TestParseIncorrect_PropertyNamesMustBeUnique()
         {
-            bool exceptionCaught = false;
-
-            try
-            {
-                string incorrectXmlContents = @"<ProjectSchemaDefinitions
+            string incorrectXmlContents = @"<ProjectSchemaDefinitions
                                        xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework`
                                        xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml`
                                        xmlns:sys=`clr-namespace:System;assembly=mscorlib`
@@ -209,15 +205,10 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
                                        <BoolProperty Name=`SameName` Switch=`Og` ReverseSwitch=`Og-` />
                                      </Rule>
                                    </ProjectSchemaDefinitions>";
-                TaskParser tp = XamlTestHelpers.LoadAndParse(incorrectXmlContents, "CL");
-            }
-            catch (XamlParseException ex)
-            {
-                exceptionCaught = true;
-                ex.Message.ShouldBe("MSB3724: Unable to create Xaml task.  Duplicate property name 'SameName'.");
-            }
 
-            exceptionCaught.ShouldBeTrue(); // "Should have caught a XamlParseException"
+            Should
+                .Throw<XamlParseException>(() => XamlTestHelpers.LoadAndParse(incorrectXmlContents, "CL"))
+                .Message.ShouldBe("MSB3724: Unable to create Xaml task.  Duplicate property name 'SameName'.");
         }
 
         /// <summary>
