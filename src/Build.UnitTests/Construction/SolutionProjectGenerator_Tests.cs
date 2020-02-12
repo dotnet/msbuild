@@ -61,6 +61,32 @@ namespace Microsoft.Build.UnitTests.Construction
         }
 
         /// <summary>
+        /// Test that if a before.{sln}>.targets or after.{sln}.targets file has one of the default targets (Build, Clean, etc.) that it includes only the user-defined target.
+        /// </summary>
+        [Theory]
+        [InlineData("before.MySln.sln.targets")]
+        [InlineData("after.MySln.sln.targets")]
+        [InlineData("name.that.does.Not.Affect.The.Build.targets")]
+        public void SolutionProjectIgnoresDuplicateDefaultTargets(string name)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
+                TransientTestFile sln = testEnvironment.CreateFile(folder, "MySln.sln", @"Microsoft Visual Studio Solution File, Format Version 16.00");
+                TransientTestFile targetsFile = testEnvironment.CreateFile(folder, name,
+                    @"<Project>
+                        <Target Name=""Build"" AfterTargets=""NonsenseTarget"">
+                        </Target>
+                      </Project>");
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(SolutionFile.Parse(sln.Path), null, null, _buildEventContext, CreateMockLoggingService());
+                instances.ShouldHaveSingleItem();
+                instances[0].Targets["Build"].AfterTargets.ShouldBe(string.Empty);
+                MockLogger logger = new MockLogger(output);
+                instances[0].Build(targets: null, new List<ILogger> { logger }).ShouldBeTrue();
+            }
+        }
+
+        /// <summary>
         /// Test that a solution filter file excludes projects not covered by its list of projects or their dependencies.
         /// </summary>
         [Fact]
