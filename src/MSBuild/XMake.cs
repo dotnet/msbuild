@@ -1309,7 +1309,10 @@ namespace Microsoft.Build.CommandLine
             {
                 Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
 
-                targetsWriter.WriteLine(string.Join(Environment.NewLine, project.Targets.Keys));
+                foreach (string target in project.Targets.Keys)
+                {
+                    targetsWriter.WriteLine(target);
+                }
 
                 projectCollection.UnloadProject(project);
                 return true;
