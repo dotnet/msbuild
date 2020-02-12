@@ -1316,7 +1316,7 @@ namespace Microsoft.Build.CommandLine
             }
             catch (Exception ex)
             {
-                var message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetsCouldNotBePrinted", ex.Message);
+                var message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetsCouldNotBePrinted", ex);
                 Console.Error.WriteLine(message);
                 return false;
             }
