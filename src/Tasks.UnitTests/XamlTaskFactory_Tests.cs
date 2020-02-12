@@ -208,7 +208,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
             Should
                 .Throw<XamlParseException>(() => XamlTestHelpers.LoadAndParse(incorrectXmlContents, "CL"))
-                .Message.ShouldBe("MSB3724: Unable to create Xaml task.  Duplicate property name 'SameName'.");
+                .Message.ShouldStartWith("MSB3724");
         }
 
         /// <summary>
