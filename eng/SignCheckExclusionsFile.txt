@@ -1,6 +1,25 @@
 ;; File passed to the SignCheck tool for exclusions
 
-;; Localization assemblies for Cli.Utils, which is referenced only by tests
-Microsoft.DotNet.Cli.Utils.resources*.dll
+;; Dlls from packages created for tests to consume
+dotnet-dependency-context-test.dll
+dotnet-desktop-binding-redirects.exe
+dotnet-fallbackfoldertool.dll
+dotnet-hello*.dll
+dotnet-outputsframeworkversion-netcoreapp1.0*.dll
+dotnet-portable-v1-prefercli*.dll
+dotnet-portable-v1*.dll
+dotnet-portable*.dll
+dotnet-prefercliruntime*.dll
+PackageWithFakeNativeDep*.dll
+dotnet-tool-with-output-name*.dll
+
+;; Third party DLLs used by tests
+Castle.Core*.dll
+Moq*.dll
+
+;; Binary test asset
+testwpf*.dll
+
+;; Possibly no longer needed
 kerneltracecontrol*.dll
 msdia140*.dll
