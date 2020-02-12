@@ -103,14 +103,18 @@ namespace Microsoft.TemplateEngine.Cli
             // Render header separator, if set
             if (_headerSeparator.HasValue)
             {
-                int totalWidth = _columnPadding * (_columns.Count - 1);
-
                 for (int i = 0; i < _columns.Count; ++i)
                 {
-                    totalWidth += Math.Max(header[i].MaxWidth, columnWidthLookup[i]);
+                    var columnWidth = Math.Max(header[i].MaxWidth, columnWidthLookup[i]);
+                    b.Append(new string(_headerSeparator.Value, columnWidth));
+
+                    if (i < _columns.Count - 1)
+                    {
+                        b.Append(new string(' ', _columnPadding));
+                    }
                 }
 
-                b.AppendLine("".PadRight(totalWidth, _headerSeparator.Value));
+                b.AppendLine();
             }
 
             IEnumerable<TextWrapper[]> rows = grid;
