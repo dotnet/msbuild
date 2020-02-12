@@ -140,7 +140,10 @@ namespace Microsoft.NET.TestFramework
                 command.Environment.Add("DOTNET_ROOT(x86)", DotNetRoot);
             }
 
-            command.Environment.Add("DOTNET_CLI_HOME", CliHomePath);
+            if (!string.IsNullOrEmpty(CliHomePath))
+            {
+                command.Environment.Add("DOTNET_CLI_HOME", CliHomePath);
+            }
 
             //  We set this environment variable for in-process tests, but we don't want it to flow to out of process tests
             //  (especially if we're trying to run on full Framework MSBuild)
