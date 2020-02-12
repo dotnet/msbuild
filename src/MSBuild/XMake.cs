@@ -3721,7 +3721,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_24_NodeReuse"));
 #endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_25_PreprocessSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_37_TargetsSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_38_TargetsSwitch"));
 
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_26_DetailedSummarySwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_31_RestoreSwitch"));
@@ -3738,6 +3738,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_6_VersionSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_4_HelpSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_16_Examples"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_37_DocsLink"));
         }
 
         /// <summary>

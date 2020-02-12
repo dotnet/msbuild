@@ -180,7 +180,12 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
-      <trans-unit id="HelpMessage_37_TargetsSwitch">
+      <trans-unit id="HelpMessage_37_DocsLink">
+        <source>For more detailed information, see https://aka.ms/msbuild/docs</source>
+        <target state="new">For more detailed information, see https://aka.ms/msbuild/docs</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="HelpMessage_38_TargetsSwitch">
         <source>  -targets[:file]
                      Prints a list of available targets without executing the
                      actual build process. By default the output is written to

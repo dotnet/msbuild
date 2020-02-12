@@ -19,9 +19,8 @@ namespace Microsoft.Build.Shared
     internal class MSBuildLoadContext : AssemblyLoadContext
     {
         private readonly string _directory;
-        private readonly object _guard = new object();
 
-        private static readonly ImmutableHashSet<string> _wellKnownAssemblyNames =
+        internal static readonly ImmutableHashSet<string> WellKnownAssemblyNames =
             new[]
             {
                 "MSBuild",
@@ -31,7 +30,7 @@ namespace Microsoft.Build.Shared
                 "Microsoft.Build.Utilities.Core",
             }.ToImmutableHashSet();
 
-        private static readonly string[] _extensions = new[] { "ni.dll", "ni.exe", "dll", "exe" };
+        internal static readonly string[] Extensions = new[] { "ni.dll", "ni.exe", "dll", "exe" };
 
 
         public MSBuildLoadContext(string assemblyPath)
@@ -41,7 +40,7 @@ namespace Microsoft.Build.Shared
 
         protected override Assembly? Load(AssemblyName assemblyName)
         {
-            if (_wellKnownAssemblyNames.Contains(assemblyName.Name!))
+            if (WellKnownAssemblyNames.Contains(assemblyName.Name!))
             {
                 // Force MSBuild assemblies to be loaded in the default ALC
                 // and unify to the current version.
@@ -57,7 +56,7 @@ namespace Microsoft.Build.Shared
                 // bare search directory if that fails.
                 : new[] { assemblyName.CultureName, string.Empty })
             {
-                foreach (var extension in _extensions)
+                foreach (var extension in Extensions)
                 {
                     var candidatePath = Path.Combine(_directory,
                         cultureSubfolder,

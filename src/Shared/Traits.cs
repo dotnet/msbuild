@@ -197,9 +197,19 @@ namespace Microsoft.Build.Utilities
         public readonly bool DisableNuGetSdkResolver = Environment.GetEnvironmentVariable("MSBUILDDISABLENUGETSDKRESOLVER") == "1";
 
         /// <summary>
+        /// Disable AssemblyLoadContext isolation for plugins.
+        /// </summary>
+        public readonly bool UseSingleLoadContext = Environment.GetEnvironmentVariable("MSBUILDSINGLELOADCONTEXT") == "1";
+
+        /// <summary>
         /// Enables the user of autorun functionality in CMD.exe on Windows which is disabled by default in MSBuild.
         /// </summary>
         public readonly bool UseAutoRunWhenLaunchingProcessUnderCmd = Environment.GetEnvironmentVariable("MSBUILDUSERAUTORUNINCMD") == "1";
+
+        /// <summary>
+        /// Disables switching codepage to UTF-8 after detection of characters that can't be represented in the current codepage.
+        /// </summary>
+        public readonly bool AvoidUnicodeWhenWritingToolTaskBatch = Environment.GetEnvironmentVariable("MSBUILDAVOIDUNICODE") == "1";
 
         /// <summary>
         /// Workaround for https://github.com/Microsoft/vstest/issues/1503.

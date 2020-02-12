@@ -9,6 +9,16 @@ vs.dependencies
   vs.dependency id=Microsoft.VisualStudio.PackageGroup.NuGet
                 version=[15.0,17.0)
 
+vs.relatedProcessFiles
+  vs.relatedProcessFile Path="[InstallDir]\MSBuild\Current\Bin\Microsoft.Build.dll"
+  vs.relatedProcessFile Path="[InstallDir]\MSBuild\Current\Bin\Microsoft.Build.Framework.dll"
+  vs.relatedProcessFile Path="[InstallDir]\MSBuild\Current\Bin\Microsoft.Build.Tasks.Core.dll"
+  vs.relatedProcessFile Path="[InstallDir]\MSBuild\Current\Bin\Microsoft.Build.Utilities.Core.dll"
+  vs.relatedProcessFile Path="[InstallDir]\MSBuild\Current\Bin\amd64\Microsoft.Build.dll"
+  vs.relatedProcessFile Path="[InstallDir]\MSBuild\Current\Bin\amd64\Microsoft.Build.Framework.dll"
+  vs.relatedProcessFile Path="[InstallDir]\MSBuild\Current\Bin\amd64\Microsoft.Build.Tasks.Core.dll"
+  vs.relatedProcessFile Path="[InstallDir]\MSBuild\Current\Bin\amd64\Microsoft.Build.Utilities.Core.dll"
+
 folder InstallDir:\MSBuild\Current
   file source=$(X86BinPath)Microsoft.Common.props
   file source=$(X86BinPath)Microsoft.VisualStudioVersion.v16.Common.props
