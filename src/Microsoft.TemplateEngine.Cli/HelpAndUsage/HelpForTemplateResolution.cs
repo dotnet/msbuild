@@ -195,7 +195,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                         columnPadding: 6,
                         headerSeparator: '-',
                         blankLineBetweenRows: false)
-                    .DefineColumn(t => t.Name, LocalizableStrings.Templates)
+                    .DefineColumn(t => t.Name, LocalizableStrings.Templates, shrinkIfNeeded: true)
                     .DefineColumn(t => t.ShortName, LocalizableStrings.ShortName)
                     .DefineColumn(t => t.Languages, out object languageColumn, LocalizableStrings.Language)
                     .DefineColumn(t => t.Classifications, out object tagsColumn, LocalizableStrings.Tags)
