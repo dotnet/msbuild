@@ -71,9 +71,12 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var runtimeConfigFile = Path.Combine(testAsset.TestRoot, testProject.Name, "bin", "Release", testProject.TargetFrameworks, testProject.RuntimeIdentifier, testProject.Name + ".runtimeconfig.json");
-            File.Exists(runtimeConfigFile).Should().BeTrue();
-            File.ReadAllText(runtimeConfigFile).Should().NotContain("TieredCompilation");
+            var configFile = Path.Combine(testAsset.TestRoot, testProject.Name, "bin", "Release", testProject.TargetFrameworks, testProject.RuntimeIdentifier, testProject.Name + ".runtimeconfig.json");
+
+            File.Exists(configFile).Should().BeTrue();
+            File.ReadAllText(configFile).Should().NotContain("TieredCompilation");
+            File.ReadAllText(configFile).Should().NotContain("System.GC.Concurrent");
+            File.ReadAllText(configFile).Should().NotContain("System.Threading.ThreadPool.MinThreads");
 
             testAsset = testAsset.WithProjectChanges(project =>
             {
@@ -81,6 +84,8 @@ namespace Microsoft.NET.Build.Tests
                 var propertyGroup = new XElement(ns + "PropertyGroup");
                 project.Root.Add(propertyGroup);
                 propertyGroup.Add(new XElement(ns + "TieredCompilation", "false"));
+                propertyGroup.Add(new XElement(ns + "ConcurrentGarbageCollection", "false"));
+                propertyGroup.Add(new XElement(ns + "ThreadPoolMinThreads", "2"));
             });
 
             new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
@@ -88,8 +93,10 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            File.Exists(runtimeConfigFile).Should().BeTrue();
-            File.ReadAllText(runtimeConfigFile).Should().Contain("TieredCompilation");
+            File.Exists(configFile).Should().BeTrue();
+            File.ReadAllText(configFile).Should().Contain("TieredCompilation");
+            File.ReadAllText(configFile).Should().Contain("System.GC.Concurrent");
+            File.ReadAllText(configFile).Should().Contain("System.Threading.ThreadPool.MinThreads");
         }
     }
 }
