@@ -154,7 +154,7 @@
     <!-- Copy our binaries to the x64 location. -->
      <Copy SourceFiles="@(FreshlyBuiltBinariesx64)"
           DestinationFiles="@(FreshlyBuiltBinariesx64 -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\amd64\%(RecursiveDir)%(Filename)%(Extension)')" />
-    
+
     <!-- Copy our freshly-built props and targets, overwriting anything we copied from the machine -->
     <Copy SourceFiles="@(FreshlyBuiltRootProjects)"
           DestinationFiles="@(FreshlyBuiltRootProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\%(Filename)%(Extension)')" />
