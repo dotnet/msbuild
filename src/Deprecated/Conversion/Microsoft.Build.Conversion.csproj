@@ -39,4 +39,5 @@
   </ItemGroup>
 
   <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="! $([MSBuild]::IsOSPlatform('windows'))" />
+
 </Project>

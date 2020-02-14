@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<!--Copyright, Microsoft Corporation, All rights reserved.-->
+﻿<!--Copyright, Microsoft Corporation, All rights reserved.-->
 <Rule
     Name="AssemblyReference"
     DisplayName="Assembly Reference"
@@ -44,4 +43,5 @@
                     Description="The CLR runtime version targeted by this assembly."
                     Visible="False"
                     ReadOnly="True" />
+
 </Rule>

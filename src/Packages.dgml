@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<DirectedGraph GraphDirection="LeftToRight" xmlns="http://schemas.microsoft.com/vs/2009/dgml">
+﻿<DirectedGraph GraphDirection="LeftToRight" xmlns="http://schemas.microsoft.com/vs/2009/dgml">
   <Nodes>
     <Node Id="Microsoft.Build.Framework" Label="Microsoft.Build.Framework" Category="Project" />
     <Node Id="Microsoft.Tpl.Dataflow 4.5.24" Label="Microsoft.Tpl.Dataflow 4.5.24" Category="Package" />

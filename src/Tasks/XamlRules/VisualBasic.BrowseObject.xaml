@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<!--Copyright, Microsoft Corporation, All rights reserved.-->
+﻿<!--Copyright, Microsoft Corporation, All rights reserved.-->
 <Rule
   Name="VisualBasic"
   DisplayName="File Properties"
@@ -85,4 +84,5 @@
       <DataSource Persistence="Intrinsic" ItemType="Compile" PersistedName="Extension" />
     </StringProperty.DataSource>
   </StringProperty>
+
 </Rule>

@@ -37,4 +37,5 @@
     <Compile Remove="InternableString.Simple.cs" />
     <Compile Remove="WeakStringCache.Locking.cs" />
   </ItemGroup>
+
 </Project>

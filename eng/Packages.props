@@ -36,4 +36,5 @@
     <PackageReference Update="xunit.console" Version="$(XUnitVersion)" />
     <PackageReference Update="xunit.core" Version="$(XUnitVersion)" />
   </ItemGroup>
+
 </Project>

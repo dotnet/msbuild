@@ -40,4 +40,5 @@
     <PackageReference Include="Microsoft.Build" Version="14.3.0" />
   </ItemGroup>
   <!-- <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" /> -->
+
 </Project>

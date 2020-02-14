@@ -15,4 +15,5 @@
     <Error Message="No files found in $(MSBuildBinPath)"
            Condition="'@(TestItems)' == ''" />
   </Target>
+
 </Project>

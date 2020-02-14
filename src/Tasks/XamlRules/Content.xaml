@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<!--Copyright, Microsoft Corporation, All rights reserved.-->
+﻿<!--Copyright, Microsoft Corporation, All rights reserved.-->
 <Rule
   Name="Content"
   DisplayName="File Properties"
@@ -77,4 +76,5 @@
       <NameValuePair Name="DoNotCopyAcrossProjects" Value="true" />
     </StringProperty.Metadata>
   </StringProperty>
+
 </Rule>

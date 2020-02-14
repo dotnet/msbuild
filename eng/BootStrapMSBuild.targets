@@ -208,4 +208,5 @@
          https://github.com/dotnet/msbuild/issues/6566 -->
     <Touch Files="$(BootstrapDestination)\DisableWorkloadResolver.sentinel" AlwaysCreate="true" />
   </Target>
+
 </Project>

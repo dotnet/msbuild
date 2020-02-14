@@ -8,4 +8,5 @@
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
     <StartAction Condition="'$(StartAction)'==''">Program</StartAction>
   </PropertyGroup>
+
 </Project>

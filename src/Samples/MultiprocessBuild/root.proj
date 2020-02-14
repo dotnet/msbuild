@@ -4,4 +4,5 @@
     <MSBuild Projects="1.csproj;2.csproj" BuildInParallel="true"/>
     <Message Importance="high" Text="## in root done building ##"/>
   </Target>
+
 </Project>

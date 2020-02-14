@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<!--Copyright, Microsoft Corporation, All rights reserved.-->
+﻿<!--Copyright, Microsoft Corporation, All rights reserved.-->
 <Rule
   Name="Folder"
   DisplayName="General"
@@ -17,4 +16,5 @@
             <DataSource Persistence="ProjectInstance" ItemType="Folder" PersistedName="FileNameAndExtension" />
       </StringProperty.DataSource>
   </StringProperty>
+
 </Rule>

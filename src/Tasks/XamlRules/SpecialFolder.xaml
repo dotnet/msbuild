@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<!--Copyright, Microsoft Corporation, All rights reserved.-->
+﻿<!--Copyright, Microsoft Corporation, All rights reserved.-->
 <Rule
 	Name="SpecialFolder"
 	DisplayName="General"
@@ -21,4 +20,5 @@
         <EnumValue Name="Recursive" />
         <EnumValue Name="TopDirectoryOnly" />
     </EnumProperty>
+
 </Rule>

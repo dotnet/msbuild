@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<!--Copyright, Microsoft Corporation, All rights reserved.-->
+﻿<!--Copyright, Microsoft Corporation, All rights reserved.-->
 <Rule
   Name="None"
   DisplayName="General"
@@ -90,4 +89,5 @@
   <StringProperty Name="LastGenOutput" Visible="false" Description="The filename of the last file generated as a result of the SFG." />
   <BoolProperty Name="DesignTime" Visible="false" Description="A value indicating whether this file has a designer." />
   <BoolProperty Name="AutoGen" Visible="false" Description="A value indicating whether this is a generated file." />
+
 </Rule>

@@ -31,4 +31,5 @@
       <NuspecProperties>$(NuspecProperties);MSBuildConversionBinPath=$(MSBuildConversionBinPath.TrimEnd('\\/'))</NuspecProperties>
     </PropertyGroup>
   </Target>
+
 </Project>

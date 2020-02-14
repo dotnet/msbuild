@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<!--Copyright, Microsoft Corporation, All rights reserved.-->
+﻿<!--Copyright, Microsoft Corporation, All rights reserved.-->
 <ProjectSchemaDefinitions
     xmlns="http://schemas.microsoft.com/build/2009/properties">
 
@@ -135,5 +134,5 @@
     <FileExtension Name=".tte" ContentType="Font" />
     <FileExtension Name=".woff" ContentType="Font" />
     <FileExtension Name=".eot" ContentType="Font" />
-</ProjectSchemaDefinitions>
 
+</ProjectSchemaDefinitions>

@@ -42,4 +42,5 @@
   </Target>
 
   <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="$(ShouldSkipProject)"/>
+
 </Project>

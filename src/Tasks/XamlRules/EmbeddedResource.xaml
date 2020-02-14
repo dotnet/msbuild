@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<!--Copyright, Microsoft Corporation, All rights reserved.-->
+﻿<!--Copyright, Microsoft Corporation, All rights reserved.-->
 <Rule
 	Name="EmbeddedResource"
 	DisplayName="Embedded Resource"
@@ -92,4 +91,5 @@
       <DataSource Persistence="ProjectFile" ItemType="EmbeddedResource" PersistedName="Generator" HasConfigurationCondition="False" />
     </StringProperty.DataSource>
   </StringProperty>
+
 </Rule>

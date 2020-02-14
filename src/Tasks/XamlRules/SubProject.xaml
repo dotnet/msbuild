@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<!--Copyright, Microsoft Corporation, All rights reserved.-->
+﻿<!--Copyright, Microsoft Corporation, All rights reserved.-->
 <Rule
   Name="SubProject"
   DisplayName="General"
@@ -13,4 +12,5 @@
   <StringProperty Name="ProjectTypeGuid" Visible="False" />
   <StringProperty Name="ProjectId" Visible="False" />
   <BoolProperty Name="VirtualProject" Visible="False" />
+
 </Rule>

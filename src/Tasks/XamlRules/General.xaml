@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<!--Copyright, Microsoft Corporation, All rights reserved.-->
+﻿<!--Copyright, Microsoft Corporation, All rights reserved.-->
 <Rule
   Name="ConfigurationGeneral"
   DisplayName="General"
@@ -90,4 +89,5 @@
       <DataSource Persistence="ProjectFile" PersistedName="MSBuildProjectDirectory" />
     </StringProperty.DataSource>
   </StringProperty>
+
 </Rule>

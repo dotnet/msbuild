@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build">
+﻿<Project DefaultTargets="Build">
   <Import Project="..\dir.props" />
   <PropertyGroup>
     <ProjectGuid>{E1ADB824-2B34-4920-953F-746DFD6DB3C1}</ProjectGuid>
@@ -70,4 +69,5 @@
     <None Include="project.json" />
   </ItemGroup>
   <Import Project="..\dir.targets" />
+
 </Project>

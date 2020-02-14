@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<xsl:stylesheet
+﻿<xsl:stylesheet
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns="urn:schemas-microsoft-com:asm.v2"
 	version="1.0">

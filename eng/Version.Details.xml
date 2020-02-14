@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.22054.3">

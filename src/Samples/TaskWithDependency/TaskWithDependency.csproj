@@ -16,4 +16,5 @@
     <ProjectReference Include="..\..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Dependency\Dependency.csproj" />
   </ItemGroup>
+
 </Project>

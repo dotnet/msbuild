@@ -26,4 +26,5 @@
     <!-- our swr file must be picked up, this is how we set that. -->
     <SwrFile Include="exe.swr" Condition=" '$(MSBuildRuntimeType)' == 'Full' " />
   </ItemGroup>
+
 </Project>

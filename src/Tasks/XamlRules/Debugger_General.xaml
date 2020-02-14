@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<!--Copyright, Microsoft Corporation, All rights reserved.-->
+﻿<!--Copyright, Microsoft Corporation, All rights reserved.-->
 <Rule Name="DebuggerGeneralProperties"
       DisplayName="Debugger General Properties"
       Description="General Debugger options"
@@ -25,4 +24,5 @@
     <EnumValue Name="Mixed" DisplayName="Mixed Image" Description="The executable image to debug is a mixture of native and managed code." />
     <EnumValue Name="Managed" DisplayName="Managed Image" Description="The executable image to debug is a fully managed application." />
   </EnumProperty>
+
 </Rule>

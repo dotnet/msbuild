@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<!--Copyright, Microsoft Corporation, All rights reserved.-->
+﻿<!--Copyright, Microsoft Corporation, All rights reserved.-->
 <Rule
   Name="SourceControl"
   DisplayName="Source control"
@@ -13,4 +12,5 @@
   <StringProperty Name="SccProvider" />
   <StringProperty Name="SccAuxPath" />
   <StringProperty Name="SccLocalPath" />
+
 </Rule>

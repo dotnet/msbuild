@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<!--Copyright, Microsoft Corporation, All rights reserved.-->
+﻿<!--Copyright, Microsoft Corporation, All rights reserved.-->
 <Rule
     Name="ResolvedAssemblyReference"
     DisplayName="Resolved Assembly Reference"
@@ -119,4 +118,5 @@
     <StringProperty Name="FusionName" Visible="False" ReadOnly="True" Description="The full fusion name of the resolved assembly." />
     <StringProperty Name="ResolvedFrom" Visible="False" ReadOnly="True" Description="{}What repository held the reference that was used to resolve this.  (&quot;{GAC}&quot; if it was in the GAC)." />
     <StringProperty Name="FrameworkFile" Visible="False" ReadOnly="True" Description="Is this file a framework file. Ie Found in the target framework directory or in the redist list." />
+
 </Rule>

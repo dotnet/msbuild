@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<!--Copyright, Microsoft Corporation, All rights reserved.-->
+﻿<!--Copyright, Microsoft Corporation, All rights reserved.-->
 <Rule
 	Name="ComReference"
 	DisplayName="COM Reference"
@@ -17,4 +16,5 @@
 	<IntProperty Name="VersionMinor" />
 	<BoolProperty Name="Isolated" />
 	<StringProperty Name="WrapperTool" />
+
 </Rule>

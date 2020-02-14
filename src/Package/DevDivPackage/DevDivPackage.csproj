@@ -25,4 +25,5 @@
   <PropertyGroup>
     <AllowedReferenceRelatedFileExtensions>$(AllowedReferenceRelatedFileExtensions);.tlb</AllowedReferenceRelatedFileExtensions>
   </PropertyGroup>
+
 </Project>

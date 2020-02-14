@@ -9,4 +9,5 @@
     <Message Text="Loading task from: $(AssemblyPath)"/>
     <LogStringFromDependency />
   </Target>
+
 </Project>

@@ -39,4 +39,5 @@
     <RemoveDir Directories="$(_PackageFolderInGlobalPackages)"
                Condition="Exists('$(_PackageFolderInGlobalPackages)')" />
   </Target>
+
 </Project>
