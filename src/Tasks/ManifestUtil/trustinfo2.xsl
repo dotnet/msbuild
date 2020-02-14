@@ -8,7 +8,7 @@
 
 <xsl:param name="defaultRequestedPrivileges"/>
 <xsl:variable name="requestedPrivileges" select="document($defaultRequestedPrivileges)" />
-              
+
 <xsl:template match="asmv2:PermissionSet" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2">
 <trustInfo>
     <security>

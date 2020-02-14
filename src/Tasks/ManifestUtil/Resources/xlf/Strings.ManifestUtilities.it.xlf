@@ -88,7 +88,7 @@
         &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
 
-         Se si vuole usare Virtualizzazione file system e registro di sistema per la 
+         Se si vuole usare Virtualizzazione file system e registro di sistema per la
          compatibilità con le versioni precedenti, eliminare il nodo requestedExecutionLevel.
     </target>
         <note />

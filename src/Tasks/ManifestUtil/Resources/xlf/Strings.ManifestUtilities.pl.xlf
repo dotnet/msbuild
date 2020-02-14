@@ -81,14 +81,14 @@
     </source>
         <target state="translated">
           Opcje manifestu kontroli konta użytkownika
-          Jeśli chcesz zmienić poziom kontroli konta użytkownika systemu Windows, zastąp węzeł 
+          Jeśli chcesz zmienić poziom kontroli konta użytkownika systemu Windows, zastąp węzeł
           requestedExecutionLevel jednym z następujących.
 
         &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
 
-         Jeśli chcesz użyć wirtualizacji plików i rejestru do celów zgodności wstecznej, 
+         Jeśli chcesz użyć wirtualizacji plików i rejestru do celów zgodności wstecznej,
          usuń węzeł requestedExecutionLevel.
     </target>
         <note />

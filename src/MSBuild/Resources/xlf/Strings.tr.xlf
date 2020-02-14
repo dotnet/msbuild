@@ -114,7 +114,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      izin verildiğini gösterir.  Etkileşimin beklenmediği
                      otomatik bir senaryoda bu bağımsız değişkeni
                      kullanmayın.
-                     -interactive değerinin belirtilmesi, -interactive:true 
+                     -interactive değerinin belirtilmesi, -interactive:true
                      değerinin belirtilmesiyle aynıdır.  Parametreyi, yanıt
                      dosyasından gelen bir değeri geçersiz kılmak için kullanın.
     </target>
@@ -365,7 +365,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      Example:
                        -property:WarningLevel=2;OutDir=bin\Debug\
 </source>
-        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  Bu proje düzeyi özellikleri ayarlayın veya geçersiz kılın. &lt;n&gt; 
+        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  Bu proje düzeyi özellikleri ayarlayın veya geçersiz kılın. &lt;n&gt;
                      özelliğin adı ve &lt;v&gt; özelliğin değeridir. Birden çok
                      özelliği birbirinden ayırmak için noktalı virgül veya virgül
                      kullanın veya her özelliği ayrı ayrı belirtin. (Kısa biçim: -p)
@@ -406,7 +406,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      &lt;günlükçü derlemesi&gt; söz dizimi şöyledir:
                        {&lt;derleme adı&gt;[,&lt;strong name&gt;] | &lt;derleme dosyası&gt;}
                      Günlükçü seçenekleri, MSBuild'in günlükçüyü oluşturma biçimini belirtir.
-                     &lt;günlükçü parametreleri &gt; isteğe bağlıdır ve tam olarak 
+                     &lt;günlükçü parametreleri &gt; isteğe bağlıdır ve tam olarak
                      yazdığınız şekliyle günlükçüye geçirilir. (Kısa biçim: -l)
                      Örnekler:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
@@ -482,29 +482,29 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
         <target state="translated">  -consoleLoggerParameters:&lt;parametreler&gt;
                      Konsol günlükçüsü için parametreler. (Kısa biçim: -clp)
                      Kullanılabilir parametreler:
-                        PerformanceSummary--Görevlerde, hedeflerde ve 
+                        PerformanceSummary--Görevlerde, hedeflerde ve
                             projelerde harcanan süreyi göster.
                         Summary--Sonda hata ve uyarı özetini göster.
                         NoSummary--Sonda hata ve uyarı özetini gösterme.
                         ErrorsOnly--Yalnızca hataları göster.
                         WarningsOnly--Yalnızca uyarıları göster.
                         NoItemAndPropertyList--Her proje derlemesinin
-                            başında öğe ve özelliklerin listesini gösterme. 
-                        ShowCommandLine--TaskCommandLineEvent iletilerini 
+                            başında öğe ve özelliklerin listesini gösterme.
+                        ShowCommandLine--TaskCommandLineEvent iletilerini
                             göster.
                         ShowTimestamp--Tüm iletilerde önek olarak Zaman
                             Damgasını göster.
-                        ShowEventId--Başlatılan olaylar, bitirilen olaylar ve 
+                        ShowEventId--Başlatılan olaylar, bitirilen olaylar ve
                             iletiler için eventId'yi göster.
                         ForceNoAlign--Metni konsol arabelleğinin boyutuna göre
                             ayarlama.
                         DisableConsoleColor--Tüm günlük iletileri için
                             varsayılan konsol renklerini kullan.
-                        DisableMPLogging--Çoklu işlemci olmayan modda 
-                            çalışırken çıkışta çok işlemcili günlük stilini 
+                        DisableMPLogging--Çoklu işlemci olmayan modda
+                            çalışırken çıkışta çok işlemcili günlük stilini
                             devre dışı bırak.
-                        EnableMPLogging--Çok işlemci olmayan modda çalışırken 
-                            bile çok işlemcili günlük stilini etkinleştir. Bu 
+                        EnableMPLogging--Çok işlemci olmayan modda çalışırken
+                            bile çok işlemcili günlük stilini etkinleştir. Bu
                             günlük stili varsayılan olarak açıktır.
                         ForceConsoleColor--Konsol desteklemese bile ANSI
                             konsol renklerini kullan
@@ -703,9 +703,9 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                        -ignoreProjectExtensions:.sln
     </source>
         <target state="translated">  -ignoreProjectExtensions:&lt;uzantılar&gt;
-                     Hangi proje dosyasının oluşturulacağı belirlenirken 
-                     yoksayılacak uzantıların listesi. Birden çok uzantıyı 
-                     birbirinden ayırmak için noktalı virgül veya 
+                     Hangi proje dosyasının oluşturulacağı belirlenirken
+                     yoksayılacak uzantıların listesi. Birden çok uzantıyı
+                     birbirinden ayırmak için noktalı virgül veya
                      virgül kullanın.
                      (Kısa biçim: -ignore)
                      Örnek:
@@ -731,8 +731,8 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
    </source>
         <target state="translated">  -toolsVersion:&lt;sürüm&gt;
                      Derleme sırasında kullanılacak MSBuild Araç Kümesinin
-                     (görevler, hedefler vb.) sürümü. Bu sürüm, tek tek projelerde 
-                     belirtilen sürümleri geçersiz kılar. (Kısa biçim: 
+                     (görevler, hedefler vb.) sürümü. Bu sürüm, tek tek projelerde
+                     belirtilen sürümleri geçersiz kılar. (Kısa biçim:
                      -tv)
                      Örnek:
                        -toolsVersion:3.5
@@ -791,14 +791,14 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
         <target state="translated">  -distributedFileLogger
                      Derleme çıkışını, her MSBuild düğümü için bir günlük
                      dosyası olmak üzere birden çok günlük dosyasına kaydeder. Bu
-                     dosyaların ilk konumu geçerli dizindir. Dosyaların 
-                     varsayılan adı "MSBuild&lt;düğümkimliği&gt;.log"dur. 
-                     Dosyaların konumu ve fileLogger'ın diğer parametreleri 
+                     dosyaların ilk konumu geçerli dizindir. Dosyaların
+                     varsayılan adı "MSBuild&lt;düğümkimliği&gt;.log"dur.
+                     Dosyaların konumu ve fileLogger'ın diğer parametreleri
                      "/fileLoggerParameters" anahtarının eklenmesi yoluyla
                      belirtilebilir.
 
                      Günlük dosyası adı fileLoggerParameters anahtarı
-                     aracılığıyla ayarlanırsa dağıtılmış günlükçü fileName 
+                     aracılığıyla ayarlanırsa dağıtılmış günlükçü fileName
                      değerini şablon olarak kullanıp her düğümün günlük dosyasını
                      oluşturmak için bu fileName değerine düğüm kimliğini ekler.
     </target>
@@ -843,32 +843,32 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
     </source>
         <target state="translated">  -fileLoggerParameters[n]:&lt;parametreler&gt;
                      Dosya günlükçüleri için ek parametreler sağlar.
-                     Bu anahtarın olması karşılık gelen -fileLogger[n] 
+                     Bu anahtarın olması karşılık gelen -fileLogger[n]
                      anahtarının olduğu anlamına gelir.
                      "n" varsa, 1-9 arasında bir rakam olabilir.
-                     Dağıtılmış dosya günlükçüleri varsa -fileLoggerParameters 
-                     bunlar tarafından da kullanılır; -distributedFileLogger 
+                     Dağıtılmış dosya günlükçüleri varsa -fileLoggerParameters
+                     bunlar tarafından da kullanılır; -distributedFileLogger
                      açıklamasına bakın.
                      (Kısa biçim: -flp[n])
-                     Konsol günlükçüsü için listelenenlerle aynı parametreler 
+                     Konsol günlükçüsü için listelenenlerle aynı parametreler
                      kullanılabilir. Kullanılabilecek bazı ek parametreler:
-                        LogFile--Oluşturma günlüğünün yazılacağı günlük 
+                        LogFile--Oluşturma günlüğünün yazılacağı günlük
                             dosyasının yolu.
-                        Append--Derleme günlüğünün gün dosyasının sonuna mı 
-                            ekleneceğini yoksa üzerine mi yazılacağını 
-                            belirler. Anahtar ayarlandığında oluşturma günlüğü 
-                            dosyanın sonuna eklenir. Anahtar ayarlanmadığında 
-                            varolan günlük dosyasının üzerine yazılır. 
+                        Append--Derleme günlüğünün gün dosyasının sonuna mı
+                            ekleneceğini yoksa üzerine mi yazılacağını
+                            belirler. Anahtar ayarlandığında oluşturma günlüğü
+                            dosyanın sonuna eklenir. Anahtar ayarlanmadığında
+                            varolan günlük dosyasının üzerine yazılır.
                             Varsayılan: günlük dosyasının sonuna eklenmez.
-                        Encoding--Dosyanın kodlamasını belirtir; örneğin, 
+                        Encoding--Dosyanın kodlamasını belirtir; örneğin,
                             UTF-8, Unicode veya ASCII
                      Varsayılan ayrıntı düzeyi ayarı Detailed'dır.
                      Örnekler:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
-                       -flp1:warningsonly;logfile=msbuild.wrn 
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+                       -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>

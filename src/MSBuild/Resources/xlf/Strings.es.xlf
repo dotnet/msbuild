@@ -498,7 +498,7 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                         ShowCommandLine: muestra los mensajes de TaskCommandLineEvent
                         ShowTimestamp: muestra la marca de tiempo como un prefijo en los
                             mensajes.
-                        ShowEventId: muestra el identificador de evento para los eventos iniciados, los eventos 
+                        ShowEventId: muestra el identificador de evento para los eventos iniciados, los eventos
                             finalizados y los mensajes.
                         ForceNoAlign: no alinea el texto al tamaño del
                             búfer de la consola
@@ -712,8 +712,8 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                        -ignoreProjectExtensions:.sln
     </source>
         <target state="translated">  -ignoreProjectExtensions:&lt;extensiones&gt;
-                     Lista de extensiones que se omiten al determinar el 
-                     archivo del proyecto que se va a compilar. Use el carácter de 
+                     Lista de extensiones que se omiten al determinar el
+                     archivo del proyecto que se va a compilar. Use el carácter de
                      punto y coma o coma para separar varias extensiones.
                     (Forma corta: -ignore)
                      Ejemplo:
@@ -864,9 +864,9 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                             sobrescribirá el archivo de registro. Si se establece el
                             modificador, se adjunta el registro de compilación al archivo de registro;
                             Si no se especifica el modificador, se sobrescribe
-                            el contenido del archivo de registro existente. 
+                            el contenido del archivo de registro existente.
                             El valor predeterminado es adjuntar el archivo de registro.
-                        Encoding: especifica la codificación del archivo, 
+                        Encoding: especifica la codificación del archivo,
                             por ejemplo, UTF-8, Unicode o ASCII
                      El nivel de detalle predeterminado es Detailed.
                      Ejemplos:

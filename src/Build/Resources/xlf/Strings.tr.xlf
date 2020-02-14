@@ -42,7 +42,7 @@
     </source>
         <target state="translated">MSB4252: Genel özelliklerle sahip "{0}" projesi
     ({1})
-    ({4}) hedefle 
+    ({4}) hedefle
     ({3})
     genel özelliklere sahip "{2}" projesini oluşturuyor ancak oluşturulan projeye yönelik derleme sonucu, altyapı önbelleğinde değil. Bu, yalıtılmış derlemelerde aşağıdakilerden biri anlamına gelebilir:
     - Başvuru, "{0}" projesindeki ProjectReferenceTargets öğesinde belirtilmeyen bir hedefle çağrıldı

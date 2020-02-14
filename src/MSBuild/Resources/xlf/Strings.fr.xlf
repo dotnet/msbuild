@@ -1681,7 +1681,7 @@ fois plus petit que le journal
         <target state="translated">  -profileEvaluation:&lt;fichier&gt;
          Profile l'évaluation MSBuild et écrit le résultat
          dans le fichier spécifié. Si l'extension du fichier spécifié
-         est '.md', le résultat est généré au format Markdown. 
+         est '.md', le résultat est généré au format Markdown.
          Sinon, un fichier de valeurs séparées par des tabulations est généré.
     </target>
         <note />

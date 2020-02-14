@@ -13,5 +13,5 @@
 
   <Import Project="..\NuspecProject.targets" Condition="'$(MonoBuild)' != 'true'" />
   <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="'$(MonoBuild)' == 'true'" />
-  
+
 </Project>

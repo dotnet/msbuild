@@ -81,7 +81,7 @@
     </source>
         <target state="translated">
           Параметры манифеста UAC
-          Если нужно изменить уровень контроля учетных записей Windows, замените 
+          Если нужно изменить уровень контроля учетных записей Windows, замените
           узел requestedExecutionLevel одним из следующих значений.
 
         &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;

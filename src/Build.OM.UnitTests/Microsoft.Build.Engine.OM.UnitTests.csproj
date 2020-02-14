@@ -16,7 +16,7 @@
 
   <PropertyGroup>
     <NuGetCommandLinePackageVersion>4.1.0</NuGetCommandLinePackageVersion>
-</PropertyGroup>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />

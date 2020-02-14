@@ -116,7 +116,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                      interakcyjność nie jest oczekiwana.
                      Podanie parametru -interactive jest równoznaczne
                      z podaniem parametru -interactive:true. Użyj tego
-                     parametru, aby przesłonić wartość pochodzącą z pliku 
+                     parametru, aby przesłonić wartość pochodzącą z pliku
                      odpowiedzi.
     </target>
         <note>
@@ -137,7 +137,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -isolateProjects[:True|False]
-                     Powoduje, że program MSBuild kompiluje każdy projekt                        
+                     Powoduje, że program MSBuild kompiluje każdy projekt
                      w sposób izolowany.
 
                      Jest to bardziej restrykcyjny tryb programu MSBuild, ponieważ
@@ -169,7 +169,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -graphBuild[:True|False]
-                     Powoduje, że program MSBuild tworzy i kompiluje graf                 
+                     Powoduje, że program MSBuild tworzy i kompiluje graf
                      projektu.
 
                      Tworzenie grafu obejmuje identyfikowanie odwołań do
@@ -313,7 +313,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                      osobno.
 
                      Wszelkie pliki odpowiedzi o nazwie „msbuild.rsp” będą automatycznie
-                     wykorzystywane z następujących lokalizacji: 
+                     wykorzystywane z następujących lokalizacji:
                      (1) katalog programu msbuild.exe
                      (2) katalog pierwszej kompilacji projektu lub rozwiązania
 </target>
@@ -500,11 +500,11 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                         ErrorsOnly — pokazuje tylko błędy.
                         WarningsOnly — pokazuje tylko ostrzeżenia.
                         NoItemAndPropertyList — nie pokazuje listy elementów
-                        i właściwości na początku każdej kompilacji projektu.    
+                        i właściwości na początku każdej kompilacji projektu.
                         ShowCommandLine — pokazuje komunikaty
                         TaskCommandLineEvent.
                         ShowTimestamp — wyświetla sygnaturę czasową jako
-                        prefiks każdego komunikatu.                                           
+                        prefiks każdego komunikatu.
                         ShowEventId — pokazuje identyfikator zdarzenia dla
                         rozpoczętych zdarzeń, zakończonych zdarzeń
                         i komunikatów.
@@ -517,7 +517,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                         jednoprocesorowym.
                         EnableMPLogging — włącza styl rejestrowania
                         wieloprocesorowego nawet podczas działania w trybie
-                        jednoprocesorowym. Ten styl rejestrowania jest włączony domyślnie. 
+                        jednoprocesorowym. Ten styl rejestrowania jest włączony domyślnie.
                         ForceConsoleColor — używa kolorów konsoli ANSI nawet wtedy,
                             gdy konsola ich nie obsługuje.
                         Verbosity — przesłania ustawienie -verbosity dla tego
@@ -864,7 +864,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                      Dostępne są parametry takie same, jak podane dla rejestratora
                      konsoli. Dostępne są również dodatkowe parametry:
                        LogFile — ścieżka do pliku dziennika, w którym będzie
-                                 zapisywany dziennik kompilacji. 
+                                 zapisywany dziennik kompilacji.
                        Append — określa, czy plik dziennika kompilacji zostanie
                                 dołączony do pliku dziennika, czy go zastąpi.
                                 Ustawienie tego przełącznika powoduje dołączenie dziennika kompilacji
@@ -878,8 +878,8 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
-                       -flp1:warningsonly;logfile=msbuild.wrn 
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+                       -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1635,10 +1635,10 @@ dzienników                     tekstowych i wykorzystać w innych narzędziach 
     </source>
         <target state="translated">  -restore[:True|False]
                      Uruchamia element docelowy o nazwie Restore przed skompilowaniem
-                     innych elementów docelowych i zapewnia, że kompilacja tych 
-                     elementów docelowych korzysta z najnowszej logiki przywróconej 
-                     kompilacji. Jest to przydatne, gdy drzewo projektu wymaga 
-                     przywrócenia pakietów przed ich skompilowaniem. Podanie parametru 
+                     innych elementów docelowych i zapewnia, że kompilacja tych
+                     elementów docelowych korzysta z najnowszej logiki przywróconej
+                     kompilacji. Jest to przydatne, gdy drzewo projektu wymaga
+                     przywrócenia pakietów przed ich skompilowaniem. Podanie parametru
                      -restore jest równoznaczne z podaniem parametru -restore:True.
                      Za pomocą tego parametru można przesłonić wartość pochodzącą
                      z pliku odpowiedzi.

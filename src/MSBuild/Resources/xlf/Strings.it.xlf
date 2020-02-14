@@ -138,7 +138,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
     </source>
         <target state="translated">  -isolateProjects[:True|False]
                      Fa in modo che MSBuild compili ogni progetto in modalità
-                     isolamento. 
+                     isolamento.
 
                      Si tratta di una modalità più restrittiva di
                      MSBuild perché richiede che il grafico del progetto sia
@@ -316,7 +316,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                      separatamente.
 
                      Qualsiasi file di risposta denominato "msbuild.rsp" viene usato
-                     automaticamente dai percorsi seguenti: 
+                     automaticamente dai percorsi seguenti:
                      (1) la directory di msbuild.exe
                      (2) la directory della prima compilazione di soluzione o progetto
 </target>

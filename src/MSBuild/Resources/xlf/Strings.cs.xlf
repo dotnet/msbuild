@@ -304,9 +304,9 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
         <target state="translated">  @&lt;soubor&gt;            Vložení nastavení příkazového řádku z textového souboru. Chcete-li zadat
                      více souborů odpovědí, uveďte každý soubor
                      odpovědí zvlášť.
-                     
-                     Automaticky jsou použity všechny soubory s názvem msbuild.rsp 
-                     nacházející se v následujících umístěních: 
+
+                     Automaticky jsou použity všechny soubory s názvem msbuild.rsp
+                     nacházející se v následujících umístěních:
                      (1) adresář nástroje msbuild.exe
                      (2) adresář prvního sestaveného projektu nebo řešení
 </target>
@@ -367,7 +367,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
 </source>
         <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  Nastavení nebo potlačení daných vlastností na úrovni
                      projektu. &lt;n&gt; je název vlastnosti a &lt;v&gt; je její hodnota. Více
-                     vlastností oddělte středníkem či čárkou nebo zadejte 
+                     vlastností oddělte středníkem či čárkou nebo zadejte
                      každou vlastnost zvlášť. (Krátký tvar: -p)
                      Příklad:
                        -property:WarningLevel=2;OutDir=bin\Debug\
@@ -408,7 +408,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Syntaxe hodnoty &lt;sestavení_protok_nást&gt;:
                         {&lt;název_sestavení&gt;[,&lt;strong name&gt;] | &lt;soubor_sestavení&gt;}
                      Parametry protokolovacího nástroje určují, jak MSBuild vytvoří protokolovací nástroj.
-                     Parametry &lt;param_protok_nást&gt; jsou volitelné a předávají se 
+                     Parametry &lt;param_protok_nást&gt; jsou volitelné a předávají se
                      protokolovacímu nástroji přesně v tom tvaru, v jakém
                      byly zadány. (Krátký tvar: -l)
                      Příklady:
@@ -508,7 +508,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                             režimu.
                         EnableMPLogging – povolí víceprocesorový styl výstupu
                             protokolování i při práci v jiném
-                            režimu. Tento styl protokolování je výchozí. 
+                            režimu. Tento styl protokolování je výchozí.
                         ForceConsoleColor – použije barvy konzoly ANSI,
                             i když to konzola nepodporuje.
                         Verbosity – potlačí nastavení -verbosity
@@ -551,10 +551,10 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Example:
                        -validate:MyExtendedBuildSchema.xsd
 </source>
-        <target state="translated">  -validate          Ověřit projekt podle výchozího schématu. 
+        <target state="translated">  -validate          Ověřit projekt podle výchozího schématu.
                      (Krátký tvar: -val)
 
-  -validate:&lt;schéma&gt; Ověřit projekt podle zadaného schématu. 
+  -validate:&lt;schéma&gt; Ověřit projekt podle zadaného schématu.
                      (Krátký tvar: -val)
                      Příklad:
                        -validate:MyExtendedBuildSchema.xsd
@@ -669,11 +669,11 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  -distributedlogger:&lt;centr_protok_nást&gt;*&lt;předáv_protok_nást&gt;                     
+        <target state="translated">  -distributedlogger:&lt;centr_protok_nást&gt;*&lt;předáv_protok_nást&gt;
                      Použít zadaný protokolovací nástroj pro protokolování událostí
-                     z nástroje MSBuild; ke každému uzlu připojit jinou instanci 
-                     protokolovacího nástroje. Chcete-li zadat více 
-                     protokolovacích nástrojů, uveďte je jednotlivě. 
+                     z nástroje MSBuild; ke každému uzlu připojit jinou instanci
+                     protokolovacího nástroje. Chcete-li zadat více
+                     protokolovacích nástrojů, uveďte je jednotlivě.
                      (Krátký tvar: -dl)
                      Syntaxe hodnoty &lt;protok_nást&gt;:
                         [&lt;třída_protok_nást&gt;,]&lt;sestav_protok_nást&gt;
@@ -737,7 +737,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
         <target state="translated">  -toolsversion:&lt;verze&gt;
                      Verze sady nástrojů MSBuild (úloh, cílů apod.), která má být
                      použita při sestavení. Tato verze má přednost před verzemi
-                     uvedenými v jednotlivých projektech. 
+                     uvedenými v jednotlivých projektech.
                      (Krátký tvar: -tv)
                      Příklad:
                        -toolsversion:3.5
@@ -855,25 +855,25 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      popis přepínače -distributedFileLogger.
                      (Krátký tvar: -flp[n])
                      K dispozici jsou stejné parametry jako ty,
-                     které jsou uvedeny u protokolovacího nástroje 
+                     které jsou uvedeny u protokolovacího nástroje
                      konzoly. Některé další dostupné parametry:
                        LogFile – cesta k souboru protokolu, do nějž bude zapsán
-                                  protokol sestavení 
+                                  protokol sestavení
                        Append  – určuje, zda bude protokol sestavení připojen
-                                  k souboru protokolu, nebo jej přepíše. Při nastavení 
+                                  k souboru protokolu, nebo jej přepíše. Při nastavení
                                   přepínače bude protokol sestavení připojen k souboru
-                                  protokolu. Není-li přepínač nastaven, bude obsah 
-                                  existujícího souboru protokolu přepsán. 
+                                  protokolu. Není-li přepínač nastaven, bude obsah
+                                  existujícího souboru protokolu přepsán.
                                   Podle výchozího nastavení je soubor protokolu přepsán.
-                       Encoding – určuje kódování souboru, například 
+                       Encoding – určuje kódování souboru, například
                      UTF-8, Unicode nebo ASCII.
                        Výchozí úroveň podrobností je Detailed.
                      Příklady:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                              Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
-                       -flp1:warningsonly;logfile=msbuild.wrn 
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+                       -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>

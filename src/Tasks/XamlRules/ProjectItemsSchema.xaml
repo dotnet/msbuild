@@ -43,13 +43,13 @@
       DisplayName="Media file"
       ItemType="Content">
     </ContentType>
-    
+
     <ContentType
       Name="Image"
       DisplayName="Image file"
       ItemType="Content">
     </ContentType>
-    
+
     <ContentType
       Name="EmbeddedResource"
       DisplayName="Embedded resource"

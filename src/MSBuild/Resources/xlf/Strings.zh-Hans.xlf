@@ -490,10 +490,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             ErrorsOnly -- 仅显示错误。
             WarningsOnly -- 仅显示警告。
             NoItemAndPropertyList -- 在开始生成每个项目时不显示
-              项和属性的列表。  
-            ShowCommandLine -- 显示 TaskCommandLineEvent 消息 
+              项和属性的列表。
+            ShowCommandLine -- 显示 TaskCommandLineEvent 消息
             ShowTimestamp -- 将时间戳作为所有消息的前缀
-              显示。                      
+              显示。
             ShowEventId -- 显示已开始事件、已完成事件和消息
               的事件 ID。
             ForceNoAlign -- 不将文本与控制台缓冲区的大小
@@ -548,10 +548,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -validate:MyExtendedBuildSchema.xsd
 </source>
-        <target state="translated">  -validate     依据默认架构验证项目。(缩写: 
+        <target state="translated">  -validate     依据默认架构验证项目。(缩写:
            -val)
 
- -validate:&lt;schema&gt; 依据指定的架构验证项目。(缩写: 
+ -validate:&lt;schema&gt; 依据指定的架构验证项目。(缩写:
            -val)
            示例:
             -validate:MyExtendedBuildSchema.xsd
@@ -731,7 +731,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <target state="translated">  -toolsversion:&lt;version&gt;
            要在生成过程中使用的 MSBuild 工具集
            (任务、目标等)的版本。此版本将重写
-           各个项目指定的版本。(缩写: 
+           各个项目指定的版本。(缩写:
            -tv)
            示例:
             -toolsversion:3.5
@@ -787,17 +787,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      template and append the node id to this fileName to
                      create a log file for each node.
     </source>
-        <target state="translated">  -distributedFileLogger                            
+        <target state="translated">  -distributedFileLogger
            将生成输出记录到多个日志文件，每个 MSBuild 节点
            一个日志文件。这些文件的初始位置为
            当前目录。默认情况下，这些文件名为
            “MSBuild&lt;nodeid&gt;.log”。可通过添加
-           “-fileLoggerParameters”开关来指定 
+           “-fileLoggerParameters”开关来指定
            这些文件的位置和 fileLogger 的其他参数。
 
            如果日志文件名是通过 fileLoggerParameters
            开关设置的，分布式记录器将使用 fileName 作为
-           模板并将节点 ID 附加到此 fileName 
+           模板并将节点 ID 附加到此 fileName
            以便为每个节点创建一个日志文件。
     </target>
         <note>
@@ -839,12 +839,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </source>
-        <target state="translated">  -fileloggerparameters[n]:&lt;parameters&gt;                
+        <target state="translated">  -fileloggerparameters[n]:&lt;parameters&gt;
            为文件记录器提供任何额外的参数。
            存在此开关意味着
            存在对应的 -filelogger[n] 开关。
           “n”(如果存在)可以为 1-9 的数字。
-           任何分布式文件记录器也可以使用 
+           任何分布式文件记录器也可以使用
            -fileloggerparameters，具体可参阅 -distributedFileLogger 的说明。
            (缩写: -flp[n])
            为控制台记录器列出的相同参数
@@ -864,8 +864,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             -fileLoggerParameters:LogFile=MyLog.log;Append;
                       Verbosity=diagnostic;Encoding=UTF-8
 
-            -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
-            -flp1:warningsonly;logfile=msbuild.wrn 
+            -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+            -flp1:warningsonly;logfile=msbuild.wrn
             -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>

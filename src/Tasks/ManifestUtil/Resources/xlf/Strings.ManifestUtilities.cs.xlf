@@ -81,14 +81,14 @@
     </source>
         <target state="translated">
           Možnosti manifestu UAC
-          Chcete-li změnit úroveň řízení uživatelských účtů v systému Windows, nahraďte 
+          Chcete-li změnit úroveň řízení uživatelských účtů v systému Windows, nahraďte
           uzel requestedExecutionLevel jedním z následujících.
 
         &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
 
-         Chcete-li využít virtualizaci souborů a registru pro zpětnou 
+         Chcete-li využít virtualizaci souborů a registru pro zpětnou
          kompatibilitu, odstraňte uzel requestedExecutionLevel.
     </target>
         <note />

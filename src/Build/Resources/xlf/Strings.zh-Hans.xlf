@@ -139,7 +139,7 @@
       <trans-unit id="LoadingProjectCachePlugin">
         <source>Loading the following project cache plugin:
     {0}</source>
-        <target state="translated">正在加载以下项目缓存插件: 
+        <target state="translated">正在加载以下项目缓存插件:
     {0}”</target>
         <note />
       </trans-unit>

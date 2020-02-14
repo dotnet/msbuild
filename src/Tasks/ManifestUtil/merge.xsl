@@ -96,7 +96,7 @@
 
         <!-- Process all child elements from primary input document -->
         <xsl:apply-templates select="child::*"/>
-        <!-- Import non-standard elements from base document -->		
+        <!-- Import non-standard elements from base document -->
         <xsl:apply-templates select="$base-element/child::*" mode="base"/>
         <xsl:choose>
             <xsl:when test="./text()">
@@ -112,13 +112,13 @@
 <xsl:template name="merge-attributes">
     <xsl:param name="base-attributes"/>
     <xsl:param name="app-attributes"/>
-	
+
     <!-- Import attributes from base document -->
     <xsl:for-each select="$base-attributes">
         <xsl:attribute name="{name()}"><xsl:value-of select="current()"/></xsl:attribute>
     </xsl:for-each>
     <!-- Import attributes from app document -->
-    <xsl:for-each select="$app-attributes"> 
+    <xsl:for-each select="$app-attributes">
         <xsl:attribute name="{name()}"><xsl:value-of select="current()"/></xsl:attribute>
     </xsl:for-each>
 </xsl:template>

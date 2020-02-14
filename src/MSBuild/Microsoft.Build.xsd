@@ -8,9 +8,9 @@ elementFormDefault="qualified">
 
     <!-- ========= ADD CUSTOM ITEMS, PROPERTIES, AND TASKS BELOW ======= -->
     <!-- Note that these will be in the msbuild namespace. A future version of
-        msbuild may require that custom itemtypes, properties, and tasks be in a 
+        msbuild may require that custom itemtypes, properties, and tasks be in a
         custom namespace, but currently msbuild only supports the msbuild namespace. -->
-    
+
     <!-- example custom itemtype with particular meta-data required-->
     <!--<xs:element name="MyItem" substitutionGroup="msb:Item">
         <xs:complexType>
@@ -25,10 +25,10 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>-->
-    
+
     <!-- Example custom itemtype with NO meta-data -->
     <!--<xs:element name="MySimpleItem" type="msb:SimpleItemType" substitutionGroup="msb:Item"/>-->
-    
+
     <!-- Example custom itemtype with ANY meta-data -->
     <!--<xs:element name="MyFlexibleItem" type="msb:GenericItemType" substitutionGroup="msb:Item"/>-->
 
@@ -45,5 +45,5 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>-->
-    
+
 </xs:schema>

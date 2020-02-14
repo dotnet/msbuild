@@ -1,7 +1,7 @@
 ﻿<xsl:stylesheet
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-	xmlns="http://schemas.microsoft.com/developer/2004/01/bootstrapper" 
-	xmlns:b="http://schemas.microsoft.com/developer/2004/01/bootstrapper" 
+	xmlns="http://schemas.microsoft.com/developer/2004/01/bootstrapper"
+	xmlns:b="http://schemas.microsoft.com/developer/2004/01/bootstrapper"
 	version="1.0">
 
 <xsl:variable name="newline">
@@ -59,7 +59,7 @@
     </xsl:template>
 
     <xsl:template match="@*">
-        <xsl:param name="indent"/>    
+        <xsl:param name="indent"/>
         <xsl:value-of select="$indent"/>
         <xsl:value-of select="local-name()"/>
         <xsl:text>="</xsl:text>

@@ -730,8 +730,8 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
    </source>
         <target state="translated">  -toolsversion:&lt;版本&gt;
                      建置期間所使用的 MSBuild 工具組 (工作、目標等)
-                      版本。此版本將會覆寫 
-                     個別專案所指定的版本。(簡短形式: 
+                      版本。此版本將會覆寫
+                     個別專案所指定的版本。(簡短形式:
                      -tv)
                      範例:
                        -toolsVersion:3.5

@@ -8,14 +8,14 @@
     xmlns:co.v1="urn:schemas-microsoft-com:clickonce.v1"
     xmlns:co.v2="urn:schemas-microsoft-com:clickonce.v2"
     version="1.0">
-    
+
 <xsl:output method="xml" encoding="utf-8" indent="yes"/>
 <xsl:strip-space elements="*"/>
 
 <xsl:param name="trust-file"/>
 
 <xsl:variable name="trust" select="document($trust-file)"/>
-    
+
 <xsl:template match="AssemblyManifest">
     <assembly
         xmlns="urn:schemas-microsoft-com:asm.v1"
@@ -157,21 +157,21 @@ This is a quirk of the native loader on downlevel OS.
                     />
                 <xsl:if test="@HostInBrowser='true'">
                     <hostInBrowser xmlns="urn:schemas-microsoft-com:asm.v3"/>
-                </xsl:if>            
+                </xsl:if>
             </entryPoint>
         </xsl:when>
         <xsl:when test="@HostInBrowser='true'">
             <entryPoint xmlns="urn:schemas-microsoft-com:asm.v2">
                 <xsl:if test="@HostInBrowser='true'">
                     <hostInBrowser xmlns="urn:schemas-microsoft-com:asm.v3"/>
-                </xsl:if>            
+                </xsl:if>
             </entryPoint>
         </xsl:when>
         <xsl:otherwise>
             <entryPoint xmlns="urn:schemas-microsoft-com:asm.v2">
                 <co.v1:customHostSpecified />
             </entryPoint>
-        </xsl:otherwise>            
+        </xsl:otherwise>
     </xsl:choose>
     <!-- Manifest Trust -->
     <xsl:if test="@UseApplicationTrust='true'">
@@ -192,7 +192,7 @@ This is a quirk of the native loader on downlevel OS.
         </dependency>
     </xsl:if>
 </xsl:template>
-    
+
 <xsl:template name="deploy-manifest">
     <!-- Description -->
     <description xmlns="urn:schemas-microsoft-com:asm.v1"
@@ -249,7 +249,7 @@ This is a quirk of the native loader on downlevel OS.
     </dependency>
 </xsl:template>
 
-<!-- Must put native <dependency> elements in the asmv1 namespace -->    
+<!-- Must put native <dependency> elements in the asmv1 namespace -->
 <xsl:template match="AssemblyReference[@IsNative='true' and @IsPrerequisite='false']">
     <dependency optional="{@IsOptional}" xmlns="urn:schemas-microsoft-com:asm.v1">
         <dependentAssembly
@@ -275,7 +275,7 @@ This is a quirk of the native loader on downlevel OS.
     </dependency>
 </xsl:template>
 
-<!-- Other <dependency> elements go in the asmv2 namespace -->    
+<!-- Other <dependency> elements go in the asmv2 namespace -->
 <xsl:template match="AssemblyReference[@IsNative='false' and @IsPrerequisite='false']">
     <dependency optional="{@IsOptional}" xmlns="urn:schemas-microsoft-com:asm.v2">
         <dependentAssembly
@@ -381,20 +381,20 @@ This is a quirk of the native loader on downlevel OS.
 
 <xsl:template match="ProxyStub" mode="internal">
     <comInterfaceProxyStub xmlns="urn:schemas-microsoft-com:asm.v1"
-        name="{@Name}" 
-        iid="{@Iid}" 
-        numMethods="{@NumMethods}" 
+        name="{@Name}"
+        iid="{@Iid}"
+        numMethods="{@NumMethods}"
         baseInterface="{@BaseInterface}"
-        tlbid="{@Tlbid}"/>        
+        tlbid="{@Tlbid}"/>
 </xsl:template>
 
 <xsl:template match="ProxyStub" mode="external">
     <comInterfaceExternalProxyStub xmlns="urn:schemas-microsoft-com:asm.v1"
-        name="{@Name}" 
-        iid="{@Iid}" 
-        numMethods="{@NumMethods}" 
+        name="{@Name}"
+        iid="{@Iid}"
+        numMethods="{@NumMethods}"
         baseInterface="{@BaseInterface}"
-        tlbid="{@Tlbid}"/>        
+        tlbid="{@Tlbid}"/>
 </xsl:template>
 
 <xsl:template match="FileAssociation">

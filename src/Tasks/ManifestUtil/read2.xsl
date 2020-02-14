@@ -3,7 +3,7 @@
     xmlns="urn:schemas-microsoft-com:asm.v1"
     xmlns:asmv1="urn:schemas-microsoft-com:asm.v1"
     xmlns:asmv2="urn:schemas-microsoft-com:asm.v2"
-    xmlns:asmv3="urn:schemas-microsoft-com:asm.v3"     
+    xmlns:asmv3="urn:schemas-microsoft-com:asm.v3"
     xmlns:xrml="urn:mpeg:mpeg21:2003:01-REL-R-NS"
     xmlns:dsig="http://www.w3.org/2000/09/xmldsig#"
     xmlns:co.v1="urn:schemas-microsoft-com:clickonce.v1"
@@ -50,10 +50,10 @@
     </xsl:attribute>
     <xsl:attribute name="MapFileExtensions">
         <xsl:value-of select="asmv2:deployment/@mapFileExtensions"/>
-    </xsl:attribute>    
+    </xsl:attribute>
     <xsl:attribute name="TrustUrlParameters">
         <xsl:value-of select="asmv2:deployment/@trustURLParameters"/>
-    </xsl:attribute>    
+    </xsl:attribute>
     <xsl:attribute name="UpdateEnabled">
         <xsl:value-of select="boolean(asmv2:deployment/asmv2:subscription/asmv2:update)"/>
     </xsl:attribute>
@@ -75,7 +75,7 @@
     </xsl:attribute>
     <xsl:attribute name="DeploymentUrl">
         <xsl:value-of select="asmv2:deployment/asmv2:deploymentProvider/@codebase"/>
-    </xsl:attribute>    
+    </xsl:attribute>
 </xsl:attribute-set>
 
 
@@ -86,7 +86,7 @@
     </xsl:attribute>
     <xsl:attribute name="EntryPointParameters">
         <xsl:value-of select="asmv2:entryPoint/asmv2:commandLine/@parameters"/>
-    </xsl:attribute>    
+    </xsl:attribute>
     <xsl:attribute name="EntryPointPath">
         <xsl:value-of select="asmv2:entryPoint/asmv2:commandLine/@file"/>
     </xsl:attribute>
@@ -102,22 +102,22 @@
             <xsl:text>false</xsl:text>
         </xsl:otherwise>
       </xsl:choose>
-    </xsl:attribute>    
+    </xsl:attribute>
     <xsl:attribute name="IconFile">
         <xsl:value-of select="asmv1:description/@asmv2:iconFile"/>
-    </xsl:attribute>    
+    </xsl:attribute>
     <xsl:attribute name="OSMajor">
         <xsl:value-of select="asmv1:dependency/asmv2:dependentOS/asmv2:osVersionInfo/asmv2:os/@majorVersion|asmv2:dependency/asmv2:dependentOS/asmv2:osVersionInfo/asmv2:os/@majorVersion"/>
-    </xsl:attribute>    
+    </xsl:attribute>
     <xsl:attribute name="OSMinor">
         <xsl:value-of select="asmv1:dependency/asmv2:dependentOS/asmv2:osVersionInfo/asmv2:os/@minorVersion|asmv2:dependency/asmv2:dependentOS/asmv2:osVersionInfo/asmv2:os/@minorVersion"/>
-    </xsl:attribute>    
+    </xsl:attribute>
     <xsl:attribute name="OSBuild">
         <xsl:value-of select="asmv1:dependency/asmv2:dependentOS/asmv2:osVersionInfo/asmv2:os/@buildNumber|asmv2:dependency/asmv2:dependentOS/asmv2:osVersionInfo/asmv2:os/@buildNumber"/>
-    </xsl:attribute>    
+    </xsl:attribute>
     <xsl:attribute name="OSRevision">
         <xsl:value-of select="asmv1:dependency/asmv2:dependentOS/asmv2:osVersionInfo/asmv2:os/@servicePackMajor|asmv2:dependency/asmv2:dependentOS/asmv2:osVersionInfo/asmv2:os/@servicePackMajor"/>
-    </xsl:attribute>    
+    </xsl:attribute>
     <xsl:attribute name="OSSupportUrl">
         <xsl:value-of select="asmv1:dependency/asmv2:dependentOS/@supportUrl|asmv2:dependency/asmv2:dependentOS/@supportUrl"/>
     </xsl:attribute>
@@ -166,7 +166,7 @@
             <xsl:element name="DeployManifest" use-attribute-sets="deploy-manifest-attributes" namespace="">
                 <xsl:call-template name="base-assembly"/>
                 <xsl:call-template name="trust-licenses"/>
-                <xsl:call-template name="public-key"/>                
+                <xsl:call-template name="public-key"/>
             </xsl:element>
         </xsl:when>
 
@@ -232,7 +232,7 @@
 </xsl:template>
 
 <xsl:template match="asmv1:dependency">
-    <xsl:element name="AssemblyReference" namespace="">    
+    <xsl:element name="AssemblyReference" namespace="">
         <xsl:attribute name="IsNative">true</xsl:attribute>
         <xsl:apply-templates select="asmv1:dependentAssembly|asmv2:dependentAssembly"/>
         <xsl:apply-templates select="asmv1:dependentAssembly/asmv1:assemblyIdentity|asmv1:dependentAssembly/asmv2:assemblyIdentity|asmv2:dependentAssembly/asmv1:assemblyIdentity|asmv2:dependentAssembly/asmv2:assemblyIdentity"/>
@@ -240,7 +240,7 @@
 </xsl:template>
 
 <xsl:template match="asmv2:dependency">
-    <xsl:element name="AssemblyReference" namespace="">    
+    <xsl:element name="AssemblyReference" namespace="">
         <xsl:attribute name="IsNative">false</xsl:attribute>
         <xsl:apply-templates select="asmv1:dependentAssembly|asmv2:dependentAssembly"/>
         <xsl:apply-templates select="asmv1:dependentAssembly/asmv1:assemblyIdentity|asmv1:dependentAssembly/asmv2:assemblyIdentity|asmv2:dependentAssembly/asmv1:assemblyIdentity|asmv2:dependentAssembly/asmv2:assemblyIdentity"/>
@@ -312,7 +312,7 @@
 <xsl:template match="asmv1:dependentAssembly/asmv1:assemblyIdentity|asmv1:dependentAssembly/asmv2:assemblyIdentity|asmv2:dependentAssembly/asmv1:assemblyIdentity|asmv2:dependentAssembly/asmv2:assemblyIdentity">
         <xsl:call-template name="assembly-identity">
             <xsl:with-param name="class">AssemblyIdentity</xsl:with-param>
-        </xsl:call-template>        
+        </xsl:call-template>
 </xsl:template>
 
 <xsl:template match="asmv1:file">
@@ -490,7 +490,7 @@
                 <xsl:value-of select="@version"/>
             </xsl:attribute>
         </xsl:if>
-        <xsl:if test="string-length(@publicKeyToken)>0">    
+        <xsl:if test="string-length(@publicKeyToken)>0">
             <xsl:attribute name="PublicKeyToken">
                 <xsl:value-of select="@publicKeyToken"/>
             </xsl:attribute>
@@ -526,18 +526,18 @@
 
 
 <xsl:template name="trust-licenses">
-  <xsl:if test="count(/asmv1:assembly/asmv2:licensing/asmv2:xrmlLicenseInfo/xrml:licenseGroup/xrml:license)>0"> 
+  <xsl:if test="count(/asmv1:assembly/asmv2:licensing/asmv2:xrmlLicenseInfo/xrml:licenseGroup/xrml:license)>0">
     <xsl:element name="TrustLicenses" namespace="">
       <xsl:apply-templates select="/asmv1:assembly/asmv2:licensing/asmv2:xrmlLicenseInfo" mode="tlic"/>
-  </xsl:element>  
+  </xsl:element>
  </xsl:if>
 </xsl:template>
- 
+
 <xsl:template match="xrml:licenseGroup" mode="tlic">
   <xsl:for-each select="xrml:license">
-    <xsl:element name="XmlDocument" namespace="">  
+    <xsl:element name="XmlDocument" namespace="">
       <xsl:copy-of select="."/>
-    </xsl:element>         
+    </xsl:element>
   </xsl:for-each>
 </xsl:template>
 

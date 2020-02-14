@@ -44,7 +44,7 @@
             <xs:element name="ProjectExtensions" type="msb:ProjectExtensionsType"/>
         </xs:choice>
     </xs:group>
-    <!-- ======================================================================================= -->    
+    <!-- ======================================================================================= -->
     <xs:group name="ProjectLevelTagType">
         <xs:choice>
             <xs:element name="PropertyGroup" type="msb:PropertyGroupType"/>
@@ -65,8 +65,8 @@
             <xs:element name="Import" type="msb:ImportType"/>
             <xs:element name="ImportGroup" type="msb:ImportGroupType"/>
         </xs:choice>
-    </xs:group>    
-    <!-- ======================================================================================= -->        
+    </xs:group>
+    <!-- ======================================================================================= -->
     <xs:complexType name="TargetType">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="TargetType" _locComment="" -->Groups tasks into a section of the build process</xs:documentation>
@@ -91,12 +91,12 @@
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="TargetType_DependsOnTargets" _locComment="" -->Optional semi-colon separated list of targets that should be run before this target</xs:documentation>
             </xs:annotation>
-        </xs:attribute>            
+        </xs:attribute>
         <xs:attribute name="Inputs" type="xs:string" use="optional">
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="TargetType_Inputs" _locComment="" -->Optional semi-colon separated list of files that form inputs into this target. Their timestamps will be compared with the timestamps of files in Outputs to determine whether the Target is up to date</xs:documentation>
             </xs:annotation>
-        </xs:attribute>                
+        </xs:attribute>
         <xs:attribute name="Outputs" type="xs:string" use="optional">
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="TargetType_Outputs" _locComment="" -->Optional semi-colon separated list of files that form outputs into this target. Their timestamps will be compared with the timestamps of files in Inputs to determine whether the Target is up to date</xs:documentation>
@@ -106,7 +106,7 @@
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="TargetType_Condition" _locComment="" -->Optional expression evaluated to determine whether the Target and the targets it depends on should be run</xs:documentation>
             </xs:annotation>
-        </xs:attribute>            
+        </xs:attribute>
         <xs:attribute name="KeepDuplicateOutputs" type="xs:string" use="optional">
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="TargetType_KeepDuplicateOutputs" _locComment="" -->Optional expression evaluated to determine whether duplicate items in the Target's Returns should be removed before returning them. The default is not to eliminate duplicates.</xs:documentation>
@@ -121,19 +121,19 @@
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="TargetType_BeforeTargets" _locComment="" -->Optional semi-colon separated list of targets that this target should run before.</xs:documentation>
             </xs:annotation>
-        </xs:attribute>   
+        </xs:attribute>
         <xs:attribute name="AfterTargets" type="xs:string" use="optional">
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="TargetType_AfterTargets" _locComment="" -->Optional semi-colon separated list of targets that this target should run after.</xs:documentation>
             </xs:annotation>
-        </xs:attribute>     
+        </xs:attribute>
         <xs:attribute name="Label" type="xs:string" use="optional">
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="ImportType_Label" _locComment="" -->Optional expression. Used to identify or order system and user elements</xs:documentation>
             </xs:annotation>
         </xs:attribute>
     </xs:complexType>
-    <!-- ======================================================================================= -->        
+    <!-- ======================================================================================= -->
     <xs:complexType name="PropertyGroupType">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="PropertyGroupType" _locComment="" -->Groups property definitions</xs:documentation>
@@ -144,15 +144,15 @@
         <xs:attribute name="Condition" type="xs:string" use="optional">
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="PropertyGroupType_Condition" _locComment="" -->Optional expression evaluated to determine whether the PropertyGroup should be used</xs:documentation>
-            </xs:annotation> 
-        </xs:attribute>     
+            </xs:annotation>
+        </xs:attribute>
         <xs:attribute name="Label" type="xs:string" use="optional">
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="PropertyGroupType_Label" _locComment="" -->Optional expression. Used to identify or order system and user elements</xs:documentation>
             </xs:annotation>
         </xs:attribute>
     </xs:complexType>
-    <!-- ======================================================================================= -->        
+    <!-- ======================================================================================= -->
     <xs:complexType name="ImportGroupType">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="ImportGroupType" _locComment="" -->Groups import definitions</xs:documentation>
@@ -163,19 +163,19 @@
         <xs:attribute name="Condition" type="xs:string" use="optional">
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="ImportGroupType_Condition" _locComment="" -->Optional expression evaluated to determine whether the ImportGroup should be used</xs:documentation>
-            </xs:annotation> 
-        </xs:attribute>     
+            </xs:annotation>
+        </xs:attribute>
         <xs:attribute name="Label" type="xs:string" use="optional">
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="ImportGroupType_Label" _locComment="" -->Optional expression. Used to identify or order system and user elements</xs:documentation>
             </xs:annotation>
         </xs:attribute>
     </xs:complexType>
-    <!-- ======================================================================================= -->        
+    <!-- ======================================================================================= -->
     <xs:complexType name="ItemGroupType">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="ItemGroupType" _locComment="" -->Groups item list definitions</xs:documentation>
-        </xs:annotation>        
+        </xs:annotation>
         <xs:choice minOccurs="0" maxOccurs="unbounded">
             <xs:element ref="msb:Item"/>
             <xs:element name="Link" type="msb:LinkItem" />
@@ -187,14 +187,14 @@
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="ItemGroupType_Condition" _locComment="" -->Optional expression evaluated to determine whether the ItemGroup should be used</xs:documentation>
             </xs:annotation>
-        </xs:attribute>     
+        </xs:attribute>
         <xs:attribute name="Label" type="xs:string" use="optional">
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="ItemGroupType_Label" _locComment="" -->Optional expression. Used to identify or order system and user elements</xs:documentation>
             </xs:annotation>
         </xs:attribute>
     </xs:complexType>
-    <!-- ======================================================================================= -->        
+    <!-- ======================================================================================= -->
     <xs:complexType name="ItemDefinitionGroupType">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="ItemDefinitionGroupType" _locComment="" -->Groups item metadata definitions</xs:documentation>
@@ -254,7 +254,7 @@
     <xs:complexType name="OtherwiseType">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="OtherwiseType" _locComment="" -->Groups PropertyGroup and/or ItemGroup elements that are used if no Conditions on sibling When elements evaluate to true</xs:documentation>
-        </xs:annotation>        
+        </xs:annotation>
         <xs:sequence minOccurs="0" maxOccurs="unbounded">
             <xs:choice>
                 <xs:element name="PropertyGroup" type="msb:PropertyGroupType"/>
@@ -263,7 +263,7 @@
             </xs:choice>
         </xs:sequence>
     </xs:complexType>
-    <!-- ======================================================================================= -->        
+    <!-- ======================================================================================= -->
     <xs:complexType name="OnErrorType">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="OnErrorType" _locComment="" -->Specifies targets to execute in the event of a recoverable error</xs:documentation>
@@ -277,27 +277,27 @@
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="OnErrorType_ExecuteTargets" _locComment="" -->Semi-colon separated list of targets to execute</xs:documentation>
             </xs:annotation>
-        </xs:attribute>    
+        </xs:attribute>
         <xs:attribute name="Label" type="xs:string" use="optional">
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="ImportType_Label" _locComment="" -->Optional expression. Used to identify or order system and user elements</xs:documentation>
             </xs:annotation>
-        </xs:attribute>        
+        </xs:attribute>
     </xs:complexType>
-    <!-- ======================================================================================= -->    
+    <!-- ======================================================================================= -->
     <xs:complexType name="UsingTaskType">
       <xs:annotation>
         <xs:documentation><!-- _locID_text="UsingTaskType" _locComment="" -->Defines the assembly containing a task's implementation, or contains the implementation itself.</xs:documentation>
       </xs:annotation>
       <xs:sequence>
         <xs:element name="ParameterGroup" type="msb:ParameterGroupType" minOccurs="0" maxOccurs="1"/>
-        <xs:element name="Task" type="msb:UsingTaskBodyType" minOccurs="0" maxOccurs="1"/>    
-      </xs:sequence> 
+        <xs:element name="Task" type="msb:UsingTaskBodyType" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
         <xs:attribute name="Condition" type="xs:string" use="optional">
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="UsingTaskType_Condition" _locComment="" -->Optional expression evaluated to determine whether the declaration should be evaluated</xs:documentation>
             </xs:annotation>
-        </xs:attribute>          
+        </xs:attribute>
         <xs:attribute name="AssemblyName" type="msb:non_empty_string" use="optional">
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="UsingTaskType_AssemblyName" _locComment="" -->Optional name of assembly containing the task. Either AssemblyName or AssemblyFile must be used</xs:documentation>
@@ -307,7 +307,7 @@
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="UsingTaskType_AssemblyFile" _locComment="" -->Optional path to assembly containing the task. Either AssemblyName or AssemblyFile must be used</xs:documentation>
             </xs:annotation>
-        </xs:attribute>            
+        </xs:attribute>
         <xs:attribute name="TaskName" type="msb:non_empty_string" use="required">
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="UsingTaskType_TaskName" _locComment="" -->Name of task class in the assembly</xs:documentation>
@@ -332,12 +332,12 @@
             </xs:documentation>
           </xs:annotation>
         </xs:attribute>
-    </xs:complexType> 
+    </xs:complexType>
     <!-- ======================================================================================= -->
     <xs:complexType name="ParameterGroupType">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="ParameterGroupType" _locComment="" -->Groups parameters that are part of an inline task definition.</xs:documentation>
-        </xs:annotation> 
+        </xs:annotation>
         <!-- ParameterGroup contains parameter elements whose element names are the parameter names.
              Attributes are:
                   * ParameterType. Optional string. Type of the task parameter. Defaults to string type.
@@ -348,7 +348,7 @@
         <xs:sequence minOccurs="0" maxOccurs="unbounded">
            <xs:any processContents="skip"/>
         </xs:sequence>
-    </xs:complexType>     
+    </xs:complexType>
     <!-- ======================================================================================= -->
     <xs:complexType name="UsingTaskBodyType" mixed="true">
         <xs:annotation>
@@ -356,28 +356,28 @@
         </xs:annotation>
         <xs:sequence minOccurs="0" maxOccurs="unbounded">
             <xs:any namespace="##any" processContents="skip"/>
-        </xs:sequence>        
+        </xs:sequence>
         <xs:attribute name="Evaluate" type="msb:boolean" use="optional">
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="UsingTaskBodyType_Evaluate" _locComment="" -->Whether the body should have properties expanded before use. Defaults to false.</xs:documentation>
             </xs:annotation>
-        </xs:attribute>        
-    </xs:complexType>     
-    <!-- ======================================================================================= -->  
+        </xs:attribute>
+    </xs:complexType>
+    <!-- ======================================================================================= -->
     <xs:complexType name="ImportType">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="ImportType" _locComment="" -->Declares that the contents of another project file should be inserted at this location</xs:documentation>
-        </xs:annotation>        
+        </xs:annotation>
         <xs:attribute name="Condition" type="xs:string" use="optional">
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="ImportType_Condition" _locComment="" -->Optional expression evaluated to determine whether the import should occur</xs:documentation>
             </xs:annotation>
-        </xs:attribute>              
+        </xs:attribute>
         <xs:attribute name="Project" type="msb:non_empty_string" use="required">
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="ImportType_Project" _locComment="" -->Project file to import</xs:documentation>
             </xs:annotation>
-        </xs:attribute>     
+        </xs:attribute>
         <xs:attribute name="Label" type="xs:string" use="optional">
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="ImportType_Label" _locComment="" -->Optional expression. Used to identify or order system and user elements</xs:documentation>
@@ -402,7 +402,7 @@
             </xs:annotation>
         </xs:attribute>
     </xs:complexType>
-    <!-- ======================================================================================= -->  
+    <!-- ======================================================================================= -->
     <xs:complexType name="ProjectExtensionsType" mixed="true">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="ProjectExtensionsType" _locComment="" -->Optional section used by MSBuild hosts, that may contain arbitrary XML content that is ignored by MSBuild itself</xs:documentation>
@@ -410,12 +410,12 @@
         <xs:sequence minOccurs="0" maxOccurs="unbounded">
             <xs:any processContents="skip"/>
         </xs:sequence>
-    </xs:complexType>    
+    </xs:complexType>
     <!-- ======================================================================================= -->
     <xs:element name="Item" type="msb:SimpleItemType" abstract="true"/>
-    <!-- ======================================================================================= -->   
+    <!-- ======================================================================================= -->
     <!-- convenience type for items that have no meta-data-->
-    <!-- note this allows Remove or no attribute instead of Include, which is too lax outside of Targets at present, but 
+    <!-- note this allows Remove or no attribute instead of Include, which is too lax outside of Targets at present, but
          it's the best we can reasonably do with an XSD -->
     <xs:complexType name="SimpleItemType">
         <xs:attribute name="Condition" type="xs:string" use="optional">
@@ -427,7 +427,7 @@
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="SimpleItemType_Include" _locComment="" -->Semi-colon separated list of files (wildcards are allowed) or other item names to include in this item list</xs:documentation>
             </xs:annotation>
-        </xs:attribute>             
+        </xs:attribute>
         <xs:attribute name="Exclude" type="xs:string" use="optional">
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="SimpleItemType_Exclude" _locComment="" -->Semi-colon separated list of files (wildcards are allowed) or other item names to exclude from the Include list</xs:documentation>
@@ -451,21 +451,21 @@
           </xs:annotation>
         </xs:attribute>
     </xs:complexType>
-    <!-- ======================================================================================= -->      
+    <!-- ======================================================================================= -->
     <!-- general utility type allowing an item type to be defined but not its child meta-data-->
     <xs:complexType name="GenericItemType">
         <xs:complexContent>
             <xs:extension base="msb:SimpleItemType">
                 <xs:sequence minOccurs="0" maxOccurs="unbounded">
-                    <xs:any namespace="##any" processContents="skip"/>  
-                </xs:sequence>      
+                    <xs:any namespace="##any" processContents="skip"/>
+                </xs:sequence>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
-    <!-- ======================================================================================= -->  
+    <!-- ======================================================================================= -->
     <!-- no type declared on this abstract element, so either a simple or complex type can be substituted for it.-->
     <xs:element name="Property" abstract="true"/>
-    <!-- ======================================================================================= -->      
+    <!-- ======================================================================================= -->
     <!-- convenience type for properties that just want to allow text and no elements in them-->
     <xs:complexType name="StringPropertyType">
         <xs:simpleContent>
@@ -485,7 +485,7 @@
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>
-    <!-- ======================================================================================= -->      
+    <!-- ======================================================================================= -->
     <!-- general utility type allowing text and/or elements inside-->
     <xs:complexType name="GenericPropertyType" mixed="true">
         <xs:sequence minOccurs="0" maxOccurs="unbounded">
@@ -494,7 +494,7 @@
         <xs:attribute name="Condition" type="xs:string" use="optional">
             <xs:annotation>
                 <xs:documentation><!-- _locID_text="GenericPropertyType_Condition" _locComment="" -->Optional expression evaluated to determine whether the property should be evaluated</xs:documentation>
-            </xs:annotation>         
+            </xs:annotation>
         </xs:attribute>
         <xs:attribute name="Label" type="xs:string" use="optional">
           <xs:annotation>
@@ -563,7 +563,7 @@
         </xs:attribute>
         <!-- We don't need the anyAttribute here because other types deriving from this type will add the right attributes.-->
     </xs:complexType>
-    <!-- ======================================================================================= -->  
+    <!-- ======================================================================================= -->
     <!-- XSD considers an empty-valued attribute to satisfy use="required", but we want it to have a non-empty value in most cases, hence this utility type. -->
     <xs:simpleType name="non_empty_string">
         <xs:restriction base="xs:string">
@@ -621,8 +621,8 @@
         </xs:simpleType>
       </xs:union>
     </xs:simpleType>
-    <!-- ======================================================================================= -->  
-    <!-- These types are used to enable Tasks and TaskItems global elements to exist in the schema. 
+    <!-- ======================================================================================= -->
+    <!-- These types are used to enable Tasks and TaskItems global elements to exist in the schema.
          They cannot both be declared as "Link" Elements of differing types in global scope. -->
     <xs:complexType name="LinkItem">
       <xs:complexContent>
