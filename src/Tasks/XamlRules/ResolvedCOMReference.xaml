@@ -7,7 +7,7 @@
     Description="Resolved reference"
     xmlns="http://schemas.microsoft.com/build/2009/properties">
     <Rule.DataSource>
-        <DataSource Persistence="ResolvedReference" ItemType="COMReference" HasConfigurationCondition="False" 
+        <DataSource Persistence="ResolvedReference" ItemType="COMReference" HasConfigurationCondition="False"
                     SourceType="TargetResults" MSBuildTarget="ResolveComReferencesDesignTime" />
     </Rule.DataSource>
 
@@ -36,16 +36,16 @@
         </BoolProperty.DataSource>
     </BoolProperty>
 
-    <StringProperty Name="Culture" 
+    <StringProperty Name="Culture"
                     ReadOnly="True"
                     Visible="False"
-                    DisplayName="Culture" 
+                    DisplayName="Culture"
                     Description="The value of the culture field from the assembly metadata." />
 
-    <StringProperty Name="Description" 
-                    ReadOnly="True" 
+    <StringProperty Name="Description"
+                    ReadOnly="True"
                     Visible="False"
-                    DisplayName="Description" 
+                    DisplayName="Description"
                     Description="The value of the Title field from the assembly metadata." />
 
     <BoolProperty Name="EmbedInteropTypes"
@@ -91,7 +91,7 @@
                     Description="Version of the .NET runtime this assembly was compiled against.">
     </StringProperty>
 
-    <BoolProperty Name="SpecificVersion" 
+    <BoolProperty Name="SpecificVersion"
                   DisplayName="Specific Version"
                   Visible="False"
                   Description="Indicates whether this assembly can be resolved without regard to multi-targeting rules for assembly resolution." />

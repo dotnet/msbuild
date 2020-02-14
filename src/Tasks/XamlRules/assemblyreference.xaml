@@ -27,7 +27,7 @@
                   DisplayName="Embed Interop Types"
                   Description="Indicates whether types defined in this assembly will be embedded into the target assembly." />
 
-    <BoolProperty Name="SpecificVersion" 
+    <BoolProperty Name="SpecificVersion"
                   DisplayName="Specific Version"
                   Description="Indicates whether this assembly can be resolved without regard to multi-targeting rules for assembly resolution.">
         <BoolProperty.DataSource>

@@ -7,7 +7,7 @@
     Description="Resolved reference"
     xmlns="http://schemas.microsoft.com/build/2009/properties">
     <Rule.DataSource>
-        <DataSource Persistence="ResolvedReference" ItemType="ProjectReference" HasConfigurationCondition="False" 
+        <DataSource Persistence="ResolvedReference" ItemType="ProjectReference" HasConfigurationCondition="False"
                     SourceType="TargetResults" MSBuildTarget="ResolveProjectReferencesDesignTime" />
     </Rule.DataSource>
 
@@ -28,15 +28,15 @@
         </BoolProperty.DataSource>
     </BoolProperty>
 
-    <StringProperty Name="Culture" 
+    <StringProperty Name="Culture"
                     ReadOnly="True"
-                    DisplayName="Culture" 
+                    DisplayName="Culture"
                     Description="The value of the culture field from the assembly metadata.">
     </StringProperty>
 
-    <StringProperty Name="Description" 
-                    ReadOnly="True" 
-                    DisplayName="Description" 
+    <StringProperty Name="Description"
+                    ReadOnly="True"
+                    DisplayName="Description"
                     Description="The value of the Title field from the assembly metadata.">
     </StringProperty>
 
@@ -83,7 +83,7 @@
                     Description="Version of the .NET runtime this assembly was compiled against.">
     </StringProperty>
 
-    <BoolProperty Name="SpecificVersion" 
+    <BoolProperty Name="SpecificVersion"
                   DisplayName="Specific Version"
                   Visible="False"
                   Description="Indicates whether this assembly can be resolved without regard to multi-targeting rules for assembly resolution." />
@@ -107,7 +107,7 @@
 
     <!-- This is the metadata we store on the reference item when we add it. -->
     <BoolProperty Name="IsWinMDFile" Visible="false" Description="Indicates whether the project system ascertained that this is a WinMD (as opposed to an assembly)" />
-    <StringProperty Name="Project" 
+    <StringProperty Name="Project"
                     Visible="False"
                     Description="the Guid the solution tracks an individual project reference target with" />
 

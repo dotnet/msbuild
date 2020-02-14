@@ -7,7 +7,7 @@
   <Rule.DataSource>
     <DataSource Persistence="UserFile" />
   </Rule.DataSource>
-  
+
   <StringProperty Name="SymbolsPath" DisplayName="Symbol Search Path"
                   Description="The search path used by the debugger to locate symbols.">
   </StringProperty>

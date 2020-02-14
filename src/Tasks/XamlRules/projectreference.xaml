@@ -27,7 +27,7 @@
 
     <BoolProperty Name="UseLibraryDependencyInputs" Visible="False" />
 
-    <StringProperty Name="Project" 
+    <StringProperty Name="Project"
                     Visible="False"
                     Description="the Guid the solution tracks an individual project reference target with" />
 
