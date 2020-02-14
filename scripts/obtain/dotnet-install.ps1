@@ -167,7 +167,7 @@ function Get-CLIArchitecture-From-Architecture([string]$Architecture) {
         { $_ -eq "x86" } { return "x86" }
         { $_ -eq "arm" } { return "arm" }
         { $_ -eq "arm64" } { return "arm64" }
-        default { throw "Architecture not supported. If you think this is a bug, report it at https://github.com/dotnet/cli/issues" }
+        default { throw "Architecture not supported. If you think this is a bug, report it at https://github.com/dotnet/sdk/issues" }
     }
 }
 
