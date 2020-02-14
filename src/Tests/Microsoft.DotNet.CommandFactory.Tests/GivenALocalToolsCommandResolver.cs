@@ -79,6 +79,19 @@ namespace Microsoft.DotNet.Tests
             commandPath.Should().Be(fakeExecutable.Value);
         }
 
+        [Fact]
+        public void WhenResolveWithNoArgumentsItReturnsNull()
+        {
+            (FilePath fakeExecutable, LocalToolsCommandResolver localToolsCommandResolver) = DefaultSetup("-d");
+
+            var result = localToolsCommandResolver.Resolve(new CommandResolverArguments()
+            {
+                CommandName = "-d",
+            });
+
+            result.Should().BeNull();
+        }
+
         private (FilePath, LocalToolsCommandResolver) DefaultSetup(string toolCommand)
         {
             NuGetVersion packageVersionA = NuGetVersion.Parse("1.0.4");
