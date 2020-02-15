@@ -164,4 +164,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftCommonProps)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter')"/>
     <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter\*" Condition="'$(ImportByWildcardAfterMicrosoftCommonProps)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter')"/>
   </ImportGroup>
+
+  <!-- 
+        Import NuGet.props file.
+    -->
+  <PropertyGroup>
+    <IsRunningFromVisualStudio Condition="'$(IsRunningFromVisualStudio)'==''">$([MSBuild]::IsRunningFromVisualStudio())</IsRunningFromVisualStudio>
+    <NuGetProps Condition="'$(NuGetProps)'=='' and '$(IsRunningFromVisualStudio)'=='true'">$(MSBuildToolsPath32)\..\..\..\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.props</NuGetProps>
+    <NuGetProps Condition="'$(NuGetProps)'==''">$(MSBuildToolsPath)\NuGet.props</NuGetProps>
+  </PropertyGroup>
+  <Import Condition="Exists('$(NuGetProps)')" Project="$(NuGetProps)" />
 </Project>
