@@ -2528,6 +2528,11 @@
         <target state="translated">MSB3762: 沒有參考傳遞至工作。需要至少 mscorlib 和 Windows.Foundation 的參考。</target>
         <note>{StrBegin="MSB3762: "}</note>
       </trans-unit>
+      <trans-unit id="Xaml.DuplicatePropertyName">
+        <source>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</source>
+        <target state="new">MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</target>
+        <note>{StrBegin="MSB3724: "}</note>
+      </trans-unit>
       <trans-unit id="Xaml.TaskCreationFailed">
         <source>MSB3686: Unable to create Xaml task.  Compilation failed.  {0}</source>
         <target state="translated">MSB3686: 無法建立 XAML 工作。編譯失敗。{0}</target>

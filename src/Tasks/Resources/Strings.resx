@@ -2221,6 +2221,10 @@
     <value>MSB3723: The parameter "{0}" requires missing parameter "{1}" to be set.</value>
     <comment>{StrBegin="MSB3723: "}</comment>
   </data>
+  <data name="Xaml.DuplicatePropertyName" xml:space="preserve">
+      <value>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</value>
+    <comment>{StrBegin="MSB3724: "}</comment>
+  </data>
 
   <!--
         The XslTransformation message bucket is: MSB3701-3710.
