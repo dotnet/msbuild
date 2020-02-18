@@ -423,6 +423,47 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
+        [InlineData("targets")]
+        [InlineData("tArGeTs")]
+        [InlineData("ts")]
+        public void TargetsSwitchIdentificationTests(string @switch)
+        {
+            CommandLineSwitches.IsParameterizedSwitch(
+                @switch,
+                out var parameterizedSwitch,
+                out var duplicateSwitchErrorMessage,
+                out var multipleParametersAllowed,
+                out var missingParametersErrorMessage,
+                out var unquoteParameters,
+                out var emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.Targets);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldBeNull();
+            unquoteParameters.ShouldBeTrue();
+            emptyParametersAllowed.ShouldBeFalse();
+        }
+
+        [Fact]
+        public void TargetsSwitchParameter()
+        {
+            CommandLineSwitches switches = new CommandLineSwitches();
+            MSBuildApp.GatherCommandLineSwitches(new ArrayList() { "/targets:targets.txt" }, switches);
+
+            switches.HaveErrors().ShouldBeFalse();
+            switches[CommandLineSwitches.ParameterizedSwitch.Targets].ShouldBe(new[] { "targets.txt" });
+        }
+
+        [Fact]
+        public void TargetsSwitchDoesNotSupportMultipleOccurrences()
+        {
+            CommandLineSwitches switches = new CommandLineSwitches();
+            MSBuildApp.GatherCommandLineSwitches(new ArrayList() { "/targets /targets" }, switches);
+
+            switches.HaveErrors().ShouldBeTrue();
+        }
+
+        [Theory]
         [InlineData("isolate")]
         [InlineData("ISOLATE")]
         [InlineData("isolateprojects")]
@@ -893,6 +934,7 @@ namespace Microsoft.Build.UnitTests
 #endif
                                         1,
                                         true,
+                                        new StringWriter(),
                                         new StringWriter(),
                                         false,
                                         warningsAsErrors: null,
