@@ -169,8 +169,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Import NuGet.props file.
     -->
   <PropertyGroup>
-    <IsRunningFromVisualStudio Condition="'$(IsRunningFromVisualStudio)'==''">$([MSBuild]::IsRunningFromVisualStudio())</IsRunningFromVisualStudio>
-    <NuGetProps Condition="'$(NuGetProps)'=='' and '$(IsRunningFromVisualStudio)'=='true'">$(MSBuildToolsPath32)\..\..\..\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.props</NuGetProps>
+    <MSBuildUseVisualStudioDirectoryLayout Condition="'$(MSBuildUseVisualStudioDirectoryLayout)'==''">$([MSBuild]::IsRunningFromVisualStudio())</MSBuildUseVisualStudioDirectoryLayout>
+    <NuGetProps Condition="'$(NuGetProps)'=='' and '$(MSBuildUseVisualStudioDirectoryLayout)'=='true'">$(MSBuildToolsPath32)\..\..\..\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.props</NuGetProps>
     <NuGetProps Condition="'$(NuGetProps)'==''">$(MSBuildToolsPath)\NuGet.props</NuGetProps>
   </PropertyGroup>
   <Import Condition="Exists('$(NuGetProps)')" Project="$(NuGetProps)" />
