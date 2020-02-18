@@ -216,6 +216,10 @@ namespace Microsoft.DotNet.Cli
 
                 exitCode = builtIn.Command(appArgs.ToArray());
             }
+            else if (string.IsNullOrEmpty(topLevelCommandParserResult.Command))
+            {
+                exitCode = 0;
+            }
             else
             {
                 CommandResult result = CommandFactoryUsingResolver.Create(
