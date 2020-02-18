@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.New.Tests
             new DotnetCommand(Log, "new")
                 .WithWorkingDirectory(rootPath)
                 .WithEnvironmentVariable("DOTNET_NEW_PREFERRED_LANG", "F#")
-                .Execute($"console --debug:ephemeral-hive --no-restore -n f1")
+                .Execute($"console", "--debug:ephemeral-hive", "--no-restore", "-n", "f1")
                 .Should().Pass();
 
             string expectedFsprojPath = Path.Combine(rootPath, "f1", "f1.fsproj");
@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.New.Tests
 
             new DotnetCommand(Log, "new")
                 .WithWorkingDirectory(rootPath)
-                .Execute($"console --debug:ephemeral-hive --no-restore -n c1")
+                .Execute($"console", "--debug:ephemeral-hive", "--no-restore", "-n", "c1")
                 .Should().Pass();
 
             string expectedCsprojPath = Path.Combine(rootPath, "c1", "c1.csproj");
@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.New.Tests
             new DotnetCommand(Log, "new")
                 .WithWorkingDirectory(rootPath)
                 .WithEnvironmentVariable("DOTNET_NEW_PREFERRED_LANG", "")
-                .Execute($"console --debug:ephemeral-hive --no-restore -n c1")
+                .Execute($"console", "--debug:ephemeral-hive", "--no-restore", "-n", "c1")
                 .Should().Pass();
 
             string expectedCsprojPath = Path.Combine(rootPath, "c1", "c1.csproj");
