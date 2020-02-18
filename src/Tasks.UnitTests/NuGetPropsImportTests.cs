@@ -21,7 +21,7 @@ namespace Microsoft.Build.UnitTests
                 </Project>";
 
         private const string NuGetPropsProjectFile = "NuGet.props";
-        private const string NuGetPropsPropertyName = "NuGetProps";
+        private const string NuGetPropsPropertyName = "NuGetPropsFile";
 
         public void Dispose()
         {
@@ -55,7 +55,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Ensures that if the NuGet.props does not exists no exception will be produced.
+        /// Ensures that if the NuGet.props does not exists Microsoft.Build.Exceptions.InvalidProjectFileException is produced.
         /// </summary>
         [Fact]
         public void ImportNuGetPropsWhenDoesNotExists()
@@ -75,9 +75,7 @@ namespace Microsoft.Build.UnitTests
                 </Project>
             ");
 
-            Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(projectRelativePath);
-
-            Assert.Empty(project.GetPropertyValue("NuGetPropsIsImported"));
+            Assert.Throws<Exceptions.InvalidProjectFileException>(() => ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(projectRelativePath));
         }
     }
 }
