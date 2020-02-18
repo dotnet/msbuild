@@ -148,7 +148,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")] // out-of-proc nodes not working on mono yet
         public void SimpleP2PBuildOutOfProc()
         {
             var newParameters = _parameters.Clone();
@@ -1502,7 +1501,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A canceled build
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CancelledBuild()
         {
             string contents = CleanupFileContents(@"
@@ -1608,7 +1606,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly. 
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CancelledBuildWithDelay40()
         {
             string contents = CleanupFileContents(@"
@@ -1640,7 +1637,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly. 
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CancelledBuildInTaskHostWithDelay40()
         {
             string contents = CleanupFileContents(@"
@@ -3277,7 +3273,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// was loaded by MSBuild, not supplied directly by the user.
         /// </remarks>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void Regress265010()
         {
             string contents = CleanupFileContents(@"
@@ -3601,7 +3596,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")] // out-of-proc nodes not working on mono yet
         public void ShouldBuildMutatedProjectInstanceWhoseProjectWasPreviouslyBuiltAsAP2PDependency()
         {
             const string mainProjectContents = @"<Project>
@@ -3695,7 +3689,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")] // out-of-proc nodes not working on mono yet
         public void OutOfProcFileBasedP2PBuildSucceeds()
         {
             const string mainProject = @"<Project>
@@ -3764,7 +3757,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        [Trait("Category", "mono-osx-failing")] // out-of-proc nodes not working on mono yet
         public void OutOfProcProjectInstanceBasedBuildDoesNotReloadFromDisk(bool shouldSerializeEntireState)
         {
             const string mainProject = @"<Project>
@@ -3851,7 +3843,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")] // out-of-proc nodes not working on mono yet
         public void OutOfProcEvaluationIdsUnique()
         {
             const string mainProject = @"<Project>
