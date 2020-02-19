@@ -21,8 +21,8 @@
   </PropertyGroup>
   <PropertyGroup>
     <VersionPrefix>5.0.100</VersionPrefix>
-    <PreReleaseVersionLabel>alpha</PreReleaseVersionLabel>
-    <PreReleaseVersionIteration>1</PreReleaseVersionIteration>
+    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+    <PreReleaseVersionIteration>2</PreReleaseVersionIteration>
   </PropertyGroup>
   <PropertyGroup>
     <RestoreSources>
