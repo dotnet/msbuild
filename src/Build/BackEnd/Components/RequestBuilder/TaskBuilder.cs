@@ -759,7 +759,7 @@ namespace Microsoft.Build.BackEnd
                         MSBuild msbuildTask = host.TaskInstance as MSBuild;
 
                         ErrorUtilities.VerifyThrow(msbuildTask != null, "Unexpected MSBuild internal task.");
-                        
+
                         var undeclaredProjects = GetUndeclaredProjects(msbuildTask);
                         isMSBuildTask = true;
 
@@ -946,9 +946,21 @@ namespace Microsoft.Build.BackEnd
                 // errors are not logged directly from them, but the tasks spawned by them.
                 if (!isMSBuildTask && taskReturned && !taskResult && !taskLoggingContext.HasLoggedErrors)
                 {
-                    taskLoggingContext.LogError(new BuildEventFileInfo(_targetChildInstance.Location),
-                        "TaskReturnedFalseButDidNotLogError",
-                        _taskNode.Name);
+                    if (_continueOnError == ContinueOnError.WarnAndContinue)
+                    {
+                        taskLoggingContext.LogWarning("",
+                            new BuildEventFileInfo(_targetChildInstance.Location),
+                            "TaskReturnedFalseButDidNotLogError",
+                            _taskNode.Name);
+
+                        taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
+                    }
+                    else
+                    {
+                        taskLoggingContext.LogError(new BuildEventFileInfo(_targetChildInstance.Location),
+                            "TaskReturnedFalseButDidNotLogError",
+                            _taskNode.Name);
+                    }
                 }
 
                 // If the task returned attempt to gather its outputs.  If gathering outputs fails set the taskResults

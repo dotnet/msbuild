@@ -309,7 +309,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 MockLogger logger = proj.BuildProjectExpectSuccess();
 
-                logger.ErrorCount.ShouldBe(1);
+                logger.WarningCount.ShouldBe(1);
 
                 logger.AssertLogContains("MSB4132");
             }
