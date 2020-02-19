@@ -190,13 +190,20 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         {
             IReadOnlyList<TemplateGroupForListDisplay> groupsForDisplay = GetTemplateGroupsForListDisplay(templates, language, defaultLanguage);
 
-            HelpFormatter<TemplateGroupForListDisplay> formatter = HelpFormatter.For(environmentSettings, groupsForDisplay, 6, '-', false)
-                .DefineColumn(t => t.Name, LocalizableStrings.Templates)
-                .DefineColumn(t => t.ShortName, LocalizableStrings.ShortName)
-                .DefineColumn(t => t.Languages, out object languageColumn, LocalizableStrings.Language)
-                .DefineColumn(t => t.Classifications, out object tagsColumn, LocalizableStrings.Tags)
-                .OrderByDescending(languageColumn, new NullOrEmptyIsLastStringComparer())
-                .OrderBy(tagsColumn);
+            HelpFormatter<TemplateGroupForListDisplay> formatter =
+                HelpFormatter
+                    .For(
+                        environmentSettings,
+                        groupsForDisplay,
+                        columnPadding: 6,
+                        headerSeparator: '-',
+                        blankLineBetweenRows: false)
+                    .DefineColumn(t => t.Name, LocalizableStrings.Templates, shrinkIfNeeded: true)
+                    .DefineColumn(t => t.ShortName, LocalizableStrings.ShortName)
+                    .DefineColumn(t => t.Languages, out object languageColumn, LocalizableStrings.Language)
+                    .DefineColumn(t => t.Classifications, out object tagsColumn, LocalizableStrings.Tags)
+                    .OrderByDescending(languageColumn, new NullOrEmptyIsLastStringComparer())
+                    .OrderBy(tagsColumn);
             Reporter.Output.WriteLine(formatter.Layout());
         }
 

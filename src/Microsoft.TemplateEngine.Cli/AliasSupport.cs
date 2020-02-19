@@ -182,9 +182,16 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Output.WriteLine(LocalizableStrings.AliasShowAllAliasesHeader);
             }
 
-            HelpFormatter<KeyValuePair<string, IReadOnlyList<string>>> formatter = new HelpFormatter<KeyValuePair<string, IReadOnlyList<string>>>(environment, aliasesToShow, 2, '-', false)
-                            .DefineColumn(t => t.Key, LocalizableStrings.AliasName)
-                            .DefineColumn(t => string.Join(" ", t.Value), LocalizableStrings.AliasValue);
+            HelpFormatter<KeyValuePair<string, IReadOnlyList<string>>> formatter =
+                new HelpFormatter<KeyValuePair<string, IReadOnlyList<string>>>(
+                    environment,
+                    aliasesToShow,
+                    columnPadding: 2,
+                    headerSeparator: '-',
+                    blankLineBetweenRows: false)
+                .DefineColumn(t => t.Key, LocalizableStrings.AliasName)
+                .DefineColumn(t => string.Join(" ", t.Value), LocalizableStrings.AliasValue);
+
             Reporter.Output.WriteLine(formatter.Layout());
             return CreationResultStatus.Success;
         }
