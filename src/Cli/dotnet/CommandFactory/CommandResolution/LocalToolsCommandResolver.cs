@@ -57,7 +57,8 @@ namespace Microsoft.DotNet.CommandFactory
                 return null;
             }
 
-            if (!arguments.CommandName.StartsWith(LeadingDotnetPrefix, StringComparison.OrdinalIgnoreCase))
+            if (!arguments.CommandName.StartsWith(LeadingDotnetPrefix, StringComparison.OrdinalIgnoreCase) ||
+                string.IsNullOrWhiteSpace(arguments.CommandName.Substring(LeadingDotnetPrefix.Length)))
             {
                 return null;
             }
