@@ -4,35 +4,30 @@
 .hy
 .SH dotnet pack
 .PP
+\f[B]This topic applies to: \[OK]\f[R] .NET Core 1.x SDK and later versions
 .SH NAME
 .PP
 \f[C]dotnet pack\f[R] - Packs the code into a NuGet package.
 .SH SYNOPSIS
-.SS .NET Core 2.x
 .IP
 .nf
 \f[C]
-dotnet pack [<PROJECT>] [-c|--configuration] [--force] [--include-source] [--include-symbols] [--no-build] [--no-dependencies]
-    [--no-restore] [-o|--output] [--runtime] [-s|--serviceable] [-v|--verbosity] [--version-suffix]
+dotnet pack [<PROJECT>|<SOLUTION>] [-c|--configuration] [--force] [--include-source] [--include-symbols] [--interactive] 
+    [--no-build] [--no-dependencies] [--no-restore] [--nologo] [-o|--output] [--runtime] [-s|--serviceable] 
+    [-v|--verbosity] [--version-suffix]
 dotnet pack [-h|--help]
 \f[R]
 .fi
-.SS .NET Core 1.x
-.IP
-.nf
-\f[C]
-dotnet pack [<PROJECT>] [-c|--configuration] [--include-source] [--include-symbols] [--no-build] [-o|--output]
-    [-s|--serviceable] [-v|--verbosity] [--version-suffix]
-dotnet pack [-h|--help]
-\f[R]
-.fi
-.PP
-   *   *   *   *   *
 .SH DESCRIPTION
 .PP
 The \f[C]dotnet pack\f[R] command builds the project and creates NuGet packages.
-The result of this command is a NuGet package.
-If the \f[C]--include-symbols\f[R] option is present, another package containing the debug symbols is created.
+The result of this command is a NuGet package (that is, a \f[I].nupkg\f[R] file).
+.PP
+If you want to generate a package that contains the debug symbols, you have two options available:
+.IP \[bu] 2
+\f[C]--include-symbols\f[R] - it creates the symbols package.
+.IP \[bu] 2
+\f[C]--include-source\f[R] - it creates the symbols package with a \f[C]src\f[R] folder inside containing the source files.
 .PP
 NuGet dependencies of the packed project are added to the \f[I].nuspec\f[R] file, so they\[cq]re properly resolved when the package is installed.
 Project-to-project references aren\[cq]t packaged inside the project.
@@ -46,17 +41,25 @@ You can provide MSBuild properties to the \f[C]dotnet pack\f[R] command for the 
 For more information, see NuGet metadata properties and the MSBuild Command-Line Reference.
 The Examples section shows how to use the MSBuild -p switch for a couple of different scenarios.
 .PP
-.SS Arguments
-.IP \[bu] 2
-\f[B]\f[CB]PROJECT\f[B]\f[R]
-.RS 2
+Web projects aren\[cq]t packable by default.
+To override the default behavior, add the following property to your \f[I].csproj\f[R] file:
+.IP
+.nf
+\f[C]
+<PropertyGroup>
+   <IsPackable>true</IsPackable>
+</PropertyGroup>
+\f[R]
+.fi
 .PP
-The project to pack.
-It\[cq]s either a path to a csproj file or to a directory.
-If not specified, it defaults to the current directory.
-.RE
+.SS Arguments
+.PP
+\f[C]PROJECT | SOLUTION\f[R]
+.PP
+The project or solution to pack.
+It\[cq]s either a path to a csproj file, a solution file, or to a directory.
+If not specified, the command searches the current directory for a project or solution file.
 .SH OPTIONS
-.SS .NET Core 2.x
 .IP \[bu] 2
 \f[B]\f[CB]-c|--configuration {Debug|Release}\f[B]\f[R]
 .RS 2
@@ -70,6 +73,7 @@ The default value is \f[C]Debug\f[R].
 .PP
 Forces all dependencies to be resolved even if the last restore was successful.
 Specifying this flag is the same as deleting the \f[I]project.assets.json\f[R] file.
+Option available since .NET Core 2.0 SDK.
 .RE
 .IP \[bu] 2
 \f[B]\f[CB]-h|--help\f[B]\f[R]
@@ -81,14 +85,21 @@ Prints out a short help for the command.
 \f[B]\f[CB]--include-source\f[B]\f[R]
 .RS 2
 .PP
-Includes the source files in the NuGet package.
-The sources files are included in the \f[C]src\f[R] folder within the \f[C]nupkg\f[R].
+Includes the debug symbols NuGet packages in addition to the regular NuGet packages in the output directory.
+The sources files are included in the \f[C]src\f[R] folder within the symbols package.
 .RE
 .IP \[bu] 2
 \f[B]\f[CB]--include-symbols\f[B]\f[R]
 .RS 2
 .PP
-Generates the symbols \f[C]nupkg\f[R].
+Includes the debug symbols NuGet packages in addition to the regular NuGet packages in the output directory.
+.RE
+.IP \[bu] 2
+\f[B]\f[CB]--interactive\f[B]\f[R]
+.RS 2
+.PP
+Allows the command to stop and wait for user input or action (for example, to complete authentication).
+Available since .NET Core 3.0 SDK.
 .RE
 .IP \[bu] 2
 \f[B]\f[CB]--no-build\f[B]\f[R]
@@ -102,12 +113,21 @@ It also implicitly sets the \f[C]--no-restore\f[R] flag.
 .RS 2
 .PP
 Ignores project-to-project references and only restores the root project.
+Option available since .NET Core 2.0 SDK.
 .RE
 .IP \[bu] 2
 \f[B]\f[CB]--no-restore\f[B]\f[R]
 .RS 2
 .PP
 Doesn\[cq]t execute an implicit restore when running the command.
+Option available since .NET Core 2.0 SDK.
+.RE
+.IP \[bu] 2
+\f[B]\f[CB]--nologo\f[B]\f[R]
+.RS 2
+.PP
+Doesn\[cq]t display the startup banner or the copyright message.
+Available since .NET Core 3.0 SDK.
 .RE
 .IP \[bu] 2
 \f[B]\f[CB]-o|--output <OUTPUT_DIRECTORY>\f[B]\f[R]
@@ -121,6 +141,7 @@ Places the built packages in the directory specified.
 .PP
 Specifies the target runtime to restore packages for.
 For a list of Runtime Identifiers (RIDs), see the RID catalog.
+Option available since .NET Core 2.0 SDK.
 .RE
 .IP \[bu] 2
 \f[B]\f[CB]-s|--serviceable\f[B]\f[R]
@@ -142,80 +163,6 @@ Defines the value for the \f[C]$(VersionSuffix)\f[R] MSBuild property in the pro
 Sets the verbosity level of the command.
 Allowed values are \f[C]q[uiet]\f[R], \f[C]m[inimal]\f[R], \f[C]n[ormal]\f[R], \f[C]d[etailed]\f[R], and \f[C]diag[nostic]\f[R].
 .RE
-.RS
-.PP
-[!NOTE] Web projects aren\[cq]t packable by default.
-To override the default behavior, add the following property to your \f[I].csproj\f[R] file:
-.IP
-.nf
-\f[C]
-<PropertyGroup>
-   <IsPackable>true</IsPackable>
-</PropertyGroup>
-\f[R]
-.fi
-.RE
-.SS .NET Core 1.x
-.IP \[bu] 2
-\f[B]\f[CB]-c|--configuration {Debug|Release}\f[B]\f[R]
-.RS 2
-.PP
-Defines the build configuration.
-The default value is \f[C]Debug\f[R].
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]-h|--help\f[B]\f[R]
-.RS 2
-.PP
-Prints out a short help for the command.
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]--include-source\f[B]\f[R]
-.RS 2
-.PP
-Includes the source files in the NuGet package.
-The sources files are included in the \f[C]src\f[R] folder within the \f[C]nupkg\f[R].
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]--include-symbols\f[B]\f[R]
-.RS 2
-.PP
-Generates the symbols \f[C]nupkg\f[R].
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]--no-build\f[B]\f[R]
-.RS 2
-.PP
-Doesn\[cq]t build the project before packing.
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]-o|--output <OUTPUT_DIRECTORY>\f[B]\f[R]
-.RS 2
-.PP
-Places the built packages in the directory specified.
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]-s|--serviceable\f[B]\f[R]
-.RS 2
-.PP
-Sets the serviceable flag in the package.
-For more information, see .NET Blog: .NET 4.5.1 Supports Microsoft Security Updates for .NET NuGet Libraries.
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]--version-suffix <VERSION_SUFFIX>\f[B]\f[R]
-.RS 2
-.PP
-Defines the value for the \f[C]$(VersionSuffix)\f[R] MSBuild property in the project.
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]-v|--verbosity <LEVEL>\f[B]\f[R]
-.RS 2
-.PP
-Sets the verbosity level of the command.
-Allowed values are \f[C]q[uiet]\f[R], \f[C]m[inimal]\f[R], \f[C]n[ormal]\f[R], \f[C]d[etailed]\f[R], and \f[C]diag[nostic]\f[R].
-.RE
-.PP
-   *   *   *   *   *
 .SH EXAMPLES
 .IP \[bu] 2
 Pack the project in the current directory:
@@ -303,7 +250,7 @@ Pack the project using a .nuspec file:
 .IP
 .nf
 \f[C]
-dotnet pack \[ti]/projects/app1/project.csproj /p:NuspecFile=\[ti]/projects/app1/project.nuspec /p:NuspecBasePath=\[ti]/projects/app1/nuget
+dotnet pack \[ti]/projects/app1/project.csproj -p:NuspecFile=\[ti]/projects/app1/project.nuspec -p:NuspecBasePath=\[ti]/projects/app1/nuget
 \f[R]
 .fi
 .RE

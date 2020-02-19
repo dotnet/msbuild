@@ -66,10 +66,11 @@
     <ILLinkTasksPackageVersion>0.1.6-prerelease.20117.1</ILLinkTasksPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <!-- Dependencies from https://github.com/dotnet/corefx -->
+    <!-- Dependencies from https://github.com/dotnet/runtime -->
     <SystemCodeDomPackageVersion>5.0.0-preview.1.20118.1</SystemCodeDomPackageVersion>
     <SystemTextEncodingCodePagesPackageVersion>5.0.0-preview.1.20118.1</SystemTextEncodingCodePagesPackageVersion>
     <SystemSecurityCryptographyProtectedDataPackageVersion>5.0.0-preview.1.20118.1</SystemSecurityCryptographyProtectedDataPackageVersion>
+    <SystemResourcesExtensionsPackageVersion>5.0.0-alpha1.19521.4</SystemResourcesExtensionsPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/Microsoft/msbuild -->

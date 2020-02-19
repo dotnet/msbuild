@@ -101,6 +101,10 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>a0ae6619929e811a7f2440f371b8ed6db85bc6ec</Sha>
     </Dependency>
+    <Dependency Name="System.Resources.Extensions" Version="5.0.0-alpha1.19521.4" CoherentParentDependency="Microsoft.NETCore.App.Runtime.win-x64">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>46299619e290936c495264162ede68354ced5b18</Sha>
+    </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="5.0.0-beta.20111.11">

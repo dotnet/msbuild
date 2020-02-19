@@ -18,6 +18,8 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 {
     public class DangerousFileDetectorTests : SdkTest
     {
+        private const int REGDB_E_CLASSNOTREG = unchecked((int)0x80040154);
+
         public DangerousFileDetectorTests(ITestOutputHelper log) : base(log)
         {
         }
@@ -33,7 +35,15 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 "Zone.Identifier",
                 "[ZoneTransfer]\r\nZoneId=3\r\nReferrerUrl=C:\\Users\\test.zip\r\n");
 
-            new DangerousFileDetector().IsDangerous(testFile).Should().BeTrue();
+            bool isTestFileDangerous = new DangerousFileDetector().IsDangerous(testFile);
+            if (!HasInternetSecurityManagerNativeApi())
+            {
+                isTestFileDangerous.Should().BeFalse("Locked down version of Windows does not have IE to download files");
+            }
+            else
+            {
+                isTestFileDangerous.Should().BeTrue();
+            }
         }
 
         [Fact]
@@ -51,6 +61,24 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             File.WriteAllText(testFile, string.Empty);
 
             new DangerousFileDetector().IsDangerous(testFile).Should().BeFalse();
+        }
+
+        private static bool HasInternetSecurityManagerNativeApi()
+        {
+            try
+            {
+                string CLSID_InternetSecurityManager = "7b8a2d94-0ac9-11d1-896c-00c04fb6bfc4";
+
+                Type iismType = Type.GetTypeFromCLSID(new Guid(CLSID_InternetSecurityManager));
+                var internetSecurityManager = (IInternetSecurityManager)Activator.CreateInstance(iismType);
+                return true;
+            }
+            catch (COMException ex) when (ex.ErrorCode == REGDB_E_CLASSNOTREG)
+            {
+                // When the COM is missing(Class not registered error), it is in a locked down
+                // version like Nano Server
+                return false;
+            }
         }
 
         private static class AlternateStream
@@ -100,7 +128,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 }
             }
 
-            [DllImport("kernel32", SetLastError = true)]
+            [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Unicode)]
             private static extern SafeFileHandle CreateFile(
                 string filename,
                 uint desiredAccess,

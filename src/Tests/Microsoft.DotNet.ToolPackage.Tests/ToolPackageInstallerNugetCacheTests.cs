@@ -127,7 +127,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             };
         }
 
-        private static (IToolPackageStore, IToolPackageInstaller, BufferedReporter, IFileSystem) Setup(
+        private (IToolPackageStore, IToolPackageInstaller, BufferedReporter, IFileSystem) Setup(
             bool useMock,
             string testDirectory,
             List<MockFeed> feeds = null,
@@ -158,7 +158,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 store = new ToolPackageStoreAndQuery(root);
                 installer = new ToolPackageInstaller(
                     store: store,
-                    projectRestorer: new ProjectRestorer(reporter),
+                    projectRestorer: new Stage2ProjectRestorer(Log, reporter),
                     tempProject: tempProject ?? GetUniqueTempProjectPathEachTest(testDirectory),
                     offlineFeed: offlineFeed ?? new DirectoryPath("does not exist"));
             }

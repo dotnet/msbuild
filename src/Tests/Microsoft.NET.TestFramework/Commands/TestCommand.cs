@@ -20,6 +20,8 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public List<string> Arguments { get; set; } = new List<string>();
 
+        public List<string> EnvironmentToRemove { get; } = new List<string>();
+
         //  These only work via Execute(), not when using GetProcessStartInfo()
         public Action<string> CommandOutputHandler { get; set; }
         public Action<Process> ProcessStartedHandler { get; set; }
@@ -51,6 +53,11 @@ namespace Microsoft.NET.TestFramework.Commands
                 commandSpec.Environment[kvp.Key] = kvp.Value;
             }
 
+            foreach (var envToRemove in EnvironmentToRemove)
+            {
+                commandSpec.Environment.Remove(envToRemove);
+            }
+
             if (WorkingDirectory != null)
             {
                 commandSpec.WorkingDirectory = WorkingDirectory;
@@ -68,7 +75,14 @@ namespace Microsoft.NET.TestFramework.Commands
         {
             var commandSpec = CreateCommandSpec(args);
 
-            return commandSpec.ToProcessStartInfo();
+            var psi = commandSpec.ToProcessStartInfo();
+
+            foreach (var envToRemove in EnvironmentToRemove)
+            {
+                psi.Environment.Remove(envToRemove);
+            }
+
+            return psi;
         }
 
         public CommandResult Execute(params string[] args)

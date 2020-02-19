@@ -4,11 +4,11 @@
 .hy
 .SH dotnet nuget push
 .PP
+\f[B]This topic applies to: \[OK]\f[R] .NET Core 1.x SDK and later versions
 .SH NAME
 .PP
 \f[C]dotnet nuget push\f[R] - Pushes a package to the server and publishes it.
 .SH SYNOPSIS
-.SS .NET Core 2.x
 .IP
 .nf
 \f[C]
@@ -17,17 +17,6 @@ dotnet nuget push [<ROOT>] [-d|--disable-buffering] [--force-english-output] [--
 dotnet nuget push [-h|--help]
 \f[R]
 .fi
-.SS .NET Core 1.x
-.IP
-.nf
-\f[C]
-dotnet nuget push [<ROOT>] [-d|--disable-buffering] [--force-english-output] [-k|--api-key] [-n|--no-symbols]
-    [-s|--source] [-sk|--symbol-api-key] [-ss|--symbol-source] [-t|--timeout]
-dotnet nuget push [-h|--help]
-\f[R]
-.fi
-.PP
-   *   *   *   *   *
 .SH DESCRIPTION
 .PP
 The \f[C]dotnet nuget push\f[R] command pushes a package to the server and publishes it.
@@ -42,7 +31,6 @@ NuGet\[cq]s default configuration is obtained by loading \f[I]%AppData%.config\f
 Specifies the file path to the package to be pushed.
 .RE
 .SH OPTIONS
-.SS .NET Core 2.x
 .IP \[bu] 2
 \f[B]\f[CB]-d|--disable-buffering\f[B]\f[R]
 .RS 2
@@ -112,66 +100,6 @@ Specifies the timeout for pushing to a server in seconds.
 Defaults to 300 seconds (5 minutes).
 Specifying 0 (zero seconds) applies the default value.
 .RE
-.SS .NET Core 1.x
-.IP \[bu] 2
-\f[B]\f[CB]-d|--disable-buffering\f[B]\f[R]
-.RS 2
-.PP
-Disables buffering when pushing to an HTTP(S) server to reduce memory usage.
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]--force-english-output\f[B]\f[R]
-.RS 2
-.PP
-Forces the application to run using an invariant, English-based culture.
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]-h|--help\f[B]\f[R]
-.RS 2
-.PP
-Prints out a short help for the command.
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]-k|--api-key <API_KEY>\f[B]\f[R]
-.RS 2
-.PP
-The API key for the server.
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]-n|--no-symbols\f[B]\f[R]
-.RS 2
-.PP
-Doesn\[cq]t push symbols (even if present).
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]-s|--source <SOURCE>\f[B]\f[R]
-.RS 2
-.PP
-Specifies the server URL.
-This option is required unless \f[C]DefaultPushSource\f[R] config value is set in the NuGet config file.
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]-sk|--symbol-api-key <API_KEY>\f[B]\f[R]
-.RS 2
-.PP
-The API key for the symbol server.
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]-ss|--symbol-source <SOURCE>\f[B]\f[R]
-.RS 2
-.PP
-Specifies the symbol server URL.
-.RE
-.IP \[bu] 2
-\f[B]\f[CB]-t|--timeout <TIMEOUT>\f[B]\f[R]
-.RS 2
-.PP
-Specifies the timeout for pushing to a server in seconds.
-Defaults to 300 seconds (5 minutes).
-Specifying 0 (zero seconds) applies the default value.
-.RE
-.PP
-   *   *   *   *   *
 .SH EXAMPLES
 .IP \[bu] 2
 Pushes \f[I]foo.nupkg\f[R] to the default push source, specifying an API key:
@@ -232,6 +160,11 @@ Pushes all \f[I].nupkg\f[R] files in the current directory to the default push s
 dotnet nuget push *.nupkg
 \f[R]
 .fi
+.RS
+.PP
+[!NOTE] If this command doesn\[cq]t work, it might be due to a bug that existed in older versions of the SDK (.NET Core 2.1 SDK and earlier versions).
+To fix this, upgrade your SDK version or run the following command instead: \f[C]dotnet nuget push **/*.nupkg\f[R]
+.RE
 .RE
 .SH AUTHORS
 karann-msft.

@@ -5,7 +5,7 @@
 #
 
 import copy
-from pandocfilters import toJSONFilters, Para, Str, Header, Space, Link
+from pandocfilters import toJSONFilters, Para, Str, Header, Space
 
 def remove_includes(key, value, format, meta):
     if key == 'Para' and value[0]['c'] == '[!INCLUDE':
@@ -37,9 +37,7 @@ def demote_net_core_1_2(key, value, format, meta):
 def remove_references(key, value, format, meta):
     if key == 'Link':
         pass
-        if value[1][0]['t'] == 'Code':
-            return value[1][0]
-        return Str(' '.join([e['c'] for e in value[1] if 'c' in e.keys()]))
+        return value[1]
     return None
 
 def main():
