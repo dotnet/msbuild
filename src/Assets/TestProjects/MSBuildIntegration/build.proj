@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Validate" 
+         xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Import Project="build.props" />
+
+  <Target Name="Build"
+          DependsOnTargets="Validate" />
+
+  <Target Name="Clean"
+          DependsOnTargets="Validate" />
+
+  <Target Name="Pack"
+          DependsOnTargets="Validate" />
+
+  <Target Name="Publish"
+          DependsOnTargets="Validate" />
+
+  <Target Name="Restore"
+          DependsOnTargets="Validate" />
+  
+  <Target Name="VSTest"
+          DependsOnTargets="Validate" />
+
+  <Target Name="Validate">  
+    <Error Condition=" $(MSBuildNodeCount) &lt; 2 " 
+           Text="Expected MSBuildNodeCount to be greater than 1, but found $(MSBuildNodeCount). Is this a single proc machine?" />
+
+    <Error Condition=" '$(MSBuildExtensionsPath)' == '' " 
+           Text="Expected MSBuildExtensionsPath to be set, but it is not." />
+    
+    <Error Condition=" '$(MSBuildSDKsPath)' == '' " 
+           Text="Expected MSBuildSDKsPath to be set, but it is not." />
+
+    <Error Condition=" !Exists('$(MSBuildSDKsPath)/%(Sdk.Identity)/Sdk/Sdk.props') " 
+           Text="Expected '$(MSBuildSDKsPath)/%(Sdk.Identity)/Sdk/Sdk.props' to exist, but it does not. " />
+
+    <Error Condition=" !Exists('$(MSBuildSDKsPath)/%(Sdk.Identity)/Sdk/Sdk.targets') " 
+           Text="Expected '$(MSBuildSDKsPath)/%(Sdk.Identity)/Sdk/Sdk.targets' to exist, but it does not. " />
+
+    <Message Importance="low" Text="Message with low importance" />
+    <Message Importance="normal" Text="Message with normal importance" />
+    <Message Importance="high" Text="Message with high importance" />
+  </Target>
+</Project>

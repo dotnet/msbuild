@@ -1,0 +1,167 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="LastArgumentMultiValueError">
+        <source>The last argument '{0}' accepts multiple values. No more argument can be added.</source>
+        <target state="translated">Poslední argument {0} umožňuje zadat několik hodnot. Nemůžete přidat další argument.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedValueForOptionError">
+        <source>Unexpected value '{0}' for option '{1}'</source>
+        <target state="translated">Nečekaná hodnota {0} u možnosti {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedArgumentError">
+        <source>Unrecognized {0} '{1}'</source>
+        <target state="translated">Nerozpoznané {0} {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResponseFileNotFoundError">
+        <source>Response file '{0}' doesn't exist.</source>
+        <target state="translated">Soubor odezvy {0} neexistuje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShowHelpInfo">
+        <source>Show command line help.</source>
+        <target state="translated">Zobrazí nápovědu příkazového řádku.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShowVersionInfo">
+        <source>Show version information</source>
+        <target state="translated">Zobrazit verzi</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShowHintInfo">
+        <source>Specify --{0} for a list of available options and commands.</source>
+        <target state="translated">Pokud chcete zobrazit seznam dostupných možností a příkazů, zadejte --{0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageHeader">
+        <source>Usage:</source>
+        <target state="translated">Použití:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageArgumentsToken">
+        <source> [arguments]</source>
+        <target state="translated"> [argumenty]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageArgumentsHeader">
+        <source>Arguments:</source>
+        <target state="translated">Argumenty:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageOptionsToken">
+        <source> [options]</source>
+        <target state="translated"> [možnosti]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageOptionsHeader">
+        <source>Options:</source>
+        <target state="translated">Možnosti:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandToken">
+        <source> [command]</source>
+        <target state="translated"> [příkaz]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandsHeader">
+        <source>Commands:</source>
+        <target state="translated">Příkazy:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandsDetailHelp">
+        <source>Use "{0} [command] --help" for more information about a command.</source>
+        <target state="translated">Další informace o příkazu získáte, když zadáte "{0} [příkaz] --help".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandArgs">
+        <source> [args]</source>
+        <target state="translated"> [arg.]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandAdditionalArgs">
+        <source> [[--] &lt;additional arguments&gt;...]]</source>
+        <target state="translated"> [[--] &lt;další argumenty&gt;...]]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandsAdditionalArgsHeader">
+        <source>Additional Arguments:</source>
+        <target state="translated">Další argumenty:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidTemplateError">
+        <source>Invalid template pattern '{0}'</source>
+        <target state="translated">Neplatný vzor šablony {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildAdditionalArgsHelpText">
+        <source>Any extra options that should be passed to MSBuild. See 'dotnet msbuild -h' for available options.</source>
+        <target state="translated">Další možnosti, které je možné předat MSBuildu. Dostupné možnosti zobrazíte příkazem dotnet msbuild -h.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionRequiresSingleValueWhichIsMissing">
+        <source>Required value for option '{0}' was not provided.</source>
+        <target state="translated">Nebyla zadána povinná hodnota parametru {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandAcceptsOnlyOneArgument">
+        <source>Command '{0}' only accepts a single argument but {1} were provided.</source>
+        <target state="translated">Příkaz {0} přijímá pouze jediný argument, ale bylo zadáno více argumentů ({1}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandAcceptsOnlyOneSubcommand">
+        <source>Command '{0}' only accepts a single subcommand but multiple were provided: {1}</source>
+        <target state="translated">Příkaz {0} přijímá pouze jediný příkaz v podnabídce, ale bylo zadáno více příkazů v podnabídce: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileDoesNotExist">
+        <source>File does not exist: {0}</source>
+        <target state="translated">Neexistující soubor: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoArgumentsAllowed">
+        <source>Arguments not allowed for option: {0}</source>
+        <target state="translated">Pro možnost {0} nejsou argumenty povoleny.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionAcceptsOnlyOneArgument">
+        <source>Option '{0}' only accepts a single argument but {1} were provided.</source>
+        <target state="translated">Možnost {0} přijímá pouze jediný argument, ale bylo zadáno více argumentů ({1}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentMissingForCommand">
+        <source>Required argument missing for command: {0}</source>
+        <target state="translated">Chybí povinný argument pro příkaz: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentMissingForOption">
+        <source>Required argument missing for option: {0}</source>
+        <target state="translated">Chybí povinný argument pro možnost: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredCommandWasNotProvided">
+        <source>Required command was not provided.</source>
+        <target state="translated">Požadovaný příkaz nebyl zadán.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedArgument">
+        <source>Argument '{0}' not recognized. Must be one of: {1}</source>
+        <target state="translated">Argument {0} nebyl rozpoznán. Musí se jednat o jeden z těchto argumentů: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedCommandOrArgument">
+        <source>Unrecognized command or argument '{0}'</source>
+        <target state="translated">Nerozpoznaný příkaz nebo argument: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedOption">
+        <source>Option '{0}' not recognized. Must be one of: {1}</source>
+        <target state="translated">Možnost {0} nebyla rozpoznána. Musí se jednat o jednu z těchto možností: {1}.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <Description>SLN file reader/writer</Description>
+    <TargetFramework>$(SdkTargetFramework)</TargetFramework>
+    <DebugType>portable</DebugType>
+    <AssemblyName>Microsoft.DotNet.Cli.Sln.Internal</AssemblyName>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
+    <SignAssembly>true</SignAssembly>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="**\*.resx" GenerateSource="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Microsoft.DotNet.Cli.Utils/Microsoft.DotNet.Cli.Utils.csproj" />
+  </ItemGroup>
+</Project>

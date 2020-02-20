@@ -1,0 +1,297 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="RollForwardDefinition">
+        <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
+        <target state="translated">Şu framework sürümüne ileri sarın: (LatestPatch, İkincil, LatestMinor, Ana, LatestMajor, Devre dışı).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Usage">
+        <source>Usage</source>
+        <target state="translated">Kullanım</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Arguments">
+        <source>Arguments</source>
+        <target state="translated">Bağımsız değişkenler</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDefinition">
+        <source>The command to execute</source>
+        <target state="translated">Yürütülecek komut</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentsDefinition">
+        <source>Arguments to pass to the command</source>
+        <target state="translated">Komuta geçirilecek bağımsız değişkenler</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="HostOptionsDefinition">
+        <source>Options specific to dotnet (host)</source>
+        <target state="translated">Dotnet’e özel seçenekler (konak)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionsDescription">
+        <source>Options common to all commands</source>
+        <target state="translated">Tüm komutlar için ortak seçenekler</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="HelpDefinition">
+        <source>Show command line help.</source>
+        <target state="translated">Komut satırı yardımını gösterir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="HostOptions">
+        <source>Host options (passed before the command)</source>
+        <target state="translated">Konak seçenekleri (komuttan önce geçirilir)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionDescription">
+        <source>Display .NET CLI Version Number</source>
+        <target state="translated">.NET CLI Sürüm Numarasını Görüntüle</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InfoDescription">
+        <source>Display .NET CLI Info</source>
+        <target state="translated">.NET CLI Bilgisini Görüntüle</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Commands">
+        <source>SDK commands</source>
+        <target state="translated">SDK komutları</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NewDefinition">
+        <source>Create a new .NET project or file.</source>
+        <target state="translated">Yeni bir .NET projesi veya dosyası oluşturur.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RestoreDefinition">
+        <source>Restore dependencies specified in a .NET project.</source>
+        <target state="translated">Bir .NET projesinde belirtilen bağımlılıkları geri yükler.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildDefinition">
+        <source>Build a .NET project.</source>
+        <target state="translated">Bir .NET projesi derler.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishDefinition">
+        <source>Publish a .NET project for deployment.</source>
+        <target state="translated">Bir .NET projesini dağıtım için yayımlar.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunDefinition">
+        <source>Build and run a .NET project output.</source>
+        <target state="translated">Bir .NET projesi çıktısı derler ve çalıştırır.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TestDefinition">
+        <source>Run unit tests using the test runner specified in a .NET project.</source>
+        <target state="translated">.NET projesinde belirtilen test çalıştırıcısını kullanarak birim testleri çalıştırır.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackDefinition">
+        <source>Create a NuGet package.</source>
+        <target state="translated">Bir NuGet paketi oluşturur.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectModificationCommands">
+        <source>Project modification commands</source>
+        <target state="translated">Projede değişiklik komutları</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddDefinition">
+        <source>Add a package or reference to a .NET project.</source>
+        <target state="translated">Bir .NET projesine paket ya da başvuru ekler.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RemoveDefinition">
+        <source>Remove a package or reference from a .NET project.</source>
+        <target state="translated">Bir .NET projesinden paket ya da başvuruyu kaldırır.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AdvancedCommands">
+        <source>Advanced Commands</source>
+        <target state="translated">Gelişmiş Komutlar</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NugetDefinition">
+        <source>Provides additional NuGet commands.</source>
+        <target state="translated">Ek NuGet komutları sağlar.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MsBuildDefinition">
+        <source>Run Microsoft Build Engine (MSBuild) commands.</source>
+        <target state="translated">Microsoft Build Engine (MSBuild) komutlarını çalıştırır.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VsTestDefinition">
+        <source>Run Microsoft Test Engine (VSTest) commands.</source>
+        <target state="translated">Microsoft Test Engine (VSTest) komutlarını çalıştırır.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DiagnosticsDefinition">
+        <source>Enable diagnostic output</source>
+        <target state="translated">Tanılama çıkışını etkinleştir</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CleanDefinition">
+        <source>Clean build outputs of a .NET project.</source>
+        <target state="translated">Bir .NET projesinin derleme çıktılarını temizler.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SlnDefinition">
+        <source>Modify Visual Studio solution files.</source>
+        <target state="translated">Visual Studio çözüm dosyalarını değiştirir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ListDefinition">
+        <source>List project references of a .NET project.</source>
+        <target state="translated">Bir .NET projesinin proje başvurularını listeler.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDoesNotExist">
+        <source>Specified command '{0}' is not a valid SDK command. Specify a valid SDK command. For more information, run dotnet help.</source>
+        <target state="translated">Belirtilen '{0}' komutu geçerli bir SDK komutu değil. Geçerli bir SDK komutu belirtin. Daha fazla bilgi için dotnet help komutunu çalıştırın.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppFullName">
+        <source>.NET CLI help utility</source>
+        <target state="translated">.NET CLI yardımcı programı</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Utility to get more detailed help about each of the SDK commands.</source>
+        <target state="translated">SDK komutlarının her biri hakkında daha ayrıntılı yardım sunan yardımcı program.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandArgumentName">
+        <source>COMMAND_NAME</source>
+        <target state="translated">COMMAND_NAME</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandArgumentDescription">
+        <source>The SDK command to launch online help for.</source>
+        <target state="translated">Çevrimiçi yardımı başlatılacak SDK komutu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PathToApplicationDefinition">
+        <source>The path to an application .dll file to execute.</source>
+        <target state="translated">Çalıştırılacak uygulama .dll dosyasının yolu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKVersionCommandDefinition">
+        <source>Display .NET Core SDK version in use.</source>
+        <target state="translated">Kullanılmakta olan .NET Core SDK sürümünü gösterir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKInfoCommandDefinition">
+        <source>Display .NET Core information.</source>
+        <target state="translated">.NET Core bilgilerini gösterir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKListSdksCommandDefinition">
+        <source>Display the installed SDKs.</source>
+        <target state="translated">Yüklü SDK’ları görüntüleyin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKListRuntimesCommandDefinition">
+        <source>Display the installed runtimes.</source>
+        <target state="translated">Yüklü çalışma zamanlarını görüntüleyin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKDiagnosticsCommandDefinition">
+        <source>Enable diagnostic output.</source>
+        <target state="translated">Tanılama çıkışını etkinleştirir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunDotnetCommandHelpForMore">
+        <source>Run 'dotnet [command] --help' for more information on a command.</source>
+        <target state="translated">Bir komut hakkında daha fazla bilgi için 'dotnet [komut] --help' komutunu çalıştırın.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AdditionalProbingPathDefinition">
+        <source>Path containing probing policy and assemblies to probe for.</source>
+        <target state="translated">Yoklama ilkesini ve yoklanacak bütünleştirilmiş kodları içeren yol.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DepsFileDefinition">
+        <source>Path to &lt;application&gt;.deps.json file.</source>
+        <target state="translated">&lt;application&gt;.deps.json dosyasının yolu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeConfigDefinition">
+        <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
+        <target state="translated">&lt;application&gt;.runtimeconfig.json dosyasının yolu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FxVersionDefinition">
+        <source>Version of the installed Shared Framework to use to run the application.</source>
+        <target state="translated">Uygulamayı çalıştırmak için kullanılacak olan yüklü Paylaşılan Çerçevenin sürümü</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AdditionalDeps">
+        <source>Path to additional deps.json file.</source>
+        <target state="translated">Ek deps.json dosyasının yolu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="StoreDefinition">
+        <source>Store the specified assemblies in the runtime package store.</source>
+        <target state="translated">Belirtilen bütünleştirilmiş kodları çalışma zamanı paket deposunda depolar.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolDefinition">
+        <source>Install or manage tools that extend the .NET experience.</source>
+        <target state="translated">.NET deneyimini genişleten araçları yükler veya yönetir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildServerDefinition">
+        <source>Interact with servers started by a build.</source>
+        <target state="translated">Bir derleme tarafından başlatılan sunucularla etkileşimde bulunun.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DevCertsDefinition">
+        <source>Create and manage development certificates.</source>
+        <target state="translated">Geliştirme sertifikaları oluşturun ve yönetin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SqlCacheDefinition">
+        <source>SQL Server cache command-line tools.</source>
+        <target state="translated">SQL Server önbellek komut satırı araçları.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UserSecretsDefinition">
+        <source>Manage development user secrets.</source>
+        <target state="translated">Kullanıcı gizli dizilerini yönetin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WatchDefinition">
+        <source>Start a file watcher that runs a command when files change.</source>
+        <target state="translated">Dosyalar değiştiğinde bir komut çalıştıran bir dosya izleyici başlatın.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AdditionalTools">
+        <source>Additional commands from bundled tools:</source>
+        <target state="translated">Paket grubu oluşturulmuş araçlardaki ek komutlar:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKCommandUsageDescription">
+        <source>Execute a .NET Core SDK command.</source>
+        <target state="translated">Bir .NET Core SDK komutunu yürütür.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExecutionUsageDescription">
+        <source>Execute a .NET Core application.</source>
+        <target state="translated">Bir .NET Core uygulamasını yürütür.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FsiDefinition">
+        <source>Start F# Interactive / execute F# scripts.</source>
+        <target state="translated">F# Etkileşimli'yi başlatın / F# betiklerini yürütün.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

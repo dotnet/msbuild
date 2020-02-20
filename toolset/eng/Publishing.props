@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
+<Project>
+
+  <PropertyGroup>
+    <Product>Toolset</Product>
+    <BlobStoragePartialRelativePath>$(Product)</BlobStoragePartialRelativePath>
+    <BlobStoragePartialRelativePath Condition="'$(IsNotOrchestratedPublish)' == 'false'">assets/$(Product)</BlobStoragePartialRelativePath>
+    <SdkAssetManifestFileName>$(OS)-$(PlatformName)-SdkAssets.xml</SdkAssetManifestFileName>
+    <SdkAssetsManifestFilePath>$(ArtifactsLogDir)AssetManifest\$(SdkAssetManifestFileName)</SdkAssetsManifestFilePath>
+
+    <TempWorkingDirectory>$(ArtifactsDir)\..\AssetsTmpDir\$([System.Guid]::NewGuid())</TempWorkingDirectory>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ToolsetAssetsToPublish Include="$(ArtifactsNonShippingPackagesDir)*.zip" />
+  </ItemGroup>
+
+  <Target Name="ReadToolsetVersion">
+    <ReadLinesFromFile File="$(ArtifactsBinDir)version.txt">
+      <Output TaskParameter="Lines" ItemName="ToolsetVersion"/>
+    </ReadLinesFromFile>
+
+    <CreateProperty Value="@(ToolsetVersion)">
+      <Output TaskParameter="Value" PropertyName="ToolsetVersionValue" />
+    </CreateProperty>
+  </Target>
+
+  <!-- We use a separate target to publish this to blob storage so that we can push this to
+       a relative path inside the blob storage. -->
+  <Target Name="PublishToolsetAssets" DependsOnTargets="ReadToolsetVersion" BeforeTargets="Publish" Condition="$(PublishToAzure)">
+    <ItemGroup>
+      <ToolsetAssetsToPushToBlobFeed Include="@(ToolsetAssetsToPublish)" IsShipping="false" >
+        <RelativeBlobPath>$(BlobStoragePartialRelativePath)/$(ToolsetVersionValue)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
+        <ManifestArtifactData>ShipInstaller=dotnetcli</ManifestArtifactData>
+      </ToolsetAssetsToPushToBlobFeed>
+    </ItemGroup>
+
+    <MakeDir Directories="$(TempWorkingDirectory)"/>
+
+    <PushToAzureDevOpsArtifacts
+      ItemsToPush="@(ToolsetAssetsToPushToBlobFeed)"
+      ManifestBuildData="Location=$(DotNetPublishBlobFeedUrl)"
+      ManifestRepoUri="$(BUILD_REPOSITORY_URI)"
+      ManifestBranch="$(BUILD_SOURCEBRANCH)"
+      ManifestBuildId="$(BUILD_BUILDNUMBER)"
+      ManifestCommit="$(BUILD_SOURCEVERSION)"
+      PublishFlatContainer="true"
+      AssetManifestPath="$(SdkAssetsManifestFilePath)"
+      AssetsTemporaryDirectory="$(TempWorkingDirectory)" />
+
+    <Copy
+      SourceFiles="$(SdkAssetsManifestFilePath)"
+      DestinationFolder="$(TempWorkingDirectory)\$(SdkAssetManifestFileName)" />
+
+    <Message
+      Text="##vso[artifact.upload containerfolder=AssetManifests;artifactname=AssetManifests]$(TempWorkingDirectory)/$(SdkAssetManifestFileName)"
+      Importance="high" />
+  </Target>
+
+</Project>

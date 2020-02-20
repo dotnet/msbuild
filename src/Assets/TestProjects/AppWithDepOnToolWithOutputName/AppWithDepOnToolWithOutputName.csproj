@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), testAsset.props))\testAsset.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <RestoreAdditionalProjectSources Condition="'$(TEST_PACKAGES)' != ''">$(RestoreAdditionalProjectSources);$(TEST_PACKAGES)</RestoreAdditionalProjectSources>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="ToolWithOutputName" Version="1.0.0" />
+  </ItemGroup>
+</Project>

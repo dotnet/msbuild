@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>.NET Run Command</source>
+        <target state="translated">.NET Run コマンド</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Command used to run .NET apps</source>
+        <target state="translated">.NET アプリの実行に使用するコマンド</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionFrameworkDescription">
+        <source>Build and run the app using the specified framework. The framework has to be specified in the project file. </source>
+        <target state="translated">指定されたフレームワークを使用して、アプリを構築して実行します。フレームワークはプロジェクト ファイルで指定する必要があります。 </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionProjectDescription">
+        <source>The path to the project file to run (defaults to the current directory if there is only one project).</source>
+        <target state="translated">実行するプロジェクト ファイルへのパス (プロジェクトが 1 つのみの場合、既定は現在のディレクトリです)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotConvertToBoolean">
+        <source>Could not convert the value of property '{0}' to a boolean.</source>
+        <target state="translated">プロパティ ' {0} ' の値をブール値に変換できませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotConvertToString">
+        <source>Could not convert the value of property '{0}' to a string.</source>
+        <target state="translated">プロパティ '{0}' の値を文字列に変換できませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandException">
+        <source>The build failed. Fix the build errors and run again.</source>
+        <target state="translated">ビルドに失敗しました。ビルド エラーを修正して、もう一度実行してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandAdditionalArgsHelpText">
+        <source>Arguments passed to the application that is being run.</source>
+        <target state="translated">実行中のアプリケーションに渡される引数。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionNoBuildDescription">
+        <source>Do not build the project before running. Implies --no-restore.</source>
+        <target state="translated">実行する前にプロジェクトをビルドしないでください。--no-restore を意味します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
+        <source>Unable to run your project
+Your project targets multiple frameworks. Specify which framework to run using '{0}'.</source>
+        <target state="translated">プロジェクトを実行できません
+プロジェクトは複数のフレームワークを対象としています。'{0}' を使用して、実行するフレームワークを指定してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionUnableToRun">
+        <source>Unable to run your project.
+Ensure you have a runnable project type and ensure '{0}' supports this project.
+A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
+The current {1} is '{2}'.</source>
+        <target state="translated">プロジェクトを実行できません。
+プロジェクト タイプが実行可能であること、このプロジェクトが '{0}' でサポートされていることを確認してください。
+実行可能なプロジェクトは実行可能な TFM (たとえば、netcoreapp2.0) を対象としている必要があり、OutputType 'Exe' が必要です。
+現在の {1} は '{2}' です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionNoProjects">
+        <source>Couldn't find a project to run. Ensure a project exists in {0}, or pass the path to the project using {1}.</source>
+        <target state="translated">実行するプロジェクトが見つかりませんでした。プロジェクトが {0} に存在することを確認するか、{1} を使用してパスをプロジェクトに渡してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionMultipleProjects">
+        <source>Specify which project file to use because {0} contains more than one project file.</source>
+        <target state="translated">{0} に複数のプロジェクト ファイルが含まれているため、使用するプロジェクト ファイルを指定してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionLaunchProfileDescription">
+        <source>The name of the launch profile (if any) to use when launching the application.</source>
+        <target state="translated">アプリケーションを起動するときに使用する起動プロファイルの名前 (存在する場合)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionNoLaunchProfileDescription">
+        <source>Do not attempt to use launchSettings.json to configure the application.</source>
+        <target state="translated">launchSettings.json の使用によるアプリケーションの構成は行わないでください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionCouldNotLocateALaunchSettingsFile">
+        <source>The specified launch profile could not be located.</source>
+        <target state="translated">指定された起動プロファイルが見つかりませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionCouldNotApplyLaunchSettings">
+        <source>The launch profile "{0}" could not be applied.
+{1}</source>
+        <target state="translated">起動プロファイル "{0}" を適用できませんでした。
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DefaultLaunchProfileDisplayName">
+        <source>(Default)</source>
+        <target state="translated">(既定)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsingLaunchSettingsFromMessage">
+        <source>Using launch settings from {0}...</source>
+        <target state="translated">{0} からの起動設定を使用中...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LaunchProfileIsNotAJsonObject">
+        <source>A profile with the specified name could not be found or is not a valid JSON object.</source>
+        <target state="translated">指定された名前のプロファイルは見つからないか、有効な JSON オブジェクトではありません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LaunchProfileHandlerCannotBeLocated">
+        <source>The launch profile type '{0}' is not supported.</source>
+        <target state="translated">起動プロファイルの種類 '{0}' はサポートされていません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsableLaunchProfileCannotBeLocated">
+        <source>A usable launch profile could not be located.</source>
+        <target state="translated">使用可能な起動プロファイルが見つかりませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedExceptionProcessingLaunchSettings">
+        <source>An unexpected exception occurred while processing launch settings:
+{0}</source>
+        <target state="translated">起動設定の処理中に予期しない例外が発生しました:
+{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LaunchProfilesCollectionIsNotAJsonObject">
+        <source>The 'profiles' property of the launch settings document is not a JSON object.</source>
+        <target state="translated">起動設定のドキュメントの 'profiles' プロパティが JSON オブジェクトではありません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DeserializationExceptionMessage">
+        <source>An error was encountered when reading launchSettings.json.
+{0}</source>
+        <target state="translated">launchSettings.json を読み取るときにエラーが発生しました。
+{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandSpecifiecFileIsNotAValidProject">
+        <source>'{0}' is not a valid project file.</source>
+        <target state="translated">'{0}' は有効なプロジェクト ファイルではありません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to run for. The default for most projects is 'Debug'.</source>
+        <target state="translated">実行する対象の構成。大部分のプロジェクトで、既定値は 'Debug' です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to run for. The target framework must also be specified in the project file.</source>
+        <target state="translated">実行する対象のターゲット フレームワーク。ターゲット フレームワークはプロジェクト ファイルでも指定する必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to run for.</source>
+        <target state="translated">実行対象のターゲット ランタイム。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ValueMustBeAnObject">
+        <source>The property '{0}' must be an object if it is specified.</source>
+        <target state="translated">プロパティ ' {0} ' は、指定されている場合はオブジェクトである必要があります。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

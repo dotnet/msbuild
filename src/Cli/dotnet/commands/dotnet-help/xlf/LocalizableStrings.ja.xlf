@@ -1,0 +1,297 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="RollForwardDefinition">
+        <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
+        <target state="translated">フレームワーク バージョン (LatestPatch、Minor、LatestMinor、Major、LatestMajor、Disable) にロールフォワードします。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Usage">
+        <source>Usage</source>
+        <target state="translated">使用法</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Arguments">
+        <source>Arguments</source>
+        <target state="translated">引数</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDefinition">
+        <source>The command to execute</source>
+        <target state="translated">実行するコマンド</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentsDefinition">
+        <source>Arguments to pass to the command</source>
+        <target state="translated">コマンドに渡す引数</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="HostOptionsDefinition">
+        <source>Options specific to dotnet (host)</source>
+        <target state="translated">dotnet (ホスト) 固有のオプション</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionsDescription">
+        <source>Options common to all commands</source>
+        <target state="translated">すべてのコマンドに共通のオプション</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="HelpDefinition">
+        <source>Show command line help.</source>
+        <target state="translated">コマンド ラインのヘルプを表示します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="HostOptions">
+        <source>Host options (passed before the command)</source>
+        <target state="translated">ホストのオプション (コマンドの前に渡されます)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionDescription">
+        <source>Display .NET CLI Version Number</source>
+        <target state="translated">.NET CLI のバージョン番号を表示する</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InfoDescription">
+        <source>Display .NET CLI Info</source>
+        <target state="translated">.NET CLI の情報を表示する</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Commands">
+        <source>SDK commands</source>
+        <target state="translated">SDK コマンド</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NewDefinition">
+        <source>Create a new .NET project or file.</source>
+        <target state="translated">新しい .NET プロジェクトまたはファイルを作成します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RestoreDefinition">
+        <source>Restore dependencies specified in a .NET project.</source>
+        <target state="translated">.NET プロジェクトに指定されている依存関係を復元します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildDefinition">
+        <source>Build a .NET project.</source>
+        <target state="translated">.NET プロジェクトをビルドします。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishDefinition">
+        <source>Publish a .NET project for deployment.</source>
+        <target state="translated">.NET プロジェクトを配置のために発行します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunDefinition">
+        <source>Build and run a .NET project output.</source>
+        <target state="translated">.NET プロジェクトの出力をビルドして実行します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TestDefinition">
+        <source>Run unit tests using the test runner specified in a .NET project.</source>
+        <target state="translated">.NET プロジェクトに指定されているテスト ランナーを使用して、単体テストを実行します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackDefinition">
+        <source>Create a NuGet package.</source>
+        <target state="translated">NuGet パッケージを作成します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectModificationCommands">
+        <source>Project modification commands</source>
+        <target state="translated">プロジェクト変更コマンド</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddDefinition">
+        <source>Add a package or reference to a .NET project.</source>
+        <target state="translated">.NET プロジェクトにパッケージまたは参照を追加します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RemoveDefinition">
+        <source>Remove a package or reference from a .NET project.</source>
+        <target state="translated">.NET プロジェクトからパッケージまたは参照を削除します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AdvancedCommands">
+        <source>Advanced Commands</source>
+        <target state="translated">高度なコマンド</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NugetDefinition">
+        <source>Provides additional NuGet commands.</source>
+        <target state="translated">追加の NuGet コマンドを提供します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MsBuildDefinition">
+        <source>Run Microsoft Build Engine (MSBuild) commands.</source>
+        <target state="translated">Microsoft Build Engine (MSBuild) コマンドを実行します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VsTestDefinition">
+        <source>Run Microsoft Test Engine (VSTest) commands.</source>
+        <target state="translated">Microsoft Test Engine (VSTest) コマンドを実行します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DiagnosticsDefinition">
+        <source>Enable diagnostic output</source>
+        <target state="translated">診断出力を有効にする</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CleanDefinition">
+        <source>Clean build outputs of a .NET project.</source>
+        <target state="translated">.NET プロジェクトのビルド出力をクリーンします。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SlnDefinition">
+        <source>Modify Visual Studio solution files.</source>
+        <target state="translated">Visual Studio ソリューション ファイルを変更します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ListDefinition">
+        <source>List project references of a .NET project.</source>
+        <target state="translated">.NET プロジェクトのプロジェクト参照を一覧表示します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDoesNotExist">
+        <source>Specified command '{0}' is not a valid SDK command. Specify a valid SDK command. For more information, run dotnet help.</source>
+        <target state="translated">指定されたコマンド '{0}' は、有効な SDK コマンドではありません。有効な SDK コマンドを指定してください。詳細については、dotnet のヘルプを実行してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppFullName">
+        <source>.NET CLI help utility</source>
+        <target state="translated">.NET CLI ヘルプ ユーティリティ</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Utility to get more detailed help about each of the SDK commands.</source>
+        <target state="translated">各 SDK コマンドに関する詳しいヘルプを取得するためのユーティリティ。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandArgumentName">
+        <source>COMMAND_NAME</source>
+        <target state="translated">COMMAND_NAME</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandArgumentDescription">
+        <source>The SDK command to launch online help for.</source>
+        <target state="translated">オンライン ヘルプを起動する SDK コマンド。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PathToApplicationDefinition">
+        <source>The path to an application .dll file to execute.</source>
+        <target state="translated">実行するアプリケーション .dll ファイルへのパス。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKVersionCommandDefinition">
+        <source>Display .NET Core SDK version in use.</source>
+        <target state="translated">使用中の .NET Core SDK バージョンを表示します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKInfoCommandDefinition">
+        <source>Display .NET Core information.</source>
+        <target state="translated">.NET Core 情報を表示します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKListSdksCommandDefinition">
+        <source>Display the installed SDKs.</source>
+        <target state="translated">インストール済み SDK を表示します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKListRuntimesCommandDefinition">
+        <source>Display the installed runtimes.</source>
+        <target state="translated">インストール済みランタイムを表示します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKDiagnosticsCommandDefinition">
+        <source>Enable diagnostic output.</source>
+        <target state="translated">診断出力を有効にします。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunDotnetCommandHelpForMore">
+        <source>Run 'dotnet [command] --help' for more information on a command.</source>
+        <target state="translated">コマンドに関する詳細情報については、'dotnet [command] --help' を実行します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AdditionalProbingPathDefinition">
+        <source>Path containing probing policy and assemblies to probe for.</source>
+        <target state="translated">調査ポリシーと調査対象アセンブリを含むパス。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DepsFileDefinition">
+        <source>Path to &lt;application&gt;.deps.json file.</source>
+        <target state="translated">&lt;application&gt;.deps.json ファイルへのパス。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeConfigDefinition">
+        <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
+        <target state="translated">&lt;application&gt;.runtimeconfig.json ファイルへのパス。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FxVersionDefinition">
+        <source>Version of the installed Shared Framework to use to run the application.</source>
+        <target state="translated">アプリケーションを実行するために使用するインストール済み Shared Framework のバージョン。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AdditionalDeps">
+        <source>Path to additional deps.json file.</source>
+        <target state="translated">追加の deps.json ファイルへのパス。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="StoreDefinition">
+        <source>Store the specified assemblies in the runtime package store.</source>
+        <target state="translated">指定されたアセンブリをランタイム パッケージ ストアに格納します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolDefinition">
+        <source>Install or manage tools that extend the .NET experience.</source>
+        <target state="translated">.NET のエクスペリエンスを向上するツールをインストールまたは管理します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildServerDefinition">
+        <source>Interact with servers started by a build.</source>
+        <target state="translated">ビルドによって開始されたサーバーとやり取りします。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DevCertsDefinition">
+        <source>Create and manage development certificates.</source>
+        <target state="translated">開発証明書を作成し、管理します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SqlCacheDefinition">
+        <source>SQL Server cache command-line tools.</source>
+        <target state="translated">SQL Server キャッシュ コマンドライン ツール。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UserSecretsDefinition">
+        <source>Manage development user secrets.</source>
+        <target state="translated">開発ユーザーのシークレットを管理します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WatchDefinition">
+        <source>Start a file watcher that runs a command when files change.</source>
+        <target state="translated">ファイルが変更されたときにコマンドを実行するファイル ウォッチャーを起動します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AdditionalTools">
+        <source>Additional commands from bundled tools:</source>
+        <target state="translated">バンドルされたツールからの追加コマンド:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKCommandUsageDescription">
+        <source>Execute a .NET Core SDK command.</source>
+        <target state="translated">.NET Core SDK コマンドを実行します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExecutionUsageDescription">
+        <source>Execute a .NET Core application.</source>
+        <target state="translated">.NET Core アプリケーションを実行します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FsiDefinition">
+        <source>Start F# Interactive / execute F# scripts.</source>
+        <target state="translated">F# Interactive を開始するか、F# スクリプトを実行します。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

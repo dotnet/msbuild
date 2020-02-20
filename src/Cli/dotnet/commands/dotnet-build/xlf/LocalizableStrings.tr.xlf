@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppDescription">
+        <source>Builder for the .NET Platform. Delegates to the MSBuild 'Build' target in the project file.</source>
+        <target state="translated">.NET Platformu için oluşturucu. Proje dosyasındaki MSBuild 'Build' hedefine temsilci atar.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppFullName">
+        <source>.NET Builder</source>
+        <target state="translated">.NET Oluşturucusu</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="translated">Başlangıç bandını veya telif hakkı iletisini görüntüleme.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoDependenciesOptionDescription">
+        <source>Do not build project-to-project references and only build the specified project.</source>
+        <target state="translated">Projeden projeye başvuruları derlemez ve yalnızca belirtilen projeyi derler.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoIncrementalOptionDescription">
+        <source>Do not use incremental building.</source>
+        <target state="translated">Artımlı derleme kullanmaz.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutputOptionDescription">
+        <source>The output directory to place built artifacts in.</source>
+        <target state="translated">Derlenen yapıtların yerleştirileceği çıkış dizini.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutputOptionName">
+        <source>OUTPUT_DIR</source>
+        <target state="translated">ÇIKIŞ_DİZİNİ</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to build for. The target framework must also be specified in the project file.</source>
+        <target state="translated">Derlemenin yapılacağı hedef çerçeve. Hedef çerçevenin proje dosyasında da belirtilmesi gerekir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to build for.</source>
+        <target state="translated">Derlemenin yapılacağı hedef çalışma zamanı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to use for building the project. The default for most projects is 'Debug'.</source>
+        <target state="translated">Projeyi derlemek için kullanılacak yapılandırma. Çoğu proje için varsayılan, ‘Hata Ayıklama’ seçeneğidir.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

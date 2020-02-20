@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppDescription">
+        <source>Publisher for the .NET Platform</source>
+        <target state="translated">.NET Platformunun yayımcısı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="translated">Başlangıç bandını veya telif hakkı iletisini görüntüleme.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOption">
+        <source>FRAMEWORK</source>
+        <target state="translated">ÇERÇEVE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to publish for. The target framework has to be specified in the project file.</source>
+        <target state="translated">Yayımlamanın yapılacağı hedef çerçeve. Hedef çerçevenin proje dosyasında belirtilmesi gerekir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoSelfContainedOptionDescription">
+        <source>Publish your application as a framework dependent application without the .NET Core runtime. A supported .NET Core runtime must be installed to run your application.</source>
+        <target state="translated">Uygulamanızı .NET Core çalışma zamanı olmadan çerçeveye bağımlı bir uygulama olarak yayımlayın. Uygulamanızı çalıştırmak için desteklenen bir .NET Core çalışma zamanı yüklü olmalıdır.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutputOption">
+        <source>OUTPUT_DIR</source>
+        <target state="translated">ÇIKIŞ_DİZİNİ</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutputOptionDescription">
+        <source>The output directory to place the published artifacts in.</source>
+        <target state="translated">Yayımlanan yapıtların yerleştirileceği çıkış dizini.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestOption">
+        <source>MANIFEST</source>
+        <target state="translated">MANIFEST</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestOptionDescription">
+        <source>The path to a target manifest file that contains the list of packages to be excluded from the publish step.</source>
+        <target state="translated">Yayımlama adımının dışında tutulacak paketlerin listesini içeren bir hedef bildirim dosyasının yolu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoBuildOptionDescription">
+        <source>Do not build the project before publishing. Implies --no-restore.</source>
+        <target state="translated">Yayımlamadan önce projeyi derlemeyin. --no-restore anlamına gelir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to publish for. This is used when creating a self-contained deployment.
+The default is to publish a framework-dependent application.</source>
+        <target state="translated">Yayımlanacak hedef çalışma zamanı. Bu, şirket içinde barındırılan bir dağıtım oluştururken yararlıdır.
+Varsayılan durum, çerçeveye bağımlı bir uygulama yayımlamaktır.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
+        <target state="translated">Yayımlanacak yapılandırma. Çoğu proje için varsayılan, ‘Hata Ayıklama’ seçeneğidir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainAndNoSelfContainedConflict">
+        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
+        <target state="translated">'--self-contained' ve '--no-self-contained' seçenekleri birbiriyle çakışır. Seçeneklerden yalnızca birini belirtin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionDescription">
+        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</source>
+        <target state="translated">Uygulamanızla birlikte .NET Core çalışma zamanını yayımladığınızda hedef makinede çalışma zamanının yüklü olması gerekmez.
+Varsayılan değeri, bir çalışma zamanı tanımlayıcısı belirtildiyse 'true' şeklindedir.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

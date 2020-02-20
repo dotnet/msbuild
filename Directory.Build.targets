@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
-  <ItemGroup Condition="'$(IsTestProject)' == 'true' AND '$(OutputType)' == 'Exe'">
+  <ItemGroup Condition="'$(IsTestProject)' == 'true' AND '$(OutputType)' == 'Exe' AND '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <PackageReference Include="xunit.console" Version="$(XUnitVersion)" Private="true" />
 
     <!-- These files are both included via a .props file in xunit.runner.visualstudio, as well as 
@@ -21,5 +21,15 @@
        file. -->
   <Import Project="OverrideTest.targets"
           Condition="'$(RunTestsAsTool)' == 'true' And '$(CanRunTestAsTool)' == 'true'"/>
+
+
+  <!-- Update KnownFrameworkReferences to target the right version of the runtime -->
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'
+                        and $(MicrosoftNETCoreAppRefPackageVersion.StartsWith('$(_TargetFrameworkVersionWithoutV)'))">
+    <FrameworkReference
+        Update="Microsoft.NETCore.App" 
+        TargetingPackVersion="$(MicrosoftNETCoreAppRefPackageVersion)"
+        RuntimeFrameworkVersion="$(MicrosoftNETCoreAppRuntimePackageersion)" />
+  </ItemGroup>
 
 </Project>

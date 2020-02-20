@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ru" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="MalformedText">
+        <source>Malformed command text '{0}'</source>
+        <target state="translated">Неправильный формат текста команды "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToLocateDotnetMultiplexer">
+        <source>Unable to locate dotnet multiplexer</source>
+        <target state="translated">Не удается найти мультиплексор dotnet.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileNotFound">
+        <source>File not found `{0}`.</source>
+        <target state="translated">Файл не найден: "{0}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectNotRestoredOrRestoreFailed">
+        <source>The project may not have been restored or restore failed - run `dotnet restore`</source>
+        <target state="translated">Возможно, проект не был восстановлен или его восстановление завершилось со сбоем. Запустите команду "dotnet restore".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoExecutableFoundMatchingCommand">
+        <source>Could not execute because the specified command or file was not found.
+Possible reasons for this include:
+  * You misspelled a built-in dotnet command.
+  * You intended to execute a .NET Core program, but {0} does not exist.
+  * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
+        <target state="translated">Не удалось выполнить, так как не найдены указанная команда или указанный файл.
+Возможные причины:
+  * Вы неправильно набрали встроенную команду dotnet.
+  * Вы планировали выполнить программу .NET Core, однако {0} не существует.
+  * Вы хотели запустить глобальное средство, но по указанному в PATH пути не удалось найти исполняемый файл с префиксом dotnet, имеющий такое имя.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WaitingForDebuggerToAttach">
+        <source>Waiting for debugger to attach. Press ENTER to continue</source>
+        <target state="translated">Ожидание подключения отладчика. Для продолжения нажмите клавишу ВВОД.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProcessId">
+        <source>Process ID: {0}</source>
+        <target state="translated">Идентификатор процесса: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotAccessAssetsFile">
+        <source>Could not access assets file.</source>
+        <target state="translated">Не удалось получить доступ к файлу активов.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WriteLineForwarderSetPreviously">
+        <source>WriteLine forwarder set previously</source>
+        <target state="translated">Сервер пересылки WriteLine, заданный ранее</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AlreadyCapturingStream">
+        <source>Already capturing stream!</source>
+        <target state="translated">Захват потока уже выполняется!</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunningFileNameArguments">
+        <source>Running {0} {1}</source>
+        <target state="translated">Выполнение {0} {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProcessExitedWithCode">
+        <source>&lt; {0} exited with {1} in {2} ms.</source>
+        <target state="translated">&lt; {0} завершил работу с {1} за {2} мс.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToInvokeMemberNameAfterCommand">
+        <source>Unable to invoke {0} after the command has been run</source>
+        <target state="translated">Не удается вызвать {0} после запуска команды.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetSdkInfoLabel">
+        <source>.NET Core SDK (reflecting any global.json):</source>
+        <target state="translated">Пакет SDK для .NET Core (отражающий любой global.json):</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetRuntimeInfoLabel">
+        <source>Runtime Environment:</source>
+        <target state="translated">Среда выполнения:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EmbedAppNameInHostAppHostHasBeenModified">
+        <source>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
+        <target state="translated">Невозможно использовать файл "{0}" в качестве исполняемого файла узла приложения, так как он не содержит требуемой последовательности байтов "{1}", которая отмечает место, где должно записываться имя приложения.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EmbedAppNameInHostFileNameIsTooLong">
+        <source>Given file name '{0}' is longer than 1024 bytes</source>
+        <target state="translated">Длина указанного имени файла "{0}" превышает 1024 байта</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotFindCommandAvailableAsTool">
+        <source>Cannot find command 'dotnet {0}', run the following command to install
+
+dotnet tool install --global {1}</source>
+        <target state="translated">Не удается найти команду "dotnet {0}". Выполните следующую команду для установки:
+
+dotnet tool install --global {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotnetCliHomeUsed">
+        <source>Using home directory '{0}' set by the '{1}' environment variable.</source>
+        <target state="translated">Используется домашний каталог "{0}", заданный переменной среды "{1}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetSdkInfo">
+        <source>.NET Core SDK</source>
+        <target state="translated">Пакет SDK для .NET Core</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

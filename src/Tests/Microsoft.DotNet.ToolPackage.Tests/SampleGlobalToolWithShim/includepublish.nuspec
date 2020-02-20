@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>global.tool.console.demo.with.shim</id>
+        <version>1.0.4</version>
+        <description>test app</description>
+        <authors>testauthor</authors>
+        <packageTypes>
+          <packageType name="DotnetTool" />
+        </packageTypes>
+    </metadata>
+    <files>
+        <file src="bin\Release\netcoreapp2.1\publish\*.*" target="tools\netcoreapp2.1\any\" />
+        <file src="DotnetToolSettings.xml" target="tools\netcoreapp2.1\any\DotnetToolSettings.xml" />
+        <file src="dummyshim.exe" target="tools\netcoreapp2.1\any\shims\win-x64\demo.exe" />
+        <file src="dummyshim.exe" target="tools\netcoreapp2.1\any\shims\win-x86\demo.exe" />
+        <file src="dummyshim" target="tools\netcoreapp2.1\any\shims\osx-x64\demo" />
+        <file src="dummyshim" target="tools\netcoreapp2.1\any\shims\linux\demo" />
+    </files>
+</package>

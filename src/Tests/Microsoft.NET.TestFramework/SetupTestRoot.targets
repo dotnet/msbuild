@@ -2,6 +2,7 @@
 <Project>
 
   <ItemGroup>
+    <Foo Include="Bar" />
     <_CopyDirectoryBuildTestDependenciesInput Include="$(MSBuildThisFileDirectory)..\Common\Empty.props" />
     <_CopyDirectoryBuildTestDependenciesInput Include="$(MSBuildThisFileDirectory)..\Common\Empty.targets" />
   </ItemGroup>
@@ -11,7 +12,9 @@
     <_CopyDirectoryBuildTestDependenciesOutput Include="$(ArtifactsTmpDir)Directory.Build.targets" />
   </ItemGroup>
 
-  <Target Name="_CopyDirectoryBuildTestDependencies" AfterTargets="Build" Inputs="@(_CopyDirectoryBuildTestDependenciesInput)" Outputs="@(_CopyDirectoryBuildTestDependenciesOutput)">
+  <!-- Since TestFramework is multi-targeted, only copy these files for one of the inner builds -->
+  <Target Name="_CopyDirectoryBuildTestDependencies" AfterTargets="Build" Inputs="@(_CopyDirectoryBuildTestDependenciesInput)" Outputs="@(_CopyDirectoryBuildTestDependenciesOutput)"
+          Condition="'$(TargetFramework)' == '$(SdkTargetFramework)'">
     <Copy SourceFiles="@(_CopyDirectoryBuildTestDependenciesInput)" DestinationFiles="@(_CopyDirectoryBuildTestDependenciesOutput)" />
   </Target>
   
@@ -19,6 +22,7 @@
           AfterTargets="Build"
           Inputs="$(RepoRoot)NuGet.config"
           Outputs="$(ArtifactsTmpDir)NuGet.config"
+          Condition="'$(TargetFramework)' == '$(SdkTargetFramework)'"
           >
     <Copy SourceFiles="$(RepoRoot)NuGet.config" DestinationFiles="$(ArtifactsTmpDir)NuGet.config" />
   </Target>

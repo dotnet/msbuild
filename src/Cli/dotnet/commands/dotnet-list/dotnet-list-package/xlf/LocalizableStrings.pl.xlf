@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pl" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>List all package references of the project or solution.</source>
+        <target state="translated">Zwróć listę wszystkich odwołań do pakietów w projekcie lub rozwiązaniu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdDeprecatedDescription">
+        <source>Lists packages that have been deprecated.</source>
+        <target state="translated">Wyświetla pakiety, które są przestarzałe.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFramework">
+        <source>FRAMEWORK | FRAMEWORK\RID</source>
+        <target state="translated">STRUKTURA | STRUKTURA\RID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFrameworkDescription">
+        <source>Chooses a framework to show its packages. Use the option multiple times for multiple frameworks.</source>
+        <target state="translated">Wybiera strukturę, aby wyświetlić jej pakiety. W przypadku wielu struktur użyj tej opcji wielokrotnie.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutdatedDescription">
+        <source>Lists packages that have newer versions.</source>
+        <target state="translated">Zwraca listę pakietów, które mają nowsze wersje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdTransitiveDescription">
+        <source>Lists transitive and top-level packages.</source>
+        <target state="translated">Zwraca listę pakietów przejściowych i pakietów najwyższego poziomu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoProjectsOrSolutions">
+        <source>A project or solution file could not be found in {0}. Specify a project or solution file to use.</source>
+        <target state="translated">W lokalizacji {0} nie można odnaleźć pliku projektu lub rozwiązania. Podaj plik projektu lub rozwiązania do użycia.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdConfig">
+        <source>CONFIG_FILE</source>
+        <target state="translated">PLIK_KONFIGURACJI</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdConfigDescription">
+        <source>The path to the NuGet config file to use. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="translated">Ścieżka do pliku konfiguracji NuGet, który ma być używany. Wymaga opcji „--outdated” lub „--deprecated”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdHighestMinorDescription">
+        <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="translated">Podczas wyszukiwania nowszych pakietów uwzględniaj tylko pakiety ze zgodnym numerem wersji głównej. Wymaga opcji „--outdated” lub „--deprecated”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdHighestPatchDescription">
+        <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="translated">Podczas wyszukiwania nowszych pakietów uwzględniaj tylko pakiety ze zgodnym numerem wersji głównej i pomocniczej. Wymaga opcji „--outdated” lub „--deprecated”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPrereleaseDescription">
+        <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="translated">Podczas wyszukiwania nowszych pakietów uwzględniaj pakiety z wersjami wstępnymi. Wymaga opcji „--outdated” lub „--deprecated”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSource">
+        <source>SOURCE</source>
+        <target state="translated">ŹRÓDŁO</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSourceDescription">
+        <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="translated">Źródła NuGet do użycia podczas wyszukiwania nowszych pakietów. Wymaga opcji „--outdated” lub „--deprecated”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutdatedAndDeprecatedOptionsCannotBeCombined">
+        <source>Option '--outdated' and '--deprecated' cannot be combined.</source>
+        <target state="translated">Nie można łączyć opcji „--outdated” i „--deprecated”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileNotFound">
+        <source>Could not find file or directory '{0}'.</source>
+        <target state="translated">Nie można odnaleźć pliku lub katalogu „{0}”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutdatedOrDeprecatedOptionOnly">
+        <source>Option '{0}' requires the '--outdated' or '--deprecated' option to be specified.</source>
+        <target state="translated">Opcja „{0}” wymaga określenia opcji „--outdated” lub „--deprecated”.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

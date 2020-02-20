@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="MSBuildServer">
+        <source>MSBuild server</source>
+        <target state="translated">Servidor MSBuild</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VBCSCompilerServer">
+        <source>VB/C# compiler server</source>
+        <target state="translated">Servidor do compilador VB/C#</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RazorServer">
+        <source>Razor build server</source>
+        <target state="translated">Servidor de build Razor</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShutdownCommandFailed">
+        <source>The shutdown command failed: {0}</source>
+        <target state="translated">O comando de desligamento falhou: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToReadPidFile">
+        <source>Failed to read pid file '{0}': {1}</source>
+        <target state="translated">Falha ao ler o arquivo PID '{0}': {1}</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

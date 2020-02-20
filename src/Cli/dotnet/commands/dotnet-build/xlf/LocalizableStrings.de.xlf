@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="de" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppDescription">
+        <source>Builder for the .NET Platform. Delegates to the MSBuild 'Build' target in the project file.</source>
+        <target state="translated">Generator für die .NET-Plattform. Delegiert an das MSBuild-Ziel "Build" in der Projektdatei.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppFullName">
+        <source>.NET Builder</source>
+        <target state="translated">.NET-Generator</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="translated">Zeigt kein Startbanner und keine Copyrightmeldung an.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoDependenciesOptionDescription">
+        <source>Do not build project-to-project references and only build the specified project.</source>
+        <target state="translated">Hiermit werden keine Projekt-zu-Projekt-Verweise erstellt, sondern nur das angegebene Projekt wird erstellt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoIncrementalOptionDescription">
+        <source>Do not use incremental building.</source>
+        <target state="translated">Hiermit wird keine inkrementelle Erstellung durchgeführt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutputOptionDescription">
+        <source>The output directory to place built artifacts in.</source>
+        <target state="translated">Das Ausgabeverzeichnis, in dem erstellte Artefakte abgelegt werden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutputOptionName">
+        <source>OUTPUT_DIR</source>
+        <target state="translated">OUTPUT_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to build for. The target framework must also be specified in the project file.</source>
+        <target state="translated">Das Zielframework für die Erstellung. Das Zielframework muss auch in der Projektdatei angegeben werden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to build for.</source>
+        <target state="translated">Die Zielruntime für die Erstellung.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to use for building the project. The default for most projects is 'Debug'.</source>
+        <target state="translated">Die für die Projekterstellung zu verwendende Konfiguration. Standard für die meisten Projekte ist "Debug".</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

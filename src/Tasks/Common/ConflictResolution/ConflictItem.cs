@@ -168,12 +168,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                     //  NuGet packages, so we will rely on that.  We still might have items from packages
                     //  that don't have the metadata set if the DLL is explicitly referenced, for example.
 
-                    _packageId = OriginalItem?.GetMetadata(MetadataNames.NuGetPackageId);
-
-                    if (string.IsNullOrEmpty(_packageId))
-                    {
-                        _packageId = OriginalItem?.GetMetadata(MetadataKeys.PackageName) ?? string.Empty;
-                    }
+                    _packageId = OriginalItem?.GetMetadata(MetadataNames.NuGetPackageId) ?? string.Empty;
                 }
 
                 return _packageId.Length == 0 ? null : _packageId;

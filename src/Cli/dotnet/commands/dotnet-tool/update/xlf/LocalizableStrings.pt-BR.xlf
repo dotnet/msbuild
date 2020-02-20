@@ -1,0 +1,182 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="InvalidNuGetVersionRange">
+        <source>Specified version '{0}' is not a valid NuGet version range.</source>
+        <target state="translated">A versão '{0}' especificada não é um intervalo de versão do NuGet válido.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalOptionDescription">
+        <source>Update the tool and the local tool manifest.</source>
+        <target state="translated">Atualize a ferramenta e o manifesto de ferramenta local.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionDescription">
+        <source>Path to the manifest file.</source>
+        <target state="translated">Caminho para o arquivo de manifesto.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentName">
+        <source>PACKAGE_ID</source>
+        <target state="translated">PACKAGE_ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentDescription">
+        <source>The NuGet Package Id of the tool to update.</source>
+        <target state="translated">A ID do pacote do NuGet da ferramenta a ser atualizada.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageId">
+        <source>Specify one tool Package Id to update.</source>
+        <target state="translated">Especifique uma ID de Pacote de ferramenta a ser atualizada.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateLocaToolSucceededVersionNoChange">
+        <source>Tool '{0}' is up to date (version '{1}' manifest file {2}) .</source>
+        <target state="translated">A ferramenta '{0}' está atualizada (versão '{1}' arquivo de manifesto {2}) .</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateLocaToolToLowerVersion">
+        <source>The requested version {0} is lower than existing version {1} (manifest file {2}).</source>
+        <target state="translated">A versão solicitada {0} é inferior à versão existente {1} (arquivo de manifesto {2}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateLocalToolSucceeded">
+        <source>Tool '{0}' was successfully updated from version '{1}' to version '{2}' (manifest file {3}).</source>
+        <target state="translated">A ferramenta '{0}' foi atualizada com êxito da versão '{1}' para a versão '{2}' (arquivo de manifesto {3}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateToLowerVersion">
+        <source>The requested version {0} is lower than existing version {1}.</source>
+        <target state="translated">A versão solicitada {0} é inferior à versão existente {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateToolCommandInvalidGlobalAndLocalAndToolPath">
+        <source>The local option (--local), the global option (--global), and the tool path option (--tool-path) cannot be used together. Specify only one of the options: {0}.</source>
+        <target state="translated">A opção local (--local), a opção global (--global) e a opção de caminho da ferramenta (--tool-path) não podem ser usadas juntas. Especifique somente uma das opções: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionDescription">
+        <source>The version range of the tool package to update to.</source>
+        <target state="translated">O intervalo de versão do pacote de ferramentas para atualização.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Update a global tool.</source>
+        <target state="translated">Atualize uma ferramenta global.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionDescription">
+        <source>The NuGet configuration file to use.</source>
+        <target state="translated">O arquivo de configuração do NuGet a ser usado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to update the tool for.</source>
+        <target state="translated">A estrutura de destino para a qual atualizar a ferramenta.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NuGetConfigurationFileDoesNotExist">
+        <source>NuGet configuration file '{0}' does not exist.</source>
+        <target state="translated">O arquivo de configuração '{0}' do NuGet não existe.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceeded">
+        <source>Tool '{0}' was successfully updated from version '{1}' to version '{2}'.</source>
+        <target state="translated">A ferramenta '{0}' foi atualizada com êxito da versão '{1}' para a versão '{2}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalOptionDescription">
+        <source>Update the tool in the current user's tools directory.</source>
+        <target state="translated">Atualizar a ferramenta no diretório de ferramentas do usuário mais recente.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateFullCommandNameLocalized">
+        <source>.NET update Command</source>
+        <target state="translated">Comando de atualização .NET</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateToolCommandNeedGlobalOrToolPath">
+        <source>Specify either the global option (--global) or the tool path option (--tool-path).</source>
+        <target state="translated">Especifique a opção global (--global) ou a opção do caminho da ferramenta (--tool-path).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateToolCommandInvalidGlobalAndToolPath">
+        <source>(--global) conflicts with the tool path option (--tool-path). Specify only one of the options.</source>
+        <target state="translated">(--global) está em conflito com a opção do caminho da ferramenta (--tool-path). Especifique apenas uma das opções.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolHasMultipleVersionsInstalled">
+        <source>Tool '{0}' has multiple versions installed and cannot be updated.</source>
+        <target state="translated">A ferramenta '{0}' tem várias versões instaladas e não pode ser atualizada.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolNotInstalled">
+        <source>A tool with the package Id '{0}' could not be found. 
+
+Tools are updated using their package Id which may be different 
+from the tool name you use when calling the tool. You can find the tool names 
+and the corresponding package Ids for installed tools using the command
+'dotnet tool list'.</source>
+        <target state="translated">Não foi possível encontrar uma ferramenta com a ID '{0}' do pacote. 
+
+As ferramentas são atualizadas usando a ID do pacote, o que pode ser diferente 
+do nome da ferramenta que você usa ao chamar a ferramenta. Você pode encontrar os nomes das ferramentas 
+e as Ids de pacote correspondentes para as ferramentas instaladas usando o comando
+'lista de ferramentas do dotnet'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceededVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
+        <target state="translated">A ferramenta '{0}' foi reinstalada com a versão estável mais recente (versão '{1}').</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateToolFailed">
+        <source>Tool '{0}' failed to update due to the following:</source>
+        <target state="translated">Falha ao atualizar a ferramenta '{0}' devido ao seguinte motivo:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionDescription">
+        <source>Add an additional NuGet package source to use during the update.</source>
+        <target state="translated">Adicionar uma origem adicional do pacote do NuGet a ser usada durante a atualização.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionName">
+        <source>SOURCE</source>
+        <target state="translated">ORIGEM</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionName">
+        <source>FILE</source>
+        <target state="translated">ARQUIVO</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionName">
+        <source>FRAMEWORK</source>
+        <target state="translated">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionDescription">
+        <source>The directory containing the tool to update.</source>
+        <target state="translated">O diretório que contém a ferramenta a ser atualizada.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionName">
+        <source>VERSION</source>
+        <target state="translated">VERSION</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

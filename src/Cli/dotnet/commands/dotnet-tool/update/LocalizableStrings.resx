@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PackageIdArgumentName" xml:space="preserve">
+    <value>PACKAGE_ID</value>
+  </data>
+  <data name="PackageIdArgumentDescription" xml:space="preserve">
+    <value>The NuGet Package Id of the tool to update.</value>
+  </data>
+  <data name="SpecifyExactlyOnePackageId" xml:space="preserve">
+    <value>Specify one tool Package Id to update.</value>
+  </data>
+  <data name="AddSourceOptionDescription" xml:space="preserve">
+    <value>Add an additional NuGet package source to use during the update.</value>
+  </data>
+  <data name="AddSourceOptionName" xml:space="preserve">
+    <value>SOURCE</value>
+  </data>
+  <data name="CommandDescription" xml:space="preserve">
+    <value>Update a global tool.</value>
+  </data>
+  <data name="ConfigFileOptionName" xml:space="preserve">
+    <value>FILE</value>
+  </data>
+  <data name="ConfigFileOptionDescription" xml:space="preserve">
+    <value>The NuGet configuration file to use.</value>
+  </data>
+  <data name="FrameworkOptionName" xml:space="preserve">
+    <value>FRAMEWORK</value>
+  </data>
+  <data name="FrameworkOptionDescription" xml:space="preserve">
+    <value>The target framework to update the tool for.</value>
+  </data>
+  <data name="NuGetConfigurationFileDoesNotExist" xml:space="preserve">
+    <value>NuGet configuration file '{0}' does not exist.</value>
+  </data>
+  <data name="UpdateSucceeded" xml:space="preserve">
+    <value>Tool '{0}' was successfully updated from version '{1}' to version '{2}'.</value>
+  </data>
+  <data name="GlobalOptionDescription" xml:space="preserve">
+    <value>Update the tool in the current user's tools directory.</value>
+  </data>
+  <data name="UpdateFullCommandNameLocalized" xml:space="preserve">
+    <value>.NET update Command</value>
+  </data>
+  <data name="UpdateToolCommandNeedGlobalOrToolPath" xml:space="preserve">
+    <value>Specify either the global option (--global) or the tool path option (--tool-path).</value>
+  </data>
+  <data name="UpdateToolCommandInvalidGlobalAndToolPath" xml:space="preserve">
+    <value>(--global) conflicts with the tool path option (--tool-path). Specify only one of the options.</value>
+  </data>
+  <data name="ToolPathOptionName" xml:space="preserve">
+    <value>PATH</value>
+  </data>
+  <data name="ToolPathOptionDescription" xml:space="preserve">
+    <value>The directory containing the tool to update.</value>
+  </data>
+  <data name="ToolHasMultipleVersionsInstalled" xml:space="preserve">
+    <value>Tool '{0}' has multiple versions installed and cannot be updated.</value>
+  </data>
+  <data name="ToolNotInstalled" xml:space="preserve">
+    <value>A tool with the package Id '{0}' could not be found. 
+
+Tools are updated using their package Id which may be different 
+from the tool name you use when calling the tool. You can find the tool names 
+and the corresponding package Ids for installed tools using the command
+'dotnet tool list'.</value>
+  </data>
+  <data name="UpdateSucceededVersionNoChange" xml:space="preserve">
+    <value>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</value>
+  </data>
+  <data name="UpdateToolFailed" xml:space="preserve">
+    <value>Tool '{0}' failed to update due to the following:</value>
+  </data>
+  <data name="VersionOptionName" xml:space="preserve">
+    <value>VERSION</value>
+  </data>
+  <data name="VersionOptionDescription" xml:space="preserve">
+    <value>The version range of the tool package to update to.</value>
+  </data>
+  <data name="InvalidNuGetVersionRange" xml:space="preserve">
+    <value>Specified version '{0}' is not a valid NuGet version range.</value>
+  </data>
+  <data name="UpdateToLowerVersion" xml:space="preserve">
+    <value>The requested version {0} is lower than existing version {1}.</value>
+  </data>
+  <data name="UpdateToolCommandInvalidGlobalAndLocalAndToolPath" xml:space="preserve">
+    <value>The local option (--local), the global option (--global), and the tool path option (--tool-path) cannot be used together. Specify only one of the options: {0}.</value>
+  </data>
+  <data name="LocalOptionDescription" xml:space="preserve">
+    <value>Update the tool and the local tool manifest.</value>
+  </data>
+  <data name="ManifestPathOptionDescription" xml:space="preserve">
+    <value>Path to the manifest file.</value>
+  </data>
+  <data name="ManifestPathOptionName" xml:space="preserve">
+    <value>PATH</value>
+  </data>
+  <data name="UpdateLocalToolSucceeded" xml:space="preserve">
+    <value>Tool '{0}' was successfully updated from version '{1}' to version '{2}' (manifest file {3}).</value>
+  </data>
+  <data name="UpdateLocaToolToLowerVersion" xml:space="preserve">
+    <value>The requested version {0} is lower than existing version {1} (manifest file {2}).</value>
+  </data>
+  <data name="UpdateLocaToolSucceededVersionNoChange" xml:space="preserve">
+    <value>Tool '{0}' is up to date (version '{1}' manifest file {2}) .</value>
+  </data>
+</root>

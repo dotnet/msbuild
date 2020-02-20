@@ -1,0 +1,674 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="UnsupportedProjectType" xml:space="preserve">
+    <value>Project '{0}' has an unknown project type and cannot be added to the solution file. Contact your SDK provider for support.</value>
+  </data>
+  <data name="ProjectAlreadyHasAreference" xml:space="preserve">
+    <value>Project already has a reference to `{0}`.</value>
+  </data>
+  <data name="ProjectReferenceCouldNotBeFound" xml:space="preserve">
+    <value>Project reference `{0}` could not be found.</value>
+  </data>
+  <data name="ProjectReferenceRemoved" xml:space="preserve">
+    <value>Project reference `{0}` removed.</value>
+  </data>
+  <data name="Project" xml:space="preserve">
+    <value>Project</value>
+  </data>
+  <data name="ProjectFile" xml:space="preserve">
+    <value>Project file</value>
+  </data>
+  <data name="Reference" xml:space="preserve">
+    <value>Reference</value>
+  </data>
+  <data name="ProjectReference" xml:space="preserve">
+    <value>Project reference</value>
+  </data>
+  <data name="ProjectReferenceOneOrMore" xml:space="preserve">
+    <value>Project reference(s)</value>
+  </data>
+  <data name="PackageReference" xml:space="preserve">
+    <value>Package reference</value>
+  </data>
+  <data name="P2P" xml:space="preserve">
+    <value>Project to Project</value>
+  </data>
+  <data name="P2PReference" xml:space="preserve">
+    <value>Project to Project reference</value>
+  </data>
+  <data name="Package" xml:space="preserve">
+    <value>Package</value>
+  </data>
+  <data name="Solution" xml:space="preserve">
+    <value>Solution</value>
+  </data>
+  <data name="SolutionFile" xml:space="preserve">
+    <value>Solution file</value>
+  </data>
+  <data name="Executable" xml:space="preserve">
+    <value>Executable</value>
+  </data>
+  <data name="Library" xml:space="preserve">
+    <value>Library</value>
+  </data>
+  <data name="Program" xml:space="preserve">
+    <value>Program</value>
+  </data>
+  <data name="Application" xml:space="preserve">
+    <value>Application</value>
+  </data>
+  <data name="ReferenceAddedToTheProject" xml:space="preserve">
+    <value>Reference `{0}` added to the project.</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Update" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="List" xml:space="preserve">
+    <value>List</value>
+  </data>
+  <data name="Load" xml:space="preserve">
+    <value>Load</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Find" xml:space="preserve">
+    <value>Find</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="File" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="Directory" xml:space="preserve">
+    <value>Directory</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Value" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="Group" xml:space="preserve">
+    <value>Group</value>
+  </data>
+  <data name="XAddedToY" xml:space="preserve">
+    <value>{0} added to {1}.</value>
+  </data>
+  <data name="XRemovedFromY" xml:space="preserve">
+    <value>{0} removed from {1}.</value>
+  </data>
+  <data name="XDeletedFromY" xml:space="preserve">
+    <value>{0} deleted from {1}.</value>
+  </data>
+  <data name="XSuccessfullyUpdated" xml:space="preserve">
+    <value>{0} successfully updated.</value>
+  </data>
+  <data name="XIsInvalid" xml:space="preserve">
+    <value>{0} is invalid.</value>
+  </data>
+  <data name="XYFoundButInvalid" xml:space="preserve">
+    <value>{0} `{1}` found but is invalid.</value>
+  </data>
+  <data name="XFoundButInvalid" xml:space="preserve">
+    <value>`{0}` found but is invalid.</value>
+  </data>
+  <data name="OperationInvalid" xml:space="preserve">
+    <value>Operation is invalid.</value>
+  </data>
+  <data name="OperationXInvalid" xml:space="preserve">
+    <value>Operation {0} is invalid.</value>
+  </data>
+  <data name="XNotFound" xml:space="preserve">
+    <value>{0} not found.</value>
+  </data>
+  <data name="XOrYNotFound" xml:space="preserve">
+    <value>{0} or {1} not found.</value>
+  </data>
+  <data name="XOrYNotFoundInZ" xml:space="preserve">
+    <value>{0} or {1} not found in `{2}`.</value>
+  </data>
+  <data name="FileNotFound" xml:space="preserve">
+    <value>File `{0}` not found.</value>
+  </data>
+  <data name="XDoesNotExist" xml:space="preserve">
+    <value>{0} does not exist.</value>
+  </data>
+  <data name="XYDoesNotExist" xml:space="preserve">
+    <value>{0} `{1}` does not exist.</value>
+  </data>
+  <data name="MoreThanOneXFound" xml:space="preserve">
+    <value>More than one {0} found.</value>
+  </data>
+  <data name="XAlreadyContainsY" xml:space="preserve">
+    <value>{0} already contains {1}.</value>
+  </data>
+  <data name="XAlreadyContainsYZ" xml:space="preserve">
+    <value>{0} already contains {1} `{2}`.</value>
+  </data>
+  <data name="XAlreadyHasY" xml:space="preserve">
+    <value>{0} already has {1}.</value>
+  </data>
+  <data name="XAlreadyHasYZ" xml:space="preserve">
+    <value>{0} already has {1} `{2}`.</value>
+  </data>
+  <data name="XWasNotExpected" xml:space="preserve">
+    <value>{0} was not expected.</value>
+  </data>
+  <data name="XNotProvided" xml:space="preserve">
+    <value>{0} not provided.</value>
+  </data>
+  <data name="SpecifyAtLeastOne" xml:space="preserve">
+    <value>Specify at least one {0}.</value>
+  </data>
+  <data name="CouldNotConnectWithTheServer" xml:space="preserve">
+    <value>Could not connect with the server.</value>
+  </data>
+  <data name="RequiredArgumentIsInvalid" xml:space="preserve">
+    <value>Required argument {0} is invalid.</value>
+  </data>
+  <data name="OptionIsInvalid" xml:space="preserve">
+    <value>Option {0} is invalid.</value>
+  </data>
+  <data name="ArgumentIsInvalid" xml:space="preserve">
+    <value>Argument {0} is invalid.</value>
+  </data>
+  <data name="RequiredArgumentNotPassed" xml:space="preserve">
+    <value>Required argument {0} was not provided.</value>
+  </data>
+  <data name="RequiredCommandNotPassed" xml:space="preserve">
+    <value>Required command was not provided.</value>
+  </data>
+  <data name="CouldNotFindAnyProjectInDirectory" xml:space="preserve">
+    <value>Could not find any project in `{0}`.</value>
+  </data>
+  <data name="CouldNotFindProjectOrDirectory" xml:space="preserve">
+    <value>Could not find project or directory `{0}`.</value>
+  </data>
+  <data name="MoreThanOneProjectInDirectory" xml:space="preserve">
+    <value>Found more than one project in `{0}`. Specify which one to use.</value>
+  </data>
+  <data name="FoundInvalidProject" xml:space="preserve">
+    <value>Found a project `{0}` but it is invalid.</value>
+  </data>
+  <data name="InvalidProject" xml:space="preserve">
+    <value>Invalid project `{0}`.</value>
+  </data>
+  <data name="InvalidProjectWithExceptionMessage" xml:space="preserve">
+    <value>Invalid project `{0}`. {1}.</value>
+  </data>
+  <data name="CouldNotFindSolutionIn" xml:space="preserve">
+    <value>Specified solution file {0} does not exist, or there is no solution file in the directory.</value>
+  </data>
+  <data name="CouldNotFindSolutionOrDirectory" xml:space="preserve">
+    <value>Could not find solution or directory `{0}`.</value>
+  </data>
+  <data name="MoreThanOneSolutionInDirectory" xml:space="preserve">
+    <value>Found more than one solution file in {0}. Specify which one to use.</value>
+  </data>
+  <data name="InvalidSolutionFormatString" xml:space="preserve">
+    <value>Invalid solution `{0}`. {1}.</value>
+  </data>
+  <data name="SolutionDoesNotExist" xml:space="preserve">
+    <value>Specified solution file {0} does not exist, or there is no solution file in the directory.</value>
+  </data>
+  <data name="ReferenceIsInvalid" xml:space="preserve">
+    <value>Reference `{0}` is invalid.</value>
+  </data>
+  <data name="SpecifyAtLeastOneReferenceToAdd" xml:space="preserve">
+    <value>You must specify at least one reference to add.</value>
+  </data>
+  <data name="PackageReferenceDoesNotExist" xml:space="preserve">
+    <value>Package reference `{0}` does not exist.</value>
+  </data>
+  <data name="PackageReferenceIsInvalid" xml:space="preserve">
+    <value>Package reference `{0}` is invalid.</value>
+  </data>
+  <data name="SpecifyAtLeastOnePackageReferenceToAdd" xml:space="preserve">
+    <value>You must specify at least one package to add.</value>
+  </data>
+  <data name="PackageReferenceAddedToTheProject" xml:space="preserve">
+    <value>Package reference `{0}` added to the project.</value>
+  </data>
+  <data name="ProjectAlreadyHasAPackageReference" xml:space="preserve">
+    <value>Project {0} already has a reference `{1}`.</value>
+  </data>
+  <data name="PleaseSpecifyVersion" xml:space="preserve">
+    <value>Specify a version of the package.</value>
+  </data>
+  <data name="ProjectDoesNotExist" xml:space="preserve">
+    <value>Project `{0}` does not exist.</value>
+  </data>
+  <data name="ProjectIsInvalid" xml:space="preserve">
+    <value>Project `{0}` is invalid.</value>
+  </data>
+  <data name="SpecifyAtLeastOneProjectToAdd" xml:space="preserve">
+    <value>You must specify at least one project to add.</value>
+  </data>
+  <data name="ProjectAddedToTheSolution" xml:space="preserve">
+    <value>Project `{0}` added to the solution.</value>
+  </data>
+  <data name="ProjectRemovedFromTheSolution" xml:space="preserve">
+    <value>Project `{0}` removed from the solution.</value>
+  </data>
+  <data name="SolutionAlreadyContainsProject" xml:space="preserve">
+    <value>Solution {0} already contains project {1}.</value>
+  </data>
+  <data name="ReferenceNotFoundInTheProject" xml:space="preserve">
+    <value>Specified reference {0} does not exist in project {1}.</value>
+  </data>
+  <data name="ReferenceRemoved" xml:space="preserve">
+    <value>Reference `{0}` deleted from the project.</value>
+  </data>
+  <data name="SpecifyAtLeastOneReferenceToRemove" xml:space="preserve">
+    <value>You must specify at least one reference to remove.</value>
+  </data>
+  <data name="ReferenceDeleted" xml:space="preserve">
+    <value>Reference `{0}` deleted.</value>
+  </data>
+  <data name="PackageReferenceNotFoundInTheProject" xml:space="preserve">
+    <value>Package reference `{0}` could not be found in the project.</value>
+  </data>
+  <data name="PackageReferenceRemoved" xml:space="preserve">
+    <value>Reference `{0}` deleted from the project.</value>
+  </data>
+  <data name="SpecifyAtLeastOnePackageReferenceToRemove" xml:space="preserve">
+    <value>You must specify at least one package reference to remove.</value>
+  </data>
+  <data name="PackageReferenceDeleted" xml:space="preserve">
+    <value>Package reference `{0}` deleted.</value>
+  </data>
+  <data name="ProjectNotFoundInTheSolution" xml:space="preserve">
+    <value>Project `{0}` could not be found in the solution.</value>
+  </data>
+  <data name="ProjectRemoved" xml:space="preserve">
+    <value>Project `{0}` removed from solution.</value>
+  </data>
+  <data name="SpecifyAtLeastOneProjectToRemove" xml:space="preserve">
+    <value>You must specify at least one project to remove.</value>
+  </data>
+  <data name="ProjectDeleted" xml:space="preserve">
+    <value>Project `{0}` deleted from solution.</value>
+  </data>
+  <data name="NoReferencesFound" xml:space="preserve">
+    <value>There are no {0} references in project {1}.</value>
+  </data>
+  <data name="NoProjectsFound" xml:space="preserve">
+    <value>No projects found in the solution.</value>
+  </data>
+  <data name="ArgumentsProjectOrSolutionDescription" xml:space="preserve">
+    <value>The project or solution to operation on. If a file is not specified, the current directory is searched.</value>
+  </data>
+  <data name="ProjectArgumentName" xml:space="preserve">
+    <value>PROJECT</value>
+  </data>
+  <data name="ProjectArgumentDescription" xml:space="preserve">
+    <value>The project file to operate on. If a file is not specified, the command will search the current directory for one.</value>
+  </data>
+  <data name="CmdFramework" xml:space="preserve">
+    <value>FRAMEWORK</value>
+  </data>
+  <data name="PleaseSpecifyNewVersion" xml:space="preserve">
+    <value>Specify new version of the package.</value>
+  </data>
+  <data name="PleaseSpecifyWhichPackageToUpdate" xml:space="preserve">
+    <value>Specify which package to update.</value>
+  </data>
+  <data name="NothingToUpdate" xml:space="preserve">
+    <value>Nothing to update.</value>
+  </data>
+  <data name="EverythingUpToDate" xml:space="preserve">
+    <value>Everything is already up-to-date.</value>
+  </data>
+  <data name="PackageVersionUpdatedTo" xml:space="preserve">
+    <value>Version of package `{0}` updated to `{1}`.</value>
+  </data>
+  <data name="PackageVersionUpdated" xml:space="preserve">
+    <value>Version of package `{0}` updated.</value>
+  </data>
+  <data name="CouldNotUpdateTheVersion" xml:space="preserve">
+    <value>Could not update the version of the package `{0}`.</value>
+  </data>
+  <data name="TemplateCreatedSuccessfully" xml:space="preserve">
+    <value>The template {0} created successfully. run "dotnet restore" to get started!</value>
+  </data>
+  <data name="TemplateInstalledSuccesfully" xml:space="preserve">
+    <value>The template {0} installed successfully. You can use "dotnet new {0}" to get started with the new template.</value>
+  </data>
+  <data name="TemplateCreateError" xml:space="preserve">
+    <value>Template {0} could not be created. Error returned was: {1}.</value>
+  </data>
+  <data name="TemplateInstallError" xml:space="preserve">
+    <value>Template {0} could not be installed. Error returned was: {1}.</value>
+  </data>
+  <data name="SpecifiedNameExists" xml:space="preserve">
+    <value>Specified name {0} already exists. Specify a different name.</value>
+  </data>
+  <data name="SpecifiedAliasExists" xml:space="preserve">
+    <value>Specified alias {0} already exists. Specify a different alias.</value>
+  </data>
+  <data name="MandatoryParameterMissing" xml:space="preserve">
+    <value>Mandatory parameter {0} missing for template {1}. </value>
+  </data>
+  <data name="ProjectNotCompatibleWithFrameworks" xml:space="preserve">
+    <value>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Review the project you are trying to add and verify that is compatible with the following targets:</value>
+  </data>
+  <data name="ProjectDoesNotTargetFramework" xml:space="preserve">
+    <value>Project `{0}` does not target framework `{1}`.</value>
+  </data>
+  <data name="ProjectCouldNotBeEvaluated" xml:space="preserve">
+    <value>Project `{0}` could not be evaluated. Evaluation failed with following error:
+{1}.</value>
+  </data>
+  <data name="VerbosityOptionDescription" xml:space="preserve">
+    <value>Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</value>
+  </data>
+  <data name="CmdVersionSuffixDescription" xml:space="preserve">
+    <value>Set the value of the $(VersionSuffix) property to use when building the project.</value>
+  </data>
+  <data name="ShowHelpDescription" xml:space="preserve">
+    <value>Show command line help.</value>
+  </data>
+  <data name="NoRestoreDescription" xml:space="preserve">
+    <value>Do not restore the project before building.</value>
+  </data>
+  <data name="ToolSettingsInvalidXml" xml:space="preserve">
+    <value>Invalid XML: {0}</value>
+  </data>
+  <data name="ToolSettingsMissingCommandName" xml:space="preserve">
+    <value>Tool defines a command with a missing name setting.</value>
+  </data>
+  <data name="ToolSettingsMissingEntryPoint" xml:space="preserve">
+    <value>Command '{0}' is missing an entry point setting.</value>
+  </data>
+  <data name="ToolSettingsInvalidCommandName" xml:space="preserve">
+    <value>Command '{0}' contains one or more of the following invalid characters: {1}.</value>
+  </data>
+  <data name="ToolSettingsMoreThanOneCommand" xml:space="preserve">
+    <value>More than one command is defined for the tool.</value>
+  </data>
+  <data name="ToolSettingsUnsupportedRunner" xml:space="preserve">
+    <value>Command '{0}' uses unsupported runner '{1}'."</value>
+  </data>
+  <data name="ShellShimConflict" xml:space="preserve">
+    <value>Command '{0}' conflicts with an existing command from another tool.</value>
+  </data>
+  <data name="CannotCreateShimForEmptyExecutablePath" xml:space="preserve">
+    <value>Cannot create shell shim for an empty executable path.</value>
+  </data>
+  <data name="CannotCreateShimForEmptyCommand" xml:space="preserve">
+    <value>Cannot create shell shim for an empty command.</value>
+  </data>
+  <data name="FailedToRetrieveToolConfiguration" xml:space="preserve">
+    <value>Failed to retrieve tool configuration: {0}</value>
+  </data>
+  <data name="EnvironmentPathLinuxManualInstructions" xml:space="preserve">
+    <value>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</value>
+  </data>
+  <data name="EnvironmentPathLinuxNeedLogout" xml:space="preserve">
+    <value>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</value>
+  </data>
+  <data name="EnvironmentPathOSXBashManualInstructions" xml:space="preserve">
+    <value>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</value>
+  </data>
+  <data name="EnvironmentPathOSXZshManualInstructions" xml:space="preserve">
+    <value>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using zsh, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+And run `zsh -l` to make it available for current session.
+
+You can only add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</value>
+  </data>
+  <data name="EnvironmentPathOSXNeedReopen" xml:space="preserve">
+    <value>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</value>
+  </data>
+  <data name="EnvironmentPathWindowsManualInstructions" xml:space="preserve">
+    <value>Tools directory '{0}' is not currently on the PATH environment variable.
+
+You can add the directory to the PATH by running the following command:
+
+setx PATH "%PATH%;{0}"
+</value>
+  </data>
+  <data name="EnvironmentPathWindowsNeedReopen" xml:space="preserve">
+    <value>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</value>
+  </data>
+  <data name="FailedToSetToolsPathEnvironmentVariable" xml:space="preserve">
+    <value>Failed to add '{0}' to the PATH environment variable. Add this directory to your PATH to use tools installed with 'dotnet tool install'.</value>
+  </data>
+  <data name="FailedToCreateShellShim" xml:space="preserve">
+    <value>Failed to create tool shim for command '{0}': {1}</value>
+  </data>
+  <data name="FailedToRemoveShellShim" xml:space="preserve">
+    <value>Failed to remove tool shim for command '{0}': {1}</value>
+  </data>
+  <data name="FailedSettingShimPermissions" xml:space="preserve">
+    <value>Failed to set user executable permissions for shell shim: {0}</value>
+  </data>
+  <data name="FailedToInstallToolPackage" xml:space="preserve">
+    <value>Failed to install tool package '{0}': {1}</value>
+  </data>
+  <data name="FailedToUninstallToolPackage" xml:space="preserve">
+    <value>Failed to uninstall tool package '{0}': {1}</value>
+  </data>
+  <data name="MissingToolEntryPointFile" xml:space="preserve">
+    <value>Entry point file '{0}' for command '{1}' was not found in the package.</value>
+  </data>
+  <data name="MissingToolSettingsFile" xml:space="preserve">
+    <value>Settings file 'DotnetToolSettings.xml' was not found in the package.</value>
+  </data>
+  <data name="ToolPackageConflictPackageId" xml:space="preserve">
+    <value>Tool '{0}' (version '{1}') is already installed.</value>
+  </data>
+  <data name="FailedToFindStagedToolPackage" xml:space="preserve">
+    <value>Failed to find staged tool package '{0}'.</value>
+  </data>
+  <data name="ColumnMaxWidthMustBeGreaterThanZero" xml:space="preserve">
+    <value>Column maximum width must be greater than zero.</value>
+  </data>
+  <data name="ToolSettingsInvalidLeadingDotCommandName" xml:space="preserve">
+    <value>The command name '{0}' cannot begin with a leading dot (.).</value>
+  </data>
+  <data name="FormatVersionIsHigher" xml:space="preserve">
+    <value>Format version is higher than supported. This tool may not be supported in this SDK version. Update your SDK.</value>
+  </data>
+  <data name="FormatVersionIsMalformed" xml:space="preserve">
+    <value>Format version is malformed. This tool may not be supported in this SDK version. Contact the author of the tool.</value>
+  </data>
+  <data name="FormatVersionIsMissing" xml:space="preserve">
+    <value>Format version is missing. This tool may not be supported in this SDK version. Contact the author of the tool.</value>
+  </data>
+  <data name="MoreThanOnePackagedShimAvailable" xml:space="preserve">
+    <value>More than one packaged shim is available: {0}.</value>
+  </data>
+  <data name="FailedToReadNuGetLockFile" xml:space="preserve">
+    <value>Failed to read NuGet LockFile for tool package '{0}': {1}</value>
+  </data>
+  <data name="LevelArgumentName" xml:space="preserve">
+    <value>LEVEL</value>
+  </data>
+  <data name="FrameworkArgumentName" xml:space="preserve">
+    <value>FRAMEWORK</value>
+  </data>
+  <data name="RuntimeIdentifierArgumentName" xml:space="preserve">
+    <value>RUNTIME_IDENTIFIER</value>
+  </data>
+  <data name="ConfigurationArgumentName" xml:space="preserve">
+    <value>CONFIGURATION</value>
+  </data>
+  <data name="VersionSuffixArgumentName" xml:space="preserve">
+    <value>VERSION_SUFFIX</value>
+  </data>
+  <data name="SolutionOrProjectArgumentDescription" xml:space="preserve">
+    <value>The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.</value>
+  </data>
+  <data name="SolutionOrProjectArgumentName" xml:space="preserve">
+    <value>PROJECT | SOLUTION</value>
+  </data>
+  <data name="CommandInteractiveOptionDescription" xml:space="preserve">
+    <value>Allows the command to stop and wait for user input or action (for example to complete authentication).</value>
+  </data>
+</root>

@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>.NET Clean Command</source>
+        <target state="translated">.NET 정리 명령</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Command to clean previously generated build outputs.</source>
+        <target state="translated">이전에 생성된 빌드 출력을 정리하는 명령입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="translated">시작 배너 또는 저작권 메시지를 표시하지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutputDir">
+        <source>OUTPUT_DIR</source>
+        <target state="translated">OUTPUT_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutputDirDescription">
+        <source>The directory containing the build artifacts to clean.</source>
+        <target state="translated">정리할 빌드 아티팩트를 포함하는 디렉터리입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to clean for. The target framework must also be specified in the project file.</source>
+        <target state="translated">정리할 대상 프레임워크입니다. 대상 프레임워크는 프로젝트 파일에도 지정되어야 합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to clean for.</source>
+        <target state="translated">정리할 대상 런타임입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to clean for. The default for most projects is 'Debug'.</source>
+        <target state="translated">정리할 구성입니다. 대부분의 프로젝트에서 기본값은 'Debug'입니다.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

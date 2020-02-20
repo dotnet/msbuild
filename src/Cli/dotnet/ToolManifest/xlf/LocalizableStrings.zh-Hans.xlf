@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CannotFindAManifestFile">
+        <source>Cannot find a manifest file.
+For a list of locations searched, specify the "-d" option before the tool name.</source>
+        <target state="translated">找不到清单文件。
+要获取已搜索的位置列表，请在工具名称之前指定 "-d" 选项。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotFindPackageIdInManifest">
+        <source>Cannot find a package with the package id {0} in the manifest file.</source>
+        <target state="translated">在清单文件中找不到包 ID 为 {0} 的包。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ListOfSearched">
+        <source>The list of searched paths:
+{0}</source>
+        <target state="translated">已搜索路径的列表:
+{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestHasMarkOfTheWeb">
+        <source>File {0} came from another computer and might be blocked to help protect this computer. For more information, including how to unblock, see https://aka.ms/motw</source>
+        <target state="translated">文件 {0} 来自另一台计算机，而且可能会被阻止以帮助保护此计算机。有关详细信息(包括如何解除阻止)，请参阅 https://aka.ms/motw</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPackageIdCollision">
+        <source>Cannot add package. Manifest file already contains version {0} of the package {1}. Uninstall/install or edit manifest file {2} to specify the new version {3}.</source>
+        <target state="translated">无法添加包。清单文件已经包含版本 {0} 的包 {1}。请卸载/安装或编辑清单文件 {2} 以指定新版本 {3}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MultipleSamePackageId">
+        <source>More than one entry exists for package(s): {0}.</source>
+        <target state="translated">包 {0} 存在多个条目。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedTypeInJson">
+        <source>Expected a {0} for property '{1}'.</source>
+        <target state="translated">属性“{1}”需要 {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionIsInvalid">
+        <source>Version {0} is invalid.</source>
+        <target state="translated">版本 {0} 无效。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FieldCommandsIsMissing">
+        <source>Missing 'commands' entry.</source>
+        <target state="translated">缺少 "commands" 条目。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidManifestFilePrefix">
+        <source>Invalid manifest file. Path {0}:
+{1}</source>
+        <target state="translated">清单文件无效。路径 {0}:
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InPackage">
+        <source>In package {0}:
+{1}</source>
+        <target state="translated">在包 {0} 中:
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestVersionHigherThanSupported">
+        <source>Manifest version is {0}. This manifest may not be supported in this SDK version that can support up to manifest version {1}.</source>
+        <target state="translated">清单版本为 {0}。此 SDK 版本最多支持清单版本 {1}，可能不支持此清单。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestVersion0">
+        <source>Manifest version 0 is not supported.</source>
+        <target state="translated">不支持清单版本 0。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolMissingVersion">
+        <source>Missing 'version' entry.</source>
+        <target state="translated">缺少 "version" 条目。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="JsonParsingError">
+        <source>Json parsing error in file {0} : {1}</source>
+        <target state="translated">文件 {0} 中存在 Json 分析错误: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestMissingIsRoot">
+        <source>Missing 'isRoot' entry.</source>
+        <target state="translated">缺少 "isRoot" 条目。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

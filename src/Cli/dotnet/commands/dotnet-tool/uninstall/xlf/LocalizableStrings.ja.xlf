@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="LocalOptionDescription">
+        <source>Uninstall the tool and remove it from the local tool manifest.</source>
+        <target state="translated">ツールをアンインストールし、ローカル ツール マニフェストから削除します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionDescription">
+        <source>Path to the manifest file.</source>
+        <target state="translated">マニフェスト ファイルへのパス。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoManifestFileContainPackageId">
+        <source>Cannot find a manifest file that contains package id '{0}'.</source>
+        <target state="translated">パッケージ ID '{0}' が含まれているマニフェスト ファイルが見つかりません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentDescription">
+        <source>The NuGet Package Id of the tool to uninstall.</source>
+        <target state="translated">アンインストールするツールの NuGet パッケージ ID。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Uninstall a global tool or local tool.</source>
+        <target state="translated">グローバル ツールまたはローカル ツールをアンインストールします。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentName">
+        <source>PACKAGE_ID</source>
+        <target state="translated">PACKAGE_ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageId">
+        <source>Specify one tool Package Id to uninstall.</source>
+        <target state="translated">アンインストールするツール パッケージの ID を 1 つ指定してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalOptionDescription">
+        <source>Uninstall the tool from the current user's tools directory.</source>
+        <target state="translated">現在のユーザーのツール ディレクトリからツールをアンインストールします。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UninstallLocalToolSucceeded">
+        <source>Tool '{0}' was successfully uninstalled and removed from manifest file {1}.</source>
+        <target state="translated">ツール '{0}' が正常にアンインストールされ、マニフェスト ファイル {1} から削除されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UninstallSucceeded">
+        <source>Tool '{0}' (version '{1}') was successfully uninstalled.</source>
+        <target state="translated">ツール '{0}' (バージョン '{1}') は正常にアンインストールされました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolNotInstalled">
+        <source>A tool with the package Id '{0}' could not be found. 
+
+Tools are uninstalled using their package Id which may be different 
+from the tool name you use when calling the tool. You can find the tool names 
+and the corresponding package Ids for installed tools using the command
+'dotnet tool list'.</source>
+        <target state="translated">パッケージ Id が ' {0} ' のツールが見つかりませんでした。
+
+ツールは、異なるパッケージ Id を使用してアンインストールされます
+ツールを呼び出すときに使用するツール名。ツール名が見つかります
+と、コマンドを使用してインストールされたツールの対応するパッケージ Id
+' dotnet tool list '。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolHasMultipleVersionsInstalled">
+        <source>Tool '{0}' has multiple versions installed and cannot be uninstalled.</source>
+        <target state="translated">ツール '{0}' の複数のバージョンがインストールされており、アンインストールできません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToUninstallTool">
+        <source>Failed to uninstall tool '{0}': {1}</source>
+        <target state="translated">ツール '{0}' をアンインストールできませんでした: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="translated">ローカル オプション (--local)、グローバル オプション (--global)、ツール パス オプション (--tool-path) は、一度に 1 つだけ指定できます。オプションを 1 つだけ指定します: {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidToolPathOption">
+        <source>Tool path '{0}' does not exist.</source>
+        <target state="translated">ツール パス '{0}' は存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionDescription">
+        <source>The directory containing the tool to uninstall.</source>
+        <target state="translated">アンインストールするツールが入っているディレクトリ。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

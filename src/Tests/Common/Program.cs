@@ -56,7 +56,7 @@ partial class Program
 
     private static int ShowSdkInfo()
     {
-        var log = new OutputLogger();
+        var log = new StringTestLogger();
         var command = new DotnetCommand(log, "--info");
         var testDirectory = TestDirectory.Create(Path.Combine(TestContext.Current.TestExecutionDirectory, "sdkinfo"));
 
@@ -78,24 +78,4 @@ partial class Program
     static partial void AfterTestRun();
 
     static partial void ShowAdditionalHelp();
-
-    private class OutputLogger : ITestOutputHelper
-    {
-        StringBuilder _stringBuilder = new StringBuilder();
-
-        public void WriteLine(string message)
-        {
-            _stringBuilder.AppendLine(message);
-        }
-
-        public void WriteLine(string format, params object[] args)
-        {
-            _stringBuilder.AppendLine(string.Format(format, args));
-        }
-
-        public override string ToString()
-        {
-            return _stringBuilder.ToString();
-        }
-    }
 }

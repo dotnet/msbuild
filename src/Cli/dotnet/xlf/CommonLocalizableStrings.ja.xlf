@@ -1,0 +1,944 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ja" original="../CommonLocalizableStrings.resx">
+    <body>
+      <trans-unit id="CommandInteractiveOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">コマンドを停止して、ユーザーの入力またはアクション (認証の完了など) を待機できるようにします。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindAnyProjectInDirectory">
+        <source>Could not find any project in `{0}`.</source>
+        <target state="translated">`{0}` にプロジェクトが見つかりませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathOSXBashManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">ツール ディレクトリ '{0}' は現在、PATH 環境変数にありません。
+Bash を使用している場合、次のコマンドを実行してプロファイルに追加できます。
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+次のコマンドを実行して現在のセッションに追加できます。
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathOSXZshManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using zsh, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+And run `zsh -l` to make it available for current session.
+
+You can only add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">ツール ディレクトリ '{0}' は現在、PATH 環境変数にありません。
+zsh を使用している場合、次のコマンドを実行してプロファイルに追加できます:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
+# .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+`zsh -l` を実行して現在のセッションで利用できるようにします。
+
+これは、次のコマンドを実行することによってのみ、現行のセッションに追加できます:
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOneProjectInDirectory">
+        <source>Found more than one project in `{0}`. Specify which one to use.</source>
+        <target state="translated">`{0}` に複数のプロジェクトが見つかりました。使用するプロジェクトを指定してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectAlreadyHasAreference">
+        <source>Project already has a reference to `{0}`.</source>
+        <target state="translated">プロジェクトには既に `{0}` への参照が指定されています。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectReferenceCouldNotBeFound">
+        <source>Project reference `{0}` could not be found.</source>
+        <target state="translated">プロジェクト参照 `{0}` は見つかりませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectReferenceRemoved">
+        <source>Project reference `{0}` removed.</source>
+        <target state="translated">プロジェクト参照 `{0}` は削除されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Project">
+        <source>Project</source>
+        <target state="translated">プロジェクト</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectFile">
+        <source>Project file</source>
+        <target state="translated">プロジェクト ファイル</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Reference">
+        <source>Reference</source>
+        <target state="translated">参照</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectReference">
+        <source>Project reference</source>
+        <target state="translated">プロジェクト参照</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReference">
+        <source>Package reference</source>
+        <target state="translated">パッケージ参照</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="P2P">
+        <source>Project to Project</source>
+        <target state="translated">プロジェクト間</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="P2PReference">
+        <source>Project to Project reference</source>
+        <target state="translated">プロジェクト間参照</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Package">
+        <source>Package</source>
+        <target state="translated">パッケージ</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Solution">
+        <source>Solution</source>
+        <target state="translated">ソリューション</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionFile">
+        <source>Solution file</source>
+        <target state="translated">ソリューション ファイル</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Executable">
+        <source>Executable</source>
+        <target state="translated">実行可能ファイル</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Library">
+        <source>Library</source>
+        <target state="translated">ライブラリ</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Program">
+        <source>Program</source>
+        <target state="translated">プログラム</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Application">
+        <source>Application</source>
+        <target state="translated">アプリケーション</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceAddedToTheProject">
+        <source>Reference `{0}` added to the project.</source>
+        <target state="translated">参照 `{0}` がプロジェクトに追加されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Add">
+        <source>Add</source>
+        <target state="translated">追加</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Remove">
+        <source>Remove</source>
+        <target state="translated">削除</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Delete">
+        <source>Delete</source>
+        <target state="translated">削除</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Update">
+        <source>Update</source>
+        <target state="translated">更新</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="New">
+        <source>New</source>
+        <target state="translated">新規</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="List">
+        <source>List</source>
+        <target state="translated">一覧</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Load">
+        <source>Load</source>
+        <target state="translated">読み込み</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Save">
+        <source>Save</source>
+        <target state="translated">保存</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Find">
+        <source>Find</source>
+        <target state="translated">検索</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Error">
+        <source>Error</source>
+        <target state="translated">エラー</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Warning">
+        <source>Warning</source>
+        <target state="translated">警告</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="File">
+        <source>File</source>
+        <target state="translated">ファイル</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Directory">
+        <source>Directory</source>
+        <target state="translated">ディレクトリ</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Type">
+        <source>Type</source>
+        <target state="translated">種類</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Value">
+        <source>Value</source>
+        <target state="translated">値</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Group">
+        <source>Group</source>
+        <target state="translated">グループ</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAddedToY">
+        <source>{0} added to {1}.</source>
+        <target state="translated">{0} が {1} に追加されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XRemovedFromY">
+        <source>{0} removed from {1}.</source>
+        <target state="translated">{0} が {1} から削除されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XDeletedFromY">
+        <source>{0} deleted from {1}.</source>
+        <target state="translated">{0} が {1} から削除されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XSuccessfullyUpdated">
+        <source>{0} successfully updated.</source>
+        <target state="translated">{0} が正常に更新されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XIsInvalid">
+        <source>{0} is invalid.</source>
+        <target state="translated">{0} は無効です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XYFoundButInvalid">
+        <source>{0} `{1}` found but is invalid.</source>
+        <target state="translated">{0} `{1}` が見つかりましたが、無効です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XFoundButInvalid">
+        <source>`{0}` found but is invalid.</source>
+        <target state="translated">`{0}` が見つかりましたが、無効です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OperationInvalid">
+        <source>Operation is invalid.</source>
+        <target state="translated">操作が無効です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OperationXInvalid">
+        <source>Operation {0} is invalid.</source>
+        <target state="translated">操作 {0} は無効です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XNotFound">
+        <source>{0} not found.</source>
+        <target state="translated">{0} が見つかりません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XOrYNotFound">
+        <source>{0} or {1} not found.</source>
+        <target state="translated">{0} または {1} が見つかりません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XOrYNotFoundInZ">
+        <source>{0} or {1} not found in `{2}`.</source>
+        <target state="translated">`{2}` に {0} または {1} が見つかりません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileNotFound">
+        <source>File `{0}` not found.</source>
+        <target state="translated">ファイル `{0}` が見つかりません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XDoesNotExist">
+        <source>{0} does not exist.</source>
+        <target state="translated">{0} は存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XYDoesNotExist">
+        <source>{0} `{1}` does not exist.</source>
+        <target state="translated">{0} `{1}` は存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOneXFound">
+        <source>More than one {0} found.</source>
+        <target state="translated">複数の {0} が見つかりました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAlreadyContainsY">
+        <source>{0} already contains {1}.</source>
+        <target state="translated">{0} には既に {1} が含まれています。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAlreadyContainsYZ">
+        <source>{0} already contains {1} `{2}`.</source>
+        <target state="translated">{0} には既に {1} `{2}` が含まれています。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAlreadyHasY">
+        <source>{0} already has {1}.</source>
+        <target state="translated">{0} には既に {1} があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAlreadyHasYZ">
+        <source>{0} already has {1} `{2}`.</source>
+        <target state="translated">{0} には既に {1} `{2}` があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XWasNotExpected">
+        <source>{0} was not expected.</source>
+        <target state="translated">{0} は必要ありません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XNotProvided">
+        <source>{0} not provided.</source>
+        <target state="translated">{0} が指定されていません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOne">
+        <source>Specify at least one {0}.</source>
+        <target state="translated">少なくとも 1 つの {0} を指定してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotConnectWithTheServer">
+        <source>Could not connect with the server.</source>
+        <target state="translated">サーバーに接続できませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentIsInvalid">
+        <source>Required argument {0} is invalid.</source>
+        <target state="translated">必要な引数 {0} は無効です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionIsInvalid">
+        <source>Option {0} is invalid.</source>
+        <target state="translated">オプション {0} は無効です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentIsInvalid">
+        <source>Argument {0} is invalid.</source>
+        <target state="translated">引数 {0} は無効です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentNotPassed">
+        <source>Required argument {0} was not provided.</source>
+        <target state="translated">必要な引数 {0} が指定されていません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindProjectOrDirectory">
+        <source>Could not find project or directory `{0}`.</source>
+        <target state="translated">プロジェクトまたはディレクトリ `{0}` が見つかりませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FoundInvalidProject">
+        <source>Found a project `{0}` but it is invalid.</source>
+        <target state="translated">プロジェクト `{0}` が見つかりましたが、有効ではありません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidProject">
+        <source>Invalid project `{0}`.</source>
+        <target state="translated">無効なプロジェクト `{0}`。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindSolutionIn">
+        <source>Specified solution file {0} does not exist, or there is no solution file in the directory.</source>
+        <target state="translated">指定したソリューション ファイル {0} が存在しないか、ディレクトリにソリューション ファイルがありません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindSolutionOrDirectory">
+        <source>Could not find solution or directory `{0}`.</source>
+        <target state="translated">ソリューションまたはディレクトリ `{0}` が見つかりませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionDoesNotExist">
+        <source>Specified solution file {0} does not exist, or there is no solution file in the directory.</source>
+        <target state="translated">指定したソリューション ファイル {0} が存在しないか、ディレクトリにソリューション ファイルがありません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceIsInvalid">
+        <source>Reference `{0}` is invalid.</source>
+        <target state="translated">参照 `{0}` は無効です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOneReferenceToAdd">
+        <source>You must specify at least one reference to add.</source>
+        <target state="translated">追加する参照を少なくとも 1 つ指定する必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceDoesNotExist">
+        <source>Package reference `{0}` does not exist.</source>
+        <target state="translated">パッケージ参照 `{0}` は存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceIsInvalid">
+        <source>Package reference `{0}` is invalid.</source>
+        <target state="translated">パッケージ参照 `{0}` は無効です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOnePackageReferenceToAdd">
+        <source>You must specify at least one package to add.</source>
+        <target state="translated">追加するパッケージを少なくとも 1 つ指定する必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceAddedToTheProject">
+        <source>Package reference `{0}` added to the project.</source>
+        <target state="translated">パッケージ参照 `{0}` がプロジェクトに追加されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectAlreadyHasAPackageReference">
+        <source>Project {0} already has a reference `{1}`.</source>
+        <target state="translated">プロジェクト {0} には既に参照 `{1}` が指定されています。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PleaseSpecifyVersion">
+        <source>Specify a version of the package.</source>
+        <target state="translated">パッケージのバージョンを指定してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectDoesNotExist">
+        <source>Project `{0}` does not exist.</source>
+        <target state="translated">プロジェクト `{0}` は存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectIsInvalid">
+        <source>Project `{0}` is invalid.</source>
+        <target state="translated">プロジェクト `{0}` は無効です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOneProjectToAdd">
+        <source>You must specify at least one project to add.</source>
+        <target state="translated">追加するプロジェクトを少なくとも 1 つ指定する必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectAddedToTheSolution">
+        <source>Project `{0}` added to the solution.</source>
+        <target state="translated">プロジェクト `{0}` をソリューションに追加しました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceNotFoundInTheProject">
+        <source>Specified reference {0} does not exist in project {1}.</source>
+        <target state="translated">指定された参照 {0} はプロジェクト {1} に存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceRemoved">
+        <source>Reference `{0}` deleted from the project.</source>
+        <target state="translated">参照 `{0}` はプロジェクトから削除されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOneReferenceToRemove">
+        <source>You must specify at least one reference to remove.</source>
+        <target state="translated">削除する参照を少なくとも 1 つ指定する必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceDeleted">
+        <source>Reference `{0}` deleted.</source>
+        <target state="translated">参照 `{0}` が削除されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceNotFoundInTheProject">
+        <source>Package reference `{0}` could not be found in the project.</source>
+        <target state="translated">パッケージ参照 `{0}` がプロジェクト内に見つかりませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceRemoved">
+        <source>Reference `{0}` deleted from the project.</source>
+        <target state="translated">参照 `{0}` はプロジェクトから削除されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOnePackageReferenceToRemove">
+        <source>You must specify at least one package reference to remove.</source>
+        <target state="translated">削除するパッケージ参照を少なくとも 1 つ指定する必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceDeleted">
+        <source>Package reference `{0}` deleted.</source>
+        <target state="translated">パッケージ参照 `{0}` が削除されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectNotFoundInTheSolution">
+        <source>Project `{0}` could not be found in the solution.</source>
+        <target state="translated">プロジェクト `{0}` がソリューション内に見つかりませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectRemoved">
+        <source>Project `{0}` removed from solution.</source>
+        <target state="translated">プロジェクト `{0}` がソリューションから削除されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOneProjectToRemove">
+        <source>You must specify at least one project to remove.</source>
+        <target state="translated">削除するプロジェクトを少なくとも 1 つ指定する必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectDeleted">
+        <source>Project `{0}` deleted from solution.</source>
+        <target state="translated">プロジェクト `{0}` がソリューションから削除されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoReferencesFound">
+        <source>There are no {0} references in project {1}.</source>
+        <target state="translated">プロジェクト {1} には {0} 参照がありません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoProjectsFound">
+        <source>No projects found in the solution.</source>
+        <target state="translated">ソリューション内にプロジェクトが見つかりません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PleaseSpecifyNewVersion">
+        <source>Specify new version of the package.</source>
+        <target state="translated">パッケージの新しいバージョンを指定してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PleaseSpecifyWhichPackageToUpdate">
+        <source>Specify which package to update.</source>
+        <target state="translated">更新するパッケージを指定してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NothingToUpdate">
+        <source>Nothing to update.</source>
+        <target state="translated">更新するものがありません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EverythingUpToDate">
+        <source>Everything is already up-to-date.</source>
+        <target state="translated">すべてが既に最新の状態です</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageVersionUpdatedTo">
+        <source>Version of package `{0}` updated to `{1}`.</source>
+        <target state="translated">パッケージ `{0}` のバージョンを `{1}` に更新しました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageVersionUpdated">
+        <source>Version of package `{0}` updated.</source>
+        <target state="translated">パッケージ `{0}` のバージョンを更新しました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotUpdateTheVersion">
+        <source>Could not update the version of the package `{0}`.</source>
+        <target state="translated">パッケージ `{0}` のバージョンを更新できませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCreatedSuccessfully">
+        <source>The template {0} created successfully. run "dotnet restore" to get started!</source>
+        <target state="translated">テンプレート {0} が正常に作成されました。"dotnet restore" を実行して開始します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInstalledSuccesfully">
+        <source>The template {0} installed successfully. You can use "dotnet new {0}" to get started with the new template.</source>
+        <target state="translated">テンプレート {0} が正常にインストールされました。"dotnet new {0}" を使用して、新しいテンプレートの使用を開始できます。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCreateError">
+        <source>Template {0} could not be created. Error returned was: {1}.</source>
+        <target state="translated">テンプレート {0} を作成できませんでした。次のエラーが返されました: {1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInstallError">
+        <source>Template {0} could not be installed. Error returned was: {1}.</source>
+        <target state="translated">テンプレート {0} をインストールできませんでした。次のエラーが返されました: {1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifiedNameExists">
+        <source>Specified name {0} already exists. Specify a different name.</source>
+        <target state="translated">指定した名前 {0} は既に存在します。別の名前を指定してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifiedAliasExists">
+        <source>Specified alias {0} already exists. Specify a different alias.</source>
+        <target state="translated">指定したエイリアス {0} は既に存在します。別のエイリアスを指定してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MandatoryParameterMissing">
+        <source>Mandatory parameter {0} missing for template {1}. </source>
+        <target state="translated">テンプレート {1} の必須パラメーター {0} がありません。 </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectReferenceOneOrMore">
+        <source>Project reference(s)</source>
+        <target state="translated">プロジェクト参照</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredCommandNotPassed">
+        <source>Required command was not provided.</source>
+        <target state="translated">必要なコマンドが指定されませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOneSolutionInDirectory">
+        <source>Found more than one solution file in {0}. Specify which one to use.</source>
+        <target state="translated">{0} に複数のソリューション ファイルが見つかりました。使用するファイルを指定してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionAlreadyContainsProject">
+        <source>Solution {0} already contains project {1}.</source>
+        <target state="translated">ソリューション {0} には既にプロジェクト {1} が含まれています。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentsProjectOrSolutionDescription">
+        <source>The project or solution to operation on. If a file is not specified, the current directory is searched.</source>
+        <target state="translated">操作するプロジェクトまたはソリューション。ファイルを指定しない場合、現在のディレクトリが検索されます。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFramework">
+        <source>FRAMEWORK</source>
+        <target state="translated">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectNotCompatibleWithFrameworks">
+        <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Review the project you are trying to add and verify that is compatible with the following targets:</source>
+        <target state="translated">2 つのプロジェクト間のターゲット フレームワークに互換性がないため、プロジェクト `{0}` を追加できません。追加しようとしているプロジェクトを確認し、次のターゲットと互換性があることを確認してください:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectDoesNotTargetFramework">
+        <source>Project `{0}` does not target framework `{1}`.</source>
+        <target state="translated">プロジェクト `{0}` はフレームワーク `{1}` をターゲットとしていません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCouldNotBeEvaluated">
+        <source>Project `{0}` could not be evaluated. Evaluation failed with following error:
+{1}.</source>
+        <target state="translated">プロジェクト `{0}` を評価できませんでした。評価は次のエラーにより失敗しました:
+{1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedProjectType">
+        <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Contact your SDK provider for support.</source>
+        <target state="translated">プロジェクト '{0}' のプロジェクト タイプは不明であるため、ソリューション ファイルに追加することができません。サポートが必要な場合は、SDK プロバイダーにお問い合わせください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidSolutionFormatString">
+        <source>Invalid solution `{0}`. {1}.</source>
+        <target state="translated">無効なソリューション `{0}`。{1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidProjectWithExceptionMessage">
+        <source>Invalid project `{0}`. {1}.</source>
+        <target state="translated">無効なプロジェクト `{0}`。{1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VerbosityOptionDescription">
+        <source>Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
+        <target state="translated">MSBuild の詳細レベルを設定します。使用可能な値: q[uiet]、m[inimal]、n[ormal]、d[etailed]、diag[nostic]。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdVersionSuffixDescription">
+        <source>Set the value of the $(VersionSuffix) property to use when building the project.</source>
+        <target state="translated">プロジェクトをビルドするときに使用する $(VersionSuffix) プロパティの値を設定します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShowHelpDescription">
+        <source>Show command line help.</source>
+        <target state="translated">コマンド ラインのヘルプを表示します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoRestoreDescription">
+        <source>Do not restore the project before building.</source>
+        <target state="translated">ビルドする前にプロジェクトを復元しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectRemovedFromTheSolution">
+        <source>Project `{0}` removed from the solution.</source>
+        <target state="translated">プロジェクト `{0}` がソリューションから削除されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsInvalidXml">
+        <source>Invalid XML: {0}</source>
+        <target state="translated">XML が無効です: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathLinuxNeedLogout">
+        <source>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</source>
+        <target state="translated">.NET Core SDK をインストールしたばかりなので、インストールしたツールを実行する前に、ログアウトするか、セッションを再起動する必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathOSXNeedReopen">
+        <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
+        <target state="translated">.NET Core SDK をインストールしたばかりなので、インストールしたツールを実行する前に、端末を再び開く必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathWindowsNeedReopen">
+        <source>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
+        <target state="translated">.NET Core SDK をインストールしたばかりなので、インストールしたツールを実行する前に、コマンド プロンプト ウィンドウを再び開く必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMissingCommandName">
+        <source>Tool defines a command with a missing name setting.</source>
+        <target state="translated">ツールは、名前設定がないコマンドを定義します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMissingEntryPoint">
+        <source>Command '{0}' is missing an entry point setting.</source>
+        <target state="translated">コマンド '{0}' にエントリ ポイント設定がありません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsInvalidCommandName">
+        <source>Command '{0}' contains one or more of the following invalid characters: {1}.</source>
+        <target state="translated">コマンド '{0}' には次の無効な文字が 1 つまたは複数含まれています: {1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMoreThanOneCommand">
+        <source>More than one command is defined for the tool.</source>
+        <target state="translated">ツールに対して複数のコマンドが定義されています。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsUnsupportedRunner">
+        <source>Command '{0}' uses unsupported runner '{1}'."</source>
+        <target state="translated">コマンド '{0}' はサポートされていないランナー '{1}' を使用します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPackageConflictPackageId">
+        <source>Tool '{0}' (version '{1}') is already installed.</source>
+        <target state="translated">ツール '{0}' (バージョン '{1}') は既にインストールされています。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShellShimConflict">
+        <source>Command '{0}' conflicts with an existing command from another tool.</source>
+        <target state="translated">コマンド '{0}' は、別のツールからの既存のコマンドと競合します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCreateShimForEmptyExecutablePath">
+        <source>Cannot create shell shim for an empty executable path.</source>
+        <target state="translated">空の実行可能パスにシェル shim を作成できませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCreateShimForEmptyCommand">
+        <source>Cannot create shell shim for an empty command.</source>
+        <target state="translated">空のコマンドにシェル shim を作成できませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToRetrieveToolConfiguration">
+        <source>Failed to retrieve tool configuration: {0}</source>
+        <target state="translated">ツールの構成を取得できませんでした: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathLinuxManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">ツール ディレクトリ '{0}' は現在、PATH 環境変数にありません。
+Bash を使用している場合、次のコマンドを実行してプロファイルに追加できます。
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+次のコマンドを実行して現在のセッションに追加できます。
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathWindowsManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+
+You can add the directory to the PATH by running the following command:
+
+setx PATH "%PATH%;{0}"
+</source>
+        <target state="translated">Tools ディレクトリ '{0}' は現在、PATH 環境変数に含まれていません。
+
+次のコマンドを実行して、PATH にディレクトリを追加できます:
+
+setx PATH "%PATH%;{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToCreateShellShim">
+        <source>Failed to create tool shim for command '{0}': {1}</source>
+        <target state="translated">コマンド '{0}' でツール shim を作成できませんでした: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToRemoveShellShim">
+        <source>Failed to remove tool shim for command '{0}': {1}</source>
+        <target state="translated">コマンド '{0}' でツール shim を削除できませんでした: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedSettingShimPermissions">
+        <source>Failed to set user executable permissions for shell shim: {0}</source>
+        <target state="translated">シェル shim で実行可能なユーザー アクセス許可を設定できませんでした: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToInstallToolPackage">
+        <source>Failed to install tool package '{0}': {1}</source>
+        <target state="translated">ツール パッケージ '{0}' をインストールできませんでした: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToUninstallToolPackage">
+        <source>Failed to uninstall tool package '{0}': {1}</source>
+        <target state="translated">ツール パッケージ '{0}' をアンインストールできませんでした: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnMaxWidthMustBeGreaterThanZero">
+        <source>Column maximum width must be greater than zero.</source>
+        <target state="translated">列の最大幅はゼロより大きくなければなりません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingToolEntryPointFile">
+        <source>Entry point file '{0}' for command '{1}' was not found in the package.</source>
+        <target state="translated">コマンド '{1}' のエントリ ポイント ファイル '{0}' がパッケージで見つかりませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingToolSettingsFile">
+        <source>Settings file 'DotnetToolSettings.xml' was not found in the package.</source>
+        <target state="translated">設定ファイル 'DotnetToolSettings.xml' がパッケージで見つかりませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToFindStagedToolPackage">
+        <source>Failed to find staged tool package '{0}'.</source>
+        <target state="translated">ステージング済みのツール パッケージ '{0}' が見つかりませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">
+        <source>The command name '{0}' cannot begin with a leading dot (.).</source>
+        <target state="translated">コマンド名 '{0}' の先頭にドット (.) を使用することはできません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsHigher">
+        <source>Format version is higher than supported. This tool may not be supported in this SDK version. Update your SDK.</source>
+        <target state="translated">形式のバージョンがサポートされているものを超えています。このツールはこのバージョンの SDK ではサポートされていない可能性があります。SDK を更新します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsMalformed">
+        <source>Format version is malformed. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
+        <target state="translated">形式のバージョンが無効です。このツールはこのバージョンの SDK ではサポートされていない可能性があります。ツールの作成者にお問い合わせください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsMissing">
+        <source>Format version is missing. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
+        <target state="translated">形式のバージョンが見つかりません。このツールはこのバージョンの SDK ではサポートされていない可能性があります。ツールの作成者にお問い合わせください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToSetToolsPathEnvironmentVariable">
+        <source>Failed to add '{0}' to the PATH environment variable. Add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
+        <target state="translated">'{0}' を PATH 環境変数に追加できませんでした。'dotnet tool install' でインストールしたツールを使用するには、このディレクトリを PATH に追加します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOnePackagedShimAvailable">
+        <source>More than one packaged shim is available: {0}.</source>
+        <target state="translated">複数のパッケージ化された shim が利用可能です: {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToReadNuGetLockFile">
+        <source>Failed to read NuGet LockFile for tool package '{0}': {1}</source>
+        <target state="translated">ツール パッケージ '{0}' の NuGet LockFile の読み取りに失敗しました: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectArgumentName">
+        <source>PROJECT</source>
+        <target state="translated">PROJECT</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectArgumentDescription">
+        <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
+        <target state="translated">操作するプロジェクト ファイル。ファイルを指定しない場合、コマンドによって現在のディレクトリから検索されます。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LevelArgumentName">
+        <source>LEVEL</source>
+        <target state="translated">LEVEL</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkArgumentName">
+        <source>FRAMEWORK</source>
+        <target state="translated">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeIdentifierArgumentName">
+        <source>RUNTIME_IDENTIFIER</source>
+        <target state="translated">RUNTIME_IDENTIFIER</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationArgumentName">
+        <source>CONFIGURATION</source>
+        <target state="translated">CONFIGURATION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionSuffixArgumentName">
+        <source>VERSION_SUFFIX</source>
+        <target state="translated">VERSION_SUFFIX</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionOrProjectArgumentDescription">
+        <source>The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.</source>
+        <target state="translated">利用するプロジェクト ファイルまたはソリューション ファイル。指定しない場合、コマンドは現在のディレクトリを検索します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionOrProjectArgumentName">
+        <source>PROJECT | SOLUTION</source>
+        <target state="translated">プロジェクト | ソリューション</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

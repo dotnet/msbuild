@@ -98,7 +98,7 @@ namespace Microsoft.NET.Build.Tasks
 
                         if (File.Exists(packageOverridesPath))
                         {
-                            packageConflictOverrides.Add(CreatePackageOverride(targetingPack.GetMetadata(MetadataKeys.PackageName), packageOverridesPath));
+                            packageConflictOverrides.Add(CreatePackageOverride(targetingPack.GetMetadata(MetadataKeys.NuGetPackageId), packageOverridesPath));
                         }
 
                         preferredPackages.AddRange(targetingPack.GetMetadata(MetadataKeys.PackageConflictPreferredPackages).Split(';'));
@@ -214,11 +214,11 @@ namespace Microsoft.NET.Build.Tasks
 
             reference.SetMetadata(MetadataKeys.ExternallyResolved, "true");
             reference.SetMetadata(MetadataKeys.Private, "false");
-            reference.SetMetadata(MetadataKeys.NuGetPackageId, targetingPack.GetMetadata(MetadataKeys.PackageName));
-            reference.SetMetadata(MetadataKeys.NuGetPackageVersion, targetingPack.GetMetadata(MetadataKeys.PackageVersion));
+            reference.SetMetadata(MetadataKeys.NuGetPackageId, targetingPack.GetMetadata(MetadataKeys.NuGetPackageId));
+            reference.SetMetadata(MetadataKeys.NuGetPackageVersion, targetingPack.GetMetadata(MetadataKeys.NuGetPackageVersion));
 
             reference.SetMetadata("FrameworkReferenceName", targetingPack.ItemSpec);
-            reference.SetMetadata("FrameworkReferenceVersion", targetingPack.GetMetadata(MetadataKeys.PackageVersion));
+            reference.SetMetadata("FrameworkReferenceVersion", targetingPack.GetMetadata(MetadataKeys.NuGetPackageVersion));
             
             return reference;
         }

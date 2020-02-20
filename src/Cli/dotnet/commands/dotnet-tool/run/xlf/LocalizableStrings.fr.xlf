@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="fr" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CannotFindCommandName">
+        <source>Cannot find a tool in the manifest file that has a command named '{0}'.</source>
+        <target state="translated">Outil introuvable dans le fichier manifeste comportant une commande nommée '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Run local tool.</source>
+        <target state="translated">Exécute l'outil local.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandNameArgumentDescription">
+        <source>The command name of the tool to run.</source>
+        <target state="translated">Nom de commande de l'outil à exécuter.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandNameArgumentName">
+        <source>COMMAND_NAME</source>
+        <target state="translated">COMMAND_NAME</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOneCommandName">
+        <source>Specify one command name to run.</source>
+        <target state="translated">Spécifiez un nom de commande à exécuter.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,27 @@
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</OSArchitecture>
+    <Architecture Condition=" $(Architecture) == '' ">$(OSArchitecture.ToLower())</Architecture>
+
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <IncludeAspNetCoreRuntime Condition="'$(IncludeAspNetCoreRuntime)' == ''">true</IncludeAspNetCoreRuntime>
+    <IncludeMSBuildSdkResolver Condition="'$(IncludeMSBuildSdkResolver)' == ''">true</IncludeMSBuildSdkResolver>
+
+    <HighEntropyVA>true</HighEntropyVA>
+
+    <!-- Only use asset target fallback that we set (not implicit one to net461). -->
+    <DisableImplicitAssetTargetFallback>true</DisableImplicitAssetTargetFallback>
+
+    <!-- NU1701: Disable asset target fallback warning globally since it does not work transitively on NoWarn of individual packages -->
+    <!-- Since we disabled the implict fallback to net461, this will only kick in when we have an explicit fallback and we don't need to be warned about it doing what we asked it to do. -->
+    <!-- NU5104: Disable 'A stable release of a package should not have a prerelease dependency' warning globally -->
+    <!-- The "pack" command under 'buildCrossTargeting' for 'Microsoft.DotNet.MSBuildSdkResolver' throws a "NU5104" warning/error while using a "2.1.300" stage0 SDK. For: Linux-x64, Linux-arm, and Linux-arm64 -->
+    <!-- NU5123: Disable warning for package installation path is too long. We are hitting this for some ni...map file in one of our packages. -->
+    <NoWarn>NU1701;NU5104;NU5123;NU5125;NU5105</NoWarn>
+
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
+
+    <RepositoryUrl>git://github.com/dotnet/cli</RepositoryUrl>
+  </PropertyGroup>
+</Project>

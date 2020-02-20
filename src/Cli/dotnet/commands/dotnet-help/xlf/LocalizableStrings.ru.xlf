@@ -1,0 +1,297 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ru" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="RollForwardDefinition">
+        <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
+        <target state="translated">Накат до версии платформы (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Usage">
+        <source>Usage</source>
+        <target state="translated">Использование</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Arguments">
+        <source>Arguments</source>
+        <target state="translated">Аргументы</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDefinition">
+        <source>The command to execute</source>
+        <target state="translated">Выполняемая команда</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentsDefinition">
+        <source>Arguments to pass to the command</source>
+        <target state="translated">Аргументы, передаваемые в команду</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="HostOptionsDefinition">
+        <source>Options specific to dotnet (host)</source>
+        <target state="translated">Параметры, определяемые dotnet (узлом)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionsDescription">
+        <source>Options common to all commands</source>
+        <target state="translated">Параметры, общие для всех команд</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="HelpDefinition">
+        <source>Show command line help.</source>
+        <target state="translated">Показать справку командной строки.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="HostOptions">
+        <source>Host options (passed before the command)</source>
+        <target state="translated">Параметры узла (передаваемые перед командой)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionDescription">
+        <source>Display .NET CLI Version Number</source>
+        <target state="translated">Показывать номер версии .NET CLI</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InfoDescription">
+        <source>Display .NET CLI Info</source>
+        <target state="translated">Показывать сведения о .NET CLI</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Commands">
+        <source>SDK commands</source>
+        <target state="translated">Команды SDK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NewDefinition">
+        <source>Create a new .NET project or file.</source>
+        <target state="translated">Создание нового файла или проекта .NET.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RestoreDefinition">
+        <source>Restore dependencies specified in a .NET project.</source>
+        <target state="translated">Восстановление зависимостей, указанных в проекте .NET.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildDefinition">
+        <source>Build a .NET project.</source>
+        <target state="translated">Сборка проекта .NET.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishDefinition">
+        <source>Publish a .NET project for deployment.</source>
+        <target state="translated">Публикация проекта .NET для развертывания.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunDefinition">
+        <source>Build and run a .NET project output.</source>
+        <target state="translated">Сборка и запуск проекта .NET.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TestDefinition">
+        <source>Run unit tests using the test runner specified in a .NET project.</source>
+        <target state="translated">Запуск модульных тестов с помощью средства, указанного в проекте .NET.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackDefinition">
+        <source>Create a NuGet package.</source>
+        <target state="translated">Создание пакета NuGet.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectModificationCommands">
+        <source>Project modification commands</source>
+        <target state="translated">Команды изменения проекта</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddDefinition">
+        <source>Add a package or reference to a .NET project.</source>
+        <target state="translated">Добавление пакета или ссылки в проект .NET.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RemoveDefinition">
+        <source>Remove a package or reference from a .NET project.</source>
+        <target state="translated">Удаление пакета или ссылки из проекта .NET.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AdvancedCommands">
+        <source>Advanced Commands</source>
+        <target state="translated">Дополнительные команды</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NugetDefinition">
+        <source>Provides additional NuGet commands.</source>
+        <target state="translated">Предоставление дополнительных команд NuGet.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MsBuildDefinition">
+        <source>Run Microsoft Build Engine (MSBuild) commands.</source>
+        <target state="translated">Выполнение команд Microsoft Build Engine (MSBuild).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VsTestDefinition">
+        <source>Run Microsoft Test Engine (VSTest) commands.</source>
+        <target state="translated">Выполнение команд Microsoft Test Engine (VSTest).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DiagnosticsDefinition">
+        <source>Enable diagnostic output</source>
+        <target state="translated">Включить диагностические выходные данные.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CleanDefinition">
+        <source>Clean build outputs of a .NET project.</source>
+        <target state="translated">Очистка выходных данных сборки проекта .NET.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SlnDefinition">
+        <source>Modify Visual Studio solution files.</source>
+        <target state="translated">Изменение файлов решения Visual Studio.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ListDefinition">
+        <source>List project references of a .NET project.</source>
+        <target state="translated">Вывод списка ссылок на проекты в проекте .NET.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDoesNotExist">
+        <source>Specified command '{0}' is not a valid SDK command. Specify a valid SDK command. For more information, run dotnet help.</source>
+        <target state="translated">Указанная команда "{0}" не является допустимой командой пакета SDK. Укажите допустимую. Для получения дополнительных сведений выполните команду "dotnet help".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppFullName">
+        <source>.NET CLI help utility</source>
+        <target state="translated">Вспомогательная программа .NET CLI</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Utility to get more detailed help about each of the SDK commands.</source>
+        <target state="translated">Служебная программа для получения более подробной справки по каждой из команд пакета SDK.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandArgumentName">
+        <source>COMMAND_NAME</source>
+        <target state="translated">COMMAND_NAME</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandArgumentDescription">
+        <source>The SDK command to launch online help for.</source>
+        <target state="translated">Команда пакета SDK, по которой нужно запустить интернет-справку.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PathToApplicationDefinition">
+        <source>The path to an application .dll file to execute.</source>
+        <target state="translated">Путь к DLL-файлу приложения, который необходимо выполнить.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKVersionCommandDefinition">
+        <source>Display .NET Core SDK version in use.</source>
+        <target state="translated">Отображение используемой версии пакета SDK для .NET Core.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKInfoCommandDefinition">
+        <source>Display .NET Core information.</source>
+        <target state="translated">Отображение сведений о .NET Core.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKListSdksCommandDefinition">
+        <source>Display the installed SDKs.</source>
+        <target state="translated">Отображение установленных пакетов SDK.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKListRuntimesCommandDefinition">
+        <source>Display the installed runtimes.</source>
+        <target state="translated">Отображение установленных сред выполнения.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKDiagnosticsCommandDefinition">
+        <source>Enable diagnostic output.</source>
+        <target state="translated">Включение выходных данных диагностики.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunDotnetCommandHelpForMore">
+        <source>Run 'dotnet [command] --help' for more information on a command.</source>
+        <target state="translated">Для получения дополнительных сведений о команде выполните команду "dotnet [команда] --help".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AdditionalProbingPathDefinition">
+        <source>Path containing probing policy and assemblies to probe for.</source>
+        <target state="translated">Путь к политике проверки и проверяемым сборкам.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DepsFileDefinition">
+        <source>Path to &lt;application&gt;.deps.json file.</source>
+        <target state="translated">Путь к файлу &lt;приложение&gt;.deps.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeConfigDefinition">
+        <source>Path to &lt;application&gt;.runtimeconfig.json file.</source>
+        <target state="translated">Путь к файлу &lt;приложение&gt;.runtimeconfig.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FxVersionDefinition">
+        <source>Version of the installed Shared Framework to use to run the application.</source>
+        <target state="translated">Версия установленной общей платформы, которую следует использовать для запуска приложения.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AdditionalDeps">
+        <source>Path to additional deps.json file.</source>
+        <target state="translated">Путь к дополнительному файлу deps.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="StoreDefinition">
+        <source>Store the specified assemblies in the runtime package store.</source>
+        <target state="translated">Сохранение указанных сборок в хранилище пакетов среды выполнения.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolDefinition">
+        <source>Install or manage tools that extend the .NET experience.</source>
+        <target state="translated">Установка и настройка инструментов, расширяющих возможности .NET.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildServerDefinition">
+        <source>Interact with servers started by a build.</source>
+        <target state="translated">Взаимодействие с серверами, запущенными в ходе сборки.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DevCertsDefinition">
+        <source>Create and manage development certificates.</source>
+        <target state="translated">Создание сертификатов разработки и управление ими.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SqlCacheDefinition">
+        <source>SQL Server cache command-line tools.</source>
+        <target state="translated">Инструменты командной строки кэша SQL Server.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UserSecretsDefinition">
+        <source>Manage development user secrets.</source>
+        <target state="translated">Управление развертыванием секретов пользователей.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WatchDefinition">
+        <source>Start a file watcher that runs a command when files change.</source>
+        <target state="translated">Запуск наблюдателя за файлами, который выполняет команду при изменении файлов.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AdditionalTools">
+        <source>Additional commands from bundled tools:</source>
+        <target state="translated">Дополнительные команды из входящих в пакет инструментов:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKCommandUsageDescription">
+        <source>Execute a .NET Core SDK command.</source>
+        <target state="translated">Выполнение команды пакета SDK для .NET Core.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExecutionUsageDescription">
+        <source>Execute a .NET Core application.</source>
+        <target state="translated">Запуск приложения .NET Core.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FsiDefinition">
+        <source>Start F# Interactive / execute F# scripts.</source>
+        <target state="translated">Запуск F# Interactive / выполнение скриптов F#.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

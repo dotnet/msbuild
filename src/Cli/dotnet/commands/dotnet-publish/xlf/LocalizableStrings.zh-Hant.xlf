@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppDescription">
+        <source>Publisher for the .NET Platform</source>
+        <target state="translated">.NET 平台的發行者</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="translated">不顯示啟始資訊或著作權訊息。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOption">
+        <source>FRAMEWORK</source>
+        <target state="translated">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to publish for. The target framework has to be specified in the project file.</source>
+        <target state="translated">要為其進行發行的目標架構。該架構必須在專案檔中指定。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoSelfContainedOptionDescription">
+        <source>Publish your application as a framework dependent application without the .NET Core runtime. A supported .NET Core runtime must be installed to run your application.</source>
+        <target state="translated">在不使用 .NET Core 執行階段的情況下，將您的應用程式作為架構相依應用程式發佈。必須安裝支援的 .NET Core 執行階段才能執行您的應用程式。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutputOption">
+        <source>OUTPUT_DIR</source>
+        <target state="translated">OUTPUT_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutputOptionDescription">
+        <source>The output directory to place the published artifacts in.</source>
+        <target state="translated">放置發行之成品的輸出目錄。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestOption">
+        <source>MANIFEST</source>
+        <target state="translated">資訊清單</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestOptionDescription">
+        <source>The path to a target manifest file that contains the list of packages to be excluded from the publish step.</source>
+        <target state="translated">目標資訊清單檔案的路徑，其包含要從發行步驟中排除的套件清單。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoBuildOptionDescription">
+        <source>Do not build the project before publishing. Implies --no-restore.</source>
+        <target state="translated">請勿在執行之前建置專案。提示：-no-restore。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to publish for. This is used when creating a self-contained deployment.
+The default is to publish a framework-dependent application.</source>
+        <target state="translated">要發佈至的目標執行階段。在建立獨立式部署時會使用此項目。
+預設為發佈與 Framework 相依的應用程式。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
+        <target state="translated">要為其進行發行的組態。大部分的專案預設為「偵錯」。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainAndNoSelfContainedConflict">
+        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
+        <target state="translated">'--self-contained' 與 '--no-self-contained' 選項互相衝突。請僅指定其中一個選項。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionDescription">
+        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</source>
+        <target state="translated">利用您的應用程式發佈 .NET Core 執行階段，使目標電腦不必安裝執行階段。
+如有指定執行階段識別碼，預設為 'true'。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

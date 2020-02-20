@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>List all package references of the project or solution.</source>
+        <target state="translated">프로젝트 또는 솔루션의 모든 패키지 참조를 나열합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdDeprecatedDescription">
+        <source>Lists packages that have been deprecated.</source>
+        <target state="translated">사용되지 않는 패키지를 나열합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFramework">
+        <source>FRAMEWORK | FRAMEWORK\RID</source>
+        <target state="translated">프레임워크 | FRAMEWORK\RID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFrameworkDescription">
+        <source>Chooses a framework to show its packages. Use the option multiple times for multiple frameworks.</source>
+        <target state="translated">프레임워크를 선택하여 패키지를 표시합니다. 여러 프레임워크의 경우 옵션을 여러 번 사용합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutdatedDescription">
+        <source>Lists packages that have newer versions.</source>
+        <target state="translated">최신 버전이 있는 패키지를 나열합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdTransitiveDescription">
+        <source>Lists transitive and top-level packages.</source>
+        <target state="translated">전이적 패키지 및 최상위 패키지를 나열합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoProjectsOrSolutions">
+        <source>A project or solution file could not be found in {0}. Specify a project or solution file to use.</source>
+        <target state="translated">{0}에서 프로젝트 또는 솔루션 파일을 찾을 수 없습니다. 사용할 프로젝트 또는 솔루션 파일을 지정하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdConfig">
+        <source>CONFIG_FILE</source>
+        <target state="translated">CONFIG_FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdConfigDescription">
+        <source>The path to the NuGet config file to use. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="translated">사용할 NuGet 구성 파일의 경로입니다. '--outdated' 또는 '--deprecated' 옵션이 필요합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdHighestMinorDescription">
+        <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="translated">최신 패키지를 검색할 때 주 버전 번호가 일치하는 패키지만 고려합니다. '--outdated' 또는 '--deprecated' 옵션이 필요합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdHighestPatchDescription">
+        <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="translated">최신 패키지를 검색할 때 주 버전 번호와 부 버전 번호가 일치하는 패키지만 고려합니다. '--outdated' 또는 '--deprecated' 옵션이 필요합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPrereleaseDescription">
+        <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="translated">최신 패키지를 검색할 때 시험판 버전이 있는 패키지를 고려합니다. '--outdated' 또는 '--deprecated' 옵션이 필요합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSource">
+        <source>SOURCE</source>
+        <target state="translated">SOURCE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSourceDescription">
+        <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="translated">최신 패키지를 검색할 때 사용하는 NuGet 소스입니다. '--outdated' 또는 '--deprecated' 옵션이 필요합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutdatedAndDeprecatedOptionsCannotBeCombined">
+        <source>Option '--outdated' and '--deprecated' cannot be combined.</source>
+        <target state="translated">'--outdated'와 '--deprecated' 옵션은 함께 사용할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileNotFound">
+        <source>Could not find file or directory '{0}'.</source>
+        <target state="translated">'{0}' 파일 또는 디렉터리를 찾을 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutdatedOrDeprecatedOptionOnly">
+        <source>Option '{0}' requires the '--outdated' or '--deprecated' option to be specified.</source>
+        <target state="translated">'{0}' 옵션을 사용하려면 '--outdated' 또는 '--deprecated' 옵션을 지정해야 합니다.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

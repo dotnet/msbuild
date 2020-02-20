@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Xunit.Abstractions;
 using System.Diagnostics;
 using System.Linq;
+using System;
 
 namespace Microsoft.NET.TestFramework.Commands
 {
@@ -19,6 +20,10 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public List<string> Arguments { get; set; } = new List<string>();
 
+        //  These only work via Execute(), not when using GetProcessStartInfo()
+        public Action<string> CommandOutputHandler { get; set; }
+        public Action<Process> ProcessStartedHandler { get; set; }
+
         protected TestCommand(ITestOutputHelper log)
         {
             Log = log;
@@ -29,6 +34,12 @@ namespace Microsoft.NET.TestFramework.Commands
         public TestCommand WithEnvironmentVariable(string name, string value)
         {
             _environment[name] = value;
+            return this;
+        }
+
+        public TestCommand WithWorkingDirectory(string workingDirectory)
+        {
+            WorkingDirectory = workingDirectory;
             return this;
         }
 
@@ -73,7 +84,12 @@ namespace Microsoft.NET.TestFramework.Commands
                 .CaptureStdOut()
                 .CaptureStdErr();
 
-            var result = command.Execute();
+            if (CommandOutputHandler != null)
+            {
+                command.OnOutputLine(CommandOutputHandler);
+            }
+
+            var result = ((Command)command).Execute(ProcessStartedHandler);
 
             Log.WriteLine($"> {result.StartInfo.FileName} {result.StartInfo.Arguments}");
             Log.WriteLine(result.StdOut);

@@ -1,0 +1,15 @@
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Target Name="_CustomizeXlfSourceNames"
+          DependsOnTargets="_CustomizeResourceNames"
+          BeforeTargets="PrepareResourceNames;GatherXlf"
+          >
+    <ItemGroup>
+      <XlfSource Condition="'%(XlfSource.Namespace)' != ''">
+        <ManifestResourceName>%(XlfSource.Namespace).%(XlfSource.Filename)</ManifestResourceName>
+        <XlfTranslatedFileName>%(XlfSource.Namespace).%(XlfSource.Filename)</XlfTranslatedFileName>
+      </XlfSource>
+    </ItemGroup>
+  </Target>
+
+</Project>

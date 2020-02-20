@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pl" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>.NET dependency restorer</source>
+        <target state="translated">Przywracanie zależności dla platformy .NET</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>restore for msbuild</source>
+        <target state="translated">przywracanie dla programu MSBuild</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdArgument">
+        <source>PROJECT</source>
+        <target state="translated">PROJEKT</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdArgumentDescription">
+        <source>Optional path to a project file or MSBuild arguments.</source>
+        <target state="translated">Opcjonalna ścieżka do pliku projektu lub argumentów programu MSBuild.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSourceOption">
+        <source>SOURCE</source>
+        <target state="translated">ŹRÓDŁO</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSourceOptionDescription">
+        <source>The NuGet package source to use for the restore.</source>
+        <target state="translated">Źródło pakietów NuGet do użycia na potrzeby przywracania.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPackagesOption">
+        <source>PACKAGES_DIR</source>
+        <target state="translated">KATALOG_PAKIETÓW</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPackagesOptionDescription">
+        <source>The directory to restore packages to.</source>
+        <target state="translated">Katalog, w którym zostaną przywrócone pakiety.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdDisableParallelOptionDescription">
+        <source>Prevent restoring multiple projects in parallel.</source>
+        <target state="translated">Nie zezwalaj na równoległe przywracanie wielu projektów.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdConfigFileOption">
+        <source>FILE</source>
+        <target state="translated">PLIK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdConfigFileOptionDescription">
+        <source>The NuGet configuration file to use.</source>
+        <target state="translated">Plik konfiguracji programu NuGet do użycia.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoCacheOptionDescription">
+        <source>Do not cache packages and http requests.</source>
+        <target state="translated">Nie przechowuj w pamięci podręcznej pakietów ani żądań HTTP.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdIgnoreFailedSourcesOptionDescription">
+        <source>Treat package source failures as warnings.</source>
+        <target state="translated">Traktuj niepowodzenia źródła pakietów jako ostrzeżenia.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoDependenciesOptionDescription">
+        <source>Do not restore project-to-project references and only restore the specified project.</source>
+        <target state="translated">Nie przywracaj odwołań między projektami i przywróć tylko określony projekt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdRuntimeOption">
+        <source>RUNTIME_IDENTIFIER</source>
+        <target state="translated">IDENTYFIKATOR_ŚRODOWISKA_URUCHOMIENIOWEGO</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdRuntimeOptionDescription">
+        <source>The target runtime to restore packages for.</source>
+        <target state="translated">Docelowe środowisko uruchomieniowe, dla którego mają zostać przywrócone pakiety.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdForceRestoreOptionDescription">
+        <source>Force all dependencies to be resolved even if the last restore was successful.
+This is equivalent to deleting project.assets.json.</source>
+        <target state="translated">Wymuś rozstrzygnięcie wszystkich zależności nawet w przypadku, gdy ostatnie przywracanie się powiodło.
+Jest to równoważne usunięciu pliku project.assets.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdLockedModeOptionDescription">
+        <source>Don't allow updating project lock file.</source>
+        <target state="translated">Nie zezwalaj na aktualizowanie pliku blokady projektu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdLockFilePathOption">
+        <source>LOCK_FILE_PATH</source>
+        <target state="translated">LOCK_FILE_PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdLockFilePathOptionDescription">
+        <source>Output location where project lock file is written. By default, this is 'PROJECT_ROOT\packages.lock.json'.</source>
+        <target state="translated">Lokalizacja danych wyjściowych, w której zapisywany jest plik blokady projektu. Domyślnie jest to „PROJECT_ROOT\packages.lock.json”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdReevaluateOptionDescription">
+        <source>Forces restore to reevaluate all dependencies even if a lock file already exists.</source>
+        <target state="translated">Wymusza przywrócenie w celu ponownego obliczenia wszystkich zależności, nawet jeśli plik blokady już istnieje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdUseLockFileOptionDescription">
+        <source>Enables project lock file to be generated and used with restore.</source>
+        <target state="translated">Umożliwia generowanie pliku blokady projektu i używanie go przy przywracaniu.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

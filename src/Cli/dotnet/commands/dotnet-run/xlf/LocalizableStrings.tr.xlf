@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>.NET Run Command</source>
+        <target state="translated">.NET Run Komutu</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Command used to run .NET apps</source>
+        <target state="translated">.NET uygulamalarını çalıştırmak için kullanılan komut</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionFrameworkDescription">
+        <source>Build and run the app using the specified framework. The framework has to be specified in the project file. </source>
+        <target state="translated">Uygulamayı belirtilen çerçeveyi kullanarak derleyin ve çalıştırın. Çerçevenin proje dosyasında belirtilmesi gerekir. </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionProjectDescription">
+        <source>The path to the project file to run (defaults to the current directory if there is only one project).</source>
+        <target state="translated">Çalıştırılacak proje dosyasının yolu (yalnızca bir proje varsa, geçerli dizin varsayılan olarak kullanılır).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotConvertToBoolean">
+        <source>Could not convert the value of property '{0}' to a boolean.</source>
+        <target state="translated">'{0}' özelliğinin değeri boole değerine dönüştürülemedi.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotConvertToString">
+        <source>Could not convert the value of property '{0}' to a string.</source>
+        <target state="translated">'{0}' özelliğinin değeri dizeye dönüştürülemedi.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandException">
+        <source>The build failed. Fix the build errors and run again.</source>
+        <target state="translated">Derleme başarısız oldu. Derleme hatalarını düzeltip yeniden çalıştırın.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandAdditionalArgsHelpText">
+        <source>Arguments passed to the application that is being run.</source>
+        <target state="translated">Çalıştırılan uygulamaya geçirilen bağımsız değişkenler.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionNoBuildDescription">
+        <source>Do not build the project before running. Implies --no-restore.</source>
+        <target state="translated">Çalıştırmadan önce projeyi derlemeyin. --no-restore anlamına gelir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
+        <source>Unable to run your project
+Your project targets multiple frameworks. Specify which framework to run using '{0}'.</source>
+        <target state="translated">Projeniz çalıştırılamıyor
+Projeniz birden fazla Framework'ü hedefliyor. '{0}' kullanarak hangi Framework'ün çalıştırılacağını belirtin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionUnableToRun">
+        <source>Unable to run your project.
+Ensure you have a runnable project type and ensure '{0}' supports this project.
+A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
+The current {1} is '{2}'.</source>
+        <target state="translated">Projeniz çalıştırılamıyor.
+Çalıştırılabilir bir proje türüne sahip olduğunuzdan ve bu projenin '{0}' tarafından desteklendiğinden emin olun.
+Çalıştırılabilir bir proje, çalıştırılabilir bir TFM’yi (örneğin, netcoreapp2.0) hedeflemeli ve OutputType 'Exe' dosyasına sahip olmalıdır.
+Geçerli {1}: '{2}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionNoProjects">
+        <source>Couldn't find a project to run. Ensure a project exists in {0}, or pass the path to the project using {1}.</source>
+        <target state="translated">Çalıştırılacak bir proje bulunamadı. {0} içinde bir projenin bulunduğundan emin olun veya {1} kullanarak yolu projeye geçirin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionMultipleProjects">
+        <source>Specify which project file to use because {0} contains more than one project file.</source>
+        <target state="translated">{0} birden fazla proje dosyası içerdiğinden, kullanılacak proje dosyasını belirtin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionLaunchProfileDescription">
+        <source>The name of the launch profile (if any) to use when launching the application.</source>
+        <target state="translated">Uygulama başlatılırken kullanılacak başlatma profilinin (varsa) adı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOptionNoLaunchProfileDescription">
+        <source>Do not attempt to use launchSettings.json to configure the application.</source>
+        <target state="translated">Uygulamayı yapılandırmak için launchSettings.json kullanmayı denemeyin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionCouldNotLocateALaunchSettingsFile">
+        <source>The specified launch profile could not be located.</source>
+        <target state="translated">Belirtilen başlatma profili bulunamadı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandExceptionCouldNotApplyLaunchSettings">
+        <source>The launch profile "{0}" could not be applied.
+{1}</source>
+        <target state="translated">"{0}" başlatma profili uygulanamadı.
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DefaultLaunchProfileDisplayName">
+        <source>(Default)</source>
+        <target state="translated">(Varsayılan)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsingLaunchSettingsFromMessage">
+        <source>Using launch settings from {0}...</source>
+        <target state="translated">{0} içindeki başlatma ayarları kullanılıyor...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LaunchProfileIsNotAJsonObject">
+        <source>A profile with the specified name could not be found or is not a valid JSON object.</source>
+        <target state="translated">Belirtilen isme sahip profil bulunamadı veya geçerli bir JSON nesnesi değil.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LaunchProfileHandlerCannotBeLocated">
+        <source>The launch profile type '{0}' is not supported.</source>
+        <target state="translated">'{0}' başlatma profili türü desteklenmiyor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsableLaunchProfileCannotBeLocated">
+        <source>A usable launch profile could not be located.</source>
+        <target state="translated">Kullanılabilir bir başlatma profili bulunamadı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedExceptionProcessingLaunchSettings">
+        <source>An unexpected exception occurred while processing launch settings:
+{0}</source>
+        <target state="translated">Başlatma ayarları işlenirken beklenmeyen bir özel durum oluştu:
+{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LaunchProfilesCollectionIsNotAJsonObject">
+        <source>The 'profiles' property of the launch settings document is not a JSON object.</source>
+        <target state="translated">Başlatma ayarları belgesinin 'profiles' özelliği bir JSON nesnesi değil.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DeserializationExceptionMessage">
+        <source>An error was encountered when reading launchSettings.json.
+{0}</source>
+        <target state="translated">launchSettings.json okunurken bir hatayla karşılaşıldı.
+{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunCommandSpecifiecFileIsNotAValidProject">
+        <source>'{0}' is not a valid project file.</source>
+        <target state="translated">'{0}' geçerli bir proje dosyası değil.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to run for. The default for most projects is 'Debug'.</source>
+        <target state="translated">Çalıştırılacak yapılandırma. Çoğu proje için varsayılan, ‘Hata Ayıklama’ seçeneğidir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to run for. The target framework must also be specified in the project file.</source>
+        <target state="translated">Çalıştırılacak hedef çerçeve. Hedef çerçevenin proje dosyasında da belirtilmesi gerekir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to run for.</source>
+        <target state="translated">Çalıştırılacağı hedef çalışma zamanı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ValueMustBeAnObject">
+        <source>The property '{0}' must be an object if it is specified.</source>
+        <target state="translated">'{0}' özelliği belirtilmişse bir nesne olmalıdır.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

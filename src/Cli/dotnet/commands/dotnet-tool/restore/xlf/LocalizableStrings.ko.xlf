@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CommandDescription">
+        <source>Restore tools defined in the local tool manifest.</source>
+        <target state="translated">로컬 도구 매니페스트에 정의된 도구를 복원합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidPackageWarning">
+        <source>Warning: tool package '{0}' is invalid, contact tool author:
+{1}</source>
+        <target state="translated">경고: 도구 패키지 '{0}'이(가) 잘못되었습니다. 도구 작성자에게 문의하세요.
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoToolsWereRestored">
+        <source>No tools were restored.</source>
+        <target state="translated">복원된 도구가 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdColumn">
+        <source>Package Id</source>
+        <target state="translated">패키지 ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionColumn">
+        <source>Version</source>
+        <target state="translated">버전</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandsColumn">
+        <source>Commands</source>
+        <target state="translated">명령</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionDescription">
+        <source>Add an additional NuGet package source to use during installation.</source>
+        <target state="translated">설치 중 사용할 추가 NuGet 패키지 소스를 추가합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionName">
+        <source>SOURCE</source>
+        <target state="translated">SOURCE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionDescription">
+        <source>The NuGet configuration file to use.</source>
+        <target state="translated">사용할 NuGet 구성 파일입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionName">
+        <source>FILE</source>
+        <target state="translated">FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionDescription">
+        <source>The version of the tool package to install.</source>
+        <target state="translated">설치할 도구 패키지 버전입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionName">
+        <source>VERSION</source>
+        <target state="translated">VERSION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageFailedToRestore">
+        <source>Package "{0}" failed to restore, due to {1}</source>
+        <target state="translated">{1}(으)로 인해 "{0}" 패키지를 복원하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RestoreFailed">
+        <source>Restore failed.</source>
+        <target state="translated">복원하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandsMismatch">
+        <source>The command {0} specified in the tool manifest file is not contained in the package with Package Id {1}. The commands contained in the package are {2}.</source>
+        <target state="translated">도구 매니페스트 파일에 지정된 {0} 명령이 패키지 ID가 {1}인 패키지에 포함되지 않았습니다. 패키지에 포함된 명령은 {2}입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionDescription">
+        <source>Path to the manifest file.</source>
+        <target state="translated">매니페스트 파일 경로입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RestoreSuccessful">
+        <source>Tool '{0}' (version '{1}') was restored. Available commands: {2}</source>
+        <target state="translated">'{0}' 도구(버전 '{1}')가 복원되었습니다. 사용 가능한 명령: {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalToolsRestoreWasSuccessful">
+        <source>Restore was successful.</source>
+        <target state="translated">복원했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackagesCommandNameCollisionConclusion">
+        <source>Command names conflict. Command names are case insensitive.
+{0}</source>
+        <target state="translated">명령 이름이 충돌합니다. 명령 이름은 대/소문자를 구분하지 않습니다.
+{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackagesCommandNameCollisionForOnePackage">
+        <source>A command "{0}" in package "{1}"</source>
+        <target state="translated">"{1}" 패키지의 "{0}" 명령</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RestorePartiallyFailed">
+        <source>Restore partially failed.</source>
+        <target state="translated">부분적으로 복원하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

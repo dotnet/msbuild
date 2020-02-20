@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>.NET Core NuGet Package Packer</source>
+        <target state="translated">.NET Core NuGet 패키지 패커</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>pack for msbuild</source>
+        <target state="translated">msbuild용 팩입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="translated">시작 배너 또는 저작권 메시지를 표시하지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutputDir">
+        <source>OUTPUT_DIR</source>
+        <target state="translated">OUTPUT_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutputDirDescription">
+        <source>The output directory to place built packages in.</source>
+        <target state="translated">빌드된 패키지를 배치할 출력 디렉터리입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoBuildOptionDescription">
+        <source>Do not build the project before packing. Implies --no-restore.</source>
+        <target state="translated">압축하기 전에 프로젝트를 빌드하지 않습니다. 복원 없음을 의미합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdIncludeSymbolsDescription">
+        <source>Include packages with symbols in addition to regular packages in output directory.</source>
+        <target state="translated">일반 패키지 외에 기호가 포함된 패키지를 출력 디렉터리에 포함합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdIncludeSourceDescription">
+        <source>Include PDBs and source files. Source files go into the 'src' folder in the resulting nuget package.</source>
+        <target state="translated">PDB 및 소스 파일을 포함합니다. 소스 파일이 결과 nuget 패키지의 'src' 폴더로 이동합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdServiceableDescription">
+        <source>Set the serviceable flag in the package. See https://aka.ms/nupkgservicing for more information.</source>
+        <target state="translated">패키지에서 서비스 가능 플래그를 설정합니다. 자세한 내용은 https://aka.ms/nupkgservicing을 참조하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdArgumentProject">
+        <source>PROJECT</source>
+        <target state="translated">PROJECT</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdArgumentDescription">
+        <source>The project to pack, defaults to the project file in the current directory. Can be a path to any project file</source>
+        <target state="translated">압축할 프로젝트입니다. 현재 디렉터리의 프로젝트 파일로 기본 설정됩니다. 프로젝트 파일의 경로일 수 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to use for building the package. The default for most projects is 'Debug'.</source>
+        <target state="translated">패키지 빌드에 사용할 구성입니다. 대부분의 프로젝트에서 기본값은 'Debug'입니다.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

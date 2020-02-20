@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="NoManifestGuide">
+        <source>If you intended to perform the action on a global tool, use the `--global` option for the command.</source>
+        <target state="translated">전역 도구에 대해 작업을 수행하려면 명령에 '--global' 옵션을 사용하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
+        <source>Specifying the tool manifest option (--tool-manifest) is only valid with the local option (--local or the default).</source>
+        <target state="translated">도구 매니페스트 옵션(--tool-manifest) 지정은 로컬 옵션(--local 또는 기본값)에만 유효합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SamePackageIdInOtherManifestFile">
+        <source>Warning: There are other manifest files in the directory hierarchy that will affect this local tool. The following files have not been changed:
+{0}</source>
+        <target state="translated">경고: 이 로컬 도구에 영향을 줄 수 있는 다른 매니페스트 파일이 디렉터리 계층 구조에 있습니다. 다음 파일은 변경되지 않았습니다.
+{0}</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

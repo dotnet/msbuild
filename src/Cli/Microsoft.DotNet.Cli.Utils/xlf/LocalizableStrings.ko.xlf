@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="MalformedText">
+        <source>Malformed command text '{0}'</source>
+        <target state="translated">형식이 잘못된 명령 텍스트 '{0}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToLocateDotnetMultiplexer">
+        <source>Unable to locate dotnet multiplexer</source>
+        <target state="translated">dotnet multiplexer를 찾을 수 없음</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileNotFound">
+        <source>File not found `{0}`.</source>
+        <target state="translated">'{0}' 파일을 찾을 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectNotRestoredOrRestoreFailed">
+        <source>The project may not have been restored or restore failed - run `dotnet restore`</source>
+        <target state="translated">프로젝트가 복원되지 않았거나 복원이 실패했을 수 있습니다. 'dotnet restore'를 실행하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoExecutableFoundMatchingCommand">
+        <source>Could not execute because the specified command or file was not found.
+Possible reasons for this include:
+  * You misspelled a built-in dotnet command.
+  * You intended to execute a .NET Core program, but {0} does not exist.
+  * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
+        <target state="translated">지정된 명령 또는 파일을 찾을 수 없으므로 실행할 수 없습니다.
+가능한 원인은 다음과 같습니다.
+  * 기본 제공 dotnet 명령 철자가 잘못 입력되었습니다.
+  * .NET Core 프로그램을 실행하려고 했지만, {0}이(가) 없습니다.
+  * 전역 도구를 실행하려고 했지만, 이 이름의 dotnet 접두사가 있는 실행 파일을 PATH에서 찾을 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WaitingForDebuggerToAttach">
+        <source>Waiting for debugger to attach. Press ENTER to continue</source>
+        <target state="translated">디버거가 연결될 때까지 대기하는 중입니다. 계속하려면 &lt;Enter&gt; 키를 누르세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProcessId">
+        <source>Process ID: {0}</source>
+        <target state="translated">프로세스 ID: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotAccessAssetsFile">
+        <source>Could not access assets file.</source>
+        <target state="translated">자산 파일에 액세스할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WriteLineForwarderSetPreviously">
+        <source>WriteLine forwarder set previously</source>
+        <target state="translated">WriteLine 전달자가 이전에 설정됨</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AlreadyCapturingStream">
+        <source>Already capturing stream!</source>
+        <target state="translated">이미 스트림을 캡처하는 중입니다!</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunningFileNameArguments">
+        <source>Running {0} {1}</source>
+        <target state="translated">{0} {1} 실행 중</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProcessExitedWithCode">
+        <source>&lt; {0} exited with {1} in {2} ms.</source>
+        <target state="translated">&lt; {2}ms 내에 {1}과(와) 함께 종료된 {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToInvokeMemberNameAfterCommand">
+        <source>Unable to invoke {0} after the command has been run</source>
+        <target state="translated">명령이 실행된 후 {0}을(를) 호출할 수 없음</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetSdkInfoLabel">
+        <source>.NET Core SDK (reflecting any global.json):</source>
+        <target state="translated">.NET Core SDK(global.json 반영):</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetRuntimeInfoLabel">
+        <source>Runtime Environment:</source>
+        <target state="translated">런타임 환경:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EmbedAppNameInHostAppHostHasBeenModified">
+        <source>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
+        <target state="translated">애플리케이션 이름이 기록되는 위치를 표시하는 '{1}' 예상 자리 표시자 바이트 시퀀스가 포함되지 않아서 '{0}'을(를) 애플리케이션 호스트 실행 파일로 사용할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EmbedAppNameInHostFileNameIsTooLong">
+        <source>Given file name '{0}' is longer than 1024 bytes</source>
+        <target state="translated">제공한 파일 이름 '{0}'이(가) 1024바이트보다 깁니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotFindCommandAvailableAsTool">
+        <source>Cannot find command 'dotnet {0}', run the following command to install
+
+dotnet tool install --global {1}</source>
+        <target state="translated">'dotnet {0}' 명령을 찾을 수 없습니다. 다음 명령을 실행하여
+
+dotnet 도구를 설치하세요. install --global {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotnetCliHomeUsed">
+        <source>Using home directory '{0}' set by the '{1}' environment variable.</source>
+        <target state="translated">'{1}' 환경 변수에 의해 설정되는 홈 디렉터리 '{0}'을(를) 사용합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetSdkInfo">
+        <source>.NET Core SDK</source>
+        <target state="translated">.NET Core SDK</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

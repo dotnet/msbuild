@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>.NET Test Driver</source>
+        <target state="translated">Testovací ovladač .NET</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Test Driver for the .NET Platform</source>
+        <target state="translated">Testovací ovladač pro platformu .NET</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Run test(s), without displaying Microsoft Testplatform banner</source>
+        <target state="translated">Spustit testy bez zobrazení nápisu Microsoft Testplatform</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSettingsFile">
+        <source>SETTINGS_FILE</source>
+        <target state="translated">SETTINGS_FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSettingsDescription">
+        <source>The settings file to use when running tests.</source>
+        <target state="translated">Soubor nastavení, který se má použít při spouštění testů</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdListTestsDescription">
+        <source>List the discovered tests instead of running the tests.</source>
+        <target state="translated">Místo spuštění testů vypíše seznam zjištěných testů.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdTestCaseFilterExpression">
+        <source>EXPRESSION</source>
+        <target state="translated">EXPRESSION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdTestCaseFilterDescription">
+        <source>Run tests that match the given expression.
+                                        Examples:
+                                        Run tests with priority set to 1: --filter "Priority = 1"
+                                        Run a test with the specified full name: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
+                                        Run tests that contain the specified name: --filter "FullyQualifiedName~Namespace.Class"
+                                        See https://aka.ms/vstest-filtering for more information on filtering support.
+                                        </source>
+        <target state="translated">Spustí testy, které odpovídají danému výrazu.
+                                        Příklady:
+                                        Spustí testy s prioritou nastavenou na 1: --filter "Priority = 1"
+                                        Spustí test se zadaným úplným názvem: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
+                                        Spustí testy, které obsahují zadaný název: --filter "FullyQualifiedName~Namespace.Class"
+                                        Další informace o podpoře filtrování: https://aka.ms/vstest-filtering
+                                        </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdTestAdapterPathDescription">
+        <source>The path to the custom adapters to use for the test run.</source>
+        <target state="translated">Cesta k vlastním adaptérům, které se mají použít pro testovací běh</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdLoggerOption">
+        <source>LOGGER</source>
+        <target state="translated">LOGGER</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdLoggerDescription">
+        <source>The logger to use for test results.
+                                        Examples:
+                                        Log in trx format using a unique file name: --logger trx
+                                        Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
+                                        See https://aka.ms/vstest-report for more information on logger arguments.</source>
+        <target state="translated">Protokolovací nástroj, který se má použít pro výsledky testování.
+                                        Příklady:
+                                        Protokolování ve formátu trx s jedinečným názvem souboru: --logger trx
+                                        Protokolování ve formátu trx se zadaným názvem souboru: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
+                                        Další informace o argumentech protokolovacího nástroje najdete na adrese https://aka.ms/vstest-report.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutputDir">
+        <source>OUTPUT_DIR</source>
+        <target state="translated">OUTPUT_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutputDescription">
+        <source>The output directory to place built artifacts in.</source>
+        <target state="translated">Výstupní adresář, do kterého se mají umístit sestavené artefakty</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPathToLogFile">
+        <source>LOG_FILE</source>
+        <target state="translated">LOG_FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPathTologFileDescription">
+        <source>Enable verbose logging to the specified file.</source>
+        <target state="translated">Povolí podrobné protokolování do zadaného souboru.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoBuildDescription">
+        <source>Do not build the project before testing. Implies --no-restore.</source>
+        <target state="translated">Nesestavujte projekt, dokud ho neotestujete. Implikuje možnost --no-restore.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdTestAdapterPath">
+        <source>ADAPTER_PATH</source>
+        <target state="translated">ADAPTER_PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdResultsDirectoryDescription">
+        <source>The directory where the test results will be placed.
+The specified directory will be created if it does not exist.</source>
+        <target state="translated">Adresář, do kterého se umístí výsledky testu.
+Pokud zadaný adresář neexistuje, bude vytvořen.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPathToResultsDirectory">
+        <source>RESULTS_DIR</source>
+        <target state="translated">RESULTS_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IgnoredArgumentsMessage">
+        <source>The following arguments have been ignored : "{0}"</source>
+        <target state="new">The following arguments have been ignored : "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunSettingsArgumentsDescription">
+        <source>
+
+RunSettings arguments:
+  Arguments to pass as RunSettings configurations. Arguments are specified as '[name]=[value]' pairs after "-- " (note the space after --). 
+  Use a space to separate multiple '[name]=[value]' pairs.
+  See https://aka.ms/vstest-runsettings-arguments for more information on RunSettings arguments.
+  Example: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</source>
+        <target state="translated">
+
+Argumenty RunSettings:
+ Argumenty, které se mají předat jako konfigurace RunSettings. Jsou zadané jako dvojice [název]=[hodnota] za „-- “ (pozor na mezeru za --). 
+ K oddělení více dvojic [název]=[hodnota] použijte mezeru.
+ Další informace o argumentech RunSettings: https://aka.ms/vstest-runsettings-arguments.
+ Příklad: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="cmdCollectFriendlyName">
+        <source>DATA_COLLECTOR_NAME</source>
+        <target state="translated">DATA_COLLECTOR_NAME</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="cmdCollectDescription">
+        <source>The friendly name of the data collector to use for the test run.
+                                        More info here: https://aka.ms/vstest-collect</source>
+        <target state="translated">Popisný název kolekce dat, která se má použít pro testovací běh.
+                                        Další informace: https://aka.ms/vstest-collect</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdBlameDescription">
+        <source>Run the tests in blame mode. This option is helpful in isolating a problematic test causing the test host to crash.
+Outputs a 'Sequence.xml' file in the current directory that captures the order of execution of test before the crash.</source>
+        <target state="translated">Spustí testy v režimu blame. Tato možnost je užitečná pro izolování problematického testu, který způsobuje chybové ukončení hostitele testů.
+Výstupem je soubor Sequence.xml v aktuálním adresáři, do kterého se zaznamená pořadí provádění testů před chybovým ukončením.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to run tests for. The target framework must also be specified in the project file.</source>
+        <target state="translated">Cílová architektura pro spuštění testů. Cílová architektura musí být určená také v souboru projektu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to use for running tests. The default for most projects is 'Debug'.</source>
+        <target state="translated">Konfigurace, která se má použít pro spuštění testů. Výchozí možností pro většinu projektů je Debug.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to test for.</source>
+        <target state="translated">Cílový modul runtime pro testování.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

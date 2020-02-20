@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>List all package references of the project or solution.</source>
+        <target state="translated">列出项目或解决方案的所有包引用。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdDeprecatedDescription">
+        <source>Lists packages that have been deprecated.</source>
+        <target state="translated">列出已弃用的包。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFramework">
+        <source>FRAMEWORK | FRAMEWORK\RID</source>
+        <target state="translated">框架 | FRAMEWORK\RID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFrameworkDescription">
+        <source>Chooses a framework to show its packages. Use the option multiple times for multiple frameworks.</source>
+        <target state="translated">选择一个框架来显示其包。对多个框架多次使用该选项。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutdatedDescription">
+        <source>Lists packages that have newer versions.</source>
+        <target state="translated">列出具有较新版本的包。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdTransitiveDescription">
+        <source>Lists transitive and top-level packages.</source>
+        <target state="translated">列出可传递的包和顶级包。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoProjectsOrSolutions">
+        <source>A project or solution file could not be found in {0}. Specify a project or solution file to use.</source>
+        <target state="translated">在 {0} 中找不到项目或解决方案文件。指定要使用的项目或解决方案文件。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdConfig">
+        <source>CONFIG_FILE</source>
+        <target state="translated">CONFIG_FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdConfigDescription">
+        <source>The path to the NuGet config file to use. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="translated">要使用的 NuGet 配置文件的路径。需要 "--outdated" 或 "--deprecated" 选项。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdHighestMinorDescription">
+        <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="translated">在搜索较新的包时，仅考虑具有匹配的主版本号的包。需要 "--outdated" 或 "--deprecated" 选项。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdHighestPatchDescription">
+        <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="translated">在搜索较新的包时，仅考虑具有匹配的主要和次要版本号的包。需要 "--outdated" 或 "--deprecated" 选项。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPrereleaseDescription">
+        <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="translated">在搜索较新的包时，请考虑使用具有预发行版本的包。需要 "--outdated" 或 "--deprecated" 选项。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSource">
+        <source>SOURCE</source>
+        <target state="translated">SOURCE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSourceDescription">
+        <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
+        <target state="translated">搜索较新的包时要使用的 NuGet 源。需要 "--outdated" 或 "--deprecated" 选项。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutdatedAndDeprecatedOptionsCannotBeCombined">
+        <source>Option '--outdated' and '--deprecated' cannot be combined.</source>
+        <target state="translated">不可结合使用 "--outdated" 或 "--deprecated"。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileNotFound">
+        <source>Could not find file or directory '{0}'.</source>
+        <target state="translated">找不到文件或目录“{0}”。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutdatedOrDeprecatedOptionOnly">
+        <source>Option '{0}' requires the '--outdated' or '--deprecated' option to be specified.</source>
+        <target state="translated">选项“{0}”要求指定 "--outdated" 或 "--deprecated" 选项。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

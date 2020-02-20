@@ -1,9 +1,24 @@
 <Project>
   <ItemGroup>
-    <!-- 
-      Suppresses code signing on this file because it causes a false-positive on SIGN001.
-    -->
-    <FileSignInfo Include="Microsoft.DotNet.Cli.Utils.resources.dll" CertificateName="None" />
+    <!-- Dlls from packages created for tests to consume -->
+    <FileSignInfo Include="dotnet-dependency-context-test.dll" CertificateName="None" />
+    <FileSignInfo Include="dotnet-desktop-binding-redirects.exe" CertificateName="None" />
+    <FileSignInfo Include="dotnet-fallbackfoldertool.dll" CertificateName="None" />
+    <FileSignInfo Include="dotnet-hello.dll" CertificateName="None" />
+    <FileSignInfo Include="dotnet-outputsframeworkversion-netcoreapp1.0.dll" CertificateName="None" />
+    <FileSignInfo Include="dotnet-portable-v1-prefercli.dll" CertificateName="None" />
+    <FileSignInfo Include="dotnet-portable-v1.dll" CertificateName="None" />
+    <FileSignInfo Include="dotnet-portable.dll" CertificateName="None" />
+    <FileSignInfo Include="dotnet-prefercliruntime.dll" CertificateName="None" />
+    <FileSignInfo Include="PackageWithFakeNativeDep.dll" CertificateName="None" />
+    <FileSignInfo Include="dotnet-tool-with-output-name.dll" CertificateName="None" />
+
+    <!-- Third party DLLs used by tests -->
+    <FileSignInfo Include="Castle.Core.dll" CertificateName="None" />
+    <FileSignInfo Include="Moq.dll" CertificateName="None" />
+    
+    <!-- Binary test asset -->
+    <FileSignInfo Include="testwpf.dll" CertificateName="None" />
   </ItemGroup>
 
   <!--

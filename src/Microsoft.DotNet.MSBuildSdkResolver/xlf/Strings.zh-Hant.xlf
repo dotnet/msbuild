@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.resx">
+    <body>
+      <trans-unit id="MSBuildSDKDirectoryNotFound">
+        <source>{0} not found. Check that a recent enough .NET Core SDK is installed and/or increase the version specified in global.json.</source>
+        <target state="translated">找不到 {0}。請檢查安裝版本的 .NET Core SDK 是否夠新，並 (或) 提高 global.json 中指定的版本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildSmallerThanMinimumVersion">
+        <source>Version {0} of the .NET Core SDK requires at least version {1} of MSBuild. The current available version of MSBuild is {2}. Change the .NET Core SDK specified in global.json to an older version that requires the MSBuild version currently available.</source>
+        <target state="translated">{0} 版的 .NET Core SDK 需要最低 {1} 版的 MSBuild。目前可用版本的 MSBuild 為 {2}。請將 global.json 中指定的 .NET Core SDK 變更為需要目前可用 MSBuild 版本的較舊版本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETCoreSDKSmallerThanMinimumRequestedVersion">
+        <source>Version {0} of the .NET Core SDK is smaller than the minimum version {1} requested. Check that a recent enough .NET Core SDK is installed, increase the minimum version specified in the project, or increase the version specified in global.json.</source>
+        <target state="translated">.NET Core SDK 的版本 {0} 低於要求的最低版本 {1}。請檢查安裝版本的 .NET Core SDK 是否夠新、提高專案中指定的最低版本，或提高 global.json 中指定的最低版本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETCoreSDKSmallerThanMinimumVersionRequiredByVisualStudio">
+        <source>Version {0} of the .NET Core SDK is smaller than the minimum version {1} required by Visual Studio. Check that a recent enough .NET Core SDK is installed or increase the version specified in global.json.</source>
+        <target state="translated">.NET Core SDK 的版本 {0} 低於 Visual Studio 要求的最低版本 {1}。請檢查安裝版本的 .NET Core SDK 是否夠新，或提高 global.json 中指定的版本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToLocateNETCoreSdk">
+        <source>Unable to locate the .NET Core SDK. Check that it is installed and that the version specified in global.json (if any) matches the installed version.</source>
+        <target state="translated">找不到 .NET Core SDK。請檢查是否已安裝該項目，且 global.json 中指定的版本 (如果有的話) 符合安裝的版本。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

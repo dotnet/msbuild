@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>.NET Test Driver</source>
+        <target state="translated">.NET 測試驅動程式</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Test Driver for the .NET Platform</source>
+        <target state="translated">適用於 .NET 平台的測試驅動程式</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Run test(s), without displaying Microsoft Testplatform banner</source>
+        <target state="translated">執行測試，但不顯示 Microsoft Testplatform 橫幅</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSettingsFile">
+        <source>SETTINGS_FILE</source>
+        <target state="translated">SETTINGS_FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSettingsDescription">
+        <source>The settings file to use when running tests.</source>
+        <target state="translated">執行測試時要使用的設定檔。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdListTestsDescription">
+        <source>List the discovered tests instead of running the tests.</source>
+        <target state="translated">列出探索到的測試，而非執行測試。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdTestCaseFilterExpression">
+        <source>EXPRESSION</source>
+        <target state="translated">EXPRESSION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdTestCaseFilterDescription">
+        <source>Run tests that match the given expression.
+                                        Examples:
+                                        Run tests with priority set to 1: --filter "Priority = 1"
+                                        Run a test with the specified full name: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
+                                        Run tests that contain the specified name: --filter "FullyQualifiedName~Namespace.Class"
+                                        See https://aka.ms/vstest-filtering for more information on filtering support.
+                                        </source>
+        <target state="translated">執行符合指定運算式的測試。
+                                        範例:
+                                        執行測試，而優先順序設為 1: --filter "Priority = 1"
+                                        使用指定的全名執行測試: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
+                                        執行內含指定名稱的測試: --filter "FullyQualifiedName~Namespace.Class"
+                                        如需篩選支援的詳細資訊，請參閱 https://aka.ms/vstest-filtering。
+                                        </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdTestAdapterPathDescription">
+        <source>The path to the custom adapters to use for the test run.</source>
+        <target state="translated">到達用於測試執行的自訂配接器路徑。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdLoggerOption">
+        <source>LOGGER</source>
+        <target state="translated">LOGGER</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdLoggerDescription">
+        <source>The logger to use for test results.
+                                        Examples:
+                                        Log in trx format using a unique file name: --logger trx
+                                        Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
+                                        See https://aka.ms/vstest-report for more information on logger arguments.</source>
+        <target state="translated">用於測試結果的記錄器。
+                                        範例:
+                                        使用獨特的檔案名稱登入 trx 格式: --logger trx
+                                        使用指定的檔案名稱登入 trx 格式: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
+                                        如需了解記錄器引數的詳細資訊，請參閱 https://aka.ms/vstest-report。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutputDir">
+        <source>OUTPUT_DIR</source>
+        <target state="translated">OUTPUT_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutputDescription">
+        <source>The output directory to place built artifacts in.</source>
+        <target state="translated">放置建置成品的輸出目錄。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPathToLogFile">
+        <source>LOG_FILE</source>
+        <target state="translated">LOG_FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPathTologFileDescription">
+        <source>Enable verbose logging to the specified file.</source>
+        <target state="translated">為指定的檔案啟用詳細資訊記錄。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoBuildDescription">
+        <source>Do not build the project before testing. Implies --no-restore.</source>
+        <target state="translated">請勿在測試之前建置專案。提示：-no-restore。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdTestAdapterPath">
+        <source>ADAPTER_PATH</source>
+        <target state="translated">ADAPTER_PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdResultsDirectoryDescription">
+        <source>The directory where the test results will be placed.
+The specified directory will be created if it does not exist.</source>
+        <target state="translated">將放置測試結果的目錄。
+若指定的目錄不存在，則會建立該目錄。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPathToResultsDirectory">
+        <source>RESULTS_DIR</source>
+        <target state="translated">RESULTS_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IgnoredArgumentsMessage">
+        <source>The following arguments have been ignored : "{0}"</source>
+        <target state="new">The following arguments have been ignored : "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunSettingsArgumentsDescription">
+        <source>
+
+RunSettings arguments:
+  Arguments to pass as RunSettings configurations. Arguments are specified as '[name]=[value]' pairs after "-- " (note the space after --). 
+  Use a space to separate multiple '[name]=[value]' pairs.
+  See https://aka.ms/vstest-runsettings-arguments for more information on RunSettings arguments.
+  Example: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</source>
+        <target state="translated">
+
+RunSettings 引數:
+  傳遞為 RunSettings 組態的引數。引數的指定方式為成對的 '[name]=[value]'，接在 "-- " (請注意 -- 之後的空格) 之後。
+  請使用空格隔開多個成對的 '[name]=[value]'。
+  如需 RunSettings 引數的詳細資訊，請參閱 https://aka.ms/vstest-runsettings-arguments。
+  範例: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="cmdCollectFriendlyName">
+        <source>DATA_COLLECTOR_NAME</source>
+        <target state="translated">DATA_COLLECTOR_NAME</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="cmdCollectDescription">
+        <source>The friendly name of the data collector to use for the test run.
+                                        More info here: https://aka.ms/vstest-collect</source>
+        <target state="translated">用於測試執行的資料收集器之易記名稱。
+                                        此處提供詳細資訊: https://aka.ms/vstest-collect</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdBlameDescription">
+        <source>Run the tests in blame mode. This option is helpful in isolating a problematic test causing the test host to crash.
+Outputs a 'Sequence.xml' file in the current directory that captures the order of execution of test before the crash.</source>
+        <target state="translated">以 Blame 模式執行測試。此選項有助於釐清造成測試主機損毀的出錯測試。
+其會在目前的目錄 (擷取損毀前執行測試的順序) 中輸出 'Sequence.xml' 檔案。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to run tests for. The target framework must also be specified in the project file.</source>
+        <target state="translated">要為其執行測試的目標架構。該目標架構必須在專案檔中指定。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to use for running tests. The default for most projects is 'Debug'.</source>
+        <target state="translated">要用於執行測試的組態。大部分的專案預設為「偵錯」。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to test for.</source>
+        <target state="translated">要測試的目標執行時間。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

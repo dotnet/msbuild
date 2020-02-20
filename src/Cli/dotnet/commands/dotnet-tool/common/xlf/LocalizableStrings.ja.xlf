@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="NoManifestGuide">
+        <source>If you intended to perform the action on a global tool, use the `--global` option for the command.</source>
+        <target state="translated">グローバル ツールでアクションを実行する場合は、コマンドで `--global` オプションを使用してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
+        <source>Specifying the tool manifest option (--tool-manifest) is only valid with the local option (--local or the default).</source>
+        <target state="translated">ツール マニフェスト オプション (--tool-manifest) の指定は、ローカル オプション (--local または既定) でのみ有効です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SamePackageIdInOtherManifestFile">
+        <source>Warning: There are other manifest files in the directory hierarchy that will affect this local tool. The following files have not been changed:
+{0}</source>
+        <target state="translated">警告: このローカル ツールに影響を与えるその他のマニフェスト ファイルがディレクトリ階層内に存在します。次のファイルは変更されていません:
+{0}</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

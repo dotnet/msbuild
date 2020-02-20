@@ -1,18 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
-
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-  </PropertyGroup>
-
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
     <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
   </PropertyGroup>
 
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>$(SdkTargetFramework)</TargetFramework>
+  </PropertyGroup>
 
   <PropertyGroup>
     <!-- Strip the '-parallel none' flag here -->
@@ -22,17 +21,12 @@
 
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
-    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="$(MicrosoftDotNetCliUtilsVersion)" />
     <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelVersion)" />
     <PackageReference Include="NuGet.LibraryModel" Version="$(NuGetProjectModelVersion)" />
     <PackageReference Include="NuGet.Versioning" Version="$(NuGetProjectModelVersion)" />
     <PackageReference Include="NuGet.Configuration" Version="$(NuGetProjectModelVersion)" />
     <PackageReference Include="NuGet.Frameworks" Version="$(NuGetProjectModelVersion)" />
     <PackageReference Include="NuGet.Common" Version="$(NuGetProjectModelVersion)" />
-
-    <!-- Referenced explicitly here because Microsoft.DotNet.Cli.Utils references a lower version at the moment, which causes
-         RAR conflicts (though ideally I would think NuGet would resolve this) -->
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelVersion)" />
   </ItemGroup>
 
   <ItemGroup>

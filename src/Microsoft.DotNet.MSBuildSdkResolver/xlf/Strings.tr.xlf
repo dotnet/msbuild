@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="tr" original="../Strings.resx">
+    <body>
+      <trans-unit id="MSBuildSDKDirectoryNotFound">
+        <source>{0} not found. Check that a recent enough .NET Core SDK is installed and/or increase the version specified in global.json.</source>
+        <target state="translated">{0} bulunamadı. Yeterince yeni bir .NET Core SDK'sının yüklü olduğundan emin olun ve/veya global.json içinde belirtilen sürümü artırın.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildSmallerThanMinimumVersion">
+        <source>Version {0} of the .NET Core SDK requires at least version {1} of MSBuild. The current available version of MSBuild is {2}. Change the .NET Core SDK specified in global.json to an older version that requires the MSBuild version currently available.</source>
+        <target state="translated">.NET Core SDK'sının {0} sürümü en az MSBuild {1} sürümünü gerektirir. Geçerli kullanılabilir MSBuild sürümü {2}. Global.json içinde belirtilen .NET Core SDK'sını geçerli kullanılabilir MSBuild sürümünü gerektiren daha eski bir sürüme değiştirin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETCoreSDKSmallerThanMinimumRequestedVersion">
+        <source>Version {0} of the .NET Core SDK is smaller than the minimum version {1} requested. Check that a recent enough .NET Core SDK is installed, increase the minimum version specified in the project, or increase the version specified in global.json.</source>
+        <target state="translated">.NET Core SDK'sının {0} sürümü, istenen en düşük {1} sürümünden daha düşük. Yeterince yeni bir .NET Core SDK'sının yüklü olduğundan emin olun, projede belirtilen en düşük sürümü artırın veya global.json içinde belirtilen sürümü artırın.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETCoreSDKSmallerThanMinimumVersionRequiredByVisualStudio">
+        <source>Version {0} of the .NET Core SDK is smaller than the minimum version {1} required by Visual Studio. Check that a recent enough .NET Core SDK is installed or increase the version specified in global.json.</source>
+        <target state="translated">.NET Core SDK'sının {0} sürümü, Visual Studio için gereken {1} sürümünden daha düşük. Yeterince yeni bir .NET Core SDK'sının yüklü olduğundan emin olun veya global.json içinde belirtilen sürümü yükseltin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToLocateNETCoreSdk">
+        <source>Unable to locate the .NET Core SDK. Check that it is installed and that the version specified in global.json (if any) matches the installed version.</source>
+        <target state="translated">.NET Core SDK'sı bulunamadı. Yüklü olduğundan ve (varsa) global.json içinde belirtilen sürümün yüklü sürümle eşleştiğinden emin olun.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

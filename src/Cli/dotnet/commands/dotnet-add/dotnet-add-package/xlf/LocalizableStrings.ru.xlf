@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ru" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>Add a NuGet package reference to the project.</source>
+        <target state="translated">Добавление в проект ссылки на пакет NuGet.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Command to add package reference</source>
+        <target state="translated">Команда добавления ссылки на пакет</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageReference">
+        <source>Specify one package reference to add.</source>
+        <target state="translated">Укажите одну добавляемую ссылку на пакет.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFrameworkDescription">
+        <source>Add the reference only when targeting a specific framework.</source>
+        <target state="translated">Добавление ссылки только для конкретной целевой платформы.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoRestoreDescription">
+        <source>Add the reference without performing restore preview and compatibility check.</source>
+        <target state="translated">Добавление ссылки без предварительной проверки восстановления и совместимости.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSourceDescription">
+        <source>The NuGet package source to use during the restore.</source>
+        <target state="translated">Источник пакетов NuGet, используемый во время восстановления.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPackageDirectoryDescription">
+        <source>The directory to restore packages to.</source>
+        <target state="translated">Каталог, в который будут восстановлены пакеты.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdVersionDescription">
+        <source>The version of the package to add.</source>
+        <target state="translated">Версия добавляемого пакета.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdDGFileException">
+        <source>Unable to create dependency graph file for project '{0}'. Cannot add package reference.</source>
+        <target state="translated">Не удалось создать файл графа зависимостей для проекта "{0}". Невозможно добавить ссылку на пакет.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdVersion">
+        <source>VERSION</source>
+        <target state="translated">VERSION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFramework">
+        <source>FRAMEWORK</source>
+        <target state="translated">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSource">
+        <source>SOURCE</source>
+        <target state="translated">SOURCE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPackageDirectory">
+        <source>PACKAGE_DIR</source>
+        <target state="translated">PACKAGE_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPackageDescription">
+        <source>The package reference to add.</source>
+        <target state="translated">Добавляемая ссылка на пакет.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPackage">
+        <source>PACKAGE_NAME</source>
+        <target state="translated">PACKAGE_NAME</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdDGFileIOException">
+        <source>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Clear the temp directory and try again.</source>
+        <target state="translated">Не удалось создать временный файл для проекта "{0}". Невозможно добавить ссылку на пакет. Очистите временный каталог и повторите попытку.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="MalformedText">
+        <source>Malformed command text '{0}'</source>
+        <target state="translated">無効な形式のコマンド テキスト '{0}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToLocateDotnetMultiplexer">
+        <source>Unable to locate dotnet multiplexer</source>
+        <target state="translated">dotnet マルチプレクサーが見つかりません</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileNotFound">
+        <source>File not found `{0}`.</source>
+        <target state="translated">ファイルが見つかりません: `{0}`。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectNotRestoredOrRestoreFailed">
+        <source>The project may not have been restored or restore failed - run `dotnet restore`</source>
+        <target state="translated">プロジェクトが復元されていないか、復元に失敗した可能性があります。`dotnet restore` を実行します</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoExecutableFoundMatchingCommand">
+        <source>Could not execute because the specified command or file was not found.
+Possible reasons for this include:
+  * You misspelled a built-in dotnet command.
+  * You intended to execute a .NET Core program, but {0} does not exist.
+  * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
+        <target state="translated">指定されたコマンドまたはファイルが見つからなかったため、実行できませんでした。
+次のような原因が考えられます:
+  * 組み込みの dotnet コマンドのスペルが間違っている。
+  * .NET Core プログラムを実行しようとしたが、{0} が存在しない。
+  * グローバル ツールを実行しようとしたが、プレフィックスとして dotnet が付いたこの名前の実行可能ファイルが PATH に見つからなかった。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WaitingForDebuggerToAttach">
+        <source>Waiting for debugger to attach. Press ENTER to continue</source>
+        <target state="translated">デバッガーのアタッチを待っています。続行するには、ENTER キーを押してください</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProcessId">
+        <source>Process ID: {0}</source>
+        <target state="translated">プロセス ID: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotAccessAssetsFile">
+        <source>Could not access assets file.</source>
+        <target state="translated">資産ファイルにアクセスできませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WriteLineForwarderSetPreviously">
+        <source>WriteLine forwarder set previously</source>
+        <target state="translated">以前に設定した WriteLine フォワーダー</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AlreadyCapturingStream">
+        <source>Already capturing stream!</source>
+        <target state="translated">既にストリームをキャプチャ中です!</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunningFileNameArguments">
+        <source>Running {0} {1}</source>
+        <target state="translated">{0} {1} を実行しています</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProcessExitedWithCode">
+        <source>&lt; {0} exited with {1} in {2} ms.</source>
+        <target state="translated">&lt; {0} は {2} ミリ秒で {1} により終了しました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToInvokeMemberNameAfterCommand">
+        <source>Unable to invoke {0} after the command has been run</source>
+        <target state="translated">コマンドの実行後、{0} を呼び出せません</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetSdkInfoLabel">
+        <source>.NET Core SDK (reflecting any global.json):</source>
+        <target state="translated">.NET Core SDK (global.json を反映):</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetRuntimeInfoLabel">
+        <source>Runtime Environment:</source>
+        <target state="translated">ランタイム環境:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EmbedAppNameInHostAppHostHasBeenModified">
+        <source>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
+        <target state="translated">'{0}' は、本来アプリケーション名が書き込まれる場所を示す、必要なプレースホルダー バイト シーケンス '{1}' が含まれていないため、実行可能アプリケーション ホストとして使用できません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EmbedAppNameInHostFileNameIsTooLong">
+        <source>Given file name '{0}' is longer than 1024 bytes</source>
+        <target state="translated">指定されたファイル名 '{0}' が 1024 バイトを超えています。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotFindCommandAvailableAsTool">
+        <source>Cannot find command 'dotnet {0}', run the following command to install
+
+dotnet tool install --global {1}</source>
+        <target state="translated">コマンド 'dotnet {0}' が見つかりませんでした。
+
+dotnet tool install --global {1} コマンドを実行してインストールしてください</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotnetCliHomeUsed">
+        <source>Using home directory '{0}' set by the '{1}' environment variable.</source>
+        <target state="translated">'{1}' 環境変数で設定したルート ディレクトリ '{0}' を使用しています。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetSdkInfo">
+        <source>.NET Core SDK</source>
+        <target state="translated">.NET Core SDK</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

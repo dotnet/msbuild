@@ -1,0 +1,192 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="translated">一次只能有一個本機選項 (--local)、全域選項 (--global)、工具路徑選項 (--tool-path)。請僅指定其中一個選項: {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallationSucceeded">
+        <source>You can invoke the tool using the following command: {0}
+Tool '{1}' (version '{2}') was successfully installed.</source>
+        <target state="translated">您可以使用下列命令來叫用工具: {0}
+已成功安裝工具 '{1}' ('{2}' 版)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalOptionDescription">
+        <source>Install the tool and add to the local tool manifest (default).</source>
+        <target state="translated">安裝工具，並將其新增至本機工具資訊清單 (預設)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalOptionDoesNotSupportFrameworkOption">
+        <source>The local option(--local) does not support the framework option (--framework).</source>
+        <target state="translated">本機選項 (--local) 並不支援架構選項 (-framework)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalToolInstallationSucceeded">
+        <source>You can invoke the tool from this directory using the following commands: 'dotnet tool run {0}' or 'dotnet {0}'.
+Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</source>
+        <target state="translated">您可使用下列命令，從此目錄叫用工具: 'dotnet tool run {0}' 或 'dotnet {0}'。
+已成功安裝工具 '{1}' (版本 '{2}')。項目已新增至資訊清單檔 {3}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionDescription">
+        <source>Path to the manifest file.</source>
+        <target state="translated">資訊清單檔的路徑。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoManifestGuide">
+        <source>If you intended to install a global tool, add `--global` to the command.
+If you would like to create a manifest, use `dotnet new tool-manifest`, usually in the repo root directory.</source>
+        <target state="translated">若預計要安裝全域工具，請為命令新增 '--global'。
+若希望建立資訊清單，請使用 'dotnet new tool-manifest'，通常位於存放庫根目錄中。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentDescription">
+        <source>The NuGet Package Id of the tool to install.</source>
+        <target state="translated">要安裝之工具的 NuGet 套件識別碼。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Install global or local tool. Local tools are added to manifest and restored.</source>
+        <target state="translated">安裝全域或本機工具。本機工具會新增至資訊清單，並會還原。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionDescription">
+        <source>The NuGet configuration file to use.</source>
+        <target state="translated">要使用的 NuGet 組態檔。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to install the tool for.</source>
+        <target state="translated">要為工具安裝的目標 Framework。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionDescription">
+        <source>The version of the tool package to install.</source>
+        <target state="translated">要安裝之工具套件的版本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentName">
+        <source>PACKAGE_ID</source>
+        <target state="translated">PACKAGE_ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageId">
+        <source>Specify one tool Package Id to install.</source>
+        <target state="translated">請指定一個要安裝的工具套件識別碼。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalOptionDescription">
+        <source>Install the tool for the current user.</source>
+        <target state="translated">為目前的使用者安裝工具。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallFullCommandNameLocalized">
+        <source>.NET Install Command</source>
+        <target state="translated">.NET 安裝命令</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidToolConfiguration">
+        <source>The settings file in the tool's NuGet package is invalid: {0}</source>
+        <target state="translated">工具之 NuGet 套件中的設定檔案無效: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailedContactAuthor">
+        <source>Tool '{0}' failed to install. Contact the tool author for assistance.</source>
+        <target state="translated">無法安裝工具 '{0}'。請連絡工具作者尋求協助。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolAlreadyInstalled">
+        <source>Tool '{0}' is already installed.</source>
+        <target state="translated">工具 '{0}' 已安裝。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToCreateToolShim">
+        <source>Failed to create shell shim for tool '{0}': {1}</source>
+        <target state="translated">無法為工具 '{0}' 建立殼層填充碼: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NuGetConfigurationFileDoesNotExist">
+        <source>NuGet configuration file '{0}' does not exist.</source>
+        <target state="translated">NuGet 組態檔 '{0}' 不存在。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationRestoreFailed">
+        <source>The tool package could not be restored.</source>
+        <target state="translated">此工具套件無法還原。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidNuGetVersionRange">
+        <source>Specified version '{0}' is not a valid NuGet version range.</source>
+        <target state="translated">指定的版本 '{0}' 不是有效的 NuGet 版本範圍。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailed">
+        <source>Tool '{0}' failed to install.</source>
+        <target state="translated">工具 '{0}' 無法安裝。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailedWithRestoreGuidance">
+        <source>Tool '{0}' failed to install. This failure may have been caused by:
+
+* You are attempting to install a preview release and did not use the --version option to specify the version.
+* A package by this name was found, but it was not a .NET Core tool.
+* The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
+* You mistyped the name of the tool.
+
+For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</source>
+        <target state="translated">工具 '{0}' 無法安裝。此失敗的原因可能是:
+
+* 您嘗試要安裝預覽版本，但未使用 --version 選項來指定版本。
+* 找到此名稱的套件，但其並非 .NET Core 工具。
+* 無法存取必要的 NuGet 摘要，可能是網際網路連線問題所致。
+* 您打錯了工具的名稱。
+
+如需詳細原因，包括套件命名強制，請前往 https://aka.ms/failure-installing-tool</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionDescription">
+        <source>Add an additional NuGet package source to use during installation.</source>
+        <target state="translated">新增於安裝期間要使用的額外 NuGet 套件來源。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionName">
+        <source>SOURCE</source>
+        <target state="translated">SOURCE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionName">
+        <source>VERSION</source>
+        <target state="translated">VERSION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionName">
+        <source>FILE</source>
+        <target state="translated">FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionName">
+        <source>FRAMEWORK</source>
+        <target state="translated">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionDescription">
+        <source>The directory where the tool will be installed. The directory will be created if it does not exist.</source>
+        <target state="translated">安裝工具所在的目錄。若該目錄不存在，則會建立該目錄。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

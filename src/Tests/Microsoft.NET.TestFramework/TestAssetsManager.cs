@@ -13,7 +13,7 @@ namespace Microsoft.NET.TestFramework
 {
     public class TestAssetsManager
     {
-        public string ProjectsRoot { get; private set; }
+        public string TestAssetsRoot { get; private set; }
 
         private List<String> TestDestinationDirectories { get; } = new List<string>();
 
@@ -26,15 +26,16 @@ namespace Microsoft.NET.TestFramework
                 throw new DirectoryNotFoundException($"Directory not found: '{testAssetsDirectory}'");
             }
 
-            ProjectsRoot = testAssetsDirectory;
+            TestAssetsRoot = testAssetsDirectory;
         }
 
         public TestAsset CopyTestAsset(
             string testProjectName,
             [CallerMemberName] string callingMethod = "",
-            string identifier = "")
+            string identifier = "",
+            string testAssetSubdirectory = "")
         {
-            var testProjectDirectory = GetAndValidateTestProjectDirectory(testProjectName);
+            var testProjectDirectory = GetAndValidateTestProjectDirectory(testProjectName, testAssetSubdirectory);
 
             var testDestinationDirectory =
                 GetTestDestinationDirectoryPath(testProjectName, callingMethod, identifier);
@@ -66,7 +67,7 @@ namespace Microsoft.NET.TestFramework
                 var project = projectStack.Pop();
                 if (!createdProjects.Contains(project))
                 {
-                    project.Create(testAsset, ProjectsRoot, targetExtension);
+                    project.Create(testAsset, TestAssetsRoot, targetExtension);
                     createdProjects.Add(project);
 
                     foreach (var referencedProject in project.ReferencedProjects)
@@ -85,13 +86,17 @@ namespace Microsoft.NET.TestFramework
             return new TestDirectory(dir, TestContext.Current.SdkVersion);
         }
 
-        public string GetAndValidateTestProjectDirectory(string testProjectName)
+        public string GetAndValidateTestProjectDirectory(string testProjectName, string testAssetSubdirectory = "")
         {
-            string testProjectDirectory = Path.Combine(ProjectsRoot, testProjectName);
+            if (string.IsNullOrEmpty(testAssetSubdirectory))
+            {
+                testAssetSubdirectory = "TestProjects";
+            }
+            string testProjectDirectory = Path.Combine(TestAssetsRoot, testAssetSubdirectory, testProjectName);
 
             if (!Directory.Exists(testProjectDirectory))
             {
-                throw new DirectoryNotFoundException($"Cannot find '{testProjectName}' at '{ProjectsRoot}'");
+                throw new DirectoryNotFoundException($"Cannot find test project directory '{testProjectDirectory}'");
             }
 
             return testProjectDirectory;

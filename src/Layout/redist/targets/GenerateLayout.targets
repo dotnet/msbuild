@@ -1,0 +1,289 @@
+<Project>
+  <Target Name="PublishVersionFile"
+          BeforeTargets="Build">
+
+    <WriteLinesToFile File="$(OutputPath)/.toolsetversion"
+                      Lines="$(GitCommitHash);$(Version);$(Rid)"
+                      Overwrite="true" />
+    
+    <!-- The .version file in the final product will be the .NET Core SDK version.  But
+         for the layout we produce here, use the toolset information, so that we don't
+         just always use the stage 0 version. -->
+    <WriteLinesToFile File="$(OutputPath)/.version"
+                      Lines="$(GitCommitHash);$(Version);$(Rid)"
+                      Overwrite="true" />
+  </Target>
+
+  <Target Name="PublishRoslyn"
+          BeforeTargets="Build">
+    <PropertyGroup>
+      <RoslynDirectory>$(OutputPath)/Roslyn</RoslynDirectory>
+    </PropertyGroup>
+    <ItemGroup>
+      <RoslynBits Include="$(NuGetPackageRoot)/microsoft.netcore.compilers/$(MicrosoftNETCoreCompilersPackageVersion)/tools/**/*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(RoslynBits)" DestinationFiles="@(RoslynBits->'$(RoslynDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <ItemGroup>
+      <RoslynFrameworkAssemblies Include="$(RoslynDirectory)/System.*.dll;$(RoslynDirectory)/runtimes/**/System.*.dll" Exclude="$(RoslynDirectory)/runtimes/**/System.IO.Pipes.AccessControl.dll"/>
+    </ItemGroup>
+    <Delete Files="@(RoslynFrameworkAssemblies)" />
+  </Target>
+
+  <Target Name="PublishMSBuildExtensions"
+          DependsOnTargets="GenerateMSBuildExtensions"
+          BeforeTargets="Build">
+    <Copy SourceFiles="@(MSBuildExtensionsContent)"
+          DestinationFiles="@(MSBuildExtensionsContent->'$(OutputPath)\%(DeploymentSubpath)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    
+  </Target>
+
+  <Target Name="PublishNetSdk"
+          BeforeTargets="Build">
+    <PropertyGroup>
+      <NETSdkSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk</NETSdkSourceRoot>
+    </PropertyGroup>
+    <ItemGroup>
+      <NETSdkContent Include="$(NETSdkSourceRoot)\**\*.*" 
+                     DeploymentSubPath="Sdks\Microsoft.NET.Sdk"/>
+    </ItemGroup>
+    <Copy SourceFiles="@(NETSdkContent)"
+      DestinationFiles="@(NETSdkContent->'$(OutputPath)\%(DeploymentSubpath)\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+
+  </Target>
+
+  <Target Name="PublishTestCli"
+          BeforeTargets="Build">
+    <PropertyGroup>
+      <TestCliNuGetDirectory>$(NuGetPackageRoot)/microsoft.testplatform.cli/$(MicrosoftTestPlatformCLIPackageVersion)/contentFiles/any/netcoreapp2.1/</TestCliNuGetDirectory>
+    </PropertyGroup>
+    <ItemGroup>
+      <!-- https://github.com/microsoft/vstest/issues/1886 -->
+      <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)NewtonSoft.Json.dll" />
+      <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)Microsoft.DotNet.PlatformAbstractions.dll" />
+      <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)Microsoft.Extensions.DependencyModel.dll" />
+      <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)System.Memory.dll" />
+      <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)System.Runtime.CompilerServices.Unsafe.dll" />
+      <TestCliBitsToExclude Include="$(TestCliNuGetDirectory)NuGet.Frameworks.dll" />
+      <TestCliBits Include="$(TestCliNuGetDirectory)**/*"
+                   Exclude="@(TestCliBitsToExclude)" />
+    </ItemGroup>
+    <Copy SourceFiles="@(TestCliBits)" DestinationFiles="@(TestCliBits->'$(OutputPath)/%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="PublishFSharp"
+          BeforeTargets="Build">
+    <MSBuild
+      Targets="Publish"
+      Projects="$(RepoRoot)/src/Layout/tool_fsharp/tool_fsc.csproj"
+      Properties="Configuration=$(Configuration);PublishDir=$(OutputPath)/FSharp" />
+  </Target>
+
+  <Target Name="GenerateCliRuntimeConfigurationFiles"
+          AfterTargets="Build">
+    <RemoveAssetFromDepsPackages DepsFile="$(OutputPath)/$(TargetName).deps.json"
+                                 SectionName="runtime"
+                                 AssetPath="%(BundledToolProjects.Identity).dll" />
+
+    <Copy SourceFiles="$(OutputPath)/$(TargetName).deps.json"
+          DestinationFiles="$(OutputPath)/%(BundledTools.Identity).deps.json" />
+
+    <Copy SourceFiles="$(OutputPath)/$(TargetName).runtimeconfig.json"
+          DestinationFiles="$(OutputPath)/%(BundledTools.Identity).runtimeconfig.json" />
+
+    <Delete Files="$(OutputPath)/$(TargetName).deps.json;
+                   $(OutputPath)/$(TargetName).runtimeconfig.json;
+                   $(OutputPath)/%(BundledToolProjects.Identity).dll;
+                   $(OutputPath)/%(BundledToolProjects.Identity).pdb" />
+
+    <ChangeEntryPointLibraryName
+          DepsFile="$(OutputPath)/%(BundledTools.Identity).deps.json"
+          NewName="%(BundledTools.Identity).deps.json" />
+  </Target>
+
+  <Target Name="MakeFscRunnableAndMoveToPublishDir"
+          AfterTargets="Build"
+          BeforeTargets="RemoveFilesAfterPublish">
+
+    <PropertyGroup>
+      <FSharpDirectory>$(OutputPath)/FSharp</FSharpDirectory>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <AssetsToRemoveFromDeps Include="tool_fsc.dll"
+                              SectionName="runtime"/>
+    </ItemGroup>
+
+    <RemoveAssetFromDepsPackages DepsFile="$(FSharpDirectory)/tool_fsc.deps.json"
+                                 SectionName="%(AssetsToRemoveFromDeps.SectionName)"
+                                 AssetPath="%(AssetsToRemoveFromDeps.Identity)" />
+
+    <!-- Deploy deps and runtime config for fsc.exe and fsi.exe.  Both apps have exactly the same dependencies so this is Ok -->
+    <Copy SourceFiles="$(FSharpDirectory)/tool_fsc.runtimeconfig.json;
+                       $(FSharpDirectory)/tool_fsc.deps.json;"
+          DestinationFiles="$(FSharpDirectory)/fsc.runtimeconfig.json;
+                            $(FSharpDirectory)/fsc.deps.json;"/>
+    <Copy SourceFiles="$(FSharpDirectory)/tool_fsc.runtimeconfig.json;
+                       $(FSharpDirectory)/tool_fsc.deps.json;"
+          DestinationFiles="$(FSharpDirectory)/fsi.runtimeconfig.json;
+                            $(FSharpDirectory)/fsi.deps.json;"/>
+  </Target>
+
+  <Target Name="RemoveFscFilesAfterPublish"
+          AfterTargets="Build">
+    <Delete Files="$(FSharpDirectory)/tool_fsc.dll" />
+    <Delete Files="$(FSharpDirectory)/tool_fsc.pdb" />
+    <Delete Files="$(FSharpDirectory)/tool_fsc.runtimeconfig.json" />
+    <Delete Files="$(FSharpDirectory)/tool_fsc.deps.json" />
+  </Target>
+
+  <Target Name="PublishTargetExtensions"
+          AfterTargets="Build"
+          BeforeTargets="GenerateCliRuntimeConfigurationFiles">
+      <PropertyGroup>
+        <MSBuildTargetsDirectory>$(OutputPath)runtimes/any/native</MSBuildTargetsDirectory>
+      </PropertyGroup>
+
+      <ItemGroup>
+        <NuPkgContentForMSBuildExtensions Include="
+          $(MSBuildTargetsDirectory)/**/*.targets;
+          $(MSBuildTargetsDirectory)/**/*.props;
+          $(MSBuildTargetsDirectory)/**/*.overridetasks;
+          $(MSBuildTargetsDirectory)/**/*.tasks" />
+
+        <NuPkgContentForMSBuildExtensionsRelativePaths Include="@(NuPkgContentForMSBuildExtensions->'runtimes/any/native/%(RecursiveDir)%(Filename)%(Extension)')" />
+      </ItemGroup>
+
+      <Copy SourceFiles="@(NuPkgContentForMSBuildExtensions)"
+            DestinationFiles="@(NuPkgContentForMSBuildExtensions->'$(OutputPath)/%(RecursiveDir)%(Filename)%(Extension)')" />
+
+      <RemoveAssetFromDepsPackages DepsFile="$(OutputPath)/$(TargetName).deps.json"
+                                   SectionName="runtimeTargets"
+                                   AssetPath="%(NuPkgContentForMSBuildExtensionsRelativePaths.Identity)" />
+  </Target>
+
+  <!-- The msdia140typelib_clr0200.dll file is not MIT licensed (and it only used on Windows). Remove it, so
+       we can MIT license the published dotnet -->
+  <Target Name="RemoveMSDiaTypeLib"
+          AfterTargets="Build"
+          Condition="'$(OSName)' != 'win'">
+    <Delete Files="$(OutputPath)/TestHost/msdia140typelib_clr0200.dll" />
+  </Target>
+
+  <Target Name="PublishSdks"
+          AfterTargets="Build">
+    <ItemGroup>
+      <SdksToBundle Include="targets\RestoreDependency.proj">
+        <Properties>
+          NuGetPackageRoot=$(NuGetPackageRoot);
+          SdkLayoutDirectory=$(OutputPath)/Sdks/%(BundledSdk.Identity);
+          DependencyPackageName=%(BundledSdk.Identity);
+          DependencyPackageVersion=%(BundledSdk.Version);
+          PreviousStageDirectory=$(PreviousStageDirectory)
+        </Properties>
+      </SdksToBundle>
+    </ItemGroup>
+
+    <MSBuild
+      BuildInParallel="False"
+      Projects="@(SdksToBundle)">
+    </MSBuild>
+
+    <!-- The WPF SDK .nupkg includes some files in the root that we don't want to bundle, so delete them -->
+    <ItemGroup>
+      <SDKFilesToDelete Include="$(OutputPath)/Sdks/Microsoft.NET.Sdk.Wpf/*" />
+      <SDKFilesToDelete Include="$(OutputPath)/Sdks/**/*.nupkg.metadata" />
+      <SDKFilesToDelete Include="$(OutputPath)/Sdks/**/*.signature.p7s" />
+    </ItemGroup>
+    <Delete Files="@(SDKFilesToDelete)" />
+  </Target>
+
+  <Target Name="ChmodPublishDir"
+          AfterTargets="GenerateCliRuntimeConfigurationFiles"
+          Condition=" '$(OSName)' != 'win' ">
+
+    <Exec Command="find $(OutputPath) -type d -exec chmod 755 {} \;" />
+    <Exec Command="find $(OutputPath) -type f -exec chmod 644 {} \;" />
+  </Target>
+
+  <Target Name="DeleteSymbolsFromPublishDir"
+          AfterTargets="GenerateCliRuntimeConfigurationFiles">
+    <ItemGroup>
+      <PdbsToDelete Include="$(OutputPath)/**/*.pdb" />
+      <PdbsToDelete Include="$(OutputPath)/**/*.ni.*.map" />
+    </ItemGroup>
+
+    <Delete Files="@(PdbsToDelete)" />
+  </Target>
+
+  <Target Name="RetargetTools"
+          BeforeTargets="PublishStage2WithBackwardsCompatibleRuntimes"
+          AfterTargets="Build">
+    <PropertyGroup>
+      <ReplacementPattern>"version": ".*"</ReplacementPattern>
+      <ReplacementString>"version": "$(MicrosoftNETCoreAppRuntimePackageVersion)"</ReplacementString>
+    </PropertyGroup>
+    <ItemGroup>
+      <!-- Exclude F# from retargeting: https://github.com/dotnet/toolset/issues/2866 -->
+      <ToolRuntimeConfigPath Include="$(OutputPath)/**/*.runtimeconfig.json"
+                             Exclude="$(OutputPath)/**/fsc.runtimeconfig.json;$(OutputPath)/**/fsi.runtimeconfig.json"/>
+
+      <MSBuild15Items Include="$(OutputPath)/15.0/**/*" />
+    </ItemGroup>
+    <ReplaceFileContents
+      InputFiles="@(ToolRuntimeConfigPath)"
+      DestinationFiles="@(ToolRuntimeConfigPath)"
+      ReplacementPatterns="$(ReplacementPattern)"
+      ReplacementStrings="$(ReplacementString)" />
+
+    <Move
+      SourceFiles="@(MSBuild15Items)"
+      DestinationFiles="@(MSBuild15Items -> '$(OutputPath)/Current/%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <RemoveDir Directories="$(OutputPath)/15.0" />
+  </Target>
+
+  <Target Name="GenerateLayout"
+          DependsOnTargets="PublishVersionFile;
+                            PublishRoslyn;
+                            PublishMSBuildExtensions;
+                            PublishFSharp;
+                            GenerateCliRuntimeConfigurationFiles;
+                            MakeFscRunnableAndMoveToPublishDir;
+                            RemoveFscFilesAfterPublish;
+                            PublishTargetExtensions;
+                            RemoveMSDiaTypeLib;
+                            PublishSdks;
+                            ChmodPublishDir;
+                            DeleteSymbolsFromPublishDir;
+                            RetargetTools"
+          AfterTargets="Build">
+    <PropertyGroup>
+      <LayoutDirectory>$(BaseOutputPath)$(Configuration)\layouts\</LayoutDirectory>
+      <SdkLayoutOutputDirectory>$(LayoutDirectory)$(ArtifactNameSdk)</SdkLayoutOutputDirectory>
+      <SdkLanguagePackOutputDirectory>$(LayoutDirectory)$(ArtifactNameSdkLanguagePack)</SdkLanguagePackOutputDirectory>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ToolsetLayoutInput Include="$(OutputPath)/**/*" />
+      <ToolsetLanguagePackInput Include="$(OutputPath)/**/*.resources.dll" />
+    </ItemGroup>
+
+    <!-- Set up Items Defining Layouts for easy change -->
+    <ItemGroup>
+      <LayoutDefinition Include="Sdk">
+        <InputFiles>@(ToolsetLayoutInput)</InputFiles>
+        <OutputFiles>@(ToolsetLayoutInput -> '$(SdkLayoutOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')</OutputFiles>
+      </LayoutDefinition>
+
+      <LayoutDefinition Include="SdkLanguagePack">
+        <InputFiles>@(ToolsetLanguagePackInput)</InputFiles>
+        <OutputFiles>@(ToolsetLanguagePackInput -> '$(SdkLanguagePackOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')</OutputFiles>
+      </LayoutDefinition>
+    </ItemGroup>
+
+    <Copy SourceFiles="%(LayoutDefinition.InputFiles)"
+          DestinationFiles="%(LayoutDefinition.OutputFiles)"
+          SkipUnchangedFiles="true" />
+  </Target>
+</Project>

@@ -1,0 +1,192 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="translated">ローカル オプション (--local)、グローバル オプション (--global)、ツール パス オプション (--tool-path) は、一度に 1 つだけ指定できます。オプションを 1 つだけ指定します: {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallationSucceeded">
+        <source>You can invoke the tool using the following command: {0}
+Tool '{1}' (version '{2}') was successfully installed.</source>
+        <target state="translated">次のコマンドを使用してツールを呼び出せます。{0}
+ツール '{1}' (バージョン '{2}') が正常にインストールされました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalOptionDescription">
+        <source>Install the tool and add to the local tool manifest (default).</source>
+        <target state="translated">ツールをインストールし、ローカル ツール マニフェスト (既定値) に追加します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalOptionDoesNotSupportFrameworkOption">
+        <source>The local option(--local) does not support the framework option (--framework).</source>
+        <target state="translated">ローカル オプション (--local) は、フレームワーク オプション (--framework) をサポートしていません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalToolInstallationSucceeded">
+        <source>You can invoke the tool from this directory using the following commands: 'dotnet tool run {0}' or 'dotnet {0}'.
+Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</source>
+        <target state="translated">次のコマンドを使用してこのディレクトリからツールを呼び出すことができます: 'dotnet tool run {0}' または 'dotnet {0}'。
+ツール '{1}' (バージョン '{2}') が正常にインストールされました。マニフェスト ファイル {3} にエントリが追加されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionDescription">
+        <source>Path to the manifest file.</source>
+        <target state="translated">マニフェスト ファイルへのパス。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoManifestGuide">
+        <source>If you intended to install a global tool, add `--global` to the command.
+If you would like to create a manifest, use `dotnet new tool-manifest`, usually in the repo root directory.</source>
+        <target state="translated">グローバル ツールをインストールする場合、コマンドに `--global` を追加します。
+マニフェストを作成する場合、通常はリポジトリのルート ディレクトリで `dotnet new tool-manifest` を使用します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentDescription">
+        <source>The NuGet Package Id of the tool to install.</source>
+        <target state="translated">インストールするツールの NuGet パッケージ ID。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Install global or local tool. Local tools are added to manifest and restored.</source>
+        <target state="translated">グローバルまたはローカルのツールをインストールします。ローカル ツールはマニフェストに追加され、復元されます。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionDescription">
+        <source>The NuGet configuration file to use.</source>
+        <target state="translated">使用する NuGet 構成ファイル。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to install the tool for.</source>
+        <target state="translated">ツールをインストールするターゲット フレームワーク。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionDescription">
+        <source>The version of the tool package to install.</source>
+        <target state="translated">インストールするツール パッケージのバージョン。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentName">
+        <source>PACKAGE_ID</source>
+        <target state="translated">PACKAGE_ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageId">
+        <source>Specify one tool Package Id to install.</source>
+        <target state="translated">インストールするツール パッケージの ID を指定してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalOptionDescription">
+        <source>Install the tool for the current user.</source>
+        <target state="translated">現在のユーザーに対してツールをインストールします。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallFullCommandNameLocalized">
+        <source>.NET Install Command</source>
+        <target state="translated">.NET インストール コマンド</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidToolConfiguration">
+        <source>The settings file in the tool's NuGet package is invalid: {0}</source>
+        <target state="translated">ツールの NuGet パッケージ内の設定ファイルが無効です: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailedContactAuthor">
+        <source>Tool '{0}' failed to install. Contact the tool author for assistance.</source>
+        <target state="translated">ツール '{0}' をインストールできませんでした。ツールの作成者にお問い合わせください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolAlreadyInstalled">
+        <source>Tool '{0}' is already installed.</source>
+        <target state="translated">ツール '{0}' は既にインストールされています。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToCreateToolShim">
+        <source>Failed to create shell shim for tool '{0}': {1}</source>
+        <target state="translated">ツール '{0}' でシェル shim を作成できませんでした: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NuGetConfigurationFileDoesNotExist">
+        <source>NuGet configuration file '{0}' does not exist.</source>
+        <target state="translated">NuGet 構成ファイル '{0}' は存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationRestoreFailed">
+        <source>The tool package could not be restored.</source>
+        <target state="translated">ツール パッケージを復元できませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidNuGetVersionRange">
+        <source>Specified version '{0}' is not a valid NuGet version range.</source>
+        <target state="translated">指定されたバージョン '{0}' は、有効な NuGet バージョン範囲ではありません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailed">
+        <source>Tool '{0}' failed to install.</source>
+        <target state="translated">ツール '{0}' をインストールできませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailedWithRestoreGuidance">
+        <source>Tool '{0}' failed to install. This failure may have been caused by:
+
+* You are attempting to install a preview release and did not use the --version option to specify the version.
+* A package by this name was found, but it was not a .NET Core tool.
+* The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
+* You mistyped the name of the tool.
+
+For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</source>
+        <target state="translated">ツール '{0}' をインストールできませんでした。この失敗は次の原因で生じた可能性があります。
+
+* プレビュー リリースをインストールしようとしており、--version オプションを使用してバージョンを指定しなかった。
+* この名前のパッケージが見つかったが、.NET Core ツールではなかった。
+* 恐らくインターネットの接続の問題で、必須の NuGet フィードにアクセスできない。
+* ツールの名前のタイプミス。
+
+パッケージの名前付けの強制を含む他の理由については、https://aka.ms/failure-installing-tool にアクセスしてください</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionDescription">
+        <source>Add an additional NuGet package source to use during installation.</source>
+        <target state="translated">インストール中に使用する他の NuGet パッケージ ソースを追加します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionName">
+        <source>SOURCE</source>
+        <target state="translated">SOURCE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionName">
+        <source>VERSION</source>
+        <target state="translated">VERSION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionName">
+        <source>FILE</source>
+        <target state="translated">FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionName">
+        <source>FRAMEWORK</source>
+        <target state="translated">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionDescription">
+        <source>The directory where the tool will be installed. The directory will be created if it does not exist.</source>
+        <target state="translated">ツールがインストールされるディレクトリ。このディレクトリが存在しない場合は、作成されます。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

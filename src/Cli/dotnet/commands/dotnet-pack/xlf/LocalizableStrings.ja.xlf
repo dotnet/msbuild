@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>.NET Core NuGet Package Packer</source>
+        <target state="translated">.NET Core NuGet パッケージ パッカー</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>pack for msbuild</source>
+        <target state="translated">msbuild のパック</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="translated">著作権情報を表示しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutputDir">
+        <source>OUTPUT_DIR</source>
+        <target state="translated">OUTPUT_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutputDirDescription">
+        <source>The output directory to place built packages in.</source>
+        <target state="translated">ビルドしたパッケージを配置する出力ディレクトリ。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoBuildOptionDescription">
+        <source>Do not build the project before packing. Implies --no-restore.</source>
+        <target state="translated">パックする前にプロジェクトをビルドしないでください。--no-restore を意味します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdIncludeSymbolsDescription">
+        <source>Include packages with symbols in addition to regular packages in output directory.</source>
+        <target state="translated">通常のパッケージに加えてシンボルを含むパッケージを出力ディレクトリに含めます。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdIncludeSourceDescription">
+        <source>Include PDBs and source files. Source files go into the 'src' folder in the resulting nuget package.</source>
+        <target state="translated">PDB とソース ファイルを含めます。ソース ファイルは、結果の nuget パッケージの 'src' フォルダーに移ります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdServiceableDescription">
+        <source>Set the serviceable flag in the package. See https://aka.ms/nupkgservicing for more information.</source>
+        <target state="translated">パッケージに処理可能なフラグを設定します。詳細については、https://aka.ms/nupkgservicing をご覧ください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdArgumentProject">
+        <source>PROJECT</source>
+        <target state="translated">PROJECT</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdArgumentDescription">
+        <source>The project to pack, defaults to the project file in the current directory. Can be a path to any project file</source>
+        <target state="translated">パックするプロジェクト。既定は現在のディレクトリ内のプロジェクト ファイルです。任意のプロジェクト ファイルへのパスを指定できます</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to use for building the package. The default for most projects is 'Debug'.</source>
+        <target state="translated">パッケージのビルドに使用する構成。ほとんどのプロジェクトで既定は 'Debug' です。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

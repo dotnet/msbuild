@@ -74,6 +74,17 @@ namespace Microsoft.NET.TestFramework.Assertions
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
+        public AndConstraint<CommandResultAssertions> HaveStdOutContainingIgnoreSpaces(string pattern)
+        {
+            string commandResultNoSpaces = _commandResult.StdOut.Replace(" ", "");
+
+            Execute.Assertion
+                .ForCondition(commandResultNoSpaces.Contains(pattern))
+                .FailWith(AppendDiagnosticsTo($"The command output did not contain expected result: {pattern}{Environment.NewLine}"));
+
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
+
         public AndConstraint<CommandResultAssertions> HaveStdOutContainingIgnoreCase(string pattern)
         {
             Execute.Assertion.ForCondition(_commandResult.StdOut.IndexOf(pattern, StringComparison.OrdinalIgnoreCase) >= 0)

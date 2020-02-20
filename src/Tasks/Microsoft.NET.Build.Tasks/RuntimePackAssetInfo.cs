@@ -44,8 +44,8 @@ namespace Microsoft.NET.Build.Tasks
                 throw new InvalidOperationException("Unexpected asset type: " + item.GetMetadata(MetadataKeys.AssetType));
             }
 
-            assetInfo.PackageName = item.GetMetadata(MetadataKeys.PackageName);
-            assetInfo.PackageVersion = item.GetMetadata(MetadataKeys.PackageVersion);
+            assetInfo.PackageName = item.GetMetadata(MetadataKeys.NuGetPackageId);
+            assetInfo.PackageVersion = item.GetMetadata(MetadataKeys.NuGetPackageVersion);
             assetInfo.PackageRuntimeIdentifier = item.GetMetadata(MetadataKeys.RuntimeIdentifier);
 
             return assetInfo;

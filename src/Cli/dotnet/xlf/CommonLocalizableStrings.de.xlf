@@ -1,0 +1,944 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="de" original="../CommonLocalizableStrings.resx">
+    <body>
+      <trans-unit id="CommandInteractiveOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">Hiermit wird zugelassen, dass der Befehl anhält und auf eine Benutzereingabe oder Aktion wartet (beispielsweise auf den Abschluss der Authentifizierung).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindAnyProjectInDirectory">
+        <source>Could not find any project in `{0}`.</source>
+        <target state="translated">In "{0}" wurde kein Projekt gefunden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathOSXBashManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">Das Toolverzeichnis "{0}" befindet sich derzeit nicht in der PATH-Umgebungsvariablen.
+Wenn Sie Bash verwenden, können Sie es Ihrem Profil durch Ausführen des folgenden Befehls hinzufügen:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+Sie können es der aktuellen Sitzung hinzufügen, indem Sie den folgenden Befehl ausführen:
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathOSXZshManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using zsh, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+And run `zsh -l` to make it available for current session.
+
+You can only add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">Das Toolverzeichnis "{0}" ist aktuell nicht in der PATH-Umgebungsvariable enthalten.
+Wenn Sie zsh verwenden, können Sie es Ihrem Profil hinzufügen, indem Sie folgenden Befehl ausführen:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+Führen Sie anschließend "zsh -l" aus, um das Tool für die aktuelle Sitzung verfügbar zu machen.
+
+Um es nur der aktuellen Sitzung hinzuzufügen, führen Sie den folgenden Befehl aus:
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOneProjectInDirectory">
+        <source>Found more than one project in `{0}`. Specify which one to use.</source>
+        <target state="translated">In "{0}" wurden mehrere Projekte gefunden. Geben Sie an, welches davon verwendet werden soll.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectAlreadyHasAreference">
+        <source>Project already has a reference to `{0}`.</source>
+        <target state="translated">Für das Projekt ist bereits ein Verweis auf "{0}" vorhanden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectReferenceCouldNotBeFound">
+        <source>Project reference `{0}` could not be found.</source>
+        <target state="translated">Der Projektverweis "{0}" wurde nicht gefunden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectReferenceRemoved">
+        <source>Project reference `{0}` removed.</source>
+        <target state="translated">Der Projektverweis "{0}" wurde entfernt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Project">
+        <source>Project</source>
+        <target state="translated">Projekt </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectFile">
+        <source>Project file</source>
+        <target state="translated">Projektdatei</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Reference">
+        <source>Reference</source>
+        <target state="translated">Verweis</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectReference">
+        <source>Project reference</source>
+        <target state="translated">Projektverweis</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReference">
+        <source>Package reference</source>
+        <target state="translated">Paketverweis</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="P2P">
+        <source>Project to Project</source>
+        <target state="translated">Projekt zu Projekt</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="P2PReference">
+        <source>Project to Project reference</source>
+        <target state="translated">Projekt-zu-Projekt-Verweis</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Package">
+        <source>Package</source>
+        <target state="translated">Paket</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Solution">
+        <source>Solution</source>
+        <target state="translated">Projektmappe</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionFile">
+        <source>Solution file</source>
+        <target state="translated">Projektmappendatei</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Executable">
+        <source>Executable</source>
+        <target state="translated">Ausführbare Datei</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Library">
+        <source>Library</source>
+        <target state="translated">Bibliothek</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Program">
+        <source>Program</source>
+        <target state="translated">Programm</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Application">
+        <source>Application</source>
+        <target state="translated">Anwendung</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceAddedToTheProject">
+        <source>Reference `{0}` added to the project.</source>
+        <target state="translated">Der Verweis "{0}" wurde dem Projekt hinzugefügt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Add">
+        <source>Add</source>
+        <target state="translated">Hinzufügen</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Remove">
+        <source>Remove</source>
+        <target state="translated">Entfernen</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Delete">
+        <source>Delete</source>
+        <target state="translated">löschen</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Update">
+        <source>Update</source>
+        <target state="translated">Aktualisieren</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="New">
+        <source>New</source>
+        <target state="translated">Neu</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="List">
+        <source>List</source>
+        <target state="translated">Liste</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Load">
+        <source>Load</source>
+        <target state="translated">Laden</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Save">
+        <source>Save</source>
+        <target state="translated">Speichern</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Find">
+        <source>Find</source>
+        <target state="translated">Suchen</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Error">
+        <source>Error</source>
+        <target state="translated">Fehler</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Warning">
+        <source>Warning</source>
+        <target state="translated">Warnung</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="File">
+        <source>File</source>
+        <target state="translated">Datei</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Directory">
+        <source>Directory</source>
+        <target state="translated">Verzeichnis</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Type">
+        <source>Type</source>
+        <target state="translated">Typ</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Value">
+        <source>Value</source>
+        <target state="translated">Wert</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Group">
+        <source>Group</source>
+        <target state="translated">Gruppe</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAddedToY">
+        <source>{0} added to {1}.</source>
+        <target state="translated">"{0}" wurde "{1}" hinzugefügt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XRemovedFromY">
+        <source>{0} removed from {1}.</source>
+        <target state="translated">"{0}" wurde aus "{1}" entfernt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XDeletedFromY">
+        <source>{0} deleted from {1}.</source>
+        <target state="translated">"{0}" wurde aus "{1}" gelöscht.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XSuccessfullyUpdated">
+        <source>{0} successfully updated.</source>
+        <target state="translated">"{0}" wurde erfolgreich aktualisiert.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XIsInvalid">
+        <source>{0} is invalid.</source>
+        <target state="translated">"{0}" ist ungültig.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XYFoundButInvalid">
+        <source>{0} `{1}` found but is invalid.</source>
+        <target state="translated">{0} "{1}" wurde gefunden, ist aber ungültig.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XFoundButInvalid">
+        <source>`{0}` found but is invalid.</source>
+        <target state="translated">"{0}" wurde gefunden, ist aber ungültig.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OperationInvalid">
+        <source>Operation is invalid.</source>
+        <target state="translated">Der Vorgang ist ungültig.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OperationXInvalid">
+        <source>Operation {0} is invalid.</source>
+        <target state="translated">Der Vorgang "{0}" ist ungültig.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XNotFound">
+        <source>{0} not found.</source>
+        <target state="translated">"{0}" wurde nicht gefunden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XOrYNotFound">
+        <source>{0} or {1} not found.</source>
+        <target state="translated">"{0}" oder "{1}" wurde nicht gefunden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XOrYNotFoundInZ">
+        <source>{0} or {1} not found in `{2}`.</source>
+        <target state="translated">"{0}" oder "{1}" wurde in "{2}" nicht gefunden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileNotFound">
+        <source>File `{0}` not found.</source>
+        <target state="translated">Die Datei "{0}" wurde nicht gefunden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XDoesNotExist">
+        <source>{0} does not exist.</source>
+        <target state="translated">"{0}" ist nicht vorhanden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XYDoesNotExist">
+        <source>{0} `{1}` does not exist.</source>
+        <target state="translated">{0} "{1}" ist nicht vorhanden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOneXFound">
+        <source>More than one {0} found.</source>
+        <target state="translated">Es wurden mehrere Elemente "{0}" gefunden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAlreadyContainsY">
+        <source>{0} already contains {1}.</source>
+        <target state="translated">"{1}" ist bereits in "{0}" enthalten.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAlreadyContainsYZ">
+        <source>{0} already contains {1} `{2}`.</source>
+        <target state="translated">{1} "{2}" ist bereits in "{0}" enthalten.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAlreadyHasY">
+        <source>{0} already has {1}.</source>
+        <target state="translated">"{0}" verfügt bereits über "{1}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAlreadyHasYZ">
+        <source>{0} already has {1} `{2}`.</source>
+        <target state="translated">"{0}" verfügt bereits über {1} "{2}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XWasNotExpected">
+        <source>{0} was not expected.</source>
+        <target state="translated">"{0}" wurde nicht erwartet.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XNotProvided">
+        <source>{0} not provided.</source>
+        <target state="translated">"{0}" wurde nicht angegeben.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOne">
+        <source>Specify at least one {0}.</source>
+        <target state="translated">Geben Sie mindestens ein Element "{0}" an.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotConnectWithTheServer">
+        <source>Could not connect with the server.</source>
+        <target state="translated">Mit dem Server konnte keine Verbindung hergestellt werden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentIsInvalid">
+        <source>Required argument {0} is invalid.</source>
+        <target state="translated">Das erforderliche Argument "{0}" ist ungültig.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionIsInvalid">
+        <source>Option {0} is invalid.</source>
+        <target state="translated">Die Option "{0}" ist ungültig.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentIsInvalid">
+        <source>Argument {0} is invalid.</source>
+        <target state="translated">Das Argument "{0}" ist ungültig.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentNotPassed">
+        <source>Required argument {0} was not provided.</source>
+        <target state="translated">Das erforderliche Argument "{0}" wurde nicht angegeben.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindProjectOrDirectory">
+        <source>Could not find project or directory `{0}`.</source>
+        <target state="translated">Das Projekt oder Verzeichnis "{0}" wurde nicht gefunden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FoundInvalidProject">
+        <source>Found a project `{0}` but it is invalid.</source>
+        <target state="translated">Ein Projekt "{0}" wurde gefunden, ist aber ungültig.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidProject">
+        <source>Invalid project `{0}`.</source>
+        <target state="translated">Ungültiges Projekt "{0}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindSolutionIn">
+        <source>Specified solution file {0} does not exist, or there is no solution file in the directory.</source>
+        <target state="translated">Die angegebene Projektmappendatei "{0}" ist nicht vorhanden, oder das Verzeichnis enthält keine Projektmappendatei.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindSolutionOrDirectory">
+        <source>Could not find solution or directory `{0}`.</source>
+        <target state="translated">Die Projektmappe oder das Verzeichnis "{0}" wurde nicht gefunden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionDoesNotExist">
+        <source>Specified solution file {0} does not exist, or there is no solution file in the directory.</source>
+        <target state="translated">Die angegebene Projektmappendatei "{0}" ist nicht vorhanden, oder das Verzeichnis enthält keine Projektmappendatei.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceIsInvalid">
+        <source>Reference `{0}` is invalid.</source>
+        <target state="translated">Der Verweis "{0}" ist ungültig.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOneReferenceToAdd">
+        <source>You must specify at least one reference to add.</source>
+        <target state="translated">Geben Sie mindestens einen hinzuzufügenden Verweis an.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceDoesNotExist">
+        <source>Package reference `{0}` does not exist.</source>
+        <target state="translated">Der Paketverweis "{0}" ist nicht vorhanden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceIsInvalid">
+        <source>Package reference `{0}` is invalid.</source>
+        <target state="translated">Der Paketverweis "{0}" ist ungültig.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOnePackageReferenceToAdd">
+        <source>You must specify at least one package to add.</source>
+        <target state="translated">Geben Sie mindestens ein hinzuzufügendes Paket an.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceAddedToTheProject">
+        <source>Package reference `{0}` added to the project.</source>
+        <target state="translated">Der Paketverweis "{0}" wurde dem Projekt hinzugefügt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectAlreadyHasAPackageReference">
+        <source>Project {0} already has a reference `{1}`.</source>
+        <target state="translated">Für das Projekt "{0}" ist bereits ein Verweis "{1}" vorhanden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PleaseSpecifyVersion">
+        <source>Specify a version of the package.</source>
+        <target state="translated">Geben Sie eine Paketversion an.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectDoesNotExist">
+        <source>Project `{0}` does not exist.</source>
+        <target state="translated">Das Projekt "{0}" ist nicht vorhanden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectIsInvalid">
+        <source>Project `{0}` is invalid.</source>
+        <target state="translated">Das Projekt "{0}" ist ungültig.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOneProjectToAdd">
+        <source>You must specify at least one project to add.</source>
+        <target state="translated">Geben Sie mindestens ein hinzuzufügendes Projekt an.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectAddedToTheSolution">
+        <source>Project `{0}` added to the solution.</source>
+        <target state="translated">Das Projekt "{0}" wurde der Projektmappe hinzugefügt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceNotFoundInTheProject">
+        <source>Specified reference {0} does not exist in project {1}.</source>
+        <target state="translated">Der angegebene Verweis "{0}" ist im Projekt "{1}" nicht vorhanden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceRemoved">
+        <source>Reference `{0}` deleted from the project.</source>
+        <target state="translated">Der Verweis "{0}" wurde aus dem Projekt gelöscht.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOneReferenceToRemove">
+        <source>You must specify at least one reference to remove.</source>
+        <target state="translated">Geben Sie mindestens einen zu löschenden Verweis an.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceDeleted">
+        <source>Reference `{0}` deleted.</source>
+        <target state="translated">Der Verweis "{0}" wurde gelöscht.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceNotFoundInTheProject">
+        <source>Package reference `{0}` could not be found in the project.</source>
+        <target state="translated">Der Paketverweis "{0}" wurde im Projekt nicht gefunden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceRemoved">
+        <source>Reference `{0}` deleted from the project.</source>
+        <target state="translated">Der Verweis "{0}" wurde aus dem Projekt gelöscht.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOnePackageReferenceToRemove">
+        <source>You must specify at least one package reference to remove.</source>
+        <target state="translated">Geben Sie mindestens einen zu löschenden Paketverweis an.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceDeleted">
+        <source>Package reference `{0}` deleted.</source>
+        <target state="translated">Der Paketverweis "{0}" wurde gelöscht.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectNotFoundInTheSolution">
+        <source>Project `{0}` could not be found in the solution.</source>
+        <target state="translated">Das Projekt "{0}" wurde in der Projektmappe nicht gefunden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectRemoved">
+        <source>Project `{0}` removed from solution.</source>
+        <target state="translated">Das Projekt "{0}" wurde aus der Projektmappe entfernt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOneProjectToRemove">
+        <source>You must specify at least one project to remove.</source>
+        <target state="translated">Geben Sie mindestens ein zu entfernendes Projekt an.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectDeleted">
+        <source>Project `{0}` deleted from solution.</source>
+        <target state="translated">Das Projekt "{0}" wurde aus der Projektmappe gelöscht.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoReferencesFound">
+        <source>There are no {0} references in project {1}.</source>
+        <target state="translated">Im Projekt "{1}" liegen keine {0}-Verweise vor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoProjectsFound">
+        <source>No projects found in the solution.</source>
+        <target state="translated">In der Projektmappe wurden keine Projekte gefunden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PleaseSpecifyNewVersion">
+        <source>Specify new version of the package.</source>
+        <target state="translated">Geben Sie die neue Version des Pakets an.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PleaseSpecifyWhichPackageToUpdate">
+        <source>Specify which package to update.</source>
+        <target state="translated">Geben Sie das zu aktualisierende Paket an.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NothingToUpdate">
+        <source>Nothing to update.</source>
+        <target state="translated">Keine Aktualisierung verfügbar.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EverythingUpToDate">
+        <source>Everything is already up-to-date.</source>
+        <target state="translated">Alle Elemente sind bereits auf dem neuesten Stand.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageVersionUpdatedTo">
+        <source>Version of package `{0}` updated to `{1}`.</source>
+        <target state="translated">Die Version des Pakets "{0}" wurde auf "{1}" aktualisiert.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageVersionUpdated">
+        <source>Version of package `{0}` updated.</source>
+        <target state="translated">Die Version des Pakets "{0}" wurde aktualisiert.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotUpdateTheVersion">
+        <source>Could not update the version of the package `{0}`.</source>
+        <target state="translated">Die Version des Pakets "{0}" konnte nicht aktualisiert werden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCreatedSuccessfully">
+        <source>The template {0} created successfully. run "dotnet restore" to get started!</source>
+        <target state="translated">Die Vorlage "{0}" wurde erfolgreich erstellt. Führen Sie "dotnet restore" aus, um zu beginnen.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInstalledSuccesfully">
+        <source>The template {0} installed successfully. You can use "dotnet new {0}" to get started with the new template.</source>
+        <target state="translated">Die Vorlage "{0}" wurde erfolgreich installiert. Verwenden Sie "dotnet new {0}", um die neue Vorlage zu verwenden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCreateError">
+        <source>Template {0} could not be created. Error returned was: {1}.</source>
+        <target state="translated">Die Vorlage "{0}" konnte nicht erstellt werden. Zurückgegebener Fehler: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInstallError">
+        <source>Template {0} could not be installed. Error returned was: {1}.</source>
+        <target state="translated">Die Vorlage "{0}" konnte nicht installiert werden. Zurückgegebener Fehler: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifiedNameExists">
+        <source>Specified name {0} already exists. Specify a different name.</source>
+        <target state="translated">Der angegebene Name "{0}" ist bereits vorhanden. Geben Sie einen anderen Namen an.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifiedAliasExists">
+        <source>Specified alias {0} already exists. Specify a different alias.</source>
+        <target state="translated">Der angegebene Alias "{0}" ist bereits vorhanden. Geben Sie einen anderen Alias an.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MandatoryParameterMissing">
+        <source>Mandatory parameter {0} missing for template {1}. </source>
+        <target state="translated">Der obligatorische Parameter "{0}" ist für die Vorlage "{1}" nicht vorhanden. </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectReferenceOneOrMore">
+        <source>Project reference(s)</source>
+        <target state="translated">Projektverweis(e)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredCommandNotPassed">
+        <source>Required command was not provided.</source>
+        <target state="translated">Der erforderliche Befehl wurde nicht bereitgestellt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOneSolutionInDirectory">
+        <source>Found more than one solution file in {0}. Specify which one to use.</source>
+        <target state="translated">In "{0}" wurden mehrere Projektmappendateien gefunden. Geben Sie an, welche davon verwendet werden soll.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionAlreadyContainsProject">
+        <source>Solution {0} already contains project {1}.</source>
+        <target state="translated">Die Projektmappe "{0}" enthält das Projekt "{1}" bereits.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentsProjectOrSolutionDescription">
+        <source>The project or solution to operation on. If a file is not specified, the current directory is searched.</source>
+        <target state="translated">Projekt oder Projektmappe, woran der Vorgang ausgeführt werden soll. Wenn keine Datei angegeben wird, wird das aktuelle Verzeichnis durchsucht.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFramework">
+        <source>FRAMEWORK</source>
+        <target state="translated">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectNotCompatibleWithFrameworks">
+        <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Review the project you are trying to add and verify that is compatible with the following targets:</source>
+        <target state="translated">Das Projekt "{0}" kann nicht hinzugefügt werden, weil die Zielframeworks der beiden Projekte nicht kompatibel sind. Überprüfen Sie das Projekt, das Sie hinzuzufügen möchten, und stellen Sie sicher, dass es mit folgenden Zielen kompatibel ist:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectDoesNotTargetFramework">
+        <source>Project `{0}` does not target framework `{1}`.</source>
+        <target state="translated">"{1}" ist kein Zielframework von Projekt "{0}" .</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCouldNotBeEvaluated">
+        <source>Project `{0}` could not be evaluated. Evaluation failed with following error:
+{1}.</source>
+        <target state="translated">Das Projekt "{0}" konnte nicht ausgewertet werden. Fehler bei der Auswertung:
+{1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedProjectType">
+        <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Contact your SDK provider for support.</source>
+        <target state="translated">Das Projekt "{0}" weist einen unbekannten Projekttyp auf und kann der Projektmappendatei nicht hinzugefügt werden. Wenden Sie sich an Ihren SDK-Anbieter, um Unterstützung zu erhalten.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidSolutionFormatString">
+        <source>Invalid solution `{0}`. {1}.</source>
+        <target state="translated">Ungültige Projektmappe "{0}". {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidProjectWithExceptionMessage">
+        <source>Invalid project `{0}`. {1}.</source>
+        <target state="translated">Ungültiges Projekt "{0}". {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VerbosityOptionDescription">
+        <source>Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
+        <target state="translated">Hiermit wird der Ausführlichkeitsgrad von MSBuild festgelegt. Zulässige Werte sind "q[uiet]", "m[inimal]", "n[ormal]", "d[etailed]" und "diag[nostic]".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdVersionSuffixDescription">
+        <source>Set the value of the $(VersionSuffix) property to use when building the project.</source>
+        <target state="translated">Hiermit wird der Wert der $(VersionSuffix)-Eigenschaft festgelegt, die beim Erstellen des Projekts verwendet werden soll.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShowHelpDescription">
+        <source>Show command line help.</source>
+        <target state="translated">Hiermit wird die Hilfe zur Befehlszeile angezeigt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoRestoreDescription">
+        <source>Do not restore the project before building.</source>
+        <target state="translated">Hiermit wird das Projekt nicht vor der Erstellung wiederhergestellt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectRemovedFromTheSolution">
+        <source>Project `{0}` removed from the solution.</source>
+        <target state="translated">Das Projekt "{0}" wurde aus der Projektmappe entfernt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsInvalidXml">
+        <source>Invalid XML: {0}</source>
+        <target state="translated">Ungültiges XML: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathLinuxNeedLogout">
+        <source>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</source>
+        <target state="translated">Da Sie gerade das .NET Core SDK installiert haben, müssen Sie sich abmelden oder Ihre Sitzung neu starten, bevor Sie das installierte Tool ausführen.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathOSXNeedReopen">
+        <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
+        <target state="translated">Da Sie gerade das .NET Core SDK installiert haben, müssen Sie das Terminal neu öffnen, bevor Sie das installierte Tool ausführen.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathWindowsNeedReopen">
+        <source>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
+        <target state="translated">Da Sie gerade das .NET Core SDK installiert haben, müssen Sie das Eingabeaufforderungsfenster neu öffnen, bevor Sie das installierte Tool ausführen.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMissingCommandName">
+        <source>Tool defines a command with a missing name setting.</source>
+        <target state="translated">Das Tool definiert einen Befehl mit fehlender Namenseinstellung.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMissingEntryPoint">
+        <source>Command '{0}' is missing an entry point setting.</source>
+        <target state="translated">Dem Befehl "{0}" fehlt eine Einstiegspunkteinstellung.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsInvalidCommandName">
+        <source>Command '{0}' contains one or more of the following invalid characters: {1}.</source>
+        <target state="translated">Der Befehl "{0}" enthält mindestens eines der folgenden ungültigen Zeichen: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMoreThanOneCommand">
+        <source>More than one command is defined for the tool.</source>
+        <target state="translated">Für das Tool wurden mehrere Befehle definiert.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsUnsupportedRunner">
+        <source>Command '{0}' uses unsupported runner '{1}'."</source>
+        <target state="translated">Der Befehl "{0}" verwendet die nicht unterstützte Ausführung "{1}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPackageConflictPackageId">
+        <source>Tool '{0}' (version '{1}') is already installed.</source>
+        <target state="translated">Das Tool "{0}" (Version "{1}") ist bereits installiert.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShellShimConflict">
+        <source>Command '{0}' conflicts with an existing command from another tool.</source>
+        <target state="translated">Der Befehl "{0}" steht in Konflikt zu einem vorhandenen Befehl aus einem anderen Tool.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCreateShimForEmptyExecutablePath">
+        <source>Cannot create shell shim for an empty executable path.</source>
+        <target state="translated">Für einen leeren Pfad einer ausführbaren Datei kann kein Shell-Shim erstellt werden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCreateShimForEmptyCommand">
+        <source>Cannot create shell shim for an empty command.</source>
+        <target state="translated">Für einen leeren Befehl kann kein Shell-Shim erstellt werden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToRetrieveToolConfiguration">
+        <source>Failed to retrieve tool configuration: {0}</source>
+        <target state="translated">Fehler beim Abrufen der Toolkonfiguration: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathLinuxManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">Das Toolverzeichnis "{0}" befindet sich derzeit nicht in der PATH-Umgebungsvariablen.
+Wenn Sie Bash verwenden, können Sie es Ihrem Profil durch Ausführen des folgenden Befehls hinzufügen:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+Sie können es der aktuellen Sitzung hinzufügen, indem Sie den folgenden Befehl ausführen:
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathWindowsManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+
+You can add the directory to the PATH by running the following command:
+
+setx PATH "%PATH%;{0}"
+</source>
+        <target state="translated">Das Toolverzeichnis "{0}" ist aktuell nicht in der PATH-Umgebungsvariable angegeben.
+
+Um das Verzeichnis zu PATH hinzuzufügen, können Sie den folgenden Befehl ausführen:
+
+setx PATH "%PATH%;{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToCreateShellShim">
+        <source>Failed to create tool shim for command '{0}': {1}</source>
+        <target state="translated">Fehler beim Erstellen des Tool-Shims für den Befehl "{0}": {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToRemoveShellShim">
+        <source>Failed to remove tool shim for command '{0}': {1}</source>
+        <target state="translated">Fehler beim Entfernen des Tool-Shims für den Befehl "{0}": {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedSettingShimPermissions">
+        <source>Failed to set user executable permissions for shell shim: {0}</source>
+        <target state="translated">Fehler beim Festlegen der Benutzerberechtigungen der ausführbaren Datei für den Shell-Shim: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToInstallToolPackage">
+        <source>Failed to install tool package '{0}': {1}</source>
+        <target state="translated">Fehler beim Installieren des Toolpakets "{0}": {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToUninstallToolPackage">
+        <source>Failed to uninstall tool package '{0}': {1}</source>
+        <target state="translated">Fehler beim Deinstallieren des Toolpakets "{0}": {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnMaxWidthMustBeGreaterThanZero">
+        <source>Column maximum width must be greater than zero.</source>
+        <target state="translated">Die maximale Spaltenbreite muss größer als 0 sein.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingToolEntryPointFile">
+        <source>Entry point file '{0}' for command '{1}' was not found in the package.</source>
+        <target state="translated">Die Einstiegspunktdatei "{0}" für den Befehl "{1}" wurde nicht im Paket gefunden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingToolSettingsFile">
+        <source>Settings file 'DotnetToolSettings.xml' was not found in the package.</source>
+        <target state="translated">Die Einstellungsdatei "DotnetToolSettings.xml" wurde nicht im Paket gefunden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToFindStagedToolPackage">
+        <source>Failed to find staged tool package '{0}'.</source>
+        <target state="translated">Das bereitgestellte Toolpaket "{0}" wurde nicht gefunden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">
+        <source>The command name '{0}' cannot begin with a leading dot (.).</source>
+        <target state="translated">Der Befehlsname "{0}" kann nicht mit einem vorangestellten Punkt (.) beginnen.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsHigher">
+        <source>Format version is higher than supported. This tool may not be supported in this SDK version. Update your SDK.</source>
+        <target state="translated">Die Formatversion ist höher als unterstützt. Dieses Tool wird in dieser SDK-Version möglicherweise nicht unterstützt. Aktualisieren Sie Ihr SDK.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsMalformed">
+        <source>Format version is malformed. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
+        <target state="translated">Die Formatversion ist fehlerhaft. Dieses Tool wird in dieser SDK-Version möglicherweise nicht unterstützt. Wenden Sie sich an den Autor des Tools.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsMissing">
+        <source>Format version is missing. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
+        <target state="translated">Die Formatversion fehlt. Dieses Tool wird in dieser SDK-Version möglicherweise nicht unterstützt. Wenden Sie sich an den Autor des Tools.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToSetToolsPathEnvironmentVariable">
+        <source>Failed to add '{0}' to the PATH environment variable. Add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
+        <target state="translated">Fehler beim Hinzufügen von "{0}" zur PATH-Umgebungsvariable. Fügen Sie dieses Verzeichnis Ihrem PATH hinzu, um mit "dotnet tool install" installierte Tools zu verwenden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOnePackagedShimAvailable">
+        <source>More than one packaged shim is available: {0}.</source>
+        <target state="translated">Mehr als ein paketierter Shim verfügbar: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToReadNuGetLockFile">
+        <source>Failed to read NuGet LockFile for tool package '{0}': {1}</source>
+        <target state="translated">Fehler beim Lesen von NuGet-LockFile für Toolpaket "{0}": {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectArgumentName">
+        <source>PROJECT</source>
+        <target state="translated">PROJECT</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectArgumentDescription">
+        <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
+        <target state="translated">Die zu verwendende Projektdatei. Wenn keine Datei angegeben ist, sucht der Befehl im aktuellen Verzeichnis nach einer Datei.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LevelArgumentName">
+        <source>LEVEL</source>
+        <target state="translated">LEVEL</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkArgumentName">
+        <source>FRAMEWORK</source>
+        <target state="translated">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeIdentifierArgumentName">
+        <source>RUNTIME_IDENTIFIER</source>
+        <target state="translated">RUNTIME_IDENTIFIER</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationArgumentName">
+        <source>CONFIGURATION</source>
+        <target state="translated">CONFIGURATION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionSuffixArgumentName">
+        <source>VERSION_SUFFIX</source>
+        <target state="translated">VERSION_SUFFIX</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionOrProjectArgumentDescription">
+        <source>The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.</source>
+        <target state="translated">Das Projekt oder die Projektmappendatei, die verwendet werden soll. Wenn keine Datei angegeben ist, durchsucht der Befehl das aktuelle Verzeichnis nach einer Datei.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionOrProjectArgumentName">
+        <source>PROJECT | SOLUTION</source>
+        <target state="translated">PROJEKT | PROJEKTMAPPE</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

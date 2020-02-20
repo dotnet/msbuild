@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>Remove a NuGet package reference from the project.</source>
+        <target state="translated">Bir NuGet paketi başvurusunu projeden kaldırın.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppDescription">
+        <source>Command to remove package reference.</source>
+        <target state="translated">Paket başvurusunu kaldırma komutu</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppHelpText">
+        <source>The package reference to remove.</source>
+        <target state="translated">Kaldırılacak paket başvurusu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageReference">
+        <source>Specify only one package reference to remove.</source>
+        <target state="translated">Kaldırmak için yalnızca bir paket başvurusu belirtin.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

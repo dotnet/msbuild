@@ -1,0 +1,944 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../CommonLocalizableStrings.resx">
+    <body>
+      <trans-unit id="CommandInteractiveOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">允許命令停止並等候使用者輸入或動作 (例如: 完成驗證)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindAnyProjectInDirectory">
+        <source>Could not find any project in `{0}`.</source>
+        <target state="translated">在 `{0}` 中找不到任何專案。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathOSXBashManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">工具目錄 '{0}' 目前不在 PATH 環境變數中。
+若目前使用 bash，可執行下列命令將其新增至您的設定檔:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# 新增 .NET Core SDK 工具
+export PATH="$PATH:{0}"
+EOF
+
+您可執行下列命令，將其新增至目前的工作階段:
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathOSXZshManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using zsh, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+And run `zsh -l` to make it available for current session.
+
+You can only add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">工具目錄 '{0}' 目前不在 PATH 環境變數上。
+如果您在使用 zsh，可以執行以下命令將其新增至您的設定檔:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
+# 新增 .NET Core SDK 工具
+export PATH="$PATH:{0}"
+EOF
+
+並執行 `zsh -l` 讓其可用於目前的工作階段。
+
+您只能執行以下命令將其新增至目前的工作階段:
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOneProjectInDirectory">
+        <source>Found more than one project in `{0}`. Specify which one to use.</source>
+        <target state="translated">在 `{0}` 中找到多個專案。請指定要使用的專案。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectAlreadyHasAreference">
+        <source>Project already has a reference to `{0}`.</source>
+        <target state="translated">專案已經有 `{0}` 的參考。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectReferenceCouldNotBeFound">
+        <source>Project reference `{0}` could not be found.</source>
+        <target state="translated">找不到專案參考 `{0}`。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectReferenceRemoved">
+        <source>Project reference `{0}` removed.</source>
+        <target state="translated">專案參考 `{0}` 已移除。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Project">
+        <source>Project</source>
+        <target state="translated">專案</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectFile">
+        <source>Project file</source>
+        <target state="translated">專案檔</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Reference">
+        <source>Reference</source>
+        <target state="translated">參考</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectReference">
+        <source>Project reference</source>
+        <target state="translated">專案參考</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReference">
+        <source>Package reference</source>
+        <target state="translated">套件參考</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="P2P">
+        <source>Project to Project</source>
+        <target state="translated">專案對專案</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="P2PReference">
+        <source>Project to Project reference</source>
+        <target state="translated">專案對專案參考</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Package">
+        <source>Package</source>
+        <target state="translated">套件</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Solution">
+        <source>Solution</source>
+        <target state="translated">解決方案</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionFile">
+        <source>Solution file</source>
+        <target state="translated">方案檔</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Executable">
+        <source>Executable</source>
+        <target state="translated">可執行檔</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Library">
+        <source>Library</source>
+        <target state="translated">程式庫</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Program">
+        <source>Program</source>
+        <target state="translated">程式</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Application">
+        <source>Application</source>
+        <target state="translated">應用程式</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceAddedToTheProject">
+        <source>Reference `{0}` added to the project.</source>
+        <target state="translated">參考 `{0}` 已新增至專案。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Add">
+        <source>Add</source>
+        <target state="translated">加入</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Remove">
+        <source>Remove</source>
+        <target state="translated">移除</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Delete">
+        <source>Delete</source>
+        <target state="translated">刪除</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Update">
+        <source>Update</source>
+        <target state="translated">更新</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="New">
+        <source>New</source>
+        <target state="translated">新建</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="List">
+        <source>List</source>
+        <target state="translated">列出</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Load">
+        <source>Load</source>
+        <target state="translated">載入</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Save">
+        <source>Save</source>
+        <target state="translated">儲存</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Find">
+        <source>Find</source>
+        <target state="translated">尋找</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Error">
+        <source>Error</source>
+        <target state="translated">錯誤</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Warning">
+        <source>Warning</source>
+        <target state="translated">警告</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="File">
+        <source>File</source>
+        <target state="translated">檔案</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Directory">
+        <source>Directory</source>
+        <target state="translated">目錄</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Type">
+        <source>Type</source>
+        <target state="translated">型別</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Value">
+        <source>Value</source>
+        <target state="translated">值</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Group">
+        <source>Group</source>
+        <target state="translated">群組</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAddedToY">
+        <source>{0} added to {1}.</source>
+        <target state="translated">{0} 已新增至 {1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XRemovedFromY">
+        <source>{0} removed from {1}.</source>
+        <target state="translated">{0} 已從 {1} 移除。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XDeletedFromY">
+        <source>{0} deleted from {1}.</source>
+        <target state="translated">{0} 已從 {1} 刪除。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XSuccessfullyUpdated">
+        <source>{0} successfully updated.</source>
+        <target state="translated">{0} 已成功更新。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XIsInvalid">
+        <source>{0} is invalid.</source>
+        <target state="translated">{0} 無效。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XYFoundButInvalid">
+        <source>{0} `{1}` found but is invalid.</source>
+        <target state="translated">找到 {0} `{1}` 但無效。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XFoundButInvalid">
+        <source>`{0}` found but is invalid.</source>
+        <target state="translated">找到 `{0}` 但無效。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OperationInvalid">
+        <source>Operation is invalid.</source>
+        <target state="translated">作業無效。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OperationXInvalid">
+        <source>Operation {0} is invalid.</source>
+        <target state="translated">作業 {0} 無效。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XNotFound">
+        <source>{0} not found.</source>
+        <target state="translated">找不到 {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XOrYNotFound">
+        <source>{0} or {1} not found.</source>
+        <target state="translated">找不到 {0} 或 {1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XOrYNotFoundInZ">
+        <source>{0} or {1} not found in `{2}`.</source>
+        <target state="translated">在 `{2}` 中找不到 {0} 或 {1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileNotFound">
+        <source>File `{0}` not found.</source>
+        <target state="translated">找不到檔案 `{0}`。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XDoesNotExist">
+        <source>{0} does not exist.</source>
+        <target state="translated">{0} 不存在。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XYDoesNotExist">
+        <source>{0} `{1}` does not exist.</source>
+        <target state="translated">{0} `{1}` 不存在。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOneXFound">
+        <source>More than one {0} found.</source>
+        <target state="translated">找到多個 {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAlreadyContainsY">
+        <source>{0} already contains {1}.</source>
+        <target state="translated">{0} 已經包含 {1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAlreadyContainsYZ">
+        <source>{0} already contains {1} `{2}`.</source>
+        <target state="translated">{0} 已經包含 {1} `{2}`。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAlreadyHasY">
+        <source>{0} already has {1}.</source>
+        <target state="translated">{0} 已經有 {1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XAlreadyHasYZ">
+        <source>{0} already has {1} `{2}`.</source>
+        <target state="translated">{0} 已經有 {1} `{2}`。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XWasNotExpected">
+        <source>{0} was not expected.</source>
+        <target state="translated">不應該是 {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="XNotProvided">
+        <source>{0} not provided.</source>
+        <target state="translated">未提供 {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOne">
+        <source>Specify at least one {0}.</source>
+        <target state="translated">請至少指定一個 {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotConnectWithTheServer">
+        <source>Could not connect with the server.</source>
+        <target state="translated">無法與伺服器連線。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentIsInvalid">
+        <source>Required argument {0} is invalid.</source>
+        <target state="translated">必要引數 {0} 無效。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionIsInvalid">
+        <source>Option {0} is invalid.</source>
+        <target state="translated">選項 {0} 無效。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentIsInvalid">
+        <source>Argument {0} is invalid.</source>
+        <target state="translated">引數 {0} 無效。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentNotPassed">
+        <source>Required argument {0} was not provided.</source>
+        <target state="translated">未提供必要引數 {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindProjectOrDirectory">
+        <source>Could not find project or directory `{0}`.</source>
+        <target state="translated">找不到專案或目錄 `{0}`。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FoundInvalidProject">
+        <source>Found a project `{0}` but it is invalid.</source>
+        <target state="translated">找到專案 `{0}` 但無效。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidProject">
+        <source>Invalid project `{0}`.</source>
+        <target state="translated">專案 `{0}` 無效。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindSolutionIn">
+        <source>Specified solution file {0} does not exist, or there is no solution file in the directory.</source>
+        <target state="translated">指定的方案檔 {0} 不存在，或目錄中沒有方案檔。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotFindSolutionOrDirectory">
+        <source>Could not find solution or directory `{0}`.</source>
+        <target state="translated">找不到解決方案或目錄 `{0}`。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionDoesNotExist">
+        <source>Specified solution file {0} does not exist, or there is no solution file in the directory.</source>
+        <target state="translated">指定的方案檔 {0} 不存在，或目錄中沒有方案檔。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceIsInvalid">
+        <source>Reference `{0}` is invalid.</source>
+        <target state="translated">參考 `{0}` 無效。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOneReferenceToAdd">
+        <source>You must specify at least one reference to add.</source>
+        <target state="translated">您必須指定至少一個要新增的參考。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceDoesNotExist">
+        <source>Package reference `{0}` does not exist.</source>
+        <target state="translated">套件參考 `{0}` 不存在。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceIsInvalid">
+        <source>Package reference `{0}` is invalid.</source>
+        <target state="translated">套件參考 `{0}` 無效。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOnePackageReferenceToAdd">
+        <source>You must specify at least one package to add.</source>
+        <target state="translated">您必須指定至少一個要新增的套件。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceAddedToTheProject">
+        <source>Package reference `{0}` added to the project.</source>
+        <target state="translated">套件參考 `{0}` 已新增至專案。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectAlreadyHasAPackageReference">
+        <source>Project {0} already has a reference `{1}`.</source>
+        <target state="translated">專案 {0} 已經有參考 `{1}`。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PleaseSpecifyVersion">
+        <source>Specify a version of the package.</source>
+        <target state="translated">請指定套件的版本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectDoesNotExist">
+        <source>Project `{0}` does not exist.</source>
+        <target state="translated">專案 `{0}` 不存在。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectIsInvalid">
+        <source>Project `{0}` is invalid.</source>
+        <target state="translated">專案 `{0}` 無效。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOneProjectToAdd">
+        <source>You must specify at least one project to add.</source>
+        <target state="translated">您必須指定至少一個要新增的專案。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectAddedToTheSolution">
+        <source>Project `{0}` added to the solution.</source>
+        <target state="translated">專案 `{0}` 已新增至解決方案。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceNotFoundInTheProject">
+        <source>Specified reference {0} does not exist in project {1}.</source>
+        <target state="translated">指定的參考 {0} 不存在於專案 {1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceRemoved">
+        <source>Reference `{0}` deleted from the project.</source>
+        <target state="translated">參考 `{0}` 已從專案刪除。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOneReferenceToRemove">
+        <source>You must specify at least one reference to remove.</source>
+        <target state="translated">您必須指定至少一個要刪除的參考。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReferenceDeleted">
+        <source>Reference `{0}` deleted.</source>
+        <target state="translated">參考 `{0}` 已刪除。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceNotFoundInTheProject">
+        <source>Package reference `{0}` could not be found in the project.</source>
+        <target state="translated">在專案中找不到套件參考 `{0}`。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceRemoved">
+        <source>Reference `{0}` deleted from the project.</source>
+        <target state="translated">參考 `{0}` 已從專案刪除。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOnePackageReferenceToRemove">
+        <source>You must specify at least one package reference to remove.</source>
+        <target state="translated">您必須指定至少一個要移除的套件參考。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageReferenceDeleted">
+        <source>Package reference `{0}` deleted.</source>
+        <target state="translated">套件參考 `{0}` 已刪除。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectNotFoundInTheSolution">
+        <source>Project `{0}` could not be found in the solution.</source>
+        <target state="translated">在解決方案中找不到專案 `{0}`。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectRemoved">
+        <source>Project `{0}` removed from solution.</source>
+        <target state="translated">專案 `{0}` 已從解決方案移除。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyAtLeastOneProjectToRemove">
+        <source>You must specify at least one project to remove.</source>
+        <target state="translated">您必須至少指定一個要移除的專案。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectDeleted">
+        <source>Project `{0}` deleted from solution.</source>
+        <target state="translated">專案 `{0}` 已從解決方案刪除。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoReferencesFound">
+        <source>There are no {0} references in project {1}.</source>
+        <target state="translated">專案 {1} 中沒有任何 {0} 參考。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoProjectsFound">
+        <source>No projects found in the solution.</source>
+        <target state="translated">在解決方案中找不到任何專案。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PleaseSpecifyNewVersion">
+        <source>Specify new version of the package.</source>
+        <target state="translated">請指定新的套件版本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PleaseSpecifyWhichPackageToUpdate">
+        <source>Specify which package to update.</source>
+        <target state="translated">請指定要更新的套件。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NothingToUpdate">
+        <source>Nothing to update.</source>
+        <target state="translated">沒有要更新的項目。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EverythingUpToDate">
+        <source>Everything is already up-to-date.</source>
+        <target state="translated">所有項目均已處於最新狀態。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageVersionUpdatedTo">
+        <source>Version of package `{0}` updated to `{1}`.</source>
+        <target state="translated">套件 `{0}` 的版本已更新為 `{1}`。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageVersionUpdated">
+        <source>Version of package `{0}` updated.</source>
+        <target state="translated">套件 `{0}` 的版本已更新。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotUpdateTheVersion">
+        <source>Could not update the version of the package `{0}`.</source>
+        <target state="translated">無法更新套件 `{0}` 的版本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCreatedSuccessfully">
+        <source>The template {0} created successfully. run "dotnet restore" to get started!</source>
+        <target state="translated">已成功建立範本 {0}。請執行 "dotnet restore"，開始使用!</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInstalledSuccesfully">
+        <source>The template {0} installed successfully. You can use "dotnet new {0}" to get started with the new template.</source>
+        <target state="translated">已成功安裝範本 {0}。您可以使用 "dotnet new {0}" 來開始使用新的範本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCreateError">
+        <source>Template {0} could not be created. Error returned was: {1}.</source>
+        <target state="translated">無法建立範本 {0}。傳回的錯誤是: {1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInstallError">
+        <source>Template {0} could not be installed. Error returned was: {1}.</source>
+        <target state="translated">無法安裝範本 {0}。傳回的錯誤是: {1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifiedNameExists">
+        <source>Specified name {0} already exists. Specify a different name.</source>
+        <target state="translated">指定的名稱 {0} 已經存在。請指定其他名稱。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifiedAliasExists">
+        <source>Specified alias {0} already exists. Specify a different alias.</source>
+        <target state="translated">指定的別名 {0} 已經存在。請指定其他別名。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MandatoryParameterMissing">
+        <source>Mandatory parameter {0} missing for template {1}. </source>
+        <target state="translated">遺漏範本 {1} 的強制參數 {0}。 </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectReferenceOneOrMore">
+        <source>Project reference(s)</source>
+        <target state="translated">專案參考</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredCommandNotPassed">
+        <source>Required command was not provided.</source>
+        <target state="translated">未提供所需的命令。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOneSolutionInDirectory">
+        <source>Found more than one solution file in {0}. Specify which one to use.</source>
+        <target state="translated">在 {0} 中找到多個解決方案檔。請指定要使用的檔案。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionAlreadyContainsProject">
+        <source>Solution {0} already contains project {1}.</source>
+        <target state="translated">解決方案 {0} 已經包含專案 {1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentsProjectOrSolutionDescription">
+        <source>The project or solution to operation on. If a file is not specified, the current directory is searched.</source>
+        <target state="translated">要運作的專案或解決方案。若未指定檔案，即會搜尋目前目錄。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFramework">
+        <source>FRAMEWORK</source>
+        <target state="translated">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectNotCompatibleWithFrameworks">
+        <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Review the project you are trying to add and verify that is compatible with the following targets:</source>
+        <target state="translated">因為兩個專案間的目標 Framework 不相容，所以無法新增專案 `{0}`。請檢閱您嘗試新增的專案，並驗證其與下列目標相容:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectDoesNotTargetFramework">
+        <source>Project `{0}` does not target framework `{1}`.</source>
+        <target state="translated">專案 `{0}` 未將架構 `{1}` 設為目標。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCouldNotBeEvaluated">
+        <source>Project `{0}` could not be evaluated. Evaluation failed with following error:
+{1}.</source>
+        <target state="translated">無法評估專案 `{0}`。評估失敗，發生下列錯誤:
+{1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedProjectType">
+        <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Contact your SDK provider for support.</source>
+        <target state="translated">專案 '{0}' 的專案類型不明，因而無法新增至解決方案檔。請連絡 SDK 提供者，以取得支援。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidSolutionFormatString">
+        <source>Invalid solution `{0}`. {1}.</source>
+        <target state="translated">解決方案 `{0}` 無效。{1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidProjectWithExceptionMessage">
+        <source>Invalid project `{0}`. {1}.</source>
+        <target state="translated">專案 `{0}` 無效。{1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VerbosityOptionDescription">
+        <source>Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
+        <target state="translated">設定 MSBuild 的詳細資訊層級。允許的值為 q[uiet]、m[inimal]、n[ormal]、d[etailed] 及 diag[nostic]。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdVersionSuffixDescription">
+        <source>Set the value of the $(VersionSuffix) property to use when building the project.</source>
+        <target state="translated">設定建置專案時，要使用之 $(VersionSuffix) 屬性的值。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShowHelpDescription">
+        <source>Show command line help.</source>
+        <target state="translated">顯示命令列說明。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoRestoreDescription">
+        <source>Do not restore the project before building.</source>
+        <target state="translated">建置前請勿還原該專案。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectRemovedFromTheSolution">
+        <source>Project `{0}` removed from the solution.</source>
+        <target state="translated">專案 `{0}` 已從解決方案移除。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsInvalidXml">
+        <source>Invalid XML: {0}</source>
+        <target state="translated">XML 無效: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathLinuxNeedLogout">
+        <source>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</source>
+        <target state="translated">因為您剛才安裝了 .NET Core SDK，您必須先登出或重新啟動，才能執行您安裝的工具。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathOSXNeedReopen">
+        <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
+        <target state="translated">因為您剛才安裝了 .NET Core SDK，您必須先重新開啟終端機，才能執行您安裝的工具。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathWindowsNeedReopen">
+        <source>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
+        <target state="translated">因為您剛才安裝了 .NET Core SDK，您必須先重新開啟 [命令提示字元] 視窗，才能執行您安裝的工具。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMissingCommandName">
+        <source>Tool defines a command with a missing name setting.</source>
+        <target state="translated">工具使用了缺少的名稱設定定義命令。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMissingEntryPoint">
+        <source>Command '{0}' is missing an entry point setting.</source>
+        <target state="translated">命令 '{0}' 缺少進入點設定。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsInvalidCommandName">
+        <source>Command '{0}' contains one or more of the following invalid characters: {1}.</source>
+        <target state="translated">命令 '{0}' 包含下列一或多個無效的字元: {1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMoreThanOneCommand">
+        <source>More than one command is defined for the tool.</source>
+        <target state="translated">為工具定義了多個命令。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsUnsupportedRunner">
+        <source>Command '{0}' uses unsupported runner '{1}'."</source>
+        <target state="translated">命令 '{0}' 使用了不支援的執行器 '{1}'。"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPackageConflictPackageId">
+        <source>Tool '{0}' (version '{1}') is already installed.</source>
+        <target state="translated">工具 '{0}' ('{1}' 版) 已經安裝。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShellShimConflict">
+        <source>Command '{0}' conflicts with an existing command from another tool.</source>
+        <target state="translated">命令 '{0}' 與來自另一個工具的現有命令發生衝突。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCreateShimForEmptyExecutablePath">
+        <source>Cannot create shell shim for an empty executable path.</source>
+        <target state="translated">無法為空白的可執行檔路徑建立殼層填充碼。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCreateShimForEmptyCommand">
+        <source>Cannot create shell shim for an empty command.</source>
+        <target state="translated">無法為空白的命令建立殼層填充碼。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToRetrieveToolConfiguration">
+        <source>Failed to retrieve tool configuration: {0}</source>
+        <target state="translated">無法擷取工具組態: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathLinuxManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">工具目錄 '{0}' 目前不在 PATH 環境變數中。
+若目前使用 bash，可執行下列命令將其新增至您的設定檔:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# 新增 .NET Core SDK 工具
+export PATH="$PATH:{0}"
+EOF
+
+您可執行下列命令，將其新增至目前的工作階段:
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathWindowsManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+
+You can add the directory to the PATH by running the following command:
+
+setx PATH "%PATH%;{0}"
+</source>
+        <target state="translated">工具目錄 '{0}' 目前不在 PATH 環境變數上。
+
+您可執行下列命令將目錄新增至 PATH:
+
+setx PATH "%PATH%;{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToCreateShellShim">
+        <source>Failed to create tool shim for command '{0}': {1}</source>
+        <target state="translated">無法為命令 '{0}' 建立工具填充碼: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToRemoveShellShim">
+        <source>Failed to remove tool shim for command '{0}': {1}</source>
+        <target state="translated">無法為命令 '{0}' 移除工具填充碼: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedSettingShimPermissions">
+        <source>Failed to set user executable permissions for shell shim: {0}</source>
+        <target state="translated">無法為殼層填充碼設定使用者可執行檔權限: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToInstallToolPackage">
+        <source>Failed to install tool package '{0}': {1}</source>
+        <target state="translated">無法安裝工具套件 '{0}': {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToUninstallToolPackage">
+        <source>Failed to uninstall tool package '{0}': {1}</source>
+        <target state="translated">無法將工具套件 '{0}' 解除安裝: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnMaxWidthMustBeGreaterThanZero">
+        <source>Column maximum width must be greater than zero.</source>
+        <target state="translated">資料行寬度上限必須大於零。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingToolEntryPointFile">
+        <source>Entry point file '{0}' for command '{1}' was not found in the package.</source>
+        <target state="translated">無法在套件中找到命令 '{1}' 的進入點檔案 '{0}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingToolSettingsFile">
+        <source>Settings file 'DotnetToolSettings.xml' was not found in the package.</source>
+        <target state="translated">無法在套件中找到設定檔 'DotnetToolSettings.xml'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToFindStagedToolPackage">
+        <source>Failed to find staged tool package '{0}'.</source>
+        <target state="translated">無法找到分段工具套件 '{0}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">
+        <source>The command name '{0}' cannot begin with a leading dot (.).</source>
+        <target state="translated">命令名稱 '{0}' 的開頭不能為點 (.)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsHigher">
+        <source>Format version is higher than supported. This tool may not be supported in this SDK version. Update your SDK.</source>
+        <target state="translated">格式版本高於支援的版本。此 SDK 版本可能不支援這項工具。請更新您的 SDK。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsMalformed">
+        <source>Format version is malformed. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
+        <target state="translated">格式版本的格式不正確。此 SDK 版本可能不支援這項工具。請連絡該工具的作者。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsMissing">
+        <source>Format version is missing. This tool may not be supported in this SDK version. Contact the author of the tool.</source>
+        <target state="translated">遺漏格式版本。此 SDK 版本可能不支援這項工具。請連絡該工具的作者。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToSetToolsPathEnvironmentVariable">
+        <source>Failed to add '{0}' to the PATH environment variable. Add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
+        <target state="translated">無法將 '{0}' 新增到 PATH 環境變數。請將此目錄新增到您的 PATH，以使用由 'dotnet tool install' 所安裝的工具。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOnePackagedShimAvailable">
+        <source>More than one packaged shim is available: {0}.</source>
+        <target state="translated">有多個經過封裝的填充碼可用: {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToReadNuGetLockFile">
+        <source>Failed to read NuGet LockFile for tool package '{0}': {1}</source>
+        <target state="translated">無法讀取工具套件 '{0}' 的 NuGet LockFile: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectArgumentName">
+        <source>PROJECT</source>
+        <target state="translated">PROJECT</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectArgumentDescription">
+        <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
+        <target state="translated">要進行作業的專案檔。若未指定檔案，此命令將會搜尋目前的目錄以取得一個檔案。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LevelArgumentName">
+        <source>LEVEL</source>
+        <target state="translated">LEVEL</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkArgumentName">
+        <source>FRAMEWORK</source>
+        <target state="translated">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeIdentifierArgumentName">
+        <source>RUNTIME_IDENTIFIER</source>
+        <target state="translated">RUNTIME_IDENTIFIER</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationArgumentName">
+        <source>CONFIGURATION</source>
+        <target state="translated">組態</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionSuffixArgumentName">
+        <source>VERSION_SUFFIX</source>
+        <target state="translated">VERSION_SUFFIX</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionOrProjectArgumentDescription">
+        <source>The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.</source>
+        <target state="translated">要操作的專案或解決方案。若未指定檔案，命令就會在目前的目錄中搜尋一個檔案。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionOrProjectArgumentName">
+        <source>PROJECT | SOLUTION</source>
+        <target state="translated">專案 | 解決方案</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

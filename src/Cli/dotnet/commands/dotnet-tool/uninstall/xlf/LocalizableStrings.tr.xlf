@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="LocalOptionDescription">
+        <source>Uninstall the tool and remove it from the local tool manifest.</source>
+        <target state="translated">Aracı kaldırın ve yerel araç bildiriminden çıkarın.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionDescription">
+        <source>Path to the manifest file.</source>
+        <target state="translated">Bildirim dosyasının yolu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoManifestFileContainPackageId">
+        <source>Cannot find a manifest file that contains package id '{0}'.</source>
+        <target state="translated">'{0}' paket kimliğini içeren bildirim dosyası bulunamıyor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentDescription">
+        <source>The NuGet Package Id of the tool to uninstall.</source>
+        <target state="translated">Kaldırılacak aracın NuGet Paket Kimliği.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Uninstall a global tool or local tool.</source>
+        <target state="translated">Genel veya yerel bir aracı kaldırın.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentName">
+        <source>PACKAGE_ID</source>
+        <target state="translated">PACKAGE_ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageId">
+        <source>Specify one tool Package Id to uninstall.</source>
+        <target state="translated">Kaldırılacak tek bir aracın Paket Kimliğini belirtin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalOptionDescription">
+        <source>Uninstall the tool from the current user's tools directory.</source>
+        <target state="translated">Aracı geçerli kullanıcının araçlar dizininden kaldırır.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UninstallLocalToolSucceeded">
+        <source>Tool '{0}' was successfully uninstalled and removed from manifest file {1}.</source>
+        <target state="translated">'{0}' aracı başarıyla kaldırıldı ve {1} bildirim dosyasından çıkarıldı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UninstallSucceeded">
+        <source>Tool '{0}' (version '{1}') was successfully uninstalled.</source>
+        <target state="translated">'{0}' aracı (sürüm '{1}') başarıyla kaldırıldı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolNotInstalled">
+        <source>A tool with the package Id '{0}' could not be found. 
+
+Tools are uninstalled using their package Id which may be different 
+from the tool name you use when calling the tool. You can find the tool names 
+and the corresponding package Ids for installed tools using the command
+'dotnet tool list'.</source>
+        <target state="translated">'{0}' paket kimliğine sahip araç bulunamadı. 
+
+Araçlar, aracı çağırırken kullandığınız araç adından farklı olabilen 
+paket kimlikleri kullanılarak kaldırılır. Yüklü araçların araç adlarını ve 
+karşılık gelen paket kimliklerini bulmak için 
+'dotnet tool list' komutunu kullanabilirsiniz.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolHasMultipleVersionsInstalled">
+        <source>Tool '{0}' has multiple versions installed and cannot be uninstalled.</source>
+        <target state="translated">'{0}' aracının birden fazla sürümü yüklü ve kaldırılamıyor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToUninstallTool">
+        <source>Failed to uninstall tool '{0}': {1}</source>
+        <target state="translated">'{0}' aracı kaldırılamadı: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="translated">Yerel seçeneği (--local), genel seçeneği (--global), araç yolu seçeneği (--tool-path) arasından yalnızca biri seçilebilir. Seçeneklerden yalnızca birini belirtin: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidToolPathOption">
+        <source>Tool path '{0}' does not exist.</source>
+        <target state="translated">'{0}' araç yolu yok.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionDescription">
+        <source>The directory containing the tool to uninstall.</source>
+        <target state="translated">Kaldırılacak aracı içeren dizin.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

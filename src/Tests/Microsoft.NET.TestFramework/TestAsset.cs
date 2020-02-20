@@ -70,22 +70,12 @@ namespace Microsoft.NET.TestFramework
             foreach (string srcFile in sourceFiles)
             {
                 string destFile = srcFile.Replace(_testAssetRoot, Path);
-                // For project.json, we need to replace the version of the Microsoft.DotNet.Core.Sdk with the actual build version
+                
                 if (System.IO.Path.GetFileName(srcFile).EndsWith("proj"))
                 {
-                    var project = XDocument.Load(srcFile);
-
-                    using (var file = File.CreateText(destFile))
-                    {
-                        project.Save(file);
-                    }
-
                     _projectFiles.Add(destFile);
                 }
-                else
-                {
-                    File.Copy(srcFile, destFile, true);
-                }
+                File.Copy(srcFile, destFile, true);
             }
 
             return this;

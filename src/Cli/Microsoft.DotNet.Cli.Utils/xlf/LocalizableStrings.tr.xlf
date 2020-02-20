@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="MalformedText">
+        <source>Malformed command text '{0}'</source>
+        <target state="translated">Hatalı biçimlendirilmiş komut metni: '{0}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToLocateDotnetMultiplexer">
+        <source>Unable to locate dotnet multiplexer</source>
+        <target state="translated">Dotnet çoğullayıcısı bulunamadı</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileNotFound">
+        <source>File not found `{0}`.</source>
+        <target state="translated">Dosya bulunamadı `{0}`.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectNotRestoredOrRestoreFailed">
+        <source>The project may not have been restored or restore failed - run `dotnet restore`</source>
+        <target state="translated">Proje geri yüklenmemiş veya geri yükleme başarısız olmuş olabilir - `dotnet restore` çalıştırın</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoExecutableFoundMatchingCommand">
+        <source>Could not execute because the specified command or file was not found.
+Possible reasons for this include:
+  * You misspelled a built-in dotnet command.
+  * You intended to execute a .NET Core program, but {0} does not exist.
+  * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
+        <target state="translated">Belirtilen komut veya dosya bulunamadığından yürütülemedi.
+Bunun nedeni şunlardan biri olabilir:
+  * Yerleşik bir dotnet komutunu yanlış yazdınız.
+  * Bir .NET Core programını yürütmeyi amaçladınız, ancak {0} mevcut değil.
+  * Genel bir aracı çalıştırmayı amaçladınız, ancak adı bu olan dotnet ön ekli yürütülebilir dosya PATH üzerinde bulunamadı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WaitingForDebuggerToAttach">
+        <source>Waiting for debugger to attach. Press ENTER to continue</source>
+        <target state="translated">Hata ayıklayıcının eklenmesi bekleniyor. Devam etmek için ENTER tuşuna basın</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProcessId">
+        <source>Process ID: {0}</source>
+        <target state="translated">İşlem kimliği: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotAccessAssetsFile">
+        <source>Could not access assets file.</source>
+        <target state="translated">Varlık dosyasına erişilemiyor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WriteLineForwarderSetPreviously">
+        <source>WriteLine forwarder set previously</source>
+        <target state="translated">WriteLine ileticisi önceden ayarlandı</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AlreadyCapturingStream">
+        <source>Already capturing stream!</source>
+        <target state="translated">Akış zaten yakalanıyor!</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunningFileNameArguments">
+        <source>Running {0} {1}</source>
+        <target state="translated">{0} {1} çalıştırılıyor</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProcessExitedWithCode">
+        <source>&lt; {0} exited with {1} in {2} ms.</source>
+        <target state="translated">&lt; {0}, {1} ile {2} ms'de çıktı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToInvokeMemberNameAfterCommand">
+        <source>Unable to invoke {0} after the command has been run</source>
+        <target state="translated">Komut çalıştırıldıktan sonra {0} çağrılamıyor</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetSdkInfoLabel">
+        <source>.NET Core SDK (reflecting any global.json):</source>
+        <target state="translated">.NET Core SDK (varsa global.json’u yansıtır):</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetRuntimeInfoLabel">
+        <source>Runtime Environment:</source>
+        <target state="translated">Çalışma Zamanı Ortamı:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EmbedAppNameInHostAppHostHasBeenModified">
+        <source>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
+        <target state="translated">'{0}', uygulama adının yazılacağı yeri işaretlemesi için beklenen yer tutucu bayt dizisini ('{1}') içermediğinden uygulama konak yürütülebiliri olarak kullanılamıyor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EmbedAppNameInHostFileNameIsTooLong">
+        <source>Given file name '{0}' is longer than 1024 bytes</source>
+        <target state="translated">Belirtilen dosya adı ('{0})' 1024 bayttan uzun</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotFindCommandAvailableAsTool">
+        <source>Cannot find command 'dotnet {0}', run the following command to install
+
+dotnet tool install --global {1}</source>
+        <target state="translated">'dotnet {0}' komutu bulunamıyor, yüklemek için aşağıdaki komutu çalıştırın
+
+dotnet tool install --global {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotnetCliHomeUsed">
+        <source>Using home directory '{0}' set by the '{1}' environment variable.</source>
+        <target state="translated">'{1}' ortam değişkeni tarafından ayarlanan '{0}' giriş dizini kullanılıyor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetSdkInfo">
+        <source>.NET Core SDK</source>
+        <target state="translated">.NET Core SDK'sı</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

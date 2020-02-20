@@ -1,0 +1,167 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="LastArgumentMultiValueError">
+        <source>The last argument '{0}' accepts multiple values. No more argument can be added.</source>
+        <target state="translated">最後の引数 '{0}' は複数の値を受け入れます。さらに引数を追加することはできません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedValueForOptionError">
+        <source>Unexpected value '{0}' for option '{1}'</source>
+        <target state="translated">オプション '{1}' の予期しない値 '{0}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedArgumentError">
+        <source>Unrecognized {0} '{1}'</source>
+        <target state="translated">認識できない {0} '{1}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResponseFileNotFoundError">
+        <source>Response file '{0}' doesn't exist.</source>
+        <target state="translated">応答ファイル '{0}' は存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShowHelpInfo">
+        <source>Show command line help.</source>
+        <target state="translated">コマンド ラインのヘルプを表示します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShowVersionInfo">
+        <source>Show version information</source>
+        <target state="translated">バージョン情報を表示する</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShowHintInfo">
+        <source>Specify --{0} for a list of available options and commands.</source>
+        <target state="translated">利用可能なオプションとコマンドの一覧に対して --{0} を指定します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageHeader">
+        <source>Usage:</source>
+        <target state="translated">使用法:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageArgumentsToken">
+        <source> [arguments]</source>
+        <target state="translated"> [arguments]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageArgumentsHeader">
+        <source>Arguments:</source>
+        <target state="translated">引数:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageOptionsToken">
+        <source> [options]</source>
+        <target state="translated"> [options]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageOptionsHeader">
+        <source>Options:</source>
+        <target state="translated">オプション:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandToken">
+        <source> [command]</source>
+        <target state="translated"> [command]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandsHeader">
+        <source>Commands:</source>
+        <target state="translated">コマンド:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandsDetailHelp">
+        <source>Use "{0} [command] --help" for more information about a command.</source>
+        <target state="translated">コマンドに関する詳細情報については、"{0} [command] --help" を使用します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandArgs">
+        <source> [args]</source>
+        <target state="translated"> [args]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandAdditionalArgs">
+        <source> [[--] &lt;additional arguments&gt;...]]</source>
+        <target state="translated"> [[--] &lt;additional arguments&gt;...]]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsageCommandsAdditionalArgsHeader">
+        <source>Additional Arguments:</source>
+        <target state="translated">追加引数:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidTemplateError">
+        <source>Invalid template pattern '{0}'</source>
+        <target state="translated">無効なテンプレート パターン '{0}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildAdditionalArgsHelpText">
+        <source>Any extra options that should be passed to MSBuild. See 'dotnet msbuild -h' for available options.</source>
+        <target state="translated">MSBuild に渡す必要があるすべての追加オプション。利用可能なオプションについては、'dotnet msbuild -h' をご覧ください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionRequiresSingleValueWhichIsMissing">
+        <source>Required value for option '{0}' was not provided.</source>
+        <target state="translated">オプション '{0}' に必要な値が指定されませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandAcceptsOnlyOneArgument">
+        <source>Command '{0}' only accepts a single argument but {1} were provided.</source>
+        <target state="translated">コマンド '{0}' は 1 つの引数のみを受け入れますが、{1} が指定されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandAcceptsOnlyOneSubcommand">
+        <source>Command '{0}' only accepts a single subcommand but multiple were provided: {1}</source>
+        <target state="translated">コマンド '{0}' は 1 つのサブコマンドのみを受け入れますが、複数指定されました: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileDoesNotExist">
+        <source>File does not exist: {0}</source>
+        <target state="translated">ファイルが存在しません: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoArgumentsAllowed">
+        <source>Arguments not allowed for option: {0}</source>
+        <target state="translated">引数をオプションで使用できません: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionAcceptsOnlyOneArgument">
+        <source>Option '{0}' only accepts a single argument but {1} were provided.</source>
+        <target state="translated">オプション '{0}' は 1 つの引数のみを受け入れますが、{1} 個指定されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentMissingForCommand">
+        <source>Required argument missing for command: {0}</source>
+        <target state="translated">必要な引数がコマンドにありません: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredArgumentMissingForOption">
+        <source>Required argument missing for option: {0}</source>
+        <target state="translated">必要な引数がオプションにありません: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredCommandWasNotProvided">
+        <source>Required command was not provided.</source>
+        <target state="translated">必要なコマンドが指定されませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedArgument">
+        <source>Argument '{0}' not recognized. Must be one of: {1}</source>
+        <target state="translated">引数 '{0}' は認識されません。次のいずれかである必要があります: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedCommandOrArgument">
+        <source>Unrecognized command or argument '{0}'</source>
+        <target state="translated">認識されないコマンドまたは引数 '{0}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedOption">
+        <source>Option '{0}' not recognized. Must be one of: {1}</source>
+        <target state="translated">オプション '{0}' は認識されません。次のいずれかである必要があります: {1}</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), testAsset.props))\testAsset.props" />
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFrameworks>net451;netcoreapp1.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
+    <SomeItemCausingThisGroupToNotBeUniform Include="foo" />
+    <ProjectReference Include="..\Lib\Lib.csproj" />
+  </ItemGroup>
+</Project>

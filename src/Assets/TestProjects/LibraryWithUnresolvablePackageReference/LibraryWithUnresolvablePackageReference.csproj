@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.5</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+  	<PackageReference Include="Something.Nonexistent" Version="1.1.1" />
+  </ItemGroup>
+
+</Project>

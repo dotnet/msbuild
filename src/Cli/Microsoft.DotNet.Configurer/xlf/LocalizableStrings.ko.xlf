@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="FailedToDetermineUserHomeDirectory">
+        <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
+        <target state="translated">사용자의 홈 디렉터리를 확인할 수 없습니다. '{0}' 환경 변수를 설정하여 사용할 디렉터리를 지정하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FirstTimeMessageMoreInformation">
+        <source>----------------
+Installed an ASP.NET Core HTTPS development certificate.
+To trust the certificate run 'dotnet dev-certs https --trust' (Windows and macOS only).
+Learn about HTTPS: https://aka.ms/dotnet-https
+----------------
+Write your first app: https://aka.ms/dotnet-hello-world
+Find out what's new: https://aka.ms/dotnet-whats-new
+Explore documentation: https://aka.ms/dotnet-docs
+Report issues and find source on GitHub: https://github.com/dotnet/core
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
+--------------------------------------------------------------------------------------</source>
+        <target state="needs-review-translation">----------------
+설명서 살펴보기: https://aka.ms/dotnet-docs
+GitHub에서 문제 보고 및 소스 찾기: https://github.com/dotnet/core
+새로운 기능 확인: https://aka.ms/dotnet-whats-new
+설치된 HTTPS 개발자 인증서에 대해 알아보기: https://aka.ms/aspnet-core-https
+사용 가능한 명령을 확인하려면 'dotnet --help' 사용 또는 다음 방문: https://aka.ms/dotnet-cli-docs
+첫 번째 앱 작성: https://aka.ms/first-net-core-app
+--------------------------------------------------------------------------------------</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FirstTimeMessageWelcome">
+        <source>Welcome to .NET Core {0}!
+---------------------
+SDK Version: {1}</source>
+        <target state="new">Welcome to .NET Core {0}!
+---------------------
+SDK Version: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TelemetryMessage">
+        <source>Telemetry
+---------
+The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
+        <target state="translated">원격 분석
+---------
+.NET Core 도구는 사용자 환경 개선을 위해 사용량 데이터를 수집합니다. 데이터는 익명입니다. Microsoft에서 데이터를 수집하여 커뮤니티와 공유합니다. 원하는 셸에서 DOTNET_CLI_TELEMETRY_OPTOUT 환경 변수를 '1' 또는 'true'로 설정하여 원격 분석을 옵트아웃할 수 있습니다.
+
+.NET Core CLI 도구 원격 분석에 대한 자세한 내용은 https://aka.ms/dotnet-cli-telemetry를 참조하세요.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

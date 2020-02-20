@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PackageIdArgumentName" xml:space="preserve">
+    <value>PACKAGE_ID</value>
+  </data>
+  <data name="PackageIdArgumentDescription" xml:space="preserve">
+    <value>The NuGet Package Id of the tool to install.</value>
+  </data>
+  <data name="SpecifyExactlyOnePackageId" xml:space="preserve">
+    <value>Specify one tool Package Id to install.</value>
+  </data>
+  <data name="VersionOptionName" xml:space="preserve">
+    <value>VERSION</value>
+  </data>
+  <data name="VersionOptionDescription" xml:space="preserve">
+    <value>The version of the tool package to install.</value>
+  </data>
+  <data name="AddSourceOptionName" xml:space="preserve">
+    <value>SOURCE</value>
+  </data>
+  <data name="AddSourceOptionDescription" xml:space="preserve">
+    <value>Add an additional NuGet package source to use during installation.</value>
+  </data>
+  <data name="CommandDescription" xml:space="preserve">
+    <value>Install global or local tool. Local tools are added to manifest and restored.</value>
+  </data>
+  <data name="ConfigFileOptionName" xml:space="preserve">
+    <value>FILE</value>
+  </data>
+  <data name="ConfigFileOptionDescription" xml:space="preserve">
+    <value>The NuGet configuration file to use.</value>
+  </data>
+  <data name="FrameworkOptionName" xml:space="preserve">
+    <value>FRAMEWORK</value>
+  </data>
+  <data name="FrameworkOptionDescription" xml:space="preserve">
+    <value>The target framework to install the tool for.</value>
+  </data>
+  <data name="NuGetConfigurationFileDoesNotExist" xml:space="preserve">
+    <value>NuGet configuration file '{0}' does not exist.</value>
+  </data>
+  <data name="InstallationSucceeded" xml:space="preserve">
+    <value>You can invoke the tool using the following command: {0}
+Tool '{1}' (version '{2}') was successfully installed.</value>
+  </data>
+  <data name="LocalToolInstallationSucceeded" xml:space="preserve">
+    <value>You can invoke the tool from this directory using the following commands: 'dotnet tool run {0}' or 'dotnet {0}'.
+Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</value>
+  </data>
+  <data name="GlobalOptionDescription" xml:space="preserve">
+    <value>Install the tool for the current user.</value>
+  </data>
+  <data name="LocalOptionDescription" xml:space="preserve">
+    <value>Install the tool and add to the local tool manifest (default).</value>
+  </data>
+  <data name="InstallFullCommandNameLocalized" xml:space="preserve">
+    <value>.NET Install Command</value>
+  </data>
+  <data name="InvalidToolConfiguration" xml:space="preserve">
+    <value>The settings file in the tool's NuGet package is invalid: {0}</value>
+  </data>
+  <data name="ToolInstallationFailed" xml:space="preserve">
+    <value>Tool '{0}' failed to install.</value>
+  </data>
+  <data name="ToolInstallationFailedWithRestoreGuidance" xml:space="preserve">
+    <value>Tool '{0}' failed to install. This failure may have been caused by:
+
+* You are attempting to install a preview release and did not use the --version option to specify the version.
+* A package by this name was found, but it was not a .NET Core tool.
+* The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
+* You mistyped the name of the tool.
+
+For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</value>
+  </data>
+  <data name="ToolInstallationFailedContactAuthor" xml:space="preserve">
+    <value>Tool '{0}' failed to install. Contact the tool author for assistance.</value>
+  </data>
+  <data name="ToolInstallationRestoreFailed" xml:space="preserve">
+    <value>The tool package could not be restored.</value>
+  </data>
+  <data name="ToolAlreadyInstalled" xml:space="preserve">
+    <value>Tool '{0}' is already installed.</value>
+  </data>
+  <data name="FailedToCreateToolShim" xml:space="preserve">
+    <value>Failed to create shell shim for tool '{0}': {1}</value>
+  </data>
+  <data name="InvalidNuGetVersionRange" xml:space="preserve">
+    <value>Specified version '{0}' is not a valid NuGet version range.</value>
+  </data>
+  <data name="InstallToolCommandInvalidGlobalAndLocalAndToolPath" xml:space="preserve">
+    <value>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</value>
+  </data>
+  <data name="ToolPathOptionName" xml:space="preserve">
+    <value>PATH</value>
+  </data>
+  <data name="ToolPathOptionDescription" xml:space="preserve">
+    <value>The directory where the tool will be installed. The directory will be created if it does not exist.</value>
+  </data>
+  <data name="ManifestPathOptionDescription" xml:space="preserve">
+    <value>Path to the manifest file.</value>
+  </data>
+  <data name="ManifestPathOptionName" xml:space="preserve">
+    <value>PATH</value>
+  </data>
+  <data name="LocalOptionDoesNotSupportFrameworkOption" xml:space="preserve">
+    <value>The local option(--local) does not support the framework option (--framework).</value>
+  </data>
+  <data name="NoManifestGuide" xml:space="preserve">
+    <value>If you intended to install a global tool, add `--global` to the command.
+If you would like to create a manifest, use `dotnet new tool-manifest`, usually in the repo root directory.</value>
+  </data>
+</root>

@@ -33,7 +33,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateAssemblyTitleAttribute Condition="'$(GenerateAssemblyTitleAttribute)' == ''">true</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyVersionAttribute Condition="'$(GenerateAssemblyVersionAttribute)' == ''">true</GenerateAssemblyVersionAttribute>
     <GenerateNeutralResourcesLanguageAttribute Condition="'$(GenerateNeutralResourcesLanguageAttribute)' == ''">true</GenerateNeutralResourcesLanguageAttribute>
+    <GenerateAssemblyMetadataAttributes Condition="'$(GenerateAssemblyMetadataAttributes)' == ''">true</GenerateAssemblyMetadataAttributes>
     <IncludeSourceRevisionInInformationalVersion Condition="'$(IncludeSourceRevisionInInformationalVersion)' == ''">true</IncludeSourceRevisionInInformationalVersion>
+    <GenerateInternalsVisibleToAttributes Condition="'$(GenerateInternalsVisibleToAttributes)' == ''">true</GenerateInternalsVisibleToAttributes>
   </PropertyGroup>
 
   <!-- 
@@ -42,9 +44,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     where CoreCompile is invoked without other potential hooks such as Compile or CoreBuild,
     etc., so we hook directly on to CoreCompile. Furthermore, we  must run *after* 
     PrepareForBuild to ensure that the intermediate directory has been created.
+
+    Targets that generate Compile items are also expected to run before
+    BeforeCompile targets (common targets convention).
    -->
   <Target Name="GenerateAssemblyInfo"
-          BeforeTargets="CoreCompile"
+          BeforeTargets="BeforeCompile;CoreCompile"
           DependsOnTargets="PrepareForBuild;CoreGenerateAssemblyInfo"
           Condition="'$(GenerateAssemblyInfo)' == 'true'" />
 
@@ -93,6 +98,15 @@ Copyright (c) .NET Foundation. All rights reserved.
       </AssemblyAttribute>
       <AssemblyAttribute Include="System.Resources.NeutralResourcesLanguageAttribute" Condition="'$(NeutralLanguage)' != '' and '$(GenerateNeutralResourcesLanguageAttribute)' == 'true'">
         <_Parameter1>$(NeutralLanguage)</_Parameter1>
+      </AssemblyAttribute>
+      <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo" Condition="%(InternalsVisibleTo.Identity) != '' and '$(GenerateInternalsVisibleToAttributes)' == 'true'">
+        <_Parameter1 Condition="'%(InternalsVisibleTo.Key)' != ''">%(InternalsVisibleTo.Identity), PublicKey=%(InternalsVisibleTo.Key)</_Parameter1>
+        <_Parameter1 Condition="'%(InternalsVisibleTo.Key)' == '' and '$(PublicKey)' != ''">%(InternalsVisibleTo.Identity), PublicKey=$(PublicKey)</_Parameter1>
+        <_Parameter1 Condition="'%(InternalsVisibleTo.Key)' == '' and '$(PublicKey)' == ''">%(InternalsVisibleTo.Identity)</_Parameter1>
+      </AssemblyAttribute>
+      <AssemblyAttribute Include="System.Reflection.AssemblyMetadata" Condition="%(AssemblyMetadata.Identity) != '' and '$(GenerateAssemblyMetadataAttributes)' == 'true'">
+        <_Parameter1>%(AssemblyMetadata.Identity)</_Parameter1>
+        <_Parameter2>%(AssemblyMetadata.Value)</_Parameter2>
       </AssemblyAttribute>
     </ItemGroup>
   </Target>

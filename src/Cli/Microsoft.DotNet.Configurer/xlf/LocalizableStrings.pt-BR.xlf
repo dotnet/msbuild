@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="FailedToDetermineUserHomeDirectory">
+        <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
+        <target state="translated">O diretório inicial do usuário não pôde ser definido. Configure a variável de ambiente '{0}' para especificar o diretório a ser utilizado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FirstTimeMessageMoreInformation">
+        <source>----------------
+Installed an ASP.NET Core HTTPS development certificate.
+To trust the certificate run 'dotnet dev-certs https --trust' (Windows and macOS only).
+Learn about HTTPS: https://aka.ms/dotnet-https
+----------------
+Write your first app: https://aka.ms/dotnet-hello-world
+Find out what's new: https://aka.ms/dotnet-whats-new
+Explore documentation: https://aka.ms/dotnet-docs
+Report issues and find source on GitHub: https://github.com/dotnet/core
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
+--------------------------------------------------------------------------------------</source>
+        <target state="needs-review-translation">----------------
+Explore a documentação: https://aka.ms/dotnet-docs
+Relate problemas e localize a origem no GitHub: https://github.com/dotnet/core
+Novidade: https://aka.ms/dotnet-whats-new
+Saiba sobre o certificado de desenvolvedor HTTPS instalado: https://aka.ms/aspnet-core-https 
+Use 'dotnet --help' para ver os comandos disponíveis ou visite: https://aka.ms/dotnet-cli-docs
+Crie seu primeiro aplicativo: https://aka.ms/first-net-core-app
+--------------------------------------------------------------------------------------</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FirstTimeMessageWelcome">
+        <source>Welcome to .NET Core {0}!
+---------------------
+SDK Version: {1}</source>
+        <target state="new">Welcome to .NET Core {0}!
+---------------------
+SDK Version: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TelemetryMessage">
+        <source>Telemetry
+---------
+The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
+        <target state="translated">Telemetria!
+---------
+As ferramentas do .NET Core coletam dados de uso para nos ajudar a melhorar sua experiência. Os dados são anônimos. Eles são coletados pela Microsoft e compartilhados com a comunidade. Você pode sair de telemetria definindo a variável de ambiente DOTNET_CLI_TELEMETRY_OPTOUT para '1' ou 'true' usando o shell favorito.
+
+Leia mais sobre a telemetria de Ferramentas da CLI do .NET Core: https://aka.ms/dotnet-cli-telemetry</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

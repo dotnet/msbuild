@@ -1,0 +1,134 @@
+trigger:
+- master
+- release/*
+
+variables:
+  _TeamName: Roslyn-Project-System
+  _DotNetArtifactsCategory: Toolset
+  ${{ if eq(variables['System.TeamProject'], 'public') }}:
+    PB_PublishBlobFeedKey:
+    PB_PublishBlobFeedUrl:
+    _DotNetPublishToBlobFeed: false
+    _PublishUsingPipelines: false
+    _PublishType: none
+  ${{ if ne(variables['System.TeamProject'], 'public') }}:
+    PB_PublishBlobFeedUrl: https://dotnetfeed.blob.core.windows.net/dotnet-toolset/index.json
+    _DotNetPublishToBlobFeed: true
+    _PublishUsingPipelines: true
+    _PublishType: blob
+
+stages:
+- stage: build
+  jobs:
+  - template: /eng/build.yml
+    parameters:
+      agentOs: Windows_NT
+      pool:
+        name: Hosted VS2017
+      strategy:
+        matrix:
+          ${{ if eq(variables['System.TeamProject'], 'public') }}:
+            Build_Debug_x86:
+              _BuildConfig: Debug
+              _BuildArchitecture: x86
+          Build_Release_x64:
+            _BuildConfig: Release
+            _BuildArchitecture: x64
+
+  - ${{ if eq(variables['System.TeamProject'], 'public') }}:
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Linux
+        enablePublishUsingPipelines: true
+        pool:
+          name: Hosted Ubuntu 1604
+        strategy:
+          matrix:
+            Build_Ubuntu_14_04_Release_x64:
+              _BuildConfig: Release
+              _DockerParameter: '--docker ubuntu.14.04'
+              _LinuxPortable: ''
+              _RuntimeIdentifier: ''
+              _BuildArchitecture: 'x64'
+            Build_Ubuntu_16_04_Debug_x64:
+              _BuildConfig: Debug
+              _DockerParameter: '--docker ubuntu.16.04'
+              _LinuxPortable: ''
+              _RuntimeIdentifier: ''
+              _BuildArchitecture: 'x64'
+            Build_Ubuntu_18_04_Debug_x64:
+              _BuildConfig: Debug
+              _DockerParameter: '--docker ubuntu.18.04'
+              _LinuxPortable: '--linux-portable'
+              _RuntimeIdentifier: ''
+              _BuildArchitecture: 'x64'
+            Build_Fedora_27_Debug_x64:
+              _BuildConfig: Debug
+              _DockerParameter: '--docker fedora.27'
+              _LinuxPortable: '--linux-portable'
+              _RuntimeIdentifier: ''
+              _BuildArchitecture: 'x64'
+            Build_CentOS_7_1_Debug_x64:
+              _BuildConfig: Debug
+              _DockerParameter: '--docker centos'
+              _LinuxPortable: ''
+              _RuntimeIdentifier: ''
+              _BuildArchitecture: 'x64'
+            Build_Debian_Jessie_Debug_x64:
+              _BuildConfig: Debug
+              _DockerParameter: '--docker debian'
+              _LinuxPortable: ''
+              _RuntimeIdentifier: ''
+              _BuildArchitecture: 'x64'
+            Build_Rhel_7_2_Release_x64:
+              _BuildConfig: Release
+              _DockerParameter: '--docker rhel'
+              _LinuxPortable: ''
+              _RuntimeIdentifier: ''
+              _BuildArchitecture: 'x64'
+            Build_Rhel_6_Debug_x64:
+              _BuildConfig: Debug
+              _DockerParameter: '--docker rhel.6'
+              _LinuxPortable: ''
+              _RuntimeIdentifier: '--runtime-id rhel.6-x64'
+              _BuildArchitecture: 'x64'
+            Build_Linux_musl_Debug_x64:
+              _BuildConfig: Debug
+              _DockerParameter: '--docker alpine.3.6'
+              _LinuxPortable: ''
+              _RuntimeIdentifier: '--runtime-id linux-musl-x64'
+              _BuildArchitecture: 'x64'
+            Build_LinuxPortable_Release_x64:
+              _BuildConfig: Release
+              _DockerParameter: ''
+              _LinuxPortable: '--linux-portable'
+              _RuntimeIdentifier: ''
+              _BuildArchitecture: 'x64'
+
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Darwin
+        pool:
+          name: Hosted macOS
+        strategy:
+          matrix:
+            Build_Release:
+              _BuildConfig: Release
+
+  - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+    - template: /eng/common/templates/job/publish-build-assets.yml
+      parameters:
+        publishUsingPipelines: true
+        dependsOn:
+          - Windows_NT
+        queue:
+          name: Hosted VS2017
+
+- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+  - template: eng\common\templates\post-build\post-build.yml
+    parameters:
+      # Symbol validation isn't being very reliable lately. This should be enabled back
+      # once this issue is resolved: https://github.com/dotnet/arcade/issues/2871
+      enableSymbolValidation: false
+      # This repo doesn't produce any signed packages.
+      enableSigningValidation: false

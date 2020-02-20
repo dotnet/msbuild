@@ -1,0 +1,36 @@
+<Project>
+  <Target Name="GenerateArchives"
+          DependsOnTargets="GenerateLayout;GetCurrentRuntimeInformation"
+          AfterTargets="Pack">
+
+    <!-- When running in Docker under a Windows host, tar is warning "file changed as we read it" for several files and returning exit code 1.
+         So this flag allows that to be ignored. -->
+    <PropertyGroup Condition="'$(IgnoreTarExitCode)' == ''">
+      <IgnoreTarExitCode>false</IgnoreTarExitCode>
+      <IgnoreTarExitCode Condition="'$(DOTNET_CORESDK_IGNORE_TAR_EXIT_CODE)' == '1'">true</IgnoreTarExitCode>
+    </PropertyGroup>
+
+    <PropertyGroup>
+      <ArtifactNameWithVersionSdk>$(ArtifactNameSdk)-$(Version)</ArtifactNameWithVersionSdk>
+
+      <ArtifactNameWithVersionSdkLanguagePack>$(ArtifactNameSdkLanguagePack)-$(Version)</ArtifactNameWithVersionSdkLanguagePack>
+
+      <VersionFilePath>$(ArtifactsBinDir)version.txt</VersionFilePath>
+    </PropertyGroup>
+
+    <ZipFileCreateFromDirectory
+        SourceDirectory="$(SdkLayoutOutputDirectory)"
+        DestinationArchive="$(ArtifactsNonShippingPackagesDir)$(ArtifactNameWithVersionSdk).zip"
+        OverwriteDestination="true" />
+
+    <ZipFileCreateFromDirectory
+        SourceDirectory="$(SdkLanguagePackOutputDirectory)"
+        DestinationArchive="$(ArtifactsNonShippingPackagesDir)$(ArtifactNameWithVersionSdkLanguagePack).zip"
+        OverwriteDestination="true" />
+
+    <WriteLinesToFile
+        File="$(VersionFilePath)"
+        Lines="$(Version)"
+        Overwrite="true" />
+  </Target>
+</Project>

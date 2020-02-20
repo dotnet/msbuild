@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+  <PropertyGroup>
+    <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>
+    <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot)/.nuget/packages</NuGetPackagesDir>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
+
+  <PropertyGroup Condition="'$(CopyrightNetFoundation)' != ''">
+    <Copyright>$(CopyrightNetFoundation)</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <DisableImplicitPackageTargetFallback>true</DisableImplicitPackageTargetFallback>
+    
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+
+    <IsShippingPackage>false</IsShippingPackage>
+    <ToolsetTargetFramework>netcoreapp3.0</ToolsetTargetFramework>
+    <LangVersion>latest</LangVersion>
+
+    <ArtifactsShippingSymbolsDir>$(ArtifactsDir)symbols\$(Configuration)\Shipping</ArtifactsShippingSymbolsDir>
+
+    <!-- NU1701: Disable asset target fallback warning globally since it does not work transitively on NoWarn of individual packages -->
+    <!-- Since we disabled the implict fallback to net461, this will only kick in when we have an explicit fallback and we don't need to be warned about it doing what we asked it to do. -->
+    <!-- NU5104: Disable 'A stable release of a package should not have a prerelease dependency' warning globally -->
+    <!-- The "pack" command under 'buildCrossTargeting' for 'Microsoft.DotNet.MSBuildSdkResolver' throws a "NU5104" warning/error while using a "2.1.300" stage0 SDK. For: Linux-x64, Linux-arm, and Linux-arm64 -->
+    <NoWarn>NU1701;NU5104;NU5125;NU5105</NoWarn>
+  </PropertyGroup>
+
+  <Import Project="build/GenerateResxSource.targets" />
+
+</Project>

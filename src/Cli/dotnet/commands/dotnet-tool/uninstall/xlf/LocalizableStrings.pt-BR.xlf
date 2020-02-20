@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="LocalOptionDescription">
+        <source>Uninstall the tool and remove it from the local tool manifest.</source>
+        <target state="translated">Desinstale a ferramenta e a remova do manifesto de ferramenta local.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionDescription">
+        <source>Path to the manifest file.</source>
+        <target state="translated">Caminho para o arquivo de manifesto.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoManifestFileContainPackageId">
+        <source>Cannot find a manifest file that contains package id '{0}'.</source>
+        <target state="translated">Não é possível localizar um arquivo de manifesto que contém a ID de pacote '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentDescription">
+        <source>The NuGet Package Id of the tool to uninstall.</source>
+        <target state="translated">A ID do pacote do NuGet da ferramenta a ser desinstalada.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Uninstall a global tool or local tool.</source>
+        <target state="translated">Desinstale uma ferramenta global ou local.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentName">
+        <source>PACKAGE_ID</source>
+        <target state="translated">PACKAGE_ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageId">
+        <source>Specify one tool Package Id to uninstall.</source>
+        <target state="translated">Especifique uma ID de Pacote de ferramenta a ser desinstalada.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalOptionDescription">
+        <source>Uninstall the tool from the current user's tools directory.</source>
+        <target state="translated">Desinstalar a ferramenta do diretório de ferramentas do usuário atual.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UninstallLocalToolSucceeded">
+        <source>Tool '{0}' was successfully uninstalled and removed from manifest file {1}.</source>
+        <target state="translated">A ferramenta '{0}' foi desinstalada com êxito e removida do arquivo de manifesto {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UninstallSucceeded">
+        <source>Tool '{0}' (version '{1}') was successfully uninstalled.</source>
+        <target state="translated">A ferramenta '{0}' (versão '{1}') foi desinstalada com êxito.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolNotInstalled">
+        <source>A tool with the package Id '{0}' could not be found. 
+
+Tools are uninstalled using their package Id which may be different 
+from the tool name you use when calling the tool. You can find the tool names 
+and the corresponding package Ids for installed tools using the command
+'dotnet tool list'.</source>
+        <target state="translated">Não foi possível encontrar uma ferramenta com a ID '{0}' do pacote. 
+
+As ferramentas são desinstaladas usando a ID do pacote que pode ser diferente 
+do nome da ferramenta que você usa ao chamar a ferramenta. Você pode encontrar os nomes das ferramentas 
+e as Ids de pacote correspondentes para as ferramentas instaladas usando o comando
+'lista de ferramentas do dotnet'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolHasMultipleVersionsInstalled">
+        <source>Tool '{0}' has multiple versions installed and cannot be uninstalled.</source>
+        <target state="translated">A ferramenta '{0}' tem várias versões instaladas e não pode ser desinstalada.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToUninstallTool">
+        <source>Failed to uninstall tool '{0}': {1}</source>
+        <target state="translated">Falha ao desinstalar a ferramenta '{0}': {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
+        <target state="translated">As opções local (--local), global (--global) e do caminho da ferramenta (--tool-path) só podem ocorrer uma por vez. Especifique apenas uma das opções: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidToolPathOption">
+        <source>Tool path '{0}' does not exist.</source>
+        <target state="translated">O caminho da ferramenta '{0}' não existe.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionDescription">
+        <source>The directory containing the tool to uninstall.</source>
+        <target state="translated">O diretório que contém a ferramenta a ser desinstalada.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

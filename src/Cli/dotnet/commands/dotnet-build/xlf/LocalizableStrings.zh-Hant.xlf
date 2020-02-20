@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppDescription">
+        <source>Builder for the .NET Platform. Delegates to the MSBuild 'Build' target in the project file.</source>
+        <target state="translated">適用於 .NET 平台的產生器。委派給專案檔中的 MSBuild 'Build' 目標。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AppFullName">
+        <source>.NET Builder</source>
+        <target state="translated">.NET 產生器</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdNoLogo">
+        <source>Do not display the startup banner or the copyright message.</source>
+        <target state="translated">不顯示啟始資訊或著作權訊息。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoDependenciesOptionDescription">
+        <source>Do not build project-to-project references and only build the specified project.</source>
+        <target state="translated">請勿建置專案對專案的參考，而只建置指定的專案。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoIncrementalOptionDescription">
+        <source>Do not use incremental building.</source>
+        <target state="translated">請勿使用累加建置。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutputOptionDescription">
+        <source>The output directory to place built artifacts in.</source>
+        <target state="translated">放置建置成品的輸出目錄。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutputOptionName">
+        <source>OUTPUT_DIR</source>
+        <target state="translated">OUTPUT_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to build for. The target framework must also be specified in the project file.</source>
+        <target state="translated">要為其進行建置的目標架構。該目標架構必須在專案檔中指定。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to build for.</source>
+        <target state="translated">要為其進行建置的目標執行階段。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to use for building the project. The default for most projects is 'Debug'.</source>
+        <target state="translated">要用於建置專案的組態。大部分的專案預設為「偵錯」。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

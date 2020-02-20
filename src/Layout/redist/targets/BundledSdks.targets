@@ -1,0 +1,14 @@
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <BundledSdk Include="NuGet.Build.Tasks.Pack" Version="$(NuGetBuildTasksPackPackageVersion)" />
+    <BundledSdk Include="Microsoft.NET.Sdk.Razor" Version="$(MicrosoftNETSdkRazorPackageVersion)" />
+    <BundledSdk Include="Microsoft.NET.Sdk.Web" Version="$(MicrosoftNETSdkWebPackageVersion)" />
+    <BundledSdk Include="Microsoft.NET.Sdk.Publish" Version="$(MicrosoftNETSdkPublishPackageVersion)" />
+    <BundledSdk Include="Microsoft.NET.Sdk.Web.ProjectSystem" Version="$(MicrosoftNETSdkWebProjectSystemPackageVersion)" />
+    <BundledSdk Include="Microsoft.NET.Sdk.Worker" Version="$(MicrosoftNETSdkWorkerPackageVersion)" />
+    <BundledSdk Include="Microsoft.NET.Sdk.WindowsDesktop" Version="$(MicrosoftNETSdkWindowsDesktopPackageVersion)" />
+    <BundledSdk Include="FSharp.NET.Sdk" Version="1.0.4-bundled-0100" />
+    <BundledSdk Include="Microsoft.Docker.Sdk" Version="1.1.0" />
+    <BundledSdk Include="ILLink.Tasks" Version="$(ILLinkTasksPackageVersion)" />
+  </ItemGroup>
+</Project>

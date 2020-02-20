@@ -12,8 +12,6 @@ namespace Microsoft.NET.Build.Tasks
         public const string FileGroup = "FileGroup";
         public const string Path = "Path";
         public const string ResolvedPath = "ResolvedPath";
-        public const string PackageName = "PackageName";
-        public const string PackageVersion = "PackageVersion";
         public const string IsImplicitlyDefined = "IsImplicitlyDefined";
         public const string IsTopLevelDependency = "IsTopLevelDependency";
         public const string AllowExplicitVersion = "AllowExplicitVersion";

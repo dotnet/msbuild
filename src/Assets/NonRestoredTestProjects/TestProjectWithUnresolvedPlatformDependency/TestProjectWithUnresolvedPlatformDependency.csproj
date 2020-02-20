@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <AssetTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">$(AssetTargetFallback);dnxcore50</AssetTargetFallback>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ThisIsNotARealDependencyAndIfSomeoneGoesAndAddsAProjectWithThisNameIWillFindThemAndPunishThem" Version="1.0.0" />
+  </ItemGroup>
+</Project>

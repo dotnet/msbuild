@@ -78,8 +78,8 @@ namespace Microsoft.NET.Build.Tasks
                 item.SetMetadata(MetadataKeys.DestinationSubPath, resolvedFile.DestinationSubPath);
                 item.SetMetadata(MetadataKeys.DestinationSubDirectory, resolvedFile.DestinationSubDirectory);
                 item.SetMetadata(MetadataKeys.AssetType, resolvedFile.Asset.ToString().ToLowerInvariant());
-                item.SetMetadata(MetadataKeys.PackageName, resolvedFile.PackageName);
-                item.SetMetadata(MetadataKeys.PackageVersion, resolvedFile.PackageVersion.ToLowerInvariant());
+                item.SetMetadata(MetadataKeys.NuGetPackageId, resolvedFile.PackageName);
+                item.SetMetadata(MetadataKeys.NuGetPackageVersion, resolvedFile.PackageVersion.ToLowerInvariant());
 
                 if (resolvedFile.Asset == AssetType.Resources)
                 {

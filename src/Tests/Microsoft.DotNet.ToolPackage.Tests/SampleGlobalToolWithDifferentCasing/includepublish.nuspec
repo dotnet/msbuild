@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>Global.Tool.Console.Demo.With.Casing</id>
+        <version>2.0.4</version>
+        <description>test app</description>
+        <authors>testauthor</authors>
+        <packageTypes>
+          <packageType name="DotnetTool" />
+        </packageTypes>
+    </metadata>
+    <files>
+        <file src="bin\Release\netcoreapp2.1\publish\*.*" target="tools\netcoreapp2.1\any\" />
+        <file src="DotnetToolSettings.xml" target="tools\netcoreapp2.1\any\DotnetToolSettings.xml" />
+    </files>
+</package>

@@ -103,6 +103,23 @@ namespace Microsoft.NET.Perf.Tests
             TestProject(testDir.Path, "ASP.NET Core MVC app", operation);
         }
 
+        [CoreMSBuildOnlyTheory]
+        [InlineData(ProjectPerfOperation.CleanBuild)]
+        [InlineData(ProjectPerfOperation.BuildWithNoChanges)]
+        public void BuildServerSideBlazorApp(ProjectPerfOperation operation)
+        {
+            var testDir = _testAssetsManager.CreateTestDirectory(identifier: operation.ToString());
+
+            NuGetConfigWriter.Write(testDir.Path, NuGetConfigWriter.AspNetCoreDevFeed, NuGetConfigWriter.DotnetCoreBlobFeed);
+
+            var newCommand = new DotnetCommand(Log);
+            newCommand.WorkingDirectory = testDir.Path;
+
+            newCommand.Execute("new", "blazorserver", "--no-restore").Should().Pass();
+
+            TestProject(testDir.Path, "ASP.NET Core Blazor (server-side) app", operation);
+        }
+
         [CoreMSBuildOnlyTheory(Skip = "The code for these scenarios needs to be acquired during the test run (instead of relying on hard-coded local path)")]
         [InlineData("SmallP2POldCsproj", ProjectPerfOperation.CleanBuild)]
         [InlineData("SmallP2POldCsproj", ProjectPerfOperation.BuildWithNoChanges)]
