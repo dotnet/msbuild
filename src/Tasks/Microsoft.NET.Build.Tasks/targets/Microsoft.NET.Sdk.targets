@@ -230,10 +230,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <GenerateRuntimeConfigurationFilesInputs Include="$(_GenerateRuntimeConfigurationPropertyInputsCache)" />
 
-      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="@(AdditionalProbingPath)"/>
+      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="@(AdditionalProbingPath->'%(Identity)')"/>
       <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(EnableDynamicLoading)"/>
       <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(RollForward)"/>
-      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="@(RuntimeHostConfigurationOption)"/>
+      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="@(RuntimeHostConfigurationOption->'%(Identity)%(Value)')"/>
       <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(RuntimeIdentifier)"/>
       <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(SelfContained)"/>
       <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(TargetFramework)"/>
