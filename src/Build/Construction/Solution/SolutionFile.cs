@@ -8,6 +8,7 @@ using System.IO;
 using System.Text;
 using System.Globalization;
 using System.Security;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
@@ -18,6 +19,7 @@ using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 using ExceptionUtilities = Microsoft.Build.Shared.ExceptionHandling;
 using System.Collections.ObjectModel;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Construction
 {
@@ -73,6 +75,7 @@ namespace Microsoft.Build.Construction
         private const string cpsProjectGuid = "{13B669BE-BB05-4DDF-9536-439F39A36129}";
         private const string cpsCsProjectGuid = "{9A19103F-16F7-4668-BE54-9A1E7A4F7556}";
         private const string cpsVbProjectGuid = "{778DAE3C-4631-46EA-AA77-85C1314464D9}";
+        private const string cpsFsProjectGuid = "{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}";
         private const string vjProjectGuid = "{E6FDF86B-F3D1-11D4-8576-0002A516ECE8}";
         private const string vcProjectGuid = "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}";
         private const string fsProjectGuid = "{F2A71F9B-5D33-465A-A702-920D77279786}";
@@ -85,6 +88,7 @@ namespace Microsoft.Build.Construction
         #endregion
         #region Member data
         private string _solutionFile;                 // Could be absolute or relative path to the .SLN file.
+        private HashSet<string> _solutionFilter;     // The project files to include in loading the solution.
         private bool _parsingForConversionOnly;      // Are we parsing this solution to get project reference data during
                                                      // conversion, or in preparation for actually building the solution?
 
@@ -195,7 +199,48 @@ namespace Microsoft.Build.Construction
             {
                 // Should already be canonicalized to a full path
                 ErrorUtilities.VerifyThrowInternalRooted(value);
-                _solutionFile = value;
+                if (FileUtilities.IsSolutionFilterFilename(value))
+                {
+                    try
+                    {
+                        using JsonDocument text = JsonDocument.Parse(File.ReadAllText(value));
+                        JsonElement solution = text.RootElement.GetProperty("solution");
+                        _solutionFile = Path.GetFullPath(solution.GetProperty("path").GetString());
+                        if (!FileSystems.Default.FileExists(_solutionFile))
+                        {
+                            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                            (
+                                "SubCategoryForSolutionParsingErrors",
+                                new BuildEventFileInfo(_solutionFile),
+                                "SolutionFilterMissingSolutionError",
+                                value,
+                                _solutionFile
+                            );
+                        }
+                        _solutionFilter = new HashSet<string>(NativeMethodsShared.OSUsesCaseSensitivePaths ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
+                        foreach (JsonElement project in solution.GetProperty("projects").EnumerateArray())
+                        {
+                            _solutionFilter.Add(project.GetString());
+                        }
+                    }
+                    catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
+                    {
+                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                        (
+                            false, /* Just throw the exception */
+                            "SubCategoryForSolutionParsingErrors",
+                            new BuildEventFileInfo(value),
+                            e,
+                            "SolutionFilterJsonParsingError",
+                            value
+                        );
+                    }
+                }
+                else
+                {
+                    _solutionFile = value;
+                    _solutionFilter = null;
+                }
             }
         }
 
@@ -217,6 +262,11 @@ namespace Microsoft.Build.Construction
         #endregion
 
         #region Methods
+
+        internal bool ProjectShouldBuild(string projectFile)
+        {
+            return _solutionFilter == null || _solutionFilter.Contains(projectFile);
+        }
 
         /// <summary>
         /// This method takes a path to a solution file, parses the projects and project dependencies
@@ -288,7 +338,6 @@ namespace Microsoft.Build.Construction
                         {
                             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
                                 (
-                                    false /* just throw the exception */,
                                     "SubCategoryForSolutionParsingErrors",
                                     new BuildEventFileInfo(solutionFile),
                                     "SolutionParseVersionMismatchError",
@@ -336,7 +385,6 @@ namespace Microsoft.Build.Construction
             // Didn't find the header in lines 1-4, so the solution file is invalid.
             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
                 (
-                    false /* just throw the exception */,
                     "SubCategoryForSolutionParsingErrors",
                     new BuildEventFileInfo(solutionFile),
                     "SolutionParseNoHeaderError"
@@ -458,6 +506,30 @@ namespace Microsoft.Build.Construction
                 {
                     // No other section types to process at this point, so just ignore the line
                     // and continue.
+                }
+            }
+
+            if (_solutionFilter != null)
+            {
+                HashSet<string> projectPaths = new HashSet<string>(_projectsInOrder.Count, NativeMethodsShared.OSUsesCaseSensitivePaths ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
+                foreach (ProjectInSolution project in _projectsInOrder)
+                {
+                    projectPaths.Add(project.RelativePath);
+                }
+                foreach (string project in _solutionFilter)
+                {
+                    if (!projectPaths.Contains(project))
+                    {
+                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                        (
+                            "SubCategoryForSolutionParsingErrors",
+                            new BuildEventFileInfo(project),
+                            "SolutionFilterFilterContainsProjectNotInSolution",
+                            _solutionFilter,
+                            project,
+                            _solutionFile
+                        );
+                    }
                 }
             }
 
@@ -1129,6 +1201,7 @@ namespace Microsoft.Build.Construction
                 (String.Compare(projectTypeGuid, cpsProjectGuid, StringComparison.OrdinalIgnoreCase) == 0) ||
                 (String.Compare(projectTypeGuid, cpsCsProjectGuid, StringComparison.OrdinalIgnoreCase) == 0) ||
                 (String.Compare(projectTypeGuid, cpsVbProjectGuid, StringComparison.OrdinalIgnoreCase) == 0) ||
+                (String.Compare(projectTypeGuid, cpsFsProjectGuid, StringComparison.OrdinalIgnoreCase) == 0) ||
                 (String.Compare(projectTypeGuid, fsProjectGuid, StringComparison.OrdinalIgnoreCase) == 0) ||
                 (String.Compare(projectTypeGuid, dbProjectGuid, StringComparison.OrdinalIgnoreCase) == 0) ||
                 (String.Compare(projectTypeGuid, vjProjectGuid, StringComparison.OrdinalIgnoreCase) == 0))

@@ -924,7 +924,7 @@ namespace Microsoft.Build.Evaluation
         /// <A Include="a.cs;*.cs"/> // Occurrences:2; Operation: Include; Provenance: StringLiteral | Glob
         /// <B Include="*.cs" Exclude="a.cs"/> // Occurrences: 1; Operation: Exclude; Provenance: StringLiteral
         /// <C Include="b.cs"/> // NA
-        /// <D Include="@(A)"/> // Occurrences: 2; Operation: Include; Provenance: Inconclusive (it is an indirect occurence from a referenced item)
+        /// <D Include="@(A)"/> // Occurrences: 2; Operation: Include; Provenance: Inconclusive (it is an indirect occurrence from a referenced item)
         /// <E Include="$(P)"/> // Occurrences: 4; Operation: Include; Provenance: FromLiteral (direct reference in $P) | Glob (direct reference in $P) | Inconclusive (it is an indirect occurrence from referenced properties and items)
         /// <PropertyGroup>
         ///     <P>a.cs;*.cs;@(A)</P>
@@ -4650,7 +4650,7 @@ namespace Microsoft.Build.Evaluation
         public Provenance Provenance { get; }
 
         /// <summary>
-        /// Gets the number of occurences of the item.
+        /// Gets the number of occurrences of the item.
         /// </summary>
         public int Occurrences { get; }
 

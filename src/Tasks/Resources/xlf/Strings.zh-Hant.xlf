@@ -2006,7 +2006,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
-        <target state="translated">可轉散發套件清單檔 "{0}" 在 FileList 項目中的可轉散發套件名稱為 null 或空白。請確認可轉散發名稱不為 null 或空白。</target>
+        <target state="translated">可轉散發套件清單檔 "{0}" 在 FileList 項目中的 Redist 名稱為 null 或空白。請確認 Redist 名稱不為 null 或空白。</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
@@ -2527,6 +2527,11 @@
         <source>MSB3762: No references were passed to the task. References to at least mscorlib and Windows.Foundation are required.</source>
         <target state="translated">MSB3762: 沒有參考傳遞至工作。需要至少 mscorlib 和 Windows.Foundation 的參考。</target>
         <note>{StrBegin="MSB3762: "}</note>
+      </trans-unit>
+      <trans-unit id="Xaml.DuplicatePropertyName">
+        <source>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</source>
+        <target state="new">MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</target>
+        <note>{StrBegin="MSB3724: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.TaskCreationFailed">
         <source>MSB3686: Unable to create Xaml task.  Compilation failed.  {0}</source>
@@ -3145,7 +3150,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
         <source>Skipping write to file "{0}" because content would not change.</source>
-        <target state="needs-review-translation">MSB3493: 因為內容不會變更，所以會跳過寫入檔案 "{0}"。</target>
+        <target state="translated">因為內容不會變更，所以正在跳過寫入檔案 "{0}" 的作業。</target>
         <note />
       </trans-unit>
       <trans-unit id="Telemetry.IllegalEventDataString">

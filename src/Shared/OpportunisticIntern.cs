@@ -12,11 +12,6 @@ using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
-#if MICROSOFT_BUILD_TASKS
-using MSBuildConstants = Microsoft.Build.Tasks.MSBuildConstants;
-#else
-using MSBuildConstants = Microsoft.Build.Shared.MSBuildConstants;
-#endif
 
 namespace Microsoft.Build
 {
@@ -176,7 +171,7 @@ namespace Microsoft.Build
             }
 
             string result = s_si.InterningToString(candidate);
-#if _DEBUG
+#if DEBUG
             string expected = candidate.ExpensiveConvertToString();
             if (!String.Equals(result, expected))
             {

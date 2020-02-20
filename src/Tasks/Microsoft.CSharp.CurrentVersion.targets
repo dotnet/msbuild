@@ -164,7 +164,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ItemGroup>
 
     <PropertyGroup>
-        <CoreCompileDependsOn>_ComputeNonExistentFileProperty;ResolveCodeAnalysisRuleSet</CoreCompileDependsOn>
+        <CoreCompileDependsOn>$(CoreCompileDependsOn);_ComputeNonExistentFileProperty;ResolveCodeAnalysisRuleSet</CoreCompileDependsOn>
         <ExportWinMDFile Condition="'$(ExportWinMDFile)' == '' and '$(OutputType)' == 'WinMDObj'">true</ExportWinMDFile>
     </PropertyGroup>
  

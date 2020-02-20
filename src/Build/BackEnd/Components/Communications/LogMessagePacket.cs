@@ -10,9 +10,6 @@ using System.Reflection;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
-#if FEATURE_APPDOMAIN
-using TaskEngineAssemblyResolver = Microsoft.Build.BackEnd.Logging.TaskEngineAssemblyResolver;
-#endif
 
 namespace Microsoft.Build.BackEnd
 {

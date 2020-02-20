@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 
 // Needed for DoesTaskHostExistForParameters
@@ -447,6 +448,36 @@ namespace Microsoft.Build.Evaluation
         internal static bool IsOsBsdLike()
         {
             return NativeMethodsShared.IsBSD;
+        }
+
+        internal static bool VersionEquals(string a, string b)
+        {
+            return SimpleVersion.Parse(a) == SimpleVersion.Parse(b);
+        }
+
+        internal static bool VersionNotEquals(string a, string b)
+        {
+            return SimpleVersion.Parse(a) != SimpleVersion.Parse(b);
+        }
+
+        internal static bool VersionGreaterThan(string a, string b)
+        {
+            return SimpleVersion.Parse(a) > SimpleVersion.Parse(b);
+        }
+
+        internal static bool VersionGreaterThanOrEquals(string a, string b)
+        {
+            return SimpleVersion.Parse(a) >= SimpleVersion.Parse(b);
+        }
+
+        internal static bool VersionLessThan(string a, string b)
+        {
+            return SimpleVersion.Parse(a) < SimpleVersion.Parse(b);
+        }
+
+        internal static bool VersionLessThanOrEquals(string a, string b)
+        {
+            return SimpleVersion.Parse(a) <= SimpleVersion.Parse(b);
         }
 
         public static string GetCurrentToolsDirectory()

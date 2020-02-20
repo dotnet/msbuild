@@ -1097,24 +1097,24 @@ namespace Microsoft.Build.BuildEngine
         #region Per-build Members
         internal int numberOfProcessors = 1;
         /// <summary>
-        /// Number of errors enountered in this build
+        /// Number of errors encountered in this build
         /// </summary>
         /// <owner>t-jeffv, sumedhk</owner>
         internal int errorCount = 0;
 
         /// <summary>
-        /// Number of warnings enountered in this build
+        /// Number of warnings encountered in this build
         /// </summary>
         /// <owner>t-jeffv, sumedhk</owner>
         internal int warningCount = 0;
 
         /// <summary>
-        /// A list of the errors that have occured during this build.
+        /// A list of the errors that have occurred during this build.
         /// </summary>
         internal ArrayList errorList;
 
         /// <summary>
-        /// A list of the warnings that have occured during this build.
+        /// A list of the warnings that have occurred during this build.
         /// </summary>
         internal ArrayList warningList;
 

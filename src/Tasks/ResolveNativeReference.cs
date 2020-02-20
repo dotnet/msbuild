@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -131,7 +132,7 @@ namespace Microsoft.Build.Tasks
 
                 if (!String.IsNullOrEmpty(path))
                 {
-#if _DEBUG
+#if DEBUG
                     try
                     {
 #endif
@@ -139,7 +140,7 @@ namespace Microsoft.Build.Tasks
                     {
                         retValue = false;
                     }
-#if _DEBUG
+#if DEBUG
                     }
                     catch (Exception)
                     {

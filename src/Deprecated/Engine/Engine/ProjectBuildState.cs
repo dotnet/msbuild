@@ -306,7 +306,7 @@ namespace Microsoft.Build.BuildEngine
             /// </summary>
             ExceptionThrown,
             /// <summary>
-            /// All needed target have been completed or an error terminating the request has occured
+            /// All needed target have been completed or an error terminating the request has occurred
             /// </summary>
             BuildComplete,
             /// <summary>

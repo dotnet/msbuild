@@ -18,6 +18,7 @@ using Xunit;
 using Xunit.Abstractions;
 using Shouldly;
 using System.IO.Compression;
+using System.Reflection;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -2118,6 +2119,34 @@ namespace Microsoft.Build.UnitTests
                 }
             }
         }
+
+#if FEATURE_ASSEMBLYLOADCONTEXT
+        /// <summary>
+        /// Ensure that tasks get loaded into their own <see cref="System.Runtime.Loader.AssemblyLoadContext"/>.
+        /// </summary>
+        /// <remarks>
+        /// When loading a task from a test assembly in a test within that assembly, the assembly is already loaded
+        /// into the default context. So put the test here and isolate the task into an MSBuild that runs in its
+        /// own process, causing it to newly load the task (test) assembly in a new ALC.
+        /// </remarks>
+        [Fact]
+        public void TasksGetAssemblyLoadContexts()
+        {
+            string customTaskPath = Assembly.GetExecutingAssembly().Location;
+
+            string projectContents = $@"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+  <UsingTask TaskName=`ValidateAssemblyLoadContext` AssemblyFile=`{customTaskPath}` />
+
+  <Target Name=`Build`>
+    <ValidateAssemblyLoadContext />
+  </Target>
+</Project>";
+
+            ExecuteMSBuildExeExpectSuccess(projectContents);
+        }
+
+#endif
+
 
         private string CopyMSBuild()
         {

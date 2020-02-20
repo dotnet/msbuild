@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
+using System.Diagnostics;
 
 namespace Microsoft.Build.Shared
 {
@@ -117,6 +118,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Assembly represented by name
         /// </summary>
+        [DebuggerDisplay("{AssemblyName}")]
         private sealed class AssemblyLoadInfoWithName : AssemblyLoadInfo
         {
             /// <summary>
@@ -160,6 +162,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Assembly info that uses a file path
         /// </summary>
+        [DebuggerDisplay("{AssemblyFile}")]
         private sealed class AssemblyLoadInfoWithFile : AssemblyLoadInfo
         {
             /// <summary>

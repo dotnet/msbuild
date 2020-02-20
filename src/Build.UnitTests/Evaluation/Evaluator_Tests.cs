@@ -4275,6 +4275,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
 #if FEATURE_HTTP_LISTENER
+        private Exception _httpListenerThreadException = null;
+
         /// <summary>
         /// Verify that DTD processing is disabled when loading a project
         /// We create an HTTP server that waits for a request and load a project containing DTD code making reference to a fictitious file in the server.
@@ -4326,7 +4328,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Thread.Sleep(500);
 
                 // Expect server to be alive and hung up unless a request originating from DTD processing was sent
-                Assert.True(t.IsAlive);
+                _httpListenerThreadException.ShouldBeNull();
+                t.IsAlive.ShouldBeTrue();
             }
         }
 #endif
@@ -4560,16 +4563,24 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// If a connection request is received, this thread will terminate, if not, the server will remain alive until
         /// "VerifyDTDProcessingIsDisabled" returns.
         /// </summary>
-        static private void HttpServerThread()
+        private void HttpServerThread()
         {
-            HttpListener listener = new HttpListener();
-            listener.Prefixes.Add("http://localhost:51111/");
-            listener.Start();
+            try
+            {
+                HttpListener listener = new HttpListener();
+                listener.Prefixes.Add("http://localhost:51111/");
+                listener.Start();
 
-            HttpListenerContext context = listener.GetContext();
+                HttpListenerContext context = listener.GetContext();
 
-            // if reached this point it means the server answered a request triggered during DTD processing
-            listener.Stop();
+                // if reached this point it means the server answered a request triggered during DTD processing
+                listener.Stop();
+            }
+            catch (Exception e)
+            {
+                // don't crash the test process; save the exception and check for it in the test
+                _httpListenerThreadException = e;
+            }
         }
 #endif
 

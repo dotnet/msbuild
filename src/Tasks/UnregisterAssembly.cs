@@ -4,6 +4,7 @@
 #if FEATURE_APPDOMAIN
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -110,7 +111,7 @@ namespace Microsoft.Build.Tasks
                         Log.LogErrorWithCodeFromResources("General.InvalidAssemblyName", assemblyPath, ex.Message);
                         taskReturnValue = false;
                     }
-#if _DEBUG
+#if DEBUG
                     catch (Exception e)
                     {
                         Debug.Assert(false, "Unexpected exception in AssemblyRegistration.Execute. " + 
@@ -261,7 +262,7 @@ namespace Microsoft.Build.Tasks
                     // rethrow other exceptions
                     else
                     {
-#if _DEBUG
+#if DEBUG
                         Debug.Assert(false, "Unexpected exception in UnregisterAssembly.DoExecute. " + 
                             "Please log a MSBuild bug specifying the steps to reproduce the problem.");
 #endif

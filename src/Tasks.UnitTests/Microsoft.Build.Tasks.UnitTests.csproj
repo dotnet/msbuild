@@ -124,7 +124,6 @@
     <Compile Remove="AssemblyDependency\VerifyTargetFrameworkHigherThanRedist.cs" />
     <Compile Remove="AssemblyDependency\WinMDTests.cs" />
     <Compile Remove="ResolveComReference_Tests.cs" />
-    <Compile Remove="ResolveNonMSBuildProjectOutput_Tests.cs" />
     <Compile Remove="ResolveSDKReference_Tests.cs" />
     <Compile Remove="SdkToolsPathUtility_Tests.cs" />
     <Compile Remove="SGen_Tests.cs" />

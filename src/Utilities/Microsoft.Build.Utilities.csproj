@@ -63,9 +63,6 @@
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>Shared\CanonicalError.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\Constants.cs">
-      <Link>Shared\Constants.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\ExtensionFoldersRegistryKey.cs">
       <Link>Shared\ExtensionFoldersRegistryKey.cs</Link>
     </Compile>

@@ -131,6 +131,15 @@ namespace Microsoft.Build.Tasks
             {
                 FileInfo destinationPath = new FileInfo(Path.Combine(destinationDirectory.FullName, zipArchiveEntry.FullName));
 
+                // Zip archives can have directory entries listed explicitly.
+                // If this entry is a directory we should create it and move to the next entry.
+                if (Path.GetFileName(destinationPath.FullName).Length == 0)
+                {
+                    // The entry is a directory
+                    Directory.CreateDirectory(destinationPath.FullName);
+                    continue;
+                }
+
                 if (!destinationPath.FullName.StartsWith(destinationDirectory.FullName, StringComparison.OrdinalIgnoreCase))
                 {
                     // ExtractToDirectory() throws an IOException for this but since we're extracting one file at a time

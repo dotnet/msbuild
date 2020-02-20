@@ -2,47 +2,43 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.CodeDom;
+using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Resources;
-using System.Resources.Extensions;
-using System.Reflection;
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
+using System.ComponentModel.Design;
+#endif
+using System.Configuration;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-#if FEATURE_COM_INTEROP
-using Microsoft.Win32;
-#endif
-using System.CodeDom;
-using System.CodeDom.Compiler;
-using System.Xml;
+using System.IO;
+using System.Linq;
+using System.Resources;
+using System.Resources.Extensions;
+using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Configuration;
-using System.Security;
-#if FEATURE_RESX_RESOURCE_READER
-using System.ComponentModel.Design;
-#endif
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
 #endif
-
-#if (!STANDALONEBUILD)
-using Microsoft.Internal.Performance;
-#endif
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Versioning;
-
-using Microsoft.Build.Utilities;
+using System.Security;
+using System.Text;
+using System.Xml;
 using System.Xml.Linq;
+
+using Microsoft.Build.Eventing;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.ResourceHandling;
+using Microsoft.Build.Utilities;
+#if FEATURE_COM_INTEROP
+using Microsoft.Win32;
+#endif
 
 namespace Microsoft.Build.Tasks
 {
@@ -668,9 +664,7 @@ namespace Microsoft.Build.Tasks
         public override bool Execute()
         {
             bool outOfProcExecutionSucceeded = true;
-#if (!STANDALONEBUILD)
-            using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildGenerateResourceBegin, CodeMarkerEvent.perfMSBuildGenerateResourceEnd))
-#endif
+            MSBuildEventSource.Log.GenerateResourceOverallStart();
             {
                 // If we're extracting ResW files from assemblies (instead of building resources),
                 // our Sources can contain PDB's, pictures, and other non-DLL's.  Prune that list.
@@ -922,6 +916,8 @@ namespace Microsoft.Build.Tasks
 
                 RecordFilesWritten();
             }
+
+            MSBuildEventSource.Log.GenerateResourceOverallStop();
 
             return !Log.HasLoggedErrors && outOfProcExecutionSucceeded;
         }
@@ -2284,7 +2280,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool _stronglyTypedClassIsPublic;
 
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
         /// <summary>
         /// Class that gets called by the ResxResourceReader to resolve references
         /// to assemblies within the .RESX.
@@ -2432,7 +2428,7 @@ namespace Microsoft.Build.Tasks
             _portableLibraryCacheInfo = new List<ResGenDependencies.PortableLibraryFile>();
             _usePreserializedResources = usePreserializedResources;
 
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
             // If references were passed in, we will have to give the ResxResourceReader an object
             // by which it can resolve types that are referenced from within the .RESX.
             if ((_assemblyFiles != null) && (_assemblyFiles.Length > 0))
@@ -2443,7 +2439,7 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
                 // Install assembly resolution event handler.
                 _eventHandler = new ResolveEventHandler(ResolveAssembly);
                 AppDomain.CurrentDomain.AssemblyResolve += _eventHandler;
@@ -2465,7 +2461,7 @@ namespace Microsoft.Build.Tasks
             }
             finally
             {
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
                 // Remove the event handler.
                 AppDomain.CurrentDomain.AssemblyResolve -= _eventHandler;
                 _eventHandler = null;
@@ -2473,7 +2469,7 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
         /// <summary>
         /// Callback to resolve assembly names to assemblies.
         /// </summary>
@@ -2991,7 +2987,7 @@ namespace Microsoft.Build.Tasks
 
             if (format == Format.Assembly) // Multiple input .resources files within one assembly
             {
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
                 ReadAssemblyResources(filename, outFileOrDir);
 #else
                 throw new InputFormatNotSupportedException("Reading resources from Assembly not supported on .NET Core MSBuild");
@@ -3011,7 +3007,7 @@ namespace Microsoft.Build.Tasks
                         // On full framework, the default is to use the longstanding
                         // deserialize/reserialize approach. On Core, always use the new
                         // preserialized approach.
-#if FEATURE_RESX_RESOURCE_READER
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
                         if (!_usePreserializedResources)
                         {
                             ResXResourceReader resXReader = null;
@@ -3050,7 +3046,7 @@ namespace Microsoft.Build.Tasks
                         break;
 
                     case Format.Binary:
-#if FEATURE_RESX_RESOURCE_READER
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
                         ReadResources(reader, new ResourceReader(filename), filename); // closes reader for us
                         break;
 #else
@@ -3084,7 +3080,7 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
         /// <summary>
         /// Reads resources from an assembly.
         /// </summary>
@@ -3318,7 +3314,7 @@ namespace Microsoft.Build.Tasks
                     break;
 
                 case Format.XML:
-#if FEATURE_RESX_RESOURCE_READER
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
                     WriteResources(reader, new ResXResourceWriter(filename)); // closes writer for us
 #else
                     _logger.LogError(format.ToString() + " not supported on .NET Core MSBuild");
@@ -3527,7 +3523,7 @@ namespace Microsoft.Build.Tasks
             return provider != null;
         }
 
-#if FEATURE_RESX_RESOURCE_READER
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
         /// <summary>
         /// Read resources from an XML or binary format file
         /// </summary>
@@ -3546,7 +3542,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
         }
-#endif // FEATURE_RESX_RESOURCE_READER
+#endif // FEATURE_RESXREADER_LIVEDESERIALIZATION
 
         /// <summary>
         /// Read resources from a text format file
@@ -3982,7 +3978,7 @@ namespace Microsoft.Build.Tasks
 #endregion // Code from ResGen.EXE
     }
 
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
     /// <summary>
     /// This implemention of ITypeResolutionService is passed into the ResxResourceReader
     /// class, which calls back into the methods on this class in order to resolve types

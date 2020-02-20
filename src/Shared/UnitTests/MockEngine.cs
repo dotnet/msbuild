@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests
      * is somewhat of a no-no for task assemblies.
      * 
      **************************************************************************/
-    internal sealed class MockEngine : IBuildEngine5
+    internal sealed class MockEngine : IBuildEngine6
     {
         private readonly object _lockObj = new object();  // Protects _log, _output
         private readonly ITestOutputHelper _output;
@@ -52,6 +52,8 @@ namespace Microsoft.Build.UnitTests
         internal int Errors { get; set; }
 
         public BuildErrorEventArgs[] ErrorEvents => _errorEvents.ToArray();
+
+        public Dictionary<string, string> GlobalProperties { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         internal MockLogger MockLogger { get; }
 
@@ -169,6 +171,11 @@ namespace Microsoft.Build.UnitTests
                 _output?.WriteLine(message);
                 _log.AppendLine(message);
             }
+        }
+
+        public IReadOnlyDictionary<string, string> GetGlobalProperties()
+        {
+            return GlobalProperties;
         }
 
         public bool ContinueOnError => false;

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -34,6 +34,7 @@
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
     <PackageReference Include="System.Memory" />
+    <PackageReference Include="System.Text.Json" />
 
     <PackageReference Include="System.Reflection.Metadata" Condition="'$(MonoBuild)' == 'true'" />
   </ItemGroup>
@@ -56,7 +57,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\BinaryWriterExtensions.cs" Link="BinaryWriterExtensions.cs" />
     <Compile Include="..\Shared\EncodingUtilities.cs">
       <Link>SharedUtilities\EncodingUtilities.cs</Link>
     </Compile>
@@ -83,10 +83,6 @@
     </Compile>
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\CanonicalError.cs</Link>
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\Constants.cs">
-      <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\Constants.cs</Link>
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
@@ -134,6 +130,7 @@
     <Compile Include="..\Shared\NodePacketFactory.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
     <Compile Include="..\Shared\NodeShutdown.cs" />
+    <Compile Include="..\Shared\NamedPipeUtil.cs" />
     <Compile Include="..\Shared\TaskLoggingHelper.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelper.cs</Link>
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
@@ -647,6 +644,7 @@
     <Compile Include="Utilities\Utilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Utilities\SimpleVersion.cs" />
     <Compile Include="Xml\ProjectXmlUtilities.XmlElementChildIterator.cs" />
     <Compile Include="Xml\ProjectXmlUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -759,6 +757,9 @@
     <Compile Include="..\Shared\CoreCLRAssemblyLoader.cs" Condition="'$(TargetFrameworkIdentifier)'!='.NETFramework'" />
     <Compile Include="..\Shared\TypeLoader.cs">
       <Link>SharedUtilities\TypeLoader.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\MSBuildLoadContext.cs" Condition="'$(TargetFrameworkIdentifier)'!='.NETFramework'">
+      <Link>SharedUtilities\MSBuildLoadContext.cs</Link>
     </Compile>
     <Compile Include="..\Shared\VisualStudioConstants.cs">
       <Link>VisualStudioConstants.cs</Link>

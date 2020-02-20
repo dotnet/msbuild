@@ -172,6 +172,36 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_37_DocsLink">
+        <source>For more detailed information, see https://aka.ms/msbuild/docs</source>
+        <target state="new">For more detailed information, see https://aka.ms/msbuild/docs</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="HelpMessage_38_TargetsSwitch">
+        <source>  -targets[:file]
+                     Prints a list of available targets without executing the
+                     actual build process. By default the output is written to
+                     the console window. If the path to an output file
+                     is provided that will be used instead.
+                     (Short form: -ts)
+                     Example:
+                       -ts:out.txt
+    </source>
+        <target state="new">  -targets[:file]
+                     Prints a list of available targets without executing the
+                     actual build process. By default the output is written to
+                     the console window. If the path to an output file
+                     is provided that will be used instead.
+                     (Short form: -ts)
+                     Example:
+                       -ts:out.txt
+    </target>
+        <note>
+      LOCALIZATION: "MSBuild" should not be localized.
+      LOCALIZATION: "-targets" and "-ts" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
       <trans-unit id="HelpMessage_3_SwitchesHeader">
         <source>Switches:            Note that you can specify switches using both
                      "-switch" and "/switch".
@@ -1213,6 +1243,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <note>{StrBegin="MSBUILD : error MSB1026: "}UE: This error is printed if the default schema does not exist or in the extremely unlikely event
     that an explicit schema file was passed and existed when the command line parameters were checked but was deleted from disk before this check was made.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="TargetsCouldNotBePrinted">
+        <source>MSBUILD : error MSB1059: Targets could not be printed. {0}</source>
+        <target state="new">MSBUILD : error MSB1059: Targets could not be printed. {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>

@@ -11,6 +11,7 @@ using Microsoft.Build.Utilities;
 using System.Text.RegularExpressions;
 using System.Globalization;
 using Xunit;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.UnitTests
 {

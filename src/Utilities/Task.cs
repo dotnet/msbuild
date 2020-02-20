@@ -70,19 +70,24 @@ namespace Microsoft.Build.Utilities
         public IBuildEngine2 BuildEngine2 => (IBuildEngine2)BuildEngine;
 
         /// <summary>
-        /// Retrieves the IBuildEngine3 version of the build engine interface provided by the host.
+        /// Retrieves the <see cref="IBuildEngine3" /> version of the build engine interface provided by the host.
         /// </summary>
         public IBuildEngine3 BuildEngine3 => (IBuildEngine3)BuildEngine;
 
         /// <summary>
-        /// Retrieves the IBuildEngine4 version of the build engine interface provided by the host.
+        /// Retrieves the <see cref="IBuildEngine4" /> version of the build engine interface provided by the host.
         /// </summary>
         public IBuildEngine4 BuildEngine4 => (IBuildEngine4)BuildEngine;
 
         /// <summary>
-        /// Retrieves the IBuildEngine5 version of the build engine interface provided by the host.
+        /// Retrieves the <see cref="IBuildEngine5" /> version of the build engine interface provided by the host.
         /// </summary>
         public IBuildEngine5 BuildEngine5 => (IBuildEngine5)BuildEngine;
+
+        /// <summary>
+        /// Retrieves the <see cref="IBuildEngine6" /> version of the build engine interface provided by the host.
+        /// </summary>
+        public IBuildEngine6 BuildEngine6 => (IBuildEngine6)BuildEngine;
 
         /// <summary>
         /// The build engine sets this property if the host IDE has associated a host object with this particular task.

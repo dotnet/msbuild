@@ -19,11 +19,6 @@ using Microsoft.Win32.SafeHandles;
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 using Microsoft.Build.Utilities;
 
-#if MICROSOFT_BUILD_TASKS
-using MSBuildConstants = Microsoft.Build.Tasks.MSBuildConstants;
-#else
-using MSBuildConstants = Microsoft.Build.Shared.MSBuildConstants;
-#endif
 
 namespace Microsoft.Build.Shared
 {
@@ -673,6 +668,11 @@ namespace Microsoft.Build.Shared
         internal static string GetOSNameForExtensionsPath()
         {
             return IsOSX ? "osx" : IsUnixLike ? "unix" : "windows";
+        }
+
+        internal static bool OSUsesCaseSensitivePaths
+        {
+            get { return IsLinux; }
         }
 
         /// <summary>
@@ -1357,7 +1357,7 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Gets the current OEM code page which is used by console apps
-        /// (as opposed to the Windows/ANSI code page used by the normal people)
+        /// (as opposed to the Windows/ANSI code page)
         /// Basically for each ANSI code page (set in Regional settings) there's a corresponding OEM code page
         /// that needs to be used for instance when writing to batch files
         /// </summary>

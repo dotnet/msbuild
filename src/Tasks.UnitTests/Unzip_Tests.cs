@@ -73,6 +73,41 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
+        [Fact]
+        public void CanUnzip_ExplicitDirectoryEntries()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder source = testEnvironment.CreateFolder(createFolder: true);
+                TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
+                testEnvironment.CreateFile(source, "BE78A17D30144B549D21F71D5C633F7D.txt", "file1");
+                testEnvironment.CreateFile(source, "A04FF4B88DF14860B7C73A8E75A4FB76.txt", "file2");
+                TransientTestFolder emptyDir = source.CreateDirectory("emptyDir");
+                TransientTestFolder subDir = source.CreateDirectory("subDir");
+                subDir.CreateFile("F83E9633685494E53BEF3794EDEEE6A6.txt", "file3");
+                subDir.CreateFile("21D6D4596067723B3AC5DF9A8B3CBFE7.txt", "file4");
+
+                TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
+
+                Unzip unzip = new Unzip
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFolder = new TaskItem(destination.Path),
+                    OverwriteReadOnlyFiles = true,
+                    SkipUnchangedFiles = false,
+                    SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) }
+                };
+
+                unzip.Execute().ShouldBeTrue(() => _mockEngine.Log);
+
+                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "BE78A17D30144B549D21F71D5C633F7D.txt"), () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "A04FF4B88DF14860B7C73A8E75A4FB76.txt"), () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "subdir", "F83E9633685494E53BEF3794EDEEE6A6.txt"), () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "subdir", "21D6D4596067723B3AC5DF9A8B3CBFE7.txt"), () => _mockEngine.Log);
+                Directory.Exists(Path.Combine(destination.Path, "emptyDir"));
+            }
+        }
+
         [PlatformSpecific(TestPlatforms.Windows)] // Can't figure out how to make CreateDirectory throw on non-Windows
         [Fact]
         public void LogsErrorIfDirectoryCannotBeCreated()

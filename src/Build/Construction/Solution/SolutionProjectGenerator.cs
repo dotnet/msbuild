@@ -637,6 +637,12 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private static bool WouldProjectBuild(SolutionFile solutionFile, string selectedSolutionConfiguration, ProjectInSolution project, ProjectConfigurationInSolution projectConfiguration)
         {
+            // If the solution filter does not contain this project, do not build it.
+            if (!solutionFile.ProjectShouldBuild(project.RelativePath))
+            {
+                return false;
+            }
+
             if (projectConfiguration == null)
             {
                 if (project.ProjectType == SolutionProjectType.WebProject)
@@ -1963,7 +1969,10 @@ namespace Microsoft.Build.Construction
                 outputItemAsItem = "@(" + outputItem + ")";
             }
 
-            ProjectTargetInstance target = traversalProject.AddTarget(targetName ?? "Build", String.Empty, String.Empty, outputItemAsItem, null, String.Empty, String.Empty, String.Empty, String.Empty, false /* legacy target returns behaviour */);
+            string correctedTargetName = targetName ?? "Build";
+
+            traversalProject.RemoveTarget(correctedTargetName);
+            ProjectTargetInstance target = traversalProject.AddTarget(correctedTargetName, string.Empty, string.Empty, outputItemAsItem, null, string.Empty, string.Empty, string.Empty, string.Empty, false /* legacy target returns behaviour */);
             AddReferencesBuildTask(target, targetName, outputItem);
         }
 

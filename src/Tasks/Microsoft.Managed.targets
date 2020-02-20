@@ -11,7 +11,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 -->
 
 <Project>
-   <!-- 
+   <!--
         We are doing a cross-targeting build if there is a non-empty list of target frameworks specified
         and there is no current target framework being built individually. In that case, a multitargeting
         project file like Microsoft.<language>.CrossTargeting.targets gets imported.
@@ -45,13 +45,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          Include="$([MSBuild]::Escape('$(MSBuildProjectDirectory)\$(MSBuildProjectName)*_wpftmp$(MSBuildProjectExtension)'))" />
    </ItemGroup>
 
+   <!-- Item copied from Microsoft.Common.Currentversion.targets   -->
+  <PropertyGroup>
+    <_RecursiveTargetForContentCopying>GetCopyToOutputDirectoryItems</_RecursiveTargetForContentCopying>
+    <_RecursiveTargetForContentCopying Condition=" '$(MSBuildCopyContentTransitively)' == 'false' ">_GetCopyToOutputDirectoryItemsFromThisProject</_RecursiveTargetForContentCopying>
+  </PropertyGroup>
+
   <!--
     Properties for extension of ProjectReferenceTargets.
     Append any current value which may have been provided in a Directory.Build.props since the intent was likely to append, not prepend.
   -->
   <PropertyGroup>
     <ProjectReferenceTargetsForBuildInOuterBuild>GetTargetFrameworks;$(ProjectReferenceTargetsForBuildInOuterBuild)</ProjectReferenceTargetsForBuildInOuterBuild>
-    <ProjectReferenceTargetsForBuild>.projectReferenceTargetsOrDefaultTargets;GetNativeManifest;GetCopyToOutputDirectoryItems;$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
+    <ProjectReferenceTargetsForBuild>.projectReferenceTargetsOrDefaultTargets;GetNativeManifest;$(_RecursiveTargetForContentCopying);$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
 
     <ProjectReferenceTargetsForCleanInOuterBuild>GetTargetFrameworks;$(ProjectReferenceTargetsForCleanInOuterBuild)</ProjectReferenceTargetsForCleanInOuterBuild>
     <ProjectReferenceTargetsForClean>Clean;$(ProjectReferenceTargetsForClean)</ProjectReferenceTargetsForClean>

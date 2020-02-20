@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.IO;
 using System.Xml;
 
 using Microsoft.Build.Shared;
@@ -23,6 +24,11 @@ namespace Microsoft.Build.Tasks
             try
             {
                 var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+
+                // it's important to normalize the path as it may contain two slashes
+                // see https://github.com/microsoft/msbuild/issues/4335 for details.
+                appConfigFile = FileUtilities.NormalizePath(appConfigFile);
+
                 reader = XmlReader.Create(appConfigFile, readerSettings);
                 Read(reader);
             }

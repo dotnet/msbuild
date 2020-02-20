@@ -73,13 +73,13 @@ namespace Microsoft.Build.BackEnd
         /// <returns>An instantiated intrinsic task.</returns>
         internal static IntrinsicTask InstantiateTask(ProjectTargetInstanceChild taskInstance, TargetLoggingContext loggingContext, ProjectInstance projectInstance, bool logTaskInputs)
         {
-            if (taskInstance is ProjectPropertyGroupTaskInstance)
+            if (taskInstance is ProjectPropertyGroupTaskInstance propertyGroupTaskInstance)
             {
-                return new PropertyGroupIntrinsicTask(taskInstance as ProjectPropertyGroupTaskInstance, loggingContext, projectInstance, logTaskInputs);
+                return new PropertyGroupIntrinsicTask(propertyGroupTaskInstance, loggingContext, projectInstance, logTaskInputs);
             }
-            else if (taskInstance is ProjectItemGroupTaskInstance)
+            else if (taskInstance is ProjectItemGroupTaskInstance itemGroupTaskInstance)
             {
-                return new ItemGroupIntrinsicTask(taskInstance as ProjectItemGroupTaskInstance, loggingContext, projectInstance, logTaskInputs);
+                return new ItemGroupIntrinsicTask(itemGroupTaskInstance, loggingContext, projectInstance, logTaskInputs);
             }
             else
             {
