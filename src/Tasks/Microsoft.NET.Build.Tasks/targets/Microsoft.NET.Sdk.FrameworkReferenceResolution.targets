@@ -64,17 +64,21 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
                                 SelfContained="$(SelfContained)"
                                 ReadyToRunEnabled="$(PublishReadyToRun)"
+                                ReadyToRunUseCrossgen2="$(PublishReadyToRunUseCrossgen2)"
                                 RuntimeIdentifier="$(RuntimeIdentifier)"
                                 RuntimeIdentifiers="$(RuntimeIdentifiers)"
                                 RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
                                 TargetLatestRuntimePatch="$(TargetLatestRuntimePatch)"
                                 TargetLatestRuntimePatchIsDefault="$(_TargetLatestRuntimePatchIsDefault)"
-                                EnableTargetingPackDownload="$(EnableTargetingPackDownload)">
+                                EnableTargetingPackDownload="$(EnableTargetingPackDownload)"
+                                KnownCrossgen2Packs="@(KnownCrossgen2Pack)"
+                                NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)">
 
       <Output TaskParameter="PackagesToDownload" ItemName="_PackageToDownload" />
       <Output TaskParameter="RuntimeFrameworks" ItemName="RuntimeFramework" />
       <Output TaskParameter="TargetingPacks" ItemName="TargetingPack" />
       <Output TaskParameter="RuntimePacks" ItemName="RuntimePack" />
+      <Output TaskParameter="Crossgen2Packs" ItemName="Crossgen2Pack" />
       <Output TaskParameter="UnavailableRuntimePacks" ItemName="UnavailableRuntimePack" />
 
     </ProcessFrameworkReferences>
@@ -180,6 +184,14 @@ Copyright (c) .NET Foundation. All rights reserved.
       PackageFolders="@(AssetsFilePackageFolder)">
 
       <Output TaskParameter="Output" ItemName="ResolvedAppHostPack" />
+
+    </GetPackageDirectory>
+
+    <GetPackageDirectory
+      Items="@(Crossgen2Pack)"
+      PackageFolders="@(AssetsFilePackageFolder)">
+
+      <Output TaskParameter="Output" ItemName="ResolvedCrossgen2Pack" />
 
     </GetPackageDirectory>
 

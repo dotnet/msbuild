@@ -232,6 +232,11 @@
         <target state="translated">NETSDK1120: Los proyectos de C++/CLI destinados a .NET Core requieren "netcoreapp3.1" como plataforma de destino mínima.</target>
         <note>{StrBegin="NETSDK1120: "}</note>
       </trans-unit>
+      <trans-unit id="Crossgen2RequiresSelfContained">
+        <source>NETSDK1126: Publishing ReadyToRun using Crossgen2 is only supported for self-contained applications.</source>
+        <target state="new">NETSDK1126: Publishing ReadyToRun using Crossgen2 is only supported for self-contained applications.</target>
+        <note>{StrBegin="NETSDK1126: "}</note>
+      </trans-unit>
       <trans-unit id="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21">
         <source>NETSDK1055: DotnetTool does not support target framework lower than netcoreapp2.1.</source>
         <target state="translated">NETSDK1055: DotnetTool no admite una plataforma de destino anterior a netcoreapp2.1.</target>

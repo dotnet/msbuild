@@ -604,4 +604,8 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1125: Publishing to a single-file is only supported for netcoreapp target.</value>
     <comment>{StrBegin="NETSDK1125: "}</comment>
   </data>
+  <data name="Crossgen2RequiresSelfContained" xml:space="preserve">
+    <value>NETSDK1126: Publishing ReadyToRun using Crossgen2 is only supported for self-contained applications.</value>
+    <comment>{StrBegin="NETSDK1126: "}</comment>
+  </data>
 </root>

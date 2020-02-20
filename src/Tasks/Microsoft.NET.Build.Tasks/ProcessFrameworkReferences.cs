@@ -32,6 +32,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool ReadyToRunEnabled { get; set; }
 
+        public bool ReadyToRunUseCrossgen2 { get; set; }
+
         public string RuntimeIdentifier { get; set; }
 
         public string[] RuntimeIdentifiers { get; set; }
@@ -48,6 +50,11 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] KnownFrameworkReferences { get; set; } = Array.Empty<ITaskItem>();
 
+        public ITaskItem[] KnownCrossgen2Packs { get; set; } = Array.Empty<ITaskItem>();
+
+        [Required]
+        public string NETCoreSdkRuntimeIdentifier { get; set; }
+
         [Output]
         public ITaskItem[] PackagesToDownload { get; set; }
 
@@ -59,6 +66,9 @@ namespace Microsoft.NET.Build.Tasks
 
         [Output]
         public ITaskItem[] RuntimePacks { get; set; }
+
+        [Output]
+        public ITaskItem[] Crossgen2Packs { get; set; }
 
         //  Runtime packs which aren't available for the specified RuntimeIdentifier
         [Output]
@@ -230,6 +240,20 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
+            if (ReadyToRunEnabled && ReadyToRunUseCrossgen2)
+            {
+                if (!SelfContained)
+                {
+                    Log.LogError(Strings.Crossgen2RequiresSelfContained);
+                    return;
+                }
+                if (!AddCrossgen2Package(normalizedTargetFrameworkVersion, packagesToDownload))
+                {
+                    Log.LogError(Strings.ReadyToRunNoValidRuntimePackageError);
+                    return;
+                }
+            }
+
             if (packagesToDownload.Any())
             {
                 PackagesToDownload = packagesToDownload.ToArray();
@@ -319,6 +343,50 @@ namespace Microsoft.NET.Build.Tasks
                     packagesToDownload.Add(packageToDownload);
                 }
             }
+        }
+
+        private bool AddCrossgen2Package(Version normalizedTargetFrameworkVersion, List<ITaskItem> packagesToDownload)
+        {
+            var knownCrossgen2Pack = KnownCrossgen2Packs.Where(crossgen2Pack =>
+            {
+                var packTargetFramework = NuGetFramework.Parse(crossgen2Pack.GetMetadata("TargetFramework"));
+                return packTargetFramework.Framework.Equals(TargetFrameworkIdentifier, StringComparison.OrdinalIgnoreCase) &&
+                    NormalizeVersion(packTargetFramework.Version) == normalizedTargetFrameworkVersion;
+            }).SingleOrDefault();
+
+            if (knownCrossgen2Pack == null)
+            {
+                return false;
+            }
+
+            var crossgen2PackPattern = knownCrossgen2Pack.GetMetadata("Crossgen2PackNamePattern");
+            var crossgen2PackVersion = knownCrossgen2Pack.GetMetadata("Crossgen2PackVersion");
+            var crossgen2PackSupportedRuntimeIdentifiers = knownCrossgen2Pack.GetMetadata("Crossgen2RuntimeIdentifiers").Split(';');
+
+            // Get the best RID for the host machine, which will be used to validate that we can run crossgen for the target platform and architecture
+            var runtimeGraph = new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath);
+            var hostRuntimeIdentifier = NuGetUtils.GetBestMatchingRid(runtimeGraph, NETCoreSdkRuntimeIdentifier, crossgen2PackSupportedRuntimeIdentifiers, out bool wasInGraph);
+            if (hostRuntimeIdentifier == null)
+            {
+                return false;
+            }
+
+            var crossgen2PackName = crossgen2PackPattern.Replace("**RID**", hostRuntimeIdentifier);
+            if (!string.IsNullOrEmpty(RuntimeFrameworkVersion))
+            {
+                crossgen2PackVersion = RuntimeFrameworkVersion;
+            }
+
+            TaskItem packageToDownload = new TaskItem(crossgen2PackName);
+            packageToDownload.SetMetadata(MetadataKeys.Version, crossgen2PackVersion);
+            packagesToDownload.Add(packageToDownload);
+
+            Crossgen2Packs = new ITaskItem[1];
+            Crossgen2Packs[0] = new TaskItem(crossgen2PackName);
+            Crossgen2Packs[0].SetMetadata(MetadataKeys.NuGetPackageId, crossgen2PackName);
+            Crossgen2Packs[0].SetMetadata(MetadataKeys.NuGetPackageVersion, crossgen2PackVersion);
+
+            return true;
         }
 
         private string GetRuntimeFrameworkVersion(

@@ -232,6 +232,11 @@
         <target state="translated">NETSDK1120: .NET Core'u hedefleyen C++/CLI projeleri için hedef Framework en az 'netcoreapp 3.1' olmalıdır.</target>
         <note>{StrBegin="NETSDK1120: "}</note>
       </trans-unit>
+      <trans-unit id="Crossgen2RequiresSelfContained">
+        <source>NETSDK1126: Publishing ReadyToRun using Crossgen2 is only supported for self-contained applications.</source>
+        <target state="new">NETSDK1126: Publishing ReadyToRun using Crossgen2 is only supported for self-contained applications.</target>
+        <note>{StrBegin="NETSDK1126: "}</note>
+      </trans-unit>
       <trans-unit id="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21">
         <source>NETSDK1055: DotnetTool does not support target framework lower than netcoreapp2.1.</source>
         <target state="translated">NETSDK1055: DotnetTool, netcoreapp2.1’den daha düşük hedef çerçeveleri desteklemez.</target>
