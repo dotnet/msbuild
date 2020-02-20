@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Evaluation;
@@ -55,7 +55,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Ensures that if the NuGet.props does not exists Microsoft.Build.Exceptions.InvalidProjectFileException is produced.
+        /// Ensures that if the NuGet.props does not exists no exception will be produced.
         /// </summary>
         [Fact]
         public void ImportNuGetPropsWhenDoesNotExists()
@@ -75,7 +75,9 @@ namespace Microsoft.Build.UnitTests
                 </Project>
             ");
 
-            Assert.Throws<Exceptions.InvalidProjectFileException>(() => ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(projectRelativePath));
+            Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(projectRelativePath);
+
+            Assert.Empty(project.GetPropertyValue("NuGetPropsIsImported"));
         }
     }
 }

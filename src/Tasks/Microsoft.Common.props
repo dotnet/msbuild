@@ -173,5 +173,5 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <NuGetPropsFile Condition="'$(NuGetPropsFile)'=='' and '$(MSBuildUseVisualStudioDirectoryLayout)'=='true'">$(MSBuildToolsPath32)\..\..\..\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.props</NuGetPropsFile>
     <NuGetPropsFile Condition="'$(NuGetPropsFile)'==''">$(MSBuildToolsPath)\NuGet.props</NuGetPropsFile>
   </PropertyGroup>
-  <Import Project="$(NuGetPropsFile)" />
+  <Import Condition="Exists('$(NuGetPropsFile)')" Project="$(NuGetPropsFile)" />
 </Project>
