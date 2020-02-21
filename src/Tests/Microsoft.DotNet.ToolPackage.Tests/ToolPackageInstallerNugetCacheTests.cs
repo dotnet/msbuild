@@ -95,8 +95,12 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 packageLocation: new PackageLocation(nugetConfig: nugetConfigPath),
                 targetFramework: _testTargetframework);
 
+            var expectedPackagesFolder = testMockBehaviorIsInSync ?
+                            NuGetGlobalPackagesFolder.GetLocation() :
+                            TestContext.Current.NuGetCachePath;
+
             var commands = toolPackage.Commands;
-            commands[0].Executable.Value.Should().StartWith(NuGetGlobalPackagesFolder.GetLocation());
+            commands[0].Executable.Value.Should().StartWith(expectedPackagesFolder);
             toolPackage.Version.Should().Be(NuGetVersion.Parse(TestPackageVersion));
         }
 
