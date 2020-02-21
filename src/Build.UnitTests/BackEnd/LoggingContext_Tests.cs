@@ -4,8 +4,10 @@
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
+using Shouldly;
 using System;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -14,6 +16,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// </summary>
     public class LoggingContext_Tests
     {
+        private readonly ITestOutputHelper _output;
+
+        public LoggingContext_Tests(ITestOutputHelper outputHelper)
+        {
+            _output = outputHelper;
+        }
+
         /// <summary>
         /// A few simple tests for NodeLoggingContexts. 
         /// </summary>
@@ -52,6 +61,22 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 NodeLoggingContext context = new NodeLoggingContext(new MockLoggingService(), -2, true);
             }
            );
+        }
+
+        [Fact]
+        public void HasLoggedErrors()
+        {
+            NodeLoggingContext context = new NodeLoggingContext(new MockLoggingService(_output.WriteLine), 1, true);
+            context.HasLoggedErrors.ShouldBeFalse();
+
+            context.LogCommentFromText(Framework.MessageImportance.High, "Test message");
+            context.HasLoggedErrors.ShouldBeFalse();
+
+            context.LogWarningFromText(null, null, null, null, "Test warning");
+            context.HasLoggedErrors.ShouldBeFalse();
+
+            context.LogErrorFromText(null, null, null, null, "Test error");
+            context.HasLoggedErrors.ShouldBeTrue();
         }
     }
 }
