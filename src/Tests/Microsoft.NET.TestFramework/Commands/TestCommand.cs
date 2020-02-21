@@ -55,7 +55,7 @@ namespace Microsoft.NET.TestFramework.Commands
 
             foreach (var envToRemove in EnvironmentToRemove)
             {
-                commandSpec.Environment.Remove(envToRemove);
+                commandSpec.EnvironmentToRemove.Add(envToRemove);
             }
 
             if (WorkingDirectory != null)
@@ -76,11 +76,6 @@ namespace Microsoft.NET.TestFramework.Commands
             var commandSpec = CreateCommandSpec(args);
 
             var psi = commandSpec.ToProcessStartInfo();
-
-            foreach (var envToRemove in EnvironmentToRemove)
-            {
-                psi.Environment.Remove(envToRemove);
-            }
 
             return psi;
         }
