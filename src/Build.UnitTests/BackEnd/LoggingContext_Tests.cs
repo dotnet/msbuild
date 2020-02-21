@@ -29,23 +29,23 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void CreateValidNodeLoggingContexts()
         {
-            NodeLoggingContext context = new NodeLoggingContext(new MockLoggingService(), 1, true);
-            Assert.True(context.IsInProcNode);
-            Assert.True(context.IsValid);
+            NodeLoggingContext context = new NodeLoggingContext(new MockLoggingService(_output.WriteLine), 1, true);
+            context.IsInProcNode.ShouldBeTrue();
+            context.IsValid.ShouldBeTrue();
 
             context.LogBuildFinished(true);
-            Assert.False(context.IsValid);
+            context.IsValid.ShouldBeFalse();
 
-            Assert.Equal(1, context.BuildEventContext.NodeId);
+            context.BuildEventContext.NodeId.ShouldBe(1);
 
-            NodeLoggingContext context2 = new NodeLoggingContext(new MockLoggingService(), 2, false);
-            Assert.False(context2.IsInProcNode);
-            Assert.True(context2.IsValid);
+            NodeLoggingContext context2 = new NodeLoggingContext(new MockLoggingService(_output.WriteLine), 2, false);
+            context2.IsInProcNode.ShouldBeFalse();
+            context2.IsValid.ShouldBeTrue();
 
             context2.LogBuildFinished(true);
-            Assert.False(context2.IsValid);
+            context2.IsValid.ShouldBeFalse();
 
-            Assert.Equal(2, context2.BuildEventContext.NodeId);
+            context2.BuildEventContext.NodeId.ShouldBe(2);
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<InternalErrorException>(() =>
             {
-                NodeLoggingContext context = new NodeLoggingContext(new MockLoggingService(), -2, true);
+                _ = new NodeLoggingContext(new MockLoggingService(), -2, true);
             }
            );
         }
