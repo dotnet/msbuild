@@ -230,12 +230,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <GenerateRuntimeConfigurationFilesInputs Include="$(_GenerateRuntimeConfigurationPropertyInputsCache)" />
 
-      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(TargetFramework)"/>
-      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(RuntimeIdentifier)"/>
-      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(RollForward)"/>
-      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(AdditionalProbingPath)"/>
-      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(SelfContained)"/>
+      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="@(AdditionalProbingPath->'%(Identity)')"/>
       <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(EnableDynamicLoading)"/>
+      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(RollForward)"/>
+      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="@(RuntimeHostConfigurationOption->'%(Identity)%(Value)')"/>
+      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(RuntimeIdentifier)"/>
+      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(SelfContained)"/>
+      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(TargetFramework)"/>
+      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(UserRuntimeConfig)"/>
+      <_GenerateRuntimeConfigurationPropertyInputsCacheToHash Include="$(_WriteIncludedFrameworks)"/>
     </ItemGroup>
 
     <Hash ItemsToHash="@(_GenerateRuntimeConfigurationPropertyInputsCacheToHash)">
