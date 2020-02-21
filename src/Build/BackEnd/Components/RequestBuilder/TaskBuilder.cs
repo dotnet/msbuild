@@ -956,7 +956,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (_continueOnError == ContinueOnError.WarnAndContinue)
                     {
-                        taskLoggingContext.LogWarning("",
+                        taskLoggingContext.LogWarning(null,
                             new BuildEventFileInfo(_targetChildInstance.Location),
                             "TaskReturnedFalseButDidNotLogError",
                             _taskNode.Name);
