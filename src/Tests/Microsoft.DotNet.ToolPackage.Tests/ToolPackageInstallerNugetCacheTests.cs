@@ -54,7 +54,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     targetFramework: _testTargetframework);
 
                 var commands = toolPackage.Commands;
-                commands[0].Executable.Value.Should().StartWith(NuGetGlobalPackagesFolder.GetLocation());
+                var expectedPackagesFolder = testMockBehaviorIsInSync ?
+                            NuGetGlobalPackagesFolder.GetLocation() :
+                            TestContext.Current.NuGetCachePath;
+                commands[0].Executable.Value.Should().StartWith(expectedPackagesFolder);
 
                 fileSystem.File
                     .Exists(commands[0].Executable.Value)
