@@ -2,32 +2,32 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Evaluation;
-using Evaluation = Microsoft.Build.Evaluation;
-using ObjectModel = System.Collections.ObjectModel;
-using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Shared;
-using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Internal;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
-using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
-using System.Xml;
 using System.IO;
-using System.Collections;
-using System.Runtime.CompilerServices;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
+using System.Xml;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Definition;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
+using ObjectModel = System.Collections.ObjectModel;
+using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 namespace Microsoft.Build.Execution
@@ -88,6 +88,10 @@ namespace Microsoft.Build.Execution
         private List<string> _defaultTargets;
 
         private List<string> _initialTargets;
+
+        private List<string> _importPaths;
+
+        private List<string> _importPathsIncludingDuplicates;
 
         /// <summary>
         /// The global properties evaluation occurred with.
@@ -238,6 +242,26 @@ namespace Microsoft.Build.Execution
         /// <param name="projectCollection">Project collection</param>
         /// <returns>A new project instance</returns>
         public ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection)
+            : this(projectFile, globalProperties, toolsVersion, subToolsetVersion, projectCollection, projectLoadSettings: null, evaluationContext: null)
+        {
+        }
+
+        /// <summary>
+        /// Creates a ProjectInstance directly.
+        /// No intermediate Project object is created.
+        /// This is ideal if the project is simply going to be built, and not displayed or edited.
+        /// Global properties may be null.
+        /// Tools version may be null.
+        /// Evaluation context may be null.
+        /// </summary>
+        /// <param name="projectFile">The name of the project file.</param>
+        /// <param name="globalProperties">The global properties to use.</param>
+        /// <param name="toolsVersion">The tools version.</param>
+        /// <param name="subToolsetVersion">The sub-toolset version, used in tandem with the ToolsVersion to determine the set of toolset properties.</param>
+        /// <param name="projectCollection">Project collection</param>
+        /// <param name="evaluationContext">The context to use for evaluation.</param>
+        /// <returns>A new project instance</returns>
+        private ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext)
         {
             ErrorUtilities.VerifyThrowArgumentLength(projectFile, "projectFile");
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, "toolsVersion");
@@ -251,7 +275,7 @@ namespace Microsoft.Build.Execution
             BuildEventContext buildEventContext = new BuildEventContext(buildParameters.NodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
             ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, true /*Explicitly Loaded*/);
 
-            Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version provided */, buildParameters, projectCollection.LoggingService, buildEventContext);
+            Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version provided */, buildParameters, projectCollection.LoggingService, buildEventContext, projectLoadSettings: projectLoadSettings, evaluationContext: evaluationContext);
         }
 
         /// <summary>
@@ -299,9 +323,29 @@ namespace Microsoft.Build.Execution
         /// <param name="projectCollection">Project collection</param>
         /// <returns>A new project instance</returns>
         public ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection)
+            : this(xml, globalProperties, toolsVersion, subToolsetVersion, projectCollection, projectLoadSettings: null, evaluationContext: null)
+        {
+        }
+
+        /// <summary>
+        /// Creates a ProjectInstance directly.
+        /// No intermediate Project object is created.
+        /// This is ideal if the project is simply going to be built, and not displayed or edited.
+        /// Global properties may be null.
+        /// Tools version may be null.
+        /// Sub-toolset version may be null, but if specified will override all other methods of determining the sub-toolset.
+        /// </summary>
+        /// <param name="xml">The project root element</param>
+        /// <param name="globalProperties">The global properties to use.</param>
+        /// <param name="toolsVersion">The tools version.</param>
+        /// <param name="subToolsetVersion">The sub-toolset version, used in tandem with the ToolsVersion to determine the set of toolset properties.</param>
+        /// <param name="projectCollection">Project collection</param>
+        /// <param name="evaluationContext">The context to use for evaluation.</param>
+        /// <returns>A new project instance</returns>
+        private ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext)
         {
             BuildEventContext buildEventContext = new BuildEventContext(0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
-            Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version specified */, new BuildParameters(projectCollection), projectCollection.LoggingService, buildEventContext);
+            Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version specified */, new BuildParameters(projectCollection), projectCollection.LoggingService, buildEventContext, projectLoadSettings: projectLoadSettings, evaluationContext: evaluationContext);
         }
 
         /// <summary>
@@ -331,6 +375,10 @@ namespace Microsoft.Build.Execution
             this.DefaultTargets.Add("Build");
             this.TaskRegistry = projectToInheritFrom.TaskRegistry;
             _isImmutable = projectToInheritFrom._isImmutable;
+            _importPaths = projectToInheritFrom._importPaths;
+            ImportPaths = _importPaths.AsReadOnly();
+            _importPathsIncludingDuplicates = projectToInheritFrom._importPathsIncludingDuplicates;
+            ImportPathsIncludingDuplicates = _importPathsIncludingDuplicates.AsReadOnly();
 
             this.EvaluatedItemElements = new List<ProjectItemElement>();
 
@@ -424,6 +472,7 @@ namespace Microsoft.Build.Execution
             this.CreateGlobalPropertiesSnapshot(data);
             this.CreateEnvironmentVariablePropertiesSnapshot(environmentVariableProperties);
             this.CreateTargetsSnapshot(data);
+            this.CreateImportsSnapshot(data);
 
             this.Toolset = data.Toolset; // UNDONE: This isn't immutable, should be cloned or made immutable; it currently has a pointer to project collection
             this.SubToolsetVersion = data.SubToolsetVersion;
@@ -515,6 +564,10 @@ namespace Microsoft.Build.Execution
                 _targets = that._targets;
                 _itemDefinitions = that._itemDefinitions;
                 _explicitToolsVersionSpecified = that._explicitToolsVersionSpecified;
+                _importPaths = that._importPaths;
+                ImportPaths = _importPaths.AsReadOnly();
+                _importPathsIncludingDuplicates = that._importPathsIncludingDuplicates;
+                ImportPathsIncludingDuplicates = _importPathsIncludingDuplicates.AsReadOnly();
 
                 this.EvaluatedItemElements = that.EvaluatedItemElements;
 
@@ -605,6 +658,41 @@ namespace Microsoft.Build.Execution
                     _translateEntireState = false;
                 }
             }
+        }
+
+        /// <summary>
+        /// Create a file based ProjectInstance.
+        /// </summary>
+        /// <param name="file">The file to evaluate the ProjectInstance from.</param>
+        /// <param name="options">The <see cref="ProjectOptions"/> to use.</param>
+        /// <returns></returns>
+        public static ProjectInstance FromFile(string file, ProjectOptions options)
+        {
+            return new ProjectInstance(
+                file,
+                options.GlobalProperties,
+                options.ToolsVersion,
+                options.SubToolsetVersion,
+                options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
+                options.LoadSettings,
+                options.EvaluationContext);
+        }
+
+        /// <summary>
+        /// Create a <see cref="ProjectRootElement"/> based ProjectInstance.
+        /// </summary>
+        /// <param name="rootElement">The <see cref="ProjectRootElement"/> to evaluate the ProjectInstance from.</param>
+        /// <param name="options">The <see cref="ProjectOptions"/> to use.</param>
+        public static ProjectInstance FromProjectRootElement(ProjectRootElement rootElement, ProjectOptions options)
+        {
+            return new ProjectInstance(
+                rootElement,
+                options.GlobalProperties,
+                options.ToolsVersion,
+                options.SubToolsetVersion,
+                options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
+                options.LoadSettings,
+                options.EvaluationContext);
         }
 
         /// <summary>
@@ -772,6 +860,18 @@ namespace Microsoft.Build.Execution
             get
             { return _itemDefinitions; }
         }
+
+        /// <summary>
+        /// The full file paths of all the files that during evaluation contributed to this project instance.
+        /// This does not include projects that were never imported because a condition on an Import element was false.
+        /// The outer ProjectRootElement that maps to this project instance itself is not included.
+        /// </summary>
+        public IReadOnlyList<string> ImportPaths { get; private set; }
+
+        /// <summary>
+        /// This list will contain duplicate imports if an import is imported multiple times. However, only the first import was used in evaluation.
+        /// </summary>
+        public IReadOnlyList<string> ImportPathsIncludingDuplicates { get; private set; }
 
         /// <summary>
         /// DefaultTargets specified in the project, or
@@ -1358,7 +1458,6 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// Record an import opened during evaluation.
-        /// Does nothing: not needed for project instances.
         /// </summary>
         void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.RecordImport(
             ProjectImportElement importElement,
@@ -1366,14 +1465,16 @@ namespace Microsoft.Build.Execution
             int versionEvaluated,
             SdkResult sdkResult)
         {
+            _importPaths.Add(import.FullPath);
+            ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this).RecordImportWithDuplicates(importElement, import, versionEvaluated);
         }
 
         /// <summary>
         /// Record an import opened during evaluation. Include duplicates
-        /// Does nothing: not needed for project instances.
         /// </summary>
         void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.RecordImportWithDuplicates(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated)
         {
+            _importPathsIncludingDuplicates.Add(import.FullPath);
         }
 
         /// <summary>
@@ -1897,6 +1998,9 @@ namespace Microsoft.Build.Execution
                 ref _itemDefinitions,
                 ProjectItemDefinitionInstance.FactoryForDeserialization,
                 capacity => new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(capacity, MSBuildNameIgnoreCaseComparer.Default));
+
+            // ignore _importPaths/ImportPaths. Only used by public API users, not nodes
+            // ignore _importPathsIncludingDuplicates/ImportPathsIncludingDuplicates. Only used by public API users, not nodes
         }
 
         private void TranslateToolsetSpecificState(ITranslator translator)
@@ -2034,9 +2138,29 @@ namespace Microsoft.Build.Execution
             // we should be generating a 4.0+ or a 3.5-style wrapper project based on the version of the solution. 
             else
             {
-                int solutionVersion;
-                int visualStudioVersion;
-                SolutionFile.GetSolutionFileAndVisualStudioMajorVersions(projectFile, out solutionVersion, out visualStudioVersion);
+                string solutionFile = projectFile;
+                if (FileUtilities.IsSolutionFilterFilename(projectFile))
+                {
+                    try
+                    {
+                        using JsonDocument text = JsonDocument.Parse(File.ReadAllText(projectFile));
+                        JsonElement solution = text.RootElement.GetProperty("solution");
+                        solutionFile = Path.GetFullPath(solution.GetProperty("path").GetString());
+                    }
+                    catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
+                    {
+                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                        (
+                            false, /* Just throw the exception */
+                            "SubCategoryForSolutionParsingErrors",
+                            new BuildEventFileInfo(projectFile),
+                            e,
+                            "SolutionFilterJsonParsingError",
+                            projectFile
+                        );
+                    }
+                }
+                SolutionFile.GetSolutionFileAndVisualStudioMajorVersions(solutionFile, out int solutionVersion, out int visualStudioVersion);
 
                 // If we get to this point, it's because it's a valid version.  Map the solution version 
                 // to the equivalent MSBuild ToolsVersion, and unless it's Dev10 or newer, spawn the old 
@@ -2064,7 +2188,7 @@ namespace Microsoft.Build.Execution
 
                     string toolsVersionToUse = Utilities.GenerateToolsVersionToUse(
                         explicitToolsVersion: null,
-                        toolsVersionFromProject: toolsVersion,
+                        toolsVersionFromProject: FileUtilities.IsSolutionFilterFilename(projectFile) ? MSBuildConstants.CurrentToolsVersion : toolsVersion,
                         getToolset: buildParameters.GetToolset,
                         defaultToolsVersion: Constants.defaultSolutionWrapperProjectToolsVersion,
                         usingDifferentToolsVersionFromProjectFile: out _);
@@ -2471,7 +2595,19 @@ namespace Microsoft.Build.Execution
         /// Tools version may be null.
         /// Does not set mutability.
         /// </summary>
-        private void Initialize(ProjectRootElement xml, IDictionary<string, string> globalProperties, string explicitToolsVersion, string explicitSubToolsetVersion, int visualStudioVersionFromSolution, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext, ISdkResolverService sdkResolverService = null, int submissionId = BuildEventContext.InvalidSubmissionId, ProjectLoadSettings? projectLoadSettings = null)
+        private void Initialize(
+            ProjectRootElement xml,
+            IDictionary<string, string> globalProperties,
+            string explicitToolsVersion,
+            string explicitSubToolsetVersion,
+            int visualStudioVersionFromSolution,
+            BuildParameters buildParameters,
+            ILoggingService loggingService,
+            BuildEventContext buildEventContext,
+            ISdkResolverService sdkResolverService = null,
+            int submissionId = BuildEventContext.InvalidSubmissionId,
+            ProjectLoadSettings? projectLoadSettings = null,
+            EvaluationContext evaluationContext = null)
         {
             ErrorUtilities.VerifyThrowArgumentNull(xml, "xml");
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(explicitToolsVersion, "toolsVersion");
@@ -2483,6 +2619,10 @@ namespace Microsoft.Build.Execution
             _items = new ItemDictionary<ProjectItemInstance>();
             _actualTargets = new RetrievableEntryHashSet<ProjectTargetInstance>(StringComparer.OrdinalIgnoreCase);
             _targets = new ObjectModel.ReadOnlyDictionary<string, ProjectTargetInstance>(_actualTargets);
+            _importPaths = new List<string>();
+            ImportPaths = _importPaths.AsReadOnly();
+            _importPathsIncludingDuplicates = new List<string>();
+            ImportPathsIncludingDuplicates = _importPathsIncludingDuplicates.AsReadOnly();
             _globalProperties = new PropertyDictionary<ProjectPropertyInstance>((globalProperties == null) ? 0 : globalProperties.Count);
             _environmentVariableProperties = buildParameters.EnvironmentPropertiesInternal;
             _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(MSBuildNameIgnoreCaseComparer.Default);
@@ -2556,6 +2696,8 @@ namespace Microsoft.Build.Execution
 
             ErrorUtilities.VerifyThrow(EvaluationId == BuildEventContext.InvalidEvaluationId, "Evaluation ID is invalid prior to evaluation");
 
+            evaluationContext = evaluationContext?.ContextForNewProject() ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
+
             Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Evaluate(
                 this,
                 xml,
@@ -2567,8 +2709,9 @@ namespace Microsoft.Build.Execution
                 buildParameters.ToolsetProvider,
                 ProjectRootElementCache,
                 buildEventContext,
-                sdkResolverService ?? SdkResolverService.Instance,
+                sdkResolverService ?? evaluationContext.SdkResolverService, /* Use override ISdkResolverService if specified */
                 submissionId,
+                evaluationContext,
                 interactive: buildParameters.Interactive);
 
             ErrorUtilities.VerifyThrow(EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
@@ -2595,6 +2738,36 @@ namespace Microsoft.Build.Execution
 
             // ProjectTargetInstances are immutable so only the dictionary must be cloned
             _targets = CreateCloneDictionary(data.Targets);
+        }
+
+        /// <summary>
+        /// Create various imports snapshots
+        /// </summary>
+        private void CreateImportsSnapshot(Evaluation.Project.Data data)
+        {
+            _importPaths = new List<string>(data.ImportClosure.Count - 1 /* outer project */);
+            foreach (var resolvedImport in data.ImportClosure)
+            {
+                // Exclude outer project itself
+                if (resolvedImport.ImportingElement != null)
+                {
+                    _importPaths.Add(resolvedImport.ImportedProject.FullPath);
+                }
+            }
+
+            ImportPaths = _importPaths.AsReadOnly();
+
+            _importPathsIncludingDuplicates = new List<string>(data.ImportClosureWithDuplicates.Count - 1 /* outer project */);
+            foreach (var resolvedImport in data.ImportClosureWithDuplicates)
+            {
+                // Exclude outer project itself
+                if (resolvedImport.ImportingElement != null)
+                {
+                    _importPathsIncludingDuplicates.Add(resolvedImport.ImportedProject.FullPath);
+                }
+            }
+
+            ImportPathsIncludingDuplicates = _importPathsIncludingDuplicates.AsReadOnly();
         }
 
         /// <summary>

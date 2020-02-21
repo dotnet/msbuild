@@ -18,6 +18,64 @@ namespace Microsoft.Build.UnitTests.Construction
     public class SolutionFile_Tests
     {
         /// <summary>
+        /// Test that a solution filter file is parsed correctly, and it can accurately respond as to whether a project should be filtered out.
+        /// </summary>
+        [Fact]
+        public void ParseSolutionFilter()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
+                TransientTestFolder src = testEnvironment.CreateFolder(Path.Combine(folder.Path, "src"), createFolder: true);
+                TransientTestFile microsoftBuild = testEnvironment.CreateFile(src, "Microsoft.Build.csproj");
+                TransientTestFile msbuild = testEnvironment.CreateFile(src, "MSBuild.csproj");
+                TransientTestFile commandLineUnitTests = testEnvironment.CreateFile(src, "Microsoft.Build.CommandLine.UnitTests.csproj");
+                TransientTestFile tasksUnitTests = testEnvironment.CreateFile(src, "Microsoft.Build.Tasks.UnitTests.csproj");
+                // The important part of this .sln is that it has references to each of the four projects we just created.
+                TransientTestFile sln = testEnvironment.CreateFile(folder, "Microsoft.Build.Dev.sln",
+                    @"
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio 15
+                    VisualStudioVersion = 15.0.27004.2009
+                    MinimumVisualStudioVersion = 10.0.40219.1
+                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Microsoft.Build"", """ + Path.Combine("src", Path.GetFileName(microsoftBuild.Path)) + @""", ""{69BE05E2-CBDA-4D27-9733-44E12B0F5627}""
+                    EndProject
+                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""MSBuild"", """ + Path.Combine("src", Path.GetFileName(msbuild.Path)) + @""", ""{6F92CA55-1D15-4F34-B1FE-56C0B7EB455E}""
+                    EndProject
+                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Microsoft.Build.CommandLine.UnitTests"", """ + Path.Combine("src", Path.GetFileName(commandLineUnitTests.Path)) + @""", ""{0ADDBC02-0076-4159-B351-2BF33FAA46B2}""
+                    EndProject
+                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Microsoft.Build.Tasks.UnitTests"", """ + Path.Combine("src", Path.GetFileName(tasksUnitTests.Path)) + @""", ""{CF999BDE-02B3-431B-95E6-E88D621D9CBF}""
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        EndGlobalSection
+                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                    EndGlobalSection
+                    GlobalSection(SolutionProperties) = preSolution
+                        HideSolutionNode = FALSE
+                    EndGlobalSection
+                    GlobalSection(ExtensibilityGlobals) = postSolution
+                    EndGlobalSection
+                    EndGlobal
+                    ");
+                TransientTestFile slnf = testEnvironment.CreateFile(folder, "Dev.slnf",
+                    @"
+                    {
+                      ""solution"": {
+                        ""path"": """ + sln.Path.Replace("\\", "\\\\") + @""",
+                        ""projects"": [
+                          """ + Path.Combine("src", Path.GetFileName(microsoftBuild.Path)).Replace("\\", "\\\\") + @""",
+                          """ + Path.Combine("src", Path.GetFileName(tasksUnitTests.Path)).Replace("\\", "\\\\") + @"""
+                        ]
+                        }
+                    }");
+                SolutionFile sp = SolutionFile.Parse(slnf.Path);
+                Assert.True(sp.ProjectShouldBuild(Path.Combine("src", Path.GetFileName(microsoftBuild.Path))) && sp.ProjectShouldBuild(Path.Combine("src", Path.GetFileName(tasksUnitTests.Path))));
+                Assert.False(sp.ProjectShouldBuild(Path.Combine("src", Path.GetFileName(commandLineUnitTests.Path))) || sp.ProjectShouldBuild(Path.Combine("src", Path.GetFileName(msbuild.Path))) || sp.ProjectShouldBuild(Path.Combine("src", "notAProject.csproj")));
+            }
+        }
+
+        /// <summary>
         /// Test just the most basic, plain vanilla first project line.
         /// </summary>
         [Fact]
@@ -872,7 +930,7 @@ namespace Microsoft.Build.UnitTests.Construction
         }
 
         /// <summary>
-        /// Tests the parsing of a very basic .SLN file with three independent projects.
+        /// Tests the parsing of a very basic .SLN file with four independent projects.
         /// </summary>
         [Fact]
         public void BasicSolution()
@@ -886,6 +944,8 @@ namespace Microsoft.Build.UnitTests.Construction
                 Project('{F184B08F-C81C-45F6-A57F-5ABD9991F28F}') = 'vbClassLibrary', 'vbClassLibrary\vbClassLibrary.vbproj', '{BA333A76-4511-47B8-8DF4-CA51C303AD0B}'
                 EndProject
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{DEBCE986-61B9-435E-8018-44B9EF751655}'
+                EndProject
+                Project('{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}') = 'cpsFsProject', 'cpsFsProject\ProjectFileName.fsproj', '{9200923E-1814-4E76-A677-C61E4896D67F}'
                 EndProject
                 Global
                     GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -905,6 +965,10 @@ namespace Microsoft.Build.UnitTests.Construction
                         {DEBCE986-61B9-435E-8018-44B9EF751655}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
                         {DEBCE986-61B9-435E-8018-44B9EF751655}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
                         {DEBCE986-61B9-435E-8018-44B9EF751655}.Release|AnyCPU.Build.0 = Release|AnyCPU
+                        {9200923E-1814-4E76-A677-C61E4896D67F}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+                        {9200923E-1814-4E76-A677-C61E4896D67F}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+                        {9200923E-1814-4E76-A677-C61E4896D67F}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+                        {9200923E-1814-4E76-A677-C61E4896D67F}.Release|AnyCPU.Build.0 = Release|AnyCPU
                     EndGlobalSection
                     GlobalSection(SolutionProperties) = preSolution
                         HideSolutionNode = FALSE
@@ -914,7 +978,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
-            Assert.Equal(3, solution.ProjectsInOrder.Count);
+            Assert.Equal(4, solution.ProjectsInOrder.Count);
 
             Assert.Equal(SolutionProjectType.KnownToBeMSBuildFormat, solution.ProjectsInOrder[0].ProjectType);
             Assert.Equal("ConsoleApplication1", solution.ProjectsInOrder[0].ProjectName);
@@ -939,6 +1003,14 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Empty(solution.ProjectsInOrder[2].Dependencies);
             Assert.Null(solution.ProjectsInOrder[2].ParentProjectGuid);
             Assert.Equal("ClassLibrary1", solution.ProjectsInOrder[2].GetUniqueProjectName());
+
+            Assert.Equal(SolutionProjectType.KnownToBeMSBuildFormat, solution.ProjectsInOrder[3].ProjectType);
+            Assert.Equal("cpsFsProject", solution.ProjectsInOrder[3].ProjectName);
+            Assert.Equal(@"cpsFsProject\ProjectFileName.fsproj", solution.ProjectsInOrder[3].RelativePath);
+            Assert.Equal("{9200923E-1814-4E76-A677-C61E4896D67F}", solution.ProjectsInOrder[3].ProjectGuid);
+            Assert.Empty(solution.ProjectsInOrder[3].Dependencies);
+            Assert.Null(solution.ProjectsInOrder[3].ParentProjectGuid);
+            Assert.Equal("cpsFsProject", solution.ProjectsInOrder[3].GetUniqueProjectName());
         }
 
         /// <summary>

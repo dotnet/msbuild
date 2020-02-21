@@ -207,7 +207,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Returns the exception that occured on the node
+        /// Returns the exception that occurred on the node
         /// </summary>
         internal Exception UnhandledException
         {

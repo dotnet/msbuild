@@ -2528,6 +2528,11 @@
         <target state="translated">MSB3762: Do zadania nie zostały przekazane informacje o żadnych odwołaniach. Wymagane są odwołania co najmniej do biblioteki mscorlib i elementu Windows.Foundation.</target>
         <note>{StrBegin="MSB3762: "}</note>
       </trans-unit>
+      <trans-unit id="Xaml.DuplicatePropertyName">
+        <source>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</source>
+        <target state="new">MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</target>
+        <note>{StrBegin="MSB3724: "}</note>
+      </trans-unit>
       <trans-unit id="Xaml.TaskCreationFailed">
         <source>MSB3686: Unable to create Xaml task.  Compilation failed.  {0}</source>
         <target state="translated">MSB3686: Nie można utworzyć zadania Xaml.  Kompilacja nie powiodła się. {0}</target>

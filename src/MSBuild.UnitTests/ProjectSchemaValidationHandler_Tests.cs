@@ -262,17 +262,21 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         private string[] PrepareSchemaFiles()
         {
+            string msbuildXsdRootDirectory = Path.GetTempPath();
+            Directory.CreateDirectory(msbuildXsdRootDirectory);
+
             Stream msbuildXsdStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Microsoft.Build.CommandLine.UnitTests.Microsoft.Build.xsd");
             StreamReader msbuildXsdStreamReader = new StreamReader(msbuildXsdStream);
             string msbuildXsdContents = msbuildXsdStreamReader.ReadToEnd();
-            string msbuildTempXsdFilename = FileUtilities.GetTemporaryFile();
+            string msbuildTempXsdFilename = Path.Combine(msbuildXsdRootDirectory, "Microsoft.Build.xsd");
             File.WriteAllText(msbuildTempXsdFilename, msbuildXsdContents);
+
+            string msbuildXsdSubDirectory = Path.Combine(msbuildXsdRootDirectory, "MSBuild");
+            Directory.CreateDirectory(msbuildXsdSubDirectory);
 
             msbuildXsdStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Microsoft.Build.CommandLine.UnitTests.Microsoft.Build.Core.xsd");
             msbuildXsdStreamReader = new StreamReader(msbuildXsdStream);
             msbuildXsdContents = msbuildXsdStreamReader.ReadToEnd();
-            string msbuildXsdSubDirectory = Path.Combine(Path.GetTempPath(), "MSBuild");
-            Directory.CreateDirectory(msbuildXsdSubDirectory);
             string msbuildTempXsdFilename2 = Path.Combine(msbuildXsdSubDirectory, "Microsoft.Build.Core.xsd");
             File.WriteAllText(msbuildTempXsdFilename2, msbuildXsdContents);
 

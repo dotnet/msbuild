@@ -10,6 +10,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -20,6 +21,13 @@ namespace Microsoft.Build.UnitTests
     /// </summary>
     sealed public class AssignProjectConfiguration_Tests
     {
+        private readonly ITestOutputHelper _output;
+
+        public AssignProjectConfiguration_Tests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         private void TestResolveHelper(string itemSpec, string projectGuid, string package, string name,
             Hashtable pregenConfigurations, bool expectedResult,
             string expectedFullConfiguration, string expectedConfiguration, string expectedPlatform)
@@ -257,7 +265,7 @@ namespace Microsoft.Build.UnitTests
             // but they are ignored anyway, and the rest is identical
             string xmlString = ResolveNonMSBuildProjectOutput_Tests.CreatePregeneratedPathDoc(pregenConfigurations);
 
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             AssignProjectConfiguration rpc = new AssignProjectConfiguration();
             rpc.BuildEngine = engine;
             rpc.SolutionConfigurationContents = xmlString;

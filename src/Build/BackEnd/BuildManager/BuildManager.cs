@@ -27,7 +27,6 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
@@ -234,6 +233,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private DateTime _instantiationTimeUtc;
 
+        private IEnumerable<DeferredBuildMessage> _deferredBuildMessages;
+
 #if DEBUG
         /// <summary>
         /// <code>true</code> to wait for a debugger to be attached, otherwise <code>false</code>.
@@ -294,12 +295,12 @@ namespace Microsoft.Build.Execution
         private enum BuildManagerState
         {
             /// <summary>
-            /// This is the default state.  <see cref="BuildManager.BeginBuild"/> may be called in this state.  All other methods raise InvalidOperationException
+            /// This is the default state.  <see cref="BeginBuild(BuildParameters)"/> may be called in this state.  All other methods raise InvalidOperationException
             /// </summary>
             Idle,
 
             /// <summary>
-            /// This is the state the BuildManager is in after <see cref="BuildManager.BeginBuild"/> has been called but before <see cref="BuildManager.EndBuild"/> has been called.
+            /// This is the state the BuildManager is in after <see cref="BeginBuild(BuildParameters)"/> has been called but before <see cref="EndBuild"/> has been called.
             /// <see cref="BuildManager.PendBuildRequest(Microsoft.Build.Execution.BuildRequestData)"/>, <see cref="BuildManager.BuildRequest(Microsoft.Build.Execution.BuildRequestData)"/>, <see cref="BuildManager.PendBuildRequest(GraphBuildRequestData)"/>, <see cref="BuildManager.BuildRequest(GraphBuildRequestData)"/>, and <see cref="BuildManager.EndBuild"/> may be called in this state.
             /// </summary>
             Building,
@@ -360,6 +361,36 @@ namespace Microsoft.Build.Execution
         LegacyThreadingData IBuildComponentHost.LegacyThreadingData => _legacyThreadingData;
 
         /// <summary>
+        /// <see cref="BuildManager.BeginBuild(BuildParameters,IEnumerable{DeferredBuildMessage})"/>
+        /// </summary>
+        public readonly struct DeferredBuildMessage
+        {
+            public MessageImportance Importance { get; }
+
+            public string Text { get; }
+
+            public DeferredBuildMessage(string text, MessageImportance importance)
+            {
+                Importance = importance;
+                Text = text;
+            }
+        }
+
+        /// <summary>
+        /// Prepares the BuildManager to receive build requests.
+        /// </summary>
+        /// <param name="parameters">The build parameters.  May be null.</param>
+        /// <param name="deferredBuildMessages"> Build messages to be logged before the build begins. </param>
+        /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
+        public void BeginBuild(BuildParameters parameters, IEnumerable<DeferredBuildMessage> deferredBuildMessages)
+        {
+            // deferredBuildMessages cannot be an optional parameter on a single BeginBuild method because it would break binary compatibility.
+            _deferredBuildMessages = deferredBuildMessages;
+            BeginBuild(parameters);
+            _deferredBuildMessages = null;
+        }
+
+        /// <summary>
         /// Prepares the BuildManager to receive build requests.
         /// </summary>
         /// <param name="parameters">The build parameters.  May be null.</param>
@@ -401,7 +432,7 @@ namespace Microsoft.Build.Execution
 
                 var loggingService = InitializeLoggingService();
 
-                LogExecutionContext(loggingService);
+                LogDeferredMessages(loggingService, _deferredBuildMessages);
 
                 InitializeCaches();
 
@@ -506,32 +537,6 @@ namespace Microsoft.Build.Execution
 
                     _buildParameters.ProjectRootElementCache.DiscardImplicitReferences();
                 }
-            }
-        }
-
-        private void LogExecutionContext(ILoggingService loggingService)
-        {
-            if (Traits.Instance.EscapeHatches.DoNotLogExecutionDetailsInBuildManagerBeginBuild)
-            {
-                return;
-            }
-
-            LogComment("Process", Process.GetCurrentProcess().MainModule?.FileName ?? string.Empty);
-
-            LogComment("CommandLine", Environment.CommandLine);
-
-            LogComment("MSBExePath", BuildEnvironmentHelper.Instance.CurrentMSBuildExePath);
-
-            LogComment("MSBVersion", ProjectCollection.DisplayVersion);
-
-            LogComment("CurrentDirectory", Environment.CurrentDirectory);
-
-            void LogComment(string resourceName, string arg)
-            {
-                loggingService.LogCommentFromText(
-                    BuildEventContext.Invalid,
-                    MessageImportance.Low,
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(resourceName, arg));
             }
         }
 
@@ -2261,19 +2266,9 @@ namespace Microsoft.Build.Execution
         {
             int cpuCount = _buildParameters.MaxNodeCount;
 
-            // Mono has issues with TPL Dataflow implementation,
-            // so use synchronous version
-            LoggerMode loggerMode;
-            if (NativeMethodsShared.IsMono)
-            {
-                loggerMode = LoggerMode.Synchronous;
-            }
-            else
-            {
-                loggerMode = cpuCount == 1 && _buildParameters.UseSynchronousLogging
-                    ? LoggerMode.Synchronous
-                    : LoggerMode.Asynchronous;
-            }
+            LoggerMode loggerMode = cpuCount == 1 && _buildParameters.UseSynchronousLogging
+                                        ? LoggerMode.Synchronous
+                                        : LoggerMode.Asynchronous;
 
             ILoggingService loggingService = LoggingService.CreateLoggingService(loggerMode,
                 1 /*This logging service is used for the build manager and the inproc node, therefore it should have the first nodeId*/);
@@ -2328,6 +2323,19 @@ namespace Microsoft.Build.Execution
             }
 
             return loggingService;
+        }
+
+        private static void LogDeferredMessages(ILoggingService loggingService, IEnumerable<DeferredBuildMessage> deferredBuildMessages)
+        {
+            if (deferredBuildMessages == null)
+            {
+                return;
+            }
+
+            foreach (var message in deferredBuildMessages)
+            {
+                loggingService.LogCommentFromText(BuildEventContext.Invalid, message.Importance, message.Text);
+            }
         }
 
         /// <summary>

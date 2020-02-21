@@ -17,6 +17,7 @@ using System.Globalization;
 using Microsoft.Build.Tasks.Xaml;
 using System.Xaml;
 using Xunit;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 {
@@ -189,6 +190,25 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
             Assert.Equal("Oi:NO", properties.First.Value.ReverseSwitchName);
             Assert.Equal("true", properties.First.Value.Reversible); // "Switch should be marked as reversible"
             Assert.Equal(PropertyType.Boolean, properties.First.Value.Type);
+        }
+
+        [Fact]
+        public void TestParseIncorrect_PropertyNamesMustBeUnique()
+        {
+            string incorrectXmlContents = @"<ProjectSchemaDefinitions
+                                       xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework`
+                                       xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml`
+                                       xmlns:sys=`clr-namespace:System;assembly=mscorlib`
+                                       xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
+                                     <Rule Name=`CL`>
+                                       <BoolProperty Name=`SameName` Switch=`Og` ReverseSwitch=`Og-` />
+                                       <BoolProperty Name=`SameName` Switch=`Og` ReverseSwitch=`Og-` />
+                                     </Rule>
+                                   </ProjectSchemaDefinitions>";
+
+            Should
+                .Throw<XamlParseException>(() => XamlTestHelpers.LoadAndParse(incorrectXmlContents, "CL"))
+                .Message.ShouldStartWith("MSB3724");
         }
 
         /// <summary>

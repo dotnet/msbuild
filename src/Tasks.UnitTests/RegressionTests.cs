@@ -1,7 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.IO;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Xunit;
 using Xunit.Abstractions;
@@ -41,6 +44,35 @@ namespace Microsoft.Build.Tasks.UnitTests
             bool result = project.Build(new MockLogger(_output));
 
             Assert.True(result);
+        }
+
+        /// <summary>
+        /// Tests fix for https://github.com/microsoft/msbuild/issues/1479.
+        /// </summary>
+        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsWindows))]
+        public void AssemblyAttributesLocation()
+        {
+            var expectedCompileItems = "a.cs;" + Path.Combine("obj", "Debug", ".NETFramework,Version=v4.0.AssemblyAttributes.cs");
+
+            var project = ObjectModelHelpers.CreateInMemoryProject($@"
+<Project>
+  <Import Project=""$(MSBuildToolsPath)\Microsoft.Common.props"" />
+  <ItemGroup>
+    <Compile Include=""a.cs""/>       
+  </ItemGroup>
+  <Import Project=""$(MSBuildToolsPath)\Microsoft.CSharp.targets"" />
+
+  <Target Name=""CopyFilesToOutputDirectory""/>
+
+  <Target Name=""CoreCompile"">
+    <Error Text=""Expected '@(Compile)' == '{expectedCompileItems}'""
+           Condition=""'@(Compile)' != '{expectedCompileItems}'""/>
+  </Target>
+</Project>
+");
+            var logger = new MockLogger(_output);
+            bool result = project.Build(logger);
+            Assert.True(result, "Output:" + Environment.NewLine + logger.FullLog);
         }
     }
 }

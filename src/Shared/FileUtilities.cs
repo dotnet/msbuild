@@ -954,12 +954,21 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// This method returns true if the specified filename is a solution file (.sln), otherwise
-        /// it returns false.
+        /// This method returns true if the specified filename is a solution file (.sln) or
+        /// solution filter file (.slnf); otherwise, it returns false.
         /// </summary>
+        /// <remarks>
+        /// Solution filters are included because they are a thin veneer over solutions, just
+        /// with a more limited set of projects to build, and should be treated the same way.
+        /// </remarks>
         internal static bool IsSolutionFilename(string filename)
         {
-            return HasExtension(filename, ".sln");
+            return HasExtension(filename, ".sln") || HasExtension(filename, ".slnf");
+        }
+
+        internal static bool IsSolutionFilterFilename(string filename)
+        {
+            return HasExtension(filename, ".slnf");
         }
 
         /// <summary>

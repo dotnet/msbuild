@@ -76,11 +76,6 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         [Fact]
         public void BuildWithMuxLoggerEquivalentToNormalLogger()
         {
-            using var env = TestEnvironment.Create();
-
-            // see https://github.com/microsoft/msbuild/issues/5056
-            env.SetEnvironmentVariable("MSBuildDoNotLogExecutionDetailsInBuildManagerBeginBuild", "true");
-
             string projectBody = ObjectModelHelpers.CleanupFileContents(@"
 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
     <Target Name='Test'>
@@ -93,12 +88,12 @@ namespace Microsoft.VisualStudio.Build.UnitTest
             BuildManager buildManager = BuildManager.DefaultBuildManager;
 
             // Build with a 'normal' logger
-            MockLogger nonMultiplexedLogger = new MockLogger();
-            nonMultiplexedLogger.LogBuildFinished = false;
+            MockLogger mockLogger2 = new MockLogger();
+            mockLogger2.LogBuildFinished = false;
             ProjectCollection projectCollection = new ProjectCollection();
             ProjectInstance project = (new Project(XmlReader.Create(new StringReader(projectBody)), null, ObjectModelHelpers.MSBuildDefaultToolsVersion, projectCollection)).CreateProjectInstance();
             BuildParameters parameters = new BuildParameters(projectCollection);
-            parameters.Loggers = new ILogger[] { nonMultiplexedLogger };
+            parameters.Loggers = new ILogger[] { mockLogger2 };
             buildManager.Build(parameters, new BuildRequestData(project, new string[0], null));
 
             // Build with the mux logger
@@ -109,13 +104,13 @@ namespace Microsoft.VisualStudio.Build.UnitTest
             parameters = new BuildParameters(projectCollection);
             parameters.Loggers = new ILogger[] { muxLogger };
             buildManager.BeginBuild(parameters);
-            MockLogger multiplexedLogger = new MockLogger();
-            multiplexedLogger.LogBuildFinished = false;
+            MockLogger mockLogger = new MockLogger();
+            mockLogger.LogBuildFinished = false;
 
             try
             {
                 BuildSubmission submission = buildManager.PendBuildRequest(new BuildRequestData(project, new string[0], null));
-                muxLogger.RegisterLogger(submission.SubmissionId, multiplexedLogger);
+                muxLogger.RegisterLogger(submission.SubmissionId, mockLogger);
                 submission.Execute();
             }
             finally
@@ -123,10 +118,10 @@ namespace Microsoft.VisualStudio.Build.UnitTest
                 buildManager.EndBuild();
             }
 
-            nonMultiplexedLogger.BuildFinishedEvents.Count.ShouldBeGreaterThan(0);
-            multiplexedLogger.BuildFinishedEvents.Count.ShouldBe(nonMultiplexedLogger.BuildFinishedEvents.Count);
-            multiplexedLogger.BuildFinishedEvents[0].Succeeded.ShouldBe(nonMultiplexedLogger.BuildFinishedEvents[0].Succeeded);
-            multiplexedLogger.FullLog.ShouldBe(nonMultiplexedLogger.FullLog);
+            mockLogger2.BuildFinishedEvents.Count.ShouldBeGreaterThan(0);
+            mockLogger.BuildFinishedEvents.Count.ShouldBe(mockLogger2.BuildFinishedEvents.Count);
+            mockLogger.BuildFinishedEvents[0].Succeeded.ShouldBe(mockLogger2.BuildFinishedEvents[0].Succeeded);
+            mockLogger.FullLog.ShouldBe(mockLogger2.FullLog);
         }
 
         /// <summary>

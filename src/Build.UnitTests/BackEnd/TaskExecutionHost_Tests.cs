@@ -1157,7 +1157,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ProjectInstance project = CreateTestProject();
 
             TypeLoader typeLoader = new TypeLoader(IsTaskFactoryClass);
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
             AssemblyLoadInfo loadInfo = AssemblyLoadInfo.Create(Assembly.GetAssembly(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory)).FullName, null);
 #else
             AssemblyLoadInfo loadInfo = AssemblyLoadInfo.Create(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).GetTypeInfo().FullName, null);

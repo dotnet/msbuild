@@ -196,34 +196,48 @@ namespace Microsoft.Build.BackEnd
             _asyncDataMonitor = new object();
             _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
 
-#if FEATURE_PIPE_SECURITY
-            SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
-            PipeSecurity security = new PipeSecurity();
+#if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
+            if (!NativeMethodsShared.IsMono)
+            {
+                SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
+                PipeSecurity security = new PipeSecurity();
 
-            // Restrict access to just this account.  We set the owner specifically here, and on the
-            // pipe client side they will check the owner against this one - they must have identical
-            // SIDs or the client will reject this server.  This is used to avoid attacks where a
-            // hacked server creates a less restricted pipe in an attempt to lure us into using it and 
-            // then sending build requests to the real pipe client (which is the MSBuild Build Manager.)
-            PipeAccessRule rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite, AccessControlType.Allow);
-            security.AddAccessRule(rule);
-            security.SetOwner(identifier);
-#endif
+                // Restrict access to just this account.  We set the owner specifically here, and on the
+                // pipe client side they will check the owner against this one - they must have identical
+                // SIDs or the client will reject this server.  This is used to avoid attacks where a
+                // hacked server creates a less restricted pipe in an attempt to lure us into using it and 
+                // then sending build requests to the real pipe client (which is the MSBuild Build Manager.)
+                PipeAccessRule rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite, AccessControlType.Allow);
+                security.AddAccessRule(rule);
+                security.SetOwner(identifier);
 
-            _pipeServer = new NamedPipeServerStream
-                (
-                pipeName,
-                PipeDirection.InOut,
-                1, // Only allow one connection at a time.
-                PipeTransmissionMode.Byte,
-                PipeOptions.Asynchronous | PipeOptions.WriteThrough,
-                PipeBufferSize, // Default input buffer
-                PipeBufferSize  // Default output buffer
-#if FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
-                , security,
-                HandleInheritability.None
-#endif
+                _pipeServer = new NamedPipeServerStream
+                    (
+                    pipeName,
+                    PipeDirection.InOut,
+                    1, // Only allow one connection at a time.
+                    PipeTransmissionMode.Byte,
+                    PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+                    PipeBufferSize, // Default input buffer
+                    PipeBufferSize,  // Default output buffer
+                    security,
+                    HandleInheritability.None
                 );
+            }
+            else
+#endif
+            {
+                _pipeServer = new NamedPipeServerStream
+                    (
+                    pipeName,
+                    PipeDirection.InOut,
+                    1, // Only allow one connection at a time.
+                    PipeTransmissionMode.Byte,
+                    PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+                    PipeBufferSize, // Default input buffer
+                    PipeBufferSize  // Default output buffer
+                );
+             }
         }
 
 #endregion

@@ -148,7 +148,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")] // out-of-proc nodes not working on mono yet
         public void SimpleP2PBuildOutOfProc()
         {
             var newParameters = _parameters.Clone();
@@ -944,43 +943,66 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[errormessage]");
         }
 
-        /// <summary>
-        /// A simple successful build.
-        /// </summary>
         [Fact]
-        public void BuildManagerShouldLogExecutionContext()
+        public void DeferredMessageShouldBeLogged()
         {
             string contents = CleanupFileContents(@"
-<Project>
- <Target Name='test'>
-    <Warning Text='[warning]'/>
-    <Message Text='[hello]' Importance='High'/>
- </Target>
-</Project>
-");
-            BuildRequestData data = GetBuildRequestData(contents);
-            BuildResult result = _buildManager.Build(_parameters, data);
-            Assert.Equal(BuildResultCode.Success, result.OverallResult);
+              <Project>
+                 <Target Name='Build'>
+                     <Message Text='[Message]' Importance='high'/>
+                     <Warning Text='[Warn]'/>	
+                </Target>
+              </Project>
+            ");
 
-            _logger.AssertLogContains("Process = ");
-            _logger.AssertLogContains("MSBuild executable path = ");
-            _logger.AssertLogContains("Command line arguments = ");
-            _logger.AssertLogContains("Current directory = ");
-            _logger.AssertLogContains("MSBuild version = ");
+            MockLogger logger;
 
-            _logger.AssertLogContains("[warning]");
-            _logger.AssertLogContains("[hello]");
+            const string highMessage = "deferred[High]";
+            const string normalMessage = "deferred[Normal]";
+            const string lowMessage = "deferred[Low]";
 
-            _logger.WarningCount.ShouldBe(1);
+            using (var buildManagerSession = new Helpers.BuildManagerSession(
+                _env,
+                deferredMessages: new[]
+                {
+                    new BuildManager.DeferredBuildMessage(highMessage, MessageImportance.High),
+                    new BuildManager.DeferredBuildMessage(normalMessage, MessageImportance.Normal),
+                    new BuildManager.DeferredBuildMessage(lowMessage, MessageImportance.Low)
+                }))
+            {
+                var result = buildManagerSession.BuildProjectFile(_env.CreateFile("build.proj", contents).Path);
 
-            _logger.BuildStartedEvents.Count.ShouldBe(1);
-            _logger.BuildFinishedEvents.Count.ShouldBe(1);
-            _logger.ProjectStartedEvents.Count.ShouldBe(1);
-            _logger.ProjectFinishedEvents.Count.ShouldBe(1);
-            _logger.TargetStartedEvents.Count.ShouldBe(1);
-            _logger.TargetFinishedEvents.Count.ShouldBe(1);
-            _logger.TaskStartedEvents.Count.ShouldBe(2);
-            _logger.TaskFinishedEvents.Count.ShouldBe(2);
+                result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+                logger = buildManagerSession.Logger;
+            }
+
+            logger.AssertLogContains("[Warn]");
+            logger.AssertLogContains("[Message]");
+
+            logger.AssertLogContains(highMessage);
+            logger.AssertLogContains(normalMessage);
+            logger.AssertLogContains(lowMessage);
+
+            var deferredMessages = logger.BuildMessageEvents.Where(e => e.Message.StartsWith("deferred")).ToArray();
+
+            deferredMessages.Length.ShouldBe(3);
+
+            deferredMessages[0].Message.ShouldBe(highMessage);
+            deferredMessages[0].Importance.ShouldBe(MessageImportance.High);
+            deferredMessages[1].Message.ShouldBe(normalMessage);
+            deferredMessages[1].Importance.ShouldBe(MessageImportance.Normal);
+            deferredMessages[2].Message.ShouldBe(lowMessage);
+            deferredMessages[2].Importance.ShouldBe(MessageImportance.Low);
+
+            logger.BuildStartedEvents.Count.ShouldBe(1);
+            logger.BuildFinishedEvents.Count.ShouldBe(1);
+            logger.ProjectStartedEvents.Count.ShouldBe(1);
+            logger.ProjectFinishedEvents.Count.ShouldBe(1);
+            logger.TargetStartedEvents.Count.ShouldBe(1);
+            logger.TargetFinishedEvents.Count.ShouldBe(1);
+            logger.TaskStartedEvents.Count.ShouldBe(2);
+            logger.TaskFinishedEvents.Count.ShouldBe(2);
         }
 
         /// <summary>
@@ -1479,7 +1501,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A canceled build
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CancelledBuild()
         {
             string contents = CleanupFileContents(@"
@@ -1585,7 +1606,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly. 
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CancelledBuildWithDelay40()
         {
             string contents = CleanupFileContents(@"
@@ -1617,7 +1637,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly. 
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CancelledBuildInTaskHostWithDelay40()
         {
             string contents = CleanupFileContents(@"
@@ -3254,7 +3273,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// was loaded by MSBuild, not supplied directly by the user.
         /// </remarks>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void Regress265010()
         {
             string contents = CleanupFileContents(@"
@@ -3578,7 +3596,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")] // out-of-proc nodes not working on mono yet
         public void ShouldBuildMutatedProjectInstanceWhoseProjectWasPreviouslyBuiltAsAP2PDependency()
         {
             const string mainProjectContents = @"<Project>
@@ -3672,7 +3689,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")] // out-of-proc nodes not working on mono yet
         public void OutOfProcFileBasedP2PBuildSucceeds()
         {
             const string mainProject = @"<Project>
@@ -3741,7 +3757,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        [Trait("Category", "mono-osx-failing")] // out-of-proc nodes not working on mono yet
         public void OutOfProcProjectInstanceBasedBuildDoesNotReloadFromDisk(bool shouldSerializeEntireState)
         {
             const string mainProject = @"<Project>
@@ -3828,7 +3843,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")] // out-of-proc nodes not working on mono yet
         public void OutOfProcEvaluationIdsUnique()
         {
             const string mainProject = @"<Project>
