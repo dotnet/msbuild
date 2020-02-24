@@ -16,6 +16,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <VersionPrefix>16.5.0</VersionPrefix>
+    <DotNetFinalVersionKind>release</DotNetFinalVersionKind>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
