@@ -608,7 +608,7 @@ namespace Microsoft.Build.CommandLine
                     _taskCancelledEvent.Set();
                     break;
                 case NodePacketType.NodeBuildComplete:
-                    HandleNodeBuildComplete(packet as NodeBuildComplete);
+                    HandleNodeBuildComplete();
                     break;
             }
         }
@@ -693,11 +693,11 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Handles the NodeBuildComplete packet.
         /// </summary>
-        private void HandleNodeBuildComplete(NodeBuildComplete buildComplete)
+        private void HandleNodeBuildComplete()
         {
             ErrorUtilities.VerifyThrow(!_isTaskExecuting, "We should never have a task in the process of executing when we receive NodeBuildComplete.");
 
-            _shutdownReason = buildComplete.PrepareForReuse ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
+            _shutdownReason = NodeEngineShutdownReason.BuildComplete;
             _shutdownEvent.Set();
         }
 
