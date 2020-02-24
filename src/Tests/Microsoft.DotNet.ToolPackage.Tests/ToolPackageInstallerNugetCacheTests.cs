@@ -54,7 +54,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     targetFramework: _testTargetframework);
 
                 var commands = toolPackage.Commands;
-                commands[0].Executable.Value.Should().StartWith(NuGetGlobalPackagesFolder.GetLocation());
+                var expectedPackagesFolder = testMockBehaviorIsInSync ?
+                            NuGetGlobalPackagesFolder.GetLocation() :
+                            TestContext.Current.NuGetCachePath;
+                commands[0].Executable.Value.Should().StartWith(expectedPackagesFolder);
 
                 fileSystem.File
                     .Exists(commands[0].Executable.Value)
@@ -92,8 +95,12 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 packageLocation: new PackageLocation(nugetConfig: nugetConfigPath),
                 targetFramework: _testTargetframework);
 
+            var expectedPackagesFolder = testMockBehaviorIsInSync ?
+                            NuGetGlobalPackagesFolder.GetLocation() :
+                            TestContext.Current.NuGetCachePath;
+
             var commands = toolPackage.Commands;
-            commands[0].Executable.Value.Should().StartWith(NuGetGlobalPackagesFolder.GetLocation());
+            commands[0].Executable.Value.Should().StartWith(expectedPackagesFolder);
             toolPackage.Version.Should().Be(NuGetVersion.Parse(TestPackageVersion));
         }
 
@@ -127,7 +134,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             };
         }
 
-        private static (IToolPackageStore, IToolPackageInstaller, BufferedReporter, IFileSystem) Setup(
+        private (IToolPackageStore, IToolPackageInstaller, BufferedReporter, IFileSystem) Setup(
             bool useMock,
             string testDirectory,
             List<MockFeed> feeds = null,
@@ -158,7 +165,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 store = new ToolPackageStoreAndQuery(root);
                 installer = new ToolPackageInstaller(
                     store: store,
-                    projectRestorer: new ProjectRestorer(reporter),
+                    projectRestorer: new Stage2ProjectRestorer(Log, reporter),
                     tempProject: tempProject ?? GetUniqueTempProjectPathEachTest(testDirectory),
                     offlineFeed: offlineFeed ?? new DirectoryPath("does not exist"));
             }

@@ -15,6 +15,8 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public Dictionary<string, string> Environment { get; set; } = new Dictionary<string, string>();
 
+        public List<string> EnvironmentToRemove { get; } = new List<string>();
+
         public string WorkingDirectory { get; set; }
 
         private string EscapeArgs()
@@ -43,6 +45,10 @@ namespace Microsoft.NET.TestFramework.Commands
             foreach (var kvp in Environment)
             {
                 ret.Environment[kvp.Key] = kvp.Value;
+            }
+            foreach (var envToRemove in EnvironmentToRemove)
+            {
+                ret.Environment.Remove(envToRemove);
             }
 
             if (WorkingDirectory != null)

@@ -9,12 +9,20 @@
 .PP
 \f[C]dotnet new\f[R] - Creates a new project, configuration file, or solution based on the specified template.
 .SH SYNOPSIS
+.SS .NET Core 2.2
+.IP
+.nf
+\f[C]
+dotnet new <TEMPLATE> [--dry-run] [--force] [-i|--install] [-lang|--language] [-n|--name] [--nuget-source] [-o|--output] [-u|--uninstall] [Template options]
+dotnet new <TEMPLATE> [-l|--list] [--type]
+dotnet new [-h|--help]
+\f[R]
+.fi
 .SS .NET Core 2.1
 .IP
 .nf
 \f[C]
-dotnet new <TEMPLATE> [--force] [-i|--install] [-lang|--language] [-n|--name] [--nuget-source] [-o|--output]
-    [-u|--uninstall] [Template options]
+dotnet new <TEMPLATE> [--force] [-i|--install] [-lang|--language] [-n|--name] [--nuget-source] [-o|--output] [-u|--uninstall] [Template options]
 dotnet new <TEMPLATE> [-l|--list] [--type]
 dotnet new [-h|--help]
 \f[R]
@@ -52,6 +60,214 @@ The command calls the template engine to create the artifacts on disk based on t
 The template to instantiate when the command is invoked.
 Each template might have specific options you can pass.
 For more information, see Template options.
+.PP
+If the \f[C]TEMPLATE\f[R] value isn\[cq]t an exact match on text in the \f[B]Templates\f[R] or \f[B]Short Name\f[R] column, a substring match is performed on those two columns.
+.SS .NET Core 2.2
+.PP
+The command contains a default list of templates.
+Use \f[C]dotnet new -l\f[R] to obtain a list of the available templates.
+The following table shows the templates that come pre-installed with the .NET Core SDK 2.2.100.
+The default language for the template is shown inside the brackets.
+.PP
+.TS
+tab(@);
+l l l l.
+T{
+Templates
+T}@T{
+Short Name
+T}@T{
+Language
+T}@T{
+Tags
+T}
+_
+T{
+Console Application
+T}@T{
+\f[C]console\f[R]
+T}@T{
+[C#], F#, VB
+T}@T{
+Common/Console
+T}
+T{
+Class library
+T}@T{
+\f[C]classlib\f[R]
+T}@T{
+[C#], F#, VB
+T}@T{
+Common/Library
+T}
+T{
+Unit Test Project
+T}@T{
+\f[C]mstest\f[R]
+T}@T{
+[C#], F#, VB
+T}@T{
+Test/MSTest
+T}
+T{
+NUnit 3 Test Project
+T}@T{
+\f[C]nunit\f[R]
+T}@T{
+[C#], F#, VB
+T}@T{
+Test/NUnit
+T}
+T{
+NUnit 3 Test Item
+T}@T{
+\f[C]nunit-test\f[R]
+T}@T{
+[C#], F#, VB
+T}@T{
+Test/NUnit
+T}
+T{
+xUnit Test Project
+T}@T{
+\f[C]xunit\f[R]
+T}@T{
+[C#], F#, VB
+T}@T{
+Test/xUnit
+T}
+T{
+Razor Page
+T}@T{
+\f[C]page\f[R]
+T}@T{
+[C#]
+T}@T{
+Web/ASP.NET
+T}
+T{
+MVC ViewImports
+T}@T{
+\f[C]viewimports\f[R]
+T}@T{
+[C#]
+T}@T{
+Web/ASP.NET
+T}
+T{
+MVC ViewStart
+T}@T{
+\f[C]viewstart\f[R]
+T}@T{
+[C#]
+T}@T{
+Web/ASP.NET
+T}
+T{
+ASP.NET Core Empty
+T}@T{
+\f[C]web\f[R]
+T}@T{
+[C#], F#
+T}@T{
+Web/Empty
+T}
+T{
+ASP.NET Core Web App (Model-View-Controller)
+T}@T{
+\f[C]mvc\f[R]
+T}@T{
+[C#], F#
+T}@T{
+Web/MVC
+T}
+T{
+ASP.NET Core Web App
+T}@T{
+\f[C]webapp\f[R], \f[C]razor\f[R]
+T}@T{
+[C#]
+T}@T{
+Web/MVC/Razor Pages
+T}
+T{
+ASP.NET Core with Angular
+T}@T{
+\f[C]angular\f[R]
+T}@T{
+[C#]
+T}@T{
+Web/MVC/SPA
+T}
+T{
+ASP.NET Core with React.js
+T}@T{
+\f[C]react\f[R]
+T}@T{
+[C#]
+T}@T{
+Web/MVC/SPA
+T}
+T{
+ASP.NET Core with React.js and Redux
+T}@T{
+\f[C]reactredux\f[R]
+T}@T{
+[C#]
+T}@T{
+Web/MVC/SPA
+T}
+T{
+Razor Class Library
+T}@T{
+\f[C]razorclasslib\f[R]
+T}@T{
+[C#]
+T}@T{
+Web/Razor/Library/Razor Class Library
+T}
+T{
+ASP.NET Core Web API
+T}@T{
+\f[C]webapi\f[R]
+T}@T{
+[C#], F#
+T}@T{
+Web/WebAPI
+T}
+T{
+global.json file
+T}@T{
+\f[C]globaljson\f[R]
+T}@T{
+T}@T{
+Config
+T}
+T{
+NuGet Config
+T}@T{
+\f[C]nugetconfig\f[R]
+T}@T{
+T}@T{
+Config
+T}
+T{
+Web Config
+T}@T{
+\f[C]webconfig\f[R]
+T}@T{
+T}@T{
+Config
+T}
+T{
+Solution File
+T}@T{
+\f[C]sln\f[R]
+T}@T{
+T}@T{
+Solution
+T}
+.TE
 .SS .NET Core 2.1
 .PP
 The command contains a default list of templates.
@@ -61,21 +277,25 @@ The default language for the template is shown inside the brackets.
 .PP
 .TS
 tab(@);
-l l l.
+l l l l.
 T{
-Template description
+Templates
 T}@T{
-Template name
+Short Name
 T}@T{
-Languages
+Language
+T}@T{
+Tags
 T}
 _
 T{
-Console application
+Console Application
 T}@T{
 \f[C]console\f[R]
 T}@T{
 [C#], F#, VB
+T}@T{
+Common/Console
 T}
 T{
 Class library
@@ -83,34 +303,35 @@ T}@T{
 \f[C]classlib\f[R]
 T}@T{
 [C#], F#, VB
+T}@T{
+Common/Library
 T}
 T{
-Unit test project
+Unit Test Project
 T}@T{
 \f[C]mstest\f[R]
 T}@T{
 [C#], F#, VB
+T}@T{
+Test/MSTest
 T}
 T{
-xUnit test project
+xUnit Test Project
 T}@T{
 \f[C]xunit\f[R]
 T}@T{
 [C#], F#, VB
+T}@T{
+Test/xUnit
 T}
 T{
-NUnit test project
-T}@T{
-\f[C]nunit\f[R]
-T}@T{
-[C#], F#, VB
-T}
-T{
-Razor page
+Razor Page
 T}@T{
 \f[C]page\f[R]
 T}@T{
 [C#]
+T}@T{
+Web/ASP.NET
 T}
 T{
 MVC ViewImports
@@ -118,6 +339,8 @@ T}@T{
 \f[C]viewimports\f[R]
 T}@T{
 [C#]
+T}@T{
+Web/ASP.NET
 T}
 T{
 MVC ViewStart
@@ -125,13 +348,17 @@ T}@T{
 \f[C]viewstart\f[R]
 T}@T{
 [C#]
+T}@T{
+Web/ASP.NET
 T}
 T{
-ASP.NET Core empty
+ASP.NET Core Empty
 T}@T{
 \f[C]web\f[R]
 T}@T{
 [C#], F#
+T}@T{
+Web/Empty
 T}
 T{
 ASP.NET Core Web App (Model-View-Controller)
@@ -139,133 +366,8 @@ T}@T{
 \f[C]mvc\f[R]
 T}@T{
 [C#], F#
-T}
-T{
-ASP.NET Core Web App
 T}@T{
-\f[C]razor\f[R], \f[C]webapp\f[R]
-T}@T{
-[C#]
-T}
-T{
-ASP.NET Core with Angular
-T}@T{
-\f[C]angular\f[R]
-T}@T{
-[C#]
-T}
-T{
-ASP.NET Core with React.js
-T}@T{
-\f[C]react\f[R]
-T}@T{
-[C#]
-T}
-T{
-ASP.NET Core with React.js and Redux
-T}@T{
-\f[C]reactredux\f[R]
-T}@T{
-[C#]
-T}
-T{
-ASP.NET Core Web API
-T}@T{
-\f[C]webapi\f[R]
-T}@T{
-[C#], F#
-T}
-T{
-Razor class library
-T}@T{
-\f[C]razorclasslib\f[R]
-T}@T{
-[C#]
-T}
-T{
-global.json file
-T}@T{
-\f[C]globaljson\f[R]
-T}@T{
-T}
-T{
-NuGet config
-T}@T{
-\f[C]nugetconfig\f[R]
-T}@T{
-T}
-T{
-Web config
-T}@T{
-\f[C]webconfig\f[R]
-T}@T{
-T}
-T{
-Solution file
-T}@T{
-\f[C]sln\f[R]
-T}@T{
-T}
-.TE
-.SS .NET Core 2.0
-.PP
-The command contains a default list of templates.
-Use \f[C]dotnet new -l\f[R] to obtain a list of the available templates.
-The following table shows the templates that come pre-installed with the .NET Core SDK 2.0.
-The default language for the template is shown inside the brackets.
-.PP
-.TS
-tab(@);
-l l l.
-T{
-Template description
-T}@T{
-Template name
-T}@T{
-Languages
-T}
-_
-T{
-Console application
-T}@T{
-\f[C]console\f[R]
-T}@T{
-[C#], F#, VB
-T}
-T{
-Class library
-T}@T{
-\f[C]classlib\f[R]
-T}@T{
-[C#], F#, VB
-T}
-T{
-Unit test project
-T}@T{
-\f[C]mstest\f[R]
-T}@T{
-[C#], F#, VB
-T}
-T{
-xUnit test project
-T}@T{
-\f[C]xunit\f[R]
-T}@T{
-[C#], F#, VB
-T}
-T{
-ASP.NET Core empty
-T}@T{
-\f[C]web\f[R]
-T}@T{
-[C#], F#
-T}
-T{
-ASP.NET Core Web App (Model-View-Controller)
-T}@T{
-\f[C]mvc\f[R]
-T}@T{
-[C#], F#
+Web/MVC
 T}
 T{
 ASP.NET Core Web App
@@ -273,6 +375,8 @@ T}@T{
 \f[C]razor\f[R]
 T}@T{
 [C#]
+T}@T{
+Web/MVC/Razor Pages
 T}
 T{
 ASP.NET Core with Angular
@@ -280,6 +384,8 @@ T}@T{
 \f[C]angular\f[R]
 T}@T{
 [C#]
+T}@T{
+Web/MVC/SPA
 T}
 T{
 ASP.NET Core with React.js
@@ -287,6 +393,8 @@ T}@T{
 \f[C]react\f[R]
 T}@T{
 [C#]
+T}@T{
+Web/MVC/SPA
 T}
 T{
 ASP.NET Core with React.js and Redux
@@ -294,6 +402,17 @@ T}@T{
 \f[C]reactredux\f[R]
 T}@T{
 [C#]
+T}@T{
+Web/MVC/SPA
+T}
+T{
+Razor Class Library
+T}@T{
+\f[C]razorclasslib\f[R]
+T}@T{
+[C#]
+T}@T{
+Web/Razor/Library/Razor Class Library
 T}
 T{
 ASP.NET Core Web API
@@ -301,74 +420,246 @@ T}@T{
 \f[C]webapi\f[R]
 T}@T{
 [C#], F#
+T}@T{
+Web/WebAPI
 T}
 T{
 global.json file
 T}@T{
 \f[C]globaljson\f[R]
 T}@T{
+T}@T{
+Config
 T}
 T{
-NuGet config
+NuGet Config
 T}@T{
 \f[C]nugetconfig\f[R]
 T}@T{
+T}@T{
+Config
 T}
 T{
-Web config
+Web Config
 T}@T{
 \f[C]webconfig\f[R]
 T}@T{
+T}@T{
+Config
 T}
 T{
-Solution file
+Solution File
 T}@T{
 \f[C]sln\f[R]
 T}@T{
+T}@T{
+Solution
+T}
+.TE
+.SS .NET Core 2.0
+.PP
+The command contains a default list of templates.
+Use \f[C]dotnet new -l\f[R] to obtain a list of the available templates.
+The following table shows the templates that come pre-installed with the .NET Core SDK 2.0.0.
+The default language for the template is shown inside the brackets.
+.PP
+.TS
+tab(@);
+l l l l.
+T{
+Templates
+T}@T{
+Short Name
+T}@T{
+Language
+T}@T{
+Tags
+T}
+_
+T{
+Console Application
+T}@T{
+\f[C]console\f[R]
+T}@T{
+[C#], F#, VB
+T}@T{
+Common/Console
 T}
 T{
-Razor page
+Class library
+T}@T{
+\f[C]classlib\f[R]
+T}@T{
+[C#], F#, VB
+T}@T{
+Common/Library
+T}
+T{
+Unit Test Project
+T}@T{
+\f[C]mstest\f[R]
+T}@T{
+[C#], F#, VB
+T}@T{
+Test/MSTest
+T}
+T{
+xUnit Test Project
+T}@T{
+\f[C]xunit\f[R]
+T}@T{
+[C#], F#, VB
+T}@T{
+Test/xUnit
+T}
+T{
+ASP.NET Core Empty
+T}@T{
+\f[C]web\f[R]
+T}@T{
+[C#], F#
+T}@T{
+Web/Empty
+T}
+T{
+ASP.NET Core Web App (Model-View-Controller)
+T}@T{
+\f[C]mvc\f[R]
+T}@T{
+[C#], F#
+T}@T{
+Web/MVC
+T}
+T{
+ASP.NET Core Web App
+T}@T{
+\f[C]razor\f[R]
+T}@T{
+[C#]
+T}@T{
+Web/MVC/Razor Pages
+T}
+T{
+ASP.NET Core with Angular
+T}@T{
+\f[C]angular\f[R]
+T}@T{
+[C#]
+T}@T{
+Web/MVC/SPA
+T}
+T{
+ASP.NET Core with React.js
+T}@T{
+\f[C]react\f[R]
+T}@T{
+[C#]
+T}@T{
+Web/MVC/SPA
+T}
+T{
+ASP.NET Core with React.js and Redux
+T}@T{
+\f[C]reactredux\f[R]
+T}@T{
+[C#]
+T}@T{
+Web/MVC/SPA
+T}
+T{
+ASP.NET Core Web API
+T}@T{
+\f[C]webapi\f[R]
+T}@T{
+[C#], F#
+T}@T{
+Web/WebAPI
+T}
+T{
+global.json file
+T}@T{
+\f[C]globaljson\f[R]
+T}@T{
+T}@T{
+Config
+T}
+T{
+Nuget Config
+T}@T{
+\f[C]nugetconfig\f[R]
+T}@T{
+T}@T{
+Config
+T}
+T{
+Web Config
+T}@T{
+\f[C]webconfig\f[R]
+T}@T{
+T}@T{
+Config
+T}
+T{
+Solution File
+T}@T{
+\f[C]sln\f[R]
+T}@T{
+T}@T{
+Solution
+T}
+T{
+Razor Page
 T}@T{
 \f[C]page\f[R]
 T}@T{
+T}@T{
+Web/ASP.NET
 T}
 T{
 MVC ViewImports
 T}@T{
 \f[C]viewimports\f[R]
 T}@T{
+T}@T{
+Web/ASP.NET
 T}
 T{
 MVC ViewStart
 T}@T{
 \f[C]viewstart\f[R]
 T}@T{
+T}@T{
+Web/ASP.NET
 T}
 .TE
 .SS .NET Core 1.x
 .PP
 The command contains a default list of templates.
 Use \f[C]dotnet new -all\f[R] to obtain a list of the available templates.
-The following table shows the templates that come pre-installed with the .NET Core SDK 1.x.
+The following table shows the templates that come pre-installed with the .NET Core SDK 1.0.1.
 The default language for the template is shown inside the brackets.
 .PP
 .TS
 tab(@);
-l l l.
+l l l l.
 T{
-Template description
+Templates
 T}@T{
-Template name
+Short Name
 T}@T{
-Languages
+Language
+T}@T{
+Tags
 T}
 _
 T{
-Console application
+Console Application
 T}@T{
 \f[C]console\f[R]
 T}@T{
 [C#], F#
+T}@T{
+Common/Console
 T}
 T{
 Class library
@@ -376,27 +667,35 @@ T}@T{
 \f[C]classlib\f[R]
 T}@T{
 [C#], F#
+T}@T{
+Common/Library
 T}
 T{
-Unit test project
+Unit Test Project
 T}@T{
 \f[C]mstest\f[R]
 T}@T{
 [C#], F#
+T}@T{
+Test/MSTest
 T}
 T{
-xUnit test project
+xUnit Test Project
 T}@T{
 \f[C]xunit\f[R]
 T}@T{
 [C#], F#
+T}@T{
+Test/xUnit
 T}
 T{
-ASP.NET Core empty
+ASP.NET Core Empty
 T}@T{
 \f[C]web\f[R]
 T}@T{
 [C#]
+T}@T{
+Web/Empty
 T}
 T{
 ASP.NET Core Web App
@@ -404,6 +703,8 @@ T}@T{
 \f[C]mvc\f[R]
 T}@T{
 [C#], F#
+T}@T{
+Web/MVC
 T}
 T{
 ASP.NET Core Web API
@@ -411,29 +712,108 @@ T}@T{
 \f[C]webapi\f[R]
 T}@T{
 [C#]
+T}@T{
+Web/WebAPI
 T}
 T{
-NuGet config
+Nuget Config
 T}@T{
 \f[C]nugetconfig\f[R]
 T}@T{
+T}@T{
+Config
 T}
 T{
-Web config
+Web Config
 T}@T{
 \f[C]webconfig\f[R]
 T}@T{
+T}@T{
+Config
 T}
 T{
-Solution file
+Solution File
 T}@T{
 \f[C]sln\f[R]
 T}@T{
+T}@T{
+Solution
 T}
 .TE
 .PP
    *   *   *   *   *
 .SH OPTIONS
+.SS .NET Core 2.2
+.PP
+\f[C]--dry-run\f[R]
+.PP
+Displays a summary of what would happen if the given command were run if it would result in a template creation.
+.PP
+\f[C]--force\f[R]
+.PP
+Forces content to be generated even if it would change existing files.
+This is required when the output directory already contains a project.
+.PP
+\f[C]-h|--help\f[R]
+.PP
+Prints out help for the command.
+It can be invoked for the \f[C]dotnet new\f[R] command itself or for any template, such as \f[C]dotnet new mvc --help\f[R].
+.PP
+\f[C]-i|--install <PATH|NUGET_ID>\f[R]
+.PP
+Installs a source or template pack from the \f[C]PATH\f[R] or \f[C]NUGET_ID\f[R] provided.
+If you want to install a prerelease version of a template package, you need to specify the version in the format of \f[C]<package-name>::<package-version>\f[R].
+By default, \f[C]dotnet new\f[R] passes * for the version, which represents the last stable package version.
+See an example at the Examples section.
+.PP
+For information on creating custom templates, see Custom templates for dotnet new.
+.PP
+\f[C]-l|--list\f[R]
+.PP
+Lists templates containing the specified name.
+If invoked for the \f[C]dotnet new\f[R] command, it lists the possible templates available for the given directory.
+For example if the directory already contains a project, it doesn\[cq]t list all project templates.
+.PP
+\f[C]-lang|--language {C#|F#|VB}\f[R]
+.PP
+The language of the template to create.
+The language accepted varies by the template (see defaults in the arguments section).
+Not valid for some templates.
+.RS
+.PP
+[!NOTE] Some shells interpret \f[C]#\f[R] as a special character.
+In those cases, you need to enclose the language parameter value, such as \f[C]dotnet new console -lang \[dq]F#\[dq]\f[R].
+.RE
+.PP
+\f[C]-n|--name <OUTPUT_NAME>\f[R]
+.PP
+The name for the created output.
+If no name is specified, the name of the current directory is used.
+.PP
+\f[C]--nuget-source\f[R]
+.PP
+Specifies a NuGet source to use during install.
+.PP
+\f[C]-o|--output <OUTPUT_DIRECTORY>\f[R]
+.PP
+Location to place the generated output.
+The default is the current directory.
+.PP
+\f[C]--type\f[R]
+.PP
+Filters templates based on available types.
+Predefined values are \[lq]project\[rq], \[lq]item\[rq], or \[lq]other\[rq].
+.PP
+\f[C]-u|--uninstall <PATH|NUGET_ID>\f[R]
+.PP
+Uninstalls a source or template pack at the \f[C]PATH\f[R] or \f[C]NUGET_ID\f[R] provided.
+When excluding the \f[C]<PATH|NUGET_ID>\f[R] value, all currently installed template packs and their associated templates are displayed.
+.RS
+.PP
+[!NOTE] To uninstall a template using a \f[C]PATH\f[R], you need to fully qualify the path.
+For example, \f[I]C:/Users/<USER>/Documents/Templates/GarciaSoftware.ConsoleTemplate.CSharp\f[R] will work, but \f[I]./GarciaSoftware.ConsoleTemplate.CSharp\f[R] from the containing folder will not.
+Additionally, do not include a final terminating directory slash on your template path.
+.RE
 .SS .NET Core 2.1
 .PP
 \f[C]--force\f[R]
@@ -609,6 +989,194 @@ The default is the current directory.
 .PP
 Each project template may have additional options available.
 The core templates have the following additional options:
+.SS .NET Core 2.2
+.PP
+\f[B]console\f[R]
+.PP
+\f[C]--langVersion <VERSION_NUMBER>\f[R] - Sets the \f[C]LangVersion\f[R] property in the created project file.
+For example, use \f[C]--langVersion 7.3\f[R] to use C# 7.3.
+Not supported for F#.
+.PP
+\f[C]--no-restore\f[R] - Doesn\[cq]t execute an implicit restore during project creation.
+.PP
+\f[B]angular, react, reactredux\f[R]
+.PP
+\f[C]--exclude-launch-settings\f[R] - Exclude \f[I]launchSettings.json\f[R] from the generated template.
+.PP
+\f[C]--no-restore\f[R] - Doesn\[cq]t execute an implicit restore during project creation.
+.PP
+\f[C]--no-https\f[R] - Project doesn\[cq]t require HTTPS.
+This option only applies if \f[C]IndividualAuth\f[R] or \f[C]OrganizationalAuth\f[R] are not being used.
+.PP
+\f[B]razorclasslib\f[R]
+.PP
+\f[C]--no-restore\f[R] - Doesn\[cq]t execute an implicit restore during project creation.
+.PP
+\f[B]classlib\f[R]
+.PP
+\f[C]-f|--framework <FRAMEWORK>\f[R] - Specifies the framework to target.
+Values: \f[C]netcoreapp2.2\f[R] to create a .NET Core Class Library or \f[C]netstandard2.0\f[R] to create a .NET Standard Class Library.
+The default value is \f[C]netstandard2.0\f[R].
+.PP
+\f[C]--langVersion <VERSION_NUMBER>\f[R] - Sets the \f[C]LangVersion\f[R] property in the created project file.
+For example, use \f[C]--langVersion 7.3\f[R] to use C# 7.3.
+Not supported for F#.
+.PP
+\f[C]--no-restore\f[R] - Doesn\[cq]t execute an implicit restore during project creation.
+.PP
+\f[B]mstest, xunit\f[R]
+.PP
+\f[C]-p|--enable-pack\f[R] - Enables packaging for the project using dotnet pack.
+.PP
+\f[C]--no-restore\f[R] - Doesn\[cq]t execute an implicit restore during project creation.
+.PP
+\f[B]nunit\f[R]
+.PP
+\f[C]-f|--framework <FRAMEWORK>\f[R] - Specifies the framework to target.
+The default value is \f[C]netcoreapp2.1\f[R].
+.PP
+\f[C]-p|--enable-pack\f[R] - Enables packaging for the project using dotnet pack.
+.PP
+\f[C]--no-restore\f[R] - Doesn\[cq]t execute an implicit restore during project creation.
+.PP
+\f[B]page\f[R]
+.PP
+\f[C]-na|--namespace <NAMESPACE_NAME>\f[R] - Namespace for the generated code.
+The default value is \f[C]MyApp.Namespace\f[R].
+.PP
+\f[C]-np|--no-pagemodel\f[R] - Creates the page without a PageModel.
+.PP
+\f[B]viewimports\f[R]
+.PP
+\f[C]-na|--namespace <NAMESPACE_NAME>\f[R] - Namespace for the generated code.
+The default value is \f[C]MyApp.Namespace\f[R].
+.PP
+\f[B]web\f[R]
+.PP
+\f[C]--exclude-launch-settings\f[R] - Exclude \f[I]launchSettings.json\f[R] from the generated template.
+.PP
+\f[C]--no-restore\f[R] - Doesn\[cq]t execute an implicit restore during project creation.
+.PP
+\f[C]--no-https\f[R] - Project doesn\[cq]t require HTTPS.
+This option only applies if \f[C]IndividualAuth\f[R] or \f[C]OrganizationalAuth\f[R] are not being used.
+.PP
+\f[B]mvc, webapp\f[R]
+.PP
+\f[C]-au|--auth <AUTHENTICATION_TYPE>\f[R] - The type of authentication to use.
+The possible values are:
+.IP \[bu] 2
+\f[C]None\f[R] - No authentication (Default).
+.IP \[bu] 2
+\f[C]Individual\f[R] - Individual authentication.
+.IP \[bu] 2
+\f[C]IndividualB2C\f[R] - Individual authentication with Azure AD B2C.
+.IP \[bu] 2
+\f[C]SingleOrg\f[R] - Organizational authentication for a single tenant.
+.IP \[bu] 2
+\f[C]MultiOrg\f[R] - Organizational authentication for multiple tenants.
+.IP \[bu] 2
+\f[C]Windows\f[R] - Windows authentication.
+.PP
+\f[C]--aad-b2c-instance <INSTANCE>\f[R] - The Azure Active Directory B2C instance to connect to.
+Use with \f[C]IndividualB2C\f[R] authentication.
+The default value is \f[C]https://login.microsoftonline.com/tfp/\f[R].
+.PP
+\f[C]-ssp|--susi-policy-id <ID>\f[R] - The sign-in and sign-up policy ID for this project.
+Use with \f[C]IndividualB2C\f[R] authentication.
+.PP
+\f[C]-rp|--reset-password-policy-id <ID>\f[R] - The reset password policy ID for this project.
+Use with \f[C]IndividualB2C\f[R] authentication.
+.PP
+\f[C]-ep|--edit-profile-policy-id <ID>\f[R] - The edit profile policy ID for this project.
+Use with \f[C]IndividualB2C\f[R] authentication.
+.PP
+\f[C]--aad-instance <INSTANCE>\f[R] - The Azure Active Directory instance to connect to.
+Use with \f[C]SingleOrg\f[R] or \f[C]MultiOrg\f[R] authentication.
+The default value is \f[C]https://login.microsoftonline.com/\f[R].
+.PP
+\f[C]--client-id <ID>\f[R] - The Client ID for this project.
+Use with \f[C]IndividualB2C\f[R], \f[C]SingleOrg\f[R], or \f[C]MultiOrg\f[R] authentication.
+The default value is \f[C]11111111-1111-1111-11111111111111111\f[R].
+.PP
+\f[C]--domain <DOMAIN>\f[R] - The domain for the directory tenant.
+Use with \f[C]SingleOrg\f[R] or \f[C]IndividualB2C\f[R] authentication.
+The default value is \f[C]qualified.domain.name\f[R].
+.PP
+\f[C]--tenant-id <ID>\f[R] - The TenantId ID of the directory to connect to.
+Use with \f[C]SingleOrg\f[R] authentication.
+The default value is \f[C]22222222-2222-2222-2222-222222222222\f[R].
+.PP
+\f[C]--callback-path <PATH>\f[R] - The request path within the application\[cq]s base path of the redirect URI.
+Use with \f[C]SingleOrg\f[R] or \f[C]IndividualB2C\f[R] authentication.
+The default value is \f[C]/signin-oidc\f[R].
+.PP
+\f[C]-r|--org-read-access\f[R] - Allows this application read-access to the directory.
+Only applies to \f[C]SingleOrg\f[R] or \f[C]MultiOrg\f[R] authentication.
+.PP
+\f[C]--exclude-launch-settings\f[R] - Exclude \f[I]launchSettings.json\f[R] from the generated template.
+.PP
+\f[C]--no-https\f[R] - Project doesn\[cq]t require HTTPS.
+\f[C]app.UseHsts\f[R] and \f[C]app.UseHttpsRedirection\f[R] aren\[cq]t added to \f[C]Startup.Configure\f[R].
+This option only applies if \f[C]Individual\f[R], \f[C]IndividualB2C\f[R], \f[C]SingleOrg\f[R], or \f[C]MultiOrg\f[R] aren\[cq]t being used.
+.PP
+\f[C]-uld|--use-local-db\f[R] - Specifies LocalDB should be used instead of SQLite.
+Only applies to \f[C]Individual\f[R] or \f[C]IndividualB2C\f[R] authentication.
+.PP
+\f[C]--no-restore\f[R] - Doesn\[cq]t execute an implicit restore during project creation.
+.PP
+\f[B]webapi\f[R]
+.PP
+\f[C]-au|--auth <AUTHENTICATION_TYPE>\f[R] - The type of authentication to use.
+The possible values are:
+.IP \[bu] 2
+\f[C]None\f[R] - No authentication (Default).
+.IP \[bu] 2
+\f[C]IndividualB2C\f[R] - Individual authentication with Azure AD B2C.
+.IP \[bu] 2
+\f[C]SingleOrg\f[R] - Organizational authentication for a single tenant.
+.IP \[bu] 2
+\f[C]Windows\f[R] - Windows authentication.
+.PP
+\f[C]--aad-b2c-instance <INSTANCE>\f[R] - The Azure Active Directory B2C instance to connect to.
+Use with \f[C]IndividualB2C\f[R] authentication.
+The default value is \f[C]https://login.microsoftonline.com/tfp/\f[R].
+.PP
+\f[C]-ssp|--susi-policy-id <ID>\f[R] - The sign-in and sign-up policy ID for this project.
+Use with \f[C]IndividualB2C\f[R] authentication.
+.PP
+\f[C]--aad-instance <INSTANCE>\f[R] - The Azure Active Directory instance to connect to.
+Use with \f[C]SingleOrg\f[R] authentication.
+The default value is \f[C]https://login.microsoftonline.com/\f[R].
+.PP
+\f[C]--client-id <ID>\f[R] - The Client ID for this project.
+Use with \f[C]IndividualB2C\f[R] or \f[C]SingleOrg\f[R] authentication.
+The default value is \f[C]11111111-1111-1111-11111111111111111\f[R].
+.PP
+\f[C]--domain <DOMAIN>\f[R] - The domain for the directory tenant.
+Use with \f[C]SingleOrg\f[R] or \f[C]IndividualB2C\f[R] authentication.
+The default value is \f[C]qualified.domain.name\f[R].
+.PP
+\f[C]--tenant-id <ID>\f[R] - The TenantId ID of the directory to connect to.
+Use with \f[C]SingleOrg\f[R] authentication.
+The default value is \f[C]22222222-2222-2222-2222-222222222222\f[R].
+.PP
+\f[C]-r|--org-read-access\f[R] - Allows this application read-access to the directory.
+Only applies to \f[C]SingleOrg\f[R] or \f[C]MultiOrg\f[R] authentication.
+.PP
+\f[C]--exclude-launch-settings\f[R] - Exclude \f[I]launchSettings.json\f[R] from the generated template.
+.PP
+\f[C]--no-https\f[R] - Project doesn\[cq]t require HTTPS.
+\f[C]app.UseHsts\f[R] and \f[C]app.UseHttpsRedirection\f[R] aren\[cq]t added to \f[C]Startup.Configure\f[R].
+This option only applies if \f[C]Individual\f[R], \f[C]IndividualB2C\f[R], \f[C]SingleOrg\f[R], or \f[C]MultiOrg\f[R] aren\[cq]t being used.
+.PP
+\f[C]-uld|--use-local-db\f[R] - Specifies LocalDB should be used instead of SQLite.
+Only applies to \f[C]Individual\f[R] or \f[C]IndividualB2C\f[R] authentication.
+.PP
+\f[C]--no-restore\f[R] - Doesn\[cq]t execute an implicit restore during project creation.
+.PP
+\f[B]globaljson\f[R]
+.PP
+\f[C]--sdk-version <VERSION_NUMBER>\f[R] - Specifies the version of the .NET Core SDK to use in the \f[I]global.json\f[R] file.
 .SS .NET Core 2.1
 .PP
 \f[B]console, angular, react, reactredux, razorclasslib\f[R]
@@ -618,7 +1186,7 @@ The core templates have the following additional options:
 \f[B]classlib\f[R]
 .PP
 \f[C]-f|--framework <FRAMEWORK>\f[R] - Specifies the framework to target.
-Values: \f[C]netcoreapp2.0\f[R] to create a .NET Core Class Library or \f[C]netstandard2.0\f[R] to create a .NET Standard Class Library.
+Values: \f[C]netcoreapp2.1\f[R] to create a .NET Core Class Library or \f[C]netstandard2.0\f[R] to create a .NET Standard Class Library.
 The default value is \f[C]netstandard2.0\f[R].
 .PP
 \f[C]--no-restore\f[R] - Doesn\[cq]t execute an implicit restore during project creation.
@@ -760,14 +1328,14 @@ This option only applies if \f[C]Individual\f[R], \f[C]IndividualB2C\f[R], \f[C]
 .PP
 \f[B]page\f[R]
 .PP
-\f[C]-na|--namespace <NAMESPACE_NAME>\f[R]- Namespace for the generated code.
+\f[C]-na|--namespace <NAMESPACE_NAME>\f[R] - Namespace for the generated code.
 The default value is \f[C]MyApp.Namespace\f[R].
 .PP
 \f[C]-np|--no-pagemodel\f[R] - Creates the page without a PageModel.
 .PP
 \f[B]viewimports\f[R]
 .PP
-\f[C]-na|--namespace <NAMESPACE_NAME>\f[R]- Namespace for the generated code.
+\f[C]-na|--namespace <NAMESPACE_NAME>\f[R] - Namespace for the generated code.
 The default value is \f[C]MyApp.Namespace\f[R].
 .SS .NET Core 2.0
 .PP
@@ -922,23 +1490,23 @@ The default value is \f[C]MyApp.Namespace\f[R].
 .PP
 \f[B]console, xunit, mstest, web, webapi\f[R]
 .PP
-\f[C]-f|--framework\f[R] - Specifies the framework to target.
+\f[C]-f|--framework <FRAMEWORK>\f[R] - Specifies the framework to target.
 Values: \f[C]netcoreapp1.0\f[R] or \f[C]netcoreapp1.1\f[R].
 The default value is \f[C]netcoreapp1.0\f[R].
 .PP
 \f[B]classlib\f[R]
 .PP
-\f[C]-f|--framework\f[R] - Specifies the framework to target.
+\f[C]-f|--framework <FRAMEWORK>\f[R] - Specifies the framework to target.
 Values: \f[C]netcoreapp1.0\f[R], \f[C]netcoreapp1.1\f[R], or \f[C]netstandard1.0\f[R] to \f[C]netstandard1.6\f[R].
 The default value is \f[C]netstandard1.4\f[R].
 .PP
 \f[B]mvc\f[R]
 .PP
-\f[C]-f|--framework\f[R] - Specifies the framework to target.
+\f[C]-f|--framework <FRAMEWORK>\f[R] - Specifies the framework to target.
 Values: \f[C]netcoreapp1.0\f[R] or \f[C]netcoreapp1.1\f[R].
 The default value is \f[C]netcoreapp1.0\f[R].
 .PP
-\f[C]-au|--auth\f[R] - The type of authentication to use.
+\f[C]-au|--auth <AUTHENTICATION_TYPE>\f[R] - The type of authentication to use.
 Values: \f[C]None\f[R] or \f[C]Individual\f[R].
 The default value is \f[C]None\f[R].
 .PP
@@ -949,6 +1517,10 @@ The default value is \f[C]false\f[R].
    *   *   *   *   *
 .SH EXAMPLES
 .PP
+Create a C# console application project by specifying the template name:
+.PP
+\f[C]dotnet new \[dq]Console Application\[dq]\f[R]
+.PP
 Create an F# console application project in the current directory:
 .PP
 \f[C]dotnet new console -lang F#\f[R]
@@ -957,17 +1529,27 @@ Create a .NET Standard class library project in the specified directory (availab
 .PP
 \f[C]dotnet new classlib -lang VB -o MyLibrary\f[R]
 .PP
-Create a new ASP.NET Core C# MVC application project in the current directory with no authentication:
+Create a new ASP.NET Core C# MVC project in the current directory with no authentication:
 .PP
 \f[C]dotnet new mvc -au None\f[R]
 .PP
-Create a new xUnit application:
+Create a new xUnit project:
 .PP
 \f[C]dotnet new xunit\f[R]
 .PP
 List all templates available for MVC:
 .PP
 \f[C]dotnet new mvc -l\f[R]
+.PP
+List all templates matching the \f[I]we\f[R] substring.
+No exact match is found, so substring matching runs against both the short name and name columns.
+.PP
+\f[C]dotnet new we -l\f[R]
+.PP
+Attempt to invoke the template matching \f[I]ng\f[R].
+If a single match can\[cq]t be determined, list the templates that are partial matches.
+.PP
+\f[C]dotnet new ng\f[R]
 .PP
 Install version 2.0 of the Single Page Application templates for ASP.NET Core (command option available for .NET Core SDK 1.1 and later versions only):
 .PP

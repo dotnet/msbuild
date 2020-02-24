@@ -4,10 +4,20 @@
 .hy
 .SH dotnet run
 .PP
+\f[B]This article applies to: \[OK]\f[R] .NET Core 1.x SDK and later versions
 .SH NAME
 .PP
 \f[C]dotnet run\f[R] - Runs source code without any explicit compile or launch commands.
 .SH SYNOPSIS
+.SS .NET Core 3.0
+.IP
+.nf
+\f[C]
+dotnet run [-c|--configuration] [-f|--framework] [--force] [--interactive] [--launch-profile] [--no-build] [--no-dependencies]
+    [--no-launch-profile] [--no-restore] [-p|--project] [-r|--runtime] [-v|--verbosity] [[--] [application arguments]]
+dotnet run [-h|--help]
+\f[R]
+.fi
 .SS .NET Core 2.1
 .IP
 .nf
@@ -67,6 +77,73 @@ Because it uses cached dependencies, it\[cq]s not recommended to use \f[C]dotnet
 Instead, create a deployment using the \f[C]dotnet publish\f[R] command and deploy the published output.
 .PP
 .SH OPTIONS
+.SS .NET Core 3.0
+.PP
+\f[C]--\f[R]
+.PP
+Delimits arguments to \f[C]dotnet run\f[R] from arguments for the application being run.
+All arguments after this delimiter are passed to the application run.
+.PP
+\f[C]-c|--configuration {Debug|Release}\f[R]
+.PP
+Defines the build configuration.
+The default value for most projects is \f[C]Debug\f[R].
+.PP
+\f[C]-f|--framework <FRAMEWORK>\f[R]
+.PP
+Builds and runs the app using the specified framework.
+The framework must be specified in the project file.
+.PP
+\f[C]--force\f[R]
+.PP
+Forces all dependencies to be resolved even if the last restore was successful.
+Specifying this flag is the same as deleting the \f[I]project.assets.json\f[R] file.
+.PP
+\f[C]-h|--help\f[R]
+.PP
+Prints out a short help for the command.
+.PP
+\f[C]--interactive\f[R]
+.PP
+Allows the command to stop and wait for user input or action (for example, to complete authentication).
+.PP
+\f[C]--launch-profile <NAME>\f[R]
+.PP
+The name of the launch profile (if any) to use when launching the application.
+Launch profiles are defined in the \f[I]launchSettings.json\f[R] file and are typically called \f[C]Development\f[R], \f[C]Staging\f[R], and \f[C]Production\f[R].
+For more information, see Working with multiple environments.
+.PP
+\f[C]--no-build\f[R]
+.PP
+Doesn\[cq]t build the project before running.
+It also implicit sets the \f[C]--no-restore\f[R] flag.
+.PP
+\f[C]--no-dependencies\f[R]
+.PP
+When restoring a project with project-to-project (P2P) references, restores the root project and not the references.
+.PP
+\f[C]--no-launch-profile\f[R]
+.PP
+Doesn\[cq]t try to use \f[I]launchSettings.json\f[R] to configure the application.
+.PP
+\f[C]--no-restore\f[R]
+.PP
+Doesn\[cq]t execute an implicit restore when running the command.
+.PP
+\f[C]-p|--project <PATH>\f[R]
+.PP
+Specifies the path of the project file to run (folder name or full path).
+If not specified, it defaults to the current directory.
+.PP
+\f[C]--runtime <RUNTIME_IDENTIFIER>\f[R]
+.PP
+Specifies the target runtime to restore packages for.
+For a list of Runtime Identifiers (RIDs), see the RID catalog.
+.PP
+\f[C]-v|--verbosity <LEVEL>\f[R]
+.PP
+Sets the verbosity level of the command.
+Allowed values are \f[C]q[uiet]\f[R], \f[C]m[inimal]\f[R], \f[C]n[ormal]\f[R], \f[C]d[etailed]\f[R], and \f[C]diag[nostic]\f[R].
 .SS .NET Core 2.1
 .PP
 \f[C]--\f[R]
@@ -77,7 +154,7 @@ All arguments after this delimiter are passed to the application run.
 \f[C]-c|--configuration {Debug|Release}\f[R]
 .PP
 Defines the build configuration.
-The default value is \f[C]Debug\f[R].
+The default value for most projects is \f[C]Debug\f[R].
 .PP
 \f[C]-f|--framework <FRAMEWORK>\f[R]
 .PP
@@ -140,7 +217,7 @@ All arguments after this delimiter are passed to the application run.
 \f[C]-c|--configuration {Debug|Release}\f[R]
 .PP
 Defines the build configuration.
-The default value is \f[C]Debug\f[R].
+The default for most projects value is \f[C]Debug\f[R].
 .PP
 \f[C]-f|--framework <FRAMEWORK>\f[R]
 .PP
@@ -198,7 +275,7 @@ All arguments after this delimiter are passed to the application run.
 \f[C]-c|--configuration {Debug|Release}\f[R]
 .PP
 Defines the build configuration.
-The default value is \f[C]Debug\f[R].
+The default value for most projects is \f[C]Debug\f[R].
 .PP
 \f[C]-f|--framework <FRAMEWORK>\f[R]
 .PP

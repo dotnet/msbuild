@@ -12,7 +12,8 @@
 .IP
 .nf
 \f[C]
-dotnet clean [<PROJECT>|<SOLUTION>] [-c|--configuration] [-f|--framework] [--interactive] [-o|--output] [-r|--runtime] [-v|--verbosity]
+dotnet clean [<PROJECT>|<SOLUTION>] [-c|--configuration] [-f|--framework] [--interactive] 
+    [--nologo] [-o|--output] [-r|--runtime] [-v|--verbosity]
 dotnet clean [-h|--help]
 \f[R]
 .fi
@@ -57,6 +58,13 @@ Prints out a short help for the command.
 .PP
 Allows the command to stop and wait for user input or action.
 For example, to complete authentication.
+Available since .NET Core 3.0 SDK.
+.RE
+.IP \[bu] 2
+\f[B]\f[CB]--nologo\f[B]\f[R]
+.RS 2
+.PP
+Doesn\[cq]t display the startup banner or the copyright message.
 Available since .NET Core 3.0 SDK.
 .RE
 .IP \[bu] 2
