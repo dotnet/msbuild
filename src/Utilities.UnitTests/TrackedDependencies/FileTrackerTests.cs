@@ -93,7 +93,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
         [Fact]
         public void FileTrackerHelp()
         {
-            Console.WriteLine("Test: FileTracker");
+            _output.WriteLine("Test: FileTracker");
             int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "");
 
             Assert.Equal(1, exit);
@@ -102,7 +102,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
         [Fact]
         public void FileTrackerBadArg()
         {
-            Console.WriteLine("Test: FileTrackerBadArg");
+            _output.WriteLine("Test: FileTrackerBadArg");
 
             int exit = FileTrackerTestHelper.RunCommandWithLog(s_defaultTrackerPath, "/q", out string log);
 
@@ -113,7 +113,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
         [Fact]
         public void FileTrackerNoUIDll()
         {
-            Console.WriteLine("Test: FileTrackerNoUIDll");
+            _output.WriteLine("Test: FileTrackerNoUIDll");
             string testDirectory = Path.Combine(Directory.GetCurrentDirectory(), "FileTrackerNoUIDll");
             string testTrackerPath = Path.Combine(testDirectory, Path.GetFileName(s_defaultTrackerPath));
 
@@ -149,13 +149,13 @@ namespace Microsoft.Build.UnitTests.FileTracking
         [Fact]
         public void FileTrackerNonexistentRspFile()
         {
-            Console.WriteLine("Test: FileTrackerNonexistentRspFile");
+            _output.WriteLine("Test: FileTrackerNonexistentRspFile");
 
             File.Delete("findstr.read.1.tlog");
             FileTrackerTestHelper.WriteAll("test.in", "foo");
 
             int exit = FileTrackerTestHelper.RunCommandWithLog(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " @abc.rsp /c findstr /ip foo test.in", out string log);
-            Console.WriteLine("");
+            _output.WriteLine("");
 
             // missing rsp file is a non-fatal error
             Assert.Equal(0, exit);
@@ -169,7 +169,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
         [Fact]
         public void FileTrackerWithDll()
         {
-            Console.WriteLine("Test: FileTrackerWithDll");
+            _output.WriteLine("Test: FileTrackerWithDll");
 
             int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath);
 
@@ -179,7 +179,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
         [Fact]
         public void FileTrackerReadOnlyTlog()
         {
-            Console.WriteLine("Test: FileTrackerTlogWriteFailure");
+            _output.WriteLine("Test: FileTrackerTlogWriteFailure");
             string tlog = "findstr.read.1.tlog";
             string trackerCommand = "/d " + s_defaultFileTrackerPath + " /c findstr /ip foo test.in";
 
@@ -189,14 +189,14 @@ namespace Microsoft.Build.UnitTests.FileTracking
             try
             {
                 int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, trackerCommand);
-                Console.WriteLine("");
+                _output.WriteLine("");
                 Assert.Equal(0, exit);
                 FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), tlog);
 
                 File.SetAttributes(tlog, FileAttributes.ReadOnly);
 
                 exit = FileTrackerTestHelper.RunCommandWithLog(s_defaultTrackerPath, trackerCommand, out string log);
-                Console.WriteLine("");
+                _output.WriteLine("");
                 Assert.Equal(0, exit);
                 Assert.Contains("FTK1011", log); // could not create new log:  the file exists.
             }
@@ -210,13 +210,13 @@ namespace Microsoft.Build.UnitTests.FileTracking
         [Fact]
         public void FileTrackerFindStrIn()
         {
-            Console.WriteLine("Test: FileTrackerFindStrIn");
+            _output.WriteLine("Test: FileTrackerFindStrIn");
 
             File.Delete("findstr.read.1.tlog");
             FileTrackerTestHelper.WriteAll("test.in", "foo");
 
             int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /c findstr /ip foo test.in");
-            Console.WriteLine("");
+            _output.WriteLine("");
             Assert.Equal(0, exit);
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), "findstr.read.1.tlog");
         }
@@ -224,13 +224,13 @@ namespace Microsoft.Build.UnitTests.FileTracking
         [Fact]
         public void FileTrackerFindStrInOperations()
         {
-            Console.WriteLine("Test: FileTrackerFindStrInOperations");
+            _output.WriteLine("Test: FileTrackerFindStrInOperations");
 
             File.Delete("findstr.read.1.tlog");
             FileTrackerTestHelper.WriteAll("test.in", "foo");
 
             int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /o /c findstr /ip foo test.in");
-            Console.WriteLine("");
+            _output.WriteLine("");
             Assert.Equal(0, exit);
 
             // On some OS's it calls CreateFileA as well, on Windows7 it doesn't, but it calls CreateFileW on defaultsort.nls..
@@ -242,13 +242,13 @@ namespace Microsoft.Build.UnitTests.FileTracking
         [Fact]
         public void FileTrackerFindStrInOperationsExtended()
         {
-            Console.WriteLine("Test: FileTrackerFindStrInOperationsExtended");
+            _output.WriteLine("Test: FileTrackerFindStrInOperationsExtended");
 
             File.Delete("findstr.read.1.tlog");
             FileTrackerTestHelper.WriteAll("test.in", "foo");
 
             int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /o /e /c findstr /ip foo test.in");
-            Console.WriteLine("");
+            _output.WriteLine("");
             Assert.Equal(0, exit);
 
             // On some OS's it calls GetFileAttributesW as well, on Windows 2k8 R2 it doesn't
@@ -265,13 +265,13 @@ namespace Microsoft.Build.UnitTests.FileTracking
         [Fact]
         public void FileTrackerFindStrInOperationsExtended_AttributesOnly()
         {
-            Console.WriteLine("Test: FileTrackerFindStrInOperationsExtended_AttributesOnly");
+            _output.WriteLine("Test: FileTrackerFindStrInOperationsExtended_AttributesOnly");
 
             File.Delete("findstr.read.1.tlog");
             FileTrackerTestHelper.WriteAll("test.in", "foo");
 
             int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /o /a /c findstr /ip foo test.in");
-            Console.WriteLine("");
+            _output.WriteLine("");
             Assert.Equal(0, exit);
             // On some OS's it calls GetFileAttributesW as well, on Windows 2k8 R2 it doesn't
             bool foundGetFileAttributesW = FileTrackerTestHelper.FindStringInTlog("GetFileAttributesW:" + Path.GetFullPath("test.in").ToUpperInvariant(), "findstr.read.1.tlog");
@@ -287,7 +287,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
         [Fact]
         public void FileTrackerExtendedDirectoryTracking()
         {
-            Console.WriteLine("Test: FileTrackerExtendedDirectoryTracking");
+            _output.WriteLine("Test: FileTrackerExtendedDirectoryTracking");
 
             File.Delete("directoryattributes.read.1.tlog");
             File.Delete("directoryattributes.write.1.tlog");
@@ -330,7 +330,7 @@ namespace ConsoleApplication4
                 string commandArgs = "/d \"" + fileTrackerPath + "\" /o /u /e /c \"" + outputFile + "\"";
 
                 int exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs);
-                Console.WriteLine("");
+                _output.WriteLine("");
                 Assert.Equal(0, exit);
 
                 // Should track directories when '/e' is passed
@@ -343,7 +343,7 @@ namespace ConsoleApplication4
                 commandArgs = "/d \"" + fileTrackerPath + "\" /o /u /a /c \"" + outputFile + "\"";
 
                 exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs);
-                Console.WriteLine("");
+                _output.WriteLine("");
                 Assert.Equal(0, exit);
 
                 // With '/a', should *not* track GetFileAttributes on directories, even though we do so on files. 
@@ -356,7 +356,7 @@ namespace ConsoleApplication4
                 commandArgs = "/d \"" + fileTrackerPath + "\" /o /u /c \"" + outputFile + "\"";
 
                 exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs);
-                Console.WriteLine("");
+                _output.WriteLine("");
                 Assert.Equal(0, exit);
 
                 // With neither '/a' nor '/e', should not do any directory tracking whatsoever
@@ -369,7 +369,7 @@ namespace ConsoleApplication4
                 commandArgs = "/d \"" + fileTrackerPath + "\" /u /e /c \"" + outputFile + "\"";
 
                 exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs);
-                Console.WriteLine("");
+                _output.WriteLine("");
                 Assert.Equal(0, exit);
 
                 // Should track directories when '/e' is passed
@@ -381,7 +381,7 @@ namespace ConsoleApplication4
                 commandArgs = "/d \"" + fileTrackerPath + "\" /u /a /c \"" + outputFile + "\"";
 
                 exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs);
-                Console.WriteLine("");
+                _output.WriteLine("");
                 Assert.Equal(0, exit);
 
                 // With '/a', should *not* track GetFileAttributes on directories, even though we do so on files. 
@@ -393,7 +393,7 @@ namespace ConsoleApplication4
                 commandArgs = "/d \"" + fileTrackerPath + "\" /u /c \"" + outputFile + "\"";
 
                 exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs);
-                Console.WriteLine("");
+                _output.WriteLine("");
                 Assert.Equal(0, exit);
 
                 // With neither '/a' nor '/e', should not do any directory tracking whatsoever
@@ -453,7 +453,7 @@ namespace ConsoleApplication4
         [Fact]
         public void FileTrackerDoNotRecordWriteAsRead()
         {
-            Console.WriteLine("Test: FileTrackerDoNotRecordWriteAsRead");
+            _output.WriteLine("Test: FileTrackerDoNotRecordWriteAsRead");
 
             File.Delete("writenoread.read.1.tlog");
             File.Delete("writenoread.write.1.tlog");
@@ -501,7 +501,7 @@ class X
                 string commandArgs = "/d \"" + fileTrackerPath + "\" /o /c \"" + outputFile + "\"";
 
                 int exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs);
-                Console.WriteLine("");
+                _output.WriteLine("");
                 Assert.Equal(0, exit);
             }
             finally
@@ -519,14 +519,14 @@ class X
         [Fact]
         public void FileTrackerFindStrInCommandLine()
         {
-            Console.WriteLine("Test: FileTrackerFindStrInCommandLine");
+            _output.WriteLine("Test: FileTrackerFindStrInCommandLine");
 
             File.Delete("findstr.read.1.tlog");
             FileTrackerTestHelper.WriteAll("test.in", "foo");
 
             int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /t /c findstr /ip foo test.in");
             string line = FileTrackerTestHelper.ReadLineFromFile("findstr.command.1.tlog", 1);
-            Console.WriteLine("");
+            _output.WriteLine("");
             Assert.Equal(0, exit);
             Assert.Equal("findstr /ip foo test.in", line);
         }
@@ -534,13 +534,13 @@ class X
         [Fact]
         public void FileTrackerFindStrInArgumentSpaces()
         {
-            Console.WriteLine("Test: FileTrackerFindStrIn");
+            _output.WriteLine("Test: FileTrackerFindStrIn");
 
             File.Delete("findstr.read.1.tlog");
             FileTrackerTestHelper.WriteAll("test file.in", "foo");
 
             int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /c findstr /ip foo \"test file.in\"");
-            Console.WriteLine("");
+            _output.WriteLine("");
             Assert.Equal(0, exit);
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test file.in").ToUpperInvariant(), "findstr.read.1.tlog");
         }
@@ -548,14 +548,14 @@ class X
         [Fact]
         public void FileTrackerFindUnicode()
         {
-            Console.WriteLine("Test: FileTrackerFindUnicode");
+            _output.WriteLine("Test: FileTrackerFindUnicode");
 
             File.Delete("find.read.1.tlog");
             FileTrackerTestHelper.WriteAll("t\u1EBCst.in", "foo");
 
             // FINDSTR.EXE doesn't support unicode, so we'll use FIND.EXE which does
             int exit = FileTrackerTestHelper.RunCommandNoStdOut(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /i . /c find /I \"\\\"foo\"\\\" t\u1EBCst.in");
-            Console.WriteLine("");
+            _output.WriteLine("");
             Assert.Equal(0, exit);
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("t\u1EBCst.in").ToUpperInvariant(), "find.read.1.tlog");
         }
@@ -563,7 +563,7 @@ class X
         [Fact]
         public void FileTrackerStartProcessFindStrIn()
         {
-            Console.WriteLine("Test: FileTrackerStartProcessFindStrIn");
+            _output.WriteLine("Test: FileTrackerStartProcessFindStrIn");
 
             File.Delete("findstr.read.1.tlog");
             FileTrackerTestHelper.WriteAll("test.in", "foo");
@@ -571,7 +571,7 @@ class X
             Process p = FileTracker.StartProcess("findstr", "/ip foo test.in", ExecutableType.Native32Bit);
             p.WaitForExit();
             int exit = p.ExitCode;
-            Console.WriteLine("");
+            _output.WriteLine("");
             Assert.Equal(0, exit);
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), "findstr.read.1.tlog");
         }
@@ -579,7 +579,7 @@ class X
         [Fact]
         public void FileTrackerResponseFile()
         {
-            Console.WriteLine("Test: FileTrackerResponseFile");
+            _output.WriteLine("Test: FileTrackerResponseFile");
 
             File.Delete("tracker.rsp");
             FileTrackerTestHelper.WriteAll("tracker.rsp", "/d " + s_defaultFileTrackerPath + " /r jibbit");
@@ -589,7 +589,7 @@ class X
 
             int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "@tracker.rsp /c findstr /ip foo test.in");
 
-            Console.WriteLine("");
+            _output.WriteLine("");
             Assert.Equal(0, exit);
             Assert.Equal("^JIBBIT",
                                    FileTrackerTestHelper.ReadLineFromFile("findstr.read.1.tlog", 1).ToUpperInvariant());
@@ -599,14 +599,14 @@ class X
         [Fact]
         public void FileTrackerFindStrInRootFiles()
         {
-            Console.WriteLine("Test: FileTrackerFindStrInRootFiles");
+            _output.WriteLine("Test: FileTrackerFindStrInRootFiles");
 
             File.Delete("findstr.read.1.tlog");
             FileTrackerTestHelper.WriteAll("test.in", "foo");
 
             int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /r jibbit /c findstr /ip foo test.in");
 
-            Console.WriteLine("");
+            _output.WriteLine("");
             Assert.Equal(0, exit);
             Assert.Equal("^JIBBIT",
                                    FileTrackerTestHelper.ReadLineFromFile("findstr.read.1.tlog", 1).ToUpperInvariant());
@@ -616,7 +616,7 @@ class X
         [Fact]
         public void FileTrackerFindStrInRootFilesCommand()
         {
-            Console.WriteLine("Test: FileTrackerFindStrInRootFilesCommand");
+            _output.WriteLine("Test: FileTrackerFindStrInRootFilesCommand");
 
             File.Delete("findstr.read.1.tlog");
             File.Delete("findstr.command.1.tlog");
@@ -624,7 +624,7 @@ class X
 
             int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "/t /d " + s_defaultFileTrackerPath + " /r jibbit /c findstr /ip foo test.in");
 
-            Console.WriteLine("");
+            _output.WriteLine("");
             Assert.Equal(0, exit);
             Assert.Equal("^JIBBIT",
                                    FileTrackerTestHelper.ReadLineFromFile("findstr.read.1.tlog", 1).ToUpperInvariant());
@@ -636,14 +636,14 @@ class X
         [Fact]
         public void FileTrackerFindStrInRootFilesSpaces()
         {
-            Console.WriteLine("Test: FileTrackerFindStrInRootFilesSpaces");
+            _output.WriteLine("Test: FileTrackerFindStrInRootFilesSpaces");
 
             File.Delete("findstr.read.1.tlog");
             FileTrackerTestHelper.WriteAll("test.in", "foo");
 
             int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /r \"jibbit goo\" /c findstr /ip foo test.in");
 
-            Console.WriteLine("");
+            _output.WriteLine("");
             Assert.Equal(0, exit);
             Assert.Equal("^JIBBIT GOO",
                                    FileTrackerTestHelper.ReadLineFromFile("findstr.read.1.tlog", 1).ToUpperInvariant());
@@ -653,7 +653,7 @@ class X
         [Fact]
         public void FileTrackerHelperCommandLine()
         {
-            Console.WriteLine("Test: FileTrackerHelperCommandLine");
+            _output.WriteLine("Test: FileTrackerHelperCommandLine");
 
             File.Delete("findstr.read.1.tlog");
             FileTrackerTestHelper.WriteAll("test.in", "foo");
@@ -667,7 +667,7 @@ class X
                     ".",
                     "jibbit goo"));
 
-            Console.WriteLine("");
+            _output.WriteLine("");
             Assert.Equal(0, exit);
             Assert.Equal("^JIBBIT GOO",
                                    FileTrackerTestHelper.ReadLineFromFile("findstr.read.1.tlog", 1).ToUpperInvariant());
@@ -677,7 +677,7 @@ class X
         [Fact]
         public void FileTrackerSortOut()
         {
-            Console.WriteLine("Test: FileTrackerSortOut");
+            _output.WriteLine("Test: FileTrackerSortOut");
 
             File.Delete("sort.read.1.tlog");
             File.Delete("sort.write.1.tlog");
@@ -703,7 +703,7 @@ class X
         [Fact]
         public void FileTrackerSortOutIntermediate()
         {
-            Console.WriteLine("Test: FileTrackerSortOutIntermediate");
+            _output.WriteLine("Test: FileTrackerSortOutIntermediate");
 
             Directory.CreateDirectory("outdir");
             File.Delete("outdir\\sort.read.1.tlog");
@@ -731,7 +731,7 @@ class X
         [Fact]
         public void FileTrackerIntermediateDirMissing()
         {
-            Console.WriteLine("Test: FileTrackerIntermediateDirMissing");
+            _output.WriteLine("Test: FileTrackerIntermediateDirMissing");
 
             // Make sure it really is missing
             if (Directory.Exists("outdir"))
@@ -761,13 +761,13 @@ class X
         [Fact]
         public void FileTrackerFindStrInChain()
         {
-            Console.WriteLine("Test: FileTrackerFindStrInChain");
+            _output.WriteLine("Test: FileTrackerFindStrInChain");
 
             File.Delete("cmd-findstr.read.1.tlog");
             FileTrackerTestHelper.WriteAll("test.in", "foo");
 
             int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /c cmd /c findstr /ip foo test.in");
-            Console.WriteLine("");
+            _output.WriteLine("");
             Assert.Equal(0, exit);
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), "cmd-findstr.read.1.tlog");
         }
@@ -775,7 +775,7 @@ class X
         [Fact]
         public void FileTrackerFindStrInChainRepeatCommand()
         {
-            Console.WriteLine("Test: FileTrackerFindStrInChainRepeatCommand");
+            _output.WriteLine("Test: FileTrackerFindStrInChainRepeatCommand");
 
             string[] tlogFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "cmd*-findstr.*.1.tlog", SearchOption.TopDirectoryOnly);
             foreach (string tlogFile in tlogFiles)
@@ -786,7 +786,7 @@ class X
 
             int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /c cmd /c cmd /c findstr /ip foo test.in");
             tlogFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "cmd*-findstr.read.1.tlog", SearchOption.TopDirectoryOnly);
-            Console.WriteLine("");
+            _output.WriteLine("");
             Assert.Equal(0, exit);
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), tlogFiles[0]);
         }
@@ -794,11 +794,11 @@ class X
         [Fact]
         public void FileTrackerFindStrInX64X86ChainRepeatCommand()
         {
-            Console.WriteLine("Test: FileTrackerFindStrInX64X86ChainRepeatCommand");
+            _output.WriteLine("Test: FileTrackerFindStrInX64X86ChainRepeatCommand");
 
             if (!Environment.Is64BitOperatingSystem)
             {
-                Console.WriteLine("FileTrackerFindStrInX64X86ChainRepeatCommand runs both 32-and 64-bit programs so it requires 64-bit Windows.");
+                _output.WriteLine("FileTrackerFindStrInX64X86ChainRepeatCommand runs both 32-and 64-bit programs so it requires 64-bit Windows.");
                 Assert.True(true);
                 return;
             }
@@ -812,7 +812,7 @@ class X
 
             int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /c " + s_cmd64Path + " /c " + s_cmd32Path + " /c findstr /ip foo test.in");
             tlogFiles = Directory.GetFiles(Environment.CurrentDirectory, "cmd*-findstr.read.1.tlog", SearchOption.TopDirectoryOnly);
-            Console.WriteLine("");
+            _output.WriteLine("");
             Assert.Equal(0, exit);
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), tlogFiles[0]);
         }
@@ -820,11 +820,11 @@ class X
         [Fact]
         public void FileTrackerFindStrInX86X64ChainRepeatCommand()
         {
-            Console.WriteLine("Test: FileTrackerFindStrInX86X64ChainRepeatCommand");
+            _output.WriteLine("Test: FileTrackerFindStrInX86X64ChainRepeatCommand");
 
             if (!Environment.Is64BitOperatingSystem)
             {
-                Console.WriteLine("FileTrackerFindStrInX86X64ChainRepeatCommand runs both 32-and 64-bit programs so it requires 64-bit Windows.");
+                _output.WriteLine("FileTrackerFindStrInX86X64ChainRepeatCommand runs both 32-and 64-bit programs so it requires 64-bit Windows.");
                 Assert.True(true);
                 return;
             }
@@ -838,7 +838,7 @@ class X
 
             int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /c " + s_cmd32Path + " /c " + s_cmd64Path + " /c findstr /ip foo test.in");
             tlogFiles = Directory.GetFiles(Environment.CurrentDirectory, "cmd*-findstr.read.1.tlog", SearchOption.TopDirectoryOnly);
-            Console.WriteLine("");
+            _output.WriteLine("");
             Assert.Equal(0, exit);
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), tlogFiles[0]);
         }
@@ -846,7 +846,7 @@ class X
         [Fact]
         public void FileTrackerFileIsUnderPath()
         {
-            Console.WriteLine("Test: FileTrackerFileIsUnderPath");
+            _output.WriteLine("Test: FileTrackerFileIsUnderPath");
 
             // YES: Both refer to something under baz, so yes this is on the path
             Assert.True(FileTracker.FileIsUnderPath(@"c:\foo\bar\baz\", @"c:\foo\bar\baz\"));
@@ -892,7 +892,7 @@ class X
         [Fact]
         public void FileTrackerFileIsExcludedFromDependencies()
         {
-            Console.WriteLine("Test: FileTrackerFileIsExcludedFromDependencies");
+            _output.WriteLine("Test: FileTrackerFileIsExcludedFromDependencies");
 
             string applicationDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             string localApplicationDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -1369,7 +1369,7 @@ class X
         [Fact(Skip = "Test fails in xunit because tracker includes the PID in the log file.")]
         public void InProcTrackingStartProcessFindStrIn()
         {
-            Console.WriteLine("Test: InProcTrackingStartProcessFindStrIn");
+            _output.WriteLine("Test: InProcTrackingStartProcessFindStrIn");
             int exit;
 
             try
@@ -1387,7 +1387,7 @@ class X
             {
                 FileTracker.StopTrackingAndCleanup();
             }
-            Console.WriteLine("");
+            _output.WriteLine("");
             Assert.Equal(0, exit);
             // This line is the problem.  It seems to have been reliable in MSTest 
             // but in xunit when run with other tests (NOT by itself), filetracker
@@ -1400,7 +1400,7 @@ class X
         [Fact]
         public void InProcTrackingStartProcessFindStrNullCommandLine()
         {
-            Console.WriteLine("Test: InProcTrackingStartProcessFindStrNullCommandLine");
+            _output.WriteLine("Test: InProcTrackingStartProcessFindStrNullCommandLine");
 
             try
             {
@@ -1449,7 +1449,7 @@ class X
         [Fact]
         public void InProcTrackingStartProcessFindStrInDefaultTaskName()
         {
-            Console.WriteLine("Test: InProcTrackingStartProcessFindStrInDefaultTaskName");
+            _output.WriteLine("Test: InProcTrackingStartProcessFindStrInDefaultTaskName");
             int exit = 0;
 
             try
@@ -1467,7 +1467,7 @@ class X
                 FileTracker.StopTrackingAndCleanup();
             }
 
-            Console.WriteLine("");
+            _output.WriteLine("");
             Assert.Equal(0, exit);
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), "findstr.read.1.tlog");
 
