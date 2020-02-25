@@ -323,13 +323,13 @@ namespace ConsoleApplication4
                 csc.BuildEngine = new MockEngine();
                 csc.Sources = new ITaskItem[] { new TaskItem(codeFile) };
                 csc.OutputAssembly = new TaskItem(outputFile);
-                csc.Execute();
+                csc.Execute().ShouldBeTrue();
 
                 string trackerPath = FileTracker.GetTrackerPath(ExecutableType.ManagedIL);
                 string fileTrackerPath = FileTracker.GetFileTrackerPath(ExecutableType.ManagedIL);
                 string commandArgs = "/d \"" + fileTrackerPath + "\" /o /u /e /c \"" + outputFile + "\"";
 
-                int exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs);
+                int exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs, _output);
                 _output.WriteLine("");
                 Assert.Equal(0, exit);
 
@@ -342,7 +342,7 @@ namespace ConsoleApplication4
 
                 commandArgs = "/d \"" + fileTrackerPath + "\" /o /u /a /c \"" + outputFile + "\"";
 
-                exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs);
+                exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs, _output);
                 _output.WriteLine("");
                 Assert.Equal(0, exit);
 
@@ -355,7 +355,7 @@ namespace ConsoleApplication4
 
                 commandArgs = "/d \"" + fileTrackerPath + "\" /o /u /c \"" + outputFile + "\"";
 
-                exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs);
+                exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs, _output);
                 _output.WriteLine("");
                 Assert.Equal(0, exit);
 
@@ -368,7 +368,7 @@ namespace ConsoleApplication4
 
                 commandArgs = "/d \"" + fileTrackerPath + "\" /u /e /c \"" + outputFile + "\"";
 
-                exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs);
+                exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs, _output);
                 _output.WriteLine("");
                 Assert.Equal(0, exit);
 
@@ -380,7 +380,7 @@ namespace ConsoleApplication4
 
                 commandArgs = "/d \"" + fileTrackerPath + "\" /u /a /c \"" + outputFile + "\"";
 
-                exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs);
+                exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs, _output);
                 _output.WriteLine("");
                 Assert.Equal(0, exit);
 
@@ -392,7 +392,7 @@ namespace ConsoleApplication4
 
                 commandArgs = "/d \"" + fileTrackerPath + "\" /u /c \"" + outputFile + "\"";
 
-                exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs);
+                exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs, _output);
                 _output.WriteLine("");
                 Assert.Equal(0, exit);
 
@@ -500,7 +500,7 @@ class X
                 string fileTrackerPath = FileTracker.GetFileTrackerPath(ExecutableType.ManagedIL);
                 string commandArgs = "/d \"" + fileTrackerPath + "\" /o /c \"" + outputFile + "\"";
 
-                int exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs);
+                int exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs, _output);
                 _output.WriteLine("");
                 Assert.Equal(0, exit);
             }
