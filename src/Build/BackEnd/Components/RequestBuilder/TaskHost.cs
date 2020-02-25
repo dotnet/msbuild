@@ -34,7 +34,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IBuildEngine6
+        IBuildEngine7
     {
         /// <summary>
         /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set. 
@@ -664,6 +664,37 @@ namespace Microsoft.Build.BackEnd
         }
 
         #endregion
+
+        int runningTotal = 0;
+
+        public int RequestCores(ITask task, int requestedCores)
+        {
+            Semaphore cpuCount = Semaphore.OpenExisting("cpuCount");
+            int coresAcquiredBeforeMoreCoresGetAcquired = runningTotal;
+            // Keep requesting cores until we can't anymore, or we've gotten the number of cores we wanted.
+            for (int i = 0; i < requestedCores; i++)
+            {
+                if(cpuCount.WaitOne(0))
+                {
+                    runningTotal++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return runningTotal - coresAcquiredBeforeMoreCoresGetAcquired;
+        }
+
+        public void ReleaseCores(ITask task, int coresToRelease)
+        {
+            Semaphore cpuCount = Semaphore.OpenExisting("cpuCount");
+
+            coresToRelease = Math.Min(runningTotal, coresToRelease);
+
+            cpuCount.Release(coresToRelease);
+        }
 
         /// <summary>
         /// Called by the internal MSBuild task.

@@ -197,6 +197,11 @@ namespace Microsoft.Build.Framework
     {
         System.Collections.Generic.IReadOnlyDictionary<string, string> GetGlobalProperties();
     }
+    public partial interface IBuildEngine7 : Microsoft.Build.Framework.IBuildEngine, Microsoft.Build.Framework.IBuildEngine2, Microsoft.Build.Framework.IBuildEngine3, Microsoft.Build.Framework.IBuildEngine4, Microsoft.Build.Framework.IBuildEngine5, Microsoft.Build.Framework.IBuildEngine6
+    {
+        void ReleaseCores(Microsoft.Build.Framework.ITask task, int releasedCores);
+        int RequestCores(Microsoft.Build.Framework.ITask task, int requestedCores);
+    }
     public partial interface ICancelableTask : Microsoft.Build.Framework.ITask
     {
         void Cancel();

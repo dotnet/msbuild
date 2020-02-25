@@ -17,7 +17,7 @@ using Microsoft.Build.BackEnd.Components.Caching;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// This class represents an implementation of INode for out-of-proc nodes.
+    /// This class represents an implementation of INode for in-proc nodes.
     /// </summary>
     internal class InProcNode : INode, INodePacketFactory
     {

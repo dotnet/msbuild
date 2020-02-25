@@ -28,6 +28,7 @@ using LoggerMode = Microsoft.Build.BackEnd.Logging.LoggerMode;
 using ObjectModel = System.Collections.ObjectModel;
 using System.Data.OleDb;
 using System.Runtime.CompilerServices;
+using System.Security.AccessControl;
 
 namespace Microsoft.Build.Evaluation
 {
