@@ -32,10 +32,14 @@ namespace Microsoft.Build.Logging
         // version 5:
         //   - new EvaluationFinished.ProfilerResult
         // version 6:
-        //   -  Ids and parent ids for the evaluation locations
+        //   - Ids and parent ids for the evaluation locations
         // version 7:
-        //   -  Include ProjectStartedEventArgs.GlobalProperties
-        internal const int FileFormatVersion = 7;
+        //   - Include ProjectStartedEventArgs.GlobalProperties
+        // version 8:
+        //   - This was used in a now-reverted change but is the same as 9.
+        // version 9:
+        //   - new record kinds: EnvironmentVariableRead, PropertyReassignment, UninitializedPropertyRead
+        internal const int FileFormatVersion = 9;
 
         private Stream stream;
         private BinaryWriter binaryWriter;
