@@ -20,6 +20,11 @@
       LOCALIZATION: The prefix "MSB1050 : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="CommandLine">
+        <source>Command line arguments = "{0}"</source>
+        <target state="new">Command line arguments = "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ConfigurationFailurePrefixNoErrorCode">
         <source>MSBUILD : Configuration error {0}: {1}</source>
         <target state="new">MSBUILD : Configuration error {0}: {1}</target>
@@ -41,6 +46,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 Copyright (C) Microsoft Corporation. All rights reserved.
 </target>
         <note>LOCALIZATION: {0} contains the DLL version number. {1} contains the name of a runtime, like ".NET Framework", ".NET Core", or "Mono"</note>
+      </trans-unit>
+      <trans-unit id="CurrentDirectory">
+        <source>Current directory = "{0}"</source>
+        <target state="new">Current directory = "{0}"</target>
+        <note />
       </trans-unit>
       <trans-unit id="DuplicateOutputResultsCache">
         <source>MSBUILD : error MSB1058: Only one output results cache can be specified.</source>
@@ -1268,6 +1278,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         LOCALIZATION: The word "Logger" should be localized, the words "MSBuild" and "error" should NOT be localized.
       </note>
       </trans-unit>
+      <trans-unit id="MSBExePath">
+        <source>MSBuild executable path = "{0}"</source>
+        <target state="new">MSBuild executable path = "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBVersion">
+        <source>MSBuild version = "{0}"</source>
+        <target state="new">MSBuild version = "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MissingLoggerError">
         <source>MSBUILD : error MSB1007: Specify a logger.</source>
         <target state="new">MSBUILD : error MSB1007: Specify a logger.</target>
@@ -1365,6 +1385,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       switches from the auto-response file msbuild.rsp: otherwise the user may be unaware
       where the switches are coming from.
     </note>
+      </trans-unit>
+      <trans-unit id="Process">
+        <source>Process = "{0}"</source>
+        <target state="new">Process = "{0}"</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectNotFoundError">
         <source>MSBUILD : error MSB1009: Project file does not exist.</source>

@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
+using System.Reflection;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -139,7 +142,21 @@ namespace Microsoft.Build.Logging
 
             binaryWriter.Write(FileFormatVersion);
 
+            LogInitialInfo();
+
             eventSource.AnyEventRaised += EventSource_AnyEventRaised;
+        }
+
+        private void LogInitialInfo()
+        {
+            LogMessage("BinLogFilePath=" + FilePath);
+        }
+
+        private void LogMessage(string text)
+        {
+            var args = new BuildMessageEventArgs(text, helpKeyword: null, senderName: "BinaryLogger", MessageImportance.Normal);
+            args.BuildEventContext = BuildEventContext.Invalid;
+            Write(args);
         }
 
         /// <summary>
