@@ -7,7 +7,8 @@ jobs:
 - job: BootstrapMSBuildOnFullFrameworkWindows
   displayName: "Windows Full"
   pool:
-    vmImage: 'windows-2019'
+    name: NetCorePublic-Pool
+    queue: buildpool.windows.10.amd64.vs2019.pre.open
   steps:
   - task: BatchScript@1
     displayName: cibuild_bootstrapped_msbuild.cmd
@@ -51,7 +52,8 @@ jobs:
 - job: BootstrapMSBuildOnCoreWindows
   displayName: "Windows Core"
   pool:
-    vmImage: 'windows-2019'
+    name: NetCorePublic-Pool
+    queue: buildpool.windows.10.amd64.vs2019.pre.open
   steps:
   - task: BatchScript@1
     displayName: cibuild_bootstrapped_msbuild.cmd
