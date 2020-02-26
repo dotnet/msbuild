@@ -36,6 +36,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [Required]
         public ITaskItem[] Files { get; set; } = Array.Empty<ITaskItem>();
+        public ITaskItem[] Files { get; set; } = Array.Empty<ITaskItem>();
 
         /// <summary>
         /// This outgoing list of files is exactly the same as the incoming Files
