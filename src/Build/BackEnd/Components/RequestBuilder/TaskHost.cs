@@ -666,11 +666,17 @@ namespace Microsoft.Build.BackEnd
         #endregion
 
         int runningTotal = 0;
+        Semaphore cpuCount;
 
         public int RequestCores(ITask task, int requestedCores)
         {
-            Semaphore cpuCount = Semaphore.OpenExisting("cpuCount");
             int coresAcquiredBeforeMoreCoresGetAcquired = runningTotal;
+
+            if (cpuCount == null)
+            {
+                cpuCount = Semaphore.OpenExisting("cpuCount");
+            }
+
             // Keep requesting cores until we can't anymore, or we've gotten the number of cores we wanted.
             for (int i = 0; i < requestedCores; i++)
             {
@@ -689,7 +695,10 @@ namespace Microsoft.Build.BackEnd
 
         public void ReleaseCores(ITask task, int coresToRelease)
         {
-            Semaphore cpuCount = Semaphore.OpenExisting("cpuCount");
+            if (cpuCount == null)
+            {
+                cpuCount = Semaphore.OpenExisting("cpuCount");
+            }
 
             coresToRelease = Math.Min(runningTotal, coresToRelease);
 

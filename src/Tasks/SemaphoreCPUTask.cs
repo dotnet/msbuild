@@ -1,12 +1,11 @@
-﻿using Microsoft.Build.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
-    class SemaphoreCPUTests : Task
+    class SemaphoreCPUTask : Task
     {
         public override bool Execute()
         {
@@ -26,5 +25,7 @@ namespace Microsoft.Build.Tasks
 
             return !Log.HasLoggedErrors;
         }
+
+
     }
 }

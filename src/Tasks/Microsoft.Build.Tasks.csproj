@@ -484,7 +484,7 @@
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryCodeType.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryCompilers.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryTaskInfo.cs" />
-    <Compile Include="SemaphoreCPUTests.cs" />
+    <Compile Include="SemaphoreCPUTask.cs" />
     <Compile Include="System.Design.cs" />
     <Compile Include="system.design\stronglytypedresourcebuilder.cs" />
     <Compile Include="TaskExtension.cs">

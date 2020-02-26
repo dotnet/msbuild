@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -31,7 +32,7 @@ namespace Microsoft.Build.UnitTests
      * is somewhat of a no-no for task assemblies.
      * 
      **************************************************************************/
-    internal sealed class MockEngine : IBuildEngine6
+    internal sealed class MockEngine : IBuildEngine7
     {
         private readonly object _lockObj = new object();  // Protects _log, _output
         private readonly ITestOutputHelper _output;
@@ -483,6 +484,49 @@ namespace Microsoft.Build.UnitTests
         {
             _objectCache.TryRemove(key, out object obj);
             return obj;
+        }
+
+        int runningTotal = 0;
+        Semaphore cpuCount;
+        public int RequestCores(ITask task, int requestedCores)
+        {
+            if (cpuCount == null)
+            {
+                cpuCount = Semaphore.OpenExisting("cpuCount");
+            }
+
+            int coresAcquiredBeforeMoreCoresGetAcquired = runningTotal;
+            // Keep requesting cores until we can't anymore, or we've gotten the number of cores we wanted.
+            for (int i = 0; i < requestedCores; i++)
+            {
+                if (cpuCount.WaitOne(0))
+                {
+                    runningTotal++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return runningTotal - coresAcquiredBeforeMoreCoresGetAcquired;
+        }
+
+        public void ReleaseCores(ITask task, int coresToRelease)
+        {
+            if(cpuCount == null)
+            {
+                cpuCount = Semaphore.OpenExisting("cpuCount");
+            }
+
+            coresToRelease = Math.Min(runningTotal, coresToRelease);
+
+            // if we attempt to release 0 cores, Release throws an exception.
+            if(coresToRelease > 0)
+            {
+                cpuCount.Release(coresToRelease);
+            }
+
         }
     }
 }
