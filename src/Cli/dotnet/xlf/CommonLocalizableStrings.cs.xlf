@@ -708,18 +708,18 @@ export PATH="$PATH:{0}"
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxNeedLogout">
-        <source>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</source>
-        <target state="translated">Právě jste nainstalovali sadu .NET Core SDK, bude proto nutné před spuštěním nainstalovaného nástroje se odhlásit nebo restartovat relaci.</target>
+        <source>Since you just installed the .NET SDK, you will need to logout or restart your session before running the tool you installed.</source>
+        <target state="needs-review-translation">Právě jste nainstalovali sadu .NET Core SDK, bude proto nutné před spuštěním nainstalovaného nástroje se odhlásit nebo restartovat relaci.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
-        <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
-        <target state="translated">Právě jste nainstalovali sadu .NET Core SDK, bude proto nutné před spuštěním nainstalovaného nástroje znovu otevřít terminál.</target>
+        <source>Since you just installed the .NET SDK, you will need to reopen terminal before running the tool you installed.</source>
+        <target state="needs-review-translation">Právě jste nainstalovali sadu .NET Core SDK, bude proto nutné před spuštěním nainstalovaného nástroje znovu otevřít terminál.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
-        <source>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
-        <target state="translated">Právě jste nainstalovali sadu .NET Core SDK, bude proto nutné před spuštěním nainstalovaného nástroje znovu otevřít okno příkazového řádku.</target>
+        <source>Since you just installed the .NET SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
+        <target state="needs-review-translation">Právě jste nainstalovali sadu .NET Core SDK, bude proto nutné před spuštěním nainstalovaného nástroje znovu otevřít okno příkazového řádku.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMissingCommandName">

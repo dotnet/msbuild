@@ -30,10 +30,10 @@ GitHub에서 문제 보고 및 소스 찾기: https://github.com/dotnet/core
         <note />
       </trans-unit>
       <trans-unit id="FirstTimeMessageWelcome">
-        <source>Welcome to .NET Core {0}!
+        <source>Welcome to .NET {0}!
 ---------------------
 SDK Version: {1}</source>
-        <target state="new">Welcome to .NET Core {0}!
+        <target state="new">Welcome to .NET {0}!
 ---------------------
 SDK Version: {1}</target>
         <note />
@@ -41,10 +41,10 @@ SDK Version: {1}</target>
       <trans-unit id="TelemetryMessage">
         <source>Telemetry
 ---------
-The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+The .NET tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
 
-Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
-        <target state="translated">원격 분석
+Read more about .NET CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
+        <target state="needs-review-translation">원격 분석
 ---------
 .NET Core 도구는 사용자 환경 개선을 위해 사용량 데이터를 수집합니다. 데이터는 익명입니다. Microsoft에서 데이터를 수집하여 커뮤니티와 공유합니다. 원하는 셸에서 DOTNET_CLI_TELEMETRY_OPTOUT 환경 변수를 '1' 또는 'true'로 설정하여 원격 분석을 옵트아웃할 수 있습니다.
 

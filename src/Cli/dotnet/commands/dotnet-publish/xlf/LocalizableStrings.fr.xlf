@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NoSelfContainedOptionDescription">
-        <source>Publish your application as a framework dependent application without the .NET Core runtime. A supported .NET Core runtime must be installed to run your application.</source>
-        <target state="translated">Publiez votre application en tant qu'application dépendante du framework sans le runtime .NET Core. Vous devez installer un runtime .NET Core pris en charge pour permettre l'exécution de votre application.</target>
+        <source>Publish your application as a framework dependent application without the .NET runtime. A supported .NET runtime must be installed to run your application.</source>
+        <target state="needs-review-translation">Publiez votre application en tant qu'application dépendante du framework sans le runtime .NET Core. Vous devez installer un runtime .NET Core pris en charge pour permettre l'exécution de votre application.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -70,9 +70,9 @@ La valeur par défaut est de publier une application dépendante du framework.</
         <note />
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
+        <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">Publiez le runtime .NET Core avec votre application pour qu'il n'ait pas besoin d'être installé sur l’ordinateur cible.
+        <target state="needs-review-translation">Publiez le runtime .NET Core avec votre application pour qu'il n'ait pas besoin d'être installé sur l’ordinateur cible.
 La valeur par défaut est « true » si un identificateur d'exécution est spécifié.</target>
         <note />
       </trans-unit>

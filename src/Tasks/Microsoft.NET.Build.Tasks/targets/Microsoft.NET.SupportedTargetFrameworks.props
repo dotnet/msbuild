@@ -22,7 +22,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v2.2" DisplayName=".NET Core 2.2" />
         <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v3.0" DisplayName=".NET Core 3.0" />
         <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v3.1" DisplayName=".NET Core 3.1" />
-        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v5.0" DisplayName=".NET Core 5.0" />
+        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v5.0" DisplayName=".NET 5.0" />
     </ItemGroup>
 
     <!-- .NET Standard -->

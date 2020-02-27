@@ -139,10 +139,10 @@
     <value>Enable diagnostic output</value>
   </data>
   <data name="SDKCommandUsageDescription" xml:space="preserve">
-    <value>Execute a .NET Core SDK command.</value>
+    <value>Execute a .NET SDK command.</value>
   </data>
   <data name="ExecutionUsageDescription" xml:space="preserve">
-    <value>Execute a .NET Core application.</value>
+    <value>Execute a .NET application.</value>
   </data>
   <data name="HelpDefinition" xml:space="preserve">
     <value>Show command line help.</value>
@@ -232,10 +232,10 @@
     <value>The path to an application .dll file to execute.</value>
   </data>
   <data name="SDKVersionCommandDefinition" xml:space="preserve">
-    <value>Display .NET Core SDK version in use.</value>
+    <value>Display .NET SDK version in use.</value>
   </data>
   <data name="SDKInfoCommandDefinition" xml:space="preserve">
-    <value>Display .NET Core information.</value>
+    <value>Display .NET information.</value>
   </data>
   <data name="SDKListSdksCommandDefinition" xml:space="preserve">
     <value>Display the installed SDKs.</value>
