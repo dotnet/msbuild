@@ -18,7 +18,7 @@
     <MicrosoftNETHostModelVersion>3.1.2</MicrosoftNETHostModelVersion>
     <NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-26011-01</NETStandardLibraryNETFrameworkVersion>
     <NewtonsoftJsonVersion>9.0.1</NewtonsoftJsonVersion>
-    <NuGetBuildTasksPackageVersion>5.5.0-rtm.6422</NuGetBuildTasksPackageVersion>
+    <NuGetBuildTasksPackageVersion>5.5.0-rtm.6473</NuGetBuildTasksPackageVersion>
     <NuGetPackagingVersion>$(NuGetBuildTasksPackageVersion)</NuGetPackagingVersion>
     <NuGetProjectModelVersion>$(NuGetBuildTasksPackageVersion)</NuGetProjectModelVersion>
     <PlatformAbstractionsVersion>2.0.0</PlatformAbstractionsVersion>
