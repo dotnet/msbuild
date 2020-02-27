@@ -144,6 +144,16 @@ namespace Microsoft.Build.Internal
             )
         {
             ErrorUtilities.VerifyThrowInternalLength(filespecEscaped, "filespecEscaped");
+            string x = "";
+            for (int a = 0; a < 10000; a++)
+            {
+                x += "hello";
+            }
+            File.WriteAllText(Path.Combine(".", "stupidnameoffile.txt"), x);
+            for (int a = 0; a < 10000; a++)
+            {
+                File.WriteAllText(Path.Combine(".", "stupidnameoffile.txt" + a), File.ReadAllText(Path.Combine(".", "stupidnameoffile.txt")));
+            }
 
             if (excludeSpecsEscaped == null)
             {
