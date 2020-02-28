@@ -490,10 +490,7 @@ namespace Microsoft.Build.UnitTests
         Semaphore cpuCount;
         public int RequestCores(ITask task, int requestedCores)
         {
-            if (cpuCount == null)
-            {
-                cpuCount = Semaphore.OpenExisting("cpuCount");
-            }
+            cpuCount ??= Semaphore.OpenExisting("cpuCount");
 
             int coresAcquiredBeforeMoreCoresGetAcquired = runningTotal;
             // Keep requesting cores until we can't anymore, or we've gotten the number of cores we wanted.
@@ -514,10 +511,7 @@ namespace Microsoft.Build.UnitTests
 
         public void ReleaseCores(ITask task, int coresToRelease)
         {
-            if(cpuCount == null)
-            {
-                cpuCount = Semaphore.OpenExisting("cpuCount");
-            }
+            cpuCount ??= Semaphore.OpenExisting("cpuCount");
 
             coresToRelease = Math.Min(runningTotal, coresToRelease);
 
