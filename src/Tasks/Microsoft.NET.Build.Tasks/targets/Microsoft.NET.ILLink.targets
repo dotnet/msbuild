@@ -114,7 +114,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyGroup>
     <ItemGroup>
       <TrimmerRootAssembly Include="@(_ManagedAssembliesToLink)" Condition=" '%(_ManagedAssembliesToLink.IsTrimmable)' != 'true' " />
-      <_ManagedAssembliesToLink Update="@(_ManagedAssembliesToLink)" Condition=" '%(_ManagedAssembliesToLink.IsTrimmable)' != 'true' ">
+      <_ManagedAssembliesToLink Condition=" '%(_ManagedAssembliesToLink.IsTrimmable)' != 'true' ">
         <action>copy</action>
       </_ManagedAssembliesToLink>
     </ItemGroup>
