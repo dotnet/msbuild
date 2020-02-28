@@ -13,24 +13,25 @@
 .IP
 .nf
 \f[C]
-dotnet [command] [arguments] [--additional-deps] [--additionalprobingpath] [-d|--diagnostics] [--fx-version]
-    [-h|--help] [--info] [--list-runtimes] [--list-sdks] [--roll-forward-on-no-candidate-fx] [-v|--verbosity] [--version]
+dotnet [command] [arguments] [--additional-deps] [--additionalprobingpath] [--depsfile]
+    [-d|--diagnostics] [--fx-version] [-h|--help] [--info] [--list-runtimes] [--list-sdks] [--roll-forward-on-no-candidate-fx] [--runtimeconfig] [-v|--verbosity] [--version]
 \f[R]
 .fi
 .SS .NET Core 2.0
 .IP
 .nf
 \f[C]
-dotnet [command] [arguments] [--additional-deps] [--additionalprobingpath] [-d|--diagnostics]
-    [--fx-version] [-h|--help] [--info] [--roll-forward-on-no-candidate-fx] [-v|--verbosity] [--version]
+dotnet [command] [arguments] [--additional-deps] [--additionalprobingpath] [--depsfile]
+    [-d|--diagnostics] [--fx-version] [-h|--help] [--info] [--roll-forward-on-no-candidate-fx]
+    [--runtimeconfig] [-v|--verbosity] [--version]
 \f[R]
 .fi
 .SS .NET Core 1.x
 .IP
 .nf
 \f[C]
-dotnet [command] [arguments] [--additionalprobingpath] [-d|--diagnostics] [--fx-version]
-    [-h|--help] [--info] [-v|--verbosity] [--version]
+dotnet [command] [arguments] [--additionalprobingpath] [--depsfile] [-d|--diagnostics]
+    [--fx-version] [-h|--help] [--info] [--runtimeconfig] [-v|--verbosity] [--version]
 \f[R]
 .fi
 .PP
@@ -49,11 +50,18 @@ See .NET Core application deployment for to learn about deployment options.
 .PP
 \f[C]--additional-deps <PATH>\f[R]
 .PP
-Path to additional \f[I]deps.json\f[R] file.
+Path to an additional \f[I].deps.json\f[R] file.
 .PP
 \f[C]--additionalprobingpath <PATH>\f[R]
 .PP
 Path containing probing policy and assemblies to probe.
+.PP
+\f[C]--depsfile\f[R]
+.PP
+Path to a \f[I]deps.json\f[R] file.
+.PP
+A \f[I]deps.json\f[R] file contains a list of dependencies, compilation dependencies and version information used to address assembly conflicts.
+For more information about this file, see Runtime Configuration Files on GitHub.
 .PP
 \f[C]-d|--diagnostics\f[R]
 .PP
@@ -83,12 +91,23 @@ Displays the installed .NET Core SDKs.
 \f[C]--roll-forward-on-no-candidate-fx <N>\f[R]
 .PP
 Defines behavior when the required shared framework is not available.
-\f[C]N\f[R] can be: * \f[C]0\f[R] - Disable even minor version roll forward.
-* \f[C]1\f[R] - Roll forward on minor version, but not on major version.
+\f[C]N\f[R] can be:
+.IP \[bu] 2
+\f[C]0\f[R] - Disable even minor version roll forward.
+.IP \[bu] 2
+\f[C]1\f[R] - Roll forward on minor version, but not on major version.
 This is the default behavior.
-* \f[C]2\f[R] - Roll forward on minor and major versions.
+.IP \[bu] 2
+\f[C]2\f[R] - Roll forward on minor and major versions.
 .PP
 For more information, see Roll forward.
+.PP
+\f[C]--runtimeconfig\f[R]
+.PP
+Path to a \f[I]runtimeconfig.json\f[R] file.
+.PP
+A \f[I]runtimeconfig.json\f[R] file is a configuration file containing runtime configuration settings.
+For more information, see Runtime Configuration Files on GitHub.
 .PP
 \f[C]-v|--verbosity <LEVEL>\f[R]
 .PP
@@ -103,11 +122,18 @@ Prints out the version of the .NET Core SDK in use.
 .PP
 \f[C]--additional-deps <PATH>\f[R]
 .PP
-Path to additional \f[I]deps.json\f[R] file.
+Path to an additional \f[I].deps.json\f[R] file.
 .PP
 \f[C]--additionalprobingpath <PATH>\f[R]
 .PP
 Path containing probing policy and assemblies to probe.
+.PP
+\f[C]--depsfile\f[R]
+.PP
+Path to a \f[I]deps.json\f[R] file.
+.PP
+A \f[I]deps.json\f[R] file contains a list of dependencies, compilation dependencies and version information used to address assembly conflicts.
+For more details on this file, see Runtime Configuration Files on GitHub.
 .PP
 \f[C]-d|--diagnostics\f[R]
 .PP
@@ -131,6 +157,13 @@ Prints out detailed information about a .NET Core installation and the machine e
 Disables minor version roll forward, if set to \f[C]0\f[R].
 For more information, see Roll forward.
 .PP
+\f[C]--runtimeconfig\f[R]
+.PP
+Path to a \f[I]runtimeconfig.json\f[R] file.
+.PP
+A \f[I]runtimeconfig.json\f[R] file is a configuration file containing runtime configuration settings.
+For more details, see Runtime Configuration Files on GitHub.
+.PP
 \f[C]-v|--verbosity <LEVEL>\f[R]
 .PP
 Sets the verbosity level of the command.
@@ -145,6 +178,13 @@ Prints out the version of the .NET Core SDK in use.
 \f[C]--additionalprobingpath <PATH>\f[R]
 .PP
 Path containing probing policy and assemblies to probe.
+.PP
+\f[C]--depsfile\f[R]
+.PP
+Path to a \f[I]deps.json\f[R] file.
+.PP
+A \f[I]deps.json\f[R] file contains a list of dependencies, compilation dependencies and version information used to address assembly conflicts.
+For more details on this file, see Runtime Configuration Files on GitHub.
 .PP
 \f[C]-d|--diagnostics\f[R]
 .PP
@@ -162,6 +202,13 @@ Prints out documentation for a given command, such as \f[C]dotnet build --help\f
 \f[C]--info\f[R]
 .PP
 Prints out detailed information about a .NET Core installation and the machine environment, such as the current operating system, and commit SHA of the .NET Core version.
+.PP
+\f[C]--runtimeconfig\f[R]
+.PP
+Path to a \f[I]runtimeconfig.json\f[R] file.
+.PP
+A \f[I]runtimeconfig.json\f[R] file is a configuration file containing runtime configuration settings.
+For more details, see Runtime Configuration Files on GitHub.
 .PP
 \f[C]-v|--verbosity <LEVEL>\f[R]
 .PP
@@ -579,8 +626,8 @@ Run an application DLL, such as \f[C]myapp.dll\f[R]:
 .PP
 \f[C]DOTNET_PACKAGES\f[R]
 .PP
-The primary package cache.
-If not set, it defaults to \f[C]$HOME/.nuget/packages\f[R] on Unix or \f[C]%HOME%\[rs]NuGet\[rs]Packages\f[R] on Windows.
+The global packages folder.
+If not set, it defaults to \f[C]\[ti]/.nuget/packages\f[R] on Unix or \f[C]%userprofile%\[rs].nuget\[rs]packages\f[R] on Windows.
 .PP
 \f[C]DOTNET_SERVICING\f[R]
 .PP
@@ -609,7 +656,7 @@ For more information, see Roll forward.
 \f[C]DOTNET_PACKAGES\f[R]
 .PP
 The primary package cache.
-If not set, it defaults to \f[C]$HOME/.nuget/packages\f[R] on Unix or \f[C]%HOME%\[rs]NuGet\[rs]Packages\f[R] on Windows.
+If not set, it defaults to \f[C]$HOME/.nuget/packages\f[R] on Unix or \f[C]%userprofile%\[rs].nuget\[rs]packages\f[R] on Windows.
 .PP
 \f[C]DOTNET_SERVICING\f[R]
 .PP
@@ -633,7 +680,7 @@ For more information about multi-level lookup, see Multi-level SharedFX Lookup.
 \f[C]DOTNET_PACKAGES\f[R]
 .PP
 The primary package cache.
-If not set, it defaults to \f[C]$HOME/.nuget/packages\f[R] on Unix or \f[C]%HOME%\[rs]NuGet\[rs]Packages\f[R] on Windows.
+If not set, it defaults to \f[C]$HOME/.nuget/packages\f[R] on Unix or \f[C]%userprofile%\[rs].nuget\[rs]packages\f[R] on Windows.
 .PP
 \f[C]DOTNET_SERVICING\f[R]
 .PP
@@ -647,3 +694,6 @@ Otherwise, set to \f[C]false\f[R] to opt into the telemetry features (values \f[
 If not set, the default is \f[C]false\f[R] and the telemetry feature is active.
 .PP
    *   *   *   *   *
+.SS See also
+.IP \[bu] 2
+Runtime Configuration Files

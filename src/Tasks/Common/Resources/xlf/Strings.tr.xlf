@@ -144,7 +144,7 @@
       </trans-unit>
       <trans-unit id="CanOnlyHaveSingleFileWithNetCoreApp">
         <source>NETSDK1125: Publishing to a single-file is only supported for netcoreapp target.</source>
-        <target state="new">NETSDK1125: Publishing to a single-file is only supported for netcoreapp target.</target>
+        <target state="translated">NETSDK1125: Tek dosyada yayımlama yalnızca netcoreapp hedefi için desteklenir.</target>
         <note>{StrBegin="NETSDK1125: "}</note>
       </trans-unit>
       <trans-unit id="ChoosingAssemblyVersion_Info">
@@ -448,7 +448,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="NoSupportCppSelfContained">
         <source>NETSDK1121: C++/CLI projects targeting .NET Core cannot use SelfContained=true.</source>
-        <target state="new">NETSDK1121: C++/CLI projects targeting .NET Core cannot use SelfContained=true.</target>
+        <target state="translated">NETSDK1121: .NET Core'u hedefleyen C++/CLI projelerinde SelfContained=true kullanılamaz.</target>
         <note>{StrBegin="NETSDK1121: "}</note>
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
@@ -483,22 +483,22 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="ProjectToolOnlySupportTFMLowerThanNetcoreapp22">
         <source>NETSDK1093: Project tools (DotnetCliTool) only support targeting .NET Core 2.2 and lower.</source>
-        <target state="translated">NETSDK1093: Proje araçları (DotnetCliTool) yalnızca .NET Core 2.2 veya altını hedeflemeyi destekliyor.</target>
+        <target state="translated">NETSDK1093: Proje araçları (DotnetCliTool) yalnızca .NET Core 2.2 veya daha düşük sürümünü hedeflemeyi destekliyor.</target>
         <note>{StrBegin="NETSDK1093: "}</note>
       </trans-unit>
       <trans-unit id="PublishReadyToRunRequiresVersion30">
         <source>NETSDK1122: ReadyToRun compilation will be skipped because it is only supported for .NET Core 3.0 or higher.</source>
-        <target state="new">NETSDK1122: ReadyToRun compilation will be skipped because it is only supported for .NET Core 3.0 or higher.</target>
+        <target state="translated">NETSDK1122: ReadyToRun derlemesi, yalnızca .NET Core 3.0 veya üzeri için desteklendiğinden atlanacak.</target>
         <note>{StrBegin="NETSDK1122: "}</note>
       </trans-unit>
       <trans-unit id="PublishSingleFileRequiresVersion30">
         <source>NETSDK1123: Publishing an application to a single-file requires .NET Core 3.0 or higher.</source>
-        <target state="new">NETSDK1123: Publishing an application to a single-file requires .NET Core 3.0 or higher.</target>
+        <target state="translated">NETSDK1123: Bir uygulamayı tek bir dosyada yayımlamak için .NET Core 3.0 veya üzeri gerekir.</target>
         <note>{StrBegin="NETSDK1123: "}</note>
       </trans-unit>
       <trans-unit id="PublishTrimmedRequiresVersion30">
         <source>NETSDK1124: Trimming assemblies requires .NET Core 3.0 or higher.</source>
-        <target state="new">NETSDK1124: Trimming assemblies requires .NET Core 3.0 or higher.</target>
+        <target state="translated">NETSDK1124: Bütünleştirilmiş kodları bölmek için .NET Core 3.0 veya üzeri gerekir.</target>
         <note>{StrBegin="NETSDK1124: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunCompilationFailed">

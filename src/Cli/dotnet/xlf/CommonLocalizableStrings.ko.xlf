@@ -708,18 +708,18 @@ export PATH="$PATH:{0}"
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxNeedLogout">
-        <source>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</source>
-        <target state="translated">.NET Core SDK를 방금 설치했기 때문에 설치한 도구를 실행하기 전에 로그아웃하거나 세션을 다시 시작해야 합니다.</target>
+        <source>Since you just installed the .NET SDK, you will need to logout or restart your session before running the tool you installed.</source>
+        <target state="needs-review-translation">.NET Core SDK를 방금 설치했기 때문에 설치한 도구를 실행하기 전에 로그아웃하거나 세션을 다시 시작해야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
-        <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
-        <target state="translated">.NET Core SDK를 방금 설치했기 때문에 설치한 도구를 실행하기 전에 터미널을 다시 열어야 합니다.</target>
+        <source>Since you just installed the .NET SDK, you will need to reopen terminal before running the tool you installed.</source>
+        <target state="needs-review-translation">.NET Core SDK를 방금 설치했기 때문에 설치한 도구를 실행하기 전에 터미널을 다시 열어야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
-        <source>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
-        <target state="translated">.NET Core SDK를 방금 설치했기 때문에 설치한 도구를 실행하기 전에 명령 프롬프트 창을 다시 열어야 합니다.</target>
+        <source>Since you just installed the .NET SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
+        <target state="needs-review-translation">.NET Core SDK를 방금 설치했기 때문에 설치한 도구를 실행하기 전에 명령 프롬프트 창을 다시 열어야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMissingCommandName">

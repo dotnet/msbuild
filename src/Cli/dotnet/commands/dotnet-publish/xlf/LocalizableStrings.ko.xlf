@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NoSelfContainedOptionDescription">
-        <source>Publish your application as a framework dependent application without the .NET Core runtime. A supported .NET Core runtime must be installed to run your application.</source>
-        <target state="translated">.NET Core 런타임 없이 애플리케이션을 프레임워크 종속 애플리케이션으로 게시합니다. 애플리케이션을 실행하려면 지원되는 .NET Core 런타임을 설치해야 합니다.</target>
+        <source>Publish your application as a framework dependent application without the .NET runtime. A supported .NET runtime must be installed to run your application.</source>
+        <target state="needs-review-translation">.NET Core 런타임 없이 애플리케이션을 프레임워크 종속 애플리케이션으로 게시합니다. 애플리케이션을 실행하려면 지원되는 .NET Core 런타임을 설치해야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -70,9 +70,9 @@ The default is to publish a framework-dependent application.</source>
         <note />
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
+        <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">런타임은 대상 컴퓨터에 설치할 필요가 없으므로 애플리케이션과 함께 .NET Core 런타임을 게시합니다.
+        <target state="needs-review-translation">런타임은 대상 컴퓨터에 설치할 필요가 없으므로 애플리케이션과 함께 .NET Core 런타임을 게시합니다.
 런타임 식별자가 지정된 경우 기본값은 'true'입니다.</target>
         <note />
       </trans-unit>

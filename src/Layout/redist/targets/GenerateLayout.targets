@@ -20,8 +20,9 @@
       <RoslynDirectory>$(OutputPath)/Roslyn</RoslynDirectory>
     </PropertyGroup>
     <ItemGroup>
-      <RoslynBits Include="$(NuGetPackageRoot)/microsoft.netcore.compilers/$(MicrosoftNETCoreCompilersPackageVersion)/tools/**/*" />
+      <RoslynBits Include="$(NuGetPackageRoot)/microsoft.net.compilers.toolset/$(MicrosoftNetCompilersToolsetPackageVersion)/tasks/netcoreapp3.1/**/*" />
     </ItemGroup>
+    <Error Condition="'@(RoslynBits)' == ''" Text="Something moved around in Roslyn package, adjust code here accordingly. TFM change?" />
     <Copy SourceFiles="@(RoslynBits)" DestinationFiles="@(RoslynBits->'$(RoslynDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
     <ItemGroup>
       <RoslynFrameworkAssemblies Include="$(RoslynDirectory)/System.*.dll;$(RoslynDirectory)/runtimes/**/System.*.dll" Exclude="$(RoslynDirectory)/runtimes/**/System.IO.Pipes.AccessControl.dll"/>

@@ -708,18 +708,18 @@ export PATH="$PATH:{0}"
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxNeedLogout">
-        <source>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</source>
-        <target state="translated">.NET Core SDK をインストールしたばかりなので、インストールしたツールを実行する前に、ログアウトするか、セッションを再起動する必要があります。</target>
+        <source>Since you just installed the .NET SDK, you will need to logout or restart your session before running the tool you installed.</source>
+        <target state="needs-review-translation">.NET Core SDK をインストールしたばかりなので、インストールしたツールを実行する前に、ログアウトするか、セッションを再起動する必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
-        <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
-        <target state="translated">.NET Core SDK をインストールしたばかりなので、インストールしたツールを実行する前に、端末を再び開く必要があります。</target>
+        <source>Since you just installed the .NET SDK, you will need to reopen terminal before running the tool you installed.</source>
+        <target state="needs-review-translation">.NET Core SDK をインストールしたばかりなので、インストールしたツールを実行する前に、端末を再び開く必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
-        <source>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
-        <target state="translated">.NET Core SDK をインストールしたばかりなので、インストールしたツールを実行する前に、コマンド プロンプト ウィンドウを再び開く必要があります。</target>
+        <source>Since you just installed the .NET SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
+        <target state="needs-review-translation">.NET Core SDK をインストールしたばかりなので、インストールしたツールを実行する前に、コマンド プロンプト ウィンドウを再び開く必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMissingCommandName">

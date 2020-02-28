@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NoSelfContainedOptionDescription">
-        <source>Publish your application as a framework dependent application without the .NET Core runtime. A supported .NET Core runtime must be installed to run your application.</source>
-        <target state="translated">Publique la aplicación como dependiente del marco de trabajo sin el runtime de .NET Core. Para ejecutar la aplicación, debe instalarse un runtime de .NET Core admitido.</target>
+        <source>Publish your application as a framework dependent application without the .NET runtime. A supported .NET runtime must be installed to run your application.</source>
+        <target state="needs-review-translation">Publique la aplicación como dependiente del marco de trabajo sin el runtime de .NET Core. Para ejecutar la aplicación, debe instalarse un runtime de .NET Core admitido.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -70,9 +70,9 @@ El valor predeterminado es publicar una aplicación dependiente del marco.</targ
         <note />
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
+        <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">Publique el tiempo de ejecución de .NET Core con la aplicación para que no sea necesario instalar el tiempo de ejecución en el equipo de destino.
+        <target state="needs-review-translation">Publique el tiempo de ejecución de .NET Core con la aplicación para que no sea necesario instalar el tiempo de ejecución en el equipo de destino.
 El valor predeterminado es "true" si se especifica un identificador de tiempo de ejecución.</target>
         <note />
       </trans-unit>

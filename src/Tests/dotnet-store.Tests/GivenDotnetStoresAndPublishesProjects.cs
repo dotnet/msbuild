@@ -106,7 +106,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should().Fail()
                 .And.HaveStdErrContaining($"Error:{Environment.NewLine}" +
                     $"  An assembly specified in the application dependencies manifest (NuGetConfigDependentProject.deps.json) was not found:{Environment.NewLine}" +
-                    $"    package: 'NuGet.Configuration', version: '4.3.0-preview3-4146'{Environment.NewLine}" +
+                    $"    package: 'NuGet.Configuration', version: '4.3.0'{Environment.NewLine}" +
                     "    path: 'lib/netstandard1.3/NuGet.Configuration.dll'");
         }
 

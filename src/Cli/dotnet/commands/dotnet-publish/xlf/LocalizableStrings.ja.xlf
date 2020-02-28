@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NoSelfContainedOptionDescription">
-        <source>Publish your application as a framework dependent application without the .NET Core runtime. A supported .NET Core runtime must be installed to run your application.</source>
-        <target state="translated">.NET Core ランタイムを使用せずに、アプリケーションをフレームワーク依存アプリケーションとして発行します。アプリケーションを実行するには、サポートされている .NET Core ランタイムをインストールする必要があります。</target>
+        <source>Publish your application as a framework dependent application without the .NET runtime. A supported .NET runtime must be installed to run your application.</source>
+        <target state="needs-review-translation">.NET Core ランタイムを使用せずに、アプリケーションをフレームワーク依存アプリケーションとして発行します。アプリケーションを実行するには、サポートされている .NET Core ランタイムをインストールする必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -70,9 +70,9 @@ The default is to publish a framework-dependent application.</source>
         <note />
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
+        <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">ランタイムをターゲット マシンにインストールする必要がないように、アプリケーションに .NET Core ランタイムを発行します。
+        <target state="needs-review-translation">ランタイムをターゲット マシンにインストールする必要がないように、アプリケーションに .NET Core ランタイムを発行します。
 ランタイム識別子が指定されている場合、既定値は 'true' です。</target>
         <note />
       </trans-unit>

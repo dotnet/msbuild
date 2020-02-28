@@ -12,8 +12,9 @@
 .IP
 .nf
 \f[C]
-dotnet build [<PROJECT>|<SOLUTION>] [-c|--configuration] [-f|--framework] [--force] [--interactive] [--no-dependencies]
-    [--no-incremental] [--nologo] [--no-restore] [-o|--output] [-r|--runtime] [-v|--verbosity] [--version-suffix]
+dotnet build [<PROJECT>|<SOLUTION>] [-c|--configuration] [-f|--framework] [--force]
+    [--interactive] [--no-dependencies] [--no-incremental] [--no-restore] [--nologo] 
+    [-o|--output] [-r|--runtime] [-v|--verbosity] [--version-suffix]
 
 dotnet build [-h|--help]
 \f[R]
@@ -21,20 +22,32 @@ dotnet build [-h|--help]
 .SH DESCRIPTION
 .PP
 The \f[C]dotnet build\f[R] command builds the project and its dependencies into a set of binaries.
-The binaries include the project\[cq]s code in Intermediate Language (IL) files with a \f[I].dll\f[R] extension and symbol files used for debugging with a \f[I].pdb\f[R] extension.
-A dependencies JSON file (\f[I]*.deps.json\f[R]) is produced that lists the dependencies of the application.
-A \f[I]*.runtimeconfig.json\f[R] file is produced, which specifies the shared runtime and its version for the application.
+The binaries include the project\[cq]s code in Intermediate Language (IL) files with a \f[I].dll\f[R] extension.
+Depending on the project type and settings, other files may be included, such as:
+.IP \[bu] 2
+An executable that can be used to run the application, if the project type is an executable targeting .NET Core 3.0 or later.
+.IP \[bu] 2
+Symbol files used for debugging with a \f[I].pdb\f[R] extension.
+.IP \[bu] 2
+A \f[I].deps.json\f[R] file, which lists the dependencies of the application or library.
+.IP \[bu] 2
+A \f[I].runtimeconfig.json\f[R] file, which specifies the shared runtime and its version for an application.
+.IP \[bu] 2
+Other libraries that the project depends on (via project references or NuGet package references).
 .PP
-If the project has third-party dependencies, such as libraries from NuGet, they\[cq]re resolved from the NuGet cache and aren\[cq]t available with the project\[cq]s built output.
+For executable projects targeting versions earlier than .NET Core 3.0, library dependencies from NuGet are typically NOT copied to the output folder.
+They\[cq]re resolved from the NuGet global packages folder at run time.
 With that in mind, the product of \f[C]dotnet build\f[R] isn\[cq]t ready to be transferred to another machine to run.
-This is in contrast to the behavior of the .NET Framework in which building an executable project (an application) produces output that\[cq]s runnable on any machine where the .NET Framework is installed.
-To have a similar experience with .NET Core, you need to use the dotnet publish command.
+To create a version of the application that can be deployed, you need to publish it (for example, with the dotnet publish command).
 For more information, see .NET Core Application Deployment.
+.PP
+For executable projects targeting .NET Core 3.0 and later, library dependencies are copied to the output folder.
+This means that if there isn\[cq]t any other publish-specific logic (such as Web projects have), the build output should be deployable.
 .PP
 Building requires the \f[I]project.assets.json\f[R] file, which lists the dependencies of your application.
 The file is created when \f[C]dotnet restore\f[R] is executed.
 Without the assets file in place, the tooling can\[cq]t resolve reference assemblies, which results in errors.
-With .NET Core 1.x SDK, you needed to explicitly run the \f[C]dotnet restore\f[R] before running \f[C]dotnet build\f[R].
+With .NET Core 1.x SDK, you needed to explicitly run \f[C]dotnet restore\f[R] before running \f[C]dotnet build\f[R].
 Starting with .NET Core 2.0 SDK, \f[C]dotnet restore\f[R] runs implicitly when you run \f[C]dotnet build\f[R].
 If you want to disable implicit restore when running the build command, you can pass the \f[C]--no-restore\f[R] option.
 .PP
@@ -50,8 +63,8 @@ The following example shows a project that produces executable code:
 \f[R]
 .fi
 .PP
-To produce a library, omit the \f[C]<OutputType>\f[R] property.
-The main difference in built output is that the IL DLL for a library doesn\[cq]t contain entry points and can\[cq]t be executed.
+To produce a library, omit the \f[C]<OutputType>\f[R] property or change its value to \f[C]Library\f[R].
+The IL DLL for a library doesn\[cq]t contain entry points and can\[cq]t be executed.
 .SS MSBuild
 .PP
 \f[C]dotnet build\f[R] uses MSBuild to build the project, so it supports both parallel and incremental builds.
@@ -61,7 +74,7 @@ In addition to its options, the \f[C]dotnet build\f[R] command accepts MSBuild o
 For more information about these options, see the MSBuild Command-Line Reference.
 Or you can also use the dotnet msbuild command.
 .PP
-Running \f[C]dotnet build\f[R] is equivalent to \f[C]dotnet msbuild -restore -target:Build\f[R].
+Running \f[C]dotnet build\f[R] is equivalent to running \f[C]dotnet msbuild -restore\f[R]; however, the default verbosity of the output is different.
 .SS Arguments
 .PP
 \f[C]PROJECT | SOLUTION\f[R]
@@ -74,7 +87,7 @@ If a project or solution file isn\[cq]t specified, MSBuild searches the current 
 .RS 2
 .PP
 Defines the build configuration.
-The default value is \f[C]Debug\f[R].
+The default for most projects is \f[C]Debug\f[R], but you can override the build configuration settings in your project.
 .RE
 .IP \[bu] 2
 \f[B]\f[CB]-f|--framework <FRAMEWORK>\f[B]\f[R]
@@ -119,13 +132,6 @@ Marks the build as unsafe for incremental build.
 This flag turns off incremental compilation and forces a clean rebuild of the project\[cq]s dependency graph.
 .RE
 .IP \[bu] 2
-\f[B]\f[CB]--no-logo\f[B]\f[R]
-.RS 2
-.PP
-Doesn\[cq]t display the startup banner or the copyright message.
-Available since .NET Core 3.0 SDK.
-.RE
-.IP \[bu] 2
 \f[B]\f[CB]--no-restore\f[B]\f[R]
 .RS 2
 .PP
@@ -133,12 +139,19 @@ Doesn\[cq]t execute an implicit restore during build.
 Available since .NET Core 2.0 SDK.
 .RE
 .IP \[bu] 2
+\f[B]\f[CB]--nologo\f[B]\f[R]
+.RS 2
+.PP
+Doesn\[cq]t display the startup banner or the copyright message.
+Available since .NET Core 3.0 SDK.
+.RE
+.IP \[bu] 2
 \f[B]\f[CB]-o|--output <OUTPUT_DIRECTORY>\f[B]\f[R]
 .RS 2
 .PP
 Directory in which to place the built binaries.
-You also need to define \f[C]--framework\f[R] when you specify this option.
 If not specified, the default path is \f[C]./bin/<configuration>/<framework>/\f[R].
+For projects with multiple target frameworks (via the \f[C]TargetFrameworks\f[R] property), you also need to define \f[C]--framework\f[R] when you specify this option.
 .RE
 .IP \[bu] 2
 \f[B]\f[CB]-r|--runtime <RUNTIME_IDENTIFIER>\f[B]\f[R]
@@ -205,7 +218,7 @@ dotnet build --source c:\[rs]packages\[rs]mypackages
 .fi
 .RE
 .IP \[bu] 2
-Build the project and set 1.2.3.4 version as a build parameter:
+Build the project and set version 1.2.3.4 as a build parameter using the \f[C]-p\f[R] MSBuild option:
 .RS 2
 .IP
 .nf

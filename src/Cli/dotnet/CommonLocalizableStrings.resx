@@ -550,7 +550,7 @@ export PATH="$PATH:{0}"
 </value>
   </data>
   <data name="EnvironmentPathLinuxNeedLogout" xml:space="preserve">
-    <value>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</value>
+    <value>Since you just installed the .NET SDK, you will need to logout or restart your session before running the tool you installed.</value>
   </data>
   <data name="EnvironmentPathOSXBashManualInstructions" xml:space="preserve">
     <value>Tools directory '{0}' is not currently on the PATH environment variable.
@@ -583,7 +583,7 @@ export PATH="$PATH:{0}"
 </value>
   </data>
   <data name="EnvironmentPathOSXNeedReopen" xml:space="preserve">
-    <value>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</value>
+    <value>Since you just installed the .NET SDK, you will need to reopen terminal before running the tool you installed.</value>
   </data>
   <data name="EnvironmentPathWindowsManualInstructions" xml:space="preserve">
     <value>Tools directory '{0}' is not currently on the PATH environment variable.
@@ -594,7 +594,7 @@ setx PATH "%PATH%;{0}"
 </value>
   </data>
   <data name="EnvironmentPathWindowsNeedReopen" xml:space="preserve">
-    <value>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</value>
+    <value>Since you just installed the .NET SDK, you will need to reopen the Command Prompt window before running the tool you installed.</value>
   </data>
   <data name="FailedToSetToolsPathEnvironmentVariable" xml:space="preserve">
     <value>Failed to add '{0}' to the PATH environment variable. Add this directory to your PATH to use tools installed with 'dotnet tool install'.</value>

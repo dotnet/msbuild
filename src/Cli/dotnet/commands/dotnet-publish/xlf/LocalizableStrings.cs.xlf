@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NoSelfContainedOptionDescription">
-        <source>Publish your application as a framework dependent application without the .NET Core runtime. A supported .NET Core runtime must be installed to run your application.</source>
-        <target state="translated">Publikujte svoji aplikaci jako aplikaci závislou na architektuře bez modulu runtime .NET Core. Aby bylo možné vaši aplikaci spustit, musí být nainstalovaný podporovaný modul runtime .NET Core.</target>
+        <source>Publish your application as a framework dependent application without the .NET runtime. A supported .NET runtime must be installed to run your application.</source>
+        <target state="needs-review-translation">Publikujte svoji aplikaci jako aplikaci závislou na architektuře bez modulu runtime .NET Core. Aby bylo možné vaši aplikaci spustit, musí být nainstalovaný podporovaný modul runtime .NET Core.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -70,9 +70,9 @@ Ve výchozím nastavení je publikována aplikace závislá na architektuře.</t
         <note />
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
+        <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">Publikujte se svou aplikací modul runtime pro .NET Core, aby ho nebylo nutné instalovat na cílovém počítači.
+        <target state="needs-review-translation">Publikujte se svou aplikací modul runtime pro .NET Core, aby ho nebylo nutné instalovat na cílovém počítači.
 Pokud není zadán identifikátor modul runtime, výchozí hodnota je true.</target>
         <note />
       </trans-unit>

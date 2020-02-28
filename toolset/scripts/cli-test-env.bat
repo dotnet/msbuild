@@ -10,7 +10,7 @@ for %%i in (%~dp0..\) DO (
 title CLI Test (%CLI_REPO_ROOT%)
 
 REM Add Stage 2 CLI to path
-set PATH=%CLI_REPO_ROOT%artifacts\tmp\Debug\dotnet;%PATH%
+set PATH=%CLI_REPO_ROOT%artifacts\bin\redist\Debug\dotnet;%PATH%
 
 set DOTNET_MULTILEVEL_LOOKUP=0
 set NUGET_PACKAGES=%CLI_REPO_ROOT%.nuget\packages
