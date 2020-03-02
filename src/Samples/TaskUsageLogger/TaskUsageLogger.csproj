@@ -5,9 +5,9 @@
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Framework" Version="14.3.0" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="14.3.0" />
-    <PackageReference Include="Microsoft.Build" Version="14.3.0" />
+    <PackageReference Include="Microsoft.Build.Framework" VersionOverride="14.3.0" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" VersionOverride="14.3.0" />
+    <PackageReference Include="Microsoft.Build" VersionOverride="14.3.0" />
   </ItemGroup>
   
 </Project>
