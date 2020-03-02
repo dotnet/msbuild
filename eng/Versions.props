@@ -18,7 +18,7 @@
     <MicrosoftExtensionsDependencyModelVersion>2.1.0-preview2-26306-03</MicrosoftExtensionsDependencyModelVersion>
     <MicrosoftApplicationInsightsPackageVersion>2.0.0</MicrosoftApplicationInsightsPackageVersion>
     <NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-26011-01</NETStandardLibraryNETFrameworkVersion>
-    <NuGetBuildTasksPackageVersion>5.5.0-rtm.6422</NuGetBuildTasksPackageVersion>
+    <NuGetBuildTasksPackageVersion>5.6.0-preview.1.6478</NuGetBuildTasksPackageVersion>
     <NuGetPackagingVersion>$(NuGetBuildTasksPackageVersion)</NuGetPackagingVersion>
     <NuGetProjectModelVersion>$(NuGetBuildTasksPackageVersion)</NuGetProjectModelVersion>
     <PlatformAbstractionsVersion>2.0.0</PlatformAbstractionsVersion>
