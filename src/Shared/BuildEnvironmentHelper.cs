@@ -329,7 +329,19 @@ namespace Microsoft.Build.Shared
 
         private static string GetMSBuildExeFromVsRoot(string visualStudioRoot)
         {
-            return FileUtilities.CombinePaths(visualStudioRoot, "MSBuild", CurrentToolsVersion, "Bin", "MSBuild.exe");
+            return FileUtilities.CombinePaths(
+                visualStudioRoot,
+                "MSBuild",
+                CurrentToolsVersion,
+                "Bin",
+#if NET35
+                IntPtr.Size == 8
+#else
+                System.Runtime.InteropServices.Marshal.SizeOf<IntPtr>() == 8
+#endif
+                  ? "amd64"
+                  : string.Empty,
+                "MSBuild.exe");
         }
 
         private static bool? _runningTests;
