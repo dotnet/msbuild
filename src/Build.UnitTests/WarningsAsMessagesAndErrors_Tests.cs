@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.Engine.UnitTests
@@ -11,6 +13,24 @@ namespace Microsoft.Build.Engine.UnitTests
     {
         private const string ExpectedEventMessage = "03767942CDB147B98D0ECDBDE1436DA3";
         private const string ExpectedEventCode = "0BF68998";
+
+        [Fact]
+        public void TaskNodesDieAfterBuild()
+        {
+            string introToPID = "PID to shut down is ";
+            string afterPID = "(EndPID)";
+            string inlineTaskProject = $@"<Project>
+    <UsingTask TaskName=""ProcessIdTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests"" />
+    <Target Name='AccessPID'>
+        <ProcessIdTask />
+    </Target>
+      </Project>";
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(inlineTaskProject);
+            int start = logger.FullLog.IndexOf(introToPID) + introToPID.Length;
+            int length = logger.FullLog.IndexOf(afterPID) - start;
+            string pid = logger.FullLog.Substring(start, length);
+            Should.Throw<ArgumentException>(() => Process.GetProcessById(Int32.Parse(pid)));
+        }
 
         [Fact]
         public void TreatAllWarningsAsErrors()

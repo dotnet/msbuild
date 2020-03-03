@@ -4,15 +4,11 @@
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Microsoft.Build.UnitTests;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using System.Diagnostics;
-using System;
-using Microsoft.Build.Shared.LanguageParser;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -43,40 +39,6 @@ namespace Microsoft.Build.UnitTests
         public void TestNonDesktopMSBuildShouldRunPortableTask()
         {
             RunMSBuildOnProjectWithPortableTaskAndAssertOutput(false);
-        }
-
-        [Fact]
-        public void TaskNodesDieAfterBuild()
-        {
-            string introToPID = "PID to shut down is ";
-            string afterPID = "(EndPID)";
-            string inlineTaskProject = $@"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion=""15.0"">
-  <UsingTask
-TaskName=""GetPID""
-TaskFactory=""CodeTaskFactory""
-AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
-<ParameterGroup>
-<id ParameterType=""System.Int32"" Output=""true"" />
-</ParameterGroup>
-                  <Task>
-<Using Namespace=""System.Diagnostics"" />
-                    <Code Type=""Fragment"" Language=""cs""><![CDATA[
-                id = Process.GetCurrentProcess().Id;
-                ]]></Code>
-    </Task>
-  </UsingTask>
-  <Target Name='AccessPID'>
-     <GetPID>
-<Output PropertyName=""PID"" TaskParameter=""id"" />
-</GetPID>
-<Message Text=""{introToPID}$(PID) {afterPID}"" Importance=""High"" />
-        </Target>
-      </Project>";
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(inlineTaskProject);
-            int start = logger.FullLog.IndexOf(introToPID) + introToPID.Length;
-            int length = logger.FullLog.IndexOf(afterPID) - start;
-            string pid = logger.FullLog.Substring(start, length);
-            Should.Throw<ArgumentException>(() => Process.GetProcessById(Int32.Parse(pid)));
         }
 
         private void RunMSBuildOnProjectWithPortableTaskAndAssertOutput(bool useDesktopMSBuild)
