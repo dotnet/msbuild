@@ -19,6 +19,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
 #endif
@@ -608,7 +609,7 @@ namespace Microsoft.Build.CommandLine
                     _taskCancelledEvent.Set();
                     break;
                 case NodePacketType.NodeBuildComplete:
-                    HandleNodeBuildComplete();
+                    HandleNodeBuildComplete(packet as NodeBuildComplete);
                     break;
             }
         }
@@ -693,11 +694,12 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Handles the NodeBuildComplete packet.
         /// </summary>
-        private void HandleNodeBuildComplete()
+        private void HandleNodeBuildComplete(NodeBuildComplete buildComplete)
         {
             ErrorUtilities.VerifyThrow(!_isTaskExecuting, "We should never have a task in the process of executing when we receive NodeBuildComplete.");
 
-            _shutdownReason = NodeEngineShutdownReason.BuildComplete;
+            // TaskHostNodes lock assemblies with custom tasks produced by build scripts if NodeReuse is on. This causes failures if the user builds twice.
+            _shutdownReason = buildComplete.PrepareForReuse && Traits.Instance.EscapeHatches.ReuseTaskHostNodes ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
             _shutdownEvent.Set();
         }
 

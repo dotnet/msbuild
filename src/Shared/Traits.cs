@@ -164,6 +164,11 @@ namespace Microsoft.Build.Utilities
         public readonly bool UseSymlinkTimeInsteadOfTargetTime = Environment.GetEnvironmentVariable("MSBUILDUSESYMLINKTIMESTAMP") == "1";
 
         /// <summary>
+        /// Allow node reuse on TaskHost nodes. This breaks if there are custom tasks.
+        /// </summary>
+        public readonly bool ReuseTaskHostNodes = Environment.GetEnvironmentVariable("REUSETASKHOSTNODES") == "1";
+
+        /// <summary>
         /// Whether or not to ignore imports that are considered empty.  See ProjectRootElement.IsEmptyXmlFile() for more info.
         /// </summary>
         public readonly bool IgnoreEmptyImports = Environment.GetEnvironmentVariable("MSBUILDIGNOREEMPTYIMPORTS") == "1";
