@@ -57,10 +57,7 @@
       <Uri>https://github.com/dotnet/aspnetcore-tooling</Uri>
       <Sha>965ce755d56a15cae3f281a8d1bfcfee01a6d140</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="5.0.0-preview.2.20128.2">
-      <Uri>https://github.com/dotnet/wpf</Uri>
-      <Sha>746e84ac3fa6ca76c05adedd46defb52e999a6e8</Sha>
-    </Dependency>
+
     <Dependency Name="NuGet.Build.Tasks" Version="5.6.0-preview.1.6478">
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
       <Sha>64f2febf7d1de8b0228eca5afed97a96c5a30bba</Sha>
@@ -92,6 +89,14 @@
     <Dependency Name="System.Resources.Extensions" Version="5.0.0-preview.2.20128.7">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>5b561b16e0c8000789af48438a9d1f144de32c3a</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.WindowsDesktop.App" Version="5.0.0-preview.1.20127.5">
+      <Uri>https://github.com/dotnet/windowsdesktop</Uri>
+      <Sha>3220fe28e26c10885932b29f653b573f7d845b31</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="5.0.0-preview.1.20127.4" CoherentParentDependency="Microsoft.WindowsDesktop.App">
+      <Uri>https://github.com/dotnet/wpf</Uri>
+      <Sha>efb8416d6de753c84030444d926bf2661346a2b7</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
