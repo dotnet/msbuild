@@ -180,23 +180,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Test the case where there are illegal chars in the sdktoolspath and Path.combine has a problem.
-        /// </summary>
-        [Fact]
-        public void VerifyErrorWithIllegalChars()
-        {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "No invalid path characters under Unix"
-            }
-
-            string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileDoesNotExist, ProcessorArchitecture.X86, "./?><;)(*&^%$#@!", _toolName, _log, true);
-            Assert.Null(toolPath);
-            _mockEngine.AssertLogContains("MSB3666");
-            Assert.Equal(1, _mockEngine.Errors);
-        }
-
-        /// <summary>
         /// Test the case where the processor architecture is x86 and the tool does not exist in the x86 sdk path (or anywhere for that matter)and we do not want to log
         /// </summary>
         [Fact]
