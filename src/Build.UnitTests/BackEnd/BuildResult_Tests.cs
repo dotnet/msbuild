@@ -10,8 +10,8 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
+using Shouldly;
 using Xunit;
-
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 namespace Microsoft.Build.UnitTests.BackEnd

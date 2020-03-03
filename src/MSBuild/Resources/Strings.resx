@@ -1249,6 +1249,21 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       logger could not be created -- this message comes from the CLR/FX and is localized.
     </comment>
   </data>
+  <data name="Process" UESanitized="true" Visibility="Public">
+    <value>Process = "{0}"</value>
+  </data>
+  <data name="MSBExePath" UESanitized="true" Visibility="Public">
+    <value>MSBuild executable path = "{0}"</value>
+  </data>
+  <data name="CommandLine" UESanitized="true" Visibility="Public">
+    <value>Command line arguments = "{0}"</value>
+  </data>
+  <data name="CurrentDirectory" UESanitized="true" Visibility="Public">
+    <value>Current directory = "{0}"</value>
+  </data>
+  <data name="MSBVersion" UESanitized="true" Visibility="Public">
+    <value>MSBuild version = "{0}"</value>
+  </data>
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 

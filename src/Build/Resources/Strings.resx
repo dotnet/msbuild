@@ -1063,6 +1063,10 @@
       LOCALIZATION: "{2}" is a localized message from a CLR/FX exception. Also, Microsoft.Build.Framework should not be localized
     </comment>
   </data>
+  <data name="TaskReturnedFalseButDidNotLogError">
+    <value>MSB4132: The "{0}" task returned false but did not log an error.</value>
+    <comment>{StrBegin="MSB4132: "}</comment>
+  </data>
   <data name="LoggerCreationError" UESanitized="true" Visibility="Public">
     <value>MSB1021: Cannot create an instance of the logger. {0}</value>
     <comment>{StrBegin="MSB1021: "}
@@ -1807,6 +1811,21 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="InvalidVersionFormat" xml:space="preserve">
     <value>Version string was not in a correct format.</value>
+  </data>
+  <data name="UninitializedPropertyRead" UESanitized="false" Visibility="Public">
+    <value>Read uninitialized property "{0}"</value>
+    <comment>
+    </comment>
+  </data>
+  <data name="EnvironmentVariableRead" UESanitized="false" Visibility="Public">
+    <value>Read environment variable "{0}"</value>
+    <comment>
+    </comment>
+  </data>
+  <data name="PropertyAssignment" UESanitized="false" Visibility="Public">
+    <value>Property initial value: $({0})="{1}" Source: {2}</value>
+    <comment>
+    </comment>
   </data>
   <!--
         The engine message bucket is: MSB4001 - MSB4999

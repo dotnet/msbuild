@@ -10,7 +10,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text.Json;
 using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
@@ -977,6 +976,11 @@ namespace Microsoft.Build.Execution
             { return _globalProperties; }
         }
 
+        PropertyDictionary<ProjectPropertyInstance> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.EnvironmentVariablePropertiesDictionary
+        {
+            get => _environmentVariableProperties;
+        }
+
         /// <summary>
         /// List of names of the properties that, while global, are still treated as overridable 
         /// </summary>
@@ -1414,7 +1418,7 @@ namespace Microsoft.Build.Execution
         /// immutable if we are immutable.
         /// Only called during evaluation, so does not check for immutability.
         /// </summary>
-        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved)
+        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable)
         {
             // Mutability not verified as this is being populated during evaluation
             ProjectPropertyInstance property = ProjectPropertyInstance.Create(name, evaluatedValueEscaped, mayBeReserved, _isImmutable);
@@ -1427,7 +1431,7 @@ namespace Microsoft.Build.Execution
         /// Predecessor is discarded as it is a design time only artefact.
         /// Only called during evaluation, so does not check for immutability.
         /// </summary>
-        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped, ProjectPropertyInstance predecessor)
+        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped)
         {
             // Mutability not verified as this is being populated during evaluation
             ProjectPropertyInstance property = ProjectPropertyInstance.Create(propertyElement.Name, evaluatedValueEscaped, false /* may not be reserved */, _isImmutable);
@@ -2138,29 +2142,9 @@ namespace Microsoft.Build.Execution
             // we should be generating a 4.0+ or a 3.5-style wrapper project based on the version of the solution. 
             else
             {
-                string solutionFile = projectFile;
-                if (FileUtilities.IsSolutionFilterFilename(projectFile))
-                {
-                    try
-                    {
-                        using JsonDocument text = JsonDocument.Parse(File.ReadAllText(projectFile));
-                        JsonElement solution = text.RootElement.GetProperty("solution");
-                        solutionFile = Path.GetFullPath(solution.GetProperty("path").GetString());
-                    }
-                    catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
-                    {
-                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
-                        (
-                            false, /* Just throw the exception */
-                            "SubCategoryForSolutionParsingErrors",
-                            new BuildEventFileInfo(projectFile),
-                            e,
-                            "SolutionFilterJsonParsingError",
-                            projectFile
-                        );
-                    }
-                }
-                SolutionFile.GetSolutionFileAndVisualStudioMajorVersions(solutionFile, out int solutionVersion, out int visualStudioVersion);
+                int solutionVersion;
+                int visualStudioVersion;
+                SolutionFile.GetSolutionFileAndVisualStudioMajorVersions(projectFile, out solutionVersion, out visualStudioVersion);
 
                 // If we get to this point, it's because it's a valid version.  Map the solution version 
                 // to the equivalent MSBuild ToolsVersion, and unless it's Dev10 or newer, spawn the old 
@@ -2188,7 +2172,7 @@ namespace Microsoft.Build.Execution
 
                     string toolsVersionToUse = Utilities.GenerateToolsVersionToUse(
                         explicitToolsVersion: null,
-                        toolsVersionFromProject: FileUtilities.IsSolutionFilterFilename(projectFile) ? MSBuildConstants.CurrentToolsVersion : toolsVersion,
+                        toolsVersionFromProject: toolsVersion,
                         getToolset: buildParameters.GetToolset,
                         defaultToolsVersion: Constants.defaultSolutionWrapperProjectToolsVersion,
                         usingDifferentToolsVersionFromProjectFile: out _);

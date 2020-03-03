@@ -75,6 +75,11 @@
         <target state="translated">MSB4257: 지정한 출력 결과 캐시 파일이 비어 있습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="EnvironmentVariableRead">
+        <source>Read environment variable "{0}"</source>
+        <target state="new">Read environment variable "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
         <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
         <target state="translated">MSB4256: "{0}" 경로에서 입력 결과 캐시 파일을 읽는 중 오류가 발생했습니다. {1}</target>
@@ -133,6 +138,11 @@
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
       </trans-unit>
+      <trans-unit id="PropertyAssignment">
+        <source>Property initial value: $({0})="{1}" Source: {2}</source>
+        <target state="new">Property initial value: $({0})="{1}" Source: {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: 프로젝트 "{0}"에서 참조된 프로젝트 "{1}"의 그래프 격리 제약 조건을 건너뛰었습니다.</target>
@@ -169,6 +179,11 @@
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
     </note>
       </trans-unit>
+      <trans-unit id="TaskReturnedFalseButDidNotLogError">
+        <source>MSB4132: The "{0}" task returned false but did not log an error.</source>
+        <target state="new">MSB4132: The "{0}" task returned false but did not log an error.</target>
+        <note>{StrBegin="MSB4132: "}</note>
+      </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
         <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
         <target state="translated">MSB4254: MSBuild 작업에서 ProjectReference 항목에 지정되지 않은 "{0}" 프로젝트를 빌드하고 있습니다. 격리된 빌드에서 참조가 "{1}"에서 ProjectReference 항목으로 명시적으로 지정되지 않은 상태일 수 있습니다.</target>
@@ -176,6 +191,11 @@
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
     </note>
+      </trans-unit>
+      <trans-unit id="UninitializedPropertyRead">
+        <source>Read uninitialized property "{0}"</source>
+        <target state="new">Read uninitialized property "{0}"</target>
+        <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">
         <source>Using input build results caches: {0}</source>

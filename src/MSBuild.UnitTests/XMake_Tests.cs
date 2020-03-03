@@ -735,10 +735,11 @@ namespace Microsoft.Build.UnitTests
             string projectString =
                    "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
                     "<Project ToolsVersion=\"4.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">" +
-                    "<Target Name=\"t\"><Message Text=\"Hello\"/></Target>" +
+                    "<Target Name=\"t\"><Message Text=\"[Hello]\"/></Target>" +
                     "</Project>";
             string tempdir = Path.GetTempPath();
             string projectFileName = Path.Combine(tempdir, "msbLoggertest.proj");
+            string logFile = Path.Combine(tempdir, "logFile");
             string quotedProjectFileName = "\"" + projectFileName + "\"";
 
             try
@@ -749,7 +750,7 @@ namespace Microsoft.Build.UnitTests
                 }
 #if FEATURE_GET_COMMANDLINE
                 //Should pass
-                MSBuildApp.Execute(@"c:\bin\msbuild.exe /logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" " + quotedProjectFileName).ShouldBe(MSBuildApp.ExitType.Success);
+                MSBuildApp.Execute(@$"c:\bin\msbuild.exe /logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"";""LogFile={logFile}"" /verbosity:detailed " + quotedProjectFileName).ShouldBe(MSBuildApp.ExitType.Success);
 
 #else
                 //Should pass
@@ -757,14 +758,26 @@ namespace Microsoft.Build.UnitTests
                     new[]
                         {
                             NativeMethodsShared.IsWindows ? @"c:\bin\msbuild.exe" : "/msbuild.exe",
-                            @"/logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a""",
+                            @$"/logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"";""LogFile={logFile}""",
+                            "/verbosity:detailed",
                             quotedProjectFileName
                         }).ShouldBe(MSBuildApp.ExitType.Success);
 #endif
+                File.Exists(logFile).ShouldBeTrue();
+
+                var logFileContents = File.ReadAllText(logFile);
+
+                logFileContents.ShouldContain("Process = ");
+                logFileContents.ShouldContain("MSBuild executable path = ");
+                logFileContents.ShouldContain("Command line arguments = ");
+                logFileContents.ShouldContain("Current directory = ");
+                logFileContents.ShouldContain("MSBuild version = ");
+                logFileContents.ShouldContain("[Hello]");
             }
             finally
             {
                 File.Delete(projectFileName);
+                File.Delete(logFile);
             }
         }
 

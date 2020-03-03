@@ -34,7 +34,6 @@
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
     <PackageReference Include="System.Memory" />
-    <PackageReference Include="System.Text.Json" />
 
     <PackageReference Include="System.Reflection.Metadata" Condition="'$(MonoBuild)' == 'true'" />
   </ItemGroup>
@@ -164,6 +163,7 @@
     <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectItemDefinitionLink.cs" />
     <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectItemLink.cs" />
     <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectLink.cs" />
+    <Compile Include="Evaluation\PropertyTrackingEvaluatorDataWrapper.cs" />
     <Compile Include="Graph\GraphBuilder.cs" />
     <Compile Include="Graph\ParallelWorkSet.cs" />
     <Compile Include="Graph\ProjectInterpretation.cs" />
