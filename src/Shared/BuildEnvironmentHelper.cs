@@ -334,13 +334,7 @@ namespace Microsoft.Build.Shared
                 "MSBuild",
                 CurrentToolsVersion,
                 "Bin",
-#if NET35
-                IntPtr.Size == 8
-#else
-                System.Runtime.InteropServices.Marshal.SizeOf<IntPtr>() == 8
-#endif
-                  ? "amd64"
-                  : string.Empty,
+                IntPtr.Size == 8 ? "amd64" : string.Empty,
                 "MSBuild.exe");
         }
 
