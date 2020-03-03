@@ -1066,7 +1066,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="ComputeFilesCopiedToPublishDir"
           DependsOnTargets="_CopyResolvedFilesToPublishPreserveNewest;
                             _CopyResolvedFilesToPublishAlways;
-                            BundlePublishDirectory">
+                            GenerateSingleFileBundle">
 
     <ItemGroup>
       <FilesCopiedToPublishDir Include="@(_ResolvedUnbundledFileToPublishPreserveNewest)"/>
