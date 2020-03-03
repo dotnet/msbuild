@@ -25,19 +25,25 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void TaskNodesDieAfterBuild()
         {
-            string introToPID = "PID to shut down is ";
-            string afterPID = "(EndPID)";
-            string inlineTaskProject = $@"<Project>
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                string introToPID = "PID to shut down is ";
+                string afterPID = "(EndPID)";
+                string pidTaskProject = $@"<Project>
     <UsingTask TaskName=""ProcessIdTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests"" />
     <Target Name='AccessPID'>
         <ProcessIdTask />
     </Target>
       </Project>";
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(inlineTaskProject);
-            int start = logger.FullLog.IndexOf(introToPID) + introToPID.Length;
-            int length = logger.FullLog.IndexOf(afterPID) - start;
-            string pid = logger.FullLog.Substring(start, length);
-            Should.Throw<ArgumentException>(() => Process.GetProcessById(Int32.Parse(pid)));
+                env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
+                TransientTestFile project = env.CreateFile("testProject.csproj", pidTaskProject);
+                MockLogger logger = new MockLogger();
+                ObjectModelHelpers.BuildTempProjectFileWithTargetsExpectSuccess(project.Path, null, null, logger);
+                int start = logger.FullLog.IndexOf(introToPID) + introToPID.Length;
+                int length = logger.FullLog.IndexOf(afterPID) - start;
+                string pid = logger.FullLog.Substring(start, length);
+                Should.Throw<ArgumentException>(() => Process.GetProcessById(Int32.Parse(pid)));
+            }
         }
 
         [Fact]
