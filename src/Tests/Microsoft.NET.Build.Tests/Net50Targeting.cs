@@ -24,7 +24,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testProject = new TestProject()
             {
-                Name = "Net5.0Test",
+                Name = "Net5Test",
                 TargetFrameworks = "net5.0",
                 IsSdkProject = true
             };
