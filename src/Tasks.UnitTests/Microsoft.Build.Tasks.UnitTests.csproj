@@ -90,7 +90,6 @@
     <Compile Remove="AssignProjectConfiguration_Tests.cs" />
     <Compile Remove="AxImp_Tests.cs" />
     <Compile Remove="AxTlbBaseTask_Tests.cs" />
-    <Compile Remove="CommandLine_Support.cs" />
     <Compile Remove="ComReferenceWalker_Tests.cs" />
     <Compile Remove="ComReference_Tests.cs" />
     <Compile Remove="CreateVisualBasicManifestResourceName_Tests.cs" />
