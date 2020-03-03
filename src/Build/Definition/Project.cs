@@ -30,7 +30,7 @@ using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
-using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemExpressionFragment<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
+using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>.ItemExpressionFragment;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 using System.Data.OleDb;
 
@@ -2501,13 +2501,13 @@ namespace Microsoft.Build.Evaluation
             {
                 var includeItemspec = new EvaluationItemSpec(itemElement.Include, _data.Expander, itemElement.IncludeLocation, itemElement.ContainingProject.DirectoryPath);
 
-                ImmutableArray<ItemFragment> includeGlobFragments = includeItemspec.Fragments.Where(f => f is GlobFragment).ToImmutableArray();
+                ImmutableArray<ItemSpecFragment> includeGlobFragments = includeItemspec.Fragments.Where(f => f is GlobFragment).ToImmutableArray();
                 if (includeGlobFragments.Length == 0)
                 {
                     return null;
                 }
 
-                ImmutableArray<string> includeGlobStrings = includeGlobFragments.Select(f => f.ItemSpecFragment).ToImmutableArray();
+                ImmutableArray<string> includeGlobStrings = includeGlobFragments.Select(f => f.TextFragment).ToImmutableArray();
                 var includeGlob = new CompositeGlob(includeGlobFragments.Select(f => f.ToMSBuildGlob()));
 
                 IEnumerable<string> excludeFragmentStrings = Enumerable.Empty<string>();
@@ -2751,7 +2751,7 @@ namespace Microsoft.Build.Evaluation
             {
                 provenance = Provenance.Undefined;
 
-                IEnumerable<ItemFragment> fragmentsMatchingItem = itemSpec.FragmentsMatchingItem(itemToMatch, out int occurrences);
+                IEnumerable<ItemSpecFragment> fragmentsMatchingItem = itemSpec.FragmentsMatchingItem(itemToMatch, out int occurrences);
                 foreach (var fragment in fragmentsMatchingItem)
                 {
                     if (fragment is ValueFragment)
