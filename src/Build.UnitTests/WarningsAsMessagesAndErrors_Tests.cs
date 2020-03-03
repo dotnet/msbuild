@@ -30,12 +30,11 @@ namespace Microsoft.Build.Engine.UnitTests
                 string introToPID = "PID to shut down is ";
                 string afterPID = "(EndPID)";
                 string pidTaskProject = $@"<Project>
-    <UsingTask TaskName=""ProcessIdTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests"" />
+    <UsingTask TaskName=""ProcessIdTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests"" TaskFactory=""TaskHostFactory"" />
     <Target Name='AccessPID'>
         <ProcessIdTask />
     </Target>
       </Project>";
-                env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
                 TransientTestFile project = env.CreateFile("testProject.csproj", pidTaskProject);
                 MockLogger logger = new MockLogger();
                 ObjectModelHelpers.BuildTempProjectFileWithTargetsExpectSuccess(project.Path, null, null, logger);
