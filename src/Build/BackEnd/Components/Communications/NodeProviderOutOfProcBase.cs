@@ -361,13 +361,8 @@ namespace Microsoft.Build.BackEnd
                 CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
                 return nodeStream;
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 // Can be:
                 // UnauthorizedAccessException -- Couldn't connect, might not be a node.
                 // IOException -- Couldn't connect, already in use.
@@ -833,13 +828,8 @@ namespace Microsoft.Build.BackEnd
                             CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} is still running.", _processId);
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
-                        if (ExceptionHandling.IsCriticalException(e))
-                        {
-                            throw;
-                        }
-
                         CommunicationsUtilities.Trace(_nodeId, "Unable to retrieve remote process information. {0}", e);
                     }
 
