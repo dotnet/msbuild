@@ -166,7 +166,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Allow node reuse on TaskHost nodes. This breaks if there are custom tasks.
         /// </summary>
-        public readonly bool ReuseTaskHostNodes = Environment.GetEnvironmentVariable("REUSETASKHOSTNODES") == "1";
+        public readonly bool ReuseTaskHostNodes = Environment.GetEnvironmentVariable("MSBUILDREUSETASKHOSTNODES") == "1";
 
         /// <summary>
         /// Whether or not to ignore imports that are considered empty.  See ProjectRootElement.IsEmptyXmlFile() for more info.

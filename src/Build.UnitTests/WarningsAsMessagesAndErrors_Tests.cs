@@ -23,6 +23,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/microsoft/msbuild/issues/5158")]
         public void TaskNodesDieAfterBuild()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -36,7 +37,7 @@ namespace Microsoft.Build.Engine.UnitTests
     </Target>
       </Project>";
                 TransientTestFile project = env.CreateFile("testProject.csproj", pidTaskProject);
-                MockLogger logger = new MockLogger();
+                MockLogger logger = new MockLogger(_output);
                 ObjectModelHelpers.BuildTempProjectFileWithTargetsExpectSuccess(project.Path, null, null, logger);
                 int start = logger.FullLog.IndexOf(introToPID) + introToPID.Length;
                 int length = logger.FullLog.IndexOf(afterPID) - start;
