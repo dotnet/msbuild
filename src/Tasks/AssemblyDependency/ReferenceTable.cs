@@ -2918,6 +2918,10 @@ namespace Microsoft.Build.Tasks
             item.RemoveMetadata(ItemMetadataNames.winmdImplmentationFile);
             item.RemoveMetadata(ItemMetadataNames.imageRuntime);
             item.RemoveMetadata(ItemMetadataNames.winMDFile);
+            if (!Traits.Instance.EscapeHatches.TargetPathForRelatedFiles)
+            {
+                item.RemoveMetadata(ItemMetadataNames.targetPath);
+            }
         }
 
         /// <summary>

@@ -79,6 +79,11 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly bool LogPropertyFunctionsRequiringReflection = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildLogPropertyFunctionsRequiringReflection"));
 
+        /// <summary>
+        /// Log property tracking information.
+        /// </summary>
+        public readonly int LogPropertyTracking = ParseIntFromEnvironmentVariableOrDefault("MsBuildLogPropertyTracking", 0); // Default to logging nothing via the property tracker.
+
         private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
         {
             return int.TryParse(Environment.GetEnvironmentVariable(environmentVariable), out int result)
@@ -89,6 +94,17 @@ namespace Microsoft.Build.Utilities
 
     internal class EscapeHatches
     {
+        /// <summary>
+        /// Do not log command line information to build loggers. Useful to unbreak people who parse the msbuild log and who are unwilling to change their code.
+        /// </summary>
+        public readonly bool DoNotSendDeferredMessagesToBuildManager = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildDoNotSendDeferredMessagesToBuildManager"));
+
+        /// <summary>
+        /// https://github.com/microsoft/msbuild/pull/4975 started expanding qualified metadata in Update operations. Before they'd expand to empty strings.
+        /// This escape hatch turns back the old empty string behavior.
+        /// </summary>
+        public readonly bool DoNotExpandQualifiedMetadataInUpdateOperation = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDoNotExpandQualifiedMetadataInUpdateOperation"));
+
         /// <summary>
         /// Force whether Project based evaluations should evaluate elements with false conditions.
         /// </summary>
@@ -195,6 +211,11 @@ namespace Microsoft.Build.Utilities
         /// Disable the NuGet-based SDK resolver.
         /// </summary>
         public readonly bool DisableNuGetSdkResolver = Environment.GetEnvironmentVariable("MSBUILDDISABLENUGETSDKRESOLVER") == "1";
+
+        /// <summary>
+        /// Don't delete TargetPath metadata from associated files found by RAR.
+        /// </summary>
+        public readonly bool TargetPathForRelatedFiles = Environment.GetEnvironmentVariable("MSBUILDTARGETPATHFORRELATEDFILES") == "1";
 
         /// <summary>
         /// Disable AssemblyLoadContext isolation for plugins.
