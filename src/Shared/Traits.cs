@@ -164,7 +164,7 @@ namespace Microsoft.Build.Utilities
         public readonly bool UseSymlinkTimeInsteadOfTargetTime = Environment.GetEnvironmentVariable("MSBUILDUSESYMLINKTIMESTAMP") == "1";
 
         /// <summary>
-        /// Allow node reuse on TaskHost nodes. This breaks if there are custom tasks.
+        /// Allow node reuse of TaskHost nodes. This results in task assemblies locked past the build lifetime, preventing them from being rebuilt if custom tasks change, but may improve performance.
         /// </summary>
         public readonly bool ReuseTaskHostNodes = Environment.GetEnvironmentVariable("MSBUILDREUSETASKHOSTNODES") == "1";
 
