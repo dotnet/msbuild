@@ -50,13 +50,17 @@ namespace Microsoft.DotNet.Configurer
 
             if (ShouldPrintFirstTimeUseNotice())
             {
-                PrintFirstTimeMessageWelcome();
-                if (ShouldPrintTelemetryMessageWhenFirstTimeUseNoticeIsEnabled())
+                if (!_dotnetFirstRunConfiguration.NoLogo)
                 {
-                    PrintTelemetryMessage();
+                    PrintFirstTimeMessageWelcome();
+                    if (ShouldPrintTelemetryMessageWhenFirstTimeUseNoticeIsEnabled())
+                    {
+                        PrintTelemetryMessage();
+                    }
+
+                    PrintFirstTimeMessageMoreInformation();
                 }
 
-                PrintFirstTimeMessageMoreInformation();
                 _firstTimeUseNoticeSentinel.CreateIfNotExists();
             }
 
