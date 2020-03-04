@@ -280,13 +280,8 @@ namespace Microsoft.Build.BackEnd
             {
                 _workQueue.Completion.Wait();
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 // If we caught an exception during cleanup, we need to log that
                 ErrorUtilities.ThrowInternalError("Failure during engine shutdown.  Exception: {0}", e.ToString());
             }
