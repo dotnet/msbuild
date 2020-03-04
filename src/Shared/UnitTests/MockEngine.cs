@@ -488,7 +488,7 @@ namespace Microsoft.Build.UnitTests
 
         int runningTotal = 0;
         Semaphore cpuCount;
-        public int RequestCores(ITask task, int requestedCores)
+        public int RequestCores(int requestedCores)
         {
             cpuCount ??= Semaphore.OpenExisting("cpuCount");
 
@@ -509,7 +509,7 @@ namespace Microsoft.Build.UnitTests
             return runningTotal - coresAcquiredBeforeMoreCoresGetAcquired;
         }
 
-        public void ReleaseCores(ITask task, int coresToRelease)
+        public void ReleaseCores(int coresToRelease)
         {
             cpuCount ??= Semaphore.OpenExisting("cpuCount");
 

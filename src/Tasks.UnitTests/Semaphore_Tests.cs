@@ -26,24 +26,24 @@ namespace Microsoft.Build.Tasks.UnitTests
             test.BuildEngine = mockEngine;
 
             // 40 - 80 = 0 cores left (claimed 40)
-            test.BuildEngine7.RequestCores(test, 12312).ShouldBe(40);
-            test.BuildEngine7.RequestCores(test, 10).ShouldBe(0);
+            test.BuildEngine7.RequestCores(12312).ShouldBe(40);
+            test.BuildEngine7.RequestCores(10).ShouldBe(0);
 
             // 0 + 39 = 39 cores left
-            test.BuildEngine7.ReleaseCores(test, 39);
+            test.BuildEngine7.ReleaseCores(39);
 
             // 39 - 100 = 0 cores left (claimed 39)
-            test.BuildEngine7.RequestCores(test, 100).ShouldBe(39);
+            test.BuildEngine7.RequestCores(100).ShouldBe(39);
 
             // 0 + 0 = 0 cores left
-            test.BuildEngine7.ReleaseCores(test, 0);
-            test.BuildEngine7.RequestCores(test, 2).ShouldBe(0);
+            test.BuildEngine7.ReleaseCores(0);
+            test.BuildEngine7.RequestCores(2).ShouldBe(0);
 
             //0 + 1 = 1 cores left
-            test.BuildEngine7.ReleaseCores(test, 1);
+            test.BuildEngine7.ReleaseCores(1);
 
             // 1 - 2 = 0 cores left (only claimed 1)
-            test.BuildEngine7.RequestCores(test, 2).ShouldBe(1);
+            test.BuildEngine7.RequestCores(2).ShouldBe(1);
         }
 
         [Fact]
@@ -57,14 +57,14 @@ namespace Microsoft.Build.Tasks.UnitTests
             test.BuildEngine = mockEngine;
 
             // should still be 40 cores
-            test.BuildEngine7.ReleaseCores(test, -100);
-            test.BuildEngine7.RequestCores(test, 41).ShouldBe(40);
+            test.BuildEngine7.ReleaseCores(-100);
+            test.BuildEngine7.RequestCores(41).ShouldBe(40);
 
             // should be 40 cores to take
-            test.BuildEngine7.ReleaseCores(test, 50);
-            test.BuildEngine7.RequestCores(test, 39).ShouldBe(39);
+            test.BuildEngine7.ReleaseCores(50);
+            test.BuildEngine7.RequestCores(39).ShouldBe(39);
 
-            test.BuildEngine7.RequestCores(test, 2).ShouldBe(1);
+            test.BuildEngine7.RequestCores(2).ShouldBe(1);
         }
     }
 }

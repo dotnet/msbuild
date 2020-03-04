@@ -669,7 +669,7 @@ namespace Microsoft.Build.BackEnd
         int runningTotal = 0;
         Semaphore cpuCount;
 
-        public int RequestCores(ITask task, int requestedCores)
+        public int RequestCores(int requestedCores)
         {
             int coresAcquiredBeforeMoreCoresGetAcquired = runningTotal;
 
@@ -691,7 +691,7 @@ namespace Microsoft.Build.BackEnd
             return runningTotal - coresAcquiredBeforeMoreCoresGetAcquired;
         }
 
-        public void ReleaseCores(ITask task, int coresToRelease)
+        public void ReleaseCores(int coresToRelease)
         {
             cpuCount ??= Semaphore.OpenExisting("cpuCount");
 
