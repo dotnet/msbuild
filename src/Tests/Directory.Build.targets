@@ -73,10 +73,6 @@
       <TestArgs>$(TestArgs) -testExecutionDirectory $(TestLocalToolExecutionFolder)</TestArgs>
     </PropertyGroup>
 
-    <!-- Run "dotnet new" (which will just display usage and available templates) in order to print first time
-         use message so that it doesn't interfere with tests which check the output of commands. -->
-    <Exec Command="$(ArtifactsBinDir)redist\$(Configuration)\dotnet\dotnet new" />
-
     <Exec Command="dotnet tool run $(ToolCommandName) -- $(TestArgs)"
           WorkingDirectory="$(TestLocalToolFolder)"
           EnvironmentVariables="DOTNET_CLI_HOME=$(DOTNET_CLI_HOME)"
