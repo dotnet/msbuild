@@ -40,7 +40,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private LoggingNodeConfiguration _loggingNodeConfiguration;
 
-#if FEATURE_APPDOMAIN
         /// <summary>
         /// Constructor
         /// </summary>
@@ -54,38 +53,20 @@ namespace Microsoft.Build.BackEnd
             int nodeId,
             BuildParameters buildParameters,
             LoggerDescription[] forwardingLoggers,
+#if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
-            LoggingNodeConfiguration loggingNodeConfiguration
-            )
-        {
-            _nodeId = nodeId;
-            _buildParameters = buildParameters;
-            _forwardingLoggers = forwardingLoggers;
-            _appDomainSetup = appDomainSetup;
-            _loggingNodeConfiguration = loggingNodeConfiguration;
-        }
-#else
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="nodeId">The node id.</param>
-        /// <param name="buildParameters">The build parameters</param>
-        /// <param name="forwardingLoggers">The forwarding loggers.</param>
-        /// <param name="loggingNodeConfiguration">The logging configuration for the node.</param>
-        public NodeConfiguration
-            (
-            int nodeId,
-            BuildParameters buildParameters,
-            LoggerDescription[] forwardingLoggers,
-            LoggingNodeConfiguration loggingNodeConfiguration
-            )
-        {
-            _nodeId = nodeId;
-            _buildParameters = buildParameters;
-            _forwardingLoggers = forwardingLoggers;
-            _loggingNodeConfiguration = loggingNodeConfiguration;
-        }
 #endif
+            LoggingNodeConfiguration loggingNodeConfiguration
+            )
+        {
+            _nodeId = nodeId;
+            _buildParameters = buildParameters;
+            _forwardingLoggers = forwardingLoggers;
+#if FEATURE_APPDOMAIN
+            _appDomainSetup = appDomainSetup;
+#endif
+            _loggingNodeConfiguration = loggingNodeConfiguration;
+        }
 
         /// <summary>
         /// Private constructor for deserialization
