@@ -3,7 +3,7 @@
 <Project>
 
   <PropertyGroup>
-    <Product>Toolset</Product>
+    <Product>Sdk</Product>
     <BlobStoragePartialRelativePath>$(Product)</BlobStoragePartialRelativePath>
     <BlobStoragePartialRelativePath Condition="'$(IsNotOrchestratedPublish)' == 'false'">assets/$(Product)</BlobStoragePartialRelativePath>
     <SdkAssetManifestFileName>$(OS)-$(PlatformName)-SdkAssets.xml</SdkAssetManifestFileName>
@@ -28,7 +28,7 @@
 
   <!-- We use a separate target to publish this to blob storage so that we can push this to
        a relative path inside the blob storage. -->
-  <Target Name="PublishToolsetAssets" DependsOnTargets="ReadToolsetVersion" BeforeTargets="Publish" Condition="$(PublishToAzure)">
+  <Target Name="PublishToolsetAssets" DependsOnTargets="ReadToolsetVersion" BeforeTargets="Publish" Condition="'$(PublishToAzure)' == 'true'">
     <ItemGroup>
       <ToolsetAssetsToPushToBlobFeed Include="@(ToolsetAssetsToPublish)" IsShipping="false" >
         <RelativeBlobPath>$(BlobStoragePartialRelativePath)/$(ToolsetVersionValue)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>

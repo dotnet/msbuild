@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="FirstTimeMessageWelcome" xml:space="preserve">
-    <value>Welcome to .NET Core {0}!
+    <value>Welcome to .NET {0}!
 ---------------------
 SDK Version: {1}</value>
   </data>
@@ -128,9 +128,9 @@ SDK Version: {1}</value>
   <data name="TelemetryMessage" xml:space="preserve">
     <value>Telemetry
 ---------
-The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+The .NET tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
 
-Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</value>
+Read more about .NET CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</value>
   </data>
   <data name="FirstTimeMessageMoreInformation" xml:space="preserve">
     <value>----------------

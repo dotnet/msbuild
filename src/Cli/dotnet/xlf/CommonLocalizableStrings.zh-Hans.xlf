@@ -708,18 +708,18 @@ EOF
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxNeedLogout">
-        <source>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</source>
-        <target state="translated">由于刚安装了 .NET Core SDK，因此在运行安装的工具之前，需要注销或重新启动会话。</target>
+        <source>Since you just installed the .NET SDK, you will need to logout or restart your session before running the tool you installed.</source>
+        <target state="needs-review-translation">由于刚安装了 .NET Core SDK，因此在运行安装的工具之前，需要注销或重新启动会话。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
-        <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
-        <target state="translated">由于刚安装了 .NET Core SDK，因此在运行安装的工具之前，需要重新打开终端。</target>
+        <source>Since you just installed the .NET SDK, you will need to reopen terminal before running the tool you installed.</source>
+        <target state="needs-review-translation">由于刚安装了 .NET Core SDK，因此在运行安装的工具之前，需要重新打开终端。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
-        <source>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
-        <target state="translated">由于刚安装了 .NET Core SDK，因此在运行安装的工具之前，需要重新打开命令提示符窗口。</target>
+        <source>Since you just installed the .NET SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
+        <target state="needs-review-translation">由于刚安装了 .NET Core SDK，因此在运行安装的工具之前，需要重新打开命令提示符窗口。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMissingCommandName">

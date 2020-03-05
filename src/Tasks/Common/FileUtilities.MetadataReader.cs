@@ -10,7 +10,7 @@
 
 //  We do use the MetadataReader version for the SDK tasks in order to correctly read the assembly
 //  versions of cross-gened assemblies.  See https://github.com/dotnet/sdk/issues/1502
-#if NETCOREAPP2_1 || !EXTENSIONS
+#if NETCOREAPP || !EXTENSIONS
 
 using System;
 using System.IO;

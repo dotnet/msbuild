@@ -4,6 +4,7 @@
 .hy
 .SH dotnet sln
 .PP
+\f[B]This article applies to: \[OK]\f[R] .NET Core 1.x SDK and later versions
 .SH NAME
 .PP
 \f[C]dotnet sln\f[R] - Modifies a .NET Core solution file.
@@ -11,12 +12,7 @@
 .IP
 .nf
 \f[C]
-dotnet sln [<SOLUTION_NAME>] add <PROJECT> <PROJECT> ...
-dotnet sln [<SOLUTION_NAME>] add <GLOBBING_PATTERN>
-dotnet sln [<SOLUTION_NAME>] remove <PROJECT> <PROJECT> ...
-dotnet sln [<SOLUTION_NAME>] remove <GLOBBING_PATTERN>
-dotnet sln [<SOLUTION_NAME>] list
-dotnet sln [-h|--help]
+dotnet sln [<SOLUTION_FILE>] [command] [-h|--help]
 \f[R]
 .fi
 .SH DESCRIPTION
@@ -31,65 +27,179 @@ If you need to create one, use the dotnet new command, like in the following exa
 dotnet new sln
 \f[R]
 .fi
-.SS Commands
-.PP
-\f[C]add <PROJECT> ...\f[R]
-.PP
-\f[C]add <GLOBBING_PATTERN>\f[R]
-.PP
-Adds a project or multiple projects to the solution file.
-Globbing patterns are supported on Unix/Linux based terminals.
-.PP
-\f[C]remove <PROJECT> ...\f[R]
-.PP
-\f[C]remove <GLOBBING_PATTERN>\f[R]
-.PP
-Removes a project or multiple projects from the solution file.
-Globbing patterns are supported on Unix/Linux based terminals.
-.PP
-\f[C]list\f[R]
-.PP
-Lists all projects in a solution file.
 .SS Arguments
+.IP \[bu] 2
+\f[B]\f[CB]SOLUTION_FILE\f[B]\f[R]
+.RS 2
 .PP
-\f[C]SOLUTION_NAME\f[R]
-.PP
-Solution file to use.
+The solution file to use.
 If not specified, the command searches the current directory for one.
 If there are multiple solution files in the directory, one must be specified.
+.RE
 .SH OPTIONS
-.PP
-\f[C]-h|--help\f[R]
+.IP \[bu] 2
+\f[B]\f[CB]-h|--help\f[B]\f[R]
+.RS 2
 .PP
 Prints out a short help for the command.
+.RE
+.SS Commands
+.SS \f[C]add\f[R]
+.PP
+Adds a project or multiple projects to the solution file.
+.SH SYNOPSIS
+.IP
+.nf
+\f[C]
+dotnet sln [<SOLUTION_FILE>] add [--in-root] [-s|--solution-folder] <PROJECT_PATH>
+dotnet sln add [-h|--help]
+\f[R]
+.fi
+.SS Arguments
+.IP \[bu] 2
+\f[B]\f[CB]SOLUTION_FILE\f[B]\f[R]
+.RS 2
+.PP
+The solution file to use.
+If not specified, the command searches the current directory for one.
+If there are multiple solution files in the directory, one must be specified.
+.RE
+.IP \[bu] 2
+\f[B]\f[CB]PROJECT_PATH\f[B]\f[R]
+.RS 2
+.PP
+The path to the project to add to the solution.
+Add multiple projects by adding one after the other separated by spaces.
+Unix/Linux shell globbing pattern expansions are processed correctly by the \f[C]dotnet sln\f[R] command.
+.RE
+.SH OPTIONS
+.IP \[bu] 2
+\f[B]\f[CB]-h|--help\f[B]\f[R]
+.RS 2
+.PP
+Prints out a short help for the command.
+.RE
+.IP \[bu] 2
+\f[B]\f[CB]--in-root\f[B]\f[R]
+.RS 2
+.PP
+Places the projects in the root of the solution, rather than creating a solution folder.
+Available since .NET Core 3.0 SDK.
+.RE
+.IP \[bu] 2
+\f[B]\f[CB]-s|--solution-folder\f[B]\f[R]
+.RS 2
+.PP
+The destination solution folder path to add the projects to.
+Available since .NET Core 3.0 SDK.
+.RE
+.SS \f[C]remove\f[R]
+.PP
+Removes a project or multiple projects from the solution file.
+.SH SYNOPSIS
+.IP
+.nf
+\f[C]
+dotnet sln [<SOLUTION_FILE>] remove <PROJECT_PATH>
+dotnet sln [<SOLUTION_FILE>] remove [-h|--help]
+\f[R]
+.fi
+.SS Arguments
+.IP \[bu] 2
+\f[B]\f[CB]SOLUTION_FILE\f[B]\f[R]
+.RS 2
+.PP
+The solution file to use.
+If not specified, the command searches the current directory for one.
+If there are multiple solution files in the directory, one must be specified.
+.RE
+.IP \[bu] 2
+\f[B]\f[CB]PROJECT_PATH\f[B]\f[R]
+.RS 2
+.PP
+The path to the project to remove from the solution.
+Remove multiple projects by adding one after the other separated by spaces.
+Unix/Linux shell globbing pattern expansions are processed correctly by the \f[C]dotnet sln\f[R] command.
+.RE
+.SH OPTIONS
+.IP \[bu] 2
+\f[B]\f[CB]-h|--help\f[B]\f[R]
+.RS 2
+.PP
+Prints out a short help for the command.
+.RE
+.SS \f[C]list\f[R]
+.PP
+Lists all projects in a solution file.
+.SH SYNOPSIS
+.IP
+.nf
+\f[C]
+dotnet sln list [-h|--help]
+\f[R]
+.fi
+.SS Arguments
+.IP \[bu] 2
+\f[B]\f[CB]SOLUTION_FILE\f[B]\f[R]
+.RS 2
+.PP
+The solution file to use.
+If not specified, the command searches the current directory for one.
+If there are multiple solution files in the directory, one must be specified.
+.RE
+.SH OPTIONS
+.IP \[bu] 2
+\f[B]\f[CB]-h|--help\f[B]\f[R]
+.RS 2
+.PP
+Prints out a short help for the command.
+.RE
 .SH EXAMPLES
 .PP
 Add a C# project to a solution:
-.PP
-\f[C]dotnet sln todo.sln add todo-app/todo-app.csproj\f[R]
+.IP
+.nf
+\f[C]
+dotnet sln todo.sln add todo-app/todo-app.csproj
+\f[R]
+.fi
 .PP
 Remove a C# project from a solution:
-.PP
-\f[C]dotnet sln todo.sln remove todo-app/todo-app.csproj\f[R]
+.IP
+.nf
+\f[C]
+dotnet sln todo.sln remove todo-app/todo-app.csproj
+\f[R]
+.fi
 .PP
 Add multiple C# projects to a solution:
-.PP
-\f[C]dotnet sln todo.sln add todo-app/todo-app.csproj back-end/back-end.csproj\f[R]
+.IP
+.nf
+\f[C]
+dotnet sln todo.sln add todo-app/todo-app.csproj back-end/back-end.csproj
+\f[R]
+.fi
 .PP
 Remove multiple C# projects from a solution:
+.IP
+.nf
+\f[C]
+dotnet sln todo.sln remove todo-app/todo-app.csproj back-end/back-end.csproj
+\f[R]
+.fi
 .PP
-\f[C]dotnet sln todo.sln remove todo-app/todo-app.csproj back-end/back-end.csproj\f[R]
+Add multiple C# projects to a solution using a globbing pattern (Unix/Linux only):
+.IP
+.nf
+\f[C]
+dotnet sln todo.sln add **/*.csproj
+\f[R]
+.fi
 .PP
-Add multiple C# projects to a solution using a globbing pattern:
-.PP
-\f[C]dotnet sln todo.sln add **/*.csproj\f[R]
-.PP
-Remove multiple C# projects from a solution using a globbing pattern:
-.PP
-\f[C]dotnet sln todo.sln remove **/*.csproj\f[R]
-.RS
-.PP
-[!NOTE] Globbing is not a CLI feature but rather a feature of the command shell.
-To successfully expand the files, you must use a shell that supports globbing.
-For more information about globbing, see Wikipedia.
-.RE
+Remove multiple C# projects from a solution using a globbing pattern (Unix/Linux only):
+.IP
+.nf
+\f[C]
+dotnet sln todo.sln remove **/*.csproj
+\f[R]
+.fi

@@ -708,18 +708,18 @@ export PATH="$PATH:{0}"
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxNeedLogout">
-        <source>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</source>
-        <target state="translated">Dal momento che è stato appena installato .NET Core SDK, è necessario disconnettersi o riavviare la sessione prima di eseguire lo strumento installato.</target>
+        <source>Since you just installed the .NET SDK, you will need to logout or restart your session before running the tool you installed.</source>
+        <target state="needs-review-translation">Dal momento che è stato appena installato .NET Core SDK, è necessario disconnettersi o riavviare la sessione prima di eseguire lo strumento installato.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
-        <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
-        <target state="translated">Dal momento che è stato appena installato .NET Core SDK, è necessario riaprire il terminale prima di eseguire lo strumento installato.</target>
+        <source>Since you just installed the .NET SDK, you will need to reopen terminal before running the tool you installed.</source>
+        <target state="needs-review-translation">Dal momento che è stato appena installato .NET Core SDK, è necessario riaprire il terminale prima di eseguire lo strumento installato.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
-        <source>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
-        <target state="translated">Dal momento che è stato appena installato .NET Core SDK, è necessario riaprire la finestra del prompt dei comandi prima di eseguire lo strumento installato.</target>
+        <source>Since you just installed the .NET SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
+        <target state="needs-review-translation">Dal momento che è stato appena installato .NET Core SDK, è necessario riaprire la finestra del prompt dei comandi prima di eseguire lo strumento installato.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMissingCommandName">

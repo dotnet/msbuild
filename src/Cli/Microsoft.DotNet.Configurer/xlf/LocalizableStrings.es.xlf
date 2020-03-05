@@ -30,10 +30,10 @@ Escriba su primera aplicación: https://aka.ms/first-net-core-app
         <note />
       </trans-unit>
       <trans-unit id="FirstTimeMessageWelcome">
-        <source>Welcome to .NET Core {0}!
+        <source>Welcome to .NET {0}!
 ---------------------
 SDK Version: {1}</source>
-        <target state="new">Welcome to .NET Core {0}!
+        <target state="new">Welcome to .NET {0}!
 ---------------------
 SDK Version: {1}</target>
         <note />
@@ -41,10 +41,10 @@ SDK Version: {1}</target>
       <trans-unit id="TelemetryMessage">
         <source>Telemetry
 ---------
-The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+The .NET tools collect usage data in order to help us improve your experience. The data is anonymous. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
 
-Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
-        <target state="translated">Telemetría
+Read more about .NET CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
+        <target state="needs-review-translation">Telemetría
 ---------
 Las herramientas de .NET Core recopilan datos de uso para ayudarnos a ejorar su experiencia. Estos datos son anónimos. Microsoft los recopila y comparte con la comunidad. Puede optar por no participar en la telemetría si establece la variable de entorno DOTNET_CLI_TELEMETRY_OPTOUT en "1" o "true" mediante su shell favorito.
 

@@ -13,7 +13,7 @@ done
 
 REPO_ROOT="$( cd -P "$( dirname "$SOURCE" )/../" && pwd )"
 
-STAGE2_DIR=$REPO_ROOT/artifacts/tmp/Debug/dotnet
+STAGE2_DIR=$REPO_ROOT/artifacts/bin/redist/Debug/dotnet
 export PATH=$STAGE2_DIR:$PATH
 
 export DOTNET_MULTILEVEL_LOOKUP=0
