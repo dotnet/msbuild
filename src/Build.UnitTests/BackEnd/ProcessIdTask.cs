@@ -13,7 +13,7 @@ namespace Microsoft.Build.UnitTests
     public class ProcessIdTask : Task
     {
         [Output]
-        public Int32 pid { get; set; }
+        public int Pid { get; set; }
 
         /// <summary>
         /// Log the id for this process.
@@ -21,7 +21,7 @@ namespace Microsoft.Build.UnitTests
         /// <returns></returns>
         public override bool Execute()
         {
-            pid = Process.GetCurrentProcess().Id;
+            Pid = Process.GetCurrentProcess().Id;
             return true;
         }
     }
