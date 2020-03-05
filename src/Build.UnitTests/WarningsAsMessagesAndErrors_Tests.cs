@@ -23,30 +23,6 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/microsoft/msbuild/issues/5158")]
-        public void TaskNodesDieAfterBuild()
-        {
-            using (TestEnvironment env = TestEnvironment.Create())
-            {
-                string introToPID = "PID to shut down is ";
-                string afterPID = "(EndPID)";
-                string pidTaskProject = $@"<Project>
-    <UsingTask TaskName=""ProcessIdTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests"" TaskFactory=""TaskHostFactory"" />
-    <Target Name='AccessPID'>
-        <ProcessIdTask />
-    </Target>
-      </Project>";
-                TransientTestFile project = env.CreateFile("testProject.csproj", pidTaskProject);
-                MockLogger logger = new MockLogger(_output);
-                ObjectModelHelpers.BuildTempProjectFileWithTargetsExpectSuccess(project.Path, null, null, logger);
-                int start = logger.FullLog.IndexOf(introToPID) + introToPID.Length;
-                int length = logger.FullLog.IndexOf(afterPID) - start;
-                string pid = logger.FullLog.Substring(start, length);
-                Should.Throw<ArgumentException>(() => Process.GetProcessById(Int32.Parse(pid)));
-            }
-        }
-
-        [Fact]
         public void TreatAllWarningsAsErrors()
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectFailure(GetTestProject(treatAllWarningsAsErrors: true));
