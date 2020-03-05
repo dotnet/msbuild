@@ -30,7 +30,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 ProjectInstance projectInstance = new ProjectInstance(project.Path);
                 projectInstance.Build().ShouldBeTrue();
                 string processId = projectInstance.GetPropertyValue("PID");
+                string.IsNullOrEmpty(processId).ShouldBeFalse();
                 Int32.TryParse(processId, out int pid).ShouldBeTrue();
+                Process.GetCurrentProcess().Id.ShouldNotBe<int>(pid);
                 Should.Throw<ArgumentException>(() => Process.GetProcessById(pid));
             }
         }
