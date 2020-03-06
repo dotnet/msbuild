@@ -1,5 +1,7 @@
 <Project>
   <Target Name="X">
     <SemaphoreCPUTask />
+    <Message Importance="High" Text="Middle" />
+    <SemaphoreCPUTask />
   </Target>
 </Project>

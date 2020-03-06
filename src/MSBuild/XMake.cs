@@ -1176,7 +1176,6 @@ namespace Microsoft.Build.CommandLine
 #if MSBUILDENABLEVSPROFILING
                     DataCollection.CommentMarkProfile(8800, "Pending Build Request from MSBuild.exe");
 #endif
-                   new Semaphore(cpuCount, cpuCount, "cpuCount");
 
                     BuildResultCode? result = null;
 

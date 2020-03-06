@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.Caching;
 using System.Reflection;
 using Microsoft.Build.Eventing;
+using Microsoft.Build.BackEnd.Components.ResourceManager;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -667,37 +668,32 @@ namespace Microsoft.Build.BackEnd
         #endregion
 
         int runningTotal = 0;
-        Semaphore cpuCount;
 
         public int RequestCores(int requestedCores)
         {
+            var rms = _host.GetComponent(BuildComponentType.TaskResourceManager) as ResourceManagerService;
+
             int coresAcquiredBeforeMoreCoresGetAcquired = runningTotal;
 
-            cpuCount ??= Semaphore.OpenExisting("cpuCount");
+            var coresAcquired = rms.RequestCores(requestedCores);
 
-            // Keep requesting cores until we can't anymore, or we've gotten the number of cores we wanted.
-            for (int i = 0; i < requestedCores; i++)
-            {
-                if(cpuCount.WaitOne(0))
-                {
-                    runningTotal++;
-                }
-                else
-                {
-                    break;
-                }
-            }
+            runningTotal += coresAcquired;
 
-            return runningTotal - coresAcquiredBeforeMoreCoresGetAcquired;
+            return coresAcquired;
         }
 
         public void ReleaseCores(int coresToRelease)
         {
-            cpuCount ??= Semaphore.OpenExisting("cpuCount");
+            var rms = _host.GetComponent(BuildComponentType.TaskResourceManager) as ResourceManagerService;
 
             coresToRelease = Math.Min(runningTotal, coresToRelease);
 
-            cpuCount.Release(coresToRelease);
+            if (coresToRelease >= 1)
+            {
+                runningTotal -= coresToRelease;
+
+                rms.ReleaseCores(coresToRelease);
+            }
         }
 
         /// <summary>
