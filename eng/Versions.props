@@ -22,7 +22,7 @@
   <PropertyGroup>
     <VersionPrefix>5.0.100</VersionPrefix>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
-    <PreReleaseVersionIteration>2</PreReleaseVersionIteration>
+    <PreReleaseVersionIteration>3</PreReleaseVersionIteration>
   </PropertyGroup>
   <PropertyGroup>
     <RestoreSources>
