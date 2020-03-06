@@ -9,6 +9,7 @@ using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Text;
 using Microsoft.Build.Framework;
+using Microsoft.NET.HostModel.ComHost;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -39,6 +40,14 @@ namespace Microsoft.NET.Build.Tasks
                             ClsidMap.Create(reader, ClsidMapDestinationPath);
                         }
                     }
+                }
+                catch (MissingGuidException missingGuid)
+                {
+                    Log.LogError(Strings.ClsidMapExportedTypesRequireExplicitGuid, missingGuid.TypeName);
+                }
+                catch (ConflictingGuidException conflictingGuid)
+                {
+                    Log.LogError(Strings.ClsidMapConflictingGuids, conflictingGuid.TypeName1, conflictingGuid.TypeName2, conflictingGuid.Guid.ToString());
                 }
                 catch (BadImageFormatException)
                 {

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Build.Framework;
+using Microsoft.NET.HostModel.ComHost;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -21,10 +22,17 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            ComHost.Create(
-                ComHostSourcePath,
-                ComHostDestinationPath,
-                ClsidMapPath);
+            try
+            {
+                ComHost.Create(
+                    ComHostSourcePath,
+                    ComHostDestinationPath,
+                    ClsidMapPath);
+            }
+            catch (ComHostCustomizationUnsupportedOSException)
+            {
+                Log.LogError(Strings.CannotEmbedClsidMapIntoComhost);
+            }
         }
     }
 }
