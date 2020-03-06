@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using ObjectModel = System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
@@ -172,6 +171,11 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private ProjectRootElement _lastModifiedProject;
 
+        /// <summary>
+        /// Keeps track of the FullPaths of ProjectRootElements that may have been modified as a stream.
+        /// </summary>
+        private List<string> _streamImports;
+
         private readonly bool _interactive;
 
         /// <summary>
@@ -190,11 +194,26 @@ namespace Microsoft.Build.Evaluation
             int submissionId,
             EvaluationContext evaluationContext,
             bool profileEvaluation,
-            bool interactive)
+            bool interactive,
+            ILoggingService loggingService,
+            BuildEventContext buildEventContext)
         {
             ErrorUtilities.VerifyThrowInternalNull(data, nameof(data));
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, nameof(projectRootElementCache));
+            ErrorUtilities.VerifyThrowInternalNull(loggingService, nameof(loggingService));
+            ErrorUtilities.VerifyThrowInternalNull(buildEventContext, nameof(buildEventContext));
 
+            _evaluationLoggingContext = new EvaluationLoggingContext(
+                loggingService,
+                buildEventContext,
+                string.IsNullOrEmpty(projectRootElement.ProjectFileLocation.File) ? "(null)" : projectRootElement.ProjectFileLocation.File);
+
+            // If someone sets the 'MsBuildLogPropertyTracking' environment variable to a non-zero value, wrap property accesses for event reporting.
+            if (Traits.Instance.LogPropertyTracking > 0)
+            {
+                // Wrap the IEvaluatorData<> object passed in.
+                data = new PropertyTrackingEvaluatorDataWrapper<P, I, M, D>(data, _evaluationLoggingContext, Traits.Instance.LogPropertyTracking);
+            }
             _evaluationContext = evaluationContext ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
 
             // Create containers for the evaluation results
@@ -231,6 +250,9 @@ namespace Microsoft.Build.Evaluation
             {
                 _lastModifiedProject = projectRootElement;
             }
+            _streamImports = new List<string>();
+            // When the imports are concatenated with a semicolon, this automatically prepends a semicolon if and only if another element is later added.
+            _streamImports.Add(string.Empty);
         }
 
         /// <summary>
@@ -269,27 +291,27 @@ namespace Microsoft.Build.Evaluation
             EvaluationContext evaluationContext = null,
             bool interactive = false)
         {
-            {
-                MSBuildEventSource.Log.EvaluateStart(root.ProjectFileLocation.File);
-                var profileEvaluation = (loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0 || loggingService.IncludeEvaluationProfile;
-                var evaluator = new Evaluator<P, I, M, D>(
-                    data,
-                    root,
-                    loadSettings,
-                    maxNodeCount,
-                    environmentProperties,
-                    itemFactory,
-                    toolsetProvider,
-                    projectRootElementCache,
-                    sdkResolverService,
-                    submissionId,
-                    evaluationContext,
-                    profileEvaluation,
-                    interactive);
+            MSBuildEventSource.Log.EvaluateStart(root.ProjectFileLocation.File);
+            var profileEvaluation = (loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0 || loggingService.IncludeEvaluationProfile;
+            var evaluator = new Evaluator<P, I, M, D>(
+                data,
+                root,
+                loadSettings,
+                maxNodeCount,
+                environmentProperties,
+                itemFactory,
+                toolsetProvider,
+                projectRootElementCache,
+                sdkResolverService,
+                submissionId,
+                evaluationContext,
+                profileEvaluation,
+                interactive,
+                loggingService,
+                buildEventContext);
 
-                evaluator.Evaluate(loggingService, buildEventContext);
-                MSBuildEventSource.Log.EvaluateStop(root.ProjectFileLocation.File);
-            }
+            evaluator.Evaluate();
+            MSBuildEventSource.Log.EvaluateStop(root.ProjectFileLocation.File);
         }
 
         /// <summary>
@@ -576,18 +598,16 @@ namespace Microsoft.Build.Evaluation
         /// Do the evaluation.
         /// Called by the static helper method.
         /// </summary>
-        private void Evaluate(ILoggingService loggingService, BuildEventContext buildEventContext)
+        private void Evaluate()
         {
-            string projectFile;
+            string projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
             using (_evaluationProfiler.TrackPass(EvaluationPass.TotalEvaluation))
             {
                 ErrorUtilities.VerifyThrow(_data.EvaluationId == BuildEventContext.InvalidEvaluationId, "There is no prior evaluation ID. The evaluator data needs to be reset at this point");
+                _data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
 
                 _logProjectImportedEvents = Traits.Instance.EscapeHatches.LogProjectImports;
 
-                ICollection<P> builtInProperties;
-                ICollection<P> environmentProperties;
-                ICollection<P> toolsetProperties;
                 ICollection<P> globalProperties;
 
                 using (_evaluationProfiler.TrackPass(EvaluationPass.InitialProperties))
@@ -595,9 +615,9 @@ namespace Microsoft.Build.Evaluation
                     // Pass0: load initial properties
                     // Follow the order of precedence so that Global properties overwrite Environment properties
                     MSBuildEventSource.Log.EvaluatePass0Start(_projectRootElement.ProjectFileLocation.File);
-                    builtInProperties = AddBuiltInProperties();
-                    environmentProperties = AddEnvironmentProperties();
-                    toolsetProperties = AddToolsetProperties();
+                    AddBuiltInProperties();
+                    AddEnvironmentProperties();
+                    AddToolsetProperties();
                     globalProperties = AddGlobalProperties();
 
                     if (_interactive)
@@ -605,11 +625,6 @@ namespace Microsoft.Build.Evaluation
                         SetBuiltInProperty(ReservedPropertyNames.interactive, "true");
                     }
                 }
-
-                projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
-
-                _evaluationLoggingContext = new EvaluationLoggingContext(loggingService, buildEventContext, projectFile);
-                _data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
 
                 _evaluationLoggingContext.LogProjectEvaluationStarted();
 
@@ -665,32 +680,29 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                if (lazyEvaluator != null)
+                using (_evaluationProfiler.TrackPass(EvaluationPass.LazyItems))
                 {
-                    using (_evaluationProfiler.TrackPass(EvaluationPass.LazyItems))
+                    // Tell the lazy evaluator to compute the items and add them to _data
+                    foreach (var itemData in lazyEvaluator.GetAllItemsDeferred())
                     {
-                        // Tell the lazy evaluator to compute the items and add them to _data
-                        foreach (var itemData in lazyEvaluator.GetAllItemsDeferred())
+                        if (itemData.ConditionResult)
                         {
-                            if (itemData.ConditionResult)
-                            {
-                                _data.AddItem(itemData.Item);
-
-                                if (_data.ShouldEvaluateForDesignTime)
-                                {
-                                    _data.AddToAllEvaluatedItemsList(itemData.Item);
-                                }
-                            }
+                            _data.AddItem(itemData.Item);
 
                             if (_data.ShouldEvaluateForDesignTime)
                             {
-                                _data.AddItemIgnoringCondition(itemData.Item);
+                                _data.AddToAllEvaluatedItemsList(itemData.Item);
                             }
                         }
 
-                        // lazy evaluator can be collected now, the rest of evaluation does not need it anymore
-                        lazyEvaluator = null;
+                        if (_data.ShouldEvaluateForDesignTime)
+                        {
+                            _data.AddItemIgnoringCondition(itemData.Item);
+                        }
                     }
+
+                    // lazy evaluator can be collected now, the rest of evaluation does not need it anymore
+                    lazyEvaluator = null;
                 }
 
                 MSBuildEventSource.Log.EvaluatePass3Stop(projectFile);
@@ -994,15 +1006,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void EvaluateItemGroupElement(ProjectItemGroupElement itemGroupElement, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
         {
-            bool itemGroupConditionResult;
-            if (lazyEvaluator != null)
-            {
-                itemGroupConditionResult = lazyEvaluator.EvaluateConditionWithCurrentState(itemGroupElement, ExpanderOptions.ExpandPropertiesAndItems, ParserOptions.AllowPropertiesAndItemLists);
-            }
-            else
-            {
-                itemGroupConditionResult = EvaluateCondition(itemGroupElement, ExpanderOptions.ExpandPropertiesAndItems, ParserOptions.AllowPropertiesAndItemLists);
-            }
+            bool itemGroupConditionResult = lazyEvaluator.EvaluateConditionWithCurrentState(itemGroupElement, ExpanderOptions.ExpandPropertiesAndItems, ParserOptions.AllowPropertiesAndItemLists);
 
             if (itemGroupConditionResult || (_data.ShouldEvaluateForDesignTime && _data.CanEvaluateElementsWithFalseConditions))
             {
@@ -1208,7 +1212,7 @@ namespace Microsoft.Build.Evaluation
 
             foreach (ProjectPropertyInstance environmentProperty in _environmentProperties)
             {
-                P property = _data.SetProperty(environmentProperty.Name, ((IProperty)environmentProperty).EvaluatedValueEscaped, false /* NOT global property */, false /* may NOT be a reserved name */);
+                P property = _data.SetProperty(environmentProperty.Name, ((IProperty)environmentProperty).EvaluatedValueEscaped, isGlobalProperty: false, mayBeReserved: false, isEnvironmentVariable: true);
                 environmentPropertiesList.Add(property);
             }
 
@@ -1345,13 +1349,19 @@ namespace Microsoft.Build.Evaluation
 
                 _expander.UsedUninitializedProperties.CurrentlyEvaluatingPropertyElementName = null;
 
-                P predecessor = _data.GetProperty(propertyElement.Name);
-
-                P property = _data.SetProperty(propertyElement, evaluatedValue, predecessor);
-
-                if (predecessor != null)
+                if (Traits.Instance.LogPropertyTracking == 0)
                 {
-                    LogPropertyReassignment(predecessor, property, propertyElement.Location.LocationString);
+                    P predecessor = _data.GetProperty(propertyElement.Name);
+                    P property = _data.SetProperty(propertyElement, evaluatedValue);
+
+                    if (predecessor != null)
+                    {
+                        LogPropertyReassignment(predecessor, property, propertyElement.Location.LocationString);
+                    }
+                }
+                else
+                {
+                    _data.SetProperty(propertyElement, evaluatedValue);
                 }
             }
         }
@@ -1359,7 +1369,7 @@ namespace Microsoft.Build.Evaluation
         private void LogPropertyReassignment(P predecessor, P property, string location)
         {
             string newValue = property.EvaluatedValue;
-            string oldValue = predecessor.EvaluatedValue;
+            string oldValue = predecessor?.EvaluatedValue;
 
             if (newValue != oldValue)
             {
@@ -1375,270 +1385,20 @@ namespace Microsoft.Build.Evaluation
 
         private void EvaluateItemElement(bool itemGroupConditionResult, ProjectItemElement itemElement, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
         {
-            bool itemConditionResult;
-            if (lazyEvaluator != null)
-            {
-                itemConditionResult = lazyEvaluator.EvaluateConditionWithCurrentState(itemElement, ExpanderOptions.ExpandPropertiesAndItems, ParserOptions.AllowPropertiesAndItemLists);
-            }
-            else
-            {
-                itemConditionResult = EvaluateCondition(itemElement, ExpanderOptions.ExpandPropertiesAndItems, ParserOptions.AllowPropertiesAndItemLists);
-            }
+            bool itemConditionResult = lazyEvaluator.EvaluateConditionWithCurrentState(itemElement, ExpanderOptions.ExpandPropertiesAndItems, ParserOptions.AllowPropertiesAndItemLists);
 
             if (!itemConditionResult && !(_data.ShouldEvaluateForDesignTime && _data.CanEvaluateElementsWithFalseConditions))
             {
                 return;
             }
 
-            if (lazyEvaluator != null)
-            {
-                var conditionResult = itemGroupConditionResult && itemConditionResult;
+            var conditionResult = itemGroupConditionResult && itemConditionResult;
 
-                lazyEvaluator.ProcessItemElement(_projectRootElement.DirectoryPath, itemElement, conditionResult);
+            lazyEvaluator.ProcessItemElement(_projectRootElement.DirectoryPath, itemElement, conditionResult);
 
-                if (conditionResult)
-                {
-                    RecordEvaluatedItemElement(itemElement);
-                }
-
-                return;
-            }
-
-            // legacy, dead code beyond this point. Runs only if the lazy evaluator is null. Also, the interpretation of Remove is not implemented
-            if (!string.IsNullOrEmpty(itemElement.Include))
-            {
-                EvaluateItemElementInclude(itemGroupConditionResult, itemConditionResult, itemElement);
-            }
-            else if (!string.IsNullOrEmpty(itemElement.Update))
-            {
-                EvaluateItemElementUpdate(itemElement);
-            }
-            else
-            {
-                ErrorUtilities.ThrowInternalError("Unexpected item operation");
-            }
-        }
-
-        private void EvaluateItemElementUpdate(ProjectItemElement itemElement)
-        {
-            RecordEvaluatedItemElement(itemElement);
-
-            var expandedItemSet =
-                new HashSet<string>(
-                    ExpressionShredder.SplitSemiColonSeparatedList
-                        (
-                            _expander.ExpandIntoStringLeaveEscaped(itemElement.Update, ExpanderOptions.ExpandPropertiesAndItems, itemElement.Location)
-                        )
-                        .SelectMany(i => _evaluationContext.EngineFileUtilities.GetFileListEscaped(_projectRootElement.DirectoryPath, i))
-                        .Select(EscapingUtilities.UnescapeAll));
-
-            var itemsToUpdate = _data.GetItems(itemElement.ItemType).Where(i => expandedItemSet.Contains(i.EvaluatedInclude)).ToList();
-
-            DecorateItemsWithMetadataFromProjectItemElement(itemElement, itemsToUpdate);
-        }
-
-        /// <summary>
-        /// Evaluate a single ProjectItemElement into zero or more items.
-        /// If specified, or if the condition on the item itself is false, only gathers the result into the list of items-ignoring-condition,
-        /// and not into the real list of items.
-        /// </summary>
-        private void EvaluateItemElementInclude(bool itemGroupConditionResult, bool itemConditionResult, ProjectItemElement itemElement)
-        {
-            // Paths in items are evaluated relative to the outer project file, rather than relative to any targets file they may be contained in
-            IList<I> items = CreateItemsFromInclude(_projectRootElement.DirectoryPath, itemElement, _itemFactory, itemElement.Include, _expander);
-
-            // STEP 4: Evaluate, split, expand and subtract any Exclude
-            if (itemElement.Exclude.Length > 0)
-            {
-                string evaluatedExclude = _expander.ExpandIntoStringLeaveEscaped(itemElement.Exclude, ExpanderOptions.ExpandPropertiesAndItems, itemElement.ExcludeLocation);
-
-                if (evaluatedExclude.Length > 0)
-                {
-                    var excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedExclude);
-
-                    HashSet<string> excludes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-                    foreach (string excludeSplit in excludeSplits)
-                    {
-                        string[] excludeSplitFiles = _evaluationContext.EngineFileUtilities.GetFileListEscaped(_projectRootElement.DirectoryPath, excludeSplit);
-
-                        foreach (string excludeSplitFile in excludeSplitFiles)
-                        {
-                            excludes.Add(EscapingUtilities.UnescapeAll(excludeSplitFile));
-                        }
-                    }
-
-                    List<I> remainingItems = new List<I>();
-
-                    for (int i = 0; i < items.Count; i++)
-                    {
-                        if (!excludes.Contains(items[i].EvaluatedInclude))
-                        {
-                            remainingItems.Add(items[i]);
-                        }
-                    }
-
-                    items = remainingItems;
-                }
-            }
-
-            // STEP 5: Evaluate each metadata XML and apply them to each item we have so far
-            DecorateItemsWithMetadataFromProjectItemElement(itemElement, items);
-
-            // FINALLY: Add the items to the project
-            if (itemConditionResult && itemGroupConditionResult)
+            if (conditionResult)
             {
                 RecordEvaluatedItemElement(itemElement);
-
-                foreach (I item in items)
-                {
-                    _data.AddItem(item);
-
-                    if (_data.ShouldEvaluateForDesignTime)
-                    {
-                        _data.AddToAllEvaluatedItemsList(item);
-                    }
-                }
-            }
-
-            if (_data.ShouldEvaluateForDesignTime)
-            {
-                foreach (I item in items)
-                {
-                    _data.AddItemIgnoringCondition(item);
-                }
-            }
-        }
-
-        private void DecorateItemsWithMetadataFromProjectItemElement(ProjectItemElement itemElement, IList<I> items)
-        {
-            if (itemElement.HasMetadata)
-            {
-                ////////////////////////////////////////////////////
-                // UNDONE: Implement batching here.
-                //
-                // We want to allow built-in metadata in metadata values here. 
-                // For example, so that an Idl file can specify that its Tlb output should be named %(Filename).tlb.
-                // 
-                // In other words, we want batching. However, we won't need to go to the trouble of using the regular batching code!
-                // That's because that code is all about grouping into buckets of similar items. In this context, we're not
-                // invoking a task, and it's fine to process each item individually, which will always give the correct results.
-                //
-                // For the CTP, to make the minimal change, we will not do this quite correctly.
-                //
-                // We will do this:
-                // -- check whether any metadata values or their conditions contain any bare built-in metadata expressions,
-                //    or whether they contain any custom metadata && the Include involved an @(itemlist) expression.
-                // -- if either case is found, we go ahead and evaluate all the metadata separately for each item.
-                // -- otherwise we can do the old thing (evaluating all metadata once then applying to all items)
-                // 
-                // This algorithm gives the correct results except when:
-                // -- batchable expressions exist on the include, exclude, or condition on the item element itself
-                //
-                // It means that 99% of cases still go through the old code, which is best for the CTP.
-                // When we ultimately implement this correctly, we should make sure we optimize for the case of very many items
-                // and little metadata, none of which varies between items.
-                List<string> values = new List<string>(itemElement.Count);
-
-                foreach (ProjectMetadataElement metadatumElement in itemElement.Metadata)
-                {
-                    values.Add(metadatumElement.Value);
-                    values.Add(metadatumElement.Condition);
-                }
-
-                ItemsAndMetadataPair itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(values);
-
-                bool needToProcessItemsIndividually = false;
-
-                if (itemsAndMetadataFound.Metadata != null && itemsAndMetadataFound.Metadata.Values.Count > 0)
-                {
-                    // If there is bare metadata of any kind, and the Include involved an item list, we should
-                    // run items individually, as even non-built-in metadata might differ between items
-                    List<string> include = new List<string>();
-                    include.Add(itemElement.Include);
-                    ItemsAndMetadataPair itemsAndMetadataFromInclude = ExpressionShredder.GetReferencedItemNamesAndMetadata(include);
-
-                    if (itemsAndMetadataFromInclude.Items != null && itemsAndMetadataFromInclude.Items.Count > 0)
-                    {
-                        needToProcessItemsIndividually = true;
-                    }
-                    else
-                    {
-                        // If there is bare built-in metadata, we must always run items individually, as that almost
-                        // always differs between items.
-
-                        // UNDONE: When batching is implemented for real, we need to make sure that
-                        // item definition metadata is included in all metadata operations during evaluation
-                        if (itemsAndMetadataFound.Metadata.Values.Count > 0)
-                        {
-                            needToProcessItemsIndividually = true;
-                        }
-                    }
-                }
-
-                if (needToProcessItemsIndividually)
-                {
-                    foreach (I item in items)
-                    {
-                        _expander.Metadata = item;
-
-                        foreach (ProjectMetadataElement metadatumElement in itemElement.Metadata)
-                        {
-                            if (!EvaluateCondition(metadatumElement, ExpanderOptions.ExpandAll, ParserOptions.AllowAll))
-                            {
-                                continue;
-                            }
-
-                            string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadatumElement.Value, ExpanderOptions.ExpandAll, metadatumElement.Location);
-
-                            item.SetMetadata(metadatumElement, evaluatedValue);
-                        }
-                    }
-
-                    // End of legal area for metadata expressions.
-                    _expander.Metadata = null;
-                }
-
-                // End of pseudo batching
-                ////////////////////////////////////////////////////
-                // Start of old code
-                else
-                {
-                    // Metadata expressions are allowed here.
-                    // Temporarily gather and expand these in a table so they can reference other metadata elements above.
-                    EvaluatorMetadataTable metadataTable = new EvaluatorMetadataTable(itemElement.ItemType);
-                    _expander.Metadata = metadataTable;
-
-                    // Also keep a list of everything so we can get the predecessor objects correct.
-                    List<Pair<ProjectMetadataElement, string>> metadataList = new List<Pair<ProjectMetadataElement, string>>();
-
-                    foreach (ProjectMetadataElement metadatumElement in itemElement.Metadata)
-                    {
-                        // Because of the checking above, it should be safe to expand metadata in conditions; the condition
-                        // will be true for either all the items or none
-                        if (!EvaluateCondition(metadatumElement, ExpanderOptions.ExpandAll, ParserOptions.AllowAll))
-                        {
-                            continue;
-                        }
-
-                        string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadatumElement.Value, ExpanderOptions.ExpandAll, metadatumElement.Location);
-
-                        metadataTable.SetValue(metadatumElement, evaluatedValue);
-                        metadataList.Add(new Pair<ProjectMetadataElement, string>(metadatumElement, evaluatedValue));
-                    }
-
-                    // Apply those metadata to each item
-                    // Note that several items could share the same metadata objects
-
-                    // Set all the items at once to make a potential copy-on-write optimization possible.
-                    // This is valuable in the case where one item element evaluates to
-                    // many items (either by semicolon or wildcards)
-                    // and that item also has the same piece/s of metadata for each item.
-                    _itemFactory.SetMetadata(metadataList, items);
-
-                    // End of legal area for metadata expressions.
-                    _expander.Metadata = null;
-                }
             }
         }
 
@@ -2080,7 +1840,6 @@ namespace Microsoft.Build.Evaluation
             bool atleastOneImportIgnored = false;
             bool atleastOneImportEmpty = false;
             imports = new List<ProjectRootElement>();
-
             foreach (string importExpressionEscapedItem in ExpressionShredder.SplitSemiColonSeparatedList(importExpressionEscaped))
             {
                 string[] importFilesEscaped = null;
@@ -2249,6 +2008,12 @@ namespace Microsoft.Build.Evaluation
                                 _lastModifiedProject = importedProjectElement;
                             }
 
+                            if (importedProjectElement.StreamTimeUtc?.ToLocalTime() > _lastModifiedProject.LastWriteTimeWhenRead)
+                            {
+                                _streamImports.Add(importedProjectElement.FullPath);
+                                importedProjectElement.StreamTimeUtc = null;
+                            }
+
                             if (_logProjectImportedEvents)
                             {
                                 ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
@@ -2374,7 +2139,7 @@ namespace Microsoft.Build.Evaluation
                     // can store the unescaped value. The only purpose of escaping is to 
                     // avoid undesired splitting or expansion.
                     _importsSeen.Add(importFileUnescaped, importElement);
-                } 
+                }
             }
 
             if (imports.Count > 0)
@@ -2628,19 +2393,14 @@ namespace Microsoft.Build.Evaluation
             if (_lastModifiedProject != null)
             {
                 P oldValue = _data.GetProperty(Constants.MSBuildAllProjectsPropertyName);
-
+                string streamImports = string.Join(";", _streamImports.ToArray());
                 P newValue = _data.SetProperty(
                     Constants.MSBuildAllProjectsPropertyName,
                     oldValue == null
-                        ? _lastModifiedProject.FullPath
-                        : $"{_lastModifiedProject.FullPath};{oldValue.EvaluatedValue}",
+                        ? $"{_lastModifiedProject.FullPath}{streamImports}"
+                        : $"{_lastModifiedProject.FullPath}{streamImports};{oldValue.EvaluatedValue}",
                     isGlobalProperty: false,
                     mayBeReserved: false);
-
-                if (oldValue != null)
-                {
-                    LogPropertyReassignment(oldValue, newValue, String.Empty);
-                }
             }
         }
     }

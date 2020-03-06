@@ -2559,9 +2559,9 @@
         <note>{StrBegin="MSB3492: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
-        <source>MSB3493: Skipping write to file "{0}" because content would not change.</source>
-        <target state="new">MSB3493: Skipping write to file "{0}" because content would not change.</target>
-        <note>{StrBegin="MSB3493: "}</note>
+        <source>Skipping write to file "{0}" because content would not change.</source>
+        <target state="new">Skipping write to file "{0}" because content would not change.</target>
+        <note />
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.InvalidTargetFrameworkMoniker">
         <source>MSB3642: The Target Framework Moniker "{0}" is invalid. "{1}"</source>
@@ -2587,6 +2587,11 @@
         <source>MSB3762: No references were passed to the task. References to at least mscorlib and Windows.Foundation are required.</source>
         <target state="new">MSB3762: No references were passed to the task. References to at least mscorlib and Windows.Foundation are required.</target>
         <note>{StrBegin="MSB3762: "}</note>
+      </trans-unit>
+      <trans-unit id="Xaml.DuplicatePropertyName">
+        <source>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</source>
+        <target state="new">MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</target>
+        <note>{StrBegin="MSB3724: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.TaskCreationFailed">
         <source>MSB3686: Unable to create Xaml task.  Compilation failed.  {0}</source>

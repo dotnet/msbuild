@@ -488,7 +488,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 </Project>";
 
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents);
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
             logger.AssertLogContains("[foo: ]");
         }
 
@@ -513,9 +513,41 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 </Project>";
 
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents);
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
             logger.AssertLogContains("[foo: ]");
         }
+
+        /// <summary>
+        /// Regression test for https://github.com/microsoft/msbuild/issues/5080
+        /// </summary>
+        [Fact]
+        public void SameAssemblyFromDifferentRelativePathsSharesAssemblyLoadContext()
+        {
+            string realTaskPath = Assembly.GetExecutingAssembly().Location;
+
+            string fileName = Path.GetFileName(realTaskPath);
+            string directoryName = Path.GetDirectoryName(realTaskPath);
+
+            using var env = TestEnvironment.Create();
+
+            string customTaskFolder = Path.Combine(directoryName, "buildCrossTargeting");
+            env.CreateFolder(customTaskFolder);
+
+            string projectContents = @"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+  <UsingTask TaskName=`RegisterObject` AssemblyFile=`" + Path.Combine(customTaskFolder, "..", fileName) + @"` />
+  <UsingTask TaskName=`RetrieveObject` AssemblyFile=`" + realTaskPath + @"` />
+
+  <Target Name=`Build`>
+    <RegisterObject />
+    <RetrieveObject />
+  </Target>
+</Project>";
+
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
+
+            logger.AssertLogDoesntContain("MSB4018");
+        }
+
 
 #if FEATURE_CODETASKFACTORY
         /// <summary>
@@ -554,7 +586,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       </Target>
                     </Project>";
 
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents);
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
             logger.AssertLogContains("[foo: ]");
         }
 
@@ -595,7 +627,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       </Target>
                     </Project>";
 
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents);
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
             logger.AssertLogContains("[foo: ]");
         }
 #endif

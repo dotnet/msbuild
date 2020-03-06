@@ -20,6 +20,10 @@
         ProjectEvaluationFinished,
         ProjectImported,
         ProjectImportArchive,
-        TargetSkipped
+        TargetSkipped,
+        PropertyReassignment,
+        UninitializedPropertyRead,
+        EnvironmentVariableRead,
+        PropertyInitialValueSet,
     }
 }

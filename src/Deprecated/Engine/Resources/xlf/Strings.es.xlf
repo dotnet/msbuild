@@ -2293,7 +2293,7 @@
       </trans-unit>
       <trans-unit id="DeferredMessagesAvailiable">
         <source>Some messages did not display because they were not associated with any ProjectStarted events. Use diagnostic verbosity to view these messages.</source>
-        <target state="translated">Algunos mensajes no se mostraron porque no estaban asociados a ningún evento ProjectStarted. Utilice el detalle de diagnóstico para ver estos mensajes.</target>
+        <target state="translated">Algunos mensajes no se mostraron porque no estaban asociados a ningún evento ProjectStarted. Utilice el nivel de detalle de diagnóstico para ver estos mensajes.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Einige Meldungen wurden nicht angezeigt, weil sie keinem ProjectStarted-Ereignis zugeordnet sind. Verwenden Sie den Ausführlichkeitsgrad "diagnostic", um diese Meldungen anzuzeigen.</target>

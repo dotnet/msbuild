@@ -14,6 +14,7 @@
     <file src="$repoRoot$/src/Package/MsBuild.Engine.Corext/README.md" target=""/>
     <file src="$repoRoot$/THIRDPARTYNOTICES.txt" target="v15.0/bin/THIRDPARTYNOTICES.txt" />
     <file src="$X86BinPath$/Microsoft.Common.props" target="\Extensions\15.0" />
+    <file src="$X86BinPath$/Microsoft.Common.props" target="\Extensions\Current" />
     <file src="$X86BinPath$/Microsoft.VisualStudioVersion.v15.Common.props" target="\Extensions\15.0" />
 
     <!-- x86 -->
@@ -34,10 +35,12 @@
     <file src="$X86BinPath$/System.Runtime.CompilerServices.Unsafe.dll" target="v15.0/bin" />
     <file src="$X86BinPath$/System.Threading.Tasks.Dataflow.dll" target="v15.0/bin" />
 
-    <file src="$X86BinPath$/Microsoft.Build.Core.xsd" target="v15.0/bin/MSBuild" />
-    <file src="$X86BinPath$/Microsoft.Build.CommonTypes.xsd" target="v15.0/bin/MSBuild" />
+    <file src="$X86BinPath$/MSBuild/Microsoft.Build.Core.xsd" target="v15.0/bin/MSBuild" />
+    <file src="$X86BinPath$/MSBuild/Microsoft.Build.CommonTypes.xsd" target="v15.0/bin/MSBuild" />
     <file src="$X86BinPath$/MSBuild.rsp" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.Managed.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.Managed.Before.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.Managed.After.targets" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.CSharp.targets" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.VisualBasic.targets" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.Common.CrossTargeting.targets" target="v15.0/bin" />
@@ -56,6 +59,7 @@
     <file src="$X86BinPath$/Microsoft.Xaml.targets" target="v15.0/bin" />
     <file src="$X86BinPath$/Workflow.targets" target="v15.0/bin" />
     <file src="$X86BinPath$/Workflow.VisualBasic.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.Net.props" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.NetFramework.CurrentVersion.props" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.NetFramework.CurrentVersion.targets" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.NetFramework.props" target="v15.0/bin" />
@@ -79,10 +83,12 @@
     <file src="$X86BinPath$/System.Runtime.CompilerServices.Unsafe.dll" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/System.Threading.Tasks.Dataflow.dll" target="v15.0/bin/amd64" />
 
-    <file src="$X86BinPath$/Microsoft.Build.Core.xsd" target="v15.0/bin/amd64/MSBuild" />
-    <file src="$X86BinPath$/Microsoft.Build.CommonTypes.xsd" target="v15.0/bin/amd64/MSBuild" />
+    <file src="$X86BinPath$/MSBuild/Microsoft.Build.Core.xsd" target="v15.0/bin/amd64/MSBuild" />
+    <file src="$X86BinPath$/MSBuild/Microsoft.Build.CommonTypes.xsd" target="v15.0/bin/amd64/MSBuild" />
     <file src="$X86BinPath$/MSBuild.rsp" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.Managed.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.Managed.Before.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.Managed.After.targets" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.CSharp.targets" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.VisualBasic.targets" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.Common.CrossTargeting.targets" target="v15.0/bin/amd64" />
@@ -101,6 +107,7 @@
     <file src="$X86BinPath$/Microsoft.Xaml.targets" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Workflow.targets" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Workflow.VisualBasic.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.Net.props" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.NetFramework.CurrentVersion.props" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.NetFramework.CurrentVersion.targets" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.NetFramework.props" target="v15.0/bin/amd64" />

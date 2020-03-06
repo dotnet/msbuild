@@ -900,7 +900,7 @@ namespace Microsoft.Build.Evaluation
                     InitializeProperties(loggingServices, buildEventContext);
 
                     string[] defaultTasksFiles = GetTaskFiles(_getFiles, loggingServices, buildEventContext, DefaultTasksFilePattern, ToolsPath, "DefaultTasksFileLoadFailureWarning");
-                    LoadAndRegisterFromTasksFile(ToolsPath, defaultTasksFiles, loggingServices, buildEventContext, DefaultTasksFilePattern, "DefaultTasksFileFailure", projectRootElementCache, _defaultTaskRegistry);
+                    LoadAndRegisterFromTasksFile(defaultTasksFiles, loggingServices, buildEventContext, "DefaultTasksFileFailure", projectRootElementCache, _defaultTaskRegistry);
                 }
                 finally
                 {
@@ -1031,7 +1031,7 @@ namespace Microsoft.Build.Evaluation
                         string[] overrideTasksFiles = GetTaskFiles(_getFiles, loggingServices, buildEventContext, OverrideTasksFilePattern, _overrideTasksPath, "OverrideTasksFileLoadFailureWarning");
 
                         // Load and register any override tasks
-                        LoadAndRegisterFromTasksFile(_overrideTasksPath, overrideTasksFiles, loggingServices, buildEventContext, OverrideTasksFilePattern, "OverrideTasksFileFailure", projectRootElementCache, _overrideTaskRegistry);
+                        LoadAndRegisterFromTasksFile(overrideTasksFiles, loggingServices, buildEventContext, "OverrideTasksFileFailure", projectRootElementCache, _overrideTaskRegistry);
                     }
                 }
                 finally
@@ -1044,7 +1044,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Do the actual loading of the tasks or override tasks file and register the tasks in the task registry
         /// </summary>
-        private void LoadAndRegisterFromTasksFile(string searchPath, string[] defaultTaskFiles, ILoggingService loggingServices, BuildEventContext buildEventContext, string defaultTasksFilePattern, string taskFileError, ProjectRootElementCacheBase projectRootElementCache, TaskRegistry registry)
+        private void LoadAndRegisterFromTasksFile(string[] defaultTaskFiles, ILoggingService loggingServices, BuildEventContext buildEventContext, string taskFileError, ProjectRootElementCacheBase projectRootElementCache, TaskRegistry registry)
         {
             foreach (string defaultTasksFile in defaultTaskFiles)
             {

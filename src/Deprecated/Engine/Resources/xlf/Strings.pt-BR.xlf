@@ -1143,7 +1143,7 @@
       </trans-unit>
       <trans-unit id="InvalidVerbosity">
         <source>MSB4103: "{0}" is not a valid logger verbosity level.</source>
-        <target state="translated">MSB4103: "{0}" não é um nível de verbosidade de agente de log válido.</target>
+        <target state="translated">MSB4103: "{0}" não é um nível de detalhamento de agente de log válido.</target>
         <note>{StrBegin="MSB4103: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4103: "{0}" ist kein gültiger Ausführlichkeitsgrad für die Protokollierung.</target>

@@ -560,7 +560,6 @@ namespace Microsoft.Build.UnitTests
 
                 if (expectedMessageType.Equals("message"))
                 {
-                    
                     console.ToString().ShouldMatch($@"<{expectedColor}><cyan>\d\d:\d\d:\d\d\.\d\d\d\s+\d+><reset color>{Regex.Escape(file)}\({lineNumber}\): {subcategory} {expectedMessageType} {code}: {message} \(TaskId:\d+\){Environment.NewLine}<reset color>");
                 }
                 else
@@ -575,7 +574,7 @@ namespace Microsoft.Build.UnitTests
                 console.ToString().ShouldMatch($@"<{expectedColor}>{Regex.Escape(file)}\({lineNumber}\): {subcategory} {expectedMessageType} {code}: {message}{Environment.NewLine}<reset color>");
             }
         }
-        
+
 
         [Fact]
         public void TestQuietWithHighMessage()
@@ -1176,13 +1175,13 @@ namespace Microsoft.Build.UnitTests
             sc.ToString().ShouldBe("<cyan>" + BaseConsoleLogger.projectSeparatorLine + Environment.NewLine +
                                    ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", "fname1") + Environment.NewLine +
                                    Environment.NewLine + "<reset color>");
-            
+
             sc.Clear();
 
             es.Consume(new TargetStartedEventArgs("ts", null,
                                                      "tarname", "fname", "tfile"));
             sc.ToString().ShouldBeEmpty();
-            
+
             sc.Clear();
 
             es.Consume(new TaskStartedEventArgs("", "", "", "", "Exec"));
@@ -1194,7 +1193,7 @@ namespace Microsoft.Build.UnitTests
                                           + Environment.NewLine +
                 "    " + ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedPrefixForNestedProjectWithDefaultTargets", "fname1", "fname2") + Environment.NewLine +
                 Environment.NewLine + "<reset color>");
-            
+
             sc.Clear();
 
             es.Consume(new ProjectFinishedEventArgs("pf2", null, "fname2", true));
@@ -2336,4 +2335,3 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
-

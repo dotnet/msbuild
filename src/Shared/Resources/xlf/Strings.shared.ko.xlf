@@ -52,7 +52,7 @@
       </trans-unit>
       <trans-unit id="InvalidVerbosity">
         <source>MSB4103: "{0}" is not a valid logger verbosity level.</source>
-        <target state="translated">MSB4103: "{0}"은(는) 로거의 자세한 정도로 알맞지 않습니다.</target>
+        <target state="translated">MSB4103: "{0}"은(는) 로거의 세부 정보 표시로 알맞지 않습니다.</target>
         <note>{StrBegin="MSB4103: "}</note>
       </trans-unit>
       <trans-unit id="MissingProject">

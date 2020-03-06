@@ -1027,7 +1027,7 @@ namespace Microsoft.Build.Tasks
                 HelpKeywordPrefix = "MSBuild."
             };
             
-            log.LogErrorFromResources("TaskFactoryNotSupportedFailure", nameof(CodeTaskFactory));
+            log.LogErrorWithCodeFromResources("TaskFactoryNotSupportedFailure", nameof(CodeTaskFactory));
 
             return false;
         }

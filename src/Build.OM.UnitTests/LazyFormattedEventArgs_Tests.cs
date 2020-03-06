@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests.Framework
      <Task>
        <Code Type=`Fragment` Language=`cs`>
          this.Log.LogError(`Correct: {0}`, `[goodone]`);
-         this.Log.LogError(`This is a message logged from a task {1} blah blah [crashing].`, `[crasher]`); 
+         this.Log.LogError(`This is a message logged from a task {1} blah blah [crashing].`, `[crasher]`);
 
             try
             {

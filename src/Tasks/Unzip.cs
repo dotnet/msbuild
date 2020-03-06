@@ -65,7 +65,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e)
             {
-                Log.LogErrorFromResources("Unzip.ErrorCouldNotCreateDestinationDirectory", DestinationFolder.ItemSpec, e.Message);
+                Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotCreateDestinationDirectory", DestinationFolder.ItemSpec, e.Message);
 
                 return false;
             }
@@ -78,7 +78,7 @@ namespace Microsoft.Build.Tasks
                 {
                     if (!FileSystems.Default.FileExists(sourceFile.ItemSpec))
                     {
-                        Log.LogErrorFromResources("Unzip.ErrorFileDoesNotExist", sourceFile.ItemSpec);
+                        Log.LogErrorWithCodeFromResources("Unzip.ErrorFileDoesNotExist", sourceFile.ItemSpec);
                         continue;
                     }
 
@@ -108,7 +108,7 @@ namespace Microsoft.Build.Tasks
                     catch (Exception e)
                     {
                         // Should only be thrown if the archive could not be opened (Access denied, corrupt file, etc)
-                        Log.LogErrorFromResources("Unzip.ErrorCouldNotOpenFile", sourceFile.ItemSpec, e.Message);
+                        Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotOpenFile", sourceFile.ItemSpec, e.Message);
                     }
                 }
             }
@@ -130,6 +130,15 @@ namespace Microsoft.Build.Tasks
             foreach (ZipArchiveEntry zipArchiveEntry in sourceArchive.Entries.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
             {
                 FileInfo destinationPath = new FileInfo(Path.Combine(destinationDirectory.FullName, zipArchiveEntry.FullName));
+
+                // Zip archives can have directory entries listed explicitly.
+                // If this entry is a directory we should create it and move to the next entry.
+                if (Path.GetFileName(destinationPath.FullName).Length == 0)
+                {
+                    // The entry is a directory
+                    Directory.CreateDirectory(destinationPath.FullName);
+                    continue;
+                }
 
                 if (!destinationPath.FullName.StartsWith(destinationDirectory.FullName, StringComparison.OrdinalIgnoreCase))
                 {

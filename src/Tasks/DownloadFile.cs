@@ -8,6 +8,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
 
 namespace Microsoft.Build.Tasks
@@ -70,42 +71,58 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
+            return ExecuteAsync().GetAwaiter().GetResult();
+        }
+
+        private async Task<bool> ExecuteAsync()
+        {
             if (!Uri.TryCreate(SourceUrl, UriKind.Absolute, out Uri uri))
             {
-                Log.LogErrorFromResources("DownloadFile.ErrorInvalidUrl", SourceUrl);
+                Log.LogErrorWithCodeFromResources("DownloadFile.ErrorInvalidUrl", SourceUrl);
                 return false;
             }
 
             int retryAttemptCount = 0;
-            bool canRetry = false;
+            
+            CancellationToken cancellationToken = _cancellationTokenSource.Token;
 
-            do
+            while(true)
             {
                 try
                 {
-                    Download(uri);
+                    await DownloadAsync(uri, cancellationToken);
                     break;
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException e) when (e.CancellationToken == cancellationToken)
                 {
+                    // This task is being cancelled. Exit the loop.
+                    break;
                 }
                 catch (Exception e)
                 {
-                    canRetry = IsRetriable(e, out Exception actualException) && retryAttemptCount++ < Retries;
+                    bool canRetry = IsRetriable(e, out Exception actualException) && retryAttemptCount++ < Retries;
 
                     if (canRetry)
                     {
                         Log.LogWarningWithCodeFromResources("DownloadFile.Retrying", SourceUrl, retryAttemptCount + 1, RetryDelayMilliseconds, actualException.Message);
 
-                        Thread.Sleep(RetryDelayMilliseconds);
+                        try
+                        {
+                            await Task.Delay(RetryDelayMilliseconds, cancellationToken).ConfigureAwait(false);
+                        }
+                        catch (OperationCanceledException delayException) when (delayException.CancellationToken == cancellationToken)
+                        {
+                            // This task is being cancelled, exit the loop
+                            break;
+                        }
                     }
                     else
                     {
-                        Log.LogErrorFromResources("DownloadFile.ErrorDownloading", SourceUrl, actualException.Message);
+                        Log.LogErrorWithCodeFromResources("DownloadFile.ErrorDownloading", SourceUrl, actualException.Message);
+                        break;
                     }
                 }
             }
-            while (canRetry);
 
             return !_cancellationTokenSource.IsCancellationRequested && !Log.HasLoggedErrors;
         }
@@ -114,16 +131,13 @@ namespace Microsoft.Build.Tasks
         /// Attempts to download the file.
         /// </summary>
         /// <param name="uri">The parsed <see cref="Uri"/> of the request.</param>
-        private void Download(Uri uri)
+        private async Task DownloadAsync(Uri uri, CancellationToken cancellationToken)
         {
             // The main reason to use HttpClient vs WebClient is because we can pass a message handler for unit tests to mock
             using (var client = new HttpClient(HttpMessageHandler ?? new HttpClientHandler(), disposeHandler: true))
             {
                 // Only get the response without downloading the file so we can determine if the file is already up-to-date
-                using (HttpResponseMessage response = client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, _cancellationTokenSource.Token)
-                                                            .ConfigureAwait(continueOnCapturedContext: false)
-                                                            .GetAwaiter()
-                                                            .GetResult())
+                using (HttpResponseMessage response = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
                 {
                     try
                     {
@@ -138,7 +152,7 @@ namespace Microsoft.Build.Tasks
 
                     if (!TryGetFileName(response, out string filename))
                     {
-                        Log.LogErrorFromResources("DownloadFile.ErrorUnknownFileName", SourceUrl, nameof(DestinationFileName));
+                        Log.LogErrorWithCodeFromResources("DownloadFile.ErrorUnknownFileName", SourceUrl, nameof(DestinationFileName));
                         return;
                     }
 
@@ -158,15 +172,16 @@ namespace Microsoft.Build.Tasks
 
                     try
                     {
+                        cancellationToken.ThrowIfCancellationRequested();
+
                         using (var target = new FileStream(destinationFile.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
                         {
                             Log.LogMessageFromResources(MessageImportance.High, "DownloadFile.Downloading", SourceUrl, destinationFile.FullName, response.Content.Headers.ContentLength);
 
-                            Task task = response.Content.CopyToAsync(target);
-
-                            task.ConfigureAwait(continueOnCapturedContext: false);
-
-                            task.Wait(_cancellationTokenSource.Token);
+                            using (Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
+                            {
+                                await responseStream.CopyToAsync(target, 1024, cancellationToken).ConfigureAwait(false);
+                            }
 
                             DownloadedFile = new TaskItem(destinationFile.FullName);
                         }
@@ -289,7 +304,7 @@ namespace Microsoft.Build.Tasks
                    && destinationFile.Exists
                    && destinationFile.Length == response.Content.Headers.ContentLength
                    && response.Content.Headers.LastModified.HasValue
-                   && destinationFile.LastWriteTimeUtc < response.Content.Headers.LastModified.Value.UtcDateTime;
+                   && destinationFile.LastWriteTimeUtc > response.Content.Headers.LastModified.Value.UtcDateTime;
         }
     }
 }

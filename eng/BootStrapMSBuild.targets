@@ -65,7 +65,8 @@
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.targets" />
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.props" />
       <SdkResolverFiles Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\**\*.*" />
-      <NuGetSdkResolverManifest Include= "$(RepoRoot)src\MSBuild\SdkResolvers\VS\Microsoft.Build.NuGetSdkResolver.xml" />
+      <NuGetSdkResolverManifest Include= "$(RepoRoot)src\MSBuild\SdkResolvers\VS\Microsoft.Build.NuGetSdkResolver.xml" Condition="'$(MonoBuild)' != 'true'" />
+      <NuGetSdkResolverManifest Include= "$(RepoRoot)src\MSBuild\SdkResolvers\Standalone\Microsoft.Build.NuGetSdkResolver.xml" Condition="'$(MonoBuild)' == 'true'" />
       <InstalledSdks Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Sdks\**\*.*" />
       <InstalledSdks Include="$(MSBuildBinPath)\Sdks\**\*" Condition="'$(MonoBuild)' == 'true'" />
 
@@ -131,8 +132,13 @@
     <Copy SourceFiles="@(InstalledNuGetFiles)"
           DestinationFiles="@(InstalledNuGetFiles->'$(BootstrapDestination)Microsoft\NuGet\%(Filename)%(Extension)')" />
 
-    <Copy SourceFiles="@(_NuGetRuntimeDependencies)"
+    <Copy Condition="'$(MonoBuild)' != 'true'"
+          SourceFiles="@(_NuGetRuntimeDependencies)"
           DestinationFolder="$(BootstrapDestination)..\Common7\IDE\CommonExtensions\Microsoft\NuGet\" />
+    <Copy Condition="'$(MonoBuild)' == 'true'"
+          SourceFiles="@(_NuGetRuntimeDependencies)"
+          DestinationFolder="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin" />
+
     <Copy SourceFiles="@(NuGetSdkResolverManifest)"
           DestinationFolder="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.Build.NuGetSdkResolver" />
 
@@ -164,12 +170,14 @@
          probably not count as a link in the cycle. -->
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="Publish" BuildInParallel="$(BuildInParallel)" />
 
-    <!-- Copy all items from the publish folder to the bootstrap folder.  We might be able to just use the published
-         version as the bootstrapped version, but the extra separation here seems like it could be valuable. -->
     <ItemGroup>
+      <!-- Copy all items from the publish folder to the bootstrap folder.  We might be able to just use the published
+            version as the bootstrapped version, but the extra separation here seems like it could be valuable. -->
       <DeployedItems Include="$(PublishDir)\**\*.*" />
+
       <NuGetSdkResolverManifest Include= "$(RepoRoot)src\MSBuild\SdkResolvers\Standalone\Microsoft.Build.NuGetSdkResolver.xml" />
       <InstalledSdks Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Sdks\**\*.*" />
+      <InstalledExtensions Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Current\**\*.*" Exclude="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Current\Microsoft.Common.props" />
     </ItemGroup>
     <Copy SourceFiles="@(DeployedItems)"
           DestinationFolder="$(BootstrapDestination)%(RecursiveDir)" />
@@ -179,6 +187,10 @@
 
     <Copy SourceFiles="@(InstalledSdks)"
           DestinationFiles="@(InstalledSdks -> '$(BootstrapDestination)Sdks\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <Copy SourceFiles="@(InstalledExtensions)"
+          DestinationFolder="$(BootstrapDestination)Current\%(RecursiveDir)" />
+
     <Copy SourceFiles="@(_NuGetRuntimeDependencies)"
           DestinationFolder="$(BootstrapDestination)" />
   </Target>

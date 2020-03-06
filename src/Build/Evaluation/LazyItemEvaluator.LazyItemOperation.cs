@@ -5,8 +5,10 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Microsoft.Build.Evaluation
@@ -48,16 +50,21 @@ namespace Microsoft.Build.Evaluation
 
             protected EngineFileUtilities EngineFileUtilities => _lazyEvaluator.EngineFileUtilities;
 
-            public virtual void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            public void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
                 MSBuildEventSource.Log.ApplyLazyItemOperationsStart(_itemElement.ItemType);
                 using (_lazyEvaluator._evaluationProfiler.TrackElement(_itemElement))
                 {
-                    var items = SelectItems(listBuilder, globsToIgnore);
-                    MutateItems(items);
-                    SaveItems(items, listBuilder);
+                    ApplyImpl(listBuilder, globsToIgnore);
                 }
                 MSBuildEventSource.Log.ApplyLazyItemOperationsStop(_itemElement.ItemType);
+            }
+
+            protected virtual void ApplyImpl(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            {
+                var items = SelectItems(listBuilder, globsToIgnore);
+                MutateItems(items);
+                SaveItems(items, listBuilder);
             }
 
             /// <summary>
@@ -76,8 +83,7 @@ namespace Microsoft.Build.Evaluation
 
             private IList<I> GetReferencedItems(string itemType, ImmutableHashSet<string> globsToIgnore)
             {
-                LazyItemList itemList;
-                if (_referencedItemLists.TryGetValue(itemType, out itemList))
+                if (_referencedItemLists.TryGetValue(itemType, out var itemList))
                 {
                     return itemList.GetMatchedItems(globsToIgnore);
                 }
@@ -87,7 +93,88 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            protected void DecorateItemsWithMetadata(ImmutableList<I> items, ImmutableList<ProjectMetadataElement> metadata)
+            [DebuggerDisplay(@"{DebugString()}")]
+            protected readonly struct ItemBatchingContext
+            {
+                public I OperationItem { get; }
+                private Dictionary<string, I> CapturedItems { get; }
+
+                public ItemBatchingContext(I operationItem, Dictionary<string, I> capturedItems = null)
+                {
+                    OperationItem = operationItem;
+
+                    CapturedItems = capturedItems == null || capturedItems.Count == 0
+                        ? null
+                        : capturedItems;
+                }
+
+                public IMetadataTable GetMetadataTable()
+                {
+                    return CapturedItems == null
+                        ? (IMetadataTable) OperationItem
+                        : new ItemOperationMetadataTable(OperationItem, CapturedItems);
+                }
+
+                private string DebugString()
+                {
+                    var referencedItemsString = CapturedItems == null
+                        ? "none"
+                        : string.Join(";", CapturedItems.Select(kvp => $"{kvp.Key} : {kvp.Value.EvaluatedInclude}"));
+
+                    return $"{OperationItem.Key} : {OperationItem.EvaluatedInclude}; CapturedItems: {referencedItemsString}";
+                }
+            }
+
+            private class ItemOperationMetadataTable : IMetadataTable
+            {
+                private readonly I _operationItem;
+                private readonly Dictionary<string, I> _capturedItems;
+
+                public ItemOperationMetadataTable(I operationItem, Dictionary<string, I> capturedItems)
+                {
+                    ErrorUtilities.VerifyThrow(
+                        capturedItems.Comparer == StringComparer.OrdinalIgnoreCase,
+                        "MSBuild assumes case insensitive item name comparison");
+
+                    _operationItem = operationItem;
+                    _capturedItems = capturedItems;
+                }
+
+                public string GetEscapedValue(string name)
+                {
+                    return _operationItem.GetEscapedValue(name);
+                }
+
+                public string GetEscapedValue(string itemType, string name)
+                {
+                    return RouteCall(itemType, name, (t, it, n) => t.GetEscapedValue(it, n));
+                }
+
+                public string GetEscapedValueIfPresent(string itemType, string name)
+                {
+                    return RouteCall(itemType, name, (t, it, n) => t.GetEscapedValueIfPresent(it, n));
+                }
+
+                private string RouteCall(string itemType, string name, Func<IMetadataTable, string, string, string> getEscapedValueFunc)
+                {
+                    if (itemType == null || itemType.Equals(_operationItem.Key, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return getEscapedValueFunc(_operationItem, itemType, name);
+                    }
+                    else if (_capturedItems.ContainsKey(itemType))
+                    {
+                        var item = _capturedItems[itemType];
+
+                        return getEscapedValueFunc(item, itemType, name);
+                    }
+                    else
+                    {
+                        return string.Empty;
+                    }
+                }
+            }
+
+            protected void DecorateItemsWithMetadata(IEnumerable<ItemBatchingContext> itemBatchingContexts, ImmutableList<ProjectMetadataElement> metadata, bool? needToExpandMetadata = null)
             {
                 if (metadata.Count > 0)
                 {
@@ -120,46 +207,13 @@ namespace Microsoft.Build.Evaluation
                     // Prior to lazy evaluation ExpanderOptions.ExpandAll was used.
                     const ExpanderOptions metadataExpansionOptions = ExpanderOptions.ExpandAll;
 
-                    List<string> values = new List<string>(metadata.Count * 2);
+                    needToExpandMetadata ??= NeedToExpandMetadataForEachItem(metadata, out _);
 
-                    foreach (var metadataElement in metadata)
+                    if (needToExpandMetadata.Value)
                     {
-                        values.Add(metadataElement.Value);
-                        values.Add(metadataElement.Condition);
-                    }
-
-                    ItemsAndMetadataPair itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(values);
-
-                    bool needToProcessItemsIndividually = false;
-
-                    if (itemsAndMetadataFound.Metadata != null && itemsAndMetadataFound.Metadata.Values.Count > 0)
-                    {
-                        // If there is bare metadata of any kind, and the Include involved an item list, we should
-                        // run items individually, as even non-built-in metadata might differ between items
-
-                        if (_referencedItemLists.Count >= 0)
+                        foreach (var itemContext in itemBatchingContexts)
                         {
-                            needToProcessItemsIndividually = true;
-                        }
-                        else
-                        {
-                            // If there is bare built-in metadata, we must always run items individually, as that almost
-                            // always differs between items.
-
-                            // UNDONE: When batching is implemented for real, we need to make sure that
-                            // item definition metadata is included in all metadata operations during evaluation
-                            if (itemsAndMetadataFound.Metadata.Values.Count > 0)
-                            {
-                                needToProcessItemsIndividually = true;
-                            }
-                        }
-                    }
-
-                    if (needToProcessItemsIndividually)
-                    {
-                        foreach (I item in items)
-                        {
-                            _expander.Metadata = item;
+                            _expander.Metadata = itemContext.GetMetadataTable();
 
                             foreach (var metadataElement in metadata)
                             {
@@ -170,7 +224,7 @@ namespace Microsoft.Build.Evaluation
 
                                 string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, metadataExpansionOptions, metadataElement.Location);
 
-                                item.SetMetadata(metadataElement, FileUtilities.MaybeAdjustFilePath(evaluatedValue, metadataElement.ContainingProject.DirectoryPath));
+                                itemContext.OperationItem.SetMetadata(metadataElement, FileUtilities.MaybeAdjustFilePath(evaluatedValue, metadataElement.ContainingProject.DirectoryPath));
                             }
                         }
 
@@ -222,12 +276,52 @@ namespace Microsoft.Build.Evaluation
                         // This is valuable in the case where one item element evaluates to
                         // many items (either by semicolon or wildcards)
                         // and that item also has the same piece/s of metadata for each item.
-                        _itemFactory.SetMetadata(metadataList, items);
+                        _itemFactory.SetMetadata(metadataList, itemBatchingContexts.Select(i => i.OperationItem));
 
                         // End of legal area for metadata expressions.
                         _expander.Metadata = null;
                     }
                 }
+            }
+
+            protected bool NeedToExpandMetadataForEachItem(ImmutableList<ProjectMetadataElement> metadata, out ItemsAndMetadataPair itemsAndMetadataFound)
+            {
+                List<string> values = new List<string>(metadata.Count * 2);
+
+                foreach (var metadataElement in metadata)
+                {
+                    values.Add(metadataElement.Value);
+                    values.Add(metadataElement.Condition);
+                }
+
+                itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(values);
+
+                bool needToExpandMetadataForEachItem = false;
+
+                if (itemsAndMetadataFound.Metadata != null && itemsAndMetadataFound.Metadata.Values.Count > 0)
+                {
+                    // If there is bare metadata of any kind, and the Include involved an item list, we should
+                    // run items individually, as even non-built-in metadata might differ between items
+
+                    if (_referencedItemLists.Count >= 0)
+                    {
+                        needToExpandMetadataForEachItem = true;
+                    }
+                    else
+                    {
+                        // If there is bare built-in metadata, we must always run items individually, as that almost
+                        // always differs between items.
+
+                        // UNDONE: When batching is implemented for real, we need to make sure that
+                        // item definition metadata is included in all metadata operations during evaluation
+                        if (itemsAndMetadataFound.Metadata.Values.Count > 0)
+                        {
+                            needToExpandMetadataForEachItem = true;
+                        }
+                    }
+                }
+
+                return needToExpandMetadataForEachItem;
             }
         }
     }

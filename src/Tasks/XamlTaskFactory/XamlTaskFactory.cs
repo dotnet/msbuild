@@ -254,7 +254,7 @@ namespace Microsoft.Build.Tasks
                 HelpKeywordPrefix = "MSBuild."
             };
             
-            log.LogErrorFromResources("TaskFactoryNotSupportedFailure", nameof(XamlTaskFactory));
+            log.LogErrorWithCodeFromResources("TaskFactoryNotSupportedFailure", nameof(XamlTaskFactory));
 
             return false;
         }

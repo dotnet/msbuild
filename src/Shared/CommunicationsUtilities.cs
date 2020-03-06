@@ -655,14 +655,10 @@ namespace Microsoft.Build.Internal
         /// <returns>Base Handshake</returns>
         private static long GetBaseHandshakeForContext(TaskHostContext hostContext)
         {
-            string salt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
+            string salt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") + BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
+            long nodeHandshakeSalt = GetHandshakeHashCode(salt);
 
-            long nodeHandshakeSalt = 0;
-
-            if (!string.IsNullOrEmpty(salt))
-            {
-                nodeHandshakeSalt = GetHandshakeHashCode(salt);
-            }
+            Trace("MSBUILDNODEHANDSHAKESALT=\"{0}\", msbuildDirectory=\"{1}\", hostContext={2}, FileVersionHash={3}", Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT"), BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, hostContext, FileVersionHash);
 
             //FileVersionHash (32 bits) is shifted 8 bits to avoid session ID collision
             //hostContext (4 bits) is shifted just after the FileVersionHash

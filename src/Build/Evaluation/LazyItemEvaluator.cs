@@ -527,10 +527,9 @@ namespace Microsoft.Build.Evaluation
         {
             builder.ItemSpec = new ItemSpec<P, I>(itemSpec, _outerExpander, itemSpecLocation, rootDirectory);
 
-            foreach (ItemFragment fragment in builder.ItemSpec.Fragments)
+            foreach (ItemSpecFragment fragment in builder.ItemSpec.Fragments)
             {
-                ItemExpressionFragment<P, I> itemExpression = fragment as ItemExpressionFragment<P, I>;
-                if (itemExpression != null)
+                if (fragment is ItemSpec<P, I>.ItemExpressionFragment itemExpression)
                 {
                     AddReferencedItemLists(builder, itemExpression.Capture);
                 }

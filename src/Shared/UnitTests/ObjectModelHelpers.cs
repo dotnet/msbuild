@@ -420,11 +420,14 @@ namespace Microsoft.Build.UnitTests
 
         internal static void AssertItemHasMetadata(Dictionary<string, string> expected, TestItem item)
         {
-            Assert.Equal(expected.Keys.Count, item.DirectMetadataCount);
+            expected ??= new Dictionary<string, string>();
+
+            item.DirectMetadataCount.ShouldBe(expected.Keys.Count);
 
             foreach (var key in expected.Keys)
             {
-                Assert.Equal(expected[key], item.GetMetadataValue(key));
+                item.GetMetadataValue(key).ShouldBe(expected[key]);
+
             }
         }
 
@@ -695,10 +698,11 @@ namespace Microsoft.Build.UnitTests
         /// <returns></returns>
         internal static MockLogger BuildProjectExpectSuccess
             (
-            string projectContents
+            string projectContents,
+            ITestOutputHelper testOutputHelper = null
             )
         {
-            MockLogger logger = new MockLogger();
+            MockLogger logger = new MockLogger(testOutputHelper);
             BuildProjectExpectSuccess(projectContents, logger);
             return logger;
         }
@@ -710,8 +714,7 @@ namespace Microsoft.Build.UnitTests
             )
         {
             Project project = CreateInMemoryProject(projectContents, logger: null); // logger is null so we take care of loggers ourselves
-            bool success = project.Build(loggers);
-            Assert.True(success);
+            project.Build(loggers).ShouldBeTrue();
         }
 
         /// <summary>
@@ -1290,11 +1293,11 @@ namespace Microsoft.Build.UnitTests
         /// Build a project with the provided content in memory.
         /// Assert that it succeeded, and return the mock logger with the output.
         /// </summary>
-        internal static MockLogger BuildProjectWithNewOMExpectSuccess(string content)
+        internal static MockLogger BuildProjectWithNewOMExpectSuccess(string content, Dictionary<string, string> globalProperties = null)
         {
             MockLogger logger;
             bool result;
-            BuildProjectWithNewOM(content, out logger, out result, false);
+            BuildProjectWithNewOM(content, out logger, out result, false, globalProperties);
             Assert.True(result);
 
             return logger;
@@ -1303,12 +1306,12 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Build a project in memory using the new OM
         /// </summary>
-        private static void BuildProjectWithNewOM(string content, out MockLogger logger, out bool result, bool allowTaskCrash)
+        private static void BuildProjectWithNewOM(string content, out MockLogger logger, out bool result, bool allowTaskCrash, Dictionary<string, string> globalProperties = null)
         {
             // Replace the crazy quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, toolsVersion: null);
             logger = new MockLogger();
             logger.AllowTaskCrashes = allowTaskCrash;
             List<ILogger> loggers = new List<ILogger>();
@@ -1869,7 +1872,8 @@ namespace Microsoft.Build.UnitTests
                 TestEnvironment env,
                 BuildParameters buildParametersPrototype = null,
                 bool enableNodeReuse = false,
-                bool shutdownInProcNode = true)
+                bool shutdownInProcNode = true,
+                IEnumerable<BuildManager.DeferredBuildMessage> deferredMessages = null)
             {
                 _env = env;
 
@@ -1886,7 +1890,7 @@ namespace Microsoft.Build.UnitTests
                 actualBuildParameters.EnableNodeReuse = enableNodeReuse;
 
                 _buildManager = new BuildManager();
-                _buildManager.BeginBuild(actualBuildParameters);
+                _buildManager.BeginBuild(actualBuildParameters, deferredMessages);
             }
 
             public BuildResult BuildProjectFile(string projectFile, string[] entryTargets = null)

@@ -13,14 +13,14 @@ namespace Microsoft.Build.UnitTests
         private DirectoryInfo root;
         private TransientIO Parent { get; }
         private string SubFolder { get; }
-        private Dictionary<string, TransientIO> Children = new Dictionary<string, TransientIO>(StringComparer.OrdinalIgnoreCase); 
+        private Dictionary<string, TransientIO> Children = new Dictionary<string, TransientIO>(StringComparer.OrdinalIgnoreCase);
 
         private DirectoryInfo EnsureTempRoot()
         {
             if (this.root == null)
             {
                 this.root = new DirectoryInfo(
-                    this.Parent != null ? 
+                    this.Parent != null ?
                           this.Parent.GetAbsolutePath(this.SubFolder)
                         : FileUtilities.GetTemporaryDirectory(true)
                 );
@@ -129,7 +129,7 @@ namespace Microsoft.Build.UnitTests
         public void Dispose()
         {
             this.Clear();
-            // this object still can be used ... 
+            // this object still can be used ...
         }
 
     }

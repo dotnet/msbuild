@@ -32,19 +32,27 @@
         <note />
       </trans-unit>
       <trans-unit id="CacheMissesNotAllowedInIsolatedGraphBuilds">
-        <source>MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the build result for the reference is not in the engine cache. In isolated builds this could mean one of the following:
-    - the reference was not explicitly specified as a ProjectReference item in "{0}"
-    - the reference was not included in the provided input caches
-    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in "{0}"
+        <source>MSB4252: Project "{0}" with global properties
+    ({1})
+    is building project "{2}" with global properties
+    ({3})
+    with the ({4}) target(s) but the build result for the built project is not in the engine cache. In isolated builds this could mean one of the following:
+    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in project "{0}"
+    - the reference was called with global properties that do not match the static graph inferred nodes
+    - the reference was not explicitly specified as a ProjectReference item in project "{0}"
     </source>
-        <target state="translated">MSB4252: il progetto "{0}" contiene un riferimento a "{1}" ({2} destinazione/i), ma il risultato della compilazione per il riferimento non è incluso nella cache del motore. Nelle compilazioni isolate questa condizione indica che:
-    - il riferimento non è stato specificato in modo esplicito come ProjectReference in "{0}"
-    - il riferimento non è stato incluso nelle cache di input specificate
-    - il riferimento è stato chiamato con una destinazione che non è specificata nell'elemento ProjectReferenceTargets in "{0}"
+        <target state="new">MSB4252: Project "{0}" with global properties
+    ({1})
+    is building project "{2}" with global properties
+    ({3})
+    with the ({4}) target(s) but the build result for the built project is not in the engine cache. In isolated builds this could mean one of the following:
+    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in project "{0}"
+    - the reference was called with global properties that do not match the static graph inferred nodes
+    - the reference was not explicitly specified as a ProjectReference item in project "{0}"
     </target>
         <note>
       {StrBegin="MSB4252:"}
-      LOCALIZATION: Do not localize the following words: ProjectReference.
+      LOCALIZATION: Do not localize the following words: ProjectReference, ProjectReferenceTargets
     </note>
       </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
@@ -67,6 +75,11 @@
         <target state="translated">MSB4257: il file della cache dei risultati di output specificato è vuoto.</target>
         <note />
       </trans-unit>
+      <trans-unit id="EnvironmentVariableRead">
+        <source>Read environment variable "{0}"</source>
+        <target state="new">Read environment variable "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
         <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
         <target state="translated">MSB4256: durante la lettura dei file della cache dei risultati di input dal percorso "{0}" è stato rilevato un errore: {1}</target>
@@ -82,9 +95,14 @@
         <target state="translated">MSB4255: i file della cache dei risultati di input seguenti non esistono: "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionFormat">
+        <source>Version string was not in a correct format.</source>
+        <target state="translated">Il formato della stringa di versione non è corretto.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
         <source>Logging verbosity is set to: {0}.</source>
-        <target state="new">Logging verbosity is set to: {0}.</target>
+        <target state="translated">Il livello di dettaglio della registrazione è impostato su: {0}.</target>
         <note>
       LOCALIZATION: {0} is an enum value of LoggerVerbosity.
     </note>
@@ -109,7 +127,7 @@
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
-        <target state="new">Method {0} cannot be called with a collection containing null or empty target names.</target>
+        <target state="translated">Non è possibile chiamare il metodo {0} con una raccolta contenente nomi di destinazione Null o vuoti.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
@@ -119,6 +137,11 @@
       {StrBegin="MSB4250: "}
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
+      </trans-unit>
+      <trans-unit id="PropertyAssignment">
+        <source>Property initial value: $({0})="{1}" Source: {2}</source>
+        <target state="new">Property initial value: $({0})="{1}" Source: {2}</target>
+        <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
@@ -156,6 +179,11 @@
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
     </note>
       </trans-unit>
+      <trans-unit id="TaskReturnedFalseButDidNotLogError">
+        <source>MSB4132: The "{0}" task returned false but did not log an error.</source>
+        <target state="new">MSB4132: The "{0}" task returned false but did not log an error.</target>
+        <note>{StrBegin="MSB4132: "}</note>
+      </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
         <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
         <target state="translated">MSB4254: il task MSBuild compila progetti "{0}" che non sono specificati nell'elemento ProjectReference. Nelle compilazioni isolate questa condizione indica probabilmente che i riferimenti non sono specificati in modo esplicito come elemento ProjectReference in "{1}"</target>
@@ -163,6 +191,11 @@
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
     </note>
+      </trans-unit>
+      <trans-unit id="UninitializedPropertyRead">
+        <source>Read uninitialized property "{0}"</source>
+        <target state="new">Read uninitialized property "{0}"</target>
+        <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">
         <source>Using input build results caches: {0}</source>
@@ -594,7 +627,7 @@
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
         <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</source>
-        <target state="new">MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</target>
+        <target state="translated">MSB4019: il progetto importato "{0}" non è stato trovato. Verificare che l'espressione nella dichiarazione Import "{1}" sia corretta e che il file sia presente sul disco.</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">

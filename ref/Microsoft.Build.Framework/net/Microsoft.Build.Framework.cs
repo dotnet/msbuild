@@ -143,6 +143,12 @@ namespace Microsoft.Build.Framework
         protected CustomBuildEventArgs(string message, string helpKeyword, string senderName, System.DateTime eventTimestamp, params object[] messageArgs) { }
     }
     public delegate void CustomBuildEventHandler(object sender, Microsoft.Build.Framework.CustomBuildEventArgs e);
+    public partial class EnvironmentVariableReadEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
+    {
+        public EnvironmentVariableReadEventArgs() { }
+        public EnvironmentVariableReadEventArgs(string environmentVariableName, string message, string helpKeyword=null, string senderName=null, Microsoft.Build.Framework.MessageImportance importance=(Microsoft.Build.Framework.MessageImportance)(2)) { }
+        public string EnvironmentVariableName { get { throw null; } set { } }
+    }
     public partial class ExternalProjectFinishedEventArgs : Microsoft.Build.Framework.CustomBuildEventArgs
     {
         protected ExternalProjectFinishedEventArgs() { }
@@ -192,6 +198,10 @@ namespace Microsoft.Build.Framework
     public partial interface IBuildEngine5 : Microsoft.Build.Framework.IBuildEngine, Microsoft.Build.Framework.IBuildEngine2, Microsoft.Build.Framework.IBuildEngine3, Microsoft.Build.Framework.IBuildEngine4
     {
         void LogTelemetry(string eventName, System.Collections.Generic.IDictionary<string, string> properties);
+    }
+    public partial interface IBuildEngine6 : Microsoft.Build.Framework.IBuildEngine, Microsoft.Build.Framework.IBuildEngine2, Microsoft.Build.Framework.IBuildEngine3, Microsoft.Build.Framework.IBuildEngine4, Microsoft.Build.Framework.IBuildEngine5
+    {
+        System.Collections.Generic.IReadOnlyDictionary<string, string> GetGlobalProperties();
     }
     public partial interface ICancelableTask : Microsoft.Build.Framework.ITask
     {
@@ -402,6 +412,23 @@ namespace Microsoft.Build.Framework
         public string ToolsVersion { get { throw null; } }
     }
     public delegate void ProjectStartedEventHandler(object sender, Microsoft.Build.Framework.ProjectStartedEventArgs e);
+    public partial class PropertyInitialValueSetEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
+    {
+        public PropertyInitialValueSetEventArgs() { }
+        public PropertyInitialValueSetEventArgs(string propertyName, string propertyValue, string propertySource, string message, string helpKeyword=null, string senderName=null, Microsoft.Build.Framework.MessageImportance importance=(Microsoft.Build.Framework.MessageImportance)(2)) { }
+        public string PropertyName { get { throw null; } set { } }
+        public string PropertySource { get { throw null; } set { } }
+        public string PropertyValue { get { throw null; } set { } }
+    }
+    public partial class PropertyReassignmentEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
+    {
+        public PropertyReassignmentEventArgs() { }
+        public PropertyReassignmentEventArgs(string propertyName, string previousValue, string newValue, string location, string message, string helpKeyword=null, string senderName=null, Microsoft.Build.Framework.MessageImportance importance=(Microsoft.Build.Framework.MessageImportance)(2)) { }
+        public string Location { get { throw null; } set { } }
+        public string NewValue { get { throw null; } set { } }
+        public string PreviousValue { get { throw null; } set { } }
+        public string PropertyName { get { throw null; } set { } }
+    }
     public enum RegisteredTaskObjectLifetime
     {
         AppDomain = 1,
@@ -562,6 +589,12 @@ namespace Microsoft.Build.Framework
         public System.Collections.Generic.IDictionary<string, string> Properties { get { throw null; } set { } }
     }
     public delegate void TelemetryEventHandler(object sender, Microsoft.Build.Framework.TelemetryEventArgs e);
+    public partial class UninitializedPropertyReadEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
+    {
+        public UninitializedPropertyReadEventArgs() { }
+        public UninitializedPropertyReadEventArgs(string propertyName, string message, string helpKeyword=null, string senderName=null, Microsoft.Build.Framework.MessageImportance importance=(Microsoft.Build.Framework.MessageImportance)(2)) { }
+        public string PropertyName { get { throw null; } set { } }
+    }
 }
 namespace Microsoft.Build.Framework.Profiler
 {

@@ -234,7 +234,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-#if FEATURE_RESX_RESOURCE_READER
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
                     using (var resxReader = new ResXResourceReader(filename))
                     {
                         // Tell the reader to return ResXDataNode's instead of the object type

@@ -4,7 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
@@ -732,8 +734,16 @@ namespace InlineCode {{
 
             if (expectedSourceCode != null)
             {
-                taskInfo.SourceCode.ShouldBe(expectedSourceCode, StringCompareShould.IgnoreLineEndings);
+                NormalizeRuntime(taskInfo.SourceCode)
+                    .ShouldBe(NormalizeRuntime(expectedSourceCode), StringCompareShould.IgnoreLineEndings);
             }
+        }
+
+        private static readonly Regex RuntimeVersionLine = new Regex("Runtime Version:.*");
+
+        private static string NormalizeRuntime(string input)
+        {
+            return RuntimeVersionLine.Replace(input, "Runtime Version:SOMETHING");
         }
     }
 }

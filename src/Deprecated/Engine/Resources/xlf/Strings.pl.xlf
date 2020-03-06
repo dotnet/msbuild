@@ -1677,7 +1677,7 @@
       </trans-unit>
       <trans-unit id="ShallowCloneNotAllowed">
         <source>A shallow clone of this object cannot be created.</source>
-        <target state="translated">Nie można utworzyć pobieżnego klonu tego obiektu.</target>
+        <target state="translated">Nie można utworzyć pobieżnego klona tego obiektu.</target>
         <note />
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">Ein unechter Klon dieses Objekts kann nicht erstellt werden.</target>
@@ -1923,7 +1923,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectNoPublish">
         <source>Web projects do not support the "Publish" target.  Continuing with remaining projects ...</source>
-        <target state="translated">Projekty sieci Web nie obsługują elementu docelowego „Publish”.  Trwa kontynuowanie pozostałych projektów...</target>
+        <target state="translated">Projekty internetowe nie obsługują elementu docelowego „Publish”.  Trwa kontynuowanie pozostałych projektów...</target>
         <note>UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do not localize "Publish".</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">

@@ -16,7 +16,7 @@ namespace Microsoft.Build.UnitTests
     {
         /*
         * Method:  TimeSpanMediumDuration
-        * 
+        *
         * Tests the mainline: a medium length duration
         * Note the ToString overload used in FormatTimeSpan is culture insensitive.
         */
@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests
 
         /*
         * Method:  TimeSpanZeroDuration
-        * 
+        *
         * Format a TimeSpan where the duration is zero.
         * Note the ToString overload used in FormatTimeSpan is culture insensitive.
         */
@@ -61,8 +61,3 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
-
-
-
-
-

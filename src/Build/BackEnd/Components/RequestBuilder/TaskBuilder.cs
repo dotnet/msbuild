@@ -2,19 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -319,7 +316,7 @@ namespace Microsoft.Build.BackEnd
                 // Only create a hash table if there are more than one bucket as this is the only time a property can be overridden
                 if (buckets.Count > 1)
                 {
-                    lookupHash = lookupHash ?? new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+                    lookupHash ??= new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
                 }
 
                 WorkUnitResult aggregateResult = new WorkUnitResult();
@@ -327,6 +324,12 @@ namespace Microsoft.Build.BackEnd
                 // Loop through each of the batch buckets and execute them one at a time
                 for (int i = 0; i < buckets.Count; i++)
                 {
+                    // Some tests do not provide an actual taskNode; checking if _taskNode == null prevents those tests from failing.
+                    if (MSBuildEventSource.Log.IsEnabled())
+                    {
+                        TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
+                        MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
+                    }
                     // Execute the batch bucket, pass in which bucket we are executing so that we know when to get a new taskId for the bucket.
                     taskResult = await ExecuteBucket(taskHost, (ItemBucket)buckets[i], mode, lookupHash);
 
@@ -336,8 +339,14 @@ namespace Microsoft.Build.BackEnd
                     {
                         break;
                     }
+                    // Some tests do not provide an actual taskNode; checking if _taskNode == null prevents those tests from failing.
+                    if (MSBuildEventSource.Log.IsEnabled())
+                    {
+                        TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
+                        MSBuildEventSource.Log.ExecuteTaskStop(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
+                    }
                 }
-
+                
                 taskResult = aggregateResult;
             }
             finally
@@ -421,6 +430,8 @@ namespace Microsoft.Build.BackEnd
                     if (requirements != null)
                     {
                         TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
+                        _buildRequestEntry.Request.CurrentTaskContext = taskLoggingContext.BuildEventContext;
+
                         try
                         {
                             if (
@@ -462,6 +473,8 @@ namespace Microsoft.Build.BackEnd
                         }
                         finally
                         {
+                            _buildRequestEntry.Request.CurrentTaskContext = null;
+
                             // Flag the completion of the task.
                             taskLoggingContext.LogTaskBatchFinished(_projectFullPath, taskResult.ResultCode == WorkUnitResultCode.Success || taskResult.ResultCode == WorkUnitResultCode.Skipped);
 
@@ -732,6 +745,7 @@ namespace Microsoft.Build.BackEnd
             UpdateContinueOnError(bucket, taskHost);
 
             bool taskResult = false;
+            bool isMSBuildTask = false;
 
             WorkUnitResultCode resultCode = WorkUnitResultCode.Success;
             WorkUnitActionCode actionCode = WorkUnitActionCode.Continue;
@@ -755,9 +769,11 @@ namespace Microsoft.Build.BackEnd
                     if (taskType == typeof(MSBuild))
                     {
                         MSBuild msbuildTask = host.TaskInstance as MSBuild;
+
                         ErrorUtilities.VerifyThrow(msbuildTask != null, "Unexpected MSBuild internal task.");
 
                         var undeclaredProjects = GetUndeclaredProjects(msbuildTask);
+                        isMSBuildTask = true;
 
                         if (undeclaredProjects != null && undeclaredProjects.Count != 0)
                         {
@@ -806,13 +822,8 @@ namespace Microsoft.Build.BackEnd
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex) && Environment.GetEnvironmentVariable("MSBUILDDONOTCATCHTASKEXCEPTIONS") != "1")
                 {
-                    if (ExceptionHandling.IsCriticalException(ex) || (Environment.GetEnvironmentVariable("MSBUILDDONOTCATCHTASKEXCEPTIONS") == "1"))
-                    {
-                        throw;
-                    }
-
                     taskException = ex;
                 }
 
@@ -934,6 +945,28 @@ namespace Microsoft.Build.BackEnd
                     else
                     {
                         ErrorUtilities.ThrowInternalErrorUnreachable();
+                    }
+                }
+
+                // When a task fails it must log an error. If a task fails to do so,
+                // that is logged as an error. MSBuild tasks are an exception because
+                // errors are not logged directly from them, but the tasks spawned by them.
+                if (!isMSBuildTask && taskReturned && !taskResult && !taskLoggingContext.HasLoggedErrors)
+                {
+                    if (_continueOnError == ContinueOnError.WarnAndContinue)
+                    {
+                        taskLoggingContext.LogWarning(null,
+                            new BuildEventFileInfo(_targetChildInstance.Location),
+                            "TaskReturnedFalseButDidNotLogError",
+                            _taskNode.Name);
+
+                        taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
+                    }
+                    else
+                    {
+                        taskLoggingContext.LogError(new BuildEventFileInfo(_targetChildInstance.Location),
+                            "TaskReturnedFalseButDidNotLogError",
+                            _taskNode.Name);
                     }
                 }
 

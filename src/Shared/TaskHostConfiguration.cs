@@ -87,6 +87,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private Dictionary<string, TaskParameter> _taskParameters;
 
+        private Dictionary<string, string> _globalParameters;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -119,7 +121,8 @@ namespace Microsoft.Build.BackEnd
                 bool continueOnError,
                 string taskName,
                 string taskLocation,
-                IDictionary<string, object> taskParameters
+                IDictionary<string, object> taskParameters,
+                Dictionary<string, string> globalParameters
             )
         {
             ErrorUtilities.VerifyThrowInternalLength(taskName, "taskName");
@@ -159,6 +162,8 @@ namespace Microsoft.Build.BackEnd
                     _taskParameters[parameter.Key] = new TaskParameter(parameter.Value);
                 }
             }
+
+            _globalParameters = globalParameters ?? new Dictionary<string, string>();
         }
 
         /// <summary>
@@ -302,6 +307,16 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Gets the global properties for the current project.
+        /// </summary>
+        public Dictionary<string, string> GlobalProperties
+        {
+            [DebuggerStepThrough]
+            get
+            { return _globalParameters; }
+        }
+
+        /// <summary>
         /// The NodePacketType of this NodePacket
         /// </summary>
         public NodePacketType Type
@@ -332,6 +347,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _taskLocation);
             translator.TranslateDictionary(ref _taskParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);
             translator.Translate(ref _continueOnError);
+            translator.TranslateDictionary(ref _globalParameters, StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>

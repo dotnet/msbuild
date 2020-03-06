@@ -74,7 +74,7 @@
       </trans-unit>
       <trans-unit id="ToolsLocationHelper.InvalidRedistFile">
         <source>There was an error reading the redist list file "{0}". {1}</source>
-        <target state="translated">재배포 목록 파일 "{0}"을(를) 읽는 동안 오류가 발생했습니다. {1}</target>
+        <target state="translated">재배포 가능 패키지 목록 파일 "{0}"을(를) 읽는 동안 오류가 발생했습니다. {1}</target>
         <note>No Error code because this resource will be used in an exception. The error code is discarded if it is included</note>
       </trans-unit>
       <trans-unit id="ToolsLocationHelper.CouldNotCreateChain">
