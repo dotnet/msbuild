@@ -837,14 +837,12 @@ namespace Microsoft.Build.CommandLine
             }
             catch (Exception e)
             {
-#if FEATURE_VARIOUS_EXCEPTIONS
                 if (e is ThreadAbortException)
                 {
                     // This thread was aborted as part of Cancellation, we will return a failure task result
                     taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
                 }
                 else
-#endif
                 if (ExceptionHandling.IsCriticalException(e))
                 {
                     throw;
