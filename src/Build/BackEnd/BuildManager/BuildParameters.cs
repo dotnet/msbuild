@@ -122,11 +122,6 @@ namespace Microsoft.Build.Execution
 #endif
 
         /// <summary>
-        /// Flag indicating whether the build process should run as low priority.
-        /// </summary>
-        private bool _lowPriority = false;
-
-        /// <summary>
         /// The original process environment.
         /// </summary>
         private Dictionary<string, string> _buildProcessEnvironment;
@@ -301,7 +296,7 @@ namespace Microsoft.Build.Execution
             _inputResultsCacheFiles = other._inputResultsCacheFiles;
             _outputResultsCacheFile = other._outputResultsCacheFile;
             DiscardBuildResults = other.DiscardBuildResults;
-            _lowPriority = other._lowPriority;
+            LowPriority = other.LowPriority;
         }
 
 #if FEATURE_THREAD_PRIORITY
@@ -778,11 +773,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Gets or sets a value indicating whether the build process should run as low priority.
         /// </summary>
-        public bool LowPriority
-        {
-            get => _lowPriority;
-            set => _lowPriority = value;
-        }
+        public bool LowPriority { get; set; }
 
         /// <summary>
         /// Retrieves a toolset.

@@ -122,7 +122,7 @@ namespace Microsoft.Build.BackEnd
             // For all processes in the list, send signal to terminate if able to connect
             foreach (Process nodeProcess in nodeProcesses)
             {
-                // Verified to miss nodes if smaller.
+                // Some nodes can take up to this long to respond, so this is the smallest it can be without erroneously missing nodes.
                 int timeout = 30;
 
                 // Attempt to connect to the process with the handshake without low priority.

@@ -624,11 +624,7 @@ namespace Microsoft.Build.CommandLine
 
                     // Honor the low priority flag, we place our selves below normal
                     // priority and let sub processes inherit that priority.
-                    if (lowPriority)
-                    {
-                        Process currentProc = Process.GetCurrentProcess();
-                        currentProc.PriorityClass = ProcessPriorityClass.BelowNormal;
-                    }
+                    ProcessPriorityClass priority = lowPriority ? ProcessPriorityClass.BelowNormal : ProcessPriorityClass.Normal;
 
                     DateTime t1 = DateTime.Now;
 
@@ -645,36 +641,39 @@ namespace Microsoft.Build.CommandLine
 #endif
                         {
                             // if everything checks out, and sufficient information is available to start building
-                            if (
-                                !BuildProject(
-                                    projectFile,
-                                    targets,
-                                    toolsVersion,
-                                    globalProperties,
-                                    restoreProperties,
-                                    loggers,
-                                    verbosity,
-                                    distributedLoggerRecords.ToArray(),
+                            using (IDisposable disposablePriority = PriorityUtils.SwitchProcessPriorityTo(priority))
+                            {
+                                if (
+                                    !BuildProject(
+                                        projectFile,
+                                        targets,
+                                        toolsVersion,
+                                        globalProperties,
+                                        restoreProperties,
+                                        loggers,
+                                        verbosity,
+                                        distributedLoggerRecords.ToArray(),
 #if FEATURE_XML_SCHEMA_VALIDATION
                                     needToValidateProject, schemaFile,
 #endif
                                     cpuCount,
-                                    enableNodeReuse,
-                                    preprocessWriter,
-                                    detailedSummary,
-                                    warningsAsErrors,
-                                    warningsAsMessages,
-                                    enableRestore,
-                                    profilerLogger,
-                                    enableProfiler,
-                                    interactive,
-                                    isolateProjects,
-                                    graphBuild,
-                                    lowPriority,
-                                    inputResultsCaches,
-                                    outputResultsCache))
-                            {
-                                exitType = ExitType.BuildError;
+                                        enableNodeReuse,
+                                        preprocessWriter,
+                                        detailedSummary,
+                                        warningsAsErrors,
+                                        warningsAsMessages,
+                                        enableRestore,
+                                        profilerLogger,
+                                        enableProfiler,
+                                        interactive,
+                                        isolateProjects,
+                                        graphBuild,
+                                        lowPriority,
+                                        inputResultsCaches,
+                                        outputResultsCache))
+                                {
+                                    exitType = ExitType.BuildError;
+                                }
                             }
                         }
 #if !STANDALONEBUILD

@@ -186,7 +186,7 @@ namespace Microsoft.Build.BackEnd
 
             // To avoid issues with mismatched priorities not shutting
             // down all the nodes on exit, we will attempt to shutdown
-            // all matching notes with and without the priroity bit set.
+            // all matching notes with and without the priority bit set.
             // This means we need both versions of the handshake.
             ShutdownAllNodes(
                 NodeProviderOutOfProc.GetHostHandshake(nodeReuse, enableLowPriority: false),
