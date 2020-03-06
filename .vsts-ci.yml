@@ -17,10 +17,14 @@ variables:
     value: .NETCore
   - name: _DotNetValidationArtifactsCategory
     value: .NETCore
+  - name: _PublishToAzure
+    value: false
   - ${{ if ne(variables['System.TeamProject'], 'public') }}:
     - name: PB_PublishBlobFeedUrl
       value: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
     - name: _DotNetPublishToBlobFeed
+      value: true
+    - name: _PublishToAzure
       value: true
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     - group: DotNet-CLI-SDLValidation-Params
