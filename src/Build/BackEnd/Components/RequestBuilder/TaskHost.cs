@@ -812,6 +812,7 @@ namespace Microsoft.Build.BackEnd
                 return lease;
             }
         }
+#endif
 
         /// <summary>
         /// Indicates to the TaskHost that it is no longer needed.
@@ -835,6 +836,7 @@ namespace Microsoft.Build.BackEnd
                 _taskLoggingContext = null;
                 _targetBuilderCallback = null;
 
+#if FEATURE_APPDOMAIN
                 // Clear out the sponsor (who is responsible for keeping the EngineProxy remoting lease alive until the task is done)
                 // this will be null if the engine proxy was never sent across an AppDomain boundary.
                 if (_sponsor != null)
@@ -849,9 +851,9 @@ namespace Microsoft.Build.BackEnd
                     _sponsor.Close();
                     _sponsor = null;
                 }
+#endif
             }
         }
-#endif
 
         /// <summary>
         /// Determine if the event is serializable. If we are running with multiple nodes we need to make sure the logging events are serializable. If not

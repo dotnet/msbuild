@@ -353,12 +353,7 @@ namespace Microsoft.Build.BackEnd
             {
                 _taskExecutionHost.CleanupForTask();
 
-                if (taskHost != null)
-                {
-#if FEATURE_APPDOMAIN
-                    taskHost.MarkAsInactive();
-#endif
-                }
+                taskHost?.MarkAsInactive();
 
                 // Now all task batches are done, apply all item adds to the outer 
                 // target batch; we do this even if the task wasn't found (in that case,
