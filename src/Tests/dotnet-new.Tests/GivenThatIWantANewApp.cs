@@ -43,5 +43,50 @@ namespace Microsoft.DotNet.New.Tests
 
             result.Should().Fail();
         }
+
+        [Fact]
+        public void When_dotnet_new_is_invoked_with_preferred_lang_env_var_set()
+        {
+            var rootPath = _testAssetsManager.CreateTestDirectory().Path;
+
+            new DotnetCommand(Log, "new")
+                .WithWorkingDirectory(rootPath)
+                .WithEnvironmentVariable("DOTNET_NEW_PREFERRED_LANG", "F#")
+                .Execute($"console", "--debug:ephemeral-hive", "--no-restore", "-n", "f1")
+                .Should().Pass();
+
+            string expectedFsprojPath = Path.Combine(rootPath, "f1", "f1.fsproj");
+            Assert.True(File.Exists(expectedFsprojPath), $"expected '{expectedFsprojPath}' but was not found");
+        }
+
+        [Fact]
+        public void When_dotnet_new_is_invoked_default_is_csharp()
+        {
+            var rootPath = _testAssetsManager.CreateTestDirectory().Path;
+
+            new DotnetCommand(Log, "new")
+                .WithWorkingDirectory(rootPath)
+                .Execute($"console", "--debug:ephemeral-hive", "--no-restore", "-n", "c1")
+                .Should().Pass();
+
+            string expectedCsprojPath = Path.Combine(rootPath, "c1", "c1.csproj");
+            Assert.True(File.Exists(expectedCsprojPath), $"expected '{expectedCsprojPath}' but was not found");
+        }
+
+        [Fact]
+        public void When_dotnet_new_is_invoked_with_preferred_lang_env_var_empty()
+        {
+            var rootPath = _testAssetsManager.CreateTestDirectory().Path;
+
+            new DotnetCommand(Log, "new")
+                .WithWorkingDirectory(rootPath)
+                .WithEnvironmentVariable("DOTNET_NEW_PREFERRED_LANG", "")
+                .Execute($"console", "--debug:ephemeral-hive", "--no-restore", "-n", "c1")
+                .Should().Pass();
+
+            string expectedCsprojPath = Path.Combine(rootPath, "c1", "c1.csproj");
+            Assert.True(File.Exists(expectedCsprojPath), $"expected '{expectedCsprojPath}' but was not found");
+        }
+
     }
 }
