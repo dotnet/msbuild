@@ -662,6 +662,7 @@ namespace Microsoft.Build.CommandLine
                                         cpuCount,
                                         enableNodeReuse,
                                         preprocessWriter,
+                                        targetsWriter,
                                         detailedSummary,
                                         warningsAsErrors,
                                         warningsAsMessages,

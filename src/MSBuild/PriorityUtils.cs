@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace Microsoft.Build.CommandLine
 {
-    class PriorityUtils
+    internal class PriorityUtils
     {
         private static ProcessPriorityClass? _initialPriorityClass = null;
 
