@@ -126,6 +126,9 @@ namespace Microsoft.Build.BackEnd
             _continueOnError = false;
             _activeProxy = true;
             _callbackMonitor = new Object();
+
+            // Ensure that we have at least one core to run this task
+            RequestCores(1);
         }
 
         /// <summary>
@@ -696,6 +699,13 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        internal void ReleaseAllCores()
+        {
+            ReleaseCores(runningTotal);
+
+            runningTotal = 0;
+        }
+
         /// <summary>
         /// Called by the internal MSBuild task.
         /// Does not take the lock because it is called by another request builder thread.
@@ -813,6 +823,8 @@ namespace Microsoft.Build.BackEnd
             {
                 VerifyActiveProxy();
                 _activeProxy = false;
+
+                ReleaseAllCores();
 
                 // Since the task has a pointer to this class it may store it in a static field. Null out
                 // internal data so the leak of this object doesn't lead to a major memory leak.            

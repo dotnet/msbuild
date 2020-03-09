@@ -46,7 +46,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             test.BuildEngine7.RequestCores(2).ShouldBe(1);
         }
 
-        [Fact]
+        [Fact(Skip = "TODO: test harness to tweak number of assignable cores")]
         public void TestReleasingInvalidNumCores()
         {
             // assume multiproc build of 40

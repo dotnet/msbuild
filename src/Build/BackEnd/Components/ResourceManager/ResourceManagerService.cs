@@ -57,8 +57,6 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
                 {
                     return i;
                 }
-
-                Console.WriteLine("Got a core");
             }
 
             return i;
