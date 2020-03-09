@@ -628,6 +628,7 @@ namespace Microsoft.Build.CommandLine
                     // Honor the low priority flag, we place our selves below normal
                     // priority and let sub processes inherit that priority.
                     ProcessPriorityClass priority = lowPriority ? ProcessPriorityClass.BelowNormal : ProcessPriorityClass.Normal;
+                    PriorityUtils.SwitchProcessPriorityTo(priority);
 
                     DateTime t1 = DateTime.Now;
 
@@ -644,40 +645,37 @@ namespace Microsoft.Build.CommandLine
 #endif
                         {
                             // if everything checks out, and sufficient information is available to start building
-                            using (IDisposable disposablePriority = PriorityUtils.SwitchProcessPriorityTo(priority))
-                            {
-                                if (
-                                    !BuildProject(
-                                        projectFile,
-                                        targets,
-                                        toolsVersion,
-                                        globalProperties,
-                                        restoreProperties,
-                                        loggers,
-                                        verbosity,
-                                        distributedLoggerRecords.ToArray(),
+                            if (
+                                !BuildProject(
+                                    projectFile,
+                                    targets,
+                                    toolsVersion,
+                                    globalProperties,
+                                    restoreProperties,
+                                    loggers,
+                                    verbosity,
+                                    distributedLoggerRecords.ToArray(),
 #if FEATURE_XML_SCHEMA_VALIDATION
-                                        needToValidateProject, schemaFile,
+                                    needToValidateProject, schemaFile,
 #endif
-                                        cpuCount,
-                                        enableNodeReuse,
-                                        preprocessWriter,
-                                        targetsWriter,
-                                        detailedSummary,
-                                        warningsAsErrors,
-                                        warningsAsMessages,
-                                        enableRestore,
-                                        profilerLogger,
-                                        enableProfiler,
-                                        interactive,
-                                        isolateProjects,
-                                        graphBuild,
-                                        lowPriority,
-                                        inputResultsCaches,
-                                        outputResultsCache))
-                                {
-                                    exitType = ExitType.BuildError;
-                                }
+                                    cpuCount,
+                                    enableNodeReuse,
+                                    preprocessWriter,
+                                    targetsWriter,
+                                    detailedSummary,
+                                    warningsAsErrors,
+                                    warningsAsMessages,
+                                    enableRestore,
+                                    profilerLogger,
+                                    enableProfiler,
+                                    interactive,
+                                    isolateProjects,
+                                    graphBuild,
+                                    lowPriority,
+                                    inputResultsCaches,
+                                    outputResultsCache))
+                            {
+                                exitType = ExitType.BuildError;
                             }
                         }
 #if !STANDALONEBUILD

@@ -7,26 +7,15 @@ namespace Microsoft.Build.CommandLine
 {
     internal class PriorityUtils
     {
-        private static ProcessPriorityClass? _initialPriorityClass = null;
-
-        public static DisposablePriority SwitchProcessPriorityTo(ProcessPriorityClass priority)
+        public static void SwitchProcessPriorityTo(ProcessPriorityClass priority)
         {
-            _initialPriorityClass ??= Process.GetCurrentProcess().PriorityClass;
-            Process.GetCurrentProcess().PriorityClass = priority;
-            return new DisposablePriority();
-        }
-
-        private static void ResetPriority()
-        {
-            Process.GetCurrentProcess().PriorityClass = _initialPriorityClass ?? ProcessPriorityClass.Normal;
-        }
-
-        internal class DisposablePriority : IDisposable
-        {
-            public void Dispose()
+            try
             {
-                ResetPriority();
+                Process.GetCurrentProcess().PriorityClass = priority;
             }
+            // Changing to a higher priority can cause exceptions on certain operating systems if
+            // run without administrator privileges. Swallow these exceptions.
+            catch (Exception) { }
         }
     }
 }
