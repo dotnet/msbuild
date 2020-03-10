@@ -55,7 +55,7 @@ jobs:
         - _PerfIterations: 25
     steps:
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
-      - script: eng\common\CIBuild.cmd
+      - script: eng\CIBuild.cmd
                   -configuration $(_BuildConfig)
                   $(_PublishArgs)
                   $(_SignArgs)
@@ -82,7 +82,7 @@ jobs:
       #       HelixAccessToken: ''
 
     - ${{ if eq(parameters.agentOs, 'Windows_NT_FullFramework') }}:
-      - script: eng\common\CIBuild.cmd
+      - script: eng\CIBuild.cmd
                   -configuration $(_BuildConfig)
                   $(_PublishArgs)
                   $(_SignArgs)
@@ -111,7 +111,7 @@ jobs:
       #       HelixAccessToken: ''
 
     - ${{ if eq(parameters.agentOs, 'Windows_NT_TestAsTools') }}:
-      - script: eng\common\CIBuild.cmd
+      - script: eng\CIBuild.cmd
                   -configuration $(_BuildConfig)
                   $(_PublishArgs)
                   $(_SignArgs)
