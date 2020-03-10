@@ -859,7 +859,6 @@ namespace Microsoft.Build.BackEnd
                         // Rethrow wrapped in order to avoid losing the callstack
                         throw new InternalLoggerException(taskException.Message, taskException, ex.BuildEventArgs, ex.ErrorCode, ex.HelpKeyword, ex.InitializationException);
                     }
-#if FEATURE_VARIOUS_EXCEPTIONS
                     else if (type == typeof(ThreadAbortException))
                     {
                         Thread.ResetAbort();
@@ -869,7 +868,6 @@ namespace Microsoft.Build.BackEnd
                         // Stack will be lost
                         throw taskException;
                     }
-#endif
                     else if (type == typeof(BuildAbortedException))
                     {
                         _continueOnError = ContinueOnError.ErrorAndStop;
