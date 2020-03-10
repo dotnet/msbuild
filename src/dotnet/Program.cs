@@ -150,6 +150,8 @@ namespace Microsoft.DotNet.Cli
                           environmentProvider.GetEnvironmentVariableAsBool("DOTNET_CLI_TELEMETRY_OPTOUT", defaultValue: false);
                         bool addGlobalToolsToPath =
                             environmentProvider.GetEnvironmentVariableAsBool("DOTNET_ADD_GLOBAL_TOOLS_TO_PATH", defaultValue: true);
+                        bool nologo =
+                            environmentProvider.GetEnvironmentVariableAsBool("DOTNET_NOLOGO", defaultValue: false);
 
                         ReportDotnetHomeUsage(environmentProvider);
 
@@ -166,7 +168,8 @@ namespace Microsoft.DotNet.Cli
                         var dotnetFirstRunConfiguration = new DotnetFirstRunConfiguration(
                             generateAspNetCertificate: generateAspNetCertificate,
                             telemetryOptout: telemetryOptout,
-                            addGlobalToolsToPath: addGlobalToolsToPath);
+                            addGlobalToolsToPath: addGlobalToolsToPath,
+                            nologo: nologo);
 
                         ConfigureDotNetForFirstTimeUse(
                             firstTimeUseNoticeSentinel,
