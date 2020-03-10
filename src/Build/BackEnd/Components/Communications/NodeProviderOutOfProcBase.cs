@@ -314,7 +314,7 @@ namespace Microsoft.Build.BackEnd
         private Stream TryConnectToProcess(int nodeProcessId, int timeout, long hostHandshake, long clientHandshake)
         {
             // Try and connect to the process.
-            string pipeName = "MSBuild" + nodeProcessId;
+            string pipeName = NamedPipeUtil.GetPipeNameOrPath("MSBuild" + nodeProcessId);
 
             NamedPipeClientStream nodeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
@@ -327,8 +327,8 @@ namespace Microsoft.Build.BackEnd
             {
                 nodeStream.Connect(timeout);
 
-#if !MONO && !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                if (NativeMethodsShared.IsWindows)
+#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+                if (NativeMethodsShared.IsWindows && !NativeMethodsShared.IsMono)
                 {
                     // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
                     // been faked up with ACLs that would let us attach to it.  It could then issue fake build requests back to
@@ -361,13 +361,8 @@ namespace Microsoft.Build.BackEnd
                 CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
                 return nodeStream;
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 // Can be:
                 // UnauthorizedAccessException -- Couldn't connect, might not be a node.
                 // IOException -- Couldn't connect, already in use.
@@ -441,10 +436,14 @@ namespace Microsoft.Build.BackEnd
 
             string exeName = msbuildLocation;
 
-#if RUNTIME_TYPE_NETCORE
-            // Run the child process with the same host as the currently-running process.
-            exeName = GetCurrentHost();
-            commandLineArgs = "\"" + msbuildLocation + "\" " + commandLineArgs;
+#if RUNTIME_TYPE_NETCORE || MONO
+            // Mono automagically uses the current mono, to execute a managed assembly
+            if (!NativeMethodsShared.IsMono)
+            {
+                // Run the child process with the same host as the currently-running process.
+                exeName = GetCurrentHost();
+                commandLineArgs = "\"" + msbuildLocation + "\" " + commandLineArgs;
+            }
 #endif
 
             if (!NativeMethodsShared.IsWindows)
@@ -546,7 +545,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-#if RUNTIME_TYPE_NETCORE
+#if RUNTIME_TYPE_NETCORE || MONO
         private static string CurrentHost;
 #endif
 
@@ -556,7 +555,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>The full path to the executable hosting the current process, or null if running on Full Framework on Windows.</returns>
         private static string GetCurrentHost()
         {
-#if RUNTIME_TYPE_NETCORE
+#if RUNTIME_TYPE_NETCORE || MONO
             if (CurrentHost == null)
             {
                 using (Process currentProcess = Process.GetCurrentProcess())
@@ -829,13 +828,8 @@ namespace Microsoft.Build.BackEnd
                             CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} is still running.", _processId);
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
-                        if (ExceptionHandling.IsCriticalException(e))
-                        {
-                            throw;
-                        }
-
                         CommunicationsUtilities.Trace(_nodeId, "Unable to retrieve remote process information. {0}", e);
                     }
 

@@ -79,6 +79,11 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly bool LogPropertyFunctionsRequiringReflection = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildLogPropertyFunctionsRequiringReflection"));
 
+        /// <summary>
+        /// Log property tracking information.
+        /// </summary>
+        public readonly int LogPropertyTracking = ParseIntFromEnvironmentVariableOrDefault("MsBuildLogPropertyTracking", 0); // Default to logging nothing via the property tracker.
+
         private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
         {
             return int.TryParse(Environment.GetEnvironmentVariable(environmentVariable), out int result)
@@ -89,6 +94,11 @@ namespace Microsoft.Build.Utilities
 
     internal class EscapeHatches
     {
+        /// <summary>
+        /// Do not log command line information to build loggers. Useful to unbreak people who parse the msbuild log and who are unwilling to change their code.
+        /// </summary>
+        public readonly bool DoNotSendDeferredMessagesToBuildManager = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildDoNotSendDeferredMessagesToBuildManager"));
+
         /// <summary>
         /// https://github.com/microsoft/msbuild/pull/4975 started expanding qualified metadata in Update operations. Before they'd expand to empty strings.
         /// This escape hatch turns back the old empty string behavior.
@@ -127,6 +137,23 @@ namespace Microsoft.Build.Utilities
             set
             {
                 _logProjectImports = value;
+            }
+        }
+
+        private bool? _logTaskInputs;
+        public bool LogTaskInputs
+        {
+            get
+            {
+                if (_logTaskInputs == null)
+                {
+                    _logTaskInputs = Environment.GetEnvironmentVariable("MSBUILDLOGTASKINPUTS") == "1";
+                }
+                return _logTaskInputs.Value;
+            }
+            set
+            {
+                _logTaskInputs = value;
             }
         }
 
@@ -186,9 +213,24 @@ namespace Microsoft.Build.Utilities
         public readonly bool DisableNuGetSdkResolver = Environment.GetEnvironmentVariable("MSBUILDDISABLENUGETSDKRESOLVER") == "1";
 
         /// <summary>
+        /// Don't delete TargetPath metadata from associated files found by RAR.
+        /// </summary>
+        public readonly bool TargetPathForRelatedFiles = Environment.GetEnvironmentVariable("MSBUILDTARGETPATHFORRELATEDFILES") == "1";
+
+        /// <summary>
+        /// Disable AssemblyLoadContext isolation for plugins.
+        /// </summary>
+        public readonly bool UseSingleLoadContext = Environment.GetEnvironmentVariable("MSBUILDSINGLELOADCONTEXT") == "1";
+
+        /// <summary>
         /// Enables the user of autorun functionality in CMD.exe on Windows which is disabled by default in MSBuild.
         /// </summary>
         public readonly bool UseAutoRunWhenLaunchingProcessUnderCmd = Environment.GetEnvironmentVariable("MSBUILDUSERAUTORUNINCMD") == "1";
+
+        /// <summary>
+        /// Disables switching codepage to UTF-8 after detection of characters that can't be represented in the current codepage.
+        /// </summary>
+        public readonly bool AvoidUnicodeWhenWritingToolTaskBatch = Environment.GetEnvironmentVariable("MSBUILDAVOIDUNICODE") == "1";
 
         /// <summary>
         /// Workaround for https://github.com/Microsoft/vstest/issues/1503.

@@ -38,7 +38,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="_ComputeTargetFrameworkItems" Returns="@(InnerOutput)">
     <ItemGroup>
       <_TargetFramework Include="$(TargetFrameworks)" />
-      <!-- Make normalization explicit: Trim; Deduplicate by keeping first occurence, case insensitive -->
+      <!-- Make normalization explicit: Trim; Deduplicate by keeping first occurrence, case insensitive -->
       <_TargetFrameworkNormalized Include="@(_TargetFramework->Trim()->Distinct())" />
       <_InnerBuildProjects Include="$(MSBuildProjectFile)">
         <AdditionalProperties>TargetFramework=%(_TargetFrameworkNormalized.Identity)</AdditionalProperties>
@@ -136,7 +136,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     This will import NuGet restore targets. We need restore to work before any package assets are available.
   -->
   <PropertyGroup>
-    <NuGetRestoreTargets Condition="'$(NuGetRestoreTargets)'=='' and '$([MSBuild]::IsRunningFromVisualStudio())'=='true'">$(MSBuildToolsPath32)\..\..\..\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.targets</NuGetRestoreTargets>
+    <MSBuildUseVisualStudioDirectoryLayout Condition="'$(MSBuildUseVisualStudioDirectoryLayout)'==''">$([MSBuild]::IsRunningFromVisualStudio())</MSBuildUseVisualStudioDirectoryLayout>
+    <NuGetRestoreTargets Condition="'$(NuGetRestoreTargets)'=='' and '$(MSBuildUseVisualStudioDirectoryLayout)'=='true'">$(MSBuildToolsPath32)\..\..\..\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.targets</NuGetRestoreTargets>
     <NuGetRestoreTargets Condition="'$(NuGetRestoreTargets)'==''">$(MSBuildToolsPath)\NuGet.targets</NuGetRestoreTargets>
   </PropertyGroup>
 

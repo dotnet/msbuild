@@ -269,7 +269,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// A list of assembly files that can be part of the search and resolution process.
-        /// These must be absolute filesnames, or project-relative filenames.
+        /// These must be absolute filenames, or project-relative filenames.
         ///
         /// Assembly files in this list will be considered when SearchPaths contains
         /// {CandidateAssemblyFiles} as one of the paths to consider.
@@ -1269,6 +1269,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void LogInputs()
         {
+            if (Traits.Instance.EscapeHatches.LogTaskInputs)
+            {
+                // the inputs will be logged automatically anyway, avoid duplication in the logs
+                return;
+            }
+
             if (!Silent)
             {
                 Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "TargetFrameworkMoniker");

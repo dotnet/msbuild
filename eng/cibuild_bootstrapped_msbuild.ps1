@@ -106,6 +106,11 @@ try {
 
   if ($buildStage1)
   {
+    if (Test-Path $Stage1Dir)
+    {
+      Remove-Item -Force -Recurse $Stage1Dir
+    }
+
     Move-Item -Path $ArtifactsDir -Destination $Stage1Dir -Force
   }
 

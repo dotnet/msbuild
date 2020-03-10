@@ -856,8 +856,8 @@ namespace Microsoft.Build.UnitTests
             string nonAnsiCharacters = "\u521B\u5EFA";
             string pathWithAnsiCharacters = @"c:\windows\system32\cmd.exe";
 
-            Assert.False(Exec.CanEncodeString(defaultEncoding.CodePage, nonAnsiCharacters));
-            Assert.True(Exec.CanEncodeString(defaultEncoding.CodePage, pathWithAnsiCharacters));
+            Assert.False(EncodingUtilities.CanEncodeString(defaultEncoding.CodePage, nonAnsiCharacters));
+            Assert.True(EncodingUtilities.CanEncodeString(defaultEncoding.CodePage, pathWithAnsiCharacters));
         }
 
         [Fact]

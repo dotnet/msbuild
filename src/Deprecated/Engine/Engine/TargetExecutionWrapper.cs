@@ -822,7 +822,7 @@ namespace Microsoft.Build.BuildEngine
                         }
                         else
                         {
-                            // The error occured outside of the user code (it may still be caused
+                            // The error occurred outside of the user code (it may still be caused
                             // by bad user input), the build should be terminated. The exception
                             // will be logged as a fatal build error in engine. The exceptions caused
                             // by user code are converted into LogFatalTaskError messages by the TaskEngine
@@ -1001,7 +1001,7 @@ namespace Microsoft.Build.BuildEngine
                 ProjectBuildState buildContext = waitingTargets[0];
                 waitingTargets.RemoveAt(0);
 
-                //Don't report any messages within the context in which the error occured. That context
+                //Don't report any messages within the context in which the error occurred. That context
                 //is addressed as the base of the stack 
                 if (buildContext == errorContext ||
                     buildContext.CurrentBuildContextState == ProjectBuildState.BuildContextState.RequestFilled)

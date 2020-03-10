@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -10,11 +10,19 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
     public sealed class ToolTask_Tests
     {
+        private ITestOutputHelper _output;
+
+        public ToolTask_Tests(ITestOutputHelper testOutput)
+        {
+            _output = testOutput;
+        }
+
         private class MyTool : ToolTask, IDisposable
         {
             private string _fullToolName;
@@ -789,5 +797,65 @@ namespace Microsoft.Build.UnitTests
 
             public string ResponseFileCommands { get; private set; }
         }
+
+        [Theory]
+        [InlineData("MSBUILDAVOIDUNICODE", null, false)]
+        [InlineData("MSBUILDAVOIDUNICODE", "0", false)]
+        [InlineData("MSBUILDAVOIDUNICODE", "1", true)]
+        public void ToolTaskCanUseUnicode(string environmentVariableName, string environmentVariableValue, bool expectNormalizationToANSI)
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
+
+            testEnvironment.SetEnvironmentVariable(environmentVariableName, environmentVariableValue);
+
+            var output = testEnvironment.ExpectFile();
+
+            MockEngine engine = new MockEngine();
+
+            var task = new ToolTaskThatNeedsUnicode
+            {
+                BuildEngine = engine,
+                UseCommandProcessor = true,
+                OutputPath = output.Path,
+            };
+
+            task.Execute();
+
+            File.Exists(output.Path).ShouldBeTrue();
+            if (NativeMethodsShared.IsUnixLike // treat all UNIXy OSes as capable of UTF-8 everywhere
+                || !expectNormalizationToANSI)
+            {
+                File.ReadAllText(output.Path).ShouldContain("łoł");
+            }
+            else
+            {
+                File.ReadAllText(output.Path).ShouldContain("lol");
+            }
+        }
+
+
+        private sealed class ToolTaskThatNeedsUnicode : ToolTask
+        {
+            protected override string ToolName => "cmd.exe";
+
+            [Required]
+            public string OutputPath { get; set; }
+
+            public ToolTaskThatNeedsUnicode()
+            {
+                UseCommandProcessor = true;
+            }
+
+            protected override string GenerateFullPathToTool()
+            {
+                return "cmd.exe";
+            }
+
+            protected override string GenerateCommandLineCommands()
+            {
+                return $"echo łoł > {OutputPath}";
+            }
+        }
+
     }
 }

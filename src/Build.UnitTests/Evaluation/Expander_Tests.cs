@@ -3883,6 +3883,12 @@ $(
         }
 
         [Fact]
+        public void PropertyFunctionStringPadLeftComplex()
+        {
+            TestPropertyFunction("$(prop.PadLeft($([MSBuild]::Multiply(1, 2)), '0'))", "prop", "x", "0x");
+        }
+
+        [Fact]
         public void PropertyFunctionStringPadRight1()
         {
             TestPropertyFunction("$(prop.PadRight(2))", "prop", "x", "x ");
@@ -3947,6 +3953,12 @@ $(
         }
 
         [Fact]
+        public void PropertyFunctionMSBuildAddComplex()
+        {
+            TestPropertyFunction("$([MSBuild]::Add($(X), $([MSBuild]::Add(2, 3))))", "X", "7", "12");
+        }
+
+        [Fact]
         public void PropertyFunctionMSBuildSubtract()
         {
             TestPropertyFunction("$([MSBuild]::Subtract($(X), 20100000))", "X", "20100042", "42");
@@ -3956,6 +3968,12 @@ $(
         public void PropertyFunctionMSBuildMultiply()
         {
             TestPropertyFunction("$([MSBuild]::Multiply($(X), 8800))", "X", "2", "17600");
+        }
+
+        [Fact]
+        public void PropertyFunctionMSBuildMultiplyComplex()
+        {
+            TestPropertyFunction("$([MSBuild]::Multiply($(X), $([MSBuild]::Multiply(1, 8800))))", "X", "2", "17600");
         }
 
         [Fact]

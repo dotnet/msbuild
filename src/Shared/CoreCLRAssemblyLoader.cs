@@ -1,12 +1,13 @@
 ﻿// Copyright (c) Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information.
 
+using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
-using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared
 {
@@ -22,16 +23,7 @@ namespace Microsoft.Build.Shared
 
         private bool _resolvingHandlerHookedUp = false;
 
-        private static readonly string[] _extensions = new[] { "ni.dll", "ni.exe", "dll", "exe" };
         private static readonly Version _currentAssemblyVersion = new Version(Microsoft.Build.Shared.MSBuildConstants.CurrentAssemblyVersion);
-        private static readonly HashSet<string> _wellKnownAssemblyNames = new HashSet<string>(
-            new[]
-            {
-                "Microsoft.Build",
-                "Microsoft.Build.Framework",
-                "Microsoft.Build.Tasks.Core",
-                "Microsoft.Build.Utilities.Core"
-            });
 
         public void AddDependencyLocation(string fullPath)
         {
@@ -55,6 +47,23 @@ namespace Microsoft.Build.Shared
 
             Debug.Assert(Path.IsPathRooted(fullPath));
 
+            // Normalize because the same assembly might get loaded via
+            // multiple paths (for instance, the `build` and `buildCrossTargeting`
+            // folders in a NuGet package).
+            fullPath = FileUtilities.NormalizePath(fullPath);
+
+            if (Traits.Instance.EscapeHatches.UseSingleLoadContext)
+            {
+                return LoadUsingLegacyDefaultContext(fullPath);
+            }
+            else
+            {
+                return LoadUsingPluginContext(fullPath);
+            }
+        }
+
+        private Assembly LoadUsingLegacyDefaultContext(string fullPath)
+        {
             lock (_guard)
             {
                 if (!_resolvingHandlerHookedUp)
@@ -73,9 +82,32 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        private Assembly LoadUsingPluginContext(string fullPath)
+        {
+            lock (_guard)
+            {
+                Assembly assembly;
+                if (_pathsToAssemblies.TryGetValue(fullPath, out assembly))
+                {
+                    return assembly;
+                }
+
+                var contextForAssemblyPath = new MSBuildLoadContext(fullPath);
+
+                assembly = contextForAssemblyPath.LoadFromAssemblyPath(fullPath);
+
+                if (assembly != null)
+                {
+                    _pathsToAssemblies[fullPath] = assembly;
+                }
+
+                return assembly;
+            }
+        }
+
         private Assembly TryGetWellKnownAssembly(AssemblyLoadContext context, AssemblyName assemblyName)
         {
-            if (!_wellKnownAssemblyNames.Contains(assemblyName.Name))
+            if (!MSBuildLoadContext.WellKnownAssemblyNames.Contains(assemblyName.Name))
             {
                 return null;
             }
@@ -121,7 +153,7 @@ namespace Microsoft.Build.Shared
             {
                 foreach (var searchPath in searchPaths)
                 {
-                    foreach (var extension in _extensions)
+                    foreach (var extension in MSBuildLoadContext.Extensions)
                     {
                         var candidatePath = Path.Combine(searchPath,
                             cultureSubfolder,

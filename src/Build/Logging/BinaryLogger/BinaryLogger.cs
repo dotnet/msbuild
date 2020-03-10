@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
+using System.Reflection;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -29,10 +32,14 @@ namespace Microsoft.Build.Logging
         // version 5:
         //   - new EvaluationFinished.ProfilerResult
         // version 6:
-        //   -  Ids and parent ids for the evaluation locations
+        //   - Ids and parent ids for the evaluation locations
         // version 7:
-        //   -  Include ProjectStartedEventArgs.GlobalProperties
-        internal const int FileFormatVersion = 7;
+        //   - Include ProjectStartedEventArgs.GlobalProperties
+        // version 8:
+        //   - This was used in a now-reverted change but is the same as 9.
+        // version 9:
+        //   - new record kinds: EnvironmentVariableRead, PropertyReassignment, UninitializedPropertyRead
+        internal const int FileFormatVersion = 9;
 
         private Stream stream;
         private BinaryWriter binaryWriter;
@@ -139,7 +146,21 @@ namespace Microsoft.Build.Logging
 
             binaryWriter.Write(FileFormatVersion);
 
+            LogInitialInfo();
+
             eventSource.AnyEventRaised += EventSource_AnyEventRaised;
+        }
+
+        private void LogInitialInfo()
+        {
+            LogMessage("BinLogFilePath=" + FilePath);
+        }
+
+        private void LogMessage(string text)
+        {
+            var args = new BuildMessageEventArgs(text, helpKeyword: null, senderName: "BinaryLogger", MessageImportance.Normal);
+            args.BuildEventContext = BuildEventContext.Invalid;
+            Write(args);
         }
 
         /// <summary>

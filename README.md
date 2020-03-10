@@ -6,11 +6,15 @@ For more information on MSBuild, see the [MSBuild documentation](https://docs.mi
 
 ### Build Status
 
-The current development branch is `master`. Changes in `master` will go into a future update of MSBuild, which will release with Visual Studio 16.5 and a corresponding version of the .NET Core SDK.
+The current development branch is `master`. Changes in `master` will go into a future update of MSBuild, which will release with Visual Studio 16.6 and a corresponding version of the .NET Core SDK.
 
 [![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=master)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=master)
 
-We have forked for MSBuild 16.4 in the branch [`vs16.4`](https://github.com/Microsoft/msbuild/tree/vs16.4). Changes to that branch need special approval.
+We have forked for MSBuild 16.5 in the branch [`vs16.5`](https://github.com/Microsoft/msbuild/tree/vs16.5). Changes to that branch need special approval.
+
+[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.5)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=vs16.5)
+
+MSBuild 16.4 builds from the branch [`vs16.4`](https://github.com/Microsoft/msbuild/tree/vs16.4). Only high-priority bugfixes will be considered for servicing 16.4.
 
 [![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.4)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=vs16.4)
 

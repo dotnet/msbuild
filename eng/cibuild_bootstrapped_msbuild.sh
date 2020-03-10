@@ -1,6 +1,6 @@
 #! /bin/bash
 
-configuration="debug"
+configuration="Debug"
 host_type="core"
 build_stage1=true
 properties=
@@ -75,7 +75,7 @@ then
   export MonoTool=`which mono`
 
   extn_path="$bootstrapRoot/net472/MSBuild/Current/Bin/Extensions"
-  extra_properties=" /p:MSBuildExtensionsPath=$extn_path /p:MSBuildExtensionsPath32=$extn_path /p:MSBuildExtensionsPath64=$extn_path /p:DeterministicSourcePaths=false /m:1"
+  extra_properties=" /p:MSBuildExtensionsPath=$extn_path /p:MSBuildExtensionsPath32=$extn_path /p:MSBuildExtensionsPath64=$extn_path /p:DeterministicSourcePaths=false"
 else
   echo "Unsupported hostType ($host_type)"
   exit 1
@@ -95,4 +95,3 @@ export DOTNET_HOST_PATH="$_InitializeDotNetCli/dotnet"
 # - Do run tests
 # - Don't try to create a bootstrap deployment
 . "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties
-

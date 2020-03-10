@@ -2528,6 +2528,11 @@
         <target state="translated">MSB3762: 参照がタスクに渡されませんでした。少なくとも mscorlib と Windows.Foundation への参照が必要です。</target>
         <note>{StrBegin="MSB3762: "}</note>
       </trans-unit>
+      <trans-unit id="Xaml.DuplicatePropertyName">
+        <source>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</source>
+        <target state="new">MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</target>
+        <note>{StrBegin="MSB3724: "}</note>
+      </trans-unit>
       <trans-unit id="Xaml.TaskCreationFailed">
         <source>MSB3686: Unable to create Xaml task.  Compilation failed.  {0}</source>
         <target state="translated">MSB3686: Xaml タスクを作成できません。コンパイルに失敗しました。{0}</target>
@@ -3035,7 +3040,7 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.AddingRedistFile">
         <source>Adding file "{0}" from redist folder with target path "{1}".</source>
-        <target state="translated">ターゲット パスが "{1}" の再頒布可能パッケージ フォルダーからファイル "{0}" を追加しています。</target>
+        <target state="translated">redist フォルダーからターゲット パス "{1}" のファイル "{0}" を追加しています。</target>
         <note />
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.ConflictRedistSameSDK">
@@ -3105,7 +3110,7 @@
       </trans-unit>
       <trans-unit id="GetSDKReferenceFiles.CannotHaveEmptyTargetArchitecture">
         <source>MSB3798: The targeted architecture for the resolved sdk reference "{0}" was empty. Cannot find reference or redist files without a targeted architecture.</source>
-        <target state="translated">MSB3798: 解決された SDK 参照 "{0}" のターゲット アーキテクチャが空です。ターゲット アーキテクチャがないと、参照または再頒布可能パッケージ ファイルを検索できません。</target>
+        <target state="translated">MSB3798: 解決された SDK 参照 "{0}" のターゲット アーキテクチャが空です。ターゲット アーキテクチャがないと、参照または再頒布可能パッケージ ファイルを見つけることができません。</target>
         <note>{StrBegin="MSB3798: "}</note>
       </trans-unit>
       <trans-unit id="FindInvalidProjectReferences.WarnWhenVersionIsIncompatible">
@@ -3145,7 +3150,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.SkippingUnchangedFile">
         <source>Skipping write to file "{0}" because content would not change.</source>
-        <target state="needs-review-translation">MSB3493: コンテンツが変更されていないため、ファイル "{0}" への書き込みをスキップします。</target>
+        <target state="translated">コンテンツが変更されていないため、ファイル "{0}" への書き込みをスキップします。</target>
         <note />
       </trans-unit>
       <trans-unit id="Telemetry.IllegalEventDataString">

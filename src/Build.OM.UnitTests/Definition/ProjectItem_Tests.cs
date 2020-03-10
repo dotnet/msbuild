@@ -2832,11 +2832,16 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                                   <m2>%(Identity)-m2</m2>
                               </from2>
 
+                              <from3 Include='1;2'>
+                                  <m3>%(Identity)-m3</m3>
+                              </from3>
+
                               <to Include='x.cs;2;ccc;1;d;y.cs'>
                                   <m3>m3_contents</m3>
                               </to>
 
-                              <to Update='@(from1);d;c*c;*.cs;@(from2)'>
+                              <to Update='@(from1);d;c*c;*.cs;@(from2);@(from3)'>
+                                  <m2>%(from2.m2);%(from3.m3)</m2>
                                   <m3>%(from1.m1);%(from2.m2)</m3>
                                   <m4>%(from1.m2);%(from2.m1)</m4>
                                   <m5>%(Identity)</m5>
@@ -2847,6 +2852,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             var expectedMetadataX = new Dictionary<string, string>
             {
+                {"m2", ";"},
                 {"m3", "x.cs-m1;"},
                 {"m4", ";"},
                 {"m5", "x.cs"},
@@ -2854,6 +2860,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             var expectedMetadata2 = new Dictionary<string, string>
             {
+                {"m2", "2-m2;2-m3"},
                 {"m3", ";2-m2"},
                 {"m4", ";"},
                 {"m5", "2"},
@@ -2861,6 +2868,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             var expectedMetadataCCC = new Dictionary<string, string>
             {
+                {"m2", ";"},
                 {"m3", ";"},
                 {"m4", ";"},
                 {"m5", "ccc"},
@@ -2868,6 +2876,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             var expectedMetadata1 = new Dictionary<string, string>
             {
+                {"m2", "1-m2;1-m3"},
                 {"m3", ";1-m2"},
                 {"m4", ";"},
                 {"m5", "1"},
@@ -2876,6 +2885,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             var expectedMetadataD = new Dictionary<string, string>
             {
+                {"m2", ";"},
                 {"m3", ";"},
                 {"m4", ";"},
                 {"m5", "d"},
@@ -2883,19 +2893,21 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             var expectedMetadataY = new Dictionary<string, string>
             {
+                {"m2", ";"},
                 {"m3", "y.cs-m1;"},
                 {"m4", ";"},
                 {"m5", "y.cs"},
             };
 
-            items[4].ItemType.ShouldBe("to");
+            items[5].ItemType.ShouldBe("from3");
+            items[6].ItemType.ShouldBe("to");
 
-            ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataX, items[4]);
-            ObjectModelHelpers.AssertItemHasMetadata(expectedMetadata2, items[5]);
-            ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataCCC, items[6]);
-            ObjectModelHelpers.AssertItemHasMetadata(expectedMetadata1, items[7]);
-            ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataD, items[8]);
-            ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataY, items[9]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataX, items[6]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedMetadata2, items[7]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataCCC, items[8]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedMetadata1, items[9]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataD, items[10]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataY, items[11]);
         }
 
         [Fact]

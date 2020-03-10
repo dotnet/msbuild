@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
            );
         }
 
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
         /// <summary>
         /// Test that an exception is thrown when the path to the task assembly is empty
         /// </summary>
@@ -267,7 +267,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskHostConfiguration deserializedConfig = packet as TaskHostConfiguration;
 
             Assert.Equal(config.TaskName, deserializedConfig.TaskName);
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
             Assert.Equal(config.TaskLocation, deserializedConfig.TaskLocation);
 #endif
             Assert.Null(deserializedConfig.TaskParameters);
@@ -305,7 +305,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskHostConfiguration deserializedConfig = packet as TaskHostConfiguration;
 
             Assert.Equal(config.TaskName, deserializedConfig.TaskName);
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
             Assert.Equal(config.TaskLocation, deserializedConfig.TaskLocation);
 #endif
             Assert.NotNull(deserializedConfig.TaskParameters);
@@ -348,7 +348,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskHostConfiguration deserializedConfig = packet as TaskHostConfiguration;
 
             Assert.Equal(config.TaskName, deserializedConfig.TaskName);
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
             Assert.Equal(config.TaskLocation, deserializedConfig.TaskLocation);
 #endif
             Assert.NotNull(deserializedConfig.TaskParameters);
@@ -389,7 +389,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskHostConfiguration deserializedConfig = packet as TaskHostConfiguration;
 
             Assert.Equal(config.TaskName, deserializedConfig.TaskName);
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
             Assert.Equal(config.TaskLocation, deserializedConfig.TaskLocation);
 #endif
             Assert.NotNull(deserializedConfig.TaskParameters);
@@ -429,7 +429,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskHostConfiguration deserializedConfig = packet as TaskHostConfiguration;
 
             Assert.Equal(config.TaskName, deserializedConfig.TaskName);
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
             Assert.Equal(config.TaskLocation, deserializedConfig.TaskLocation);
 #endif
             Assert.NotNull(deserializedConfig.TaskParameters);

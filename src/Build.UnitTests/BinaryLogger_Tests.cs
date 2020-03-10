@@ -44,20 +44,21 @@ namespace Microsoft.Build.UnitTests
 
             binaryLogger.Parameters = _logFile;
 
-            var mockLogger1 = new MockLogger();
+            var mockLogFromBuild = new MockLogger();
 
             // build and log into binary logger and mockLogger1
-            ObjectModelHelpers.BuildProjectExpectSuccess(s_testProject, binaryLogger, mockLogger1);
+            ObjectModelHelpers.BuildProjectExpectSuccess(s_testProject, binaryLogger, mockLogFromBuild);
 
-            var mockLogger2 = new MockLogger();
+            var mockLogFromPlayback = new MockLogger();
 
             var binaryLogReader = new BinaryLogReplayEventSource();
-            mockLogger2.Initialize(binaryLogReader);
+            mockLogFromPlayback.Initialize(binaryLogReader);
 
             // read the binary log and replay into mockLogger2testassembly
             binaryLogReader.Replay(_logFile);
 
-            Assert.Equal(mockLogger1.FullLog, mockLogger2.FullLog);
+            // the binlog will have more information than recorded by the text log
+            Assert.Contains(mockLogFromBuild.FullLog, mockLogFromPlayback.FullLog);
         }
 
         [Fact]

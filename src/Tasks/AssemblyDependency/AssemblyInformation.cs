@@ -14,7 +14,7 @@ using System.Text;
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-#if !FEATURE_ASSEMBLY_LOADFROM || MONO
+#if FEATURE_ASSEMBLYLOADCONTEXT || MONO
 using System.Reflection.PortableExecutable;
 using System.Reflection.Metadata;
 #endif
@@ -30,7 +30,7 @@ namespace Microsoft.Build.Tasks
     {
         private AssemblyNameExtension[] _assemblyDependencies;
         private string[] _assemblyFiles;
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
         private readonly IMetaDataDispenser _metadataDispenser;
         private readonly IMetaDataAssemblyImport _assemblyImport;
         private static Guid s_importerGuid = new Guid(((GuidAttribute)Attribute.GetCustomAttribute(typeof(IMetaDataImport), typeof(GuidAttribute), false)).Value);
@@ -39,14 +39,14 @@ namespace Microsoft.Build.Tasks
         private readonly string _sourceFile;
         private FrameworkName _frameworkName;
 
-#if !FEATURE_ASSEMBLY_LOADFROM || MONO
+#if FEATURE_ASSEMBLYLOADCONTEXT || MONO
         private bool _metadataRead;
 #endif
 
-#if FEATURE_ASSEMBLY_LOADFROM && !MONO
+#if !FEATURE_ASSEMBLYLOADCONTEXT && !MONO
         private static string s_targetFrameworkAttribute = "System.Runtime.Versioning.TargetFrameworkAttribute";
 #endif
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
         // Borrowed from genman.
         private const int GENMAN_STRING_BUF_SIZE = 1024;
         private const int GENMAN_LOCALE_BUF_SIZE = 64;
@@ -68,7 +68,7 @@ namespace Microsoft.Build.Tasks
             ErrorUtilities.VerifyThrowArgumentNull(sourceFile, nameof(sourceFile));
             _sourceFile = sourceFile;
 
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
             if (NativeMethodsShared.IsWindows)
             {
                 // Create the metadata dispenser and open scope on the source file.
@@ -82,7 +82,7 @@ namespace Microsoft.Build.Tasks
 #endif
         }
 
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
         private static Assembly ReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
         {
             string[] nameParts = args.Name.Split(MSBuildConstants.CommaChar);
@@ -274,7 +274,7 @@ namespace Microsoft.Build.Tasks
 // Assembly.GetCustomAttributes* for an attribute which belongs
 // to an assembly that mono cannot find, causes a crash!
 // Instead, opt for using PEReader and friends to get that info
-#if FEATURE_ASSEMBLY_LOADFROM && !MONO
+#if !FEATURE_ASSEMBLYLOADCONTEXT && !MONO
             if (!NativeMethodsShared.IsWindows)
             {
                 if (String.Equals(Environment.GetEnvironmentVariable("MONO29679"), "1", StringComparison.OrdinalIgnoreCase))
@@ -345,7 +345,7 @@ namespace Microsoft.Build.Tasks
 #endif
         }
 
-#if !FEATURE_ASSEMBLY_LOADFROM || MONO
+#if FEATURE_ASSEMBLYLOADCONTEXT || MONO
         /// <summary>
         /// Read everything from the assembly in a single stream.
         /// </summary>
@@ -454,7 +454,7 @@ namespace Microsoft.Build.Tasks
 
 // Enabling this for MONO, because it's required by GetFrameworkName.
 // More details are in the comment for that method
-#if !FEATURE_ASSEMBLY_LOADFROM || MONO
+#if FEATURE_ASSEMBLYLOADCONTEXT || MONO
         //  This method copied from DNX source: https://github.com/aspnet/dnx/blob/e0726f769aead073af2d8cd9db47b89e1745d574/src/Microsoft.Dnx.Tooling/Utils/LockFileUtils.cs#L385
         //  System.Reflection.Metadata 1.1 is expected to have an API that helps with this.
         /// <summary>
@@ -514,7 +514,7 @@ namespace Microsoft.Build.Tasks
         }
 #endif
 
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
         /// <summary>
         /// Release interface pointers on Dispose(). 
         /// </summary>
@@ -586,7 +586,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>The array of assembly dependencies.</returns>
         private AssemblyNameExtension[] ImportAssemblyDependencies()
         {
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
             var asmRefs = new List<AssemblyNameExtension>();
 
             if (!NativeMethodsShared.IsWindows)
@@ -683,7 +683,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>The extra files of assembly dependencies.</returns>
         private string[] ImportFiles()
         {
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
             var files = new List<string>();
             IntPtr fileEnum = IntPtr.Zero;
             var fileTokens = new UInt32[GENMAN_ENUM_TOKEN_BUF_SIZE];
@@ -726,7 +726,7 @@ namespace Microsoft.Build.Tasks
 #endif
         }
 
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
         /// <summary>
         /// Allocate assembly metadata structure buffer.
         /// </summary>

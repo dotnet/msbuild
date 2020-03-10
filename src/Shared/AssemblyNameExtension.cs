@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Configuration.Assemblies;
 using System.Runtime.Serialization;
 using System.IO;
-#if !FEATURE_ASSEMBLY_LOADFROM
+#if FEATURE_ASSEMBLYLOADCONTEXT
 using System.Reflection.PortableExecutable;
 using System.Reflection.Metadata;
 #endif
@@ -183,20 +183,20 @@ namespace Microsoft.Build.Shared
         internal static AssemblyNameExtension GetAssemblyNameEx(string path)
         {
             AssemblyName assemblyName = null;
-#if FEATURE_ASSEMBLY_LOADFROM
+#if !FEATURE_ASSEMBLYLOADCONTEXT
             try
             {
                 assemblyName = AssemblyName.GetAssemblyName(path);
             }
-            catch (System.IO.FileLoadException)
+            catch (FileLoadException)
             {
                 // Its pretty hard to get here, you need an assembly that contains a valid reference
                 // to a dependent assembly that, in turn, throws a FileLoadException during GetAssemblyName.
                 // Still it happened once, with an older version of the CLR. 
 
-                // ...falling through and relying on the targetAssemblyName==null behavior below...
+                // ...falling through and relying on the assemblyName == null behavior below...
             }
-            catch (System.IO.FileNotFoundException)
+            catch (FileNotFoundException)
             {
                 // Its pretty hard to get here, also since we do a file existence check right before calling this method so it can only happen if the file got deleted between that check and this call.
             }
