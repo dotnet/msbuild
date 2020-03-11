@@ -511,22 +511,24 @@ namespace Microsoft.Build.Execution
                 _configCache = ((IBuildComponentHost)this).GetComponent(BuildComponentType.ConfigCache) as IConfigCache;
                 _resultsCache = ((IBuildComponentHost)this).GetComponent(BuildComponentType.ResultsCache) as IResultsCache;
 
-                if (!usesInputCaches && (_buildParameters.ResetCaches || _configCache.IsConfigCacheSizeLargerThanThreshold()))
+                if (usesInputCaches)
+                {
+                    return;
+                }
+
+                if ((_buildParameters.ResetCaches || _configCache.IsConfigCacheSizeLargerThanThreshold()))
                 {
                     ResetCaches();
                 }
                 else
                 {
-                    if (!usesInputCaches)
-                    {
-                        List<int> configurationsCleared = _configCache.ClearNonExplicitlyLoadedConfigurations();
+                    List<int> configurationsCleared = _configCache.ClearNonExplicitlyLoadedConfigurations();
 
-                        if (configurationsCleared != null)
+                    if (configurationsCleared != null)
+                    {
+                        foreach (int configurationId in configurationsCleared)
                         {
-                            foreach (int configurationId in configurationsCleared)
-                            {
-                                _resultsCache.ClearResultsForConfiguration(configurationId);
-                            }
+                            _resultsCache.ClearResultsForConfiguration(configurationId);
                         }
                     }
 
