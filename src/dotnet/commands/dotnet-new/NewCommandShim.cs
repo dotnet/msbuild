@@ -63,9 +63,12 @@ namespace Microsoft.DotNet.Tools.New
                 typeof(NupkgUpdater).GetTypeInfo().Assembly
             });
 
+            string preferredLangEnvVar = Environment.GetEnvironmentVariable("DOTNET_NEW_PREFERRED_LANG");
+            string preferredLang = string.IsNullOrWhiteSpace(preferredLangEnvVar)? "C#" : preferredLangEnvVar;
+
             var preferences = new Dictionary<string, string>
             {
-                { "prefs:language", "C#" },
+                { "prefs:language", preferredLang },
                 { "dotnet-cli-version", Product.Version },
                 { "RuntimeFrameworkVersion", new Muxer().SharedFxVersion },
                 { "NetStandardImplicitPackageVersion", new FrameworkDependencyFile().GetNetStandardLibraryVersion() },
