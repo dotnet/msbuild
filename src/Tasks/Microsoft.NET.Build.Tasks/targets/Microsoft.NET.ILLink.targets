@@ -43,7 +43,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <!-- Remove assemblies from inputs to GenerateDepsFile. See
-         https://github.com/dotnet/sdk/pull/3086. -->
+         https://github.com/dotnet/sdk/pull/3086 -->
     <ItemGroup>
       <_RemovedManagedAssemblies Include="@(_ManagedAssembliesToLink)" Condition="!Exists('$(IntermediateLinkDir)%(Filename)%(Extension)')" />
 
