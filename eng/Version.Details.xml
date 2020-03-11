@@ -99,17 +99,17 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="5.0.0-beta.20128.2">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="5.0.0-beta.20160.4">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>4d9720ccb07cc01068c2f7c19cb2ded64c44b1a1</Sha>
+      <Sha>9a9422d109520d942711e07fae8c662c20e7b6e9</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Helix.Sdk" Version="5.0.0-beta.20128.2">
+    <Dependency Name="Microsoft.DotNet.Helix.Sdk" Version="5.0.0-beta.20160.4">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>4d9720ccb07cc01068c2f7c19cb2ded64c44b1a1</Sha>
+      <Sha>9a9422d109520d942711e07fae8c662c20e7b6e9</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.SignTool" Version="5.0.0-beta.20128.2">
+    <Dependency Name="Microsoft.DotNet.SignTool" Version="5.0.0-beta.20160.4">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>4d9720ccb07cc01068c2f7c19cb2ded64c44b1a1</Sha>
+      <Sha>9a9422d109520d942711e07fae8c662c20e7b6e9</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
