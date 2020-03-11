@@ -1569,6 +1569,28 @@ namespace Microsoft.Build.UnitTests
 
         internal static ProjectGraph CreateProjectGraph(
             TestEnvironment env,
+            IDictionary<int, int[]> dependencyEdges,
+            IDictionary<int, string> extraContentPerProjectNumber)
+        {
+            return CreateProjectGraph(
+                env: env,
+                dependencyEdges: dependencyEdges,
+                globalProperties: null,
+                createProjectFile: (environment, projectNumber, references, projectReferenceTargets, defaultTargets, extraContent) =>
+                {
+                    extraContentPerProjectNumber.ShouldContainKey(projectNumber);
+                    return CreateProjectFile(
+                        environment,
+                        projectNumber,
+                        references,
+                        projectReferenceTargets,
+                        defaultTargets,
+                        extraContentPerProjectNumber[projectNumber].Cleanup());
+                });
+        }
+
+        internal static ProjectGraph CreateProjectGraph(
+            TestEnvironment env,
             // direct dependencies that the kvp.key node has on the nodes represented by kvp.value
             IDictionary<int, int[]> dependencyEdges,
             IDictionary<string, string> globalProperties = null,
@@ -1576,7 +1598,7 @@ namespace Microsoft.Build.UnitTests
             IEnumerable<int> entryPoints = null,
             ProjectCollection projectCollection = null)
         {
-            createProjectFile = createProjectFile ?? CreateProjectFile;
+            createProjectFile ??= CreateProjectFile;
 
             var nodes = new Dictionary<int, (bool IsRoot, string ProjectPath)>();
 
