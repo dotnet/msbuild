@@ -147,6 +147,7 @@ stages:
           displayName: Build
           condition: succeeded()
 
+- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - template: eng\common\templates\post-build\post-build.yml
     parameters:
       # Symbol validation isn't being very reliable lately. This should be enabled back
