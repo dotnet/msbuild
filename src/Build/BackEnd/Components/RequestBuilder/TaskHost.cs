@@ -128,7 +128,7 @@ namespace Microsoft.Build.BackEnd
             _callbackMonitor = new Object();
 
             // Ensure that we have at least one core to run this task
-            RequestCores(1);
+            RequireCores(1);
         }
 
         /// <summary>
@@ -683,6 +683,15 @@ namespace Microsoft.Build.BackEnd
             runningTotal += coresAcquired;
 
             return coresAcquired;
+        }
+
+        private void RequireCores(int requestedCores)
+        {
+            var rms = _host.GetComponent(BuildComponentType.TaskResourceManager) as ResourceManagerService;
+
+            rms.RequireCores(requestedCores);
+
+            runningTotal += 1; // default reservation
         }
 
         public void ReleaseCores(int coresToRelease)

@@ -75,5 +75,21 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
 
             s.Release(coresToRelease);
         }
+
+        internal void RequireCores(int requestedCores)
+        {
+            if (s is null)
+            {
+                // TODO: ErrorUtilities should be annotated so this can just be `ErrorUtilities.VerifyThrow`
+                // https://github.com/microsoft/msbuild/issues/5163
+                throw new InternalErrorException($"{nameof(ResourceManagerService)} was called while uninitialized");
+            }
+
+            if (!s.WaitOne())
+            {
+                ErrorUtilities.ThrowInternalError("Couldn't get a core to run a task even with infinite timeout");
+
+            }
+        }
     }
 }
