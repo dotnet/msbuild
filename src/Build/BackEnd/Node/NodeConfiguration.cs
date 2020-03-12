@@ -40,8 +40,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private LoggingNodeConfiguration _loggingNodeConfiguration;
 
-        private string _resourceManagerSemaphoreName;
-
         /// <summary>
         /// Constructor
         /// </summary>
@@ -58,8 +56,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
-            LoggingNodeConfiguration loggingNodeConfiguration,
-            string resourceManagerSemaphoreName
+            LoggingNodeConfiguration loggingNodeConfiguration
             )
         {
             _nodeId = nodeId;
@@ -69,7 +66,6 @@ namespace Microsoft.Build.BackEnd
             _appDomainSetup = appDomainSetup;
 #endif
             _loggingNodeConfiguration = loggingNodeConfiguration;
-            _resourceManagerSemaphoreName = resourceManagerSemaphoreName;
         }
 
         /// <summary>
@@ -135,18 +131,7 @@ namespace Microsoft.Build.BackEnd
             { return _loggingNodeConfiguration; }
         }
 
-        /// <summary>
-        /// Name of the semaphore that communicates resource use between nodes.
-        /// </summary>
-        public string ResourceManagerSemaphoreName
-        {
-            [DebuggerStepThrough]
-            get
-            { return _resourceManagerSemaphoreName; }
-
-        }
-
-        #region INodePacket Members
+#region INodePacket Members
 
         /// <summary>
         /// Retrieves the packet type.
@@ -175,7 +160,6 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateDotNet(ref _appDomainSetup);
 #endif
             translator.Translate(ref _loggingNodeConfiguration);
-            translator.Translate(ref _resourceManagerSemaphoreName);
         }
 
         /// <summary>
@@ -199,7 +183,6 @@ namespace Microsoft.Build.BackEnd
                 , _appDomainSetup
 #endif
                 , _loggingNodeConfiguration
-                , _resourceManagerSemaphoreName
                 );
         }
     }

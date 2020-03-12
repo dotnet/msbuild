@@ -18,7 +18,6 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.SdkResolution;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
-using Microsoft.Build.BackEnd.Components.ResourceManager;
 
 namespace Microsoft.Build.Execution
 {
@@ -639,11 +638,6 @@ namespace Microsoft.Build.Execution
         {
             // Grab the system parameters.
             _buildParameters = configuration.BuildParameters;
-
-            //configuration.ResourceManagerSemaphoreName
-
-            ((IBuildComponentHost)this).RegisterFactory(BuildComponentType.TaskResourceManager, new ResourceManagerServiceFactory(configuration.ResourceManagerSemaphoreName).CreateInstance);
-
 
             _buildParameters.ProjectRootElementCache = s_projectRootElementCacheBase;
 
