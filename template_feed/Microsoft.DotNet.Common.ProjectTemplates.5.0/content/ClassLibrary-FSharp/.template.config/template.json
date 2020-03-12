@@ -17,9 +17,9 @@
   "preferNameDirectory": true,
   "baselines": {
     "app": {
-      "description": "Target netcoreapp",
+      "description": "Target .NET",
       "defaultOverrides": {
-        "Framework": "netcoreapp5.0"
+        "Framework": "net5.0"
       }
     },
     "standard": {
@@ -43,8 +43,8 @@
       "datatype": "choice",
       "choices": [
         {
-          "choice": "netcoreapp5.0",
-          "description": "Target netcoreapp5.0"
+          "choice": "net5.0",
+          "description": "Target net5.0"
         },
         {
           "choice": "netstandard2.1",
@@ -55,8 +55,8 @@
           "description": "Target netstandard2.0"
         }
       ],
-      "replaces": "netstandard2.0",
-      "defaultValue": "netstandard2.0"
+      "replaces": "net5.0",
+      "defaultValue": "net5.0"
     },
     "HostIdentifier": {
       "type": "bind",

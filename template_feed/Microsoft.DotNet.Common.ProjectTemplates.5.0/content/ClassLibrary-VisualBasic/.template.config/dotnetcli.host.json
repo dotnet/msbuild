@@ -19,6 +19,6 @@
     }
   },
   "usageExamples": [
-    "--framework netcoreapp3.1"
+    "--framework net5.0"
   ]
 }

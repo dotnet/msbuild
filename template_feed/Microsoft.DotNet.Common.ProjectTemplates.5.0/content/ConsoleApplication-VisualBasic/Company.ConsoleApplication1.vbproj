@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>Company.ConsoleApplication1</RootNamespace>
-    <TargetFramework Condition="'$(TargetFrameworkOverride)' == ''">netcoreapp5.0</TargetFramework>
+    <TargetFramework Condition="'$(TargetFrameworkOverride)' == ''">net5.0</TargetFramework>
     <TargetFramework Condition="'$(TargetFrameworkOverride)' != ''">TargetFrameworkOverride</TargetFramework>
     <LangVersion Condition="'$(langVersion)' != ''">$(ProjectLanguageVersion)</LangVersion>
   </PropertyGroup>
