@@ -2154,6 +2154,7 @@ namespace Microsoft.Build.Execution
                 , AppDomain.CurrentDomain.SetupInformation
 #endif
                 , new LoggingNodeConfiguration(loggingService.IncludeEvaluationMetaprojects, loggingService.IncludeEvaluationProfile, loggingService.IncludeTaskInputs)
+                , "MSBuildCpuCount"
                 );
             }
 

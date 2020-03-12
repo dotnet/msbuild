@@ -17,6 +17,13 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
     {
         Semaphore? s = null;
 
+        private string _semaphoreName;
+
+        public ResourceManagerService(string semaphoreName)
+        {
+            _semaphoreName = semaphoreName;
+        }
+
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
             ErrorUtilities.VerifyThrow(type == BuildComponentType.TaskResourceManager, "Cannot create components of type {0}", type);
