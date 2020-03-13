@@ -33,7 +33,7 @@
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>5.0.0-preview.2.20152.11</MicrosoftDotNetPlatformAbstractionsPackageVersion>
     <MicrosoftExtensionsDependencyModelPackageVersion>5.0.0-preview.2-runtime.20152.11</MicrosoftExtensionsDependencyModelPackageVersion>
     <MicrosoftNETCoreDotNetHostResolverPackageVersion>5.0.0-preview.2.20152.11</MicrosoftNETCoreDotNetHostResolverPackageVersion>
-    <MicrosoftNETHostModelVersion>5.0.0-preview.2.20152.11</MicrosoftNETHostModelVersion>
+    <MicrosoftNETHostModelVersion>5.0.0-preview.3.20161.13</MicrosoftNETHostModelVersion>
     <PlatformAbstractionsVersion>$(MicrosoftDotNetPlatformAbstractionsPackageVersion)</PlatformAbstractionsVersion>
     <MicrosoftExtensionsDependencyModelVersion>$(MicrosoftExtensionsDependencyModelPackageVersion)</MicrosoftExtensionsDependencyModelVersion>
   </PropertyGroup>

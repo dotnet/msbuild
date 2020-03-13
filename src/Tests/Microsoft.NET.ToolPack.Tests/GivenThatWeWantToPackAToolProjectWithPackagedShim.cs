@@ -433,7 +433,7 @@ namespace Microsoft.NET.ToolPack.Tests
                     $"tools/netcoreapp3.0/any/shims/win-x64/{_customToolCommandName}.exe",
                     tmpfilePath,
                     null);
-                HostModel.AppHost.BinaryUtils.GetWindowsGraphicalUserInterfaceBit(copiedFile).Should().Be(windowsGUISubsystem);
+                HostModel.AppHost.PEUtils.GetWindowsGraphicalUserInterfaceBit(copiedFile).Should().Be(windowsGUISubsystem);
             }
         }
 

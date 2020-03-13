@@ -23,7 +23,8 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            var bundler = new Bundler(AppHostName, OutputDir, IncludeSymbols, ShowDiagnosticOutput);
+            BundleOptions options = BundleOptions.BundleAllContent | (IncludeSymbols ? BundleOptions.BundleSymbolFiles : BundleOptions.None);
+            var bundler = new Bundler(AppHostName, OutputDir, options, diagnosticOutput: ShowDiagnosticOutput);
             var fileSpec = new List<FileSpec>(FilesToBundle.Length);
 
             foreach (var item in FilesToBundle)

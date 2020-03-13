@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         {
             string shimPath = CreateApphostAndReturnShimPath();
 
-            BinaryUtils.GetWindowsGraphicalUserInterfaceBit(shimPath).Should().Be(WindowsGUISubsystem);
+            PEUtils.GetWindowsGraphicalUserInterfaceBit(shimPath).Should().Be(WindowsGUISubsystem);
         }
 
         [UnixOnlyFact]

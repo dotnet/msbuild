@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.ShellShim
 
             if (ResourceUpdater.IsSupportedOS())
             {
-                var windowsGraphicalUserInterfaceBit = BinaryUtils.GetWindowsGraphicalUserInterfaceBit(entryPointFullPath);
+                var windowsGraphicalUserInterfaceBit = PEUtils.GetWindowsGraphicalUserInterfaceBit(entryPointFullPath);
                 HostWriter.CreateAppHost(appHostSourceFilePath: appHostSourcePath,
                                          appHostDestinationFilePath: appHostDestinationFilePath,
                                          appBinaryFilePath: appBinaryFilePath,
