@@ -12,6 +12,7 @@ using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using static Microsoft.Build.UnitTests.Helpers;
 
 namespace Microsoft.Build.Graph.UnitTests
 {
@@ -375,6 +376,131 @@ BuildEngine5.BuildProjectFilesInParallel(
                 projectReferenceModifier: projectReferenceModifier,
                 msbuildOnDeclaredReferenceModifier: msbuildProjectModifier);
         }
+
+        [Fact]
+        public void ProjectExemptFromIsolationIsIncludedInTheOutputResultsCacheFile()
+        {
+            var exemptProjectFile = _env.CreateFile(
+                "ExemptProject.proj",
+                @"
+                <Project>
+                    <Target Name=`BuildExemptProject`>
+                        <Message Text=`BuildExemptProject` />
+                    </Target>
+                </Project>".Cleanup()).Path;
+
+            var graph = CreateProjectGraph(
+                _env,
+                dependencyEdges: new Dictionary<int, int[]>
+                {
+                    {1, new[] {3, 4}},
+                    {2, new[] {3, 4}},
+                },
+                extraContentPerProjectNumber: new Dictionary<int, string>
+                {
+                    {
+                        1,
+                        $@"
+                          <ItemGroup>
+                            <{ItemTypeNames.GraphIsolationExemptReference} Include='{exemptProjectFile}' />
+                          </ItemGroup>
+
+                          <Target Name=`Build` DependsOnTargets=`BeforeBuild`>
+                            <MSBuild Projects=`@(ProjectReference)` Targets='Build'/>
+                          </Target>
+
+                          <Target Name=`BeforeBuild`>
+                            <MSBuild Projects=`{exemptProjectFile}` Targets='BuildExemptProject'/>
+                          </Target>"
+                    },
+                    {
+                        2,
+                        @"
+                          <Target Name=`Build`>
+                            <MSBuild Projects=`@(ProjectReference)` Targets='Build'/>
+                          </Target>"
+                    },
+                    {
+                        3,
+                        $@"
+                          <ItemGroup>
+                            <{ItemTypeNames.GraphIsolationExemptReference} Include='{exemptProjectFile}' />
+                          </ItemGroup>
+
+                          <Target Name=`Build` DependsOnTargets=`BeforeBuild`>
+                            <Message Text=`Build` />
+                          </Target>
+
+                          <Target Name=`BeforeBuild`>
+                            <MSBuild Projects=`{exemptProjectFile}` Targets='BuildExemptProject'/>
+                          </Target>"
+                    },
+                    {
+                        4,
+                        $@"
+                          <ItemGroup>
+                            <{ItemTypeNames.GraphIsolationExemptReference} Include='{exemptProjectFile}' />
+                          </ItemGroup>
+
+                          <Target Name=`Build` DependsOnTargets=`BeforeBuild`>
+                            <Message Text=`Build` />
+                          </Target>
+
+                          <Target Name=`BeforeBuild`>
+                            <MSBuild Projects=`{exemptProjectFile}` Targets='BuildExemptProject'/>
+                          </Target>"
+                    }
+                }
+                );
+
+            var cacheFiles = new Dictionary<ProjectGraphNode, string>();
+
+            var buildResults = ResultCacheBasedBuilds_Tests.BuildGraphUsingCacheFiles(
+                _env,
+                graph: graph,
+                expectedLogOutputPerNode: new Dictionary<ProjectGraphNode, string[]>(),
+                outputCaches: cacheFiles,
+                generateCacheFiles: true,
+                assertBuildResults: false);
+
+            foreach (var result in buildResults)
+            {
+                result.Value.Result.OverallResult.ShouldBe(BuildResultCode.Success);
+            }
+
+            cacheFiles.Count.ShouldBe(4);
+
+            var caches = cacheFiles.ToDictionary(kvp => kvp.Key, kvp => CacheSerialization.DeserializeCaches(kvp.Value));
+
+            // 1 does not contain the exempt project because it does not build it, it reads it from the input caches
+            var projectsWhoseOutputCacheShouldContainTheExemptProject = new[] {3, 4};
+
+            foreach (var cache in caches)
+            {
+                cache.Value.exception.ShouldBeNull();
+                var projectNumber = ProjectNumber(cache.Key.ProjectInstance.FullPath);
+
+                cache.Value.ConfigCache.ShouldContain(c => ProjectNumber(c.ProjectFullPath) == projectNumber);
+
+                if (projectsWhoseOutputCacheShouldContainTheExemptProject.Contains(projectNumber))
+                {
+                    cache.Value.ConfigCache.ShouldContain(c => c.ProjectFullPath.Equals(exemptProjectFile));
+                    cache.Value.ConfigCache.Count().ShouldBe(2);
+
+                    cache.Value.ResultsCache.ShouldContain(r => r.HasResultsForTarget("BuildExemptProject"));
+                    cache.Value.ResultsCache.Count().ShouldBe(2);
+                }
+                else
+                {
+                    cache.Value.ConfigCache.Count().ShouldBe(1);
+
+                    cache.Value.ResultsCache.ShouldNotContain(r => r.HasResultsForTarget("BuildExemptProject"));
+                    cache.Value.ResultsCache.Count().ShouldBe(1);
+                }
+            }
+        }
+
+        private static int ProjectNumber(string path) => int.Parse(Path.GetFileNameWithoutExtension(path));
 
         private void AssertBuild(
             string[] targets,

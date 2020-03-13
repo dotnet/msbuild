@@ -241,6 +241,7 @@ namespace Microsoft.Build.BackEnd
             IsCacheable = other.IsCacheable;
             _configId = configId;
             TargetNames = other.TargetNames;
+            _skippedFromStaticGraphIsolationConstraints = other._skippedFromStaticGraphIsolationConstraints;
         }
 
         /// <summary>
@@ -547,6 +548,12 @@ namespace Microsoft.Build.BackEnd
             set => _resultsNodeId = value;
         }
 
+        public bool SkippedFromStaticGraphIsolationConstraints
+        {
+            get => _skippedFromStaticGraphIsolationConstraints;
+            set => _skippedFromStaticGraphIsolationConstraints = value;
+        }
+
         /// <summary>
         /// Implementation of the equality operator.
         /// </summary>
@@ -678,6 +685,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         private Func<string, bool> shouldSkipStaticGraphIsolationOnReference;
+        private bool _skippedFromStaticGraphIsolationConstraints;
 
         public bool ShouldSkipIsolationConstraintsForReference(string referenceFullPath)
         {
@@ -804,6 +812,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _resultsNodeId);
             translator.Translate(ref _savedCurrentDirectory);
             translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
+            translator.Translate(ref _skippedFromStaticGraphIsolationConstraints);
 
             // if the entire state is translated, then the transferred state, if exists, represents the full evaluation data
             if (_translateEntireProjectInstanceState &&
@@ -823,6 +832,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _projectDefaultTargets);
             translator.Translate(ref _projectInitialTargets);
             translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
+            translator.Translate(ref _skippedFromStaticGraphIsolationConstraints);
         }
 
         /// <summary>

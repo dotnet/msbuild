@@ -63,14 +63,30 @@ namespace Microsoft.Build.Execution
                 return;
             }
 
-            var seenConfigIds = new HashSet<int>();
+            var acceptedConfigs = new HashSet<int>();
+            var skipedConfigs = new HashSet<int>();
             var configIdMapping = new Dictionary<int, int>();
 
             foreach (var config in configs)
             {
-                seenConfigIds.Add(config.ConfigurationId);
+                var existingConfig = _aggregatedConfigCache.GetMatchingConfiguration(config);
 
-                ErrorUtilities.VerifyThrow(_aggregatedConfigCache.GetMatchingConfiguration(config) == null, "Input caches should not contain entries for the same configuration");
+                if (existingConfig != null && !(existingConfig.SkippedFromStaticGraphIsolationConstraints && config.SkippedFromStaticGraphIsolationConstraints))
+                {
+                    throw existingConfig.SkippedFromStaticGraphIsolationConstraints || config.SkippedFromStaticGraphIsolationConstraints
+                        ? new InternalErrorException(
+                            $"Input caches should not contain duplicate entries where only some are exempt from isolation constraints: {existingConfig.ProjectFullPath}")
+                        : new InternalErrorException($"Input caches should not contain entries for the same configuration: {existingConfig.ProjectFullPath}");
+                }
+
+                if (existingConfig != null && (existingConfig.SkippedFromStaticGraphIsolationConstraints && config.SkippedFromStaticGraphIsolationConstraints))
+                {
+                    skipedConfigs.Add(config.ConfigurationId);
+                    // If conflict is allowed, resolve by keeping the existing config.
+                    continue;
+                }
+
+                acceptedConfigs.Add(config.ConfigurationId);
 
                 _lastConfigurationId = _nextConfigurationId();
                 configIdMapping[config.ConfigurationId] = _lastConfigurationId;
@@ -83,7 +99,13 @@ namespace Microsoft.Build.Execution
 
             foreach (var result in results)
             {
-                ErrorUtilities.VerifyThrow(seenConfigIds.Contains(result.ConfigurationId), "Each result should have a corresponding configuration. Otherwise the caches are not consistent");
+                if (skipedConfigs.Contains(result.ConfigurationId))
+                {
+                    // If a config has been skipped, do not add its corresponding result.
+                    continue;
+                }
+
+                ErrorUtilities.VerifyThrow(acceptedConfigs.Contains(result.ConfigurationId), "Each result should have a corresponding configuration. Otherwise the caches are not consistent");
 
                 _aggregatedResultsCache.AddResult(
                     new BuildResult(

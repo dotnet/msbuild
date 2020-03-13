@@ -1586,6 +1586,11 @@ namespace Microsoft.Build.BackEnd
                 {
                     emitNonErrorLogs(_componentHost.LoggingService);
 
+                    if (request.SkipStaticGraphIsolationConstraints)
+                    {
+                        _configCache[request.ConfigurationId].SkippedFromStaticGraphIsolationConstraints = true;
+                    }
+
                     // Ensure there is no affinity mismatch between this request and a previous request of the same configuration.
                     NodeAffinity requestAffinity = GetNodeAffinityForRequest(request);
                     NodeAffinity existingRequestAffinity = NodeAffinity.Any;

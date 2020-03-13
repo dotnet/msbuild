@@ -546,7 +546,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     buildParameters.OutputResultsCacheFile = outputCaches[node];
                 }
 
-                var logger = new MockLogger();
+                var logger = new MockLogger(env.Output);
 
                 buildParameters.Loggers = new[] {logger};
 

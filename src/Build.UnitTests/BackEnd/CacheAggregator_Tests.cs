@@ -142,34 +142,74 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Fact]
-        public void RejectCollidingConfigurationsFromSeparateCaches()
+        [Theory]
+        [InlineData(true, true, null)]
+        [InlineData(true, false, "Input caches should not contain duplicate entries where only some are exempt from isolation constraints")]
+        [InlineData(false, true, "Input caches should not contain duplicate entries where only some are exempt from isolation constraints")]
+        [InlineData(false, false, "Input caches should not contain entries for the same configuration")]
+        public void RejectCollidingConfigurationsFromSeparateCaches(bool config1IsExempt, bool config2IsExempt, string expectedErrorMessage)
         {
             // collides with the config id from configCache2
+            var config1 = new BuildRequestConfiguration(1,
+                new BuildRequestData(
+                    projectFullPath: "path",
+                    globalProperties: new Dictionary<string, string> {["p"] = "v"},
+                    toolsVersion: "13",
+                    targetsToBuild: new[] {"foo"},
+                    hostServices: null), "13")
+            {
+                SkippedFromStaticGraphIsolationConstraints = config1IsExempt
+            };
+
             var configCache1 = new ConfigCache();
-            configCache1.AddConfiguration(new BuildRequestConfiguration(configId: 1, new BuildRequestData("path", new Dictionary<string, string>(){["p"] = "v"}, "13", new []{"a", "b"}, null), "13"));
+            configCache1.AddConfiguration(config1);
 
             var resultsCache1 = new ResultsCache();
-            var buildResult11 = new BuildResult(new BuildRequest(1, 2, configurationId: 1, new List<string>(){"a", "b"}, null, BuildEventContext.Invalid, null));
-            buildResult11.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult());
+            var buildResult11 = new BuildResult(new BuildRequest(1, 2, configurationId: 1,
+                new List<string>() {"foo"}, null, BuildEventContext.Invalid, null));
+            buildResult11.AddResultsForTarget("foo", GetNonEmptySucceedingTargetResult());
             resultsCache1.AddResult(buildResult11);
 
+            var config2 = new BuildRequestConfiguration(1,
+                new BuildRequestData(
+                    projectFullPath: "path",
+                    globalProperties: new Dictionary<string, string> {["p"] = "v"},
+                    toolsVersion: "13",
+                    targetsToBuild: new[] {"bar"},
+                    hostServices: null), "13")
+            {
+                SkippedFromStaticGraphIsolationConstraints = config2IsExempt
+            };
+
             var configCache2 = new ConfigCache();
-            configCache2.AddConfiguration(new BuildRequestConfiguration(configId: 1, new BuildRequestData("path", new Dictionary<string, string>(){["p"] = "v"}, "13", new []{"a", "b"}, null), "13"));
+            configCache2.AddConfiguration(config2);
 
             var resultsCache2 = new ResultsCache();
-            var buildResult21 = new BuildResult(new BuildRequest(1, 2, configurationId: 1, new List<string>(){"e", "f"}, null, BuildEventContext.Invalid, null));
-            buildResult21.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult());
+            var buildResult21 = new BuildResult(new BuildRequest(1, 2, configurationId: 1,
+                new List<string>() {"e", "f"}, null, BuildEventContext.Invalid, null));
+            buildResult21.AddResultsForTarget("bar", GetNonEmptySucceedingTargetResult());
             resultsCache2.AddResult(buildResult21);
 
             aggregator.Add(configCache1, resultsCache1);
             aggregator.Add(configCache2, resultsCache2);
 
-            using (var env = TestEnvironment.Create())
+            if (expectedErrorMessage == null)
             {
+                var aggregatedCaches = aggregator.Aggregate();
+                aggregatedCaches.ConfigCache.Count().ShouldBe(1);
+                aggregatedCaches.ResultsCache.Count().ShouldBe(1);
+
+                // In case of accepted duplicate configs, first one wins.
+                aggregatedCaches.ConfigCache.First().TargetNames.ShouldBeEquivalentTo(new []{"foo"});
+                aggregatedCaches.ResultsCache.First().HasResultsForTarget("foo");
+            }
+            else
+            {
+                using var env = TestEnvironment.Create();
+
                 env.SetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER", "1");
                 var e = Should.Throw<InternalErrorException>(() => aggregator.Aggregate());
-                e.Message.ShouldContain("Input caches should not contain entries for the same configuration");
+                e.Message.ShouldContain(expectedErrorMessage);
             }
         }
 
