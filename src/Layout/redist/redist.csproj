@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <PackageReference Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksPackageVersion)" />
+    <PackageReference Include="NuGet.Build.Tasks.Console" Version="$(NuGetBuildTasksConsolePackageVersion)" />
     <PackageReference Include="Microsoft.Build.NuGetSdkResolver" Version="$(MicrosoftBuildNuGetSdkResolverPackageVersion)" />
     <PackageReference Include="Microsoft.TestPlatform.CLI" Version="$(MicrosoftTestPlatformCLIPackageVersion)" ExcludeAssets="All" />
     <PackageReference Include="Microsoft.TestPlatform.Build" Version="$(MicrosoftTestPlatformBuildPackageVersion)" />
