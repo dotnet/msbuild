@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -96,7 +97,7 @@ namespace Microsoft.Build.Evaluation
                 else if (options.Equals(MatchOnMetadataOptions.CaseInsensitive))
                 {
                     return ReferencedItems.Any(referencedItem =>
-                        metadata.All(m => item.GetMetadataValue(m).ToUpper().Equals(referencedItem.Item.GetMetadataValue(m).ToUpper()) && !item.GetMetadataValue(m).Equals(string.Empty)));
+                        metadata.All(m => String.Equals(item.GetMetadataValue(m), referencedItem.Item.GetMetadataValue(m), StringComparison.OrdinalIgnoreCase) && !item.GetMetadataValue(m).Equals(string.Empty)));
                 }
                 else
                 {

@@ -2373,7 +2373,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 <I2 Remove='@(I1)' MatchOnMetadata='M1;M2'/>");
 
-            Assert.ThrowsAny<InvalidProjectFileException>(() => ObjectModelHelpers.CreateInMemoryProject(content));
+            Should.Throw<InvalidProjectFileException>(() => ObjectModelHelpers.CreateInMemoryProject(content));
         }
 
         [Fact]
@@ -2397,7 +2397,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 <I3 Remove='@(I1);@(I2)' MatchOnMetadata='M1' />");
 
-            Assert.ThrowsAny<InvalidProjectFileException>(() => ObjectModelHelpers.CreateInMemoryProject(content));
+            Should.Throw<InvalidProjectFileException>(() => ObjectModelHelpers.CreateInMemoryProject(content));
         }
 
         [Fact]
@@ -2416,7 +2416,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 <I2 Remove='%(I1.M1)' MatchOnMetadata='M1' />");
 
-            Assert.ThrowsAny<InvalidProjectFileException>(() => ObjectModelHelpers.CreateInMemoryProject(content));
+            Should.Throw<InvalidProjectFileException>(() => ObjectModelHelpers.CreateInMemoryProject(content));
         }
 
         [Fact]
@@ -3142,7 +3142,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             else
             {
-                Assert.Single(items);
+                items.ShouldHaveSingleItem();
 
                 var expectedUpdated = new Dictionary<string, string>
                 {

@@ -246,7 +246,7 @@ namespace Microsoft.Build.UnitTests
 
             if (!FileUtilities.GetIsFileSystemCaseSensitive() || allowedExtensions.All(extension => fileName.Contains(extension)))
             {
-                Assert.True(result);
+                result.ShouldBeTrue();
             }
         }
 
@@ -289,11 +289,11 @@ namespace Microsoft.Build.UnitTests
 
                 if (FileUtilities.GetIsFileSystemCaseSensitive())
                 {
-                    Assert.False(result);
+                    result.ShouldBeFalse();
                 }
                 else
                 {
-                    Assert.True(result);
+                    result.ShouldBeTrue();
                 }
             }
             finally

@@ -27,19 +27,17 @@ namespace Microsoft.Build.Evaluation
             // todo Perf: do not match against the globs: https://github.com/Microsoft/msbuild/issues/2329
             protected override ImmutableList<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
+                var matchOnMetadataValid = !_matchOnMetadata.IsEmpty && _itemSpec.Fragments.Count == 1
+                    && _itemSpec.Fragments.First() is ItemSpec<ProjectProperty, ProjectItem>.ItemExpressionFragment;
                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
-                    _matchOnMetadata.IsEmpty || (!_matchOnMetadata.IsEmpty
-                    && _itemSpec.Fragments.Count == 1
-                    && _itemSpec.Fragments.First() is ItemSpec<ProjectProperty, ProjectItem>.ItemExpressionFragment)
-                    && _matchOnMetadata.Count == 1,
+                    _matchOnMetadata.IsEmpty || matchOnMetadataValid && _matchOnMetadata.Count == 1,
                     new BuildEventFileInfo(string.Empty),
                     "OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem");
 
                 var items = ImmutableHashSet.CreateBuilder<I>();
                 foreach (ItemData item in listBuilder)
                 {
-                    if ((_matchOnMetadata.IsEmpty && _itemSpec.MatchesItem(item.Item)) ||
-                        (!_matchOnMetadata.IsEmpty && _itemSpec.MatchesItemOnMetadata(item.Item, _matchOnMetadata, _matchOnMetadataOptions)))
+                    if (_matchOnMetadata.IsEmpty ? _itemSpec.MatchesItem(item.Item) : _itemSpec.MatchesItemOnMetadata(item.Item, _matchOnMetadata, _matchOnMetadataOptions))
                         items.Add(item.Item);
                 }
 

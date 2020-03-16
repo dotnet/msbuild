@@ -21,7 +21,6 @@ using Shouldly;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using Xunit;
-using System.Runtime.InteropServices;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {

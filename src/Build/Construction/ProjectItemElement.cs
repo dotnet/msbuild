@@ -46,6 +46,11 @@ namespace Microsoft.Build.Construction
         private string _remove;
 
         /// <summary>
+        /// MatchOnMetadata value cached for performance
+        /// </summary>
+        private string _matchOnMetadata;
+
+        /// <summary>
         /// Update value cached for performance
         /// </summary>
         private string _update;
@@ -172,14 +177,14 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return GetAttributeValue(XMakeAttributes.matchOnMetadata);
+                return GetAttributeValue(XMakeAttributes.matchOnMetadata, ref _matchOnMetadata);
             }
 
             set
             {
                 ErrorUtilities.VerifyThrowInvalidOperation(Parent == null || Parent.Parent is ProjectTargetElement || Parent.Parent is ProjectRootElement, "OM_NoMatchOnMetadataOutsideTargetsOrProject");
                 ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || RemoveMetadata.Length != 0, "OM_MatchOnMetadataOnlyApplicableToRemoveItems", ElementName, XMakeAttributes.matchOnMetadata);
-                SetOrRemoveAttribute(XMakeAttributes.matchOnMetadata, value, "Set item MatchOnMetadata {0}", value);
+                SetOrRemoveAttribute(XMakeAttributes.matchOnMetadata, value, ref _matchOnMetadata, "Set item MatchOnMetadata {0}", value);
             }
         }
 
@@ -446,6 +451,7 @@ namespace Microsoft.Build.Construction
             _include = null;
             _exclude = null;
             _remove = null;
+            _matchOnMetadata = null;
             _update = null;
             _includeHasWildcards = null;
         }

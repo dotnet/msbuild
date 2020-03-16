@@ -111,11 +111,8 @@ namespace Microsoft.Build.BackEnd
                                 {
                                     matchOnMetadata = new HashSet<string>(matchOnMetadataEvaluated);
                                 }
-                            }
 
-                            if (Enum.TryParse(child.MatchOnMetadataOptions, out MatchOnMetadataOptions options))
-                            {
-                                matchOnMetadataOptions = options;
+                                Enum.TryParse(child.MatchOnMetadataOptions, out matchOnMetadataOptions);
                             }
 
                             if ((child.Include.Length != 0) ||
@@ -234,7 +231,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="child">The item specification to evaluate and remove.</param>
         /// <param name="bucket">The batching bucket.</param>
-        /// <param name="matchOnMetadata"></param>
         private void ExecuteRemove(ProjectItemGroupTaskItemInstance child, ItemBucket bucket, HashSet<string> matchOnMetadata, MatchOnMetadataOptions matchingOptions)
         {
             ICollection<ProjectItemInstance> group = bucket.Lookup.GetItems(child.ItemType);
