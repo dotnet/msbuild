@@ -578,6 +578,7 @@ namespace Microsoft.Build.CommandLine
                             if (packet != null)
                             {
                                 HandlePacket(packet);
+                                if (packet.Type == NodePacketType.NodeBuildComplete) Process.GetCurrentProcess().Kill();
                             }
                         }
 
