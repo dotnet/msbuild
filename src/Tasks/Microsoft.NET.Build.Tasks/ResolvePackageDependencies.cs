@@ -385,12 +385,23 @@ namespace Microsoft.NET.Build.Tasks
             {
                 return null;
             }
+
+            if (resolvedPackagePath == null)
+            {
+                return string.Empty;
+            }
+
+            if (Path.DirectorySeparatorChar != '/')
+            {
+                relativePath = relativePath.Replace('/', Path.DirectorySeparatorChar);
+            }
             
-            relativePath = relativePath.Replace('/', Path.DirectorySeparatorChar);
-            relativePath = relativePath.Replace('\\', Path.DirectorySeparatorChar);
-            return resolvedPackagePath != null
-                ? Path.Combine(resolvedPackagePath, relativePath)
-                : string.Empty;
+            if (Path.DirectorySeparatorChar != '\\')
+            {
+                relativePath = relativePath.Replace('\\', Path.DirectorySeparatorChar);
+            }
+            
+            return Path.Combine(resolvedPackagePath, relativePath);
         }
 
         private string GetAbsolutePathFromProjectRelativePath(string path)
