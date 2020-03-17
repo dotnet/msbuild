@@ -16,6 +16,11 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     {
         private ITestOutputHelper _output;
 
+        public TaskHostFactory_Tests(ITestOutputHelper testOutputHelper)
+        {
+            _output = testOutputHelper;
+        }
+
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/microsoft/msbuild/issues/5158")]
         public void TaskNodesDieAfterBuild()
