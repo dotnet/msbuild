@@ -5,13 +5,17 @@ using System.Diagnostics;
 using System.Threading;
 using Microsoft.Build.Execution;
 using Microsoft.Build.UnitTests;
+using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     public sealed class TaskHostFactory_Tests
     {
+        private ITestOutputHelper _output;
+
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/microsoft/msbuild/issues/5158")]
         public void TaskNodesDieAfterBuild()
@@ -34,7 +38,11 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 string.IsNullOrEmpty(processId).ShouldBeFalse();
                 Int32.TryParse(processId, out int pid).ShouldBeTrue();
                 Process.GetCurrentProcess().Id.ShouldNotBe<int>(pid);
-                Thread.Sleep(5000);
+                for (int a = 0; a < 20; a++)
+                {
+                    Thread.Sleep(100);
+                    _output.WriteLine("Time so far: " + (0.1 * a));
+                }
                 Should.Throw<ArgumentException>(() => Process.GetProcessById(pid));
             }
         }
