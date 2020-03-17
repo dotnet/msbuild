@@ -93,7 +93,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 // We keep analyzers and assemblies with CompileTimeAssembly metadata; skip everything else.
 
-                ItemMetadata itemMetadata = null;                
+                ItemMetadata itemMetadata;
                 if (Assemblies.TryGetValue(item.ItemSpec, out itemMetadata) && 
                     itemMetadata.Type == DependencyType.AnalyzerAssembly)
                 {
@@ -269,12 +269,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private static DependencyType GetDependencyType(string dependencyTypeString)
         {
-            var dependencyType = DependencyType.Unknown;
-            if (!string.IsNullOrEmpty(dependencyTypeString))
-            {
-                Enum.TryParse(dependencyTypeString, /* ignoreCase */ true, out dependencyType);
-            }
-
+            Enum.TryParse(dependencyTypeString, ignoreCase: true, out DependencyType dependencyType);
             return dependencyType;
         }
 
@@ -317,7 +312,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 // update parent
                 var parentDependencyId = $"{parentTargetId}/{parentPackageId}".Trim('/');
-                ItemMetadata parentDependency = null;
+                ItemMetadata parentDependency;
                 if (DependenciesWorld.TryGetValue(parentDependencyId, out parentDependency))
                 {
                     parentDependency.Dependencies.Add(currentItemId);
