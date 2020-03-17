@@ -89,7 +89,7 @@ namespace Microsoft.NET.Build.Tasks
 
             AddDependenciesToTheWorld(Packages, PackageDependencies);
 
-            AddDependenciesToTheWorld(Assemblies, FileDependencies, (item) =>
+            AddDependenciesToTheWorld(Assemblies, FileDependencies, item =>
             {
                 // We keep analyzers and assemblies with CompileTimeAssembly metadata; skip everything else.
 
@@ -111,7 +111,7 @@ namespace Microsoft.NET.Build.Tasks
             DependenciesDesignTime = DependenciesWorld.Select(itemKvp =>
             {
                 var newTaskItem = new TaskItem(itemKvp.Key);
-                foreach(var metadataKvp in itemKvp.Value.ToDictionary())
+                foreach (var metadataKvp in itemKvp.Value.ToDictionary())
                 {
                     newTaskItem.SetMetadata(metadataKvp.Key, metadataKvp.Value);
                 }
@@ -378,7 +378,7 @@ namespace Microsoft.NET.Build.Tasks
         private class TargetMetadata : ItemMetadata
         {
             public TargetMetadata(ITaskItem item)
-                :base(DependencyType.Target)
+                : base(DependencyType.Target)
             {
                 RuntimeIdentifier = item.GetMetadata(MetadataKeys.RuntimeIdentifier) ?? string.Empty;
                 TargetFrameworkMoniker = item.GetMetadata(MetadataKeys.TargetFrameworkMoniker) ?? string.Empty;
