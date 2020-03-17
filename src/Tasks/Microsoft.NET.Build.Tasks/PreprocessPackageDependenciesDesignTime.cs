@@ -93,8 +93,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 // We keep analyzers and assemblies with CompileTimeAssembly metadata; skip everything else.
 
-                ItemMetadata itemMetadata;
-                if (Assemblies.TryGetValue(item.ItemSpec, out itemMetadata) && 
+                if (Assemblies.TryGetValue(item.ItemSpec, out ItemMetadata itemMetadata) && 
                     itemMetadata.Type == DependencyType.AnalyzerAssembly)
                 {
                     return false;
@@ -312,8 +311,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 // update parent
                 var parentDependencyId = $"{parentTargetId}/{parentPackageId}".Trim('/');
-                ItemMetadata parentDependency;
-                if (DependenciesWorld.TryGetValue(parentDependencyId, out parentDependency))
+                if (DependenciesWorld.TryGetValue(parentDependencyId, out ItemMetadata parentDependency))
                 {
                     parentDependency.Dependencies.Add(currentItemId);
                     if (parentDependency.Type == DependencyType.Target)
