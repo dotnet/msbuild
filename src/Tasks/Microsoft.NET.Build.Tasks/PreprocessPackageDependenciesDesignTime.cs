@@ -345,7 +345,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private abstract class ItemMetadata
         {
-            public ItemMetadata(DependencyType type, IList<string> dependencies = null, bool isTopLevelDependency = false)
+            protected ItemMetadata(DependencyType type, IList<string> dependencies = null, bool isTopLevelDependency = false)
             {
                 Type = type;
                 Dependencies = dependencies == null ? new List<string>() : new List<string>(dependencies);
@@ -444,7 +444,7 @@ namespace Microsoft.NET.Build.Tasks
                         : item.GetMetadata(MetadataKeys.Path)) ?? string.Empty;
             }
 
-            protected PackageMetadata(
+            private PackageMetadata(
                 DependencyType type,
                 IList<string> dependencies,
                 bool isTopLevelDependency,
