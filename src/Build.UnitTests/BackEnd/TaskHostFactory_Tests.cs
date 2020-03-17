@@ -14,13 +14,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     public sealed class TaskHostFactory_Tests
     {
-        private ITestOutputHelper _output;
-
-        public TaskHostFactory_Tests(ITestOutputHelper testOutputHelper)
-        {
-            _output = testOutputHelper;
-        }
-
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/microsoft/msbuild/issues/5158")]
         public void TaskNodesDieAfterBuild()
@@ -43,22 +36,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 string.IsNullOrEmpty(processId).ShouldBeFalse();
                 Int32.TryParse(processId, out int pid).ShouldBeTrue();
                 Process.GetCurrentProcess().Id.ShouldNotBe<int>(pid);
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
-                for (int a = 0; a < 20; a++)
-                {
-                    Thread.Sleep(100);
-                    _output.WriteLine("Time so far: " + sw.ElapsedMilliseconds);
-                    try
-                    {
-                        Process.GetProcessById(pid);
-                    }
-                    catch (ArgumentException)
-                    {
-                        break;
-                    }
-                }
-                sw.Stop();
+                Thread.Sleep(1000);
                 Should.Throw<ArgumentException>(() => Process.GetProcessById(pid));
             }
         }
