@@ -84,7 +84,7 @@ namespace Microsoft.NET.Build.Tasks
             PopulateAssemblies();
             PopulateExistingReferenceItems();
 
-            InputDiagnosticMessages = InputDiagnosticMessages ?? Array.Empty<ITaskItem>();
+            InputDiagnosticMessages ??= Array.Empty<ITaskItem>();
             PopulateDiagnosticsMap();
 
             AddDependenciesToTheWorld(Packages, PackageDependencies);

@@ -123,31 +123,9 @@ namespace Microsoft.NET.Build.Tasks
 
         #endregion
 
-        private IPackageResolver PackageResolver
-        {
-            get
-            {
-                if (_packageResolver == null)
-                {
-                    _packageResolver = NuGetPackageResolver.CreateResolver(LockFile);
-                }
+        private IPackageResolver PackageResolver => _packageResolver ??= NuGetPackageResolver.CreateResolver(LockFile);
 
-                return _packageResolver;
-            }
-        }
-
-        private LockFile LockFile
-        {
-            get
-            {
-                if (_lockFile == null)
-                {
-                    _lockFile = new LockFileCache(this).GetLockFile(ProjectAssetsFile);
-                }
-
-                return _lockFile;
-            }
-        }
+        private LockFile LockFile => _lockFile ??= new LockFileCache(this).GetLockFile(ProjectAssetsFile);
 
         /// <summary>
         /// Raise Nuget LockFile representation to MSBuild items
