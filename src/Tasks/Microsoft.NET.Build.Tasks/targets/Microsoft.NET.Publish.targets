@@ -68,6 +68,8 @@ Copyright (c) .NET Foundation. All rights reserved.
          build step's minimal output. Otherwise there is no indication at minimal verbosity of where
          the published assets were copied. -->
     <Message Importance="High" Text="$(MSBuildProjectName) -> $([System.IO.Path]::GetFullPath('$(PublishDir)'))" />
+
+    <AllowEmptyTelemetry EventName="PublishProperties" EventData="PublishReadyToRun=$(PublishReadyToRun);PublishTrimmed=$(PublishTrimmed);PublishSingleFile=$(PublishSingleFile)" />
   </Target>
 
   <!-- Don't let project reference resolution build project references in NoBuild case. -->
@@ -278,6 +280,8 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="_PrepareForReadyToRunCompilation;
                             _CreateR2RImages;
                             _CreateR2RSymbols">
+
+    <AllowEmptyTelemetry EventName="ReadyToRun" EventData="PublishReadyToRunUseCrossgen2=$(PublishReadyToRunUseCrossgen2);Crossgen2PackVersion=%(ResolvedCrossgen2Pack.NuGetPackageVersion);CompileListCount=@(_ReadyToRunCompileList->Count());FailedCount=@(_ReadyToRunCompilationFailures->Count())" />
 
     <NETSdkError Condition="'@(_ReadyToRunCompilationFailures)' != ''" ResourceName="ReadyToRunCompilationFailed" />
 

@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
+    <ProjectReference Include="..\TelemetryStdOutLogger\TelemetryStdOutLogger.csproj" />
   </ItemGroup>
 
   <ItemGroup>
