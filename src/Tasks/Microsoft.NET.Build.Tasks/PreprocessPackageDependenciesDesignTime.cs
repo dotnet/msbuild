@@ -704,7 +704,7 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             var packageNames = defaultImplicitPackages.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-            if (packageNames == null || packageNames.Length <= 0)
+            if (packageNames.Length == 0)
             {
                 return implicitPackageReferences;
             }
