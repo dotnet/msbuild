@@ -54,19 +54,19 @@ namespace Microsoft.NET.Build.Tasks
         [Output]
         public ITaskItem[] DependenciesDesignTime { get; set; }
 
-        private Dictionary<string, ItemMetadata> Targets { get; set; }
+        private Dictionary<string, ItemMetadata> Targets { get; }
                     = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
 
-        private Dictionary<string, ItemMetadata> Packages { get; set; }
+        private Dictionary<string, ItemMetadata> Packages { get; }
                     = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
 
-        private Dictionary<string, ItemMetadata> Assemblies { get; set; }
+        private Dictionary<string, ItemMetadata> Assemblies { get; }
                     = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
 
-        private Dictionary<string, ItemMetadata> DiagnosticsMap { get; set; }
+        private Dictionary<string, ItemMetadata> DiagnosticsMap { get; }
                     = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
 
-        private Dictionary<string, ItemMetadata> DependenciesWorld { get; set; }
+        private Dictionary<string, ItemMetadata> DependenciesWorld { get; }
                     = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
 
         private HashSet<string> ImplicitPackageReferences { get; set; }
