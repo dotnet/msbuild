@@ -267,7 +267,7 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        private DependencyType GetDependencyType(string dependencyTypeString)
+        private static DependencyType GetDependencyType(string dependencyTypeString)
         {
             var dependencyType = DependencyType.Unknown;
             if (!string.IsNullOrEmpty(dependencyTypeString))

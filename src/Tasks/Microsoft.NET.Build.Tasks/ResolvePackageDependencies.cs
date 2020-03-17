@@ -379,7 +379,7 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        private string ResolveFilePath(string relativePath, string resolvedPackagePath)
+        private static string ResolveFilePath(string relativePath, string resolvedPackagePath)
         {
             if (NuGetUtils.IsPlaceholderFile(relativePath))
             {
