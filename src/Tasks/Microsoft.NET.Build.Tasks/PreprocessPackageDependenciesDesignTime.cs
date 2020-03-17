@@ -118,7 +118,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 return newTaskItem;
-            }).ToArray();
+            }).ToArray<ITaskItem>();
         }
 
         /// <summary>
