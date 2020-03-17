@@ -336,11 +336,13 @@ namespace Microsoft.NET.Build.Tasks
                     DependenciesWorld[parentDependencyId] = parentDependency;
                 }
             }
-        }
 
-        private ItemMetadata GetItem(Dictionary<string, ItemMetadata> items, string id)
-        {
-            return Targets.Count > 1 ? items[id].Clone() : items[id];
+            return;
+
+            ItemMetadata GetItem(Dictionary<string, ItemMetadata> items, string id)
+            {
+                return Targets.Count > 1 ? items[id].Clone() : items[id];
+            }
         }
 
         private abstract class ItemMetadata
