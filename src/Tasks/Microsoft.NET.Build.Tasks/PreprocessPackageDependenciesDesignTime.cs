@@ -15,8 +15,8 @@ namespace Microsoft.NET.Build.Tasks
     /// Task combines data returned from ResolvePackageDependencies into single items collection
     /// that can be consumed by DesignTime build and contains all info needed to expand packages
     /// dependency graph.
-    /// If any changes are made here, make sure corresponding changes are made to NuGetDependenciesSubTreeProvider
-    /// in roslyn-project-system repo and corresponding tests.
+    /// If any changes are made here, make sure corresponding changes are made to PackageRuleHandler
+    /// in the dotnet/project-system repo and corresponding tests.
     /// </summary>
     public class PreprocessPackageDependenciesDesignTime : TaskBase
     {
