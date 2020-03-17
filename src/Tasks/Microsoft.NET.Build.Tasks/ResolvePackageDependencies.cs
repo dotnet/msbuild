@@ -200,8 +200,7 @@ namespace Microsoft.NET.Build.Tasks
                     else
                     {
                         // get a type for the file if one is available
-                        string fileType;
-                        if (!_fileTypes.TryGetValue(fileKey, out fileType))
+                        if (!_fileTypes.TryGetValue(fileKey, out string fileType))
                         {
                             fileType = "unknown";
                         }
@@ -276,8 +275,7 @@ namespace Microsoft.NET.Build.Tasks
             TaskItem item;
             foreach (var deps in package.Dependencies)
             {
-                string version;
-                if (!resolvedPackageVersions.TryGetValue(deps.Id, out version))
+                if (!resolvedPackageVersions.TryGetValue(deps.Id, out string version))
                 {
                     continue;
                 }
@@ -348,8 +346,7 @@ namespace Microsoft.NET.Build.Tasks
             string fileType = fileGroup.GetTypeMetadata();
             if (fileType != null)
             {
-                string currentFileType;
-                if (!_fileTypes.TryGetValue(fileKey, out currentFileType))
+                if (!_fileTypes.TryGetValue(fileKey, out string currentFileType))
                 {
                     _fileTypes.Add(fileKey, fileType);
                 }
