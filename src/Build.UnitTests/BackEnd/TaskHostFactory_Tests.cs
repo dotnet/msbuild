@@ -43,11 +43,22 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 string.IsNullOrEmpty(processId).ShouldBeFalse();
                 Int32.TryParse(processId, out int pid).ShouldBeTrue();
                 Process.GetCurrentProcess().Id.ShouldNotBe<int>(pid);
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
                 for (int a = 0; a < 20; a++)
                 {
                     Thread.Sleep(100);
-                    _output.WriteLine("Time so far: " + (0.1 * a));
+                    _output.WriteLine("Time so far: " + sw.ElapsedMilliseconds);
+                    try
+                    {
+                        Process.GetProcessById(pid);
+                    }
+                    catch (ArgumentException)
+                    {
+                        break;
+                    }
                 }
+                sw.Stop();
                 Should.Throw<ArgumentException>(() => Process.GetProcessById(pid));
             }
         }
