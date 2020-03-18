@@ -945,6 +945,11 @@ Copyright (c) .NET Foundation. All rights reserved.
       <PublishedSingleFilePath>$(PublishDir)$(PublishedSingleFileName)</PublishedSingleFilePath>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(_FilesToBundle)"/>
+      <!-- ResolvedFileToPublish shouldn't include the output; the single-file bundle is written directly to the publish directory -->
+    </ItemGroup>
+
   </Target>
 
   <UsingTask TaskName="GenerateBundle" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
@@ -959,12 +964,6 @@ Copyright (c) .NET Foundation. All rights reserved.
                     IncludeSymbols="$(IncludeSymbolsInSingleFile)"
                     OutputDir="$(PublishDir)"
                     ShowDiagnosticOutput="false"/>
-
-    <ItemGroup>
-      <ResolvedFileToPublish Remove="@(_FilesToBundle)"/>
-      <!-- ResolvedFileToPublish shouldn't include the output; the single-file bundle is written directly to the publish directory -->
-    </ItemGroup>
-
 
   </Target>
 
@@ -1067,7 +1066,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     Gathers all the files that were copied to the publish directory.  This is used by wapproj and is required for back compat.
     ============================================================
     -->
-  <Target Name="ComputeFilesCopiedToPublishDir" DependsOnTargets="ComputeFilesToPublish">
+  <Target Name="ComputeFilesCopiedToPublishDir"
+          DependsOnTargets="ComputeResolvedFilesToPublishList;
+                            _ComputeFilesToBundle">
     <ItemGroup>
       <FilesCopiedToPublishDir Include="@(ResolvedFileToPublish)"/>
       <FilesCopiedToPublishDir Include="$(PublishedSingleFilePath)" RelativePath="$(PublishedSingleFileName)" IsKeyOutput="true" Condition="'$(PublishSingleFile)' == 'true'"/>
