@@ -16,6 +16,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     {
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/microsoft/msbuild/issues/5158")]
+        [Trait("Category", "mono-osx-failing")]
         public void TaskNodesDieAfterBuild()
         {
             using (TestEnvironment env = TestEnvironment.Create())
