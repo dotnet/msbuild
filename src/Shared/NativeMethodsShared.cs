@@ -670,6 +670,11 @@ namespace Microsoft.Build.Shared
             return IsOSX ? "osx" : IsUnixLike ? "unix" : "windows";
         }
 
+        internal static bool OSUsesCaseSensitivePaths
+        {
+            get { return IsLinux; }
+        }
+
         /// <summary>
         /// The base directory for all framework paths in Mono
         /// </summary>
