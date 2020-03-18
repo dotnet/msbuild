@@ -39,12 +39,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 Process.GetCurrentProcess().Id.ShouldNotBe<int>(pid);
                 try {
                     Process taskHostNode = Process.GetProcessById(pid);
-                    taskHostNode.WaitForExit(2000);
-                    Should.Throw<ArgumentException>(() => Process.GetProcessById(pid));
+                    taskHostNode.WaitForExit(2000).ShouldBeTrue();
                 }
-                catch (Exception e)
+                // We expect the TaskHostNode to exit quickly. If it exits before Process.GetProcessById, it will throw an ArgumentException.
+                catch (ArgumentException e)
                 {
-                    e.ShouldBeOfType<ArgumentException>();
+                    e.Message.ShouldBe($"Process with an Id of {pid} is not running.");
                 }
             }
         }
