@@ -139,13 +139,6 @@ Copyright (c) .NET Foundation. All rights reserved.
           Inputs="@(_ResolvedFileToPublishPreserveNewest)"
           Outputs="@(_ResolvedFileToPublishPreserveNewest->'$(PublishDir)%(RelativePath)')">
 
-    <ItemGroup>
-      <_ResolvedUnbundledFileToPublishPreserveNewest 
-                    Include="@(_ResolvedFileToPublishPreserveNewest)" 
-                    Condition="'$(PublishSingleFile)' != 'true' or 
-                               '%(_ResolvedFileToPublishPreserveNewest.ExcludeFromSingleFile)'=='true'" />
-    </ItemGroup>
-
     <!--
       PreserveNewest means that we will only copy the source to the destination if the source is newer.
       SkipUnchangedFiles is not used for that purpose because it will copy if the source and destination
@@ -175,13 +168,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <Target Name="_CopyResolvedFilesToPublishAlways"
           DependsOnTargets="_ComputeResolvedFilesToPublishTypes">
-
-    <ItemGroup>
-      <_ResolvedUnbundledFileToPublishAlways
-                    Include="@(_ResolvedFileToPublishAlways)"
-                    Condition="'$(PublishSingleFile)' != 'true' or 
-                               '%(_ResolvedFileToPublishAlways.ExcludeFromSingleFile)'=='true'" />
-    </ItemGroup>
 
     <!--
       Use SkipUnchangedFiles to prevent unnecessary file copies. The copy will occur if the
@@ -358,6 +344,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                         _ComputeResolvedFilesToPublishTypes
 
     Splits ResolvedFileToPublish items into 'PreserveNewest' and 'Always' buckets.
+    Then further splits those into 'Unbundled' buckets based on the single file setting.
     ============================================================
     -->
   <Target Name="_ComputeResolvedFilesToPublishTypes">
@@ -368,6 +355,19 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <_ResolvedFileToPublishAlways Include="@(ResolvedFileToPublish)"
                                     Condition="'%(ResolvedFileToPublish.CopyToPublishDirectory)'=='Always'" />
+    </ItemGroup>
+
+    <ItemGroup>
+
+      <_ResolvedUnbundledFileToPublishPreserveNewest
+                    Include="@(_ResolvedFileToPublishPreserveNewest)"
+                    Condition="'$(PublishSingleFile)' != 'true' or 
+                               '%(_ResolvedFileToPublishPreserveNewest.ExcludeFromSingleFile)'=='true'" />
+
+      <_ResolvedUnbundledFileToPublishAlways
+              Include="@(_ResolvedFileToPublishAlways)"
+              Condition="'$(PublishSingleFile)' != 'true' or 
+                         '%(_ResolvedFileToPublishAlways.ExcludeFromSingleFile)'=='true'" />
     </ItemGroup>
   </Target>
 
@@ -984,13 +984,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
                                         ComputeFilesCopiedToPublishDir
 
-    Gathers all the files that were copied to the publish directory.
+    Gathers all the files that will be copied to the publish directory.
     ============================================================
     -->
   <Target Name="ComputeFilesCopiedToPublishDir"
-          DependsOnTargets="_CopyResolvedFilesToPublishPreserveNewest;
-                            _CopyResolvedFilesToPublishAlways;
-                            BundlePublishDirectory">
+          DependsOnTargets="_ComputeResolvedFilesToPublishTypes;
+                            _ComputeFilesToBundle">
 
     <ItemGroup>
       <FilesCopiedToPublishDir Include="@(_ResolvedUnbundledFileToPublishPreserveNewest)"/>
