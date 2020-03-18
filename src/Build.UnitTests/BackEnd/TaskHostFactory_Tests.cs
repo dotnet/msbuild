@@ -37,7 +37,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 string.IsNullOrEmpty(processId).ShouldBeFalse();
                 Int32.TryParse(processId, out int pid).ShouldBeTrue();
                 Process.GetCurrentProcess().Id.ShouldNotBe<int>(pid);
-                try {
+                try
+                {
                     Process taskHostNode = Process.GetProcessById(pid);
                     taskHostNode.WaitForExit(2000).ShouldBeTrue();
                 }
