@@ -4,7 +4,7 @@ This repo contains core functionality needed to create .NET Core projects, that 
 
 * MSBuild tasks can be found under [/src/Tasks/Microsoft.NET.Build.Tasks/](src/Tasks/Microsoft.NET.Build.Tasks).
 
-Please refer to [dotnet/cli](https://github.com/dotnet/cli) for .NET Core CLI source code, and to [dotnet/project-system](https://github.com/dotnet/project-system) for the project system work that is specific to Visual Studio.
+Please refer to [dotnet/project-system](https://github.com/dotnet/project-system) for the project system work that is specific to Visual Studio.
 
 ## Build status
 
