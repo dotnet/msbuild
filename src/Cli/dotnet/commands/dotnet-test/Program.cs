@@ -134,6 +134,12 @@ namespace Microsoft.DotNet.Tools.Test
         {
             foreach (var arg in args)
             {
+                // Stop parsing after the RunConfiguration delimiter
+                if (arg == "--")
+                {
+                    break;
+                }
+
                 if (!arg.StartsWith("-") &&
                     (arg.EndsWith("dll", StringComparison.OrdinalIgnoreCase) || arg.EndsWith("exe", StringComparison.OrdinalIgnoreCase)))
                 {

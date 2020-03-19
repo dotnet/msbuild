@@ -1,12 +1,12 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.DotNet.Cli;
+using System.Collections.Generic;
+using Xunit;
+
 namespace Microsoft.DotNet.Tests.ParserTests
 {
-    using Microsoft.DotNet.Cli;
-    using System.Collections.Generic;
-    using Xunit;
-
     public class VSTestArgumentConverterTests
     {
         [Theory]
@@ -54,11 +54,11 @@ namespace Microsoft.DotNet.Tests.ParserTests
 
         public static class DataSource
         {
-            private static readonly List<object[]> argTestCases = new List<object[]>
+            public static IEnumerable<object[]> ArgTestCases { get; } = new List<object[]>
             {
                 new object[] { "-h", "--help" },
                 new object[] { "sometest.dll -s test.settings", "sometest.dll --settings:test.settings" },
-                new object[] { "sometest.dll -t", "sometest.dll --listtests" },
+                new object[] { "sometest.dll -t -- RunConfiguration.DotNetHostPath=dotnet.exe", "sometest.dll --listtests -- RunConfiguration.DotNetHostPath=dotnet.exe" },
                 new object[] { "sometest.dll --list-tests", "sometest.dll --listtests" },
                 new object[] { "sometest.dll --filter", "sometest.dll --testcasefilter" },
                 new object[] { "sometest.dll -l trx", "sometest.dll --logger:trx" },
@@ -69,10 +69,10 @@ namespace Microsoft.DotNet.Tests.ParserTests
                 new object[] { @"sometest.dll --results-directory c:\temp\", @"sometest.dll --resultsdirectory:c:\temp\" },
                 new object[] { @"sometest.dll -s testsettings -t -a c:\path -f net451 -d log.txt --results-directory c:\temp\", @"sometest.dll --settings:testsettings --listtests --testadapterpath:c:\path --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\" },
                 new object[] { @"sometest.dll -s:testsettings -t -a:c:\path -f:net451 -d:log.txt --results-directory:c:\temp\", @"sometest.dll --settings:testsettings --listtests --testadapterpath:c:\path --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\" },
-                new object[] { @"sometest.dll --settings testsettings -t --test-adapter-path c:\path --framework net451 --diag log.txt --results-directory c:\temp\", @"sometest.dll --settings:testsettings --listtests --testadapterpath:c:\path --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\" }
+                new object[] { @"sometest.dll --settings testsettings -t --test-adapter-path c:\path --framework net451 --diag log.txt --results-directory c:\temp\ -- RunConfiguration.DisableAppDomain=true", @"sometest.dll --settings:testsettings --listtests --testadapterpath:c:\path --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\ -- RunConfiguration.DisableAppDomain=true" }
             };
 
-            private static readonly List<object[]> verbosityTestCases = new List<object[]>
+            public static IEnumerable<object[]> VerbosityTestCases { get; } = new List<object[]>
             {
                 new object[] { "sometest.dll -v q", "sometest.dll --logger:console;verbosity=quiet" },
                 new object[] { "sometest.dll -v m", "sometest.dll --logger:console;verbosity=minimal" },
@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
                 new object[] { "sometest.dll --verbosity:q", "sometest.dll --logger:console;verbosity=quiet" },
             };
 
-            private static readonly List<object[]> ignoredTestCases = new List<object[]>
+            public static IEnumerable<object[]> IgnoredArgTestCases { get; } = new List<object[]>
             {
                 new object[] { "sometest.dll -c Debug", "sometest.dll", "-c Debug" },
                 new object[] { "sometest.dll --configuration Debug", "sometest.dll", "--configuration Debug" },
@@ -107,21 +107,6 @@ namespace Microsoft.DotNet.Tests.ParserTests
                     @"--configuration Debug --output C:\foo --runtime win10-x64 --no-build --no-restore --interactive"
                 }
             };
-
-            public static IEnumerable<object[]> ArgTestCases
-            {
-                get { return argTestCases; }
-            }
-
-            public static IEnumerable<object[]> VerbosityTestCases
-            {
-                get { return verbosityTestCases; }
-            }
-
-            public static IEnumerable<object[]> IgnoredArgTestCases
-            {
-                get { return ignoredTestCases; }
-            }
         }
 
     }
