@@ -49,8 +49,6 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string TargetFrameworkMoniker { get; set; }
 
-        public ITaskItem[] InputDiagnosticMessages { get; set; }
-
         [Output]
         public ITaskItem[] DependenciesDesignTime { get; set; }
 
@@ -61,9 +59,6 @@ namespace Microsoft.NET.Build.Tasks
                     = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
 
         private Dictionary<string, ItemMetadata> Assemblies { get; }
-                    = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
-
-        private Dictionary<string, ItemMetadata> DiagnosticsMap { get; }
                     = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
 
         private Dictionary<string, ItemMetadata> DependenciesWorld { get; }
@@ -84,9 +79,6 @@ namespace Microsoft.NET.Build.Tasks
             PopulateAssemblies();
             PopulateExistingReferenceItems();
 
-            InputDiagnosticMessages ??= Array.Empty<ITaskItem>();
-            PopulateDiagnosticsMap();
-
             AddDependenciesToTheWorld(Packages, PackageDependencies);
 
             AddDependenciesToTheWorld(Assemblies, FileDependencies, item =>
@@ -104,8 +96,6 @@ namespace Microsoft.NET.Build.Tasks
             });
 
             AddDependenciesToTheWorld(Assemblies, ExistingReferenceItemDependencies);
-
-            AddDependenciesToTheWorld(DiagnosticsMap, InputDiagnosticMessages);
 
             // prepare output collection: add corresponding metadata to ITaskItem based in item type
             DependenciesDesignTime = DependenciesWorld.Select(itemKvp =>
@@ -255,15 +245,6 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             ExistingReferenceItemDependencies = existingReferenceItemDependencies.ToArray();
-        }
-
-        private void PopulateDiagnosticsMap()
-        {
-            foreach (var diagnostic in InputDiagnosticMessages)
-            {
-                var metadata = new DiagnosticMetadata(diagnostic);
-                DiagnosticsMap[diagnostic.ItemSpec] = metadata;
-            }
         }
 
         private static DependencyType GetDependencyType(string dependencyTypeString)
@@ -553,89 +534,6 @@ namespace Microsoft.NET.Build.Tasks
                     Name,
                     Path,
                     Visible);
-            }
-        }
-
-        private sealed class DiagnosticMetadata : ItemMetadata
-        {
-            public DiagnosticMetadata(ITaskItem item)
-                : base(DependencyType.Diagnostic)
-            {
-                DiagnosticCode = item.GetMetadata(MetadataKeys.DiagnosticCode) ?? string.Empty;
-                Message = item.GetMetadata(MetadataKeys.Message) ?? string.Empty;
-                FilePath = item.GetMetadata(MetadataKeys.FilePath) ?? string.Empty;
-                Severity = item.GetMetadata(MetadataKeys.Severity) ?? string.Empty;
-                StartLine = item.GetMetadata(MetadataKeys.StartLine) ?? string.Empty;
-                StartColumn = item.GetMetadata(MetadataKeys.StartColumn) ?? string.Empty;
-                EndLine = item.GetMetadata(MetadataKeys.EndLine) ?? string.Empty;
-                EndColumn = item.GetMetadata(MetadataKeys.EndColumn) ?? string.Empty;
-            }
-
-            private DiagnosticMetadata(
-                DependencyType type,
-                IList<string> dependencies,
-                bool isTopLevelDependency,
-                string diagnosticCode,
-                string message,
-                string filePath,
-                string severity,
-                string startLine,
-                string startColumn,
-                string endLine,
-                string endColumn)
-                : base(type, dependencies, isTopLevelDependency)
-            {
-                DiagnosticCode = diagnosticCode;
-                Message = message;
-                FilePath = filePath;
-                Severity = severity;
-                StartLine = startLine;
-                StartColumn = startColumn;
-                EndLine = endLine;
-                EndColumn = endColumn;
-            }
-
-            public string DiagnosticCode { get; }
-            public string Message { get; }
-            public string FilePath { get; }
-            public string Severity { get; }
-            public string StartLine { get; }
-            public string StartColumn { get; }
-            public string EndLine { get; }
-            public string EndColumn { get; }
-
-            public override IDictionary<string, string> ToDictionary()
-            {
-                return new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, Message },
-                    { MetadataKeys.DiagnosticCode, DiagnosticCode },
-                    { MetadataKeys.Message, Message },
-                    { MetadataKeys.FilePath, FilePath },
-                    { MetadataKeys.Severity, Severity },
-                    { MetadataKeys.StartLine, StartLine },
-                    { MetadataKeys.StartColumn, StartColumn },
-                    { MetadataKeys.EndLine, EndLine },
-                    { MetadataKeys.EndColumn, EndColumn },
-                    { MetadataKeys.Type, Type.ToString() },
-                    { DependenciesMetadata, string.Join(";", Dependencies) }
-                };
-            }
-
-            public override ItemMetadata Clone()
-            {
-                return new DiagnosticMetadata(
-                    Type,
-                    Dependencies,
-                    IsTopLevelDependency,
-                    DiagnosticCode,
-                    Message,
-                    FilePath,
-                    Severity,
-                    StartLine,
-                    StartColumn,
-                    EndLine,
-                    EndColumn);
             }
         }
 
