@@ -158,30 +158,15 @@ namespace Microsoft.NET.Publish.Tests
 
             var buildCommand = new BuildCommand(Log, testAsset.Path, testProject.Name);
             buildCommand
-                .Execute("/p:RuntimeIdentifier=win-x86;DesignTimeBuild=true;PublishSingleFile=true", "/t:PublishItemsOutputGroup")
-                .Should()
-                .Pass();
-        }
-
-        [CoreMSBuildAndWindowsOnlyFact]
-        public void GroupBuildDoesNotGeneratePublishFiles()
-        {
-            var testProject = this.SetupProject();
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
-
-            var restoreCommand = new RestoreCommand(Log, testAsset.Path, testProject.Name);
-            restoreCommand
-                .Execute()
+                .Execute("/p:RuntimeIdentifier=win-x86;DesignTimeBuild=true", "/t:PublishItemsOutputGroup")
                 .Should()
                 .Pass();
 
-            var buildCommand = new BuildCommand(Log, testAsset.Path, testProject.Name);
-
-            // Since this build tries to copies all the final publish artifacts without calling the publish target it should fail
-            buildCommand
-                .Execute("/p:RuntimeIdentifier=win-x86;DesignTimeBuild=true;PublishSingleFile=true", "/t:PublishItemsOutputGroup")
+            // Confirm we were able to build the output group without the publish actually happening
+            var publishDir = new DirectoryInfo(Path.Combine(buildCommand.GetOutputDirectory(testProject.TargetFrameworks).FullName, "win-x86", "publish"));
+            publishDir
                 .Should()
-                .Fail();
+                .NotExist();
         }
 
         private TestProject SetupProject(bool addCopyFilesTargets = true)
