@@ -1,4 +1,4 @@
-﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -114,6 +114,9 @@
       <!-- Provide a mechanism for turning on verbose TlbExp output for diagnosing issues -->
       <TlbExpVerbosity Condition="'$(VerboseTlbExp)' == 'true'">/verbose</TlbExpVerbosity>
       <TlbExpVerbosity Condition="'$(VerboseTlbExp)' != 'true'">/silent</TlbExpVerbosity>
+
+      <BitnessArgument>/win32</BitnessArgument>
+      <BitnessArgument Condition="'$(Platform)' == 'x64'">/win64</BitnessArgument>
     </PropertyGroup>
 
     <ItemGroup>
@@ -127,7 +130,7 @@
     <Error Condition=" '$(TlbExpPath)' == '' "
            Text="TlbExp was not found. Ensure that you have installed everything from .vsconfig. If you have, please report a bug to MSBuild." />
 
-    <Exec Command="&quot;$(TlbExpPath)&quot; $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') &quot;$(TargetPath)&quot; /out:&quot;$(TargetDir)$(TargetName).tlb&quot;" />
+    <Exec Command="&quot;$(TlbExpPath)&quot; $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') &quot;$(TargetPath)&quot; /out:&quot;$(TargetDir)$(TargetName).tlb&quot; $(BitnessArgument)" />
   </Target>
 
   <Import Project="$(BUILD_STAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.IBCMerge.*\**\build\MicroBuild.Plugins.*.targets" Condition="'$(BUILD_STAGINGDIRECTORY)' != '' and $(TargetFramework.StartsWith('net4')) and '$(MicroBuild_EnablePGO)' != 'false'" />
