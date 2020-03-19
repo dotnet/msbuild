@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
@@ -9,6 +8,9 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Execution
 {
+    // This class composes two caches, an override cache and a current cache.
+    // Reads are served from both caches (override first).
+    // Writes should only happen in the current cache.
     internal class ConfigCacheWithOverride : IConfigCache
     {
         private readonly IConfigCache _override;
@@ -32,6 +34,8 @@ namespace Microsoft.Build.Execution
 
         public IEnumerator<BuildRequestConfiguration> GetEnumerator()
         {
+            // Enumerators do not compose both caches to limit the influence of the override cache (reduce the number of possible states out there).
+            // So far all runtime examples do not need the two composed.
             return CurrentCache.GetEnumerator();
         }
 
@@ -109,7 +113,18 @@ namespace Microsoft.Build.Execution
 
         public BuildRequestConfiguration GetMatchingConfiguration(ConfigurationMetadata configMetadata, ConfigCreateCallback callback, bool loadProject)
         {
-            return _override.GetMatchingConfiguration(configMetadata, callback, loadProject) ?? CurrentCache.GetMatchingConfiguration(configMetadata, callback, loadProject);
+            // Call a retrieval method without side effects to avoid creating new entries in the override cache. New entries should go into the current cache.
+            var overrideConfig = GetMatchingConfiguration(configMetadata);
+
+            if (overrideConfig != null)
+            {
+#if DEBUG
+                ErrorUtilities.VerifyThrow(CurrentCache.GetMatchingConfiguration(configMetadata) == null, "caches should not overlap");
+#endif
+                return overrideConfig;
+            }
+
+            return CurrentCache.GetMatchingConfiguration(configMetadata, callback, loadProject);
         }
 
         public bool HasConfiguration(int configId)
@@ -121,7 +136,7 @@ namespace Microsoft.Build.Execution
 #if DEBUG
                 ErrorUtilities.VerifyThrow(!CurrentCache.HasConfiguration(configId), "caches should not overlap");
 #endif
-                return overrideHasConfiguration;
+                return true;
             }
 
             return _override.HasConfiguration(configId) || CurrentCache.HasConfiguration(configId);

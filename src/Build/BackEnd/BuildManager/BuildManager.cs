@@ -2486,9 +2486,11 @@ namespace Microsoft.Build.Execution
 
                 var cacheAggregation = cacheAggregator.Aggregate();
 
-                // using caches with override (override queried first before current cache) based on the assumption that during single project cached builds
-                // there's many old results, but just one single actively building project.
-
+                // In a build session with input caches, build results from cache files are separated from new build results executed in the current build session.
+                // This separation is done to differentiate between the two types, as the output caches that will be written by the current build session
+                // should contain only the results from new builds, and should not contain old results inherited from the cache files.
+                // The override cache will contain the old build results, and the current cache will contain new results.
+                // Upon reads, both caches are interrogated (override before current), but writes should only happen in the current cache.
                 _componentFactories.ReplaceFactory(BuildComponentType.ConfigCache, new ConfigCacheWithOverride(cacheAggregation.ConfigCache));
                 _componentFactories.ReplaceFactory(BuildComponentType.ResultsCache, new ResultsCacheWithOverride(cacheAggregation.ResultsCache));
 

@@ -8,6 +8,9 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Execution
 {
+    // This class composes two caches, an override cache and a current cache.
+    // Reads are served from both caches (override first)
+    // Writes should only happen in the current cache.
     internal class ResultsCacheWithOverride : IResultsCache
     {
         private readonly IResultsCache _override;
@@ -119,6 +122,8 @@ namespace Microsoft.Build.Execution
 
         public IEnumerator<BuildResult> GetEnumerator()
         {
+            // Enumerators do not compose both caches to limit the influence of the override cache (reduce the number of possible states out there).
+            // So far all runtime examples do not need the two composed.
             return CurrentCache.GetEnumerator();
         }
 
