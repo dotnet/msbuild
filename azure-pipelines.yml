@@ -158,7 +158,6 @@ stages:
       enableSourceLinkValidation: false
       publishDependsOn:
       - Validate
-      - ValidateSdk
       # This is to enable SDL runs part of Post-Build Validation Stage
       SDLValidationParameters:
         enable: true
