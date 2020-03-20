@@ -10,6 +10,7 @@ using Microsoft.DotNet.Tools.Tool.Install;
 using Microsoft.DotNet.Tools.Tool.List;
 using Microsoft.DotNet.Tools.Tool.Restore;
 using Microsoft.DotNet.Tools.Tool.Run;
+using Microsoft.DotNet.Tools.Tool.Search;
 using Microsoft.DotNet.Tools.Tool.Uninstall;
 using Microsoft.DotNet.Tools.Tool.Update;
 
@@ -48,6 +49,10 @@ namespace Microsoft.DotNet.Tools.Tool
                 ["run"] =
                 appliedOption => new ToolRunCommand(
                     appliedOption["run"],
+                    ParseResult),
+                ["search"] =
+                appliedOption => new ToolSearchCommand(
+                    appliedOption["search"],
                     ParseResult)
             };
 
