@@ -115,7 +115,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var buildCommand = new BuildCommand(Log, testAsset.Path, testProject.Name);
             buildCommand
-                .Execute("/p:RuntimeIdentifier=win-x86;DesignTimeBuild=true;PublishSingleFile=true", "/t:PublishItemsOutputGroup")
+                .Execute("/p:RuntimeIdentifier=win-x86;DesignTimeBuild=true;PublishSingleFile=true", "/t:Publish;PublishItemsOutputGroup")
                 .Should()
                 .Pass();
 
@@ -144,7 +144,32 @@ namespace Microsoft.NET.Publish.Tests
             }
         }
 
-        private TestProject SetupProject()
+        [CoreMSBuildAndWindowsOnlyFact]
+        public void GroupBuildsWithoutPublish()
+        {
+            var testProject = this.SetupProject(addCopyFilesTargets: false);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var restoreCommand = new RestoreCommand(Log, testAsset.Path, testProject.Name);
+            restoreCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var buildCommand = new BuildCommand(Log, testAsset.Path, testProject.Name);
+            buildCommand
+                .Execute("/p:RuntimeIdentifier=win-x86;DesignTimeBuild=true", "/t:PublishItemsOutputGroup")
+                .Should()
+                .Pass();
+
+            // Confirm we were able to build the output group without the publish actually happening
+            var publishDir = new DirectoryInfo(Path.Combine(buildCommand.GetOutputDirectory(testProject.TargetFrameworks).FullName, "win-x86", "publish"));
+            publishDir
+                .Should()
+                .NotExist();
+        }
+
+        private TestProject SetupProject(bool addCopyFilesTargets = true)
         {
             var testProject = new TestProject()
             {
@@ -159,23 +184,26 @@ namespace Microsoft.NET.Publish.Tests
             //  Use a test-specific packages folder
             testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\..\pkg";
 
-            // Add a target that will dump the contents of the PublishItemsOutputGroup to
-            // a test directory after building.
-            testProject.CopyFilesTargets.Add(new CopyFilesTarget(
-                "CopyPublishItemsOutputGroup",
-                "PublishItemsOutputGroup",
-                "@(PublishItemsOutputGroupOutputs)",
-                null,
-                "$(MSBuildProjectDirectory)\\TestOutput"));
+            if (addCopyFilesTargets)
+            {
+                // Add a target that will dump the contents of the PublishItemsOutputGroup to
+                // a test directory after building.
+                testProject.CopyFilesTargets.Add(new CopyFilesTarget(
+                    "CopyPublishItemsOutputGroup",
+                    "PublishItemsOutputGroup",
+                    "@(PublishItemsOutputGroupOutputs)",
+                    null,
+                    "$(MSBuildProjectDirectory)\\TestOutput"));
 
-            // Add another target that will dump the members of PublishItemsOutputGroup that
-            // have property IsKeyOutput set to true to a different test directory.
-            testProject.CopyFilesTargets.Add(new CopyFilesTarget(
-                "CopyPublishKeyItemsOutputGroup",
-                "PublishItemsOutputGroup",
-                "@(PublishItemsOutputGroupOutputs)",
-                @"'%(PublishItemsOutputGroupOutputs.IsKeyOutput)' == 'True'",
-                "$(MSBuildProjectDirectory)\\TestOutput_Key"));
+                // Add another target that will dump the members of PublishItemsOutputGroup that
+                // have property IsKeyOutput set to true to a different test directory.
+                testProject.CopyFilesTargets.Add(new CopyFilesTarget(
+                    "CopyPublishKeyItemsOutputGroup",
+                    "PublishItemsOutputGroup",
+                    "@(PublishItemsOutputGroupOutputs)",
+                    @"'%(PublishItemsOutputGroupOutputs.IsKeyOutput)' == 'True'",
+                    "$(MSBuildProjectDirectory)\\TestOutput_Key"));
+            }
 
             return testProject;
         }
