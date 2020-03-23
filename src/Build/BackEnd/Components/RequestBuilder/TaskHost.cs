@@ -241,6 +241,8 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        public bool TaskInParallelBuildFailed { get; private set; } = false;
+
         #region IBuildEngine2 Members
 
         /// <summary>
@@ -307,6 +309,8 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
             }
+
+            TaskInParallelBuildFailed = !result.Result;
 
             return result.Result;
         }

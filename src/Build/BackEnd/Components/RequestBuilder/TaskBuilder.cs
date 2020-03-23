@@ -951,7 +951,8 @@ namespace Microsoft.Build.BackEnd
                 // When a task fails it must log an error. If a task fails to do so,
                 // that is logged as an error. MSBuild tasks are an exception because
                 // errors are not logged directly from them, but the tasks spawned by them.
-                if (!isMSBuildTask && taskReturned && !taskResult && !taskLoggingContext.HasLoggedErrors)
+                IBuildEngine be = host.TaskInstance.BuildEngine;
+                if (be is TaskHost ? ((TaskHost)be).TaskInParallelBuildFailed : false)
                 {
                     if (_continueOnError == ContinueOnError.WarnAndContinue)
                     {
