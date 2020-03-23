@@ -181,6 +181,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Gather up outputs for the requested targets and return those.  All of our information should be in the base lookup now.
+            ComputeAfterTargetFailures(targetNames);
             BuildResult resultsToReport = new BuildResult(_buildResult, targetNames);
 
             // Return after-build project state if requested.
@@ -765,6 +766,40 @@ namespace Microsoft.Build.BackEnd
             }
 
             return false;
+        }
+
+        private void ComputeAfterTargetFailures(string[] targetNames)
+        {
+            foreach (string targetName in targetNames)
+            {
+                if (_buildResult.ResultsByTarget.ContainsKey(targetName))
+                {
+                    // Queue of targets waiting to be processed, seeded with the specific target for which we're computing AfterTargetsHaveFailed.
+                    var targetsToCheckForAfterTargets = new Queue<string>();
+                    targetsToCheckForAfterTargets.Enqueue(targetName);
+
+                    while (targetsToCheckForAfterTargets?.Count > 0)
+                    {
+                        string targetToCheck = targetsToCheckForAfterTargets.Dequeue();
+                        IList<TargetSpecification> targetsWhichRunAfter = _requestEntry.RequestConfiguration.Project.GetTargetsWhichRunAfter(targetToCheck);
+
+                        foreach (TargetSpecification afterTarget in targetsWhichRunAfter)
+                        {
+                            _buildResult.ResultsByTarget.TryGetValue(afterTarget.TargetName, out TargetResult result);
+                            if (result?.ResultCode == TargetResultCode.Failure && !result.TargetFailureDoesntCauseBuildFailure)
+                            {
+                                // Mark the target as having an after target failed, and break the loop to move to the next target.
+                                _buildResult.ResultsByTarget[targetName].AfterTargetsHaveFailed = true;
+                                targetsToCheckForAfterTargets = null;
+                                break;
+                            }
+
+                            // We haven't seen this target yet, add it to the list to check.
+                            targetsToCheckForAfterTargets.Enqueue(afterTarget.TargetName);
+                        }
+                    }
+                }
+            }
         }
     }
 }
