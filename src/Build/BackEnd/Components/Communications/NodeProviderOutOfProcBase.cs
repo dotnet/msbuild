@@ -103,9 +103,10 @@ namespace Microsoft.Build.BackEnd
         /// Shuts down all of the managed nodes permanently.
         /// </summary>
         /// <param name="hostHandshake">host handshake key</param>
+        /// <param name="hostHandshakeWithLowPriority">host handshake key with low priority added</param>
         /// <param name="clientHandshake">client handshake key</param>
         /// <param name="terminateNode">Delegate used to tell the node provider that a context has terminated</param>
-        protected void ShutdownAllNodes(long hostHandshake, long clientHandshake, NodeContextTerminateDelegate terminateNode)
+        protected void ShutdownAllNodes(long hostHandshake, long hostHandshakeWithLowPriority, long clientHandshake, NodeContextTerminateDelegate terminateNode)
         {
             // INodePacketFactory
             INodePacketFactory factory = new NodePacketFactory();
@@ -121,7 +122,17 @@ namespace Microsoft.Build.BackEnd
             // For all processes in the list, send signal to terminate if able to connect
             foreach (Process nodeProcess in nodeProcesses)
             {
-                Stream nodeStream = TryConnectToProcess(nodeProcess.Id, 30/*verified to miss nodes if smaller*/, hostHandshake, clientHandshake);
+                // A 2013 comment suggested some nodes take this long to respond, so a smaller timeout would miss nodes.
+                int timeout = 30;
+
+                // Attempt to connect to the process with the handshake without low priority.
+                Stream nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, hostHandshake, clientHandshake);
+
+                if (null == nodeStream)
+                {
+                    // If we couldn't connect attempt to connect to the process with the handshake including low priority.
+                    nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, hostHandshakeWithLowPriority, clientHandshake);
+                }
 
                 if (null != nodeStream)
                 {

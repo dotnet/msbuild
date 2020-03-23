@@ -745,7 +745,7 @@ namespace Microsoft.Build.BackEnd
             UpdateContinueOnError(bucket, taskHost);
 
             bool taskResult = false;
-            bool isMSBuildTask = false;
+            bool isMSBuildTaskOrCallTargetTask = false;
 
             WorkUnitResultCode resultCode = WorkUnitResultCode.Success;
             WorkUnitActionCode actionCode = WorkUnitActionCode.Continue;
@@ -773,7 +773,7 @@ namespace Microsoft.Build.BackEnd
                         ErrorUtilities.VerifyThrow(msbuildTask != null, "Unexpected MSBuild internal task.");
 
                         var undeclaredProjects = GetUndeclaredProjects(msbuildTask);
-                        isMSBuildTask = true;
+                        isMSBuildTaskOrCallTargetTask = true;
 
                         if (undeclaredProjects != null && undeclaredProjects.Count != 0)
                         {
@@ -810,6 +810,7 @@ namespace Microsoft.Build.BackEnd
                     else if (taskType == typeof(CallTarget))
                     {
                         CallTarget callTargetTask = host.TaskInstance as CallTarget;
+                        isMSBuildTaskOrCallTargetTask = true;
                         taskResult = await callTargetTask.ExecuteInternal();
                     }
                     else
@@ -859,7 +860,6 @@ namespace Microsoft.Build.BackEnd
                         // Rethrow wrapped in order to avoid losing the callstack
                         throw new InternalLoggerException(taskException.Message, taskException, ex.BuildEventArgs, ex.ErrorCode, ex.HelpKeyword, ex.InitializationException);
                     }
-#if FEATURE_VARIOUS_EXCEPTIONS
                     else if (type == typeof(ThreadAbortException))
                     {
                         Thread.ResetAbort();
@@ -869,7 +869,6 @@ namespace Microsoft.Build.BackEnd
                         // Stack will be lost
                         throw taskException;
                     }
-#endif
                     else if (type == typeof(BuildAbortedException))
                     {
                         _continueOnError = ContinueOnError.ErrorAndStop;
