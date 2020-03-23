@@ -19,6 +19,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
 #endif
@@ -697,7 +698,8 @@ namespace Microsoft.Build.CommandLine
         {
             ErrorUtilities.VerifyThrow(!_isTaskExecuting, "We should never have a task in the process of executing when we receive NodeBuildComplete.");
 
-            _shutdownReason = buildComplete.PrepareForReuse ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
+            // TaskHostNodes lock assemblies with custom tasks produced by build scripts if NodeReuse is on. This causes failures if the user builds twice.
+            _shutdownReason = buildComplete.PrepareForReuse && Traits.Instance.EscapeHatches.ReuseTaskHostNodes ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
             _shutdownEvent.Set();
         }
 
@@ -837,14 +839,12 @@ namespace Microsoft.Build.CommandLine
             }
             catch (Exception e)
             {
-#if FEATURE_VARIOUS_EXCEPTIONS
                 if (e is ThreadAbortException)
                 {
                     // This thread was aborted as part of Cancellation, we will return a failure task result
                     taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
                 }
                 else
-#endif
                 if (ExceptionHandling.IsCriticalException(e))
                 {
                     throw;

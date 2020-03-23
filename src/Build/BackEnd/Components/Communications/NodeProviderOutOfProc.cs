@@ -72,16 +72,21 @@ namespace Microsoft.Build.BackEnd
         /// Derived from the binary timestamp to avoid mixing binary versions,
         /// Is64BitProcess to avoid mixing bitness, and enableNodeReuse to
         /// ensure that a /nr:false build doesn't reuse clients left over from
-        /// a prior /nr:true build.
+        /// a prior /nr:true build. The enableLowPriority flag is to ensure that
+        /// a build with /low:false doesn't reuse clients left over for a prior
+        /// /low:true build.
         /// </summary>
         /// <param name="enableNodeReuse">Is reuse of build nodes allowed?</param>
-        internal static long GetHostHandshake(bool enableNodeReuse)
+        /// <param name="enableLowPriority">Is the build running at low priority?</param>
+        internal static long GetHostHandshake(bool enableNodeReuse, bool enableLowPriority)
         {
             long baseHandshake = Constants.AssemblyTimestamp;
 
             baseHandshake = baseHandshake*17 + EnvironmentUtilities.Is64BitProcess.GetHashCode();
 
             baseHandshake = baseHandshake*17 + enableNodeReuse.GetHashCode();
+
+            baseHandshake = baseHandshake*17 + enableLowPriority.GetHashCode();
 
             return CommunicationsUtilities.GenerateHostHandshakeFromBase(baseHandshake, GetClientHandshake());
         }
@@ -111,17 +116,17 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            // Start the new process.  We pass in a node mode with a node number of 1, to indicate that we 
+            // Start the new process.  We pass in a node mode with a node number of 1, to indicate that we
             // want to start up just a standard MSBuild out-of-proc node.
             // Note: We need to always pass /nodeReuse to ensure the value for /nodeReuse from msbuild.rsp
             // (next to msbuild.exe) is ignored.
-            string commandLineArgs = ComponentHost.BuildParameters.EnableNodeReuse ? 
-                "/nologo /nodemode:1 /nodeReuse:true" : 
-                "/nologo /nodemode:1 /nodeReuse:false";
+            string commandLineArgs = $"/nologo /nodemode:1 /nodeReuse:{ComponentHost.BuildParameters.EnableNodeReuse.ToString().ToLower()} /low:{ComponentHost.BuildParameters.LowPriority.ToString().ToLower()}";
 
             // Make it here.
             CommunicationsUtilities.Trace("Starting to acquire a new or existing node to establish node ID {0}...", nodeId);
-            NodeContext context = GetNode(null, commandLineArgs, nodeId, factory, NodeProviderOutOfProc.GetHostHandshake(ComponentHost.BuildParameters.EnableNodeReuse), NodeProviderOutOfProc.GetClientHandshake(), NodeContextTerminated);
+
+            long hostHandShake = NodeProviderOutOfProc.GetHostHandshake(ComponentHost.BuildParameters.EnableNodeReuse, ComponentHost.BuildParameters.LowPriority);
+            NodeContext context = GetNode(null, commandLineArgs, nodeId, factory, hostHandShake, NodeProviderOutOfProc.GetClientHandshake(), NodeContextTerminated);
 
             if (null != context)
             {
@@ -173,13 +178,21 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownAllNodes()
         {
-            // if no BuildParameters were specified for this build,
+            // If no BuildParameters were specified for this build,
             // we must be trying to shut down idle nodes from some
             // other, completed build. If they're still around,
             // they must have been started with node reuse.
             bool nodeReuse = ComponentHost.BuildParameters?.EnableNodeReuse ?? true;
 
-            ShutdownAllNodes(NodeProviderOutOfProc.GetHostHandshake(nodeReuse), NodeProviderOutOfProc.GetClientHandshake(), NodeContextTerminated);
+            // To avoid issues with mismatched priorities not shutting
+            // down all the nodes on exit, we will attempt to shutdown
+            // all matching nodes with and without the priority bit set.
+            // This means we need both versions of the handshake.
+            ShutdownAllNodes(
+                NodeProviderOutOfProc.GetHostHandshake(nodeReuse, enableLowPriority: false),
+                NodeProviderOutOfProc.GetHostHandshake(nodeReuse, enableLowPriority: true),
+                NodeProviderOutOfProc.GetClientHandshake(),
+                NodeContextTerminated);
         }
 
         #endregion
