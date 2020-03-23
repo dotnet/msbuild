@@ -511,7 +511,6 @@ namespace Microsoft.Build.BackEnd
                                         request: request,
                                         configInitialTargets: config.ProjectInitialTargets,
                                         configDefaultTargets: config.ProjectDefaultTargets,
-                                        additionalTargetsToCheckForOverallResult: config.GetAfterTargetsForDefaultTargets(request),
                                         skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
 
                                     if (cacheResponse.Type == ResultsCacheResponseType.Satisfied)
@@ -1173,7 +1172,6 @@ namespace Microsoft.Build.BackEnd
                             request: newRequest,
                             configInitialTargets: matchingConfig.ProjectInitialTargets,
                             configDefaultTargets: matchingConfig.ProjectDefaultTargets,
-                            additionalTargetsToCheckForOverallResult: matchingConfig.GetAfterTargetsForDefaultTargets(newRequest),
                             skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
 
                         if (response.Type == ResultsCacheResponseType.Satisfied)

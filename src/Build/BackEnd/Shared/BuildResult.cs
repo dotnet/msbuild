@@ -179,7 +179,7 @@ namespace Microsoft.Build.Execution
         /// <param name="existingResults">The existing results, if any.</param>
         /// <param name="exception">The exception, if any</param>
         internal BuildResult(BuildRequest request, BuildResult existingResults, Exception exception)
-            : this(request, existingResults, null, null, exception)
+            : this(request, existingResults, null, exception)
         {
         }
 
@@ -189,9 +189,8 @@ namespace Microsoft.Build.Execution
         /// <param name="request">The build request with which these results should be associated.</param>
         /// <param name="existingResults">The existing results, if any.</param>
         /// <param name="targetNames">The list of target names that are the subset of results that should be returned.</param>
-        /// <param name="additionalTargetsToCheck">The additional targets that need to be taken into account when computing the overall result, if any.</param>
         /// <param name="exception">The exception, if any</param>
-        internal BuildResult(BuildRequest request, BuildResult existingResults, string[] targetNames, List<string> additionalTargetsToCheck, Exception exception)
+        internal BuildResult(BuildRequest request, BuildResult existingResults, string[] targetNames, Exception exception)
         {
             ErrorUtilities.VerifyThrow(request != null, "Must specify a request.");
             _submissionId = request.SubmissionId;
@@ -200,57 +199,17 @@ namespace Microsoft.Build.Execution
             _parentGlobalRequestId = request.ParentGlobalRequestId;
             _nodeRequestId = request.NodeRequestId;
             _circularDependency = false;
+            _baseOverallResult = true;
 
             if (existingResults == null)
             {
                 _requestException = exception;
                 _resultsByTarget = CreateTargetResultDictionary(0);
-                _baseOverallResult = true;
             }
             else
             {
                 _requestException = exception ?? existingResults._requestException;
-
                 _resultsByTarget = targetNames == null ? existingResults._resultsByTarget : CreateTargetResultDictionaryWithContents(existingResults, targetNames);
-
-                if (existingResults.OverallResult == BuildResultCode.Success || (additionalTargetsToCheck == null || additionalTargetsToCheck.Count == 0))
-                {
-                    // If we know for a fact that all of the existing results succeeded, then by definition we'll have 
-                    // succeeded too.  Alternately, if we don't have any additional targets to check, then we want the 
-                    // overall result to reflect only the targets included in this result, which the OverallResult 
-                    // property already does -- so just default to true in that case as well. 
-                    _baseOverallResult = true;
-                }
-                else
-                {
-                    // If the existing result is a failure, then we need to determine whether the targets we are 
-                    // specifically interested in contributed to that failure or not.  If they did not, then this 
-                    // result should be sucessful even though the result it is based on failed. 
-                    // 
-                    // For the most part, this is taken care of for us because any dependent targets that fail also 
-                    // mark their parent targets (up to and including the entrypoint target) as failed.  However, 
-                    // there is one case in which this is not true: if the entrypoint target has AfterTargets that 
-                    // fail, then as far as the entrypoint target knows when it is executing, it has succeeded.  The 
-                    // failure doesn't come until after.  On the other hand, we don't want to actually include the 
-                    // AfterTarget results in the build result itself if the user hasn't asked for them.  
-                    // 
-                    // So in the case where there are AfterTargets, we will check them for failure so that we can  
-                    // make sure the overall success/failure result is correct, but not actually add their contents 
-                    // to the new result. 
-                    _baseOverallResult = true;
-
-                    foreach (string additionalTarget in additionalTargetsToCheck)
-                    {
-                        if (existingResults.ResultsByTarget.TryGetValue(additionalTarget, out TargetResult targetResult))
-                        {
-                            if (targetResult.ResultCode == TargetResultCode.Failure && !targetResult.TargetFailureDoesntCauseBuildFailure)
-                            {
-                                _baseOverallResult = false;
-                                break;
-                            }
-                        }
-                    }
-                }
             }
         }
 
@@ -383,7 +342,8 @@ namespace Microsoft.Build.Execution
 
                 foreach (KeyValuePair<string, TargetResult> result in _resultsByTarget)
                 {
-                    if (result.Value.ResultCode == TargetResultCode.Failure && !result.Value.TargetFailureDoesntCauseBuildFailure)
+                    if ((result.Value.ResultCode == TargetResultCode.Failure && !result.Value.TargetFailureDoesntCauseBuildFailure)
+                        || result.Value.AfterTargetsHaveFailed)
                     {
                         return BuildResultCode.Failure;
                     }
