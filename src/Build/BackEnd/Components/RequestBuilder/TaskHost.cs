@@ -241,7 +241,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        public bool TaskInParallelBuildFailed { get; private set; } = false;
+        public bool ParallelTasksSucceeded { get; private set; } = true;
 
         #region IBuildEngine2 Members
 
@@ -310,7 +310,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            TaskInParallelBuildFailed = !result.Result;
+            ParallelTasksSucceeded = result.Result;
 
             return result.Result;
         }
@@ -705,6 +705,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 result = new BuildEngineResult(overallSuccess, targetOutputsPerProject);
+                ParallelTasksSucceeded = overallSuccess;
             }
             else
             {
@@ -966,6 +967,8 @@ namespace Microsoft.Build.BackEnd
 
                     ErrorUtilities.VerifyThrow(results.Length == projectFileNames.Length || overallSuccess == false, "The number of results returned {0} cannot be less than the number of project files {1} unless one of the results indicated failure.", results.Length, projectFileNames.Length);
                 }
+
+                ParallelTasksSucceeded = overallSuccess;
 
                 return new BuildEngineResult(overallSuccess, targetOutputsPerProject);
             }
