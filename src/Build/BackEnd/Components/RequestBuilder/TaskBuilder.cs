@@ -745,6 +745,7 @@ namespace Microsoft.Build.BackEnd
             UpdateContinueOnError(bucket, taskHost);
 
             bool taskResult = false;
+            bool isMSBuildTask = false;
 
             WorkUnitResultCode resultCode = WorkUnitResultCode.Success;
             WorkUnitActionCode actionCode = WorkUnitActionCode.Continue;
@@ -772,6 +773,7 @@ namespace Microsoft.Build.BackEnd
                         ErrorUtilities.VerifyThrow(msbuildTask != null, "Unexpected MSBuild internal task.");
 
                         var undeclaredProjects = GetUndeclaredProjects(msbuildTask);
+                        isMSBuildTask = true;
 
                         if (undeclaredProjects != null && undeclaredProjects.Count != 0)
                         {
