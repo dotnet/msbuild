@@ -1059,6 +1059,20 @@ Copyright (c) .NET Foundation. All rights reserved.
     </GetEmbeddedApphostPaths>
 
   </Target>
+  
+  <!--
+    ============================================================
+                                            ComputeFilesCopiedToPublishDir
+
+    Gathers all the files that were copied to the publish directory.  This is used by wapproj and is required for back compat.
+    ============================================================
+    -->
+  <Target Name="ComputeFilesCopiedToPublishDir" DependsOnTargets="ComputeFilesToPublish">
+    <ItemGroup>
+      <FilesCopiedToPublishDir Include="@(ResolvedFileToPublish)"/>
+      <FilesCopiedToPublishDir Include="$(PublishedSingleFilePath)" RelativePath="$(PublishedSingleFileName)" IsKeyOutput="true" Condition="'$(PublishSingleFile)' == 'true'"/>
+    </ItemGroup>
+  </Target>
 
   <!--
     ============================================================
@@ -1071,21 +1085,16 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PublishItemsOutputGroupDependsOn>
       $(PublishItemsOutputGroupDependsOn);
       ResolveReferences;
-      ComputeFilesToPublish;
+      ComputeFilesCopiedToPublishDir;
     </PublishItemsOutputGroupDependsOn>
   </PropertyGroup>
 
   <Target Name="PublishItemsOutputGroup" DependsOnTargets="$(PublishItemsOutputGroupDependsOn)" Returns="@(PublishItemsOutputGroupOutputs)">
     <ItemGroup>
-      <PublishItemsOutputGroupOutputs Include="@(ResolvedFileToPublish->'%(FullPath)')"
-                                      TargetPath="%(ResolvedFileToPublish.RelativePath)"
-                                      IsKeyOutput="%(ResolvedFileToPublish.IsKeyOutput)"
+      <PublishItemsOutputGroupOutputs Include="@(FilesCopiedToPublishDir->'%(FullPath)')"
+                                      TargetPath="%(FilesCopiedToPublishDir.RelativePath)"
+                                      IsKeyOutput="%(FilesCopiedToPublishDir.IsKeyOutput)"
                                       OutputGroup="PublishItemsOutputGroup" />
-      <PublishItemsOutputGroupOutputs Include="$(PublishedSingleFilePath)"
-                                      TargetPath="$(PublishedSingleFileName)"
-                                      IsKeyOutput="true"
-                                      OutputGroup="PublishItemsOutputGroup" 
-                                      Condition="'$(PublishSingleFile)' == 'true'" />    
     </ItemGroup>
   </Target>
 
