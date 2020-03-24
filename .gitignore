@@ -16,9 +16,6 @@ obj/
 # OS X Device Services Store
 .DS_Store
 
-# Performance tests GIT source
-.perftestsource/
-
 *.binlog
 
 sdk.sln.DotSettings.user

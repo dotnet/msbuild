@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "Microsoft.NET.PerformanceTests": {
-      "commandName": "Project",
-      "commandLineArgs": "-wait"
-    }
-  }
-}
