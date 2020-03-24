@@ -334,7 +334,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </GetReferenceAssemblyPaths>
     
     <ItemGroup>
-      <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" Condition="'$(_FullFrameworkReferenceAssemblyPaths)' == ''"/>
+      <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" IsImplicitlyDefined="true" Condition="'$(_FullFrameworkReferenceAssemblyPaths)' == ''"/>
     </ItemGroup>
   </Target>
   

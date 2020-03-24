@@ -50,7 +50,7 @@ namespace Microsoft.NET.Restore.Tests
             LockFile lockFile = LockFileUtilities.GetLockFile(projectAssetsJsonPath, NullLogger.Instance);
             var netFrameworkLibrary = lockFile.GetTarget(NuGetFramework.Parse(".NETFramework,Version=v" + version), null).Libraries.FirstOrDefault((file) => file.Name.Contains(targetFramework));
 
-            if (ReferenceAssembliesAreInstalled(targetFrameworkVersion))
+            if (TestProject.ReferenceAssembliesAreInstalled(targetFrameworkVersion))
             {
                 netFrameworkLibrary.Should().BeNull();
             }
@@ -88,7 +88,7 @@ namespace Microsoft.NET.Restore.Tests
                 NullLogger.Instance);
 
             var net471FrameworkLibrary = lockFile.GetTarget(NuGetFramework.Parse(".NETFramework,Version=v4.7.1"), null).Libraries.FirstOrDefault((file) => file.Name.Contains("net471"));
-            if (ReferenceAssembliesAreInstalled(TargetDotNetFrameworkVersion.Version471))
+            if (TestProject.ReferenceAssembliesAreInstalled(TargetDotNetFrameworkVersion.Version471))
             {
                 net471FrameworkLibrary.Should().BeNull();
             }
@@ -100,7 +100,7 @@ namespace Microsoft.NET.Restore.Tests
 
             var net472FrameworkLibrary = lockFile.GetTarget(NuGetFramework.Parse(".NETFramework,Version=v4.7.2"), null).Libraries.FirstOrDefault((file) => file.Name.Contains("net472"));
 
-            if (ReferenceAssembliesAreInstalled(TargetDotNetFrameworkVersion.Version472))
+            if (TestProject.ReferenceAssembliesAreInstalled(TargetDotNetFrameworkVersion.Version472))
             {
                 net472FrameworkLibrary.Should().BeNull();
             }
@@ -110,12 +110,6 @@ namespace Microsoft.NET.Restore.Tests
                 net472FrameworkLibrary.Type.Should().Be("package");
             }
 
-        }
-
-        public static bool ReferenceAssembliesAreInstalled(TargetDotNetFrameworkVersion targetFrameworkVersion)
-        {
-            var referenceAssemblies = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(targetFrameworkVersion);
-            return referenceAssemblies != null;
         }
     }
 }
