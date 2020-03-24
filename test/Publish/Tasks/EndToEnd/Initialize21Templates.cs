@@ -21,7 +21,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
 
             string TemplateDir21 = Path.Combine(dotNetInstallDir, "sdk", DotNet21SdkVersion, "Templates");
             //Install the 2.1 templates
-            int? exitCode = new ProcessWrapper().RunProcess(FolderPublish30.DotNetExeName, $"new -i \"{TemplateDir21}/*.nupkg\" ", AppContext.BaseDirectory, out int? processId1, createDirectoryIfNotExists: true, waitForExit: true, testOutputHelper: null);
+            int? exitCode = new ProcessWrapper().RunProcess(FolderPublish31.DotNetExeName, $"new -i \"{TemplateDir21}/*.nupkg\" ", AppContext.BaseDirectory, out int? processId1, createDirectoryIfNotExists: true, waitForExit: true, testOutputHelper: null);
     }
 
         public void Dispose()
