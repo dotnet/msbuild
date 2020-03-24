@@ -36,7 +36,6 @@ jobs:
       - _OfficialBuildIdArgs: ''
       - _PublishArgs: ''
       - _SignArgs: ''
-      - _TestArgs: $(_Test)
       - ${{ if ne(variables['System.TeamProject'], 'public') }}:
         - group: DotNet-Symbol-Server-PATs
         - group: DotNet-HelixApi-Access
@@ -60,6 +59,7 @@ jobs:
                   $(_PublishArgs)
                   $(_SignArgs)
                   $(_OfficialBuildIdArgs)
+                  $(_Test)
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
@@ -72,7 +72,7 @@ jobs:
       #         -prepareMachine
       #         -ci
       #         -restore
-      #         $(_TestArgs)
+      #         $(_Test)
       #         -projects $(Build.SourcesDirectory)/src/Tests/UnitTests.proj
       #         /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\TestInHelix.binlog
       #         /p:_CustomHelixTargetQueue=${{ parameters.helixTargetQueue }}
@@ -87,6 +87,7 @@ jobs:
                   $(_PublishArgs)
                   $(_SignArgs)
                   $(_OfficialBuildIdArgs)
+                  $(_Test)
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
@@ -116,6 +117,7 @@ jobs:
                   $(_PublishArgs)
                   $(_SignArgs)
                   $(_OfficialBuildIdArgs)
+                  $(_Test)
                   /p:RunTestsAsTool=true
         displayName: Build
         env:
