@@ -677,7 +677,7 @@ namespace Microsoft.Build.Internal
         /// but stripped out architecture specific defines
         /// that causes the hashcode to be different and this causes problem in cross-architecture handshaking
         /// </summary>
-        private static int GetHandshakeHashCode(string fileVersion)
+        internal static int GetHandshakeHashCode(string fileVersion)
         {
             unsafe
             {

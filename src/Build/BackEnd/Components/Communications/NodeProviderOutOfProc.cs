@@ -80,7 +80,12 @@ namespace Microsoft.Build.BackEnd
         /// <param name="enableLowPriority">Is the build running at low priority?</param>
         internal static long GetHostHandshake(bool enableNodeReuse, bool enableLowPriority)
         {
-            long baseHandshake = Constants.AssemblyTimestamp;
+            CommunicationsUtilities.Trace("MSBUILDNODEHANDSHAKESALT=\"{0}\", msbuildDirectory=\"{1}\", enableNodeReuse={2}, enableLowPriority={3}", Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT"), BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, enableNodeReuse, enableLowPriority);
+
+            string salt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") + BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
+            long baseHandshake = CommunicationsUtilities.GetHandshakeHashCode(salt);
+
+            baseHandshake = baseHandshake*17 + Constants.AssemblyTimestamp;
 
             baseHandshake = baseHandshake*17 + EnvironmentUtilities.Is64BitProcess.GetHashCode();
 
