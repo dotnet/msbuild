@@ -21,6 +21,10 @@ variables:
     value: true
   - name: _DotNetArtifactsCategory
     value: .NETCore
+    
+  # used for post-build phases, internal builds only
+  - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+    - group: DotNet-AspNet-SDLValidation-Params
 
 resources:
   containers:
