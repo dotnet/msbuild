@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
@@ -169,11 +170,23 @@ namespace Microsoft.Build.Execution
             return CurrentCache.WriteConfigurationsToDisk();
         }
 
-        private void AssertCurrentCacheDoesNotContainConfig(BuildRequestConfiguration config)
+        private void AssertCurrentCacheDoesNotContainConfig(BuildRequestConfiguration overrideConfig)
         {
-            if (_isolateProjects)
+            ErrorUtilities.VerifyThrow(!CurrentCache.HasConfiguration(overrideConfig.ConfigurationId), "caches should not overlap");
+        }
+
+        public void BuildResultAddedForConfiguration(int configId)
+        {
+            // If a build result is added for a configuration, that configuration must exist in the CurrentCache.
+            // If the configuration is in the override cache, then it must be moved into the CurrentCache.
+            // This is because if the caches are serialized to files, both the config and the build result serialized caches must have a 1-1 mapping
+            // between themselves.
+            if (_override.TryGetConfiguration(configId, out var overrideConfig))
             {
-                ErrorUtilities.VerifyThrow(!CurrentCache.HasConfiguration(config.ConfigurationId), "caches should not overlap");
+                AssertCurrentCacheDoesNotContainConfig(overrideConfig);
+
+                _override.RemoveConfiguration(configId);
+                CurrentCache.AddConfiguration(overrideConfig);
             }
         }
     }

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -131,6 +132,7 @@ BuildEngine5.BuildProjectFilesInParallel(
         {
             _testOutput = testOutput;
             _env = TestEnvironment.Create(_testOutput);
+            _env.DoNotLaunchDebugger();
 
             if (NativeMethodsShared.IsOSX)
             {
@@ -378,7 +380,7 @@ BuildEngine5.BuildProjectFilesInParallel(
         }
 
         [Fact]
-        public void ProjectExemptFromIsolationIsIncludedInTheOutputResultsCacheFile()
+        public void ProjectExemptFromIsolationIsIncludedInTheOutputCacheFile()
         {
             var exemptProjectFile = _env.CreateFile(
                 "ExemptProject.proj",
@@ -405,11 +407,11 @@ BuildEngine5.BuildProjectFilesInParallel(
                             <{ItemTypeNames.GraphIsolationExemptReference} Include='{exemptProjectFile}' />
                           </ItemGroup>
 
-                          <Target Name=`Build` DependsOnTargets=`BeforeBuild`>
+                          <Target Name=`Build` DependsOnTargets=`TargetBuildingTheExemptProject`>
                             <MSBuild Projects=`@(ProjectReference)` Targets='Build'/>
                           </Target>
 
-                          <Target Name=`BeforeBuild`>
+                          <Target Name=`TargetBuildingTheExemptProject`>
                             <MSBuild Projects=`{exemptProjectFile}` Targets='BuildExemptProject'/>
                           </Target>"
                     },
@@ -427,11 +429,11 @@ BuildEngine5.BuildProjectFilesInParallel(
                             <{ItemTypeNames.GraphIsolationExemptReference} Include='{exemptProjectFile}' />
                           </ItemGroup>
 
-                          <Target Name=`Build` DependsOnTargets=`BeforeBuild`>
+                          <Target Name=`Build` DependsOnTargets=`TargetBuildingTheExemptProject`>
                             <Message Text=`Build` />
                           </Target>
 
-                          <Target Name=`BeforeBuild`>
+                          <Target Name=`TargetBuildingTheExemptProject`>
                             <MSBuild Projects=`{exemptProjectFile}` Targets='BuildExemptProject'/>
                           </Target>"
                     },
@@ -442,11 +444,11 @@ BuildEngine5.BuildProjectFilesInParallel(
                             <{ItemTypeNames.GraphIsolationExemptReference} Include='{exemptProjectFile}' />
                           </ItemGroup>
 
-                          <Target Name=`Build` DependsOnTargets=`BeforeBuild`>
+                          <Target Name=`Build`>
                             <Message Text=`Build` />
                           </Target>
 
-                          <Target Name=`BeforeBuild`>
+                          <Target Name=`TargetBuildingTheExemptProject` AfterTargets=`Build`>
                             <MSBuild Projects=`{exemptProjectFile}` Targets='BuildExemptProject'/>
                           </Target>"
                     }
@@ -472,7 +474,9 @@ BuildEngine5.BuildProjectFilesInParallel(
 
             var caches = cacheFiles.ToDictionary(kvp => kvp.Key, kvp => CacheSerialization.DeserializeCaches(kvp.Value));
 
-            // 1 does not contain the exempt project because it does not build it, it reads it from the input caches
+            // 1 builds the exempt project but does not contain the exempt project in its output cache because it reads the
+            // exempt project's results from the input caches
+            // 2 does not contain the exempt project in its output cache because it does not build it
             var projectsWhoseOutputCacheShouldContainTheExemptProject = new[] {3, 4};
 
             foreach (var cache in caches)
@@ -482,16 +486,36 @@ BuildEngine5.BuildProjectFilesInParallel(
 
                 cache.Value.ConfigCache.ShouldContain(c => ProjectNumber(c.ProjectFullPath) == projectNumber);
 
+                cache.Value.ResultsCache.ShouldContain(r => r.HasResultsForTarget("Build"));
+
+                if (projectNumber != 2)
+                {
+                    cache.Value.ResultsCache.ShouldContain(r => r.HasResultsForTarget("TargetBuildingTheExemptProject"));
+                }
+
                 if (projectsWhoseOutputCacheShouldContainTheExemptProject.Contains(projectNumber))
                 {
-                    cache.Value.ConfigCache.ShouldContain(c => c.ProjectFullPath.Equals(exemptProjectFile));
                     cache.Value.ConfigCache.Count().ShouldBe(2);
 
-                    cache.Value.ResultsCache.ShouldContain(r => r.HasResultsForTarget("BuildExemptProject"));
+                    var exemptConfigs = cache.Value.ConfigCache.Where(c => c.ProjectFullPath.Equals(exemptProjectFile)).ToArray();
+                    exemptConfigs.Length.ShouldBe(1);
+
+                    exemptConfigs.First().SkippedFromStaticGraphIsolationConstraints.ShouldBeTrue();
+
                     cache.Value.ResultsCache.Count().ShouldBe(2);
+
+                    var exemptResults = cache.Value.ResultsCache
+                        .Where(r => r.ConfigurationId == exemptConfigs.First().ConfigurationId).ToArray();
+                    exemptResults.Length.ShouldBe(1);
+
+                    exemptResults.First().ResultsByTarget.TryGetValue("BuildExemptProject", out var targetResult);
+
+                    targetResult.ShouldNotBeNull();
+                    targetResult.ResultCode.ShouldBe(TargetResultCode.Success);
                 }
                 else
                 {
+                    cache.Value.ConfigCache.ShouldNotContain(c => c.SkippedFromStaticGraphIsolationConstraints);
                     cache.Value.ConfigCache.Count().ShouldBe(1);
 
                     cache.Value.ResultsCache.ShouldNotContain(r => r.HasResultsForTarget("BuildExemptProject"));
@@ -500,7 +524,96 @@ BuildEngine5.BuildProjectFilesInParallel(
             }
         }
 
+        [Fact]
+        public void ProjectExemptFromIsolationOnlyIncludesNewlyBuiltTargetsInOutputCacheFile()
+        {
+            var graph = CreateProjectGraph(
+                _env,
+                dependencyEdges: new Dictionary<int, int[]>
+                {
+                    {1, new[] {2}},
+                },
+                extraContentPerProjectNumber: new Dictionary<int, string>
+                {
+                    {
+                        1,
+                        $@"
+                          <ItemGroup>
+                            <{ItemTypeNames.GraphIsolationExemptReference} Include='$(MSBuildThisFileDirectory)\2.proj' />
+                          </ItemGroup>
+
+                          <Target Name=`Build`>
+                            <MSBuild Projects=`@(ProjectReference)` Targets='Build2'/>
+                          </Target>
+
+                          <Target Name=`ExtraBuild` AfterTargets=`Build`>
+                            <!-- UncachedTarget won't be in the input results cache from 2 -->
+                            <MSBuild Projects=`@(ProjectReference)` Targets='UncachedTarget'/>
+                          </Target>"
+                    },
+                    {
+                        2,
+                        @"
+                          <Target Name=`Build2`>
+                            <Message Text=`Build2` />
+                          </Target>
+
+                          <Target Name=`UncachedTarget`>
+                            <Message Text=`UncachedTarget` />
+                          </Target>"
+                    }
+                }
+                );
+
+            var cacheFiles = new Dictionary<ProjectGraphNode, string>();
+
+            var buildResults = ResultCacheBasedBuilds_Tests.BuildGraphUsingCacheFiles(
+                _env,
+                graph: graph,
+                expectedLogOutputPerNode: new Dictionary<ProjectGraphNode, string[]>(),
+                outputCaches: cacheFiles,
+                generateCacheFiles: true,
+                assertBuildResults: false);
+
+            foreach (var result in buildResults)
+            {
+                result.Value.Result.OverallResult.ShouldBe(BuildResultCode.Success);
+            }
+
+            cacheFiles.Count.ShouldBe(2);
+
+            var caches = cacheFiles.ToDictionary(kvp => kvp.Key, kvp => CacheSerialization.DeserializeCaches(kvp.Value));
+
+            var cache2 = caches.FirstOrDefault(c => ProjectNumber(c.Key) == 2);
+
+            cache2.Value.ConfigCache.ShouldHaveSingleItem();
+            cache2.Value.ConfigCache.First().ProjectFullPath.ShouldBe(cache2.Key.ProjectInstance.FullPath);
+
+            cache2.Value.ResultsCache.ShouldHaveSingleItem();
+            cache2.Value.ResultsCache.First().ResultsByTarget.Keys.ShouldBeEquivalentTo(new[] { "Build2" });
+
+            var cache1 = caches.FirstOrDefault(c => ProjectNumber(c.Key) == 1);
+
+            cache1.Value.ConfigCache.Count().ShouldBe(2);
+            cache1.Value.ResultsCache.Count().ShouldBe(2);
+
+            foreach (var config in cache1.Value.ConfigCache)
+            {
+                switch (ProjectNumber(config.ProjectFullPath))
+                {
+                    case 1:
+                        cache1.Value.ResultsCache.GetResultsForConfiguration(config.ConfigurationId).ResultsByTarget.Keys.ShouldBeEquivalentTo(new []{ "Build", "ExtraBuild"});
+                        break;
+                    case 2:
+                        cache1.Value.ResultsCache.GetResultsForConfiguration(config.ConfigurationId).ResultsByTarget.Keys.ShouldBeEquivalentTo(new[] { "UncachedTarget"});
+                        break;
+                    default: throw new NotImplementedException();
+                }
+            }
+        }
+
         private static int ProjectNumber(string path) => int.Parse(Path.GetFileNameWithoutExtension(path));
+        private static int ProjectNumber(ProjectGraphNode node) => int.Parse(Path.GetFileNameWithoutExtension(node.ProjectInstance.FullPath));
 
         private void AssertBuild(
             string[] targets,

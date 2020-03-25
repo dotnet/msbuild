@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
@@ -16,13 +15,17 @@ namespace Microsoft.Build.Execution
     {
         private readonly IResultsCache _override;
         private readonly bool _isolateProjects;
+        private readonly ConfigCacheWithOverride _configCacheWithOverride;
         public ResultsCache CurrentCache { get; }
 
 
-        public ResultsCacheWithOverride(IResultsCache @override, bool isolateProjects)
+        public ResultsCacheWithOverride(IResultsCache @override, bool isolateProjects,
+            ConfigCacheWithOverride configCacheWithOverride)
         {
             _override = @override;
             _isolateProjects = isolateProjects;
+            _configCacheWithOverride = configCacheWithOverride;
+
             CurrentCache = new ResultsCache();
         }
 
@@ -44,6 +47,8 @@ namespace Microsoft.Build.Execution
         public void AddResult(BuildResult result)
         {
             CurrentCache.AddResult(result);
+
+            _configCacheWithOverride.BuildResultAddedForConfiguration(result.ConfigurationId);
         }
 
         public void ClearResults()
@@ -57,8 +62,6 @@ namespace Microsoft.Build.Execution
 
             if (overrideResult != null)
             {
-                AssertCachesDoNotOverlap(() => CurrentCache.GetResultForRequest(request) == null);
-
                 return overrideResult;
             }
 
@@ -70,8 +73,6 @@ namespace Microsoft.Build.Execution
             var overrideResult = _override.GetResultsForConfiguration(configurationId);
             if (overrideResult != null)
             {
-                AssertCachesDoNotOverlap(() => CurrentCache.GetResultsForConfiguration(configurationId) == null);
-
                 return overrideResult;
             }
 
@@ -92,12 +93,7 @@ namespace Microsoft.Build.Execution
 
             if (overrideRequest.Type == ResultsCacheResponseType.Satisfied)
             {
-                AssertCachesDoNotOverlap(() => CurrentCache.SatisfyRequest(
-                        request,
-                        configInitialTargets,
-                        configDefaultTargets,
-                        skippedResultsDoNotCauseCacheMiss)
-                    .Type == ResultsCacheResponseType.NotSatisfied);
+                AssertOverrideResultIsSupersetOfCurrentResult(_override.GetResultsForConfiguration(request.ConfigurationId), additionalTargetsToCheckForOverallResult);
 
                 return overrideRequest;
             }
@@ -131,11 +127,18 @@ namespace Microsoft.Build.Execution
             return GetEnumerator();
         }
 
-        private void AssertCachesDoNotOverlap(Func<bool> condition)
+        private void AssertOverrideResultIsSupersetOfCurrentResult(BuildResult overrideResult, List<string> additionalTargetsToCheckForOverallResult)
         {
-            if (_isolateProjects)
+            // There could be an exempt project being built for which there is already an entry in the override cache (if the exempt project is also present
+            // in an input cache, for example if a project both exempts a reference, and also has a ProjectReference on it).
+            // In this situation, the exempt project may be built with additional targets for which there are no results in the override cache.
+            // This will cause the newly built targets to be saved both in the override cache, and also in the current cache.
+            // For this particular case, skip the check that a BuildResult for a particular configuration id should be in only one of the caches, not both.
+            var skipCheck = _isolateProjects && _configCacheWithOverride[overrideResult.ConfigurationId].SkippedFromStaticGraphIsolationConstraints;
+
+            if (!skipCheck)
             {
-                ErrorUtilities.VerifyThrow(condition(), "caches should not overlap");
+                ErrorUtilities.VerifyThrow(CurrentCache.GetResultsForConfiguration(overrideResult.ConfigurationId) == null, "caches should not overlap");
             }
         }
     }
