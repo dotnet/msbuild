@@ -55,8 +55,8 @@
           "description": "Target netstandard2.0"
         }
       ],
-      "replaces": "netstandard2.0",
-      "defaultValue": "netstandard2.0"
+      "replaces": "net5.0",
+      "defaultValue": "net5.0"
     },
     "langVersion": {
       "type": "parameter",
