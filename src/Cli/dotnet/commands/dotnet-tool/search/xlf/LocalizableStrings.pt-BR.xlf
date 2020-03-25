@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="Authors">
+        <source>Authors</source>
+        <target state="new">Authors</target>
+        <note>Table lable</note>
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Search dotnet tools in nuget.org</source>
+        <target state="new">Search dotnet tools in nuget.org</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandsColumn">
+        <source>Commands</source>
+        <target state="new">Commands</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Description">
+        <source>Description</source>
+        <target state="new">Description</target>
+        <note>Table lable</note>
+      </trans-unit>
+      <trans-unit id="DetailArgumentName">
+        <source>Detail</source>
+        <target state="new">Detail</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailDescription">
+        <source>Show detail result of the query.</source>
+        <target state="new">Show detail result of the query.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Downloads">
+        <source>Downloads</source>
+        <target state="new">Downloads</target>
+        <note>Table lable</note>
+      </trans-unit>
+      <trans-unit id="InvalidInputTypeInteger">
+        <source>{0} should be an integer</source>
+        <target state="new">{0} should be an integer</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LatestVersion">
+        <source>Latest Version</source>
+        <target state="new">Latest Version</target>
+        <note>Table lable</note>
+      </trans-unit>
+      <trans-unit id="NoResult">
+        <source>Could not find any results.</source>
+        <target state="new">Could not find any results.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageId">
+        <source>Package ID</source>
+        <target state="new">Package ID</target>
+        <note>Table lable</note>
+      </trans-unit>
+      <trans-unit id="PrereleaseDescription">
+        <source>determining whether to include pre-release packages.</source>
+        <target state="new">determining whether to include pre-release packages.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SearchTermArgumentName">
+        <source>Search Term</source>
+        <target state="new">Search Term</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SearchTermDescription">
+        <source>Search term from package id or package description. Require at least one character.</source>
+        <target state="new">Search term from package id or package description. Require at least one character.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SemVerLevelArgumentName">
+        <source>SemVer Level</source>
+        <target state="new">SemVer Level</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SemVerLevelDescription">
+        <source>A SemVer 1.0.0 version string.</source>
+        <target state="new">A SemVer 1.0.0 version string.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipArgumentName">
+        <source>Skip</source>
+        <target state="new">Skip</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipDescription">
+        <source>The number of results to skip, for pagination.</source>
+        <target state="new">The number of results to skip, for pagination.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Summary">
+        <source>Summary</source>
+        <target state="new">Summary</target>
+        <note>Table lable</note>
+      </trans-unit>
+      <trans-unit id="Tags">
+        <source>Tags</source>
+        <target state="new">Tags</target>
+        <note>Table lable</note>
+      </trans-unit>
+      <trans-unit id="TakeArgumentName">
+        <source>Take</source>
+        <target state="new">Take</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TakeDescription">
+        <source>The number of results to return, for pagination.</source>
+        <target state="new">The number of results to return, for pagination.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Verified">
+        <source>Verified</source>
+        <target state="new">Verified</target>
+        <note>Table lable</note>
+      </trans-unit>
+      <trans-unit id="Version">
+        <source>Version</source>
+        <target state="new">Version</target>
+        <note>Table lable</note>
+      </trans-unit>
+      <trans-unit id="Versions">
+        <source>Versions</source>
+        <target state="new">Versions</target>
+        <note>Table lable</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

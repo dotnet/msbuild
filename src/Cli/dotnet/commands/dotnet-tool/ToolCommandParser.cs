@@ -20,6 +20,7 @@ namespace Microsoft.DotNet.Cli
                 ToolUpdateCommandParser.ToolUpdate(),
                 ToolListCommandParser.ToolList(),
                 ToolRunCommandParser.ToolRun(),
+                ToolSearchCommandParser.ToolSearch(),
                 ToolRestoreCommandParser.ToolRestore());
         }
     }

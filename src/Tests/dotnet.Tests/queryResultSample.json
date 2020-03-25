@@ -1,0 +1,66 @@
+{
+    "@context": {
+        "@vocab": "http://schema.nuget.org/schema#",
+        "@base": "https://apidev.nugettest.org/v3/registration4/"
+    },
+    "totalHits": 23,
+    "data": [
+        {
+            "@id": "https://apidev.nugettest.org/v3/registration4/global.tool.console.demo/index.json",
+            "@type": "Package",
+            "registration": "https://apidev.nugettest.org/v3/registration4/global.tool.console.demo/index.json",
+            "id": "global.tool.console.demo",
+            "version": "1.0.4",
+            "description": "test app",
+            "summary": "The summary",
+            "title": "global.tool.console.demo",
+            "tags": [
+                "test"
+            ],
+            "authors": "author is a scalar",
+            "totalDownloads": 20,
+            "verified": false,
+            "packageTypes": [
+                {
+                    "name": "DotnetTool"
+                }
+            ],
+            "versions": [
+                {
+                    "version": "1.0.4",
+                    "downloads": 20,
+                    "@id": "https://apidev.nugettest.org/v3/registration4/global.tool.console.demo/1.0.4.json"
+                }
+            ]
+        },
+        {
+            "@id": "https://apidev.nugettest.org/v3/registration4/basetestpackage.dotnettool/index.json",
+            "@type": "Package",
+            "registration": "https://apidev.nugettest.org/v3/registration4/basetestpackage.dotnettool/index.json",
+            "id": "BaseTestPackage.DotnetTool",
+            "version": "1.0.0",
+            "description": "Package Description",
+            "summary": "The summary",
+            "title": "BaseTestPackage.DotnetTool",
+            "tags": [],
+            "authors": [
+                "author1",
+                "authors2"
+            ],
+            "totalDownloads": 1,
+            "verified": false,
+            "packageTypes": [
+                {
+                    "name": "DotnetTool"
+                }
+            ],
+            "versions": [
+                {
+                    "version": "1.0.0",
+                    "downloads": 1,
+                    "@id": "https://apidev.nugettest.org/v3/registration4/basetestpackage.dotnettool/1.0.0.json"
+                }
+            ]
+        }
+    ]
+}
