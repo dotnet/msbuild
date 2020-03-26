@@ -323,7 +323,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     Add package reference for required targeting pack if necessary
     ============================================================
     -->
-  <Target Name="IncludeTargetingPackReference" BeforeTargets="_GetRestoreSettingsPerFramework" Condition="'$(TargetFrameworkMoniker)' != '' and '$(TargetFrameworkIdentifier)' == '.NETFramework'">
+  <Target Name="IncludeTargetingPackReference" BeforeTargets="_GetRestoreSettingsPerFramework;_CheckForInvalidConfigurationAndPlatform"
+          Condition="'$(TargetFrameworkMoniker)' != '' and '$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(AutomaticallyUseReferenceAssemblyPackages)' == 'true'">
     <GetReferenceAssemblyPaths
         TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
         RootPath="$(TargetFrameworkRootPath)"
@@ -334,7 +335,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </GetReferenceAssemblyPaths>
     
     <ItemGroup>
-      <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" IsImplicitlyDefined="true" Condition="'$(_FullFrameworkReferenceAssemblyPaths)' == ''"/>
+      <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="$(MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion)" IsImplicitlyDefined="true" Condition="'$(_FullFrameworkReferenceAssemblyPaths)' == ''"/>
     </ItemGroup>
   </Target>
   
