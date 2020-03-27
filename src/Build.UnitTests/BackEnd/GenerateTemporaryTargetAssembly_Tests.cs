@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 using Microsoft.Build.UnitTests;
 using Shouldly;
+using System.Linq;
 using System.Reflection;
 using Xunit;
 
@@ -28,6 +29,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     </Target>
 </Project>");
                 logger.ErrorCount.ShouldBe(1);
+                logger.Errors.First().Message.ShouldBe("Task successfully failed.");
             }
         }
     }
