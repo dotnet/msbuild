@@ -8,6 +8,7 @@ using System.Globalization;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Reflection;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -75,7 +76,14 @@ namespace Microsoft.Build.BackEnd
                         sb.Append("        ");
                     }
 
-                    sb.Append(GetStringFromParameterValue(parameterValue[i]));
+                    string data = GetStringFromParameterValue(parameterValue[i]);
+
+                    if(!Traits.Instance.EscapeHatches.LogTaskInputsVerbose && data.Length > )
+                    {
+
+                    }
+
+                    sb.Append(data);
 
                     if (!specialTreatmentForSingle && i < parameterValue.Count - 1)
                     {
