@@ -52,7 +52,51 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             fakeTelemetry.LogEntry.Properties["detail"].Should().Be("Exception detail");
         }
 
-         // Reproduce https://github.com/dotnet/sdk/issues/3868
+        [Fact]
+        public void ItDoesNotMaskPublishPropertiesTelemetry()
+        {
+            var fakeTelemetry = new FakeTelemetry();
+            var telemetryEventArgs = new TelemetryEventArgs
+            {
+                EventName = MSBuildLogger.PublishPropertiesTelemetryEventName,
+                Properties = new Dictionary<string, string>
+                {
+                    { "PublishReadyToRun", "null"},
+                    { "otherProperty", "otherProperty value"}
+                }
+            };
+
+            MSBuildLogger.FormatAndSend(fakeTelemetry, telemetryEventArgs);
+
+            fakeTelemetry.LogEntry.EventName.Should().Be(MSBuildLogger.PublishPropertiesTelemetryEventName);
+            fakeTelemetry.LogEntry.Properties.Keys.Count.Should().Be(2);
+            fakeTelemetry.LogEntry.Properties["PublishReadyToRun"].Should().Be("null");
+            fakeTelemetry.LogEntry.Properties["otherProperty"].Should().Be("otherProperty value");
+        }
+
+        [Fact]
+        public void ItDoesNotMaskReadyToRunTelemetry()
+        {
+            var fakeTelemetry = new FakeTelemetry();
+            var telemetryEventArgs = new TelemetryEventArgs
+            {
+                EventName = MSBuildLogger.ReadyToRunTelemetryEventName,
+                Properties = new Dictionary<string, string>
+                {
+                    { "PublishReadyToRunUseCrossgen2", "null"},
+                    { "otherProperty", "otherProperty value"}
+                }
+            };
+
+            MSBuildLogger.FormatAndSend(fakeTelemetry, telemetryEventArgs);
+
+            fakeTelemetry.LogEntry.EventName.Should().Be(MSBuildLogger.ReadyToRunTelemetryEventName);
+            fakeTelemetry.LogEntry.Properties.Keys.Count.Should().Be(2);
+            fakeTelemetry.LogEntry.Properties["PublishReadyToRunUseCrossgen2"].Should().Be("null");
+            fakeTelemetry.LogEntry.Properties["otherProperty"].Should().Be("otherProperty value");
+        }
+
+        // Reproduce https://github.com/dotnet/sdk/issues/3868
         [Fact]
         public void ItCanSendProperties()
         {

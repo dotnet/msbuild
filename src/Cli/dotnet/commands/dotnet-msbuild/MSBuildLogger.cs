@@ -8,6 +8,7 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Configurer;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.DotNet.Tools.MSBuild
 {
@@ -19,6 +20,8 @@ namespace Microsoft.DotNet.Tools.MSBuild
         private const string NewEventName = "msbuild";
         internal const string TargetFrameworkTelemetryEventName = "targetframeworkeval";
         internal const string SdkTaskBaseCatchExceptionTelemetryEventName = "taskBaseCatchException";
+        internal const string PublishPropertiesTelemetryEventName = "PublishProperties";
+        internal const string ReadyToRunTelemetryEventName = "ReadyToRun";
 
         internal const string TargetFrameworkVersionTelemetryPropertyKey = "TargetFrameworkVersion";
         internal const string RuntimeIdentifierTelemetryPropertyKey = "RuntimeIdentifier";
@@ -98,7 +101,12 @@ namespace Microsoft.DotNet.Tools.MSBuild
                 telemetry.TrackEvent(newEventName, maskedProperties, measurements: null);
             }
 
-            if (args.EventName == SdkTaskBaseCatchExceptionTelemetryEventName)
+            var passthroughEvents = new string[] {
+                    SdkTaskBaseCatchExceptionTelemetryEventName,
+                    PublishPropertiesTelemetryEventName,
+                    ReadyToRunTelemetryEventName };
+
+            if (passthroughEvents.Contains(args.EventName))
             {
                 telemetry.TrackEvent(args.EventName, args.Properties, measurements: null);
             }
