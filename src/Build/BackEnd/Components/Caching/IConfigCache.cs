@@ -28,6 +28,14 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Check existence of entry and return value if present.
+        /// </summary>
+        /// <param name="configId">The configuration id.</param>
+        /// <param name="existingConfig">Corresponding configuration if configId is present. Null otherwise</param>
+        /// <returns>True if the cache contains the configuration. False otherwise. </returns>
+        bool TryGetConfiguration(int configId, out BuildRequestConfiguration existingConfig);
+
+        /// <summary>
         /// Adds the configuration to the cache.
         /// </summary>
         /// <param name="config">The configuration to add.</param>

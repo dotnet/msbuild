@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
@@ -14,12 +15,14 @@ namespace Microsoft.Build.Execution
     internal class ResultsCacheWithOverride : IResultsCache
     {
         private readonly IResultsCache _override;
+        private readonly bool _isolateProjects;
         public ResultsCache CurrentCache { get; }
 
 
-        public ResultsCacheWithOverride(IResultsCache @override)
+        public ResultsCacheWithOverride(IResultsCache @override, bool isolateProjects)
         {
             _override = @override;
+            _isolateProjects = isolateProjects;
             CurrentCache = new ResultsCache();
         }
 
@@ -51,11 +54,11 @@ namespace Microsoft.Build.Execution
         public BuildResult GetResultForRequest(BuildRequest request)
         {
             var overrideResult = _override.GetResultForRequest(request);
+
             if (overrideResult != null)
             {
-#if DEBUG
-                ErrorUtilities.VerifyThrow(CurrentCache.GetResultForRequest(request) == null, "caches should not overlap");
-#endif
+                AssertCachesDoNotOverlap(() => CurrentCache.GetResultForRequest(request) == null);
+
                 return overrideResult;
             }
 
@@ -67,9 +70,8 @@ namespace Microsoft.Build.Execution
             var overrideResult = _override.GetResultsForConfiguration(configurationId);
             if (overrideResult != null)
             {
-#if DEBUG
-                ErrorUtilities.VerifyThrow(CurrentCache.GetResultsForConfiguration(configurationId) == null, "caches should not overlap");
-#endif
+                AssertCachesDoNotOverlap(() => CurrentCache.GetResultsForConfiguration(configurationId) == null);
+
                 return overrideResult;
             }
 
@@ -90,16 +92,13 @@ namespace Microsoft.Build.Execution
 
             if (overrideRequest.Type == ResultsCacheResponseType.Satisfied)
             {
-#if DEBUG
-                ErrorUtilities.VerifyThrow(
-                    CurrentCache.SatisfyRequest(
+                AssertCachesDoNotOverlap(() => CurrentCache.SatisfyRequest(
                         request,
                         configInitialTargets,
                         configDefaultTargets,
                         skippedResultsDoNotCauseCacheMiss)
-                        .Type == ResultsCacheResponseType.NotSatisfied,
-                    "caches should not overlap");
-#endif
+                    .Type == ResultsCacheResponseType.NotSatisfied);
+
                 return overrideRequest;
             }
 
@@ -130,6 +129,14 @@ namespace Microsoft.Build.Execution
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        private void AssertCachesDoNotOverlap(Func<bool> condition)
+        {
+            if (_isolateProjects)
+            {
+                ErrorUtilities.VerifyThrow(condition(), "caches should not overlap");
+            }
         }
     }
 }

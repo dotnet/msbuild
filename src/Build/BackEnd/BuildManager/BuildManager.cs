@@ -417,6 +417,8 @@ namespace Microsoft.Build.Execution
                 // Initialize additional build parameters.
                 _buildParameters.BuildId = GetNextBuildId();
 
+                // Loading caches from files turns on project isolation constraints.
+                // Undefined behavior for what would happen if file based caches are used without isolation.
                 if (_buildParameters.UsesCachedResults())
                 {
                     _buildParameters.IsolateProjects = true;
@@ -2491,8 +2493,8 @@ namespace Microsoft.Build.Execution
                 // should contain only the results from new builds, and should not contain old results inherited from the cache files.
                 // The override cache will contain the old build results, and the current cache will contain new results.
                 // Upon reads, both caches are interrogated (override before current), but writes should only happen in the current cache.
-                _componentFactories.ReplaceFactory(BuildComponentType.ConfigCache, new ConfigCacheWithOverride(cacheAggregation.ConfigCache));
-                _componentFactories.ReplaceFactory(BuildComponentType.ResultsCache, new ResultsCacheWithOverride(cacheAggregation.ResultsCache));
+                _componentFactories.ReplaceFactory(BuildComponentType.ConfigCache, new ConfigCacheWithOverride(cacheAggregation.ConfigCache, _buildParameters.IsolateProjects));
+                _componentFactories.ReplaceFactory(BuildComponentType.ResultsCache, new ResultsCacheWithOverride(cacheAggregation.ResultsCache, _buildParameters.IsolateProjects));
 
                 return true;
             }

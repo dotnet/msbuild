@@ -66,6 +66,24 @@ namespace Microsoft.Build.BackEnd
 
         #region IConfigCache Members
 
+        /// <inheritdoc />
+        public bool TryGetConfiguration(int configId, out BuildRequestConfiguration existingConfig)
+        {
+            lock (_lockObject)
+            {
+                if (HasConfiguration(configId))
+                {
+                    existingConfig = this[configId];
+                    return true;
+                }
+                else
+                {
+                    existingConfig = null;
+                    return false;
+                }
+            }
+        }
+
         /// <summary>
         /// Adds the specified configuration to the cache.
         /// </summary>
