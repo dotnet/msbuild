@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+using System.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -10,17 +12,10 @@ namespace Microsoft.Build.UnitTests
             : base(null)
         { }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public override bool Execute()
         {
-            try
-            {
-                BuildEngine.BuildProjectFile(CurrentProject, new string[] { "CoreCompile" }, new Hashtable(), null);
-            }
-            catch
-            {
-            }
-            return false;
+            // BuildEngine.BuildProjectFile is how the GenerateTemporaryTargetAssembly task builds projects.
+            return BuildEngine.BuildProjectFile(CurrentProject, new string[] { "ErrorTask" }, new Hashtable(), null);
         }
 
         [Required]

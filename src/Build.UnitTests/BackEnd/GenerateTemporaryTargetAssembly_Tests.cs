@@ -1,5 +1,8 @@
-﻿using Microsoft.Build.UnitTests;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+using Microsoft.Build.UnitTests;
 using Shouldly;
+using System.Reflection;
 using Xunit;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
@@ -9,14 +12,23 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void FailsWithOnlyTargetErrors()
         {
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectFailure(@"
+            using (TestEnvironment testenv = TestEnvironment.Create())
+            {
+                TransientTestFile otherproj = testenv.CreateFile("otherproj.csproj", @"
 <Project>
-    <UsingTask TaskName=""FailingBuilderTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests"" />
-    <Target Name=""MyTarget"">
-        <FailingBuilderTask CurrentProject="".\otherproj.csproj"" />
+    <Target Name=""ErrorTask"">
+        <Error Text=""Task successfully failed."" />
     </Target>
 </Project>");
-            logger.ErrorCount.ShouldBe(1);
+                MockLogger logger = ObjectModelHelpers.BuildProjectExpectFailure(@$"
+<Project>
+    <UsingTask TaskName=""FailingBuilderTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
+    <Target Name=""MyTarget"">
+        <FailingBuilderTask CurrentProject=""{otherproj.Path}"" />
+    </Target>
+</Project>");
+                logger.ErrorCount.ShouldBe(1);
+            }
         }
     }
 }
