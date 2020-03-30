@@ -556,6 +556,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1046: '{0}' TargetFramework değeri geçerli değil. Çoklu hedefleme için 'TargetFrameworks' özelliğini kullanın.</target>
         <note>{StrBegin="NETSDK1046: "}</note>
       </trans-unit>
+      <trans-unit id="TargetingPackNeedsRestore">
+        <source>NETSDK1127: The targeting pack {0} is not installed. Please restore and try again.</source>
+        <target state="new">NETSDK1127: The targeting pack {0} is not installed. Please restore and try again.</target>
+        <note>{StrBegin="NETSDK1127: "}</note>
+      </trans-unit>
       <trans-unit id="UnableToFindResolvedPath">
         <source>NETSDK1016: Unable to find resolved path for '{0}'.</source>
         <target state="translated">NETSDK1016: '{0}' için çözümlenmiş yol bulunamıyor.</target>

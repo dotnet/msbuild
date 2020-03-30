@@ -54,12 +54,19 @@ namespace Microsoft.NET.Build.Tasks
                 ITaskItem targetingPack;
                 resolvedTargetingPacks.TryGetValue(frameworkReference.ItemSpec, out targetingPack);
                 string targetingPackRoot = targetingPack?.GetMetadata(MetadataKeys.Path);
- 
+
                 if (string.IsNullOrEmpty(targetingPackRoot) || !Directory.Exists(targetingPackRoot))
                 {
                     if (GenerateErrorForMissingTargetingPacks)
                     {
-                        Log.LogError(Strings.UnknownFrameworkReference, frameworkReference.ItemSpec);
+                        if (targetingPack == null)
+                        {
+                            Log.LogError(Strings.UnknownFrameworkReference, frameworkReference.ItemSpec);
+                        }
+                        else
+                        {
+                            Log.LogError(Strings.TargetingPackNeedsRestore, frameworkReference.ItemSpec);
+                        }
                     }
                 }
                 else

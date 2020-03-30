@@ -608,4 +608,8 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1126: Publishing ReadyToRun using Crossgen2 is only supported for self-contained applications.</value>
     <comment>{StrBegin="NETSDK1126: "}</comment>
   </data>
+  <data name="TargetingPackNeedsRestore" xml:space="preserve">
+    <value>NETSDK1127: The targeting pack {0} is not installed. Please restore and try again.</value>
+    <comment>{StrBegin="NETSDK1127: "}</comment>
+  </data>
 </root>
