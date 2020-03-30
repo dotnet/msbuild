@@ -105,9 +105,30 @@ fi
 #  VSO
 [ ! -z "$BUILD_BUILDID" ] && DOTNET_BUILD_CONTAINER_NAME="$BUILD_BUILDID"
 
+function retry {
+  local max_count=$1
+  shift
+
+  local count=0
+  until "$@"; do
+    exit=$?
+    wait=$((2 ** $count))
+    count=$(($count + 1))
+    if [[ ${count} -lt ${max_count} ]]; then
+      echo "Retry $count/$max_count returned $exit, wait $wait seconds..."
+      sleep ${wait}
+    else
+      echo "Retry $count/$max_count returned $exit."
+      return ${exit}
+    fi
+  done
+  return 0
+}
+
 # Build the docker container (will be fast if it is already built)
+# with retry since docker pull has high failure rate
 echo "Building Docker Container using Dockerfile: $DOCKERFILE"
-docker build --build-arg USER_ID=$(id -u) -t $DOTNET_BUILD_CONTAINER_TAG $DOCKERFILE
+retry 10 docker build --build-arg USER_ID=$(id -u) -t $DOTNET_BUILD_CONTAINER_TAG $DOCKERFILE 2>&1
 
 # Run the build in the container
 echo "Launching build in Docker Container"
