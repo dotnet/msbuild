@@ -154,6 +154,21 @@ namespace Microsoft.Build.Internal
             }
         }
 
+        private static bool Is64Bit(HandshakeOptions options)
+        {
+            switch (options) {
+                case HandshakeOptions.X64CLR2:
+                case HandshakeOptions.X64CLR4:
+                case HandshakeOptions.NodeProviderNodeReuseLowPriority64Bit:
+                case HandshakeOptions.NodeProviderNodeReuseNormalPriority64Bit:
+                case HandshakeOptions.NodeProviderNoNodeReuseLowPriority64Bit:
+                case HandshakeOptions.NodeProviderNoNodeReuseNormalPriority64Bit:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         /// <summary>
         /// Get environment block
         /// </summary>
@@ -334,10 +349,11 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static long GetHostHandshake(HandshakeOptions nodeType)
         {
-            string salt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") + BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
-            int nodeHandshakeSalt = GetHandshakeHashCode(salt);
+            string salt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
+            string toolsDirectory = Is64Bit(nodeType) ? BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64 : BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
+            int nodeHandshakeSalt = GetHandshakeHashCode(salt + toolsDirectory);
 
-            Trace("MSBUILDNODEHANDSHAKESALT=\"{0}\", msbuildDirectory=\"{1}\", hostContext={2}, FileVersionHash={3}", Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT"), BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, nodeType, FileVersionHash);
+            Trace("MSBUILDNODEHANDSHAKESALT=\"{0}\", msbuildDirectory=\"{1}\", nodeType={2}, FileVersionHash={3}", salt, toolsDirectory, nodeType, FileVersionHash);
 
             //FileVersionHash (32 bits) is shifted 8 bits to avoid session ID collision
             //nodeType (4 bits) is shifted just after the FileVersionHash
