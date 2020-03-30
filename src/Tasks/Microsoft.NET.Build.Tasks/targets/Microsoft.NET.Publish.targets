@@ -947,7 +947,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
       <ResolvedFileToPublish Remove="@(_FilesToBundle)"/>
-      <!-- ResolvedFileToPublish shouldn't include the output; the single-file bundle is written directly to the publish directory -->
+      <!-- ResolvedFileToPublish shouldn't include PublishedSingleFilePath, since the single-file bundle is written directly to the publish directory -->
     </ItemGroup>
 
   </Target>
