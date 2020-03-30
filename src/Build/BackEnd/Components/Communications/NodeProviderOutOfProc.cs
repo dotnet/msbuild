@@ -3,24 +3,15 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
-using System.IO;
-using System.IO.Pipes;
 using System.Diagnostics;
-using System.Threading;
-using System.Runtime.InteropServices;
-using System.Security;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.AccessControl;
 #endif
-using System.Security.Principal;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
 #endif
 
 using Microsoft.Build.Shared;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Internal;
 
@@ -81,19 +72,7 @@ namespace Microsoft.Build.BackEnd
         internal static long GetHostHandshake(bool enableNodeReuse, bool enableLowPriority)
         {
             CommunicationsUtilities.Trace("MSBUILDNODEHANDSHAKESALT=\"{0}\", msbuildDirectory=\"{1}\", enableNodeReuse={2}, enableLowPriority={3}", Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT"), BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, enableNodeReuse, enableLowPriority);
-
-            string salt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") + BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
-            long baseHandshake = CommunicationsUtilities.GetHandshakeHashCode(salt);
-
-            baseHandshake = baseHandshake*17 + Constants.AssemblyTimestamp;
-
-            baseHandshake = baseHandshake*17 + EnvironmentUtilities.Is64BitProcess.GetHashCode();
-
-            baseHandshake = baseHandshake*17 + enableNodeReuse.GetHashCode();
-
-            baseHandshake = baseHandshake*17 + enableLowPriority.GetHashCode();
-
-            return CommunicationsUtilities.GenerateHostHandshakeFromBase(baseHandshake, GetClientHandshake());
+            return CommunicationsUtilities.GetHostHandshake(CommunicationsUtilities.GetNodeProviderContext(enableNodeReuse, enableLowPriority, EnvironmentUtilities.Is64BitProcess));
         }
 
         /// <summary>

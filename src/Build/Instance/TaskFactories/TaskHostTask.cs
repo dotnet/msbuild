@@ -89,7 +89,7 @@ namespace Microsoft.Build.BackEnd
         /// The task host context of the task host we're launching -- used to 
         /// communicate with the task host. 
         /// </summary>
-        private TaskHostContext _requiredContext = TaskHostContext.Invalid;
+        private HandshakeOptions _requiredContext = HandshakeOptions.Invalid;
 
         /// <summary>
         /// True if currently connected to the task host; false otherwise. 
@@ -549,7 +549,7 @@ namespace Microsoft.Build.BackEnd
         /// Since we log that we weren't able to connect to the task host in a couple of different places,
         /// extract it out into a separate method. 
         /// </summary>
-        private void LogErrorUnableToCreateTaskHost(TaskHostContext requiredContext, string runtime, string architecture, NodeFailedToLaunchException e)
+        private void LogErrorUnableToCreateTaskHost(HandshakeOptions requiredContext, string runtime, string architecture, NodeFailedToLaunchException e)
         {
             string msbuildLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationFromHostContext(requiredContext);
 
@@ -559,15 +559,15 @@ namespace Microsoft.Build.BackEnd
                 // 32-bit machine.  At least give them the exe name to look for, though ...
                 switch (requiredContext)
                 {
-                    case TaskHostContext.X32CLR2:
-                    case TaskHostContext.X64CLR2:
+                    case HandshakeOptions.X32CLR2:
+                    case HandshakeOptions.X64CLR2:
                         msbuildLocation = "MSBuildTaskHost.exe";
                         break;
-                    case TaskHostContext.X32CLR4:
-                    case TaskHostContext.X64CLR4:
+                    case HandshakeOptions.X32CLR4:
+                    case HandshakeOptions.X64CLR4:
                         msbuildLocation = "MSBuild.exe";
                         break;
-                    case TaskHostContext.Invalid:
+                    case HandshakeOptions.Invalid:
                     default:
                         ErrorUtilities.ThrowInternalErrorUnreachable();
                         break;
