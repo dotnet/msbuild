@@ -2293,6 +2293,11 @@
         <target state="translated">MSB3473: il percorso di "{0}" non è valido. {1}</target>
         <note>{StrBegin="MSB3473: "}</note>
       </trans-unit>
+      <trans-unit id="SGen.TaskNotSupported">
+        <source>MSB3474: The task "{0}" is not supported on the .NET Core version of MSBuild. Please instead use the Microsoft XML Serializer Generator. See https://go.microsoft.com/fwlink/?linkid=858594 for further details.</source>
+        <target state="new">MSB3474: The task "{0}" is not supported on the .NET Core version of MSBuild. Please instead use the Microsoft XML Serializer Generator. See https://go.microsoft.com/fwlink/?linkid=858594 for further details.</target>
+        <note>{StrBegin="MSB3474: "}</note>
+      </trans-unit>
       <trans-unit id="SignFile.CertNotInStore">
         <source>MSB3481: The signing certificate could not be located. Ensure that it is in the current user's personal store.</source>
         <target state="translated">MSB3481: non è stato possibile trovare il certificato di firma. Verificare che si trovi nell'archivio personale dell'utente corrente.</target>
