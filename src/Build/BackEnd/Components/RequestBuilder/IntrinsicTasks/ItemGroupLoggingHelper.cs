@@ -18,6 +18,11 @@ namespace Microsoft.Build.BackEnd
     internal static class ItemGroupLoggingHelper
     {
         /// <summary>
+        /// The default character limit for logging parameters.
+        /// </summary>
+        internal static int parameterTextLimit = 10000;
+
+        /// <summary>
         /// Gets a text serialized value of a parameter for logging.
         /// </summary>
         internal static string GetParameterText(string prefix, string parameterName, params object[] parameterValues)
@@ -76,18 +81,17 @@ namespace Microsoft.Build.BackEnd
                         sb.Append("        ");
                     }
 
-                    string data = GetStringFromParameterValue(parameterValue[i]);
-
-                    if(!Traits.Instance.EscapeHatches.LogTaskInputsVerbose && data.Length > )
-                    {
-
-                    }
-
-                    sb.Append(data);
+                    sb.Append(GetStringFromParameterValue(parameterValue[i]));
 
                     if (!specialTreatmentForSingle && i < parameterValue.Count - 1)
                     {
                         sb.Append("\n");
+                    }
+
+                    if (!Traits.Instance.EscapeHatches.LogTaskInputsVerbose && sb.Length >= parameterTextLimit)
+                    {
+                        sb.Append("...\nThe parameters have been truncated beyond this point. To view all parameters, set environment variable MSBUILDLOGTASKINPUTSVERBOSE=1");
+                        break;
                     }
                 }
 
