@@ -7,8 +7,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Reflection;
 using Microsoft.Build.Utilities;
+using System.Reflection;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -18,9 +18,14 @@ namespace Microsoft.Build.BackEnd
     internal static class ItemGroupLoggingHelper
     {
         /// <summary>
-        /// The default character limit for logging parameters.
+        /// The default character limit for logging parameters. 10k is somewhat arbitrary, see https://github.com/microsoft/msbuild/issues/4907.
         /// </summary>
-        internal static int parameterTextLimit = 10000;
+        internal static int parameterCharacterLimit = 10_000;
+
+        /// <summary>
+        /// The default parameter limit for logging. 200 is somewhat arbitrary, see https://github.com/microsoft/msbuild/pull/5210.
+        /// </summary>
+        internal static int parameterLimit = 200;
 
         /// <summary>
         /// Gets a text serialized value of a parameter for logging.
@@ -69,6 +74,8 @@ namespace Microsoft.Build.BackEnd
                     sb.Append("\n");
                 }
 
+                bool logVerbose = Traits.Instance.EscapeHatches.LogTaskInputsVerbose;
+
                 for (int i = 0; i < parameterValue.Count; i++)
                 {
                     if (parameterValue[i] == null)
@@ -88,9 +95,9 @@ namespace Microsoft.Build.BackEnd
                         sb.Append("\n");
                     }
 
-                    if (!Traits.Instance.EscapeHatches.LogTaskInputsVerbose && sb.Length >= parameterTextLimit)
+                    if (!logVerbose && (sb.Length >= parameterCharacterLimit || i > parameterLimit))
                     {
-                        sb.Append("...\nThe parameters have been truncated beyond this point. To view all parameters, set environment variable MSBUILDLOGTASKINPUTSVERBOSE=1");
+                        sb.Append("...\nThe parameters have been truncated beyond this point. To view all parameters, set environment variable MSBUILDLOGTASKINPUTSVERBOSE to 1");
                         break;
                     }
                 }
