@@ -118,7 +118,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Stop truncating task inputs when logging them.
         /// </summary>
-        public readonly bool LogTaskInputsVerbose = Environment.GetEnvironmentVariable("MSBUILDLOGTASKINPUTSVERBOSE") == "1";
+        public readonly bool LogTaskInputsVerbose = Environment.GetEnvironmentVariable("MSBUILDLOGALLTASKINPUTS") == "1";
 
         /// <summary>
         /// Emit events for project imports.
