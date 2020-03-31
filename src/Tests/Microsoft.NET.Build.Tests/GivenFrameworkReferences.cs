@@ -297,7 +297,7 @@ namespace FrameworkReferenceTest
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining("NETSDK1073");
+                .HaveStdOutContaining("NETSDK1127");
         }
 
         [Theory]
