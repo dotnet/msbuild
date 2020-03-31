@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -79,7 +80,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var resultsCache = new ResultsCache();
             var buildResult = new BuildResult(new BuildRequest(1, 2, configurationId: 1, new List<string>(){"a", "b"}, null, BuildEventContext.Invalid, null));
-            buildResult.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult());
+            buildResult.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult("i", "v"));
             resultsCache.AddResult(buildResult);
 
             aggregator.Add(configCache, resultsCache);
@@ -100,12 +101,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var resultsCache = new ResultsCache();
             var buildResult = new BuildResult(new BuildRequest(1, 2, configurationId: 1, new List<string>(){"a", "b"}, null, BuildEventContext.Invalid, null));
-            buildResult.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult());
+            buildResult.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult("i", "v"));
 
             resultsCache.AddResult(buildResult);
 
             var buildResult2 = new BuildResult(new BuildRequest(1, 2, configurationId: 2, new List<string>(){"a", "b"}, null, BuildEventContext.Invalid, null));
-            buildResult2.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult());
+            buildResult2.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult("i", "v"));
 
             resultsCache.AddResult(buildResult2);
 
@@ -129,7 +130,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var resultsCache = new ResultsCache();
             var buildResult = new BuildResult(new BuildRequest(1, 2, configurationId: 2, new List<string>(){"a", "b"}, null, BuildEventContext.Invalid, null));
-            buildResult.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult());
+            buildResult.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult("i", "v"));
             resultsCache.AddResult(buildResult);
 
             aggregator.Add(configCache, resultsCache);
@@ -142,75 +143,78 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Theory]
-        [InlineData(true, true, null)]
-        [InlineData(true, false, "Input caches should not contain duplicate entries where only some are exempt from isolation constraints")]
-        [InlineData(false, true, "Input caches should not contain duplicate entries where only some are exempt from isolation constraints")]
-        [InlineData(false, false, "Input caches should not contain entries for the same configuration")]
-        public void RejectCollidingConfigurationsFromSeparateCaches(bool config1IsExempt, bool config2IsExempt, string expectedErrorMessage)
+        [Fact]
+        public void CollidingConfigurationsGetMergedViaFirstOneWinsResolution()
         {
             // collides with the config id from configCache2
             var config1 = new BuildRequestConfiguration(1,
                 new BuildRequestData(
                     projectFullPath: "path",
-                    globalProperties: new Dictionary<string, string> {["p"] = "v"},
+                    globalProperties: new Dictionary<string, string> { ["p"] = "v" },
                     toolsVersion: "13",
-                    targetsToBuild: new[] {"foo"},
-                    hostServices: null), "13")
-            {
-                SkippedFromStaticGraphIsolationConstraints = config1IsExempt
-            };
+                    targetsToBuild: new[] { "foo" },
+                    hostServices: null), "13");
 
             var configCache1 = new ConfigCache();
             configCache1.AddConfiguration(config1);
 
             var resultsCache1 = new ResultsCache();
-            var buildResult11 = new BuildResult(new BuildRequest(1, 2, configurationId: 1,
-                new List<string>() {"foo"}, null, BuildEventContext.Invalid, null));
-            buildResult11.AddResultsForTarget("foo", GetNonEmptySucceedingTargetResult());
-            resultsCache1.AddResult(buildResult11);
+            var buildResult1 = new BuildResult(new BuildRequest(1, 2, configurationId: 1,
+                new List<string>() { "foo" }, null, BuildEventContext.Invalid, null));
+
+            // exists only in config1
+            buildResult1.AddResultsForTarget("target1", GetNonEmptySucceedingTargetResult("i1Config1"));
+            // exists in both configs with different values
+            buildResult1.AddResultsForTarget("target3", GetNonEmptySucceedingTargetResult("i3Config1"));
+            // exists in both configs with the same value
+            buildResult1.AddResultsForTarget("target4", GetNonEmptySucceedingTargetResult("v"));
+
+            resultsCache1.AddResult(buildResult1);
 
             var config2 = new BuildRequestConfiguration(1,
                 new BuildRequestData(
                     projectFullPath: "path",
-                    globalProperties: new Dictionary<string, string> {["p"] = "v"},
+                    globalProperties: new Dictionary<string, string> { ["p"] = "v" },
                     toolsVersion: "13",
-                    targetsToBuild: new[] {"bar"},
-                    hostServices: null), "13")
-            {
-                SkippedFromStaticGraphIsolationConstraints = config2IsExempt
-            };
+                    targetsToBuild: new[] { "bar" },
+                    hostServices: null), "13");
 
             var configCache2 = new ConfigCache();
             configCache2.AddConfiguration(config2);
 
             var resultsCache2 = new ResultsCache();
-            var buildResult21 = new BuildResult(new BuildRequest(1, 2, configurationId: 1,
-                new List<string>() {"e", "f"}, null, BuildEventContext.Invalid, null));
-            buildResult21.AddResultsForTarget("bar", GetNonEmptySucceedingTargetResult());
-            resultsCache2.AddResult(buildResult21);
+            var buildResult2 = new BuildResult(new BuildRequest(1, 2, configurationId: 1,
+                new List<string>() { "e", "f" }, null, BuildEventContext.Invalid, null));
+
+            // exists only in config2
+            buildResult2.AddResultsForTarget("target2", GetNonEmptySucceedingTargetResult("i2Config2"));
+            // exists in both configs with different values
+            buildResult2.AddResultsForTarget("target3", GetNonEmptySucceedingTargetResult("i3Config3"));
+            // exists in both configs with the same value
+            buildResult2.AddResultsForTarget("target4", GetNonEmptySucceedingTargetResult("v"));
+
+
+            resultsCache2.AddResult(buildResult2);
 
             aggregator.Add(configCache1, resultsCache1);
             aggregator.Add(configCache2, resultsCache2);
 
-            if (expectedErrorMessage == null)
-            {
-                var aggregatedCaches = aggregator.Aggregate();
-                aggregatedCaches.ConfigCache.Count().ShouldBe(1);
-                aggregatedCaches.ResultsCache.Count().ShouldBe(1);
+            var aggregatedCache = aggregator.Aggregate();
 
-                // In case of accepted duplicate configs, first one wins.
-                aggregatedCaches.ConfigCache.First().TargetNames.ShouldBeEquivalentTo(new []{"foo"});
-                aggregatedCaches.ResultsCache.First().HasResultsForTarget("foo");
-            }
-            else
-            {
-                using var env = TestEnvironment.Create();
+            aggregatedCache.ConfigCache.ShouldHaveSingleItem();
+            aggregatedCache.ConfigCache.First().ProjectFullPath.ShouldEndWith("path");
+            aggregatedCache.ConfigCache.First().GlobalProperties.ToDictionary().ShouldBe(new Dictionary<string, string> { ["p"] = "v" });
+            aggregatedCache.ConfigCache.First().ToolsVersion.ShouldBe("13");
+            // first config wins
+            aggregatedCache.ConfigCache.First().TargetNames.ShouldBe(new []{"foo"});
 
-                env.SetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER", "1");
-                var e = Should.Throw<InternalErrorException>(() => aggregator.Aggregate());
-                e.Message.ShouldContain(expectedErrorMessage);
-            }
+            aggregatedCache.ResultsCache.Count().ShouldBe(1);
+            aggregatedCache.ResultsCache.First().ResultsByTarget.Count.ShouldBe(4);
+            aggregatedCache.ResultsCache.First().ResultsByTarget["target1"].Items.Aggregate(string.Empty, (acc, i) => $"{acc}{i.ItemSpec}").ShouldBe("i1Config1");
+            aggregatedCache.ResultsCache.First().ResultsByTarget["target2"].Items.Aggregate(string.Empty, (acc, i) => $"{acc}{i.ItemSpec}").ShouldBe("i2Config2");
+            // first target result wins
+            aggregatedCache.ResultsCache.First().ResultsByTarget["target3"].Items.Aggregate(string.Empty, (acc, i) => $"{acc}{i.ItemSpec}").ShouldBe("i3Config1");
+            aggregatedCache.ResultsCache.First().ResultsByTarget["target4"].Items.Aggregate(string.Empty, (acc, i) => $"{acc}{i.ItemSpec}").ShouldBe("v");
         }
 
         [Fact]
@@ -235,7 +239,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var resultsCache = new ResultsCache();
             var buildResult = new BuildResult(new BuildRequest(1, 2, configurationId: 1, new List<string>(){"a", "b"}, null, BuildEventContext.Invalid, null));
-            buildResult.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult());
+            buildResult.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult("i", "v"));
             resultsCache.AddResult(buildResult);
 
             aggregator.Add(configCache, resultsCache);
@@ -254,9 +258,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var resultsCache1 = new ResultsCache();
             var buildResult11 = new BuildResult(new BuildRequest(1, 2, configurationId: 1, new List<string>(){"a", "b"}, null, BuildEventContext.Invalid, null));
-            buildResult11.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult());
+            buildResult11.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult("i", "v"));
             var buildResult12 = new BuildResult(new BuildRequest(1, 2, configurationId: 2, new List<string>(){"c", "d"}, null, BuildEventContext.Invalid, null));
-            buildResult12.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult());
+            buildResult12.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult("i", "v"));
             resultsCache1.AddResult(buildResult11);
             resultsCache1.AddResult(buildResult12);
 
@@ -266,9 +270,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var resultsCache2 = new ResultsCache();
             var buildResult21 = new BuildResult(new BuildRequest(1, 2, configurationId: 1, new List<string>(){"e", "f"}, null, BuildEventContext.Invalid, null));
-            buildResult21.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult());
+            buildResult21.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult("i", "v"));
             var buildResult22 = new BuildResult(new BuildRequest(1, 2, configurationId: 2, new List<string>(){"g", "h"}, null, BuildEventContext.Invalid, null));
-            buildResult22.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult());
+            buildResult22.AddResultsForTarget("a", GetNonEmptySucceedingTargetResult("i", "v"));
             resultsCache2.AddResult(buildResult21);
             resultsCache2.AddResult(buildResult22);
 

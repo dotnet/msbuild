@@ -2,9 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -25,7 +22,12 @@ namespace Microsoft.Build.Unittest
 
         public static TargetResult GetNonEmptySucceedingTargetResult()
         {
-            return new TargetResult(new TaskItem[1] { new TaskItem("i", "v")}, BuildResultUtilities.GetSuccessResult());
+            return GetNonEmptySucceedingTargetResult("i", "v");
+        }
+
+        public static TargetResult GetNonEmptySucceedingTargetResult(string itemInclude, string definingFile = "")
+        {
+            return new TargetResult(new TaskItem[1] { new TaskItem(itemInclude, definingFile)}, BuildResultUtilities.GetSuccessResult());
         }
 
         public static WorkUnitResult GetSuccessResult()

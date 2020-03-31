@@ -63,30 +63,24 @@ namespace Microsoft.Build.Execution
                 return;
             }
 
-            var acceptedConfigs = new HashSet<int>();
-            var skipedConfigs = new HashSet<int>();
             var configIdMapping = new Dictionary<int, int>();
+
+            // seen config id -> equivalent config id already existing in the aggregated cache (null if not existing)
+            var seenConfigIds = new Dictionary<int, int?>();
 
             foreach (var config in configs)
             {
                 var existingConfig = _aggregatedConfigCache.GetMatchingConfiguration(config);
 
-                if (existingConfig != null && !(existingConfig.SkippedFromStaticGraphIsolationConstraints && config.SkippedFromStaticGraphIsolationConstraints))
+                if (existingConfig != null)
                 {
-                    throw existingConfig.SkippedFromStaticGraphIsolationConstraints || config.SkippedFromStaticGraphIsolationConstraints
-                        ? new InternalErrorException(
-                            $"Input caches should not contain duplicate entries where only some are exempt from isolation constraints: {existingConfig.ProjectFullPath}")
-                        : new InternalErrorException($"Input caches should not contain entries for the same configuration: {existingConfig.ProjectFullPath}");
-                }
-
-                if (existingConfig != null && (existingConfig.SkippedFromStaticGraphIsolationConstraints && config.SkippedFromStaticGraphIsolationConstraints))
-                {
-                    skipedConfigs.Add(config.ConfigurationId);
-                    // If conflict is allowed, resolve by keeping the existing config.
+                    // This config has been found in a previous cache file. Don't aggregate it.
+                    // => "First config wins" conflict resolution.
+                    seenConfigIds[config.ConfigurationId] = existingConfig.ConfigurationId;
                     continue;
                 }
 
-                acceptedConfigs.Add(config.ConfigurationId);
+                seenConfigIds[config.ConfigurationId] = null;
 
                 _lastConfigurationId = _nextConfigurationId();
                 configIdMapping[config.ConfigurationId] = _lastConfigurationId;
@@ -99,23 +93,38 @@ namespace Microsoft.Build.Execution
 
             foreach (var result in results)
             {
-                if (skipedConfigs.Contains(result.ConfigurationId))
+                ErrorUtilities.VerifyThrow(seenConfigIds.ContainsKey(result.ConfigurationId), "Each result should have a corresponding configuration. Otherwise the caches are not consistent");
+
+                if (seenConfigIds[result.ConfigurationId] != null)
                 {
-                    // If a config has been skipped, do not add its corresponding result.
-                    continue;
+                    // The config is already present in the aggregated cache. Merge the new build results into the ones already present in the aggregated cache.
+                    MergeBuildResults(result, _aggregatedResultsCache.GetResultsForConfiguration(seenConfigIds[result.ConfigurationId].Value));
                 }
-
-                ErrorUtilities.VerifyThrow(acceptedConfigs.Contains(result.ConfigurationId), "Each result should have a corresponding configuration. Otherwise the caches are not consistent");
-
-                _aggregatedResultsCache.AddResult(
-                    new BuildResult(
-                        result,
-                        BuildEventContext.InvalidSubmissionId,
-                        configIdMapping[result.ConfigurationId],
-                        BuildRequest.InvalidGlobalRequestId,
-                        BuildRequest.InvalidGlobalRequestId,
-                        BuildRequest.InvalidNodeRequestId
+                else
+                {
+                    _aggregatedResultsCache.AddResult(
+                        new BuildResult(
+                            result: result,
+                            submissionId: BuildEventContext.InvalidSubmissionId,
+                            configurationId: configIdMapping[result.ConfigurationId],
+                            requestId: BuildRequest.InvalidGlobalRequestId,
+                            parentRequestId: BuildRequest.InvalidGlobalRequestId,
+                            nodeRequestId: BuildRequest.InvalidNodeRequestId
                         ));
+                }
+            }
+        }
+
+        private void MergeBuildResults(BuildResult newResult, BuildResult existingResult)
+        {
+            foreach (var newTargetResult in newResult.ResultsByTarget)
+            {
+                // "First target result wins" conflict resolution. Seems like a reasonable heuristic, because targets in MSBuild should only run once
+                // for a given config, which means that a target's result should not change if the config does not changes.
+                if (!existingResult.HasResultsForTarget(newTargetResult.Key))
+                {
+                    existingResult.ResultsByTarget[newTargetResult.Key] = newTargetResult.Value;
+                }
             }
         }
     }
