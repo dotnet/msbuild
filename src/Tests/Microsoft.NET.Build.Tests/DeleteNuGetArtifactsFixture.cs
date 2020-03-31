@@ -14,7 +14,7 @@ namespace Microsoft.NET.Build.Tests
         public static string TestDirectoriesNamePrefix = "Nuget_reference_compat";
         public static string ReferencerDirectoryName = "Reference";
         public static string NuGetSharedDirectoryNamePostfix = "_NuGetDependencies";
-        public static string NetstandardToken = "netstandard";
+        public static string NetstandardTargetFrameworkIdentifier = ".NETStandard";
         public static string DependencyDirectoryNamePrefix = "D_";
 
         public static string ConstructNuGetPackageReferencePath(TestProject dependencyProject)

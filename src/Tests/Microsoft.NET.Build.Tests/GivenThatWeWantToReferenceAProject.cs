@@ -71,7 +71,7 @@ namespace Microsoft.NET.Build.Tests
             referencerProject.ReferencedProjects.Add(dependencyProject);
 
             //  Set the referencer project as an Exe unless it targets .NET Standard
-            if (!referencerProject.ShortTargetFrameworkIdentifiers.Contains("netstandard"))
+            if (!referencerProject.TargetFrameworkIdentifiers.Contains(ConstantStringValues.NetstandardTargetFrameworkIdentifier))
             {
                 referencerProject.IsExe = true;
             }

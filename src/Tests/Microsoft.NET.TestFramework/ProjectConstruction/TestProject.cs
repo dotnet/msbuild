@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Microsoft.Build.Utilities;
+using NuGet.Frameworks;
 
 namespace Microsoft.NET.TestFramework.ProjectConstruction
 {
@@ -51,35 +52,20 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public Dictionary<string, string> AdditionalItems { get; } = new Dictionary<string, string>();
 
-        private static string GetShortTargetFrameworkIdentifier(string targetFramework)
-        {
-            int identifierLength = 0;
-            for (; identifierLength < targetFramework.Length; identifierLength++)
-            {
-                if (!char.IsLetter(targetFramework[identifierLength]))
-                {
-                    break;
-                }
-            }
-
-            string identifier = targetFramework.Substring(0, identifierLength);
-            return identifier;
-        }
-
-        public IEnumerable<string> ShortTargetFrameworkIdentifiers
+        public IEnumerable<string> TargetFrameworkIdentifiers
         {
             get
             {
                 if (!IsSdkProject)
                 {
                     //  Assume .NET Framework
-                    yield return "net";
+                    yield return ".NETFramework";
                     yield break;
                 }
 
                 foreach (var target in TargetFrameworks.Split(';'))
                 {
-                    yield return GetShortTargetFrameworkIdentifier(target);
+                    yield return NuGetFramework.Parse(target).Framework;
                 }
             }
         }
@@ -94,9 +80,9 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 }
 
                 //  Currently can't build projects targeting .NET Framework on non-Windows: https://github.com/dotnet/sdk/issues/335
-                foreach (var identifier in ShortTargetFrameworkIdentifiers)
+                foreach (var identifier in TargetFrameworkIdentifiers)
                 {
-                    if (identifier.Equals("net", StringComparison.OrdinalIgnoreCase))
+                    if (identifier.Equals(".NETFramework", StringComparison.OrdinalIgnoreCase))
                     {
                         return false;
                     }
