@@ -556,6 +556,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1046: TargetFramework 값 '{0}'이(가) 잘못되었습니다. 여러 대상을 지정하려면 'TargetFrameworks' 속성을 대신 사용하세요.</target>
         <note>{StrBegin="NETSDK1046: "}</note>
       </trans-unit>
+      <trans-unit id="TargetingPackNeedsRestore">
+        <source>NETSDK1127: The targeting pack {0} is not installed. Please restore and try again.</source>
+        <target state="new">NETSDK1127: The targeting pack {0} is not installed. Please restore and try again.</target>
+        <note>{StrBegin="NETSDK1127: "}</note>
+      </trans-unit>
       <trans-unit id="UnableToFindResolvedPath">
         <source>NETSDK1016: Unable to find resolved path for '{0}'.</source>
         <target state="translated">NETSDK1016: '{0}'에 대해 확인된 경로를 찾을 수 없습니다.</target>
