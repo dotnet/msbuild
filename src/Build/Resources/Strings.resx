@@ -617,7 +617,7 @@
     <value>Environment at start of build:</value>
   </data>
   <data name="LogTaskInputs.Truncated" UESanitized="false" Visibility="Public">
-    <value>The parameters have been truncated beyond this point. To view all parameters, set environment variable MSBUILDLOGTASKINPUTSVERBOSE to 1.</value>
+    <value>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</value>
   </data>
   <data name="MetadataDefinitionCannotContainItemVectorExpression" UESanitized="false" Visibility="Public">
     <value>MSB4164: The value "{0}" of metadata "{1}" contains an item list expression. Item list expressions are not allowed on default metadata values.</value>
