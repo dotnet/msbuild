@@ -97,7 +97,7 @@ namespace Microsoft.Build.BackEnd
 
                     if (!logVerbose && (sb.Length >= parameterCharacterLimit || i > parameterLimit))
                     {
-                        sb.Append("...\nThe parameters have been truncated beyond this point. To view all parameters, set environment variable MSBUILDLOGTASKINPUTSVERBOSE to 1");
+                        sb.Append(ResourceUtilities.GetResourceString("LogTaskInputs.Truncated"));
                         break;
                     }
                 }
