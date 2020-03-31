@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests
     </Target>
 </Project>");
                 logger.ErrorCount.ShouldBe(1);
-                logger.Errors.First().Message.ShouldBe("SGen.TaskNotSupported");
+                logger.Errors.First().Code.ShouldBe("MSB3474");
             }
         }
 #else

@@ -61,7 +61,7 @@ namespace Microsoft.Build.Tasks
 #if RUNTIME_TYPE_NETCORE
     public class SGen : ToolTaskExtension, ISGenTaskContract
     {
-        #region Properties
+    #region Properties
 
         [Required]
         public string BuildAssemblyName { get; set; }
@@ -96,9 +96,9 @@ namespace Microsoft.Build.Tasks
 
         public string[] Types { get; set; }
 
-        #endregion
+    #endregion
 
-        #region Tool Members
+    #region Tool Members
 
         protected override string ToolName
         {
@@ -117,11 +117,11 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
-            Log.LogError("SGen.TaskNotSupported", nameof(SGen));
+            Log.LogErrorWithCodeFromResources("SGen.TaskNotSupported", nameof(SGen));
             return false;
         }
 
-        #endregion
+    #endregion
     }
 #else
     /// <summary>
