@@ -93,6 +93,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static string GetStringFromParameterValue(object parameterValue, bool includeMetadata = false)
         {
+            // fast path for the common case
+            if (parameterValue is string valueText)
+            {
+                return valueText;
+            }
+
             using (var sb = new ReuseableStringBuilder())
             {
                 AppendStringFromParameterValue(sb, parameterValue, includeMetadata);
