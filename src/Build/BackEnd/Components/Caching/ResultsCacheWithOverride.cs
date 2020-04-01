@@ -62,6 +62,7 @@ namespace Microsoft.Build.Execution
 
             if (overrideResult != null)
             {
+                AssertCurrentCacheDoesNotContainResult(overrideResult);
                 return overrideResult;
             }
 
@@ -73,6 +74,7 @@ namespace Microsoft.Build.Execution
             var overrideResult = _override.GetResultsForConfiguration(configurationId);
             if (overrideResult != null)
             {
+                AssertCurrentCacheDoesNotContainResult(overrideResult);
                 return overrideResult;
             }
 
@@ -93,7 +95,7 @@ namespace Microsoft.Build.Execution
 
             if (overrideRequest.Type == ResultsCacheResponseType.Satisfied)
             {
-                AssertOverrideResultIsSupersetOfCurrentResult(_override.GetResultsForConfiguration(request.ConfigurationId), additionalTargetsToCheckForOverallResult);
+                AssertCurrentCacheDoesNotContainResult(_override.GetResultsForConfiguration(request.ConfigurationId));
 
                 return overrideRequest;
             }
@@ -127,7 +129,7 @@ namespace Microsoft.Build.Execution
             return GetEnumerator();
         }
 
-        private void AssertOverrideResultIsSupersetOfCurrentResult(BuildResult overrideResult, List<string> additionalTargetsToCheckForOverallResult)
+        private void AssertCurrentCacheDoesNotContainResult(BuildResult overrideResult)
         {
             // There could be an exempt project being built for which there is already an entry in the override cache (if the exempt project is also present
             // in an input cache, for example if a project both exempts a reference, and also has a ProjectReference on it).
