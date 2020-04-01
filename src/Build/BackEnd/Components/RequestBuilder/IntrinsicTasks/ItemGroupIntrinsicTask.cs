@@ -202,7 +202,7 @@ namespace Microsoft.Build.BackEnd
 
             if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && itemsToAdd != null && itemsToAdd.Count > 0)
             {
-                var itemGroupText = ItemGroupLoggingHelper.GetParameterText(ResourceUtilities.GetResourceString("ItemGroupIncludeLogMessagePrefix"), child.ItemType, itemsToAdd.ToArray());
+                var itemGroupText = ItemGroupLoggingHelper.GetParameterText(ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix, child.ItemType, itemsToAdd.ToArray());
                 LoggingContext.LogCommentFromText(MessageImportance.Low, itemGroupText);
             }
 
@@ -231,7 +231,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && itemsToRemove.Count > 0)
                 {
-                    var itemGroupText = ItemGroupLoggingHelper.GetParameterText(ResourceUtilities.GetResourceString("ItemGroupRemoveLogMessage"), child.ItemType, itemsToRemove.ToArray());
+                    var itemGroupText = ItemGroupLoggingHelper.GetParameterText(ItemGroupLoggingHelper.ItemGroupRemoveLogMessage, child.ItemType, itemsToRemove.ToArray());
                     LoggingContext.LogCommentFromText(MessageImportance.Low, itemGroupText);
                 }
 
