@@ -258,7 +258,7 @@ namespace Microsoft.NET.Build.Tasks
             foreach (var dependency in itemDependencies)
             {
                 var currentItemId = dependency.ItemSpec;
-                if (!items.Keys.Contains(currentItemId))
+                if (!items.ContainsKey(currentItemId))
                 {
                     // if this package definition does not even exist - skip it
                     continue;
@@ -270,14 +270,14 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 var parentTargetId = dependency.GetMetadata(MetadataKeys.ParentTarget) ?? string.Empty;
-                if (parentTargetId.Contains("/") || !Targets.Keys.Contains(parentTargetId))
+                if (parentTargetId.Contains("/") || !Targets.ContainsKey(parentTargetId))
                 {
                     // skip "target/rid"s and only consume actual targets and ignore non-existent parent targets
                     continue;
                 }
 
                 var parentPackageId = dependency.GetMetadata(MetadataKeys.ParentPackage) ?? string.Empty;
-                if (!string.IsNullOrEmpty(parentPackageId) && !Packages.Keys.Contains(parentPackageId))
+                if (!string.IsNullOrEmpty(parentPackageId) && !Packages.ContainsKey(parentPackageId))
                 {
                     // ignore non-existent parent packages
                     continue;
