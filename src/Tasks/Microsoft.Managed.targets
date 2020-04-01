@@ -9,7 +9,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(MSBuildToolsPath)\Microsoft.Managed.Before.targets" />
 
-   <!-- Item copied from Microsoft.Common.Currentversion.targets   -->
+  <!-- Item copied from Microsoft.Common.Currentversion.targets   -->
   <PropertyGroup>
     <_RecursiveTargetForContentCopying>GetCopyToOutputDirectoryItems</_RecursiveTargetForContentCopying>
     <_RecursiveTargetForContentCopying Condition=" '$(MSBuildCopyContentTransitively)' == 'false' ">_GetCopyToOutputDirectoryItemsFromThisProject</_RecursiveTargetForContentCopying>
