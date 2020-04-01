@@ -390,12 +390,12 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        private static void ParametersKeyTranslator(ref string key, ITranslator translator)
+        private static void ParametersKeyTranslator(ITranslator translator, ref string key)
         {
             translator.Translate(ref key);
         }
 
-        private static void ParametersValueTranslator(ref (string, ElementLocation) value, ITranslator translator)
+        private static void ParametersValueTranslator(ITranslator translator, ref (string, ElementLocation) value)
         {
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
