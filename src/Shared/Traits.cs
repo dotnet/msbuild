@@ -158,6 +158,12 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
+        /// Log metadata for items that are inputs to tasks.
+        /// This is only relevant when <see cref="LogTaskInputs" /> is already true.
+        /// </summary>
+        public readonly bool LogTaskInputItemMetadata = Environment.GetEnvironmentVariable("MSBUILDLOGTASKINPUTITEMMETADATA") == "1";
+
+        /// <summary>
         /// Read information only once per file per ResolveAssemblyReference invocation.
         /// </summary>
         public readonly bool CacheAssemblyInformation = Environment.GetEnvironmentVariable("MSBUILDDONOTCACHERARASSEMBLYINFORMATION") != "1";

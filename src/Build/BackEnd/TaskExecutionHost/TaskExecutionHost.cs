@@ -1288,7 +1288,8 @@ namespace Microsoft.Build.BackEnd
                 string parameterText = ItemGroupLoggingHelper.GetParameterText(
                     ItemGroupLoggingHelper.TaskParameterPrefix,
                     parameter.Name,
-                    parameterValue);
+                    parameterValue,
+                    includeMetadata: Traits.Instance.EscapeHatches.LogTaskInputItemMetadata);
                 _taskLoggingContext.LogCommentFromText(MessageImportance.Low, parameterText);
             }
 
