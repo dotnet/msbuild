@@ -64,14 +64,10 @@ namespace Microsoft.NET.Build.Tasks
         private Dictionary<string, ItemMetadata> DependenciesWorld { get; }
                     = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
 
-        private HashSet<string> ImplicitPackageReferences { get; set; }
-
         private ITaskItem[] ExistingReferenceItemDependencies { get; set; }
 
         protected override void ExecuteCore()
         {
-            ImplicitPackageReferences = GetImplicitPackageReferences(DefaultImplicitPackages);
-            
             PopulateTargets();
 
             PopulatePackages();
@@ -144,6 +140,8 @@ namespace Microsoft.NET.Build.Tasks
         /// </summary>
         private void PopulatePackages()
         {
+            var implicitPackageReferences = GetImplicitPackageReferences(DefaultImplicitPackages);
+
             foreach (var packageDef in PackageDefinitions)
             {
                 var dependencyType = GetDependencyType(packageDef.GetMetadata(MetadataKeys.Type));
@@ -157,7 +155,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 var dependency = new PackageMetadata(packageDef);
-                dependency.IsImplicitlyDefined = ImplicitPackageReferences.Contains(dependency.Name);
+                dependency.IsImplicitlyDefined = implicitPackageReferences.Contains(dependency.Name);
 
                 Packages[packageDef.ItemSpec] = dependency;
             }
