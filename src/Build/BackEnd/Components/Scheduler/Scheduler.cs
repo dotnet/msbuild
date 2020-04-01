@@ -1586,10 +1586,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     emitNonErrorLogs(_componentHost.LoggingService);
 
-                    if (request.SkipStaticGraphIsolationConstraints)
-                    {
-                        _configCache[request.ConfigurationId].SkippedFromStaticGraphIsolationConstraints = true;
-                    }
+                    MarkConfigAsSkippedFromGraphIsolationConstraints(request);
 
                     // Ensure there is no affinity mismatch between this request and a previous request of the same configuration.
                     NodeAffinity requestAffinity = GetNodeAffinityForRequest(request);
@@ -1670,6 +1667,30 @@ namespace Microsoft.Build.BackEnd
                         }
                     }
                 }
+            }
+        }
+
+        private void MarkConfigAsSkippedFromGraphIsolationConstraints(BuildRequest request)
+        {
+            if (!_componentHost.BuildParameters.IsolateProjects || request.IsRootRequest)
+            {
+                return;
+            }
+
+            if (request.SkipStaticGraphIsolationConstraints
+                ||
+                // Self builds are exempt from isolation constraints.
+                IsSelfBuild(request)
+                )
+            {
+                _configCache[request.ConfigurationId].SkippedFromStaticGraphIsolationConstraints = true;
+            }
+
+            bool IsSelfBuild(BuildRequest buildRequest)
+            {
+                return _configCache[buildRequest.ConfigurationId].ProjectFullPath.Equals(
+                    _configCache[GetParentRequest(buildRequest).ConfigurationId].ProjectFullPath,
+                    FileUtilities.PathComparison);
             }
         }
 
@@ -1807,7 +1828,7 @@ namespace Microsoft.Build.BackEnd
                 if (isIsolatedBuild && request.SkipStaticGraphIsolationConstraints)
                 {
                     // retrieving the configs is not quite free, so avoid computing them eagerly
-                    var configs = GetConfigurations();
+                    var configs = GetConfigurations(request);
 
                     emitNonErrorLogs = ls => ls.LogComment(
                             NewBuildEventContext(),
@@ -1820,10 +1841,10 @@ namespace Microsoft.Build.BackEnd
                 return true;
             }
 
-            var (requestConfig, parentConfig) = GetConfigurations();
+            var (requestConfig, parentConfig) = GetConfigurations(request);
 
             // allow self references (project calling the msbuild task on itself, potentially with different global properties)
-            if (parentConfig.ProjectFullPath.Equals(requestConfig.ProjectFullPath, StringComparison.OrdinalIgnoreCase))
+            if (parentConfig.ProjectFullPath.Equals(requestConfig.ProjectFullPath, FileUtilities.PathComparison))
             {
                 return true;
             }
@@ -1859,26 +1880,40 @@ namespace Microsoft.Build.BackEnd
                     BuildEventContext.InvalidTaskId);
             }
 
-            (BuildRequestConfiguration requestConfig, BuildRequestConfiguration parentConfig) GetConfigurations()
+            (BuildRequestConfiguration requestConfig, BuildRequestConfiguration parentConfig) GetConfigurations(BuildRequest request)
             {
                 var buildRequestConfiguration = configCache[request.ConfigurationId];
 
-                // Need the parent request. It might be blocked or executing; check both.
-                var parentRequest = _schedulingData.BlockedRequests.FirstOrDefault(r => r.BuildRequest.GlobalRequestId == request.ParentGlobalRequestId)
-                                    ?? _schedulingData.ExecutingRequests.FirstOrDefault(r => r.BuildRequest.GlobalRequestId == request.ParentGlobalRequestId);
+                var parentConfiguration = configCache[GetParentRequest(request).ConfigurationId];
 
-                ErrorUtilities.VerifyThrowInternalNull(parentRequest, nameof(parentRequest));
-                ErrorUtilities.VerifyThrow(
-                    configCache.HasConfiguration(parentRequest.BuildRequest.ConfigurationId),
-                    "All non root requests should have a parent with a loaded configuration");
-
-                var parentConfiguration = configCache[parentRequest.BuildRequest.ConfigurationId];
                 return (buildRequestConfiguration, parentConfiguration);
             }
 
             string ConcatenateGlobalProperties(BuildRequestConfiguration configuration)
             {
                 return string.Join("; ", configuration.GlobalProperties.Select<ProjectPropertyInstance, string>(p => $"{p.Name}={p.EvaluatedValue}"));
+            }
+        }
+
+        private BuildRequest GetParentRequest(BuildRequest request)
+        {
+            if (request.IsRootRequest)
+            {
+                return null;
+            }
+            else
+            {
+                var schedulerRequest = _schedulingData.BlockedRequests.FirstOrDefault(r =>
+                                         r.BuildRequest.GlobalRequestId == request.ParentGlobalRequestId)
+                                     ?? _schedulingData.ExecutingRequests.FirstOrDefault(r =>
+                                         r.BuildRequest.GlobalRequestId == request.ParentGlobalRequestId);
+
+                ErrorUtilities.VerifyThrowInternalNull(schedulerRequest, nameof(schedulerRequest));
+                ErrorUtilities.VerifyThrow(
+                    _configCache.HasConfiguration(schedulerRequest.BuildRequest.ConfigurationId),
+                    "All non root requests should have a parent with a loaded configuration");
+
+                return schedulerRequest.BuildRequest;
             }
         }
 

@@ -612,6 +612,82 @@ BuildEngine5.BuildProjectFilesInParallel(
             }
         }
 
+        [Fact]
+        public void SelfBuildsAreExemptFromIsolationConstraints()
+        {
+            var projectContents = @"
+<Project>
+    <Target Name=`Build`>
+        <!-- request satisfied from cache -->
+        <MSBuild Projects=`$(MSBuildThisFileFullPath)` Targets=`SelfBuild1` Properties='TargetFramework=foo' />
+
+        <!-- request not satisfied from cache -->
+        <MSBuild Projects=`$(MSBuildThisFileFullPath)` Targets=`SelfBuild2` Properties='TargetFramework=foo' />
+    </Target>
+
+    <Target Name=`SelfBuild1` />
+    <Target Name=`SelfBuild2` />
+</Project>
+";
+            var projectFile = _env.CreateFile("build.proj", projectContents.Cleanup()).Path;
+            var outputCacheFileForRoot = _env.CreateFile().Path;
+            var outputCacheFileForReference = _env.CreateFile().Path;
+
+            using (var buildManagerSession = new BuildManagerSession(
+                _env,
+                new BuildParameters
+                {
+                    OutputResultsCacheFile = outputCacheFileForReference
+                }))
+            {
+                buildManagerSession.BuildProjectFile(projectFile, new[] {"SelfBuild1"}, new Dictionary<string, string>
+                {
+                    {"TargetFramework", "foo"}
+                }).OverallResult.ShouldBe(BuildResultCode.Success);
+            }
+
+            using (var buildManagerSession = new BuildManagerSession(
+                _env,
+                new BuildParameters
+                {
+                    InputResultsCacheFiles = new []{outputCacheFileForReference},
+                    OutputResultsCacheFile = outputCacheFileForRoot
+                }))
+            {
+                buildManagerSession.BuildProjectFile(projectFile, new[] {"Build"}).OverallResult.ShouldBe(BuildResultCode.Success);
+            }
+
+            var referenceCaches = CacheSerialization.DeserializeCaches(outputCacheFileForReference);
+
+            referenceCaches.exception.ShouldBeNull();
+
+            referenceCaches.ConfigCache.ShouldHaveSingleItem();
+            referenceCaches.ConfigCache.First().ProjectFullPath.ShouldBe(projectFile);
+            referenceCaches.ConfigCache.First().GlobalProperties.ToDictionary().Keys.ShouldBe(new[] {"TargetFramework"});
+            referenceCaches.ConfigCache.First().SkippedFromStaticGraphIsolationConstraints.ShouldBeFalse();
+
+            referenceCaches.ResultsCache.ShouldHaveSingleItem();
+            referenceCaches.ResultsCache.First().ResultsByTarget.Keys.ShouldBe(new[] { "SelfBuild1" });
+
+            var rootCaches = CacheSerialization.DeserializeCaches(outputCacheFileForRoot);
+
+            rootCaches.ConfigCache.Count().ShouldBe(2);
+
+            var rootConfig = rootCaches.ConfigCache.FirstOrDefault(c => !c.GlobalProperties.Contains("TargetFramework"));
+            var selfBuildConfig = rootCaches.ConfigCache.FirstOrDefault(c => c.GlobalProperties.Contains("TargetFramework"));
+
+            rootConfig.ShouldNotBeNull();
+            rootConfig.SkippedFromStaticGraphIsolationConstraints.ShouldBeFalse();
+
+            selfBuildConfig.ShouldNotBeNull();
+            // Self builds that are not resolved from the cache are exempt from isolation constraints.
+            selfBuildConfig.SkippedFromStaticGraphIsolationConstraints.ShouldBeTrue();
+
+            rootCaches.ResultsCache.Count().ShouldBe(2);
+            rootCaches.ResultsCache.First(r => r.ConfigurationId == rootConfig.ConfigurationId).ResultsByTarget.Keys.ShouldBe(new []{"Build"});
+            rootCaches.ResultsCache.First(r => r.ConfigurationId == selfBuildConfig.ConfigurationId).ResultsByTarget.Keys.ShouldBe(new []{"SelfBuild2"});
+        }
+
         private static int ProjectNumber(string path) => int.Parse(Path.GetFileNameWithoutExtension(path));
         private static int ProjectNumber(ProjectGraphNode node) => int.Parse(Path.GetFileNameWithoutExtension(node.ProjectInstance.FullPath));
 

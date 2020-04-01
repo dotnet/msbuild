@@ -1915,11 +1915,11 @@ namespace Microsoft.Build.UnitTests
                 _buildManager.BeginBuild(actualBuildParameters, deferredMessages);
             }
 
-            public BuildResult BuildProjectFile(string projectFile, string[] entryTargets = null)
+            public BuildResult BuildProjectFile(string projectFile, string[] entryTargets = null, Dictionary<string, string> globalProperties = null)
             {
                 var buildResult = _buildManager.BuildRequest(
                     new BuildRequestData(projectFile,
-                        new Dictionary<string, string>(),
+                        globalProperties ?? new Dictionary<string, string>(),
                         MSBuildConstants.CurrentToolsVersion,
                         entryTargets ?? new string[0],
                         null));
