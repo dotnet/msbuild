@@ -24,15 +24,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets a text serialized value of a parameter for logging.
         /// </summary>
-        internal static string GetParameterText(string prefix, string parameterName, params object[] parameterValues)
-        {
-            return GetParameterText(prefix, parameterName, (IList)parameterValues);
-        }
-
-        /// <summary>
-        /// Gets a text serialized value of a parameter for logging.
-        /// </summary>
-        internal static string GetParameterText(string prefix, string parameterName, IList parameterValue)
+        internal static string GetParameterText(string prefix, string parameterName, IList parameterValue, bool includeMetadata = false)
         {
             if (parameterValue == null || parameterValue.Count == 0)
             {
@@ -81,7 +73,7 @@ namespace Microsoft.Build.BackEnd
                         sb.Append("        ");
                     }
 
-                    AppendStringFromParameterValue(sb, parameterValue[i]);
+                    AppendStringFromParameterValue(sb, parameterValue[i], includeMetadata);
 
                     if (!specialTreatmentForSingle && i < parameterValue.Count - 1)
                     {
@@ -99,11 +91,11 @@ namespace Microsoft.Build.BackEnd
         /// First line is already indented.
         /// Indent of any subsequent line should be 12 spaces.
         /// </summary>
-        internal static string GetStringFromParameterValue(object parameterValue)
+        internal static string GetStringFromParameterValue(object parameterValue, bool includeMetadata = false)
         {
             using (var sb = new ReuseableStringBuilder())
             {
-                AppendStringFromParameterValue(sb, parameterValue);
+                AppendStringFromParameterValue(sb, parameterValue, includeMetadata);
                 return sb.ToString();
             }
         }
@@ -113,7 +105,7 @@ namespace Microsoft.Build.BackEnd
         [ThreadStatic]
         private static List<KeyValuePair<string, string>> keyValuePairList;
 
-        private static void AppendStringFromParameterValue(ReuseableStringBuilder sb, object parameterValue)
+        private static void AppendStringFromParameterValue(ReuseableStringBuilder sb, object parameterValue, bool includeMetadata = false)
         {
             if (parameterValue is string text)
             {
@@ -123,44 +115,58 @@ namespace Microsoft.Build.BackEnd
             {
                 sb.Append(item.ItemSpec);
 
-                var customMetadata = item.CloneCustomMetadata();
-                int count = customMetadata.Count;
-
-                if (count > 0)
+                if (includeMetadata)
                 {
-                    sb.Append('\n');
+                    var customMetadata = item.CloneCustomMetadata();
+                    int count = customMetadata.Count;
 
-                    // need to initialize the thread static on each new thread
-                    if (keyValuePairList == null)
+                    if (count > 0)
                     {
-                        keyValuePairList = new List<KeyValuePair<string, string>>(count);
-                    }
+                        sb.Append('\n');
 
-                    foreach (KeyValuePair<string, string> kvp in customMetadata)
-                    {
-                        keyValuePairList.Add(kvp);
-                    }
-
-                    if (count > 1)
-                    {
-                        keyValuePairList.Sort((l, r) => StringComparer.OrdinalIgnoreCase.Compare(l.Key, r.Key));
-                    }
-
-                    for (int i = 0; i < count; i++)
-                    {
-                        var kvp = keyValuePairList[i];
-                        sb.Append("                ");
-                        sb.Append(kvp.Key);
-                        sb.Append('=');
-                        sb.Append(kvp.Value);
-
-                        if (i < count - 1)
+                        // need to initialize the thread static on each new thread
+                        if (keyValuePairList == null)
                         {
-                            sb.Append('\n');
+                            keyValuePairList = new List<KeyValuePair<string, string>>(count);
                         }
-                    }
 
-                    keyValuePairList.Clear();
+                        var customMetadataDictionary = customMetadata as IDictionary<string, string>;
+                        if (customMetadataDictionary != null)
+                        {
+                            foreach (KeyValuePair<string, string> kvp in customMetadataDictionary)
+                            {
+                                keyValuePairList.Add(kvp);
+                            }
+                        }
+                        else
+                        {
+                            foreach (DictionaryEntry kvp in customMetadata)
+                            {
+                                keyValuePairList.Add(new KeyValuePair<string, string>((string)kvp.Key, (string)kvp.Value));
+                            }
+                        }
+
+                        if (count > 1)
+                        {
+                            keyValuePairList.Sort((l, r) => StringComparer.OrdinalIgnoreCase.Compare(l.Key, r.Key));
+                        }
+
+                        for (int i = 0; i < count; i++)
+                        {
+                            var kvp = keyValuePairList[i];
+                            sb.Append("                ");
+                            sb.Append(kvp.Key);
+                            sb.Append('=');
+                            sb.Append(kvp.Value);
+
+                            if (i < count - 1)
+                            {
+                                sb.Append('\n');
+                            }
+                        }
+
+                        keyValuePairList.Clear();
+                    }
                 }
             }
             else if (parameterValue.GetType().GetTypeInfo().IsValueType)

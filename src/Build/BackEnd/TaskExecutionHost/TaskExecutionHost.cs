@@ -1285,7 +1285,10 @@ namespace Microsoft.Build.BackEnd
         {
             if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && parameterValue.Count > 0)
             {
-                string parameterText = ItemGroupLoggingHelper.GetParameterText(ItemGroupLoggingHelper.TaskParameterPrefix, parameter.Name, parameterValue);
+                string parameterText = ItemGroupLoggingHelper.GetParameterText(
+                    ItemGroupLoggingHelper.TaskParameterPrefix,
+                    parameter.Name,
+                    parameterValue);
                 _taskLoggingContext.LogCommentFromText(MessageImportance.Low, parameterText);
             }
 
@@ -1427,7 +1430,8 @@ namespace Microsoft.Build.BackEnd
                         string parameterText = ItemGroupLoggingHelper.GetParameterText(
                             ItemGroupLoggingHelper.OutputItemParameterMessagePrefix,
                             outputTargetName,
-                            outputs);
+                            outputs,
+                            includeMetadata: true);
 
                         _taskLoggingContext.LogCommentFromText(MessageImportance.Low, parameterText);
                     }
@@ -1500,7 +1504,11 @@ namespace Microsoft.Build.BackEnd
 
                     if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && outputs.Length > 0)
                     {
-                        string parameterText = ItemGroupLoggingHelper.GetParameterText(ItemGroupLoggingHelper.OutputItemParameterMessagePrefix, outputTargetName, outputs);
+                        string parameterText = ItemGroupLoggingHelper.GetParameterText(
+                            ItemGroupLoggingHelper.OutputItemParameterMessagePrefix,
+                            outputTargetName,
+                            outputs,
+                            includeMetadata: true);
                         _taskLoggingContext.LogCommentFromText(MessageImportance.Low, parameterText);
                     }
                 }
