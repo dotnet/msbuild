@@ -74,7 +74,7 @@ namespace Microsoft.Build.BackEnd
                     sb.Append("\n");
                 }
 
-                bool truncateLogging = Traits.Instance.EscapeHatches.TruncateTaskInputLogging;
+                bool logAllTaskInputs = Traits.Instance.EscapeHatches.LogAllTaskInputs;
 
                 for (int i = 0; i < parameterValue.Count; i++)
                 {
@@ -95,7 +95,7 @@ namespace Microsoft.Build.BackEnd
                         sb.Append("\n");
                     }
 
-                    if (truncateLogging && (sb.Length >= parameterCharacterLimit || i > parameterLimit))
+                    if (!logAllTaskInputs && (sb.Length >= parameterCharacterLimit || i > parameterLimit))
                     {
                         sb.Append(ResourceUtilities.GetResourceString("LogTaskInputs.Truncated"));
                         break;
