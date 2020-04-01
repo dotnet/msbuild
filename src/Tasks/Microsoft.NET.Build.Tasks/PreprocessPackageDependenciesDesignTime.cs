@@ -12,7 +12,7 @@ using Microsoft.Build.Utilities;
 namespace Microsoft.NET.Build.Tasks
 {
     /// <summary>
-    /// Task combines data returned from ResolvePackageDependencies into single items collection
+    /// Task combines data returned from <see cref="ResolvePackageDependencies"/> into single items collection
     /// that can be consumed by DesignTime build and contains all info needed to expand packages
     /// dependency graph.
     /// If any changes are made here, make sure corresponding changes are made to PackageRuleHandler
