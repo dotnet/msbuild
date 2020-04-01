@@ -16,13 +16,10 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal static class ItemGroupLoggingHelper
     {
-        /// <summary>
-        /// Gets a text serialized value of a parameter for logging.
-        /// </summary>
-        internal static string GetParameterText(string prefix, string parameterName, params object[] parameterValues)
-        {
-            return GetParameterText(prefix, parameterName, (IList)parameterValues);
-        }
+        internal static string ItemGroupIncludeLogMessagePrefix = ResourceUtilities.GetResourceString("ItemGroupIncludeLogMessagePrefix");
+        internal static string ItemGroupRemoveLogMessage = ResourceUtilities.GetResourceString("ItemGroupRemoveLogMessage");
+        internal static string OutputItemParameterMessagePrefix = ResourceUtilities.GetResourceString("OutputItemParameterMessagePrefix");
+        internal static string TaskParameterPrefix = ResourceUtilities.GetResourceString("TaskParameterPrefix");
 
         /// <summary>
         /// Gets a text serialized value of a parameter for logging.
@@ -56,7 +53,8 @@ namespace Microsoft.Build.BackEnd
                     sb.Append("\n    ");
                 }
 
-                sb.Append(parameterName + "=");
+                sb.Append(parameterName);
+                sb.Append('=');
 
                 if (!specialTreatmentForSingle)
                 {
@@ -75,7 +73,7 @@ namespace Microsoft.Build.BackEnd
                         sb.Append("        ");
                     }
 
-                    sb.Append(GetStringFromParameterValue(parameterValue[i]));
+                    AppendStringFromParameterValue(sb, parameterValue[i]);
 
                     if (!specialTreatmentForSingle && i < parameterValue.Count - 1)
                     {
@@ -95,53 +93,93 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static string GetStringFromParameterValue(object parameterValue)
         {
-            var type = parameterValue.GetType();
-
-            ErrorUtilities.VerifyThrow(!type.IsArray, "scalars only");
-
-            if (type == typeof(string))
+            // fast path for the common case
+            if (parameterValue is string valueText)
             {
-                return (string)parameterValue;
+                return valueText;
             }
-            else if (type.GetTypeInfo().IsValueType)
+
+            using (var sb = new ReuseableStringBuilder())
             {
-                return (string)Convert.ChangeType(parameterValue, typeof(string), CultureInfo.CurrentCulture);
+                AppendStringFromParameterValue(sb, parameterValue);
+                return sb.ToString();
             }
-            else if (typeof(ITaskItem).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
+        }
+
+        // Avoid allocating a temporary list to hold metadata for sorting every time.
+        // Each thread gets its own copy.
+        [ThreadStatic]
+        private static List<KeyValuePair<string, string>> keyValuePairList;
+
+        private static void AppendStringFromParameterValue(ReuseableStringBuilder sb, object parameterValue)
+        {
+            if (parameterValue is string text)
             {
-                var item = ((ITaskItem)parameterValue);
-                string result = item.ItemSpec;
+                sb.Append(text);
+            }
+            else if (parameterValue is ITaskItem item)
+            {
+                sb.Append(item.ItemSpec);
 
                 var customMetadata = item.CloneCustomMetadata();
+                int count = customMetadata.Count;
 
-                if (customMetadata.Count > 0)
+                if (count > 0)
                 {
-                    result += "\n";
-                    var names = new List<string>();
+                    sb.Append('\n');
 
-                    foreach (string name in customMetadata.Keys)
+                    // need to initialize the thread static on each new thread
+                    if (keyValuePairList == null)
                     {
-                        names.Add(name);
+                        keyValuePairList = new List<KeyValuePair<string, string>>(count);
                     }
 
-                    names.Sort();
-
-                    for (int i = 0; i < names.Count; i++)
+                    var customMetadataDictionary = customMetadata as IDictionary<string, string>;
+                    if (customMetadataDictionary != null)
                     {
-                        result += "                " + names[i] + "=" + customMetadata[names[i]];
-
-                        if (i < names.Count - 1)
+                        foreach (KeyValuePair<string, string> kvp in customMetadataDictionary)
                         {
-                            result += "\n";
+                            keyValuePairList.Add(kvp);
                         }
                     }
+                    else
+                    {
+                        foreach (DictionaryEntry kvp in customMetadata)
+                        {
+                            keyValuePairList.Add(new KeyValuePair<string, string>((string)kvp.Key, (string)kvp.Value));
+                        }
+                    }
+
+                    if (count > 1)
+                    {
+                        keyValuePairList.Sort((l, r) => StringComparer.OrdinalIgnoreCase.Compare(l.Key, r.Key));
+                    }
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        var kvp = keyValuePairList[i];
+                        sb.Append("                ");
+                        sb.Append(kvp.Key);
+                        sb.Append('=');
+                        sb.Append(kvp.Value);
+
+                        if (i < count - 1)
+                        {
+                            sb.Append('\n');
+                        }
+                    }
+
+                    keyValuePairList.Clear();
                 }
-
-                return result;
             }
-
-            ErrorUtilities.ThrowInternalErrorUnreachable();
-            return null;
+            else if (parameterValue.GetType().GetTypeInfo().IsValueType)
+            {
+                sb.Append((string)Convert.ChangeType(parameterValue, typeof(string), CultureInfo.CurrentCulture));
+            }
+            else
+            {
+                ErrorUtilities.ThrowInternalErrorUnreachable();
+            }
         }
     }
 }
