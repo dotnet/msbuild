@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 Microsoft.NETFramework.CurrentVersion.targets
 
@@ -12,7 +12,6 @@ these two files are used to encapsulate the multi-targeting and framework specif
 Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
-
 <Project>
 
   <PropertyGroup>

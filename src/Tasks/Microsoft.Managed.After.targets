@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
           created a backup copy.  Incorrect changes to this file will make it
@@ -10,7 +10,6 @@ It is imported after the common targets have been imported.
 Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
-
 <Project>
 
    <!-- Define crosstargeting for static graph, so it can identify inner and outer build graph nodes -->

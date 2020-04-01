@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 Microsoft.Common.targets
 
@@ -13,12 +13,12 @@ Visual Basic, and Visual C#.
 Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
-
 <Project DefaultTargets="Build">
 
   <PropertyGroup>
     <CommonTargetsPath>$(MSBuildToolsPath)\Microsoft.Common.CurrentVersion.targets</CommonTargetsPath>
   </PropertyGroup>
+
   <Import Project="$(CommonTargetsPath)" />
 
   <!--

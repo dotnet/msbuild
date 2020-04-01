@@ -1,10 +1,11 @@
-﻿<Project>
+<Project>
 
     <!-- This file lists all the tasks that ship by default with MSBuild -->
 
     <!-- NOTE: Listing a <UsingTask> tag in a *.tasks file like this one rather than in a project or targets file
                can give a significant performance advantage in a large build, because every time a <UsingTask> tag
                is encountered, it will cause the task to be rediscovered next time the task is used. -->
+
     <!-- NOTE: Using the fully qualified class name in a <UsingTask> tag is faster than using a partially qualified name. -->
 
     <UsingTask TaskName="Microsoft.Build.Tasks.AL"                                    AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
