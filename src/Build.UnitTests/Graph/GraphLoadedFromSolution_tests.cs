@@ -687,10 +687,10 @@ namespace Microsoft.Build.Graph.UnitTests
             if (projectConfigurations == null || graphFromSolution.ProjectNodes.All(n => n.ProjectReferences.Count == 0))
             {
                 graphFromSolution.GraphRoots.Select(GetProjectPath)
-                    .ShouldBeEquivalentTo(graph.GraphRoots.Select(GetProjectPath));
+                    .ShouldBeSameIgnoringOrder(graph.GraphRoots.Select(GetProjectPath));
 
                 graphFromSolution.ProjectNodes.Select(GetProjectPath)
-                    .ShouldBeEquivalentTo(graph.ProjectNodes.Select(GetProjectPath));
+                    .ShouldBeSameIgnoringOrder(graph.ProjectNodes.Select(GetProjectPath));
             }
 
             var expectedCurrentConfiguration = currentSolutionConfiguration ?? solutionConfigurations.First();

@@ -1248,14 +1248,14 @@ namespace Microsoft.Build.UnitTests
                 });
         }
 
-        internal static void ShouldBeEquivalentTo<K, V>(this IDictionary<K, V> a, IReadOnlyDictionary<K, V> b)
+        internal static void ShouldBeSameIgnoringOrder<K, V>(this IDictionary<K, V> a, IReadOnlyDictionary<K, V> b)
         {
             a.ShouldBeSubsetOf(b);
             b.ShouldBeSubsetOf(a);
             a.Count.ShouldBe(b.Count);
         }
 
-        internal static void ShouldBeEquivalentTo<K>(this IEnumerable<K> a, IEnumerable<K> b)
+        internal static void ShouldBeSameIgnoringOrder<K>(this IEnumerable<K> a, IEnumerable<K> b)
         {
             a.ShouldBeSubsetOf(b);
             b.ShouldBeSubsetOf(a);

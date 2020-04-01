@@ -69,7 +69,7 @@ namespace Microsoft.Build.Graph.UnitTests
             additionalGlobalProperties = additionalGlobalProperties ?? new Dictionary<string, string>();
 
             IsNotMultitargeting(node).ShouldBeTrue();
-            node.ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
+            node.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
             node.ProjectInstance.GetProperty(InnerBuildPropertyName).ShouldBeNull();
         }
 
@@ -81,7 +81,7 @@ namespace Microsoft.Build.Graph.UnitTests
             IsInnerBuild(outerBuild).ShouldBeFalse();
 
             outerBuild.ProjectInstance.GetProperty(InnerBuildPropertyName).ShouldBeNull();
-            outerBuild.ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
+            outerBuild.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
         }
 
         public static void AssertInnerBuildEvaluation(
@@ -100,7 +100,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
             if (InnerBuildPropertyIsSetViaGlobalProperty)
             {
-                innerBuild.ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(
+                innerBuild.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(
                     EmptyGlobalProperties
                         .Add(InnerBuildPropertyName, innerBuildPropertyValue)
                         .AddRange(additionalGlobalProperties));

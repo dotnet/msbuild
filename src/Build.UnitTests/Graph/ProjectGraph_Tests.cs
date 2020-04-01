@@ -114,13 +114,13 @@ namespace Microsoft.Build.Graph.UnitTests
                 node.AddProjectReference(reference1, referenceItem1, edges);
                 node.AddProjectReference(reference2, referenceItem2, edges);
 
-                node.ProjectReferences.ShouldBeEquivalentTo(new []{reference1, reference2});
+                node.ProjectReferences.ShouldBeSameIgnoringOrder(new []{reference1, reference2});
                 node.ReferencingProjects.ShouldBeEmpty();
 
-                reference1.ReferencingProjects.ShouldBeEquivalentTo(new[] {node});
+                reference1.ReferencingProjects.ShouldBeSameIgnoringOrder(new[] {node});
                 reference1.ProjectReferences.ShouldBeEmpty();
 
-                reference2.ReferencingProjects.ShouldBeEquivalentTo(new[] {node});
+                reference2.ReferencingProjects.ShouldBeSameIgnoringOrder(new[] {node});
                 reference2.ProjectReferences.ShouldBeEmpty();
 
                 edges[(node, reference1)].ShouldBe(referenceItem1);
@@ -336,16 +336,16 @@ namespace Microsoft.Build.Graph.UnitTests
             var root1 = GetFirstNodeWithProjectNumber(graph, 1);
             var globalPropertiesFor1 = new Dictionary<string, string> { ["B"] = "EntryPointB", ["C"] = "EntryPointC", ["IsGraphBuild"] = "true" };
 
-            root1.ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(globalPropertiesFor1);
-            root1.ProjectReferences.First(r => GetProjectNumber(r) == 3).ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(globalPropertiesFor1);
-            root1.ProjectReferences.First(r => GetProjectNumber(r) == 4).ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(globalPropertiesFor1);
+            root1.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(globalPropertiesFor1);
+            root1.ProjectReferences.First(r => GetProjectNumber(r) == 3).ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(globalPropertiesFor1);
+            root1.ProjectReferences.First(r => GetProjectNumber(r) == 4).ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(globalPropertiesFor1);
 
             var root2 = GetFirstNodeWithProjectNumber(graph, 2);
             var globalPropertiesFor2 = new Dictionary<string, string> { ["IsGraphBuild"] = "true" };
 
-            root2.ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(globalPropertiesFor2);
-            root2.ProjectReferences.First(r => GetProjectNumber(r) == 4).ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(globalPropertiesFor2);
-            root2.ProjectReferences.First(r => GetProjectNumber(r) == 5).ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(globalPropertiesFor2);
+            root2.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(globalPropertiesFor2);
+            root2.ProjectReferences.First(r => GetProjectNumber(r) == 4).ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(globalPropertiesFor2);
+            root2.ProjectReferences.First(r => GetProjectNumber(r) == 5).ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(globalPropertiesFor2);
         }
 
         [Fact]
@@ -375,7 +375,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 // Projects 2 and 3 both reference project 4, but with different properties, so they should not point to the same node.
                 GetFirstNodeWithProjectNumber(graph, 2).ProjectReferences.First().ShouldNotBe(GetFirstNodeWithProjectNumber(graph, 3).ProjectReferences.First());
                 GetFirstNodeWithProjectNumber(graph, 2).ProjectReferences.First().ProjectInstance.FullPath.ShouldEndWith("4.proj");
-                GetFirstNodeWithProjectNumber(graph, 2).ProjectReferences.First().ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(EmptyGlobalProperties);
+                GetFirstNodeWithProjectNumber(graph, 2).ProjectReferences.First().ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(EmptyGlobalProperties);
                 GetFirstNodeWithProjectNumber(graph, 3).ProjectReferences.First().ProjectInstance.FullPath.ShouldEndWith("4.proj");
                 GetFirstNodeWithProjectNumber(graph, 3).ProjectReferences.First().ProjectInstance.GlobalProperties.Count.ShouldBeGreaterThan(1);
             }
@@ -1726,13 +1726,13 @@ $@"
 
             innerBuildWithCommonReferences.ProjectReferences.Count.ShouldBe(4);
             var referenceNumbersSet = innerBuildWithCommonReferences.ProjectReferences.Select(r => Path.GetFileNameWithoutExtension(r.ProjectInstance.FullPath)).ToHashSet();
-            referenceNumbersSet.ShouldBeEquivalentTo(new HashSet<string>{"2", "3"});
+            referenceNumbersSet.ShouldBeSameIgnoringOrder(new HashSet<string>{"2", "3"});
 
             var innerBuildWithAdditionalReferences = GetNodesWithProjectNumber(graph, 1).First(n => n.ProjectInstance.GlobalProperties.TryGetValue(InnerBuildPropertyName, out string p) && p == "b");
 
             innerBuildWithAdditionalReferences.ProjectReferences.Count.ShouldBe(8);
             referenceNumbersSet = innerBuildWithAdditionalReferences.ProjectReferences.Select(r => Path.GetFileNameWithoutExtension(r.ProjectInstance.FullPath)).ToHashSet();
-            referenceNumbersSet.ShouldBeEquivalentTo(new HashSet<string>{"2", "3", "4", "5"});
+            referenceNumbersSet.ShouldBeSameIgnoringOrder(new HashSet<string>{"2", "3", "4", "5"});
         }
 
         [Fact]
@@ -1767,7 +1767,7 @@ $@"
             two.ProjectReferences.ShouldHaveSingleItem();
             two.ProjectReferences.First().ShouldBe(referencedInnerBuild);
 
-            referencedInnerBuild.ReferencingProjects.ShouldBeEquivalentTo(new []{two, outerBuild});
+            referencedInnerBuild.ReferencingProjects.ShouldBeSameIgnoringOrder(new []{two, outerBuild});
         }
 
         [Fact]
@@ -1852,7 +1852,7 @@ $@"
             // the outer build is necessary as the referencing inner build can still call targets on it
             GetNodesWithProjectNumber(graph, 2).Count().ShouldBe(2);
 
-            innerBuild1WithReferenceToInnerBuild2.ProjectReferences.ShouldBeEquivalentTo(new []{outerBuild2, innerBuild2});
+            innerBuild1WithReferenceToInnerBuild2.ProjectReferences.ShouldBeSameIgnoringOrder(new []{outerBuild2, innerBuild2});
         }
 
         public static IEnumerable<object[]> AllNodesShouldHaveGraphBuildGlobalPropertyData
@@ -1953,7 +1953,7 @@ $@"
 
                 foreach (var node in projectGraph.ProjectNodes)
                 {
-                    node.ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(expectedGlobalProperties);
+                    node.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(expectedGlobalProperties);
                 }
             }
         }

@@ -590,7 +590,7 @@ BuildEngine5.BuildProjectFilesInParallel(
             cache2.Value.ConfigCache.First().ProjectFullPath.ShouldBe(cache2.Key.ProjectInstance.FullPath);
 
             cache2.Value.ResultsCache.ShouldHaveSingleItem();
-            cache2.Value.ResultsCache.First().ResultsByTarget.Keys.ShouldBeEquivalentTo(new[] { "Build2" });
+            cache2.Value.ResultsCache.First().ResultsByTarget.Keys.ShouldBeSameIgnoringOrder(new[] { "Build2" });
 
             var cache1 = caches.FirstOrDefault(c => ProjectNumber(c.Key) == 1);
 
@@ -602,10 +602,10 @@ BuildEngine5.BuildProjectFilesInParallel(
                 switch (ProjectNumber(config.ProjectFullPath))
                 {
                     case 1:
-                        cache1.Value.ResultsCache.GetResultsForConfiguration(config.ConfigurationId).ResultsByTarget.Keys.ShouldBeEquivalentTo(new []{ "Build", "ExtraBuild"});
+                        cache1.Value.ResultsCache.GetResultsForConfiguration(config.ConfigurationId).ResultsByTarget.Keys.ShouldBeSameIgnoringOrder(new []{ "Build", "ExtraBuild"});
                         break;
                     case 2:
-                        cache1.Value.ResultsCache.GetResultsForConfiguration(config.ConfigurationId).ResultsByTarget.Keys.ShouldBeEquivalentTo(new[] { "UncachedTarget"});
+                        cache1.Value.ResultsCache.GetResultsForConfiguration(config.ConfigurationId).ResultsByTarget.Keys.ShouldBeSameIgnoringOrder(new[] { "UncachedTarget"});
                         break;
                     default: throw new NotImplementedException();
                 }
