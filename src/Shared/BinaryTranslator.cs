@@ -264,14 +264,14 @@ namespace Microsoft.Build.BackEnd
             /// <param name="list">The list to be translated.</param>
             /// <param name="factory">Factory to deserialize T</param>
             /// <typeparam name="T">TaskItem type</typeparam>
-            public void Translate<T>(ref List<T> list, NodePacketValueFactory<T> factory) where T : ITranslatable
+            public void Translate<T>(ref List<T> list, ObjectTranslator<T> objectTranslator)
             {
                 IList<T> listAsInterface = list;
-                Translate(ref listAsInterface, factory, count => new List<T>(count));
+                Translate(ref listAsInterface, objectTranslator, count => new List<T>(count));
                 list = (List<T>) listAsInterface;
             }
 
-            public void Translate<T, L>(ref IList<T> list, NodePacketValueFactory<T> factory, NodePacketCollectionCreator<L> collectionFactory) where T : ITranslatable where L : IList<T>
+            public void Translate<T, L>(ref IList<T> list, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory) where L : IList<T>
             {
                 if (!TranslateNullable(list))
                 {
@@ -290,7 +290,7 @@ namespace Microsoft.Build.BackEnd
                         continue;
                     }
 
-                    value = factory(this);
+                    objectTranslator(this, ref value);
                     list.Add(value);
                 }
             }
@@ -445,24 +445,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Translates an object implementing INodePacketTranslatable which does not expose a
-            /// public parameterless constructor.
-            /// </summary>
-            /// <typeparam name="T">The reference type.</typeparam>
-            /// <param name="value">The value to be translated.</param>
-            /// <param name="factory">The factory method used to instantiate values of type T.</param>
-            public void Translate<T>(ref T value, NodePacketValueFactory<T> factory)
-                where T : ITranslatable
-            {
-                if (!TranslateNullable(value))
-                {
-                    return;
-                }
-
-                value = factory(this);
-            }
-
-            /// <summary>
             /// Translates an array of objects implementing INodePacketTranslatable.
             /// </summary>
             /// <typeparam name="T">The reference type.</typeparam>
@@ -491,8 +473,7 @@ namespace Microsoft.Build.BackEnd
             /// <typeparam name="T">The reference type.</typeparam>
             /// <param name="array">The array to be translated.</param>
             /// <param name="factory">The factory method used to instantiate values of type T.</param>
-            public void TranslateArray<T>(ref T[] array, NodePacketValueFactory<T> factory)
-                where T : ITranslatable
+            public void TranslateArray<T>(ref T[] array, ObjectTranslator<T> objectTranslator)
             {
                 if (!TranslateNullable(array))
                 {
@@ -504,7 +485,7 @@ namespace Microsoft.Build.BackEnd
 
                 for (int i = 0; i < count; i++)
                 {
-                    array[i] = factory(this);
+                    objectTranslator(this, ref array[i]);
                 }
             }
 
@@ -546,8 +527,8 @@ namespace Microsoft.Build.BackEnd
 
             public void TranslateDictionary<K, V>(
                 ref IDictionary<K, V> dictionary,
-                Translator<K> keyTranslator,
-                Translator<V> valueTranslator,
+                ObjectTranslator<K> keyTranslator,
+                ObjectTranslator<V> valueTranslator,
                 NodePacketCollectionCreator<IDictionary<K, V>> dictionaryCreator)
             {
                 if (!TranslateNullable(dictionary))
@@ -561,9 +542,9 @@ namespace Microsoft.Build.BackEnd
                 for (int i = 0; i < count; i++)
                 {
                     K key = default(K);
-                    keyTranslator.Invoke(ref key, this);
+                    keyTranslator(this, ref key);
                     V value = default(V);
-                    valueTranslator(ref value, this);
+                    valueTranslator(this, ref value);
                     dictionary[key] = value;
                 }
             }
@@ -575,8 +556,8 @@ namespace Microsoft.Build.BackEnd
             /// <param name="dictionary">The dictionary to be translated.</param>
             /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
             /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
-            public void TranslateDictionary<T>(ref Dictionary<string, T> dictionary, IEqualityComparer<string> comparer, NodePacketValueFactory<T> valueFactory)
-                where T : class, ITranslatable
+            public void TranslateDictionary<T>(ref Dictionary<string, T> dictionary, IEqualityComparer<string> comparer, ObjectTranslator<T> objectTranslator)
+                where T : class
             {
                 if (!TranslateNullable(dictionary))
                 {
@@ -591,7 +572,7 @@ namespace Microsoft.Build.BackEnd
                     string key = null;
                     Translate(ref key);
                     T value = null;
-                    Translate(ref value, valueFactory);
+                    objectTranslator(this, ref value);
                     dictionary[key] = value;
                 }
             }
@@ -603,9 +584,9 @@ namespace Microsoft.Build.BackEnd
             /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
             /// <param name="dictionary">The dictionary to be translated.</param>
             /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
-            public void TranslateDictionary<D, T>(ref D dictionary, NodePacketValueFactory<T> valueFactory)
+            public void TranslateDictionary<D, T>(ref D dictionary, ObjectTranslator<T> objectTranslator)
                 where D : IDictionary<string, T>, new()
-                where T : class, ITranslatable
+                where T : class
             {
                 if (!TranslateNullable(dictionary))
                 {
@@ -620,7 +601,7 @@ namespace Microsoft.Build.BackEnd
                     string key = null;
                     Translate(ref key);
                     T value = null;
-                    Translate(ref value, valueFactory);
+                    objectTranslator(this, ref value);
                     dictionary[key] = value;
                 }
             }
@@ -633,9 +614,9 @@ namespace Microsoft.Build.BackEnd
             /// <param name="dictionary">The dictionary to be translated.</param>
             /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
             /// <param name="dictionaryCreator">The delegate used to instantiate the dictionary.</param>
-            public void TranslateDictionary<D, T>(ref D dictionary, NodePacketValueFactory<T> valueFactory, NodePacketCollectionCreator<D> dictionaryCreator)
+            public void TranslateDictionary<D, T>(ref D dictionary, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<D> dictionaryCreator)
                 where D : IDictionary<string, T>
-                where T : class, ITranslatable
+                where T : class
             {
                 if (!TranslateNullable(dictionary))
                 {
@@ -650,7 +631,7 @@ namespace Microsoft.Build.BackEnd
                     string key = null;
                     Translate(ref key);
                     T value = null;
-                    Translate(ref value, valueFactory);
+                    objectTranslator(this, ref value);
                     dictionary[key] = value;
                 }
             }
@@ -863,7 +844,7 @@ namespace Microsoft.Build.BackEnd
             /// <param name="list">The list to be translated.</param>
             /// <param name="factory">factory to create type T</param>
             /// <typeparam name="T">A TaskItemType</typeparam>
-            public void Translate<T>(ref List<T> list, NodePacketValueFactory<T> factory) where T : ITranslatable
+            public void Translate<T>(ref List<T> list, ObjectTranslator<T> objectTranslator)
             {
                 if (!TranslateNullable(list))
                 {
@@ -876,7 +857,7 @@ namespace Microsoft.Build.BackEnd
                 for (int i = 0; i < count; i++)
                 {
                     T value = list[i];
-                    Translate<T>(ref value, factory);
+                    objectTranslator(this, ref value);
                 }
             }
 
@@ -888,7 +869,7 @@ namespace Microsoft.Build.BackEnd
             /// <param name="collectionFactory">factory to create the IList</param>
             /// <typeparam name="T">A TaskItemType</typeparam>
             /// <typeparam name="L">IList subtype</typeparam>
-            public void Translate<T, L>(ref IList<T> list, NodePacketValueFactory<T> factory, NodePacketCollectionCreator<L> collectionFactory) where T : ITranslatable where L : IList<T>
+            public void Translate<T, L>(ref IList<T> list, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory) where L : IList<T>
             {
                 if (!TranslateNullable(list))
                 {
@@ -901,7 +882,7 @@ namespace Microsoft.Build.BackEnd
                 for (int i = 0; i < count; i++)
                 {
                     T value = list[i];
-                    Translate<T>(ref value, factory);
+                    objectTranslator(this, ref value);
                 }
             }
 
@@ -1017,24 +998,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Translates an object implementing INodePacketTranslatable which does not expose a
-            /// public parameterless constructor.
-            /// </summary>
-            /// <typeparam name="T">The reference type.</typeparam>
-            /// <param name="value">The value to be translated.</param>
-            /// <param name="factory">The factory method used to instantiate values of type T.</param>
-            public void Translate<T>(ref T value, NodePacketValueFactory<T> factory)
-                where T : ITranslatable
-            {
-                if (!TranslateNullable(value))
-                {
-                    return;
-                }
-
-                value.Translate(this);
-            }
-
-            /// <summary>
             /// Translates a byte array
             /// </summary>
             /// <param name="byteArray">The byte array to be translated</param>
@@ -1081,8 +1044,7 @@ namespace Microsoft.Build.BackEnd
             /// <typeparam name="T">The reference type.</typeparam>
             /// <param name="array">The array to be translated.</param>
             /// <param name="factory">The factory method used to instantiate values of type T.</param>
-            public void TranslateArray<T>(ref T[] array, NodePacketValueFactory<T> factory)
-                where T : ITranslatable
+            public void TranslateArray<T>(ref T[] array, ObjectTranslator<T> objectTranslator)
             {
                 if (!TranslateNullable(array))
                 {
@@ -1094,7 +1056,7 @@ namespace Microsoft.Build.BackEnd
 
                 for (int i = 0; i < count; i++)
                 {
-                    array[i].Translate(this);
+                    objectTranslator(this, ref array[i]);
                 }
             }
 
@@ -1130,8 +1092,8 @@ namespace Microsoft.Build.BackEnd
 
             public void TranslateDictionary<K, V>(
                 ref IDictionary<K, V> dictionary,
-                Translator<K> keyTranslator,
-                Translator<V> valueTranslator,
+                ObjectTranslator<K> keyTranslator,
+                ObjectTranslator<V> valueTranslator,
                 NodePacketCollectionCreator<IDictionary<K, V>> collectionCreator)
             {
                 if (!TranslateNullable(dictionary))
@@ -1145,9 +1107,9 @@ namespace Microsoft.Build.BackEnd
                 foreach (KeyValuePair<K, V> pair in dictionary)
                 {
                     K key = pair.Key;
-                    keyTranslator.Invoke(ref key, this);
+                    keyTranslator(this, ref key);
                     V value = pair.Value;
-                    valueTranslator.Invoke(ref value, this);
+                    valueTranslator(this, ref value);
                 }
             }
 
@@ -1158,8 +1120,8 @@ namespace Microsoft.Build.BackEnd
             /// <param name="dictionary">The dictionary to be translated.</param>
             /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
             /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
-            public void TranslateDictionary<T>(ref Dictionary<string, T> dictionary, IEqualityComparer<string> comparer, NodePacketValueFactory<T> valueFactory)
-                where T : class, ITranslatable
+            public void TranslateDictionary<T>(ref Dictionary<string, T> dictionary, IEqualityComparer<string> comparer, ObjectTranslator<T> objectTranslator)
+                where T : class
             {
                 if (!TranslateNullable(dictionary))
                 {
@@ -1174,7 +1136,7 @@ namespace Microsoft.Build.BackEnd
                     string key = pair.Key;
                     Translate(ref key);
                     T value = pair.Value;
-                    Translate(ref value, valueFactory);
+                    objectTranslator(this, ref value);
                 }
             }
 
@@ -1185,9 +1147,9 @@ namespace Microsoft.Build.BackEnd
             /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
             /// <param name="dictionary">The dictionary to be translated.</param>
             /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
-            public void TranslateDictionary<D, T>(ref D dictionary, NodePacketValueFactory<T> valueFactory)
+            public void TranslateDictionary<D, T>(ref D dictionary, ObjectTranslator<T> objectTranslator)
                 where D : IDictionary<string, T>, new()
-                where T : class, ITranslatable
+                where T : class
             {
                 if (!TranslateNullable(dictionary))
                 {
@@ -1202,7 +1164,7 @@ namespace Microsoft.Build.BackEnd
                     string key = pair.Key;
                     Translate(ref key);
                     T value = pair.Value;
-                    Translate(ref value, valueFactory);
+                    objectTranslator(this, ref value);
                 }
             }
 
@@ -1214,9 +1176,9 @@ namespace Microsoft.Build.BackEnd
             /// <param name="dictionary">The dictionary to be translated.</param>
             /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
             /// <param name="dictionaryCreator">The delegate used to instantiate the dictionary.</param>
-            public void TranslateDictionary<D, T>(ref D dictionary, NodePacketValueFactory<T> valueFactory, NodePacketCollectionCreator<D> dictionaryCreator)
+            public void TranslateDictionary<D, T>(ref D dictionary, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<D> dictionaryCreator)
                 where D : IDictionary<string, T>
-                where T : class, ITranslatable
+                where T : class
             {
                 if (!TranslateNullable(dictionary))
                 {
@@ -1231,7 +1193,7 @@ namespace Microsoft.Build.BackEnd
                     string key = pair.Key;
                     Translate(ref key);
                     T value = pair.Value;
-                    Translate(ref value, valueFactory);
+                    objectTranslator(this, ref value);
                 }
             }
 
