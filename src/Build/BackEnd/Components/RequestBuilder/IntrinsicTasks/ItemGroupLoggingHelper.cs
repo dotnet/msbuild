@@ -134,8 +134,7 @@ namespace Microsoft.Build.BackEnd
                         keyValuePairList = new List<KeyValuePair<string, string>>(count);
                     }
 
-                    var customMetadataDictionary = customMetadata as IDictionary<string, string>;
-                    if (customMetadataDictionary != null)
+                    if (customMetadata is IDictionary<string, string> customMetadataDictionary)
                     {
                         foreach (KeyValuePair<string, string> kvp in customMetadataDictionary)
                         {
@@ -172,7 +171,7 @@ namespace Microsoft.Build.BackEnd
                     keyValuePairList.Clear();
                 }
             }
-            else if (parameterValue.GetType().GetTypeInfo().IsValueType)
+            else if (parameterValue.GetType().IsValueType)
             {
                 sb.Append((string)Convert.ChangeType(parameterValue, typeof(string), CultureInfo.CurrentCulture));
             }
