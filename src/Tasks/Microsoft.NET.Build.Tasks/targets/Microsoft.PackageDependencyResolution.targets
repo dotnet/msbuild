@@ -299,16 +299,16 @@ Copyright (c) .NET Foundation. All rights reserved.
              AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   
   <Target Name="ResolvePackageDependenciesDesignTime"
-          Returns="@(_DependenciesDesignTime)"
+          Returns="@(_PackageDependenciesDesignTime)"
           DependsOnTargets="RunResolvePackageDependencies;ResolveAssemblyReferencesDesignTime">
 
     <PreprocessPackageDependenciesDesignTime
-          TargetDefinitions="@(TargetDefinitions)"
           PackageDefinitions="@(PackageDefinitions)"
           PackageDependencies="@(PackageDependencies)"
-          DefaultImplicitPackages="$(DefaultImplicitPackages)">
+          DefaultImplicitPackages="$(DefaultImplicitPackages)"
+          TargetFrameworkMoniker="$(NuGetTargetMoniker)">
 
-      <Output TaskParameter="DependenciesDesignTime" ItemName="_DependenciesDesignTime" />
+      <Output TaskParameter="PackageDependenciesDesignTime" ItemName="_PackageDependenciesDesignTime" />
     </PreprocessPackageDependenciesDesignTime>
 
   </Target>
