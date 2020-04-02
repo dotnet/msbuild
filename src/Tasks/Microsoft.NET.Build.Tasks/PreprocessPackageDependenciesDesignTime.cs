@@ -97,11 +97,7 @@ namespace Microsoft.NET.Build.Tasks
             DependenciesDesignTime = DependenciesWorld.Select(itemKvp =>
             {
                 var newTaskItem = new TaskItem(itemKvp.Key);
-                foreach (var metadataKvp in itemKvp.Value.ToDictionary())
-                {
-                    newTaskItem.SetMetadata(metadataKvp.Key, metadataKvp.Value);
-                }
-
+                itemKvp.Value.SetMetadataOnTaskItem(newTaskItem);
                 return newTaskItem;
             }).ToArray<ITaskItem>();
         }
@@ -343,10 +339,9 @@ namespace Microsoft.NET.Build.Tasks
             public List<string> Dependencies { get; }
 
             /// <summary>
-            /// Returns name/value pairs for metadata specific to given item type's implementation.
+            /// Populates metadata on <paramref name="taskItem"/>.
             /// </summary>
-            /// <returns></returns>
-            public abstract IDictionary<string, string> ToDictionary();
+            public abstract void SetMetadataOnTaskItem(TaskItem taskItem);
 
             /// <summary>
             /// Creates a copy of the item
@@ -386,17 +381,14 @@ namespace Microsoft.NET.Build.Tasks
             public string FrameworkName { get; }
             public string FrameworkVersion { get; }
 
-            public override IDictionary<string, string> ToDictionary()
+            public override void SetMetadataOnTaskItem(TaskItem taskItem)
             {
-                return new Dictionary<string, string>
-                {
-                    { MetadataKeys.RuntimeIdentifier, RuntimeIdentifier },
-                    { MetadataKeys.TargetFrameworkMoniker, TargetFrameworkMoniker },
-                    { MetadataKeys.FrameworkName, FrameworkName },
-                    { MetadataKeys.FrameworkVersion, FrameworkVersion },
-                    { MetadataKeys.Type, Type.ToString() },
-                    { DependenciesMetadata, string.Join(";", Dependencies) }
-                };
+                taskItem.SetMetadata(MetadataKeys.RuntimeIdentifier, RuntimeIdentifier);
+                taskItem.SetMetadata(MetadataKeys.TargetFrameworkMoniker, TargetFrameworkMoniker);
+                taskItem.SetMetadata(MetadataKeys.FrameworkName, FrameworkName);
+                taskItem.SetMetadata(MetadataKeys.FrameworkVersion, FrameworkVersion);
+                taskItem.SetMetadata(MetadataKeys.Type, Type.ToString());
+                taskItem.SetMetadata(DependenciesMetadata, string.Join(";", Dependencies));
             }
 
             public override ItemMetadata Clone()
@@ -449,19 +441,16 @@ namespace Microsoft.NET.Build.Tasks
             public bool Resolved { get; }
             public bool IsImplicitlyDefined { get; set; }
 
-            public override IDictionary<string, string> ToDictionary()
+            public override void SetMetadataOnTaskItem(TaskItem taskItem)
             {
-                return new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, Name },
-                    { MetadataKeys.Version, Version },
-                    { MetadataKeys.Path, Path },
-                    { MetadataKeys.Type, Type.ToString() },
-                    { MetadataKeys.IsImplicitlyDefined, IsImplicitlyDefined.ToString() },
-                    { MetadataKeys.IsTopLevelDependency, IsTopLevelDependency.ToString() },
-                    { ResolvedMetadata, Resolved.ToString() },
-                    { DependenciesMetadata, string.Join(";", Dependencies) }
-                };
+                taskItem.SetMetadata(MetadataKeys.Name, Name);
+                taskItem.SetMetadata(MetadataKeys.Version, Version);
+                taskItem.SetMetadata(MetadataKeys.Path, Path);
+                taskItem.SetMetadata(MetadataKeys.Type, Type.ToString());
+                taskItem.SetMetadata(MetadataKeys.IsImplicitlyDefined, IsImplicitlyDefined.ToString());
+                taskItem.SetMetadata(MetadataKeys.IsTopLevelDependency, IsTopLevelDependency.ToString());
+                taskItem.SetMetadata(ResolvedMetadata, Resolved.ToString());
+                taskItem.SetMetadata(DependenciesMetadata, string.Join(";", Dependencies));
             }
 
             public override ItemMetadata Clone()
@@ -511,19 +500,16 @@ namespace Microsoft.NET.Build.Tasks
             public string Path { get; }
             public bool Visible { get; }
 
-            public override IDictionary<string, string> ToDictionary()
+            public override void SetMetadataOnTaskItem(TaskItem taskItem)
             {
-                return new Dictionary<string, string>
-                {
-                    { MetadataKeys.Name, Name },
-                    { MetadataKeys.Path, Path },
-                    { MetadataKeys.Type, Type.ToString() },
-                    { MetadataKeys.IsImplicitlyDefined, "false" },
-                    { MetadataKeys.IsTopLevelDependency, "false" },
-                    { ResolvedMetadata, "true" },
-                    { VisibleMetadata, Visible.ToString() },
-                    { DependenciesMetadata, string.Empty }
-                };
+                taskItem.SetMetadata(MetadataKeys.Name, Name);
+                taskItem.SetMetadata(MetadataKeys.Path, Path);
+                taskItem.SetMetadata(MetadataKeys.Type, Type.ToString());
+                taskItem.SetMetadata(MetadataKeys.IsImplicitlyDefined, "false");
+                taskItem.SetMetadata(MetadataKeys.IsTopLevelDependency, "false");
+                taskItem.SetMetadata(ResolvedMetadata, "true");
+                taskItem.SetMetadata(VisibleMetadata, Visible.ToString());
+                taskItem.SetMetadata(DependenciesMetadata, string.Empty);
             }
 
             public override ItemMetadata Clone()
