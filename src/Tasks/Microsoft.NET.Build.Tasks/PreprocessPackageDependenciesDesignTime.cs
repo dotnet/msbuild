@@ -121,7 +121,6 @@ namespace Microsoft.NET.Build.Tasks
                     outputItem.SetMetadata(MetadataKeys.Path, path);
                     outputItem.SetMetadata(MetadataKeys.Type, DependencyType.Package.ToString());
                     outputItem.SetMetadata(MetadataKeys.IsImplicitlyDefined, isImplicitlyDefined.ToString());
-                    outputItem.SetMetadata(MetadataKeys.IsTopLevelDependency, bool.TrueString);
                     outputItem.SetMetadata(ResolvedMetadata, resolved.ToString());
 
                     outputItems.Add(outputItem);
