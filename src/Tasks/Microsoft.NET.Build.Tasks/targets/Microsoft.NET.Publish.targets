@@ -1072,6 +1072,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <FilesCopiedToPublishDir Include="@(ResolvedFileToPublish)"/>
       <FilesCopiedToPublishDir Include="$(PublishedSingleFilePath)" RelativePath="$(PublishedSingleFileName)" IsKeyOutput="true" Condition="'$(PublishSingleFile)' == 'true'"/>
+
+      <!-- Wapproj handles adding the correct deps.json file, so remove it here to avoid duplicates. -->
+      <FilesCopiedToPublishDir Remove="@(FilesCopiedToPublishDir)" Condition="'%(FilesCopiedToPublishDir.Filename)%(FilesCopiedToPublishDir.Extension)' == '$(ProjectDepsFileName)'"/>
     </ItemGroup>
   </Target>
 
@@ -1086,15 +1089,21 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PublishItemsOutputGroupDependsOn>
       $(PublishItemsOutputGroupDependsOn);
       ResolveReferences;
-      ComputeFilesCopiedToPublishDir;
+      ComputeResolvedFilesToPublishList;
+      _ComputeFilesToBundle;
     </PublishItemsOutputGroupDependsOn>
   </PropertyGroup>
 
   <Target Name="PublishItemsOutputGroup" DependsOnTargets="$(PublishItemsOutputGroupDependsOn)" Returns="@(PublishItemsOutputGroupOutputs)">
     <ItemGroup>
-      <PublishItemsOutputGroupOutputs Include="@(FilesCopiedToPublishDir->'%(FullPath)')"
-                                      TargetPath="%(FilesCopiedToPublishDir.RelativePath)"
-                                      IsKeyOutput="%(FilesCopiedToPublishDir.IsKeyOutput)"
+      <PublishItemsOutputGroupOutputs Include="@(ResolvedFileToPublish->'%(FullPath)')"
+                                      TargetPath="%(ResolvedFileToPublish.RelativePath)"
+                                      IsKeyOutput="%(ResolvedFileToPublish.IsKeyOutput)"
+                                      OutputGroup="PublishItemsOutputGroup" />
+      <PublishItemsOutputGroupOutputs Include="$(PublishedSingleFilePath)"
+                                      TargetPath="$(PublishedSingleFileName)"
+                                      IsKeyOutput="true"
+                                      Condition="'$(PublishSingleFile)' == 'true'"
                                       OutputGroup="PublishItemsOutputGroup" />
     </ItemGroup>
   </Target>

@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.PlatformAbstractions;
@@ -25,10 +27,13 @@ namespace Microsoft.NET.Publish.Tests
             "WindowsBase.dll",
         };
 
-        [Fact]
-        public void GroupPopulatedWithRid()
+        [Theory]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        [InlineData(false, false)]
+        public void RunPublishItemsOutputGroupTest(bool specifyRid, bool singleFile)
         {
-            var testProject = this.SetupProject();
+            var testProject = this.SetupProject(specifyRid, singleFile);
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var restoreCommand = new RestoreCommand(Log, testAsset.Path, testProject.Name);
@@ -37,117 +42,63 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var buildCommand = new BuildCommand(Log, testAsset.Path, testProject.Name);
-            buildCommand
-                .Execute("/p:RuntimeIdentifier=win-x86;DesignTimeBuild=true", "/t:PublishItemsOutputGroup")
-                .Should()
-                .Pass();
+            var command = new GetValuesCommand(
+                Log,
+                Path.Combine(testAsset.Path, testProject.Name),
+                testProject.TargetFrameworks,
+                "PublishItemsOutputGroupOutputs",
+                GetValuesCommand.ValueType.Item)
+            {
+                DependsOnTargets = "PublishItemsOutputGroup",
+                MetadataNames = { "TargetPath", "IsKeyOutput" },
+            };
 
-            var testOutputDir = new DirectoryInfo(Path.Combine(testAsset.Path, testProject.Name, "TestOutput"));
-            Log.WriteLine("Contents of PublishItemsOutputGroup dumped to '{0}'.", testOutputDir.FullName);
+            command.Execute().Should().Pass();
+            var items = from item in command.GetValuesWithMetadata()
+                        select new
+                        {
+                            Identity = item.value,
+                            TargetPath = item.metadata["TargetPath"],
+                            IsKeyOutput = item.metadata["IsKeyOutput"]
+                        };
 
-            // Check for the existence of a few specific files that should be in the directory where the 
-            // contents of PublishItemsOutputGroup were dumped to make sure it's getting populated.
-            testOutputDir.Should().HaveFile($"{testProject.Name}.exe");
-            testOutputDir.Should().HaveFile($"{testProject.Name}.deps.json");
-            testOutputDir.Should().HaveFiles(FrameworkAssemblies);
+            Log.WriteLine("PublishItemsOutputGroup contains '{0}' items:", items.Count());
+            foreach (var item in items)
+            {
+                Log.WriteLine("    '{0}': TargetPath = '{1}', IsKeyOutput = '{2}'", item.Identity, item.TargetPath, item.IsKeyOutput);
+            }
 
-            var testKeyOutputDir = new DirectoryInfo(Path.Combine(testAsset.Path, testProject.Name, "TestOutput_Key"));
-            Log.WriteLine("PublishItemsOutputGroup key items dumped to '{0}'.", testKeyOutputDir.FullName);
+            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Darwin)
+            {
+                // Check that there's only one key item, and it's the exe
+                string exeSuffix = specifyRid ? ".exe" : Constants.ExeSuffix;
+                items.
+                    Where(i => i.IsKeyOutput.Equals("true", StringComparison.OrdinalIgnoreCase)).
+                    Should().
+                    ContainSingle(i => i.TargetPath.Equals($"{testProject.Name}{exeSuffix}", StringComparison.OrdinalIgnoreCase));
+            }
 
-            // Verify the only key item is the exe
-            testKeyOutputDir.Should().OnlyHaveFiles(new List<string>() { $"{testProject.Name}.exe" });
+            // Framework assemblies should be there if we specified and rid and this isn't in the single file case
+            if (specifyRid && !singleFile)
+            {
+                FrameworkAssemblies.ForEach(fa => items.Should().ContainSingle(i => i.TargetPath.Equals(fa, StringComparison.OrdinalIgnoreCase)));
+            }
+            else
+            {
+                FrameworkAssemblies.ForEach(fa => items.Should().NotContain(i => i.TargetPath.Equals(fa, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            // The deps.json file should be included unless this is the single file case
+            if (!singleFile)
+            {
+                items.Should().ContainSingle(i => i.TargetPath.Equals($"{testProject.Name}.deps.json", StringComparison.OrdinalIgnoreCase));
+            }
         }
 
         [Fact]
-        public void GroupNotPopulatedWithoutRid()
-        {
-            var testProject = this.SetupProject();
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
-
-            var restoreCommand = new RestoreCommand(Log, testAsset.Path, testProject.Name);
-            restoreCommand
-                .Execute()
-                .Should()
-                .Pass();
-
-            var buildCommand = new BuildCommand(Log, testAsset.Path, testProject.Name);
-            buildCommand
-                .Execute("/p:DesignTimeBuild=true", "/t:PublishItemsOutputGroup")
-                .Should()
-                .Pass();
-
-            var testOutputDir = new DirectoryInfo(Path.Combine(testAsset.Path, testProject.Name, "TestOutput"));
-            Log.WriteLine("Contents of PublishItemsOutputGroup dumped to '{0}'.", testOutputDir.FullName);
-
-            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Darwin)
-            {
-                testOutputDir.Should().HaveFile($"{testProject.Name}{Constants.ExeSuffix}");
-            }
-
-            testOutputDir.Should().HaveFile($"{testProject.Name}.deps.json");
-
-            // Since no RID was specified the output group should not contain framework assemblies
-            testOutputDir.Should().NotHaveFiles(FrameworkAssemblies);
-
-            var testKeyOutputDir = new DirectoryInfo(Path.Combine(testAsset.Path, testProject.Name, "TestOutput_Key"));
-            Log.WriteLine("PublishItemsOutputGroup key items dumped to '{0}'.", testKeyOutputDir.FullName);
-
-            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Darwin)
-            {
-                // Verify the only key item is the exe
-                testKeyOutputDir.Should()
-                    .OnlyHaveFiles(new List<string>() {$"{testProject.Name}{Constants.ExeSuffix}"});
-            }
-        }
-
-        [CoreMSBuildAndWindowsOnlyFact]
-        public void GroupPopulatedCorrectlyWithSingleFile()
-        {
-            var testProject = this.SetupProject();
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
-
-            var restoreCommand = new RestoreCommand(Log, testAsset.Path, testProject.Name);
-            restoreCommand
-                .Execute()
-                .Should()
-                .Pass();
-
-            var buildCommand = new BuildCommand(Log, testAsset.Path, testProject.Name);
-            buildCommand
-                .Execute("/p:RuntimeIdentifier=win-x86;DesignTimeBuild=true;PublishSingleFile=true", "/t:Publish;PublishItemsOutputGroup")
-                .Should()
-                .Pass();
-
-            var testOutputDir = new DirectoryInfo(Path.Combine(testAsset.Path, testProject.Name, "TestOutput"));
-            Log.WriteLine("Contents of PublishItemsOutputGroup dumped to '{0}'.", testOutputDir.FullName);
-
-            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Darwin)
-            {
-                testOutputDir.Should().HaveFile($"{testProject.Name}{Constants.ExeSuffix}");
-            }
-
-            // In the single file case there shouldn't be a deps.json file 
-            testOutputDir.Should().NotHaveFile($"{testProject.Name}.deps.json");
-
-            // The framework assemblies should also get bundled with the main exe
-            testOutputDir.Should().NotHaveFiles(FrameworkAssemblies);
-
-            var testKeyOutputDir = new DirectoryInfo(Path.Combine(testAsset.Path, testProject.Name, "TestOutput_Key"));
-            Log.WriteLine("PublishItemsOutputGroup key items dumped to '{0}'.", testKeyOutputDir.FullName);
-
-            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Darwin)
-            {
-                // Verify the only key item is the exe
-                testKeyOutputDir.Should()
-                    .OnlyHaveFiles(new List<string>() { $"{testProject.Name}{Constants.ExeSuffix}" });
-            }
-        }
-
-        [CoreMSBuildAndWindowsOnlyFact]
         public void GroupBuildsWithoutPublish()
         {
-            var testProject = this.SetupProject(addCopyFilesTargets: false);
+            var testProject = this.SetupProject();
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var restoreCommand = new RestoreCommand(Log, testAsset.Path, testProject.Name);
@@ -169,7 +120,7 @@ namespace Microsoft.NET.Publish.Tests
                 .NotExist();
         }
 
-        private TestProject SetupProject(bool addCopyFilesTargets = true)
+        private TestProject SetupProject(bool specifyRid = true, bool singleFile = false)
         {
             var testProject = new TestProject()
             {
@@ -181,28 +132,20 @@ namespace Microsoft.NET.Publish.Tests
 
             testProject.AdditionalProperties["RuntimeIdentifiers"] = "win-x86";
 
-            //  Use a test-specific packages folder
+            // Use a test-specific packages folder
             testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\..\pkg";
 
-            if (addCopyFilesTargets)
-            {
-                // Add a target that will dump the contents of the PublishItemsOutputGroup to
-                // a test directory after building.
-                testProject.CopyFilesTargets.Add(new CopyFilesTarget(
-                    "CopyPublishItemsOutputGroup",
-                    "PublishItemsOutputGroup",
-                    "@(PublishItemsOutputGroupOutputs)",
-                    null,
-                    "$(MSBuildProjectDirectory)\\TestOutput"));
+            // This target is primarily used during design time builds
+            testProject.AdditionalProperties["DesignTimeBuild"] = "true";
 
-                // Add another target that will dump the members of PublishItemsOutputGroup that
-                // have property IsKeyOutput set to true to a different test directory.
-                testProject.CopyFilesTargets.Add(new CopyFilesTarget(
-                    "CopyPublishKeyItemsOutputGroup",
-                    "PublishItemsOutputGroup",
-                    "@(PublishItemsOutputGroupOutputs)",
-                    @"'%(PublishItemsOutputGroupOutputs.IsKeyOutput)' == 'True'",
-                    "$(MSBuildProjectDirectory)\\TestOutput_Key"));
+            if (specifyRid)
+            {
+                testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x86";
+            }
+
+            if (singleFile)
+            {
+                testProject.AdditionalProperties["PublishSingleFile"] = "true";
             }
 
             return testProject;
