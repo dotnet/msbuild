@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>The directory containing the build artifacts to clean.</source>
-        <target state="translated">包含要清理的生成项目的目录。</target>
+        <target state="translated">包含要清理的生成工件的目录。</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">

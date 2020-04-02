@@ -121,7 +121,7 @@ Le répertoire spécifié est créé, s'il n'existe pas déjà.</target>
       </trans-unit>
       <trans-unit id="IgnoredArgumentsMessage">
         <source>The following arguments have been ignored : "{0}"</source>
-        <target state="new">The following arguments have been ignored : "{0}"</target>
+        <target state="translated">Les arguments suivants ont été ignorés : "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="RunSettingsArgumentsDescription">

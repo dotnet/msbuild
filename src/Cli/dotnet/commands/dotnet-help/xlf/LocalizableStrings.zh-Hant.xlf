@@ -79,7 +79,7 @@
       </trans-unit>
       <trans-unit id="PublishDefinition">
         <source>Publish a .NET project for deployment.</source>
-        <target state="translated">為部署發行 .NET 專案。</target>
+        <target state="translated">為部署發佈 .NET 專案。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunDefinition">

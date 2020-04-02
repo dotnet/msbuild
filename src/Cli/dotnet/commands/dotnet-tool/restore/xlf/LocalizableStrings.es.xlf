@@ -71,7 +71,7 @@
       </trans-unit>
       <trans-unit id="RestoreFailed">
         <source>Restore failed.</source>
-        <target state="translated">No se pudo llevar a cabo la restauración.</target>
+        <target state="translated">Error de restauración.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandsMismatch">

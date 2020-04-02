@@ -856,7 +856,7 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="FailedToFindStagedToolPackage">
         <source>Failed to find staged tool package '{0}'.</source>
-        <target state="translated">ステージング済みのツール パッケージ '{0}' が見つかりませんでした。</target>
+        <target state="translated">ステージ済みのツール パッケージ '{0}' が見つかりませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">

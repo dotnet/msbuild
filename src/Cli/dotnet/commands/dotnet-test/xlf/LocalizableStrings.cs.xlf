@@ -121,7 +121,7 @@ Pokud zadaný adresář neexistuje, bude vytvořen.</target>
       </trans-unit>
       <trans-unit id="IgnoredArgumentsMessage">
         <source>The following arguments have been ignored : "{0}"</source>
-        <target state="new">The following arguments have been ignored : "{0}"</target>
+        <target state="translated">Následující argumenty se ignorovaly: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RunSettingsArgumentsDescription">

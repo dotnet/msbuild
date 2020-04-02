@@ -232,7 +232,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="Type">
         <source>Type</source>
-        <target state="translated">型別</target>
+        <target state="translated">類型</target>
         <note />
       </trans-unit>
       <trans-unit id="Value">
@@ -679,7 +679,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="VerbosityOptionDescription">
         <source>Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
-        <target state="translated">設定 MSBuild 的詳細資訊層級。允許的值為 q[uiet]、m[inimal]、n[ormal]、d[etailed] 及 diag[nostic]。</target>
+        <target state="translated">設定 MSBuild 的詳細程度層級。允許的值為 q[uiet]、m[inimal]、n[ormal]、d[etailed] 及 diag[nostic]。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
@@ -856,7 +856,7 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="FailedToFindStagedToolPackage">
         <source>Failed to find staged tool package '{0}'.</source>
-        <target state="translated">無法找到分段工具套件 '{0}'。</target>
+        <target state="translated">無法找到暫存工具套件 '{0}'。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">

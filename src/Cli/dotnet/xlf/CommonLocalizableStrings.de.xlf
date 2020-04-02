@@ -92,7 +92,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="Project">
         <source>Project</source>
-        <target state="translated">Projekt </target>
+        <target state="translated">Projekt</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectFile">
@@ -856,7 +856,7 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="FailedToFindStagedToolPackage">
         <source>Failed to find staged tool package '{0}'.</source>
-        <target state="translated">Das bereitgestellte Toolpaket "{0}" wurde nicht gefunden.</target>
+        <target state="translated">Das gestagete Toolpaket "{0}" wurde nicht gefunden.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">

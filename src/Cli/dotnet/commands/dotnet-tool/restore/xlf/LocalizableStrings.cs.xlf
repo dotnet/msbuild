@@ -71,7 +71,7 @@
       </trans-unit>
       <trans-unit id="RestoreFailed">
         <source>Restore failed.</source>
-        <target state="translated">Obnovení nebylo úspěšné.</target>
+        <target state="translated">Obnovení selhalo.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandsMismatch">

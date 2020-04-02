@@ -19,13 +19,16 @@ Explore documentation: https://aka.ms/dotnet-docs
 Report issues and find source on GitHub: https://github.com/dotnet/core
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
 --------------------------------------------------------------------------------------</source>
-        <target state="needs-review-translation">----------------
+        <target state="translated">----------------
+已安裝 ASP.NET Core HTTPS 開發憑證。
+若要信任憑證，請執行 'dotnet dev-certs https --trust' (僅限 Windows 與 macOS )。
+深入了解 HTTPS: https://aka.ms/dotnet-https
+----------------
+撰寫第一個應用程式: https://aka.ms/dotnet-hello-world
+了解全新功能: https://aka.ms/dotnet-whats-new
 探索文件: https://aka.ms/dotnet-docs
-回報問題並尋找 GitHub 上的來源: https://github.com/dotnet/core
-了解最新動態: https://aka.ms/dotnet-whats-new
-了解已安裝的 HTTPS 開發人員憑證: https://aka.ms/aspnet-core-https
-使用 'dotnet --help' 查看可用的命令，或是瀏覽: https://aka.ms/dotnet-cli-docs
-撰寫您的第一個應用程式: https://aka.ms/first-net-core-app
+於 GitHub 回報問題和尋找來源: https://github.com/dotnet/core
+Use 'dotnet --help' 查看可用的命令或瀏覽: https://aka.ms/dotnet-cli
 --------------------------------------------------------------------------------------</target>
         <note />
       </trans-unit>

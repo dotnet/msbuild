@@ -172,7 +172,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="Remove">
         <source>Remove</source>
-        <target state="translated">Skasuj</target>
+        <target state="translated">Usuń</target>
         <note />
       </trans-unit>
       <trans-unit id="Delete">
@@ -856,7 +856,7 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="FailedToFindStagedToolPackage">
         <source>Failed to find staged tool package '{0}'.</source>
-        <target state="translated">Nie można odnaleźć etapowego pakietu narzędzia „{0}”.</target>
+        <target state="translated">Nie można odnaleźć przygotowanego pakietu narzędzia „{0}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">

@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="ManifestPathOptionName">
         <source>PATH</source>
-        <target state="translated">PATH</target>
+        <target state="translated">CAMINHO</target>
         <note />
       </trans-unit>
       <trans-unit id="NoManifestFileContainPackageId">

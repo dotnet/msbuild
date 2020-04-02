@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="ManifestFileColumn">
         <source>Manifest</source>
-        <target state="translated">Manifest</target>
+        <target state="translated">Bildirim</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">

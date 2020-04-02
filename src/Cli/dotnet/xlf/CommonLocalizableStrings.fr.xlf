@@ -582,7 +582,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="TemplateCreatedSuccessfully">
         <source>The template {0} created successfully. run "dotnet restore" to get started!</source>
-        <target state="translated">Le modèle {0} a été créé. Exécutez "dotnet restore" pour commencer !</target>
+        <target state="translated">Le modèle {0} a été créé. Exécutez "dotnet restore" pour démarrer !</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInstalledSuccesfully">
@@ -679,7 +679,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="VerbosityOptionDescription">
         <source>Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
-        <target state="translated">Définissez le niveau de détail MSBuild. Les valeurs autorisées sont q[uiet], m[inimal], n[ormal], d[etailed] et diag[nostic].</target>
+        <target state="translated">Définissez le niveau de verbosité MSBuild. Les valeurs autorisées sont q[uiet], m[inimal], n[ormal], d[etailed] et diag[nostic].</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
@@ -856,7 +856,7 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="FailedToFindStagedToolPackage">
         <source>Failed to find staged tool package '{0}'.</source>
-        <target state="translated">Package d'outils intermédiaire '{0}' introuvable.</target>
+        <target state="translated">Package d'outils indexé '{0}' introuvable.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">

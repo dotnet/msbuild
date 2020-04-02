@@ -38,7 +38,7 @@ A ferramenta '{1}' (versão '{2}') foi instalada com êxito. A entrada foi adici
       </trans-unit>
       <trans-unit id="ManifestPathOptionName">
         <source>PATH</source>
-        <target state="translated">PATH</target>
+        <target state="translated">CAMINHO</target>
         <note />
       </trans-unit>
       <trans-unit id="NoManifestGuide">

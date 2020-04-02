@@ -38,7 +38,7 @@ Lo strumento '{1}' versione '{2}' è stato installato. La voce è stata aggiunta
       </trans-unit>
       <trans-unit id="ManifestPathOptionName">
         <source>PATH</source>
-        <target state="translated">PERCORSO</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="NoManifestGuide">
@@ -149,7 +149,7 @@ For more reasons, including package naming enforcement, visit https://aka.ms/fai
 * Non è possibile accedere al feed NuGet richiesto, probabilmente a causa di un problema di connessione Internet.
 * Il nome dello strumento non è stato digitato correttamente.
 
-Per altri motivi, inclusa l'assegnazione imposta del nome ai pacchetti, visitare https://aka.ms/failure-installing-tool</target>
+Per altri motivi, inclusa l'aggiunta obbligatoria del prefisso microsoft ai nomi di pacchetto, visitare https://aka.ms/failure-installing-tool</target>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionDescription">

@@ -19,13 +19,16 @@ Explore documentation: https://aka.ms/dotnet-docs
 Report issues and find source on GitHub: https://github.com/dotnet/core
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
 --------------------------------------------------------------------------------------</source>
-        <target state="needs-review-translation">----------------
-Знакомство с документацией: https://aka.ms/dotnet-docs
-Сообщения об ошибках и поиск исходного кода на GitHub: https://github.com/dotnet/core
-Новые возможности: https://aka.ms/dotnet-whats-new
-Сведения об установленном сертификате разработчика HTTPS: https://aka.ms/aspnet-core-https
-Для просмотра доступных команд выполните команду dotnet --help или перейдите на страницу https://aka.ms/dotnet-cli-docs
-Создание своего первого предложения: https://aka.ms/first-net-core-app
+        <target state="translated">----------------
+Установлен сертификат разработки HTTPS в ASP.NET Core.
+Чтобы сделать сертификат доверенным, выполните команду "dotnet dev-certs https --trust" (только в Windows и macOS).
+Дополнительные сведения об HTTPS: https://aka.ms/dotnet-https
+----------------
+Как написать свое первое приложение: https://aka.ms/dotnet-hello-world
+Узнать о новых возможностях: https://aka.ms/dotnet-whats-new
+Просмотреть документацию: https://aka.ms/dotnet-docs
+Сообщить о проблемах и найти исходный код на GitHub: https://github.com/dotnet/core
+Для просмотра доступных команд введите команду "dotnet --help" или посетите следующую страницу: https://aka.ms/dotnet-cli.
 --------------------------------------------------------------------------------------</target>
         <note />
       </trans-unit>

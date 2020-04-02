@@ -121,7 +121,7 @@ Jeśli określony katalog nie istnieje, zostanie utworzony.</target>
       </trans-unit>
       <trans-unit id="IgnoredArgumentsMessage">
         <source>The following arguments have been ignored : "{0}"</source>
-        <target state="new">The following arguments have been ignored : "{0}"</target>
+        <target state="translated">Następujące argumenty zostały zignorowane: „{0}”</target>
         <note />
       </trans-unit>
       <trans-unit id="RunSettingsArgumentsDescription">

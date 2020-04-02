@@ -79,7 +79,7 @@
       </trans-unit>
       <trans-unit id="PublishDefinition">
         <source>Publish a .NET project for deployment.</source>
-        <target state="translated">.NET プロジェクトを配置のために発行します。</target>
+        <target state="translated">.NET プロジェクトを配置のために公開します。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunDefinition">

@@ -212,7 +212,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="Error">
         <source>Error</source>
-        <target state="translated">Fehler</target>
+        <target state="translated">Error</target>
         <note />
       </trans-unit>
       <trans-unit id="Warning">

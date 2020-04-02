@@ -679,7 +679,7 @@ EOF
       </trans-unit>
       <trans-unit id="VerbosityOptionDescription">
         <source>Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
-        <target state="translated">设置 MSBuild 详细级别。允许值为 q[uiet]、m[inimal]、n[ormal]、d[etailed] 和 diag[nostic]。</target>
+        <target state="translated">设置 MSBuild 详细程度。允许值为 q[uiet]、m[inimal]、n[ormal]、d[etailed] 和 diag[nostic]。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">

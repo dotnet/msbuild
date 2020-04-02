@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>The directory containing the build artifacts to clean.</source>
-        <target state="translated">Adresář obsahující artefakty sestavení, které se mají vyčistit</target>
+        <target state="translated">Adresář obsahující artefakty buildu, které se mají vyčistit</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
