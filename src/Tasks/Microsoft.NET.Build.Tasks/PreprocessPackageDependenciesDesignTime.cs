@@ -3,83 +3,155 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.NET.Build.Tasks
 {
     /// <summary>
-    /// Task combines data returned from <see cref="ResolvePackageDependencies"/> into single items collection
-    /// that can be consumed by DesignTime build and contains all info needed to expand packages
-    /// dependency graph.
-    /// If any changes are made here, make sure corresponding changes are made to PackageRuleHandler
-    /// in the dotnet/project-system repo and corresponding tests.
+    /// Filters and projects items produced by <see cref="ResolvePackageDependencies"/> for consumption by
+    /// the dependencies tree, via design-time builds.
     /// </summary>
+    /// <remarks>
+    /// Only top-level package references are retained (i.e. those referenced directly by the project, not
+    /// those only brought in transitively).
+    /// 
+    /// Changes to the implementation of this class must be coordinated with <c>PackageRuleHandler</c>
+    /// in the dotnet/project-system repo.
+    /// </remarks>
     public class PreprocessPackageDependenciesDesignTime : TaskBase
     {
-        public const string DependenciesMetadata = "Dependencies";
         public const string ResolvedMetadata = "Resolved";
-        public const string VisibleMetadata = "Visible";
 
         [Required]
         public ITaskItem[] TargetDefinitions { get; set; }
 
+        /// <summary>
+        /// Information about each package in the project, with metadata:
+        /// - Name = "MetadataExtractor"
+        /// - Path = "metadataextractor/1.0.0"
+        /// - ResolvedPath = "C:\Users\drnoakes\.nuget\packages\metadataextractor\1.0.0"
+        /// - Type = "package"
+        /// - Version = "2.3.0"
+        /// </summary>
         [Required]
         public ITaskItem[] PackageDefinitions { get; set; }
 
+        /// <summary>
+        /// Items with metadata "ParentTarget" and "ParentPackage", which allows determining the hierarchy of package references.
+        /// </summary>
         [Required]
         public ITaskItem[] PackageDependencies { get; set; }
 
-        [Required]
-        public ITaskItem[] FileDependencies { get; set; }
-
+        /// <summary>
+        /// Eg: "Microsoft.NETCore.App;NETStandard.Library"
+        /// </summary>
         [Required]
         public string DefaultImplicitPackages { get; set; }
 
-        [Required]
-        public ITaskItem[] References { get; set; }
-
-        [Required]
-        public string TargetFrameworkMoniker { get; set; }
-
         [Output]
-        public ITaskItem[] DependenciesDesignTime { get; set; }
-
-        private Dictionary<string, ItemMetadata> Targets { get; }
-                    = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
-
-        private Dictionary<string, ItemMetadata> Packages { get; }
-                    = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
-
-        private Dictionary<string, ItemMetadata> DependenciesWorld { get; }
-                    = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
+        public ITaskItem[] DependenciesDesignTime { get; private set; }
 
         protected override void ExecuteCore()
         {
-            PopulateTargets();
+            var targets = GetTargets(TargetDefinitions);
 
-            PopulatePackages();
+            var implicitPackageReferences = GetImplicitPackageReferences(DefaultImplicitPackages);
 
-            AddDependenciesToTheWorld(Packages, PackageDependencies);
+            var packageByItemSpec = new Dictionary<string, PackageMetadata>(StringComparer.OrdinalIgnoreCase);
 
-            // prepare output collection: add corresponding metadata to ITaskItem based in item type
-            DependenciesDesignTime = DependenciesWorld.Select(itemKvp =>
+            foreach (var packageDef in PackageDefinitions)
             {
-                var newTaskItem = new TaskItem(itemKvp.Key);
-                itemKvp.Value.SetMetadataOnTaskItem(newTaskItem);
-                return newTaskItem;
-            }).ToArray<ITaskItem>();
+                var dependencyType = GetDependencyType(packageDef.GetMetadata(MetadataKeys.Type));
+                
+                if (dependencyType == DependencyType.Package &&
+                    dependencyType == DependencyType.Unresolved)
+                {
+                    packageByItemSpec[packageDef.ItemSpec] = new PackageMetadata(packageDef, implicitPackageReferences);
+                }
+            }
+
+            var packageByUniqueId = new Dictionary<string, PackageMetadata>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var dependency in PackageDependencies)
+            {
+                var currentItemId = dependency.ItemSpec;
+
+                if (!packageByItemSpec.TryGetValue(currentItemId, out var package))
+                {
+                    // if this package definition does not even exist - skip it
+                    continue;
+                }
+
+                if (dependency.HasMetadataValue(MetadataKeys.ParentPackage))
+                {
+                    // ignore non-top-level packages (those with ParentPackage)
+                    continue;
+                }
+
+                var parentTargetId = dependency.GetMetadata(MetadataKeys.ParentTarget) ?? string.Empty;
+                if (parentTargetId.IndexOf('/') != -1 || !targets.Contains(parentTargetId))
+                {
+                    // skip "target/rid"s and only consume actual targets and ignore non-existent parent targets
+                    continue;
+                }
+
+                var currentPackageUniqueId = $"{parentTargetId}/{currentItemId}";
+
+                // add current package to dependencies world
+                packageByUniqueId[currentPackageUniqueId] = package;
+            }
+
+            var outputItems = new List<ITaskItem>(packageByUniqueId.Count);
+
+            foreach (var pair in packageByUniqueId)
+            {
+                outputItems.Add(pair.Value.ToTaskItem(pair.Key));
+            }
+
+            DependenciesDesignTime = outputItems.ToArray();
         }
 
-        /// <summary>
-        /// Adds targets from TargetDefinitions to dependencies world dictionary
-        /// </summary>
-        private void PopulateTargets()
+        private sealed class PackageMetadata
         {
-            foreach (var targetDef in TargetDefinitions)
+            public PackageMetadata(ITaskItem item, HashSet<string> implicitPackageReferences)
             {
-                if (string.IsNullOrEmpty(targetDef.ItemSpec) || targetDef.ItemSpec.Contains("/"))
+                Name = item.GetMetadata(MetadataKeys.Name) ?? string.Empty;
+                Version = item.GetMetadata(MetadataKeys.Version) ?? string.Empty;
+                Resolved = !string.IsNullOrEmpty(item.GetMetadata(MetadataKeys.ResolvedPath));
+                Path = (Resolved
+                        ? item.GetMetadata(MetadataKeys.ResolvedPath)
+                        : item.GetMetadata(MetadataKeys.Path)) ?? string.Empty;
+                IsImplicitlyDefined = implicitPackageReferences.Contains(Name);
+            }
+
+            private string Name { get; }
+            private string Version { get; }
+            private string Path { get; }
+            private bool Resolved { get; }
+            private bool IsImplicitlyDefined { get; }
+
+            public ITaskItem ToTaskItem(string itemSpec)
+            {
+                var outputItem = new TaskItem(itemSpec);
+                outputItem.SetMetadata(MetadataKeys.Name, Name);
+                outputItem.SetMetadata(MetadataKeys.Version, Version);
+                outputItem.SetMetadata(MetadataKeys.Path, Path);
+                outputItem.SetMetadata(MetadataKeys.Type, DependencyType.Package.ToString());
+                outputItem.SetMetadata(MetadataKeys.IsImplicitlyDefined, IsImplicitlyDefined.ToString());
+                outputItem.SetMetadata(MetadataKeys.IsTopLevelDependency, bool.TrueString);
+                outputItem.SetMetadata(ResolvedMetadata, Resolved.ToString());
+                return outputItem;
+            }
+        }
+
+        private static HashSet<string> GetTargets(ITaskItem[] targetDefinitions)
+        {
+            var targets = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var targetDef in targetDefinitions)
+            {
+                if (string.IsNullOrEmpty(targetDef.ItemSpec) || targetDef.ItemSpec.IndexOf('/') != -1)
                 {
                     // skip "target/rid"s and only consume actual targets
                     continue;
@@ -92,265 +164,10 @@ namespace Microsoft.NET.Build.Tasks
                     continue;
                 }
 
-                var target = new TargetMetadata(targetDef);
-                                
-                Targets[targetDef.ItemSpec] = target;
-
-                // add target to the world now, since it does not have parents
-                DependenciesWorld[targetDef.ItemSpec] = target;
-            }
-        }
-
-        /// <summary>
-        /// Adds packages from PackageDefinitions to the dependencies world dictionary.
-        /// </summary>
-        private void PopulatePackages()
-        {
-            var implicitPackageReferences = GetImplicitPackageReferences(DefaultImplicitPackages);
-
-            foreach (var packageDef in PackageDefinitions)
-            {
-                var dependencyType = GetDependencyType(packageDef.GetMetadata(MetadataKeys.Type));
-                if (dependencyType != DependencyType.Package &&
-                    dependencyType != DependencyType.Unresolved)
-                {
-                    // we ignore all other dependency types since 
-                    //      - assemblies we handle separately below 
-                    //      - projects we don't care here, since they are sent to project system via other route
-                    continue;
-                }
-
-                var dependency = new PackageMetadata(packageDef);
-                dependency.IsImplicitlyDefined = implicitPackageReferences.Contains(dependency.Name);
-
-                Packages[packageDef.ItemSpec] = dependency;
-            }
-        }
-
-        private static DependencyType GetDependencyType(string dependencyTypeString)
-        {
-            Enum.TryParse(dependencyTypeString, ignoreCase: true, out DependencyType dependencyType);
-            return dependencyType;
-        }
-
-        private void AddDependenciesToTheWorld(Dictionary<string, ItemMetadata> items,
-                                               ITaskItem[] itemDependencies,
-                                               Func<ITaskItem, bool> shouldSkipItemCheck = null)
-        {
-            foreach (var dependency in itemDependencies)
-            {
-                var currentItemId = dependency.ItemSpec;
-                if (!items.ContainsKey(currentItemId))
-                {
-                    // if this package definition does not even exist - skip it
-                    continue;
-                }
-
-                if (shouldSkipItemCheck != null && shouldSkipItemCheck(dependency))
-                {
-                    continue;
-                }
-
-                var parentTargetId = dependency.GetMetadata(MetadataKeys.ParentTarget) ?? string.Empty;
-                if (parentTargetId.Contains("/") || !Targets.ContainsKey(parentTargetId))
-                {
-                    // skip "target/rid"s and only consume actual targets and ignore non-existent parent targets
-                    continue;
-                }
-
-                var parentPackageId = dependency.GetMetadata(MetadataKeys.ParentPackage) ?? string.Empty;
-                if (!string.IsNullOrEmpty(parentPackageId) && !Packages.ContainsKey(parentPackageId))
-                {
-                    // ignore non-existent parent packages
-                    continue;
-                }
-
-                var currentPackageUniqueId = $"{parentTargetId}/{currentItemId}";
-                // add current package to dependencies world
-                var currentItem = GetItem(items, currentItemId);
-                DependenciesWorld[currentPackageUniqueId] = currentItem;
-
-                // update parent
-                var parentDependencyId = $"{parentTargetId}/{parentPackageId}".Trim('/');
-                if (DependenciesWorld.TryGetValue(parentDependencyId, out ItemMetadata parentDependency))
-                {
-                    parentDependency.Dependencies.Add(currentItemId);
-                    if (parentDependency.Type == DependencyType.Target)
-                    {
-                        currentItem.IsTopLevelDependency = true;
-                    }
-                }
-                else
-                {
-                    // Update parent's Dependencies count and make sure parent is in the dependencies world
-                    if (!string.IsNullOrEmpty(parentPackageId))
-                    {
-                        parentDependency = GetItem(Packages, parentPackageId);
-                    }
-                    else
-                    {
-                        parentDependency = GetItem(Targets, parentTargetId);
-                        currentItem.IsTopLevelDependency = true;
-                    }
-
-                    parentDependency.Dependencies.Add(currentItemId);
-                    DependenciesWorld[parentDependencyId] = parentDependency;
-                }
+                targets.Add(targetDef.ItemSpec);
             }
 
-            return;
-
-            ItemMetadata GetItem(Dictionary<string, ItemMetadata> items, string id)
-            {
-                return Targets.Count > 1 ? items[id].Clone() : items[id];
-            }
-        }
-
-        private abstract class ItemMetadata
-        {
-            protected ItemMetadata(DependencyType type, IList<string> dependencies = null, bool isTopLevelDependency = false)
-            {
-                Type = type;
-                Dependencies = dependencies == null ? new List<string>() : new List<string>(dependencies);
-                IsTopLevelDependency = isTopLevelDependency;
-            }
-
-            public DependencyType Type { get; }
-            public bool IsTopLevelDependency { get; set; }
-
-            /// <summary>
-            /// A list of name/version strings to specify dependency identities.
-            /// Note: identity here is just a "name/version" and does not have TFM part in front.
-            /// </summary>
-            public List<string> Dependencies { get; }
-
-            /// <summary>
-            /// Populates metadata on <paramref name="taskItem"/>.
-            /// </summary>
-            public abstract void SetMetadataOnTaskItem(TaskItem taskItem);
-
-            /// <summary>
-            /// Creates a copy of the item
-            /// </summary>
-            public abstract ItemMetadata Clone();
-        }
-
-        private class TargetMetadata : ItemMetadata
-        {
-            public TargetMetadata(ITaskItem item)
-                : base(DependencyType.Target)
-            {
-                RuntimeIdentifier = item.GetMetadata(MetadataKeys.RuntimeIdentifier) ?? string.Empty;
-                TargetFrameworkMoniker = item.GetMetadata(MetadataKeys.TargetFrameworkMoniker) ?? string.Empty;
-                FrameworkName = item.GetMetadata(MetadataKeys.FrameworkName) ?? string.Empty;
-                FrameworkVersion = item.GetMetadata(MetadataKeys.FrameworkVersion) ?? string.Empty;
-            }
-
-            private TargetMetadata(
-                DependencyType type,
-                IList<string> dependencies,
-                bool isTopLevelDependency,
-                string runtimeIdentifier,
-                string targetFrameworkMoniker,
-                string frameworkName,
-                string frameworkVersion)
-                : base(type, dependencies, isTopLevelDependency)
-            {
-                RuntimeIdentifier = runtimeIdentifier;
-                TargetFrameworkMoniker = targetFrameworkMoniker;
-                FrameworkName = frameworkName;
-                FrameworkVersion = frameworkVersion;
-            }
-
-            public string RuntimeIdentifier { get; }
-            public string TargetFrameworkMoniker { get; }
-            public string FrameworkName { get; }
-            public string FrameworkVersion { get; }
-
-            public override void SetMetadataOnTaskItem(TaskItem taskItem)
-            {
-                taskItem.SetMetadata(MetadataKeys.RuntimeIdentifier, RuntimeIdentifier);
-                taskItem.SetMetadata(MetadataKeys.TargetFrameworkMoniker, TargetFrameworkMoniker);
-                taskItem.SetMetadata(MetadataKeys.FrameworkName, FrameworkName);
-                taskItem.SetMetadata(MetadataKeys.FrameworkVersion, FrameworkVersion);
-                taskItem.SetMetadata(MetadataKeys.Type, Type.ToString());
-                taskItem.SetMetadata(DependenciesMetadata, string.Join(";", Dependencies));
-            }
-
-            public override ItemMetadata Clone()
-            {
-                return new TargetMetadata(
-                    Type,
-                    Dependencies,
-                    IsTopLevelDependency,
-                    RuntimeIdentifier,
-                    TargetFrameworkMoniker,
-                    FrameworkName,
-                    FrameworkVersion);
-            }
-        }
-
-        private class PackageMetadata : ItemMetadata
-        {
-            public PackageMetadata(ITaskItem item)
-                : base(DependencyType.Package)
-            {
-                Name = item.GetMetadata(MetadataKeys.Name) ?? string.Empty;
-                Version = item.GetMetadata(MetadataKeys.Version) ?? string.Empty;
-                Resolved = Type != DependencyType.Unknown && !string.IsNullOrEmpty(item.GetMetadata(MetadataKeys.ResolvedPath));
-                Path = (Resolved
-                        ? item.GetMetadata(MetadataKeys.ResolvedPath)
-                        : item.GetMetadata(MetadataKeys.Path)) ?? string.Empty;
-            }
-
-            private PackageMetadata(
-                DependencyType type,
-                IList<string> dependencies,
-                bool isTopLevelDependency,
-                string name,
-                string version,
-                string path,
-                bool resolved,
-                bool isImplicitlyDefined)
-                : base(type, dependencies, isTopLevelDependency)
-            {
-                Name = name;
-                Version = version;
-                Path = path;
-                Resolved = resolved;
-                IsImplicitlyDefined = isImplicitlyDefined;
-            }
-
-            public string Name { get; }
-            public string Version { get; }
-            public string Path { get; }
-            public bool Resolved { get; }
-            public bool IsImplicitlyDefined { get; set; }
-
-            public override void SetMetadataOnTaskItem(TaskItem taskItem)
-            {
-                taskItem.SetMetadata(MetadataKeys.Name, Name);
-                taskItem.SetMetadata(MetadataKeys.Version, Version);
-                taskItem.SetMetadata(MetadataKeys.Path, Path);
-                taskItem.SetMetadata(MetadataKeys.Type, Type.ToString());
-                taskItem.SetMetadata(MetadataKeys.IsImplicitlyDefined, IsImplicitlyDefined.ToString());
-                taskItem.SetMetadata(MetadataKeys.IsTopLevelDependency, IsTopLevelDependency.ToString());
-                taskItem.SetMetadata(ResolvedMetadata, Resolved.ToString());
-                taskItem.SetMetadata(DependenciesMetadata, string.Join(";", Dependencies));
-            }
-
-            public override ItemMetadata Clone()
-            {
-                return new PackageMetadata(
-                    Type,
-                    Dependencies,
-                    IsTopLevelDependency,
-                    Name,
-                    Version,
-                    Path,
-                    Resolved,
-                    IsImplicitlyDefined);
-            }
+            return targets;
         }
 
         internal static HashSet<string> GetImplicitPackageReferences(string defaultImplicitPackages)
@@ -373,6 +190,12 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             return implicitPackageReferences;
+        }
+
+        private static DependencyType GetDependencyType(string dependencyTypeString)
+        {
+            Enum.TryParse(dependencyTypeString, ignoreCase: true, out DependencyType dependencyType);
+            return dependencyType;
         }
     }
 }
