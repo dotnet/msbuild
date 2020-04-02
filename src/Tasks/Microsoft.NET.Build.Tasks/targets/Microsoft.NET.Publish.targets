@@ -446,7 +446,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <!-- Copy generated COM References. -->
       <ResolvedFileToPublish Include="@(ReferenceComWrappersToCopyLocal)">
-        <RelativePath>@(ReferenceComWrappersToCopyLocal->'%(Filename)%(Extension)')</RelativePath>
+        <RelativePath>%(Filename)%(Extension)</RelativePath>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
 
