@@ -119,7 +119,6 @@ namespace Microsoft.NET.Build.Tasks
                     outputItem.SetMetadata(MetadataKeys.Name, name);
                     outputItem.SetMetadata(MetadataKeys.Version, version);
                     outputItem.SetMetadata(MetadataKeys.Path, path);
-                    outputItem.SetMetadata(MetadataKeys.Type, DependencyType.Package.ToString());
                     outputItem.SetMetadata(MetadataKeys.IsImplicitlyDefined, isImplicitlyDefined.ToString());
                     outputItem.SetMetadata(ResolvedMetadata, resolved.ToString());
 
