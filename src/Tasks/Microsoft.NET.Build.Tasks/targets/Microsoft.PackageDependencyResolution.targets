@@ -306,10 +306,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           TargetDefinitions="@(TargetDefinitions)"
           PackageDefinitions="@(PackageDefinitions)"
           PackageDependencies="@(PackageDependencies)"
-          FileDependencies="@(FileDependencies)"
-          References="@(Reference)"
-          DefaultImplicitPackages="$(DefaultImplicitPackages)"
-          TargetFrameworkMoniker="$(NuGetTargetMoniker)">
+          DefaultImplicitPackages="$(DefaultImplicitPackages)">
 
       <Output TaskParameter="DependenciesDesignTime" ItemName="_DependenciesDesignTime" />
     </PreprocessPackageDependenciesDesignTime>
