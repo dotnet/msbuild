@@ -305,7 +305,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PreprocessPackageDependenciesDesignTime
           TargetDefinitions="@(TargetDefinitions)"
           PackageDefinitions="@(PackageDefinitions)"
-          FileDefinitions="@(FileDefinitions)"
           PackageDependencies="@(PackageDependencies)"
           FileDependencies="@(FileDependencies)"
           References="@(Reference)"

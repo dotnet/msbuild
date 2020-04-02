@@ -2,9 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -21,7 +19,6 @@ namespace Microsoft.NET.Build.Tasks
     public class PreprocessPackageDependenciesDesignTime : TaskBase
     {
         public const string DependenciesMetadata = "Dependencies";
-        public const string CompileTimeAssemblyMetadata = "CompileTimeAssembly";
         public const string ResolvedMetadata = "Resolved";
         public const string VisibleMetadata = "Visible";
 
@@ -30,9 +27,6 @@ namespace Microsoft.NET.Build.Tasks
 
         [Required]
         public ITaskItem[] PackageDefinitions { get; set; }
-
-        [Required]
-        public ITaskItem[] FileDefinitions { get; set; }
 
         [Required]
         public ITaskItem[] PackageDependencies { get; set; }
@@ -58,13 +52,8 @@ namespace Microsoft.NET.Build.Tasks
         private Dictionary<string, ItemMetadata> Packages { get; }
                     = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
 
-        private Dictionary<string, ItemMetadata> Assemblies { get; }
-                    = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
-
         private Dictionary<string, ItemMetadata> DependenciesWorld { get; }
                     = new Dictionary<string, ItemMetadata>(StringComparer.OrdinalIgnoreCase);
-
-        private ITaskItem[] ExistingReferenceItemDependencies { get; set; }
 
         protected override void ExecuteCore()
         {
@@ -72,26 +61,7 @@ namespace Microsoft.NET.Build.Tasks
 
             PopulatePackages();
 
-            PopulateAssemblies();
-            PopulateExistingReferenceItems();
-
             AddDependenciesToTheWorld(Packages, PackageDependencies);
-
-            AddDependenciesToTheWorld(Assemblies, FileDependencies, item =>
-            {
-                // We keep analyzers and assemblies with CompileTimeAssembly metadata; skip everything else.
-
-                if (Assemblies.TryGetValue(item.ItemSpec, out ItemMetadata itemMetadata) && 
-                    itemMetadata.Type == DependencyType.AnalyzerAssembly)
-                {
-                    return false;
-                }
-
-                var fileGroup = item.GetMetadata(MetadataKeys.FileGroup);
-                return string.IsNullOrEmpty(fileGroup) || !fileGroup.Equals(CompileTimeAssemblyMetadata);
-            });
-
-            AddDependenciesToTheWorld(Assemblies, ExistingReferenceItemDependencies);
 
             // prepare output collection: add corresponding metadata to ITaskItem based in item type
             DependenciesDesignTime = DependenciesWorld.Select(itemKvp =>
@@ -155,90 +125,6 @@ namespace Microsoft.NET.Build.Tasks
 
                 Packages[packageDef.ItemSpec] = dependency;
             }
-        }
-
-        /// <summary>
-        /// Adds assemblies, analyzers and framework assemblies from FileDefinitions to dependencies world dictionary.
-        /// </summary>
-        private void PopulateAssemblies()
-        {
-            foreach (var fileDef in FileDefinitions)
-            {
-                var dependencyType = GetDependencyType(fileDef.GetMetadata(MetadataKeys.Type));
-                if (dependencyType != DependencyType.Assembly &&
-                    dependencyType != DependencyType.FrameworkAssembly &&
-                    dependencyType != DependencyType.AnalyzerAssembly)
-                {
-                    continue;
-                }
-
-                var name = Path.GetFileName(fileDef.ItemSpec);
-                var assembly = new AssemblyMetadata(dependencyType, fileDef, name);
-                Assemblies[fileDef.ItemSpec] = assembly;
-            }
-        }
-
-        /// <summary>
-        /// Update FileDefinitions and FileDependencies to pretend that certain Reference items
-        /// explicitly added by a .targets file in the NETStandard.Library are actually normal
-        /// package items. This allows them to show up properly under the "SDK" node in Solution
-        /// Explorer, rather than just under the "Assemblies" node.
-        ///
-        /// This is not meant to be a general mechanism for injecting files that can't be handled
-        /// through the normal NuGet package mechanisms.
-        /// </summary>
-        private void PopulateExistingReferenceItems()
-        {
-            var existingReferenceItemDependencies = new List<ITaskItem>();
-            foreach (var reference in References)
-            {
-                var packageName = reference.GetMetadata(MetadataKeys.NuGetPackageId);
-                var packageVersion = reference.GetMetadata(MetadataKeys.NuGetPackageVersion);
-
-                // This is not a "pre-resolved" assembly; skip it.
-                if (packageName == null || packageVersion == null)
-                {
-                    continue;
-                }
-
-                // If we don't know about the specified package, skip it.
-                var packageId = $"{packageName}/{packageVersion}";
-                if (!Packages.TryGetValue(packageId, out ItemMetadata packageItemMetadata))
-                {
-                    continue;
-                }
-
-                // If the file isn't actually a part of the package, skip it.
-                var packageMetadata = (PackageMetadata)packageItemMetadata;
-                if (!reference.ItemSpec.StartsWith(packageMetadata.Path, StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                var referenceRelativePath = reference.ItemSpec.Substring(packageMetadata.Path.Length).Trim('\\');
-                var referenceKey = $"{packageId}/{referenceRelativePath.Replace('\\', '/')}";
-
-                // If we already know about the assembly file, skip it.
-                if (Assemblies.TryGetValue(referenceKey, out ItemMetadata assemblyItemMetadata))
-                {
-                    continue;
-                }
-
-                // Create the appropriate metadata.
-                var name = Path.GetFileName(referenceKey);
-                var facadeMetadata = reference.GetBooleanMetadata("Facade");
-                var visible = facadeMetadata.HasValue ? !facadeMetadata.Value : true;
-                var assembly = new ExistingReferenceItemMetadata(name, reference.ItemSpec, visible);
-                Assemblies[referenceKey] = assembly;
-
-                // Create the file dependency.
-                existingReferenceItemDependencies.Add(new ExistingReferenceItemDependency(
-                    referenceKey,
-                    TargetFrameworkMoniker,
-                    packageId));
-            }
-
-            ExistingReferenceItemDependencies = existingReferenceItemDependencies.ToArray();
         }
 
         private static DependencyType GetDependencyType(string dependencyTypeString)
@@ -329,7 +215,7 @@ namespace Microsoft.NET.Build.Tasks
                 IsTopLevelDependency = isTopLevelDependency;
             }
 
-            public DependencyType Type { get; protected set; }
+            public DependencyType Type { get; }
             public bool IsTopLevelDependency { get; set; }
 
             /// <summary>
@@ -435,7 +321,7 @@ namespace Microsoft.NET.Build.Tasks
                 IsImplicitlyDefined = isImplicitlyDefined;
             }
 
-            public string Name { get; protected set; }
+            public string Name { get; }
             public string Version { get; }
             public string Path { get; }
             public bool Resolved { get; }
@@ -464,116 +350,6 @@ namespace Microsoft.NET.Build.Tasks
                     Path,
                     Resolved,
                     IsImplicitlyDefined);
-            }
-        }
-
-        private class AssemblyMetadata : PackageMetadata
-        {
-            public AssemblyMetadata(DependencyType type,
-                                    ITaskItem item,
-                                    string name)
-                : base(item)
-            {
-                Name = name ?? string.Empty;
-                Type = type;
-            }
-        }
-
-        /// <summary>
-        /// Represents metadata for a Reference item that we want to pretend was resolved as a
-        /// standard NuGet package assembly.
-        /// </summary>
-        private class ExistingReferenceItemMetadata : ItemMetadata
-        {
-            public ExistingReferenceItemMetadata(string name, string path, bool visible)
-                : base(
-                      type: DependencyType.Assembly,
-                      dependencies: null,
-                      isTopLevelDependency: false)
-            {
-                Name = name;
-                Path = path;
-                Visible = visible;
-            }
-
-            public string Name { get; }
-            public string Path { get; }
-            public bool Visible { get; }
-
-            public override void SetMetadataOnTaskItem(TaskItem taskItem)
-            {
-                taskItem.SetMetadata(MetadataKeys.Name, Name);
-                taskItem.SetMetadata(MetadataKeys.Path, Path);
-                taskItem.SetMetadata(MetadataKeys.Type, Type.ToString());
-                taskItem.SetMetadata(MetadataKeys.IsImplicitlyDefined, "false");
-                taskItem.SetMetadata(MetadataKeys.IsTopLevelDependency, "false");
-                taskItem.SetMetadata(ResolvedMetadata, "true");
-                taskItem.SetMetadata(VisibleMetadata, Visible.ToString());
-                taskItem.SetMetadata(DependenciesMetadata, string.Empty);
-            }
-
-            public override ItemMetadata Clone()
-            {
-                return new ExistingReferenceItemMetadata(
-                    Name,
-                    Path,
-                    Visible);
-            }
-        }
-
-        /// <summary>
-        /// Represents the FileDependency metadata for a Reference item that we want to pretend was
-        /// resolved as a standard NuGet package assembly.
-        /// </summary>
-        private sealed class ExistingReferenceItemDependency : ITaskItem
-        {
-            private readonly Dictionary<string, string> _metadata = new Dictionary<string, string>(capacity: 3, comparer: StringComparer.OrdinalIgnoreCase);
-
-            public ExistingReferenceItemDependency(string itemSpec, string parentTarget, string parentPackage)
-            {
-                ItemSpec = itemSpec;
-                _metadata[MetadataKeys.FileGroup] = CompileTimeAssemblyMetadata;
-                _metadata[MetadataKeys.ParentTarget] = parentTarget;
-                _metadata[MetadataKeys.ParentPackage] = parentPackage;
-            }
-
-            public string ItemSpec { get; set; }
-
-            public ICollection MetadataNames => _metadata.Keys;
-
-            public int MetadataCount => _metadata.Count;
-
-            public IDictionary CloneCustomMetadata()
-            {
-                return new Dictionary<string, string>(_metadata, _metadata.Comparer);
-            }
-
-            public void CopyMetadataTo(ITaskItem destinationItem)
-            {
-                foreach (var pair in _metadata)
-                {
-                    destinationItem.SetMetadata(pair.Key, pair.Value);
-                }
-            }
-
-            public string GetMetadata(string metadataName)
-            {
-                if (_metadata.TryGetValue(metadataName, out string metadataValue))
-                {
-                    return metadataValue;
-                }
-
-                return null;
-            }
-
-            public void RemoveMetadata(string metadataName)
-            {
-                _metadata.Remove(metadataName);
-            }
-
-            public void SetMetadata(string metadataName, string metadataValue)
-            {
-                _metadata[metadataName] = metadataValue;
             }
         }
 
