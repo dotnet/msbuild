@@ -116,9 +116,10 @@ namespace Microsoft.NET.Build.Tasks
                     }
 
                     var version = packageDef.GetMetadata(MetadataKeys.Version) ?? string.Empty;
-                    var resolved = !string.IsNullOrEmpty(packageDef.GetMetadata(MetadataKeys.ResolvedPath));
+                    var resolvedPath = packageDef.GetMetadata(MetadataKeys.ResolvedPath);
+                    var resolved = !string.IsNullOrEmpty(resolvedPath);
                     var path = (resolved
-                        ? packageDef.GetMetadata(MetadataKeys.ResolvedPath)
+                        ? resolvedPath
                         : packageDef.GetMetadata(MetadataKeys.Path)) ?? string.Empty;
                     var isImplicitlyDefined = implicitPackageReferences.Contains(name);
 
