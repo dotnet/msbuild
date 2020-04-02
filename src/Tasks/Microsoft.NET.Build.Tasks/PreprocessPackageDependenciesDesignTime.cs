@@ -107,7 +107,14 @@ namespace Microsoft.NET.Build.Tasks
                 if (dependencyType == DependencyType.Package ||
                     dependencyType == DependencyType.Unresolved)
                 {
-                    var name = packageDef.GetMetadata(MetadataKeys.Name) ?? string.Empty;
+                    var name = packageDef.GetMetadata(MetadataKeys.Name);
+
+                    if (string.IsNullOrEmpty(name))
+                    {
+                        // Name is required
+                        continue;
+                    }
+
                     var version = packageDef.GetMetadata(MetadataKeys.Version) ?? string.Empty;
                     var resolved = !string.IsNullOrEmpty(packageDef.GetMetadata(MetadataKeys.ResolvedPath));
                     var path = (resolved
