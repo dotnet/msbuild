@@ -2530,7 +2530,7 @@
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
         <source>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</source>
-        <target state="new">MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</target>
+        <target state="translated">MSB3724: XAML 작업을 만들 수 없습니다. 속성 이름 '{0}'이(가) 중복되었습니다.</target>
         <note>{StrBegin="MSB3724: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.TaskCreationFailed">
