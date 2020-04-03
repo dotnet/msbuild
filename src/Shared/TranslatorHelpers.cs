@@ -20,6 +20,10 @@ namespace Microsoft.Build.BackEnd
             ref T instance,
             NodePacketValueFactory<T> valueFactory) where T : ITranslatable
         {
+            if (!translator.TranslateNullable(instance))
+            {
+                return;
+            }
             if (translator.Mode == TranslationDirection.ReadFromStream)
             {
                 instance = valueFactory(translator);
@@ -37,6 +41,10 @@ namespace Microsoft.Build.BackEnd
         {
             void objectTranslator(ITranslator t2, ref T objectToTranslate)
             {
+                if (!t2.TranslateNullable(objectToTranslate))
+                {
+                    return;
+                }
                 if (t2.Mode == TranslationDirection.ReadFromStream)
                 {
                     objectToTranslate = valueFactory(t2);
@@ -58,6 +66,11 @@ namespace Microsoft.Build.BackEnd
         {
             void objectTranslator(ITranslator t2, ref T objectToTranslate)
             {
+                if (!t2.TranslateNullable(objectToTranslate))
+                {
+                    return;
+                }
+
                 if (t2.Mode == TranslationDirection.ReadFromStream)
                 {
                     objectToTranslate = valueFactory(t2);
@@ -78,6 +91,11 @@ namespace Microsoft.Build.BackEnd
         {
             void objectTranslator(ITranslator t2, ref T objectToTranslate)
             {
+                if (!t2.TranslateNullable(objectToTranslate))
+                {
+                    return;
+                }
+
                 if (t2.Mode == TranslationDirection.ReadFromStream)
                 {
                     objectToTranslate = valueFactory(t2);
@@ -99,6 +117,11 @@ namespace Microsoft.Build.BackEnd
         {
             void objectTranslator(ITranslator t2, ref T objectToTranslate)
             {
+                if (!t2.TranslateNullable(objectToTranslate))
+                {
+                    return;
+                }
+
                 if (t2.Mode == TranslationDirection.ReadFromStream)
                 {
                     objectToTranslate = valueFactory(t2);
@@ -121,6 +144,11 @@ namespace Microsoft.Build.BackEnd
         {
             void objectTranslator(ITranslator t2, ref T objectToTranslate)
             {
+                if (!t2.TranslateNullable(objectToTranslate))
+                {
+                    return;
+                }
+
                 if (t2.Mode == TranslationDirection.ReadFromStream)
                 {
                     objectToTranslate = valueFactory(t2);
@@ -144,6 +172,11 @@ namespace Microsoft.Build.BackEnd
         {
             void objectTranslator(ITranslator t2, ref T objectToTranslate)
             {
+                if (!t2.TranslateNullable(objectToTranslate))
+                {
+                    return;
+                }
+
                 if (t2.Mode == TranslationDirection.ReadFromStream)
                 {
                     objectToTranslate = valueFactory(t2);
