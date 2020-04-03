@@ -24,12 +24,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportBefore\*" Condition="'$(ImportUserLocationsByWildcardBeforeMicrosoftNetFrameworkTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportBefore')"/>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportBefore\*" Condition="'$(ImportByWildcardBeforeMicrosoftNetFrameworkTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportBefore')"/>
-  
+
   <Target
       Name="GetFrameworkPaths"
       DependsOnTargets="$(GetFrameworkPathsDependsOn)">
 
-    <!-- For backwards compatibility of targets who replaced this target we cannot move these values outside the target even though they 
+    <!-- For backwards compatibility of targets who replaced this target we cannot move these values outside the target even though they
              now only depend on statically availiable values-->
 
     <ItemGroup>
@@ -82,7 +82,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       GetReferenceAssemblyPaths
     </ImplicitlyExpandDesignTimeFacadesDependsOn>
   </PropertyGroup>
-  
+
   <!-- Implicitly references all portable design-time facades if the user is referencing a System.Runtime-based portable library -->
   <Target Name="ImplicitlyExpandDesignTimeFacades" Condition="'$(ImplicitlyExpandDesignTimeFacades)' == 'true'" DependsOnTargets="$(ImplicitlyExpandDesignTimeFacadesDependsOn)">
 
@@ -128,7 +128,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(MSBuildToolsPath)\Microsoft.WinFX.targets" Condition="'$(TargetFrameworkVersion)' != 'v2.0' and '$(TargetCompactFramework)' != 'true' and Exists('$(MSBuildToolsPath)\Microsoft.WinFX.targets')"/>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Data.Entity.targets" Condition="'$(TargetFrameworkVersion)' != 'v2.0' and '$(TargetFrameworkVersion)' !=  'v3.0' and Exists('$(MSBuildToolsPath)\Microsoft.Data.Entity.targets')"/>
-  
+
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportAfter\*" Condition="'$(ImportByWildcardAfterMicrosoftNetFrameworkTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportAfter')"/>
   <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftNetFrameworkTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportAfter')"/>
 

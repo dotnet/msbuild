@@ -4208,16 +4208,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Include the following files in clickonce manifest only if single file publish is false -->
     <ItemGroup Condition="'$(PublishSingleFile)' != 'true'">
-      <!-- 
-      _ClickOnceRuntimeCopyLocalItems group contains any runtimes folder assets of Nuget packages that are not included in 
-      _DeploymentReferencePaths (e.g. pdbs). They are populated from the RuntimeTargetsCopyLocalItems and NativeCopyLocalItems 
-      group that contain the RID-specific assets that go in runtimes folder on publish. They are output groups of the 
+      <!--
+      _ClickOnceRuntimeCopyLocalItems group contains any runtimes folder assets of Nuget packages that are not included in
+      _DeploymentReferencePaths (e.g. pdbs). They are populated from the RuntimeTargetsCopyLocalItems and NativeCopyLocalItems
+      group that contain the RID-specific assets that go in runtimes folder on publish. They are output groups of the
       ResolvePackageAssets target in dotnet/sdk
       -->
       <_ClickOnceRuntimeCopyLocalItems Include="@(RuntimeTargetsCopyLocalItems)"
                                       Condition="'%(RuntimeTargetsCopyLocalItems.CopyLocal)' == 'true'" />
 
-      <_ClickOnceRuntimeCopyLocalItems Include="@(NativeCopyLocalItems)" 
+      <_ClickOnceRuntimeCopyLocalItems Include="@(NativeCopyLocalItems)"
                                       Condition="'%(NativeCopyLocalItems.CopyLocal)' == 'true'" />
       <_ClickOnceRuntimeCopyLocalItems Remove="@(_DeploymentReferencePaths)" />
       <_ClickOnceFiles Include="@(ContentWithTargetPath);@(_DeploymentManifestIconFile);@(AppConfigWithTargetPath);@(NetCoreRuntimeJsonFilesForClickOnce);@(_ClickOnceRuntimeCopyLocalItems)"/>

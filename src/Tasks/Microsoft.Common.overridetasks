@@ -1,8 +1,8 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-    <!-- This file lists UsingTask elements that we wish to override 
+    <!-- This file lists UsingTask elements that we wish to override
          any other UsingTask elements -->
-    
+
     <!-- NOTE: Listing a <UsingTask> tag in a *.tasks file like this one rather than in a project or targets file
                can give a significant performance advantage in a large build, because every time a <UsingTask> tag
                is encountered, it will cause the task to be rediscovered next time the task is used. -->

@@ -33,7 +33,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="Result"
         PropertyName="_AdditionalPropertiesFromProject"/>
     </CombineXmlElements>
-    
+
     <ItemGroup>
       <_ThisProjectBuildMetadata Include="$(MSBuildProjectFullPath)">
         <TargetFrameworks>@(_TargetFrameworkInfo)</TargetFrameworks>
@@ -178,7 +178,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <ImportByWildcardAfterMicrosoftCommonCrossTargetingTargets Condition="'$(ImportByWildcardAfterMicrosoftCommonCrossTargetingTargets)' == ''">true</ImportByWildcardAfterMicrosoftCommonCrossTargetingTargets>
   </PropertyGroup>
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.CrossTargeting.targets\ImportAfter\*.targets" 
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.CrossTargeting.targets\ImportAfter\*.targets"
           Condition="'$(ImportByWildcardAfterMicrosoftCommonCrossTargetingTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.CrossTargeting.targets\ImportAfter')"/>
 
   <!--
@@ -188,8 +188,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     Each package management system should use a unique moniker to avoid collisions.  It is a wild-card iport so the package
     management system can write out multiple files but the order of the import is alphabetic because MSBuild sorts the list.
 
-    This is the same import that would happen in an inner (non-cross targeting) build. Package management systems are responsible for generating 
-    appropriate conditions based on $(IsCrossTargetingBuild) to pull in only those package targets that are meant to participate in a cross-targeting 
+    This is the same import that would happen in an inner (non-cross targeting) build. Package management systems are responsible for generating
+    appropriate conditions based on $(IsCrossTargetingBuild) to pull in only those package targets that are meant to participate in a cross-targeting
     build.
   -->
   <PropertyGroup>
@@ -202,7 +202,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ImportDirectoryBuildTargets Condition="'$(ImportDirectoryBuildTargets)' == ''">true</ImportDirectoryBuildTargets>
   </PropertyGroup>
 
-  <!-- 
+  <!--
         Determine the path to the directory build targets file if the user did not disable $(ImportDirectoryBuildTargets) and
         they did not already specify an absolute path to use via $(DirectoryBuildTargetsPath)
     -->
@@ -215,6 +215,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Import Project="$(DirectoryBuildTargetsPath)" Condition="'$(ImportDirectoryBuildTargets)' == 'true' and exists('$(DirectoryBuildTargetsPath)')"/>
 
   <!-- TODO: https://github.com/Microsoft/msbuild/issues/1062: Remove this temporary hook when possible. -->
-  <Import Project="$(CoreCrossTargetingTargetsPath)" 
+  <Import Project="$(CoreCrossTargetingTargetsPath)"
           Condition="'$(CoreCrossTargetingTargetsPath)' != '' and Exists('$(CoreCrossTargetingTargetsPath)')" />
 </Project>
