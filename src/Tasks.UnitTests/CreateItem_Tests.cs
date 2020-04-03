@@ -191,7 +191,7 @@ namespace Microsoft.Build.UnitTests
                 parameters.Loggers = new ILogger[] { new MockLogger(_testOutput) };
                 BuildResult result = BuildManager.DefaultBuildManager.Build(parameters, data);
                 result.OverallResult.ShouldBe(BuildResultCode.Success);
-                result.ResultsByTarget["Repro"].Items[0].GetMetadata("RecursiveDir").ShouldBe("Subdir\\");
+                result.ResultsByTarget["Repro"].Items[0].GetMetadata("RecursiveDir").ShouldBe("Subdir" + Path.PathSeparator);
             }
             finally
             {
