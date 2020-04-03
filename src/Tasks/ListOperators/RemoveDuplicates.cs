@@ -31,7 +31,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public bool HadAnyDuplicates { get; set; }
 
-        protected override ParameterLoggingOptions GetParameterLoggingOptions(string parameterName)
+        internal override ParameterLoggingOptions GetParameterLoggingOptions(string parameterName)
         {
             return parameterName switch
             {

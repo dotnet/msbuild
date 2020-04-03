@@ -41,7 +41,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] OutOfPath { get; set; }
 
-        protected override ParameterLoggingOptions GetParameterLoggingOptions(string parameterName)
+        internal override ParameterLoggingOptions GetParameterLoggingOptions(string parameterName)
         {
             return parameterName switch
             {

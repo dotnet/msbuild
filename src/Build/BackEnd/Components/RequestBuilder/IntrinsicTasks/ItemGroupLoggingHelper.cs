@@ -19,15 +19,15 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets a text serialized value of a parameter for logging.
         /// </summary>
-        internal static string GetParameterText(string prefix, string parameterName, params object[] parameterValues)
+        internal static string GetParameterText(string prefix, string parameterName, bool logItemMetadata, params object[] parameterValues)
         {
-            return GetParameterText(prefix, parameterName, (IList)parameterValues);
+            return GetParameterText(prefix, parameterName, (IList)parameterValues, logItemMetadata);
         }
 
         /// <summary>
         /// Gets a text serialized value of a parameter for logging.
         /// </summary>
-        internal static string GetParameterText(string prefix, string parameterName, IList parameterValue)
+        internal static string GetParameterText(string prefix, string parameterName, IList parameterValue, bool logItemMetadata)
         {
             if (parameterValue == null || parameterValue.Count == 0)
             {
@@ -75,7 +75,7 @@ namespace Microsoft.Build.BackEnd
                         sb.Append("        ");
                     }
 
-                    sb.Append(GetStringFromParameterValue(parameterValue[i]));
+                    sb.Append(GetStringFromParameterValue(parameterValue[i], logItemMetadata));
 
                     if (!specialTreatmentForSingle && i < parameterValue.Count - 1)
                     {
@@ -93,7 +93,7 @@ namespace Microsoft.Build.BackEnd
         /// First line is already indented.
         /// Indent of any subsequent line should be 12 spaces.
         /// </summary>
-        internal static string GetStringFromParameterValue(object parameterValue)
+        internal static string GetStringFromParameterValue(object parameterValue, bool logItemMetadata)
         {
             var type = parameterValue.GetType();
 
@@ -114,7 +114,7 @@ namespace Microsoft.Build.BackEnd
 
                 var customMetadata = item.CloneCustomMetadata();
 
-                if (customMetadata.Count > 0)
+                if (customMetadata.Count > 0 && logItemMetadata)
                 {
                     result += "\n";
                     var names = new List<string>();

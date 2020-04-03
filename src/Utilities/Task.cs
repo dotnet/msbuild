@@ -138,32 +138,6 @@ namespace Microsoft.Build.Utilities
         /// <returns>true, if successful</returns>
         public abstract bool Execute();
 
-        /// <summary>
-        /// Task implementations can override this to customize the logging of input and output parameters.
-        /// </summary>
-        /// <param name="parameterName">Name of a parameter to get the options for.</param>
-        /// <returns>A struct indicating whether to log the parameter, and if yes and it's an item list, whether to log metadata for each item.</returns>
-        protected internal virtual ParameterLoggingOptions GetParameterLoggingOptions(string parameterName) => default;
-
-        /// <summary>
-        /// Determines whether to log a parameter, and if yes, and it's an item list, whether to log item metadata.
-        /// This is effectively a 3-state, encoded by 2 bits. This is not an enum for potential future extensibility.
-        /// </summary>
-        protected internal struct ParameterLoggingOptions
-        {
-            public static ParameterLoggingOptions DoNotLog = new ParameterLoggingOptions(disableLogging: true, disableLoggingItemMetadata: false);
-            public static ParameterLoggingOptions DoNotLogItemMetadata = new ParameterLoggingOptions(disableLogging: false, disableLoggingItemMetadata: true);
-
-            public ParameterLoggingOptions(bool disableLogging, bool disableLoggingItemMetadata)
-            {
-                DisableLogging = disableLogging;
-                DisableLoggingItemMetadata = disableLoggingItemMetadata;
-            }
-
-            public bool DisableLogging;
-            public bool DisableLoggingItemMetadata;
-        }
-
         #endregion
     }
 }

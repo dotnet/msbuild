@@ -46,7 +46,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool WriteOnlyWhenDifferent { get; set; }
 
-        protected override ParameterLoggingOptions GetParameterLoggingOptions(string parameterName)
+        internal override ParameterLoggingOptions GetParameterLoggingOptions(string parameterName)
         {
             return parameterName switch
             {

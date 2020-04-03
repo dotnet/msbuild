@@ -9,7 +9,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// A small intermediate class for MSBuild tasks, see also TaskLoadInSeparateAppDomainExtension
     /// </summary>
-    public abstract class TaskExtension : Task
+    public abstract class TaskExtension : Task, ITaskParameterLoggingOptions
     {
         #region Constructors
 
@@ -37,5 +37,15 @@ namespace Microsoft.Build.Tasks
         private readonly TaskLoggingHelperExtension _logExtension;
 
         #endregion
+
+        /// <summary>
+        /// Task implementations can override this to customize the logging of input and output parameters.
+        /// </summary>
+        /// <param name="parameterName">Name of a parameter to get the options for.</param>
+        /// <returns>A struct indicating whether to log the parameter, and if yes and it's an item list, whether to log metadata for each item.</returns>
+        internal virtual ParameterLoggingOptions GetParameterLoggingOptions(string parameterName) => default;
+
+        ParameterLoggingOptions ITaskParameterLoggingOptions.GetParameterLoggingOptions(string parameterName)
+            => GetParameterLoggingOptions(parameterName);
     }
 }

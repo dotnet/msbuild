@@ -101,7 +101,6 @@ namespace Microsoft.Build.Tasks
         [Microsoft.Build.Framework.RequiredAttribute]
         public Microsoft.Build.Framework.ITaskItem[] Paths { get { throw null; } set { } }
         public override bool Execute() { throw null; }
-        protected override Microsoft.Build.Utilities.Task.ParameterLoggingOptions GetParameterLoggingOptions(string parameterName) { throw null; }
     }
     public partial class Copy : Microsoft.Build.Tasks.TaskExtension, Microsoft.Build.Framework.ICancelableTask, Microsoft.Build.Framework.ITask
     {
@@ -122,7 +121,6 @@ namespace Microsoft.Build.Tasks
         public bool UseSymboliclinksIfPossible { get { throw null; } set { } }
         public void Cancel() { }
         public override bool Execute() { throw null; }
-        protected override Microsoft.Build.Utilities.Task.ParameterLoggingOptions GetParameterLoggingOptions(string parameterName) { throw null; }
     }
     public partial class CreateCSharpManifestResourceName : Microsoft.Build.Tasks.CreateManifestResourceName
     {
@@ -303,7 +301,6 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem Path { get { throw null; } set { } }
         public bool UpdateToAbsolutePaths { get { throw null; } set { } }
         public override bool Execute() { throw null; }
-        protected override Microsoft.Build.Utilities.Task.ParameterLoggingOptions GetParameterLoggingOptions(string parameterName) { throw null; }
     }
     public sealed partial class FormatVersion : Microsoft.Build.Tasks.TaskExtension
     {
@@ -365,7 +362,6 @@ namespace Microsoft.Build.Tasks
         public bool UsePreserializedResources { get { throw null; } set { } }
         public bool UseSourcePath { get { throw null; } set { } }
         public override bool Execute() { throw null; }
-        protected override Microsoft.Build.Utilities.Task.ParameterLoggingOptions GetParameterLoggingOptions(string parameterName) { throw null; }
     }
     public partial class GetAssemblyIdentity : Microsoft.Build.Tasks.TaskExtension
     {
@@ -452,7 +448,6 @@ namespace Microsoft.Build.Tasks
         [Microsoft.Build.Framework.RequiredAttribute]
         public Microsoft.Build.Framework.ITaskItem[] ItemsToHash { get { throw null; } set { } }
         public override bool Execute() { throw null; }
-        protected override Microsoft.Build.Utilities.Task.ParameterLoggingOptions GetParameterLoggingOptions(string parameterName) { throw null; }
     }
     public partial class MakeDir : Microsoft.Build.Tasks.TaskExtension
     {
@@ -537,7 +532,6 @@ namespace Microsoft.Build.Tasks
         public bool HadAnyDuplicates { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem[] Inputs { get { throw null; } set { } }
         public override bool Execute() { throw null; }
-        protected override Microsoft.Build.Utilities.Task.ParameterLoggingOptions GetParameterLoggingOptions(string parameterName) { throw null; }
     }
     public partial class ResolveAssemblyReference : Microsoft.Build.Tasks.TaskExtension
     {
@@ -786,7 +780,6 @@ namespace Microsoft.Build.Tasks
         public bool Overwrite { get { throw null; } set { } }
         public bool WriteOnlyWhenDifferent { get { throw null; } set { } }
         public override bool Execute() { throw null; }
-        protected override Microsoft.Build.Utilities.Task.ParameterLoggingOptions GetParameterLoggingOptions(string parameterName) { throw null; }
     }
     [System.ObsoleteAttribute("The XamlTaskFactory is not supported on .NET Core.  This class is included so that users receive run-time errors and should not be used for any other purpose.", true)]
     public sealed partial class XamlTaskFactory : Microsoft.Build.Framework.ITaskFactory

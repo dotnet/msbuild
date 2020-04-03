@@ -202,16 +202,6 @@ namespace Microsoft.Build.Utilities
         public Microsoft.Build.Utilities.TaskLoggingHelper Log { get { throw null; } }
         protected System.Resources.ResourceManager TaskResources { get { throw null; } set { } }
         public abstract bool Execute();
-        protected internal virtual Microsoft.Build.Utilities.Task.ParameterLoggingOptions GetParameterLoggingOptions(string parameterName) { throw null; }
-        [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-        protected internal partial struct ParameterLoggingOptions
-        {
-            public bool DisableLogging;
-            public bool DisableLoggingItemMetadata;
-            public static Microsoft.Build.Utilities.Task.ParameterLoggingOptions DoNotLog;
-            public static Microsoft.Build.Utilities.Task.ParameterLoggingOptions DoNotLogItemMetadata;
-            public ParameterLoggingOptions(bool disableLogging, bool disableLoggingItemMetadata) { throw null;}
-        }
     }
     public sealed partial class TaskItem : Microsoft.Build.Framework.ITaskItem, Microsoft.Build.Framework.ITaskItem2
     {

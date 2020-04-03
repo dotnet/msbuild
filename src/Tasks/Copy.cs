@@ -192,7 +192,7 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-        protected override ParameterLoggingOptions GetParameterLoggingOptions(string parameterName)
+        internal override ParameterLoggingOptions GetParameterLoggingOptions(string parameterName)
         {
             return parameterName switch
             {

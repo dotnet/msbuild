@@ -21,6 +21,7 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -430,12 +431,12 @@ namespace Microsoft.Build.BackEnd
                 if (TaskParameterTypeVerifier.IsAssignableToITask(type))
                 {
                     ITaskItem[] outputs = GetItemOutputs(parameter);
-                    GatherTaskItemOutputs(outputTargetIsItem, outputTargetName, outputs, parameterLocation);
+                    GatherTaskItemOutputs(outputTargetIsItem, outputTargetName, outputs, parameterLocation, parameter);
                 }
                 else if (TaskParameterTypeVerifier.IsValueTypeOutputParameter(type))
                 {
                     string[] outputs = GetValueOutputs(parameter);
-                    GatherArrayStringAndValueOutputs(outputTargetIsItem, outputTargetName, outputs, parameterLocation);
+                    GatherArrayStringAndValueOutputs(outputTargetIsItem, outputTargetName, outputs, parameterLocation, parameter);
                 }
                 else
                 {
@@ -1285,9 +1286,18 @@ namespace Microsoft.Build.BackEnd
         {
             if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && parameterValue.Count > 0)
             {
-                string parameterText = ResourceUtilities.GetResourceString("TaskParameterPrefix");
-                parameterText = ItemGroupLoggingHelper.GetParameterText(parameterText, parameter.Name, parameterValue);
-                _taskLoggingContext.LogCommentFromText(MessageImportance.Low, parameterText);
+                ParameterLoggingOptions options = default;
+                if (TaskInstance is ITaskParameterLoggingOptions loggingOptions)
+                {
+                    options = loggingOptions.GetParameterLoggingOptions(parameter.Name);
+                }
+
+                if (!options.DisableLogging)
+                {
+                    string parameterText = ResourceUtilities.GetResourceString("TaskParameterPrefix");
+                    parameterText = ItemGroupLoggingHelper.GetParameterText(parameterText, parameter.Name, parameterValue, logItemMetadata: !options.DisableLoggingItemMetadata);
+                    _taskLoggingContext.LogCommentFromText(MessageImportance.Low, parameterText);
+                }
             }
 
             return InternalSetTaskParameter(parameter, (object)parameterValue);
@@ -1312,7 +1322,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     _taskLoggingContext.LogCommentFromText(
                         MessageImportance.Low,
-                        ResourceUtilities.GetResourceString("TaskParameterPrefix") + parameter.Name + "=" + ItemGroupLoggingHelper.GetStringFromParameterValue(parameterValue));
+                        ResourceUtilities.GetResourceString("TaskParameterPrefix") + parameter.Name + "=" + ItemGroupLoggingHelper.GetStringFromParameterValue(parameterValue, logItemMetadata: true));
                 }
             }
 
@@ -1368,7 +1378,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets task item outputs
         /// </summary>
-        private void GatherTaskItemOutputs(bool outputTargetIsItem, string outputTargetName, ITaskItem[] outputs, ElementLocation parameterLocation)
+        private void GatherTaskItemOutputs(bool outputTargetIsItem, string outputTargetName, ITaskItem[] outputs, ElementLocation parameterLocation, TaskPropertyInfo parameter)
         {
             // if the task has generated outputs (if it didn't, don't do anything)
             if (outputs != null)
@@ -1425,12 +1435,22 @@ namespace Microsoft.Build.BackEnd
 
                     if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && outputs.Length > 0)
                     {
-                        string parameterText = ItemGroupLoggingHelper.GetParameterText(
-                            ResourceUtilities.GetResourceString("OutputItemParameterMessagePrefix"),
-                            outputTargetName,
-                            outputs);
+                        ParameterLoggingOptions options = default;
+                        if (TaskInstance is ITaskParameterLoggingOptions loggingOptions)
+                        {
+                            options = loggingOptions.GetParameterLoggingOptions(parameter.Name);
+                        }
 
-                        _taskLoggingContext.LogCommentFromText(MessageImportance.Low, parameterText);
+                        if (!options.DisableLogging)
+                        {
+                            string parameterText = ItemGroupLoggingHelper.GetParameterText(
+                                                ResourceUtilities.GetResourceString("OutputItemParameterMessagePrefix"),
+                                                outputTargetName,
+                                                outputs,
+                                                logItemMetadata: !options.DisableLoggingItemMetadata);
+
+                            _taskLoggingContext.LogCommentFromText(MessageImportance.Low, parameterText);
+                        }
                     }
                 }
                 else
@@ -1481,7 +1501,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gather task outputs in array form
         /// </summary>
-        private void GatherArrayStringAndValueOutputs(bool outputTargetIsItem, string outputTargetName, string[] outputs, ElementLocation parameterLocation)
+        private void GatherArrayStringAndValueOutputs(bool outputTargetIsItem, string outputTargetName, string[] outputs, ElementLocation parameterLocation, TaskPropertyInfo parameter)
         {
             // if the task has generated outputs (if it didn't, don't do anything)            
             if (outputs != null)
@@ -1501,8 +1521,17 @@ namespace Microsoft.Build.BackEnd
 
                     if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && outputs.Length > 0)
                     {
-                        string parameterText = ItemGroupLoggingHelper.GetParameterText(ResourceUtilities.GetResourceString("OutputItemParameterMessagePrefix"), outputTargetName, outputs);
-                        _taskLoggingContext.LogCommentFromText(MessageImportance.Low, parameterText);
+                        ParameterLoggingOptions options = default;
+                        if (TaskInstance is ITaskParameterLoggingOptions loggingOptions)
+                        {
+                            options = loggingOptions.GetParameterLoggingOptions(parameter.Name);
+                        }
+
+                        if (!options.DisableLogging)
+                        {
+                            string parameterText = ItemGroupLoggingHelper.GetParameterText(ResourceUtilities.GetResourceString("OutputItemParameterMessagePrefix"), outputTargetName, outputs, logItemMetadata: !options.DisableLoggingItemMetadata);
+                            _taskLoggingContext.LogCommentFromText(MessageImportance.Low, parameterText);
+                        }
                     }
                 }
                 else

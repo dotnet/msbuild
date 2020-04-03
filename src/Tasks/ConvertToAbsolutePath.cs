@@ -37,7 +37,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] AbsolutePaths { get; set; }
 
-        protected override ParameterLoggingOptions GetParameterLoggingOptions(string parameterName)
+        internal override ParameterLoggingOptions GetParameterLoggingOptions(string parameterName)
         {
             return parameterName switch
             {
