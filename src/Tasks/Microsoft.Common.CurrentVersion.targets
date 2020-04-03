@@ -68,6 +68,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Import Project="Microsoft.NET.props" Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' or '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"/>
 
   <PropertyGroup>
+    <!-- Generates full paths for the 'File' property in errors, warnings and messages in many targets -->
+    <GenerateFullPaths Condition="'$(GenerateFullPaths)' == ''">true</GenerateFullPaths>
     <!-- Yield optimization properties -->
     <YieldDuringToolExecution Condition="'$(YieldDuringToolExecution)' == ''">true</YieldDuringToolExecution>
   </PropertyGroup>
@@ -109,7 +111,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     OutDir can be used to gather multiple project outputs in one location. In addition,
     OutDir is included in AssemblySearchPaths used for resolving references.
 
+    BaseOutputPath:
+    This is the top level folder where all configuration specific output folders will be created.
+    Default value is bin\
+
     OutputPath:
+    This is the full Output Path, and is derived from BaseOutputPath, if none specified
+    (eg. bin\Debug). If this property is overridden, then setting BaseOutputPath has no effect.
+
+    For projects loaded with MPFProj (Legacy project system):
     This property is usually specified in the project file and is used to initialize OutDir.
     OutDir and OutputPath are distinguished for legacy reasons, and OutDir should be used if at all possible.
 
@@ -119,26 +129,37 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     IntermediateOutputPath:
     This is the full intermediate Output Path, and is derived from BaseIntermediateOutputPath, if none specified
-    (eg. obj\debug). If this property is overridden, then setting BaseIntermediateOutputPath has no effect.
+    (eg. obj\Debug). If this property is overridden, then setting BaseIntermediateOutputPath has no effect.
+
+    Ensure any and all path property has a trailing slash, so it can be concatenated.
     -->
 
   <PropertyGroup>
-    <GenerateFullPaths Condition="'$(GenerateFullPaths)' == ''">true</GenerateFullPaths>
-    <!-- Ensure any OutputPath has a trailing slash, so it can be concatenated -->
-    <OutputPath Condition="'$(OutputPath)' != '' and !HasTrailingSlash('$(OutputPath)')">$(OutputPath)\</OutputPath>
-    <AssemblyName Condition=" '$(AssemblyName)'=='' ">$(MSBuildProjectName)</AssemblyName>
-    <!--
-        Be careful not to give OutputPath a default value in the case of an invalid Configuration/Platform.
-        We use OutputPath specifically to check for invalid configurations/platforms.
-        -->
-    <OutputPath Condition=" '$(Platform)'=='' and '$(Configuration)'=='' and '$(OutputPath)'=='' ">bin\Debug\</OutputPath>
-    <_OriginalConfiguration>$(Configuration)</_OriginalConfiguration>
+    <!-- Example, AnyCPU -->
     <_OriginalPlatform>$(Platform)</_OriginalPlatform>
-    <Configuration Condition=" '$(Configuration)'=='' ">Debug</Configuration>
-    <ConfigurationName Condition=" '$(ConfigurationName)' == '' ">$(Configuration)</ConfigurationName>
+    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
+    <PlatformName Condition="'$(PlatformName)' == ''">$(Platform)</PlatformName>
     <!-- Example, Debug -->
-    <Platform Condition=" '$(Platform)'=='' ">AnyCPU</Platform>
+    <_OriginalConfiguration>$(Configuration)</_OriginalConfiguration>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <ConfigurationName Condition="'$(ConfigurationName)' == ''">$(Configuration)</ConfigurationName>
 
+    <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">bin\</BaseOutputPath>
+    <BaseOutputPath Condition="!HasTrailingSlash('$(BaseOutputPath)')">$(BaseOutputPath)\</BaseOutputPath>
+    <OutputPath Condition="'$(OutputPath)' == '' and '$(PlatformName)' == 'AnyCPU'">$(BaseOutputPath)$(Configuration)\</OutputPath>
+    <OutputPath Condition="'$(OutputPath)' == '' and '$(PlatformName)' != 'AnyCPU'">$(BaseOutputPath)$(PlatformName)\$(Configuration)\</OutputPath>
+    <OutputPath Condition="!HasTrailingSlash('$(OutputPath)')">$(OutputPath)\</OutputPath>
+
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">obj\</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath Condition="!HasTrailingSlash('$(BaseIntermediateOutputPath)')">$(BaseIntermediateOutputPath)\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' == '' and '$(PlatformName)' == 'AnyCPU'">$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
+    <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' == '' and '$(PlatformName)' != 'AnyCPU'">$(BaseIntermediateOutputPath)$(PlatformName)\$(Configuration)\</IntermediateOutputPath>
+    <IntermediateOutputPath Condition="!HasTrailingSlash('$(IntermediateOutputPath)')">$(IntermediateOutputPath)\</IntermediateOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+
+    <!-- Determine OutputType property from the legacy TargetType property -->
     <OutputType Condition=" '$(TargetType)' != ''">$(TargetType)</OutputType>
     <OutputType Condition=" '$(TargetType)' == 'Container' or '$(TargetType)' == 'DocumentContainer' ">library</OutputType>
     <OutputType Condition=" '$(OutputType)' == '' ">exe</OutputType>
@@ -201,6 +222,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- For projects that generate app packages or ones that want a per-project output directory, update OutDir to include the project name -->
     <OutDir Condition="'$(OutDir)' != '' and '$(OutDirWasSpecified)' == 'true' and (('$(WindowsAppContainer)' == 'true' and '$(GenerateProjectSpecificOutputFolder)' != 'false') or '$(GenerateProjectSpecificOutputFolder)' == 'true')">$(OutDir)$(ProjectName)\</OutDir>
 
+    <AssemblyName Condition=" '$(AssemblyName)'=='' ">$(MSBuildProjectName)</AssemblyName>
     <TargetName Condition="'$(TargetName)' == '' and '$(OutputType)' == 'winmdobj' and '$(RootNamespace)' != ''">$(RootNamespace)</TargetName>
     <TargetName Condition=" '$(TargetName)' == '' ">$(AssemblyName)</TargetName>
     <!-- Example, MyAssembly -->
@@ -279,26 +301,23 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </ItemGroup>
 
   <PropertyGroup>
-    <!-- Example, c:\MyProjects\MyProject\bin\debug\ -->
+    <!-- Example, C:\MyProjects\MyProject\bin\Debug\ -->
     <!--
         Condition intentionally omitted on this one, because it causes problems
         when we pick up the value of an environment variable named TargetDir
         -->
     <TargetDir Condition="'$(OutDir)' != ''">$([MSBuild]::Escape($([System.IO.Path]::GetFullPath(`$([System.IO.Path]::Combine(`$(MSBuildProjectDirectory)`, `$(OutDir)`))`))))</TargetDir>
 
-    <!-- Example, c:\MyProjects\MyProject\bin\debug\MyAssembly.dll -->
+    <!-- Example, C:\MyProjects\MyProject\bin\Debug\MyAssembly.dll -->
     <TargetPath Condition=" '$(TargetPath)' == '' ">$(TargetDir)$(TargetFileName)</TargetPath>
 
     <TargetRefPath Condition=" '$(TargetRefPath)' == '' and '$(ProduceReferenceAssembly)' == 'true' ">$([MSBuild]::NormalizePath($(TargetDir), 'ref', $(TargetFileName)))</TargetRefPath>
 
-    <!-- Example, c:\MyProjects\MyProject\ -->
-    <ProjectDir Condition=" '$(ProjectDir)' == '' ">$(MSBuildProjectDirectory)\</ProjectDir>
+    <!-- Example, C:\MyProjects\MyProject\ -->
+    <ProjectDir Condition=" '$(ProjectDir)' == '' ">$([MSBuild]::EnsureTrailingSlash($(MSBuildProjectDirectory))</ProjectDir>
 
-    <!-- Example, c:\MyProjects\MyProject\MyProject.csproj -->
+    <!-- Example, C:\MyProjects\MyProject\MyProject.csproj -->
     <ProjectPath Condition=" '$(ProjectPath)' == '' ">$(ProjectDir)$(ProjectFileName)</ProjectPath>
-
-    <!-- Example, AnyCPU -->
-    <PlatformName Condition=" '$(PlatformName)' == '' ">$(Platform)</PlatformName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -336,7 +355,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <AutoUnifyAssemblyReferences Condition="'$(GenerateBindingRedirectsOutputType)' == 'true' and '$(AutoGenerateBindingRedirects)' != 'true'">false</AutoUnifyAssemblyReferences>
   </PropertyGroup>
   <PropertyGroup>
-    <BaseIntermediateOutputPath Condition="!HasTrailingSlash('$(BaseIntermediateOutputPath)')">$(BaseIntermediateOutputPath)\</BaseIntermediateOutputPath>
     <CleanFile Condition="'$(CleanFile)'==''">$(MSBuildProjectFile).FileListAbsolute.txt</CleanFile>
     <!-- During DesignTime Builds, skip project reference build as Design time is only queueing information.-->
     <BuildProjectReferences Condition="'$(BuildProjectReferences)' == '' and '$(DesignTimeBuild)' == 'true'">false</BuildProjectReferences>
@@ -349,12 +367,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ComReferenceNoClassMembers Condition="'$(ComReferenceNoClassMembers)' == ''">false</ComReferenceNoClassMembers>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" $(IntermediateOutputPath) == '' ">
-    <IntermediateOutputPath Condition=" '$(PlatformName)' == 'AnyCPU' ">$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
-    <IntermediateOutputPath Condition=" '$(PlatformName)' != 'AnyCPU' ">$(BaseIntermediateOutputPath)$(PlatformName)\$(Configuration)\</IntermediateOutputPath>
-  </PropertyGroup>
   <PropertyGroup>
-    <IntermediateOutputPath Condition="!HasTrailingSlash('$(IntermediateOutputPath)')">$(IntermediateOutputPath)\</IntermediateOutputPath>
     <_GenerateBindingRedirectsIntermediateAppConfig>$(IntermediateOutputPath)$(TargetFileName).config</_GenerateBindingRedirectsIntermediateAppConfig>
   </PropertyGroup>
   <ItemGroup>
