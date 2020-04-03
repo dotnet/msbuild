@@ -11,6 +11,9 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
+    /// <summary>
+    /// An interface containing public SGen task properties to make sure that all versions of the task have the same public surface.
+    /// </summary>
     internal interface ISGenTaskContract
     {
     #region Properties

@@ -1968,7 +1968,7 @@
     <comment>{StrBegin="MSB3473: "}</comment>
   </data>
   <data name="SGen.TaskNotSupported">
-    <value>MSB3474: The task "{0}" is not supported on the .NET Core version of MSBuild. Please instead use the Microsoft XML Serializer Generator. See https://go.microsoft.com/fwlink/?linkid=858594 for further details.</value>
+    <value>MSB3474: The task "{0}" is not supported on the .NET Core version of MSBuild. Use the Microsoft XML Serializer Generator package instead. See https://go.microsoft.com/fwlink/?linkid=858594 for more information.</value>
     <comment>{StrBegin="MSB3474: "}</comment>
   </data>
   <!--
