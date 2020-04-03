@@ -37,6 +37,15 @@ namespace Microsoft.Build.Tasks
         [Output]
         public string HashResult { get; set; }
 
+        protected override ParameterLoggingOptions GetParameterLoggingOptions(string parameterName)
+        {
+            return parameterName switch
+            {
+                nameof(ItemsToHash) => ParameterLoggingOptions.DoNotLogItemMetadata, // we only use the ItemSpec for the Hash
+                _ => default
+            };
+        }
+
         /// <summary>
         /// Execute the task.
         /// </summary>

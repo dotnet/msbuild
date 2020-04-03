@@ -37,6 +37,16 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] AbsolutePaths { get; set; }
 
+        protected override ParameterLoggingOptions GetParameterLoggingOptions(string parameterName)
+        {
+            return parameterName switch
+            {
+                nameof(Paths) => ParameterLoggingOptions.DoNotLog,
+                nameof(AbsolutePaths) => ParameterLoggingOptions.DoNotLogItemMetadata,
+                _ => default
+            };
+        }
+
         /// <summary>
         /// Calls Path.GetFullPath for each of the inputs.  Preserves metadata.
         /// </summary>

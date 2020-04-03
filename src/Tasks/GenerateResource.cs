@@ -560,6 +560,15 @@ namespace Microsoft.Build.Tasks
         }
 #endif
 
+        protected override ParameterLoggingOptions GetParameterLoggingOptions(string parameterName)
+        {
+            return parameterName switch
+            {
+                nameof(FilesWritten) => ParameterLoggingOptions.DoNotLogItemMetadata,
+                _ => default
+            };
+        }
+
         /// <summary>
         /// Logs a Resgen.exe command line that indicates what parameters were
         /// passed to this task. Since this task is replacing Resgen, and we used

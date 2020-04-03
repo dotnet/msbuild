@@ -192,6 +192,17 @@ namespace Microsoft.Build.Tasks
             }
         }
 
+        protected override ParameterLoggingOptions GetParameterLoggingOptions(string parameterName)
+        {
+            return parameterName switch
+            {
+                nameof(SourceFiles) => ParameterLoggingOptions.DoNotLogItemMetadata,
+                nameof(DestinationFiles) => ParameterLoggingOptions.DoNotLogItemMetadata,
+                nameof(CopiedFiles) => ParameterLoggingOptions.DoNotLogItemMetadata,
+                _ => default
+            };
+        }
+
         /// <summary>
         /// Copy one file from source to destination. Create the target directory if necessary and 
         /// leave the file read-write.

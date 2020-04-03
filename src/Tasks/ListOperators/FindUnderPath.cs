@@ -41,6 +41,17 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] OutOfPath { get; set; }
 
+        protected override ParameterLoggingOptions GetParameterLoggingOptions(string parameterName)
+        {
+            return parameterName switch
+            {
+                nameof(Files) => ParameterLoggingOptions.DoNotLogItemMetadata,
+                nameof(InPath) => ParameterLoggingOptions.DoNotLogItemMetadata,
+                nameof(OutOfPath) => ParameterLoggingOptions.DoNotLog,
+                _ => default
+            };
+        }
+
         /// <summary>
         /// Execute the task.
         /// </summary>

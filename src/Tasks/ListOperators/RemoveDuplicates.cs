@@ -31,6 +31,16 @@ namespace Microsoft.Build.Tasks
         [Output]
         public bool HadAnyDuplicates { get; set; }
 
+        protected override ParameterLoggingOptions GetParameterLoggingOptions(string parameterName)
+        {
+            return parameterName switch
+            {
+                nameof(Inputs) => ParameterLoggingOptions.DoNotLog,
+                nameof(Filtered) => ParameterLoggingOptions.DoNotLogItemMetadata,
+                _ => default
+            };
+        }
+
         /// <summary>
         /// Execute the task.
         /// </summary>
