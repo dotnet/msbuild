@@ -142,7 +142,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <OutputType Condition=" '$(TargetType)' == 'Container' or '$(TargetType)' == 'DocumentContainer' ">library</OutputType>
     <OutputType Condition=" '$(OutputType)' == '' ">exe</OutputType>
 
-    <DebugSymbols Condition=" '$(ConfigurationName)' == 'Debug' and '$(DebugSymbols)' == '' and '$(DebugType)'==''">true</DebugSymbols>
+    <DebugSymbols Condition=" '$(Configuration)' == 'Debug' and '$(DebugSymbols)' == '' and '$(DebugType)'==''">true</DebugSymbols>
 
     <!-- Whether or not a .pdb file is produced. -->
     <_DebugSymbolsProduced>false</_DebugSymbolsProduced>
@@ -2326,8 +2326,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetedSDKConfiguration Condition="'$(TargetedSDKConfiguration)' == '' and '_$(Configuration)' == '_Debug'">Debug</TargetedSDKConfiguration>
-    <TargetedSDKConfiguration Condition="'$(TargetedSDKConfiguration)' == '' and '_$(Configuration)' == '_Release'">Retail</TargetedSDKConfiguration>
+    <TargetedSDKConfiguration Condition="'$(TargetedSDKConfiguration)' == '' and '$(Configuration)' == 'Debug'">Debug</TargetedSDKConfiguration>
+    <TargetedSDKConfiguration Condition="'$(TargetedSDKConfiguration)' == '' and '$(Configuration)' == 'Release'">Retail</TargetedSDKConfiguration>
     <TargetedSDKConfiguration Condition="'$(TargetedSDKConfiguration)' == ''">Retail</TargetedSDKConfiguration>
     <TargetedSDKArchitecture Condition="'$(TargetedSDKArchitecture)' == ''">$(ProcessorArchitecture)</TargetedSDKArchitecture>
     <TargetedSDKArchitecture Condition="'$(TargetedSDKArchitecture)' == ''">Neutral</TargetedSDKArchitecture>
@@ -3488,7 +3488,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_SGenDllCreated>false</_SGenDllCreated>
     <_SGenGenerateSerializationAssembliesConfig>$(GenerateSerializationAssemblies)</_SGenGenerateSerializationAssembliesConfig>
     <_SGenGenerateSerializationAssembliesConfig Condition="'$(GenerateSerializationAssemblies)' == ''">Auto</_SGenGenerateSerializationAssembliesConfig>
-    <_SGenGenerateSerializationAssembliesConfig Condition="'$(ConfigurationName)'=='Debug' and '$(_SGenGenerateSerializationAssembliesConfig)' == 'Auto'">Off</_SGenGenerateSerializationAssembliesConfig>
+    <_SGenGenerateSerializationAssembliesConfig Condition="'$(Configuration)'=='Debug' and '$(_SGenGenerateSerializationAssembliesConfig)' == 'Auto'">Off</_SGenGenerateSerializationAssembliesConfig>
     <SGenUseProxyTypes Condition="'$(SGenUseProxyTypes)' == ''">true</SGenUseProxyTypes>
     <SGenUseKeep Condition="'$(SGenUseKeep)'==''">false</SGenUseKeep>
     <SGenShouldGenerateSerializer Condition="'$(SGenShouldGenerateSerializer)' == ''">true</SGenShouldGenerateSerializer>
