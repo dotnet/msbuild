@@ -41,15 +41,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </Otherwise>
   </Choose>
 
-  <PropertyGroup Condition="'$(MSBuildAssemblyVersion)' == ''">
-    <!--
-        Overrides for the Microsoft.Common.targets extension targets. Used to make sure that only the imports we specify
-        (hard-coded to 4.0 locations) are used, not the 12.0 locations that would be used by default.
+  <!--
+      Overrides for the Microsoft.Common.targets extension targets. Used to make sure that only the imports we specify
+      (hard-coded to 4.0 locations) are used, not the 12.0 locations that would be used by default.
 
-        NOTE: This logic is duplicated in Microsoft.VisualBasic.targets and in Microsoft.CSharp.targets because those two files
-        import Microsoft.Common.targets from the current directory and thus don't get the benefit of the redirections, so for
-        any changes to this logic in this file, please also edit the other two.
-    -->
+      NOTE: This logic is duplicated in Microsoft.VisualBasic.targets and in Microsoft.CSharp.targets because those two files
+      import Microsoft.Common.targets from the current directory and thus don't get the benefit of the redirections, so for
+      any changes to this logic in this file, please also edit the other two.
+  -->
+  <PropertyGroup Condition="'$(MSBuildAssemblyVersion)' == ''">
     <ImportByWildcardBefore40MicrosoftCommonTargets Condition="'$(ImportByWildcardBefore40MicrosoftCommonTargets)' == ''">$(ImportByWildcardBeforeMicrosoftCommonTargets)</ImportByWildcardBefore40MicrosoftCommonTargets>
     <ImportByWildcardBefore40MicrosoftCommonTargets Condition="'$(ImportByWildcardBefore40MicrosoftCommonTargets)' == ''">true</ImportByWildcardBefore40MicrosoftCommonTargets>
 
@@ -71,17 +71,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <CustomAfterMicrosoftCommonTargets Condition="'$(CustomAfterMicrosoftCommonTargets)' == ''">$(MSBuildExtensionsPath)\v4.0\Custom.After.Microsoft.Common.targets</CustomAfterMicrosoftCommonTargets>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(MSBuildAssemblyVersion)' == '' and ('$(TargetFrameworkIdentifier)' == '.NETFramework' or '$(TargetFrameworkIdentifier)' == 'Silverlight' or ('$(TargetFrameworkIdentifier)' == '' and ('$(TargetRuntime)' == 'Managed' or '$(TargetRuntime)' == '')))">
-    <!--
-        Overrides for the Microsoft.NETFramework.props extension targets. Used to make sure that only the imports we specify
-        (hard-coded to 4.0 locations) are used, not the 12.0 locations that would be used by default. Required because
-        Microsoft.Common.targets imports it from the current directory, so we don't get a chance to redirect these in its
-        own redirection targets.
+  <!--
+      Overrides for the Microsoft.NETFramework.props extension targets. Used to make sure that only the imports we specify
+      (hard-coded to 4.0 locations) are used, not the 12.0 locations that would be used by default. Required because
+      Microsoft.Common.targets imports it from the current directory, so we don't get a chance to redirect these in its
+      own redirection targets.
 
-        NOTE: This logic is duplicated in Microsoft.VisualBasic.targets and in Microsoft.CSharp.targets because those two files
-        import Microsoft.Common.targets from the current directory and thus don't get the benefit of these redirections either,
-        so for any changes to this logic in this file, please also edit the other two.
-    -->
+      NOTE: This logic is duplicated in Microsoft.VisualBasic.targets and in Microsoft.CSharp.targets because those two files
+      import Microsoft.Common.targets from the current directory and thus don't get the benefit of these redirections either,
+      so for any changes to this logic in this file, please also edit the other two.
+  -->
+  <PropertyGroup Condition="'$(MSBuildAssemblyVersion)' == '' and ('$(TargetFrameworkIdentifier)' == '.NETFramework' or '$(TargetFrameworkIdentifier)' == 'Silverlight' or ('$(TargetFrameworkIdentifier)' == '' and ('$(TargetRuntime)' == 'Managed' or '$(TargetRuntime)' == '')))">
     <ImportByWildcardBefore40MicrosoftNetFrameworkProps Condition="'$(ImportByWildcardBefore40MicrosoftNetFrameworkProps)' == ''">$(ImportByWildcardBeforeMicrosoftNetFrameworkProps)</ImportByWildcardBefore40MicrosoftNetFrameworkProps>
     <ImportByWildcardBefore40MicrosoftNetFrameworkProps Condition="'$(ImportByWildcardBefore40MicrosoftNetFrameworkProps)' == ''">true</ImportByWildcardBefore40MicrosoftNetFrameworkProps>
 
@@ -151,9 +151,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <Import Project="$(MSBuildUserExtensionsPath)\4.0\Microsoft.Common.targets\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfter40MicrosoftCommonTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\4.0\Microsoft.Common.targets\ImportAfter')"/>
   </ImportGroup>
 
-  <!-- Fix up FrameworkPathOverride, which is primarily used to determine the location of mscorlib.dll in the
-       (relatively uncommon) situation where the reference assemblies, in which it's usually found, are not
-       installed.  -->
+  <!--
+      Fix up FrameworkPathOverride, which is primarily used to determine the location of mscorlib.dll in the
+      (relatively uncommon) situation where the reference assemblies, in which it's usually found, are not installed.
+  -->
   <PropertyGroup Condition="'$(MSBuildAssemblyVersion)' == ''">
     <FrameworkPathOverride Condition="!Exists('$(FrameworkPathOverride)\mscorlib.dll')">$(MSBuildFrameworkToolsPath)</FrameworkPathOverride>
   </PropertyGroup>
