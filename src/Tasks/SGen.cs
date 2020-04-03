@@ -12,9 +12,125 @@ using Microsoft.Build.Utilities;
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
+    /// An interface containing public SGen task properties to make sure that all versions of the task have the same public surface.
+    /// </summary>
+    internal interface ISGenTaskContract
+    {
+    #region Properties
+
+        // Input files
+        [Required]
+        string BuildAssemblyName { get; set; }
+
+        [Required]
+        string BuildAssemblyPath { get; set; }
+
+        [Required]
+        bool ShouldGenerateSerializer { get; set; }
+
+        [Required]
+        bool UseProxyTypes { get; set; }
+
+        bool UseKeep { get; set; }
+
+        string[] References { get; set; }
+
+        string KeyContainer { get; set; }
+
+        string KeyFile { get; set; }
+
+        bool DelaySign { get; set; }
+
+        [Output]
+        ITaskItem[] SerializationAssembly { get; set; }
+
+        string SerializationAssemblyName { get; }
+
+        string SdkToolsPath { get; set; }
+
+        /// <summary>
+        /// Gets or Sets the Compiler Platform used by SGen to generate the output assembly.
+        /// </summary>
+        string Platform { get; set; }
+
+        /// <summary>
+        /// Gets or Sets a list of specific Types to generate serialization code for, SGen will generate serialization code only for those types.
+        /// </summary>
+        string[] Types { get; set; }
+
+    #endregion
+    }
+
+#if RUNTIME_TYPE_NETCORE
+    public class SGen : ToolTaskExtension, ISGenTaskContract
+    {
+    #region Properties
+
+        [Required]
+        public string BuildAssemblyName { get; set; }
+
+        [Required]
+        public string BuildAssemblyPath { get; set; }
+
+        [Required]
+        public bool ShouldGenerateSerializer { get; set; }
+
+        [Required]
+        public bool UseProxyTypes { get; set; }
+
+        public bool UseKeep { get; set; }
+
+        public string[] References { get; set; }
+
+        public string KeyContainer { get; set; }
+
+        public string KeyFile { get; set; }
+
+        public bool DelaySign { get; set; }
+
+        [Output]
+        public ITaskItem[] SerializationAssembly { get; set; }
+
+        public string SerializationAssemblyName { get; }
+
+        public string SdkToolsPath { get; set; }
+
+        public string Platform { get; set; }
+
+        public string[] Types { get; set; }
+
+    #endregion
+
+    #region Tool Members
+
+        protected override string ToolName
+        {
+            get
+            {
+                ErrorUtilities.ThrowInternalErrorUnreachable();
+                return null;
+            }
+        }
+
+        protected override string GenerateFullPathToTool()
+        {
+            ErrorUtilities.ThrowInternalErrorUnreachable();
+            return null;
+        }
+
+        public override bool Execute()
+        {
+            Log.LogErrorWithCodeFromResources("SGen.TaskNotSupported", nameof(SGen));
+            return false;
+        }
+
+    #endregion
+    }
+#else
+    /// <summary>
     /// Genererates a serialization assembly containing XML serializers for the input assembly.
     /// </summary>
-    public class SGen : ToolTaskExtension
+    public class SGen : ToolTaskExtension, ISGenTaskContract
     {
         private string _buildAssemblyPath;
         #region Properties
@@ -332,4 +448,5 @@ namespace Microsoft.Build.Tasks
 
         #endregion
     }
+#endif
 }
