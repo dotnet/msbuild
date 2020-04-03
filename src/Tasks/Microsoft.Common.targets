@@ -15,6 +15,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 -->
 
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
   <!--
        In VS 2010 SP1 and VS 2012, both supported for asset compatibility, the MSBuild installed
        as part of them did not enforce using the local ToolsVersion (4.0) in all cases, but instead
@@ -158,4 +159,5 @@ Copyright (C) Microsoft Corporation. All rights reserved.
    <PropertyGroup Condition="'$(MSBuildAssemblyVersion)' == ''">
       <FrameworkPathOverride Condition="!Exists('$(FrameworkPathOverride)\mscorlib.dll')">$(MSBuildFrameworkToolsPath)</FrameworkPathOverride>
    </PropertyGroup>
+
 </Project>

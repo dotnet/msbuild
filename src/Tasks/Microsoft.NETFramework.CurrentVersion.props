@@ -28,9 +28,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <!-- By default we want to replace subsets with profiles, but we do need a way to turning off this "upgrade" in case a user needs to target a subset-->
     <UpgradeSubsetToProfile Condition="'$(UpgradeSubsetToProfile)' == '' ">true</UpgradeSubsetToProfile>
-
     <TargetFrameworkProfile Condition="'$(UpgradeSubsetToProfile)' == 'true' and '$(TargetFrameworkSubset)' != '' and '$(TargetFrameworkProfile)' == ''">$(TargetFrameworkSubset)</TargetFrameworkProfile>
-
     <!-- If we are not upgrading the Subset to a profile this means we want to target a subset, do not wipe out the subset name-->
     <TargetFrameworkSubset Condition="'$(UpgradeTargetFrameworkSubsetToProfile)' == 'true'"></TargetFrameworkSubset>
   </PropertyGroup>
@@ -41,7 +39,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(TargetFrameworkVersion)' == 'v4.0' and '$(FrameworkPathOverride)' == ''">
-
     <!-- The FrameworkPathOverride property is required for the IDE Visual Basic compiler to initialize.
              This location contains reference assemblies for mscorlib.dll and other key VB assemblies.
              This property is required during project evaluation, since the IDE compilers need to initialize before
@@ -62,7 +59,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <MSBuildFrameworkToolsRoot Condition="'$(MSBuildFrameworkToolsRoot)' == '' and '$(MSBuildRuntimeType)' != 'Core'">$(Registry:HKEY_LOCAL_MACHINE\Software\Microsoft\.NETFramework@InstallRoot)</MSBuildFrameworkToolsRoot>
     <_DeploymentSignClickOnceManifests Condition="'$(TargetFrameworkVersion)' == 'v2.0' or '$(TargetFrameworkVersion)' == 'v3.0' or '$(SignManifests)' == 'true'">true</_DeploymentSignClickOnceManifests>
-
     <!-- Assembly names added to the AdditionalExplicitAssemblyReferences property will be added as references to the resolve assembly reference call by default this is done because when upgrading from
          a project targeting 2.0 to 3.5 the system.core reference is not added, therefore we need to add it automatically -->
     <AddAdditionalExplicitAssemblyReferences Condition="'$(AddAdditionalExplicitAssemblyReferences)' == ''">true</AddAdditionalExplicitAssemblyReferences>
@@ -79,17 +75,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <PropertyGroup>
     <TargetingClr2Framework Condition="'$(TargetFrameworkVersion)' == 'v2.0' or '$(TargetFrameworkVersion)' == 'v3.0' or '$(TargetFrameworkVersion)' == 'v3.5'">true</TargetingClr2Framework>
-
     <MSBuildManagedCompilerPath Condition="'$(TargetingClr2Framework)' == 'true'">$(MSBuildFrameworkToolsRoot)\v3.5</MSBuildManagedCompilerPath >
-
     <TargetFrameworkSDKToolsDirectory Condition="'$(TargetingClr2Framework)' == 'true'">$(SDK35ToolsPath)</TargetFrameworkSDKToolsDirectory>
     <!-- If the sdk path is not 3.5 or lower set it to the 40 sdk tools path. This will allow future target framework versions to use the 4.0 sdk tool set
              When a new windows SDK revs they will inplace update the location pointed to by this property. When a new sdk is release this target will have to be
              revised along with another toolsversion. -->
-
     <TargetedRuntimeVersion Condition="'$(TargetedRuntimeVersion)' == '' and ('$(TargetingClr2Framework)' == 'true')">v2.0.50727</TargetedRuntimeVersion>
     <TargetedRuntimeVersion Condition="'$(TargetedRuntimeVersion)' == ''">v$(MSBuildRuntimeVersion)</TargetedRuntimeVersion>
-
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(TargetingClr2Framework)' != 'true' and '$(TargetFrameworkVersion)' != 'v4.0' and ('$(OutputType)' == 'exe' or '$(OutputType)' == 'winexe' or '$(OutputType)' == 'appcontainerexe' or '$(OutputType)' == '')">

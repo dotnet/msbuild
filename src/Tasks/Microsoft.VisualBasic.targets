@@ -17,6 +17,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 -->
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
    <!--
         In VS 2010 SP1 and VS 2012, both supported for asset compatibility, the MSBuild installed
         as part of them did not enforce using the local ToolsVersion (4.0) in all cases, but instead
@@ -35,7 +36,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <When Condition="'$(MSBuildAssemblyVersion)' == ''">
       <PropertyGroup>
         <VisualBasicTargetsPath>$(MSBuildFrameworkToolsPath)\Microsoft.VisualBasic.targets</VisualBasicTargetsPath>
-
         <!-- Same condition as in .NET 4.5 VB targets so that we can override the behavior where it defaults to
              MSBuildToolsPath, which would be incorrect in this case -->
         <VbcToolPath Condition="'$(VbcToolPath)' == '' and '$(BuildingInsideVisualStudio)' != 'true'">$(MsBuildFrameworkToolsPath)</VbcToolPath>
@@ -191,4 +191,5 @@ Copyright (C) Microsoft Corporation. All rights reserved.
    <PropertyGroup Condition="'$(MSBuildAssemblyVersion)' == ''">
       <FrameworkPathOverride Condition="!Exists('$(FrameworkPathOverride)\mscorlib.dll')">$(MSBuildFrameworkToolsPath)</FrameworkPathOverride>
    </PropertyGroup>
+
 </Project>
