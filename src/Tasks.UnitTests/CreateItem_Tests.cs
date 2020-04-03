@@ -167,6 +167,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void RecursiveDirOutOfProc()
         {
+            using var env = TestEnvironment.Create(_testOutput);
+
             ObjectModelHelpers.DeleteTempProjectDirectory();
 
             string projectFileFullPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("Myapp.proj", @"
@@ -181,22 +183,15 @@ namespace Microsoft.Build.UnitTests
 
             ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine("Subdir", "Bar.txt"), "bar");
 
-            string originalCompressionThresholdVariable = Environment.GetEnvironmentVariable("MSBUILDTARGETRESULTCOMPRESSIONTHRESHOLD");
-            Environment.SetEnvironmentVariable("MSBUILDTARGETRESULTCOMPRESSIONTHRESHOLD", "0");
-            try
-            {
-                BuildRequestData data = new BuildRequestData(projectFileFullPath, new Dictionary<string, string>(), null, new string[] { "Repro" }, null);
-                BuildParameters parameters = new BuildParameters();
-                parameters.DisableInProcNode = true;
-                parameters.Loggers = new ILogger[] { new MockLogger(_testOutput) };
-                BuildResult result = BuildManager.DefaultBuildManager.Build(parameters, data);
-                result.OverallResult.ShouldBe(BuildResultCode.Success);
-                result.ResultsByTarget["Repro"].Items[0].GetMetadata("RecursiveDir").ShouldBe("Subdir" + Path.DirectorySeparatorChar);
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("MSBUILDTARGETRESULTCOMPRESSIONTHRESHOLD", originalCompressionThresholdVariable);
-            }
+            env.SetEnvironmentVariable("MSBUILDTARGETRESULTCOMPRESSIONTHRESHOLD", "0");
+
+            BuildRequestData data = new BuildRequestData(projectFileFullPath, new Dictionary<string, string>(), null, new string[] { "Repro" }, null);
+            BuildParameters parameters = new BuildParameters();
+            parameters.DisableInProcNode = true;
+            parameters.Loggers = new ILogger[] { new MockLogger(_testOutput) };
+            BuildResult result = BuildManager.DefaultBuildManager.Build(parameters, data);
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            result.ResultsByTarget["Repro"].Items[0].GetMetadata("RecursiveDir").ShouldBe("Subdir" + Path.DirectorySeparatorChar);
         }
 
         /// <summary>
