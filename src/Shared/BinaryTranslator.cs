@@ -285,11 +285,6 @@ namespace Microsoft.Build.BackEnd
                 {
                     T value = default(T);
 
-                    if (!TranslateNullable(value))
-                    {
-                        continue;
-                    }
-
                     objectTranslator(this, ref value);
                     list.Add(value);
                 }
