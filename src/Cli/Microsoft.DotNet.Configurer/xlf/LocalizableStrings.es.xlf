@@ -49,7 +49,7 @@ The .NET tools collect usage data in order to help us improve your experience. T
 Read more about .NET CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
         <target state="needs-review-translation">Telemetría
 ---------
-Las herramientas de .NET Core recopilan datos de uso para ayudarnos a ejorar su experiencia. Estos datos son anónimos. Microsoft los recopila y comparte con la comunidad. Puede optar por no participar en la telemetría si establece la variable de entorno DOTNET_CLI_TELEMETRY_OPTOUT en "1" o "true" mediante su shell favorito.
+Las herramientas de .NET Core recopilan datos de uso para ayudarnos a mejorar su experiencia. Estos datos son anónimos. Microsoft los recopila y comparte con la comunidad. Puede optar por no participar en la telemetría si establece la variable de entorno DOTNET_CLI_TELEMETRY_OPTOUT en "1" o "true" mediante su shell favorito.
 
 Lea más sobre la telemetría de las herramientas de la CLI de .NET Core: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
