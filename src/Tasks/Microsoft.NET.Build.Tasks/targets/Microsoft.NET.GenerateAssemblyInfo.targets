@@ -6,7 +6,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
@@ -39,11 +39,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateInternalsVisibleToAttributes Condition="'$(GenerateInternalsVisibleToAttributes)' == ''">true</GenerateInternalsVisibleToAttributes>
   </PropertyGroup>
 
-  <!-- 
+  <!--
     Note that this must run before every invocation of CoreCompile to ensure that all compiler
-    runs see the generated assembly info. There is at least one scenario involving Xaml 
+    runs see the generated assembly info. There is at least one scenario involving Xaml
     where CoreCompile is invoked without other potential hooks such as Compile or CoreBuild,
-    etc., so we hook directly on to CoreCompile. Furthermore, we  must run *after* 
+    etc., so we hook directly on to CoreCompile. Furthermore, we  must run *after*
     PrepareForBuild to ensure that the intermediate directory has been created.
 
     Targets that generate Compile items are also expected to run before
@@ -124,7 +124,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <_Parameter1>$(TargetPlatformIdentifier)$(TargetPlatformVersion)</_Parameter1>
       </AssemblyAttribute>
     </ItemGroup>
-    
+
     <ItemGroup Condition="'$(TargetPlatformIdentifier)' != ''
                          and '$(SupportedOSPlatformVersion)' != ''
                          and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
@@ -140,7 +140,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
-  <!-- 
+  <!--
     To allow version changes to be respected on incremental builds (e.g. through CLI parameters),
     create a hash of all assembly attributes so that the cache file will change with the calculated
     assembly attribute values and msbuild will then execute CoreGenerateAssembly to generate a new file.
@@ -157,7 +157,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </Hash>
 
     <WriteLinesToFile Lines="$(_AssemblyAttributesHash)" File="$(GeneratedAssemblyInfoInputsCacheFile)" Overwrite="True" WriteOnlyWhenDifferent="True" />
-    
+
     <ItemGroup>
       <FileWrites Include="$(GeneratedAssemblyInfoInputsCacheFile)" />
     </ItemGroup>
@@ -203,7 +203,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GetAssemblyVersion Condition="'$(AssemblyVersion)' == ''" NuGetVersion="$(Version)">
       <Output TaskParameter="AssemblyVersion" PropertyName="AssemblyVersion" />
     </GetAssemblyVersion>
-    
+
     <PropertyGroup>
       <FileVersion Condition="'$(FileVersion)' == ''">$(AssemblyVersion)</FileVersion>
       <InformationalVersion Condition="'$(InformationalVersion)' == ''">$(Version)</InformationalVersion>

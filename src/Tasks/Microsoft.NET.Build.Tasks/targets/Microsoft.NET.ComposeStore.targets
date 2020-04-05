@@ -6,7 +6,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
@@ -14,7 +14,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!--
     ============================================================
                                         ComposeStore
- 
+
     The main store entry point.
     ============================================================
     -->
@@ -32,9 +32,9 @@ Copyright (c) .NET Foundation. All rights reserved.
    Processes the store project files
     ============================================================
     -->
-  
+
   <Target Name="StoreWorkerMain">
-    
+
     <ItemGroup>
       <_AllProjects Include="$(AdditionalProjects.Split('%3B'))"/>
       <_AllProjects Include ="$(MSBuildProjectFullPath)"/>
@@ -96,8 +96,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                  Targets="RestoreForComposeStore"
                  BuildInParallel="$(BuildInParallel)">
     </MSBuild>
-    
-    
+
+
 <!-- Resolve phase-->
     <MSBuild Projects="@(PackageReferencesToStore)"
                  Targets="StoreResolver"
@@ -111,7 +111,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           Returns="@(ResolvedPackagesPublished)"
           DependsOnTargets="PrepforRestoreForComposeStore;
                             StoreWorkerPerformWork"/>
-  
+
   <Target Name="StoreWorkerPerformWork"
           DependsOnTargets="ComputeAndCopyFilesToStoreDirectory;"
           Condition="Exists($(StoreWorkerWorkingDir))" />
@@ -132,7 +132,7 @@ Copyright (c) .NET Foundation. All rights reserved.
          InputPackageReferences="@(AllResolvedPackagesPublished)">
       <Output TaskParameter="UniquePackageReferences"  ItemName="AllResolvedPackagesPublishedAfterFilter"/>
     </RemoveDuplicatePackageReferences>
-    
+
     <ItemGroup>
       <ListOfPackageReference Include="@(AllResolvedPackagesPublishedAfterFilter -> '%20%20&lt;Package Id=&quot;%(Identity)&quot; Version=&quot;%(Version)&quot; /&gt;')"/>
     </ItemGroup>
@@ -196,7 +196,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
     </Copy>
   </Target>
-  
+
   <!--
     ============================================================
                                         PrepareForComposeStore
@@ -204,7 +204,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     Prepare the prerequisites for ComposeStore.
     ============================================================
     -->
-  
+
   <Target Name="PrepareForComposeStore">
 
     <PropertyGroup>
@@ -223,7 +223,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <NETSdkError Condition="'$(_TFM)' ==''"
                  ResourceName="AtLeastOneTargetFrameworkMustBeSpecified"/>
-      
+
     <PropertyGroup>
       <DefaultComposeDir>$(UserProfileRuntimeStorePath)</DefaultComposeDir>
 
@@ -249,7 +249,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
       <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
     </PropertyGroup>
-    
+
     <PropertyGroup Condition="'$(CreateProfilingSymbols)' == ''">
       <!-- There is no support for profiling symbols on OSX -->
       <CreateProfilingSymbols Condition="$(RuntimeIdentifier.StartsWith('osx'))">false</CreateProfilingSymbols>
@@ -275,13 +275,13 @@ Copyright (c) .NET Foundation. All rights reserved.
       <BaseIntermediateOutputPath>$(StoreWorkerWorkingDir)\</BaseIntermediateOutputPath>
       <ProjectAssetsFile>$(BaseIntermediateOutputPath)\project.assets.json</ProjectAssetsFile>
     </PropertyGroup>
-    
+
     <PropertyGroup>
       <PackagesToPrune>$(MicrosoftNETPlatformLibrary)</PackagesToPrune>
       <SelfContained Condition="'$(SelfContained)' == ''">true</SelfContained>
     </PropertyGroup>
   </Target>
-  
+
   <!--
     ============================================================
                                         RestoreForComposeStore
@@ -289,13 +289,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     Restores the package
     ============================================================
     -->
-  
+
   <Target Name="RestoreForComposeStore"
           DependsOnTargets="PrepforRestoreForComposeStore;"
           Condition="!Exists($(StoreWorkerWorkingDir))">
-    
+
     <MakeDir Directories="$(StoreWorkerWorkingDir)" />
-    
+
     <MSBuild Projects="$(MSBuildProjectFullPath)"
                  Targets="Restore"
                  Properties="RestoreGraphProjectInput=$(MSBuildProjectFullPath);
@@ -313,7 +313,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     Computes the list of all files to copy to the publish directory and then publishes them.
     ============================================================
     -->
-  
+
   <Target Name="ComputeAndCopyFilesToStoreDirectory"
           DependsOnTargets="ComputeFilesToStore;
                             CopyFilesToStoreDirectory" />
@@ -325,11 +325,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     Copy all build outputs, satellites and other necessary files to the publish directory.
     ============================================================
     -->
-  
+
   <Target Name="CopyFilesToStoreDirectory"
           DependsOnTargets="_CopyResolvedUnOptimizedFiles"/>
-  
-  
+
+
   <!--
     ============================================================
                                         _CopyResolvedUnOptimizedFiles
@@ -337,7 +337,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     Copy _UnOptimizedResolvedFileToPublish items to the publish directory.
     ============================================================
     -->
-  
+
   <Target Name="_CopyResolvedUnOptimizedFiles"
           DependsOnTargets="_ComputeResolvedFilesToStoreTypes;
                             _RunOptimizer">
@@ -359,7 +359,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                         _ComputeResolvedFilesToStoreTypes
     ============================================================
     -->
-  
+
   <Target Name="_ComputeResolvedFilesToStoreTypes"
            DependsOnTargets="_GetResolvedFilesToStore;_SplitResolvedFiles;" />
 
@@ -370,7 +370,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     Splits ResolvedFileToPublish items into 'managed' and 'unmanaged' buckets.
     ============================================================
     -->
-  
+
   <Target Name="_SplitResolvedFiles"
            Condition="$(SkipOptimization) !='true' "
            DependsOnTargets="_GetResolvedFilesToStore">
@@ -392,7 +392,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                         _GetResolvedFilesToStore
     ============================================================
     -->
-  
+
   <Target Name="_GetResolvedFilesToStore"
            Condition="$(SkipOptimization) == 'true' ">
     <ItemGroup>
@@ -431,12 +431,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ResolvedPackagesPublished Include="@(PackagesThatWereResolved)"
                                  Condition="$(DoNotTrackPackageAsResolved) !='true'"/>
     </ItemGroup>
-    
+
   </Target>
 
   <!--
     ============================================================
-                                       PrepRestoreForStoreProjects 
+                                       PrepRestoreForStoreProjects
 
     Removes specified PackageReference for store and inserts the specified StorePackageName
     ============================================================
@@ -444,7 +444,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="PrepRestoreForStoreProjects"
           BeforeTargets="_GenerateProjectRestoreGraphPerFramework;"
           Condition="'$(StorePackageName)' != ''" >
-    
+
     <ItemGroup>
       <PackageReference Remove="@(PackageReference)" Condition="'%(PackageReference.IsImplicitlyDefined)' != 'true'"/>
       <PackageReference Include="$(StorePackageName)" Version="$(StorePackageVersion)"/>
