@@ -34,28 +34,22 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        static ObjectTranslator<T> AdaptFactory<T>(NodePacketValueFactory<T> valueFactory) where T : ITranslatable
+        {
+            void Translate(ITranslator translator, ref T objectToTranslate)
+            {
+                TranslatorHelpers.Translate<T>(translator, ref objectToTranslate, valueFactory);
+            }
+
+            return Translate;
+        }
+
         public static void Translate<T>(
             this ITranslator translator,
             ref List<T> list,
             NodePacketValueFactory<T> valueFactory) where T : class, ITranslatable
         {
-            void objectTranslator(ITranslator t2, ref T objectToTranslate)
-            {
-                if (!t2.TranslateNullable(objectToTranslate))
-                {
-                    return;
-                }
-                if (t2.Mode == TranslationDirection.ReadFromStream)
-                {
-                    objectToTranslate = valueFactory(t2);
-                }
-                else
-                {
-                    objectToTranslate.Translate(t2);
-                }
-            }
-
-            translator.Translate(ref list, objectTranslator);
+            translator.Translate(ref list, AdaptFactory(valueFactory));
         }
 
         public static void Translate<T, L>(
@@ -64,24 +58,7 @@ namespace Microsoft.Build.BackEnd
             NodePacketValueFactory<T> valueFactory,
             NodePacketCollectionCreator<L> collectionFactory) where L : IList<T> where T : ITranslatable
         {
-            void objectTranslator(ITranslator t2, ref T objectToTranslate)
-            {
-                if (!t2.TranslateNullable(objectToTranslate))
-                {
-                    return;
-                }
-
-                if (t2.Mode == TranslationDirection.ReadFromStream)
-                {
-                    objectToTranslate = valueFactory(t2);
-                }
-                else
-                {
-                    objectToTranslate.Translate(t2);
-                }
-            }
-
-            translator.Translate(ref list, objectTranslator, collectionFactory);
+            translator.Translate(ref list, AdaptFactory(valueFactory), collectionFactory);
         }
 
         public static void TranslateArray<T>(
@@ -89,24 +66,7 @@ namespace Microsoft.Build.BackEnd
             ref T[] array,
             NodePacketValueFactory<T> valueFactory) where T : class, ITranslatable
         {
-            void objectTranslator(ITranslator t2, ref T objectToTranslate)
-            {
-                if (!t2.TranslateNullable(objectToTranslate))
-                {
-                    return;
-                }
-
-                if (t2.Mode == TranslationDirection.ReadFromStream)
-                {
-                    objectToTranslate = valueFactory(t2);
-                }
-                else
-                {
-                    objectToTranslate.Translate(t2);
-                }
-            }
-
-            translator.TranslateArray(ref array, objectTranslator);
+            translator.TranslateArray(ref array, AdaptFactory(valueFactory));
         }
 
         public static void TranslateDictionary<T>(
@@ -115,24 +75,7 @@ namespace Microsoft.Build.BackEnd
             IEqualityComparer<string> comparer,
             NodePacketValueFactory<T> valueFactory) where T : class, ITranslatable
         {
-            void objectTranslator(ITranslator t2, ref T objectToTranslate)
-            {
-                if (!t2.TranslateNullable(objectToTranslate))
-                {
-                    return;
-                }
-
-                if (t2.Mode == TranslationDirection.ReadFromStream)
-                {
-                    objectToTranslate = valueFactory(t2);
-                }
-                else
-                {
-                    objectToTranslate.Translate(t2);
-                }
-            }
-
-            translator.TranslateDictionary(ref dictionary, comparer, objectTranslator);
+            translator.TranslateDictionary(ref dictionary, comparer, AdaptFactory(valueFactory));
         }
 
         public static void TranslateDictionary<D, T>(
@@ -142,24 +85,7 @@ namespace Microsoft.Build.BackEnd
             where D : IDictionary<string, T>, new()
             where T : class, ITranslatable
         {
-            void objectTranslator(ITranslator t2, ref T objectToTranslate)
-            {
-                if (!t2.TranslateNullable(objectToTranslate))
-                {
-                    return;
-                }
-
-                if (t2.Mode == TranslationDirection.ReadFromStream)
-                {
-                    objectToTranslate = valueFactory(t2);
-                }
-                else
-                {
-                    objectToTranslate.Translate(t2);
-                }
-            }
-
-            translator.TranslateDictionary(ref dictionary, (ObjectTranslator<T>) objectTranslator);
+            translator.TranslateDictionary(ref dictionary, AdaptFactory(valueFactory));
         }
 
         public static void TranslateDictionary<D, T>(
@@ -170,48 +96,7 @@ namespace Microsoft.Build.BackEnd
             where D : IDictionary<string, T>
             where T : class, ITranslatable
         {
-            void objectTranslator(ITranslator t2, ref T objectToTranslate)
-            {
-                if (!t2.TranslateNullable(objectToTranslate))
-                {
-                    return;
-                }
-
-                if (t2.Mode == TranslationDirection.ReadFromStream)
-                {
-                    objectToTranslate = valueFactory(t2);
-                }
-                else
-                {
-                    objectToTranslate.Translate(t2);
-                }
-            }
-
-            translator.TranslateDictionary(ref dictionary, (ObjectTranslator<T>) objectTranslator, collectionCreator);
-        }
-
-
-        public static void TranslatableTranslator<T>(ITranslator t, ref T objectToTranslate) where T : class, ITranslatable, new()
-        {
-            objectToTranslate = null;
-            if (t.Mode == TranslationDirection.ReadFromStream)
-            {
-                objectToTranslate = new T();
-            }
-            objectToTranslate.Translate(t);
-        }
-
-        public static void FactoryAdapter<T>(ITranslator t, ref T objectToTranslate, Func<ITranslator, T> factoryForDeserialization)
-            where T : ITranslatable
-        {
-            if (t.Mode == TranslationDirection.ReadFromStream)
-            {
-                objectToTranslate = factoryForDeserialization(t);
-            }
-            else
-            {
-                objectToTranslate.Translate(t);
-            }
+            translator.TranslateDictionary(ref dictionary, AdaptFactory(valueFactory), collectionCreator);
         }
     }
 }
