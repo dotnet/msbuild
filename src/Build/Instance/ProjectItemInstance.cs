@@ -1618,7 +1618,7 @@ namespace Microsoft.Build.Execution
                         {
                             int key = translator.Reader.ReadInt32();
                             int value = translator.Reader.ReadInt32();
-                            _directMetadata.Set(new ProjectMetadataInstance(interner.GetString(key), interner.GetString(value)));
+                            _directMetadata.Set(new ProjectMetadataInstance(interner.GetString(key), interner.GetString(value), allowItemSpecModifiers: true));
                         }
                     }
                 }
