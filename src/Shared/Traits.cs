@@ -109,8 +109,6 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly bool AlwaysUseContentTimestamp = Environment.GetEnvironmentVariable("MSBUILDALWAYSCHECKCONTENTTIMESTAMP") == "1";
 
-        public readonly bool LogTaskInputsVerbose = Environment.GetEnvironmentVariable("MSBUILDLOGTASKINPUTSVERBOSE") == "1";
-
         /// <summary>
         /// Emit events for project imports.
         /// </summary>
