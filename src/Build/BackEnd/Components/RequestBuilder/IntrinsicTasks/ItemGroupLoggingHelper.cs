@@ -20,7 +20,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The default character limit for logging parameters. 10k is somewhat arbitrary, see https://github.com/microsoft/msbuild/issues/4907.
         /// </summary>
-        internal static int parameterCharacterLimit = 10_000;
+        internal static int parameterCharacterLimit = 40_000;
 
         /// <summary>
         /// The default parameter limit for logging. 200 is somewhat arbitrary, see https://github.com/microsoft/msbuild/pull/5210.
