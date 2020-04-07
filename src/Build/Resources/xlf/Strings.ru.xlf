@@ -41,14 +41,14 @@
     - the reference was called with global properties that do not match the static graph inferred nodes
     - the reference was not explicitly specified as a ProjectReference item in project "{0}"
     </source>
-        <target state="new">MSB4252: Project "{0}" with global properties
+        <target state="translated">MSB4252: проект "{0}" с глобальными свойствами
     ({1})
-    is building project "{2}" with global properties
+    создает проект "{2}" с глобальными свойствами
     ({3})
-    with the ({4}) target(s) but the build result for the built project is not in the engine cache. In isolated builds this could mean one of the following:
-    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in project "{0}"
-    - the reference was called with global properties that do not match the static graph inferred nodes
-    - the reference was not explicitly specified as a ProjectReference item in project "{0}"
+    для целевых объектов ({4}), но результат сборки для полученного проекта отсутствует в кэше подсистемы. В изолированных сборках это может означать один из следующих вариантов:
+    – ссылка была вызвана с целью, которая не указана в элементе ProjectReferenceTargets в проекте "{0}"
+    – ссылка была вызвана с глобальными свойствами, которые не совпадают со статическими узлами, полученными от графа
+    – ссылка не была явно указана в качестве элемента ProjectReference в проекте "{0}"
     </target>
         <note>
       {StrBegin="MSB4252:"}
@@ -77,7 +77,7 @@
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
         <source>Read environment variable "{0}"</source>
-        <target state="new">Read environment variable "{0}"</target>
+        <target state="translated">Чтение переменной среды "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
@@ -145,7 +145,7 @@
       </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
-        <target state="new">Property initial value: $({0})="{1}" Source: {2}</target>
+        <target state="translated">Начальное значение свойства: $({0})="{1}" Источник: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -186,7 +186,7 @@
       </trans-unit>
       <trans-unit id="TaskReturnedFalseButDidNotLogError">
         <source>MSB4132: The "{0}" task returned false but did not log an error.</source>
-        <target state="new">MSB4132: The "{0}" task returned false but did not log an error.</target>
+        <target state="translated">MSB4132: задача "{0}" возвратила значение false, но не зарегистрировала ошибку.</target>
         <note>{StrBegin="MSB4132: "}</note>
       </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
@@ -199,7 +199,7 @@
       </trans-unit>
       <trans-unit id="UninitializedPropertyRead">
         <source>Read uninitialized property "{0}"</source>
-        <target state="new">Read uninitialized property "{0}"</target>
+        <target state="translated">Чтение неинициализированного свойства "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">

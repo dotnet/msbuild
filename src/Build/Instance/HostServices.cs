@@ -90,6 +90,11 @@ namespace Microsoft.Build.Execution
                 {
 #if FEATURE_COM_INTEROP
 
+                    if (Environment.Is64BitProcess)
+                    {
+                        throw new PlatformNotSupportedException("GetHostObject with monikerName is only supported in 32 bit");
+                    }
+
                     try
                     {
                         object objectFromRunningObjectTable =
@@ -155,6 +160,11 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(targetName, "targetName");
             ErrorUtilities.VerifyThrowArgumentNull(taskName, "taskName");
             ErrorUtilities.VerifyThrowArgumentNull(monikerName, "monikerName");
+
+            if (Environment.Is64BitProcess)
+            {
+                throw new PlatformNotSupportedException("RegisterHostObject with monikerName is only supported in 32 bit");
+            }
 
             _hostObjectMap = _hostObjectMap ?? new Dictionary<string, HostObjects>(StringComparer.OrdinalIgnoreCase);
 

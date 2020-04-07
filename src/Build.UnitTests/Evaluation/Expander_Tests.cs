@@ -3889,6 +3889,12 @@ $(
         }
 
         [Fact]
+        public void PropertyFunctionStringPadLeftChar()
+        {
+            TestPropertyFunction("$(VersionSuffixBuildOfTheDay.PadLeft(3, $([System.Convert]::ToChar(`0`))))", "VersionSuffixBuildOfTheDay", "4", "004");
+        }
+
+        [Fact]
         public void PropertyFunctionStringPadRight1()
         {
             TestPropertyFunction("$(prop.PadRight(2))", "prop", "x", "x ");

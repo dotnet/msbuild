@@ -41,14 +41,14 @@
     - the reference was called with global properties that do not match the static graph inferred nodes
     - the reference was not explicitly specified as a ProjectReference item in project "{0}"
     </source>
-        <target state="new">MSB4252: Project "{0}" with global properties
+        <target state="translated">MSB4252: 具有全域屬性的專案 "{0}"
     ({1})
-    is building project "{2}" with global properties
+    正在建置具有全域屬性的專案 "{2}"
     ({3})
-    with the ({4}) target(s) but the build result for the built project is not in the engine cache. In isolated builds this could mean one of the following:
-    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in project "{0}"
-    - the reference was called with global properties that do not match the static graph inferred nodes
-    - the reference was not explicitly specified as a ProjectReference item in project "{0}"
+    具有 ({4}) 個目標，但是已建置專案的組建結果不在引擎快取中。在隔離式組建中，這可能代表下列其中一項情況:
+    - 使用在專案 "{0}" 中 ProjectReferenceTargets 項目內未指定的目標呼叫了參考
+    - 使用與靜態圖表推斷節點不相符的全域屬性呼叫了參考
+    - 未明確指定參考作為專案 "{0}" 中的 ProjectReference 項目
     </target>
         <note>
       {StrBegin="MSB4252:"}
@@ -77,7 +77,7 @@
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
         <source>Read environment variable "{0}"</source>
-        <target state="new">Read environment variable "{0}"</target>
+        <target state="translated">讀取環境變數 "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
@@ -145,7 +145,7 @@
       </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
-        <target state="new">Property initial value: $({0})="{1}" Source: {2}</target>
+        <target state="translated">屬性初始值: $({0})="{1}" 來源: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -186,7 +186,7 @@
       </trans-unit>
       <trans-unit id="TaskReturnedFalseButDidNotLogError">
         <source>MSB4132: The "{0}" task returned false but did not log an error.</source>
-        <target state="new">MSB4132: The "{0}" task returned false but did not log an error.</target>
+        <target state="translated">MSB4132: "{0}" 工作傳回了 false，但並未記錄錯誤。</target>
         <note>{StrBegin="MSB4132: "}</note>
       </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
@@ -199,7 +199,7 @@
       </trans-unit>
       <trans-unit id="UninitializedPropertyRead">
         <source>Read uninitialized property "{0}"</source>
-        <target state="new">Read uninitialized property "{0}"</target>
+        <target state="translated">讀取未初始化的屬性 "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">
