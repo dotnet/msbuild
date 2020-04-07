@@ -116,7 +116,8 @@ namespace Microsoft.Build.Utilities
         public readonly bool AlwaysUseContentTimestamp = Environment.GetEnvironmentVariable("MSBUILDALWAYSCHECKCONTENTTIMESTAMP") == "1";
 
         /// <summary>
-        /// Stop truncating task inputs when logging them. Setting any value disables this.
+        /// Truncate task inputs when logging them. This can reduce memory pressure
+        /// at the expense of log usefulness.
         /// </summary>
         public readonly bool TruncateTaskInputs = Environment.GetEnvironmentVariable("MSBUILDTRUNCATETASKINPUTS") == "1";
 
