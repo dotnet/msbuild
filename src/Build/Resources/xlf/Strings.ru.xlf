@@ -179,11 +179,6 @@
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
     </note>
       </trans-unit>
-      <trans-unit id="TaskReturnedFalseButDidNotLogError">
-        <source>MSB4132: The "{0}" task returned false but did not log an error.</source>
-        <target state="translated">MSB4132: задача "{0}" возвратила значение false, но не зарегистрировала ошибку.</target>
-        <note>{StrBegin="MSB4132: "}</note>
-      </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
         <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
         <target state="translated">MSB4254: задача MSBuild собирает проект(ы) {0}, которые не указаны в элементе ProjectReference. В изолированных сборках это может означать, что ссылки явно не указаны как элемент ProjectReference в "{1}".</target>
