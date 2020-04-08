@@ -17,8 +17,6 @@ using BuildEventFileInfo = Microsoft.Build.Shared.BuildEventFileInfo;
 using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 using ExceptionUtilities = Microsoft.Build.Shared.ExceptionHandling;
 using System.Collections.ObjectModel;
-using Microsoft.Build.Shared;
-using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.Construction
 {
