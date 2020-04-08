@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 using System.Reflection;
 
 namespace Microsoft.Build.BackEnd
@@ -16,6 +17,24 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal static class ItemGroupLoggingHelper
     {
+        /// <summary>
+        /// The default character limit for logging parameters. 10k is somewhat arbitrary, see https://github.com/microsoft/msbuild/issues/4907.
+        /// </summary>
+        internal static int parameterCharacterLimit = 40_000;
+
+        /// <summary>
+        /// The default parameter limit for logging. 200 is somewhat arbitrary, see https://github.com/microsoft/msbuild/pull/5210.
+        /// </summary>
+        internal static int parameterLimit = 200;
+
+        /// <summary>
+        /// Gets a text serialized value of a parameter for logging.
+        /// </summary>
+        internal static string GetParameterText(string prefix, string parameterName, params object[] parameterValues)
+        {
+            return GetParameterText(prefix, parameterName, (IList)parameterValues);
+        }
+
         internal static string ItemGroupIncludeLogMessagePrefix = ResourceUtilities.GetResourceString("ItemGroupIncludeLogMessagePrefix");
         internal static string ItemGroupRemoveLogMessage = ResourceUtilities.GetResourceString("ItemGroupRemoveLogMessage");
         internal static string OutputItemParameterMessagePrefix = ResourceUtilities.GetResourceString("OutputItemParameterMessagePrefix");
@@ -61,6 +80,8 @@ namespace Microsoft.Build.BackEnd
                     sb.Append("\n");
                 }
 
+                bool truncateTaskInputs = Traits.Instance.EscapeHatches.TruncateTaskInputs;
+
                 for (int i = 0; i < parameterValue.Count; i++)
                 {
                     if (parameterValue[i] == null)
@@ -78,6 +99,12 @@ namespace Microsoft.Build.BackEnd
                     if (!specialTreatmentForSingle && i < parameterValue.Count - 1)
                     {
                         sb.Append("\n");
+                    }
+
+                    if (truncateTaskInputs && (sb.Length >= parameterCharacterLimit || i > parameterLimit))
+                    {
+                        sb.Append(ResourceUtilities.GetResourceString("LogTaskInputs.Truncated"));
+                        break;
                     }
                 }
 
