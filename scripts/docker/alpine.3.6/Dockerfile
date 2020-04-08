@@ -4,7 +4,7 @@
 #
 
 # Dockerfile that creates a container suitable to build dotnet-cli
-FROM microsoft/dotnet-buildtools-prereqs:alpine-3.6-3148f11-20171119021156
+FROM mcr.microsoft.com/dotnet-buildtools/prereqs:alpine-3.6-3e800f1-20190501005341
 
 # This Dockerfile doesn't use the USER_ID, but the parameter needs to be declared to prevent docker
 # from issuing a warning
