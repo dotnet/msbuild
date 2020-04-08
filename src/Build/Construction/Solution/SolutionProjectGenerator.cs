@@ -163,7 +163,7 @@ namespace Microsoft.Build.Construction
 
             if (targetNames != null)
             {
-                _targetNames = targetNames.Select(i => i.Split(MSBuildConstants.ColonChar, 2, StringSplitOptions.RemoveEmptyEntries).Last()).ToList();
+                _targetNames = targetNames.Select(i => i.Split(new char[] { ':' }, 2, StringSplitOptions.RemoveEmptyEntries).Last()).ToList();
             }
         }
 
@@ -1347,7 +1347,7 @@ namespace Microsoft.Build.Construction
             }
 
             task.SetParameter("BuildInParallel", "True");
-            task.SetParameter("ToolsVersion", MSBuildConstants.CurrentToolsVersion);
+            task.SetParameter("ToolsVersion", "Current");
             task.SetParameter("Properties", SolutionProperties);
             task.SetParameter("SkipNonexistentProjects", "%(ProjectReference.SkipNonexistentProjects)");
 
