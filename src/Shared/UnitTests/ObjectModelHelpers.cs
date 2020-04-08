@@ -1343,32 +1343,35 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        public static BuildResult BuildProjectFileUsingBuildManager(string projectFile, MockLogger logger = null, BuildParameters parameters = null)
+        public static BuildResult BuildProjectFileUsingBuildManager(
+            string projectFile,
+            MockLogger logger = null,
+            BuildParameters parameters = null,
+            string[] targetsToBuild = null
+        )
         {
-            using (var buildManager = new BuildManager())
+            using var buildManager = new BuildManager();
+            parameters ??= new BuildParameters();
+
+            if (logger != null)
             {
-                parameters = parameters ?? new BuildParameters();
-
-                if (logger != null)
-                {
-                    parameters.Loggers = parameters.Loggers == null
-                        ? new[] {logger}
-                        : parameters.Loggers.Concat(new[] {logger});
-                }
-
-                var request = new BuildRequestData(
-                    projectFile,
-                    new Dictionary<string, string>(),
-                    MSBuildConstants.CurrentToolsVersion,
-                    new string[] {},
-                    null);
-
-                var result = buildManager.Build(
-                    parameters,
-                    request);
-
-                return result;
+                parameters.Loggers = parameters.Loggers == null
+                    ? new[] {logger}
+                    : parameters.Loggers.Concat(new[] {logger});
             }
+
+            var request = new BuildRequestData(
+                projectFile,
+                new Dictionary<string, string>(),
+                MSBuildConstants.CurrentToolsVersion,
+                targetsToBuild ?? new string[] {},
+                null);
+
+            var result = buildManager.Build(
+                parameters,
+                request);
+
+            return result;
         }
 
         /// <summary>

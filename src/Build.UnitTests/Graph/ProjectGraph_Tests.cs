@@ -1266,6 +1266,134 @@ $@"
             }
         }
 
+        [Fact]
+        public void GetTargetsListShouldSupportTargetsMarkedASkipNonexistentTargets()
+        {
+            var graph = Helpers.CreateProjectGraph(
+                env: _env,
+                dependencyEdges: new Dictionary<int, int[]>
+                {
+                    {1, new[] {2}}
+                },
+                extraContentPerProjectNumber: new Dictionary<int, string>
+                {
+                    {
+                        1,
+                        @"
+                          <ItemGroup>
+                            <ProjectReferenceTargets Include='Build' Targets='MandatoryTarget1' />
+                            <ProjectReferenceTargets Include='Build' Targets='MandatoryTarget2' SkipNonexistentTargets='false' />
+                            <ProjectReferenceTargets Include='Build' Targets='OptionalTargetWhichExists;OptionalTargetWhichDoesNotExist' SkipNonexistentTargets='true' />
+
+                            <ProjectReference Include='2.proj' />
+                          </ItemGroup>
+
+                          <Target Name='Build'>
+                            <MSBuild Projects='2.proj' Targets='MandatoryTarget1; MandatoryTarget2' />
+                            <MSBuild Projects='2.proj' Targets='OptionalTargetWhichExists;OptionalTargetWhichDoesNotExist' SkipNonexistentTargets='true'/>
+                          </Target>"
+                    },
+                    {
+                        2,
+                        @"<Target Name='MandatoryTarget1'>
+                          </Target>
+
+                          <Target Name='MandatoryTarget2'>
+                          </Target>
+
+                          <Target Name='OptionalTargetWhichExists'>
+                          </Target>"
+                    }
+                }
+            );
+
+            var targetLists = graph.GetTargetLists(entryProjectTargets: new[] {"Build"});
+
+            targetLists[key: GetFirstNodeWithProjectNumber(graph: graph, projectNum: 1)].ShouldBe(expected: new []{"Build"});
+            targetLists[key: GetFirstNodeWithProjectNumber(graph: graph, projectNum: 2)].ShouldBe(expected: new []{"MandatoryTarget1", "MandatoryTarget2", "OptionalTargetWhichExists"});
+
+
+            var results = ResultCacheBasedBuilds_Tests.BuildGraphUsingCacheFiles(
+                env: _env,
+                graph: graph,
+                generateCacheFiles: true,
+                expectedLogOutputPerNode: new Dictionary<ProjectGraphNode, string[]>(),
+                outputCaches: new Dictionary<ProjectGraphNode, string>(),
+                assertBuildResults: false,
+                targetListsPerNode: targetLists);
+
+            foreach (var result in results)
+            {
+                result.Value.Result.OverallResult.ShouldBe(BuildResultCode.Success);
+            }
+        }
+
+        [Fact]
+        public void SkipNonexistentTargetsShouldNotHideMissedTargetResults()
+        {
+            _env.DoNotLaunchDebugger();
+
+            var graph = Helpers.CreateProjectGraph(
+                env: _env,
+                dependencyEdges: new Dictionary<int, int[]>
+                {
+                    {1, new[] {2}}
+                },
+                extraContentPerProjectNumber: new Dictionary<int, string>
+                {
+                    {
+                        1,
+                        @"
+                          <ItemGroup>
+                            <!-- MandatoryTarget2 is not specified in the target protocol, which should cause the build to fail -->
+                            <ProjectReferenceTargets Include='Build' Targets='MandatoryTarget1;OptionalTargetWhichExists;OptionalTargetWhichDoesNotExist' SkipNonexistentTargets='true' />
+
+                            <ProjectReference Include='2.proj' />
+                          </ItemGroup>
+
+                          <Target Name='Build'>
+                            <MSBuild Projects='2.proj' Targets='MandatoryTarget1;MandatoryTarget2;OptionalTargetWhichExists;OptionalTargetWhichDoesNotExist' SkipNonexistentTargets='true'/>
+                          </Target>"
+                    },
+                    {
+                        2,
+                        @"<Target Name='MandatoryTarget1'>
+                          </Target>
+
+                          <Target Name='MandatoryTarget2'>
+                          </Target>
+
+                          <Target Name='OptionalTargetWhichExists'>
+                          </Target>"
+                    }
+                }
+            );
+
+            var targetLists = graph.GetTargetLists(entryProjectTargets: new[] { "Build" });
+
+            targetLists[key: GetFirstNodeWithProjectNumber(graph: graph, projectNum: 1)].ShouldBe(expected: new[] { "Build" });
+            targetLists[key: GetFirstNodeWithProjectNumber(graph: graph, projectNum: 2)].ShouldBe(expected: new[] { "MandatoryTarget1", "OptionalTargetWhichExists" });
+
+
+            var results = ResultCacheBasedBuilds_Tests.BuildGraphUsingCacheFiles(
+                env: _env,
+                graph: graph,
+                generateCacheFiles: true,
+                expectedLogOutputPerNode: new Dictionary<ProjectGraphNode, string[]>(),
+                outputCaches: new Dictionary<ProjectGraphNode, string>(),
+                assertBuildResults: false,
+                targetListsPerNode: targetLists);
+
+            results[2].Result.OverallResult.ShouldBe(BuildResultCode.Success);
+            results[1].Result.OverallResult.ShouldBe(BuildResultCode.Failure);
+
+            results[1].Logger.ErrorCount.ShouldBe(1);
+            results[1].Logger.Errors.First().Message.ShouldContain("MSB4252");
+            results[1].Logger.Errors.First().Message.ShouldContain("1.proj");
+            results[1].Logger.Errors.First().Message.ShouldContain("2.proj");
+            results[1].Logger.Errors.First().Message.ShouldContain(" with the (MandatoryTarget1;MandatoryTarget2;OptionalTargetWhichExists;OptionalTargetWhichDoesNotExist) target(s) but the build result for the built project is not in the engine cache");
+        }
+
         public static IEnumerable<object[]> Graphs
         {
             get

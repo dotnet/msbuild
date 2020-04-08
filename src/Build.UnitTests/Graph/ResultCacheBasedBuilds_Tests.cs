@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -16,6 +17,7 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.Build.UnitTests.Helpers;
+using static Microsoft.Build.Graph.UnitTests.GraphTestingUtilities;
 
 namespace Microsoft.Build.Graph.UnitTests
 {
@@ -375,22 +377,22 @@ namespace Microsoft.Build.Graph.UnitTests
             BuildGraphUsingCacheFiles(_env, graph, expectedOutput, outputCaches, generateCacheFiles: true);
 
             // remove cache for project 3 to cause a cache miss
-            outputCaches.Remove(expectedOutput.Keys.First(n => ProjectNumber(n) == "3"));
+            outputCaches.Remove(expectedOutput.Keys.First(n => GetProjectNumber(n) == 3));
 
             var results = BuildGraphUsingCacheFiles(_env, graph, expectedOutput, outputCaches, generateCacheFiles: false, assertBuildResults: false);
 
-            results["3"].Result.OverallResult.ShouldBe(BuildResultCode.Success);
-            results["2"].Result.OverallResult.ShouldBe(BuildResultCode.Success);
+            results[3].Result.OverallResult.ShouldBe(BuildResultCode.Success);
+            results[2].Result.OverallResult.ShouldBe(BuildResultCode.Success);
 
-            results["1"].Result.OverallResult.ShouldBe(BuildResultCode.Failure);
-            results["1"].Logger.ErrorCount.ShouldBe(1);
-            results["1"].Logger.Errors.First().Message.ShouldContain("MSB4252");
+            results[1].Result.OverallResult.ShouldBe(BuildResultCode.Failure);
+            results[1].Logger.ErrorCount.ShouldBe(1);
+            results[1].Logger.Errors.First().Message.ShouldContain("MSB4252");
 
-            results["1"].Logger.Errors.First().BuildEventContext.NodeId.ShouldNotBe(BuildEventContext.InvalidNodeId);
-            results["1"].Logger.Errors.First().BuildEventContext.ProjectInstanceId.ShouldNotBe(BuildEventContext.InvalidProjectInstanceId);
-            results["1"].Logger.Errors.First().BuildEventContext.ProjectContextId.ShouldNotBe(BuildEventContext.InvalidProjectContextId);
-            results["1"].Logger.Errors.First().BuildEventContext.TargetId.ShouldNotBe(BuildEventContext.InvalidTargetId);
-            results["1"].Logger.Errors.First().BuildEventContext.TaskId.ShouldNotBe(BuildEventContext.InvalidTaskId);
+            results[1].Logger.Errors.First().BuildEventContext.NodeId.ShouldNotBe(BuildEventContext.InvalidNodeId);
+            results[1].Logger.Errors.First().BuildEventContext.ProjectInstanceId.ShouldNotBe(BuildEventContext.InvalidProjectInstanceId);
+            results[1].Logger.Errors.First().BuildEventContext.ProjectContextId.ShouldNotBe(BuildEventContext.InvalidProjectContextId);
+            results[1].Logger.Errors.First().BuildEventContext.TargetId.ShouldNotBe(BuildEventContext.InvalidTargetId);
+            results[1].Logger.Errors.First().BuildEventContext.TaskId.ShouldNotBe(BuildEventContext.InvalidTaskId);
         }
 
         [Fact]
@@ -465,7 +467,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
             caches.Count.ShouldBe(3);
 
-            var rootCache = caches.FirstOrDefault(c => ProjectNumber(c.Key) == "1");
+            var rootCache = caches.FirstOrDefault(c => GetProjectNumber(c.Key) == 1);
 
             rootCache.ShouldNotBeNull();
 
@@ -505,7 +507,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// <param name="expectedOutputProducer"></param>
         /// <param name="topoSortedNodes"></param>
         /// <returns></returns>
-        internal static Dictionary<string, (BuildResult Result, MockLogger Logger)> BuildGraphUsingCacheFiles(
+        internal static Dictionary<int, (BuildResult Result, MockLogger Logger)> BuildGraphUsingCacheFiles(
             TestEnvironment env,
             ProjectGraph graph,
             Dictionary<ProjectGraphNode, string[]> expectedLogOutputPerNode,
@@ -513,11 +515,12 @@ namespace Microsoft.Build.Graph.UnitTests
             bool generateCacheFiles,
             bool assertBuildResults = true,
             // (current node, expected output dictionary) -> actual expected output for current node
-            Func<ProjectGraphNode, Dictionary<ProjectGraphNode, string[]>, string[]> expectedOutputProducer = null)
+            Func<ProjectGraphNode, Dictionary<ProjectGraphNode, string[]>, string[]> expectedOutputProducer = null,
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetListsPerNode = null)
         {
             expectedOutputProducer ??= ((node, expectedOutputs) => expectedOutputs[node]);
 
-            var results = new Dictionary<string, (BuildResult Result, MockLogger Logger)>(graph.ProjectNodesTopologicallySorted.Count);
+            var results = new Dictionary<int, (BuildResult Result, MockLogger Logger)>(graph.ProjectNodesTopologicallySorted.Count);
 
             if (generateCacheFiles)
             {
@@ -542,7 +545,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
                 if (generateCacheFiles)
                 {
-                    outputCaches[node] = env.DefaultTestDirectory.CreateFile($"OutputCache-{ProjectNumber(node)}").Path;
+                    outputCaches[node] = env.DefaultTestDirectory.CreateFile($"OutputCache-{GetProjectNumber(node)}").Path;
                     buildParameters.OutputResultsCacheFile = outputCaches[node];
                 }
 
@@ -553,9 +556,10 @@ namespace Microsoft.Build.Graph.UnitTests
                 var result = BuildProjectFileUsingBuildManager(
                     node.ProjectInstance.FullPath,
                     null,
-                    buildParameters);
+                    buildParameters,
+                    targetListsPerNode?[node].ToArray());
 
-                results[ProjectNumber(node)] = (result, logger);
+                results[GetProjectNumber(node)] = (result, logger);
 
                 if (assertBuildResults)
                 {
@@ -573,9 +577,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
             string[] ExpectedBuildOutputForNode(ProjectGraphNode node)
             {
-                var expectedOutputForNode = new List<string>();
-
-                expectedOutputForNode.Add(ProjectNumber(node));
+                var expectedOutputForNode = new List<string> {GetProjectNumber(node).ToString()};
 
                 foreach (var referenceOutput in node.ProjectReferences.SelectMany(n => expectedLogOutputPerNode[n]))
                 {
@@ -588,8 +590,6 @@ namespace Microsoft.Build.Graph.UnitTests
                 return expectedOutputForNode.ToArray();
             }
         }
-
-        private static string ProjectNumber(ProjectGraphNode node) => Path.GetFileNameWithoutExtension(node.ProjectInstance.FullPath);
 
         private static TransientTestFile CreateProjectFileWrapper(TestEnvironment env, int projectNumber, int[] projectReferences, Dictionary<string, string[]> projectReferenceTargets, string defaultTargets, string extraContent)
         {
@@ -624,7 +624,7 @@ namespace Microsoft.Build.Graph.UnitTests
                             <i Include='{projectNumber}'/>
                         </ItemGroup>");
 
-            return CreateProjectFile(
+            return Helpers.CreateProjectFile(
                 env,
                 projectNumber,
                 projectReferences,

@@ -26,6 +26,9 @@ namespace Microsoft.Build.Graph
         private const string ProjectReferenceTargetIsOuterBuildMetadataName = "OuterBuild";
         internal const string InnerBuildReferenceItemName = "_ProjectSelfReference";
 
+        private static readonly IImmutableSet<string> TargetsWhichCannotBeSkippedIfNonexistent =
+            new[] {MSBuildConstants.DefaultTargetsMarker, MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}.ToImmutableHashSet();
+
         private static readonly char[] PropertySeparator = MSBuildConstants.SemicolonChar;
 
         public static ProjectInterpretation Instance = new ProjectInterpretation();
@@ -348,10 +351,10 @@ namespace Microsoft.Build.Graph
 
         public readonly struct TargetsToPropagate
         {
-            private readonly ImmutableList<string> _outerBuildTargets;
-            private readonly ImmutableList<string> _allTargets;
+            private readonly ImmutableList<TargetSpecification> _outerBuildTargets;
+            private readonly ImmutableList<TargetSpecification> _allTargets;
 
-            private TargetsToPropagate(ImmutableList<string> outerBuildTargets, ImmutableList<string> nonOuterBuildTargets)
+            private TargetsToPropagate(ImmutableList<TargetSpecification> outerBuildTargets, ImmutableList<TargetSpecification> nonOuterBuildTargets)
             {
                 _outerBuildTargets = outerBuildTargets;
 
@@ -373,8 +376,8 @@ namespace Microsoft.Build.Graph
             /// <returns></returns>
             public static TargetsToPropagate FromProjectAndEntryTargets(ProjectInstance project, ImmutableList<string> entryTargets)
             {
-                var targetsForOuterBuild = ImmutableList.CreateBuilder<string>();
-                var targetsForInnerBuild = ImmutableList.CreateBuilder<string>();
+                var targetsForOuterBuild = ImmutableList.CreateBuilder<TargetSpecification>();
+                var targetsForInnerBuild = ImmutableList.CreateBuilder<TargetSpecification>();
 
                 var projectReferenceTargets = project.GetItems(ItemTypeNames.ProjectReferenceTargets);
 
@@ -388,7 +391,11 @@ namespace Microsoft.Build.Graph
 
                             var targetsAreForOuterBuild = projectReferenceTarget.GetMetadataValue(ProjectReferenceTargetIsOuterBuildMetadataName).Equals("true", StringComparison.OrdinalIgnoreCase);
 
-                            var targets = ExpressionShredder.SplitSemiColonSeparatedList(targetsMetadataValue).ToArray();
+                            var skipNonexistentTargets = projectReferenceTarget
+                                .GetMetadataValue("SkipNonexistentTargets")
+                                .Equals("true", StringComparison.OrdinalIgnoreCase);
+
+                            var targets = ExpressionShredder.SplitSemiColonSeparatedList(targetsMetadataValue).Select(t => new TargetSpecification(t, skipNonexistentTargets)).ToArray();
 
                             if (targetsAreForOuterBuild)
                             {
@@ -405,18 +412,41 @@ namespace Microsoft.Build.Graph
                 return new TargetsToPropagate(targetsForOuterBuild.ToImmutable(), targetsForInnerBuild.ToImmutable());
             }
 
+            private readonly struct TargetSpecification
+            {
+                public string TargetName { get; }
+                public bool SkipNonexistentTarget { get; }
+
+                public TargetSpecification(string targetName, bool skipNonexistentTarget)
+                {
+                    TargetName = targetName;
+                    SkipNonexistentTarget = skipNonexistentTarget;
+
+                    ErrorUtilities.VerifyThrow(!skipNonexistentTarget || !TargetsWhichCannotBeSkippedIfNonexistent.Contains(targetName), $"some targets cannot be marked as SkipNonexistentTargets");
+                }
+            }
+
             public ImmutableList<string> GetApplicableTargetsForReference(ProjectInstance reference)
             {
                 switch (GetProjectType(reference))
                 {
                     case ProjectType.InnerBuild:
-                        return _allTargets;
+                        return RemoveNonExistentTargets(_allTargets);
                     case ProjectType.OuterBuild:
-                        return _outerBuildTargets;
+                        return RemoveNonExistentTargets(_outerBuildTargets);
                     case ProjectType.NonMultitargeting:
-                        return _allTargets;
+                        return RemoveNonExistentTargets(_allTargets);
                     default:
                         throw new ArgumentOutOfRangeException();
+                }
+
+                ImmutableList<string> RemoveNonExistentTargets(ImmutableList<TargetSpecification> targets)
+                {
+                    return targets
+                        .Where(t => t.SkipNonexistentTarget == false ||
+                                    t.SkipNonexistentTarget && reference.Targets.ContainsKey(t.TargetName))
+                        .Select(t => t.TargetName)
+                        .ToImmutableList();
                 }
             }
         }
