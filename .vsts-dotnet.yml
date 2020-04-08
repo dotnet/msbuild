@@ -31,6 +31,7 @@ stages:
       name: VSEng-MicroBuildVS2019
       demands:
       - agent.os -equals Windows_NT
+      - VisualStudio_Version -equals 16.5
 
     timeoutInMinutes: 180
 
