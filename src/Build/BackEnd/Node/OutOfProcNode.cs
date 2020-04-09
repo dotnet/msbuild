@@ -249,7 +249,7 @@ namespace Microsoft.Build.Execution
         {
             // Console.WriteLine("Run called at {0}", DateTime.Now);
             int currentProcID = Process.GetCurrentProcess().Id;
-            string pipeName = NamedPipeUtil.GetPipeNameOrPath("MSBuild" + Process.GetCurrentProcess().Id);
+            string pipeName = NamedPipeUtil.GetPipeNameOrPath("MSBuild" + currentProcID);
 
             _nodeEndpoint = new NodeEndpointOutOfProc(pipeName, this, enableReuse, lowPriority);
             _nodeEndpoint.OnLinkStatusChanged += OnLinkStatusChanged;
