@@ -248,6 +248,7 @@ namespace Microsoft.Build.Execution
         public NodeEngineShutdownReason Run(bool enableReuse, bool lowPriority, out Exception shutdownException)
         {
             // Console.WriteLine("Run called at {0}", DateTime.Now);
+            int currentProcID = Process.GetCurrentProcess().Id;
             string pipeName = NamedPipeUtil.GetPipeNameOrPath("MSBuild" + Process.GetCurrentProcess().Id);
 
             _nodeEndpoint = new NodeEndpointOutOfProc(pipeName, this, enableReuse, lowPriority);
@@ -264,6 +265,7 @@ namespace Microsoft.Build.Execution
                 {
                     case 0:
                         NodeEngineShutdownReason shutdownReason = HandleShutdown(out shutdownException);
+                        CommunicationsUtilities.Trace("Shutting down node MSBuild" + currentProcID);
                         return shutdownReason;
 
                     case 1:
