@@ -61,9 +61,9 @@
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
       <Sha>1c2681b16a0bb9be9271abe043a1cbf892761ef8</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.6.0">
+    <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.7.0-preview-20200408-06">
       <Uri>https://github.com/microsoft/vstest</Uri>
-      <Sha>008f22a9ebb66bb51d38b01cfd29756c898287e0</Sha>
+      <Sha>732a3a37e8d3e1a2522546fca644c7d69be457cf</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Sdk.Web" Version="5.0.100-preview.4.20207.1">
       <Uri>https://github.com/aspnet/websdk</Uri>
