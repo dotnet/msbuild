@@ -509,10 +509,7 @@ namespace Microsoft.Build.Execution
                 CleanupCaches();
             }
 
-            if (_debugCommunications)
-            {
-                CommunicationsUtilities.Trace("Shut down complete.");
-            }
+            CommunicationsUtilities.Trace("Shut down complete.");
 
             return _shutdownReason;
         }
