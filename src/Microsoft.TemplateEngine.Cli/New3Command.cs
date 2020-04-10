@@ -37,15 +37,15 @@ namespace Microsoft.TemplateEngine.Cli
                         (?:-[A-Z]{2})?
                     $"
             , RegexOptions.IgnorePatternWhitespace);
-        private readonly Action<IEngineEnvironmentSettings, IInstaller> _onFirstRun;
+        private readonly New3Callbacks _callbacks;
         private readonly Func<string> _inputGetter = () => Console.ReadLine();
 
-        public New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, INewCommandInput commandInput)
-            : this(commandName, host, telemetryLogger, onFirstRun, commandInput, null)
+        public New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, INewCommandInput commandInput)
+            : this(commandName, host, telemetryLogger, callbacks, commandInput, null)
         {
         }
 
-        public New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, INewCommandInput commandInput, string hivePath)
+        public New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, INewCommandInput commandInput, string hivePath)
         {
             _telemetryLogger = telemetryLogger;
             host = new ExtendedTemplateEngineHost(host, this);
@@ -56,9 +56,13 @@ namespace Microsoft.TemplateEngine.Cli
             _aliasRegistry = new AliasRegistry(EnvironmentSettings);
             CommandName = commandName;
             _paths = new Paths(EnvironmentSettings);
-            _onFirstRun = onFirstRun;
             _hostDataLoader = new HostSpecificDataLoader(EnvironmentSettings.SettingsLoader);
             _commandInput = commandInput;
+            _callbacks = callbacks;
+            if (callbacks == null)
+            {
+                callbacks = new New3Callbacks();
+            }
 
             if (!EnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out _defaultLanguage))
             {
@@ -78,7 +82,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args)
         {
-            return Run(commandName, host, telemetryLogger, onFirstRun, args, null);
+            return Run(commandName, host, telemetryLogger, new New3Callbacks() { OnFirstRun = onFirstRun }, args, null);
         }
 
         private static readonly Guid _entryMutexGuid = new Guid("5CB26FD1-32DB-4F4C-B3DC-49CFD61633D2");
@@ -108,6 +112,11 @@ namespace Microsoft.TemplateEngine.Cli
 
         public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args, string hivePath)
         {
+            return Run(commandName, host, telemetryLogger, new New3Callbacks() { OnFirstRun = onFirstRun }, args, hivePath);
+        }
+
+        public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, string[] args, string hivePath)
+        {
             if (!args.Any(x => string.Equals(x, "--debug:ephemeral-hive")))
             {
                 EnsureEntryMutex(hivePath, host);
@@ -120,7 +129,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             try
             {
-                return ActualRun(commandName, host, telemetryLogger, onFirstRun, args, hivePath);
+                return ActualRun(commandName, host, telemetryLogger, callbacks, args, hivePath);
             }
             finally
             {
@@ -131,7 +140,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private static int ActualRun(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args, string hivePath)
+        private static int ActualRun(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, string[] args, string hivePath)
         {
             if (args.Any(x => string.Equals(x, "--debug:version", StringComparison.Ordinal)))
             {
@@ -167,7 +176,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             INewCommandInput commandInput = new NewCommandInputCli(commandName);
-            New3Command instance = new New3Command(commandName, host, telemetryLogger, onFirstRun, commandInput, hivePath);
+            New3Command instance = new New3Command(commandName, host, telemetryLogger, callbacks, commandInput, hivePath);
 
             commandInput.OnExecute(instance.ExecuteAsync);
 
@@ -221,7 +230,7 @@ namespace Microsoft.TemplateEngine.Cli
                 _paths.DeleteDirectory(_paths.User.BaseDir);
             }
 
-            _onFirstRun?.Invoke(EnvironmentSettings, Installer);
+            _callbacks.OnFirstRun?.Invoke(EnvironmentSettings, Installer);
             EnvironmentSettings.SettingsLoader.Components.RegisterMany(typeof(New3Command).GetTypeInfo().Assembly.GetTypes());
         }
 
@@ -382,7 +391,7 @@ namespace Microsoft.TemplateEngine.Cli
                 return HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(templateResolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage, showUsageHelp: _commandInput.IsHelpFlagSpecified);
             }
 
-            TemplateInvocationAndAcquisitionCoordinator invocationCoordinator = new TemplateInvocationAndAcquisitionCoordinator(_settingsLoader, _commandInput, _templateCreator, _hostDataLoader, _telemetryLogger, _defaultLanguage, CommandName, _inputGetter);
+            TemplateInvocationAndAcquisitionCoordinator invocationCoordinator = new TemplateInvocationAndAcquisitionCoordinator(_settingsLoader, _commandInput, _templateCreator, _hostDataLoader, _telemetryLogger, _defaultLanguage, CommandName, _inputGetter, _callbacks);
             return await invocationCoordinator.CoordinateInvocationOrAcquisitionAsync();
         }
 

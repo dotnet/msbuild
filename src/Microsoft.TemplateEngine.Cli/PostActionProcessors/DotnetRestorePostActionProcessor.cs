@@ -75,10 +75,21 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 }
 
                 environment.Host.LogMessage(string.Format(LocalizableStrings.RunningDotnetRestoreOn, pathToRestore));
-                Dotnet restoreCommand = Dotnet.Restore(pathToRestore).ForwardStdErr().ForwardStdOut();
-                Dotnet.Result commandResult = restoreCommand.Execute();
 
-                if (commandResult.ExitCode != 0)
+                // Prefer to restore the project in-proc vs. creating a new process.
+                bool succeeded = false;
+                if (Callbacks.RestoreProject != null)
+                {
+                    succeeded = Callbacks.RestoreProject(pathToRestore);
+                }
+                else
+                {
+                    Dotnet restoreCommand = Dotnet.Restore(pathToRestore).ForwardStdErr().ForwardStdOut();
+                    Dotnet.Result commandResult = restoreCommand.Execute();
+                    succeeded = commandResult.ExitCode == 0;
+                }
+
+                if (!succeeded)
                 {
                     environment.Host.LogMessage(LocalizableStrings.RestoreFailed);
                     allSucceeded = false;
@@ -116,10 +127,21 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 }
 
                 environment.Host.LogMessage(string.Format(LocalizableStrings.RunningDotnetRestoreOn, pathToRestore));
-                Dotnet restoreCommand = Dotnet.Restore(pathToRestore).ForwardStdErr().ForwardStdOut();
-                Dotnet.Result commandResult = restoreCommand.Execute();
 
-                if (commandResult.ExitCode != 0)
+                // Prefer to restore the project in-proc vs. creating a new process.
+                bool succeeded = false;
+                if (Callbacks.RestoreProject != null)
+                {
+                    succeeded = Callbacks.RestoreProject(pathToRestore);
+                }
+                else
+                {
+                    Dotnet restoreCommand = Dotnet.Restore(pathToRestore).ForwardStdErr().ForwardStdOut();
+                    Dotnet.Result commandResult = restoreCommand.Execute();
+                    succeeded = commandResult.ExitCode == 0;
+                }
+
+                if (!succeeded)
                 {
                     environment.Host.LogMessage(LocalizableStrings.RestoreFailed);
                     allSucceeded = false;

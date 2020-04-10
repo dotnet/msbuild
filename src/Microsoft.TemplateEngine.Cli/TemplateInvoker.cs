@@ -18,17 +18,19 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly ITelemetryLogger _telemetryLogger;
         private readonly string _commandName;
         private readonly Func<string> _inputGetter;
+        private readonly New3Callbacks _callbacks;
 
         private readonly TemplateCreator _templateCreator;
         private readonly IHostSpecificDataLoader _hostDataLoader;
 
-        public TemplateInvoker(IEngineEnvironmentSettings environment, INewCommandInput commandInput, ITelemetryLogger telemetryLogger, string commandName, Func<string> inputGetter)
+        public TemplateInvoker(IEngineEnvironmentSettings environment, INewCommandInput commandInput, ITelemetryLogger telemetryLogger, string commandName, Func<string> inputGetter, New3Callbacks callbacks)
         {
             _environment = environment;
             _commandInput = commandInput;
             _telemetryLogger = telemetryLogger;
             _commandName = commandName;
             _inputGetter = inputGetter;
+            _callbacks = callbacks;
 
             _templateCreator = new TemplateCreator(_environment);
             _hostDataLoader = new HostSpecificDataLoader(_environment.SettingsLoader);
@@ -292,7 +294,7 @@ namespace Microsoft.TemplateEngine.Cli
                 scriptRunSettings = AllowPostActionsSetting.Prompt;
             }
 
-            PostActionDispatcher postActionDispatcher = new PostActionDispatcher(_environment, creationResult, scriptRunSettings, _commandInput.IsDryRun);
+            PostActionDispatcher postActionDispatcher = new PostActionDispatcher(_environment, _callbacks, creationResult, scriptRunSettings, _commandInput.IsDryRun);
             postActionDispatcher.Process(_inputGetter);
         }
     }

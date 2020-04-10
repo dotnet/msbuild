@@ -26,13 +26,14 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly string _defaultLanguage;
         private readonly string _commandName;
         private readonly Func<string> _inputGetter;
+        private readonly New3Callbacks _callbacks;
 
         private bool _resolutionResultInitialized = false;
         TemplateListResolutionResult _templateResolutionResult;
         ITemplateMatchInfo _templateToInvoke;
         SingularInvokableMatchCheckStatus _singleMatchStatus;
 
-        public TemplateInvocationAndAcquisitionCoordinator(SettingsLoader settingsLoader, INewCommandInput commandInput, TemplateCreator templateCreator, IHostSpecificDataLoader hostDataLoader, ITelemetryLogger telemetryLogger, string defaultLanguage, string commandName, Func<string> inputGetter)
+        public TemplateInvocationAndAcquisitionCoordinator(SettingsLoader settingsLoader, INewCommandInput commandInput, TemplateCreator templateCreator, IHostSpecificDataLoader hostDataLoader, ITelemetryLogger telemetryLogger, string defaultLanguage, string commandName, Func<string> inputGetter, New3Callbacks callbacks)
         {
             _settingsLoader = settingsLoader;
             _environment = _settingsLoader.EnvironmentSettings;
@@ -43,6 +44,7 @@ namespace Microsoft.TemplateEngine.Cli
             _defaultLanguage = defaultLanguage;
             _commandName = commandName;
             _inputGetter = inputGetter;
+            _callbacks = callbacks;
         }
 
         public async Task<CreationResultStatus> CoordinateInvocationOrAcquisitionAsync()
@@ -132,7 +134,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         private async Task<CreationResultStatus> InvokeTemplateAsync()
         {
-            TemplateInvoker invoker = new TemplateInvoker(_environment, _commandInput, _telemetryLogger, _commandName, _inputGetter);
+            TemplateInvoker invoker = new TemplateInvoker(_environment, _commandInput, _telemetryLogger, _commandName, _inputGetter, _callbacks);
             return await invoker.InvokeTemplate(_templateToInvoke);
         }
 

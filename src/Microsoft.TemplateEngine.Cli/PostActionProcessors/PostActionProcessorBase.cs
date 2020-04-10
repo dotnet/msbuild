@@ -9,6 +9,8 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 {
     public abstract class PostActionProcessor2Base
     {
+        protected internal New3Callbacks Callbacks { get; set; }
+
         protected IReadOnlyList<string> GetTargetForSource(ICreationEffects2 creationEffects, string sourcePathGlob)
         {
             Glob g = Glob.Parse(sourcePathGlob);
