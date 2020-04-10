@@ -53,6 +53,11 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private IDictionary<string, string> _factoryIdentityParameters;
 
+        /// <summary>
+        /// Parameters set on the UsingTask XML element, if any. Used for setting Log and LogItemMetadata.
+        /// </summary>
+        private IDictionary<string, TaskPropertyInfo> _usingTaskParameters;
+
         #endregion
 
         #region Constructors
@@ -60,7 +65,12 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates an instance of this class for the given type.
         /// </summary>
-        internal TaskFactoryWrapper(ITaskFactory taskFactory, LoadedType taskFactoryLoadInfo, string taskName, IDictionary<string, string> factoryIdentityParameters)
+        internal TaskFactoryWrapper(
+            ITaskFactory taskFactory,
+            LoadedType taskFactoryLoadInfo,
+            string taskName,
+            IDictionary<string, string> factoryIdentityParameters,
+            IDictionary<string, TaskPropertyInfo> usingTaskParameters = null)
         {
             ErrorUtilities.VerifyThrowArgumentNull(taskFactory, "taskFactory");
             ErrorUtilities.VerifyThrowArgumentLength(taskName, "taskName");
@@ -68,6 +78,7 @@ namespace Microsoft.Build.Execution
             _taskName = taskName;
             TaskFactoryLoadedType = taskFactoryLoadInfo;
             _factoryIdentityParameters = factoryIdentityParameters;
+            _usingTaskParameters = usingTaskParameters;
         }
 
         #endregion
@@ -256,6 +267,13 @@ namespace Microsoft.Build.Execution
                     if (!taskTypeImplementsIGeneratedTask)
                     {
                         propertyInfo = new ReflectableTaskPropertyInfo(propertyInfo, _taskFactory.TaskType);
+                    }
+
+                    // If the UsingTask element had a Parameter that specified Log or LogItemMetadata, inherit that here
+                    if (_usingTaskParameters != null && _usingTaskParameters.TryGetValue(propertyInfo.Name, out var usingTaskPropertyInfo))
+                    {
+                        propertyInfo.Log = usingTaskPropertyInfo.Log;
+                        propertyInfo.LogItemMetadata = usingTaskPropertyInfo.LogItemMetadata;
                     }
 
                     try

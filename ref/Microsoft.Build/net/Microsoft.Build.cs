@@ -425,6 +425,8 @@ namespace Microsoft.Build.Construction
         internal ProjectUsingTaskParameterElement() { }
         public override string Condition { get { throw null; } set { } }
         public override Microsoft.Build.Construction.ElementLocation ConditionLocation { get { throw null; } }
+        public bool Log { get { throw null; } }
+        public bool LogItemMetadata { get { throw null; } }
         public string Name { get { throw null; } set { } }
         public string Output { get { throw null; } set { } }
         public Microsoft.Build.Construction.ElementLocation OutputLocation { get { throw null; } }

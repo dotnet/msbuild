@@ -132,6 +132,24 @@ namespace Microsoft.Build.Construction
             }
         }
 
+        public bool Log
+        {
+            get
+            {
+                string logAttribute = GetAttributeValue(XMakeAttributes.log);
+                return String.IsNullOrEmpty(logAttribute) ? true : bool.TryParse(logAttribute, out bool result) ? result : true;
+            }
+        }
+
+        public bool LogItemMetadata
+        {
+            get
+            {
+                string logItemMetadataAttribute = GetAttributeValue(XMakeAttributes.logItemMetadata);
+                return String.IsNullOrEmpty(logItemMetadataAttribute) ? true : bool.TryParse(logItemMetadataAttribute, out bool result) ? result : true;
+            }
+        }
+
         /// <summary>
         /// This does not allow conditions, so it should not be called.
         /// </summary>

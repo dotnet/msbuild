@@ -57,6 +57,8 @@ namespace Microsoft.Build.Shared
         internal const string evaluate = "Evaluate";
         internal const string label = "Label";
         internal const string returns = "Returns";
+        internal const string log = "Log";
+        internal const string logItemMetadata = "LogItemMetadata";
 
         // Obsolete
         internal const string requiredRuntime = "RequiredRuntime";

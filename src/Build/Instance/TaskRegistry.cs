@@ -266,7 +266,7 @@ namespace Microsoft.Build.Execution
 
             if (String.IsNullOrEmpty(taskFactory) || taskFactory.Equals(RegisteredTaskRecord.AssemblyTaskFactory, StringComparison.OrdinalIgnoreCase) || taskFactory.Equals(RegisteredTaskRecord.TaskHostFactory, StringComparison.OrdinalIgnoreCase))
             {
-                ProjectXmlUtilities.VerifyThrowProjectNoChildElements(projectUsingTaskXml.XmlElement);
+                ProjectXmlUtilities.VerifyThrowProjectOnlyAllowedChildrenWithName(projectUsingTaskXml.XmlElement, XMakeElements.usingTaskParameterGroup);
             }
 
             if (projectUsingTaskXml.AssemblyFile.Length > 0)
@@ -1476,7 +1476,7 @@ namespace Microsoft.Build.Execution
                     }
 
 
-                    _taskFactoryWrapperInstance = new TaskFactoryWrapper(factory, loadedType, RegisteredName, TaskFactoryParameters);
+                    _taskFactoryWrapperInstance = new TaskFactoryWrapper(factory, loadedType, RegisteredName, TaskFactoryParameters, ParameterGroupAndTaskBody.UsingTaskParameters);
                 }
 
                 return true;
@@ -1694,7 +1694,13 @@ namespace Microsoft.Build.Execution
                             );
                         }
 
-                        UsingTaskParameters.Add(parameter.Name, new TaskPropertyInfo(parameter.Name, paramType, output, required));
+                        var taskPropertyInfo = new TaskPropertyInfo(parameter.Name, paramType, output, required)
+                        {
+                            Log = parameter.Log,
+                            LogItemMetadata = parameter.LogItemMetadata
+                        };
+
+                        UsingTaskParameters.Add(parameter.Name, taskPropertyInfo);
                     }
                 }
 

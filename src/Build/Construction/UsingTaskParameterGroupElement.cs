@@ -129,12 +129,11 @@ namespace Microsoft.Build.Construction
             ProjectUsingTaskElement parentUsingTask = parent as ProjectUsingTaskElement;
             ErrorUtilities.VerifyThrowInvalidOperation(parentUsingTask != null, "OM_CannotAcceptParent");
 
-            // Now since there is not goign to be a TaskElement on the using task we need to validate and make sure there is a TaskFactory attribute on the parent element and 
+            // Now since there is not going to be a TaskElement on the using task we need to validate and make sure there is a TaskFactory attribute on the parent element and 
             // that it is not empty
             if (parentUsingTask.TaskFactory.Length == 0)
             {
                 ErrorUtilities.VerifyThrow(parentUsingTask.Link == null, "TaskFactory");
-                ProjectXmlUtilities.VerifyThrowProjectRequiredAttribute(parent.XmlElement, "TaskFactory");
             }
 
             // UNDONE: Do check to make sure the parameter group is the first child

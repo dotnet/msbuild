@@ -42,6 +42,23 @@ namespace Microsoft.Build.Internal
             }
         }
 
+        /// <summary>
+        /// Throw an invalid project exception if there are any child elements with a different name than expected.
+        /// Used in the situation where we want to allow Parameters under UsingTask without the body (useful for setting
+        /// Log and LogItemMetadata)
+        /// </summary>
+        internal static void VerifyThrowProjectOnlyAllowedChildrenWithName(XmlElementWithLocation element, string allowedChildName)
+        {
+            foreach (var child in GetVerifyThrowProjectChildElements(element))
+            {
+                if (string.Equals(child.Name, allowedChildName, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                ThrowProjectInvalidChildElement(child.Name, element.Name, element.Location);
+            }
+        }
 
         /// <summary>
         /// Throw an invalid project exception indicating that the child is not valid beneath the element because it is a duplicate

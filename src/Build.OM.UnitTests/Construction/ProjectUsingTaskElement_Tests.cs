@@ -445,30 +445,6 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Make sure there is an exception when a parameter group is added but no task factory attribute is on the using task
         /// </summary>
         [Fact]
-        public void ExceptionWhenNoTaskFactoryAndHavePG()
-        {
-            Assert.Throws<InvalidProjectFileException>(() =>
-            {
-                string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
-                        <UsingTask TaskName='t2' AssemblyName='an' Condition='c'>
-                            <ParameterGroup>
-                               <MyParameter/>
-                            </ParameterGroup>
-                        </UsingTask>
-                    </Project>
-                ";
-
-                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-                Helpers.GetFirst(project.Children);
-                Assert.True(false);
-            }
-           );
-        }
-        /// <summary>
-        /// Make sure there is an exception when a parameter group is added but no task factory attribute is on the using task
-        /// </summary>
-        [Fact]
         public void ExceptionWhenNoTaskFactoryAndHaveTask()
         {
             Assert.Throws<InvalidProjectFileException>(() =>
