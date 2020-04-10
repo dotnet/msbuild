@@ -425,10 +425,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private NodeEngineShutdownReason HandleShutdown(out Exception exception)
         {
-            if (_debugCommunications)
-            {
-                CommunicationsUtilities.Trace("Shutting down with reason: {1},  and exception: {2}.", Process.GetCurrentProcess().Id, _shutdownReason, _shutdownException);
-            }
+            CommunicationsUtilities.Trace("Shutting down with reason: {0}, and exception: {1}.", _shutdownReason, _shutdownException);
 
             // Clean up the engine
             if (null != _buildRequestEngine && _buildRequestEngine.Status != BuildRequestEngineStatus.Uninitialized)
