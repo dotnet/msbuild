@@ -1817,11 +1817,70 @@ namespace Microsoft.Build.Evaluation
                     ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "CouldNotResolveSdk", importElement.ParsedSdkReference.ToString());
                 }
 
-                project = Path.Combine(sdkResult.Path, project);
+                if (sdkResult.Path == null)
+                {
+                    projects = new List<ProjectRootElement>();
+                }
+                else
+                {
+                    ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, Path.Combine(sdkResult.Path, project),
+                        throwOnFileNotExistsError, out projects);
+
+                    if (sdkResult.AdditionalPaths != null)
+                    {
+                        foreach (var additionalPath in sdkResult.AdditionalPaths)
+                        {
+                            ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, Path.Combine(additionalPath.Path, project),
+                                throwOnFileNotExistsError, out var additionalProjects);
+
+                            projects.AddRange(additionalProjects);
+                        }
+                    }
+                }
+
+                if ((sdkResult.PropertiesToAdd != null && sdkResult.PropertiesToAdd.Any()) ||
+                    (sdkResult.ItemsToAdd != null && sdkResult.ItemsToAdd.Any()))
+                {
+                    //  Inserting at the beginning will mean that the properties or items from the SdkResult will be evaluated before
+                    //  any projects from paths returned by the SDK Resolver.
+                    projects.Insert(0, CreateProjectForSdkResult(sdkResult));
+                }
+            }
+            else
+            {
+                ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, project,
+                    throwOnFileNotExistsError, out projects);
+            }
+        }
+
+        private int _sdkResolverProjectNumber = 1;
+
+        //  Creates a project to set the properties and include the items from an SdkResult
+        private ProjectRootElement CreateProjectForSdkResult(SdkResult sdkResult)
+        {
+            ProjectRootElement project = ProjectRootElement.Create();
+            project.FullPath = _projectRootElement.FullPath + ".SdkResolver." + (_sdkResolverProjectNumber++) + ".proj";
+
+            if (sdkResult.PropertiesToAdd != null && sdkResult.PropertiesToAdd.Any())
+            {
+                var propertyGroup = project.AddPropertyGroup();
+                foreach (var propertyNameAndValue in sdkResult.PropertiesToAdd)
+                {
+                    propertyGroup.AddProperty(propertyNameAndValue.Key, EscapingUtilities.Escape(propertyNameAndValue.Value));
+                }
             }
 
-            ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, project,
-                throwOnFileNotExistsError, out projects);
+            if (sdkResult.ItemsToAdd != null && sdkResult.ItemsToAdd.Any())
+            {
+                var itemGroup = project.AddItemGroup();
+                foreach (var item in sdkResult.ItemsToAdd)
+                {
+                    //  TODO: Does the itemspec or metadata need to be escaped?
+                    itemGroup.AddItem(item.Key, item.Value.ItemSpec, item.Value.Metadata);
+                }
+            }
+
+            return project;
         }
 
         /// <summary>

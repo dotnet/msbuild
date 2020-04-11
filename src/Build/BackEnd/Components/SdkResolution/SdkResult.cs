@@ -1,8 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Framework;
+using System;
 using System.Collections.Generic;
-
+using System.Linq;
+using System.Runtime.Versioning;
 using SdkReference = Microsoft.Build.Framework.SdkReference;
 using SdkResultBase = Microsoft.Build.Framework.SdkResult;
 
@@ -13,9 +16,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     /// </summary>
     internal sealed class SdkResult : SdkResultBase, INodePacket
     {
-        private string _path;
-        private string _version;
-
         public SdkResult(ITranslator translator)
         {
             Translate(translator);
@@ -33,30 +33,61 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         {
             Success = true;
             SdkReference = sdkReference;
-            _path = path;
-            _version = version;
+            Path = path;
+            Version = version;
             Warnings = warnings;
         }
 
         public SdkResult()
         {
+
+        }
+
+        public SdkResult(SdkReference sdkReference, IEnumerable<SdkResultPathAndVersion> paths, IDictionary<string, string> propertiesToAdd,
+                         IDictionary<string, SdkResultItem> itemsToAdd, IEnumerable<string> warnings)
+        {
+            Success = true;
+            SdkReference = sdkReference;
+            if (paths != null)
+            {
+                var firstPathAndVersion = paths.FirstOrDefault();
+                if (firstPathAndVersion != null)
+                {
+                    Path = firstPathAndVersion.Path;
+                    Version = firstPathAndVersion.Version;
+                }
+                if (paths.Count() > 1)
+                {
+                    AdditionalPaths = paths.Skip(1).ToList();
+                }
+            }
+
+            //  Note: these dictionaries should use StringComparison.OrdinalIgnoreCase
+            PropertiesToAdd = propertiesToAdd;
+            ItemsToAdd = itemsToAdd;
+
+            Warnings = warnings;
         }
 
         public Construction.ElementLocation ElementLocation { get; set; }
 
         public IEnumerable<string> Errors { get; }
 
-        public override string Path => _path;
-
-        public override SdkReference SdkReference { get; protected set; }
-
-        public override string Version => _version;
-
         public IEnumerable<string> Warnings { get; }
         public void Translate(ITranslator translator)
         {
+            translator.Translate(ref _success);
             translator.Translate(ref _path);
             translator.Translate(ref _version);
+
+            translator.Translate(ref _additionalPaths, SdkResultTranslationHelpers.Translate, count => new List<SdkResultPathAndVersion>(count));
+            translator.TranslateDictionary(ref _propertiesToAdd, count => new Dictionary<string, string>(count, StringComparer.OrdinalIgnoreCase));
+            translator.TranslateDictionary(ref _itemsToAdd,
+                                           keyTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
+                                           valueTranslator: SdkResultTranslationHelpers.Translate,
+                                           dictionaryCreator: count => new Dictionary<string, SdkResultItem>(count, StringComparer.OrdinalIgnoreCase));
+
+            translator.Translate(ref _sdkReference);
         }
 
         public NodePacketType Type => NodePacketType.ResolveSdkResponse;

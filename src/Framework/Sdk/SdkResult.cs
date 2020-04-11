@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -12,17 +14,26 @@ namespace Microsoft.Build.Framework
     /// </summary>
     public abstract class SdkResult
     {
+        //  Explicit backing fields so that implementation in Microsoft.Build.dll can use them for translation
+        private protected bool _success;
+        private protected string _path;
+        private protected string _version;
+        private protected IList<SdkResultPathAndVersion> _additionalPaths;
+        private protected IDictionary<string, string> _propertiesToAdd;
+        private protected IDictionary<string, SdkResultItem> _itemsToAdd;
+        private protected SdkReference _sdkReference;
+
         /// <summary>
         ///     Indicates the resolution was successful.
         /// </summary>
-        public virtual bool Success { get; protected set; }
+        public virtual bool Success { get => _success; protected set => _success = value; }
 
         /// <summary>
         ///     Resolved path to the SDK.
         /// 
         ///     Null if <see cref="Success"/> == false
         /// </summary>
-        public virtual string Path { get; protected set; }
+        public virtual string Path { get => _path; protected set => _path = value; }
 
         /// <summary>
         ///     Resolved version of the SDK.
@@ -30,11 +41,17 @@ namespace Microsoft.Build.Framework
         /// 
         ///     Null if <see cref="Success"/> == false
         /// </summary>
-        public virtual string Version { get; protected set; }
+        public virtual string Version { get => _version; protected set => _version = value; }
+
+        public virtual IList<SdkResultPathAndVersion> AdditionalPaths { get => _additionalPaths; set => _additionalPaths = value; }
+
+        public virtual IDictionary<string, string> PropertiesToAdd { get => _propertiesToAdd; protected set => _propertiesToAdd = value; }
+
+        public virtual IDictionary<string, SdkResultItem> ItemsToAdd { get => _itemsToAdd; protected set => _itemsToAdd = value; }
 
         /// <summary>
         ///     The Sdk reference
         /// </summary>
-        public virtual SdkReference SdkReference { get; protected set; }
+        public virtual SdkReference SdkReference { get => _sdkReference; protected set => _sdkReference = value; }
     }
 }

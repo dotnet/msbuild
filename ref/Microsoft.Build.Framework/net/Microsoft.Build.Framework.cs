@@ -492,7 +492,10 @@ namespace Microsoft.Build.Framework
     public abstract partial class SdkResult
     {
         protected SdkResult() { }
+        public virtual System.Collections.Generic.IList<Microsoft.Build.Framework.SdkResultPathAndVersion> AdditionalPaths { get { throw null; } set { } }
+        public virtual System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.SdkResultItem> ItemsToAdd { get { throw null; } protected set { } }
         public virtual string Path { get { throw null; } protected set { } }
+        public virtual System.Collections.Generic.IDictionary<string, string> PropertiesToAdd { get { throw null; } protected set { } }
         public virtual Microsoft.Build.Framework.SdkReference SdkReference { get { throw null; } protected set { } }
         public virtual bool Success { get { throw null; } protected set { } }
         public virtual string Version { get { throw null; } protected set { } }
@@ -501,7 +504,22 @@ namespace Microsoft.Build.Framework
     {
         protected SdkResultFactory() { }
         public abstract Microsoft.Build.Framework.SdkResult IndicateFailure(System.Collections.Generic.IEnumerable<string> errors, System.Collections.Generic.IEnumerable<string> warnings=null);
+        public abstract Microsoft.Build.Framework.SdkResult IndicateSuccess(System.Collections.Generic.IEnumerable<Microsoft.Build.Framework.SdkResultPathAndVersion> paths, System.Collections.Generic.IDictionary<string, string> propertiesToAdd=null, System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.SdkResultItem> itemsToAdd=null, System.Collections.Generic.IEnumerable<string> warnings=null);
         public abstract Microsoft.Build.Framework.SdkResult IndicateSuccess(string path, string version, System.Collections.Generic.IEnumerable<string> warnings=null);
+    }
+    public partial class SdkResultItem
+    {
+        public SdkResultItem() { }
+        public SdkResultItem(string itemSpec, System.Collections.Generic.Dictionary<string, string> metadata) { }
+        public string ItemSpec { get { throw null; } set { } }
+        public System.Collections.Generic.Dictionary<string, string> Metadata { get { throw null; } }
+    }
+    public sealed partial class SdkResultPathAndVersion
+    {
+        public SdkResultPathAndVersion(string path) { }
+        public SdkResultPathAndVersion(string path, string version) { }
+        public string Path { get { throw null; } }
+        public string Version { get { throw null; } }
     }
     public enum TargetBuiltReason
     {

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+
 using System.Collections.Generic;
 
 namespace Microsoft.Build.Framework
@@ -19,6 +20,11 @@ namespace Microsoft.Build.Framework
         /// <param name="warnings">Optional warnings to display during resolution.</param>
         /// <returns></returns>
         public abstract SdkResult IndicateSuccess(string path, string version, IEnumerable<string> warnings = null);
+
+        public abstract SdkResult IndicateSuccess(IEnumerable<SdkResultPathAndVersion> paths,
+            IDictionary<string, string> propertiesToAdd = null,
+            IDictionary<string, SdkResultItem> itemsToAdd = null,
+            IEnumerable<string> warnings = null);
 
         /// <summary>
         ///     Create an <see cref="SdkResolver" /> object indicating failure resolving the SDK.
