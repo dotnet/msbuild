@@ -567,6 +567,8 @@ namespace Microsoft.Build.Framework
     public partial class TaskPropertyInfo
     {
         public TaskPropertyInfo(string name, System.Type typeOfParameter, bool output, bool required) { }
+        public bool Log { get { throw null; } set { } }
+        public bool LogItemMetadata { get { throw null; } set { } }
         public string Name { get { throw null; } }
         public bool Output { get { throw null; } }
         public System.Type PropertyType { get { throw null; } }
