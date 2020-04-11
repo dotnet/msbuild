@@ -12,7 +12,7 @@ The current development branch is `master`. Changes in `master` will go into a f
 
 We have forked for MSBuild 16.6 in the branch [`vs16.6`](https://github.com/Microsoft/msbuild/tree/vs16.6). Changes to that branch need special approval.
 
-[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.5)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=vs16.5)
+[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.6)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=vs16.6)
 
 MSBuild 16.4 builds from the branch [`vs16.4`](https://github.com/Microsoft/msbuild/tree/vs16.4). Only high-priority bugfixes will be considered for servicing 16.4.
 
