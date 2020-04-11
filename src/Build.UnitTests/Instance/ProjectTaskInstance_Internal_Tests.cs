@@ -28,15 +28,15 @@ namespace Microsoft.Build.Engine.UnitTests.Instance
 
                 yield return new object[]
                 {
-                    new Dictionary<string, Tuple<string, MockElementLocation>>(),
+                    new Dictionary<string, (string, MockElementLocation)>(),
                     new List<ProjectTaskInstanceChild>()
                 };
 
                 yield return new object[]
                 {
-                    new Dictionary<string, Tuple<string, MockElementLocation>>
+                    new Dictionary<string, (string, MockElementLocation)>
                     {
-                        {"p1", Tuple.Create("v1", new MockElementLocation("p1"))}
+                        {"p1", ("v1", new MockElementLocation("p1"))}
                     },
                     new List<ProjectTaskInstanceChild>
                     {
@@ -46,10 +46,10 @@ namespace Microsoft.Build.Engine.UnitTests.Instance
 
                 yield return new object[]
                 {
-                    new Dictionary<string, Tuple<string, MockElementLocation>>
+                    new Dictionary<string, (string, MockElementLocation)>
                     {
-                        {"p1", Tuple.Create("v1", new MockElementLocation("p1"))},
-                        {"p2", Tuple.Create("v2", new MockElementLocation("p2"))}
+                        {"p1", ("v1", new MockElementLocation("p1"))},
+                        {"p2", ("v2", new MockElementLocation("p2"))}
                     },
                     new List<ProjectTaskInstanceChild>
                     {
