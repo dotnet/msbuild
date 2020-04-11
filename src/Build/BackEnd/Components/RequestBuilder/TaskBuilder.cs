@@ -242,7 +242,7 @@ namespace Microsoft.Build.BackEnd
 
             List<string> taskParameters = new List<string>(_taskNode.ParametersForBuild.Count + _taskNode.Outputs.Count);
 
-            foreach (KeyValuePair<string, Tuple<string, ElementLocation>> taskParameter in _taskNode.ParametersForBuild)
+            foreach (KeyValuePair<string, (string, ElementLocation)> taskParameter in _taskNode.ParametersForBuild)
             {
                 taskParameters.Add(taskParameter.Value.Item1);
             }

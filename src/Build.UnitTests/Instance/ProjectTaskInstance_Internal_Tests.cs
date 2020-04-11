@@ -63,15 +63,15 @@ namespace Microsoft.Build.Engine.UnitTests.Instance
         [Theory]
         [MemberData(nameof(TestData))]
         public void ProjectTaskInstanceCanSerializeViaTranslator(
-            IDictionary<string, Tuple<string, MockElementLocation>> parameters,
+            IDictionary<string, (string, MockElementLocation)> parameters,
             List<ProjectTaskInstanceChild> outputs)
         {
-            parameters = parameters ?? new Dictionary<string, Tuple<string, MockElementLocation>>();
+            parameters = parameters ?? new Dictionary<string, (string, MockElementLocation)>();
 
-            var parametersCopy = new Dictionary<string, Tuple<string, ElementLocation>>(parameters.Count);
+            var parametersCopy = new Dictionary<string, (string, ElementLocation)>(parameters.Count);
             foreach (var param in parameters)
             {
-                parametersCopy[param.Key] = Tuple.Create(param.Value.Item1, (ElementLocation) param.Value.Item2);
+                parametersCopy[param.Key] = (param.Value.Item1, param.Value.Item2);
             }
 
             var original = CreateTargetTask(null, parametersCopy, outputs);

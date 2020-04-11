@@ -105,14 +105,14 @@ namespace Microsoft.Build.Engine.UnitTests.TestData
 
         public static ProjectTaskInstance CreateTargetTask(
             int? counter = null,
-            IDictionary<string, Tuple<string, ElementLocation>> parameters = null,
+            IDictionary<string, (string, ElementLocation)> parameters = null,
             List<ProjectTaskInstanceChild> outputs = null)
         {
             var stringCounter = CounterToString(counter);
 
             var readonlyParameters = parameters != null
-                ? new CopyOnWriteDictionary<string, Tuple<string, ElementLocation>>(parameters)
-                : new CopyOnWriteDictionary<string, Tuple<string, ElementLocation>>();
+                ? new CopyOnWriteDictionary<string, (string, ElementLocation)>(parameters)
+                : new CopyOnWriteDictionary<string, (string, ElementLocation)>();
 
             outputs = outputs ?? new List<ProjectTaskInstanceChild>();
 
