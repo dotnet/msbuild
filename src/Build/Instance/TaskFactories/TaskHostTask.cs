@@ -89,7 +89,7 @@ namespace Microsoft.Build.BackEnd
         /// The task host context of the task host we're launching -- used to 
         /// communicate with the task host. 
         /// </summary>
-        private HandshakeOptions _requiredContext = HandshakeOptions.Invalid;
+        private HandshakeOptions _requiredContext = HandshakeOptions.None;
 
         /// <summary>
         /// True if currently connected to the task host; false otherwise. 
@@ -551,28 +551,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void LogErrorUnableToCreateTaskHost(HandshakeOptions requiredContext, string runtime, string architecture, NodeFailedToLaunchException e)
         {
-            string msbuildLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationFromHostContext(requiredContext);
-
-            if (msbuildLocation == null)
-            {
+            string msbuildLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationFromHostContext(requiredContext) ??
                 // We don't know the path -- probably we're trying to get a 64-bit assembly on a 
                 // 32-bit machine.  At least give them the exe name to look for, though ...
-                switch (requiredContext)
-                {
-                    case HandshakeOptions.X32CLR2:
-                    case HandshakeOptions.X64CLR2:
-                        msbuildLocation = "MSBuildTaskHost.exe";
-                        break;
-                    case HandshakeOptions.X32CLR4:
-                    case HandshakeOptions.X64CLR4:
-                        msbuildLocation = "MSBuild.exe";
-                        break;
-                    case HandshakeOptions.Invalid:
-                    default:
-                        ErrorUtilities.ThrowInternalErrorUnreachable();
-                        break;
-                }
-            }
+                (requiredContext.HasFlag(HandshakeOptions.CLR2) ? "MSBuildTaskHost.exe" : "MSBuild.exe");
 
             if (e == null)
             {

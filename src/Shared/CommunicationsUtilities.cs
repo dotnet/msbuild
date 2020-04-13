@@ -23,45 +23,35 @@ namespace Microsoft.Build.Internal
     /// <summary>
     /// Enumeration of all possible (currently supported) types of task host context.
     /// </summary>
+    [Flags]
     internal enum HandshakeOptions
     {
-        /// <summary>
-        /// 32-bit Intel process, using the 2.0 CLR.
-        /// </summary>
-        X32CLR2,
+        None = 0,
 
         /// <summary>
-        /// 64-bit Intel process, using the 2.0 CLR.
+        /// Process is a TaskHost
         /// </summary>
-        X64CLR2,
+        TaskHost = 1,
 
         /// <summary>
-        /// 32-bit Intel process, using the 4.0 CLR.
+        /// Using the 2.0 CLR
         /// </summary>
-        X32CLR4,
+        CLR2 = 2,
 
         /// <summary>
-        /// 64-bit Intel process, using the 4.0 CLR.
+        /// 64-bit Intel process
         /// </summary>
-        X64CLR4,
+        X64 = 4,
 
-        NodeProviderNodeReuseLowPriority64Bit,
+        /// <summary>
+        /// Node reuse enabled
+        /// </summary>
+        NodeReuse = 8,
 
-        NodeProviderNoNodeReuseLowPriority64Bit,
-
-        NodeProviderNodeReuseNormalPriority64Bit,
-
-        NodeProviderNoNodeReuseNormalPriority64Bit,
-
-        NodeProviderNodeReuseLowPriority,
-
-        NodeProviderNoNodeReuseLowPriority,
-
-        NodeProviderNodeReuseNormalPriority,
-
-        NodeProviderNoNodeReuseNormalPriority,
-
-        Invalid
+        /// <summary>
+        /// Building with BelowNormal priority
+        /// </summary>
+        LowPriority = 16
     }
 
     /// <summary>
@@ -151,21 +141,6 @@ namespace Microsoft.Build.Internal
                 }
 
                 return s_fileVersionHash;
-            }
-        }
-
-        private static bool Is64Bit(HandshakeOptions options)
-        {
-            switch (options) {
-                case HandshakeOptions.X64CLR2:
-                case HandshakeOptions.X64CLR4:
-                case HandshakeOptions.NodeProviderNodeReuseLowPriority64Bit:
-                case HandshakeOptions.NodeProviderNodeReuseNormalPriority64Bit:
-                case HandshakeOptions.NodeProviderNoNodeReuseLowPriority64Bit:
-                case HandshakeOptions.NodeProviderNoNodeReuseNormalPriority64Bit:
-                    return true;
-                default:
-                    return false;
             }
         }
 
@@ -350,7 +325,7 @@ namespace Microsoft.Build.Internal
         internal static long GetHostHandshake(HandshakeOptions nodeType)
         {
             string salt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
-            string toolsDirectory = Is64Bit(nodeType) ? BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64 : BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
+            string toolsDirectory = nodeType.HasFlag(HandshakeOptions.X64) ? BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64 : BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
             int nodeHandshakeSalt = GetHandshakeHashCode(salt + toolsDirectory);
 
             Trace("MSBUILDNODEHANDSHAKESALT=\"{0}\", msbuildDirectory=\"{1}\", nodeType={2}, FileVersionHash={3}", salt, toolsDirectory, nodeType, FileVersionHash);
@@ -546,20 +521,20 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static HandshakeOptions GetTaskHostContext(bool is64BitProcess, int clrVersion)
         {
-            HandshakeOptions hostContext = HandshakeOptions.Invalid;
-            switch (clrVersion)
+            HandshakeOptions hostContext = HandshakeOptions.None;
+            if (clrVersion != 2 && clrVersion != 4)
             {
-                case 2:
-                    hostContext = is64BitProcess ? HandshakeOptions.X64CLR2 : HandshakeOptions.X32CLR2;
-                    break;
-                case 4:
-                    hostContext = is64BitProcess ? HandshakeOptions.X64CLR4 : HandshakeOptions.X32CLR4;
-                    break;
-                default:
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
-                    break;
+                ErrorUtilities.ThrowInternalErrorUnreachable();
             }
-
+            if (clrVersion == 2)
+            {
+                hostContext |= HandshakeOptions.CLR2;
+            }
+            if (is64BitProcess)
+            {
+                hostContext |= HandshakeOptions.X64;
+            }
+            hostContext |= HandshakeOptions.TaskHost;
             return hostContext;
         }
 
@@ -581,28 +556,18 @@ namespace Microsoft.Build.Internal
 
         internal static HandshakeOptions GetNodeProviderContext(bool nodeReuse, bool lowPriority, bool is64BitProcess)
         {
-            HandshakeOptions nodeProviderContext = HandshakeOptions.Invalid;
+            HandshakeOptions nodeProviderContext = HandshakeOptions.None;
+            if (lowPriority)
+            {
+                nodeProviderContext |= HandshakeOptions.LowPriority;
+            }
             if (nodeReuse)
             {
-                if (lowPriority)
-                {
-                    nodeProviderContext = is64BitProcess ? HandshakeOptions.NodeProviderNodeReuseLowPriority64Bit : HandshakeOptions.NodeProviderNodeReuseLowPriority;
-                }
-                else
-                {
-                    nodeProviderContext = is64BitProcess ? HandshakeOptions.NodeProviderNodeReuseNormalPriority64Bit : HandshakeOptions.NodeProviderNodeReuseNormalPriority;
-                }
+                nodeProviderContext |= HandshakeOptions.NodeReuse;
             }
-            else
+            if (is64BitProcess)
             {
-                if (lowPriority)
-                {
-                    nodeProviderContext = is64BitProcess ? HandshakeOptions.NodeProviderNoNodeReuseLowPriority64Bit : HandshakeOptions.NodeProviderNoNodeReuseLowPriority;
-                }
-                else
-                {
-                    nodeProviderContext = is64BitProcess ? HandshakeOptions.NodeProviderNoNodeReuseNormalPriority64Bit : HandshakeOptions.NodeProviderNoNodeReuseNormalPriority;
-                }
+                nodeProviderContext |= HandshakeOptions.X64;
             }
             return nodeProviderContext;
         }

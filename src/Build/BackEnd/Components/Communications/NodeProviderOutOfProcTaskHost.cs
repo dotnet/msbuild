@@ -390,7 +390,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static string GetTaskHostNameFromHostContext(HandshakeOptions hostContext)
         {
-            if (hostContext == HandshakeOptions.X64CLR4 || hostContext == HandshakeOptions.X32CLR4)
+            ErrorUtilities.ThrowInternalErrorUnreachable(hostContext.HasFlag(HandshakeOptions.TaskHost));
+            if (hostContext.HasFlag(HandshakeOptions.CLR2)) {
+                return TaskHostNameForClr2TaskHost;
+            }
+            else
             {
                 if (s_msbuildName == null)
                 {
@@ -403,15 +407,6 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 return s_msbuildName;
-            }
-            else if (hostContext == HandshakeOptions.X32CLR2 || hostContext == HandshakeOptions.X64CLR2)
-            {
-                return TaskHostNameForClr2TaskHost;
-            }
-            else
-            {
-                ErrorUtilities.ThrowInternalErrorUnreachable();
-                return null;
             }
         }
 
@@ -427,22 +422,11 @@ namespace Microsoft.Build.BackEnd
 
             s_baseTaskHostPath = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
             s_baseTaskHostPath64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64;
+            ErrorUtilities.ThrowInternalErrorUnreachable(hostContext.HasFlag(HandshakeOptions.TaskHost));
 
             switch (hostContext)
             {
-                case HandshakeOptions.X32CLR2:
-                    if (s_pathToX32Clr2 == null)
-                    {
-                        s_pathToX32Clr2 = Environment.GetEnvironmentVariable("MSBUILDTASKHOSTLOCATION");
-                        if (s_pathToX32Clr2 == null || !FileUtilities.FileExistsNoThrow(Path.Combine(s_pathToX32Clr2, toolName)))
-                        {
-                            s_pathToX32Clr2 = s_baseTaskHostPath;
-                        }
-                    }
-
-                    toolPath = s_pathToX32Clr2;
-                    break;
-                case HandshakeOptions.X64CLR2:
+                case HandshakeOptions.X64 | HandshakeOptions.CLR2:
                     if (s_pathToX64Clr2 == null)
                     {
                         s_pathToX64Clr2 = Environment.GetEnvironmentVariable("MSBUILDTASKHOSTLOCATION64");
@@ -455,15 +439,19 @@ namespace Microsoft.Build.BackEnd
 
                     toolPath = s_pathToX64Clr2;
                     break;
-                case HandshakeOptions.X32CLR4:
-                    if (s_pathToX32Clr4 == null)
+                case HandshakeOptions.CLR2:
+                    if (s_pathToX32Clr2 == null)
                     {
-                        s_pathToX32Clr4 = s_baseTaskHostPath;
+                        s_pathToX32Clr2 = Environment.GetEnvironmentVariable("MSBUILDTASKHOSTLOCATION");
+                        if (s_pathToX32Clr2 == null || !FileUtilities.FileExistsNoThrow(Path.Combine(s_pathToX32Clr2, toolName)))
+                        {
+                            s_pathToX32Clr2 = s_baseTaskHostPath;
+                        }
                     }
 
-                    toolPath = s_pathToX32Clr4;
+                    toolPath = s_pathToX32Clr2;
                     break;
-                case HandshakeOptions.X64CLR4:
+                case HandshakeOptions.X64:
                     if (s_pathToX64Clr4 == null)
                     {
                         s_pathToX64Clr4 = s_baseTaskHostPath64;
@@ -472,7 +460,12 @@ namespace Microsoft.Build.BackEnd
                     toolPath = s_pathToX64Clr4;
                     break;
                 default:
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    if (s_pathToX32Clr4 == null)
+                    {
+                        s_pathToX32Clr4 = s_baseTaskHostPath;
+                    }
+
+                    toolPath = s_pathToX32Clr4;
                     break;
             }
 
