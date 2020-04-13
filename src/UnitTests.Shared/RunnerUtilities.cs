@@ -112,7 +112,13 @@ namespace Microsoft.Build.UnitTests.Shared
                 p.BeginOutputReadLine();
                 p.BeginErrorReadLine();
                 p.StandardInput.Dispose();
-                p.WaitForExit();
+                p.WaitForExit(10000);
+                while (!p.HasExited)
+                {
+                    Console.WriteLine(p.TotalProcessorTime.TotalMilliseconds);
+                    Console.WriteLine(p.PriorityClass);
+                    p.WaitForExit(10000);
+                }
 
                 successfulExit = p.ExitCode == 0;
             }
