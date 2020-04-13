@@ -2,175 +2,232 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.NET.TestFramework.Utilities;
-using Moq;
 using Xunit;
 
 namespace Microsoft.DotNet.ShellShim.Tests
 {
     public class WindowsEnvironmentPathTests
     {
-        [Fact]
-        public void GivenPathNotSetItPrintsManualInstructions()
+        public WindowsEnvironmentPathTests()
         {
-            var reporter = new BufferedReporter();
-            var toolsPath = @"C:\Tools";
-            var pathValue = @"C:\Other";
-            var provider = new Mock<IEnvironmentProvider>(MockBehavior.Strict);
+            _reporter = new BufferedReporter();
+            _mockPathInternal = new MockPathInternal();
+            var mockEnvironmentProvider = new MockEnvironmentProvider(_mockPathInternal);
+            var mockEnvironmentPathEditor = new MockEnvironmentPathEditor(_mockPathInternal);
+            _windowsEnvironmentPath = new WindowsEnvironmentPath(
+                _toolsPath,
+                CliFolderPathCalculator.WindowsNonExpandedToolsShimPath,
+                mockEnvironmentProvider,
+                mockEnvironmentPathEditor,
+                _reporter
+            );
+        }
 
-            provider
-                .Setup(p => p.GetEnvironmentVariable(
-                    "PATH",
-                    It.Is<EnvironmentVariableTarget>(t =>
-                        t == EnvironmentVariableTarget.Process ||
-                        t == EnvironmentVariableTarget.User ||
-                        t == EnvironmentVariableTarget.Machine)))
-                .Returns(pathValue);
+        private readonly BufferedReporter _reporter;
+        private readonly WindowsEnvironmentPath _windowsEnvironmentPath;
+        private readonly MockPathInternal _mockPathInternal;
+        private const string _toolsPath = @"C:\Users\username\.dotnet\tools";
 
-            var environmentPath = new WindowsEnvironmentPath(toolsPath, reporter, provider.Object);
+        [Fact]
+        public void GivenPathIsNullItItAddsToEnvironment()
+        {
+            _mockPathInternal.UserLevelPath = null;
 
-            environmentPath.PrintAddPathInstructionIfPathDoesNotExist();
+            _windowsEnvironmentPath.AddPackageExecutablePathToUserPath();
 
-            reporter.Lines.Should().Equal(
-                string.Format(
-                    CommonLocalizableStrings.EnvironmentPathWindowsManualInstructions,
-                    toolsPath));
+            _reporter.Lines.Should().BeEmpty();
+            _mockPathInternal.UserLevelPath.Should().Be(@"%USERPROFILE%\.dotnet\tools");
         }
 
         [Fact]
-        public void GivenPathNotSetInProcessItPrintsReopenNotice()
+        public void GivenPathNotSetInProcessItPrintsReopenNoticeAndNoChangeInEnvironment()
         {
-            var reporter = new BufferedReporter();
-            var toolsPath = @"C:\Tools";
-            var pathValue = @"C:\Other";
-            var provider = new Mock<IEnvironmentProvider>(MockBehavior.Strict);
+            _mockPathInternal.UserLevelPath = @"%USERPROFILE%\.dotnet\tools";
 
-            provider
-                .Setup(p => p.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process))
-                .Returns(pathValue);
+            _windowsEnvironmentPath.PrintAddPathInstructionIfPathDoesNotExist();
 
-            provider
-                .Setup(p => p.GetEnvironmentVariable(
-                    "PATH",
-                    It.Is<EnvironmentVariableTarget>(t =>
-                        t == EnvironmentVariableTarget.User ||
-                        t == EnvironmentVariableTarget.Machine)))
-                .Returns(pathValue + ";" + toolsPath);
-
-            var environmentPath = new WindowsEnvironmentPath(toolsPath, reporter, provider.Object);
-
-            environmentPath.PrintAddPathInstructionIfPathDoesNotExist();
-
-            reporter.Lines.Should().Equal(CommonLocalizableStrings.EnvironmentPathWindowsNeedReopen);
+            _reporter.Lines.Should().Equal(CommonLocalizableStrings.EnvironmentPathWindowsNeedReopen);
         }
 
         [Fact]
-        public void GivenPathSetInProcessAndEnvironmentItPrintsNothing()
+        public void GivenPathNotSetInProcessWhenAddPackageExecutablePathToUserPathItPrintsReopenNoticeAndNoChangeInEnvironment()
         {
-            var reporter = new BufferedReporter();
-            var toolsPath = @"C:\Tools";
-            var pathValue = @"C:\Other";
-            var provider = new Mock<IEnvironmentProvider>(MockBehavior.Strict);
+            _mockPathInternal.UserLevelPath = @"%USERPROFILE%\Other;%USERPROFILE%\.dotnet\tools";
 
-            provider
-                .Setup(p => p.GetEnvironmentVariable(
-                    "PATH",
-                    It.Is<EnvironmentVariableTarget>(t =>
-                        t == EnvironmentVariableTarget.Process ||
-                        t == EnvironmentVariableTarget.User ||
-                        t == EnvironmentVariableTarget.Machine)))
-                .Returns(pathValue + ";" + toolsPath);
+            _windowsEnvironmentPath.AddPackageExecutablePathToUserPath();
 
-            var environmentPath = new WindowsEnvironmentPath(toolsPath, reporter, provider.Object);
-
-            environmentPath.PrintAddPathInstructionIfPathDoesNotExist();
-
-            reporter.Lines.Should().BeEmpty();
-        }
-
-        [Fact]
-        public void GivenPathSetItDoesNotAddPathToEnvironment()
-        {
-            var reporter = new BufferedReporter();
-            var toolsPath = @"C:\Tools";
-            var pathValue = @"C:\Other";
-            var provider = new Mock<IEnvironmentProvider>(MockBehavior.Strict);
-
-            provider
-                .Setup(p => p.GetEnvironmentVariable(
-                    "PATH",
-                    It.Is<EnvironmentVariableTarget>(t =>
-                        t == EnvironmentVariableTarget.Process ||
-                        t == EnvironmentVariableTarget.User ||
-                        t == EnvironmentVariableTarget.Machine)))
-                .Returns(pathValue + ";" + toolsPath);
-
-            var environmentPath = new WindowsEnvironmentPath(toolsPath, reporter, provider.Object);
-
-            environmentPath.AddPackageExecutablePathToUserPath();
-
-            reporter.Lines.Should().BeEmpty();
+            _reporter.Lines.Should().BeEmpty("No message since this happens in first run experience");
+            _mockPathInternal.UserLevelPath.Should()
+                .Be(@"%USERPROFILE%\Other;%USERPROFILE%\.dotnet\tools", "no change");
         }
 
         [Fact]
         public void GivenPathNotSetItAddsToEnvironment()
         {
-            var reporter = new BufferedReporter();
-            var toolsPath = @"C:\Tools";
-            var pathValue = @"C:\Other";
-            var provider = new Mock<IEnvironmentProvider>(MockBehavior.Strict);
+            _mockPathInternal.UserLevelPath = @"%USERPROFILE%\Other";
 
-            provider
-                .Setup(p => p.GetEnvironmentVariable(
-                    "PATH",
-                    It.Is<EnvironmentVariableTarget>(t =>
-                        t == EnvironmentVariableTarget.Process ||
-                        t == EnvironmentVariableTarget.User ||
-                        t == EnvironmentVariableTarget.Machine)))
-                .Returns(pathValue);
-            provider
-                .Setup(p => p.SetEnvironmentVariable("PATH", pathValue + ";" + toolsPath, EnvironmentVariableTarget.User));
+            _windowsEnvironmentPath.AddPackageExecutablePathToUserPath();
 
-            var environmentPath = new WindowsEnvironmentPath(toolsPath, reporter, provider.Object);
-
-            environmentPath.AddPackageExecutablePathToUserPath();
-
-            reporter.Lines.Should().BeEmpty();
+            _reporter.Lines.Should().BeEmpty();
+            _mockPathInternal.UserLevelPath.Should().Be(@"%USERPROFILE%\Other;%USERPROFILE%\.dotnet\tools");
         }
 
         [Fact]
-        public void GivenSecurityExceptionItPrintsWarning()
+        public void GivenPathNotSetItPrintsManualInstructions()
         {
-            var reporter = new BufferedReporter();
-            var toolsPath = @"C:\Tools";
-            var pathValue = @"C:\Other";
-            var provider = new Mock<IEnvironmentProvider>(MockBehavior.Strict);
+            _mockPathInternal.UserLevelPath = @"%USERPROFILE%\Other";
+            _windowsEnvironmentPath.PrintAddPathInstructionIfPathDoesNotExist();
 
-            provider
-                .Setup(p => p.GetEnvironmentVariable(
-                    "PATH",
-                    It.Is<EnvironmentVariableTarget>(t =>
-                        t == EnvironmentVariableTarget.Process ||
-                        t == EnvironmentVariableTarget.User ||
-                        t == EnvironmentVariableTarget.Machine)))
-                .Returns(pathValue);
-            provider
-                .Setup(p => p.SetEnvironmentVariable("PATH", pathValue + ";" + toolsPath, EnvironmentVariableTarget.User))
-                .Throws(new System.Security.SecurityException());
-
-            var environmentPath = new WindowsEnvironmentPath(toolsPath, reporter, provider.Object);
-
-            environmentPath.AddPackageExecutablePathToUserPath();
-
-            reporter.Lines.Should().Equal(
+            _reporter.Lines.Should().Equal(
                 string.Format(
-                    CommonLocalizableStrings.FailedToSetToolsPathEnvironmentVariable,
-                    toolsPath).Yellow());
+                    CommonLocalizableStrings.EnvironmentPathWindowsManualInstructions,
+                    _toolsPath));
+        }
+
+        [Fact]
+        public void GivenPathSetInProcessAndEnvironmentItPrintsNothingAndNoChangeInEnvironment()
+        {
+            var pathWithToolPath = @"%USERPROFILE%\Other;%USERPROFILE%\.dotnet\tools";
+            _mockPathInternal.UserLevelPath = pathWithToolPath;
+            _mockPathInternal.ProcessLevelPath = pathWithToolPath;
+
+            _windowsEnvironmentPath.PrintAddPathInstructionIfPathDoesNotExist();
+
+            _reporter.Lines.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void GivenPathSetItDoesNotAddPathToEnvironment()
+        {
+            var pathWithToolPath = @"%USERPROFILE%\Other;%USERPROFILE%\.dotnet\tools";
+            _mockPathInternal.UserLevelPath = pathWithToolPath;
+            _mockPathInternal.ProcessLevelPath = pathWithToolPath;
+
+            _windowsEnvironmentPath.AddPackageExecutablePathToUserPath();
+
+            _reporter.Lines.Should().BeEmpty();
+            _mockPathInternal.UserLevelPath.Should().Be(pathWithToolPath, "no change");
+        }
+
+        private class MockPathInternal
+        {
+            public string MachineLevelPath { get; set; }
+            public string UserLevelPath { get; set; }
+            public string ProcessLevelPath { get; set; }
+        }
+
+        private class MockEnvironmentProvider : IEnvironmentProvider
+        {
+            private readonly MockPathInternal _mockPathInternal;
+
+            public MockEnvironmentProvider(MockPathInternal mockPathInternal)
+            {
+                _mockPathInternal = mockPathInternal ?? throw new ArgumentNullException(nameof(mockPathInternal));
+            }
+
+            public IEnumerable<string> ExecutableExtensions { get; }
+
+            public string GetCommandPath(string commandName, params string[] extensions)
+            {
+                throw new NotImplementedException();
+            }
+
+            public string GetCommandPathFromRootPath(string rootPath, string commandName, params string[] extensions)
+            {
+                throw new NotImplementedException();
+            }
+
+            public string GetCommandPathFromRootPath(string rootPath, string commandName,
+                IEnumerable<string> extensions)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool GetEnvironmentVariableAsBool(string name, bool defaultValue)
+            {
+                throw new NotImplementedException();
+            }
+
+            public string GetEnvironmentVariable(string name)
+            {
+                throw new NotImplementedException();
+            }
+
+            public string GetEnvironmentVariable(string variable, EnvironmentVariableTarget target)
+            {
+                if (variable != "PATH")
+                {
+                    throw new ArgumentException("should only read PATH");
+                }
+
+                switch (target)
+                {
+                    case EnvironmentVariableTarget.Process:
+                        return Expand(_mockPathInternal.ProcessLevelPath);
+                    case EnvironmentVariableTarget.User:
+                        return Expand(_mockPathInternal.UserLevelPath);
+                    case EnvironmentVariableTarget.Machine:
+                        return Expand(_mockPathInternal.MachineLevelPath);
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(target), target, null);
+                }
+            }
+
+            public void SetEnvironmentVariable(string variable, string value, EnvironmentVariableTarget target)
+            {
+                throw new NotImplementedException();
+            }
+
+            private static string Expand(string path)
+            {
+                return path?.Replace("%USERPROFILE%", @"C:\Users\username");
+            }
+        }
+
+        private class MockEnvironmentPathEditor : IWindowsRegistryEnvironmentPathEditor
+        {
+            private readonly MockPathInternal _mockPathInternal;
+
+            public MockEnvironmentPathEditor(MockPathInternal mockPathInternal)
+            {
+                _mockPathInternal = mockPathInternal;
+            }
+
+            public string Get(SdkEnvironmentVariableTarget sdkEnvironmentVariableTarget)
+            {
+                switch (sdkEnvironmentVariableTarget)
+                {
+                    case SdkEnvironmentVariableTarget.DotDefault:
+                        return "";
+                    case SdkEnvironmentVariableTarget.CurrentUser:
+                        return _mockPathInternal.UserLevelPath;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(sdkEnvironmentVariableTarget),
+                            sdkEnvironmentVariableTarget, null);
+                }
+            }
+
+            public void Set(string value, SdkEnvironmentVariableTarget sdkEnvironmentVariableTarget)
+            {
+                switch (sdkEnvironmentVariableTarget)
+                {
+                    case SdkEnvironmentVariableTarget.DotDefault:
+                        throw new ApplicationException("Should never touch DotDefault's EnvironmentVariable.");
+                    case SdkEnvironmentVariableTarget.CurrentUser:
+                        _mockPathInternal.UserLevelPath = value;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(sdkEnvironmentVariableTarget),
+                            sdkEnvironmentVariableTarget, null);
+                }
+            }
         }
     }
 }
