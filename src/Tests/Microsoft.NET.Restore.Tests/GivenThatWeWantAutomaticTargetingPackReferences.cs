@@ -150,9 +150,14 @@ namespace Microsoft.NET.Restore.Tests
                 var ns = project.Root.Name.Namespace;
                 var itemGroup = project.Root.Elements(ns + "ItemGroup").FirstOrDefault();
                 itemGroup.Add(new XElement(ns + "PackageReference",
+                    new XAttribute("Include", $"Newtonsoft.Json"),
+                    new XAttribute("Version", $"11.0.2")));
+                itemGroup.Add(new XElement(ns + "PackageReference",
+                    new XAttribute("Include", $"sqlite"),
+                    new XAttribute("Version", $"3.13.0")));
+                itemGroup.Add(new XElement(ns + "PackageReference",
                     new XAttribute("Include", $"Microsoft.NETFramework.ReferenceAssemblies"),
                     new XAttribute("Version", $"1.0.0")));
-
             });
 
             string projectAssetsJsonPath = Path.Combine(

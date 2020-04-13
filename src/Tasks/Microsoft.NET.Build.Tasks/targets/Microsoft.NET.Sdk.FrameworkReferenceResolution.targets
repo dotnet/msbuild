@@ -323,7 +323,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     Add package reference for required targeting pack if necessary
     ============================================================
     -->
-  <Target Name="IncludeTargetingPackReference" BeforeTargets="CollectPackageReferences;_CheckForInvalidConfigurationAndPlatform"
+  <Target Name="IncludeTargetingPackReference" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences;CheckForImplicitPackageReferenceOverrides"
           Condition="'$(TargetFrameworkMoniker)' != '' and '$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(AutomaticallyUseReferenceAssemblyPackages)' == 'true'">
     <GetReferenceAssemblyPaths
         TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
@@ -333,9 +333,15 @@ Copyright (c) .NET Foundation. All rights reserved.
         SuppressNotFoundError="true">
       <Output TaskParameter="FullFrameworkReferenceAssemblyPaths" PropertyName="_FullFrameworkReferenceAssemblyPaths"/>
     </GetReferenceAssemblyPaths>
+
+    <PropertyGroup>
+      <_PackageReferenceList>@(PackageReference)</_PackageReferenceList>
+      <_PackageReferencesContainsRefAssemblies>$(_PackageReferenceList.Contains('Microsoft.NETFramework.ReferenceAssemblies'))</_PackageReferencesContainsRefAssemblies>
+    </PropertyGroup>
     
     <ItemGroup>
-      <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="$(MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion)" IsImplicitlyDefined="true" Condition="'$(_FullFrameworkReferenceAssemblyPaths)' == ''"/>
+      <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="$(MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion)" IsImplicitlyDefined="true"
+                        Condition="'$(_FullFrameworkReferenceAssemblyPaths)' == '' and '$(_PackageReferencesContainsRefAssemblies)' == 'false'"/>
     </ItemGroup>
   </Target>
   
