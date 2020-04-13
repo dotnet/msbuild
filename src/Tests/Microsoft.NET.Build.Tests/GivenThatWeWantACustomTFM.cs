@@ -9,6 +9,7 @@ using Xunit;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.ProjectConstruction;
+using System.Collections.Generic;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -20,40 +21,53 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_imports_custom_parsing_targets()
         {
+            var targetFramework = "netcoreapp3.0";
+            var runtimeIdentifier = "osx-x64";
             TestProject testProject = new TestProject()
             {
                 Name = "CustomTFMProject",
                 IsSdkProject = true, 
                 IsExe = true, 
-                TargetFrameworks = "netcoreapp3.0"
+                TargetFrameworks = $"{ targetFramework }-{ runtimeIdentifier }"
             };
 
             testProject.AdditionalProperties["CustomTargetFrameworkParsingTargets"] = @"$(MSBuildProjectDirectory)\CustomTargetFramework.targets";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var propertyName = "CustomTargetFrameworkProp";
             File.WriteAllText(Path.Combine(testAsset.TestRoot, testProject.Name, "CustomTargetFramework.targets"), $@"
-<Project ToolsVersion=`14.0` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+<Project>
   <PropertyGroup>
-    <{ propertyName }>TargetFramework: $(TargetFramework), TargetFrameworkVersion: $(TargetFrameworkVersion)</{ propertyName }>
+    <RuntimeIdentifier>$(TargetFramework.Split('-')[1])-$(TargetFramework.Split('-')[2])</RuntimeIdentifier>
+    <TargetFramework>$(TargetFramework.Split('-')[0])</TargetFramework>
   </PropertyGroup>
 </Project>
 ".Replace('`', '"'));
 
-            var getValuesCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name),
-                    testProject.TargetFrameworks, propertyName, GetValuesCommand.ValueType.Property)
+            var expectedValues = new Dictionary<string, string>
             {
-                Configuration = "Debug"
+                { "TargetFramework", targetFramework },
+                { "TargetFrameworkIdentifier", ".NETCoreApp" },
+                { "TargetFrameworkVersion", "v3.0" },
+                { "RuntimeIdentifier", runtimeIdentifier }
             };
-            getValuesCommand
-                .Execute("/bl:C:/code/binlogs/binlog.binlog")
-                .Should()
-                .Pass();
 
-            var values = getValuesCommand.GetValues();
-            values.Count.Should().Be(1);
-            values[0].Trim().Should().Be("TargetFramework: netcoreapp3.0, TargetFrameworkVersion:");
+            foreach (var property in expectedValues.Keys)
+            {
+                var getValuesCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name),
+                    targetFramework, property, GetValuesCommand.ValueType.Property)
+                {
+                    Configuration = "Debug"
+                };
+                getValuesCommand
+                    .Execute()
+                    .Should()
+                    .Pass();
+
+                var values = getValuesCommand.GetValues();
+                values.Count.Should().Be(1);
+                values[0].Trim().Should().Be(expectedValues[property]);
+            }
         }
     }
 }
