@@ -154,13 +154,13 @@ namespace Microsoft.DotNet.Cli
                         ReportDotnetHomeUsage(environmentProvider);
 
                         topLevelCommandParserResult = new TopLevelCommandParserResult(command);
-                        var hasSuperUserAccess = false;
+                        var isDotnetBeingInvokedFromNativeInstaller = false;
                         if (IsDotnetBeingInvokedFromNativeInstaller(topLevelCommandParserResult))
                         {
                             aspNetCertificateSentinel = new NoOpAspNetCertificateSentinel();
                             firstTimeUseNoticeSentinel = new NoOpFirstTimeUseNoticeSentinel();
                             toolPathSentinel = new NoOpFileSentinel(exists: false);
-                            hasSuperUserAccess = true;
+                            isDotnetBeingInvokedFromNativeInstaller  = true;
                         }
 
                         var dotnetFirstRunConfiguration = new DotnetFirstRunConfiguration(
@@ -172,7 +172,7 @@ namespace Microsoft.DotNet.Cli
                             firstTimeUseNoticeSentinel,
                             aspNetCertificateSentinel,
                             toolPathSentinel,
-                            hasSuperUserAccess,
+                            isDotnetBeingInvokedFromNativeInstaller,
                             dotnetFirstRunConfiguration,
                             environmentProvider);
 
@@ -258,13 +258,13 @@ namespace Microsoft.DotNet.Cli
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
             IAspNetCertificateSentinel aspNetCertificateSentinel,
             IFileSentinel toolPathSentinel,
-            bool hasSuperUserAccess,
+            bool isDotnetBeingInvokedFromNativeInstaller,
             DotnetFirstRunConfiguration dotnetFirstRunConfiguration,
             IEnvironmentProvider environmentProvider)
         {
             using (PerfTrace.Current.CaptureTiming())
             {
-                var environmentPath = EnvironmentPathFactory.CreateEnvironmentPath(hasSuperUserAccess, environmentProvider);
+                var environmentPath = EnvironmentPathFactory.CreateEnvironmentPath(isDotnetBeingInvokedFromNativeInstaller, environmentProvider);
                 var commandFactory = new DotNetCommandFactory(alwaysRunOutOfProc: true);
                 var aspnetCertificateGenerator = new AspNetCoreCertificateGenerator();
                 var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(
@@ -278,6 +278,11 @@ namespace Microsoft.DotNet.Cli
                     environmentPath);
 
                 dotnetConfigurer.Configure();
+
+                if (isDotnetBeingInvokedFromNativeInstaller && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    DotDefaultPathCorrector.Correct();
+                }
             }
         }
 
