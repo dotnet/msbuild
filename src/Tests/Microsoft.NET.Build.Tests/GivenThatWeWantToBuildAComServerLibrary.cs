@@ -117,6 +117,28 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
+        [WindowsOnlyFact]
+        public void It_warns_on_self_contained_build()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("ComServer")
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Add(new XElement("SelfContained", true));
+                });
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("NETSDK1128: ");
+        }
+
         [PlatformSpecificFact(Platform.Linux, Platform.Darwin, Platform.FreeBSD)]
         public void It_fails_to_find_comhost_for_platforms_without_comhost()
         {

@@ -612,4 +612,8 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1127: The targeting pack {0} is not installed. Please restore and try again.</value>
     <comment>{StrBegin="NETSDK1127: "}</comment>
   </data>
+  <data name="NoSupportComSelfContained" xml:space="preserve">
+    <value>NETSDK1128: COM hosting does not support self-contained deployments.</value>
+    <comment>{StrBegin="NETSDK1128: "}</comment>
+  </data>
 </root>

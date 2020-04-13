@@ -426,6 +426,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1082: 指定された RuntimeIdentifier '{1}' で利用できる {0} のランタイム パックがありませんでした。</target>
         <note>{StrBegin="NETSDK1082: "}</note>
       </trans-unit>
+      <trans-unit id="NoSupportComSelfContained">
+        <source>NETSDK1128: COM hosting does not support self-contained deployments.</source>
+        <target state="new">NETSDK1128: COM hosting does not support self-contained deployments.</target>
+        <note>{StrBegin="NETSDK1128: "}</note>
+      </trans-unit>
       <trans-unit id="NoSupportCppEnableComHosting">
         <source>NETSDK1119: C++/CLI projects targeting .NET Core cannot use EnableComHosting=true.</source>
         <target state="translated">NETSDK1119: .NET Core をターゲットとする C++/CLI プロジェクトでは EnableComHosting=true を使用できません。</target>
