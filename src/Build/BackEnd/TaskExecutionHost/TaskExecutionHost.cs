@@ -1239,11 +1239,11 @@ namespace Microsoft.Build.BackEnd
             string key = "DisableLogTaskParameter_" + taskAndParameterName;
             string metadataKey = "DisableLogTaskParameterItemMetadata_" + taskAndParameterName;
 
-            if (lookup.GetProperty(key)?.EvaluatedValue == "true")
+            if (string.Equals(lookup.GetProperty(key)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
             {
                 parameter.Log = false;
             }
-            else if (lookup.GetProperty(metadataKey)?.EvaluatedValue == "true")
+            else if (string.Equals(lookup.GetProperty(metadataKey)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
             {
                 parameter.LogItemMetadata = false;
             }
