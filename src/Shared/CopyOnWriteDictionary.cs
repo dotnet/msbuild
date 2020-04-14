@@ -95,7 +95,6 @@ namespace Microsoft.Build.Collections
         /// </summary>
         private CopyOnWriteDictionary(CopyOnWriteDictionary<K, V> that)
         {
-            Comparer = that.Comparer;
             backing = that.backing;
         }
 
@@ -185,7 +184,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Comparer used for keys
         /// </summary>
-        internal IEqualityComparer<K> Comparer { get => backing.KeyComparer; private set => throw new NotSupportedException(); }
+        internal IEqualityComparer<K> Comparer { get => ReadOperation.KeyComparer; private set => backing = WriteOperation.WithComparers(keyComparer: value, valueComparer: backing.ValueComparer); }
 
         /// <summary>
         /// Gets the backing dictionary for reading.
