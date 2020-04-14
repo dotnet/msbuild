@@ -1218,6 +1218,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LowPriorityBuild()
         {
+            _output.WriteLine("Low priority build starting");
             RunPriorityBuildTest(expectedPrority: ProcessPriorityClass.BelowNormal, arguments: "/low");
         }
 
