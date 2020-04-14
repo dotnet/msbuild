@@ -236,10 +236,10 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 formatter.Serialize(stream, dictionary);
                 stream.Position = 0;
 
-                CopyOnWriteDictionary<string, string> dictionary2 = (CopyOnWriteDictionary<string, string>)formatter.Deserialize(stream);
+                CopyOnWriteDictionary<string, string> deserialized = (CopyOnWriteDictionary<string, string>)formatter.Deserialize(stream);
 
-                Assert.Equal(dictionary.Count, dictionary2.Count);
-                Assert.IsType<MSBuildNameIgnoreCaseComparer>(dictionary2.Comparer);
+                deserialized.Count.ShouldBe(dictionary.Count);
+                deserialized.Comparer.ShouldBeOfType<MSBuildNameIgnoreCaseComparer>();
             }
         }
     }
