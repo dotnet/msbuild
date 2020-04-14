@@ -72,7 +72,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal CopyOnWriteDictionary(int capacity, IEqualityComparer<K> keyComparer)
         {
-            Comparer = keyComparer;
+            backing = ImmutableDictionary.Create<K, V>(keyComparer);
         }
 
         /// <summary>
@@ -81,8 +81,13 @@ namespace Microsoft.Build.Collections
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "context", Justification = "Not needed")]
         protected CopyOnWriteDictionary(SerializationInfo info, StreamingContext context)
         {
-            object v = info.GetValue(nameof(backing), typeof(Dictionary<K, V>));
-            backing = ((Dictionary<K, V>)v).ToImmutableDictionary();
+            object v = info.GetValue(nameof(backing), typeof(KeyValuePair<K, V>[]));
+
+            object comparer = info.GetValue(nameof(Comparer), typeof(IEqualityComparer<K>));
+
+            var b = ImmutableDictionary.Create<K, V>((IEqualityComparer<K>)comparer);
+
+            backing = b.AddRange((KeyValuePair<K, V>[])v);
         }
 
         /// <summary>
@@ -180,7 +185,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Comparer used for keys
         /// </summary>
-        internal IEqualityComparer<K> Comparer { get; private set; }
+        internal IEqualityComparer<K> Comparer { get => backing.KeyComparer; private set => throw new NotSupportedException(); }
 
         /// <summary>
         /// Gets the backing dictionary for reading.
@@ -420,9 +425,10 @@ namespace Microsoft.Build.Collections
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             ImmutableDictionary<K, V> snapshot = ReadOperation;
-            Dictionary<K, V> mutableDictionary = snapshot.ToDictionary(pair => pair.Key, pair => pair.Value, snapshot.KeyComparer);
+            var array = snapshot.ToArray();
 
-            info.AddValue(nameof(backing), mutableDictionary);
+            info.AddValue(nameof(backing), array);
+            info.AddValue(nameof(Comparer), Comparer);
         }
     }
 }

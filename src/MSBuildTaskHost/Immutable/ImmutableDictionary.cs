@@ -144,11 +144,23 @@ namespace System.Collections.Immutable
             }
         }
 
-        internal Dictionary<K, V> ToDictionary(Func<KeyValuePair<K,V>, K> keySelector, Func<KeyValuePair<K, V>, V> valueSelector, IEqualityComparer<K> keyComparer)
+        public IEqualityComparer<K> KeyComparer { get => _backing.Comparer; internal set => throw new NotSupportedException(); }
+
+        internal KeyValuePair<K, V>[] ToArray()
         {
-            return new Dictionary<K, V>(_backing, _backing.Comparer);
+            return _backing.ToArray();
         }
 
-        internal IEqualityComparer<K> KeyComparer { get; }
+        internal ImmutableDictionary<K,V> AddRange(KeyValuePair<K, V>[] v)
+        {
+            var n = new Dictionary<K, V>(_backing, _backing.Comparer);
+
+            foreach (var item in v)
+            {
+                n.Add(item.Key, item.Value);
+            }
+
+            return new ImmutableDictionary<K, V>(n);
+        }
     }
 }
