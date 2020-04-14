@@ -529,16 +529,10 @@ namespace Microsoft.Build.Evaluation
                 {
                     var matchOnMetadataSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedmatchOnMetadata);
 
-                    ImmutableList<string>.Builder metadataPatterns = ImmutableList.CreateBuilder<string>();
                     foreach (var matchOnMetadataSplit in matchOnMetadataSplits)
                     {
-                        metadataPatterns.Add(matchOnMetadataSplit);
                         AddItemReferences(matchOnMetadataSplit, operationBuilder, itemElement.MatchOnMetadataLocation);
-                    }
-                    
-                    foreach (string metadata in metadataPatterns)
-                    {
-                        string metadataExpanded = _expander.ExpandIntoStringLeaveEscaped(metadata, ExpanderOptions.ExpandPropertiesAndItems, itemElement.MatchOnMetadataLocation);
+                        string metadataExpanded = _expander.ExpandIntoStringLeaveEscaped(matchOnMetadataSplit, ExpanderOptions.ExpandPropertiesAndItems, itemElement.MatchOnMetadataLocation);
                         var metadataSplits = ExpressionShredder.SplitSemiColonSeparatedList(metadataExpanded);
                         operationBuilder.MatchOnMetadata.AddRange(metadataSplits);
                     }

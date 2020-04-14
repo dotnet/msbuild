@@ -57,7 +57,7 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Determines whether the file system is case sensitive.
-        /// Copied from https://source.dot.net/#System.IO.FileSystem/Common/System/IO/PathInternal.CaseSensitivity.cs,41
+        /// Copied from https://github.com/dotnet/runtime/blob/73ba11f3015216b39cb866d9fb7d3d25e93489f2/src/libraries/Common/src/System/IO/PathInternal.CaseSensitivity.cs#L41-L59
         /// </summary>
         public static bool GetIsFileSystemCaseSensitive()
         {

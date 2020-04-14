@@ -2250,6 +2250,28 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
+        public void RemoveWithItemReferenceOnIntrinsicMatchingMetadata()
+        {
+            string content = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(
+                $@"<I1 Include='foo.txt' />
+                <I1 Include='bar.cs' />
+                <I1 Include='../bar.cs' />
+                <I1 Include='/foo/../bar.txt' />
+
+                <I2 Include='foo.txt' />
+                <I2 Include='../foo.txt' />
+                <I2 Include='/bar.txt' />
+                <I2 Include='/foo/bar.txt' />
+
+                <I2 Remove='@(I1)' MatchOnMetadata='FullPath' MatchOnMetadataOptions='PathLike' />");
+
+            var project = ObjectModelHelpers.CreateInMemoryProject(content);
+            var items = project.ItemsIgnoringCondition.Where(i => i.ItemType.Equals("I2"));
+
+            items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "../foo.txt", "/foo/bar.txt" });
+        }
+
+        [Fact]
         public void RemoveWithPropertyReferenceInMatchOnMetadata()
         {
             string content = 
@@ -2373,7 +2395,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 <I2 Remove='@(I1)' MatchOnMetadata='M1;M2'/>");
 
-            Should.Throw<InvalidProjectFileException>(() => ObjectModelHelpers.CreateInMemoryProject(content));
+            Should.Throw<InvalidProjectFileException>(() => ObjectModelHelpers.CreateInMemoryProject(content))
+                .HelpKeyword.ShouldBe("MSBuild.OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem");
         }
 
         [Fact]
@@ -2397,7 +2420,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 <I3 Remove='@(I1);@(I2)' MatchOnMetadata='M1' />");
 
-            Should.Throw<InvalidProjectFileException>(() => ObjectModelHelpers.CreateInMemoryProject(content));
+            Should.Throw<InvalidProjectFileException>(() => ObjectModelHelpers.CreateInMemoryProject(content))
+                .HelpKeyword.ShouldBe("MSBuild.OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem");
         }
 
         [Fact]
@@ -2416,7 +2440,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 <I2 Remove='%(I1.M1)' MatchOnMetadata='M1' />");
 
-            Should.Throw<InvalidProjectFileException>(() => ObjectModelHelpers.CreateInMemoryProject(content));
+            Should.Throw<InvalidProjectFileException>(() => ObjectModelHelpers.CreateInMemoryProject(content))
+                .HelpKeyword.ShouldBe("MSBuild.OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem");
         }
 
         [Fact]

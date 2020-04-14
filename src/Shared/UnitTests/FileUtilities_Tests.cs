@@ -244,7 +244,7 @@ namespace Microsoft.Build.UnitTests
         {
             var result = FileUtilities.HasExtension(fileName, allowedExtensions);
 
-            if (!FileUtilities.GetIsFileSystemCaseSensitive() || allowedExtensions.All(extension => fileName.Contains(extension)))
+            if (!FileUtilities.GetIsFileSystemCaseSensitive() || allowedExtensions.Any(extension => fileName.Contains(extension)))
             {
                 result.ShouldBeTrue();
             }

@@ -1843,6 +1843,37 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
+        public void RemoveWithItemReferenceOnIntrinsicMatchingMetadata()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(
+                $@"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                    <Target Name='t'>
+                        <ItemGroup>
+                            <I1 Include='foo.txt' />
+                            <I1 Include='bar.cs' />
+                            <I1 Include='../bar.cs' />
+                            <I1 Include='/foo/../bar.txt' />
+
+                            <I2 Include='foo.txt' />
+                            <I2 Include='../foo.txt' />
+                            <I2 Include='/bar.txt' />
+                            <I2 Include='/foo/bar.txt' />
+
+                            <I2 Remove='@(I1)' MatchOnMetadata='FullPath' MatchOnMetadataOptions='PathLike' />
+                        </ItemGroup>
+                    </Target></Project> ");
+
+            IntrinsicTask task = CreateIntrinsicTask(content);
+            PropertyDictionary<ProjectPropertyInstance> properties = GeneratePropertyGroup();
+            Lookup lookup = LookupHelpers.CreateLookup(properties);
+            ExecuteTask(task, lookup);
+
+            var items = lookup.GetItems("I2");
+
+            items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "../foo.txt", "/foo/bar.txt" });
+        }
+
+        [Fact]
         public void RemoveWithPropertyReferenceInMatchOnMetadata()
         {
             // <PropertyGroup>
@@ -1981,7 +2012,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </Target></Project>");
             IntrinsicTask task = CreateIntrinsicTask(content);
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
-            Assert.ThrowsAny<InvalidProjectFileException>(() => ExecuteTask(task, lookup));
+            Assert.ThrowsAny<InvalidProjectFileException>(() => ExecuteTask(task, lookup))
+                .HelpKeyword.ShouldBe("MSBuild.OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem");
         }
 
         [Fact]
@@ -2011,7 +2043,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </Target></Project>");
             IntrinsicTask task = CreateIntrinsicTask(content);
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
-            Assert.ThrowsAny<InvalidProjectFileException>(() => ExecuteTask(task, lookup));
+            Assert.ThrowsAny<InvalidProjectFileException>(() => ExecuteTask(task, lookup))
+                .HelpKeyword.ShouldBe("MSBuild.OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem");
         }
 
         [Fact]
@@ -2036,7 +2069,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </Target></Project>");
             IntrinsicTask task = CreateIntrinsicTask(content);
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
-            Assert.ThrowsAny<InvalidProjectFileException>(() => ExecuteTask(task, lookup));
+            Assert.ThrowsAny<InvalidProjectFileException>(() => ExecuteTask(task, lookup))
+                .HelpKeyword.ShouldBe("MSBuild.OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem");
         }
 
         [Fact]

@@ -172,6 +172,11 @@ namespace Microsoft.Build.Construction
             }
         }
 
+        /// <summary>
+        /// Gets of sets the MatchOnMetadata value.
+        /// Returns empty string if it is not present.
+        /// Removes the attribute if the value to set is empty or null.
+        /// </summary>
         public string MatchOnMetadata
         {
             [DebuggerStepThrough]
@@ -182,12 +187,19 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(Parent == null || Parent.Parent is ProjectTargetElement || Parent.Parent is ProjectRootElement, "OM_NoMatchOnMetadataOutsideTargetsOrProject");
+                // MatchOnMetadata must be inside of a target
+                ErrorUtilities.VerifyThrowInvalidOperation(Parent == null || Parent.Parent is ProjectTargetElement || Parent.Parent is ProjectRootElement, "OM_NoMatchOnMetadataOutsideTargets");
+                // MatchOnMetadata must be inside of a remove item
                 ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || RemoveMetadata.Length != 0, "OM_MatchOnMetadataOnlyApplicableToRemoveItems", ElementName, XMakeAttributes.matchOnMetadata);
                 SetOrRemoveAttribute(XMakeAttributes.matchOnMetadata, value, ref _matchOnMetadata, "Set item MatchOnMetadata {0}", value);
             }
         }
 
+        /// <summary>
+        /// Gets of sets the MatchOnMetadataOptions value.
+        /// Returns empty string if it is not present.
+        /// Removes the attribute if the value to set is empty or null.
+        /// </summary>
         public string MatchOnMetadataOptions
         {
             [DebuggerStepThrough]
@@ -296,12 +308,12 @@ namespace Microsoft.Build.Construction
         public ElementLocation UpdateLocation => GetAttributeLocation(XMakeAttributes.update);
 
         /// <summary>
-        /// Location of the matchOnMetadata attribute
+        /// Location of the MatchOnMetadata attribute
         /// </summary>
         public ElementLocation MatchOnMetadataLocation => GetAttributeLocation(XMakeAttributes.matchOnMetadata);
 
         /// <summary>
-        /// Location of the matchOnMetadataOptions attribute
+        /// Location of the MatchOnMetadataOptions attribute
         /// </summary>
         public ElementLocation MatchOnMetadataOptionsLocation => GetAttributeLocation(XMakeAttributes.matchOnMetadataOptions);
 
