@@ -65,7 +65,6 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ErrorUtilities.VerifyThrow(IsValid, "must be valid");
             LoggingService.LogFatalTaskError(BuildEventContext, exception, file, taskName);
-            _hasLoggedErrors = true;
         }
     }
 }

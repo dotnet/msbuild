@@ -28,8 +28,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private bool _isValid;
 
-        protected bool _hasLoggedErrors;
-
         /// <summary>
         /// Constructs the logging context from a logging service and an event context.
         /// </summary>
@@ -43,7 +41,6 @@ namespace Microsoft.Build.BackEnd.Logging
             _loggingService = loggingService;
             _eventContext = eventContext;
             _isValid = false;
-            _hasLoggedErrors = false;
         }
 
         /// <summary>
@@ -109,8 +106,6 @@ namespace Microsoft.Build.BackEnd.Logging
             }
         }
 
-        internal bool HasLoggedErrors { get { return _hasLoggedErrors; } set { _hasLoggedErrors = value; } }
-
         /// <summary>
         ///  Helper method to create a message build event from a string resource and some parameters
         /// </summary>
@@ -144,7 +139,6 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ErrorUtilities.VerifyThrow(_isValid, "must be valid");
             _loggingService.LogError(_eventContext, file, messageResourceName, messageArgs);
-            _hasLoggedErrors = true;
         }
 
         /// <summary>
@@ -158,7 +152,6 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ErrorUtilities.VerifyThrow(_isValid, "must be valid");
             _loggingService.LogError(_eventContext, subcategoryResourceName, file, messageResourceName, messageArgs);
-            _hasLoggedErrors = true;
         }
 
         /// <summary>
@@ -173,7 +166,6 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ErrorUtilities.VerifyThrow(_isValid, "must be valid");
             _loggingService.LogErrorFromText(_eventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
-            _hasLoggedErrors = true;
         }
 
         /// <summary>
@@ -184,7 +176,6 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ErrorUtilities.VerifyThrow(_isValid, "must be valid");
             _loggingService.LogInvalidProjectFileError(_eventContext, invalidProjectFileException);
-            _hasLoggedErrors = true;
         }
 
         /// <summary>
@@ -198,7 +189,6 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ErrorUtilities.VerifyThrow(_isValid, "must be valid");
             _loggingService.LogFatalError(_eventContext, exception, file, messageResourceName, messageArgs);
-            _hasLoggedErrors = true;
         }
 
         /// <summary>
@@ -247,7 +237,6 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ErrorUtilities.VerifyThrow(IsValid, "must be valid");
             LoggingService.LogFatalBuildError(BuildEventContext, exception, file);
-            _hasLoggedErrors = true;
         }
     }
 }

@@ -1386,9 +1386,10 @@ namespace Microsoft.Build.Execution
             /// <returns>The cloned metadata.</returns>
             public IDictionary CloneCustomMetadata()
             {
-                Dictionary<string, string> clonedMetadata = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+                var metadata = MetadataCollection;
+                Dictionary<string, string> clonedMetadata = new Dictionary<string, string>(metadata.Count, MSBuildNameIgnoreCaseComparer.Default);
 
-                foreach (ProjectMetadataInstance metadatum in MetadataCollection)
+                foreach (ProjectMetadataInstance metadatum in metadata)
                 {
                     clonedMetadata[metadatum.Name] = metadatum.EvaluatedValue;
                 }
@@ -1617,7 +1618,7 @@ namespace Microsoft.Build.Execution
                         {
                             int key = translator.Reader.ReadInt32();
                             int value = translator.Reader.ReadInt32();
-                            _directMetadata.Set(new ProjectMetadataInstance(interner.GetString(key), interner.GetString(value)));
+                            _directMetadata.Set(new ProjectMetadataInstance(interner.GetString(key), interner.GetString(value), allowItemSpecModifiers: true));
                         }
                     }
                 }

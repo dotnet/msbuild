@@ -41,14 +41,14 @@
     - the reference was called with global properties that do not match the static graph inferred nodes
     - the reference was not explicitly specified as a ProjectReference item in project "{0}"
     </source>
-        <target state="new">MSB4252: Project "{0}" with global properties
+        <target state="translated">MSB4252: Projekt „{0}” z właściwościami globalnymi
     ({1})
-    is building project "{2}" with global properties
+    kompiluje projekt „{2}” z właściwościami globalnymi
     ({3})
-    with the ({4}) target(s) but the build result for the built project is not in the engine cache. In isolated builds this could mean one of the following:
-    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in project "{0}"
-    - the reference was called with global properties that do not match the static graph inferred nodes
-    - the reference was not explicitly specified as a ProjectReference item in project "{0}"
+    i obiektami docelowymi ({4}), ale wynik kompilacji dla skompilowanego projektu nie znajduje się w pamięci podręcznej aparatu. W przypadku izolowanych kompilacji może to oznaczać, że:
+    - odwołanie zostało wywołane z elementem docelowym, który nie został określony w elemencie ProjectReferenceTargets w projekcie „{0}”;
+    - odwołanie zostało wywołane z właściwościami globalnymi, które nie pasują do węzłów wywnioskowanych z grafu statycznego;
+    - odwołanie nie zostało jawnie określone jako element ProjectReference w projekcie „{0}”.
     </target>
         <note>
       {StrBegin="MSB4252:"}
@@ -77,7 +77,7 @@
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
         <source>Read environment variable "{0}"</source>
-        <target state="new">Read environment variable "{0}"</target>
+        <target state="translated">Odczytaj zmienną środowiskową „{0}”</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
@@ -160,7 +160,7 @@
       </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
-        <target state="new">Property initial value: $({0})="{1}" Source: {2}</target>
+        <target state="translated">Wartość początkowa właściwości: $({0})=„{1}” Źródło: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -214,7 +214,7 @@
       </trans-unit>
       <trans-unit id="UninitializedPropertyRead">
         <source>Read uninitialized property "{0}"</source>
-        <target state="new">Read uninitialized property "{0}"</target>
+        <target state="translated">Odczytaj niezainicjowaną właściwość „{0}”</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">

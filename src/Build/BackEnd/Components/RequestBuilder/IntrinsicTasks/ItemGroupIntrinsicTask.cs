@@ -169,7 +169,7 @@ namespace Microsoft.Build.BackEnd
             bucket.Expander.Metadata = metadataTable;
 
             // Second, expand the item include and exclude, and filter existing metadata as appropriate.
-            IList<ProjectItemInstance> itemsToAdd = ExpandItemIntoItems(child, bucket.Expander, keepMetadata, removeMetadata);
+            List<ProjectItemInstance> itemsToAdd = ExpandItemIntoItems(child, bucket.Expander, keepMetadata, removeMetadata);
 
             // Third, expand the metadata.           
             foreach (ProjectItemGroupTaskMetadataInstance metadataInstance in child.Metadata)
@@ -217,7 +217,10 @@ namespace Microsoft.Build.BackEnd
 
             if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && itemsToAdd != null && itemsToAdd.Count > 0)
             {
-                var itemGroupText = ItemGroupLoggingHelper.GetParameterText(ResourceUtilities.GetResourceString("ItemGroupIncludeLogMessagePrefix"), child.ItemType, itemsToAdd.ToArray());
+                var itemGroupText = ItemGroupLoggingHelper.GetParameterText(
+                    ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix,
+                    child.ItemType,
+                    itemsToAdd);
                 LoggingContext.LogCommentFromText(MessageImportance.Low, itemGroupText);
             }
 
@@ -255,7 +258,10 @@ namespace Microsoft.Build.BackEnd
             {
                 if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && itemsToRemove.Count > 0)
                 {
-                    var itemGroupText = ItemGroupLoggingHelper.GetParameterText(ResourceUtilities.GetResourceString("ItemGroupRemoveLogMessage"), child.ItemType, itemsToRemove.ToArray());
+                    var itemGroupText = ItemGroupLoggingHelper.GetParameterText(
+                        ItemGroupLoggingHelper.ItemGroupRemoveLogMessage,
+                        child.ItemType,
+                        itemsToRemove);
                     LoggingContext.LogCommentFromText(MessageImportance.Low, itemGroupText);
                 }
 
@@ -380,7 +386,7 @@ namespace Microsoft.Build.BackEnd
         /// been refactored.
         /// </remarks>
         /// <returns>A list of items.</returns>
-        private IList<ProjectItemInstance> ExpandItemIntoItems
+        private List<ProjectItemInstance> ExpandItemIntoItems
         (
             ProjectItemGroupTaskItemInstance originalItem,
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander,
@@ -391,7 +397,7 @@ namespace Microsoft.Build.BackEnd
             //todo this is duplicated logic with the item computation logic from evaluation (in LazyIncludeOperation.SelectItems)
 
             ProjectErrorUtilities.VerifyThrowInvalidProject(!(keepMetadata != null && removeMetadata != null), originalItem.KeepMetadataLocation, "KeepAndRemoveMetadataMutuallyExclusive");
-            IList<ProjectItemInstance> items = new List<ProjectItemInstance>();
+            List<ProjectItemInstance> items = new List<ProjectItemInstance>();
 
             // Expand properties and metadata in Include
             string evaluatedInclude = expander.ExpandIntoStringLeaveEscaped(originalItem.Include, ExpanderOptions.ExpandPropertiesAndMetadata, originalItem.IncludeLocation);

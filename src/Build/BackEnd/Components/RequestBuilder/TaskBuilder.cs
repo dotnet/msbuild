@@ -745,7 +745,6 @@ namespace Microsoft.Build.BackEnd
             UpdateContinueOnError(bucket, taskHost);
 
             bool taskResult = false;
-            bool isMSBuildTask = false;
 
             WorkUnitResultCode resultCode = WorkUnitResultCode.Success;
             WorkUnitActionCode actionCode = WorkUnitActionCode.Continue;
@@ -769,11 +768,9 @@ namespace Microsoft.Build.BackEnd
                     if (taskType == typeof(MSBuild))
                     {
                         MSBuild msbuildTask = host.TaskInstance as MSBuild;
-
                         ErrorUtilities.VerifyThrow(msbuildTask != null, "Unexpected MSBuild internal task.");
 
                         var undeclaredProjects = GetUndeclaredProjects(msbuildTask);
-                        isMSBuildTask = true;
 
                         if (undeclaredProjects != null && undeclaredProjects.Count != 0)
                         {
@@ -859,7 +856,6 @@ namespace Microsoft.Build.BackEnd
                         // Rethrow wrapped in order to avoid losing the callstack
                         throw new InternalLoggerException(taskException.Message, taskException, ex.BuildEventArgs, ex.ErrorCode, ex.HelpKeyword, ex.InitializationException);
                     }
-#if FEATURE_VARIOUS_EXCEPTIONS
                     else if (type == typeof(ThreadAbortException))
                     {
                         Thread.ResetAbort();
@@ -869,7 +865,6 @@ namespace Microsoft.Build.BackEnd
                         // Stack will be lost
                         throw taskException;
                     }
-#endif
                     else if (type == typeof(BuildAbortedException))
                     {
                         _continueOnError = ContinueOnError.ErrorAndStop;
@@ -945,28 +940,6 @@ namespace Microsoft.Build.BackEnd
                     else
                     {
                         ErrorUtilities.ThrowInternalErrorUnreachable();
-                    }
-                }
-
-                // When a task fails it must log an error. If a task fails to do so,
-                // that is logged as an error. MSBuild tasks are an exception because
-                // errors are not logged directly from them, but the tasks spawned by them.
-                if (!isMSBuildTask && taskReturned && !taskResult && !taskLoggingContext.HasLoggedErrors)
-                {
-                    if (_continueOnError == ContinueOnError.WarnAndContinue)
-                    {
-                        taskLoggingContext.LogWarning(null,
-                            new BuildEventFileInfo(_targetChildInstance.Location),
-                            "TaskReturnedFalseButDidNotLogError",
-                            _taskNode.Name);
-
-                        taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
-                    }
-                    else
-                    {
-                        taskLoggingContext.LogError(new BuildEventFileInfo(_targetChildInstance.Location),
-                            "TaskReturnedFalseButDidNotLogError",
-                            _taskNode.Name);
                     }
                 }
 

@@ -49,14 +49,12 @@ namespace Microsoft.Build.BackEnd
         /// <param name="request">The request whose results we should return</param>
         /// <param name="configInitialTargets">The initial targets for the request's configuration.</param>
         /// <param name="configDefaultTargets">The default targets for the request's configuration.</param>
-        /// <param name="additionalTargetsToCheckForOverallResult">Any additional targets that need to be checked to determine overall 
-        /// pass or failure, but that are not included as actual results. (E.g. AfterTargets of an entrypoint target)</param>
         /// <param name="skippedResultsDoNotCauseCacheMiss">If false, a cached skipped target will cause this method to return "NotSatisfied".  
         /// If true, then as long as there is a result in the cache (regardless of whether it was skipped or not), this method 
         /// will return "Satisfied". In most cases this should be false, but it may be set to true in a situation where there is no 
         /// chance of re-execution (which is the usual response to missing / skipped targets), and the caller just needs the data.</param>
         /// <returns>A response indicating the results, if any, and the targets needing to be built, if any.</returns>
-        ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, List<string> additionalTargetsToCheckForOverallResult, bool skippedResultsDoNotCauseCacheMiss);
+        ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss);
 
         /// <summary>
         /// Clears the results for a specific configuration.

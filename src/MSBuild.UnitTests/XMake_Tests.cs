@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -13,7 +14,6 @@ using Microsoft.Build.CommandLine;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
-using Microsoft.Build.UnitTests;
 using Xunit;
 using Xunit.Abstractions;
 using Shouldly;
@@ -1212,6 +1212,54 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        /// <summary>
+        /// Test that low priority builds actually execute with low priority.
+        /// </summary>
+        [Fact]
+        public void LowPriorityBuild()
+        {
+            RunPriorityBuildTest(expectedPrority: ProcessPriorityClass.BelowNormal, arguments: "/low");
+        }
+
+        /// <summary>
+        /// Test that normal builds execute with normal priority.
+        /// </summary>
+        [Fact]
+        public void NormalPriorityBuild()
+        {
+            // In case we are already running at a  different priority, validate
+            // the build runs as the current priority, and not some hard coded priority.
+            ProcessPriorityClass currentPriority = Process.GetCurrentProcess().PriorityClass;
+            RunPriorityBuildTest(expectedPrority: currentPriority);
+        }
+
+        private void RunPriorityBuildTest(ProcessPriorityClass expectedPrority, params string[] arguments)
+        {
+            string[] aggregateArguments = arguments.Union(new string[] { " /nr:false /v:diag "}).ToArray();
+
+            string contents = ObjectModelHelpers.CleanupFileContents(@"
+<Project DefaultTargets=""Build"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+ <Target Name=""Build"">
+    <Message Text=""Task priority is '$([System.Diagnostics.Process]::GetCurrentProcess().PriorityClass)'""/>
+ </Target>
+</Project>
+");
+            // Set our test environment variables:
+            //  - Disable in proc build to make sure priority is inherited by subprocesses.
+            //  - Enable property functions so we can easily read our priority class.
+            IDictionary<string, string> environmentVars = new Dictionary<string, string>
+            {
+                { "MSBUILDNOINPROCNODE", "1"},
+                { "DISABLECONSOLECOLOR", "1"},
+                { "MSBUILDENABLEALLPROPERTYFUNCTIONS", "1" },
+            };
+
+            string logContents = ExecuteMSBuildExeExpectSuccess(contents, envsToCreate: environmentVars, arguments: aggregateArguments);
+
+            string expected = string.Format(@"Task priority is '{0}'", expectedPrority);
+            logContents.ShouldContain(expected, () => logContents);
+        }
+
 #region IgnoreProjectExtensionTests
 
         /// <summary>
@@ -1973,7 +2021,7 @@ namespace Microsoft.Build.UnitTests
                 }
             };
 
-            string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, preExistingProps, "/restore");
+            string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, filesToCreate: preExistingProps, arguments: "/restore");
 
             logContents.ShouldContain(guid1);
             logContents.ShouldContain(guid2);
@@ -2020,7 +2068,7 @@ namespace Microsoft.Build.UnitTests
                 }
             };
 
-            string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, preExistingProps, "/restore");
+            string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, filesToCreate: preExistingProps, arguments: "/restore");
 
             logContents.ShouldContain(guid1);
             logContents.ShouldContain(guid2);
@@ -2207,7 +2255,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        private string ExecuteMSBuildExeExpectSuccess(string projectContents, IDictionary<string, string> filesToCreate = null, params string[] arguments)
+        private string ExecuteMSBuildExeExpectSuccess(string projectContents, IDictionary<string, string> filesToCreate = null,  IDictionary<string, string> envsToCreate = null, params string[] arguments)
         {
             using (TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create())
             {
@@ -2218,6 +2266,14 @@ namespace Microsoft.Build.UnitTests
                     foreach (var item in filesToCreate)
                     {
                         File.WriteAllText(Path.Combine(testProject.TestRoot, item.Key), item.Value);
+                    }
+                }
+
+                if (envsToCreate != null)
+                {
+                    foreach (var env in envsToCreate)
+                    {
+                        testEnvironment.SetEnvironmentVariable(env.Key, env.Value);
                     }
                 }
 

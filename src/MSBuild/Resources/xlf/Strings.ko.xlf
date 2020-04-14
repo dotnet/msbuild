@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="CommandLine">
         <source>Command line arguments = "{0}"</source>
-        <target state="new">Command line arguments = "{0}"</target>
+        <target state="translated">명령줄 인수 = "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationFailurePrefixNoErrorCode">
@@ -39,7 +39,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="CurrentDirectory">
         <source>Current directory = "{0}"</source>
-        <target state="new">Current directory = "{0}"</target>
+        <target state="translated">현재 디렉터리 = "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateOutputResultsCache">
@@ -185,7 +185,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="HelpMessage_37_DocsLink">
         <source>For more detailed information, see https://aka.ms/msbuild/docs</source>
-        <target state="new">For more detailed information, see https://aka.ms/msbuild/docs</target>
+        <target state="translated">자세한 내용은 https://aka.ms/msbuild/docs를 참조하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="HelpMessage_38_TargetsSwitch">
@@ -198,18 +198,39 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      Example:
                        -ts:out.txt
     </source>
-        <target state="new">  -targets[:file]
-                     Prints a list of available targets without executing the
-                     actual build process. By default the output is written to
-                     the console window. If the path to an output file
-                     is provided that will be used instead.
-                     (Short form: -ts)
-                     Example:
-                       -ts:out.txt
+        <target state="translated">  -targets [: file]
+                     실제 빌드 프로세스를 실행하지 않고
+                     사용 가능한 대상 목록을 출력합니다. 출력은 기본적으로
+                     콘솔 창에 기록됩니다. 출력 파일의 경로를 제공하면
+                     해당 경로가 대신 사용됩니다.
+                     (약식: -ts)
+                     예
+                       -ts: out .txt
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
       LOCALIZATION: "-targets" and "-ts" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_39_LowPrioritySwitch">
+        <source>  -lowPriority[:True|False]
+                     Causes MSBuild to run at low process priority.
+
+                     Specifying -lowPriority is the same as specifying
+                     -lowPriority:True.
+                     (Short form: -low)
+    </source>
+        <target state="translated">  -lowPriority[:True|False]
+                     MSBuild가 낮은 프로세스 우선 순위로 실행됩니다.
+
+                     -lowPriority를 지정하는 것은 
+                     -lowPriority:True를 지정하는 것과 같습니다.
+                     (약식: -low)
+    </target>
+        <note>
+      LOCALIZATION: "MSBuild" should not be localized.
+      LOCALIZATION: "-lowPriority" and "-low" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
@@ -1091,12 +1112,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="MSBExePath">
         <source>MSBuild executable path = "{0}"</source>
-        <target state="new">MSBuild executable path = "{0}"</target>
+        <target state="translated">MSBuild 실행 파일 경로 = "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBVersion">
         <source>MSBuild version = "{0}"</source>
-        <target state="new">MSBuild version = "{0}"</target>
+        <target state="translated">MSBuild 버전 = "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingLoggerError">
@@ -1199,7 +1220,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="Process">
         <source>Process = "{0}"</source>
-        <target state="new">Process = "{0}"</target>
+        <target state="translated">프로세스 = "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectNotFoundError">
@@ -1271,7 +1292,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="TargetsCouldNotBePrinted">
         <source>MSBUILD : error MSB1059: Targets could not be printed. {0}</source>
-        <target state="new">MSBUILD : error MSB1059: Targets could not be printed. {0}</target>
+        <target state="translated">MSBUILD : error MSB1059: 대상을 출력할 수 없습니다. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
