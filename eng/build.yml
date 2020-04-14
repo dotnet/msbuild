@@ -37,7 +37,7 @@ jobs:
       - _PublishArgs: ''
       - _SignArgs: ''
       - _TestArgs: $(_Test)
-      - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
         - group: DotNet-Symbol-Server-PATs
         - group: DotNet-HelixApi-Access
         - group: dotnet-benchview
