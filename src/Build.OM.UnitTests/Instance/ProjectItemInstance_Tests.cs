@@ -342,6 +342,9 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectItemInstance item = GetOneItem(content);
 
             var itemMetadata = Helpers.MakeList(item.Metadata);
+
+            itemMetadata.Sort();
+
             Assert.Equal(2, itemMetadata.Count);
             Assert.Equal("m1", itemMetadata[0].Name);
             Assert.Equal("m2", itemMetadata[1].Name);
