@@ -100,12 +100,12 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Returns the collection of keys in the dictionary.
         /// </summary>
-        public ICollection<K> Keys => (ICollection<K>)ReadOperation.Keys;
+        public ICollection<K> Keys => ((IDictionary<K, V>)ReadOperation).Keys;
 
         /// <summary>
         /// Returns the collection of values in the dictionary.
         /// </summary>
-        public ICollection<V> Values => (ICollection<V>)ReadOperation.Values;
+        public ICollection<V> Values => ((IDictionary<K, V>)ReadOperation).Values;
 
         /// <summary>
         /// Returns the number of items in the collection.
