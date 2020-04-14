@@ -10,6 +10,8 @@ using System.Linq;
 using System.Runtime.Serialization;
 using Microsoft.Build.Shared;
 
+#nullable enable
+
 namespace Microsoft.Build.Collections
 {
     /// <summary>
@@ -49,6 +51,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal CopyOnWriteDictionary()
         {
+            backing = ImmutableDictionary<K, V>.Empty;
         }
 
         /// <summary>
@@ -70,7 +73,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Constructor taking a specified comparer for the keys and an initial capacity
         /// </summary>
-        internal CopyOnWriteDictionary(int capacity, IEqualityComparer<K> keyComparer)
+        internal CopyOnWriteDictionary(int capacity, IEqualityComparer<K>? keyComparer)
         {
             backing = ImmutableDictionary.Create<K, V>(keyComparer);
         }
