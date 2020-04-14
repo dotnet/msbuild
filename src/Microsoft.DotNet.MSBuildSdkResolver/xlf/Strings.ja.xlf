@@ -3,28 +3,28 @@
   <file datatype="xml" source-language="en" target-language="ja" original="../Strings.resx">
     <body>
       <trans-unit id="MSBuildSDKDirectoryNotFound">
-        <source>{0} not found. Check that a recent enough .NET Core SDK is installed and/or increase the version specified in global.json.</source>
-        <target state="translated">{0} が見つかりません。十分新しい .NET Core SDK がインストールされていることを確認するか、global.json で指定するバージョンを上げてください (どちらも実行する必要がある場合もあります)。</target>
+        <source>{0} not found. Check that a recent enough .NET SDK is installed and/or increase the version specified in global.json.</source>
+        <target state="needs-review-translation">{0} が見つかりません。十分新しい .NET Core SDK がインストールされていることを確認するか、global.json で指定するバージョンを上げてください (どちらも実行する必要がある場合もあります)。</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildSmallerThanMinimumVersion">
-        <source>Version {0} of the .NET Core SDK requires at least version {1} of MSBuild. The current available version of MSBuild is {2}. Change the .NET Core SDK specified in global.json to an older version that requires the MSBuild version currently available.</source>
-        <target state="translated">.NET Core SDK バージョン {0} では、MSBuild バージョン {1} 以上が必要です。現在利用可能な MSBuild のバージョンは {2} です。global.json で指定した .NET Core SDK を、現在利用可能な MSBuild バージョンで求められる古いバージョンに変更します。</target>
+        <source>Version {0} of the .NET SDK requires at least version {1} of MSBuild. The current available version of MSBuild is {2}. Change the .NET SDK specified in global.json to an older version that requires the MSBuild version currently available.</source>
+        <target state="needs-review-translation">.NET Core SDK バージョン {0} では、MSBuild バージョン {1} 以上が必要です。現在利用可能な MSBuild のバージョンは {2} です。global.json で指定した .NET Core SDK を、現在利用可能な MSBuild バージョンで求められる古いバージョンに変更します。</target>
         <note />
       </trans-unit>
       <trans-unit id="NETCoreSDKSmallerThanMinimumRequestedVersion">
-        <source>Version {0} of the .NET Core SDK is smaller than the minimum version {1} requested. Check that a recent enough .NET Core SDK is installed, increase the minimum version specified in the project, or increase the version specified in global.json.</source>
-        <target state="translated">.NET Core SDK のバージョン {0} は、要求されている最低バージョン {1} 未満です。十分新しい .NET Core SDK がインストールされていることを確認し、プロジェクトで指定された最低バージョンを上げるか、global.json で指定されたバージョンを上げてください。</target>
+        <source>Version {0} of the .NET SDK is smaller than the minimum version {1} requested. Check that a recent enough .NET SDK is installed, increase the minimum version specified in the project, or increase the version specified in global.json.</source>
+        <target state="needs-review-translation">.NET Core SDK のバージョン {0} は、要求されている最低バージョン {1} 未満です。十分新しい .NET Core SDK がインストールされていることを確認し、プロジェクトで指定された最低バージョンを上げるか、global.json で指定されたバージョンを上げてください。</target>
         <note />
       </trans-unit>
       <trans-unit id="NETCoreSDKSmallerThanMinimumVersionRequiredByVisualStudio">
-        <source>Version {0} of the .NET Core SDK is smaller than the minimum version {1} required by Visual Studio. Check that a recent enough .NET Core SDK is installed or increase the version specified in global.json.</source>
-        <target state="translated">.NET Core SDK のバージョン {0} が、Visual Studio で必要な最低バージョン {1} 未満です。十分に新しい .NET Core SDK がインストールされていることを確認するか、global.json で指定されたバージョンを上げてください。</target>
+        <source>Version {0} of the .NET SDK is smaller than the minimum version {1} required by Visual Studio. Check that a recent enough .NET SDK is installed or increase the version specified in global.json.</source>
+        <target state="needs-review-translation">.NET Core SDK のバージョン {0} が、Visual Studio で必要な最低バージョン {1} 未満です。十分に新しい .NET Core SDK がインストールされていることを確認するか、global.json で指定されたバージョンを上げてください。</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToLocateNETCoreSdk">
-        <source>Unable to locate the .NET Core SDK. Check that it is installed and that the version specified in global.json (if any) matches the installed version.</source>
-        <target state="translated">.NET Core SDK が見つかりません。インストールされていること、および (存在する場合には) そのインストール済みバージョンが global.json で指定されたバージョンと一致していることを確認してください。</target>
+        <source>Unable to locate the .NET SDK. Check that it is installed and that the version specified in global.json (if any) matches the installed version.</source>
+        <target state="needs-review-translation">.NET Core SDK が見つかりません。インストールされていること、および (存在する場合には) そのインストール済みバージョンが global.json で指定されたバージョンと一致していることを確認してください。</target>
         <note />
       </trans-unit>
     </body>

@@ -3,28 +3,28 @@
   <file datatype="xml" source-language="en" target-language="ko" original="../Strings.resx">
     <body>
       <trans-unit id="MSBuildSDKDirectoryNotFound">
-        <source>{0} not found. Check that a recent enough .NET Core SDK is installed and/or increase the version specified in global.json.</source>
-        <target state="translated">{0}을(를) 찾을 수 없습니다. 최신 .NET Core SDK가 설치되어 있는지 확인하거나 global.json에 지정된 버전을 높이세요.</target>
+        <source>{0} not found. Check that a recent enough .NET SDK is installed and/or increase the version specified in global.json.</source>
+        <target state="needs-review-translation">{0}을(를) 찾을 수 없습니다. 최신 .NET Core SDK가 설치되어 있는지 확인하거나 global.json에 지정된 버전을 높이세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildSmallerThanMinimumVersion">
-        <source>Version {0} of the .NET Core SDK requires at least version {1} of MSBuild. The current available version of MSBuild is {2}. Change the .NET Core SDK specified in global.json to an older version that requires the MSBuild version currently available.</source>
-        <target state="translated">.NET Core SDK의 {0} 버전에는 최소 {1} 버전의 MSBuild가 필요합니다. 현재 사용할 수 있는 MSBuild의 버전은 {2}입니다. global.json에 지정된 .NET Core SDK를 현재 사용할 수 있는 MSBuild 버전을 필요로 하는 이전 버전으로 변경하세요.</target>
+        <source>Version {0} of the .NET SDK requires at least version {1} of MSBuild. The current available version of MSBuild is {2}. Change the .NET SDK specified in global.json to an older version that requires the MSBuild version currently available.</source>
+        <target state="needs-review-translation">.NET Core SDK의 {0} 버전에는 최소 {1} 버전의 MSBuild가 필요합니다. 현재 사용할 수 있는 MSBuild의 버전은 {2}입니다. global.json에 지정된 .NET Core SDK를 현재 사용할 수 있는 MSBuild 버전을 필요로 하는 이전 버전으로 변경하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="NETCoreSDKSmallerThanMinimumRequestedVersion">
-        <source>Version {0} of the .NET Core SDK is smaller than the minimum version {1} requested. Check that a recent enough .NET Core SDK is installed, increase the minimum version specified in the project, or increase the version specified in global.json.</source>
-        <target state="translated">.NET Core SDK의 {0} 버전은 요청된 {1} 최소 버전보다 낮습니다. 적합한 최신 .NET Core SDK가 설치되어 있는지 확인하거나, 프로젝트에 지정된 최소 버전을 높이거나, global.json에 지정된 버전을 높이세요.</target>
+        <source>Version {0} of the .NET SDK is smaller than the minimum version {1} requested. Check that a recent enough .NET SDK is installed, increase the minimum version specified in the project, or increase the version specified in global.json.</source>
+        <target state="needs-review-translation">.NET Core SDK의 {0} 버전은 요청된 {1} 최소 버전보다 낮습니다. 적합한 최신 .NET Core SDK가 설치되어 있는지 확인하거나, 프로젝트에 지정된 최소 버전을 높이거나, global.json에 지정된 버전을 높이세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="NETCoreSDKSmallerThanMinimumVersionRequiredByVisualStudio">
-        <source>Version {0} of the .NET Core SDK is smaller than the minimum version {1} required by Visual Studio. Check that a recent enough .NET Core SDK is installed or increase the version specified in global.json.</source>
-        <target state="translated">.NET Core SDK의 {0} 버전이 Visual Studio에 필요한 최소 버전 {1}보다 낮습니다. 최신 .NET Core SDK가 설치되어 있는지 확인하거나 global.json에 지정된 버전을 높이세요.</target>
+        <source>Version {0} of the .NET SDK is smaller than the minimum version {1} required by Visual Studio. Check that a recent enough .NET SDK is installed or increase the version specified in global.json.</source>
+        <target state="needs-review-translation">.NET Core SDK의 {0} 버전이 Visual Studio에 필요한 최소 버전 {1}보다 낮습니다. 최신 .NET Core SDK가 설치되어 있는지 확인하거나 global.json에 지정된 버전을 높이세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToLocateNETCoreSdk">
-        <source>Unable to locate the .NET Core SDK. Check that it is installed and that the version specified in global.json (if any) matches the installed version.</source>
-        <target state="translated">.NET Core SDK를 찾을 수 없습니다. 이 SDK가 설치되어 있고 global.json에 지정된 버전(있는 경우)이 설치된 버전과 일치하는지 확인하세요.</target>
+        <source>Unable to locate the .NET SDK. Check that it is installed and that the version specified in global.json (if any) matches the installed version.</source>
+        <target state="needs-review-translation">.NET Core SDK를 찾을 수 없습니다. 이 SDK가 설치되어 있고 global.json에 지정된 버전(있는 경우)이 설치된 버전과 일치하는지 확인하세요.</target>
         <note />
       </trans-unit>
     </body>
