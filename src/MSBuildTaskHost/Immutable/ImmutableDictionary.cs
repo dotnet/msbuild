@@ -143,5 +143,12 @@ namespace System.Collections.Immutable
                 return new ImmutableDictionary<K, V>();
             }
         }
+
+        internal Dictionary<K, V> ToDictionary(Func<KeyValuePair<K,V>, K> keySelector, Func<KeyValuePair<K, V>, V> valueSelector, IEqualityComparer<K> keyComparer)
+        {
+            return new Dictionary<K, V>(_backing, _backing.Comparer);
+        }
+
+        internal IEqualityComparer<K> KeyComparer { get; }
     }
 }

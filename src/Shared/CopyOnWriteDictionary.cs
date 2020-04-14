@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Runtime.Serialization;
 using Microsoft.Build.Shared;
 
@@ -35,7 +36,7 @@ namespace Microsoft.Build.Collections
     /// be run in a separate appdomain.
     /// </comment>
     [Serializable]
-    internal class CopyOnWriteDictionary<K, V> : IDictionary<K, V>, IDictionary where V : class
+    internal class CopyOnWriteDictionary<K, V> : IDictionary<K, V>, IDictionary, ISerializable where V : class
     {
         /// <summary>
         /// The backing dictionary.
@@ -77,10 +78,11 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Serialization constructor, for crossing appdomain boundaries
         /// </summary>
-        [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "info", Justification = "Not needed")]
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "context", Justification = "Not needed")]
         protected CopyOnWriteDictionary(SerializationInfo info, StreamingContext context)
         {
+            object v = info.GetValue(nameof(backing), typeof(Dictionary<K, V>));
+            backing = ((Dictionary<K, V>)v).ToImmutableDictionary();
         }
 
         /// <summary>
@@ -413,6 +415,14 @@ namespace Microsoft.Build.Collections
         internal bool HasSameBacking(CopyOnWriteDictionary<K, V> other)
         {
             return ReferenceEquals(other.backing, backing);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            ImmutableDictionary<K, V> snapshot = ReadOperation;
+            Dictionary<K, V> mutableDictionary = snapshot.ToDictionary(pair => pair.Key, pair => pair.Value, snapshot.KeyComparer);
+
+            info.AddValue(nameof(backing), mutableDictionary);
         }
     }
 }
