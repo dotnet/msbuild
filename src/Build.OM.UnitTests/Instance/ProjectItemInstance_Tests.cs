@@ -14,6 +14,7 @@ using Microsoft.Build.Shared;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using System.Linq;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
@@ -343,7 +344,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             var itemMetadata = Helpers.MakeList(item.Metadata);
 
-            itemMetadata.Sort();
+            itemMetadata = itemMetadata.OrderBy(pmi => pmi.Name).ToList();
 
             Assert.Equal(2, itemMetadata.Count);
             Assert.Equal("m1", itemMetadata[0].Name);
