@@ -26,9 +26,9 @@
         <source>Could not execute because the specified command or file was not found.
 Possible reasons for this include:
   * You misspelled a built-in dotnet command.
-  * You intended to execute a .NET Core program, but {0} does not exist.
+  * You intended to execute a .NET program, but {0} does not exist.
   * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
-        <target state="translated">Die Ausführung war nicht möglich, weil der angegebene Befehl oder die Datei nicht gefunden wurde.
+        <target state="needs-review-translation">Die Ausführung war nicht möglich, weil der angegebene Befehl oder die Datei nicht gefunden wurde.
 Mögliche Ursachen:
   * Sie haben sich bei einem integrierten dotnet-Befehl verschrieben.
   * Sie wollten ein .NET Core-Programm ausführen, aber "{0}" ist nicht vorhanden.
@@ -76,8 +76,8 @@ Mögliche Ursachen:
         <note />
       </trans-unit>
       <trans-unit id="DotNetSdkInfoLabel">
-        <source>.NET Core SDK (reflecting any global.json):</source>
-        <target state="translated">.NET Core SDK (gemäß "global.json"):</target>
+        <source>.NET SDK (reflecting any global.json):</source>
+        <target state="needs-review-translation">.NET Core SDK (gemäß "global.json"):</target>
         <note />
       </trans-unit>
       <trans-unit id="DotNetRuntimeInfoLabel">
@@ -110,8 +110,8 @@ dotnet tool install --global {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="DotNetSdkInfo">
-        <source>.NET Core SDK</source>
-        <target state="translated">.NET Core SDK</target>
+        <source>.NET SDK</source>
+        <target state="needs-review-translation">.NET Core SDK</target>
         <note />
       </trans-unit>
     </body>

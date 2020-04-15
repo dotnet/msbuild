@@ -137,12 +137,12 @@ Jeśli chcesz utworzyć manifest, użyj polecenia „dotnet new tool-manifest”
         <source>Tool '{0}' failed to install. This failure may have been caused by:
 
 * You are attempting to install a preview release and did not use the --version option to specify the version.
-* A package by this name was found, but it was not a .NET Core tool.
+* A package by this name was found, but it was not a .NET tool.
 * The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
 * You mistyped the name of the tool.
 
 For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</source>
-        <target state="translated">Zainstalowanie narzędzia „{0}” nie powiodło się. To niepowodzenie może wynikać z następujących przyczyn:
+        <target state="needs-review-translation">Zainstalowanie narzędzia „{0}” nie powiodło się. To niepowodzenie może wynikać z następujących przyczyn:
 
 * Próbujesz zainstalować wersję zapoznawczą bez użycia opcji --version do określenia wersji.
 * Znaleziono pakiet o tej nazwie, ale nie było to narzędzie .NET Core.

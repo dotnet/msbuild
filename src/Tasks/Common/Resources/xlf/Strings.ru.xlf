@@ -258,8 +258,8 @@
         <note>{StrBegin="NETSDK1015: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateRuntimePackAsset">
-        <source>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET Core team here: https://aka.ms/dotnet-sdk-issue.</source>
-        <target state="translated">NETSDK1110: сразу несколько ресурсов в пакете среды выполнения имеют один и тот же конечный вложенный путь "{0}". Сообщите об этой ошибке группе разработчиков .NET Core по следующему адресу: https://aka.ms/dotnet-sdk-issue.</target>
+        <source>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
+        <target state="needs-review-translation">NETSDK1110: сразу несколько ресурсов в пакете среды выполнения имеют один и тот же конечный вложенный путь "{0}". Сообщите об этой ошибке группе разработчиков .NET Core по следующему адресу: https://aka.ms/dotnet-sdk-issue.</target>
         <note>{StrBegin="NETSDK1110: "}</note>
       </trans-unit>
       <trans-unit id="EncounteredConflict_Info">
@@ -482,8 +482,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1011: "}</note>
       </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
-        <source>NETSDK1059: The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
-        <target state="translated">NETSDK1059: инструмент "{0}" теперь включен в пакет SDK для .NET Core. Сведения о том, как устранить это предупреждение: https://aka.ms/dotnetclitools-in-box.</target>
+        <source>NETSDK1059: The tool '{0}' is now included in the .NET SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
+        <target state="needs-review-translation">NETSDK1059: инструмент "{0}" теперь включен в пакет SDK для .NET Core. Сведения о том, как устранить это предупреждение: https://aka.ms/dotnetclitools-in-box.</target>
         <note>{StrBegin="NETSDK1059: "}</note>
       </trans-unit>
       <trans-unit id="ProjectToolOnlySupportTFMLowerThanNetcoreapp22">
@@ -542,8 +542,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1028: "}</note>
       </trans-unit>
       <trans-unit id="RuntimeListNotFound">
-        <source>NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET Core team here: https://aka.ms/dotnet-sdk-issue.</source>
-        <target state="translated">NETSDK1109: не найден файл списка среды выполнения "{0}". Сообщите об этой ошибке группе разработчиков .NET Core по следующему адресу: https://aka.ms/dotnet-sdk-issue.</target>
+        <source>NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
+        <target state="needs-review-translation">NETSDK1109: не найден файл списка среды выполнения "{0}". Сообщите об этой ошибке группе разработчиков .NET Core по следующему адресу: https://aka.ms/dotnet-sdk-issue.</target>
         <note>{StrBegin="NETSDK1109: "}</note>
       </trans-unit>
       <trans-unit id="RuntimePackNotDownloaded">
@@ -622,8 +622,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1107: "}</note>
       </trans-unit>
       <trans-unit id="UsingPreviewSdk_Info">
-        <source>You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</source>
-        <target state="translated">Вы используете предварительную версию .NET Core. Дополнительные сведения см. на странице https://aka.ms/dotnet-core-preview.</target>
+        <source>You are using a preview version of .NET. See: https://aka.ms/dotnet-core-preview</source>
+        <target state="needs-review-translation">Вы используете предварительную версию .NET Core. Дополнительные сведения см. на странице https://aka.ms/dotnet-core-preview.</target>
         <note />
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresUseWpfOrUseWindowsForms">

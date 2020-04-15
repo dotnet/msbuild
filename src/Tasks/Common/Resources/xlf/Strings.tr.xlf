@@ -258,8 +258,8 @@
         <note>{StrBegin="NETSDK1015: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateRuntimePackAsset">
-        <source>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET Core team here: https://aka.ms/dotnet-sdk-issue.</source>
-        <target state="translated">NETSDK1110: Çalışma zamanı paketindeki birden fazla varlık, aynı '{0}' hedef alt yoluna sahip. Bu hatayı https://aka.ms/dotnet-sdk-issue adresinden .NET Core ekibine bildirin.</target>
+        <source>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
+        <target state="needs-review-translation">NETSDK1110: Çalışma zamanı paketindeki birden fazla varlık, aynı '{0}' hedef alt yoluna sahip. Bu hatayı https://aka.ms/dotnet-sdk-issue adresinden .NET Core ekibine bildirin.</target>
         <note>{StrBegin="NETSDK1110: "}</note>
       </trans-unit>
       <trans-unit id="EncounteredConflict_Info">
@@ -482,8 +482,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1011: "}</note>
       </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
-        <source>NETSDK1059: The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
-        <target state="translated">NETSDK1059: '{0}' aracı .NET Core SDK’sına eklendi. Bu uyarının çözümlenmesiyle ilgili bilgi edinmek için bkz. (https://aka.ms/dotnetclitools-in-box).</target>
+        <source>NETSDK1059: The tool '{0}' is now included in the .NET SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
+        <target state="needs-review-translation">NETSDK1059: '{0}' aracı .NET Core SDK’sına eklendi. Bu uyarının çözümlenmesiyle ilgili bilgi edinmek için bkz. (https://aka.ms/dotnetclitools-in-box).</target>
         <note>{StrBegin="NETSDK1059: "}</note>
       </trans-unit>
       <trans-unit id="ProjectToolOnlySupportTFMLowerThanNetcoreapp22">
@@ -542,8 +542,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1028: "}</note>
       </trans-unit>
       <trans-unit id="RuntimeListNotFound">
-        <source>NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET Core team here: https://aka.ms/dotnet-sdk-issue.</source>
-        <target state="translated">NETSDK1109: '{0}' çalışma zamanı listesi dosyası bulunamadı. Bu hatayı https://aka.ms/dotnet-sdk-issue adresinden .NET Core ekibine bildirin.</target>
+        <source>NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
+        <target state="needs-review-translation">NETSDK1109: '{0}' çalışma zamanı listesi dosyası bulunamadı. Bu hatayı https://aka.ms/dotnet-sdk-issue adresinden .NET Core ekibine bildirin.</target>
         <note>{StrBegin="NETSDK1109: "}</note>
       </trans-unit>
       <trans-unit id="RuntimePackNotDownloaded">
@@ -622,8 +622,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1107: "}</note>
       </trans-unit>
       <trans-unit id="UsingPreviewSdk_Info">
-        <source>You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</source>
-        <target state="translated">.NET Core'un önizleme sürümünü kullanıyorsunuz. Bkz. https://aka.ms/dotnet-core-preview</target>
+        <source>You are using a preview version of .NET. See: https://aka.ms/dotnet-core-preview</source>
+        <target state="needs-review-translation">.NET Core'un önizleme sürümünü kullanıyorsunuz. Bkz. https://aka.ms/dotnet-core-preview</target>
         <note />
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresUseWpfOrUseWindowsForms">

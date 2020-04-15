@@ -26,9 +26,9 @@
         <source>Could not execute because the specified command or file was not found.
 Possible reasons for this include:
   * You misspelled a built-in dotnet command.
-  * You intended to execute a .NET Core program, but {0} does not exist.
+  * You intended to execute a .NET program, but {0} does not exist.
   * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
-        <target state="translated">Nie można wykonać, ponieważ nie odnaleziono określonego polecenia lub pliku.
+        <target state="needs-review-translation">Nie można wykonać, ponieważ nie odnaleziono określonego polecenia lub pliku.
 Możliwe przyczyny:
   * Błąd pisowni wbudowanego polecenia dotnet .
   * Planowano wykonanie programu .NET Core, ale element {0} nie istnieje.
@@ -76,8 +76,8 @@ Możliwe przyczyny:
         <note />
       </trans-unit>
       <trans-unit id="DotNetSdkInfoLabel">
-        <source>.NET Core SDK (reflecting any global.json):</source>
-        <target state="translated">Zestaw .NET Core SDK (odzwierciedlenie dowolnego pliku global.json):</target>
+        <source>.NET SDK (reflecting any global.json):</source>
+        <target state="needs-review-translation">Zestaw .NET Core SDK (odzwierciedlenie dowolnego pliku global.json):</target>
         <note />
       </trans-unit>
       <trans-unit id="DotNetRuntimeInfoLabel">
@@ -110,8 +110,8 @@ dotnet tool install --global {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="DotNetSdkInfo">
-        <source>.NET Core SDK</source>
-        <target state="translated">Zestaw .NET Core SDK</target>
+        <source>.NET SDK</source>
+        <target state="needs-review-translation">Zestaw .NET Core SDK</target>
         <note />
       </trans-unit>
     </body>
