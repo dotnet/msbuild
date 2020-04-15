@@ -233,10 +233,10 @@ namespace Microsoft.Build.BuildEngine
         // Counter of node Ids
         private int nextNodeId = 1;
 
-        // Context of the event in which the fatal error terminating the execution occured
+        // Context of the event in which the fatal error terminating the execution occurred
         private BuildEventContext fatalErrorContext;
 
-        // File name of the project in which fatal error occured (cached in order to avoid complexity in the
+        // File name of the project in which fatal error occurred (cached in order to avoid complexity in the
         // finally clause)
         private string fatalErrorProjectName;
 

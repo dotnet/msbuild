@@ -13,6 +13,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Resources;
 using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -555,6 +556,7 @@ namespace Microsoft.Build.CommandLine
                 bool enableNodeReuse = false;
 #endif
                 TextWriter preprocessWriter = null;
+                TextWriter targetsWriter = null;
                 bool detailedSummary = false;
                 ISet<string> warningsAsErrors = null;
                 ISet<string> warningsAsMessages = null;
@@ -564,6 +566,7 @@ namespace Microsoft.Build.CommandLine
                 bool interactive = false;
                 bool isolateProjects = false;
                 bool graphBuild = false;
+                bool lowPriority = false;
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
 
@@ -588,6 +591,7 @@ namespace Microsoft.Build.CommandLine
                         ref cpuCount,
                         ref enableNodeReuse,
                         ref preprocessWriter,
+                        ref targetsWriter,
                         ref detailedSummary,
                         ref warningsAsErrors,
                         ref warningsAsMessages,
@@ -600,6 +604,7 @@ namespace Microsoft.Build.CommandLine
                         ref graphBuild,
                         ref inputResultsCaches,
                         ref outputResultsCache,
+                        ref lowPriority,
                         recursing: false
                         ))
                 {
@@ -619,6 +624,11 @@ namespace Microsoft.Build.CommandLine
                         // see that in preprocessing/debugging
                         Environment.SetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE", "1");
                     }
+
+                    // Honor the low priority flag, we place our selves below normal
+                    // priority and let sub processes inherit that priority.
+                    ProcessPriorityClass priority = lowPriority ? ProcessPriorityClass.BelowNormal : ProcessPriorityClass.Normal;
+                    Process.GetCurrentProcess().PriorityClass = priority;
 
                     DateTime t1 = DateTime.Now;
 
@@ -651,6 +661,7 @@ namespace Microsoft.Build.CommandLine
                                     cpuCount,
                                     enableNodeReuse,
                                     preprocessWriter,
+                                    targetsWriter,
                                     detailedSummary,
                                     warningsAsErrors,
                                     warningsAsMessages,
@@ -660,6 +671,7 @@ namespace Microsoft.Build.CommandLine
                                     interactive,
                                     isolateProjects,
                                     graphBuild,
+                                    lowPriority,
                                     inputResultsCaches,
                                     outputResultsCache))
                             {
@@ -959,6 +971,7 @@ namespace Microsoft.Build.CommandLine
             int cpuCount,
             bool enableNodeReuse,
             TextWriter preprocessWriter,
+            TextWriter targetsWriter,
             bool detailedSummary,
             ISet<string> warningsAsErrors,
             ISet<string> warningsAsMessages,
@@ -968,6 +981,7 @@ namespace Microsoft.Build.CommandLine
             bool interactive,
             bool isolateProjects,
             bool graphBuild,
+            bool lowPriority,
             string[] inputResultsCaches,
             string outputResultsCache
         )
@@ -1056,6 +1070,7 @@ namespace Microsoft.Build.CommandLine
                 ToolsetDefinitionLocations toolsetDefinitionLocations = ToolsetDefinitionLocations.Default;
 
                 bool preprocessOnly = preprocessWriter != null && !FileUtilities.IsSolutionFilename(projectFile);
+                bool targetsOnly = targetsWriter != null && !FileUtilities.IsSolutionFilename(projectFile);
 
                 projectCollection = new ProjectCollection
                 (
@@ -1102,7 +1117,13 @@ namespace Microsoft.Build.CommandLine
                     projectCollection.UnloadProject(project);
                     success = true;
                 }
-                else
+
+                if (targetsOnly)
+                {
+                    success = PrintTargets(projectFile, toolsVersion, globalProperties, targetsWriter, projectCollection);
+                }
+
+                if (!preprocessOnly && !targetsOnly)
                 {
                     BuildParameters parameters = new BuildParameters(projectCollection);
 
@@ -1114,6 +1135,7 @@ namespace Microsoft.Build.CommandLine
                     }
 
                     parameters.EnableNodeReuse = enableNodeReuse;
+                    parameters.LowPriority = lowPriority;
 #if FEATURE_ASSEMBLY_LOCATION
                     parameters.NodeExeLocation = Assembly.GetExecutingAssembly().Location;
 #else
@@ -1164,7 +1186,13 @@ namespace Microsoft.Build.CommandLine
                     DataCollection.CommentMarkProfile(8800, "Pending Build Request from MSBuild.exe");
 #endif
                     BuildResultCode? result = null;
-                    buildManager.BeginBuild(parameters);
+
+                    var messagesToLogInBuildLoggers = Traits.Instance.EscapeHatches.DoNotSendDeferredMessagesToBuildManager
+                        ? null
+                        : GetMessagesToLogInBuildLoggers();
+
+                    buildManager.BeginBuild(parameters, messagesToLogInBuildLoggers);
+
                     Exception exception = null;
                     try
                     {
@@ -1290,6 +1318,60 @@ namespace Microsoft.Build.CommandLine
             }
 
             return success;
+        }
+
+        private static bool PrintTargets(string projectFile, string toolsVersion, Dictionary<string, string> globalProperties, TextWriter targetsWriter, ProjectCollection projectCollection)
+        {
+            try
+            {
+                Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
+
+                foreach (string target in project.Targets.Keys)
+                {
+                    targetsWriter.WriteLine(target);
+                }
+
+                projectCollection.UnloadProject(project);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                var message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetsCouldNotBePrinted", ex);
+                Console.Error.WriteLine(message);
+                return false;
+            }
+        }
+
+        private static IEnumerable<BuildManager.DeferredBuildMessage> GetMessagesToLogInBuildLoggers()
+        {
+            return new[]
+            {
+                new BuildManager.DeferredBuildMessage(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "Process",
+                        Process.GetCurrentProcess().MainModule?.FileName ?? string.Empty),
+                    MessageImportance.Low),
+                new BuildManager.DeferredBuildMessage(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "MSBExePath",
+                        BuildEnvironmentHelper.Instance.CurrentMSBuildExePath),
+                    MessageImportance.Low),
+                new BuildManager.DeferredBuildMessage(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "CommandLine",
+                        Environment.CommandLine),
+                    MessageImportance.Low),
+                new BuildManager.DeferredBuildMessage(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "CurrentDirectory",
+                        Environment.CurrentDirectory),
+                    MessageImportance.Low),
+                new BuildManager.DeferredBuildMessage(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "MSBVersion",
+                        ProjectCollection.DisplayVersion),
+                    MessageImportance.Low)
+            };
         }
 
         private static (BuildResultCode result, Exception exception) ExecuteBuild(BuildManager buildManager, BuildRequestData request)
@@ -2011,6 +2093,7 @@ namespace Microsoft.Build.CommandLine
             ref int cpuCount,
             ref bool enableNodeReuse,
             ref TextWriter preprocessWriter,
+            ref TextWriter targetsWriter,
             ref bool detailedSummary,
             ref ISet<string> warningsAsErrors,
             ref ISet<string> warningsAsMessages,
@@ -2023,6 +2106,7 @@ namespace Microsoft.Build.CommandLine
             ref bool graphBuild,
             ref string[] inputResultsCaches,
             ref string outputResultsCache,
+            ref bool lowPriority,
             bool recursing
         )
         {
@@ -2126,6 +2210,7 @@ namespace Microsoft.Build.CommandLine
                                                                ref cpuCount,
                                                                ref enableNodeReuse,
                                                                ref preprocessWriter,
+                                                               ref targetsWriter,
                                                                ref detailedSummary,
                                                                ref warningsAsErrors,
                                                                ref warningsAsMessages,
@@ -2138,6 +2223,7 @@ namespace Microsoft.Build.CommandLine
                                                                ref graphBuild,
                                                                ref inputResultsCaches,
                                                                ref outputResultsCache,
+                                                               ref lowPriority,
                                                                recursing: true
                                                              );
                         }
@@ -2169,6 +2255,13 @@ namespace Microsoft.Build.CommandLine
                         preprocessWriter = ProcessPreprocessSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Preprocess]);
                     }
 
+                    // determine what if any writer to print targets to
+                    targetsWriter = null;
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Targets))
+                    {
+                        targetsWriter = ProcessTargetsSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Targets]);
+                    }
+
                     detailedSummary = commandLineSwitches.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.DetailedSummary);
 
                     warningsAsErrors = ProcessWarnAsErrorSwitch(commandLineSwitches);
@@ -2193,6 +2286,11 @@ namespace Microsoft.Build.CommandLine
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GraphBuild))
                     {
                         graphBuild = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GraphBuild], defaultValue: true, resourceName: "InvalidGraphBuildValue");
+                    }
+
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.LowPriority))
+                    {
+                        lowPriority = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority], defaultValue: true, resourceName: "InvalidLowPriorityValue");
                     }
 
                     inputResultsCaches = ProcessInputResultsCaches(commandLineSwitches);
@@ -2326,6 +2424,25 @@ namespace Microsoft.Build.CommandLine
                 catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {
                     CommandLineSwitchException.Throw("InvalidPreprocessPath", parameters[parameters.Length - 1], ex.Message);
+                }
+            }
+
+            return writer;
+        }
+
+        internal static TextWriter ProcessTargetsSwitch(string[] parameters)
+        {
+            TextWriter writer = Console.Out;
+
+            if (parameters.Length > 0)
+            {
+                try
+                {
+                    writer = FileUtilities.OpenWrite(parameters[parameters.Length - 1], append: false);
+                }
+                catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
+                {
+                    CommandLineSwitchException.Throw("TargetsCouldNotBePrinted", parameters[parameters.Length - 1], ex.Message);
                 }
             }
 
@@ -2504,8 +2621,9 @@ namespace Microsoft.Build.CommandLine
 
                         // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
                         bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
+                        bool lowpriority = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority][0].Equals("true");
 
-                        shutdownReason = node.Run(nodeReuse, out nodeException);
+                        shutdownReason = node.Run(nodeReuse, lowpriority, out nodeException);
 
                         FileUtilities.ClearCacheDirectory();
                     }
@@ -3663,6 +3781,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_24_NodeReuse"));
 #endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_25_PreprocessSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_38_TargetsSwitch"));
 
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_26_DetailedSummarySwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_31_RestoreSwitch"));
@@ -3673,12 +3792,14 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_InputCachesFiles"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_OutputCacheFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_36_GraphBuildSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_39_LowPrioritySwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_7_ResponseFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_8_NoAutoResponseSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_5_NoLogoSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_6_VersionSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_4_HelpSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_16_Examples"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_37_DocsLink"));
         }
 
         /// <summary>

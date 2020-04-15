@@ -30,7 +30,7 @@ using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
-using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemExpressionFragment<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
+using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>.ItemExpressionFragment;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 using System.Data.OleDb;
 
@@ -924,7 +924,7 @@ namespace Microsoft.Build.Evaluation
         /// <A Include="a.cs;*.cs"/> // Occurrences:2; Operation: Include; Provenance: StringLiteral | Glob
         /// <B Include="*.cs" Exclude="a.cs"/> // Occurrences: 1; Operation: Exclude; Provenance: StringLiteral
         /// <C Include="b.cs"/> // NA
-        /// <D Include="@(A)"/> // Occurrences: 2; Operation: Include; Provenance: Inconclusive (it is an indirect occurence from a referenced item)
+        /// <D Include="@(A)"/> // Occurrences: 2; Operation: Include; Provenance: Inconclusive (it is an indirect occurrence from a referenced item)
         /// <E Include="$(P)"/> // Occurrences: 4; Operation: Include; Provenance: FromLiteral (direct reference in $P) | Glob (direct reference in $P) | Inconclusive (it is an indirect occurrence from referenced properties and items)
         /// <PropertyGroup>
         ///     <P>a.cs;*.cs;@(A)</P>
@@ -2501,13 +2501,13 @@ namespace Microsoft.Build.Evaluation
             {
                 var includeItemspec = new EvaluationItemSpec(itemElement.Include, _data.Expander, itemElement.IncludeLocation, itemElement.ContainingProject.DirectoryPath);
 
-                ImmutableArray<ItemFragment> includeGlobFragments = includeItemspec.Fragments.Where(f => f is GlobFragment).ToImmutableArray();
+                ImmutableArray<ItemSpecFragment> includeGlobFragments = includeItemspec.Fragments.Where(f => f is GlobFragment).ToImmutableArray();
                 if (includeGlobFragments.Length == 0)
                 {
                     return null;
                 }
 
-                ImmutableArray<string> includeGlobStrings = includeGlobFragments.Select(f => f.ItemSpecFragment).ToImmutableArray();
+                ImmutableArray<string> includeGlobStrings = includeGlobFragments.Select(f => f.TextFragment).ToImmutableArray();
                 var includeGlob = new CompositeGlob(includeGlobFragments.Select(f => f.ToMSBuildGlob()));
 
                 IEnumerable<string> excludeFragmentStrings = Enumerable.Empty<string>();
@@ -2751,7 +2751,7 @@ namespace Microsoft.Build.Evaluation
             {
                 provenance = Provenance.Undefined;
 
-                IEnumerable<ItemFragment> fragmentsMatchingItem = itemSpec.FragmentsMatchingItem(itemToMatch, out int occurrences);
+                IEnumerable<ItemSpecFragment> fragmentsMatchingItem = itemSpec.FragmentsMatchingItem(itemToMatch, out int occurrences);
                 foreach (var fragment in fragmentsMatchingItem)
                 {
                     if (fragment is ValueFragment)
@@ -3961,6 +3961,11 @@ namespace Microsoft.Build.Evaluation
             public PropertyDictionary<ProjectPropertyInstance> GlobalPropertiesDictionary { get; }
 
             /// <summary>
+            /// A dictionary of all of the properties read from environment variables during evaluation.
+            /// </summary>
+            public PropertyDictionary<ProjectPropertyInstance> EnvironmentVariablePropertiesDictionary => this.Project.ProjectCollection.EnvironmentProperties;
+
+            /// <summary>
             /// List of names of the properties that, while global, are still treated as overridable 
             /// </summary>
             public ISet<string> GlobalPropertiesToTreatAsLocal => _globalPropertiesToTreatAsLocal ?? (_globalPropertiesToTreatAsLocal =
@@ -4334,7 +4339,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Sets a property which is not derived from Xml.
             /// </summary>
-            public ProjectProperty SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved)
+            public ProjectProperty SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false)
             {
                 ProjectProperty property = ProjectProperty.Create(Project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved);
                 Properties.Set(property);
@@ -4346,13 +4351,10 @@ namespace Microsoft.Build.Evaluation
 
             /// <summary>
             /// Sets a property derived from Xml.
-            /// Predecessor is any immediately previous property that was overridden by this one during evaluation.
-            /// This would include all properties with the same name that lie above in the logical
-            /// project file, and whose conditions evaluated to true.
-            /// If there are none above this is null.
             /// </summary>
-            public ProjectProperty SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped, ProjectProperty predecessor)
+            public ProjectProperty SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped)
             {
+                ProjectProperty predecessor = GetProperty(propertyElement.Name);
                 ProjectProperty property = ProjectProperty.Create(Project, propertyElement, evaluatedValueEscaped, predecessor);
                 Properties.Set(property);
 
@@ -4650,7 +4652,7 @@ namespace Microsoft.Build.Evaluation
         public Provenance Provenance { get; }
 
         /// <summary>
-        /// Gets the number of occurences of the item.
+        /// Gets the number of occurrences of the item.
         /// </summary>
         public int Occurrences { get; }
 

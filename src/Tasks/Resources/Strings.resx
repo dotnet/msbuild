@@ -1967,6 +1967,10 @@
     <value>MSB3473: Path for "{0}" is invalid. {1}</value>
     <comment>{StrBegin="MSB3473: "}</comment>
   </data>
+  <data name="SGen.TaskNotSupported">
+    <value>MSB3474: The task "{0}" is not supported on the .NET Core version of MSBuild. Use the Microsoft XML Serializer Generator package instead. See https://go.microsoft.com/fwlink/?linkid=858594 for more information.</value>
+    <comment>{StrBegin="MSB3474: "}</comment>
+  </data>
   <!--
         The SignFile message bucket is: MSB3481 - MSB3490
 
@@ -2220,6 +2224,10 @@
   <data name="Xaml.MissingRequiredArgument">
     <value>MSB3723: The parameter "{0}" requires missing parameter "{1}" to be set.</value>
     <comment>{StrBegin="MSB3723: "}</comment>
+  </data>
+  <data name="Xaml.DuplicatePropertyName" xml:space="preserve">
+      <value>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</value>
+    <comment>{StrBegin="MSB3724: "}</comment>
   </data>
 
   <!--

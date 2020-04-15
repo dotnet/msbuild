@@ -10,6 +10,11 @@
       fire this error.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="CommandLine">
+        <source>Command line arguments = "{0}"</source>
+        <target state="translated">Arguments de ligne de commande = "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ConfigurationFailurePrefixNoErrorCode">
         <source>MSBUILD : Configuration error {0}: {1}</source>
         <target state="translated">MSBUILD : Configuration - error {0}: {1}</target>
@@ -31,6 +36,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 Copyright (C) Microsoft Corporation. Tous droits réservés.
 </target>
         <note>LOCALIZATION: {0} contains the DLL version number. {1} contains the name of a runtime, like ".NET Framework", ".NET Core", or "Mono"</note>
+      </trans-unit>
+      <trans-unit id="CurrentDirectory">
+        <source>Current directory = "{0}"</source>
+        <target state="translated">Répertoire actif = "{0}"</target>
+        <note />
       </trans-unit>
       <trans-unit id="DuplicateOutputResultsCache">
         <source>MSBUILD : error MSB1058: Only one output results cache can be specified.</source>
@@ -170,6 +180,57 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
       LOCALIZATION: "-graphBuild" and "-graph" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_37_DocsLink">
+        <source>For more detailed information, see https://aka.ms/msbuild/docs</source>
+        <target state="translated">Pour obtenir des informations plus détaillées, accédez à https://aka.ms/msbuild/docs</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="HelpMessage_38_TargetsSwitch">
+        <source>  -targets[:file]
+                     Prints a list of available targets without executing the
+                     actual build process. By default the output is written to
+                     the console window. If the path to an output file
+                     is provided that will be used instead.
+                     (Short form: -ts)
+                     Example:
+                       -ts:out.txt
+    </source>
+        <target state="translated">  -targets[:fichier]
+                     Liste les cibles disponibles sans exécuter le
+                     processus de génération réel. Par défaut, la sortie est écrite dans
+                     la fenêtre de console. Si le chemin d'un fichier de sortie
+                     est fourni, il est utilisé à la place.
+                     (Forme abrégée : -ts)
+                     Exemple :
+                       -ts:out.txt
+    </target>
+        <note>
+      LOCALIZATION: "MSBuild" should not be localized.
+      LOCALIZATION: "-targets" and "-ts" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_39_LowPrioritySwitch">
+        <source>  -lowPriority[:True|False]
+                     Causes MSBuild to run at low process priority.
+
+                     Specifying -lowPriority is the same as specifying
+                     -lowPriority:True.
+                     (Short form: -low)
+    </source>
+        <target state="translated">  -lowPriority[:True|False]
+                     Entraîne l'exécution de MSBuild avec une faible priorité de processus.
+
+                     Spécifier -lowPriority revient à spécifier
+                     -lowPriority:True.
+                     (Forme abrégée : -low)
+    </target>
+        <note>
+      LOCALIZATION: "MSBuild" should not be localized.
+      LOCALIZATION: "-lowPriority" and "-low" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
@@ -1050,6 +1111,16 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
         LOCALIZATION: The word "Logger" should be localized, the words "MSBuild" and "error" should NOT be localized.
       </note>
       </trans-unit>
+      <trans-unit id="MSBExePath">
+        <source>MSBuild executable path = "{0}"</source>
+        <target state="translated">Chemin de l'exécutable MSBuild = "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBVersion">
+        <source>MSBuild version = "{0}"</source>
+        <target state="translated">Version de MSBuild = "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MissingLoggerError">
         <source>MSBUILD : error MSB1007: Specify a logger.</source>
         <target state="translated">MSBUILD : error MSB1007: Spécifiez un journal.</target>
@@ -1148,6 +1219,11 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
       where the switches are coming from.
     </note>
       </trans-unit>
+      <trans-unit id="Process">
+        <source>Process = "{0}"</source>
+        <target state="translated">Processus = "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectNotFoundError">
         <source>MSBUILD : error MSB1009: Project file does not exist.</source>
         <target state="translated">MSBUILD : error MSB1009: Le fichier projet n'existe pas.</target>
@@ -1214,6 +1290,11 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
         <note>{StrBegin="MSBUILD : error MSB1026: "}UE: This error is printed if the default schema does not exist or in the extremely unlikely event
     that an explicit schema file was passed and existed when the command line parameters were checked but was deleted from disk before this check was made.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="TargetsCouldNotBePrinted">
+        <source>MSBUILD : error MSB1059: Targets could not be printed. {0}</source>
+        <target state="translated">MSBUILD : error MSB1059: les cibles n'ont pas pu être imprimées. {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>

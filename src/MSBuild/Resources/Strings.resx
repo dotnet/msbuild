@@ -787,6 +787,39 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
+  <data name="HelpMessage_37_DocsLink" Visibility="Public">
+    <value>For more detailed information, see https://aka.ms/msbuild/docs</value>
+  </data>
+  <data name="HelpMessage_38_TargetsSwitch" Visibility="Public">
+    <value>  -targets[:file]
+                     Prints a list of available targets without executing the
+                     actual build process. By default the output is written to
+                     the console window. If the path to an output file
+                     is provided that will be used instead.
+                     (Short form: -ts)
+                     Example:
+                       -ts:out.txt
+    </value>
+    <comment>
+      LOCALIZATION: "MSBuild" should not be localized.
+      LOCALIZATION: "-targets" and "-ts" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </comment>
+  </data>
+  <data name="HelpMessage_39_LowPrioritySwitch" Visibility="Public">
+    <value>  -lowPriority[:True|False]
+                     Causes MSBuild to run at low process priority.
+
+                     Specifying -lowPriority is the same as specifying
+                     -lowPriority:True.
+                     (Short form: -low)
+    </value>
+    <comment>
+      LOCALIZATION: "MSBuild" should not be localized.
+      LOCALIZATION: "-lowPriority" and "-low" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </comment>
+  </data>
   <data name="InvalidConfigurationFile" Visibility="Public">
     <value>MSBUILD : Configuration error MSB1043: The application could not start. {0}</value>
     <comment>
@@ -1154,6 +1187,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <value>MSBUILD : error MSB1047: File to preprocess to is not valid. {0}</value>
     <comment>{StrBegin="MSBUILD : error MSB1047: "}</comment>
   </data>
+  <data name="TargetsCouldNotBePrinted">
+    <value>MSBUILD : error MSB1059: Targets could not be printed. {0}</value>
+    <comment>{StrBegin="MSBUILD : error MSB1059: "}</comment>
+  </data>
   <!-- MSB1021 and MSB1020 are also used in the engine but their copies do not have the "MSBUILD : " prefix so we must have our own -->
   <data name="LoggerCreationError" UESanitized="true" Visibility="Public">
     <value>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</value>
@@ -1226,10 +1263,25 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       logger could not be created -- this message comes from the CLR/FX and is localized.
     </comment>
   </data>
+  <data name="Process" UESanitized="true" Visibility="Public">
+    <value>Process = "{0}"</value>
+  </data>
+  <data name="MSBExePath" UESanitized="true" Visibility="Public">
+    <value>MSBuild executable path = "{0}"</value>
+  </data>
+  <data name="CommandLine" UESanitized="true" Visibility="Public">
+    <value>Command line arguments = "{0}"</value>
+  </data>
+  <data name="CurrentDirectory" UESanitized="true" Visibility="Public">
+    <value>Current directory = "{0}"</value>
+  </data>
+  <data name="MSBVersion" UESanitized="true" Visibility="Public">
+    <value>MSBuild version = "{0}"</value>
+  </data>
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1059.
+        Next error code should be MSB1060.
 
         Don't forget to update this comment after using the new code.
   -->

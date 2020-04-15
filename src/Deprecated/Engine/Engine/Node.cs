@@ -441,7 +441,7 @@ namespace Microsoft.Build.BuildEngine
                 }
                 catch (Exception ex)
                 {
-                    // If an error occured while trying to send the orginal exception to the parent 
+                    // If an error occurred while trying to send the original exception to the parent 
                     // rethrow the original exception
                     string message = ResourceUtilities.FormatResourceString("FatalErrorOnChildNode", nodeId, ex.Message);
 

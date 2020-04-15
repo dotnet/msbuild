@@ -1778,7 +1778,7 @@ namespace Microsoft.Build.BackEnd
         private ScheduleResponse TrySatisfyRequestFromCache(int nodeForResults, BuildRequest request, bool skippedResultsDoNotCauseCacheMiss)
         {
             BuildRequestConfiguration config = _configCache[request.ConfigurationId];
-            ResultsCacheResponse resultsResponse = _resultsCache.SatisfyRequest(request, config.ProjectInitialTargets, config.ProjectDefaultTargets, config.GetAfterTargetsForDefaultTargets(request), skippedResultsDoNotCauseCacheMiss);
+            ResultsCacheResponse resultsResponse = _resultsCache.SatisfyRequest(request, config.ProjectInitialTargets, config.ProjectDefaultTargets, skippedResultsDoNotCauseCacheMiss);
 
             if (resultsResponse.Type == ResultsCacheResponseType.Satisfied)
             {
@@ -1826,7 +1826,9 @@ namespace Microsoft.Build.BackEnd
             var errorMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                 "CacheMissesNotAllowedInIsolatedGraphBuilds",
                 parentConfig.ProjectFullPath,
+                ConcatenateGlobalProperties(parentConfig),
                 requestConfig.ProjectFullPath,
+                ConcatenateGlobalProperties(requestConfig),
                 request.Targets.Count == 0
                     ? "default"
                     : string.Join(";", request.Targets));
@@ -1834,8 +1836,6 @@ namespace Microsoft.Build.BackEnd
             // Issue a failed build result to have the msbuild task marked as failed and thus stop the build
             BuildResult result = new BuildResult(request);
             result.SetOverallResult(false);
-
-            // Log an error to have something useful displayed to the user and to avoid having a failed build with 0 errors
             result.SchedulerInducedError = errorMessage;
 
             var response = GetResponseForResult(nodeForResults, request, result);
@@ -1869,6 +1869,11 @@ namespace Microsoft.Build.BackEnd
 
                 var parentConfiguration = configCache[parentRequest.BuildRequest.ConfigurationId];
                 return (buildRequestConfiguration, parentConfiguration);
+            }
+
+            string ConcatenateGlobalProperties(BuildRequestConfiguration configuration)
+            {
+                return string.Join("; ", configuration.GlobalProperties.Select<ProjectPropertyInstance, string>(p => $"{p.Name}={p.EvaluatedValue}"));
             }
         }
 

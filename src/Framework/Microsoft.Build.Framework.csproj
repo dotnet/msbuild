@@ -13,8 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Runtime.Serialization.Primitives" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
-    <PackageReference Include="System.Threading.Thread" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
+    <PackageReference Include="System.Security.Permissions" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
     <Reference Include="System.Xaml" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </ItemGroup>
 

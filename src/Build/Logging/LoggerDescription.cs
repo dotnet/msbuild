@@ -249,7 +249,7 @@ namespace Microsoft.Build.Logging
                 if (innerException is LoggerException)
                 {
                     // Logger failed politely during construction. In order to preserve
-                    // the stack trace at which the error occured we wrap the original
+                    // the stack trace at which the error occurred we wrap the original
                     // exception instead of throwing.
                     LoggerException l = ((LoggerException)innerException);
                     throw new LoggerException(l.Message, innerException, l.ErrorCode, l.HelpKeyword);

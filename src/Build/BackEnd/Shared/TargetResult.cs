@@ -32,6 +32,11 @@ namespace Microsoft.Build.Execution
         private bool _targetFailureDoesntCauseBuildFailure;
 
         /// <summary>
+        /// Flag indicating whether at least one target which has run after us (transitively via AfterTargets) failed.
+        /// </summary>
+        private bool _afterTargetsHaveFailed;
+
+        /// <summary>
         /// The store of items in this result.
         /// </summary>
         private ItemsStore _itemsStore;
@@ -141,6 +146,18 @@ namespace Microsoft.Build.Execution
             set => _targetFailureDoesntCauseBuildFailure = value;
         }
 
+        /// <summary>
+        /// Sets or gets a flag indicating whether at least one target which has run after us (transitively via AfterTargets) failed.
+        /// </summary>
+        internal bool AfterTargetsHaveFailed
+        {
+            [DebuggerStepThrough]
+            get => _afterTargetsHaveFailed;
+
+            [DebuggerStepThrough]
+            set => _afterTargetsHaveFailed = value;
+        }
+
         #region INodePacketTranslatable Members
 
         /// <summary>
@@ -239,6 +256,7 @@ namespace Microsoft.Build.Execution
         {
             translator.Translate(ref _result, WorkUnitResult.FactoryForDeserialization);
             translator.Translate(ref _targetFailureDoesntCauseBuildFailure);
+            translator.Translate(ref _afterTargetsHaveFailed);
             translator.Translate(ref _itemsStore, ItemsStore.FactoryForDeserialization);
         }
 

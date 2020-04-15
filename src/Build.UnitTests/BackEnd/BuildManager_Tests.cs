@@ -148,7 +148,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")] // out-of-proc nodes not working on mono yet
         public void SimpleP2PBuildOutOfProc()
         {
             var newParameters = _parameters.Clone();
@@ -944,6 +943,68 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[errormessage]");
         }
 
+        [Fact]
+        public void DeferredMessageShouldBeLogged()
+        {
+            string contents = CleanupFileContents(@"
+              <Project>
+                 <Target Name='Build'>
+                     <Message Text='[Message]' Importance='high'/>
+                     <Warning Text='[Warn]'/>	
+                </Target>
+              </Project>
+            ");
+
+            MockLogger logger;
+
+            const string highMessage = "deferred[High]";
+            const string normalMessage = "deferred[Normal]";
+            const string lowMessage = "deferred[Low]";
+
+            using (var buildManagerSession = new Helpers.BuildManagerSession(
+                _env,
+                deferredMessages: new[]
+                {
+                    new BuildManager.DeferredBuildMessage(highMessage, MessageImportance.High),
+                    new BuildManager.DeferredBuildMessage(normalMessage, MessageImportance.Normal),
+                    new BuildManager.DeferredBuildMessage(lowMessage, MessageImportance.Low)
+                }))
+            {
+                var result = buildManagerSession.BuildProjectFile(_env.CreateFile("build.proj", contents).Path);
+
+                result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+                logger = buildManagerSession.Logger;
+            }
+
+            logger.AssertLogContains("[Warn]");
+            logger.AssertLogContains("[Message]");
+
+            logger.AssertLogContains(highMessage);
+            logger.AssertLogContains(normalMessage);
+            logger.AssertLogContains(lowMessage);
+
+            var deferredMessages = logger.BuildMessageEvents.Where(e => e.Message.StartsWith("deferred")).ToArray();
+
+            deferredMessages.Length.ShouldBe(3);
+
+            deferredMessages[0].Message.ShouldBe(highMessage);
+            deferredMessages[0].Importance.ShouldBe(MessageImportance.High);
+            deferredMessages[1].Message.ShouldBe(normalMessage);
+            deferredMessages[1].Importance.ShouldBe(MessageImportance.Normal);
+            deferredMessages[2].Message.ShouldBe(lowMessage);
+            deferredMessages[2].Importance.ShouldBe(MessageImportance.Low);
+
+            logger.BuildStartedEvents.Count.ShouldBe(1);
+            logger.BuildFinishedEvents.Count.ShouldBe(1);
+            logger.ProjectStartedEvents.Count.ShouldBe(1);
+            logger.ProjectFinishedEvents.Count.ShouldBe(1);
+            logger.TargetStartedEvents.Count.ShouldBe(1);
+            logger.TargetFinishedEvents.Count.ShouldBe(1);
+            logger.TaskStartedEvents.Count.ShouldBe(2);
+            logger.TaskFinishedEvents.Count.ShouldBe(2);
+        }
+
         /// <summary>
         /// A build with a message, error and warning, verify that 
         /// we only get errors, warnings, and project started and finished when OnlyLogCriticalEvents is true
@@ -1440,7 +1501,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A canceled build
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CancelledBuild()
         {
             string contents = CleanupFileContents(@"
@@ -1546,7 +1606,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly. 
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CancelledBuildWithDelay40()
         {
             string contents = CleanupFileContents(@"
@@ -1578,7 +1637,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly. 
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CancelledBuildInTaskHostWithDelay40()
         {
             string contents = CleanupFileContents(@"
@@ -2239,8 +2297,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// overall build result -- and thus the return value of the MSBuild task -- should reflect
         /// that failure. 
         /// </summary>
-        [Fact]
-        public void FailedAfterTargetInP2PShouldCauseOverallBuildFailure()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void FailedAfterTargetInP2PShouldCauseOverallBuildFailure(bool disableInProcNode)
         {
             var projA = _env.CreateFile(".proj").Path;
             var projB = _env.CreateFile(".proj").Path;
@@ -2270,6 +2330,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             File.WriteAllText(projA, CleanupFileContents(contentsA));
             File.WriteAllText(projB, CleanupFileContents(contentsB));
 
+            _parameters.DisableInProcNode = disableInProcNode;
             _buildManager.BeginBuild(_parameters);
             var data = new BuildRequestData(projA, new Dictionary<string, string>(), null, new[] { "Build" }, new HostServices());
             BuildResult result = _buildManager.PendBuildRequest(data).Execute();
@@ -2285,8 +2346,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// that failure.  Specifically tests where there are multiple entrypoint targets with 
         /// AfterTargets, only one of which fails. 
         /// </summary>
-        [Fact]
-        public void FailedAfterTargetInP2PShouldCauseOverallBuildFailure_MultipleEntrypoints()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void FailedAfterTargetInP2PShouldCauseOverallBuildFailure_MultipleEntrypoints(bool disableInProcNode)
         {
             var projA = _env.CreateFile(".proj").Path;
             var projB = _env.CreateFile(".proj").Path;
@@ -2328,6 +2391,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             File.WriteAllText(projA, CleanupFileContents(contentsA));
             File.WriteAllText(projB, CleanupFileContents(contentsB));
 
+            _parameters.DisableInProcNode = disableInProcNode;
             _buildManager.BeginBuild(_parameters);
             var data = new BuildRequestData(projA, new Dictionary<string, string>(), null, new[] { "Build" }, new HostServices());
             BuildResult result = _buildManager.PendBuildRequest(data).Execute();
@@ -2348,8 +2412,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// that failure. This should also be true if the AfterTarget is an AfterTarget of the 
         /// entrypoint target.
         /// </summary>
-        [Fact]
-        public void FailedNestedAfterTargetInP2PShouldCauseOverallBuildFailure()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void FailedNestedAfterTargetInP2PShouldCauseOverallBuildFailure(bool disableInProcNode)
         {
             var projA = _env.CreateFile(".proj").Path;
             var projB = _env.CreateFile(".proj").Path;
@@ -2383,6 +2449,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             File.WriteAllText(projA, CleanupFileContents(contentsA));
             File.WriteAllText(projB, CleanupFileContents(contentsB));
 
+            _parameters.DisableInProcNode = disableInProcNode;
             _buildManager.BeginBuild(_parameters);
             var data = new BuildRequestData(projA, new Dictionary<string, string>(), null, new[] { "Build" }, new HostServices());
             BuildResult result = _buildManager.PendBuildRequest(data).Execute();
@@ -3215,7 +3282,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// was loaded by MSBuild, not supplied directly by the user.
         /// </remarks>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void Regress265010()
         {
             string contents = CleanupFileContents(@"
@@ -3539,7 +3605,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")] // out-of-proc nodes not working on mono yet
         public void ShouldBuildMutatedProjectInstanceWhoseProjectWasPreviouslyBuiltAsAP2PDependency()
         {
             const string mainProjectContents = @"<Project>
@@ -3633,7 +3698,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")] // out-of-proc nodes not working on mono yet
         public void OutOfProcFileBasedP2PBuildSucceeds()
         {
             const string mainProject = @"<Project>
@@ -3702,7 +3766,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        [Trait("Category", "mono-osx-failing")] // out-of-proc nodes not working on mono yet
         public void OutOfProcProjectInstanceBasedBuildDoesNotReloadFromDisk(bool shouldSerializeEntireState)
         {
             const string mainProject = @"<Project>
@@ -3789,7 +3852,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")] // out-of-proc nodes not working on mono yet
         public void OutOfProcEvaluationIdsUnique()
         {
             const string mainProject = @"<Project>

@@ -32,19 +32,27 @@
         <note />
       </trans-unit>
       <trans-unit id="CacheMissesNotAllowedInIsolatedGraphBuilds">
-        <source>MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the build result for the reference is not in the engine cache. In isolated builds this could mean one of the following:
-    - the reference was not explicitly specified as a ProjectReference item in "{0}"
-    - the reference was not included in the provided input caches
-    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in "{0}"
+        <source>MSB4252: Project "{0}" with global properties
+    ({1})
+    is building project "{2}" with global properties
+    ({3})
+    with the ({4}) target(s) but the build result for the built project is not in the engine cache. In isolated builds this could mean one of the following:
+    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in project "{0}"
+    - the reference was called with global properties that do not match the static graph inferred nodes
+    - the reference was not explicitly specified as a ProjectReference item in project "{0}"
     </source>
-        <target state="translated">MSB4252: "{0}" 프로젝트에 "{1}"(대상 {2}개)에 대한 참조가 있지만 참조의 빌드 결과가 엔진 캐시에 있지 않습니다. 격리된 빌드에서는 다음 중 하나를 의미할 수 있습니다.
-    - 참조가 "{0}"에서 ProjectReference 항목으로 명시적으로 지정되지 않았음
-    - 참조가 제공된 입력 캐시에 포함되지 않았음
-    - 참조가 "{0}"에서 ProjectReferenceTargets 항목에 지정되지 않은 대상으로 호출되었음
+        <target state="translated">MSB4252: 전역 속성({1})이 있는 "{0}" 프로젝트가
+    대상이
+    ({4})인 전역 속성({3})으로 "{2}" 프로젝트를
+    빌드하고
+    있지만, 빌드된 프로젝트의 빌드 결과가 엔진 캐시에 없습니다. 격리된 빌드에서 이는 다음 중 하나를 의미할 수 있습니다.
+    - 참조가 "{0}" 프로젝트의 ProjectReferenceTargets 항목에 지정되지 않은 대상으로 호출되었습니다.
+    - 참조가 정적 그래프 유추된 노드와 일치하지 않는 전역 속성으로 호출되었습니다.
+    - 참조가 "{0}" 프로젝트에서 ProjectReference 항목으로 명시적으로 지정되지 않았습니다.
     </target>
         <note>
       {StrBegin="MSB4252:"}
-      LOCALIZATION: Do not localize the following words: ProjectReference.
+      LOCALIZATION: Do not localize the following words: ProjectReference, ProjectReferenceTargets
     </note>
       </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
@@ -65,6 +73,11 @@
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
         <target state="translated">MSB4257: 지정한 출력 결과 캐시 파일이 비어 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentVariableRead">
+        <source>Read environment variable "{0}"</source>
+        <target state="translated">환경 변수 "{0}" 읽기</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
@@ -93,6 +106,11 @@
         <note>
       LOCALIZATION: {0} is an enum value of LoggerVerbosity.
     </note>
+      </trans-unit>
+      <trans-unit id="LogTaskInputs.Truncated">
+        <source>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</source>
+        <target state="new">The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
@@ -124,6 +142,11 @@
       {StrBegin="MSB4250: "}
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
+      </trans-unit>
+      <trans-unit id="PropertyAssignment">
+        <source>Property initial value: $({0})="{1}" Source: {2}</source>
+        <target state="translated">속성 초기 값: $({0})="{1}" 소스: {2}</target>
+        <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
@@ -168,6 +191,11 @@
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
     </note>
+      </trans-unit>
+      <trans-unit id="UninitializedPropertyRead">
+        <source>Read uninitialized property "{0}"</source>
+        <target state="translated">초기화되지 않은 속성 "{0}" 읽기</target>
+        <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">
         <source>Using input build results caches: {0}</source>

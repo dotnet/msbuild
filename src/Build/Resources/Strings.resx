@@ -616,6 +616,9 @@
   <data name="EnvironmentHeader" UESanitized="false" Visibility="Public">
     <value>Environment at start of build:</value>
   </data>
+  <data name="LogTaskInputs.Truncated" UESanitized="false" Visibility="Public">
+    <value>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</value>
+  </data>
   <data name="MetadataDefinitionCannotContainItemVectorExpression" UESanitized="false" Visibility="Public">
     <value>MSB4164: The value "{0}" of metadata "{1}" contains an item list expression. Item list expressions are not allowed on default metadata values.</value>
     <comment>{StrBegin="MSB4164: "}</comment>
@@ -1718,14 +1721,18 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     </comment>
   </data>
   <data name="CacheMissesNotAllowedInIsolatedGraphBuilds" UESanitized="false" Visibility="Public">
-    <value>MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the build result for the reference is not in the engine cache. In isolated builds this could mean one of the following:
-    - the reference was not explicitly specified as a ProjectReference item in "{0}"
-    - the reference was not included in the provided input caches
-    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in "{0}"
+    <value>MSB4252: Project "{0}" with global properties
+    ({1})
+    is building project "{2}" with global properties
+    ({3})
+    with the ({4}) target(s) but the build result for the built project is not in the engine cache. In isolated builds this could mean one of the following:
+    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in project "{0}"
+    - the reference was called with global properties that do not match the static graph inferred nodes
+    - the reference was not explicitly specified as a ProjectReference item in project "{0}"
     </value>
     <comment>
       {StrBegin="MSB4252:"}
-      LOCALIZATION: Do not localize the following words: ProjectReference.
+      LOCALIZATION: Do not localize the following words: ProjectReference, ProjectReferenceTargets
     </comment>
   </data>
   <data name="NullReferenceFromProjectInstanceFactory" UESanitized="false" Visibility="Public">
@@ -1803,6 +1810,21 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="InvalidVersionFormat" xml:space="preserve">
     <value>Version string was not in a correct format.</value>
+  </data>
+  <data name="UninitializedPropertyRead" UESanitized="false" Visibility="Public">
+    <value>Read uninitialized property "{0}"</value>
+    <comment>
+    </comment>
+  </data>
+  <data name="EnvironmentVariableRead" UESanitized="false" Visibility="Public">
+    <value>Read environment variable "{0}"</value>
+    <comment>
+    </comment>
+  </data>
+  <data name="PropertyAssignment" UESanitized="false" Visibility="Public">
+    <value>Property initial value: $({0})="{1}" Source: {2}</value>
+    <comment>
+    </comment>
   </data>
   <!--
         The engine message bucket is: MSB4001 - MSB4999

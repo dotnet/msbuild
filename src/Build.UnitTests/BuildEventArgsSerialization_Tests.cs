@@ -419,6 +419,79 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void RoundTripEnvironmentVariableReadEventArgs()
+        {
+            var args = new EnvironmentVariableReadEventArgs(
+                environmentVariableName: Guid.NewGuid().ToString(),
+                message: Guid.NewGuid().ToString(),
+                helpKeyword: Guid.NewGuid().ToString(),
+                senderName: Guid.NewGuid().ToString());
+
+            Roundtrip(args,
+                e => e.EnvironmentVariableName,
+                e => e.Message,
+                e => e.HelpKeyword,
+                e => e.SenderName);
+        }
+
+        [Fact]
+        public void RoundTripPropertyReassignmentEventArgs()
+        {
+            var args = new PropertyReassignmentEventArgs(
+                propertyName: Guid.NewGuid().ToString(),
+                previousValue: Guid.NewGuid().ToString(),
+                newValue: Guid.NewGuid().ToString(),
+                location: Guid.NewGuid().ToString(),
+                message: Guid.NewGuid().ToString(),
+                helpKeyword: Guid.NewGuid().ToString(),
+                senderName: Guid.NewGuid().ToString());
+
+            Roundtrip(args,
+                e => e.PropertyName,
+                e => e.PreviousValue,
+                e => e.NewValue,
+                e => e.Location,
+                e => e.Message,
+                e => e.HelpKeyword,
+                e => e.SenderName);
+        }
+
+        [Fact]
+        public void UninitializedPropertyReadEventArgs()
+        {
+            var args = new UninitializedPropertyReadEventArgs(
+                propertyName: Guid.NewGuid().ToString(),
+                message: Guid.NewGuid().ToString(),
+                helpKeyword: Guid.NewGuid().ToString(),
+                senderName: Guid.NewGuid().ToString());
+
+            Roundtrip(args,
+                e => e.PropertyName,
+                e => e.Message,
+                e => e.HelpKeyword,
+                e => e.SenderName);
+        }
+
+        [Fact]
+        public void PropertyInitialValueEventArgs()
+        {
+            var args = new PropertyInitialValueSetEventArgs(
+                propertyName: Guid.NewGuid().ToString(),
+                propertyValue: Guid.NewGuid().ToString(),
+                propertySource: Guid.NewGuid().ToString(),
+                message: Guid.NewGuid().ToString(),
+                helpKeyword: Guid.NewGuid().ToString(),
+                senderName: Guid.NewGuid().ToString());
+
+            Roundtrip(args,
+                e => e.PropertyName,
+                e => e.PropertyValue,
+                e => e.PropertySource,
+                e => e.Message,
+                e => e.HelpKeyword,
+                e => e.SenderName);
+        }
+        [Fact]
         public void ReadingCorruptedStreamThrows()
         {
             var memoryStream = new MemoryStream();
