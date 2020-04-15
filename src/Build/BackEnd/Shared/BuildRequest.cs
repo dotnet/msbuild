@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
@@ -267,6 +267,13 @@ namespace Microsoft.Build.BackEnd
                 _buildEventContext = value;
             }
         }
+
+        /// <summary>
+        /// The <see cref="BuildEventContext" /> of the currently executing task, if any.
+        /// Used to correlate a project's build with the parent task that spawned it
+        /// (usually the MSBuild task).
+        /// </summary>
+        public BuildEventContext CurrentTaskContext { get; set; }
 
         /// <summary>
         /// The set of flags specified in the BuildRequestData for this request.

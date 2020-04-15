@@ -231,7 +231,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Log an error based on an exception
         /// </summary>
-        /// <param name="exception">The exception wich is to be logged</param>
+        /// <param name="exception">The exception to be logged</param>
         /// <param name="file">The file in which the error occurred</param>
         internal void LogFatalBuildError(Exception exception, BuildEventFileInfo file)
         {

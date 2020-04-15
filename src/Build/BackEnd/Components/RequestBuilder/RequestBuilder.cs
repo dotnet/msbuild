@@ -690,14 +690,12 @@ namespace Microsoft.Build.BackEnd
                 await BuildAndReport();
                 MSBuildEventSource.Log.RequestThreadProcStop();
             }
-#if FEATURE_VARIOUS_EXCEPTIONS
             catch (ThreadAbortException)
             {
                 // Do nothing.  This will happen when the thread is forcibly terminated because we are shutting down, for example
                 // when the unit test framework terminates.
                 throw;
             }
-#endif
             catch (Exception e)
             {
                 // Dump all engine exceptions to a temp file

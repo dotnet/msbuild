@@ -16,6 +16,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
+using Shouldly;
 
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
@@ -691,6 +692,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, entry.Request.Targets.ToArray(), CreateStandardLookup(project), CancellationToken.None).Result;
             AssertTaskExecutionOrder(new string[] { "BuildTask" });
+            Assert.False(result.ResultsByTarget["Build"].AfterTargetsHaveFailed);
         }
 
         /// <summary>
@@ -716,6 +718,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, entry.Request.Targets.ToArray(), CreateStandardLookup(project), CancellationToken.None).Result;
             AssertTaskExecutionOrder(new string[] { "AfterTask" });
+            Assert.False(result.ResultsByTarget["Build"].AfterTargetsHaveFailed);
         }
 
         /// <summary>
@@ -744,6 +747,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, entry.Request.Targets.ToArray(), CreateStandardLookup(project), CancellationToken.None).Result;
             AssertTaskExecutionOrder(new string[] { "BuildTask" });
+            Assert.False(result.ResultsByTarget["Build"].AfterTargetsHaveFailed);
         }
 
         /// <summary>
@@ -786,6 +790,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, entry.Request.Targets.ToArray(), CreateStandardLookup(project), CancellationToken.None).Result;
             AssertTaskExecutionOrder(new string[] { "BuildTask", "AfterTask", "Error2" });
+            Assert.False(result.ResultsByTarget["PostBuild"].AfterTargetsHaveFailed);
         }
 
         /// <summary>
@@ -811,6 +816,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, entry.Request.Targets.ToArray(), CreateStandardLookup(project), CancellationToken.None).Result;
             AssertTaskExecutionOrder(new string[] { "BuildTask", "AfterTask" });
+            Assert.False(result.ResultsByTarget["Build"].AfterTargetsHaveFailed);
         }
 
         /// <summary>
@@ -836,6 +842,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, entry.Request.Targets.ToArray(), CreateStandardLookup(project), CancellationToken.None).Result;
             AssertTaskExecutionOrder(new string[] { "BuildTask", "AfterTask" });
+            Assert.False(result.ResultsByTarget["Build;Me"].AfterTargetsHaveFailed);
         }
 
         /// <summary>
@@ -866,6 +873,53 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, entry.Request.Targets.ToArray(), CreateStandardLookup(project), CancellationToken.None).Result;
             AssertTaskExecutionOrder(new string[] { "BuildTask", "AfterTask", "AfterTask2" });
+            Assert.False(result.ResultsByTarget["Build"].AfterTargetsHaveFailed);
+        }
+
+        /// <summary>
+        /// Test a failing after target
+        /// </summary>
+        [Fact]
+        public void TestAfterTargetsWithFailure()
+        {
+            string projectBody = @"
+<Target Name='Build'>
+    <BuildTask/>
+</Target>
+
+<Target Name='After' AfterTargets='Build'>
+    <ErrorTask1/>
+</Target>
+";
+
+            BuildResult result = BuildSimpleProject(projectBody, new string[] { "Build" }, failTaskNumber: 2 /* Fail on After */);
+            result.ResultsByTarget["Build"].ResultCode.ShouldBe(TargetResultCode.Success);
+            result.ResultsByTarget["Build"].AfterTargetsHaveFailed.ShouldBe(true);
+        }
+
+        /// <summary>
+        /// Test a transitively failing after target
+        /// </summary>
+        [Fact]
+        public void TestAfterTargetsWithTransitiveFailure()
+        {
+            string projectBody = @"
+<Target Name='Build'>
+    <BuildTask/>
+</Target>
+
+<Target Name='After1' AfterTargets='Build'>
+    <BuildTask/>
+</Target>
+
+<Target Name='After2' AfterTargets='After1'>
+    <ErrorTask1/>
+</Target>
+";
+
+            BuildResult result = BuildSimpleProject(projectBody, new string[] { "Build" }, failTaskNumber: 3 /* Fail on After2 */);
+            result.ResultsByTarget["Build"].ResultCode.ShouldBe(TargetResultCode.Success);
+            result.ResultsByTarget["Build"].AfterTargetsHaveFailed.ShouldBe(true);
         }
 
         /// <summary>
@@ -1080,6 +1134,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, entry.Request.Targets.ToArray(), CreateStandardLookup(project), CancellationToken.None).Result;
             AssertTaskExecutionOrder(new string[] { "BuildTask", "BeforeErrorTargetTask", "ErrorTargetTask", "AfterErrorTargetTask" });
+            Assert.False(result.ResultsByTarget["Build"].AfterTargetsHaveFailed);
         }
 
         /// <summary>
@@ -1482,6 +1537,27 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private ProjectLoggingContext GetProjectLoggingContext(BuildRequestEntry entry)
         {
             return new ProjectLoggingContext(new NodeLoggingContext(_host, 1, false), entry, null);
+        }
+
+        /// <summary>
+        /// Builds a project using TargetBuilder and returns the result.
+        /// </summary>
+        /// <param name="projectBody">The project contents.</param>
+        /// <param name="targets">The targets to build.</param>
+        /// <param name="failTaskNumber">The task ordinal to fail on.</param>
+        /// <returns>The result of building the specified project/tasks.</returns>
+        private BuildResult BuildSimpleProject(string projectBody, string[] targets, int failTaskNumber)
+        {
+            ProjectInstance project = CreateTestProject(projectBody);
+
+            MockTaskBuilder taskBuilder = (MockTaskBuilder)_host.GetComponent(BuildComponentType.TaskBuilder);
+            taskBuilder.FailTaskNumber = failTaskNumber;
+
+            TargetBuilder builder = (TargetBuilder)_host.GetComponent(BuildComponentType.TargetBuilder);
+            IConfigCache cache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
+            BuildRequestEntry entry = new BuildRequestEntry(CreateNewBuildRequest(1, targets), cache[1]);
+
+            return builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, entry.Request.Targets.ToArray(), CreateStandardLookup(project), CancellationToken.None).Result;
         }
 
         /// <summary>

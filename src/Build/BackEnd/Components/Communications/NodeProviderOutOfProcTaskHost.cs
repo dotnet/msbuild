@@ -36,39 +36,39 @@ namespace Microsoft.Build.BackEnd
     internal class NodeProviderOutOfProcTaskHost : NodeProviderOutOfProcBase, INodeProvider, INodePacketFactory, INodePacketHandler
     {
         /// <summary>
-        /// The maximum number of nodes that this provider supports. Should 
-        /// always be equivalent to the number of different TaskHostContexts 
-        /// that exist. 
+        /// The maximum number of nodes that this provider supports. Should
+        /// always be equivalent to the number of different TaskHostContexts
+        /// that exist.
         /// </summary>
         private const int MaxNodeCount = 4;
 
         /// <summary>
-        /// Store the path for MSBuild / MSBuildTaskHost so that we don't have to keep recalculating it. 
+        /// Store the path for MSBuild / MSBuildTaskHost so that we don't have to keep recalculating it.
         /// </summary>
         private static string s_baseTaskHostPath;
 
         /// <summary>
-        /// Store the 64-bit path for MSBuild / MSBuildTaskHost so that we don't have to keep recalculating it. 
+        /// Store the 64-bit path for MSBuild / MSBuildTaskHost so that we don't have to keep recalculating it.
         /// </summary>
         private static string s_baseTaskHostPath64;
 
         /// <summary>
-        /// Store the path for the 32-bit MSBuildTaskHost so that we don't have to keep re-calculating it. 
+        /// Store the path for the 32-bit MSBuildTaskHost so that we don't have to keep re-calculating it.
         /// </summary>
         private static string s_pathToX32Clr2;
 
         /// <summary>
-        /// Store the path for the 64-bit MSBuildTaskHost so that we don't have to keep re-calculating it. 
+        /// Store the path for the 64-bit MSBuildTaskHost so that we don't have to keep re-calculating it.
         /// </summary>
         private static string s_pathToX64Clr2;
 
         /// <summary>
-        /// Store the path for the 32-bit MSBuild so that we don't have to keep re-calculating it. 
+        /// Store the path for the 32-bit MSBuild so that we don't have to keep re-calculating it.
         /// </summary>
         private static string s_pathToX32Clr4;
 
         /// <summary>
-        /// Store the path for the 64-bit MSBuild so that we don't have to keep re-calculating it. 
+        /// Store the path for the 64-bit MSBuild so that we don't have to keep re-calculating it.
         /// </summary>
         private static string s_pathToX64Clr4;
 
@@ -83,7 +83,7 @@ namespace Microsoft.Build.BackEnd
         private static string s_msbuildTaskHostName;
 
         /// <summary>
-        /// Are there any active nodes? 
+        /// Are there any active nodes?
         /// </summary>
         private ManualResetEvent _noNodesActiveEvent;
 
@@ -93,12 +93,12 @@ namespace Microsoft.Build.BackEnd
         private Dictionary<TaskHostContext, NodeContext> _nodeContexts;
 
         /// <summary>
-        /// A mapping of all of the INodePacketFactories wrapped by this provider. 
+        /// A mapping of all of the INodePacketFactories wrapped by this provider.
         /// </summary>
         private IDictionary<int, INodePacketFactory> _nodeIdToPacketFactory;
 
         /// <summary>
-        /// A mapping of all of the INodePacketHandlers wrapped by this provider. 
+        /// A mapping of all of the INodePacketHandlers wrapped by this provider.
         /// </summary>
         private IDictionary<int, INodePacketHandler> _nodeIdToPacketHandler;
 
@@ -108,7 +108,7 @@ namespace Microsoft.Build.BackEnd
         private HashSet<int> _activeNodes;
 
         /// <summary>
-        /// Packet factory we use if there's not already one associated with a particular context. 
+        /// Packet factory we use if there's not already one associated with a particular context.
         /// </summary>
         private NodePacketFactory _localPacketFactory;
 
@@ -217,9 +217,21 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownAllNodes()
         {
-            ShutdownAllNodes(NodeProviderOutOfProc.GetHostHandshake(ComponentHost.BuildParameters.EnableNodeReuse), NodeProviderOutOfProc.GetClientHandshake(), NodeContextTerminated);
-        }
+            bool nodeReuse = ComponentHost.BuildParameters.EnableNodeReuse;
 
+            // To avoid issues with mismatched priorities not shutting
+            // down all the nodes on exit, we will attempt to shutdown
+            // all matching notes with and without the priroity bit set.
+            // So precompute both versions of the handshake now.
+            long hostHandshake = NodeProviderOutOfProc.GetHostHandshake(nodeReuse, enableLowPriority: false);
+            long hostHandshakeWithLow = NodeProviderOutOfProc.GetHostHandshake(nodeReuse, enableLowPriority: true);
+
+            ShutdownAllNodes(
+                hostHandshake,
+                hostHandshakeWithLow,
+                NodeProviderOutOfProc.GetClientHandshake(),
+                NodeContextTerminated);
+        }
         #endregion
 
         #region IBuildComponent Members
@@ -358,7 +370,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Clears out our cached values for the various task host names and paths. 
+        /// Clears out our cached values for the various task host names and paths.
         /// FOR UNIT TESTING ONLY
         /// </summary>
         internal static void ClearCachedTaskHostPaths()
@@ -374,7 +386,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Given a TaskHostContext, returns the name of the executable we should be searching for. 
+        /// Given a TaskHostContext, returns the name of the executable we should be searching for.
         /// </summary>
         internal static string GetTaskHostNameFromHostContext(TaskHostContext hostContext)
         {
@@ -404,9 +416,9 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Given a TaskHostContext, return the appropriate location of the 
+        /// Given a TaskHostContext, return the appropriate location of the
         /// executable (MSBuild or MSBuildTaskHost) that we wish to use, or null
-        /// if that location cannot be resolved.  
+        /// if that location cannot be resolved.
         /// </summary>
         internal static string GetMSBuildLocationFromHostContext(TaskHostContext hostContext)
         {
@@ -473,7 +485,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Make sure a node in the requested context exists.  
+        /// Make sure a node in the requested context exists.
         /// </summary>
         internal bool AcquireAndSetUpHost(TaskHostContext hostContext, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration)
         {
@@ -505,7 +517,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Expected to be called when TaskHostTask is done with host of the given context.  
+        /// Expected to be called when TaskHostTask is done with host of the given context.
         /// </summary>
         internal void DisconnectFromHost(TaskHostContext hostContext)
         {
@@ -529,13 +541,13 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            // Start the new process.  We pass in a node mode with a node number of 2, to indicate that we 
-            // want to start up an MSBuild task host node. 
+            // Start the new process.  We pass in a node mode with a node number of 2, to indicate that we
+            // want to start up an MSBuild task host node.
             string commandLineArgs = $" /nologo /nodemode:2 /nodereuse:{ComponentHost.BuildParameters.EnableNodeReuse} ";
 
             string msbuildLocation = GetMSBuildLocationFromHostContext(hostContext);
 
-            // we couldn't even figure out the location we're trying to launch ... just go ahead and fail.  
+            // we couldn't even figure out the location we're trying to launch ... just go ahead and fail.
             if (msbuildLocation == null)
             {
                 return false;

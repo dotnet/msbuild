@@ -241,7 +241,7 @@ namespace Microsoft.Build.Exceptions
         // the F1-help keyword for the host IDE
         private string helpKeyword;
 
-        // This flag is set to indicate that the exception occured during logger initialization
+        // This flag is set to indicate that the exception occurred during logger initialization
         [OptionalField(VersionAdded = 2)]
         private bool initializationException;
     }

@@ -32,18 +32,27 @@
         <note />
       </trans-unit>
       <trans-unit id="CacheMissesNotAllowedInIsolatedGraphBuilds">
-        <source>MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the build result for the reference is not in the engine cache. In isolated builds this could mean one of the following:
-    - the reference was not explicitly specified as a ProjectReference item in "{0}"
-    - the reference was not included in the provided input caches
-    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in "{0}"
+        <source>MSB4252: Project "{0}" with global properties
+    ({1})
+    is building project "{2}" with global properties
+    ({3})
+    with the ({4}) target(s) but the build result for the built project is not in the engine cache. In isolated builds this could mean one of the following:
+    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in project "{0}"
+    - the reference was called with global properties that do not match the static graph inferred nodes
+    - the reference was not explicitly specified as a ProjectReference item in project "{0}"
     </source>
-        <target state="translated">MSB4252: o projeto "{0}" tem uma referência a "{1}" ({2} destinos, mas o resultado do build da referência não está no cache do mecanismo. Em builds isolados, isso poderia significar uma das opções a seguir:
-    – a referência não foi especificada explicitamente como um item ProjectReference em "{0}"
-    – a referência não foi incluída nos caches de entrada fornecidos
-    – a referência foi chamada com um destino que não está especificado no item ProjectReferenceTargets em "{0}"</target>
+        <target state="translated">MSB4252: o projeto "{0}" com propriedades globais
+    ({1})
+    está criando o projeto "{2}" com propriedades globais
+    ({3})
+    com ({4}) destino(s), mas o resultado do build para o projeto criado não está no cache do mecanismo. Em builds isolados, isso pode significar um dos seguintes:
+    – a referência foi chamada com um destino que não está especificado no item de ProjectReferenceTargets no projeto "{0}"
+    – a referência foi chamada com propriedades globais que não correspondem aos nós inferidos do gráfico estático
+    – a referência não foi especificada explicitamente como um item de ProjectReference no projeto "{0}"
+    </target>
         <note>
       {StrBegin="MSB4252:"}
-      LOCALIZATION: Do not localize the following words: ProjectReference.
+      LOCALIZATION: Do not localize the following words: ProjectReference, ProjectReferenceTargets
     </note>
       </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
@@ -64,6 +73,11 @@
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
         <target state="translated">MSB4257: o arquivo de cache do resultado de saída especificado está vazio.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentVariableRead">
+        <source>Read environment variable "{0}"</source>
+        <target state="translated">Ler a variável de ambiente "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
@@ -92,6 +106,11 @@
         <note>
       LOCALIZATION: {0} is an enum value of LoggerVerbosity.
     </note>
+      </trans-unit>
+      <trans-unit id="LogTaskInputs.Truncated">
+        <source>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</source>
+        <target state="new">The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
@@ -123,6 +142,11 @@
       {StrBegin="MSB4250: "}
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
+      </trans-unit>
+      <trans-unit id="PropertyAssignment">
+        <source>Property initial value: $({0})="{1}" Source: {2}</source>
+        <target state="translated">Valor inicial da propriedade: $({0})="{1}" Origem: {2}</target>
+        <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
@@ -167,6 +191,11 @@
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
     </note>
+      </trans-unit>
+      <trans-unit id="UninitializedPropertyRead">
+        <source>Read uninitialized property "{0}"</source>
+        <target state="translated">Ler a propriedade não inicializada "{0}"</target>
+        <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">
         <source>Using input build results caches: {0}</source>

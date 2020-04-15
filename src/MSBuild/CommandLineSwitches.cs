@@ -93,6 +93,7 @@ namespace Microsoft.Build.CommandLine
             FileLoggerParameters9,
             NodeReuse,
             Preprocess,
+            Targets,
             WarningsAsErrors,
             WarningsAsMessages,
             BinaryLogger,
@@ -104,6 +105,7 @@ namespace Microsoft.Build.CommandLine
             GraphBuild,
             InputResultsCaches,
             OutputResultsCache,
+            LowPriority,
             NumberOfParameterizedSwitches,
         }
 
@@ -261,6 +263,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters9", "flp9" },     ParameterizedSwitch.FileLoggerParameters9,      null,                           false,          "MissingFileLoggerParameterError",     true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "nodereuse", "nr" },                   ParameterizedSwitch.NodeReuse,                  null,                           false,          "MissingNodeReuseParameterError",      true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "preprocess", "pp" },                  ParameterizedSwitch.Preprocess,                 null,                           false,          null,                                  true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "targets", "ts" },                     ParameterizedSwitch.Targets,                    null,                           false,          null,                                  true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "warnaserror", "err" },                ParameterizedSwitch.WarningsAsErrors,           null,                           true,           null,                                  true,   true   ),
             new ParameterizedSwitchInfo(  new string[] { "warnasmessage", "nowarn" },           ParameterizedSwitch.WarningsAsMessages,         null,                           true,           "MissingWarnAsMessageParameterError",  true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "binarylogger", "bl" },                ParameterizedSwitch.BinaryLogger,               null,                           false,          null,                                  true,   false  ),
@@ -272,6 +275,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "graphbuild", "graph" },               ParameterizedSwitch.GraphBuild,                 null,                           false,          null,                                  true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "inputResultsCaches", "irc" },         ParameterizedSwitch.InputResultsCaches,         null,                           true,           null,                                  true,   true   ),
             new ParameterizedSwitchInfo(  new string[] { "outputResultsCache", "orc" },         ParameterizedSwitch.OutputResultsCache,         "DuplicateOutputResultsCache",  false,          null,                                  true,   true   ),
+            new ParameterizedSwitchInfo(  new string[] { "lowpriority", "low" },                ParameterizedSwitch.LowPriority,                null,                           false,          null,                                  true,   false  ),
         };
 
         /// <summary>

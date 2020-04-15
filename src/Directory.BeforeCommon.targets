@@ -19,7 +19,7 @@
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net4')) Or $(TargetFramework.StartsWith('net3'))">
     <DefineConstants>$(DefineConstants);FEATURE_64BIT_ENVIRONMENT_QUERY</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_APARTMENT_STATE</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_APM</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_APM</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_APPDOMAIN</DefineConstants>
     <FeatureAppDomain>true</FeatureAppDomain>
     <DefineConstants>$(DefineConstants);FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION</DefineConstants>
@@ -91,7 +91,6 @@
     <DefineConstants>$(DefineConstants);FEATURE_TYPE_GETINTERFACE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_USERINTERACTIVE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_USERDOMAINNAME</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_VARIOUS_EXCEPTIONS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_XAML_TYPES</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_XAMLTASKFACTORY</DefineConstants>
     <FeatureXamlTypes>true</FeatureXamlTypes>

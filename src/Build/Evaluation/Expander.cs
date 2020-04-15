@@ -4251,6 +4251,11 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 arg1 = args[1] as string;
+                if (arg1 == null && args[1] is char ch)
+                {
+                    arg1 = ch.ToString();
+                }
+
                 if (TryConvertToInt(args[0], out arg0) &&
                     arg1 != null)
                 {

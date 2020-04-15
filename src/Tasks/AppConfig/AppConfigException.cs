@@ -11,11 +11,7 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     [Serializable]
     internal class AppConfigException :
-#if FEATURE_VARIOUS_EXCEPTIONS
         System.ApplicationException
-#else
-        Exception
-#endif
     {
         /// <summary>
         /// The name of the app.config file.

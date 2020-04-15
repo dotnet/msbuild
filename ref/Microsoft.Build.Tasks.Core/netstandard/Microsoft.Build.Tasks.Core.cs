@@ -682,6 +682,32 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.TaskPropertyInfo[] GetTaskParameters() { throw null; }
         public bool Initialize(string taskName, System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.TaskPropertyInfo> parameterGroup, string taskBody, Microsoft.Build.Framework.IBuildEngine taskFactoryLoggingHost) { throw null; }
     }
+    public partial class SGen : Microsoft.Build.Tasks.ToolTaskExtension
+    {
+        public SGen() { }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public string BuildAssemblyName { get { throw null; } set { } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public string BuildAssemblyPath { get { throw null; } set { } }
+        public bool DelaySign { get { throw null; } set { } }
+        public string KeyContainer { get { throw null; } set { } }
+        public string KeyFile { get { throw null; } set { } }
+        public string Platform { get { throw null; } set { } }
+        public string[] References { get { throw null; } set { } }
+        public string SdkToolsPath { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] SerializationAssembly { get { throw null; } set { } }
+        public string SerializationAssemblyName { get { throw null; } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public bool ShouldGenerateSerializer { get { throw null; } set { } }
+        protected override string ToolName { get { throw null; } }
+        public string[] Types { get { throw null; } set { } }
+        public bool UseKeep { get { throw null; } set { } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public bool UseProxyTypes { get { throw null; } set { } }
+        public override bool Execute() { throw null; }
+        protected override string GenerateFullPathToTool() { throw null; }
+    }
     public abstract partial class TaskExtension : Microsoft.Build.Utilities.Task
     {
         internal TaskExtension() { }

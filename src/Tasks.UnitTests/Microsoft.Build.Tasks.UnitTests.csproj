@@ -80,6 +80,7 @@
 
   <ItemGroup Condition="'$(MonoBuild)' == 'true'">
     <Compile Remove="LC_Tests.cs" />
+    <Compile Remove="SGen_Tests.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
@@ -126,7 +127,6 @@
     <Compile Remove="ResolveComReference_Tests.cs" />
     <Compile Remove="ResolveSDKReference_Tests.cs" />
     <Compile Remove="SdkToolsPathUtility_Tests.cs" />
-    <Compile Remove="SGen_Tests.cs" />
     <Compile Remove="TlbImp_Tests.cs" />
     <Compile Remove="VisualBasicParserUtilitites_Tests.cs" />
     <Compile Remove="VisualBasicTokenizer_Tests.cs" />

@@ -17,10 +17,8 @@ using System.Text;
 using System.Threading;
 using System.Xml;
 using Microsoft.Build.Shared.FileSystem;
-#if FEATURE_VARIOUS_EXCEPTIONS
 using System.Xml.Schema;
 using System.Runtime.Serialization;
-#endif
 
 namespace Microsoft.Build.Shared
 #endif
@@ -70,12 +68,10 @@ namespace Microsoft.Build.Shared
         internal static bool IsCriticalException(Exception e)
         {
             if (e is OutOfMemoryException
-#if FEATURE_VARIOUS_EXCEPTIONS
              || e is StackOverflowException
              || e is ThreadAbortException
              || e is ThreadInterruptedException
              || e is AccessViolationException
-#endif
 #if !BUILDINGAPPXTASKS
              || e is InternalErrorException
 #endif
@@ -144,10 +140,8 @@ namespace Microsoft.Build.Shared
         internal static bool IsXmlException(Exception e)
         {
             return e is XmlException
-#if FEATURE_VARIOUS_EXCEPTIONS
                 || e is XmlSyntaxException
                 || e is XmlSchemaException
-#endif
                 || e is UriFormatException; // XmlTextReader for example uses this under the covers
         }
 
@@ -168,14 +162,12 @@ namespace Microsoft.Build.Shared
             }
             else
             {
-#if FEATURE_VARIOUS_EXCEPTIONS
                 var schemaException = e as XmlSchemaException;
                 if (schemaException != null)
                 {
                     line = schemaException.LineNumber;
                     column = schemaException.LinePosition;
                 }
-#endif
             }
 
             return new LineAndColumn
@@ -227,12 +219,10 @@ namespace Microsoft.Build.Shared
                 || e is TargetParameterCountException   // thrown when the number of parameters for an invocation does not match the number expected
                 || e is InvalidCastException
                 || e is AmbiguousMatchException         // thrown when binding to a member results in more than one member matching the binding criteria
-#if FEATURE_VARIOUS_EXCEPTIONS
                 || e is CustomAttributeFormatException  // thrown if a custom attribute on a data type is formatted incorrectly
                 || e is InvalidFilterCriteriaException  // thrown in FindMembers when the filter criteria is not valid for the type of filter you are using
                 || e is TargetException                 // thrown when an attempt is made to invoke a non-static method on a null object.  This may occur because the caller does not
                                                         //     have access to the member, or because the target does not define the member, and so on.
-#endif
                 || e is MissingFieldException           // thrown when code in a dependent assembly attempts to access a missing field in an assembly that was modified.
                 || !NotExpectedException(e)             // Reflection can throw IO exceptions if the assembly cannot be opened
 
@@ -253,9 +243,7 @@ namespace Microsoft.Build.Shared
         {
             if
             (
-#if FEATURE_VARIOUS_EXCEPTIONS
                 e is SerializationException ||
-#endif
                 !NotExpectedReflectionException(e)
             )
             {

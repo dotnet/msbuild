@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 using System.Reflection;
 
 namespace Microsoft.Build.BackEnd
@@ -17,12 +18,27 @@ namespace Microsoft.Build.BackEnd
     internal static class ItemGroupLoggingHelper
     {
         /// <summary>
+        /// The default character limit for logging parameters. 10k is somewhat arbitrary, see https://github.com/microsoft/msbuild/issues/4907.
+        /// </summary>
+        internal static int parameterCharacterLimit = 40_000;
+
+        /// <summary>
+        /// The default parameter limit for logging. 200 is somewhat arbitrary, see https://github.com/microsoft/msbuild/pull/5210.
+        /// </summary>
+        internal static int parameterLimit = 200;
+
+        /// <summary>
         /// Gets a text serialized value of a parameter for logging.
         /// </summary>
         internal static string GetParameterText(string prefix, string parameterName, params object[] parameterValues)
         {
             return GetParameterText(prefix, parameterName, (IList)parameterValues);
         }
+
+        internal static string ItemGroupIncludeLogMessagePrefix = ResourceUtilities.GetResourceString("ItemGroupIncludeLogMessagePrefix");
+        internal static string ItemGroupRemoveLogMessage = ResourceUtilities.GetResourceString("ItemGroupRemoveLogMessage");
+        internal static string OutputItemParameterMessagePrefix = ResourceUtilities.GetResourceString("OutputItemParameterMessagePrefix");
+        internal static string TaskParameterPrefix = ResourceUtilities.GetResourceString("TaskParameterPrefix");
 
         /// <summary>
         /// Gets a text serialized value of a parameter for logging.
@@ -56,12 +72,15 @@ namespace Microsoft.Build.BackEnd
                     sb.Append("\n    ");
                 }
 
-                sb.Append(parameterName + "=");
+                sb.Append(parameterName);
+                sb.Append('=');
 
                 if (!specialTreatmentForSingle)
                 {
                     sb.Append("\n");
                 }
+
+                bool truncateTaskInputs = Traits.Instance.EscapeHatches.TruncateTaskInputs;
 
                 for (int i = 0; i < parameterValue.Count; i++)
                 {
@@ -75,11 +94,17 @@ namespace Microsoft.Build.BackEnd
                         sb.Append("        ");
                     }
 
-                    sb.Append(GetStringFromParameterValue(parameterValue[i]));
+                    AppendStringFromParameterValue(sb, parameterValue[i]);
 
                     if (!specialTreatmentForSingle && i < parameterValue.Count - 1)
                     {
                         sb.Append("\n");
+                    }
+
+                    if (truncateTaskInputs && (sb.Length >= parameterCharacterLimit || i > parameterLimit))
+                    {
+                        sb.Append(ResourceUtilities.GetResourceString("LogTaskInputs.Truncated"));
+                        break;
                     }
                 }
 
@@ -95,53 +120,92 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static string GetStringFromParameterValue(object parameterValue)
         {
-            var type = parameterValue.GetType();
-
-            ErrorUtilities.VerifyThrow(!type.IsArray, "scalars only");
-
-            if (type == typeof(string))
+            // fast path for the common case
+            if (parameterValue is string valueText)
             {
-                return (string)parameterValue;
+                return valueText;
             }
-            else if (type.GetTypeInfo().IsValueType)
+
+            using (var sb = new ReuseableStringBuilder())
             {
-                return (string)Convert.ChangeType(parameterValue, typeof(string), CultureInfo.CurrentCulture);
+                AppendStringFromParameterValue(sb, parameterValue);
+                return sb.ToString();
             }
-            else if (typeof(ITaskItem).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
+        }
+
+        // Avoid allocating a temporary list to hold metadata for sorting every time.
+        // Each thread gets its own copy.
+        [ThreadStatic]
+        private static List<KeyValuePair<string, string>> keyValuePairList;
+
+        private static void AppendStringFromParameterValue(ReuseableStringBuilder sb, object parameterValue)
+        {
+            if (parameterValue is string text)
             {
-                var item = ((ITaskItem)parameterValue);
-                string result = item.ItemSpec;
+                sb.Append(text);
+            }
+            else if (parameterValue is ITaskItem item)
+            {
+                sb.Append(item.ItemSpec);
 
                 var customMetadata = item.CloneCustomMetadata();
+                int count = customMetadata.Count;
 
-                if (customMetadata.Count > 0)
+                if (count > 0)
                 {
-                    result += "\n";
-                    var names = new List<string>();
+                    sb.Append('\n');
 
-                    foreach (string name in customMetadata.Keys)
+                    // need to initialize the thread static on each new thread
+                    if (keyValuePairList == null)
                     {
-                        names.Add(name);
+                        keyValuePairList = new List<KeyValuePair<string, string>>(count);
                     }
 
-                    names.Sort();
-
-                    for (int i = 0; i < names.Count; i++)
+                    if (customMetadata is IDictionary<string, string> customMetadataDictionary)
                     {
-                        result += "                " + names[i] + "=" + customMetadata[names[i]];
-
-                        if (i < names.Count - 1)
+                        foreach (KeyValuePair<string, string> kvp in customMetadataDictionary)
                         {
-                            result += "\n";
+                            keyValuePairList.Add(kvp);
                         }
                     }
+                    else
+                    {
+                        foreach (DictionaryEntry kvp in customMetadata)
+                        {
+                            keyValuePairList.Add(new KeyValuePair<string, string>((string)kvp.Key, (string)kvp.Value));
+                        }
+                    }
+
+                    if (count > 1)
+                    {
+                        keyValuePairList.Sort((l, r) => StringComparer.OrdinalIgnoreCase.Compare(l.Key, r.Key));
+                    }
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        var kvp = keyValuePairList[i];
+                        sb.Append("                ");
+                        sb.Append(kvp.Key);
+                        sb.Append('=');
+                        sb.Append(kvp.Value);
+
+                        if (i < count - 1)
+                        {
+                            sb.Append('\n');
+                        }
+                    }
+
+                    keyValuePairList.Clear();
                 }
-
-                return result;
             }
-
-            ErrorUtilities.ThrowInternalErrorUnreachable();
-            return null;
+            else if (parameterValue.GetType().IsValueType)
+            {
+                sb.Append((string)Convert.ChangeType(parameterValue, typeof(string), CultureInfo.CurrentCulture));
+            }
+            else
+            {
+                ErrorUtilities.ThrowInternalErrorUnreachable();
+            }
         }
     }
 }

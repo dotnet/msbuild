@@ -49,6 +49,8 @@ $filesToCopyToBin = @(
     "artifacts\bin\MSBuild.Bootstrap\$configuration\$targetFramework\Microsoft.CSharp.CurrentVersion.targets"
     "artifacts\bin\MSBuild.Bootstrap\$configuration\$targetFramework\Microsoft.CSharp.targets"
     "artifacts\bin\MSBuild.Bootstrap\$configuration\$targetFramework\Microsoft.Managed.targets"
+    "artifacts\bin\MSBuild.Bootstrap\$configuration\$targetFramework\Microsoft.Managed.Before.targets"
+    "artifacts\bin\MSBuild.Bootstrap\$configuration\$targetFramework\Microsoft.Managed.After.targets"
     "artifacts\bin\MSBuild.Bootstrap\$configuration\$targetFramework\Microsoft.Net.props"
     "artifacts\bin\MSBuild.Bootstrap\$configuration\$targetFramework\Microsoft.NetFramework.CurrentVersion.props"
     "artifacts\bin\MSBuild.Bootstrap\$configuration\$targetFramework\Microsoft.NetFramework.CurrentVersion.targets"
