@@ -137,12 +137,12 @@ Si desea crear un manifiesto, utilice "dotnet new tool-manifest", normalmente en
         <source>Tool '{0}' failed to install. This failure may have been caused by:
 
 * You are attempting to install a preview release and did not use the --version option to specify the version.
-* A package by this name was found, but it was not a .NET Core tool.
+* A package by this name was found, but it was not a .NET tool.
 * The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
 * You mistyped the name of the tool.
 
 For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</source>
-        <target state="translated">Error al instalar la herramienta "{0}". El error puede deberse a lo siguiente:
+        <target state="needs-review-translation">Error al instalar la herramienta "{0}". El error puede deberse a lo siguiente:
 
 * Intenta instalar una versión preliminar y no usó la opción --version para especificar la versión.
 * Se encontró un paquete con este nombre, pero no era una herramienta de .NET Core.

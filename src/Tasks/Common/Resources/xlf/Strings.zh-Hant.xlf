@@ -258,8 +258,8 @@
         <note>{StrBegin="NETSDK1015: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateRuntimePackAsset">
-        <source>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET Core team here: https://aka.ms/dotnet-sdk-issue.</source>
-        <target state="translated">NETSDK1110: 執行階段套件中有多個資產具有相同的目的地子路徑 '{0}'。請於此處將錯誤回報給 .NET Core 小組: https://aka.ms/dotnet-sdk-issue。</target>
+        <source>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
+        <target state="needs-review-translation">NETSDK1110: 執行階段套件中有多個資產具有相同的目的地子路徑 '{0}'。請於此處將錯誤回報給 .NET Core 小組: https://aka.ms/dotnet-sdk-issue。</target>
         <note>{StrBegin="NETSDK1110: "}</note>
       </trans-unit>
       <trans-unit id="EncounteredConflict_Info">
@@ -482,8 +482,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1011: "}</note>
       </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
-        <source>NETSDK1059: The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
-        <target state="translated">NETSDK1059: 工具 '{0}' 現已包含在 .NET Core SDK 中。解決此警告的資訊位於 (https://aka.ms/dotnetclitools-in-box)。</target>
+        <source>NETSDK1059: The tool '{0}' is now included in the .NET SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
+        <target state="needs-review-translation">NETSDK1059: 工具 '{0}' 現已包含在 .NET Core SDK 中。解決此警告的資訊位於 (https://aka.ms/dotnetclitools-in-box)。</target>
         <note>{StrBegin="NETSDK1059: "}</note>
       </trans-unit>
       <trans-unit id="ProjectToolOnlySupportTFMLowerThanNetcoreapp22">
@@ -542,8 +542,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1028: "}</note>
       </trans-unit>
       <trans-unit id="RuntimeListNotFound">
-        <source>NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET Core team here: https://aka.ms/dotnet-sdk-issue.</source>
-        <target state="translated">NETSDK1109: 找不到執行階段清單檔案 '{0}'。請於此處將錯誤回報給 .NET Core 小組: https://aka.ms/dotnet-sdk-issue。</target>
+        <source>NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
+        <target state="needs-review-translation">NETSDK1109: 找不到執行階段清單檔案 '{0}'。請於此處將錯誤回報給 .NET Core 小組: https://aka.ms/dotnet-sdk-issue。</target>
         <note>{StrBegin="NETSDK1109: "}</note>
       </trans-unit>
       <trans-unit id="RuntimePackNotDownloaded">
@@ -622,8 +622,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1107: "}</note>
       </trans-unit>
       <trans-unit id="UsingPreviewSdk_Info">
-        <source>You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</source>
-        <target state="translated">您目前使用 .NET Core 預覽版。請參閱: https://aka.ms/dotnet-core-preview</target>
+        <source>You are using a preview version of .NET. See: https://aka.ms/dotnet-core-preview</source>
+        <target state="needs-review-translation">您目前使用 .NET Core 預覽版。請參閱: https://aka.ms/dotnet-core-preview</target>
         <note />
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresUseWpfOrUseWindowsForms">

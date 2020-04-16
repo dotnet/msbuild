@@ -328,7 +328,7 @@
     <comment>{StrBegin="NETSDK1056: "}</comment>
   </data>
   <data name="UsingPreviewSdk_Info" xml:space="preserve">
-    <value>You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</value>
+    <value>You are using a preview version of .NET. See: https://aka.ms/dotnet-core-preview</value>
   </data>
   <data name="InvalidItemSpecToUse" xml:space="preserve">
     <value>NETSDK1058: Invalid value for ItemSpecToUse parameter: '{0}'.  This property must be blank or set to 'Left' or 'Right'</value>
@@ -336,7 +336,7 @@
 The following are names of parameters or literal values and should not be translated: ItemSpecToUse, Left, Right</comment>
   </data>
   <data name="ProjectContainsObsoleteDotNetCliTool" xml:space="preserve">
-    <value>NETSDK1059: The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</value>
+    <value>NETSDK1059: The tool '{0}' is now included in the .NET SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</value>
     <comment>{StrBegin="NETSDK1059: "}</comment>
   </data>
   <data name="ErrorReadingAssetsFile" xml:space="preserve">
@@ -537,11 +537,11 @@ The following are names of parameters or literal values and should not be transl
     <value>Some ReadyToRun compilations emitted warnings, indicating potential missing dependencies. Missing dependencies could potentially cause runtime failures. To show the warnings, set the PublishReadyToRunShowWarnings property to true.</value>
   </data>
   <data name="RuntimeListNotFound" xml:space="preserve">
-    <value>NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET Core team here: https://aka.ms/dotnet-sdk-issue.</value>
+    <value>NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</value>
     <comment>{StrBegin="NETSDK1109: "}</comment>
   </data>
   <data name="DuplicateRuntimePackAsset" xml:space="preserve">
-    <value>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET Core team here: https://aka.ms/dotnet-sdk-issue.</value>
+    <value>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</value>
     <comment>{StrBegin="NETSDK1110: "}</comment>
   </data>
   <data name="FailedToDeleteApphost" xml:space="preserve">
