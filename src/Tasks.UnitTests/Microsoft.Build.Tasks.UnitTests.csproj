@@ -143,4 +143,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <Import Project="$(RepoRoot)eng\TestMSBuild.targets" />
+
 </Project>

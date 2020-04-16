@@ -1,0 +1,14 @@
+<Project>
+  <!--
+  Copies the NuGet dll's required for testing to testing folders
+   -->
+  <Target Name="CopyNuGetDependencies" AfterTargets="ResolvePackageAssets">
+    <ItemGroup>
+        <_NuGetDependencies Include="$(RepoRoot).dotnet\sdk\$(DotNetCliVersion)\Sdks\Microsoft.NET.Sdk\tools\net472\NuGet.Frameworks.dll" /> 
+    </ItemGroup>
+
+    <Copy SourceFiles="@(_NuGetDependencies)"
+          DestinationFolder="$(OutputPath)%(_TargetFrameworks.Identity)" />
+  </Target>
+
+</Project>
