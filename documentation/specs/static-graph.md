@@ -2,9 +2,12 @@
   - [Overview](#overview)
     - [Motivations](#motivations)
   - [Project Graph](#project-graph)
+    - [Constructing the project graph](#constructing-the-project-graph)
     - [Build dimensions](#build-dimensions)
       - [Crosstargeting](#crosstargeting)
-    - [Building a project graph](#building-a-project-graph)
+    - [Executing targets on a graph](#executing-targets-on-a-graph)
+      - [Command line](#command-line)
+      - [APIs](#apis)
     - [Inferring which targets to run for a project within the graph](#inferring-which-targets-to-run-for-a-project-within-the-graph)
       - [Crosstargeting details](#crosstargeting-details)
     - [Underspecified graphs](#underspecified-graphs)
@@ -12,8 +15,8 @@
   - [Isolated builds](#isolated-builds)
     - [Isolated graph builds](#isolated-graph-builds)
     - [Single project isolated builds](#single-project-isolated-builds)
-      - [APIs](#apis)
-      - [Command line](#command-line)
+      - [APIs](#apis-1)
+      - [Command line](#command-line-1)
       - [Exempting references from isolation constraints](#exempting-references-from-isolation-constraints)
   - [I/O Tracking](#io-tracking)
     - [Detours](#detours)
@@ -34,10 +37,14 @@
 
 ## Project Graph
 
+### Constructing the project graph
 Calculating the project graph will be very similar to the MS internal build engine's existing Traversal logic. For a given evaluated project, all project references will be identified and recursively evaluated (with deduping).
 Project references are identified via the `ProjectReference` item.
 
 A node in the graph is a tuple of the project file and global properties. Each (project, global properties) combo can be evaluated in parallel.
+
+Transitive project references are opt-in per project. Once a project opts-in, transitivity is applied for all ProjectReference items.
+A project opt-ins by setting the property `AddTransitiveProjectReferencesInStaticGraph` to true.
 
 ### Build dimensions
 
@@ -101,7 +108,7 @@ To summarize, there are two main patterns for build dimensions which are handled
 1. The project crosstargets, in which case the SDK needs to specify the crosstargeting build dimensions.
 2. A different set of global properties are used to choose the dimension like with Configuration or Platform. The project graph supports this via multiple entry points.
 
-### Building a project graph
+### Executing targets on a graph
 When building a graph, project references should be built before the projects that reference them, as opposed to the existing msbuild scheduler which builds projects just in time.
 
 For example if project A depends on project B, then project B should build first, then project A. Existing msbuild scheduling would start building project A, reach an MSBuild task for project B, yield project A, build project B, then resume project A once unblocked.
@@ -109,6 +116,13 @@ For example if project A depends on project B, then project B should build first
 Building in this way should make better use of parallelism as all CPU cores can be saturated immediately, rather than waiting for projects to get to the phase in their execution where they build their project references. More subtly, less execution state needs to be held in memory at any given time as there are no paused builds waiting to be unblocked. Knowing the shape of the graph may be able to better inform the scheduler to prevent scheduling projects that could run in parallel onto the same node.
 
 Note that graph cycles are disallowed, even if they're using disconnected targets. This is a breaking change, as today you can have two projects where each project depends on a target from the other project, but that target doesn't depend on the default target or anything in its target graph.
+
+#### Command line
+`msbuild /graph` - msbuild will create a static graph from the entry point project and build it in topological order with the specified targets. Targets to call on each node are inferred via the rules in [this section](#inferring-which-targets-to-run-for-a-project-within-the-graph).
+
+#### APIs
+
+[BuildManager.PendBuildRequest(GraphBuildRequestData requestData)](https://github.com/microsoft/msbuild/blob/37c5a9fec416b403212a63f95f15b03dbd5e8b5d/src/Build/BackEnd/BuildManager/BuildManager.cs#L676)
 
 ### Inferring which targets to run for a project within the graph
 In the classic traversal, the referencing project chooses which targets to call on the referenced projects and may call into a project multiple times with different target lists and global properties (examples in [project reference protocol](../ProjectReference-Protocol.md)). When building a graph, where projects are built before the projects that reference them, we have to determine the target list to execute on each project statically.
