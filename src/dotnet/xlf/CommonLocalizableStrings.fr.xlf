@@ -582,7 +582,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="TemplateCreatedSuccessfully">
         <source>The template {0} created successfully. run "dotnet restore" to get started!</source>
-        <target state="translated">Le modèle {0} a été créé. Exécutez "dotnet restore" pour commencer !</target>
+        <target state="translated">Le modèle {0} a été créé. Exécutez "dotnet restore" pour démarrer !</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInstalledSuccesfully">
