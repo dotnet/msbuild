@@ -1517,7 +1517,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             asyncResult.ExecuteAsync(null, null);
             _buildManager.CancelAllSubmissions();
-            asyncResult.WaitHandle.WaitOne();
+            asyncResult.WaitHandle.WaitOne(10000);
+            asyncResult.IsCompleted.ShouldBeTrue("Failing to complete by this point indicates a hang.");
             BuildResult result = asyncResult.BuildResult;
             _buildManager.EndBuild();
 
