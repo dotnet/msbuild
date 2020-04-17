@@ -181,36 +181,6 @@ namespace Microsoft.Build.Graph
                     return transitiveReferences;
                 }
             }
-
-            void AddEdgesToNode(ProjectGraphNode node, ParsedProject parsedProject, bool isTransitive, bool isRecursiveCall = false)
-            {
-                foreach (var referenceInfo in parsedProject.ReferenceInfos)
-                {
-                    ErrorUtilities.VerifyThrow(
-                        allParsedProjects.ContainsKey(referenceInfo.ReferenceConfiguration),
-                        "all references should have been parsed");
-
-                    var referenceItem = isRecursiveCall
-                        ? new ProjectItemInstance(
-                            project: node.ProjectInstance,
-                            itemType: ProjectInterpretation.TransitiveReferenceItemName,
-                            includeEscaped: referenceInfo.ReferenceConfiguration.ProjectFullPath,
-                            directMetadata: null,
-                            definingFileEscaped: node.ProjectInstance.FullPath
-                        )
-                        : referenceInfo.ProjectReferenceItem;
-
-                    node.AddProjectReference(
-                        allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode,
-                        referenceItem,
-                        edges);
-
-                    if (isTransitive)
-                    {
-                        AddEdgesToNode(node, allParsedProjects[referenceInfo.ReferenceConfiguration], true, true);
-                    }
-                }
-            }
         }
 
         private static void AddEdgesFromSolution(IReadOnlyDictionary<ConfigurationMetadata, ParsedProject> allParsedProjects, IReadOnlyDictionary<string, IReadOnlyCollection<string>> solutionDependencies, GraphEdges edges)
