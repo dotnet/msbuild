@@ -715,6 +715,8 @@ namespace Microsoft.Build
 
             private bool TryInternHardcodedString<T>(T candidate, string str, ref string interned) where T : IInternable
             {
+                Debug.Assert(candidate.Length == str.Length);
+
                 if (candidate.StartsWithStringByOrdinalComparison(str))
                 {
                     interned = str;
