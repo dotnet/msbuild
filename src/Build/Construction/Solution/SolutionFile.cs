@@ -17,7 +17,6 @@ using BuildEventFileInfo = Microsoft.Build.Shared.BuildEventFileInfo;
 using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 using ExceptionUtilities = Microsoft.Build.Shared.ExceptionHandling;
 using System.Collections.ObjectModel;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Construction
 {
@@ -1035,7 +1034,7 @@ namespace Microsoft.Build.Construction
                 // ProjectReferences = "{FD705688-88D1-4C22-9BFF-86235D89C2FC}|CSClassLibrary1.dll;{F0726D09-042B-4A7A-8A01-6BED2422BD5D}|VCClassLibrary1.dll;" 
                 if (string.Compare(propertyName, "ProjectReferences", StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    string[] projectReferenceEntries = propertyValue.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
+                    string[] projectReferenceEntries = propertyValue.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 
                     foreach (string projectReferenceEntry in projectReferenceEntries)
                     {
@@ -1228,7 +1227,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void ParseSolutionConfigurations()
         {
-            var nameValueSeparators = MSBuildConstants.EqualsChar;
+            var nameValueSeparators = '=';
             var configPlatformSeparators = new[] { SolutionConfigurationInSolution.ConfigurationPlatformSeparator };
 
             do
@@ -1310,7 +1309,7 @@ namespace Microsoft.Build.Construction
                     continue;
                 }
 
-                string[] nameValue = str.Split(MSBuildConstants.EqualsChar);
+                string[] nameValue = str.Split('=');
 
                 // There should be exactly one '=' character, separating the name and value. 
                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(nameValue.Length == 2, "SubCategoryForSolutionParsingErrors",
