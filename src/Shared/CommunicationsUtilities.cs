@@ -325,7 +325,7 @@ namespace Microsoft.Build.Internal
         internal static long GetHostHandshake(HandshakeOptions nodeType)
         {
             string salt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
-            string toolsDirectory = nodeType.HasFlag(HandshakeOptions.X64) ? BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64 : BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
+            string toolsDirectory = (nodeType & HandshakeOptions.X64) == HandshakeOptions.X64 ? BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64 : BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
             int nodeHandshakeSalt = GetHandshakeHashCode(salt + toolsDirectory);
 
             Trace("MSBUILDNODEHANDSHAKESALT=\"{0}\", msbuildDirectory=\"{1}\", nodeType={2}, FileVersionHash={3}", salt, toolsDirectory, nodeType, FileVersionHash);

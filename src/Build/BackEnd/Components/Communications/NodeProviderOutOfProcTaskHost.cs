@@ -390,8 +390,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static string GetTaskHostNameFromHostContext(HandshakeOptions hostContext)
         {
-            ErrorUtilities.ThrowInternalErrorUnreachable(hostContext.HasFlag(HandshakeOptions.TaskHost));
-            if (hostContext.HasFlag(HandshakeOptions.CLR2)) {
+            ErrorUtilities.ThrowInternalErrorUnreachable((hostContext & HandshakeOptions.TaskHost) == HandshakeOptions.TaskHost);
+            if ((hostContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2) {
                 return TaskHostNameForClr2TaskHost;
             }
             else
@@ -418,55 +418,56 @@ namespace Microsoft.Build.BackEnd
         internal static string GetMSBuildLocationFromHostContext(HandshakeOptions hostContext)
         {
             string toolName = GetTaskHostNameFromHostContext(hostContext);
-            string toolPath = null;
+            string toolPath;
 
             s_baseTaskHostPath = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
             s_baseTaskHostPath64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64;
-            ErrorUtilities.ThrowInternalErrorUnreachable(hostContext.HasFlag(HandshakeOptions.TaskHost));
+            ErrorUtilities.ThrowInternalErrorUnreachable((hostContext & HandshakeOptions.TaskHost) == HandshakeOptions.TaskHost);
 
-            switch (hostContext)
+            if ((hostContext & HandshakeOptions.X64) == HandshakeOptions.X64 && (hostContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2)
             {
-                case HandshakeOptions.X64 | HandshakeOptions.CLR2:
-                    if (s_pathToX64Clr2 == null)
+                if (s_pathToX64Clr2 == null)
+                {
+                    s_pathToX64Clr2 = Environment.GetEnvironmentVariable("MSBUILDTASKHOSTLOCATION64");
+
+                    if (s_pathToX64Clr2 == null || !FileUtilities.FileExistsNoThrow(Path.Combine(s_pathToX64Clr2, toolName)))
                     {
-                        s_pathToX64Clr2 = Environment.GetEnvironmentVariable("MSBUILDTASKHOSTLOCATION64");
-
-                        if (s_pathToX64Clr2 == null || !FileUtilities.FileExistsNoThrow(Path.Combine(s_pathToX64Clr2, toolName)))
-                        {
-                            s_pathToX64Clr2 = s_baseTaskHostPath64;
-                        }
+                        s_pathToX64Clr2 = s_baseTaskHostPath64;
                     }
+                }
 
-                    toolPath = s_pathToX64Clr2;
-                    break;
-                case HandshakeOptions.CLR2:
-                    if (s_pathToX32Clr2 == null)
+                toolPath = s_pathToX64Clr2;
+            }
+            else if ((hostContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2)
+            {
+                if (s_pathToX32Clr2 == null)
+                {
+                    s_pathToX32Clr2 = Environment.GetEnvironmentVariable("MSBUILDTASKHOSTLOCATION");
+                    if (s_pathToX32Clr2 == null || !FileUtilities.FileExistsNoThrow(Path.Combine(s_pathToX32Clr2, toolName)))
                     {
-                        s_pathToX32Clr2 = Environment.GetEnvironmentVariable("MSBUILDTASKHOSTLOCATION");
-                        if (s_pathToX32Clr2 == null || !FileUtilities.FileExistsNoThrow(Path.Combine(s_pathToX32Clr2, toolName)))
-                        {
-                            s_pathToX32Clr2 = s_baseTaskHostPath;
-                        }
+                        s_pathToX32Clr2 = s_baseTaskHostPath;
                     }
+                }
 
-                    toolPath = s_pathToX32Clr2;
-                    break;
-                case HandshakeOptions.X64:
-                    if (s_pathToX64Clr4 == null)
-                    {
-                        s_pathToX64Clr4 = s_baseTaskHostPath64;
-                    }
+                toolPath = s_pathToX32Clr2;
+            }
+            else if ((hostContext & HandshakeOptions.X64) == HandshakeOptions.X64)
+            {
+                if (s_pathToX64Clr4 == null)
+                {
+                    s_pathToX64Clr4 = s_baseTaskHostPath64;
+                }
 
-                    toolPath = s_pathToX64Clr4;
-                    break;
-                default:
-                    if (s_pathToX32Clr4 == null)
-                    {
-                        s_pathToX32Clr4 = s_baseTaskHostPath;
-                    }
+                toolPath = s_pathToX64Clr4;
+            }
+            else
+            {
+                if (s_pathToX32Clr4 == null)
+                {
+                    s_pathToX32Clr4 = s_baseTaskHostPath;
+                }
 
-                    toolPath = s_pathToX32Clr4;
-                    break;
+                toolPath = s_pathToX32Clr4;
             }
 
             if (toolName != null && toolPath != null)

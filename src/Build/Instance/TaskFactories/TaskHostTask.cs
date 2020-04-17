@@ -554,7 +554,7 @@ namespace Microsoft.Build.BackEnd
             string msbuildLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationFromHostContext(requiredContext) ??
                 // We don't know the path -- probably we're trying to get a 64-bit assembly on a 
                 // 32-bit machine.  At least give them the exe name to look for, though ...
-                (requiredContext.HasFlag(HandshakeOptions.CLR2) ? "MSBuildTaskHost.exe" : "MSBuild.exe");
+                ((requiredContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2 ? "MSBuildTaskHost.exe" : "MSBuild.exe");
 
             if (e == null)
             {
