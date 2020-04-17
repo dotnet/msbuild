@@ -71,7 +71,15 @@ namespace Microsoft.DotNet.Cli.Telemetry
                 {TelemetryProfile, Environment.GetEnvironmentVariable(TelemetryProfileEnvironmentVariable)},
                 {DockerContainer, _userLevelCacheWriter.RunWithCache(IsDockerContainerCacheKey, () => _dockerContainerDetector.IsDockerContainer().ToString("G") )},
                 {CurrentPathHash, _hasher(_getCurrentDirectory())},
-                {MachineId, _userLevelCacheWriter.RunWithCache(MachineIdCacheKey, GetMachineId)},
+                // we don't want to recalcuate a new id for every new SDK version. Reuse the same path accross versions.
+                // If we change the format of the cache later.
+                // We need to rename the cache from v1 to v2
+                {MachineId,
+                    _userLevelCacheWriter.RunWithCacheInFilePath(
+                        Path.Combine(
+                            CliFolderPathCalculator.DotnetUserProfileFolderPath,
+                            $"{MachineIdCacheKey}.v1.dotnetUserLevelCache"),
+                        GetMachineId)},
                 {KernelVersion, GetKernelVersion()},
                 {InstallationType, ExternalTelemetryProperties.GetInstallationType()},
                 {ProductType, ExternalTelemetryProperties.GetProductType()},

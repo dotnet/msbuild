@@ -125,6 +125,11 @@ namespace Microsoft.DotNet.Tests
             {
                 return getValueToCache();
             }
+
+            public string RunWithCacheInFilePath(string cacheFilepath, Func<string> getValueToCache)
+            {
+                return getValueToCache();
+            }
         }
     }
 }
