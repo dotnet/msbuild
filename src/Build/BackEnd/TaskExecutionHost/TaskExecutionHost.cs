@@ -321,7 +321,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="parameters">The name/value pairs for the parameters.</param>
         /// <returns>True if the parameters were set correctly, false otherwise.</returns>
-        bool ITaskExecutionHost.SetTaskParameters(IDictionary<string, Tuple<string, ElementLocation>> parameters)
+        bool ITaskExecutionHost.SetTaskParameters(IDictionary<string, (string, ElementLocation)> parameters)
         {
             ErrorUtilities.VerifyThrowArgumentNull(parameters, nameof(parameters));
 
@@ -333,7 +333,7 @@ namespace Microsoft.Build.BackEnd
             IDictionary<string, string> requiredParameters = GetNamesOfPropertiesWithRequiredAttribute();
 
             // look through all the attributes of the task element
-            foreach (KeyValuePair<string, Tuple<string, ElementLocation>> parameter in parameters)
+            foreach (KeyValuePair<string, (string, ElementLocation)> parameter in parameters)
             {
                 bool taskParameterSet = false;  // Did we actually call the setter on this task parameter?
                 bool success;
