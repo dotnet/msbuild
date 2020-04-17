@@ -333,15 +333,13 @@ Copyright (c) .NET Foundation. All rights reserved.
         SuppressNotFoundError="true">
       <Output TaskParameter="FullFrameworkReferenceAssemblyPaths" PropertyName="_FullFrameworkReferenceAssemblyPaths"/>
     </GetReferenceAssemblyPaths>
-
-    <PropertyGroup>
-      <_PackageReferenceList>@(PackageReference)</_PackageReferenceList>
-      <_PackageReferencesContainsRefAssemblies>$(_PackageReferenceList.Contains('Microsoft.NETFramework.ReferenceAssemblies'))</_PackageReferencesContainsRefAssemblies>
-    </PropertyGroup>
+    
     
     <ItemGroup>
+      <_ExistingReferenceAssembliesPackageReference Include="@(PackageReference)" Condition="'%(PackageReference.Identity)' == 'Microsoft.NETFramework.ReferenceAssemblies'"/>
+
       <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="$(MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion)" IsImplicitlyDefined="true"
-                        Condition="'$(_FullFrameworkReferenceAssemblyPaths)' == '' and '$(_PackageReferencesContainsRefAssemblies)' == 'false'"/>
+                        Condition="'$(_FullFrameworkReferenceAssemblyPaths)' == '' and '@(_ExistingReferenceAssembliesPackageReference)' == ''"/>
     </ItemGroup>
   </Target>
   
