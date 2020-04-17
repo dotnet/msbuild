@@ -1148,7 +1148,7 @@ namespace Microsoft.Build.Execution
             }
 
             ErrorUtilities.VerifyThrow(FileUtilities.IsSolutionFilename(config.ProjectFullPath), "{0} is not a solution", config.ProjectFullPath);
-            ProjectInstance[] instances = ProjectInstance.LoadSolutionForBuild(config.ProjectFullPath, config.GlobalProperties, config.ExplicitToolsVersionSpecified ? config.ToolsVersion : null, _buildParameters, ((IBuildComponentHost)this).LoggingService, request.BuildEventContext, false /* loaded by solution parser*/, config.TargetNames, SdkResolverService, request.SubmissionId);
+            ProjectInstance[] instances = ProjectInstance.LoadSolutionForBuild(config.ProjectFullPath, config.GlobalProperties, config.ExplicitToolsVersionSpecified ? config.ToolsVersion : null, _buildParameters, ((IBuildComponentHost)this).LoggingService, request.BuildEventContext, false /* loaded by solution parser*/, config.RequestedTargetNames, SdkResolverService, request.SubmissionId);
 
             // The first instance is the traversal project, which goes into this configuration
             config.Project = instances[0];
@@ -1819,6 +1819,11 @@ namespace Microsoft.Build.Execution
                 if (configuration.ProjectInitialTargets == null)
                 {
                     configuration.ProjectInitialTargets = result.InitialTargets;
+                }
+
+                if (configuration.ProjectTargets == null)
+                {
+                    configuration.ProjectTargets = result.Targets;
                 }
             }
 

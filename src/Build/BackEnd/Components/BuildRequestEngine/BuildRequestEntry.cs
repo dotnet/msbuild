@@ -192,7 +192,7 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrow(configuration.WasGeneratedByNode, "Configuration has already been resolved.");
 
-            _unresolvedConfigurationsToIssue = _unresolvedConfigurationsToIssue ?? new List<BuildRequestConfiguration>();
+            _unresolvedConfigurationsToIssue ??= new List<BuildRequestConfiguration>();
             _unresolvedConfigurationsToIssue.Add(configuration);
         }
 

@@ -1051,6 +1051,7 @@ namespace Microsoft.Build.Execution
         public Microsoft.Build.Execution.ProjectInstance ProjectStateAfterBuild { get { throw null; } set { } }
         public System.Collections.Generic.IDictionary<string, Microsoft.Build.Execution.TargetResult> ResultsByTarget { get { throw null; } }
         public int SubmissionId { get { throw null; } }
+        public System.Collections.Generic.HashSet<string> Targets { get { throw null; } set { } }
         public void AddResultsForTarget(string target, Microsoft.Build.Execution.TargetResult result) { }
         public bool HasResultsForTarget(string target) { throw null; }
         public void MergeResults(Microsoft.Build.Execution.BuildResult results) { }

@@ -138,7 +138,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The target names that were requested to execute.
         /// </summary>
-        internal IReadOnlyCollection<string> TargetNames { get; }
+        internal IReadOnlyCollection<string> RequestedTargetNames { get; }
 
         /// <summary>
         /// Initializes a configuration from a BuildRequestData structure.  Used by the BuildManager.
@@ -170,14 +170,17 @@ namespace Microsoft.Build.BackEnd
             _explicitToolsVersionSpecified = data.ExplicitToolsVersionSpecified;
             _toolsVersion = ResolveToolsVersion(data, defaultToolsVersion);
             _globalProperties = data.GlobalPropertiesDictionary;
-            TargetNames = new List<string>(data.TargetNames);
+            RequestedTargetNames = new List<string>(data.TargetNames);
 
             // The following information only exists when the request is populated with an existing project.
             if (data.ProjectInstance != null)
             {
                 _project = data.ProjectInstance;
+
                 _projectInitialTargets = data.ProjectInstance.InitialTargets;
                 _projectDefaultTargets = data.ProjectInstance.DefaultTargets;
+                _projectTargets = data.ProjectInstance.Targets.Keys.ToHashSet();
+
                 _translateEntireProjectInstanceState = data.ProjectInstance.TranslateEntireState;
 
                 if (data.PropertiesToTransfer != null)
@@ -214,8 +217,11 @@ namespace Microsoft.Build.BackEnd
             _globalProperties = instance.GlobalPropertiesDictionary;
 
             _project = instance;
+
             _projectInitialTargets = instance.InitialTargets;
             _projectDefaultTargets = instance.DefaultTargets;
+            _projectTargets = instance.Targets.Keys.ToHashSet();
+
             _translateEntireProjectInstanceState = instance.TranslateEntireState;
             IsCacheable = false;
         }
@@ -234,13 +240,14 @@ namespace Microsoft.Build.BackEnd
             _transferredProperties = other._transferredProperties;
             _projectDefaultTargets = other._projectDefaultTargets;
             _projectInitialTargets = other._projectInitialTargets;
+            _projectTargets = other._projectTargets;
             _projectFullPath = other._projectFullPath;
             _toolsVersion = other._toolsVersion;
             _explicitToolsVersionSpecified = other._explicitToolsVersionSpecified;
             _globalProperties = other._globalProperties;
             IsCacheable = other.IsCacheable;
             _configId = configId;
-            TargetNames = other.TargetNames;
+            RequestedTargetNames = other.RequestedTargetNames;
             _skippedFromStaticGraphIsolationConstraints = other._skippedFromStaticGraphIsolationConstraints;
         }
 
@@ -408,9 +415,12 @@ namespace Microsoft.Build.BackEnd
             // Clear these out so the other accessors don't complain.  We don't want to generally enable resetting these fields.
             _projectDefaultTargets = null;
             _projectInitialTargets = null;
+            _projectTargets = null;
 
             ProjectDefaultTargets = _project.DefaultTargets;
             ProjectInitialTargets = _project.InitialTargets;
+            ProjectTargets = _project.Targets.Keys.ToHashSet();
+
             _translateEntireProjectInstanceState = _project.TranslateEntireState;
 
             if (IsCached)
@@ -480,6 +490,16 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrow(_projectDefaultTargets == null, "Default targets cannot be reset once they have been set.");
                 _projectDefaultTargets = value;
+            }
+        }
+
+        public HashSet<string> ProjectTargets
+        {
+            get => _projectTargets;
+            set
+            {
+                ErrorUtilities.VerifyThrow(_projectTargets == null, "Targets cannot be reset once they have been set.");
+                _projectTargets = value;
             }
         }
 
@@ -686,6 +706,7 @@ namespace Microsoft.Build.BackEnd
 
         private Func<string, bool> shouldSkipStaticGraphIsolationOnReference;
         private bool _skippedFromStaticGraphIsolationConstraints;
+        private HashSet<string> _projectTargets;
 
         public bool ShouldSkipIsolationConstraintsForReference(string referenceFullPath)
         {
@@ -831,6 +852,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _explicitToolsVersionSpecified);
             translator.Translate(ref _projectDefaultTargets);
             translator.Translate(ref _projectInitialTargets);
+            translator.Translate(ref _projectTargets);
             translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
             translator.Translate(ref _skippedFromStaticGraphIsolationConstraints);
         }

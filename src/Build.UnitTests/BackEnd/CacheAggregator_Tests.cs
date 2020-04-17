@@ -206,7 +206,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             aggregatedCache.ConfigCache.First().GlobalProperties.ToDictionary().ShouldBe(new Dictionary<string, string> { ["p"] = "v" });
             aggregatedCache.ConfigCache.First().ToolsVersion.ShouldBe("13");
             // first config wins
-            aggregatedCache.ConfigCache.First().TargetNames.ShouldBe(new []{"foo"});
+            aggregatedCache.ConfigCache.First().RequestedTargetNames.ShouldBe(new []{"foo"});
 
             aggregatedCache.ResultsCache.Count().ShouldBe(1);
             aggregatedCache.ResultsCache.First().ResultsByTarget.Count.ShouldBe(4);
