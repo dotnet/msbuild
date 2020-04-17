@@ -23,15 +23,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [InlineData("@(foo->'xxx;xxx');@(foo, 'xxx;xxx');@(foo->'xxx;xxx', 'xxx;xxx')", new string[] { "@(foo->'xxx;xxx')", "@(foo, 'xxx;xxx')", "@(foo->'xxx;xxx', 'xxx;xxx')" })]
         public void TokenizeExpression(string expression, string[] expectedTokens)
         {
-            SemiColonTokenizer tokenizer = new SemiColonTokenizer(expression);
-
-            int index = 0;
-            foreach (string actualToken in tokenizer)
-            {
-                actualToken.ShouldBe(expectedTokens[index]);
-                index++;
-            }
-            index.ShouldBe(expectedTokens.Length);
+            new SemiColonTokenizer(expression).ShouldBe(expectedTokens);
         }
     }
 }
