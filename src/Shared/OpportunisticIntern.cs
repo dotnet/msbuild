@@ -451,10 +451,10 @@ namespace Microsoft.Build
             public string ExpensiveConvertToString() => _target;
 
             /// <summary>
-            /// Compare if the target string is equal to the given string.
+            /// Compare target to string. Assumes string is of equal or smaller length than target.
             /// </summary>
             /// <param name="other">The string to compare with the target.</param>
-            /// <returns>True if the strings are equal, false otherwise.</returns>
+            /// <returns>True if target starts with <paramref name="other"/>, false otherwise.</returns>
             public bool StartsWithStringByOrdinalComparison(string other) => _target.StartsWith(other, StringComparison.Ordinal);
 
             /// <summary>
@@ -518,11 +518,11 @@ namespace Microsoft.Build
             public string ExpensiveConvertToString() => _target.Substring(_startIndex, Length);
 
             /// <summary>
-            /// Compare if the target substring is equal to the given string.
+            /// Compare target substring to a string. Assumes string is of equal or smaller length than the target substring.
             /// </summary>
             /// <param name="other">The string to compare with the target substring.</param>
-            /// <returns>True if the strings are equal, false otherwise.</returns>
-            public bool IsOrdinalEqualToStringOfSameLength(string other) => (String.CompareOrdinal(_target, _startIndex, other, 0, other.Length) == 0);
+            /// <returns>True if target substring starts with <paramref name="other"/>, false otherwise.</returns>
+            public bool StartsWithStringByOrdinalComparison(string other) => (String.CompareOrdinal(_target, _startIndex, other, 0, other.Length) == 0);
 
             /// <summary>
             /// Never reference equals to string.

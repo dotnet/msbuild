@@ -139,11 +139,11 @@ namespace Microsoft.Build.Evaluation
                 {
                     startIndex++;
                 }
-                while (endIndex > startIndex && char.IsWhiteSpace(_expression[endIndex - 1]))
+                while (startIndex < endIndex && char.IsWhiteSpace(_expression[endIndex - 1]))
                 {
                     endIndex--;
                 }
-                if (endIndex > startIndex)
+                if (startIndex < endIndex)
                 {
                     var target = new OpportunisticIntern.SubstringInternTarget(_expression, startIndex, endIndex - startIndex);
                     return OpportunisticIntern.InternableToString(target);
