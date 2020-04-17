@@ -3,10 +3,6 @@
 
 using System;
 using System.IO;
-using System.Reflection;
-using System.Collections.Generic;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Microsoft.DotNet.CommandFactory
 {
@@ -18,7 +14,7 @@ namespace Microsoft.DotNet.CommandFactory
         {
             if (dotnetToolPath == null)
             {
-                _dotnetToolPath = Path.Combine(ApplicationEnvironment.ApplicationBasePath,
+                _dotnetToolPath = Path.Combine(AppContext.BaseDirectory,
                     "DotnetTools");
             }
             else

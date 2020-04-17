@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Tools.Common
 {
@@ -152,7 +152,7 @@ namespace Microsoft.DotNet.Tools.Common
             }
 
             StringComparison compare;
-            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 compare = StringComparison.OrdinalIgnoreCase;
                 // check if paths are on the same volume
@@ -288,7 +288,7 @@ namespace Microsoft.DotNet.Tools.Common
                     result = component;
 
                     // On Windows, manually append a separator for drive references because Path.Combine won't do so
-                    if (result.EndsWith(":") && RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
+                    if (result.EndsWith(":") && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     {
                         result += Path.DirectorySeparatorChar;
                     }
@@ -311,7 +311,7 @@ namespace Microsoft.DotNet.Tools.Common
         {
             var comparison = StringComparison.Ordinal;
 
-            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 comparison = StringComparison.OrdinalIgnoreCase;
             }

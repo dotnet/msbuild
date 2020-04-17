@@ -13,9 +13,9 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>6e83eafe49ce3c55e9f68ae669f24957e5b482f8</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.PlatformAbstractions" Version="5.0.0-preview.4.20213.12">
-      <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>6e83eafe49ce3c55e9f68ae669f24957e5b482f8</Sha>
+    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="5.0.0-beta.20201.2">
+      <Uri>https://github.com/dotnet/arcade</Uri>
+      <Sha>bce0a98620c1c5a110b2bba9912f3d5929069c6b</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.HostModel" Version="5.0.0-preview.4.20213.12">
       <Uri>https://github.com/dotnet/runtime</Uri>

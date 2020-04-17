@@ -3,19 +3,15 @@
 
 using System;
 using System.IO;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.PlatformAbstractions;
-using Microsoft.DotNet.Tools.Test.Utilities;
-using Xunit;
-using LocalizableStrings = Microsoft.DotNet.Tools.Publish.LocalizableStrings;
-using System.Runtime.CompilerServices;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Xunit;
 using Xunit.Abstractions;
+using LocalizableStrings = Microsoft.DotNet.Tools.Publish.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli.Publish.Tests
 {

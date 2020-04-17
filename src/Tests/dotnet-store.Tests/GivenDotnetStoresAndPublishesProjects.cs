@@ -2,13 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
-using Microsoft.DotNet.PlatformAbstractions;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -17,7 +16,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
     public class GivenDotnetStoresAndPublishesProjects : SdkTest
     {
         private static string _tfm = "netcoreapp3.0";
-        private static string _arch = RuntimeEnvironment.RuntimeArchitecture.ToLowerInvariant();
+        private static string _arch = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
 
         public GivenDotnetStoresAndPublishesProjects(ITestOutputHelper log) : base(log)
         {

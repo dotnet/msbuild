@@ -1,10 +1,11 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#if NETCOREAPP
+
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.PlatformAbstractions;
 using System.IO;
-using System.Linq;
+using System.Runtime.InteropServices;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.TestFramework.Commands
@@ -17,8 +18,6 @@ namespace Microsoft.NET.TestFramework.Commands
             : base(log, "ComposeStore", projectPath, relativePathToProject)
         {
         }
-
-       
 
         public override DirectoryInfo GetOutputDirectory(string targetFramework = "netcoreapp1.0", string configuration = "Debug", string runtimeIdentifier = "")
         {
@@ -35,10 +34,12 @@ namespace Microsoft.NET.TestFramework.Commands
         {
             if (runtimeIdentifier.Length == 0)
             {
-                runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();
+                runtimeIdentifier = RuntimeInformation.RuntimeIdentifier;
             }
             string arch = runtimeIdentifier.Substring(runtimeIdentifier.LastIndexOf("-") + 1);
             return Path.Combine(configuration, arch, targetFramework, PublishSubfolderName);
         }
     }
 }
+
+#endif

@@ -1,9 +1,9 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.Tools;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.HostModel;
@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.ShellShim
         {
             _appHostSourceDirectory =
                 appHostSourceDirectory
-                ?? Path.Combine(ApplicationEnvironment.ApplicationBasePath, "AppHostTemplate");
+                ?? Path.Combine(AppContext.BaseDirectory, "AppHostTemplate");
 
             _filePermissionSetter =
                 filePermissionSetter

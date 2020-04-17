@@ -3,8 +3,7 @@
 
 using System;
 using System.IO;
-using Microsoft.Build.Framework;
-using Microsoft.DotNet.PlatformAbstractions;
+using System.Runtime.InteropServices;
 using Microsoft.Extensions.DependencyModel.Resolution;
 
 namespace Microsoft.NET.Build.Tasks
@@ -21,7 +20,7 @@ namespace Microsoft.NET.Build.Tasks
                 return referenceAssembliesPath;
             }
 
-            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Windows)
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // There is no reference assemblies path outside of windows
                 // The environment variable can be used to specify one

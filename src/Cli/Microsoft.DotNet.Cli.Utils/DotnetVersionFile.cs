@@ -18,9 +18,9 @@ namespace Microsoft.DotNet.Cli.Utils
         /// The runtime identifier (rid) that this CLI was built for.
         /// </summary>
         /// <remarks>
-        /// This is different than RuntimeEnvironment.GetRuntimeIdentifier() because the 
+        /// This is different than RuntimeInformation.RuntimeIdentifier because the 
         /// BuildRid is a RID that is guaranteed to exist and works on the current machine. The
-        /// RuntimeEnvironment.GetRuntimeIdentifier() may be for a new version of the OS that 
+        /// RuntimeInformation.RuntimeIdentifier may be for a new version of the OS that 
         /// doesn't have full support yet.
         /// </remarks>
         public string BuildRid { get; set; }

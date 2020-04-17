@@ -13,7 +13,6 @@ using Xunit.Abstractions;
 using Xunit;
 using System;
 using System.IO;
-using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using Microsoft.Build.Utilities;
 

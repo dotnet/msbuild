@@ -2,13 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Security;
-using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.Win32;
-using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 
@@ -24,7 +20,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
         /// </summary>
         internal static string GetInstallationType()
         {
-            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Windows)
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 return "";
             }
@@ -56,7 +52,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
         /// </summary>
         internal static string GetProductType()
         {
-            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Windows)
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 return "";
             }
@@ -90,7 +86,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
         /// </summary>
         internal static string GetLibcRelease()
         {
-            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 return "";
             }
@@ -114,7 +110,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
         /// </summary>
         internal static string GetLibcVersion()
         {
-            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 return "";
             }

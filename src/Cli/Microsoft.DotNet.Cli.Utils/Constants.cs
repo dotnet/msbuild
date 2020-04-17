@@ -1,18 +1,18 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.PlatformAbstractions;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
     public static class Constants
     {
-        private static Platform CurrentPlatform => RuntimeEnvironment.OperatingSystemPlatform;
         public const string DefaultConfiguration = "Debug";
 
         public static readonly string ProjectFileName = "project.json";
         public static readonly string DotConfigDirectoryName = ".config";
-        public static readonly string ExeSuffix = CurrentPlatform == Platform.Windows ? ".exe" : string.Empty;
+        public static readonly string ExeSuffix =
+            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : string.Empty;
 
         public static readonly string BinDirectoryName = "bin";
         public static readonly string ObjDirectoryName = "obj";
