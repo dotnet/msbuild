@@ -84,7 +84,7 @@ namespace Microsoft.Build.BackEnd
                             HashSet<string> keepMetadata = null;
                             HashSet<string> removeMetadata = null;
                             HashSet<string> matchOnMetadata = null;
-                            MatchOnMetadataOptions matchOnMetadataOptions = MatchOnMetadataOptions.CaseSensitive;
+                            MatchOnMetadataOptions matchOnMetadataOptions = MatchOnMetadataConstants.MatchOnMetadataOptionsDefaultValue;
 
                             if (!String.IsNullOrEmpty(child.KeepMetadata))
                             {

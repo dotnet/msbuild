@@ -89,36 +89,20 @@ namespace Microsoft.Build.Evaluation
 
             public override bool IsMatchOnMetadata(IItem item, IEnumerable<string> metadata, MatchOnMetadataOptions options)
             {
-                switch (options)
+                return ReferencedItems.Any(referencedItem =>
+                        metadata.All(m => !item.GetMetadataValue(m).Equals(string.Empty) && MetadataComparer(options, item.GetMetadataValue(m), referencedItem.Item.GetMetadataValue(m))));
+            }
+
+            private bool MetadataComparer(MatchOnMetadataOptions options, string itemMetadata, string referencedItemMetadata)
+            {
+                if (options.Equals(MatchOnMetadataOptions.PathLike))
                 {
-                    case MatchOnMetadataOptions.CaseSensitive:
-                        return IsCaseSensitiveMetadataMatch(item, metadata, ReferencedItems);
-                    case MatchOnMetadataOptions.CaseInsensitive:
-                        return IsCaseInsensitiveMetadataMatch(item, metadata, ReferencedItems);
-                    case MatchOnMetadataOptions.PathLike:
-                        return IsPathLikeMetadataMatch(item, metadata, ReferencedItems, ProjectDirectory);
-                    default:
-                        ErrorUtilities.ThrowInternalErrorUnreachable();
-                        return false;
+                    return FileUtilities.ComparePathsNoThrow(itemMetadata, referencedItemMetadata, ProjectDirectory);
                 }
-            }
-
-            private static bool IsCaseSensitiveMetadataMatch(IItem item, IEnumerable<string> metadata, List<ReferencedItem> referencedItems)
-            {
-                return referencedItems.Any(referencedItem =>
-                            metadata.All(m => item.GetMetadataValue(m).Equals(referencedItem.Item.GetMetadataValue(m)) && !item.GetMetadataValue(m).Equals(string.Empty)));
-            }
-
-            private static bool IsCaseInsensitiveMetadataMatch(IItem item, IEnumerable<string> metadata, List<ReferencedItem> referencedItems)
-            {
-                return referencedItems.Any(referencedItem =>
-                    metadata.All(m => String.Equals(item.GetMetadataValue(m), referencedItem.Item.GetMetadataValue(m), StringComparison.OrdinalIgnoreCase) && !item.GetMetadataValue(m).Equals(string.Empty)));
-            }
-
-            private static bool IsPathLikeMetadataMatch(IItem item, IEnumerable<string> metadata, List<ReferencedItem> referencedItems, string projectDirectory)
-            {
-                return referencedItems.Any(referencedItem =>
-                    metadata.All(m => !item.GetMetadataValue(m).Equals(string.Empty) && FileUtilities.ComparePathsNoThrow(item.GetMetadataValue(m), referencedItem.Item.GetMetadataValue(m), projectDirectory)));
+                else 
+                {
+                    return String.Equals(itemMetadata, referencedItemMetadata, options.Equals(MatchOnMetadataOptions.CaseInsensitive) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+                }
             }
 
             public override IMSBuildGlob ToMSBuildGlob()

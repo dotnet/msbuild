@@ -89,4 +89,8 @@ namespace Microsoft.Build.Evaluation
         CaseInsensitive,
         PathLike
     }
+
+    public static class MatchOnMetadataConstants {
+        public const MatchOnMetadataOptions MatchOnMetadataOptionsDefaultValue = MatchOnMetadataOptions.CaseSensitive;
+    }
 }

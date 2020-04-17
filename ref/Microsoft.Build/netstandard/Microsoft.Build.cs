@@ -508,6 +508,10 @@ namespace Microsoft.Build.Evaluation
         public Microsoft.Build.Globbing.IMSBuildGlob MsBuildGlob { get { throw null; } set { } }
         public System.Collections.Generic.IEnumerable<string> Removes { get { throw null; } set { } }
     }
+    public static partial class MatchOnMetadataConstants
+    {
+        public const Microsoft.Build.Evaluation.MatchOnMetadataOptions MatchOnMetadataOptionsDefaultValue = Microsoft.Build.Evaluation.MatchOnMetadataOptions.CaseSensitive;
+    }
     public enum MatchOnMetadataOptions
     {
         CaseInsensitive = 1,
