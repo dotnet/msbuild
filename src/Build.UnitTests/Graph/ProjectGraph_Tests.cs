@@ -2029,6 +2029,27 @@ $@"
                 {
                     new Dictionary<int, int[]>
                     {
+                        {1, new[] {2}},
+                        {2, new[] {3}},
+                        {3, new[] {4}}
+                    },
+                    new Dictionary<int, string>
+                    {
+                        {1, EnableTransitiveProjectReferencesPropertyGroup}
+                    },
+                    new Dictionary<int, int[]>
+                    {
+                        {1, new[] {2, 3, 4}},
+                        {2, new[] {3}},
+                        {3, new[] {4}},
+                        {4, new int[0]}
+                    }
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
                         {1, new[] {3}},
                         {2, new[] {3}},
                         {3, new[] {4}}
@@ -2107,8 +2128,6 @@ $@"
             );
 
             graph.AssertReferencesIgnoringOrder(expectedReferences);
-
-            
         }
 
         [Fact]
