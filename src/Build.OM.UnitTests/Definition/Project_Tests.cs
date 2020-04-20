@@ -3354,7 +3354,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             AssertProvenanceResult(expected, project, longString + "a");
         }
 
-        // todo: on xplat, split this to windows and non-windows test
         [Fact]
         public void GetItemProvenancePathMatchingShouldBeCaseInsensitive()
         {
@@ -3371,7 +3370,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ("A", Operation.Include, Provenance.StringLiteral, 1)
             };
 
-            AssertProvenanceResult(expected, project, "A");
+            AssertProvenanceResult(expected, project, FileUtilities.GetIsFileSystemCaseSensitive() ? "a" : "A");
         }
 
 

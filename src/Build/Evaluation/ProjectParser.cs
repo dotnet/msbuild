@@ -31,7 +31,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Valid attribute list for item
         /// </summary>
-        private static readonly HashSet<string> KnownAttributesOnItem = new HashSet<string> { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.include, XMakeAttributes.exclude, XMakeAttributes.remove, XMakeAttributes.keepMetadata, XMakeAttributes.removeMetadata, XMakeAttributes.keepDuplicates, XMakeAttributes.update };
+        private static readonly HashSet<string> KnownAttributesOnItem = new HashSet<string> { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.include, XMakeAttributes.exclude, XMakeAttributes.remove, XMakeAttributes.keepMetadata, XMakeAttributes.removeMetadata, XMakeAttributes.keepDuplicates, XMakeAttributes.update, XMakeAttributes.matchOnMetadata, XMakeAttributes.matchOnMetadataOptions };
 
         /// <summary>
         /// Valid attributes list for item which is case-insensitive.

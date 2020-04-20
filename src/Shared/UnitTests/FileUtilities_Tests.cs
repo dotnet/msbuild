@@ -8,6 +8,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using Shouldly;
@@ -243,7 +244,10 @@ namespace Microsoft.Build.UnitTests
         {
             var result = FileUtilities.HasExtension(fileName, allowedExtensions);
 
-            Assert.True(result);
+            if (!FileUtilities.GetIsFileSystemCaseSensitive() || allowedExtensions.Any(extension => fileName.Contains(extension)))
+            {
+                result.ShouldBeTrue();
+            }
         }
 
         [Theory]
@@ -283,7 +287,7 @@ namespace Microsoft.Build.UnitTests
 
                 var result = FileUtilities.HasExtension("foo.ini", new string[] { ".INI" });
 
-                Assert.True(result);
+                result.ShouldBe(!FileUtilities.GetIsFileSystemCaseSensitive());
             }
             finally
             {
