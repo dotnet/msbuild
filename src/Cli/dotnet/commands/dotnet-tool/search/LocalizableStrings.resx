@@ -150,12 +150,6 @@
   <data name="PrereleaseDescription" xml:space="preserve">
     <value>determining whether to include pre-release packages.</value>
   </data>
-  <data name="SemVerLevelArgumentName" xml:space="preserve">
-    <value>SemVer Level</value>
-  </data>
-  <data name="SemVerLevelDescription" xml:space="preserve">
-    <value>A SemVer 1.0.0 version string.</value>
-  </data>
   <data name="NoResult" xml:space="preserve">
     <value>Could not find any results.</value>
   </data>
