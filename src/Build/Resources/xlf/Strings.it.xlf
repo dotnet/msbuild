@@ -109,7 +109,7 @@
       </trans-unit>
       <trans-unit id="LogTaskInputs.Truncated">
         <source>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</source>
-        <target state="new">The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</target>
+        <target state="translated">I parametri oltre questo punto sono stati troncati. Per visualizzare tutti i parametri, cancellare la variabile di ambiente MSBUILDTRUNCATETASKINPUTLOGGING.</target>
         <note />
       </trans-unit>
       <trans-unit id="MetaprojectGenerated">
@@ -186,7 +186,7 @@
       </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
         <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
-        <target state="translated">MSB4254: il task MSBuild compila progetti "{0}" che non sono specificati nell'elemento ProjectReference. Nelle compilazioni isolate questa condizione indica probabilmente che i riferimenti non sono specificati in modo esplicito come elemento ProjectReference in "{1}"</target>
+        <target state="translated">MSB4254: l'attività MSBuild compila progetti "{0}" che non sono specificati nell'elemento ProjectReference. Nelle compilazioni isolate questa condizione indica probabilmente che i riferimenti non sono specificati in modo esplicito come elemento ProjectReference in "{1}"</target>
         <note>
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
