@@ -4,6 +4,7 @@
 using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -16,6 +17,10 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
     class ResourceManagerService : IBuildComponent
     {
         Semaphore? s = null;
+
+#if DEBUG
+        public int TotalNumberHeld = -1;
+#endif
 
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
@@ -30,6 +35,10 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
 
             int resourceCount = host.BuildParameters.MaxNodeCount; // TODO: tweakability
 
+#if DEBUG
+            TotalNumberHeld = 0;
+#endif
+
             s = new Semaphore(resourceCount, resourceCount, SemaphoreName); // TODO: SemaphoreSecurity?
         }
 
@@ -37,6 +46,10 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
         {
             s?.Dispose();
             s = null;
+
+#if DEBUG
+            TotalNumberHeld = -2;
+#endif
         }
 
         public int RequestCores(int requestedCores)
@@ -74,6 +87,10 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
             ErrorUtilities.VerifyThrow(coresToRelease > 0, "Tried to release {0} cores", coresToRelease);
 
             s.Release(coresToRelease);
+
+#if DEBUG
+            TotalNumberHeld -= coresToRelease;
+#endif
         }
 
         internal void RequireCores(int requestedCores)
@@ -88,8 +105,11 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
             if (!s.WaitOne())
             {
                 ErrorUtilities.ThrowInternalError("Couldn't get a core to run a task even with infinite timeout");
-
             }
+
+#if DEBUG
+            TotalNumberHeld++;
+#endif
         }
     }
 }

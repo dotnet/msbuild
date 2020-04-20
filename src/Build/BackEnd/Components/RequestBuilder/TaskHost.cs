@@ -126,9 +126,6 @@ namespace Microsoft.Build.BackEnd
             _continueOnError = false;
             _activeProxy = true;
             _callbackMonitor = new Object();
-
-            // Ensure that we have at least one core to run this task
-            RequireCores(1);
         }
 
         /// <summary>
@@ -685,13 +682,13 @@ namespace Microsoft.Build.BackEnd
             return coresAcquired;
         }
 
-        private void RequireCores(int requestedCores)
+        public void RequireCores(int requestedCores)
         {
             var rms = _host.GetComponent(BuildComponentType.TaskResourceManager) as ResourceManagerService;
 
             rms.RequireCores(requestedCores);
 
-            runningTotal += 1; // default reservation
+            runningTotal += requestedCores; // default reservation
         }
 
         public void ReleaseCores(int coresToRelease)
@@ -702,9 +699,8 @@ namespace Microsoft.Build.BackEnd
 
             if (coresToRelease >= 1)
             {
-                runningTotal -= coresToRelease;
-
                 rms.ReleaseCores(coresToRelease);
+                runningTotal -= coresToRelease;
             }
         }
 
