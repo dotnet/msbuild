@@ -120,7 +120,6 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowInternalNull(taskLocation, "taskLocation");
 
             _host = host;
-            rms = _host.GetComponent(BuildComponentType.TaskResourceManager) as ResourceManagerService;
             _requestEntry = requestEntry;
             _taskLocation = taskLocation;
             _targetBuilderCallback = targetBuilderCallback;
@@ -128,10 +127,8 @@ namespace Microsoft.Build.BackEnd
             _activeProxy = true;
             _callbackMonitor = new Object();
 
-            Log($"TaskHost ctor for {requestEntry.RequestConfiguration.ConfigurationId}: {requestEntry.RequestConfiguration.ProjectFullPath}");
-
             // Ensure that we have at least one core to run this task
-            //RequireCores(1);
+            RequireCores(1);
         }
 
         /// <summary>
@@ -350,8 +347,6 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                Log("Yielding");
-
                 IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
                 ErrorUtilities.VerifyThrow(_yieldThreadId == -1, "Cannot call Yield() while yielding.");
                 _yieldThreadId = Thread.CurrentThread.ManagedThreadId;
@@ -369,7 +364,6 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                Log("reacquring");
                 IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
                 ErrorUtilities.VerifyThrow(_yieldThreadId != -1, "Cannot call Reacquire() before Yield().");
                 ErrorUtilities.VerifyThrow(_yieldThreadId == Thread.CurrentThread.ManagedThreadId, "Cannot call Reacquire() on thread {0} when Yield() was called on thread {1}", Thread.CurrentThread.ManagedThreadId, _yieldThreadId);
@@ -377,7 +371,6 @@ namespace Microsoft.Build.BackEnd
                 MSBuildEventSource.Log.ExecuteTaskReacquireStart(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
                 builderCallback.Reacquire();
                 MSBuildEventSource.Log.ExecuteTaskReacquireStop(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
-                Log("reacquired");
                 _yieldThreadId = -1;
             }
         }
@@ -679,10 +672,6 @@ namespace Microsoft.Build.BackEnd
 
         int runningTotal = 0;
 
-        ResourceManagerService rms;
-
-        public void Log(string s) => rms.Log($"{s}, runningTotal={runningTotal}");
-
         public int RequestCores(int requestedCores)
         {
             var rms = _host.GetComponent(BuildComponentType.TaskResourceManager) as ResourceManagerService;
@@ -693,53 +682,37 @@ namespace Microsoft.Build.BackEnd
 
             runningTotal += coresAcquired;
 
-            Log($"Requested {requestedCores}, got {coresAcquired}");
-
             return coresAcquired;
         }
 
-        public void RequireCores(int requestedCores)
+        private void RequireCores(int requestedCores)
         {
             var rms = _host.GetComponent(BuildComponentType.TaskResourceManager) as ResourceManagerService;
 
             rms.RequireCores(requestedCores);
 
-            runningTotal += requestedCores; // default reservation
-
-            Log($"Required {requestedCores}");
-
+            runningTotal += 1; // default reservation
         }
 
         public void ReleaseCores(int coresToRelease)
         {
             var rms = _host.GetComponent(BuildComponentType.TaskResourceManager) as ResourceManagerService;
-            Log($"Attempting to release {coresToRelease}");
 
             coresToRelease = Math.Min(runningTotal, coresToRelease);
 
             if (coresToRelease >= 1)
             {
-                rms.ReleaseCores(coresToRelease);
                 runningTotal -= coresToRelease;
-            }
 
-            Log($"Released {coresToRelease}");
+                rms.ReleaseCores(coresToRelease);
+            }
         }
 
         internal void ReleaseAllCores()
         {
-            Log("Releasing all");
             ReleaseCores(runningTotal);
 
-            var rms = _host.GetComponent(BuildComponentType.TaskResourceManager) as ResourceManagerService;
-
-            if (rms.TotalNumberHeld != 0)
-            {
-                //Debug.Fail("still holding");
-            }
-
             runningTotal = 0;
-            Log("all released");
         }
 
         /// <summary>
