@@ -99,8 +99,9 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
 
             ToolRestoreResult[] toolRestoreResults =
                 packagesFromManifest
+                    .AsParallel()
                     .Select(package => InstallPackages(package, configFile))
-                    .AsParallel().ToArray();
+                    .ToArray();
 
             Dictionary<RestoredCommandIdentifier, RestoredCommand> downloaded =
                 toolRestoreResults.SelectMany(result => result.SaveToCache)
