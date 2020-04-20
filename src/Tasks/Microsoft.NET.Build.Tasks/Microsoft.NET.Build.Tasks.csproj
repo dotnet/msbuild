@@ -104,7 +104,7 @@
       <Stage0SdkFile Include="$(_Stage0SdksFolder)\Microsoft.NET.Sdk.Web.ProjectSystem\**" SdkName="Microsoft.NET.Sdk.Web.ProjectSystem" />
       <Stage0SdkFile Include="$(_Stage0SdksFolder)\Microsoft.NET.Sdk.Razor\**" SdkName="Microsoft.NET.Sdk.Razor" />
       <Stage0SdkFile Include="$(_Stage0SdksFolder)\Microsoft.NET.Sdk.WindowsDesktop\**" SdkName="Microsoft.NET.Sdk.WindowsDesktop" />
-      <Stage0SdkFile Include="$(_Stage0SdksFolder)\ILLink.Tasks\**" SdkName="ILLink.Tasks" />
+      <Stage0SdkFile Include="$(_Stage0SdksFolder)\Microsoft.NET.ILLink.Tasks\**" SdkName="Microsoft.NET.ILLink.Tasks" />
       <LayoutFile Include="@(Stage0SdkFile)">
         <TargetPath>..\%(Stage0SdkFile.SdkName)\%(Stage0SdkFile.RecursiveDir)%(Stage0SdkFile.Filename)%(Stage0SdkFile.Extension)</TargetPath>
       </LayoutFile>

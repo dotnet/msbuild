@@ -11,7 +11,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <Import Project="Sdk.props" Sdk="ILLink.Tasks" />
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.ILLink.Tasks" />
 
   <PropertyGroup Condition=" '$(PublishTrimmed)' == 'true' ">
     <IntermediateLinkDir Condition=" '$(IntermediateLinkDir)' == '' ">$(IntermediateOutputPath)linked\</IntermediateLinkDir>
