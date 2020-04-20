@@ -102,7 +102,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <CheckForOverflowUnderflow Condition="'$(CheckForOverflowUnderflow)'==''">false</CheckForOverflowUnderflow>
     <AutomaticallyUseReferenceAssemblyPackages>true</AutomaticallyUseReferenceAssemblyPackages>
     <MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion>1.0.0</MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion>
-    
+    <IgnoreConflictingTransitiveContent>false</IgnoreConflictingTransitiveContent>
+
     <!-- Uncomment this once https://github.com/Microsoft/visualfsharp/issues/3207 gets fixed -->
     <!-- <WarningsAsErrors Condition=" '$(WarningsAsErrors)' == '' ">NU1605</WarningsAsErrors> -->
   </PropertyGroup>
