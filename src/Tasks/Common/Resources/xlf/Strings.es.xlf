@@ -113,18 +113,18 @@
         <note>{StrBegin="NETSDK1032: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSelfContainedWithoutRuntimeIdentifier">
-        <source>NETSDK1031: It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</source>
-        <target state="translated">NETSDK1031: No se admite compilar o publicar una aplicación autocontenida sin especificar un valor para RuntimeIdentifier. Especifique un valor para RuntimeIdentifier o establezca SelfContained en false.</target>
+        <source>NETSDK1031: It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier. You must either specify a RuntimeIdentifier or set SelfContained to false.</source>
+        <target state="needs-review-translation">NETSDK1031: No se admite compilar o publicar una aplicación autocontenida sin especificar un valor para RuntimeIdentifier. Especifique un valor para RuntimeIdentifier o establezca SelfContained en false.</target>
         <note>{StrBegin="NETSDK1031: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutRuntimeIdentifier">
-        <source>NETSDK1097: It is not supported to publish an application to a single-file without specifying a RuntimeIdentifier. Please either specify a RuntimeIdentifier or set PublishSingleFile to false.</source>
-        <target state="translated">NETSDK1097: No se admite la publicación de una aplicación en un archivo único sin especificar RuntimeIdentifier. Especifique RuntimeIdentifier o establezca PublishSingleFile en false.</target>
+        <source>NETSDK1097: It is not supported to publish an application to a single-file without specifying a RuntimeIdentifier. You must either specify a RuntimeIdentifier or set PublishSingleFile to false.</source>
+        <target state="needs-review-translation">NETSDK1097: No se admite la publicación de una aplicación en un archivo único sin especificar RuntimeIdentifier. Especifique RuntimeIdentifier o establezca PublishSingleFile en false.</target>
         <note>{StrBegin="NETSDK1097: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutAppHost">
-        <source>NETSDK1098: Applications published to a single-file are required to use the application host. Please either set PublishSingleFile to false or set UseAppHost to true.</source>
-        <target state="translated">NETSDK1098: Las aplicaciones publicadas en un archivo único deben usar el host de aplicación. Establezca PublishSingleFile en false o establezca UseAppHost en true.</target>
+        <source>NETSDK1098: Applications published to a single-file are required to use the application host. You must either set PublishSingleFile to false or set UseAppHost to true.</source>
+        <target state="needs-review-translation">NETSDK1098: Las aplicaciones publicadas en un archivo único deben usar el host de aplicación. Establezca PublishSingleFile en false o establezca UseAppHost en true.</target>
         <note>{StrBegin="NETSDK1098: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutExecutable">
