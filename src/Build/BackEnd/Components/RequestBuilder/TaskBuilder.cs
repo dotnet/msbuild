@@ -321,6 +321,8 @@ namespace Microsoft.Build.BackEnd
 
                 WorkUnitResult aggregateResult = new WorkUnitResult();
 
+                taskHost?.Log($"In ExecuteTask, project instance {_targetLoggingContext?.BuildEventContext?.ProjectInstanceId} target {_targetLoggingContext?.BuildEventContext?.TargetId}");
+
                 // Loop through each of the batch buckets and execute them one at a time
                 for (int i = 0; i < buckets.Count; i++)
                 {
@@ -346,7 +348,9 @@ namespace Microsoft.Build.BackEnd
                         MSBuildEventSource.Log.ExecuteTaskStop(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
                     }
                 }
-                
+
+                taskHost?.Log($"ExecuteTask done, project instance {_targetLoggingContext?.BuildEventContext?.ProjectInstanceId} target {_targetLoggingContext?.BuildEventContext?.TargetId}");
+
                 taskResult = aggregateResult;
             }
             finally
@@ -759,6 +763,8 @@ namespace Microsoft.Build.BackEnd
                 TaskExecutionHost host = taskExecutionHost as TaskExecutionHost;
                 Type taskType = host.TaskInstance.GetType();
 
+                taskHost?.Log($"ExecuteInstantiatedTask project instance {_targetLoggingContext?.BuildEventContext?.ProjectInstanceId} target {_targetLoggingContext?.BuildEventContext?.TargetId}, task is {taskType.Name}");
+
                 try
                 {
                     if (taskType == typeof(MSBuild))
@@ -813,7 +819,13 @@ namespace Microsoft.Build.BackEnd
                         using (FullTracking.Track(taskLoggingContext.TargetLoggingContext.Target.Name, _taskNode.Name, _buildRequestEntry.ProjectRootDirectory, _buildRequestEntry.RequestConfiguration.Project.PropertiesToBuildWith))
 #endif
                         {
+                            taskHost?.Log($"In ExecuteInstantiatedTask, project instance {_targetLoggingContext?.BuildEventContext?.ProjectInstanceId} target {_targetLoggingContext?.BuildEventContext?.TargetId}");
+                            taskHost?.RequireCores(1);
+
                             taskResult = taskExecutionHost.Execute();
+
+                            taskHost?.ReleaseCores(1);
+                            taskHost?.Log($"ExecuteInstantiatedTask done, project instance {_targetLoggingContext?.BuildEventContext?.ProjectInstanceId} target {_targetLoggingContext?.BuildEventContext?.TargetId}");
                         }
                     }
                 }

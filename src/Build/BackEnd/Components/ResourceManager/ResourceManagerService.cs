@@ -4,6 +4,7 @@
 using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -16,6 +17,12 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
     class ResourceManagerService : IBuildComponent
     {
         Semaphore? s = null;
+
+        public int TotalNumberHeld = -1;
+
+        private static StringBuilder log = new StringBuilder();
+
+        public void Log(string s) => log.AppendFormat("{0}: {1}, current={2} thread={4} {3}", DateTime.Now.Ticks, s, TotalNumberHeld, Environment.NewLine, Thread.CurrentThread.ManagedThreadId);
 
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
@@ -30,6 +37,10 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
 
             int resourceCount = host.BuildParameters.MaxNodeCount; // TODO: tweakability
 
+            TotalNumberHeld = 0;
+
+            Log($"Initialized with {resourceCount}");
+
             s = new Semaphore(resourceCount, resourceCount, SemaphoreName); // TODO: SemaphoreSecurity?
         }
 
@@ -37,10 +48,16 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
         {
             s?.Dispose();
             s = null;
+
+            Log($"Tearing down; held should have been {TotalNumberHeld}");
+
+            TotalNumberHeld = -2;
         }
 
         public int RequestCores(int requestedCores)
         {
+            Log($"Requesting {requestedCores}");
+
             if (s is null)
             {
                 // TODO: ErrorUtilities should be annotated so this can just be `ErrorUtilities.VerifyThrow`
@@ -59,6 +76,8 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
                 }
             }
 
+            Log($"got {i}, holding {TotalNumberHeld}");
+
             return i;
         }
 
@@ -74,6 +93,10 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
             ErrorUtilities.VerifyThrow(coresToRelease > 0, "Tried to release {0} cores", coresToRelease);
 
             s.Release(coresToRelease);
+
+            TotalNumberHeld -= coresToRelease;
+
+            Log($"released {coresToRelease}, now holding {TotalNumberHeld}");
         }
 
         internal void RequireCores(int requestedCores)
@@ -85,11 +108,18 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
                 throw new InternalErrorException($"{nameof(ResourceManagerService)} was called while uninitialized");
             }
 
+            if (TotalNumberHeld >= 1)
+            {
+                //Debugger.Launch();
+            }
+
             if (!s.WaitOne())
             {
                 ErrorUtilities.ThrowInternalError("Couldn't get a core to run a task even with infinite timeout");
-
             }
+
+            TotalNumberHeld++;
+            Log($"required 1, now holding {TotalNumberHeld}");
         }
     }
 }
