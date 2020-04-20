@@ -109,7 +109,7 @@
       </trans-unit>
       <trans-unit id="LogTaskInputs.Truncated">
         <source>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</source>
-        <target state="new">The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</target>
+        <target state="translated">Parametreler bu noktanın ötesinde kısaltıldı. Tüm parametreleri görüntülemek için MSBUILDTRUNCATETASKINPUTLOGGING ortam değişkenini temizleyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="MetaprojectGenerated">
