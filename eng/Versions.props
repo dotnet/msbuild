@@ -8,7 +8,7 @@
   <PropertyGroup>
     <VersionPrefix>5.0.100</VersionPrefix>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
-    <PreReleaseVersionIteration>4</PreReleaseVersionIteration>
+    <PreReleaseVersionIteration>5</PreReleaseVersionIteration>
   </PropertyGroup>
   <!-- Production Dependencies -->
   <PropertyGroup>
