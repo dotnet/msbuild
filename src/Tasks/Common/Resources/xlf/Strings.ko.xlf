@@ -506,6 +506,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1124: 어셈블리를 트리밍하려면 .NET Core 3.0 이상이 필요합니다.</target>
         <note>{StrBegin="NETSDK1124: "}</note>
       </trans-unit>
+      <trans-unit id="PublishUnsupportedWithoutTargetFramework">
+        <source>NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify the framework for the published application.</source>
+        <target state="new">NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify the framework for the published application.</target>
+        <note>{StrBegin="NETSDK1129: "}</note>
+      </trans-unit>
       <trans-unit id="ReadyToRunCompilationFailed">
         <source>NETSDK1096: Optimizing assemblies for performance failed. You can either exclude the failing assemblies from being optimized, or set the PublishReadyToRun property to false.</source>
         <target state="translated">NETSDK1096: 성능 향상을 위해 어셈블리를 최적화하지 못했습니다. 오류가 발생하는 어셈블리를 최적화에서 제외하거나 PublishReadyToRun 속성을 false로 설정할 수 있습니다.</target>

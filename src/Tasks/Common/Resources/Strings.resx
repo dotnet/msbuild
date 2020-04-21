@@ -616,4 +616,8 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1128: COM hosting does not support self-contained deployments.</value>
     <comment>{StrBegin="NETSDK1128: "}</comment>
   </data>
+  <data name="PublishUnsupportedWithoutTargetFramework" xml:space="preserve">
+    <value>NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify the framework for the published application.</value>
+    <comment>{StrBegin="NETSDK1129: "}</comment>
+  </data>
 </root>

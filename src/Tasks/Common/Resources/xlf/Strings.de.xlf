@@ -506,6 +506,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1124: Zum Kürzen von Assemblys ist .NET Core 3.0 oder höher erforderlich.</target>
         <note>{StrBegin="NETSDK1124: "}</note>
       </trans-unit>
+      <trans-unit id="PublishUnsupportedWithoutTargetFramework">
+        <source>NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify the framework for the published application.</source>
+        <target state="new">NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify the framework for the published application.</target>
+        <note>{StrBegin="NETSDK1129: "}</note>
+      </trans-unit>
       <trans-unit id="ReadyToRunCompilationFailed">
         <source>NETSDK1096: Optimizing assemblies for performance failed. You can either exclude the failing assemblies from being optimized, or set the PublishReadyToRun property to false.</source>
         <target state="translated">NETSDK1096: Fehler bei der Leistungsoptimierung von Assemblys. Sie können entweder die fehlerhaften Assemblys von der Optimierung ausschließen oder die PublishReadyToRun-Eigenschaft auf FALSE festlegen.</target>

@@ -506,6 +506,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1124: 修整程序集需要 .NET Core 3.0 或更高版本。</target>
         <note>{StrBegin="NETSDK1124: "}</note>
       </trans-unit>
+      <trans-unit id="PublishUnsupportedWithoutTargetFramework">
+        <source>NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify the framework for the published application.</source>
+        <target state="new">NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify the framework for the published application.</target>
+        <note>{StrBegin="NETSDK1129: "}</note>
+      </trans-unit>
       <trans-unit id="ReadyToRunCompilationFailed">
         <source>NETSDK1096: Optimizing assemblies for performance failed. You can either exclude the failing assemblies from being optimized, or set the PublishReadyToRun property to false.</source>
         <target state="translated">NETSDK1096: 程序集性能优化失败。可将失败的程序集排除在优化操作之外，或者将 PublishReadyToRun 属性设置为 false。</target>
