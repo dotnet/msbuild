@@ -25,8 +25,8 @@ EventSource is primarily used to profile code. For MSBuild specifically, a major
 
 One can run MSBuild with eventing using the following command:
 
-`PerfView /OnlyProviders=*Microsoft-VisualStudio-Common run MSBuild.exe <project to build>`
+`PerfView /OnlyProviders=*Microsoft-Build run MSBuild.exe <project to build>`
 
 For example, if PerfView is one level up from my current directory (which has MSBuild.exe), and I want to build MSBuild.sln on Windows, I would use the following command:
 
-`..\PerfView /OnlyProviders=*Microsoft-VisualStudio-Common run .\MSBuild.exe .\MSBuild.sln`
+`..\PerfView /OnlyProviders=*Microsoft-Build run .\MSBuild.exe .\MSBuild.sln`
