@@ -17,7 +17,10 @@
     <!-- Set output type of test projects to EXE.  This will allow us to run tests on .NET Core via F5 or "dotnet run" -->
     <OutputType>Exe</OutputType>
     <GenerateProgramFile>false</GenerateProgramFile>
-
+    
+    <!-- Makes xunit print all test names in stdout -->
+    <XunitOptions>$(XunitOptions) -diagnostics</XunitOptions>
+    
     <!-- Respect the traits set up by PlatformSpecific attribute. -->
     <XunitOptions Condition="'$(OsEnvironment)'=='windows'">$(XunitOptions) -notrait category=nonwindowstests</XunitOptions>
     <XunitOptions Condition="'$(OsEnvironment)'=='linux'">$(XunitOptions) -notrait category=nonlinuxtests</XunitOptions>
