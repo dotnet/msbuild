@@ -1853,34 +1853,86 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private int _sdkResolverProjectNumber = 1;
-
         //  Creates a project to set the properties and include the items from an SdkResult
         private ProjectRootElement CreateProjectForSdkResult(SdkResult sdkResult)
         {
-            ProjectRootElement project = ProjectRootElement.Create();
-            project.FullPath = _projectRootElement.FullPath + ".SdkResolver." + (_sdkResolverProjectNumber++) + ".proj";
+            int propertiesAndItemsHash;
 
-            if (sdkResult.PropertiesToAdd != null && sdkResult.PropertiesToAdd.Any())
+#if NETCOREAPP
+            HashCode hash = new HashCode();
+#else
+            propertiesAndItemsHash = -849885975;
+#endif
+
+            if (sdkResult.PropertiesToAdd != null)
             {
-                var propertyGroup = project.AddPropertyGroup();
-                foreach (var propertyNameAndValue in sdkResult.PropertiesToAdd)
+                foreach (var property in sdkResult.PropertiesToAdd)
                 {
-                    propertyGroup.AddProperty(propertyNameAndValue.Key, EscapingUtilities.Escape(propertyNameAndValue.Value));
+#if NETCOREAPP
+                    hash.Add(property.Key);
+                    hash.Add(property.Value);
+#else
+                    propertiesAndItemsHash = propertiesAndItemsHash * -1521134295 + property.Key.GetHashCode();
+                    propertiesAndItemsHash = propertiesAndItemsHash * -1521134295 + property.Value.GetHashCode();
+#endif
                 }
             }
-
-            if (sdkResult.ItemsToAdd != null && sdkResult.ItemsToAdd.Any())
+            if (sdkResult.ItemsToAdd != null)
             {
-                var itemGroup = project.AddItemGroup();
                 foreach (var item in sdkResult.ItemsToAdd)
                 {
-                    //  TODO: Does the itemspec or metadata need to be escaped?
-                    itemGroup.AddItem(item.Key, item.Value.ItemSpec, item.Value.Metadata);
+#if NETCOREAPP
+                    hash.Add(item.Key);
+                    hash.Add(item.Value);
+#else
+                    propertiesAndItemsHash = propertiesAndItemsHash * -1521134295 + item.Key.GetHashCode();
+                    propertiesAndItemsHash = propertiesAndItemsHash * -1521134295 + item.Value.GetHashCode();
+#endif
+
                 }
             }
 
-            return project;
+#if NETCOREAPP
+            propertiesAndItemsHash = hash.ToHashCode();
+#endif
+
+            string projectPath = _projectRootElement.FullPath + ".SdkResolver." + (propertiesAndItemsHash++) + ".proj";
+
+            ProjectRootElement InnerCreate(string _, ProjectRootElementCacheBase __)
+            {
+                ProjectRootElement project = ProjectRootElement.Create();
+                project.FullPath = projectPath;
+
+                if (sdkResult.PropertiesToAdd != null && sdkResult.PropertiesToAdd.Any())
+                {
+                    var propertyGroup = project.AddPropertyGroup();
+                    foreach (var propertyNameAndValue in sdkResult.PropertiesToAdd)
+                    {
+                        propertyGroup.AddProperty(propertyNameAndValue.Key, EscapingUtilities.Escape(propertyNameAndValue.Value));
+                    }
+                }
+
+                if (sdkResult.ItemsToAdd != null && sdkResult.ItemsToAdd.Any())
+                {
+                    var itemGroup = project.AddItemGroup();
+                    foreach (var item in sdkResult.ItemsToAdd)
+                    {
+                        //  TODO: Does the itemspec or metadata need to be escaped?
+                        itemGroup.AddItem(item.Key, item.Value.ItemSpec, item.Value.Metadata);
+                    }
+                }
+
+                _projectRootElementCache.AddEntry(project);
+
+                return project;
+            }
+
+            //  TODO: Is it worth using the cache for these?
+            return _projectRootElementCache.Get(
+                projectPath,
+                InnerCreate,
+                _projectRootElement.IsExplicitlyLoaded,
+                preserveFormatting: null);
         }
 
         /// <summary>
