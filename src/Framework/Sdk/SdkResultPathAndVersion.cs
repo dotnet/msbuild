@@ -23,5 +23,20 @@ namespace Microsoft.Build.Framework
             Path = path;
             Version = version;
         }
+
+        public override bool Equals(object obj)
+        {
+            return obj is SdkResultPathAndVersion version &&
+                   Path == version.Path &&
+                   Version == version.Version;
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = 2040984829;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Path);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Version);
+            return hashCode;
+        }
     }
 }

@@ -512,6 +512,8 @@ namespace Microsoft.Build.Framework
         public SdkResultItem(string itemSpec, System.Collections.Generic.Dictionary<string, string> metadata) { }
         public string ItemSpec { get { throw null; } set { } }
         public System.Collections.Generic.Dictionary<string, string> Metadata { get { throw null; } }
+        public override bool Equals(object obj) { throw null; }
+        public override int GetHashCode() { throw null; }
     }
     public sealed partial class SdkResultPathAndVersion
     {
@@ -519,6 +521,8 @@ namespace Microsoft.Build.Framework
         public SdkResultPathAndVersion(string path, string version) { }
         public string Path { get { throw null; } }
         public string Version { get { throw null; } }
+        public override bool Equals(object obj) { throw null; }
+        public override int GetHashCode() { throw null; }
     }
     public enum TargetBuiltReason
     {

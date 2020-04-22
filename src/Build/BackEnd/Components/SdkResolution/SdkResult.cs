@@ -96,5 +96,91 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         {
             return new SdkResult(translator);
         }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is SdkResult result &&
+                  _success == result._success &&
+                  _path == result._path &&
+                  _version == result._version &&
+                  _additionalPaths?.Count == result._additionalPaths?.Count &&
+                  _propertiesToAdd?.Count == result._propertiesToAdd?.Count &&
+                  _itemsToAdd?.Count == result._propertiesToAdd?.Count &&
+                  EqualityComparer<SdkReference>.Default.Equals(_sdkReference, result._sdkReference))
+            {
+                if (_additionalPaths != null)
+                {
+                    for (int i = 0; i < _additionalPaths.Count; i++)
+                    {
+                        if (!_additionalPaths[i].Equals(result._additionalPaths[i]))
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+                if (_propertiesToAdd != null)
+                {
+                    foreach (var propertyToAdd in _propertiesToAdd)
+                    {
+                        if (result._propertiesToAdd[propertyToAdd.Key] != propertyToAdd.Value)
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+                if (_itemsToAdd != null)
+                {
+                    foreach (var itemToAdd in _itemsToAdd)
+                    {
+                        if (!result._itemsToAdd[itemToAdd.Key].Equals(itemToAdd.Value))
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+            }
+
+
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = -1043047289;
+            hashCode = hashCode * -1521134295 + _success.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(_path);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(_version);
+            hashCode = hashCode * -1521134295 + EqualityComparer<SdkReference>.Default.GetHashCode(_sdkReference);
+
+            if (_additionalPaths != null)
+            {
+                foreach (var additionalPath in _additionalPaths)
+                {
+                    hashCode = hashCode * -1521134295 + additionalPath.GetHashCode();
+                }
+            }
+            if (_propertiesToAdd != null)
+            {
+                foreach (var propertyToAdd in _propertiesToAdd)
+                {
+                    hashCode = hashCode * -1521134295 + propertyToAdd.Key.GetHashCode();
+                    hashCode = hashCode * -1521134295 + propertyToAdd.Value.GetHashCode();
+                }
+            }
+            if (_itemsToAdd != null)
+            {
+                foreach (var itemToAdd in _itemsToAdd)
+                {
+                    hashCode = hashCode * -1521134295 + itemToAdd.Key.GetHashCode();
+                    hashCode = hashCode * -1521134295 + itemToAdd.Value.GetHashCode();
+                }
+            }
+
+            return hashCode;
+        }
     }
 }
