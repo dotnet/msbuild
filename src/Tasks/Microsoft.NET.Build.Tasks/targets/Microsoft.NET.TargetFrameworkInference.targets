@@ -44,7 +44,7 @@ Copyright (c) .NET Foundation. All rights reserved.
    -->
 
   <!-- Hook for importing custom target framework parsing -->
-  <Import Project="$(CustomTargetFrameworkParsingTargets)" Condition="$(CustomTargetFrameworkParsingTargets) != ''" />
+  <Import Project="$(BeforeTargetFrameworkInferenceTargets)" Condition="$(BeforeTargetFrameworkInferenceTargets) != ''" />
 
   <!-- Split $(TargetFramework) (e.g. net45) into short identifier and short version (e.g. 'net' and '45'). -->
   <PropertyGroup Condition="'$(TargetFramework)' != '' and !$(TargetFramework.Contains(',')) and !$(TargetFramework.Contains('+'))">

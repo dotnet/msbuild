@@ -31,7 +31,7 @@ namespace Microsoft.NET.Build.Tests
                 TargetFrameworks = $"{ targetFramework }-{ runtimeIdentifier }"
             };
 
-            testProject.AdditionalProperties["CustomTargetFrameworkParsingTargets"] = @"$(MSBuildProjectDirectory)\CustomTargetFramework.targets";
+            testProject.AdditionalProperties["BeforeTargetFrameworkInferenceTargets"] = @"$(MSBuildProjectDirectory)\CustomTargetFramework.targets";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
