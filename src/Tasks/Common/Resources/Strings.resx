@@ -230,7 +230,7 @@
     <comment>{StrBegin="NETSDK1030: "}</comment>
   </data>
   <data name="CannotHaveSelfContainedWithoutRuntimeIdentifier" xml:space="preserve">
-    <value>NETSDK1031: It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</value>
+    <value>NETSDK1031: It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier. You must either specify a RuntimeIdentifier or set SelfContained to false.</value>
     <comment>{StrBegin="NETSDK1031: "}</comment>
   </data>
   <data name="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget" xml:space="preserve">
@@ -491,11 +491,11 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1096: "}</comment>
   </data>
   <data name="CannotHaveSingleFileWithoutRuntimeIdentifier" xml:space="preserve">
-    <value>NETSDK1097: It is not supported to publish an application to a single-file without specifying a RuntimeIdentifier. Please either specify a RuntimeIdentifier or set PublishSingleFile to false.</value>
+    <value>NETSDK1097: It is not supported to publish an application to a single-file without specifying a RuntimeIdentifier. You must either specify a RuntimeIdentifier or set PublishSingleFile to false.</value>
     <comment>{StrBegin="NETSDK1097: "}</comment>
   </data>
   <data name="CannotHaveSingleFileWithoutAppHost" xml:space="preserve">
-    <value>NETSDK1098: Applications published to a single-file are required to use the application host. Please either set PublishSingleFile to false or set UseAppHost to true.</value>
+    <value>NETSDK1098: Applications published to a single-file are required to use the application host. You must either set PublishSingleFile to false or set UseAppHost to true.</value>
     <comment>{StrBegin="NETSDK1098: "}</comment>
   </data>
   <data name="CannotHaveSingleFileWithoutExecutable" xml:space="preserve">
@@ -615,5 +615,9 @@ The following are names of parameters or literal values and should not be transl
   <data name="NoSupportComSelfContained" xml:space="preserve">
     <value>NETSDK1128: COM hosting does not support self-contained deployments.</value>
     <comment>{StrBegin="NETSDK1128: "}</comment>
+  </data>
+  <data name="PublishUnsupportedWithoutTargetFramework" xml:space="preserve">
+    <value>NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify the framework for the published application.</value>
+    <comment>{StrBegin="NETSDK1129: "}</comment>
   </data>
 </root>

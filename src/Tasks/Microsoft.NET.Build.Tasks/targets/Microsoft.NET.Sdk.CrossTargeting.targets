@@ -24,7 +24,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   ============================================================
    -->
   <Target Name="Publish">
-    <Error Text="The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, please specify the framework for the published application." />
+    <NETSdkError ResourceName="PublishUnsupportedWithoutTargetFramework"/>
   </Target>
 
   <!--
