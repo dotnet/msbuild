@@ -3341,7 +3341,10 @@ namespace Microsoft.Build.Evaluation
                     // need to locate an appropriate constructor and invoke it
                     if (String.Equals("new", _methodMethodName, StringComparison.OrdinalIgnoreCase))
                     {
-                        functionResult = LateBindExecute(null /* no previous exception */, BindingFlags.Public | BindingFlags.Instance, null /* no instance for a constructor */, args, true /* is constructor */);
+                        if (!TryExecuteWellKnownConstructorNoThrow(out functionResult, args))
+                        {
+                            functionResult = LateBindExecute(null /* no previous exception */, BindingFlags.Public | BindingFlags.Instance, null /* no instance for a constructor */, args, true /* is constructor */);
+                        }
                     }
                     else
                     {
@@ -4040,6 +4043,33 @@ namespace Microsoft.Build.Evaluation
                     LogFunctionCall("PropertyFunctionsRequiringReflection", objectInstance, args);
                 }
 
+                return false;
+            }
+
+            /// <summary>
+            /// Shortcut to avoid calling into binding if we recognize some most common constructors.
+            /// Analogous to TryExecuteWellKnownFunction but guaranteed to not throw.
+            /// </summary>
+            /// <param name="returnVal">The instance as created by the constructor call.</param>
+            /// <param name="args">Arguments.</param>
+            /// <returns>True if the well known constructor call binding was successful.</returns>
+            private bool TryExecuteWellKnownConstructorNoThrow(out object returnVal, object[] args)
+            {
+                returnVal = null;
+
+                if (_receiverType == typeof(string))
+                {
+                    if (args.Length == 0)
+                    {
+                        returnVal = String.Empty;
+                        return true;
+                    }
+                    if (TryGetArg(args, out string arg0))
+                    {
+                        returnVal = arg0;
+                        return true;
+                    }
+                }
                 return false;
             }
 
