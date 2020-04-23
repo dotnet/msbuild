@@ -785,7 +785,7 @@ namespace Microsoft.Build.BackEnd
                     // own cache.
                     completedEntry.Result.DefaultTargets = configuration.ProjectDefaultTargets;
                     completedEntry.Result.InitialTargets = configuration.ProjectInitialTargets;
-                    completedEntry.Result.Targets = configuration.Project.Targets.Keys.ToHashSet();
+                    completedEntry.Result.Targets = configuration.ProjectTargets;
                 }
 
                 TraceEngine("ERS: Request is now {0}({1}) (nr {2}) has had its builder cleaned up.", completedEntry.Request.GlobalRequestId, completedEntry.Request.ConfigurationId, completedEntry.Request.NodeRequestId);

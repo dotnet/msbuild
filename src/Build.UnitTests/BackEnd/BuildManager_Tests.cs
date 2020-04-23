@@ -3433,7 +3433,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Helper for cache tests.  Builds a project and verifies the right cache files are created.
+        /// Helper for memory reduction caching tests (msbuild caches configs and build results when memory usage gets high).
+        /// Builds a project and verifies the right cache files are created.
         /// </summary>
         private static string BuildAndCheckCache(BuildManager localBuildManager, IEnumerable<string> exceptCacheDirectories)
         {
@@ -3459,9 +3460,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             try
             {
                 var services = new HostServices();
-                BuildRequestData data = new BuildRequestData(fileName, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new[] { "One", "Two", "Three" }, services);
+                var data = new BuildRequestData(
+                    projectFullPath: fileName,
+                    globalProperties: new Dictionary<string, string>(),
+                    toolsVersion: MSBuildDefaultToolsVersion,
+                    targetsToBuild: new[] {"One", "Two", "Three"},
+                    hostServices: services);
                 var result = localBuildManager.PendBuildRequest(data).Execute();
-                Assert.Equal(BuildResultCode.Success, result.OverallResult); // "Test project failed to build correctly."
+
+                result.OverallResult.ShouldBe(BuildResultCode.Success);
             }
             finally
             {
@@ -3473,12 +3480,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string directory = Directory.EnumerateDirectories(cacheDirectory).Except(exceptCacheDirectories).First();
 
             // Within this directory should be a set of target results files, one for each of the targets we invoked.
-            var resultsFiles = Directory.EnumerateFiles(directory).Select(Path.GetFileName);
+            var resultsFiles = Directory.EnumerateFiles(directory).Select(Path.GetFileName).ToArray();
 
-            Assert.Equal(3, resultsFiles.Count());
-            Assert.Contains("One.cache", resultsFiles);
-            Assert.Contains("Two.cache", resultsFiles);
-            Assert.Contains("Three.cache", resultsFiles);
+            resultsFiles.ShouldBeSameIgnoringOrder(new []{"One.cache", "Two.cache", "Three.cache"});
 
             // Return the cache directory created for this build.
             return directory;

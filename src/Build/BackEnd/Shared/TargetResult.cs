@@ -194,10 +194,15 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Gets the name of the cache file for this configuration.
         /// </summary>
-        internal static string GetCacheFile(int configId, string targetToCache)
+        private static string GetCacheFile(int configId, string targetToCache)
         {
-            string filename = Path.Combine(FileUtilities.GetCacheDirectory(), String.Format(CultureInfo.InvariantCulture, Path.Combine("Results{0}", "{1}.cache"), configId, targetToCache));
-            return filename;
+            return Path.Combine(
+                FileUtilities.GetCacheDirectory(),
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    Path.Combine("Results{0}", "{1}.cache"),
+                    configId,
+                    targetToCache));
         }
 
         /// <summary>
