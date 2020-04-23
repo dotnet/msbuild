@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 namespace Microsoft.Build.Internal
 {
     /// <summary>
-    /// Enumeration of all possible (currently supported) types of task host context.
+    /// Enumeration of all possible (currently supported) options for handshakes.
     /// </summary>
     [Flags]
     internal enum HandshakeOptions
@@ -294,7 +294,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Given a base handshake, generates the real handshake based on e.g. elevation level.  
         /// </summary>
-        internal static long GenerateHostHandshakeFromBase(long baseHandshake)
+        private static long GenerateHostHandshakeFromBase(long baseHandshake)
         {
 #if FEATURE_SECURITY_PRINCIPAL_WINDOWS
             // If we are running in elevated privs, we will only accept a handshake from an elevated process as well.
@@ -491,85 +491,47 @@ namespace Microsoft.Build.Internal
 #endif
 
         /// <summary>
-        /// Given the appropriate information, return the equivalent TaskHostContext.  
+        /// Given the appropriate information, return the equivalent HandshakeOptions.
         /// </summary>
-        internal static HandshakeOptions GetTaskHostContext(IDictionary<string, string> taskHostParameters)
+        internal static HandshakeOptions GetHandshakeOptions(bool taskHost, bool is64Bit = false, int clrVersion = 0, bool nodeReuse = false, bool lowPriority = false, IDictionary<string, string> taskHostParameters = null)
         {
-            ErrorUtilities.VerifyThrow(taskHostParameters.ContainsKey(XMakeAttributes.runtime), "Should always have an explicit runtime when we call this method.");
-            ErrorUtilities.VerifyThrow(taskHostParameters.ContainsKey(XMakeAttributes.architecture), "Should always have an explicit architecture when we call this method.");
+            HandshakeOptions context = taskHost ? HandshakeOptions.TaskHost : HandshakeOptions.None;
 
-            string runtime = taskHostParameters[XMakeAttributes.runtime];
-            string architecture = taskHostParameters[XMakeAttributes.architecture];
-
-            bool is64BitProcess = architecture.Equals(XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase);
-            if (!is64BitProcess && !architecture.Equals(XMakeAttributes.MSBuildArchitectureValues.x86, StringComparison.OrdinalIgnoreCase))
+            // We don't know about the TaskHost. Figure it out.
+            if (taskHost && clrVersion == 0)
             {
-                ErrorUtilities.ThrowInternalError("Should always have an explicit architecture when calling this method");
+                // Take the current TaskHost context
+                if (taskHostParameters == null)
+                {
+                    clrVersion = typeof(bool).GetTypeInfo().Assembly.GetName().Version.Major;
+                    is64Bit = XMakeAttributes.GetCurrentMSBuildArchitecture().Equals(XMakeAttributes.MSBuildArchitectureValues.x64);
+                }
+                else
+                {
+                    ErrorUtilities.VerifyThrow(taskHostParameters.ContainsKey(XMakeAttributes.runtime), "Should always have an explicit runtime when we call this method.");
+                    ErrorUtilities.VerifyThrow(taskHostParameters.ContainsKey(XMakeAttributes.architecture), "Should always have an explicit architecture when we call this method.");
+
+                    clrVersion = taskHostParameters[XMakeAttributes.runtime].Equals(XMakeAttributes.MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase) ? 4 : 2;
+                    is64Bit = taskHostParameters[XMakeAttributes.architecture].Equals(XMakeAttributes.MSBuildArchitectureValues.x64);
+                }
             }
-
-            int clrVersion = runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase) ? 4 : 2;
-            if (clrVersion == 2 && !runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.clr2, StringComparison.OrdinalIgnoreCase))
+            if (is64Bit)
             {
-                ErrorUtilities.ThrowInternalError("Should always have an explicit runtime when calling this method");
-            }
-            
-            return GetTaskHostContext(is64BitProcess, clrVersion);
-        }
-
-        /// <summary>
-        /// Given the appropriate information, return the equivalent TaskHostContext.  
-        /// </summary>
-        internal static HandshakeOptions GetTaskHostContext(bool is64BitProcess, int clrVersion)
-        {
-            HandshakeOptions hostContext = HandshakeOptions.None;
-            if (clrVersion != 2 && clrVersion != 4)
-            {
-                ErrorUtilities.ThrowInternalErrorUnreachable();
+                context |= HandshakeOptions.X64;
             }
             if (clrVersion == 2)
             {
-                hostContext |= HandshakeOptions.CLR2;
-            }
-            if (is64BitProcess)
-            {
-                hostContext |= HandshakeOptions.X64;
-            }
-            hostContext |= HandshakeOptions.TaskHost;
-            return hostContext;
-        }
-
-        /// <summary>
-        /// Returns the TaskHostContext corresponding to this process
-        /// </summary>
-        internal static HandshakeOptions GetCurrentTaskHostContext()
-        {
-            // We know that whichever assembly is executing this code -- whether it's MSBuildTaskHost.exe or 
-            // Microsoft.Build.dll -- is of the version of the CLR that this process is running.  So grab
-            // the version of mscorlib currently in use and call that good enough.  
-            Version mscorlibVersion = typeof(bool).GetTypeInfo().Assembly.GetName().Version;
-
-            string currentMSBuildArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture();
-            HandshakeOptions hostContext = GetTaskHostContext(currentMSBuildArchitecture.Equals(XMakeAttributes.MSBuildArchitectureValues.x64), mscorlibVersion.Major);
-
-            return hostContext;
-        }
-
-        internal static HandshakeOptions GetNodeProviderContext(bool nodeReuse, bool lowPriority, bool is64BitProcess)
-        {
-            HandshakeOptions nodeProviderContext = HandshakeOptions.None;
-            if (lowPriority)
-            {
-                nodeProviderContext |= HandshakeOptions.LowPriority;
+                context |= HandshakeOptions.CLR2;
             }
             if (nodeReuse)
             {
-                nodeProviderContext |= HandshakeOptions.NodeReuse;
+                context |= HandshakeOptions.NodeReuse;
             }
-            if (is64BitProcess)
+            if (lowPriority)
             {
-                nodeProviderContext |= HandshakeOptions.X64;
+                context |= HandshakeOptions.LowPriority;
             }
-            return nodeProviderContext;
+            return context;
         }
 
         /// <summary>
