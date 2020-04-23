@@ -5,29 +5,29 @@
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>3c33db6be09d62f5d4fb154d23ccecf4ea3f5127</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.App.Ref" Version="5.0.0-preview.5.20221.15">
+    <Dependency Name="Microsoft.NETCore.App.Ref" Version="5.0.0-preview.5.20223.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>ec9d33daf4f1922b2f36f548752ac4539f370c91</Sha>
+      <Sha>bac79b9f62595924f71cf6666283e9fc60a8beea</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.App.Runtime.win-x64" Version="5.0.0-preview.5.20221.15">
+    <Dependency Name="Microsoft.NETCore.App.Runtime.win-x64" Version="5.0.0-preview.5.20223.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>ec9d33daf4f1922b2f36f548752ac4539f370c91</Sha>
+      <Sha>bac79b9f62595924f71cf6666283e9fc60a8beea</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="5.0.0-beta.20201.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>bce0a98620c1c5a110b2bba9912f3d5929069c6b</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.HostModel" Version="5.0.0-preview.5.20221.15">
+    <Dependency Name="Microsoft.NET.HostModel" Version="5.0.0-preview.5.20223.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>ec9d33daf4f1922b2f36f548752ac4539f370c91</Sha>
+      <Sha>bac79b9f62595924f71cf6666283e9fc60a8beea</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="5.0.0-preview.5.20221.15">
+    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="5.0.0-preview.5.20223.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>ec9d33daf4f1922b2f36f548752ac4539f370c91</Sha>
+      <Sha>bac79b9f62595924f71cf6666283e9fc60a8beea</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.DotNetHostResolver" Version="5.0.0-preview.5.20221.15">
+    <Dependency Name="Microsoft.NETCore.DotNetHostResolver" Version="5.0.0-preview.5.20223.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>ec9d33daf4f1922b2f36f548752ac4539f370c91</Sha>
+      <Sha>bac79b9f62595924f71cf6666283e9fc60a8beea</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Cli.CommandLine" Version="1.0.0-preview.19208.1">
       <Uri>https://github.com/dotnet/CliCommandLineParser</Uri>
@@ -73,21 +73,21 @@
       <Uri>https://github.com/mono/linker</Uri>
       <Sha>17b3c016d78508b9f6c1f6a61a31b5786d91cf24</Sha>
     </Dependency>
-    <Dependency Name="System.CodeDom" Version="5.0.0-preview.5.20221.15">
+    <Dependency Name="System.CodeDom" Version="5.0.0-preview.5.20223.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>ec9d33daf4f1922b2f36f548752ac4539f370c91</Sha>
+      <Sha>bac79b9f62595924f71cf6666283e9fc60a8beea</Sha>
     </Dependency>
-    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="5.0.0-preview.5.20221.15">
+    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="5.0.0-preview.5.20223.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>ec9d33daf4f1922b2f36f548752ac4539f370c91</Sha>
+      <Sha>bac79b9f62595924f71cf6666283e9fc60a8beea</Sha>
     </Dependency>
-    <Dependency Name="System.Text.Encoding.CodePages" Version="5.0.0-preview.5.20221.15">
+    <Dependency Name="System.Text.Encoding.CodePages" Version="5.0.0-preview.5.20223.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>ec9d33daf4f1922b2f36f548752ac4539f370c91</Sha>
+      <Sha>bac79b9f62595924f71cf6666283e9fc60a8beea</Sha>
     </Dependency>
-    <Dependency Name="System.Resources.Extensions" Version="5.0.0-preview.5.20221.15">
+    <Dependency Name="System.Resources.Extensions" Version="5.0.0-preview.5.20223.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>ec9d33daf4f1922b2f36f548752ac4539f370c91</Sha>
+      <Sha>bac79b9f62595924f71cf6666283e9fc60a8beea</Sha>
     </Dependency>
     <Dependency Name="Microsoft.WindowsDesktop.App" Version="5.0.0-preview.5.20221.5">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
