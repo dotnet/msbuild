@@ -2489,7 +2489,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Expand property function that is defined (on CoreFX) in an assembly named after its full namespace.
         /// </summary>
         [Fact]
-        public void PropertyStaticFunctioLocatedFromAssemblyWithNamespaceName()
+        public void PropertyStaticFunctionLocatedFromAssemblyWithNamespaceName()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
 
@@ -3430,6 +3430,26 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string result = expander.ExpandIntoStringLeaveEscaped(@"$([System.IO.Path]::Combine($(SomePath),%(Compile.Identity)))", ExpanderOptions.ExpandAll, MockElementLocation.Instance);
 
             Assert.Equal(Path.Combine(s_rootPathPrefix, "some", "path", "fOo.Cs"), result);
+        }
+
+        /// <summary>
+        /// Expand a property function which is a string constructor referencing item metadata.
+        /// </summary>
+        /// <remarks>
+        /// Note that referencing a non-existent metadatum results in binding to a parameter-less String constructor. This constructor
+        /// does not exist in BCL but it is special-cased in the expander logic and handled to return an empty string.
+        /// </remarks>
+        [Theory]
+        [InlineData("language", "english")]
+        [InlineData("nonexistent", "")]
+        public void PropertyStringConstructorConsumingItemMetadata(string metadatumName, string metadatumValue)
+        {
+            ProjectHelpers.CreateEmptyProjectInstance();
+            var expander = CreateItemFunctionExpander();
+
+            string result = expander.ExpandIntoStringLeaveEscaped($"$([System.String]::new(%({metadatumName})))", ExpanderOptions.ExpandAll, MockElementLocation.Instance);
+
+            result.ShouldBe(metadatumValue);
         }
 
         /// <summary>
