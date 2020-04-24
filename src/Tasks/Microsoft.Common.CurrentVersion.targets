@@ -4569,7 +4569,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="TargetOutputs" ItemName="_ThisProjectItemsToCopyToOutputDirectory" />
     </CallTarget>
 
-    <ItemGroup Condition="'$(IgnoreConflictingTransitiveContent)' == 'false'">
+    <ItemGroup Condition="'$(CopyConflictingTransitiveContent)' == 'true'">
       <_TransitiveItemsToCopyToOutputDirectory Remove="@(_ThisProjectItemsToCopyToOutputDirectory)" MatchOnMetadata="TargetPath" MatchOnMetadataOptions="PathLike" />
     </ItemGroup>
 
