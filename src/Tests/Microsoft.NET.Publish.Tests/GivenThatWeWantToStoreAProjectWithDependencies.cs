@@ -340,6 +340,41 @@ namespace Microsoft.NET.Publish.Tests
             });
         }
 
+        [CoreMSBuildOnlyFact]
+        public void DotnetStoreWithPrunedPackages()
+        {
+            const string TargetFramework = "netcoreapp3.1";
+
+            TestAsset targetManifestsAsset = _testAssetsManager
+                .CopyTestAsset("TargetManifests")
+                .WithSource();
+
+            var outputFolder = Path.Combine(targetManifestsAsset.TestRoot, "o");
+            var workingDir = Path.Combine(targetManifestsAsset.TestRoot, "w");
+
+            var composeStore = new ComposeStoreCommand(Log, targetManifestsAsset.TestRoot, "PrunePackages.xml")
+                .Execute(
+                    $"/p:TargetFramework={TargetFramework}",
+                    $"/p:RuntimeIdentifier={EnvironmentInfo.GetCompatibleRid(TargetFramework)}",
+                    $"/p:ComposeDir={outputFolder}",
+                    $"/p:ComposeWorkingDir={workingDir}",
+                    "/p:PreserveComposeWorkingDir=true",
+                    "/p:DoNotDecorateComposeDir=true",
+                    "/p:CreateProfilingSymbols=false"
+                );
+
+            composeStore.Should().Pass();
+
+            new DirectoryInfo(outputFolder).GetDirectories()
+                .Select(d => d.Name)
+                .Should().BeEquivalentTo(
+                    "fluentassertions",
+                    "newtonsoft.json",
+                    "system.configuration.configurationmanager",
+                    "system.security.cryptography.protecteddata");
+
+        }
+
         private static HashSet<PackageIdentity> ParseStoreArtifacts(string path)
         {
             return new HashSet<PackageIdentity>(
