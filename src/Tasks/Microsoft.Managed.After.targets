@@ -20,7 +20,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
    </PropertyGroup>
 
    <PropertyGroup Condition="'$(IsGraphBuild)' == 'true'">
-      <AddTransitiveProjectReferencesInStaticGraph Condition="'$(UsingMicrosoftNETSdk)' == 'true' and '$(DisableTransitiveProjectReferences)' != 'true'">true</AddTransitiveProjectReferencesInStaticGraph>
+      <AddTransitiveProjectReferencesInStaticGraph Condition="'$(AddTransitiveProjectReferencesInStaticGraph)' == '' and '$(UsingMicrosoftNETSdk)' == 'true' and '$(DisableTransitiveProjectReferences)' != 'true'">true</AddTransitiveProjectReferencesInStaticGraph>
    </PropertyGroup>
 
    <ItemGroup Condition="'$(IsGraphBuild)' == 'true'">
