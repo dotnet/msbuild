@@ -124,7 +124,7 @@ namespace Microsoft.Build.Graph
 
         private void AddEdgesFromProjectReferenceItems(Dictionary<ConfigurationMetadata, ParsedProject> allParsedProjects, GraphEdges edges)
         {
-            var transitiveReferenceCache = new Dictionary<ProjectGraphNode, IEnumerable<ProjectGraphNode>>(allParsedProjects.Count);
+            var transitiveReferenceCache = new Dictionary<ProjectGraphNode, List<ProjectGraphNode>>(allParsedProjects.Count);
 
             foreach (var parsedProject in allParsedProjects)
             {
@@ -160,9 +160,9 @@ namespace Microsoft.Build.Graph
                 }
             }
 
-            IEnumerable<ProjectGraphNode> GetTransitiveProjectReferences(ParsedProject parsedProject)
+            List<ProjectGraphNode> GetTransitiveProjectReferences(ParsedProject parsedProject)
             {
-                if (transitiveReferenceCache.TryGetValue(parsedProject.GraphNode, out var cachedTransitiveReferences))
+                if (transitiveReferenceCache.TryGetValue(parsedProject.GraphNode, out List<ProjectGraphNode> cachedTransitiveReferences))
                 {
                     return cachedTransitiveReferences;
                 }
