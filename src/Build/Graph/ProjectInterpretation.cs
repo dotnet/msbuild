@@ -447,7 +447,8 @@ namespace Microsoft.Build.Graph
 
             // special case for Quickbuild which updates msbuild binaries independent of props/targets. Remove this when all QB repos will have
             // migrated to new enough Visual Studio versions whose Microsoft.Managed.After.Targets enable transitive references.
-            if (projectInstance.GetPropertyValue("UsingMicrosoftNETSdk").Equals("true", StringComparison.OrdinalIgnoreCase) &&
+            if (string.IsNullOrWhiteSpace(projectInstance.GetPropertyValue(AddTransitiveProjectReferencesInStaticGraphPropertyName)) &&
+                projectInstance.GetPropertyValue("UsingMicrosoftNETSdk").Equals("true", StringComparison.OrdinalIgnoreCase) &&
                 !projectInstance.GetPropertyValue("DisableTransitiveProjectReferences").Equals("true", StringComparison.OrdinalIgnoreCase))
             {
                 return true;
