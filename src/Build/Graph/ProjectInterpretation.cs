@@ -402,7 +402,7 @@ namespace Microsoft.Build.Graph
                         {
                             var targetsMetadataValue = projectReferenceTarget.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
 
-                            var targetsAreForOuterBuild = projectReferenceTarget.GetMetadataValue(ProjectReferenceTargetIsOuterBuildMetadataName).Equals("true", StringComparison.OrdinalIgnoreCase);
+                            var targetsAreForOuterBuild = MSBuildStringIsTrue(projectReferenceTarget.GetMetadataValue(ProjectReferenceTargetIsOuterBuildMetadataName));
 
                             var targets = ExpressionShredder.SplitSemiColonSeparatedList(targetsMetadataValue).ToArray();
 
@@ -448,15 +448,19 @@ namespace Microsoft.Build.Graph
             // special case for Quickbuild which updates msbuild binaries independent of props/targets. Remove this when all QB repos will have
             // migrated to new enough Visual Studio versions whose Microsoft.Managed.After.Targets enable transitive references.
             if (string.IsNullOrWhiteSpace(projectInstance.GetPropertyValue(AddTransitiveProjectReferencesInStaticGraphPropertyName)) &&
-                projectInstance.GetPropertyValue("UsingMicrosoftNETSdk").Equals("true", StringComparison.OrdinalIgnoreCase) &&
-                !projectInstance.GetPropertyValue("DisableTransitiveProjectReferences").Equals("true", StringComparison.OrdinalIgnoreCase))
+                MSBuildStringIsTrue(projectInstance.GetPropertyValue("UsingMicrosoftNETSdk")) &&
+                MSBuildStringIsFalse(projectInstance.GetPropertyValue("DisableTransitiveProjectReferences")))
             {
                 return true;
             }
 
-            return projectInstance
-                       .GetPropertyValue(AddTransitiveProjectReferencesInStaticGraphPropertyName)
-                       .Equals("true", StringComparison.OrdinalIgnoreCase);
+            return MSBuildStringIsTrue(
+                projectInstance.GetPropertyValue(AddTransitiveProjectReferencesInStaticGraphPropertyName));
         }
+
+        private static bool MSBuildStringIsTrue(string msbuildString) =>
+            ConversionUtilities.ConvertStringToBool(msbuildString, nullOrWhitespaceIsFalse: true);
+
+        private static bool MSBuildStringIsFalse(string msbuildString) => !MSBuildStringIsTrue(msbuildString);
     }
 }
