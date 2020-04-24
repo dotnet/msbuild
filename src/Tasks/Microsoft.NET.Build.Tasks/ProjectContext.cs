@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Framework;
+using Microsoft.DotNet.PlatformAbstractions;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
 using System;
@@ -145,9 +146,13 @@ namespace Microsoft.NET.Build.Tasks
             return runtimeLibraries.Filter(allExclusionList).ToArray();
         }
 
-        internal IEnumerable<PackageIdentity> GetTransitiveList(string package)
+        internal IEnumerable<PackageIdentity> GetTransitiveList(string package, bool ignoreIfNotFound = false)
         {
             LockFileTargetLibrary platformLibrary = _lockFileTarget.GetLibrary(package);
+            if (platformLibrary == null && ignoreIfNotFound)
+            {
+                return Enumerable.Empty<PackageIdentity>();
+            }
             IEnumerable<LockFileTargetLibrary> runtimeLibraries = _lockFileTarget.Libraries;
             Dictionary<string, LockFileTargetLibrary> libraryLookup =
                 runtimeLibraries.ToDictionary(e => e.Name, StringComparer.OrdinalIgnoreCase);
