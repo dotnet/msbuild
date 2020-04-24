@@ -7,12 +7,46 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using System.IO;
+using System.Linq;
 using Xunit;
+using Xunit.Abstractions;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests
 {
     public class SGen_Tests
     {
+#if RUNTIME_TYPE_NETCORE
+        [Fact]
+        public void TaskFailsOnCore()
+        {
+            using (TestEnvironment testenv = TestEnvironment.Create())
+            {
+                MockLogger logger = ObjectModelHelpers.BuildProjectExpectFailure(@$"
+<Project>
+    <Target Name=""MyTarget"">
+        <SGen
+            BuildAssemblyName=""Foo""
+            BuildAssemblyPath=""Foo""
+            ShouldGenerateSerializer=""true""
+            UseProxyTypes=""true""
+            UseKeep=""true""
+            References=""Foo""
+            KeyContainer=""Foo""
+            KeyFile=""Foo""
+            DelaySign=""true""
+            SerializationAssembly=""Foo""
+            SdkToolsPath=""Foo""
+            Platform=""Foo""
+            Types=""Foo""
+        />
+    </Target>
+</Project>");
+                logger.ErrorCount.ShouldBe(1);
+                logger.Errors.First().Code.ShouldBe("MSB3474");
+            }
+        }
+#else
         internal class SGenExtension : SGen
         {
             internal string CommandLine()
@@ -56,6 +90,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.True(commandLine.IndexOf("/keep", StringComparison.OrdinalIgnoreCase) >= 0);
         }
+
         [Fact]
         public void TestKeepFlagFalse()
         {
@@ -242,5 +277,6 @@ namespace Microsoft.Build.UnitTests
             
             Assert.Equal(targetCommandLine, commandLine);
         }
+#endif
     }
 }

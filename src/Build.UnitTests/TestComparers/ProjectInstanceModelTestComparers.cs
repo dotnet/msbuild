@@ -330,7 +330,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
             throw new NotImplementedException();
         }
 
-        private void AssertParametersEqual(IDictionary<string, Tuple<string, ElementLocation>> x, IDictionary<string, Tuple<string, ElementLocation>> y)
+        private void AssertParametersEqual(IDictionary<string, (string, ElementLocation)> x, IDictionary<string, (string, ElementLocation)> y)
         {
             Assert.Equal(x.Count, y.Count);
 
