@@ -64,7 +64,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Allow the user to specify that two processes should not be communicating via an environment variable.
         /// </summary>
-        public static readonly int MSBuildNodeHandshakeSalt = ParseIntFromEnvironmentVariableOrDefault("MSBUILDNODEHANDSHAKESALT", -1);
+        public static readonly string MSBuildNodeHandshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
 
         /// <summary>
         /// Setting the associated environment variable to 1 restores the pre-15.8 single
