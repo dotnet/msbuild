@@ -116,6 +116,12 @@ namespace Microsoft.Build.Utilities
         public readonly bool AlwaysUseContentTimestamp = Environment.GetEnvironmentVariable("MSBUILDALWAYSCHECKCONTENTTIMESTAMP") == "1";
 
         /// <summary>
+        /// Truncate task inputs when logging them. This can reduce memory pressure
+        /// at the expense of log usefulness.
+        /// </summary>
+        public readonly bool TruncateTaskInputs = Environment.GetEnvironmentVariable("MSBUILDTRUNCATETASKINPUTS") == "1";
+
+        /// <summary>
         /// Emit events for project imports.
         /// </summary>
         private bool? _logProjectImports;
@@ -168,6 +174,11 @@ namespace Microsoft.Build.Utilities
         /// Never use the slow (but more accurate) CreateFile approach to timestamp extraction.
         /// </summary>
         public readonly bool UseSymlinkTimeInsteadOfTargetTime = Environment.GetEnvironmentVariable("MSBUILDUSESYMLINKTIMESTAMP") == "1";
+
+        /// <summary>
+        /// Allow node reuse of TaskHost nodes. This results in task assemblies locked past the build lifetime, preventing them from being rebuilt if custom tasks change, but may improve performance.
+        /// </summary>
+        public readonly bool ReuseTaskHostNodes = Environment.GetEnvironmentVariable("MSBUILDREUSETASKHOSTNODES") == "1";
 
         /// <summary>
         /// Whether or not to ignore imports that are considered empty.  See ProjectRootElement.IsEmptyXmlFile() for more info.

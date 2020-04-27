@@ -509,6 +509,29 @@ namespace Microsoft.Build.UnitTests
             emptyParametersAllowed.ShouldBeFalse();
         }
 
+        [Theory]
+        [InlineData("low")]
+        [InlineData("LOW")]
+        [InlineData("lowpriority")]
+        [InlineData("lowPriority")]
+        public void LowPrioritySwitchIdentificationTests(string lowpriority)
+        {
+            CommandLineSwitches.IsParameterizedSwitch(lowpriority,
+                out CommandLineSwitches.ParameterizedSwitch parameterizedSwitch,
+                out string duplicateSwitchErrorMessage,
+                out bool multipleParametersAllowed,
+                out string missingParametersErrorMessage,
+                out bool unquoteParameters,
+                out bool emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.LowPriority);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldBeNull();
+            unquoteParameters.ShouldBeTrue();
+            emptyParametersAllowed.ShouldBeFalse();
+        }
+
+
         [Fact]
         public void InputResultsCachesSupportsMultipleOccurrence()
         {
@@ -945,6 +968,7 @@ namespace Microsoft.Build.UnitTests
                                         interactive: false,
                                         isolateProjects: false,
                                         graphBuild: false,
+                                        lowPriority: false,
                                         inputResultsCaches: null,
                                         outputResultsCache: null
                         );

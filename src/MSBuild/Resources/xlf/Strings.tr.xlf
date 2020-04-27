@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="CommandLine">
         <source>Command line arguments = "{0}"</source>
-        <target state="new">Command line arguments = "{0}"</target>
+        <target state="translated">Komut satırı bağımsız değişkenleri = "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationFailurePrefixNoErrorCode">
@@ -39,7 +39,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="CurrentDirectory">
         <source>Current directory = "{0}"</source>
-        <target state="new">Current directory = "{0}"</target>
+        <target state="translated">Geçerli dizin = "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateOutputResultsCache">
@@ -185,7 +185,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="HelpMessage_37_DocsLink">
         <source>For more detailed information, see https://aka.ms/msbuild/docs</source>
-        <target state="new">For more detailed information, see https://aka.ms/msbuild/docs</target>
+        <target state="translated">Ayrıntılı bilgi için bkz. https://aka.ms/msbuild/docs</target>
         <note />
       </trans-unit>
       <trans-unit id="HelpMessage_38_TargetsSwitch">
@@ -198,18 +198,39 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      Example:
                        -ts:out.txt
     </source>
-        <target state="new">  -targets[:file]
-                     Prints a list of available targets without executing the
-                     actual build process. By default the output is written to
-                     the console window. If the path to an output file
-                     is provided that will be used instead.
-                     (Short form: -ts)
-                     Example:
-                       -ts:out.txt
+        <target state="translated">  -targets[:dosya]
+                     Gerçek derleme işlemini yürütmeden
+                     kullanılabilir hedeflerin bir listesini yazdırır. Varsayılan olarak çıkış, konsol penceresine
+                     yazdırılır. Çıkış dosyasının yolu sağlanmışsa
+                     konsol penceresi yerine bu dosya kullanılır.
+                     (Kısa biçim:-ts)
+                     Örnek:
+                       -ts:çıkış.txt
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
       LOCALIZATION: "-targets" and "-ts" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_39_LowPrioritySwitch">
+        <source>  -lowPriority[:True|False]
+                     Causes MSBuild to run at low process priority.
+
+                     Specifying -lowPriority is the same as specifying
+                     -lowPriority:True.
+                     (Short form: -low)
+    </source>
+        <target state="translated">  -lowPriority[:True|False]
+                     MSBuild'ın düşük işlem önceliğinde çalışmasına neden olur.
+
+                     -lowPriority belirtilmesi -lowPriority:True belirtilmesiyle
+                     aynıdır.
+                     (Kısa biçim: -low)
+    </target>
+        <note>
+      LOCALIZATION: "MSBuild" should not be localized.
+      LOCALIZATION: "-lowPriority" and "-low" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
@@ -1095,12 +1116,12 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="MSBExePath">
         <source>MSBuild executable path = "{0}"</source>
-        <target state="new">MSBuild executable path = "{0}"</target>
+        <target state="translated">MSBuild yürütülebilir yolu = "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBVersion">
         <source>MSBuild version = "{0}"</source>
-        <target state="new">MSBuild version = "{0}"</target>
+        <target state="translated">MSBuild sürümü = "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingLoggerError">
@@ -1203,7 +1224,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="Process">
         <source>Process = "{0}"</source>
-        <target state="new">Process = "{0}"</target>
+        <target state="translated">İşlem = "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectNotFoundError">
@@ -1275,7 +1296,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="TargetsCouldNotBePrinted">
         <source>MSBUILD : error MSB1059: Targets could not be printed. {0}</source>
-        <target state="new">MSBUILD : error MSB1059: Targets could not be printed. {0}</target>
+        <target state="translated">MSBUILD : error MSB1059: Hedefler yazdırılamadı. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">

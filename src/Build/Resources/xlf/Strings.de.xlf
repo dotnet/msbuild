@@ -41,14 +41,14 @@
     - the reference was called with global properties that do not match the static graph inferred nodes
     - the reference was not explicitly specified as a ProjectReference item in project "{0}"
     </source>
-        <target state="new">MSB4252: Project "{0}" with global properties
+        <target state="translated">MSB4252: Das Projekt "{0}" mit globalen Eigenschaften
     ({1})
-    is building project "{2}" with global properties
+    erstellt das Projekt "{2}" mit globalen Eigenschaften
     ({3})
-    with the ({4}) target(s) but the build result for the built project is not in the engine cache. In isolated builds this could mean one of the following:
-    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in project "{0}"
-    - the reference was called with global properties that do not match the static graph inferred nodes
-    - the reference was not explicitly specified as a ProjectReference item in project "{0}"
+    mit den ({4}) Zielen, aber das Buildergebnis für das erstellte Projekt befindet sich nicht im Engine-Cache. In isolierten Builds kann dies Folgendes bedeuten:
+    – Der Verweis wurde mit einem Ziel aufgerufen, das im ProjectReferenceTargets-Element im Projekt "{0}" nicht angegeben ist.
+    – Der Verweis wurde mit globalen Eigenschaften aufgerufen, die nicht mit den abgeleiteten Knoten des statischen Graphen übereinstimmen.
+    – Der Verweis wurde nicht explizit als ProjectReference-Element im Projekt "{0}" angegeben.
     </target>
         <note>
       {StrBegin="MSB4252:"}
@@ -77,7 +77,7 @@
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
         <source>Read environment variable "{0}"</source>
-        <target state="new">Read environment variable "{0}"</target>
+        <target state="translated">Umgebungsvariable "{0}" lesen</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
@@ -125,6 +125,26 @@
       LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
     </note>
       </trans-unit>
+      <trans-unit id="OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem">
+        <source>Only one item type may be referenced when removing with MatchOnMetadata.</source>
+        <target state="new">Only one item type may be referenced when removing with MatchOnMetadata.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OM_MatchOnMetadataOnlyApplicableToRemoveItems">
+        <source>MatchOnMetadata only applies to Remove operations on items.</source>
+        <target state="new">MatchOnMetadata only applies to Remove operations on items.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OM_MatchOnMetadataOptionsOnlyApplicableToItemsWithMatchOnMetadata">
+        <source>MatchOnMetadataOptions is valid only when removing items using MatchOnMetadata.</source>
+        <target state="new">MatchOnMetadataOptions is valid only when removing items using MatchOnMetadata.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OM_NoMatchOnMetadataOutsideTargets">
+        <source>MatchOnMetadata cannot be used outside of a &lt;Target&gt;.</source>
+        <target state="new">MatchOnMetadata cannot be used outside of a &lt;Target&gt;.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">Die Methode "{0}" kann nicht mit einer Sammlung aufgerufen werden, die NULL oder leere Zielnamen enthält.</target>
@@ -140,7 +160,7 @@
       </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
-        <target state="new">Property initial value: $({0})="{1}" Source: {2}</target>
+        <target state="translated">Anfangswert der Eigenschaft: $({0})="{1}", Quelle: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -151,8 +171,8 @@
     </note>
       </trans-unit>
       <trans-unit id="StaticGraphAcceptsSingleSolutionEntryPoint">
-        <source>MSB4261: Static graph only accepts a solution as the only entry point. Multiple entry points detected: {0}</source>
-        <target state="translated">MSB4261: Ein statischer Graph akzeptiert nur eine Projektmappe als einzigen Einstiegspunkt. Es wurden mehrere Einstiegspunkte erkannt: {0}</target>
+        <source>MSB4261: Multiple entry points with solutions detected: {0}. If static graph is loaded from a solution, that that solution must be the only entry point.</source>
+        <target state="needs-review-translation">MSB4261: Ein statischer Graph akzeptiert nur eine Projektmappe als einzigen Einstiegspunkt. Es wurden mehrere Einstiegspunkte erkannt: {0}</target>
         <note>
       LOCALIZATION: {0} is a semicolon delimited list of files
     </note>
@@ -194,7 +214,7 @@
       </trans-unit>
       <trans-unit id="UninitializedPropertyRead">
         <source>Read uninitialized property "{0}"</source>
-        <target state="new">Read uninitialized property "{0}"</target>
+        <target state="translated">Nicht initialisierte Eigenschaft "{0}" lesen</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">

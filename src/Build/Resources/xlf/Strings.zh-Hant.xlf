@@ -41,14 +41,14 @@
     - the reference was called with global properties that do not match the static graph inferred nodes
     - the reference was not explicitly specified as a ProjectReference item in project "{0}"
     </source>
-        <target state="new">MSB4252: Project "{0}" with global properties
+        <target state="translated">MSB4252: 具有全域屬性的專案 "{0}"
     ({1})
-    is building project "{2}" with global properties
+    正在建置具有全域屬性的專案 "{2}"
     ({3})
-    with the ({4}) target(s) but the build result for the built project is not in the engine cache. In isolated builds this could mean one of the following:
-    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in project "{0}"
-    - the reference was called with global properties that do not match the static graph inferred nodes
-    - the reference was not explicitly specified as a ProjectReference item in project "{0}"
+    具有 ({4}) 個目標，但是已建置專案的組建結果不在引擎快取中。在隔離式組建中，這可能代表下列其中一項情況:
+    - 使用在專案 "{0}" 中 ProjectReferenceTargets 項目內未指定的目標呼叫了參考
+    - 使用與靜態圖表推斷節點不相符的全域屬性呼叫了參考
+    - 未明確指定參考作為專案 "{0}" 中的 ProjectReference 項目
     </target>
         <note>
       {StrBegin="MSB4252:"}
@@ -77,7 +77,7 @@
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
         <source>Read environment variable "{0}"</source>
-        <target state="new">Read environment variable "{0}"</target>
+        <target state="translated">讀取環境變數 "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
@@ -125,6 +125,26 @@
       LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
     </note>
       </trans-unit>
+      <trans-unit id="OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem">
+        <source>Only one item type may be referenced when removing with MatchOnMetadata.</source>
+        <target state="new">Only one item type may be referenced when removing with MatchOnMetadata.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OM_MatchOnMetadataOnlyApplicableToRemoveItems">
+        <source>MatchOnMetadata only applies to Remove operations on items.</source>
+        <target state="new">MatchOnMetadata only applies to Remove operations on items.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OM_MatchOnMetadataOptionsOnlyApplicableToItemsWithMatchOnMetadata">
+        <source>MatchOnMetadataOptions is valid only when removing items using MatchOnMetadata.</source>
+        <target state="new">MatchOnMetadataOptions is valid only when removing items using MatchOnMetadata.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OM_NoMatchOnMetadataOutsideTargets">
+        <source>MatchOnMetadata cannot be used outside of a &lt;Target&gt;.</source>
+        <target state="new">MatchOnMetadata cannot be used outside of a &lt;Target&gt;.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">無法使用內含 null 或空白目標名稱的集合呼叫方法 {0}。</target>
@@ -140,7 +160,7 @@
       </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
-        <target state="new">Property initial value: $({0})="{1}" Source: {2}</target>
+        <target state="translated">屬性初始值: $({0})="{1}" 來源: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -151,8 +171,8 @@
     </note>
       </trans-unit>
       <trans-unit id="StaticGraphAcceptsSingleSolutionEntryPoint">
-        <source>MSB4261: Static graph only accepts a solution as the only entry point. Multiple entry points detected: {0}</source>
-        <target state="translated">MSB4261: 靜態圖表只接受解決方案作為唯一的進入點。偵測到多個進入點: {0}</target>
+        <source>MSB4261: Multiple entry points with solutions detected: {0}. If static graph is loaded from a solution, that that solution must be the only entry point.</source>
+        <target state="needs-review-translation">MSB4261: 靜態圖表只接受解決方案作為唯一的進入點。偵測到多個進入點: {0}</target>
         <note>
       LOCALIZATION: {0} is a semicolon delimited list of files
     </note>
@@ -194,7 +214,7 @@
       </trans-unit>
       <trans-unit id="UninitializedPropertyRead">
         <source>Read uninitialized property "{0}"</source>
-        <target state="new">Read uninitialized property "{0}"</target>
+        <target state="translated">讀取未初始化的屬性 "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">

@@ -116,9 +116,9 @@ namespace Microsoft.Build
             string ExpensiveConvertToString();
 
             /// <summary>
-            /// Compare target to string. Assumes lengths are equal.
+            /// Compare target to string. Assumes string is of equal or smaller length than target.
             /// </summary>
-            bool IsOrdinalEqualToStringOfSameLength(string other);
+            bool StartsWithStringByOrdinalComparison(string other);
 
             /// <summary>
             /// Reference compare target to string. If target is non-string this should return false.
@@ -160,7 +160,7 @@ namespace Microsoft.Build
         /// <summary>
         /// Intern the given internable.
         /// </summary>
-        internal static string InternableToString(IInternable candidate)
+        internal static string InternableToString<T>(T candidate) where T : IInternable
         {
             if (s_whatIfInfinite != null)
             {
@@ -275,14 +275,14 @@ namespace Microsoft.Build
             }
 
             /// <summary>
-            /// Compare target to string. Assumes lengths are equal.
+            /// Compare target to string. Assumes string is of equal or smaller length than target.
             /// </summary>
-            public bool IsOrdinalEqualToStringOfSameLength(string other)
+            public bool StartsWithStringByOrdinalComparison(string other)
             {
 #if DEBUG
-                ErrorUtilities.VerifyThrow(other.Length == _target.Length, "should be same length");
+                ErrorUtilities.VerifyThrow(other.Length <= _target.Length, "should be at most as long as target");
 #endif
-                int length = _target.Length;
+                int length = other.Length;
 
                 // Backwards because the end of the string is (by observation of Australian Government build) more likely to be different earlier in the loop.
                 // For example, C:\project1, C:\project2
@@ -383,16 +383,16 @@ namespace Microsoft.Build
             }
 
             /// <summary>
-            /// Compare target to string. Assumes lengths are equal.
+            /// Compare target to string. Assumes string is of equal or smaller length than target.
             /// </summary>
-            public bool IsOrdinalEqualToStringOfSameLength(string other)
+            public bool StartsWithStringByOrdinalComparison(string other)
             {
 #if DEBUG
-                ErrorUtilities.VerifyThrow(other.Length == Length, "should be same length");
+                ErrorUtilities.VerifyThrow(other.Length <= Length, "should be at most as long as target");
 #endif
                 // Backwards because the end of the string is (by observation of Australian Government build) more likely to be different earlier in the loop.
                 // For example, C:\project1, C:\project2
-                for (int i = Length - 1; i >= 0; --i)
+                for (int i = other.Length - 1; i >= 0; --i)
                 {
                     if (_target[i + _startIndex] != other[i])
                     {
@@ -451,11 +451,11 @@ namespace Microsoft.Build
             public string ExpensiveConvertToString() => _target;
 
             /// <summary>
-            /// Compare if the target string is equal to the given string.
+            /// Compare target to string. Assumes string is of equal or smaller length than target.
             /// </summary>
             /// <param name="other">The string to compare with the target.</param>
-            /// <returns>True if the strings are equal, false otherwise.</returns>
-            public bool IsOrdinalEqualToStringOfSameLength(string other) => _target.Equals(other, StringComparison.Ordinal);
+            /// <returns>True if target starts with <paramref name="other"/>, false otherwise.</returns>
+            public bool StartsWithStringByOrdinalComparison(string other) => _target.StartsWith(other, StringComparison.Ordinal);
 
             /// <summary>
             /// Verifies if the reference of the target string is the same of the given string.
@@ -463,6 +463,71 @@ namespace Microsoft.Build
             /// <param name="other">The string reference to compare to.</param>
             /// <returns>True if both references are equal, false otherwise.</returns>
             public bool ReferenceEquals(string other) => ReferenceEquals(_target, other);
+        }
+
+        /// <summary>
+        /// Wrapper over a substring of a string.
+        /// </summary>
+        internal struct SubstringInternTarget : IInternable
+        {
+            /// <summary>
+            /// Stores the wrapped string.
+            /// </summary>
+            private readonly string _target;
+
+            /// <summary>
+            /// Start index of the substring within the wrapped string.
+            /// </summary>
+            private readonly int _startIndex;
+
+            /// <summary>
+            /// Constructor of the class
+            /// </summary>
+            /// <param name="target">The string to wrap.</param>
+            /// <param name="startIndex">Start index of the substring within <paramref name="target"/>.</param>
+            /// <param name="length">Length of the substring.</param>
+            internal SubstringInternTarget(string target, int startIndex, int length)
+            {
+#if DEBUG
+                if (startIndex + length > target.Length)
+                {
+                    ErrorUtilities.ThrowInternalError("wrong length");
+                }
+#endif
+                _target = target;
+                _startIndex = startIndex;
+                Length = length;
+            }
+
+            /// <summary>
+            /// Gets the length of the target substring.
+            /// </summary>
+            public int Length { get; }
+
+            /// <summary>
+            /// Gets the n character in the target substring.
+            /// </summary>
+            /// <param name="index">Index of the character to gather.</param>
+            /// <returns>The character in the position marked by index.</returns>
+            public char this[int index] => _target[index + _startIndex];
+
+            /// <summary>
+            /// Returns the target substring as a string.
+            /// </summary>
+            /// <returns>The substring.</returns>
+            public string ExpensiveConvertToString() => _target.Substring(_startIndex, Length);
+
+            /// <summary>
+            /// Compare target substring to a string. Assumes string is of equal or smaller length than the target substring.
+            /// </summary>
+            /// <param name="other">The string to compare with the target substring.</param>
+            /// <returns>True if target substring starts with <paramref name="other"/>, false otherwise.</returns>
+            public bool StartsWithStringByOrdinalComparison(string other) => (String.CompareOrdinal(_target, _startIndex, other, 0, other.Length) == 0);
+
+            /// <summary>
+            /// Never reference equals to string.
+            /// </summary>
+            public bool ReferenceEquals(string other) => false;
         }
 
         #endregion
@@ -634,7 +699,7 @@ namespace Microsoft.Build
             /// <summary>
             /// Intern the given internable.
             /// </summary>
-            internal string InterningToString(IInternable candidate)
+            internal string InterningToString<T>(T candidate) where T : IInternable
             {
                 if (candidate.Length == 0)
                 {
@@ -713,15 +778,28 @@ namespace Microsoft.Build
                 Console.WriteLine("##########Top Rejected Strings: \n{0} ", string.Join("\n==============\n", topRejectedString.ToArray()));
             }
 
+            private bool TryInternHardcodedString<T>(T candidate, string str, ref string interned) where T : IInternable
+            {
+                Debug.Assert(candidate.Length == str.Length);
+
+                if (candidate.StartsWithStringByOrdinalComparison(str))
+                {
+                    interned = str;
+                    return true;
+                }
+                return false;
+            }
+
             /// <summary>
             /// Try to intern the string.
             /// Return true if an interned value could be returned.
             /// Return false if it was added to the intern list, but wasn't there already.
             /// Return null if it didn't meet the length criteria for any of the buckets. Interning was rejected
             /// </summary>
-            private bool? TryIntern(IInternable candidate, out string interned)
+            private bool? TryIntern<T>(T candidate, out string interned) where T : IInternable
             {
                 int length = candidate.Length;
+                interned = null;
 
                 // First, try the hard coded intern strings.
                 // Each of the hard-coded small strings below showed up in a profile run with considerable duplication in memory.
@@ -752,130 +830,46 @@ namespace Microsoft.Build
                     }
                     else if (length == 4)
                     {
-                        if (candidate[0] == 'T')
+                        if (TryInternHardcodedString(candidate, "TRUE", ref interned) ||
+                            TryInternHardcodedString(candidate, "True", ref interned) ||
+                            TryInternHardcodedString(candidate, "Copy", ref interned) ||
+                            TryInternHardcodedString(candidate, "true", ref interned) ||
+                            TryInternHardcodedString(candidate, "v4.0", ref interned))
                         {
-                            if (candidate[1] == 'R' && candidate[2] == 'U' && candidate[3] == 'E')
-                            {
-                                interned = "TRUE";
-                                return true;
-                            }
-
-                            if (candidate[1] == 'r' && candidate[2] == 'u' && candidate[3] == 'e')
-                            {
-                                interned = "True";
-                                return true;
-                            }
-                        }
-
-                        if (candidate[0] == 'C' && candidate[1] == 'o' && candidate[2] == 'p' && candidate[3] == 'y')
-                        {
-                            interned = "Copy";
-                            return true;
-                        }
-
-                        if (candidate[0] == 't' && candidate[1] == 'r' && candidate[2] == 'u' && candidate[3] == 'e')
-                        {
-                            interned = "true";
-                            return true;
-                        }
-
-                        if (candidate[0] == 'v' && candidate[1] == '4' && candidate[2] == '.' && candidate[3] == '0')
-                        {
-                            interned = "v4.0";
                             return true;
                         }
                     }
                     else if (length == 5)
                     {
-                        if (candidate[0] == 'F' && candidate[1] == 'A' && candidate[2] == 'L' && candidate[3] == 'S' && candidate[4] == 'E')
+                        if (TryInternHardcodedString(candidate, "FALSE", ref interned) ||
+                            TryInternHardcodedString(candidate, "false", ref interned) ||
+                            TryInternHardcodedString(candidate, "Debug", ref interned) ||
+                            TryInternHardcodedString(candidate, "Build", ref interned) ||
+                            TryInternHardcodedString(candidate, "Win32", ref interned))
                         {
-                            interned = "FALSE";
-                            return true;
-                        }
-
-                        if (candidate[0] == 'f' && candidate[1] == 'a' && candidate[2] == 'l' && candidate[3] == 's' && candidate[4] == 'e')
-                        {
-                            interned = "false";
-                            return true;
-                        }
-
-                        if (candidate[0] == 'D' && candidate[1] == 'e' && candidate[2] == 'b' && candidate[3] == 'u' && candidate[4] == 'g')
-                        {
-                            interned = "Debug";
-                            return true;
-                        }
-
-                        if (candidate[0] == 'B' && candidate[1] == 'u' && candidate[2] == 'i' && candidate[3] == 'l' && candidate[4] == 'd')
-                        {
-                            interned = "Build";
-                            return true;
-                        }
-
-                        if (candidate[0] == 'W' && candidate[1] == 'i' && candidate[2] == 'n' && candidate[3] == '3' && candidate[4] == '2')
-                        {
-                            interned = "Win32";
                             return true;
                         }
                     }
                     else if (length == 6)
                     {
-                        if (candidate[0] == '\'' && candidate[1] == '\'' && candidate[2] == '!' && candidate[3] == '=' && candidate[4] == '\'' && candidate[5] == '\'')
+                        if (TryInternHardcodedString(candidate, "''!=''", ref interned) ||
+                            TryInternHardcodedString(candidate, "AnyCPU", ref interned))
                         {
-                            interned = "''!=''";
-                            return true;
-                        }
-
-                        if (candidate[0] == 'A' && candidate[1] == 'n' && candidate[2] == 'y' && candidate[3] == 'C' && candidate[4] == 'P' && candidate[5] == 'U')
-                        {
-                            interned = "AnyCPU";
                             return true;
                         }
                     }
                     else if (length == 7)
                     {
-                        if (candidate[0] == 'L' && candidate[1] == 'i' && candidate[2] == 'b' && candidate[3] == 'r' && candidate[4] == 'a' && candidate[5] == 'r' && candidate[6] == 'y')
+                        if (TryInternHardcodedString(candidate, "Library", ref interned) ||
+                            TryInternHardcodedString(candidate, "MSBuild", ref interned) ||
+                            TryInternHardcodedString(candidate, "Release", ref interned))
                         {
-                            interned = "Library";
-                            return true;
-                        }
-
-                        if (candidate[0] == 'M' && candidate[1] == 'S' && candidate[2] == 'B' && candidate[3] == 'u' && candidate[4] == 'i' && candidate[5] == 'l' && candidate[6] == 'd')
-                        {
-                            interned = "MSBuild";
-                            return true;
-                        }
-
-                        if (candidate[0] == 'R' && candidate[1] == 'e' && candidate[2] == 'l' && candidate[3] == 'e' && candidate[4] == 'a' && candidate[5] == 's' && candidate[6] == 'e')
-                        {
-                            interned = "Release";
                             return true;
                         }
                     }
                     // see Microsoft.Build.BackEnd.BuildRequestConfiguration.CreateUniqueGlobalProperty
                     else if (length > MSBuildConstants.MSBuildDummyGlobalPropertyHeader.Length &&
-                             candidate[0] == 'M' &&
-                             candidate[1] == 'S' &&
-                             candidate[2] == 'B' &&
-                             candidate[3] == 'u' &&
-                             candidate[4] == 'i' &&
-                             candidate[5] == 'l' &&
-                             candidate[6] == 'd' &&
-                             candidate[7] == 'P' &&
-                             candidate[8] == 'r' &&
-                             candidate[9] == 'o' &&
-                             candidate[10] == 'j' &&
-                             candidate[11] == 'e' &&
-                             candidate[12] == 'c' &&
-                             candidate[13] == 't' &&
-                             candidate[14] == 'I' &&
-                             candidate[15] == 'n' &&
-                             candidate[16] == 's' &&
-                             candidate[17] == 't' &&
-                             candidate[18] == 'a' &&
-                             candidate[19] == 'n' &&
-                             candidate[20] == 'c' &&
-                             candidate[21] == 'e'
-                    )
+                            candidate.StartsWithStringByOrdinalComparison(MSBuildConstants.MSBuildDummyGlobalPropertyHeader))
                     {
                         // don't want to leak unique strings into the cache
                         interned = candidate.ExpensiveConvertToString();
@@ -883,16 +877,9 @@ namespace Microsoft.Build
                     }
                     else if (length == 24)
                     {
-                        if (candidate[0] == 'R' && candidate[1] == 'e' && candidate[2] == 's' && candidate[3] == 'o' && candidate[4] == 'l' && candidate[5] == 'v' && candidate[6] == 'e')
+                        if (TryInternHardcodedString(candidate, "ResolveAssemblyReference", ref interned))
                         {
-                            if (candidate[7] == 'A' && candidate[8] == 's' && candidate[9] == 's' && candidate[10] == 'e' && candidate[11] == 'm' && candidate[12] == 'b' && candidate[13] == 'l' && candidate[14] == 'y')
-                            {
-                                if (candidate[15] == 'R' && candidate[16] == 'e' && candidate[17] == 'f' && candidate[18] == 'e' && candidate[19] == 'r' && candidate[20] == 'e' && candidate[21] == 'n' && candidate[22] == 'c' && candidate[23] == 'e')
-                                {
-                                    interned = "ResolveAssemblyReference";
-                                    return true;
-                                }
-                            }
+                            return true;
                         }
                     }
                     else if (length > _ginormousThreshold)
@@ -903,7 +890,7 @@ namespace Microsoft.Build
 
                             while (current != null)
                             {
-                                if (current.Value.Target is string last && last.Length == candidate.Length && candidate.IsOrdinalEqualToStringOfSameLength(last))
+                                if (current.Value.Target is string last && last.Length == candidate.Length && candidate.StartsWithStringByOrdinalComparison(last))
                                 {
                                     interned = last;
                                     _ginormousHits++;
@@ -967,42 +954,45 @@ namespace Microsoft.Build
             /// <summary>
             /// Version of Intern that gathers statistics
             /// </summary>
-            private string InternWithStatistics(IInternable candidate)
+            private string InternWithStatistics<T>(T candidate) where T : IInternable
             {
-                _stopwatch.Start();
-                bool? interned = TryIntern(candidate, out string result);
-                _stopwatch.Stop();
-
-                if (interned.HasValue && !interned.Value)
+                lock (_missedStrings)
                 {
-                    // Could not intern.
-                    _internMisses++;
+                    _stopwatch.Start();
+                    bool? interned = TryIntern(candidate, out string result);
+                    _stopwatch.Stop();
 
-                    _missedStrings.TryGetValue(result, out int priorCount);
-                    _missedStrings[result] = priorCount + 1;
+                    if (interned.HasValue && !interned.Value)
+                    {
+                        // Could not intern.
+                        _internMisses++;
+
+                        _missedStrings.TryGetValue(result, out int priorCount);
+                        _missedStrings[result] = priorCount + 1;
+
+                        return result;
+                    }
+                    else if (interned == null)
+                    {
+                        // Decided not to attempt interning
+                        _internRejects++;
+
+                        _rejectedStrings.TryGetValue(result, out int priorCount);
+                        _rejectedStrings[result] = priorCount + 1;
+
+                        return result;
+                    }
+
+                    _internHits++;
+                    if (!candidate.ReferenceEquals(result))
+                    {
+                        // Reference changed so 'candidate' is now released and should save memory.
+                        _internEliminatedStrings++;
+                        _internEliminatedChars += candidate.Length;
+                    }
 
                     return result;
                 }
-                else if (interned == null)
-                {
-                    // Decided not to attempt interning
-                    _internRejects++;
-
-                    _rejectedStrings.TryGetValue(result, out int priorCount);
-                    _rejectedStrings[result] = priorCount + 1;
-
-                    return result;
-                }
-
-                _internHits++;
-                if (!candidate.ReferenceEquals(result))
-                {
-                    // Reference changed so 'candidate' is now released and should save memory.
-                    _internEliminatedStrings++;
-                    _internEliminatedChars += candidate.Length;
-                }
-
-                return result;
             }
 
             /// <summary>
@@ -1033,7 +1023,7 @@ namespace Microsoft.Build
                 /// Try to get one element from the list. Upon leaving the function 'candidate' will be at the head of the Mru list.
                 /// This function is not thread-safe.
                 /// </summary>
-                internal bool TryGet(IInternable candidate, out string interned)
+                internal bool TryGet<T>(T candidate, out string interned) where T : IInternable
                 {
                     if (_size == 0)
                     {
@@ -1052,7 +1042,7 @@ namespace Microsoft.Build
                     {
                         if (head.Value.Length == length)
                         {
-                            if (candidate.IsOrdinalEqualToStringOfSameLength(head.Value))
+                            if (candidate.StartsWithStringByOrdinalComparison(head.Value))
                             {
                                 found = true;
                             }

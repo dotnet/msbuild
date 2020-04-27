@@ -242,6 +242,8 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        public bool BuildRequestsSucceeded { get; private set; } = true;
+
         #region IBuildEngine2 Members
 
         /// <summary>
@@ -308,6 +310,8 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
             }
+
+            BuildRequestsSucceeded = result.Result;
 
             return result.Result;
         }
@@ -442,7 +446,6 @@ namespace Microsoft.Build.BackEnd
                 {
                     e.BuildEventContext = _taskLoggingContext.BuildEventContext;
                     _taskLoggingContext.LoggingService.LogBuildEvent(e);
-                    _taskLoggingContext.HasLoggedErrors = true;
                 }
             }
         }
@@ -746,6 +749,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 result = new BuildEngineResult(overallSuccess, targetOutputsPerProject);
+                BuildRequestsSucceeded = overallSuccess;
             }
             else
             {
@@ -1011,6 +1015,8 @@ namespace Microsoft.Build.BackEnd
 
                     ErrorUtilities.VerifyThrow(results.Length == projectFileNames.Length || overallSuccess == false, "The number of results returned {0} cannot be less than the number of project files {1} unless one of the results indicated failure.", results.Length, projectFileNames.Length);
                 }
+
+                BuildRequestsSucceeded = overallSuccess;
 
                 return new BuildEngineResult(overallSuccess, targetOutputsPerProject);
             }

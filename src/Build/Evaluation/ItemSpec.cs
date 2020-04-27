@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -83,6 +85,24 @@ namespace Microsoft.Build.Evaluation
             public override bool IsMatch(string itemToMatch)
             {
                 return ReferencedItems.Any(v => v.ItemAsValueFragment.IsMatch(itemToMatch));
+            }
+
+            public override bool IsMatchOnMetadata(IItem item, IEnumerable<string> metadata, MatchOnMetadataOptions options)
+            {
+                return ReferencedItems.Any(referencedItem =>
+                        metadata.All(m => !item.GetMetadataValue(m).Equals(string.Empty) && MetadataComparer(options, item.GetMetadataValue(m), referencedItem.Item.GetMetadataValue(m))));
+            }
+
+            private bool MetadataComparer(MatchOnMetadataOptions options, string itemMetadata, string referencedItemMetadata)
+            {
+                if (options.Equals(MatchOnMetadataOptions.PathLike))
+                {
+                    return FileUtilities.ComparePathsNoThrow(itemMetadata, referencedItemMetadata, ProjectDirectory);
+                }
+                else 
+                {
+                    return String.Equals(itemMetadata, referencedItemMetadata, options.Equals(MatchOnMetadataOptions.CaseInsensitive) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+                }
             }
 
             public override IMSBuildGlob ToMSBuildGlob()
@@ -293,6 +313,25 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        ///     Return true if any of the given <paramref name="metadata" /> matches the metadata on <paramref name="item" />
+        /// </summary>
+        /// <param name="item">The item to attempt to find a match for based on matching metadata</param>
+        /// <param name="metadata">Names of metadata to look for matches for</param>
+        /// <returns></returns>
+        public bool MatchesItemOnMetadata(IItem item, IEnumerable<string> metadata, MatchOnMetadataOptions options)
+        {
+            foreach (var fragment in Fragments)
+            {
+                if (fragment.IsMatchOnMetadata(item, metadata, options))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         ///     Return the fragments that match against the given <paramref name="itemToMatch" />
         /// </summary>
         /// <param name="itemToMatch">The item to match.</param>
@@ -418,6 +457,14 @@ namespace Microsoft.Build.Evaluation
         public virtual bool IsMatch(string itemToMatch)
         {
             return FileMatcher.IsMatch(itemToMatch);
+        }
+
+        /// <summary>
+        /// Returns true if <paramref name="itemToMatch" /> matches any ReferencedItems based on <paramref name="metadata" /> and <paramref name="options" />.
+        /// </summary>
+        public virtual bool IsMatchOnMetadata(IItem itemToMatch, IEnumerable<string> metadata, MatchOnMetadataOptions options)
+        {
+            return false;
         }
 
         public virtual IMSBuildGlob ToMSBuildGlob()

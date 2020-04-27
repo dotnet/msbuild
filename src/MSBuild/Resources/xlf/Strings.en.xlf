@@ -223,6 +223,27 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_39_LowPrioritySwitch">
+        <source>  -lowPriority[:True|False]
+                     Causes MSBuild to run at low process priority.
+
+                     Specifying -lowPriority is the same as specifying
+                     -lowPriority:True.
+                     (Short form: -low)
+    </source>
+        <target state="new">  -lowPriority[:True|False]
+                     Causes MSBuild to run at low process priority.
+
+                     Specifying -lowPriority is the same as specifying
+                     -lowPriority:True.
+                     (Short form: -low)
+    </target>
+        <note>
+      LOCALIZATION: "MSBuild" should not be localized.
+      LOCALIZATION: "-lowPriority" and "-low" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
       <trans-unit id="HelpMessage_3_SwitchesHeader">
         <source>Switches:            Note that you can specify switches using both
                      "-switch" and "/switch".

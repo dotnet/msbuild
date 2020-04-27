@@ -321,7 +321,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="parameters">The name/value pairs for the parameters.</param>
         /// <returns>True if the parameters were set correctly, false otherwise.</returns>
-        bool ITaskExecutionHost.SetTaskParameters(IDictionary<string, Tuple<string, ElementLocation>> parameters)
+        bool ITaskExecutionHost.SetTaskParameters(IDictionary<string, (string, ElementLocation)> parameters)
         {
             ErrorUtilities.VerifyThrowArgumentNull(parameters, nameof(parameters));
 
@@ -333,7 +333,7 @@ namespace Microsoft.Build.BackEnd
             IDictionary<string, string> requiredParameters = GetNamesOfPropertiesWithRequiredAttribute();
 
             // look through all the attributes of the task element
-            foreach (KeyValuePair<string, Tuple<string, ElementLocation>> parameter in parameters)
+            foreach (KeyValuePair<string, (string, ElementLocation)> parameter in parameters)
             {
                 bool taskParameterSet = false;  // Did we actually call the setter on this task parameter?
                 bool success;
@@ -1285,8 +1285,10 @@ namespace Microsoft.Build.BackEnd
         {
             if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && parameterValue.Count > 0)
             {
-                string parameterText = ResourceUtilities.GetResourceString("TaskParameterPrefix");
-                parameterText = ItemGroupLoggingHelper.GetParameterText(parameterText, parameter.Name, parameterValue);
+                string parameterText = ItemGroupLoggingHelper.GetParameterText(
+                    ItemGroupLoggingHelper.TaskParameterPrefix,
+                    parameter.Name,
+                    parameterValue);
                 _taskLoggingContext.LogCommentFromText(MessageImportance.Low, parameterText);
             }
 
@@ -1312,7 +1314,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     _taskLoggingContext.LogCommentFromText(
                         MessageImportance.Low,
-                        ResourceUtilities.GetResourceString("TaskParameterPrefix") + parameter.Name + "=" + ItemGroupLoggingHelper.GetStringFromParameterValue(parameterValue));
+                        ItemGroupLoggingHelper.TaskParameterPrefix + parameter.Name + "=" + ItemGroupLoggingHelper.GetStringFromParameterValue(parameterValue));
                 }
             }
 
@@ -1426,7 +1428,7 @@ namespace Microsoft.Build.BackEnd
                     if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && outputs.Length > 0)
                     {
                         string parameterText = ItemGroupLoggingHelper.GetParameterText(
-                            ResourceUtilities.GetResourceString("OutputItemParameterMessagePrefix"),
+                            ItemGroupLoggingHelper.OutputItemParameterMessagePrefix,
                             outputTargetName,
                             outputs);
 
@@ -1501,7 +1503,10 @@ namespace Microsoft.Build.BackEnd
 
                     if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && outputs.Length > 0)
                     {
-                        string parameterText = ItemGroupLoggingHelper.GetParameterText(ResourceUtilities.GetResourceString("OutputItemParameterMessagePrefix"), outputTargetName, outputs);
+                        string parameterText = ItemGroupLoggingHelper.GetParameterText(
+                            ItemGroupLoggingHelper.OutputItemParameterMessagePrefix,
+                            outputTargetName,
+                            outputs);
                         _taskLoggingContext.LogCommentFromText(MessageImportance.Low, parameterText);
                     }
                 }
