@@ -2,7 +2,7 @@ Build Status
 
 |Windows, Mac & Linux|
 |:------:|
-[![Build Status](https://dnceng.visualstudio.com/public/_apis/build/status/aspnet/websdk/websdk-ci?branchName=master)](https://dnceng.visualstudio.com/public/_build/latest?definitionId=266?branchName=master)
+[![Build Status](https://dnceng.visualstudio.com/public/_apis/build/status/dotnet/websdk/websdk-ci?branchName=master)](https://dnceng.visualstudio.com/public/_build/latest?definitionId=266?branchName=master)
 
 Microsoft.NET.Sdk.Web
 ======================
