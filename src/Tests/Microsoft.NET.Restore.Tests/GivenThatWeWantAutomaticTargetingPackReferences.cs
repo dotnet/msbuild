@@ -62,8 +62,10 @@ namespace Microsoft.NET.Restore.Tests
             }
         }
 
-        [Fact]
-        public void It_restores_multitargeted_net_framework_project_successfully()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_restores_multitargeted_net_framework_project_successfully(bool includeExplicitReference)
         {
             var testProject = new TestProject()
             {
@@ -72,7 +74,23 @@ namespace Microsoft.NET.Restore.Tests
                 IsSdkProject = true,
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            TestAsset testAsset = null;
+            if (includeExplicitReference)
+            {
+                // Add explicit reference to assembly packs
+                testAsset = _testAssetsManager.CreateTestProject(testProject).WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var itemGroup = project.Root.Elements(ns + "ItemGroup").FirstOrDefault();
+                    itemGroup.Add(new XElement(ns + "PackageReference",
+                        new XAttribute("Include", $"Microsoft.NETFramework.ReferenceAssemblies"),
+                        new XAttribute("Version", $"1.0.0-preview.2")));
+                });
+            }
+            else
+            {
+                testAsset = _testAssetsManager.CreateTestProject(testProject);
+            }
 
             string projectAssetsJsonPath = Path.Combine(
                 testAsset.Path,
@@ -80,16 +98,19 @@ namespace Microsoft.NET.Restore.Tests
                 "obj",
                 "project.assets.json");
 
-            var restoreCommand =
-                testAsset.GetRestoreCommand(Log, relativePath: testProject.Name);
-            restoreCommand.Execute().Should().Pass();
+            var restoreCommand = testAsset.GetRestoreCommand(Log, relativePath: testProject.Name);
+            restoreCommand.Execute()
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutContaining("NETSDK1023");
 
             LockFile lockFile = LockFileUtilities.GetLockFile(
                 projectAssetsJsonPath,
                 NullLogger.Instance);
 
             var net471FrameworkLibrary = lockFile.GetTarget(NuGetFramework.Parse(".NETFramework,Version=v4.7.1"), null).Libraries.FirstOrDefault((file) => file.Name.Contains("net471"));
-            if (TestProject.ReferenceAssembliesAreInstalled(TargetDotNetFrameworkVersion.Version471))
+            if (TestProject.ReferenceAssembliesAreInstalled(TargetDotNetFrameworkVersion.Version471) && !includeExplicitReference)
             {
                 net471FrameworkLibrary.Should().BeNull();
             }
@@ -101,7 +122,7 @@ namespace Microsoft.NET.Restore.Tests
 
             var net472FrameworkLibrary = lockFile.GetTarget(NuGetFramework.Parse(".NETFramework,Version=v4.7.2"), null).Libraries.FirstOrDefault((file) => file.Name.Contains("net472"));
 
-            if (TestProject.ReferenceAssembliesAreInstalled(TargetDotNetFrameworkVersion.Version472))
+            if (TestProject.ReferenceAssembliesAreInstalled(TargetDotNetFrameworkVersion.Version472) && !includeExplicitReference)
             {
                 net472FrameworkLibrary.Should().BeNull();
             }
@@ -129,9 +150,14 @@ namespace Microsoft.NET.Restore.Tests
                 var ns = project.Root.Name.Namespace;
                 var itemGroup = project.Root.Elements(ns + "ItemGroup").FirstOrDefault();
                 itemGroup.Add(new XElement(ns + "PackageReference",
+                    new XAttribute("Include", $"Newtonsoft.Json"),
+                    new XAttribute("Version", $"11.0.2")));
+                itemGroup.Add(new XElement(ns + "PackageReference",
+                    new XAttribute("Include", $"sqlite"),
+                    new XAttribute("Version", $"3.13.0")));
+                itemGroup.Add(new XElement(ns + "PackageReference",
                     new XAttribute("Include", $"Microsoft.NETFramework.ReferenceAssemblies"),
-                    new XAttribute("Version", $"1.0.0-preview.2")));
-
+                    new XAttribute("Version", $"1.0.0")));
             });
 
             string projectAssetsJsonPath = Path.Combine(
@@ -142,15 +168,18 @@ namespace Microsoft.NET.Restore.Tests
 
             var restoreCommand =
                 testAsset.GetRestoreCommand(Log, relativePath: testProject.Name);
-            restoreCommand.Execute().Should().Pass();
+            restoreCommand.Execute()
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutContaining("NETSDK1023");
 
             LockFile lockFile = LockFileUtilities.GetLockFile(projectAssetsJsonPath, NullLogger.Instance);
             var netFrameworkLibrary = lockFile.GetTarget(NuGetFramework.Parse(".NETFramework,Version=v4.7.1"), null).Libraries.FirstOrDefault((file) => file.Name.Contains(targetFramework));
 
-
             netFrameworkLibrary.Name.Should().Be("Microsoft.NETFramework.ReferenceAssemblies." + targetFramework);
             netFrameworkLibrary.Type.Should().Be("package");
-            netFrameworkLibrary.Version.ToFullString().Should().Be("1.0.0-preview.2");
+            netFrameworkLibrary.Version.ToFullString().Should().Be("1.0.0");
         }
     }
 }

@@ -9,6 +9,6 @@
     <BundledSdk Include="Microsoft.NET.Sdk.WindowsDesktop" Version="$(MicrosoftNETSdkWindowsDesktopPackageVersion)" Condition="'$(DotNetBuildFromSource)' != 'true'" />
     <BundledSdk Include="FSharp.NET.Sdk" Version="1.0.4-bundled-0100" />
     <BundledSdk Include="Microsoft.Docker.Sdk" Version="1.1.0" />
-    <BundledSdk Include="ILLink.Tasks" Version="$(ILLinkTasksPackageVersion)" />
+    <BundledSdk Include="Microsoft.NET.ILLink.Tasks" Version="$(MicrosoftNETILLinkTasksPackageVersion)" />
   </ItemGroup>
 </Project>

@@ -2,9 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Security;
 using Microsoft.Win32;
-using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Cli.Telemetry
 {
@@ -12,32 +12,36 @@ namespace Microsoft.DotNet.Cli.Telemetry
     {
         public IsDockerContainer IsDockerContainer()
         {
-            switch (RuntimeEnvironment.OperatingSystemPlatform)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                case Platform.Windows:
-                    try
+                try
+                {
+                    using (RegistryKey subkey
+                        = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\Control"))
                     {
-                        using (RegistryKey subkey
-                            = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\Control"))
-                        {
-                            return subkey?.GetValue("ContainerType") != null
-                                ? Cli.Telemetry.IsDockerContainer.True
-                                : Cli.Telemetry.IsDockerContainer.False;
-                        }
+                        return subkey?.GetValue("ContainerType") != null
+                            ? Cli.Telemetry.IsDockerContainer.True
+                            : Cli.Telemetry.IsDockerContainer.False;
                     }
-                    catch (SecurityException)
-                    {
-                        return Cli.Telemetry.IsDockerContainer.Unknown;
-                    }
-                case Platform.Linux:
-                    return ReadProcToDetectDockerInLinux()
-                        ? Cli.Telemetry.IsDockerContainer.True
-                        : Cli.Telemetry.IsDockerContainer.False;
-                case Platform.Unknown:
+                }
+                catch (SecurityException)
+                {
                     return Cli.Telemetry.IsDockerContainer.Unknown;
-                case Platform.Darwin:
-                default:
-                    return Cli.Telemetry.IsDockerContainer.False;
+                }
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                return ReadProcToDetectDockerInLinux()
+                    ? Cli.Telemetry.IsDockerContainer.True
+                    : Cli.Telemetry.IsDockerContainer.False;
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                return Cli.Telemetry.IsDockerContainer.False;
+            }
+            else
+            {
+                return Cli.Telemetry.IsDockerContainer.Unknown;
             }
         }
 

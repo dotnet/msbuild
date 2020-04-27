@@ -40,7 +40,6 @@ namespace Microsoft.DotNet.Tools.Test
             var msbuildArgs = new List<string>()
             {
                 "-target:VSTest",
-                $"-verbosity:{GetDefaultVerbosity(parsedTest)}",
                 "-nodereuse:false", // workaround for https://github.com/Microsoft/vstest/issues/1503
                 "-nologo"
             };
@@ -86,17 +85,6 @@ namespace Microsoft.DotNet.Tools.Test
             }
 
             return testCommand;
-        }
-
-        private static string GetDefaultVerbosity(AppliedOption options)
-        {
-            var defaultVerbosity = "quiet";
-            if (options.HasOption(Constants.RestoreInteractiveOption))
-            {
-                defaultVerbosity = "minimal";
-            }
-
-            return defaultVerbosity;
         }
 
         public static int Run(string[] args)

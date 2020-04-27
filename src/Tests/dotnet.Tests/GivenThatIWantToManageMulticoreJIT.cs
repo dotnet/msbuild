@@ -1,15 +1,12 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved. 
 // Licensed under the MIT license. See LICENSE file in the project root for full license information. 
 
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using Xunit;
 using Xunit.Abstractions;
 using FluentAssertions;
-using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -90,7 +87,7 @@ namespace Microsoft.DotNet.Tests
 
         private static string GetOptimizationRootPath(string version)
         {
-            var rid = PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
+            var rid = RuntimeInformation.RuntimeIdentifier;
             
             return RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 ? $@"Microsoft\dotnet\optimizationdata\{version}\{rid}" 

@@ -3,7 +3,6 @@
 
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
@@ -13,6 +12,7 @@ using Xunit;
 using Xunit.Abstractions;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -30,7 +30,7 @@ namespace Microsoft.NET.Publish.Tests
         private const string ReadyToRunWithSymbols = "/p:PublishReadyToRunEmitSymbols=true";
         private const string UseAppHost = "/p:UseAppHost=true";
 
-        private readonly string RuntimeIdentifier = $"/p:RuntimeIdentifier={RuntimeEnvironment.GetRuntimeIdentifier()}";
+        private readonly string RuntimeIdentifier = $"/p:RuntimeIdentifier={RuntimeInformation.RuntimeIdentifier}";
         private readonly string SingleFile = $"{TestProjectName}{Constants.ExeSuffix}";
         private readonly string PdbFile = $"{TestProjectName}.pdb";
         private readonly string NiPdbFile = $"{TestProjectName}.ni.pdb";
@@ -69,7 +69,7 @@ namespace Microsoft.NET.Publish.Tests
         private DirectoryInfo GetPublishDirectory(PublishCommand publishCommand)
         {
             return publishCommand.GetOutputDirectory(targetFramework: "netcoreapp3.0",
-                                                     runtimeIdentifier: RuntimeEnvironment.GetRuntimeIdentifier());
+                                                     runtimeIdentifier: RuntimeInformation.RuntimeIdentifier);
         }
 
         [Fact]

@@ -18,16 +18,27 @@ namespace Microsoft.DotNet.Configurer
 
         public static string CliFallbackFolderPath =>
             Environment.GetEnvironmentVariable("DOTNET_CLI_TEST_FALLBACKFOLDER") ??
-                Path.Combine(new DirectoryInfo(AppContext.BaseDirectory).Parent.FullName, "NuGetFallbackFolder");
+            Path.Combine(new DirectoryInfo(AppContext.BaseDirectory).Parent.FullName, "NuGetFallbackFolder");
 
         public static string ToolsShimPath => Path.Combine(DotnetUserProfileFolderPath, ToolsShimFolderName);
 
-        public static string ToolsPackagePath => ToolPackageFolderPathCalculator.GetToolPackageFolderPath(ToolsShimPath);
+        public static string ToolsPackagePath =>
+            ToolPackageFolderPathCalculator.GetToolPackageFolderPath(ToolsShimPath);
 
         public static BashPathUnderHomeDirectory ToolsShimPathInUnix =>
             new BashPathUnderHomeDirectory(
                 DotnetHomePath,
                 Path.Combine(DotnetProfileDirectoryName, ToolsShimFolderName));
+
+        public static string WindowsNonExpandedToolsShimPath
+        {
+            get
+            {
+                return string.IsNullOrEmpty(Environment.GetEnvironmentVariable(DotnetHomeVariableName))
+                    ? $@"%USERPROFILE%\{DotnetProfileDirectoryName}\{ToolsShimFolderName}"
+                    : ToolsShimPath;
+            }
+        }
 
         public static string DotnetUserProfileFolderPath =>
             Path.Combine(DotnetHomePath, DotnetProfileDirectoryName);
@@ -48,9 +59,9 @@ namespace Microsoft.DotNet.Configurer
                     if (string.IsNullOrEmpty(home))
                     {
                         throw new ConfigurationException(
-                            string.Format(
-                                LocalizableStrings.FailedToDetermineUserHomeDirectory,
-                                DotnetHomeVariableName))
+                                string.Format(
+                                    LocalizableStrings.FailedToDetermineUserHomeDirectory,
+                                    DotnetHomeVariableName))
                             .DisplayAsError();
                     }
                 }

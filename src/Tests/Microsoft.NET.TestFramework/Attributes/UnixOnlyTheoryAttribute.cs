@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Xunit;
-using Microsoft.DotNet.PlatformAbstractions;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.NET.TestFramework
 {
@@ -10,7 +10,7 @@ namespace Microsoft.NET.TestFramework
     {
         public UnixOnlyTheoryAttribute()
         {
-            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 this.Skip = "This test requires Unix to run";
             }

@@ -4,14 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
-using Microsoft.DotNet.PlatformAbstractions;
-using Microsoft.DotNet.Cli.Telemetry.PersistenceChannel;
 
 namespace Microsoft.DotNet.Cli.Telemetry
 {

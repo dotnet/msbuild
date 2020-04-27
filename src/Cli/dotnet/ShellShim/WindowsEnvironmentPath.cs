@@ -13,14 +13,38 @@ namespace Microsoft.DotNet.ShellShim
     {
         private readonly IReporter _reporter;
         private const string PathName = "PATH";
-        private readonly string _packageExecutablePath;
-        private readonly IEnvironmentProvider _environmentProvider;
+        private readonly string _expandedPackageExecutablePath;
+        private readonly string _nonExpandedPackageExecutablePath;
 
-        public WindowsEnvironmentPath(string packageExecutablePath, IReporter reporter, IEnvironmentProvider environmentProvider)
+        /// <summary>
+        /// This will read cached and expanded environment variable. We use this
+        /// to check if the expanded tool shim path exists. Since this is ultimately how shell will invoke command
+        /// </summary>
+        private readonly IEnvironmentProvider _expandedEnvironmentReader;
+
+        /// <summary>
+        /// This will read from registry with non expanded environment like %USERPROFILE%\AppData\Local\Microsoft\WindowsApps
+        /// when append tool shim PATH. Use to read and write to avoid edit existing PATH.
+        /// </summary>
+        private readonly IWindowsRegistryEnvironmentPathEditor _environmentPathEditor;
+
+        public WindowsEnvironmentPath(string packageExecutablePath,
+            string nonExpandedPackageExecutablePath,
+            IEnvironmentProvider expandedEnvironmentReader,
+            IWindowsRegistryEnvironmentPathEditor environmentPathEditor,
+            IReporter reporter)
         {
-            _packageExecutablePath = packageExecutablePath ?? throw new ArgumentNullException(nameof(packageExecutablePath));
+            _nonExpandedPackageExecutablePath = nonExpandedPackageExecutablePath ??
+                                                throw new ArgumentNullException(nameof(packageExecutablePath));
+            _expandedPackageExecutablePath =
+                packageExecutablePath ?? throw new ArgumentNullException(nameof(packageExecutablePath));
             _reporter = reporter ?? throw new ArgumentNullException(nameof(reporter));
-            _environmentProvider = environmentProvider ?? throw new ArgumentNullException(nameof(environmentProvider));
+
+            _expandedEnvironmentReader =
+                expandedEnvironmentReader ?? throw new ArgumentNullException(nameof(expandedEnvironmentReader));
+
+            _environmentPathEditor =
+                environmentPathEditor ?? throw new ArgumentNullException(nameof(environmentPathEditor));
         }
 
         public void AddPackageExecutablePathToUserPath()
@@ -30,16 +54,16 @@ namespace Microsoft.DotNet.ShellShim
                 return;
             }
 
-            var existingUserEnvPath = _environmentProvider.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.User);
+            var existingUserEnvPath =
+                _environmentPathEditor.Get(SdkEnvironmentVariableTarget.CurrentUser);
 
             try
             {
                 if (existingUserEnvPath == null)
                 {
-                    _environmentProvider.SetEnvironmentVariable(
-                        PathName,
-                        _packageExecutablePath,
-                        EnvironmentVariableTarget.User);
+                    _environmentPathEditor.Set(
+                        _nonExpandedPackageExecutablePath,
+                        SdkEnvironmentVariableTarget.CurrentUser);
                 }
                 else
                 {
@@ -48,10 +72,9 @@ namespace Microsoft.DotNet.ShellShim
                         existingUserEnvPath = existingUserEnvPath.Substring(0, (existingUserEnvPath.Length - 1));
                     }
 
-                    _environmentProvider.SetEnvironmentVariable(
-                        PathName,
-                        $"{existingUserEnvPath};{_packageExecutablePath}",
-                        EnvironmentVariableTarget.User);
+                    _environmentPathEditor.Set(
+                        $"{existingUserEnvPath};{_nonExpandedPackageExecutablePath}",
+                        SdkEnvironmentVariableTarget.CurrentUser);
                 }
             }
             catch (System.Security.SecurityException)
@@ -59,27 +82,31 @@ namespace Microsoft.DotNet.ShellShim
                 _reporter.WriteLine(
                     string.Format(
                         CommonLocalizableStrings.FailedToSetToolsPathEnvironmentVariable,
-                        _packageExecutablePath).Yellow());
+                        _expandedPackageExecutablePath).Yellow());
             }
         }
 
         private bool PackageExecutablePathExists()
         {
-            return PackageExecutablePathExistsForCurrentProcess() || PackageExecutablePathWillExistForFutureNewProcess();
+            return PackageExecutablePathExistsForCurrentProcess() ||
+                   PackageExecutablePathWillExistForFutureNewProcess();
         }
 
         private bool PackageExecutablePathWillExistForFutureNewProcess()
         {
-            return EnvironmentVariableContainsPackageExecutablePath(_environmentProvider.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.User))
-                   || EnvironmentVariableContainsPackageExecutablePath(_environmentProvider.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.Machine));
+            return EnvironmentVariableConatinsPackageExecutablePath(
+                       _expandedEnvironmentReader.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.User))
+                   || EnvironmentVariableConatinsPackageExecutablePath(
+                       _expandedEnvironmentReader.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.Machine));
         }
 
         private bool PackageExecutablePathExistsForCurrentProcess()
         {
-            return EnvironmentVariableContainsPackageExecutablePath(_environmentProvider.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.Process));
+            return EnvironmentVariableConatinsPackageExecutablePath(
+                _expandedEnvironmentReader.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.Process));
         }
 
-        private bool EnvironmentVariableContainsPackageExecutablePath(string environmentVariable)
+        private bool EnvironmentVariableConatinsPackageExecutablePath(string environmentVariable)
         {
             if (environmentVariable == null)
             {
@@ -88,7 +115,7 @@ namespace Microsoft.DotNet.ShellShim
 
             return environmentVariable
                 .Split(';')
-                .Any(p => string.Equals(p, _packageExecutablePath, StringComparison.OrdinalIgnoreCase));
+                .Any(p => string.Equals(p, _expandedPackageExecutablePath, StringComparison.OrdinalIgnoreCase));
         }
 
         public void PrintAddPathInstructionIfPathDoesNotExist()
@@ -102,7 +129,7 @@ namespace Microsoft.DotNet.ShellShim
                 _reporter.WriteLine(
                     string.Format(
                         CommonLocalizableStrings.EnvironmentPathWindowsManualInstructions,
-                        _packageExecutablePath));
+                        _expandedPackageExecutablePath));
             }
         }
     }

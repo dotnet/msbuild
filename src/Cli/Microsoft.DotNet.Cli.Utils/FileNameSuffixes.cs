@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Microsoft.DotNet.PlatformAbstractions;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -16,18 +16,25 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             get
             {
-                switch (RuntimeEnvironment.OperatingSystemPlatform)
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    case Platform.Windows:
-                        return Windows;
-                    case Platform.Darwin:
-                        return OSX;
-                    case Platform.Linux:
-                        return Linux;
-                    case Platform.FreeBSD:
-                        return FreeBSD;
-                    default:
-                        throw new InvalidOperationException("Unknown Platform");
+                    return Windows;
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    return OSX;
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    return Linux;
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD")))
+                {
+                    return FreeBSD;
+                }
+                else
+                {
+                    throw new InvalidOperationException("Unknown Platform");
                 }
             }
         }

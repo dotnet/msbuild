@@ -1,15 +1,14 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using FluentAssertions;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.PlatformAbstractions;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using FluentAssertions;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -90,7 +89,7 @@ namespace Microsoft.NET.Publish.Tests
 
         private void PublishAppWithLibraryAndRid(bool selfContained, out DirectoryInfo publishDirectory, out string runtimeIdentifier)
         {
-            runtimeIdentifier = DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
+            runtimeIdentifier = RuntimeInformation.RuntimeIdentifier;
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibraryAndRid", $"PublishAppWithLibraryAndRid{selfContained}")
                 .WithSource();

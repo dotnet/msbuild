@@ -5,8 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.PlatformAbstractions;
-
+using System.Runtime.InteropServices;
 using Microsoft.Extensions.DependencyModel;
 
 namespace Microsoft.DotNet.Cli.Utils
@@ -28,11 +27,6 @@ namespace Microsoft.DotNet.Cli.Utils
             _dependencyContext = new Lazy<DependencyContext>(CreateDependencyContext);
         }
 
-        public bool SupportsCurrentRuntime()
-        {
-            return IsRuntimeSupported(RuntimeEnvironment.GetRuntimeIdentifier());
-        }
-
         public bool IsRuntimeSupported(string runtimeIdentifier)
         {
             return DependencyContext.RuntimeGraph.Any(g => g.Runtime == runtimeIdentifier);
@@ -46,18 +40,20 @@ namespace Microsoft.DotNet.Cli.Utils
                 ?.Version;
         }
 
+#if NETCOREAPP
         public bool TryGetMostFitRuntimeIdentifier(
             string alternativeCurrentRuntimeIdentifier,
             string[] candidateRuntimeIdentifiers,
             out string mostFitRuntimeIdentifier)
         {
             return TryGetMostFitRuntimeIdentifier(
-                RuntimeEnvironment.GetRuntimeIdentifier(),
+                RuntimeInformation.RuntimeIdentifier,
                 alternativeCurrentRuntimeIdentifier,
                 DependencyContext.RuntimeGraph,
                 candidateRuntimeIdentifiers,
                 out mostFitRuntimeIdentifier);
         }
+#endif
 
         internal static bool TryGetMostFitRuntimeIdentifier(
             string currentRuntimeIdentifier,

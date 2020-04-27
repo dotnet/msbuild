@@ -8,5 +8,6 @@ namespace Microsoft.DotNet.Configurer
     public interface IUserLevelCacheWriter
     {
         string RunWithCache(string cacheKey, Func<string> getValueToCache);
+        string RunWithCacheInFilePath(string cacheFilepath, Func<string> getValueToCache);
     }
 }

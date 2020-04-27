@@ -1,10 +1,13 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -68,7 +71,7 @@ namespace Microsoft.NET.Publish.Tests
                 Log.WriteLine("    '{0}': TargetPath = '{1}', IsKeyOutput = '{2}'", item.Identity, item.TargetPath, item.IsKeyOutput);
             }
 
-            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Darwin)
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 // Check that there's only one key item, and it's the exe
                 string exeSuffix = specifyRid ? ".exe" : Constants.ExeSuffix;

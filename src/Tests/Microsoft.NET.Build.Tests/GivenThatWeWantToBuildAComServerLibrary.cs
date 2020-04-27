@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using FluentAssertions;
-using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -117,7 +116,29 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
-        [PlatformSpecificFact(Platform.Linux, Platform.Darwin, Platform.FreeBSD)]
+        [WindowsOnlyFact]
+        public void It_warns_on_self_contained_build()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("ComServer")
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Add(new XElement("SelfContained", true));
+                });
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("NETSDK1128: ");
+        }
+
+        [PlatformSpecificFact(TestPlatforms.Linux | TestPlatforms.OSX | TestPlatforms.FreeBSD)]
         public void It_fails_to_find_comhost_for_platforms_without_comhost()
         {
             var testAsset = _testAssetsManager
@@ -138,7 +159,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("NETSDK1091: ");
         }
 
-        [PlatformSpecificTheory(Platform.Linux, Platform.Darwin, Platform.FreeBSD)]
+        [PlatformSpecificTheory(TestPlatforms.Linux | TestPlatforms.OSX | TestPlatforms.FreeBSD)]
         [InlineData("win-x64")]
         [InlineData("win-x86")]
         public void It_fails_to_embed_clsid_when_not_on_windows(string rid)

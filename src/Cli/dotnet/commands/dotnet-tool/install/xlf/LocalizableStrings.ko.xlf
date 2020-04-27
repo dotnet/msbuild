@@ -137,12 +137,12 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
         <source>Tool '{0}' failed to install. This failure may have been caused by:
 
 * You are attempting to install a preview release and did not use the --version option to specify the version.
-* A package by this name was found, but it was not a .NET Core tool.
+* A package by this name was found, but it was not a .NET tool.
 * The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
 * You mistyped the name of the tool.
 
 For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</source>
-        <target state="translated">'{0}' 도구를 설치하지 못했습니다. 다음과 같은 이유 때문일 수 있습니다.
+        <target state="needs-review-translation">'{0}' 도구를 설치하지 못했습니다. 다음과 같은 이유 때문일 수 있습니다.
 
 * 미리 보기 릴리스를 설치하려고 하는데 --version 옵션을 사용하여 버전을 지정하지 않았습니다.
 * 이 이름으로 패키지가 검색되었지만 .NET Core 도구가 아니었습니다.

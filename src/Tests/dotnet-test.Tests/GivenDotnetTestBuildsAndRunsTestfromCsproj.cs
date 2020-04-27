@@ -532,7 +532,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         }
 
         [Fact]
-        public void ItShouldNotShowImportantMessage()
+        public void ItShouldShowImportantMessage()
         {
             string testAppName = "VSTestCore";
             var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
@@ -546,31 +546,6 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             CommandResult result = new DotnetTestCommand(Log)
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute();
-
-            // Verify
-            if (!TestContext.IsLocalized())
-            {
-                result.StdOut.Should().NotContain("Important text");
-            }
-
-            result.ExitCode.Should().Be(1);
-        }
-
-        [Fact]
-        public void ItShouldShowImportantMessageWhenInteractiveFlagIsPassed()
-        {
-            string testAppName = "VSTestCore";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                .WithSource()
-                .WithVersionVariables()
-                .WithProjectChanges(ProjectModification.AddDisplayMessageBeforeVsTestToProject);
-
-            var testProjectDirectory = testInstance.Path;
-
-            // Call test
-            CommandResult result = new DotnetTestCommand(Log)
-                .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--interactive");
 
             // Verify
             if (!TestContext.IsLocalized())

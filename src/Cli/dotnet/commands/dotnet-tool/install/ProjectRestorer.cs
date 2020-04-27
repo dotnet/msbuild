@@ -6,9 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.ToolPackage;
-using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.Tools.Tool.Install

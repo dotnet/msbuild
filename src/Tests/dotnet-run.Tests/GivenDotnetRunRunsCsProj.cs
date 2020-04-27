@@ -6,7 +6,6 @@ using System.IO;
 using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
@@ -545,7 +544,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                    .HaveStdOutContaining($"dotnet{Constants.ExeSuffix}");
         }
 
-        [PlatformSpecificFact(Platform.Windows, Platform.Linux, Platform.FreeBSD)]
+        [PlatformSpecificFact(TestPlatforms.Windows | TestPlatforms.Linux | TestPlatforms.FreeBSD)]
         public void ItRunsWithApphost()
         {
             var testInstance = _testAssetsManager.CopyTestAsset("AppOutputsExecutablePath").WithSource();

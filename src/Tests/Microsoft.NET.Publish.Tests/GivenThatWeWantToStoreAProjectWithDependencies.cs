@@ -31,7 +31,7 @@ namespace Microsoft.NET.Publish.Tests
 
         static GivenThatWeWantToStoreAProjectWithDependencies()
         {
-            var rid = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
+            var rid = RuntimeInformation.RuntimeIdentifier;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 _testArch = rid.Substring(rid.LastIndexOf("-") + 1);

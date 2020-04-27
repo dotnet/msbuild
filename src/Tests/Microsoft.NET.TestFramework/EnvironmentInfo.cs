@@ -1,10 +1,10 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#if NETCOREAPP
+
 using System;
-using System.IO;
 using System.Runtime.InteropServices;
-using Microsoft.DotNet.PlatformAbstractions;
 using NuGet.Frameworks;
 
 namespace Microsoft.NET.TestFramework
@@ -21,7 +21,7 @@ namespace Microsoft.NET.TestFramework
 
         public static string GetCompatibleRid(string targetFramework = null)
         {
-            string rid = DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
+            string rid = RuntimeInformation.RuntimeIdentifier;
 
             if (targetFramework == null)
             {
@@ -33,9 +33,8 @@ namespace Microsoft.NET.TestFramework
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
                     Version osVersion;
-                    if (Version.TryParse(DotNet.PlatformAbstractions.RuntimeEnvironment.OperatingSystemVersion, out osVersion))
+                    if (Version.TryParse(DotNet.Cli.Utils.RuntimeEnvironment.OperatingSystemVersion, out osVersion))
                     {
-
                         if (osVersion > new Version(10, 11))
                         {
                             //  netcoreapp1.0 only supports osx.10.10 and osx.10.11
@@ -59,7 +58,7 @@ namespace Microsoft.NET.TestFramework
         public static bool SupportsTargetFramework(string targetFramework)
         {
             var nugetFramework = NuGetFramework.Parse(targetFramework);
-            string currentRid = DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
+            string currentRid = RuntimeInformation.RuntimeIdentifier;
 
             string ridOS = currentRid.Split('.')[0];
             if (ridOS.Equals("alpine", StringComparison.OrdinalIgnoreCase))
@@ -165,3 +164,5 @@ namespace Microsoft.NET.TestFramework
         }
     }
 }
+
+#endif

@@ -1,10 +1,13 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -87,7 +90,7 @@ namespace Microsoft.NET.Publish.Tests
             }
 
             // Check for the main exe
-            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Darwin)
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 string exeSuffix = specifyRid ? ".exe" : Constants.ExeSuffix;
                 items.Should().ContainSingle(i => i.RelativePath.Equals($"{testProject.Name}{exeSuffix}", StringComparison.OrdinalIgnoreCase));

@@ -1,17 +1,14 @@
-﻿using System.IO;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.IO;
+using System.Xml.Linq;
 using FluentAssertions;
-using System.Runtime.InteropServices;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
-using System.Xml.Linq;
-using System.Runtime.CompilerServices;
-using System;
-using Microsoft.Extensions.DependencyModel;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.Publish.Tests
@@ -75,7 +72,6 @@ namespace Microsoft.NET.Publish.Tests
                 .Pass()
                 .And
                 .HaveStdOutContaining("Hello World");
-
         }
     }
 }

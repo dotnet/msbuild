@@ -3,11 +3,10 @@
 
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.CommandFactory;
-using Microsoft.DotNet.PlatformAbstractions;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
 namespace Microsoft.DotNet.Tests
@@ -245,7 +244,7 @@ namespace Microsoft.DotNet.Tests
 
             IPlatformCommandSpecFactory platformCommandSpecFactory = new GenericPlatformCommandSpecFactory();
 
-            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 && !forceGeneric)
             {
                 platformCommandSpecFactory = new WindowsExePreferredCommandSpecFactory();

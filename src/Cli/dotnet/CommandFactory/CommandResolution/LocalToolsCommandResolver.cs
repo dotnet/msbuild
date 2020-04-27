@@ -3,15 +3,12 @@
 
 using System;
 using System.IO;
-using System.Reflection;
-using System.Collections.Generic;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.ToolManifest;
 using Microsoft.DotNet.ToolPackage;
-using NuGet.Frameworks;
-using Microsoft.DotNet.Cli;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.CommandFactory
 {

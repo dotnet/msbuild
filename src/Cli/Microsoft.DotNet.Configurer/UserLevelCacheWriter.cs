@@ -25,6 +25,11 @@ namespace Microsoft.DotNet.Configurer
         public string RunWithCache(string cacheKey, Func<string> getValueToCache)
         {
             var cacheFilepath = GetCacheFilePath(cacheKey);
+            return RunWithCacheInFilePath(cacheFilepath, getValueToCache);
+        }
+
+        public string RunWithCacheInFilePath(string cacheFilepath, Func<string> getValueToCache)
+        {
             try
             {
                 if (!_file.Exists(cacheFilepath))
@@ -55,7 +60,6 @@ namespace Microsoft.DotNet.Configurer
 
                 throw;
             }
-
         }
 
         internal UserLevelCacheWriter(string dotnetUserProfileFolderPath, IFile file, IDirectory directory)

@@ -113,18 +113,18 @@
         <note>{StrBegin="NETSDK1032: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSelfContainedWithoutRuntimeIdentifier">
-        <source>NETSDK1031: It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</source>
-        <target state="translated">NETSDK1031: Sestavení nebo publikování nezávislé aplikace bez zadání parametru RuntimeIdentifier není podporované. Zadejte prosím buď parametr RuntimeIdentifier, nebo nastavte parametr SelfContained na hodnotu False.</target>
+        <source>NETSDK1031: It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier. You must either specify a RuntimeIdentifier or set SelfContained to false.</source>
+        <target state="needs-review-translation">NETSDK1031: Sestavení nebo publikování nezávislé aplikace bez zadání parametru RuntimeIdentifier není podporované. Zadejte prosím buď parametr RuntimeIdentifier, nebo nastavte parametr SelfContained na hodnotu False.</target>
         <note>{StrBegin="NETSDK1031: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutRuntimeIdentifier">
-        <source>NETSDK1097: It is not supported to publish an application to a single-file without specifying a RuntimeIdentifier. Please either specify a RuntimeIdentifier or set PublishSingleFile to false.</source>
-        <target state="translated">NETSDK1097: Publikování aplikace do jednoho souboru bez zadání parametru RuntimeIdentifier není podporované. Buď prosím zadejte parametr RuntimeIdentifier, nebo nastavte parametr PublishSingleFile na hodnotu False.</target>
+        <source>NETSDK1097: It is not supported to publish an application to a single-file without specifying a RuntimeIdentifier. You must either specify a RuntimeIdentifier or set PublishSingleFile to false.</source>
+        <target state="needs-review-translation">NETSDK1097: Publikování aplikace do jednoho souboru bez zadání parametru RuntimeIdentifier není podporované. Buď prosím zadejte parametr RuntimeIdentifier, nebo nastavte parametr PublishSingleFile na hodnotu False.</target>
         <note>{StrBegin="NETSDK1097: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutAppHost">
-        <source>NETSDK1098: Applications published to a single-file are required to use the application host. Please either set PublishSingleFile to false or set UseAppHost to true.</source>
-        <target state="translated">NETSDK1098: Aplikace publikované do jednoho souboru musí používat hostitele aplikací. Buď prosím nastavte parametr PublishSingleFile na hodnotu False, nebo parametr UseAppHost na hodnotu True.</target>
+        <source>NETSDK1098: Applications published to a single-file are required to use the application host. You must either set PublishSingleFile to false or set UseAppHost to true.</source>
+        <target state="needs-review-translation">NETSDK1098: Aplikace publikované do jednoho souboru musí používat hostitele aplikací. Buď prosím nastavte parametr PublishSingleFile na hodnotu False, nebo parametr UseAppHost na hodnotu True.</target>
         <note>{StrBegin="NETSDK1098: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutExecutable">
@@ -258,8 +258,8 @@
         <note>{StrBegin="NETSDK1015: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateRuntimePackAsset">
-        <source>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET Core team here: https://aka.ms/dotnet-sdk-issue.</source>
-        <target state="translated">NETSDK1110: Více než jeden prostředek v balíčku modulu runtime má stejnou cílovou dílčí cestu {0}. Tady můžete tuto chybu nahlásit týmu .NET Core: https://aka.ms/dotnet-sdk-issue.</target>
+        <source>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
+        <target state="needs-review-translation">NETSDK1110: Více než jeden prostředek v balíčku modulu runtime má stejnou cílovou dílčí cestu {0}. Tady můžete tuto chybu nahlásit týmu .NET Core: https://aka.ms/dotnet-sdk-issue.</target>
         <note>{StrBegin="NETSDK1110: "}</note>
       </trans-unit>
       <trans-unit id="EncounteredConflict_Info">
@@ -426,6 +426,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1082: Pro zadaný identifikátor RuntimeIdentifier {1} nebyl k dispozici žádný balíček modulu runtime {0}.</target>
         <note>{StrBegin="NETSDK1082: "}</note>
       </trans-unit>
+      <trans-unit id="NoSupportComSelfContained">
+        <source>NETSDK1128: COM hosting does not support self-contained deployments.</source>
+        <target state="new">NETSDK1128: COM hosting does not support self-contained deployments.</target>
+        <note>{StrBegin="NETSDK1128: "}</note>
+      </trans-unit>
       <trans-unit id="NoSupportCppEnableComHosting">
         <source>NETSDK1119: C++/CLI projects targeting .NET Core cannot use EnableComHosting=true.</source>
         <target state="translated">NETSDK1119: Projekty C++/CLI cílené na rozhraní .NET Core nemůžou používat EnableComHosting=true.</target>
@@ -477,8 +482,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1011: "}</note>
       </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
-        <source>NETSDK1059: The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
-        <target state="translated">NETSDK1059: Nástroj {0} je teď zahrnutý v sadě .NET Core SDK. Informace o tom, jak vyřešit toto upozornění, jsou dostupné na adrese https://aka.ms/dotnetclitools-in-box.</target>
+        <source>NETSDK1059: The tool '{0}' is now included in the .NET SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
+        <target state="needs-review-translation">NETSDK1059: Nástroj {0} je teď zahrnutý v sadě .NET Core SDK. Informace o tom, jak vyřešit toto upozornění, jsou dostupné na adrese https://aka.ms/dotnetclitools-in-box.</target>
         <note>{StrBegin="NETSDK1059: "}</note>
       </trans-unit>
       <trans-unit id="ProjectToolOnlySupportTFMLowerThanNetcoreapp22">
@@ -500,6 +505,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1124: Trimming assemblies requires .NET Core 3.0 or higher.</source>
         <target state="translated">NETSDK1124: Oříznutí sestavení vyžaduje architekturu .NET Core 3.0 nebo vyšší.</target>
         <note>{StrBegin="NETSDK1124: "}</note>
+      </trans-unit>
+      <trans-unit id="PublishUnsupportedWithoutTargetFramework">
+        <source>NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify the framework for the published application.</source>
+        <target state="new">NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify the framework for the published application.</target>
+        <note>{StrBegin="NETSDK1129: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunCompilationFailed">
         <source>NETSDK1096: Optimizing assemblies for performance failed. You can either exclude the failing assemblies from being optimized, or set the PublishReadyToRun property to false.</source>
@@ -537,8 +547,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1028: "}</note>
       </trans-unit>
       <trans-unit id="RuntimeListNotFound">
-        <source>NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET Core team here: https://aka.ms/dotnet-sdk-issue.</source>
-        <target state="translated">NETSDK1109: Soubor seznamu modulu runtime {0} nebyl nalezen. Tady můžete tuto chybu nahlásit týmu .NET Core: https://aka.ms/dotnet-sdk-issue.</target>
+        <source>NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
+        <target state="needs-review-translation">NETSDK1109: Soubor seznamu modulu runtime {0} nebyl nalezen. Tady můžete tuto chybu nahlásit týmu .NET Core: https://aka.ms/dotnet-sdk-issue.</target>
         <note>{StrBegin="NETSDK1109: "}</note>
       </trans-unit>
       <trans-unit id="RuntimePackNotDownloaded">
@@ -617,8 +627,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1107: "}</note>
       </trans-unit>
       <trans-unit id="UsingPreviewSdk_Info">
-        <source>You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</source>
-        <target state="translated">Používáte preview verzi .NET Core. Další informace: https://aka.ms/dotnet-core-preview</target>
+        <source>You are using a preview version of .NET. See: https://aka.ms/dotnet-core-preview</source>
+        <target state="needs-review-translation">Používáte preview verzi .NET Core. Další informace: https://aka.ms/dotnet-core-preview</target>
         <note />
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresUseWpfOrUseWindowsForms">

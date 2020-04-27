@@ -18,8 +18,7 @@ namespace Microsoft.DotNet.NugetSearch
                 nugetSearchApiParameter.SearchTerm,
                 nugetSearchApiParameter.Skip,
                 nugetSearchApiParameter.Take,
-                nugetSearchApiParameter.Prerelease,
-                nugetSearchApiParameter.SemverLevel);
+                nugetSearchApiParameter.Prerelease);
 
             var httpClient = new HttpClient();
             var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(10));
@@ -44,7 +43,7 @@ namespace Microsoft.DotNet.NugetSearch
         }
 
         internal static Uri ConstructUrl(string searchTerm = null, int? skip = null, int? take = null,
-            bool prerelease = false, string semverLevel = null)
+            bool prerelease = false)
         {
             var uriBuilder = new UriBuilder("https://azuresearch-usnc.nuget.org/query");
             NameValueCollection query = HttpUtility.ParseQueryString(uriBuilder.Query);
@@ -54,6 +53,10 @@ namespace Microsoft.DotNet.NugetSearch
             }
 
             query["packageType"] = "dotnettool";
+
+            // This is a field for internal nuget back
+            // compactabiliy should be "2.0.0" for all new API usage
+            query["semVerLevel"] = "2.0.0";
 
             if (skip.HasValue)
             {
@@ -68,11 +71,6 @@ namespace Microsoft.DotNet.NugetSearch
             if (prerelease)
             {
                 query["prerelease"] = "true";
-            }
-
-            if (!string.IsNullOrWhiteSpace(semverLevel))
-            {
-                query["semVerLevel"] = semverLevel;
             }
 
             uriBuilder.Query = query.ToString();

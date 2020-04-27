@@ -183,7 +183,7 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
     <value>Tool '{0}' failed to install. This failure may have been caused by:
 
 * You are attempting to install a preview release and did not use the --version option to specify the version.
-* A package by this name was found, but it was not a .NET Core tool.
+* A package by this name was found, but it was not a .NET tool.
 * The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
 * You mistyped the name of the tool.
 

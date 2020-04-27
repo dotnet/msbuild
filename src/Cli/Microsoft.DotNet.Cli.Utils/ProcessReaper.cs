@@ -1,12 +1,11 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.Win32.SafeHandles;
-
-using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -37,7 +36,7 @@ namespace Microsoft.DotNet.Cli.Utils
             // where the child writes output the test expects before the intermediate dotnet process
             // has registered the event handlers to handle the signals the tests will generate.
             Console.CancelKeyPress += HandleCancelKeyPress;
-            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Windows)
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 _shutdownMutex = new Mutex();
                 AppDomain.CurrentDomain.ProcessExit += HandleProcessExit;
@@ -49,7 +48,7 @@ namespace Microsoft.DotNet.Cli.Utils
         /// </summary>
         public void NotifyProcessStarted()
         {
-            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // Limit the use of job objects to versions of Windows that support nested jobs (i.e. Windows 8/2012 or later).
                 // Ideally, we would check for some new API export or OS feature instead of the OS version,
@@ -66,7 +65,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public void Dispose()
         {
-            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 if (_job != null)
                 {

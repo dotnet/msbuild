@@ -26,9 +26,9 @@
         <source>Could not execute because the specified command or file was not found.
 Possible reasons for this include:
   * You misspelled a built-in dotnet command.
-  * You intended to execute a .NET Core program, but {0} does not exist.
+  * You intended to execute a .NET program, but {0} does not exist.
   * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
-        <target state="translated">Spuštění nebylo úspěšné, protože zadaný příkaz nebo soubor se nenašly.
+        <target state="needs-review-translation">Spuštění nebylo úspěšné, protože zadaný příkaz nebo soubor se nenašly.
 Mezi možné příčiny patří toto:
   * V integrovaném příkazu dotnet je překlep.
   * Chtěli jste spustit program .NET Core, ale {0} neexistuje.
@@ -76,8 +76,8 @@ Mezi možné příčiny patří toto:
         <note />
       </trans-unit>
       <trans-unit id="DotNetSdkInfoLabel">
-        <source>.NET Core SDK (reflecting any global.json):</source>
-        <target state="translated">Sada .NET Core SDK (vyjadřující jakýkoli global.json):</target>
+        <source>.NET SDK (reflecting any global.json):</source>
+        <target state="needs-review-translation">Sada .NET Core SDK (vyjadřující jakýkoli global.json):</target>
         <note />
       </trans-unit>
       <trans-unit id="DotNetRuntimeInfoLabel">
@@ -110,8 +110,8 @@ dotnet tool install --global {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="DotNetSdkInfo">
-        <source>.NET Core SDK</source>
-        <target state="translated">Sada .NET Core SDK</target>
+        <source>.NET SDK</source>
+        <target state="needs-review-translation">Sada .NET Core SDK</target>
         <note />
       </trans-unit>
     </body>

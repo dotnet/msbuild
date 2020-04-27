@@ -10,16 +10,14 @@ using System.Text;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.CommandFactory;
 using Microsoft.DotNet.Configurer;
-using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.DotNet.Tools.Help;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Frameworks;
-using Command = Microsoft.DotNet.Cli.Utils.Command;
-using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
 using LocalizableStrings = Microsoft.DotNet.Cli.Utils.LocalizableStrings;
-using Microsoft.DotNet.CommandFactory;
+using RuntimeEnvironment = Microsoft.DotNet.Cli.Utils.RuntimeEnvironment;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -154,13 +152,13 @@ namespace Microsoft.DotNet.Cli
                         ReportDotnetHomeUsage(environmentProvider);
 
                         topLevelCommandParserResult = new TopLevelCommandParserResult(command);
-                        var hasSuperUserAccess = false;
+                        var isDotnetBeingInvokedFromNativeInstaller = false;
                         if (IsDotnetBeingInvokedFromNativeInstaller(topLevelCommandParserResult))
                         {
                             aspNetCertificateSentinel = new NoOpAspNetCertificateSentinel();
                             firstTimeUseNoticeSentinel = new NoOpFirstTimeUseNoticeSentinel();
                             toolPathSentinel = new NoOpFileSentinel(exists: false);
-                            hasSuperUserAccess = true;
+                            isDotnetBeingInvokedFromNativeInstaller  = true;
                         }
 
                         var dotnetFirstRunConfiguration = new DotnetFirstRunConfiguration(
@@ -172,7 +170,7 @@ namespace Microsoft.DotNet.Cli
                             firstTimeUseNoticeSentinel,
                             aspNetCertificateSentinel,
                             toolPathSentinel,
-                            hasSuperUserAccess,
+                            isDotnetBeingInvokedFromNativeInstaller,
                             dotnetFirstRunConfiguration,
                             environmentProvider);
 
@@ -258,13 +256,13 @@ namespace Microsoft.DotNet.Cli
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
             IAspNetCertificateSentinel aspNetCertificateSentinel,
             IFileSentinel toolPathSentinel,
-            bool hasSuperUserAccess,
+            bool isDotnetBeingInvokedFromNativeInstaller,
             DotnetFirstRunConfiguration dotnetFirstRunConfiguration,
             IEnvironmentProvider environmentProvider)
         {
             using (PerfTrace.Current.CaptureTiming())
             {
-                var environmentPath = EnvironmentPathFactory.CreateEnvironmentPath(hasSuperUserAccess, environmentProvider);
+                var environmentPath = EnvironmentPathFactory.CreateEnvironmentPath(isDotnetBeingInvokedFromNativeInstaller, environmentProvider);
                 var commandFactory = new DotNetCommandFactory(alwaysRunOutOfProc: true);
                 var aspnetCertificateGenerator = new AspNetCoreCertificateGenerator();
                 var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(
@@ -278,6 +276,11 @@ namespace Microsoft.DotNet.Cli
                     environmentPath);
 
                 dotnetConfigurer.Configure();
+
+                if (isDotnetBeingInvokedFromNativeInstaller && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    DotDefaultPathCorrector.Correct();
+                }
             }
         }
 
@@ -313,7 +316,7 @@ namespace Microsoft.DotNet.Cli
             Reporter.Output.WriteLine($" OS Version:  {RuntimeEnvironment.OperatingSystemVersion}");
             Reporter.Output.WriteLine($" OS Platform: {RuntimeEnvironment.OperatingSystemPlatform}");
             Reporter.Output.WriteLine($" RID:         {GetDisplayRid(versionFile)}");
-            Reporter.Output.WriteLine($" Base Path:   {ApplicationEnvironment.ApplicationBasePath}");
+            Reporter.Output.WriteLine($" Base Path:   {AppContext.BaseDirectory}");
         }
 
         private static bool IsArg(string candidate, string longName)
@@ -331,7 +334,7 @@ namespace Microsoft.DotNet.Cli
         {
             FrameworkDependencyFile fxDepsFile = new FrameworkDependencyFile();
 
-            string currentRid = RuntimeEnvironment.GetRuntimeIdentifier();
+            string currentRid = RuntimeInformation.RuntimeIdentifier;
 
             // if the current RID isn't supported by the shared framework, display the RID the CLI was
             // built with instead, so the user knows which RID they should put in their "runtimes" section.

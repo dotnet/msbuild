@@ -7,6 +7,7 @@
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <IsPackable>true</IsPackable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,7 +16,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelPackageVersion)" />
-    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)" />
     <PackageReference Include="NuGet.Versioning" Version="$(NuGetVersioningPackageVersion)" />
     <PackageReference Include="NuGet.Packaging" Version="$(NuGetPackagingPackageVersion)" />
     <!-- nuget moved all type from NuGet.Packaging.Core to NuGet.Packaging and added type forwarding in 5.0.0-rtm.5821.
@@ -26,6 +26,7 @@
     <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelPackageVersion)" />
     <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
+    <PackageReference Include="System.Security.Principal.Windows" Version="4.7.0" />
   </ItemGroup>
 
 </Project>

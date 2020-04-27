@@ -4,10 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
@@ -37,7 +36,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData("false", "netcoreapp3.0")]
         public void It_publishes_with_or_without_apphost(string useAppHost, string targetFramework)
         {
-            var runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();
+            var runtimeIdentifier = RuntimeInformation.RuntimeIdentifier;
             var appHostName = $"{TestProjectName}{Constants.ExeSuffix}";
 
             var testAsset = _testAssetsManager
@@ -107,7 +106,7 @@ namespace Microsoft.NET.Publish.Tests
         [Fact]
         public void It_errors_when_using_app_host_with_older_target_framework()
         {
-            var runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();
+            var runtimeIdentifier = RuntimeInformation.RuntimeIdentifier;
 
             var testAsset = _testAssetsManager
                 .CopyTestAsset(TestProjectName)

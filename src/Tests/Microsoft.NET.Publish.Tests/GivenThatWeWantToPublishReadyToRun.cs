@@ -173,7 +173,7 @@ namespace Microsoft.NET.Publish.Tests
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
             publishCommand.Execute($"/p:PublishReadyToRun=true",
-                                   $"/p:RuntimeIdentifier={DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier()}")
+                                   $"/p:RuntimeIdentifier={RuntimeInformation.RuntimeIdentifier}")
                 .Should()
                 .Pass()
                 .And

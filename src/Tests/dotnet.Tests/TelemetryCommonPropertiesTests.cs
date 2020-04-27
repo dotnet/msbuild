@@ -2,13 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using System;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Configurer;
-using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
 using Microsoft.NET.TestFramework;
 using Xunit.Abstractions;
 
@@ -111,7 +109,7 @@ namespace Microsoft.DotNet.Tests
         [LinuxOnlyFact]
         public void TelemetryCommonPropertiesShouldContainLibcReleaseAndVersion()
         {
-            if (!RuntimeEnvironment.OperatingSystem.Contains("Alpine", StringComparison.OrdinalIgnoreCase))
+            if (!RuntimeInformation.RuntimeIdentifier.Contains("alpine", StringComparison.OrdinalIgnoreCase))
             {
                 var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => null, userLevelCacheWriter: new NothingCache());
                 unitUnderTest.GetTelemetryCommonProperties()["Libc Release"].Should().NotBeEmpty();
@@ -122,6 +120,11 @@ namespace Microsoft.DotNet.Tests
         private class NothingCache : IUserLevelCacheWriter
         {
             public string RunWithCache(string cacheKey, Func<string> getValueToCache)
+            {
+                return getValueToCache();
+            }
+
+            public string RunWithCacheInFilePath(string cacheFilepath, Func<string> getValueToCache)
             {
                 return getValueToCache();
             }

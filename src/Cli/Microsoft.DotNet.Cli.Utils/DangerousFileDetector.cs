@@ -4,8 +4,6 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using Microsoft.DotNet.PlatformAbstractions;
-using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -13,7 +11,7 @@ namespace Microsoft.DotNet.Cli.Utils
     {
         public bool IsDangerous(string filePath)
         {
-            if (RuntimeEnvironment.OperatingSystemPlatform != Platform.Windows)
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 return false;
             }

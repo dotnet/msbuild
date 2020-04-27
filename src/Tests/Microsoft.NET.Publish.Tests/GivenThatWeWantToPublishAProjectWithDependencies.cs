@@ -162,7 +162,7 @@ namespace Microsoft.NET.Publish.Tests
         {
             string project = "SimpleDependencies";
             string targetFramework = "netcoreapp2.1";
-            var rid = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
+            var rid = RuntimeInformation.RuntimeIdentifier;
             TestAsset simpleDependenciesAsset = _testAssetsManager
                 .CopyTestAsset(project)
                 .WithSource()

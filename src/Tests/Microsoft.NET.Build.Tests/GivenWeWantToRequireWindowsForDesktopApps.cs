@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using System.Xml.Linq;
-using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
@@ -39,7 +38,7 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
         }
 
-        [PlatformSpecificTheory(Platform.Linux, Platform.Darwin, Platform.FreeBSD)]
+        [PlatformSpecificTheory(TestPlatforms.Linux | TestPlatforms.OSX | TestPlatforms.FreeBSD)]
         [InlineData("UseWPF")]
         [InlineData("UseWindowsForms")]
         public void It_errors_on_nonwindows_with_the_windows_desktop_sdk(string uiFrameworkProperty)
@@ -76,7 +75,7 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
         }
 
-        [PlatformSpecificTheory(Platform.Linux, Platform.Darwin, Platform.FreeBSD)]
+        [PlatformSpecificTheory(TestPlatforms.Linux | TestPlatforms.OSX | TestPlatforms.FreeBSD)]
         [InlineData("Microsoft.WindowsDesktop.App")]
         [InlineData("Microsoft.WindowsDesktop.App.WindowsForms")]
         [InlineData("Microsoft.WindowsDesktop.App.WPF")]
@@ -123,7 +122,7 @@ namespace Microsoft.NET.Build.Tests
             Directory.Exists(Path.Combine(asset.Path, ProjectName, "packages")).Should().BeFalse();
         }
 
-        [PlatformSpecificFact(Platform.Linux, Platform.Darwin, Platform.FreeBSD)]
+        [PlatformSpecificFact(TestPlatforms.Linux | TestPlatforms.OSX | TestPlatforms.FreeBSD)]
         public void It_does_not_download_desktop_runtime_packs_on_unix()
         {
             const string ProjectName = "NoDownloadRuntimePackTest";

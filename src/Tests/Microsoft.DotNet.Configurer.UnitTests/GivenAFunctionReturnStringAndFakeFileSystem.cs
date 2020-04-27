@@ -65,6 +65,15 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         }
 
         [Fact]
+        public void ItKeepsTheCacheInSpecificPath()
+        {
+            var cacheFilePath = Path.Combine("some path", $"fooCache.dotnetUserLevelCache");
+            _userLevelCacheWriter.RunWithCacheInFilePath(cacheFilePath, () => "foo");
+            _fileSystemMock.File.Exists(cacheFilePath);
+            _fileSystemMock.File.ReadAllText(cacheFilePath).Should().Be("foo");
+        }
+
+        [Fact]
         public void ItRunsAndReturnsTheValueIfCacheCreationFailed()
         {
             var mockFile = new Mock<IFile>();

@@ -11,10 +11,6 @@
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)" />
-  </ItemGroup>
-
   <Target Name="PrecompileScript" BeforeTargets="Build" Condition=" '$(IsCrossTargetingBuild)' != 'true' ">
     <MSBuild
       BuildInParallel="False"

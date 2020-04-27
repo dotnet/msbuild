@@ -3,17 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.PlatformAbstractions;
 using System.IO;
-using System.Security;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
-using Microsoft.Win32;
-using System.Linq;
-using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
+using RuntimeEnvironment = Microsoft.DotNet.Cli.Utils.RuntimeEnvironment;
 using RuntimeInformation = System.Runtime.InteropServices.RuntimeInformation;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
 
 namespace Microsoft.DotNet.Cli.Telemetry
 {
@@ -66,12 +60,20 @@ namespace Microsoft.DotNet.Cli.Telemetry
                 {OSVersion, RuntimeEnvironment.OperatingSystemVersion},
                 {OSPlatform, RuntimeEnvironment.OperatingSystemPlatform.ToString()},
                 {OutputRedirected, Console.IsOutputRedirected.ToString()},
-                {RuntimeId, RuntimeEnvironment.GetRuntimeIdentifier()},
+                {RuntimeId, RuntimeInformation.RuntimeIdentifier},
                 {ProductVersion, Product.Version},
                 {TelemetryProfile, Environment.GetEnvironmentVariable(TelemetryProfileEnvironmentVariable)},
                 {DockerContainer, _userLevelCacheWriter.RunWithCache(IsDockerContainerCacheKey, () => _dockerContainerDetector.IsDockerContainer().ToString("G") )},
                 {CurrentPathHash, _hasher(_getCurrentDirectory())},
-                {MachineId, _userLevelCacheWriter.RunWithCache(MachineIdCacheKey, GetMachineId)},
+                // we don't want to recalcuate a new id for every new SDK version. Reuse the same path accross versions.
+                // If we change the format of the cache later.
+                // We need to rename the cache from v1 to v2
+                {MachineId,
+                    _userLevelCacheWriter.RunWithCacheInFilePath(
+                        Path.Combine(
+                            CliFolderPathCalculator.DotnetUserProfileFolderPath,
+                            $"{MachineIdCacheKey}.v1.dotnetUserLevelCache"),
+                        GetMachineId)},
                 {KernelVersion, GetKernelVersion()},
                 {InstallationType, ExternalTelemetryProperties.GetInstallationType()},
                 {ProductType, ExternalTelemetryProperties.GetProductType()},

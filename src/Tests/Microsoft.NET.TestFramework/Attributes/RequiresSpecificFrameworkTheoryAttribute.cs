@@ -1,6 +1,8 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#if NETCOREAPP
+
 using Microsoft.DotNet.Tools.Test.Utilities;
 using System;
 using System.Collections.Generic;
@@ -20,3 +22,5 @@ namespace Microsoft.NET.TestFramework
         }
     }
 }
+
+#endif

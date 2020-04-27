@@ -106,7 +106,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <SelfContained Condition="'$(SelfContained)' == '' and '$(RuntimeIdentifier)' != ''">true</SelfContained>
     <SelfContained Condition="'$(SelfContained)' == ''">false</SelfContained>
     <_OnOsx>$(NETCoreSdkRuntimeIdentifier.StartsWith('osx'))</_OnOsx>
+    <_RuntimeIdentifierUsesAppHost Condition="'$(RuntimeIdentifier)' != '' and ($(RuntimeIdentifier.StartsWith('ios')) or $(RuntimeIdentifier.StartsWith('tvos')) or $(RuntimeIdentifier.StartsWith('android')))">false</_RuntimeIdentifierUsesAppHost>
+    <_RuntimeIdentifierUsesAppHost Condition="'$(_RuntimeIdentifierUsesAppHost)' == ''">true</_RuntimeIdentifierUsesAppHost>
     <UseAppHost Condition="'$(UseAppHost)' == '' and
+                           '$(_RuntimeIdentifierUsesAppHost)' == 'true' and
                            ('$(SelfContained)' == 'true' or
                             ('$(RuntimeIdentifier)' != '' and '$(_TargetFrameworkVersionWithoutV)' >= '2.1') or
                             ('$(_TargetFrameworkVersionWithoutV)' >= '3.0' and $(_OnOsx) != 'true'))">true</UseAppHost>
@@ -133,7 +136,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(RuntimeIdentifier)' == ''"
                  ResourceName="CannotHaveSelfContainedWithoutRuntimeIdentifier" />
 
-    <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(UseAppHost)' != 'true'"
+    <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(UseAppHost)' != 'true' and '$(_RuntimeIdentifierUsesAppHost)' == 'true'"
                  ResourceName="CannotUseSelfContainedWithoutAppHost" />
 
     <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and '$(RuntimeIdentifier)' == ''"
@@ -156,6 +159,15 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <NETSdkWarning Condition="'$(PublishTrimmed)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'"
                    ResourceName="PublishTrimmedRequiresVersion30" />
+
+  </Target>
+
+  <Target Name="_CheckForUnsupportedHostingUsage"
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+          Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+
+    <NETSdkWarning Condition="'$(SelfContained)' == 'true' and '$(EnableComHosting)' == 'true'"
+                   ResourceName="NoSupportComSelfContained" />
 
   </Target>
 
