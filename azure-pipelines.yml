@@ -43,7 +43,7 @@ stages:
       enablePublishBuildAssets: true
       enablePublishUsingPipelines: ${{ variables._PublishUsingPipelines }}
       enableTelemetry: true
-      helixRepo: aspnet/websdk
+      helixRepo: dotnet/websdk
       jobs:
       - job: Windows_NT
         pool:
