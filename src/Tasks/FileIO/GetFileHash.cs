@@ -78,9 +78,22 @@ namespace Microsoft.Build.Tasks
             Parallel.For(0, Files.Length, index =>
             {
                 var file = Files[index];
+
                 if (!FileSystems.Default.FileExists(file.ItemSpec))
                 {
                     Log.LogErrorWithCodeFromResources("FileHash.FileNotFound", file.ItemSpec);
+                    return;
+                }
+
+                var hash = ComputeHash(algorithmFactory, file.ItemSpec);
+                var encodedHash = EncodeHash(encoding, hash);
+
+                lock (file)
+                {
+                    // We cannot guaranteee Files instances are uniques. Write to it inside a lock to
+                    // avoid concurrent edits.
+                    file.SetMetadata("FileHashAlgorithm", Algorithm);
+                    file.SetMetadata(MetadataName, encodedHash);
                 }
             });
 
@@ -88,14 +101,6 @@ namespace Microsoft.Build.Tasks
             {
                 return false;
             }
-
-            Parallel.For(0, Files.Length, index =>
-            {
-                var file = Files[index];
-                var hash = ComputeHash(algorithmFactory, file.ItemSpec);
-                file.SetMetadata("FileHashAlgorithm", Algorithm);
-                file.SetMetadata(MetadataName, EncodeHash(encoding, hash));
-            });
 
             Items = Files;
 
