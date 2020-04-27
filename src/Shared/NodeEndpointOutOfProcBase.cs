@@ -38,12 +38,12 @@ namespace Microsoft.Build.BackEnd
     {
         #region Private Data
 
-#if NETCOREAPP2_1
+#if NETCOREAPP2_1 || MONO
         /// <summary>
         /// The amount of time to wait for the client to connect to the host.
         /// </summary>
         private const int ClientConnectTimeout = 60000;
-#endif // NETCOREAPP2_1
+#endif // NETCOREAPP2_1 || MONO
 
         /// <summary>
         /// The size of the buffers to use for named pipes
@@ -401,7 +401,7 @@ namespace Microsoft.Build.BackEnd
                     try
                     {
                         long handshake = localReadPipe.ReadLongForHandshake(/* reject these leads */ new byte[] { 0x5F, 0x60 }, 0xFF /* this will disconnect the host; it expects leading 00 or F5 or 06 */
-#if NETCOREAPP2_1
+#if NETCOREAPP2_1 || MONO
                             , ClientConnectTimeout /* wait a long time for the handshake from this side */
 #endif
                             );

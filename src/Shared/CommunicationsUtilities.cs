@@ -369,13 +369,13 @@ namespace Microsoft.Build.Internal
         /// Extension method to read a series of bytes from a stream
         /// </summary>
         internal static long ReadLongForHandshake(this PipeStream stream
-#if NETCOREAPP2_1
+#if NETCOREAPP2_1 || MONO
             , int handshakeReadTimeout
 #endif
             )
         {
             return stream.ReadLongForHandshake((byte[])null, 0
-#if NETCOREAPP2_1
+#if NETCOREAPP2_1 || MONO
                 , handshakeReadTimeout
 #endif
                 );
@@ -387,14 +387,14 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static long ReadLongForHandshake(this PipeStream stream, byte[] leadingBytesToReject,
             byte rejectionByteToReturn
-#if NETCOREAPP2_1
+#if NETCOREAPP2_1 || MONO
             , int timeout
 #endif
             )
         {
             byte[] bytes = new byte[8];
 
-#if NETCOREAPP2_1
+#if NETCOREAPP2_1 || MONO
             if (!NativeMethodsShared.IsWindows)
             {
                 // Enforce a minimum timeout because the Windows code can pass
