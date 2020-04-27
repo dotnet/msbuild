@@ -186,9 +186,12 @@ namespace Microsoft.Build.UnitTests
             env.SetEnvironmentVariable("MSBUILDTARGETRESULTCOMPRESSIONTHRESHOLD", "0");
 
             BuildRequestData data = new BuildRequestData(projectFileFullPath, new Dictionary<string, string>(), null, new string[] { "Repro" }, null);
-            BuildParameters parameters = new BuildParameters();
-            parameters.DisableInProcNode = true;
-            parameters.Loggers = new ILogger[] { new MockLogger(_testOutput) };
+            BuildParameters parameters = new BuildParameters
+            {
+                DisableInProcNode = true,
+                EnableNodeReuse = false,
+                Loggers = new ILogger[] { new MockLogger(_testOutput) },
+            };
             BuildResult result = BuildManager.DefaultBuildManager.Build(parameters, data);
             result.OverallResult.ShouldBe(BuildResultCode.Success);
             result.ResultsByTarget["Repro"].Items[0].GetMetadata("RecursiveDir").ShouldBe("Subdir" + Path.DirectorySeparatorChar);
