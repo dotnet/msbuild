@@ -356,7 +356,7 @@ namespace Microsoft.Build.BackEnd
                 nodeStream.WriteLongForHandshake(hostHandshake);
 
                 CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
-#if NETCOREAPP2_1
+#if NETCOREAPP2_1 || MONO
                 long handshake = nodeStream.ReadLongForHandshake(timeout);
 #else
                 long handshake = nodeStream.ReadLongForHandshake();
