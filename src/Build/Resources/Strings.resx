@@ -1661,6 +1661,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>MSB4231: ProjectRootElement can't reload if it contains unsaved changes.</value>
     <comment>{StrBegin="MSB4231: "}</comment>
   </data>
+  <data name="LogTaskInputs.Truncated">
+    <value>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</value>
+  </data>
   <data name="MetaprojectGenerated" xml:space="preserve">
     <value>Metaproject "{0}" generated.</value>
   </data>
