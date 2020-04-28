@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using Microsoft.Build.Framework;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -30,7 +30,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
                 return false;
             }
 
-            if (destinationConnectionStrings == null || destinationAppSettingsFilePath.Length == 0)
+            if (destinationConnectionStrings == null || destinationConnectionStrings.Length == 0)
             {
                 return false;
             }
@@ -42,7 +42,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             {
                 string key = destinationConnectionString.ItemSpec;
                 string Value = destinationConnectionString.GetMetadata("Value");
-                appSettingsJsonObject["ConnectionStrings"][key] = Value;
+                var connectionStringsObject = appSettingsJsonObject["ConnectionStrings"];
+                if (connectionStringsObject != null)
+                {
+                    connectionStringsObject[key] = Value;
+                }
             }
 
             File.WriteAllText(destinationAppSettingsFilePath, appSettingsJsonObject.ToString());

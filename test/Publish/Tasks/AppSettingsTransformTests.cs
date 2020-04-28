@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -42,6 +42,33 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
             // Assert
             JToken connectionStringValue = JObject.Parse(File.ReadAllText(appsettingsFile))["ConnectionStrings"][connectionName];
             Assert.Equal(connectionStringValue.ToString(), connectionString);
+
+            if (File.Exists(appsettingsFile))
+            {
+                File.Delete(appsettingsFile);
+            }
+        }
+
+        [Theory]
+        [InlineData("DefaultConnection", @"Server=(localdb)\mssqllocaldb;Database=defaultDB;Trusted_Connection=True;MultipleActiveResultSets=true")]
+        [InlineData("EmptyConnection", @"")]
+        [InlineData("", @"SomeConnectionStringValue")]
+        public void AppSettingsTransform_DoesNotFailsIfEntryIsMissinginAppSettings(string connectionName, string connectionString)
+        {
+            // Arrange
+            ITaskItem[] taskItemArray = new ITaskItem[1];
+            TaskItem connectionstringTaskItem = new TaskItem(connectionName);
+            connectionstringTaskItem.SetMetadata("Value", connectionString);
+            taskItemArray[0] = connectionstringTaskItem;
+
+            string appsettingsFile = AppSettingsTransform.GenerateDefaultAppSettingsJsonFile();
+            File.WriteAllText(appsettingsFile, "{}");
+
+            // Act 
+            bool succeed = AppSettingsTransform.UpdateDestinationConnectionStringEntries(appsettingsFile, taskItemArray);
+
+            // Assert
+            Assert.True(succeed);
 
             if (File.Exists(appsettingsFile))
             {
