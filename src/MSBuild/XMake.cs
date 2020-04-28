@@ -3737,7 +3737,7 @@ namespace Microsoft.Build.CommandLine
         private static void DisplayCopyrightMessage()
         {
 #if RUNTIME_TYPE_NETCORE
-            const string frameworkName = ".NET Core";
+            const string frameworkName = ".NET";
 #elif MONO
             const string frameworkName = "Mono";
 #else
