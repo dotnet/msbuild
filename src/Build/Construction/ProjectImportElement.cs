@@ -34,7 +34,7 @@ namespace Microsoft.Build.Construction
             : base(xmlElement, parent, containingProject)
         {
             ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
-            ParsedSdkReference = sdkReference;
+            SdkReference = sdkReference;
         }
 
         /// <summary>
@@ -130,9 +130,9 @@ namespace Microsoft.Build.Construction
 
 
         /// <summary>
-        /// <see cref="SdkReference"/> if applicable to this import element.
+        /// <see cref="Framework.SdkReference"/> if applicable to this import element.
         /// </summary>
-        internal SdkReference ParsedSdkReference { get; set; }
+        internal SdkReference SdkReference { get; set; }
 
         /// <summary>
         /// Creates an unparented ProjectImportElement, wrapping an unparented XmlElement.
@@ -162,7 +162,7 @@ namespace Microsoft.Build.Construction
                 Project = project,
                 Sdk = sdkReference.ToString(),
                 ImplicitImportLocation = implicitImportLocation,
-                ParsedSdkReference = sdkReference,
+                SdkReference = sdkReference,
                 OriginalElement = originalElement
             };
         }
@@ -183,22 +183,22 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Helper method to update the <see cref="ParsedSdkReference" /> property if necessary (update only when changed).
+        /// Helper method to update the <see cref="SdkReference" /> property if necessary (update only when changed).
         /// </summary>
-        /// <returns>True if the <see cref="ParsedSdkReference" /> property was updated, otherwise false (no update necessary).</returns>
+        /// <returns>True if the <see cref="SdkReference" /> property was updated, otherwise false (no update necessary).</returns>
         private bool UpdateSdkReference(string name = null, string version = null, string minimumVersion = null)
         {
             var sdk = new SdkReference(
-                name ?? ParsedSdkReference?.Name ?? GetAttributeValue(XMakeAttributes.sdk, true),
-                version ?? ParsedSdkReference?.Version ?? GetAttributeValue(XMakeAttributes.sdkVersion, true),
-                minimumVersion ?? ParsedSdkReference?.MinimumVersion ?? GetAttributeValue(XMakeAttributes.sdkMinimumVersion, true));
+                name ?? SdkReference?.Name ?? GetAttributeValue(XMakeAttributes.sdk, true),
+                version ?? SdkReference?.Version ?? GetAttributeValue(XMakeAttributes.sdkVersion, true),
+                minimumVersion ?? SdkReference?.MinimumVersion ?? GetAttributeValue(XMakeAttributes.sdkMinimumVersion, true));
 
-            if (sdk.Equals(ParsedSdkReference))
+            if (sdk.Equals(SdkReference))
             {
                 return false;
             }
 
-            ParsedSdkReference = sdk;
+            SdkReference = sdk;
 
             return true;
         }

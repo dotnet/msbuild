@@ -12,7 +12,7 @@ namespace Microsoft.Build.UnitTests.Construction
     public class ProjectImportElement_Tests
     {
         /// <summary>
-        /// Verifies that the <see cref="ProjectImportElement.ParsedSdkReference" /> object is correctly set when creating <see cref="ProjectImportElement" /> objects.
+        /// Verifies that the <see cref="ProjectImportElement.SdkReference" /> object is correctly set when creating <see cref="ProjectImportElement" /> objects.
         /// </summary>
         [Fact]
         public void SdkReferenceIsCorrect()
@@ -26,23 +26,23 @@ namespace Microsoft.Build.UnitTests.Construction
                 SetPropertyAndExpectProjectXmlChangedEventToFire(rootElement, () => importElement.Sdk = "My.Sdk", "Set Import Sdk My.Sdk");
                 SetPropertyAndExpectProjectXmlChangedEventToNotFire(rootElement, () => importElement.Sdk = "My.Sdk");
 
-                importElement.ParsedSdkReference.Name.ShouldBe("My.Sdk");
-                importElement.ParsedSdkReference.Version.ShouldBeNull();
-                importElement.ParsedSdkReference.MinimumVersion.ShouldBeNull();
+                importElement.SdkReference.Name.ShouldBe("My.Sdk");
+                importElement.SdkReference.Version.ShouldBeNull();
+                importElement.SdkReference.MinimumVersion.ShouldBeNull();
 
                 SetPropertyAndExpectProjectXmlChangedEventToFire(rootElement, () => importElement.Version = "1.2.0", "Set Import Version 1.2.0");
                 SetPropertyAndExpectProjectXmlChangedEventToNotFire(rootElement, () => importElement.Version = "1.2.0");
 
-                importElement.ParsedSdkReference.Name.ShouldBe("My.Sdk");
-                importElement.ParsedSdkReference.Version.ShouldBe("1.2.0");
-                importElement.ParsedSdkReference.MinimumVersion.ShouldBeNull();
+                importElement.SdkReference.Name.ShouldBe("My.Sdk");
+                importElement.SdkReference.Version.ShouldBe("1.2.0");
+                importElement.SdkReference.MinimumVersion.ShouldBeNull();
 
                 SetPropertyAndExpectProjectXmlChangedEventToFire(rootElement, () => importElement.MinimumVersion = "1.0.0", "Set Import Minimum Version 1.0.0");
                 SetPropertyAndExpectProjectXmlChangedEventToNotFire(rootElement, () => importElement.MinimumVersion = "1.0.0");
 
-                importElement.ParsedSdkReference.Name.ShouldBe("My.Sdk");
-                importElement.ParsedSdkReference.Version.ShouldBe("1.2.0");
-                importElement.ParsedSdkReference.MinimumVersion.ShouldBe("1.0.0");
+                importElement.SdkReference.Name.ShouldBe("My.Sdk");
+                importElement.SdkReference.Version.ShouldBe("1.2.0");
+                importElement.SdkReference.MinimumVersion.ShouldBe("1.0.0");
 
                 rootElement.Save(env.GetTempFile(".csproj").Path);
 
@@ -50,25 +50,25 @@ namespace Microsoft.Build.UnitTests.Construction
 
                 SetPropertyAndExpectProjectXmlChangedEventToFire(rootElement, () => importElement.Sdk = "Some.Other.Sdk", "Set Import Sdk Some.Other.Sdk");
 
-                importElement.ParsedSdkReference.Name.ShouldBe("Some.Other.Sdk");
-                importElement.ParsedSdkReference.Version.ShouldBe("1.2.0");
-                importElement.ParsedSdkReference.MinimumVersion.ShouldBe("1.0.0");
+                importElement.SdkReference.Name.ShouldBe("Some.Other.Sdk");
+                importElement.SdkReference.Version.ShouldBe("1.2.0");
+                importElement.SdkReference.MinimumVersion.ShouldBe("1.0.0");
 
                 rootElement.Save();
 
                 SetPropertyAndExpectProjectXmlChangedEventToFire(rootElement, () => importElement.Version = "4.0.0", "Set Import Version 4.0.0");
 
-                importElement.ParsedSdkReference.Name.ShouldBe("Some.Other.Sdk");
-                importElement.ParsedSdkReference.Version.ShouldBe("4.0.0");
-                importElement.ParsedSdkReference.MinimumVersion.ShouldBe("1.0.0");
+                importElement.SdkReference.Name.ShouldBe("Some.Other.Sdk");
+                importElement.SdkReference.Version.ShouldBe("4.0.0");
+                importElement.SdkReference.MinimumVersion.ShouldBe("1.0.0");
 
                 rootElement.Save();
 
                 SetPropertyAndExpectProjectXmlChangedEventToFire(rootElement, () => importElement.MinimumVersion = "2.0.0", "Set Import Minimum Version 2.0.0");
 
-                importElement.ParsedSdkReference.Name.ShouldBe("Some.Other.Sdk");
-                importElement.ParsedSdkReference.Version.ShouldBe("4.0.0");
-                importElement.ParsedSdkReference.MinimumVersion.ShouldBe("2.0.0");
+                importElement.SdkReference.Name.ShouldBe("Some.Other.Sdk");
+                importElement.SdkReference.Version.ShouldBe("4.0.0");
+                importElement.SdkReference.MinimumVersion.ShouldBe("2.0.0");
             }
         }
 
