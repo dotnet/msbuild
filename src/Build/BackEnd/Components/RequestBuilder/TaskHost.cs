@@ -34,7 +34,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IBuildEngine6
+        IBuildEngine7
     {
         /// <summary>
         /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set. 
@@ -445,6 +445,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     e.BuildEventContext = _taskLoggingContext.BuildEventContext;
                     _taskLoggingContext.LoggingService.LogBuildEvent(e);
+                    _taskLoggingContext.HasLoggedErrors = true;
                 }
             }
         }
@@ -667,6 +668,13 @@ namespace Microsoft.Build.BackEnd
             return _requestEntry.RequestConfiguration.GlobalProperties.ToDictionary();
         }
 
+        #endregion
+
+        #region IBuildEngine7 Members
+        /// <summary>
+        /// Enables or disables emitting a default error when a task fails without logging errors
+        /// </summary>
+        public bool AllowFailureWithoutError { get; set; } = true;
         #endregion
 
         /// <summary>
