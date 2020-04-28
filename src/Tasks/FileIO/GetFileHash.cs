@@ -75,6 +75,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
+            var writeLock = new object();
             Parallel.For(0, Files.Length, index =>
             {
                 var file = Files[index];
@@ -88,7 +89,7 @@ namespace Microsoft.Build.Tasks
                 var hash = ComputeHash(algorithmFactory, file.ItemSpec);
                 var encodedHash = EncodeHash(encoding, hash);
 
-                lock (file)
+                lock (writeLock)
                 {
                     // We cannot guaranteee Files instances are uniques. Write to it inside a lock to
                     // avoid concurrent edits.
