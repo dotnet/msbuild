@@ -19,12 +19,12 @@ namespace Microsoft.Build.Graph.UnitTests
         public static readonly string InnerBuildPropertyName = "InnerBuild";
         public static readonly string InnerBuildPropertiesName = "InnerBuildProperties";
 
-        public static readonly string CrosstargetingSpecificationPropertyGroup = $@"<PropertyGroup>
+        public static readonly string MultitargetingSpecificationPropertyGroup = $@"<PropertyGroup>
                                                                         <InnerBuildProperty>{InnerBuildPropertyName}</InnerBuildProperty>
                                                                         <InnerBuildPropertyValues>{InnerBuildPropertiesName}</InnerBuildPropertyValues>
                                                                         <{InnerBuildPropertiesName}>a;b</{InnerBuildPropertiesName}>
                                                                      </PropertyGroup>";
-        public static readonly string HardCodedInnerBuildWithCrosstargetingSpecification = $@"<PropertyGroup>
+        public static readonly string HardCodedInnerBuildWithMultitargetingSpecification = $@"<PropertyGroup>
                                                                         <InnerBuildProperty>{InnerBuildPropertyName}</InnerBuildProperty>
                                                                         <InnerBuildPropertyValues>{InnerBuildPropertiesName}</InnerBuildPropertyValues>
                                                                         <{InnerBuildPropertyName}>a</{InnerBuildPropertyName}>

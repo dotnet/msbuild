@@ -581,8 +581,8 @@ namespace Microsoft.Build.Graph.UnitTests
                 Projects = new Dictionary<string, string>
                 {
                     {"1", GraphTestingUtilities.CreateProjectFile(_env, 1, new[] {2}).Path},
-                    {"2", GraphTestingUtilities.CreateProjectFile(_env, 2, extraContent: CrosstargetingSpecificationPropertyGroup).Path},
-                    {"3", GraphTestingUtilities.CreateProjectFile(_env, 3, new[] {4}, extraContent: CrosstargetingSpecificationPropertyGroup).Path},
+                    {"2", GraphTestingUtilities.CreateProjectFile(_env, 2, extraContent: MultitargetingSpecificationPropertyGroup).Path},
+                    {"3", GraphTestingUtilities.CreateProjectFile(_env, 3, new[] {4}, extraContent: MultitargetingSpecificationPropertyGroup).Path},
                     {"4", GraphTestingUtilities.CreateProjectFile(_env, 4).Path}
                 },
                 SolutionDependencies = new[] {("1", "2"), ("3", "4")}

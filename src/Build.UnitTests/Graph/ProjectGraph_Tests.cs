@@ -33,7 +33,7 @@ namespace Microsoft.Build.Graph.UnitTests
         private static string[] NonOuterBuildTargets = {"AHelperOuter", "AHelperInner", "A"};
         private static string[] OuterBuildTargets = {"AHelperOuter"};
 
-        private static readonly string OuterBuildSpecificationWithProjectReferenceTargets = CrosstargetingSpecificationPropertyGroup + ProjectReferenceTargetsWithMultitargeting;
+        private static readonly string OuterBuildSpecificationWithProjectReferenceTargets = MultitargetingSpecificationPropertyGroup + ProjectReferenceTargetsWithMultitargeting;
 
         public ProjectGraphTests(ITestOutputHelper outputHelper)
         {
@@ -972,7 +972,7 @@ $@"<ItemGroup>
                 projectReferences: null,
                 projectReferenceTargets: null,
                 defaultTargets: "D1",
-                extraContent: CrosstargetingSpecificationPropertyGroup +
+                extraContent: MultitargetingSpecificationPropertyGroup +
                               projectReferenceTargetsProtocol +
 $@"
 <ItemGroup>
@@ -998,7 +998,7 @@ $@"
                 projectReferences: null,
                 projectReferenceTargets: null,
                 defaultTargets: "D3",
-                extraContent: CrosstargetingSpecificationPropertyGroup + projectReferenceTargetsProtocol);
+                extraContent: MultitargetingSpecificationPropertyGroup + projectReferenceTargetsProtocol);
 
             var graph = new ProjectGraph(entryProject);
 
@@ -1510,7 +1510,7 @@ $@"
         [Fact]
         public void OuterBuildAsRootShouldDirectlyReferenceInnerBuilds()
         {
-            var projectFile = _env.CreateTestProjectWithFiles($@"<Project>{CrosstargetingSpecificationPropertyGroup}</Project>").ProjectFile;
+            var projectFile = _env.CreateTestProjectWithFiles($@"<Project>{MultitargetingSpecificationPropertyGroup}</Project>").ProjectFile;
 
             var graph = new ProjectGraph(projectFile);
 
@@ -1536,7 +1536,7 @@ $@"
                 projectReferences: null,
                 projectReferenceTargets: null,
                 defaultTargets: null,
-                extraContent: CrosstargetingSpecificationPropertyGroup);
+                extraContent: MultitargetingSpecificationPropertyGroup);
 
 
             var graph = new ProjectGraph(entryProject);
@@ -1570,7 +1570,7 @@ $@"
                 projectReferences: null,
                 projectReferenceTargets: null,
                 defaultTargets: null,
-                extraContent: CrosstargetingSpecificationPropertyGroup);
+                extraContent: MultitargetingSpecificationPropertyGroup);
 
 
             var graph = new ProjectGraph(entryProject);
@@ -1598,7 +1598,7 @@ $@"
         public void DuplicatedInnerBuildMonikersShouldGetDeduplicated()
         {
             // multitarget to duplicate monikers
-            var multitargetingSpecification = CrosstargetingSpecificationPropertyGroup +
+            var multitargetingSpecification = MultitargetingSpecificationPropertyGroup +
                                               @"<PropertyGroup>
                                                     <InnerBuildProperties>a;a</InnerBuildProperties>
                                                 </PropertyGroup>";
@@ -1622,7 +1622,7 @@ $@"
         [Fact]
         public void ReferenceOfMultitargetingProjectShouldNotInheritInnerBuildSpecificGlobalProperties()
         {
-            var root = CreateProjectFile(env: _env, projectNumber: 1, projectReferences: new[] {2}, projectReferenceTargets: null, defaultTargets: null, extraContent: CrosstargetingSpecificationPropertyGroup).Path;
+            var root = CreateProjectFile(env: _env, projectNumber: 1, projectReferences: new[] {2}, projectReferenceTargets: null, defaultTargets: null, extraContent: MultitargetingSpecificationPropertyGroup).Path;
             CreateProjectFile(env: _env, projectNumber: 2);
 
             var graph = new ProjectGraph(root);
@@ -1641,7 +1641,7 @@ $@"
         [Fact]
         public void InnerBuildAsRootViaLocalPropertyShouldNotPropagateInnerBuildPropertyToReference()
         {
-            var innerBuildViaLocalProperty = CrosstargetingSpecificationPropertyGroup + $"<PropertyGroup><{InnerBuildPropertyName}>foo</{InnerBuildPropertyName}></PropertyGroup>";
+            var innerBuildViaLocalProperty = MultitargetingSpecificationPropertyGroup + $"<PropertyGroup><{InnerBuildPropertyName}>foo</{InnerBuildPropertyName}></PropertyGroup>";
 
             var root = CreateProjectFile(
                 env: _env,
@@ -1669,7 +1669,7 @@ $@"
         [Fact]
         public void InnerBuildAsRootViaGlobalPropertyShouldNotPropagateInnerBuildPropertyToReference()
         {
-            var root = CreateProjectFile(env: _env, projectNumber: 1, projectReferences: new[] {2}, projectReferenceTargets: null, defaultTargets: null, extraContent: CrosstargetingSpecificationPropertyGroup).Path;
+            var root = CreateProjectFile(env: _env, projectNumber: 1, projectReferences: new[] {2}, projectReferenceTargets: null, defaultTargets: null, extraContent: MultitargetingSpecificationPropertyGroup).Path;
             CreateProjectFile(env: _env, projectNumber: 2);
 
             var graph = new ProjectGraph(root, new Dictionary<string, string>{{InnerBuildPropertyName, "foo"}});
@@ -1688,10 +1688,10 @@ $@"
         [Fact]
         public void NonMultitargetingProjectsAreCompatibleWithMultitargetingProjects()
         {
-            var root = CreateProjectFile(env: _env, projectNumber: 1, projectReferences: new[] {2, 3}, projectReferenceTargets: null, defaultTargets: null, extraContent: CrosstargetingSpecificationPropertyGroup).Path;
+            var root = CreateProjectFile(env: _env, projectNumber: 1, projectReferences: new[] {2, 3}, projectReferenceTargets: null, defaultTargets: null, extraContent: MultitargetingSpecificationPropertyGroup).Path;
             CreateProjectFile(env: _env, projectNumber: 2, projectReferences: new[] {4});
             CreateProjectFile(env: _env, projectNumber: 3, projectReferences: new[] {4});
-            CreateProjectFile(env: _env, projectNumber: 4, projectReferences: null, projectReferenceTargets: null, defaultTargets: null, extraContent: CrosstargetingSpecificationPropertyGroup);
+            CreateProjectFile(env: _env, projectNumber: 4, projectReferences: null, projectReferenceTargets: null, defaultTargets: null, extraContent: MultitargetingSpecificationPropertyGroup);
 
             var graph = new ProjectGraph(root);
 
@@ -1709,15 +1709,15 @@ $@"
         [Fact]
         public void InnerBuildsCanHaveSeparateReferences()
         {
-            var extraInnerBuildReferenceSpec = CrosstargetingSpecificationPropertyGroup +
+            var extraInnerBuildReferenceSpec = MultitargetingSpecificationPropertyGroup +
                                           $@"<ItemGroup>
                                                 <ProjectReference Condition=`'$({InnerBuildPropertyName})'=='b'` Include=`4.proj;5.proj`/>
                                             </ItemGroup>".Cleanup();
 
             var root = CreateProjectFile(env: _env, projectNumber: 1, projectReferences: new[] {2, 3}, projectReferenceTargets: null, defaultTargets: null, extraContent: extraInnerBuildReferenceSpec).Path;
-            CreateProjectFile(env: _env, projectNumber: 2, projectReferences: null, projectReferenceTargets: null, defaultTargets: null, extraContent: CrosstargetingSpecificationPropertyGroup);
+            CreateProjectFile(env: _env, projectNumber: 2, projectReferences: null, projectReferenceTargets: null, defaultTargets: null, extraContent: MultitargetingSpecificationPropertyGroup);
             CreateProjectFile(env: _env, projectNumber: 3);
-            CreateProjectFile(env: _env, projectNumber: 4, projectReferences: null, projectReferenceTargets: null, defaultTargets: null, extraContent: CrosstargetingSpecificationPropertyGroup);
+            CreateProjectFile(env: _env, projectNumber: 4, projectReferences: null, projectReferenceTargets: null, defaultTargets: null, extraContent: MultitargetingSpecificationPropertyGroup);
             CreateProjectFile(env: _env, projectNumber: 5);
 
             var graph = new ProjectGraph(root);
@@ -1757,7 +1757,7 @@ $@"
 
             var graph = new ProjectGraph(new []
             {
-                CreateProjectFile(env: _env, projectNumber: 1, projectReferences: null, projectReferenceTargets: null, defaultTargets: null, extraContent: CrosstargetingSpecificationPropertyGroup).Path,
+                CreateProjectFile(env: _env, projectNumber: 1, projectReferences: null, projectReferenceTargets: null, defaultTargets: null, extraContent: MultitargetingSpecificationPropertyGroup).Path,
                 CreateProjectFile(env: _env, projectNumber: 2, projectReferences: null, projectReferenceTargets: null, defaultTargets: null, extraContent: referenceToInnerBuild).Path
             },
             additionalGlobalProperties);
@@ -1789,7 +1789,7 @@ $@"
                                            </ItemGroup>";
 
             var root = CreateProjectFile(env: _env, projectNumber: 1, projectReferences: null, projectReferenceTargets: null, defaultTargets: null, extraContent: referenceToInnerBuild).Path;
-            CreateProjectFile(env: _env, projectNumber: 2, projectReferences: new []{3}, projectReferenceTargets: null, defaultTargets: null, extraContent: CrosstargetingSpecificationPropertyGroup + $"<PropertyGroup><{InnerBuildPropertyName}>a</{InnerBuildPropertyName}></PropertyGroup>");
+            CreateProjectFile(env: _env, projectNumber: 2, projectReferences: new []{3}, projectReferenceTargets: null, defaultTargets: null, extraContent: MultitargetingSpecificationPropertyGroup + $"<PropertyGroup><{InnerBuildPropertyName}>a</{InnerBuildPropertyName}></PropertyGroup>");
             CreateProjectFile(env: _env, projectNumber: 3);
 
             var additionalGlobalProperties = new Dictionary<string, string>{{"x", "y"}};
@@ -1827,7 +1827,7 @@ $@"
                 projectReferences: null,
                 projectReferenceTargets: null,
                 defaultTargets: null,
-                extraContent: CrosstargetingSpecificationPropertyGroup + referenceToInnerBuild)
+                extraContent: MultitargetingSpecificationPropertyGroup + referenceToInnerBuild)
                 .Path;
 
             CreateProjectFile(
@@ -1836,7 +1836,7 @@ $@"
                 projectReferences: null,
                 projectReferenceTargets: null,
                 defaultTargets: null,
-                extraContent: CrosstargetingSpecificationPropertyGroup);
+                extraContent: MultitargetingSpecificationPropertyGroup);
 
             var graph = new ProjectGraph(new [] { root }, additionalGlobalProperties);
 
@@ -2148,25 +2148,25 @@ $@"
                     {
                         1,
                         EnableTransitiveProjectReferencesPropertyGroup +
-                        CrosstargetingSpecificationPropertyGroup
+                        MultitargetingSpecificationPropertyGroup
                     },
                     {
                         2,
                         EnableTransitiveProjectReferencesPropertyGroup +
-                        HardCodedInnerBuildWithCrosstargetingSpecification
+                        HardCodedInnerBuildWithMultitargetingSpecification
                     },
                     {
                         4,
                         EnableTransitiveProjectReferencesPropertyGroup +
-                        CrosstargetingSpecificationPropertyGroup
+                        MultitargetingSpecificationPropertyGroup
                     },
                     {
                         5,
-                        HardCodedInnerBuildWithCrosstargetingSpecification
+                        HardCodedInnerBuildWithMultitargetingSpecification
                     },
                     {
                         6,
-                        CrosstargetingSpecificationPropertyGroup
+                        MultitargetingSpecificationPropertyGroup
                     }
                 }
             );
@@ -2195,7 +2195,7 @@ $@"
         }
 
         [Fact]
-        public void TransitiveReferencesShouldNotOverwriteCrosstargetingEdges()
+        public void TransitiveReferencesShouldNotOverwriteMultitargetingEdges()
         {
             var graph = Helpers.CreateProjectGraph(
                 env: _env,
