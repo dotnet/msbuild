@@ -6,8 +6,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
-using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
-
 namespace Microsoft.Build.Construction
 {
     /// <summary>
@@ -75,12 +73,10 @@ namespace Microsoft.Build.Construction
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.sdk);
-                // TODO: here and other setters. Confirm that CheckUpdatedSdk() ussage is
-                //       really the intended one. Currently it does check for equality  before updating the attribute
-                //       so setter will only take effect if "ParsedSdkReference" is not updated. Currently it might work by accident
-                //       if all "Set" calls are different and no ParsedSdkReference is triggered in between.
-                if (!CheckUpdatedSdk()) return;
-                SetOrRemoveAttribute(XMakeAttributes.sdk, value, "Set Import Sdk {0}", value);
+                if (UpdateSdkReference(name: value))
+                {
+                    SetOrRemoveAttribute(XMakeAttributes.sdk, value, "Set Import Sdk {0}", value);
+                }
             }
         }
 
@@ -92,8 +88,10 @@ namespace Microsoft.Build.Construction
             get => GetAttributeValue(XMakeAttributes.sdkVersion);
             set
             {
-                if (!CheckUpdatedSdk()) return;
-                SetOrRemoveAttribute(XMakeAttributes.sdkVersion, value, "Set Import Version {0}", value);
+                if (UpdateSdkReference(version: value))
+                {
+                    SetOrRemoveAttribute(XMakeAttributes.sdkVersion, value, "Set Import Version {0}", value);
+                }
             }
         }
 
@@ -105,8 +103,10 @@ namespace Microsoft.Build.Construction
             get => GetAttributeValue(XMakeAttributes.sdkMinimumVersion);
             set
             {
-                if (!CheckUpdatedSdk()) return;
-                SetOrRemoveAttribute(XMakeAttributes.sdkMinimumVersion, value, "Set Import Minimum Version {0}", value);
+                if (UpdateSdkReference(minimumVersion: value))
+                {
+                    SetOrRemoveAttribute(XMakeAttributes.sdkMinimumVersion, value, "Set Import Minimum Version {0}", value);
+                }
             }
         }
 
@@ -183,16 +183,15 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Helper method to extract attribute values and update the ParsedSdkReference property if
-        /// necessary (update only when changed).
+        /// Helper method to update the <see cref="ParsedSdkReference" /> property if necessary (update only when changed).
         /// </summary>
-        /// <returns>True if the ParsedSdkReference was updated, otherwise false (no update necessary).</returns>
-        private bool CheckUpdatedSdk()
+        /// <returns>True if the <see cref="ParsedSdkReference" /> property was updated, otherwise false (no update necessary).</returns>
+        private bool UpdateSdkReference(string name = null, string version = null, string minimumVersion = null)
         {
             var sdk = new SdkReference(
-                GetAttributeValue(XMakeAttributes.sdk, true),
-                GetAttributeValue(XMakeAttributes.sdkVersion, true),
-                GetAttributeValue(XMakeAttributes.sdkMinimumVersion, true));
+                name ?? ParsedSdkReference?.Name ?? GetAttributeValue(XMakeAttributes.sdk, true),
+                version ?? ParsedSdkReference?.Version ?? GetAttributeValue(XMakeAttributes.sdkVersion, true),
+                minimumVersion ?? ParsedSdkReference?.MinimumVersion ?? GetAttributeValue(XMakeAttributes.sdkMinimumVersion, true));
 
             if (sdk.Equals(ParsedSdkReference))
             {
@@ -200,6 +199,7 @@ namespace Microsoft.Build.Construction
             }
 
             ParsedSdkReference = sdk;
+
             return true;
         }
     }
