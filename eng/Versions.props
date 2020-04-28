@@ -120,7 +120,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/windowsdesktop -->
-    <MicrosoftWindowsDesktopAppVersion>5.0.0-preview.5.20222.1</MicrosoftWindowsDesktopAppVersion>
+    <MicrosoftWindowsDesktopAppVersion>5.0.0-preview.5.20227.2</MicrosoftWindowsDesktopAppVersion>
   </PropertyGroup>
   <!-- Get .NET Framework reference assemblies from NuGet packages -->
   <PropertyGroup>
