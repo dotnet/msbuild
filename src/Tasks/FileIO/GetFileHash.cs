@@ -91,7 +91,7 @@ namespace Microsoft.Build.Tasks
 
                 lock (writeLock)
                 {
-                    // We cannot guaranteee Files instances are uniques. Write to it inside a lock to
+                    // We cannot guarantee Files instances are unique. Write to it inside a lock to
                     // avoid concurrent edits.
                     file.SetMetadata("FileHashAlgorithm", Algorithm);
                     file.SetMetadata(MetadataName, encodedHash);
