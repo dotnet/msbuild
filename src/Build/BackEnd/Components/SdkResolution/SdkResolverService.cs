@@ -151,6 +151,18 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                         loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "SdkResultVersionDifferentThanReference", sdk.Name, sdk.Version, result.Version);
                     }
 
+                    if (result.AdditionalPaths != null)
+                    {
+                        foreach (var additionalPath in result.AdditionalPaths)
+                        {
+                            if (!IsReferenceSameVersion(sdk, additionalPath.Version))
+                            {
+                                // MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.
+                                loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "SdkResultVersionDifferentThanReference", sdk.Name, sdk.Version, additionalPath.Version);
+                            }
+                        }
+                    }
+
                     // Associate the element location of the resolved SDK reference
                     result.ElementLocation = sdkReferenceLocation;
 
