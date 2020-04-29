@@ -15,11 +15,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             const string aspNetCoreElementName = "aspNetCore";
             const string envVariablesElementName = "environmentVariables";
 
-            const string WebConfigTemplate = @"<configuration><location path=""."" inheritInChildApplications=""false"" /></configuration>";
-
             if (webConfig == null || webConfig.Root.Name.LocalName != "configuration")
             {
-                webConfig = XDocument.Parse(WebConfigTemplate);
+                webConfig = XDocument.Parse(WebConfigTemplate.Template);
             }
 
             XElement rootElement = null;
