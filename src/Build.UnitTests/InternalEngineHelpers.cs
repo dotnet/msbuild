@@ -68,11 +68,55 @@ namespace Microsoft.Build.Unittest
                 ResolvedCalls.AddOrUpdate(sdkReference.Name, k => 1, (k, c) => c + 1);
 
                 return _resultMap.TryGetValue(sdkReference.Name, out var result)
-                    ? new SdkResult(sdkReference, result.Path, result.Version, null)
+                    ? CloneSdkResult(result)
                     : null;
             }
 
+            private SdkResult CloneSdkResult(SdkResult sdkResult)
+            {
+                if (!sdkResult.Success)
+                {
+                    return new SdkResult(sdkResult.SdkReference, sdkResult.Warnings, sdkResult.Errors);
+                }
 
+                IEnumerable<SdkResultPathAndVersion> sdkResultPathAndVersions;
+                if (sdkResult.Path == null)
+                {
+                    sdkResultPathAndVersions = Enumerable.Empty<SdkResultPathAndVersion>();
+                }
+                else
+                {
+                    List<SdkResultPathAndVersion> pathAndVersionList = new List<SdkResultPathAndVersion>();
+                    pathAndVersionList.Add(new SdkResultPathAndVersion(sdkResult.Path, sdkResult.Version));
+                    if (sdkResult.AdditionalPaths != null)
+                    {
+                        pathAndVersionList.AddRange(sdkResult.AdditionalPaths);
+                    }
+                    sdkResultPathAndVersions = pathAndVersionList;
+                }
+
+                Dictionary<string, SdkResultItem> sdkResultItems;
+
+                if (sdkResult.ItemsToAdd == null)
+                {
+                    sdkResultItems = null;
+                }
+                else
+                {
+                    sdkResultItems = new Dictionary<string, SdkResultItem>(StringComparer.OrdinalIgnoreCase);
+                    foreach (var item in sdkResult.ItemsToAdd)
+                    {
+                        sdkResultItems.Add(item.Key, new SdkResultItem(item.Value.ItemSpec,
+                            new Dictionary<string, string>(item.Value.Metadata, StringComparer.OrdinalIgnoreCase)));
+                    }
+                }
+
+                return new SdkResult(sdkResult.SdkReference,
+                                     sdkResultPathAndVersions,
+                                     sdkResult.PropertiesToAdd == null ? null : new Dictionary<string, string>(sdkResult.PropertiesToAdd, StringComparer.OrdinalIgnoreCase),
+                                     sdkResultItems,
+                                     sdkResult.Warnings);
+            }
         }
 
         internal class FileBasedMockSdkResolver : SdkResolver
