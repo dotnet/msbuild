@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.Build.Utilities;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using NuGet.Common;
 using NuGet.Frameworks;
@@ -180,6 +181,47 @@ namespace Microsoft.NET.Restore.Tests
             netFrameworkLibrary.Name.Should().Be("Microsoft.NETFramework.ReferenceAssemblies." + targetFramework);
             netFrameworkLibrary.Type.Should().Be("package");
             netFrameworkLibrary.Version.ToFullString().Should().Be("1.0.0");
+        }
+
+        [Fact]
+        public void It_fails_without_assembly_pack_reference()
+        {
+            var targetFramework = "net472";
+            var testProject = new TestProject()
+            {
+                Name = "ProjectWithoutTargetingPackRef",
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true,
+            };
+            testProject.AdditionalProperties["AutomaticallyUseReferenceAssemblyPackages"] = "false";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            if (TestProject.ReferenceAssembliesAreInstalled(TargetDotNetFrameworkVersion.Version472))
+            {
+                buildCommand.Execute()
+                    .Should()
+                    .Pass();
+
+                string projectAssetsJsonPath = Path.Combine(
+                    testAsset.Path,
+                    testProject.Name,
+                    "obj",
+                    "project.assets.json");
+                LockFile lockFile = LockFileUtilities.GetLockFile(
+                    projectAssetsJsonPath,
+                    NullLogger.Instance);
+                lockFile.GetTarget(NuGetFramework.Parse(".NETFramework,Version=v4.7.2"), null).Libraries.FirstOrDefault((file) => file.Name.Contains("net472"))
+                        .Should()
+                        .BeNull();
+            }
+            else
+            {
+                buildCommand.Execute()
+                    .Should()
+                    .Fail();
+            }
         }
     }
 }
