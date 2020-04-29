@@ -72,16 +72,34 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             Log.LogMessage(MessageImportance.Low, $"Configuring the following project for use with IIS: '{PublishDir}'");
 
             XDocument webConfigXml = null;
-            string webConfigPath = Path.Combine(PublishDir, "web.config");
-            webConfigPath = Path.GetFullPath(webConfigPath);
 
-            if (File.Exists(webConfigPath))
+            // Initialize the publish web.config file with project web.config content if present. Else, clean the existing web.config in the
+            // publish folder to make sure we have a consistent web.config update experience.
+            string projectWebConfigPath = null;
+            if (!string.IsNullOrEmpty(ProjectFullPath))
             {
-                Log.LogMessage($"Updating web.config at '{webConfigPath}'");
+                projectWebConfigPath = Path.Combine(Path.GetDirectoryName(ProjectFullPath), "web.config");
+            }
+
+            string publishWebConfigPath = Path.Combine(PublishDir, "web.config");
+            publishWebConfigPath = Path.GetFullPath(publishWebConfigPath);
+
+            if (File.Exists(publishWebConfigPath))
+            {
+                if (File.Exists(projectWebConfigPath))
+                {
+                    File.Copy(projectWebConfigPath, publishWebConfigPath, true);
+                }
+                else
+                {
+                    File.WriteAllText(publishWebConfigPath, WebConfigTemplate.Template);
+                }
+
+                Log.LogMessage($"Updating web.config at '{publishWebConfigPath}'");
 
                 try
                 {
-                    webConfigXml = XDocument.Load(webConfigPath);
+                    webConfigXml = XDocument.Load(publishWebConfigPath);
                 }
                 catch (XmlException e)
                 {
@@ -90,7 +108,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             }
             else
             {
-                Log.LogMessage($"No web.config found. Creating '{webConfigPath}'");
+                Log.LogMessage($"No web.config found. Creating '{publishWebConfigPath}'");
             }
 
             if (IsAzure)
@@ -112,7 +130,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
 
             // Telemetry
             transformedConfig = WebConfigTelemetry.AddTelemetry(transformedConfig, ProjectGuid, IgnoreProjectGuid, SolutionPath, ProjectFullPath);
-            using (FileStream f = new FileStream(webConfigPath, FileMode.Create))
+            using (FileStream f = new FileStream(publishWebConfigPath, FileMode.Create))
             {
                 transformedConfig.Save(f);
             }
