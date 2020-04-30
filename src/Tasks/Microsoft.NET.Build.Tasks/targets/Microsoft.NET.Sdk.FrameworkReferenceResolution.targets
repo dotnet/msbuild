@@ -338,7 +338,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <_ExistingReferenceAssembliesPackageReference Include="@(PackageReference)" Condition="'%(PackageReference.Identity)' == 'Microsoft.NETFramework.ReferenceAssemblies'"/>
 
-      <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="$(MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion)" IsImplicitlyDefined="true"
+      <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="$(MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion)" IsImplicitlyDefined="true" PrivateAssets="All"
                         Condition="'$(_FullFrameworkReferenceAssemblyPaths)' == '' and '@(_ExistingReferenceAssembliesPackageReference)' == ''"/>
     </ItemGroup>
   </Target>
