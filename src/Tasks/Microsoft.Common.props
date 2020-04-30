@@ -175,7 +175,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
   <Import Condition="Exists('$(NuGetPropsFile)')" Project="$(NuGetPropsFile)" />
 
-  <PropertyGroup>
+  <PropertyGroup Condition=" '$(MSBuildLogVerboseTaskParameters)' != 'true' ">
     <DisableLogTaskParameter_ConvertToAbsolutePath_Path>true</DisableLogTaskParameter_ConvertToAbsolutePath_Path>
     <DisableLogTaskParameter_FindUnderPath_OutOfPath>true</DisableLogTaskParameter_FindUnderPath_OutOfPath>
     <DisableLogTaskParameter_RemoveDuplicates_Inputs>true</DisableLogTaskParameter_RemoveDuplicates_Inputs>
