@@ -2479,6 +2479,10 @@ namespace Microsoft.Build.Evaluation
 
                     if (!string.IsNullOrEmpty(itemElement.Include))
                     {
+                        if (NativeMethodsShared.IsWindows && FileUtilities.InvalidFileNameChars.Any(c => itemElement.Include.Contains(c)))
+                        {
+                            continue;
+                        }
                         var globResult = BuildGlobResultFromIncludeItem(itemElement, removeElementCache);
 
                         if (globResult != null)
@@ -2488,6 +2492,10 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (!string.IsNullOrEmpty(itemElement.Remove))
                     {
+                        if (NativeMethodsShared.IsWindows && FileUtilities.InvalidFileNameChars.Any(c => itemElement.Include.Contains(c)))
+                        {
+                            continue;
+                        }
                         CacheInformationFromRemoveItem(itemElement, removeElementCache);
                     }
                 }
