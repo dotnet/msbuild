@@ -17,12 +17,22 @@ namespace Microsoft.Build.Graph.UnitTests
         public static readonly ImmutableDictionary<string, string> EmptyGlobalProperties = new Dictionary<string, string> {{PropertyNames.IsGraphBuild, "true"}}.ToImmutableDictionary();
 
         public static readonly string InnerBuildPropertyName = "InnerBuild";
+        public static readonly string InnerBuildPropertiesName = "InnerBuildProperties";
 
-        public static readonly string MultitargetingSpecification = $@"<PropertyGroup>
+        public static readonly string MultitargetingSpecificationPropertyGroup = $@"<PropertyGroup>
                                                                         <InnerBuildProperty>{InnerBuildPropertyName}</InnerBuildProperty>
-                                                                        <InnerBuildPropertyValues>InnerBuildProperties</InnerBuildPropertyValues>
-                                                                        <InnerBuildProperties>a;b</InnerBuildProperties>
+                                                                        <InnerBuildPropertyValues>{InnerBuildPropertiesName}</InnerBuildPropertyValues>
+                                                                        <{InnerBuildPropertiesName}>a;b</{InnerBuildPropertiesName}>
                                                                      </PropertyGroup>";
+        public static readonly string HardCodedInnerBuildWithMultitargetingSpecification = $@"<PropertyGroup>
+                                                                        <InnerBuildProperty>{InnerBuildPropertyName}</InnerBuildProperty>
+                                                                        <InnerBuildPropertyValues>{InnerBuildPropertiesName}</InnerBuildPropertyValues>
+                                                                        <{InnerBuildPropertyName}>a</{InnerBuildPropertyName}>
+                                                                     </PropertyGroup>";
+
+        public static readonly string EnableTransitiveProjectReferencesPropertyGroup = @"<PropertyGroup>
+                                                                                            <AddTransitiveProjectReferencesInStaticGraph>true</AddTransitiveProjectReferencesInStaticGraph>
+                                                                                         </PropertyGroup>";
 
         public static void AssertOuterBuildAsNonRoot(
             ProjectGraphNode outerBuild,
@@ -30,7 +40,7 @@ namespace Microsoft.Build.Graph.UnitTests
             Dictionary<string, string> additionalGlobalProperties = null,
             int expectedInnerBuildCount = 2)
         {
-            additionalGlobalProperties = additionalGlobalProperties ?? new Dictionary<string, string>();
+            additionalGlobalProperties ??= new Dictionary<string, string>();
 
             AssertOuterBuildEvaluation(outerBuild, additionalGlobalProperties);
 
@@ -54,7 +64,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     innerBuild.ReferencingProjects.ShouldContain(outerBuildReferencer);
                     innerBuild.ReferencingProjects.ShouldNotContain(outerBuild);
 
-                    graph.TestOnly_Edges.TestOnly_HasEdge((outerBuild, innerBuild)).ShouldBeFalse();
+                    graph.TestOnly_Edges.HasEdge((outerBuild, innerBuild)).ShouldBeFalse();
 
                     var edgeToOuterBuild = graph.TestOnly_Edges[(outerBuildReferencer, outerBuild)];
                     var edgeToInnerBuild = graph.TestOnly_Edges[(outerBuildReferencer, innerBuild)];
@@ -69,7 +79,7 @@ namespace Microsoft.Build.Graph.UnitTests
             additionalGlobalProperties = additionalGlobalProperties ?? new Dictionary<string, string>();
 
             IsNotMultitargeting(node).ShouldBeTrue();
-            node.ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
+            node.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
             node.ProjectInstance.GetProperty(InnerBuildPropertyName).ShouldBeNull();
         }
 
@@ -81,7 +91,7 @@ namespace Microsoft.Build.Graph.UnitTests
             IsInnerBuild(outerBuild).ShouldBeFalse();
 
             outerBuild.ProjectInstance.GetProperty(InnerBuildPropertyName).ShouldBeNull();
-            outerBuild.ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
+            outerBuild.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
         }
 
         public static void AssertInnerBuildEvaluation(
@@ -100,7 +110,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
             if (InnerBuildPropertyIsSetViaGlobalProperty)
             {
-                innerBuild.ProjectInstance.GlobalProperties.ShouldBeEquivalentTo(
+                innerBuild.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(
                     EmptyGlobalProperties
                         .Add(InnerBuildPropertyName, innerBuildPropertyValue)
                         .AddRange(additionalGlobalProperties));
@@ -204,6 +214,33 @@ namespace Microsoft.Build.Graph.UnitTests
                 // Use "Build" when the default target is unspecified since in practice that is usually the default target.
                 defaultTargets ?? "Build",
                 extraContent);
+        }
+
+        internal static IEnumerable<ProjectGraphNode> ComputeClosure(ProjectGraphNode node)
+        {
+            foreach (var reference in node.ProjectReferences)
+            {
+                yield return reference;
+
+                foreach (var closureReference in ComputeClosure(reference))
+                {
+                    yield return closureReference;
+                }
+            }
+        }
+
+        internal static void AssertReferencesIgnoringOrder(this ProjectGraph graph, Dictionary<int, int[]> expectedReferencesForNode)
+        {
+            foreach (var kvp in expectedReferencesForNode)
+            {
+                var node = GetFirstNodeWithProjectNumber(graph, kvp.Key);
+                node.AssertReferencesIgnoringOrder(kvp.Value);
+            }
+        }
+
+        internal static void AssertReferencesIgnoringOrder(this ProjectGraphNode node, int[] expectedReferences)
+        {
+            node.ProjectReferences.Select(GetProjectNumber).ShouldBeSameIgnoringOrder(expectedReferences);
         }
     }
 }

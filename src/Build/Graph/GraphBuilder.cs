@@ -78,6 +78,7 @@ namespace Microsoft.Build.Graph
             {
                 return;
             }
+
             var allParsedProjects = FindGraphNodes();
             
             AddEdges(allParsedProjects);
@@ -110,28 +111,74 @@ namespace Microsoft.Build.Graph
         private void AddEdges(Dictionary<ConfigurationMetadata, ParsedProject> allParsedProjects)
         {
             Edges = new GraphEdges();
-            AddEdgesFromProjectFileReferences(allParsedProjects, Edges);
-            _projectInterpretation.PostProcess(allParsedProjects, this);
+
+            AddEdgesFromProjectReferenceItems(allParsedProjects, Edges);
+
+            _projectInterpretation.ReparentInnerBuilds(allParsedProjects, this);
+
             if (_solutionDependencies != null && _solutionDependencies.Count != 0)
             {
                 AddEdgesFromSolution(allParsedProjects, _solutionDependencies, Edges);
             }
         }
 
-        private static void AddEdgesFromProjectFileReferences(Dictionary<ConfigurationMetadata, ParsedProject> allParsedProjects, GraphEdges edges)
+        private void AddEdgesFromProjectReferenceItems(Dictionary<ConfigurationMetadata, ParsedProject> allParsedProjects, GraphEdges edges)
         {
+            var transitiveReferenceCache = new Dictionary<ProjectGraphNode, List<ProjectGraphNode>>(allParsedProjects.Count);
+
             foreach (var parsedProject in allParsedProjects)
             {
+                var currentNode = parsedProject.Value.GraphNode;
+
+                var requiresTransitiveProjectReferences = _projectInterpretation.RequiresTransitiveProjectReferences(currentNode.ProjectInstance);
+
                 foreach (var referenceInfo in parsedProject.Value.ReferenceInfos)
                 {
-                    ErrorUtilities.VerifyThrow(
-                        allParsedProjects.ContainsKey(referenceInfo.ReferenceConfiguration),
-                        "all references should have been parsed");
-
-                    parsedProject.Value.GraphNode.AddProjectReference(
+                    // Always add direct references.
+                    currentNode.AddProjectReference(
                         allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode,
                         referenceInfo.ProjectReferenceItem,
                         edges);
+
+                    // Add transitive references only if the project requires it.
+                    if (requiresTransitiveProjectReferences)
+                    {
+                        foreach (var transitiveProjectReference in GetTransitiveProjectReferences(allParsedProjects[referenceInfo.ReferenceConfiguration]))
+                        {
+                            currentNode.AddProjectReference(
+                                transitiveProjectReference,
+                                new ProjectItemInstance(
+                                    project: currentNode.ProjectInstance,
+                                    itemType: ProjectInterpretation.TransitiveReferenceItemName,
+                                    includeEscaped: referenceInfo.ReferenceConfiguration.ProjectFullPath,
+                                    directMetadata: null,
+                                    definingFileEscaped: currentNode.ProjectInstance.FullPath
+                                ),
+                                edges);
+                        }
+                    }
+                }
+            }
+
+            List<ProjectGraphNode> GetTransitiveProjectReferences(ParsedProject parsedProject)
+            {
+                if (transitiveReferenceCache.TryGetValue(parsedProject.GraphNode, out List<ProjectGraphNode> cachedTransitiveReferences))
+                {
+                    return cachedTransitiveReferences;
+                }
+                else
+                {
+                    var transitiveReferences = new List<ProjectGraphNode>();
+
+                    foreach (var referenceInfo in parsedProject.ReferenceInfos)
+                    {
+                        transitiveReferences.Add(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode);
+                        transitiveReferences.AddRange(GetTransitiveProjectReferences(allParsedProjects[referenceInfo.ReferenceConfiguration]));
+                    }
+
+                    transitiveReferenceCache.Add(parsedProject.GraphNode, transitiveReferences);
+
+                    return transitiveReferences;
                 }
             }
         }
@@ -582,6 +629,9 @@ namespace Microsoft.Build.Graph
                 ReferenceItems.TryRemove(key, out _);
             }
 
+            internal bool HasEdge((ProjectGraphNode node, ProjectGraphNode reference) key) => ReferenceItems.ContainsKey(key);
+            internal bool TryGetEdge((ProjectGraphNode node, ProjectGraphNode reference) key, out ProjectItemInstance edge) => ReferenceItems.TryGetValue(key, out edge);
+
             internal IReadOnlyDictionary<(ConfigurationMetadata, ConfigurationMetadata), ProjectItemInstance> TestOnly_AsConfigurationMetadata()
             {
                 return ReferenceItems.ToImmutableDictionary(
@@ -589,8 +639,6 @@ namespace Microsoft.Build.Graph
                     kvp => kvp.Value
                     );
             }
-
-            internal bool TestOnly_HasEdge((ProjectGraphNode node, ProjectGraphNode reference) key) => ReferenceItems.ContainsKey(key);
         }
 
         private enum NodeVisitationState

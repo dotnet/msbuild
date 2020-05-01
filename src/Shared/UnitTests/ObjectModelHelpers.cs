@@ -1248,14 +1248,14 @@ namespace Microsoft.Build.UnitTests
                 });
         }
 
-        internal static void ShouldBeEquivalentTo<K, V>(this IDictionary<K, V> a, IReadOnlyDictionary<K, V> b)
+        internal static void ShouldBeSameIgnoringOrder<K, V>(this IDictionary<K, V> a, IReadOnlyDictionary<K, V> b)
         {
             a.ShouldBeSubsetOf(b);
             b.ShouldBeSubsetOf(a);
             a.Count.ShouldBe(b.Count);
         }
 
-        internal static void ShouldBeEquivalentTo<K>(this IEnumerable<K> a, IEnumerable<K> b)
+        internal static void ShouldBeSameIgnoringOrder<K>(this IEnumerable<K> a, IEnumerable<K> b)
         {
             a.ShouldBeSubsetOf(b);
             b.ShouldBeSubsetOf(a);
@@ -1565,6 +1565,34 @@ namespace Microsoft.Build.UnitTests
             sb.Append("</Project>");
 
             return env.CreateFile(projectNumber + ".proj", sb.ToString());
+        }
+
+        internal static ProjectGraph CreateProjectGraph(
+            TestEnvironment env,
+            IDictionary<int, int[]> dependencyEdges,
+            IDictionary<int, string> extraContentPerProjectNumber,
+            string extraContentForAllNodes = null)
+        {
+            return CreateProjectGraph(
+                env: env,
+                dependencyEdges: dependencyEdges,
+                globalProperties: null,
+                createProjectFile: (environment, projectNumber, references, projectReferenceTargets, defaultTargets, extraContent) =>
+                {
+                    extraContent = extraContentPerProjectNumber != null && extraContentPerProjectNumber.TryGetValue(projectNumber, out var content)
+                        ? content
+                        : string.Empty;
+
+                    extraContent += extraContentForAllNodes ?? string.Empty;
+
+                    return CreateProjectFile(
+                        environment,
+                        projectNumber,
+                        references,
+                        projectReferenceTargets,
+                        defaultTargets,
+                        extraContent.Cleanup());
+                });
         }
 
         internal static ProjectGraph CreateProjectGraph(
