@@ -62,6 +62,11 @@ namespace Microsoft.Build.Utilities
         public readonly bool EnableRestoreFirst = Environment.GetEnvironmentVariable("MSBUILDENABLERESTOREFIRST") == "1";
 
         /// <summary>
+        /// Allow the user to specify that two processes should not be communicating via an environment variable.
+        /// </summary>
+        public static readonly string MSBuildNodeHandshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
+
+        /// <summary>
         /// Setting the associated environment variable to 1 restores the pre-15.8 single
         /// threaded (slower) copy behavior. Zero implies Int32.MaxValue, less than zero
         /// (default) uses the empirical default in Copy.cs, greater than zero can allow
