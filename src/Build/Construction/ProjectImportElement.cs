@@ -73,7 +73,7 @@ namespace Microsoft.Build.Construction
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.sdk);
-                if (UpdateSdkReference(name: value))
+                if (UpdateSdkReference(name: value, SdkReference?.Version, SdkReference?.MinimumVersion))
                 {
                     SetOrRemoveAttribute(XMakeAttributes.sdk, value, "Set Import Sdk {0}", value);
                 }
@@ -88,7 +88,7 @@ namespace Microsoft.Build.Construction
             get => GetAttributeValue(XMakeAttributes.sdkVersion);
             set
             {
-                if (UpdateSdkReference(version: value))
+                if (UpdateSdkReference(SdkReference?.Name, version: value, SdkReference?.MinimumVersion))
                 {
                     SetOrRemoveAttribute(XMakeAttributes.sdkVersion, value, "Set Import Version {0}", value);
                 }
@@ -103,7 +103,7 @@ namespace Microsoft.Build.Construction
             get => GetAttributeValue(XMakeAttributes.sdkMinimumVersion);
             set
             {
-                if (UpdateSdkReference(minimumVersion: value))
+                if (UpdateSdkReference(SdkReference?.Name, SdkReference?.Version, minimumVersion: value))
                 {
                     SetOrRemoveAttribute(XMakeAttributes.sdkMinimumVersion, value, "Set Import Minimum Version {0}", value);
                 }
@@ -186,12 +186,9 @@ namespace Microsoft.Build.Construction
         /// Helper method to update the <see cref="SdkReference" /> property if necessary (update only when changed).
         /// </summary>
         /// <returns>True if the <see cref="SdkReference" /> property was updated, otherwise false (no update necessary).</returns>
-        private bool UpdateSdkReference(string name = null, string version = null, string minimumVersion = null)
+        private bool UpdateSdkReference(string name, string version, string minimumVersion)
         {
-            var sdk = new SdkReference(
-                name ?? SdkReference?.Name ?? GetAttributeValue(XMakeAttributes.sdk, true),
-                version ?? SdkReference?.Version ?? GetAttributeValue(XMakeAttributes.sdkVersion, true),
-                minimumVersion ?? SdkReference?.MinimumVersion ?? GetAttributeValue(XMakeAttributes.sdkMinimumVersion, true));
+            SdkReference sdk = new SdkReference(name, version, minimumVersion);
 
             if (sdk.Equals(SdkReference))
             {
