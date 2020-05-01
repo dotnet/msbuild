@@ -1987,7 +1987,6 @@ $@"
         [MemberData(nameof(Graphs))]
         public void GraphShouldSupportTransitiveReferences(Dictionary<int, int[]> edges)
         {
-            
             var graph = Helpers.CreateProjectGraph(
                 env: _env,
                 dependencyEdges: edges,
