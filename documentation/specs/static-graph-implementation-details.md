@@ -39,7 +39,7 @@ Entries that make it into the output cache file are separated from entries seria
 
 ## Isolation implementation
 
-[Isolation constraints](static-graph.md##single-project-isolated-builds) are implemented in the Scheduler and the TaskBuilder. [TaskBuilder.ExecuteInstantiatedTask](https://github.com/microsoft/msbuild/blob/37c5a9fec416b403212a63f95f15b03dbd5e8b5d/src/Build/BackEnd/Components/RequestBuilder/TaskBuilder.cs#L743) ensures all `MSBuild` tasks are made on projects declared in `ProjectReference`. [Scheduler.CheckIfCacheMissOnReferencedProjectIsAllowedAndErrorIfNot](https://github.com/microsoft/msbuild/blob/37c5a9fec416b403212a63f95f15b03dbd5e8b5d/src/Build/BackEnd/Components/Scheduler/Scheduler.cs#L1818) ensures all `MSBuild` tasks are cache hits.
+[Isolation constraints](static-graph.md##single-project-isolated-builds) are implemented in the Scheduler and the TaskBuilder. [TaskBuilder.ExecuteInstantiatedTask](https://github.com/microsoft/msbuild/blob/37c5a9fec416b403212a63f95f15b03dbd5e8b5d/src/Build/BackEnd/Components/RequestBuilder/TaskBuilder.cs#L743) ensures that the `MSBuild` task is only called on projects declared in `ProjectReference`. [Scheduler.CheckIfCacheMissOnReferencedProjectIsAllowedAndErrorIfNot](https://github.com/microsoft/msbuild/blob/37c5a9fec416b403212a63f95f15b03dbd5e8b5d/src/Build/BackEnd/Components/Scheduler/Scheduler.cs#L1818) ensures that all `MSBuild` tasks are cache hits.
 
 ### How isolation exemption complicates everything :(
 <!-- Potential cache scenarios caused by exemption -->
