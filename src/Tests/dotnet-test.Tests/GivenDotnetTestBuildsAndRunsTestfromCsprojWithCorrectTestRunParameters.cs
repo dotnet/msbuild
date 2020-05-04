@@ -3,61 +3,61 @@
 
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
-using System;
-using System.IO;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit.Abstractions;
-using System.Runtime.CompilerServices;
+using System;
+using System.IO;
 
-namespace Microsoft.DotNet.Cli.VSTest.Tests
+namespace Microsoft.DotNet.Cli.Test.Tests
 {
-    public class VSTestTests : SdkTest
+    public class GivenDotnetTestBuildsAndRunsTestfromCsprojWithCorrectTestRunParameters : SdkTest
     {
-        public VSTestTests(ITestOutputHelper log) : base(log)
+        public GivenDotnetTestBuildsAndRunsTestfromCsprojWithCorrectTestRunParameters(ITestOutputHelper log) : base(log)
         {
         }
 
+        private readonly string[] ConsoleLoggerOutputNormal = new[] { "--logger", "console;verbosity=normal" };
+
         [Fact]
-        public void TestsFromAGivenContainerShouldRunWithExpectedOutput()
+        public void GivenAProjectAndMultipleTestRunParametersItPassesThemToVStestConsoleInTheCorrectFormat()
         {
-            var testAppName = "VSTestCore";
-            var testRoot = _testAssetsManager.CopyTestAsset(testAppName)
-                .WithSource()
-                .WithVersionVariables()
-                .Path;
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("1");
 
-            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+            // Call test
+            CommandResult result = new DotnetTestCommand(Log)
+                                        .WithWorkingDirectory(testProjectDirectory)
+                                        .Execute(ConsoleLoggerOutputNormal.Concat(new[] {
+                                            "--",
+                                            "TestRunParameters.Parameter(name=\"myParam\",",
+                                            "value=\"value\")",
+                                            "TestRunParameters.Parameter(name=\"myParam2\",",
+                                            "value=\"value", 
+                                            "with", 
+                                            "space\")"
+                                        }));
 
-            new BuildCommand(Log, testRoot)
-                .Execute()
-                .Should().Pass();
-
-            var outputDll = Path.Combine(testRoot, "bin", configuration, "netcoreapp3.0", $"{testAppName}.dll");
-
-            // Call vstest
-            var result = new DotnetVSTestCommand(Log)
-                .Execute(outputDll, "--logger:console;verbosity=normal");
+            // Verify
             if (!TestContext.IsLocalized())
             {
-                result.StdOut
-                    .Should().Contain("Total tests: 2")
-                    .And.Contain("Passed: 1")
-                    .And.Contain("Failed: 1")
-                    .And.Contain("\u221a VSTestPassTest")
-                    .And.Contain("X VSTestFailTest");
+                result.StdOut.Should().NotMatch("The test run parameter argument '*' is invalid.");
+                result.StdOut.Should().Contain("Total tests: 1");
+                result.StdOut.Should().Contain("Passed: 1");
+                result.StdOut.Should().Contain("\u221a VSTestTestRunParameters");
             }
 
-            result.ExitCode.Should().Be(1);
+            result.ExitCode.Should().Be(0);
         }
 
         [Fact]
         public void GivenADllAndMultipleTestRunParametersItPassesThemToVStestConsoleInTheCorrectFormat()
         {
-            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("1");
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("2");
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
@@ -68,10 +68,9 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
             var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp3.0", "VSTestTestRunParameters.dll");
 
             // Call test
-            CommandResult result = new DotnetVSTestCommand(Log)
-                                        .Execute(new[] {
+            CommandResult result = new DotnetTestCommand(Log)
+                                        .Execute(ConsoleLoggerOutputNormal.Concat(new[] {
                                             outputDll,
-                                            "--logger:console;verbosity=normal",
                                             "--",
                                             "TestRunParameters.Parameter(name=\"myParam\",",
                                             "value=\"value\")",
@@ -79,7 +78,7 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
                                             "value=\"value",
                                             "with",
                                             "space\")"
-                                        });
+                                        }));
 
             // Verify
             if (!TestContext.IsLocalized())

@@ -3,6 +3,7 @@
 
 namespace Microsoft.DotNet.Cli
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -63,6 +64,11 @@ namespace Microsoft.DotNet.Cli
             string activeArgument = null;
             foreach (var arg in args)
             {
+                if (arg == "--")
+                {
+                    throw new ArgumentException("Inline settings should not be passed to Convert.");
+                }
+
                 if (arg.StartsWith("-"))
                 {
                     if (!string.IsNullOrEmpty(activeArgument))
@@ -102,11 +108,6 @@ namespace Microsoft.DotNet.Cli
                         }
 
                         newArgList.Add(string.Join(":", argValues));
-                    }
-                    // RunConfiguration args, treat -- and remaining args as literals.
-                    else if (arg == "--")
-                    {
-                        newArgList.Add(arg);
                     }
                     else
                     {

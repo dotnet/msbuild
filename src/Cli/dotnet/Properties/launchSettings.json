@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "dotnet": {
+      "commandName": "Project",
+      "commandLineArgs": "test C:\\temp\\VSTestTestRunParameters  -- TestRunParameters.Parameter(name=\\\"myParam\\\", value=\\\"value\\\") TestRunParameters.Parameter(name=\\\"myParam2\\\", value=\\\"value with space\\\")"
+    }
+  }
+}
