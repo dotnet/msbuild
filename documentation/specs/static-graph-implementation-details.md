@@ -11,7 +11,7 @@ Single project isolated builds can be achieved by providing MSBuild with input a
 The input cache files contain the cached results of all the targets that a project calls on its references. When a project executes, it builds its references via [MSBuild task](aka.ms/msbuild_tasks) calls. In isolated builds, the engine, instead of executing these tasks, serves them from the provided input caches. In an isolated project build, only the current project should build targets. Any other referenced projects should be provided from the input caches. 
 
 The output cache file tells MSBuild where to serialize the results of building the current project. This output cache becomes an input cache for all other projects that depend on the current project.
-The output cache file can be omitted in which case the build would just reuse prior results but not write out any new results. This could be useful when one wants to replay a build from previous caches.
+The output cache file can be omitted in which case the build reuses prior results but does not write out any new results. This is useful when one wants to re-execute the build for a project without building its references.
 
 The presence of either input or output caches turns on [isolated build constraints](static-graph.md##single-project-isolated-builds).
 
