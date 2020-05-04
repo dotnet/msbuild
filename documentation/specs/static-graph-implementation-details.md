@@ -1,7 +1,7 @@
 - [Single project isolated builds: implementation details](#single-project-isolated-builds-implementation-details)
   - [Input / Output cache implementation](#input--output-cache-implementation)
   - [Isolation implementation](#isolation-implementation)
-    - [How isolation exemption complicates everything :(](#how-isolation-exemption-complicates-everything)
+    - [How isolation exemption complicates everything](#how-isolation-exemption-complicates-everything)
 
 # Single project isolated builds: implementation details
 
