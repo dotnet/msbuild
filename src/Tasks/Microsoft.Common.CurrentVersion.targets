@@ -4572,6 +4572,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="TargetOutputs" ItemName="_ThisProjectItemsToCopyToOutputDirectory" />
     </CallTarget>
 
+    <ItemGroup Condition="'$(CopyConflictingTransitiveContent)' == 'false'">
+      <_TransitiveItemsToCopyToOutputDirectory Remove="@(_ThisProjectItemsToCopyToOutputDirectory)" MatchOnMetadata="TargetPath" MatchOnMetadataOptions="PathLike" />
+    </ItemGroup>
+
     <ItemGroup>
       <_TransitiveItemsToCopyToOutputDirectoryAlways               KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_TransitiveItemsToCopyToOutputDirectory->'%(FullPath)')" Condition="'%(_TransitiveItemsToCopyToOutputDirectory.CopyToOutputDirectory)'=='Always'"/>
       <_TransitiveItemsToCopyToOutputDirectoryPreserveNewest       KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_TransitiveItemsToCopyToOutputDirectory->'%(FullPath)')" Condition="'%(_TransitiveItemsToCopyToOutputDirectory.CopyToOutputDirectory)'=='PreserveNewest'"/>

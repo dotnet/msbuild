@@ -107,6 +107,11 @@
       LOCALIZATION: {0} is an enum value of LoggerVerbosity.
     </note>
       </trans-unit>
+      <trans-unit id="LogTaskInputs.Truncated">
+        <source>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</source>
+        <target state="translated">Los parámetros se han truncado a partir de este punto. Para ver todos los parámetros, borre la variable de entorno MSBUILDTRUNCATETASKINPUTLOGGING.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">Se generó el metaproyecto "{0}".</target>
@@ -200,9 +205,9 @@
     </note>
       </trans-unit>
       <trans-unit id="TaskReturnedFalseButDidNotLogError">
-        <source>MSB4132: The "{0}" task returned false but did not log an error.</source>
-        <target state="new">MSB4132: The "{0}" task returned false but did not log an error.</target>
-        <note>{StrBegin="MSB4132: "}</note>
+        <source>MSB4181: The "{0}" task returned false but did not log an error.</source>
+        <target state="translated">MSB4181: La tarea "{0}" devolvió false, pero no registró un error.</target>
+        <note>{StrBegin="MSB4181: "}</note>
       </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
         <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>

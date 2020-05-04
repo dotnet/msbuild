@@ -107,6 +107,11 @@
       LOCALIZATION: {0} is an enum value of LoggerVerbosity.
     </note>
       </trans-unit>
+      <trans-unit id="LogTaskInputs.Truncated">
+        <source>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</source>
+        <target state="translated">这些参数在此点之前已被截断。若要查看所有参数，请清除 MSBUILDTRUNCATETASKINPUTLOGGING 环境变量。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">已生成元项目“{0}”。</target>
@@ -200,13 +205,13 @@
     </note>
       </trans-unit>
       <trans-unit id="TaskReturnedFalseButDidNotLogError">
-        <source>MSB4132: The "{0}" task returned false but did not log an error.</source>
-        <target state="new">MSB4132: The "{0}" task returned false but did not log an error.</target>
-        <note>{StrBegin="MSB4132: "}</note>
+        <source>MSB4181: The "{0}" task returned false but did not log an error.</source>
+        <target state="translated">MSB4181: “{0}”任务返回了 false，但未记录错误。</target>
+        <note>{StrBegin="MSB4181: "}</note>
       </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
         <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
-        <target state="translated">MSB4254: MSBuild 任务正在生成未在 ProjectReference 项中指定的项目“{0}”。在独立生成中，这可能表示未将引用显式地指定为“{1}”中的 ProjectReference 项</target>
+        <target state="translated">MSB4254: MSBuild task 正在生成未在 ProjectReference 项中指定的项目“{0}”。在独立生成中，这可能表示未将引用显式地指定为“{1}”中的 ProjectReference 项</target>
         <note>
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.

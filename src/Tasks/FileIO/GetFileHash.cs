@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -19,6 +20,13 @@ namespace Microsoft.Build.Tasks
         internal const string _defaultFileHashAlgorithm = "SHA256";
         internal const string _hashEncodingHex = "hex";
         internal const string _hashEncodingBase64 = "base64";
+        internal static readonly Dictionary<string, Func<HashAlgorithm>> SupportedAlgorithms
+            = new Dictionary<string, Func<HashAlgorithm>>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["SHA256"] = SHA256.Create,
+                ["SHA384"] = SHA384.Create,
+                ["SHA512"] = SHA512.Create,
+            };
 
         /// <summary>
         /// The files to be hashed.
@@ -55,7 +63,7 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
-            if (!SupportsAlgorithm(Algorithm))
+            if (!SupportedAlgorithms.TryGetValue(Algorithm, out var algorithmFactory))
             {
                 Log.LogErrorWithCodeFromResources("FileHash.UnrecognizedHashAlgorithm", Algorithm);
                 return false;
@@ -67,24 +75,32 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            foreach (var file in Files)
+            var writeLock = new object();
+            Parallel.For(0, Files.Length, index =>
             {
+                var file = Files[index];
+
                 if (!FileSystems.Default.FileExists(file.ItemSpec))
                 {
                     Log.LogErrorWithCodeFromResources("FileHash.FileNotFound", file.ItemSpec);
+                    return;
                 }
-            }
+
+                var hash = ComputeHash(algorithmFactory, file.ItemSpec);
+                var encodedHash = EncodeHash(encoding, hash);
+
+                lock (writeLock)
+                {
+                    // We cannot guarantee Files instances are unique. Write to it inside a lock to
+                    // avoid concurrent edits.
+                    file.SetMetadata("FileHashAlgorithm", Algorithm);
+                    file.SetMetadata(MetadataName, encodedHash);
+                }
+            });
 
             if (Log.HasLoggedErrors)
             {
                 return false;
-            }
-
-            foreach (var file in Files)
-            {
-                var hash = ComputeHash(Algorithm, file.ItemSpec);
-                file.SetMetadata("FileHashAlgorithm", Algorithm);
-                file.SetMetadata(MetadataName, EncodeHash(encoding, hash));
             }
 
             Items = Files;
@@ -113,38 +129,12 @@ namespace Microsoft.Build.Tasks
         internal static bool TryParseHashEncoding(string value, out HashEncoding encoding)
             => Enum.TryParse<HashEncoding>(value, /*ignoreCase:*/ true, out encoding);
 
-        internal static bool SupportsAlgorithm(string algorithmName)
-            => _supportedAlgorithms.Contains(algorithmName);
-
-        internal static byte[] ComputeHash(string algorithmName, string filePath)
+        internal static byte[] ComputeHash(Func<HashAlgorithm> algorithmFactory, string filePath)
         {
             using (var stream = File.OpenRead(filePath))
-            using (var algorithm = CreateAlgorithm(algorithmName))
+            using (var algorithm = algorithmFactory())
             {
                 return algorithm.ComputeHash(stream);
-            }
-        }
-
-        private static readonly HashSet<string> _supportedAlgorithms
-            = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-            {
-                "SHA256",
-                "SHA384",
-                "SHA512",
-            };
-
-        private static HashAlgorithm CreateAlgorithm(string algorithmName)
-        {
-            switch (algorithmName.ToUpperInvariant())
-            {
-                case "SHA256":
-                    return SHA256.Create();
-                case "SHA384":
-                    return SHA384.Create();
-                case "SHA512":
-                    return SHA512.Create();
-                default:
-                    throw new ArgumentOutOfRangeException();
             }
         }
     }

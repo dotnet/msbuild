@@ -107,6 +107,11 @@
       LOCALIZATION: {0} is an enum value of LoggerVerbosity.
     </note>
       </trans-unit>
+      <trans-unit id="LogTaskInputs.Truncated">
+        <source>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</source>
+        <target state="translated">Далее параметры были усечены. Чтобы просмотреть все параметры, очистите переменную среды MSBUILDTRUNCATETASKINPUTLOGGING.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">Создан метапроект "{0}".</target>
@@ -200,13 +205,13 @@
     </note>
       </trans-unit>
       <trans-unit id="TaskReturnedFalseButDidNotLogError">
-        <source>MSB4132: The "{0}" task returned false but did not log an error.</source>
-        <target state="new">MSB4132: The "{0}" task returned false but did not log an error.</target>
-        <note>{StrBegin="MSB4132: "}</note>
+        <source>MSB4181: The "{0}" task returned false but did not log an error.</source>
+        <target state="translated">MSB4181: задача "{0}" возвратила значение false, но не зарегистрировала ошибку.</target>
+        <note>{StrBegin="MSB4181: "}</note>
       </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
         <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
-        <target state="translated">MSB4254: задача MSBuild собирает проект(ы) {0}, которые не указаны в элементе ProjectReference. В изолированных сборках это может означать, что ссылки явно не указаны как элемент ProjectReference в "{1}".</target>
+        <target state="translated">MSB4254: задача MSBuild собирает проект(ы) {0}, который(ые) не указан(ы) в элементе ProjectReference. В изолированных сборках это может означать, что ссылки явно не указаны как элемент ProjectReference в "{1}".</target>
         <note>
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.

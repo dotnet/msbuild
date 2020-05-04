@@ -107,6 +107,11 @@
       LOCALIZATION: {0} is an enum value of LoggerVerbosity.
     </note>
       </trans-unit>
+      <trans-unit id="LogTaskInputs.Truncated">
+        <source>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</source>
+        <target state="translated">このポイントを超えるパラメーターは切り詰められています。すべてのパラメーターを表示するには、MSBUILDTRUNCATETASKINPUTLOGGING 環境変数をクリアします。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">メタプロジェクト "{0}" が生成されました。</target>
@@ -200,13 +205,13 @@
     </note>
       </trans-unit>
       <trans-unit id="TaskReturnedFalseButDidNotLogError">
-        <source>MSB4132: The "{0}" task returned false but did not log an error.</source>
-        <target state="new">MSB4132: The "{0}" task returned false but did not log an error.</target>
-        <note>{StrBegin="MSB4132: "}</note>
+        <source>MSB4181: The "{0}" task returned false but did not log an error.</source>
+        <target state="translated">MSB4181: "{0}" タスクから false が返されましたが、エラーがログに記録されませんでした。</target>
+        <note>{StrBegin="MSB4181: "}</note>
       </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
         <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
-        <target state="translated">MSB4254: ProjectReference 項目で指定されていないプロジェクト "{0}" が MSBuild task によってビルドされています。分離されたビルドでは、これは多くの場合、参照が "{1}" で ProjectReference 項目として明示的に指定されていないことを意味します</target>
+        <target state="translated">MSB4254: ProjectReference 項目で指定されていないプロジェクト "{0}" が MSBuild タスクによってビルドされています。分離されたビルドでは、これは多くの場合、参照が "{1}" で ProjectReference 項目として明示的に指定されていないことを意味します</target>
         <note>
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.

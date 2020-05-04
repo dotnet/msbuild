@@ -1101,9 +1101,9 @@
       LOCALIZATION: "{2}" is a localized message from a CLR/FX exception. Also, Microsoft.Build.Framework should not be localized
     </comment>
   </data>
-  <data name="TaskReturnedFalseButDidNotLogError" xml:space="preserve">
-    <value>MSB4132: The "{0}" task returned false but did not log an error.</value>
-    <comment>{StrBegin="MSB4132: "}</comment>
+  <data name="TaskReturnedFalseButDidNotLogError">
+    <value>MSB4181: The "{0}" task returned false but did not log an error.</value>
+    <comment>{StrBegin="MSB4181: "}</comment>
   </data>
   <data name="LoggerCreationError" xml:space="preserve">
     <value>MSB1021: Cannot create an instance of the logger. {0}</value>
@@ -1660,6 +1660,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="NoReloadOnUnsavedChanges" xml:space="preserve">
     <value>MSB4231: ProjectRootElement can't reload if it contains unsaved changes.</value>
     <comment>{StrBegin="MSB4231: "}</comment>
+  </data>
+  <data name="LogTaskInputs.Truncated">
+    <value>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</value>
   </data>
   <data name="MetaprojectGenerated" xml:space="preserve">
     <value>Metaproject "{0}" generated.</value>

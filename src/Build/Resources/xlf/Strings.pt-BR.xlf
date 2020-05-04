@@ -107,6 +107,11 @@
       LOCALIZATION: {0} is an enum value of LoggerVerbosity.
     </note>
       </trans-unit>
+      <trans-unit id="LogTaskInputs.Truncated">
+        <source>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</source>
+        <target state="translated">Os parâmetros foram truncados além deste ponto. Para exibir todos os parâmetros, limpe a variável de ambiente MSBUILDTRUNCATETASKINPUTLOGGING.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">Metaprojeto "{0}" gerado.</target>
@@ -200,13 +205,13 @@
     </note>
       </trans-unit>
       <trans-unit id="TaskReturnedFalseButDidNotLogError">
-        <source>MSB4132: The "{0}" task returned false but did not log an error.</source>
-        <target state="new">MSB4132: The "{0}" task returned false but did not log an error.</target>
-        <note>{StrBegin="MSB4132: "}</note>
+        <source>MSB4181: The "{0}" task returned false but did not log an error.</source>
+        <target state="translated">MSB4181: a tarefa "{0}" retornou false, mas não registrou um erro.</target>
+        <note>{StrBegin="MSB4181: "}</note>
       </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
         <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
-        <target state="translated">MSB4254: a task MSBuild está criando projetos "{0}" que não estão especificados no item ProjectReference. Nos builds isolados isso provavelmente significa que as referências não estão explicitamente especificadas como um item ProjectReference em "{1}"</target>
+        <target state="translated">MSB4254: a tarefa MSBuild está criando projetos "{0}" que não estão especificados no item ProjectReference. Nos builds isolados, isso provavelmente significa que as referências não estão explicitamente especificadas como um item ProjectReference em "{1}"</target>
         <note>
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.

@@ -58,6 +58,14 @@ namespace Microsoft.Build.Graph
             edges[(this, reference)] = projectReferenceItem;
         }
 
+        internal void RemoveReference(ProjectGraphNode reference, GraphBuilder.GraphEdges edges)
+        {
+            _projectReferences.Remove(reference);
+            reference._referencingProjects.Remove(reference);
+
+            edges.RemoveEdge((this, reference));
+        }
+
         internal void RemoveReferences(GraphBuilder.GraphEdges edges)
         {
             foreach (var reference in _projectReferences)
