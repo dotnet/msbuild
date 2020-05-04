@@ -8,7 +8,7 @@
 <!-- workflow -->
 Single project isolated builds can be achieved by providing MSBuild with input and output cache files.
 
-The input cache files should contain the cached results all the targets that a project calls on its references. When a project executes, it will naturally build its references via [MSBuild task](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-task) calls. In isolated builds, the engine, instead of executing these tasks, will serve them from the provided input caches. In an isolated project build, only the current project should be building targets. Any other referenced projects should be provided form the input caches. 
+The input cache files contain the cached results of all the targets that a project calls on its references. When a project executes, it builds its references via [MSBuild task](aka.ms/msbuild_tasks) calls. In isolated builds, the engine, instead of executing these tasks, serves them from the provided input caches. In an isolated project build, only the current project should build targets. Any other referenced projects should be provided from the input caches. 
 
 The output cache file tells MSBuild where it should serialize the results of the current project. This output cache would become an input cache for all other projects that depend on the current project.
 The output cache file can be omitted in which case the build would just reuse prior results but not write out any new results. This could be useful when one wants to replay a build from previous caches.
