@@ -352,7 +352,7 @@ A project is exempt from isolation constraints by adding its full path to the `G
 
 A reference is exempt only in projects that add the reference in `GraphIsolationExemptReference`. If multiple projects need to exempt the same reference, all of them need to add the reference to `GraphIsolationExemptReference`.
 
-For now, self builds (a project building itself with different global properties) are also exempt from isolation constraints, but this behaviour is of dubious value and might be changed in the future.
+For now, self-builds (a project building itself with different global properties) are also exempt from isolation constraints, but this behaviour is of dubious value and might be changed in the future.
 
 Details on how isolation and cache files are implemented in MSBuild can be found [here](./static-graph-implementation-details.md).
 
