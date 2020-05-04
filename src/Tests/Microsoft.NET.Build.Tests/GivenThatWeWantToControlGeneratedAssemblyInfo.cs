@@ -595,5 +595,52 @@ namespace Microsoft.NET.Build.Tests
 
             AssemblyInfo.Get(assemblyPath)["UserSecretsIdAttribute"].Should().Be("SecretsIdValue");
         }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_includes_repository_url(bool privateRepo)
+        {
+            var fakeUrl = "fakeUrl";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource()
+                .WithTargetFramework("netcoreapp3.1");
+            if (privateRepo)
+            {
+                testAsset = testAsset
+                    .WithProjectChanges((path, project) =>
+                    {
+                        var ns = project.Root.Name.Namespace;
+
+                        project.Root.Add(
+                            new XElement(ns + "PropertyGroup",
+                                new XElement(ns + "PublishRepositoryUrl", true)));
+                        project.Root.Add(
+                            new XElement(ns + "PropertyGroup",
+                                new XElement(ns + "PrivateRepositoryUrl", fakeUrl)));
+                    });
+            }
+            else
+            {
+                testAsset = testAsset
+                    .WithProjectChanges((path, project) =>
+                    {
+                        var ns = project.Root.Name.Namespace;
+
+                        project.Root.Add(
+                            new XElement(ns + "PropertyGroup",
+                                new XElement(ns + "RepositoryUrl", fakeUrl)));
+                    });
+            } 
+
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            buildCommand.Execute().Should().Pass();
+
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netcoreapp3.1").FullName, "HelloWorld.dll");
+
+            AssemblyInfo.Get(assemblyPath)["AssemblyMetadataAttribute"].Should().Be("RepositoryUrl:" + fakeUrl);
+        }
     }
 }
