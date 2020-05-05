@@ -595,5 +595,38 @@ namespace Microsoft.NET.Build.Tests
 
             AssemblyInfo.Get(assemblyPath)["UserSecretsIdAttribute"].Should().Be("SecretsIdValue");
         }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_includes_repository_url(bool privateRepo)
+        {
+            var fakeUrl = "fakeUrl";
+            var testProject = new TestProject()
+            {
+                Name = "RepoUrlProject",
+                IsSdkProject = true,
+                TargetFrameworks = "netcoreapp3.1"
+            };
+
+            if (privateRepo)
+            {
+                testProject.AdditionalProperties["PublishRepositoryUrl"] = "true";
+                testProject.AdditionalProperties["PrivateRepositoryUrl"] = fakeUrl;
+            }
+            else
+            {
+                testProject.AdditionalProperties["RepositoryUrl"] = fakeUrl;
+            }
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            buildCommand.Execute().Should().Pass();
+
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netcoreapp3.1").FullName, testProject.Name + ".dll");
+
+            AssemblyInfo.Get(assemblyPath)["AssemblyMetadataAttribute"].Should().Be("RepositoryUrl:" + fakeUrl);
+        }
     }
 }
