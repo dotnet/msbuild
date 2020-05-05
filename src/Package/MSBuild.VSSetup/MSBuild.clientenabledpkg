@@ -1,0 +1,7 @@
+Microsoft.Build.Framework.pkgdef
+Microsoft.Build.pkgdef
+Microsoft.Build.Tasks.Core.pkgdef
+System.Resources.Extensions.pkgdef
+Microsoft.Build.Utilities.Core.pkgdef
+Microsoft.Build.Conversion.Core.pkgdef
+Microsoft.Build.Engine.pkgdef

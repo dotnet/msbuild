@@ -30,6 +30,8 @@
     <UsingToolVisualStudioIbcTraining>true</UsingToolVisualStudioIbcTraining>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
     <UsingToolVSSDK>true</UsingToolVSSDK>
+    <!-- Override default VSSDK version with one that supports client enablement. -->
+    <MicrosoftVSSDKBuildToolsVersion>16.7.13</MicrosoftVSSDKBuildToolsVersion>
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
