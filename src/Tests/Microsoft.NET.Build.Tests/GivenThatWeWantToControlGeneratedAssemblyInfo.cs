@@ -602,43 +602,29 @@ namespace Microsoft.NET.Build.Tests
         public void It_includes_repository_url(bool privateRepo)
         {
             var fakeUrl = "fakeUrl";
-            var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld")
-                .WithSource()
-                .WithTargetFramework("netcoreapp3.1");
+            var testProject = new TestProject()
+            {
+                Name = "RepoUrlProject",
+                IsSdkProject = true,
+                TargetFrameworks = "netcoreapp3.1"
+            };
+
             if (privateRepo)
             {
-                testAsset = testAsset
-                    .WithProjectChanges((path, project) =>
-                    {
-                        var ns = project.Root.Name.Namespace;
-
-                        project.Root.Add(
-                            new XElement(ns + "PropertyGroup",
-                                new XElement(ns + "PublishRepositoryUrl", true)));
-                        project.Root.Add(
-                            new XElement(ns + "PropertyGroup",
-                                new XElement(ns + "PrivateRepositoryUrl", fakeUrl)));
-                    });
+                testProject.AdditionalProperties["PublishRepositoryUrl"] = "true";
+                testProject.AdditionalProperties["PrivateRepositoryUrl"] = fakeUrl;
             }
             else
             {
-                testAsset = testAsset
-                    .WithProjectChanges((path, project) =>
-                    {
-                        var ns = project.Root.Name.Namespace;
+                testProject.AdditionalProperties["RepositoryUrl"] = fakeUrl;
+            }
 
-                        project.Root.Add(
-                            new XElement(ns + "PropertyGroup",
-                                new XElement(ns + "RepositoryUrl", fakeUrl)));
-                    });
-            } 
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             buildCommand.Execute().Should().Pass();
 
-            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netcoreapp3.1").FullName, "HelloWorld.dll");
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netcoreapp3.1").FullName, testProject.Name + ".dll");
 
             AssemblyInfo.Get(assemblyPath)["AssemblyMetadataAttribute"].Should().Be("RepositoryUrl:" + fakeUrl);
         }
