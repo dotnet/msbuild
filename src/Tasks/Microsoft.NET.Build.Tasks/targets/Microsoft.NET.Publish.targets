@@ -985,7 +985,12 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'$(GenerateDependencyFile)' == 'true' and '$(_UseBuildDependencyFile)' != 'true'">
 
     <PropertyGroup>
-      <PublishDepsFilePath Condition=" '$(PublishDepsFilePath)' == ''">$(IntermediateOutputPath)$(ProjectDepsFileName)</PublishDepsFilePath>
+      <!-- IntermediateDepsFilePath is the location where the deps.json file is originally created
+           PublishDepsFilePath is the location where the deps.json resides when published 
+           PublishDepsFilePath is empty (by default) for PublishSingleFile, since the deps.json file is embedde within the single-file bundle -->      
+      <IntermediateDepsFilePath Condition=" '$(PublishDepsFilePath)' != ''">$(PublishDepsFilePath)</IntermediateDepsFilePath >
+      <IntermediateDepsFilePath Condition=" '$(PublishDepsFilePath)' == ''">$(IntermediateOutputPath)$(ProjectDepsFileName)</IntermediateDepsFilePath >
+      <PublishDepsFilePath Condition=" '$(PublishDepsFilePath)' == '' And '$(PublishSingleFile)' != 'true'">$(PublishDir)$(ProjectDepsFileName)</PublishDepsFilePath>      
     </PropertyGroup>
     <ItemGroup>
       <ResolvedCompileFileDefinitions Remove="@(_PublishConflictPackageFiles)" Condition="'%(_PublishConflictPackageFiles.ConflictItemType)' == 'Reference'" />
@@ -1000,7 +1005,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
                       AssetsFilePath="$(ProjectAssetsFile)"
-                      DepsFilePath="$(PublishDepsFilePath)"
+                      DepsFilePath="$(IntermediateDepsFilePath)"
                       TargetFramework="$(TargetFrameworkMoniker)"
                       AssemblyName="$(AssemblyName)"
                       AssemblyExtension="$(TargetExt)"
@@ -1026,7 +1031,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"/>
 
     <ItemGroup>
-      <ResolvedFileToPublish Include="$(PublishDepsFilePath)">
+      <ResolvedFileToPublish Include="$(IntermediateDepsFilePath)">
         <RelativePath>$(ProjectDepsFileName)</RelativePath>
       </ResolvedFileToPublish>
     </ItemGroup>

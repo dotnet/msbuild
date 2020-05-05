@@ -72,16 +72,6 @@
         <target state="new">Search term from package id or package description. Require at least one character.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SemVerLevelArgumentName">
-        <source>SemVer Level</source>
-        <target state="new">SemVer Level</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SemVerLevelDescription">
-        <source>A SemVer 1.0.0 version string.</source>
-        <target state="new">A SemVer 1.0.0 version string.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SkipArgumentName">
         <source>Skip</source>
         <target state="new">Skip</target>

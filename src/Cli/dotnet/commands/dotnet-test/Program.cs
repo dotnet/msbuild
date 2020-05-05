@@ -5,11 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.MSBuild;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tools.Test
@@ -26,7 +24,7 @@ namespace Microsoft.DotNet.Tools.Test
         {
         }
 
-        public static TestCommand FromArgs(string[] args, string msbuildPath = null)
+        public static TestCommand FromArgs(string[] args, string[] settings, string msbuildPath = null)
         {
             var parser = Parser.Instance;
 
@@ -40,7 +38,6 @@ namespace Microsoft.DotNet.Tools.Test
             var msbuildArgs = new List<string>()
             {
                 "-target:VSTest",
-                $"-verbosity:{GetDefaultVerbosity(parsedTest)}",
                 "-nodereuse:false", // workaround for https://github.com/Microsoft/vstest/issues/1503
                 "-nologo"
             };
@@ -49,14 +46,12 @@ namespace Microsoft.DotNet.Tools.Test
 
             msbuildArgs.AddRange(parsedTest.Arguments);
 
-            var runSettingsOptions =
-                result.UnparsedTokens
-                    .Select(GetSemiColonEscapedString);
-
-            if (runSettingsOptions.Any())
+            if (settings.Any())
             {
-                var runSettingsArg = string.Join(";", runSettingsOptions);
+                // skip '--' and escape every \ to be \\ and every " to be \" to survive the next hop
+                var escaped = settings.Skip(1).Select(s => s.Replace("\\", "\\\\").Replace("\"", "\\\"")).ToArray();
 
+                var runSettingsArg = string.Join(";", escaped);
                 msbuildArgs.Add($"-property:VSTestCLIRunSettings=\"{runSettingsArg}\"");
             }
 
@@ -88,20 +83,14 @@ namespace Microsoft.DotNet.Tools.Test
             return testCommand;
         }
 
-        private static string GetDefaultVerbosity(AppliedOption options)
-        {
-            var defaultVerbosity = "quiet";
-            if (options.HasOption(Constants.RestoreInteractiveOption))
-            {
-                defaultVerbosity = "minimal";
-            }
-
-            return defaultVerbosity;
-        }
-
         public static int Run(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
+
+            // settings parameters are after -- (including --), these should not be considered by the parser
+            var settings = args.SkipWhile(a => a != "--").ToArray();
+            // all parameters before --
+            args = args.TakeWhile(a => a != "--").ToArray();
 
             // Fix for https://github.com/Microsoft/vstest/issues/1453
             // Try to run dll/exe directly using the VSTestForwardingApp
@@ -112,6 +101,11 @@ namespace Microsoft.DotNet.Tools.Test
                 {
                     Reporter.Output.WriteLine(string.Format(LocalizableStrings.IgnoredArgumentsMessage, string.Join(" ", ignoredArgs)).Yellow());
                 }
+
+                // merge the args settings, we don't need to escape
+                // one more time, there is no extra hop via msbuild
+                convertedArgs.AddRange(settings);
+
                 return new VSTestForwardingApp(convertedArgs).Execute();
             }
 
@@ -122,7 +116,7 @@ namespace Microsoft.DotNet.Tools.Test
             try
             {
                 Environment.SetEnvironmentVariable(NodeWindowEnvironmentName, "1");
-                return FromArgs(args).Execute();
+                return FromArgs(args, settings).Execute();
             }
             finally
             {
@@ -133,13 +127,7 @@ namespace Microsoft.DotNet.Tools.Test
         private static bool ContainsBuiltTestSources(string[] args)
         {
             foreach (var arg in args)
-            {
-                // Stop parsing after the RunConfiguration delimiter
-                if (arg == "--")
-                {
-                    break;
-                }
-
+            {               
                 if (!arg.StartsWith("-") &&
                     (arg.EndsWith("dll", StringComparison.OrdinalIgnoreCase) || arg.EndsWith("exe", StringComparison.OrdinalIgnoreCase)))
                 {

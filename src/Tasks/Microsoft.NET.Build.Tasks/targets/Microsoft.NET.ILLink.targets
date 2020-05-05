@@ -11,7 +11,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <Import Project="Sdk.props" Sdk="ILLink.Tasks" />
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.ILLink.Tasks" />
 
   <PropertyGroup Condition=" '$(PublishTrimmed)' == 'true' ">
     <IntermediateLinkDir Condition=" '$(IntermediateLinkDir)' == '' ">$(IntermediateOutputPath)linked\</IntermediateLinkDir>
@@ -83,8 +83,21 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ILLink AssemblyPaths="@(_ManagedAssembliesToLink)"
             ReferenceAssemblyPaths="@(ReferencePath)"
             RootAssemblyNames="@(TrimmerRootAssembly)"
+            DefaultAction="$(_TrimmerDefaultAction)"
+            LinkSymbols="$(_TrimmerLinkSymbols)"
+
+            BeforeFieldInit="$(_TrimmerBeforeFieldInit)"
+            OverrideRemoval="$(_TrimmerOverrideRemoval)"
+            UnreachableBodies="$(_TrimmerUnreachableBodies)"
+            ClearInitLocals="$(_TrimmerClearInitLocals)"
+            UnusedInterfaces="$(_TrimmerUnusedInterfaces)"
+            IPConstProp="$(_TrimmerIPConstProp)"
+            Sealer="$(_TrimmerSealer)"
+
+            CustomSteps="@(_TrimmerCustomSteps)"
             RootDescriptorFiles="@(TrimmerRootDescriptor)"
             OutputDirectory="$(IntermediateLinkDir)"
+            DumpDependencies="$(_TrimmerDumpDependencies)"
             ExtraArgs="$(_ExtraTrimmerArgs)"
             ToolExe="$(_DotNetHostFileName)"
             ToolPath="$(_DotNetHostDirectory)" />
@@ -110,7 +123,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <PropertyGroup>
       <_ExtraTrimmerArgs>--skip-unresolved true $(_ExtraTrimmerArgs)</_ExtraTrimmerArgs>
-      <_ExtraTrimmerArgs>-c copyused -u copyused $(_ExtraTrimmerArgs)</_ExtraTrimmerArgs>
+      <_TrimmerDefaultAction Condition=" '$(_TrimmerDefaultAction)' == '' ">copyused</_TrimmerDefaultAction>
     </PropertyGroup>
     <ItemGroup>
       <TrimmerRootAssembly Include="@(_ManagedAssembliesToLink)" Condition=" '%(_ManagedAssembliesToLink.IsTrimmable)' != 'true' " />

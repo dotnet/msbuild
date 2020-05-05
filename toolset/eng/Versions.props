@@ -88,10 +88,6 @@
     <MicrosoftTestPlatformBuildPackageVersion>$(MicrosoftNETTestSdkPackageVersion)</MicrosoftTestPlatformBuildPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <!-- Dependencies from https://github.com/mono/linker -->
-    <ILLinkTasksPackageVersion>0.1.6-prerelease.19380.1</ILLinkTasksPackageVersion>
-  </PropertyGroup>
-  <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/corefx -->
     <SystemCodeDomPackageVersion>5.0.0-alpha1.19517.14</SystemCodeDomPackageVersion>
     <SystemTextEncodingCodePagesPackageVersion>5.0.0-alpha1.19517.14</SystemTextEncodingCodePagesPackageVersion>

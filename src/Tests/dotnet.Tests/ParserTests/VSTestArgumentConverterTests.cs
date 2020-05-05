@@ -1,7 +1,9 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using FluentAssertions;
 using Microsoft.DotNet.Cli;
+using System;
 using System.Collections.Generic;
 using Xunit;
 
@@ -19,8 +21,8 @@ namespace Microsoft.DotNet.Tests.ParserTests
             // Act
             var convertedArgs = new VSTestArgumentConverter().Convert(args, out var ignoredArgs);
 
-            Assert.Equal(expectedArgs, convertedArgs);
-            Assert.True(ignoredArgs.Count == 0);
+            convertedArgs.Should().BeEquivalentTo(convertedArgs);
+            ignoredArgs.Should().BeEmpty();
         }
 
         [Theory]
@@ -33,8 +35,8 @@ namespace Microsoft.DotNet.Tests.ParserTests
             // Act
             var convertedArgs = new VSTestArgumentConverter().Convert(args, out var ignoredArgs);
 
-            Assert.Equal(expectedArgs, convertedArgs);
-            Assert.True(ignoredArgs.Count == 0);
+            convertedArgs.Should().BeEquivalentTo(convertedArgs);
+            ignoredArgs.Should().BeEmpty();
         }
 
         [Theory]
@@ -48,8 +50,19 @@ namespace Microsoft.DotNet.Tests.ParserTests
             // Act
             var convertedArgs = new VSTestArgumentConverter().Convert(args, out var ignoredArgs);
 
-            Assert.Equal(expectedArgs, convertedArgs);
+            convertedArgs.Should().BeEquivalentTo(convertedArgs);
             Assert.Equal(expIgnoredArgs, ignoredArgs);
+        }
+
+        [Fact]
+        public void ConvertArgsThrowsWhenWeTryToParseInlineSettings()
+        {
+            string[] args = "sometest.dll -s test.settings -- inlineSetting=1".Split(" ");
+
+            // Act
+            new VSTestArgumentConverter().Invoking(i => i.Convert(args, out _))
+                .ShouldThrow<ArgumentException>()
+                .WithMessage("Inline settings should not be passed to Convert.");
         }
 
         public static class DataSource
@@ -58,7 +71,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             {
                 new object[] { "-h", "--help" },
                 new object[] { "sometest.dll -s test.settings", "sometest.dll --settings:test.settings" },
-                new object[] { "sometest.dll -t -- RunConfiguration.DotNetHostPath=dotnet.exe", "sometest.dll --listtests -- RunConfiguration.DotNetHostPath=dotnet.exe" },
+                new object[] { "sometest.dll -t", "sometest.dll --listtests" },
                 new object[] { "sometest.dll --list-tests", "sometest.dll --listtests" },
                 new object[] { "sometest.dll --filter", "sometest.dll --testcasefilter" },
                 new object[] { "sometest.dll -l trx", "sometest.dll --logger:trx" },
@@ -69,7 +82,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
                 new object[] { @"sometest.dll --results-directory c:\temp\", @"sometest.dll --resultsdirectory:c:\temp\" },
                 new object[] { @"sometest.dll -s testsettings -t -a c:\path -f net451 -d log.txt --results-directory c:\temp\", @"sometest.dll --settings:testsettings --listtests --testadapterpath:c:\path --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\" },
                 new object[] { @"sometest.dll -s:testsettings -t -a:c:\path -f:net451 -d:log.txt --results-directory:c:\temp\", @"sometest.dll --settings:testsettings --listtests --testadapterpath:c:\path --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\" },
-                new object[] { @"sometest.dll --settings testsettings -t --test-adapter-path c:\path --framework net451 --diag log.txt --results-directory c:\temp\ -- RunConfiguration.DisableAppDomain=true", @"sometest.dll --settings:testsettings --listtests --testadapterpath:c:\path --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\ -- RunConfiguration.DisableAppDomain=true" }
+                new object[] { @"sometest.dll --settings testsettings -t --test-adapter-path c:\path --framework net451 --diag log.txt --results-directory c:\temp\", @"sometest.dll --settings:testsettings --listtests --testadapterpath:c:\path --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\" }
             };
 
             public static IEnumerable<object[]> VerbosityTestCases { get; } = new List<object[]>

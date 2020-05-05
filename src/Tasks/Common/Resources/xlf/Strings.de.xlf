@@ -113,18 +113,18 @@
         <note>{StrBegin="NETSDK1032: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSelfContainedWithoutRuntimeIdentifier">
-        <source>NETSDK1031: It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</source>
-        <target state="translated">NETSDK1031: Das Erstellen oder Veröffentlichen einer eigenständigen Anwendung ohne die Angabe eines RuntimeIdentifier wird nicht unterstützt. Geben Sie entweder einen RuntimeIdentifier an, oder legen Sie für SelfContained "False" fest.</target>
+        <source>NETSDK1031: It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier. You must either specify a RuntimeIdentifier or set SelfContained to false.</source>
+        <target state="needs-review-translation">NETSDK1031: Das Erstellen oder Veröffentlichen einer eigenständigen Anwendung ohne die Angabe eines RuntimeIdentifier wird nicht unterstützt. Geben Sie entweder einen RuntimeIdentifier an, oder legen Sie für SelfContained "False" fest.</target>
         <note>{StrBegin="NETSDK1031: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutRuntimeIdentifier">
-        <source>NETSDK1097: It is not supported to publish an application to a single-file without specifying a RuntimeIdentifier. Please either specify a RuntimeIdentifier or set PublishSingleFile to false.</source>
-        <target state="translated">NETSDK1097: Das Veröffentlichen einer Anwendung in einer einzelnen Datei ohne Angabe eines RuntimeIdentifier wird nicht unterstützt. Geben Sie entweder einen RuntimeIdentifier an, oder legen Sie PublishSingleFile auf FALSE fest.</target>
+        <source>NETSDK1097: It is not supported to publish an application to a single-file without specifying a RuntimeIdentifier. You must either specify a RuntimeIdentifier or set PublishSingleFile to false.</source>
+        <target state="needs-review-translation">NETSDK1097: Das Veröffentlichen einer Anwendung in einer einzelnen Datei ohne Angabe eines RuntimeIdentifier wird nicht unterstützt. Geben Sie entweder einen RuntimeIdentifier an, oder legen Sie PublishSingleFile auf FALSE fest.</target>
         <note>{StrBegin="NETSDK1097: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutAppHost">
-        <source>NETSDK1098: Applications published to a single-file are required to use the application host. Please either set PublishSingleFile to false or set UseAppHost to true.</source>
-        <target state="translated">NETSDK1098: Anwendungen, die in einer einzelnen Datei veröffentlicht wurden, müssen den Anwendungshost verwenden. Legen Sie PublishSingleFile auf FALSE oder UseAppHost auf TRUE fest.</target>
+        <source>NETSDK1098: Applications published to a single-file are required to use the application host. You must either set PublishSingleFile to false or set UseAppHost to true.</source>
+        <target state="needs-review-translation">NETSDK1098: Anwendungen, die in einer einzelnen Datei veröffentlicht wurden, müssen den Anwendungshost verwenden. Legen Sie PublishSingleFile auf FALSE oder UseAppHost auf TRUE fest.</target>
         <note>{StrBegin="NETSDK1098: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSingleFileWithoutExecutable">
@@ -505,6 +505,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1124: Trimming assemblies requires .NET Core 3.0 or higher.</source>
         <target state="translated">NETSDK1124: Zum Kürzen von Assemblys ist .NET Core 3.0 oder höher erforderlich.</target>
         <note>{StrBegin="NETSDK1124: "}</note>
+      </trans-unit>
+      <trans-unit id="PublishUnsupportedWithoutTargetFramework">
+        <source>NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify the framework for the published application.</source>
+        <target state="new">NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify the framework for the published application.</target>
+        <note>{StrBegin="NETSDK1129: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunCompilationFailed">
         <source>NETSDK1096: Optimizing assemblies for performance failed. You can either exclude the failing assemblies from being optimized, or set the PublishReadyToRun property to false.</source>

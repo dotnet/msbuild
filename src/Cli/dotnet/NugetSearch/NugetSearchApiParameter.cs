@@ -12,21 +12,18 @@ namespace Microsoft.DotNet.NugetSearch
             string searchTerm = null,
             int? skip = null,
             int? take = null,
-            bool prerelease = false,
-            string semverLevel = null)
+            bool prerelease = false)
         {
             SearchTerm = searchTerm;
             Skip = skip;
             Take = take;
             Prerelease = prerelease;
-            SemverLevel = semverLevel;
         }
 
         public string SearchTerm { get; }
         public int? Skip { get; }
         public int? Take { get; }
         public bool Prerelease { get; }
-        public string SemverLevel { get; }
 
         public NugetSearchApiParameter(AppliedOption appliedOption)
         {
@@ -35,13 +32,11 @@ namespace Microsoft.DotNet.NugetSearch
             var skip = GetParsedResultAsInt(appliedOption, "skip");
             var take = GetParsedResultAsInt(appliedOption, "take");
             var prerelease = appliedOption.ValueOrDefault<bool>("prerelease");
-            var semverLevel = appliedOption.ValueOrDefault<string>("semver-level");
 
             SearchTerm = searchTerm;
             Skip = skip;
             Take = take;
             Prerelease = prerelease;
-            SemverLevel = semverLevel;
         }
 
         private static int? GetParsedResultAsInt(AppliedOption appliedOption, string alias)

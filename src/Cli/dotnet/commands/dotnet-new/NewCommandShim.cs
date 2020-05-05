@@ -11,6 +11,7 @@ using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Tools.MSBuild;
+using Microsoft.DotNet.Tools.Restore;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli;
 using Microsoft.TemplateEngine.Edge;
@@ -51,7 +52,13 @@ namespace Microsoft.DotNet.Tools.New
                 });
             }
 
-            return New3Command.Run(CommandName, CreateHost(), logger, FirstRun, args);
+            New3Callbacks callbacks = new New3Callbacks()
+            {
+                OnFirstRun = FirstRun,
+                RestoreProject = RestoreProject
+            };
+
+            return New3Command.Run(CommandName, CreateHost(), logger, callbacks, args, null);
         }
 
         private static ITemplateEngineHost CreateHost()
@@ -151,6 +158,11 @@ namespace Microsoft.DotNet.Tools.New
             }
 
             return bestVersionsByBucket.OrderBy(x => x.Key).Select(x => x.Value.path).ToList();
+        }
+
+        private static bool RestoreProject(string pathToRestore)
+        {
+            return RestoreCommand.Run(new string[] { pathToRestore }) == 0;
         }
     }
 }

@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [Fact]
         public void ListSearchParserCanGetArguments()
         {
-            var result = Parser.Instance.Parse("dotnet tool search mytool --detail --skip 3 --take 4 --prerelease --semver-level 1.0.0");
+            var result = Parser.Instance.Parse("dotnet tool search mytool --detail --skip 3 --take 4 --prerelease");
 
             var appliedOptions = result["dotnet"]["tool"]["search"];
             var packageId = appliedOptions.Arguments.Single();
@@ -34,7 +34,6 @@ namespace Microsoft.DotNet.Tests.ParserTests
             appliedOptions.ValueOrDefault<string>("skip").Should().Be("3");
             appliedOptions.ValueOrDefault<string>("take").Should().Be("4");
             appliedOptions.ValueOrDefault<bool>("prerelease").Should().Be(true);
-            appliedOptions.ValueOrDefault<string>("semver-level").Should().Be("1.0.0");
         }
     }
 }

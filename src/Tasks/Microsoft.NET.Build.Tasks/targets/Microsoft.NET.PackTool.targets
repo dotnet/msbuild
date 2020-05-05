@@ -33,7 +33,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="PackTool" DependsOnTargets="GenerateToolsSettingsFileFromBuildProperty;$(_PackToolPublishDependency);_PackToolValidation" Condition=" '$(PackAsTool)' == 'true' ">
     <ItemGroup>
-      <_GeneratedFiles Include="$(PublishDepsFilePath)"/>
+      <_GeneratedFiles Include="$(PublishDepsFilePath)" Condition="'$(GenerateDependencyFile)' != 'true' or '$(_UseBuildDependencyFile)' == 'true'" />
       <_GeneratedFiles Include="$(PublishRuntimeConfigFilePath)"/>
       <_GeneratedFiles Include="$(_ToolsSettingsFilePath)"/>
     </ItemGroup>

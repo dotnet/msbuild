@@ -35,11 +35,6 @@ namespace Microsoft.DotNet.Cli
                     $"--prerelease",
                     LocalizableStrings.PrereleaseDescription,
                     Accept.NoArguments()),
-                Create.Option(
-                    $"--semver-level",
-                    LocalizableStrings.SemVerLevelDescription,
-                    Accept.ExactlyOneArgument()
-                        .With(name: LocalizableStrings.SemVerLevelArgumentName)),
                 CommonOptions.HelpOption());
         }
     }
