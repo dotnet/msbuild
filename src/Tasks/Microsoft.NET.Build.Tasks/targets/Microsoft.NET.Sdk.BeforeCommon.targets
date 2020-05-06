@@ -17,6 +17,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Import Project="Microsoft.NET.Sdk.DefaultItems.props" />
     <Import Project="Microsoft.NET.SupportedTargetFrameworks.props" />
   </ImportGroup>
+
+    <!-- Workaround: https://github.com/microsoft/msbuild/issues/4948 -->
+  <PropertyGroup>
+    <ImportFrameworkWinFXTargets>false</ImportFrameworkWinFXTargets>
+  </PropertyGroup>
   
   <PropertyGroup>
     <_IsExecutable Condition="'$(OutputType)' == 'Exe' or '$(OutputType)'=='WinExe'">true</_IsExecutable>
