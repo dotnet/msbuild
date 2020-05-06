@@ -17,7 +17,7 @@
     <SystemSecurityCryptographyProtectedDataPackageVersion>4.3.0</SystemSecurityCryptographyProtectedDataPackageVersion>
     <SystemCollectionsSpecializedPackageVersion>4.3.0</SystemCollectionsSpecializedPackageVersion>
     <SystemXmlXmlDocumentPackageVersion>4.3.0</SystemXmlXmlDocumentPackageVersion>
-    <MicrosoftAspNetCoreAnalyzersPackageVersion>5.0.0-preview.5.20254.9</MicrosoftAspNetCoreAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreAnalyzersPackageVersion>5.0.0-preview.5.20255.6</MicrosoftAspNetCoreAnalyzersPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <VersionPrefix>5.0.100</VersionPrefix>
@@ -35,8 +35,8 @@
 
   -->
   <PropertyGroup Label="Automated">
-    <MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>5.0.0-preview.5.20254.9</MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>5.0.0-preview.5.20254.9</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>5.0.0-preview.5.20254.9</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>5.0.0-preview.5.20255.6</MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>5.0.0-preview.5.20255.6</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>5.0.0-preview.5.20255.6</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
   </PropertyGroup>
 </Project>
