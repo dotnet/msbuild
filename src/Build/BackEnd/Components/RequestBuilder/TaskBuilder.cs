@@ -324,12 +324,6 @@ namespace Microsoft.Build.BackEnd
                 // Loop through each of the batch buckets and execute them one at a time
                 for (int i = 0; i < buckets.Count; i++)
                 {
-                    // Some tests do not provide an actual taskNode; checking if _taskNode == null prevents those tests from failing.
-                    if (MSBuildEventSource.Log.IsEnabled())
-                    {
-                        TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
-                        MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
-                    }
                     // Execute the batch bucket, pass in which bucket we are executing so that we know when to get a new taskId for the bucket.
                     taskResult = await ExecuteBucket(taskHost, (ItemBucket)buckets[i], mode, lookupHash);
 
@@ -338,12 +332,6 @@ namespace Microsoft.Build.BackEnd
                     if (aggregateResult.ActionCode == WorkUnitActionCode.Stop)
                     {
                         break;
-                    }
-                    // Some tests do not provide an actual taskNode; checking if _taskNode == null prevents those tests from failing.
-                    if (MSBuildEventSource.Log.IsEnabled())
-                    {
-                        TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
-                        MSBuildEventSource.Log.ExecuteTaskStop(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
                     }
                 }
                 
@@ -403,6 +391,13 @@ namespace Microsoft.Build.BackEnd
                 taskResult = new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Continue, null);
 
                 return taskResult;
+            }
+
+            // Some tests do not provide an actual taskNode; checking if _taskNode == null prevents those tests from failing.
+            if (MSBuildEventSource.Log.IsEnabled())
+            {
+                TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
+                MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
             }
 
             // If this is an Intrinsic task, it gets handled in a special fashion.
@@ -510,6 +505,13 @@ namespace Microsoft.Build.BackEnd
 
                     taskResult = new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, null);
                 }
+            }
+
+            // Some tests do not provide an actual taskNode; checking if _taskNode == null prevents those tests from failing.
+            if (MSBuildEventSource.Log.IsEnabled())
+            {
+                TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
+                MSBuildEventSource.Log.ExecuteTaskStop(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
             }
 
             return taskResult;
