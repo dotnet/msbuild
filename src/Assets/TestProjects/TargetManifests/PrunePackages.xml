@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="FluentAssertions" Version="5.10.3" />
+  </ItemGroup>
+    
+  <Target Name="AddPackagesToPrune" AfterTargets="PrepforRestoreForComposeStore">
+    <ItemGroup>
+      <PackageToPrune Include="Microsoft.CSharp" />
+      <PackageToPrune Include="System.Collections" />
+      <PackageToPrune Include="System.Diagnostics.Debug" />
+      <PackageToPrune Include="System.Dynamic.Runtime" />
+      <PackageToPrune Include="System.Globalization" />
+      <PackageToPrune Include="System.IO" />
+      <PackageToPrune Include="System.Linq" />
+      <PackageToPrune Include="System.Linq.Expressions" />
+      <PackageToPrune Include="System.ObjectModel" />
+      <PackageToPrune Include="System.Reflection" />
+      <PackageToPrune Include="System.Reflection.Extensions" />
+      <PackageToPrune Include="System.Resources.ResourceManager" />
+      <PackageToPrune Include="System.Runtime" />
+      <PackageToPrune Include="System.Runtime.Extensions" />
+      <PackageToPrune Include="System.Runtime.Serialization.Primitives" />
+      <PackageToPrune Include="System.Text.Encoding" />
+      <PackageToPrune Include="System.Text.Encoding.Extensions" />
+      <PackageToPrune Include="System.Text.RegularExpressions" />
+      <PackageToPrune Include="System.Threading" />
+      <PackageToPrune Include="System.Threading.Tasks" />
+      <PackageToPrune Include="System.Xml.ReaderWriter" />
+      <PackageToPrune Include="System.Xml.XDocument" />
+    </ItemGroup>
+    <PropertyGroup>
+      <PackagesToPrune>$(PackagesToPrune);@(PackageToPrune)</PackagesToPrune>
+    </PropertyGroup>
+  </Target>
+</Project>
