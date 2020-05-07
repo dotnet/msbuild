@@ -30,7 +30,9 @@
     <UsingToolVisualStudioIbcTraining>true</UsingToolVisualStudioIbcTraining>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
     <UsingToolVSSDK>true</UsingToolVSSDK>
-    <!-- Override default VSSDK version with one that supports client enablement. -->
+
+    <!-- Override Arcade's default VSSDK version with one that supports client enablement.
+         Can be removed after Arcade moves up. -->
     <MicrosoftVSSDKBuildToolsVersion>16.7.13</MicrosoftVSSDKBuildToolsVersion>
   </PropertyGroup>
   <!-- Toolset Dependencies -->
