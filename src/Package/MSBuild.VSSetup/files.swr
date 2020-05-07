@@ -305,6 +305,7 @@ folder InstallDir:\MSBuild\Current\Bin\amd64\zh-Hant
   file source=$(TaskHostX64BinPath)zh-Hant\MSBuildTaskHost.resources.dll vs.file.ngenArchitecture=all
 
 folder InstallDir:\Common7\IDE\CommonExtensions\MSBuild
+  file source=$(SourceDir)Package\MSBuild.VSSetup\MSBuild.clientenabledpkg
   file source=$(SourceDir)Framework\Microsoft.Build.Framework.pkgdef
   file source=$(SourceDir)Build\Microsoft.Build.pkgdef
   file source=$(SourceDir)Tasks\Microsoft.Build.Tasks.Core.pkgdef
