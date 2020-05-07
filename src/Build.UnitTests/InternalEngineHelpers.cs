@@ -106,8 +106,12 @@ namespace Microsoft.Build.Unittest
                     sdkResultItems = new Dictionary<string, SdkResultItem>(StringComparer.OrdinalIgnoreCase);
                     foreach (var item in sdkResult.ItemsToAdd)
                     {
-                        sdkResultItems.Add(item.Key, new SdkResultItem(item.Value.ItemSpec,
-                            new Dictionary<string, string>(item.Value.Metadata, StringComparer.OrdinalIgnoreCase)));
+                        Dictionary<string, string> newMetadata = null;
+                        if (item.Value.Metadata != null)
+                        {
+                            newMetadata = new Dictionary<string, string>(item.Value.Metadata, StringComparer.OrdinalIgnoreCase);
+                        }
+                        sdkResultItems.Add(item.Key, new SdkResultItem(item.Value.ItemSpec, newMetadata));
                     }
                 }
 

@@ -58,6 +58,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return new MainNodeSdkResolverService();
         }
 
+        //  Test hook
+        internal void InitializeForTests(SdkResolverLoader resolverLoader = null, IList<SdkResolver> resolvers = null)
+        {
+            ((CachingSdkResolverService)_cachedSdkResolver).InitializeForTests(resolverLoader, resolvers);
+        }
+
         /// <inheritdoc cref="ISdkResolverService.ClearCache"/>
         public override void ClearCache(int submissionId)
         {
