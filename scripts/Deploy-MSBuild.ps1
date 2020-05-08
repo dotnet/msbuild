@@ -94,7 +94,7 @@ if ($runtime -eq "Desktop") {
 
         FileToCopy "$bootstrapBinDirectory\Microsoft.Data.Entity.targets"
         FileToCopy "$bootstrapBinDirectory\Microsoft.ServiceModel.targets"
-        FileToCopy "$bootstrapBinDirectory\Microsoft.WinFx.targets"
+        FileToCopy "$bootstrapBinDirectory\Microsoft.WinFX.targets"
         FileToCopy "$bootstrapBinDirectory\Microsoft.WorkflowBuildExtensions.targets"
         FileToCopy "$bootstrapBinDirectory\Microsoft.Xaml.targets"
         FileToCopy "$bootstrapBinDirectory\Workflow.targets"

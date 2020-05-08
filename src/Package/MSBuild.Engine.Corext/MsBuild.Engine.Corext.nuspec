@@ -60,7 +60,7 @@
     <file src="$X86BinPath$/Microsoft.ServiceModel.targets" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.VisualBasic.CrossTargeting.targets" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.VisualBasic.CurrentVersion.targets" target="v15.0/bin" />
-    <file src="$X86BinPath$/Microsoft.WinFx.targets" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.WinFX.targets" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.WorkflowBuildExtensions.targets" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.Xaml.targets" target="v15.0/bin" />
     <file src="$X86BinPath$/Workflow.targets" target="v15.0/bin" />
@@ -114,7 +114,7 @@
     <file src="$X86BinPath$/Microsoft.ServiceModel.targets" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.VisualBasic.CrossTargeting.targets" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.VisualBasic.CurrentVersion.targets" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$/Microsoft.WinFx.targets" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.WinFX.targets" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.WorkflowBuildExtensions.targets" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.Xaml.targets" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Workflow.targets" target="v15.0/bin/amd64" />
