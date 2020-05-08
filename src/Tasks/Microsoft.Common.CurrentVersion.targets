@@ -137,10 +137,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <!-- Example, AnyCPU -->
     <_OriginalPlatform>$(Platform)</_OriginalPlatform>
-    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
-    <PlatformName Condition="'$(PlatformName)' == ''">$(Platform)</PlatformName>
     <!-- Example, Debug -->
     <_OriginalConfiguration>$(Configuration)</_OriginalConfiguration>
+    <!-- Check whether OutputPath was specified for valid Configuration/Platform combination -->
+    <_OutputPathWasMissing Condition="'$(_OriginalPlatform)' != '' and '$(_OriginalConfiguration)' != '' and '$(OutputPath)' == ''">true</_OutputPathWasMissing>
+    <!-- Check whether BaseOutputPath was specified -->
+    <BaseOutputPathWasSpecified Condition="'$(BaseOutputPath)' != ''">true</BaseOutputPathWasSpecified>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
+    <PlatformName Condition="'$(PlatformName)' == ''">$(Platform)</PlatformName>
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
     <ConfigurationName Condition="'$(ConfigurationName)' == ''">$(Configuration)</ConfigurationName>
 
@@ -181,12 +188,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ProduceReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == ''">false</ProduceReferenceAssembly>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(OutputPath)' == '' ">
+  <!--
+    For projects loaded with MPFProj (Legacy project system) that defines the properties per Configuration/Platform
+    combination by the IDE itself, the validation of an invalid Configuration/Platform is determined by the non-empty
+    value of the 'OutputPath' property specified under the IDE generated Configuration/Platform 'PropertyGroup' section.
+
+    If 'BaseOutputPath' is not specified, then, we should fallback to the existing behavior, as described above.
+  -->
+  <PropertyGroup Condition="'$(BaseOutputPathWasSpecified)' != 'true' and '$(_OutputPathWasMissing)' == 'true'">
     <!--
-        A blank OutputPath at this point means that the user passed in an invalid Configuration/Platform
-        combination.  Whether this is considered an error or a warning depends on the value of
-        $(SkipInvalidConfigurations).
-        -->
+        When 'OutputPath' is missing or empty (along with non-existent 'BaseOutputPath') at this point means that
+        we're in legacy mode and we should assume the current Configuration/Platform combination as invalid.
+        Whether this is considered an error or a warning depends on the value of $(SkipInvalidConfigurations).
+    -->
     <_InvalidConfigurationError Condition=" '$(SkipInvalidConfigurations)' != 'true' ">true</_InvalidConfigurationError>
     <_InvalidConfigurationWarning Condition=" '$(SkipInvalidConfigurations)' == 'true' ">true</_InvalidConfigurationWarning>
   </PropertyGroup>
@@ -195,7 +209,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     IDE Macros available from both integrated builds and from command line builds.
     The following properties are 'macros' that are available via IDE for
     pre and post build steps.
-    -->
+  -->
   <PropertyGroup>
     <TargetExt Condition="'$(TargetExt)' == '' and '$(OutputType)'=='exe'">.exe</TargetExt>
     <TargetExt Condition="'$(TargetExt)' == '' and '$(OutputType)'=='winexe'">.exe</TargetExt>
@@ -793,7 +807,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       BeforeTargets="$(BuildDependsOn);Build;$(RebuildDependsOn);Rebuild;$(CleanDependsOn);Clean">
 
     <PropertyGroup>
-      <_InvalidConfigurationMessageText>The OutputPath property is not set for project '$(MSBuildProjectFile)'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='$(_OriginalConfiguration)'  Platform='$(_OriginalPlatform)'.</_InvalidConfigurationMessageText>
+      <_InvalidConfigurationMessageText>The BaseOutputPath/OutputPath property is not set for project '$(MSBuildProjectFile)'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='$(_OriginalConfiguration)'  Platform='$(_OriginalPlatform)'.</_InvalidConfigurationMessageText>
       <_InvalidConfigurationMessageText Condition="'$(BuildingInsideVisualStudio)' == 'true'">$(_InvalidConfigurationMessageText)  This error may also appear if some other project is trying to follow a project-to-project reference to this project, this project has been unloaded or is not included in the solution, and the referencing project does not build using the same or an equivalent Configuration or Platform.</_InvalidConfigurationMessageText>
       <_InvalidConfigurationMessageText Condition="'$(BuildingInsideVisualStudio)' != 'true'">$(_InvalidConfigurationMessageText)  You may be seeing this message because you are trying to build a project without a solution file, and have specified a non-default Configuration or Platform that doesn't exist for this project.</_InvalidConfigurationMessageText>
     </PropertyGroup>
@@ -806,8 +820,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Although we try to ensure a trailing slash, it's possible to circumvent this if the property is set on the command line -->
     <Error Condition="'$(OutDir)' != '' and !HasTrailingSlash('$(OutDir)')" Text="The OutDir property must end with a trailing slash." />
-    <Error Condition="'$(BaseIntermediateOutputPath)' != '' and !HasTrailingSlash('$(BaseIntermediateOutputPath)')" Text="The BaseIntermediateOutputPath must end with a trailing slash." />
+    <Error Condition="'$(OutputPath)' != '' and !HasTrailingSlash('$(OutputPath)')" Text="The OutputPath must end with a trailing slash." />
+    <Error Condition="'$(BaseOutputPath)' != '' and !HasTrailingSlash('$(BaseOutputPath)')" Text="The BaseOutputPath must end with a trailing slash." />
     <Error Condition="'$(IntermediateOutputPath)' != '' and !HasTrailingSlash('$(IntermediateOutputPath)')" Text="The IntermediateOutputPath must end with a trailing slash." />
+    <Error Condition="'$(BaseIntermediateOutputPath)' != '' and !HasTrailingSlash('$(BaseIntermediateOutputPath)')" Text="The BaseIntermediateOutputPath must end with a trailing slash." />
 
     <!-- Also update the value of PlatformTargetAsMSBuildArchitecture per the value of Prefer32Bit.  We are doing
          this here because Prefer32Bit may be set anywhere in the targets, so we can't depend on it having the
