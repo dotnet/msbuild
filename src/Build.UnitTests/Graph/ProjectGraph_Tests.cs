@@ -1409,6 +1409,19 @@ $@"
                 {
                     new Dictionary<int, int[]>
                     {
+                        {1, new []{2, 4, 3, 5} },
+                        {2, new []{5} },
+                        {3, new []{5} },
+                        {4, new []{6} },
+                        {5, new []{7} },
+                        {6, new []{5} }
+                    },
+                };
+
+                yield return new object[]
+                {
+                    new Dictionary<int, int[]>
+                    {
                         {1, new []{5, 4, 7}},
                         {2, new []{5}},
                         {3, new []{6, 5}},
@@ -1996,11 +2009,9 @@ $@"
 
             foreach (var node in graph.ProjectNodes)
             {
-                foreach (var closureReference in ComputeClosure(node))
-                {
-                    node.ProjectReferences.ShouldContain(closureReference);
-                    closureReference.ReferencingProjects.ShouldContain(node);
-                }
+                var expectedClosure = ComputeClosure(node);
+
+                node.ProjectReferences.ShouldBeSameIgnoringOrder(expectedClosure);
             }
         }
 

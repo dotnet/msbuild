@@ -124,7 +124,7 @@ namespace Microsoft.Build.Graph
 
         private void AddEdgesFromProjectReferenceItems(Dictionary<ConfigurationMetadata, ParsedProject> allParsedProjects, GraphEdges edges)
         {
-            var transitiveReferenceCache = new Dictionary<ProjectGraphNode, List<ProjectGraphNode>>(allParsedProjects.Count);
+            var transitiveReferenceCache = new Dictionary<ProjectGraphNode, HashSet<ProjectGraphNode>>(allParsedProjects.Count);
 
             foreach (var parsedProject in allParsedProjects)
             {
@@ -143,7 +143,7 @@ namespace Microsoft.Build.Graph
                     // Add transitive references only if the project requires it.
                     if (requiresTransitiveProjectReferences)
                     {
-                        foreach (var transitiveProjectReference in GetTransitiveProjectReferences(allParsedProjects[referenceInfo.ReferenceConfiguration]))
+                        foreach (var transitiveProjectReference in GetTransitiveProjectReferencesExcludingSelf(allParsedProjects[referenceInfo.ReferenceConfiguration]))
                         {
                             currentNode.AddProjectReference(
                                 transitiveProjectReference,
@@ -160,20 +160,24 @@ namespace Microsoft.Build.Graph
                 }
             }
 
-            List<ProjectGraphNode> GetTransitiveProjectReferences(ParsedProject parsedProject)
+            HashSet<ProjectGraphNode> GetTransitiveProjectReferencesExcludingSelf(ParsedProject parsedProject)
             {
-                if (transitiveReferenceCache.TryGetValue(parsedProject.GraphNode, out List<ProjectGraphNode> cachedTransitiveReferences))
+                if (transitiveReferenceCache.TryGetValue(parsedProject.GraphNode, out HashSet<ProjectGraphNode> cachedTransitiveReferences))
                 {
                     return cachedTransitiveReferences;
                 }
                 else
                 {
-                    var transitiveReferences = new List<ProjectGraphNode>();
+                    var transitiveReferences = new HashSet<ProjectGraphNode>();
 
                     foreach (var referenceInfo in parsedProject.ReferenceInfos)
                     {
                         transitiveReferences.Add(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode);
-                        transitiveReferences.AddRange(GetTransitiveProjectReferences(allParsedProjects[referenceInfo.ReferenceConfiguration]));
+
+                        foreach (var transitiveReference in GetTransitiveProjectReferencesExcludingSelf(allParsedProjects[referenceInfo.ReferenceConfiguration]))
+                        {
+                            transitiveReferences.Add(transitiveReference);
+                        }
                     }
 
                     transitiveReferenceCache.Add(parsedProject.GraphNode, transitiveReferences);
