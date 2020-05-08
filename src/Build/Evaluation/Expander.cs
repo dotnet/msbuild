@@ -3537,6 +3537,14 @@ namespace Microsoft.Build.Evaluation
                             return true;
                         }
                     }
+                    else if (string.Equals(_methodMethodName, nameof(string.IndexOf), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (TryGetArg(args, out string arg0, out StringComparison arg1))
+                        {
+                            returnVal = text.IndexOf(arg0, arg1);
+                            return true;
+                        }
+                    }
                     else if (string.Equals(_methodMethodName, nameof(string.IndexOfAny), StringComparison.OrdinalIgnoreCase))
                     {
                         if (TryGetArg(args, out string arg0))
@@ -4240,6 +4248,44 @@ namespace Microsoft.Build.Evaluation
 
                 arg0 = args[0] as string;
                 return arg0 != null;
+            }
+
+            private static readonly Dictionary<string, StringComparison> StringComparisonNames =
+                new Dictionary<string, StringComparison>(StringComparer.Ordinal)
+                {
+                    {"System.StringComparison.OrdinalIgnoreCase", StringComparison.OrdinalIgnoreCase},
+                    {"System.StringComparison.Ordinal", StringComparison.Ordinal},
+                    {"System.StringComparison.CurrentCulture", StringComparison.CurrentCulture},
+                    {"System.StringComparison.CurrentCultureIgnoreCase", StringComparison.CurrentCultureIgnoreCase},
+                    {"System.StringComparison.InvariantCulture", StringComparison.InvariantCulture},
+                    {"System.StringComparison.InvariantCultureIgnoreCase", StringComparison.InvariantCultureIgnoreCase},
+                    {"OrdinalIgnoreCase", StringComparison.OrdinalIgnoreCase},
+                    {"Ordinal", StringComparison.Ordinal},
+                    {"CurrentCulture", StringComparison.CurrentCulture},
+                    {"CurrentCultureIgnoreCase", StringComparison.CurrentCultureIgnoreCase},
+                    {"InvariantCulture", StringComparison.InvariantCulture},
+                    {"InvariantCultureIgnoreCase", StringComparison.InvariantCultureIgnoreCase}
+                };
+
+            private static bool TryGetArg(object[] args, out string arg0, out StringComparison arg1)
+            {
+                if (args.Length != 2)
+                {
+                    arg0 = null;
+                    arg1 = default;
+
+                    return false;
+                }
+
+                arg0 = args[0] as string;
+
+                if (arg0 == null || !(args[1] is string arg1AsString))
+                {
+                    arg1 = default;
+                    return false;
+                }
+
+                return StringComparisonNames.TryGetValue(arg1AsString, out arg1);
             }
 
             private static bool TryGetArgs(object[] args, out int arg0, out int arg1)
