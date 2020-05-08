@@ -74,7 +74,7 @@
 
       <ShimTargets Include="Microsoft.Data.Entity.targets" />
       <ShimTargets Include="Microsoft.ServiceModel.targets" />
-      <ShimTargets Include="Microsoft.WinFx.targets" />
+      <ShimTargets Include="Microsoft.WinFX.targets" />
       <ShimTargets Include="Microsoft.WorkflowBuildExtensions.targets" />
       <ShimTargets Include="Microsoft.Xaml.targets" />
       <ShimTargets Include="Workflow.Targets" />

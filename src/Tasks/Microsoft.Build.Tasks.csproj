@@ -678,7 +678,7 @@
     <Content Include="Microsoft.ServiceModel.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Microsoft.WinFx.targets">
+    <Content Include="Microsoft.WinFX.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Microsoft.WorkflowBuildExtensions.targets">
@@ -863,7 +863,7 @@
     </CopyFile>
     <DataFile Include="Microsoft.Data.Entity.targets" />
     <DataFile Include="Microsoft.ServiceModel.targets" />
-    <DataFile Include="Microsoft.WinFx.targets" />
+    <DataFile Include="Microsoft.WinFX.targets" />
     <DataFile Include="Microsoft.WorkflowBuildExtensions.targets" />
     <DataFile Include="Microsoft.Xaml.targets" />
     <DataFile Include="Workflow.targets" />
