@@ -118,7 +118,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
         [InlineData("DefaultConnection", @"Server=(localdb)\mssqllocaldb;Database=defaultDB;Trusted_Connection=True;MultipleActiveResultSets=true")]
         [InlineData("EmptyConnection", @"")]
         [InlineData("", @"SomeConnectionStringValue")]
-        public void AppSettingsTransform_DoesNotFailIfConnectionStringsElementIsMissing(string connectionName, string connectionString)
+        public void AppSettingsTransform_UpdateConnectionStringEvenIfConnectionStringSectionMissing(string connectionName, string connectionString)
         {
             // Arrange
             ITaskItem[] taskItemArray = new ITaskItem[1];
