@@ -29,6 +29,8 @@ build.cmd
 
 The build script will output a `dotnet` installation to `artifacts\tmp\Debug\dotnet` that will include any local changes to the .NET Core CLI.
 
+To open the solution in Visual Studio, be sure to run `artifacts\sdk-build-env.bat` first and open with `devenv sdk.sln`.
+
 ### Linux and macOS
 
 Run the following command from the root of the repository:
@@ -60,61 +62,6 @@ Run the following command from the root of the repository to run all the .NET Co
 ## Using the built dotnet
 
 The `dotnet` executable in the artifacts directory can be run directly.
-
-However, it's easier to configure a test environment to run the built `dotnet`.
-
-### Windows
-
-Run the following commands from the root of the repository to setup the test environment:
-
-```
-cd scripts
-cli-test-env.bat
-```
-
-Ensure the `dotnet` being used is from the artifacts directory:
-
-```
-where dotnet
-```
-
-This should output `...\artifacts\tmp\Debug\dotnet\dotnet.exe`.
-
-You can now run `dotnet` commands to test changes.
-
-### Linux and macOS
-
-Run the following commands from the root of the repository to setup the test environment:
-
-```
-cd scripts
-source cli-test-env.sh
-```
-
-Ensure the `dotnet` being used is from the artifacts directory:
-
-```
-which dotnet
-```
-
-This should output `.../artifacts/tmp/Debug/dotnet/dotnet`.
-
-You can now run `dotnet` commands to test changes.
-
-## Running specific tests
-
-After the test environment is set up by running the `cli-test-env` script from the previous step, `dotnet run` can be used to run tests from a specific test project.
-
-Run the following commands to run specific tests:
-
-```
-cd test/$TEST_DIRECTORY
-dotnet test
-```
-
-where `$TEST_DIRECTORY` is the name of a test project directory (e.g. `dotnet.Tests`).
-
-Refer to the command-line help for `dotnet test` if you want to run a specific test in the test project.
 
 ## A simple test
 
