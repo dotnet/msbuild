@@ -29,7 +29,7 @@ build.cmd
 
 The build script will output a `dotnet` installation to `artifacts\tmp\Debug\dotnet` that will include any local changes to the .NET Core CLI.
 
-To open the solution in Visual Studio, be sure to run `artifacts\sdk-build-env.bat` first and open with `devenv sdk.sln`.
+To open the solution in Visual Studio, be sure to build with `build.cmd` and run the generated `artifacts\sdk-build-env.bat`. Finally, open Visual Studio with `devenv sdk.sln`.
 
 ### Linux and macOS
 
@@ -62,6 +62,44 @@ Run the following command from the root of the repository to run all the .NET Co
 ## Using the built dotnet
 
 The `dotnet` executable in the artifacts directory can be run directly.
+
+However, it's easier to configure a test environment to run the built `dotnet`.
+
+### Windows
+
+Run the following commands from the root of the repository to setup the test environment:
+
+```
+eng\dogfood.cmd
+```
+
+Ensure the `dotnet` being used is from the artifacts directory:
+
+```
+where dotnet
+```
+
+This should output `..\artifacts\tmp\Debug\dotnet\dotnet.exe`.
+
+You can now run `dotnet` commands to test changes.
+
+### Linux and macOS
+
+Run the following commands from the root of the repository to setup the test environment:
+
+```
+.\eng\dogfood.sh
+```
+
+Ensure the `dotnet` being used is from the artifacts directory:
+
+```
+which dotnet
+```
+
+This should output `.../artifacts/tmp/Debug/dotnet/dotnet`.
+
+You can now run `dotnet` commands to test changes.
 
 ## A simple test
 
