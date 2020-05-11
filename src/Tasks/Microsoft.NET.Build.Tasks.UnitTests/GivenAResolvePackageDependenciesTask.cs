@@ -766,31 +766,31 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             others.Where(t => t.ItemSpec == "ProjF/1.0.0").Count().Should().Be(1);
         }
 
-        private ResolvePackageDependencies GetExecutedTaskFromPrefix(string lockFilePrefix)
+        private static ResolvePackageDependencies GetExecutedTaskFromPrefix(string lockFilePrefix)
         {
             LockFile lockFile;
             return GetExecutedTaskFromPrefix(lockFilePrefix, out lockFile);
         }
 
-        private ResolvePackageDependencies GetExecutedTaskFromPrefix(string lockFilePrefix, out LockFile lockFile)
+        private static ResolvePackageDependencies GetExecutedTaskFromPrefix(string lockFilePrefix, out LockFile lockFile)
         {
             lockFile = TestLockFiles.GetLockFile(lockFilePrefix);
             return GetExecutedTask(lockFile);
         }
 
-        private ResolvePackageDependencies GetExecutedTaskFromContents(string lockFileContents)
+        private static ResolvePackageDependencies GetExecutedTaskFromContents(string lockFileContents)
         {
             LockFile lockFile;
             return GetExecutedTaskFromContents(lockFileContents, out lockFile);
         }
 
-        private ResolvePackageDependencies GetExecutedTaskFromContents(string lockFileContents, out LockFile lockFile)
+        private static ResolvePackageDependencies GetExecutedTaskFromContents(string lockFileContents, out LockFile lockFile)
         {
             lockFile = TestLockFiles.CreateLockFile(lockFileContents);
             return GetExecutedTask(lockFile);
         }
 
-        private ResolvePackageDependencies GetExecutedTask(LockFile lockFile)
+        private static ResolvePackageDependencies GetExecutedTask(LockFile lockFile)
         {
             var resolver = new MockPackageResolver(_packageRoot);
 
