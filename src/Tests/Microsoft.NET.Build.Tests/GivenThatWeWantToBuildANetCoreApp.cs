@@ -247,6 +247,7 @@ namespace Microsoft.NET.Build.Tests
                 "netcoreapp2.1", "TargetDefinitions", GetValuesCommand.ValueType.Item)
             {
                 DependsOnTargets = "RunResolvePackageDependencies",
+                Properties = { { "EmitLegacyAssetsFileItems", "true" } }
             };
 
             getValuesCommand
