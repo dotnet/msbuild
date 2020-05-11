@@ -749,7 +749,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent, out var lockFile);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             task.PackageDependencies.Count().Should().Be(6);
 
@@ -768,8 +768,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
         private static ResolvePackageDependencies GetExecutedTaskFromPrefix(string lockFilePrefix)
         {
-            LockFile lockFile;
-            return GetExecutedTaskFromPrefix(lockFilePrefix, out lockFile);
+            return GetExecutedTaskFromPrefix(lockFilePrefix, out _);
         }
 
         private static ResolvePackageDependencies GetExecutedTaskFromPrefix(string lockFilePrefix, out LockFile lockFile)
@@ -780,8 +779,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
         private static ResolvePackageDependencies GetExecutedTaskFromContents(string lockFileContents)
         {
-            LockFile lockFile;
-            return GetExecutedTaskFromContents(lockFileContents, out lockFile);
+            return GetExecutedTaskFromContents(lockFileContents, out _);
         }
 
         private static ResolvePackageDependencies GetExecutedTaskFromContents(string lockFileContents, out LockFile lockFile)
