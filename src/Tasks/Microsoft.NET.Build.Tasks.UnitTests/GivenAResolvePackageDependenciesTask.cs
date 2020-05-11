@@ -22,7 +22,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         [MemberData(nameof(ItemCounts))]
         public void ItRaisesLockFileToMSBuildItems(string projectName, int [] counts)
         {
-            var task = GetExecutedTaskFromPrefix(projectName);
+            var task = GetExecutedTaskFromPrefix(projectName, out _);
 
             task.PackageDefinitions .Count().Should().Be(counts[0]);
             task.FileDefinitions    .Count().Should().Be(counts[1]);
@@ -54,7 +54,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         [InlineData("simple.dependencies")]
         public void ItAssignsTypeMetaDataToEachDefinition(string projectName)
         {
-            var task = GetExecutedTaskFromPrefix(projectName);
+            var task = GetExecutedTaskFromPrefix(projectName, out _);
 
             Func<ITaskItem[], bool> allTyped =
                 (items) => items.All(x => !string.IsNullOrEmpty(x.GetMetadata(MetadataKeys.Type)));
@@ -129,7 +129,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             var topLevels = task.PackageDependencies
                 .Where(t => string.IsNullOrEmpty(t.GetMetadata(MetadataKeys.ParentPackage)));
@@ -166,7 +166,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             var topLevels = task.PackageDependencies
                 .Where(t => string.IsNullOrEmpty(t.GetMetadata(MetadataKeys.ParentPackage)));
@@ -199,7 +199,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             task.TargetDefinitions.Count().Should().Be(2);
 
@@ -338,7 +338,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             IEnumerable<ITaskItem> fileDefns;
 
@@ -385,7 +385,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             IEnumerable<ITaskItem> fileDeps;
 
@@ -426,7 +426,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             IEnumerable<ITaskItem> fileDeps;
 
@@ -474,7 +474,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             task.FileDefinitions
                 .Any(t => t.GetMetadata(MetadataKeys.Path) == "lib/file/Z.dll")
@@ -677,7 +677,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             var chiDeps = task.PackageDependencies
                 .Where(t => t.ItemSpec.StartsWith("Dep.Lib.Chi"));
@@ -766,20 +766,10 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             others.Where(t => t.ItemSpec == "ProjF/1.0.0").Count().Should().Be(1);
         }
 
-        private static ResolvePackageDependencies GetExecutedTaskFromPrefix(string lockFilePrefix)
-        {
-            return GetExecutedTaskFromPrefix(lockFilePrefix, out _);
-        }
-
         private static ResolvePackageDependencies GetExecutedTaskFromPrefix(string lockFilePrefix, out LockFile lockFile)
         {
             lockFile = TestLockFiles.GetLockFile(lockFilePrefix);
             return GetExecutedTask(lockFile);
-        }
-
-        private static ResolvePackageDependencies GetExecutedTaskFromContents(string lockFileContents)
-        {
-            return GetExecutedTaskFromContents(lockFileContents, out _);
         }
 
         private static ResolvePackageDependencies GetExecutedTaskFromContents(string lockFileContents, out LockFile lockFile)
