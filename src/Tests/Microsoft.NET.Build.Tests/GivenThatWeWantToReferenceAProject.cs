@@ -155,9 +155,10 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [CoreMSBuildOnlyTheory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void It_disables_copying_conflicting_transitive_content(bool copyConflictingTransitiveContent)
+        [InlineData(true, true)]
+        [InlineData(false, true)]
+        [InlineData(false, false)]
+        public void It_disables_copying_conflicting_transitive_content(bool copyConflictingTransitiveContent, bool explicitlySet)
         {
             var tfm = "netcoreapp3.1";
             var contentName = "script.sh";
@@ -177,9 +178,9 @@ namespace Microsoft.NET.Build.Tests
                 Name = "ParentProject",
                 IsSdkProject = true
             };
-            if (copyConflictingTransitiveContent)
+            if (explicitlySet)
             {
-                parentProject.AdditionalProperties["CopyConflictingTransitiveContent"] = "true";
+                parentProject.AdditionalProperties["CopyConflictingTransitiveContent"] = copyConflictingTransitiveContent.ToString().ToLower();
             }
             var parentAsset = _testAssetsManager.CreateTestProject(parentProject)
                 .WithProjectChanges(project => AddProjectChanges(project, Path.Combine(childAsset.Path, childProject.Name, childProject.Name + ".csproj")));
@@ -196,13 +197,12 @@ namespace Microsoft.NET.Build.Tests
             if (copyConflictingTransitiveContent)
             {
                 valuesResult.Count().Should().Be(2);
-                String.Join(';', valuesResult).Should().Contain(parentProject.Name);
-                String.Join(';',valuesResult).Should().Contain(parentProject.Name);
+                valuesResult.Should().BeEquivalentTo(Path.Combine(parentAsset.Path, parentProject.Name, contentName), Path.Combine(childAsset.Path, childProject.Name, contentName));
             }
             else
             {
                 valuesResult.Count().Should().Be(1);
-                valuesResult.First().Should().Contain(parentProject.Name);
+                valuesResult.First().Should().Contain(Path.Combine(parentAsset.Path, parentProject.Name, contentName));
             }
         }
 
