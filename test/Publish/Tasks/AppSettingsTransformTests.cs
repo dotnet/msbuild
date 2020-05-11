@@ -113,5 +113,34 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
                 File.Delete(destinationAppSettingsFile);
             }
         }
+
+        [Theory]
+        [InlineData("DefaultConnection", @"Server=(localdb)\mssqllocaldb;Database=defaultDB;Trusted_Connection=True;MultipleActiveResultSets=true")]
+        [InlineData("EmptyConnection", @"")]
+        [InlineData("", @"SomeConnectionStringValue")]
+        public void AppSettingsTransform_UpdateConnectionStringEvenIfConnectionStringSectionMissing(string connectionName, string connectionString)
+        {
+            // Arrange
+            ITaskItem[] taskItemArray = new ITaskItem[1];
+            var connectionstringTaskItem = new TaskItem(connectionName);
+            connectionstringTaskItem.SetMetadata("Value", connectionString);
+            taskItemArray[0] = connectionstringTaskItem;
+
+            // appSettings.json with no ConnectionStrings (empty)
+            var appsettingsFile = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            File.WriteAllText(appsettingsFile, "{}");
+
+            // Act 
+            AppSettingsTransform.UpdateDestinationConnectionStringEntries(appsettingsFile, taskItemArray);
+
+            // Assert
+            JToken connectionStringValue = JObject.Parse(File.ReadAllText(appsettingsFile))["ConnectionStrings"][connectionName];
+            Assert.Equal(connectionStringValue.ToString(), connectionString);
+
+            if (File.Exists(appsettingsFile))
+            {
+                File.Delete(appsettingsFile);
+            }
+        }
     }
 }

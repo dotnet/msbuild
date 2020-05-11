@@ -7,6 +7,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
 {
     public static class AppSettingsTransform
     {
+        private const string ConnectionStringsId = "ConnectionStrings";
+
         public static string GenerateDefaultAppSettingsJsonFile()
         {
             string tempFileFullPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -37,12 +39,16 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
 
             string appSettingsJsonContent = File.ReadAllText(destinationAppSettingsFilePath);
             JObject appSettingsJsonObject = JObject.Parse(appSettingsJsonContent);
+            if (!appSettingsJsonObject.TryGetValue(ConnectionStringsId, out _))
+            {
+                appSettingsJsonObject[ConnectionStringsId] = new JObject();
+            }
 
             foreach (ITaskItem destinationConnectionString in destinationConnectionStrings)
             {
                 string key = destinationConnectionString.ItemSpec;
                 string Value = destinationConnectionString.GetMetadata("Value");
-                var connectionStringsObject = appSettingsJsonObject["ConnectionStrings"];
+                var connectionStringsObject = appSettingsJsonObject[ConnectionStringsId];
                 if (connectionStringsObject != null)
                 {
                     connectionStringsObject[key] = Value;
