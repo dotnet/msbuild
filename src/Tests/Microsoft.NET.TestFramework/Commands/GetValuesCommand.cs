@@ -30,6 +30,7 @@ namespace Microsoft.NET.TestFramework.Commands
         public string Configuration { get; set; }
 
         public List<string> MetadataNames { get; set; } = new List<string>();
+        public Dictionary<string, string> Properties { get; } = new Dictionary<string, string>();
 
         public GetValuesCommand(ITestOutputHelper log, string projectPath, string targetFramework,
             string valueName, ValueType valueType = ValueType.Property)
@@ -69,8 +70,20 @@ namespace Microsoft.NET.TestFramework.Commands
                 }
             }
 
+            string propertiesElement = "";
+            if (Properties.Count != 0)
+            {
+                propertiesElement += "<PropertyGroup>\n";
+                foreach ((string key, string value) in Properties)
+                {
+                    propertiesElement += $"    <{key}>{value}</{key}>\n";
+                }
+                propertiesElement += "  </PropertyGroup>";
+            }
+
             string injectTargetContents =
 $@"<Project ToolsVersion=`14.0` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+  {propertiesElement}
   <Target Name=`WriteValuesToFile` {(ShouldCompile ? $"DependsOnTargets=`{DependsOnTargets}`" : "")}>
     <ItemGroup>
       <LinesToWrite Include=`{linesAttribute}`/>
