@@ -69,7 +69,7 @@ namespace Microsoft.NET.Build.Tasks
                 var pkgName = packageItem.ItemSpec;
                 if (!string.IsNullOrEmpty(pkgName))
                 {
-                    packageClosure.UnionWith(projectContext.GetTransitiveList(pkgName));
+                    packageClosure.UnionWith(projectContext.GetTransitiveList(pkgName, ignoreIfNotFound: true));
                 }
             }
 
