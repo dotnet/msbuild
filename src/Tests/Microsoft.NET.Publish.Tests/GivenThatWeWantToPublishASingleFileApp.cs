@@ -66,9 +66,9 @@ namespace Microsoft.NET.Publish.Tests
             return new PublishCommand(Log, testAsset.TestRoot);
         }
 
-        private DirectoryInfo GetPublishDirectory(PublishCommand publishCommand)
+        private DirectoryInfo GetPublishDirectory(PublishCommand publishCommand, string targetFramework = "netcoreapp3.0")
         {
-            return publishCommand.GetOutputDirectory(targetFramework: "netcoreapp3.0",
+            return publishCommand.GetOutputDirectory(targetFramework: targetFramework,
                                                      runtimeIdentifier: RuntimeInformation.RuntimeIdentifier);
         }
 
@@ -351,6 +351,42 @@ namespace Microsoft.NET.Publish.Tests
             var appHostSize = new FileInfo(appHostPath).Length;
 
             appHostSize.Should().BeLessThan(singleFileSize);
+        }
+
+        [CoreMSBuildOnlyTheory]
+        [InlineData("netcoreapp3.0", false)]
+        [InlineData("netcoreapp3.0", true)]
+        [InlineData("netcoreapp3.1", false)]
+        [InlineData("netcoreapp3.1", true)]
+        [InlineData("netcoreapp5.0", false)]
+        [InlineData("netcoreapp5.0", true)]
+        public void It_runs_single_file_apps(string targetFramework, bool selfContained)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "SingleFileTest",
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true,
+                IsExe = true,
+            };
+            testProject.AdditionalProperties.Add("SelfContained", $"{selfContained}");
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            publishCommand.Execute(PublishSingleFile, RuntimeIdentifier)
+                .Should()
+                .Pass();
+
+            var publishDir = GetPublishDirectory(publishCommand, targetFramework).FullName;
+            var singleFilePath = Path.Combine(publishDir, $"{testProject.Name}{Constants.ExeSuffix}");
+
+            var command = new RunExeCommand(Log, singleFilePath);
+            command.Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World");
         }
     }
 }
