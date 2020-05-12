@@ -12,7 +12,7 @@ namespace Microsoft.Build.UnitTests
 {
     public class OpportunisticIntern_Tests
     {
-        private static bool IsInternable(OpportunisticIntern.IInternable internable)
+        private static bool IsInternable(IInternable internable)
         {
             string i1 = OpportunisticIntern.InternableToString(internable);
             string i2 = OpportunisticIntern.InternableToString(internable);
@@ -20,19 +20,19 @@ namespace Microsoft.Build.UnitTests
             return Object.ReferenceEquals(i1, i2);
         }
 
-        private static void AssertInternable(OpportunisticIntern.IInternable internable)
+        private static void AssertInternable(IInternable internable)
         {
             Assert.True(IsInternable(internable));
         }
 
         private static void AssertInternable(StringBuilder sb)
         {
-            AssertInternable(new OpportunisticIntern.StringBuilderInternTarget(sb));
+            AssertInternable(new StringBuilderInternTarget(sb));
         }
 
         private static string AssertInternable(char[] ch, int startIndex, int count)
         {
-            var target = new OpportunisticIntern.CharArrayInternTarget(ch, startIndex, count);
+            var target = new CharArrayInternTarget(ch, startIndex, count);
             AssertInternable(target);
             Assert.Equal(target.Length, count);
 
@@ -45,19 +45,19 @@ namespace Microsoft.Build.UnitTests
             AssertInternable(value.ToCharArray(), 0, value.ToCharArray().Length);
         }
 
-        private static void AssertNotInternable(OpportunisticIntern.IInternable internable)
+        private static void AssertNotInternable(IInternable internable)
         {
             Assert.False(IsInternable(internable));
         }
 
         private static void AssertNotInternable(StringBuilder sb)
         {
-            AssertNotInternable(new OpportunisticIntern.StringBuilderInternTarget(sb));
+            AssertNotInternable(new StringBuilderInternTarget(sb));
         }
 
         private static void AssertNotInternable(char[] ch)
         {
-            AssertNotInternable(new OpportunisticIntern.CharArrayInternTarget(ch, ch.Length));
+            AssertNotInternable(new CharArrayInternTarget(ch, ch.Length));
         }
 
         private static void AssertNotInternable(string value)
@@ -86,24 +86,6 @@ namespace Microsoft.Build.UnitTests
             var result = AssertInternable(new char[] { 'a', 't', 'r', 'u', 'e', 'x' }, 1, 4);
 
             Assert.Equal("true", result);
-        }
-
-        /// <summary>
-        /// Test a single know-to-intern tiny string to verify the mechanism.
-        /// </summary>
-        [Fact]
-        public void InternableTinyString()
-        {
-            AssertInternable("true");
-        }
-
-        /// <summary>
-        /// Test a single known-to-not-intern tiny string to verify the mechanism.
-        /// </summary>
-        [Fact]
-        public void NonInternableTinyString()
-        {
-            AssertNotInternable("1234");
         }
 
         /// <summary>
