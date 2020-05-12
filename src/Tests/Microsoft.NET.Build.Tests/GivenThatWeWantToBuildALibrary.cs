@@ -323,6 +323,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("net461", new[] { "NETFRAMEWORK", "NET461" }, true)]
         [InlineData("netcoreapp1.0", new[] { "NETCOREAPP", "NETCOREAPP1_0" }, false)]
         [InlineData("netcoreapp3.0", new[] { "NETCOREAPP", "NETCOREAPP3_0" }, false)]
+        [InlineData("net5.0", new[] { "NETCOREAPP", "NET", "NET5_0" }, false)]
         [InlineData(".NETPortable,Version=v4.5,Profile=Profile78", new string[] { }, false)]
         [InlineData(".NETFramework,Version=v4.0,Profile=Client", new string[] { "NETFRAMEWORK", "NET40" }, false)]
         [InlineData("Xamarin.iOS,Version=v1.0", new string[] { "XAMARINIOS", "XAMARINIOS1_0" }, false)]
@@ -376,6 +377,38 @@ namespace Microsoft.NET.Build.Tests
                 shouldCompile = false;
             }
 
+            AssertDefinedConstantsOutput(testAsset, targetFramework, expectedDefines, shouldCompile);
+        }
+
+        [Theory]
+        [InlineData("ios", "1.1", new[] { "IOS", "IOS1_1" })]
+        [InlineData("android", "2.2", new[] { "ANDROID", "ANDROID2_2" })]
+        [InlineData("windows", "10.1", new[] { "WINDOWS", "WINDOWS10_1" })]
+        public void It_implicitly_defines_compilation_constants_for_the_target_platform(string targetPlatformIdentifier, string targetPlatformVersion, string[] expectedDefines)
+        {
+            var targetFramework = "net5.0";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", targetFramework)
+                .WithSource()
+                .WithTargetFramework(targetFramework)
+                .WithProjectChanges(project =>
+                {
+                    //  Manually set target plaform properties
+                    var ns = project.Root.Name.Namespace;
+                    var propGroup = new XElement(ns + "PropertyGroup");
+                    project.Root.Add(propGroup);
+
+                    var platformIdentifier = new XElement(ns + "TargetPlatformIdentifier", targetPlatformIdentifier);
+                    propGroup.Add(platformIdentifier);
+                    var platformVersion = new XElement(ns + "TargetPlatformVersion", targetPlatformVersion);
+                    propGroup.Add(platformVersion);
+                });
+
+            AssertDefinedConstantsOutput(testAsset, targetFramework, new[] { "NETCOREAPP", "NET", "NET5_0" }.Concat(expectedDefines).ToArray(), true);
+        }
+
+        private void AssertDefinedConstantsOutput(TestAsset testAsset, string targetFramework, string[] expectedDefines, bool shouldCompile)
+        {
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
             var getValuesCommand = new GetValuesCommand(Log, libraryProjectDirectory,

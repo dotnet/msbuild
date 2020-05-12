@@ -161,17 +161,27 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- Add conditional compilation symbols for the target framework (for example NET461, NETSTANDARD2_0, NETCOREAPP1_0) -->
   <PropertyGroup Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetFrameworkIdentifier)' != '.NETPortable' and '$(TargetFrameworkIdentifier)' != ''">
+    <_FrameworkVersionForImplicitDefine>$(TargetFrameworkVersion.TrimStart('vV'))</_FrameworkVersionForImplicitDefine>
     <_FrameworkIdentifierForImplicitDefine>$(TargetFrameworkIdentifier.Replace('.', '').ToUpperInvariant())</_FrameworkIdentifierForImplicitDefine>
     <VersionlessImplicitFrameworkDefine>$(_FrameworkIdentifierForImplicitDefine)</VersionlessImplicitFrameworkDefine>
+    <_FrameworkIdentifierForImplicitDefine Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_FrameworkVersionForImplicitDefine)' >= '5.0' ">NET</_FrameworkIdentifierForImplicitDefine>
+    <VersionlessImplicitFrameworkDefine Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_FrameworkVersionForImplicitDefine)' >= '5.0' ">$(VersionlessImplicitFrameworkDefine);$(_FrameworkIdentifierForImplicitDefine)</VersionlessImplicitFrameworkDefine>
     <_FrameworkIdentifierForImplicitDefine Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework'">NET</_FrameworkIdentifierForImplicitDefine>
 
-    <_FrameworkVersionForImplicitDefine>$(TargetFrameworkVersion.TrimStart('vV'))</_FrameworkVersionForImplicitDefine>
-
     <_FrameworkVersionForImplicitDefine>$(_FrameworkVersionForImplicitDefine.Replace('.', '_'))</_FrameworkVersionForImplicitDefine>
-    
+
     <_FrameworkVersionForImplicitDefine Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework'">$(_FrameworkVersionForImplicitDefine.Replace('_', ''))</_FrameworkVersionForImplicitDefine>
 
     <ImplicitFrameworkDefine>$(_FrameworkIdentifierForImplicitDefine)$(_FrameworkVersionForImplicitDefine)</ImplicitFrameworkDefine>
+  </PropertyGroup>
+
+  <!-- Add conditional compilation symbols for the target platform (for example ANDROID, IOS, WINDOWS) -->
+  <PropertyGroup Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetPlatformIdentifier)' != ''">
+    <_PlatformIdentifierForImplicitDefine>$(TargetPlatformIdentifier.ToUpperInvariant())</_PlatformIdentifierForImplicitDefine>
+    <_PlatformVersionForImplicitDefine>$(TargetPlatformVersion.Replace('.', '_'))</_PlatformVersionForImplicitDefine>
+    <ImplicitPlatformDefine>$(_PlatformIdentifierForImplicitDefine);$(_PlatformIdentifierForImplicitDefine)$(_PlatformVersionForImplicitDefine)</ImplicitPlatformDefine>
+    
+    <ImplicitFrameworkDefine>$(ImplicitFrameworkDefine);$(ImplicitPlatformDefine)</ImplicitFrameworkDefine>
   </PropertyGroup>
 
   <!-- Handle XML documentation file settings -->
