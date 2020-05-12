@@ -13,6 +13,7 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit.Abstractions;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 
 namespace Microsoft.DotNet.Restore.Test
 {
@@ -56,17 +57,21 @@ namespace Microsoft.DotNet.Restore.Test
         [InlineData(false)]
         public void ItRestoresLibToSpecificDirectory(bool useStaticGraphEvaluation)
         {
-            var rootPath = _testAssetsManager.CreateTestDirectory().Path;
+            var testProject = new TestProject()
+            {
+                Name = "RestoreToDir",
+                TargetFrameworks = "net5.0",
+                IsSdkProject = true,
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.3"));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: useStaticGraphEvaluation.ToString());
+
+            var rootPath = Path.Combine(testAsset.TestRoot, testProject.Name);
 
             string dir = "pkgs";
             string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));
-
-            string [] newArgs = new[] { "classlib", "-o", rootPath, "--no-restore" };
-            new DotnetCommand(Log, "new")
-                .WithWorkingDirectory(rootPath)
-                .Execute(newArgs)
-                .Should()
-                .Pass();
 
             string[] args = new[] { "--packages", dir };
             args = HandleStaticGraphEvaluation(useStaticGraphEvaluation, args);
@@ -77,8 +82,21 @@ namespace Microsoft.DotNet.Restore.Test
                 .Pass()
                 .And.NotHaveStdErr();
 
+            var dllCount = 0;
+
+            if (Directory.Exists(fullPath))
+            {
+                dllCount = Directory.EnumerateFiles(fullPath, "*.dll", SearchOption.AllDirectories).Count();
+            }
+
+            if (dllCount == 0)
+            {
+                Log.WriteLine("Assets file contents:");
+                Log.WriteLine(File.ReadAllText(Path.Combine(rootPath, "obj", "project.assets.json")));
+            }
+
             Directory.Exists(fullPath).Should().BeTrue();
-            Directory.EnumerateFiles(fullPath, "*.dll", SearchOption.AllDirectories).Count().Should().BeGreaterThan(0);
+            dllCount.Should().BeGreaterThan(0);
         }
 
         [Theory]
