@@ -14,6 +14,7 @@ using FluentAssertions;
 using System.Runtime.InteropServices;
 using System.Linq;
 using Xunit.Abstractions;
+using System.Xml.Linq;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -151,6 +152,87 @@ namespace Microsoft.NET.Build.Tests
             }
 
             return ret;
+        }
+
+        [CoreMSBuildOnlyTheory]
+        [InlineData(true, true)]
+        [InlineData(false, true)]
+        [InlineData(false, false)]
+        public void It_disables_copying_conflicting_transitive_content(bool copyConflictingTransitiveContent, bool explicitlySet)
+        {
+            var tfm = "netcoreapp3.1";
+            var contentName = "script.sh";
+            var childProject = new TestProject()
+            {
+                TargetFrameworks = tfm,
+                Name = "ChildProject",
+                IsSdkProject = true
+            };
+            var childAsset = _testAssetsManager.CreateTestProject(childProject)
+                .WithProjectChanges(project => AddProjectChanges(project));
+            File.WriteAllText(Path.Combine(childAsset.Path, childProject.Name, contentName), childProject.Name);
+
+            var parentProject = new TestProject()
+            {
+                TargetFrameworks = tfm,
+                Name = "ParentProject",
+                IsSdkProject = true
+            };
+            if (explicitlySet)
+            {
+                parentProject.AdditionalProperties["CopyConflictingTransitiveContent"] = copyConflictingTransitiveContent.ToString().ToLower();
+            }
+            var parentAsset = _testAssetsManager.CreateTestProject(parentProject)
+                .WithProjectChanges(project => AddProjectChanges(project, Path.Combine(childAsset.Path, childProject.Name, childProject.Name + ".csproj")));
+            File.WriteAllText(Path.Combine(parentAsset.Path, parentProject.Name, contentName), parentProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(parentAsset.Path, parentProject.Name));
+            buildCommand.Execute().Should().Pass();
+
+            var getValuesCommand = new GetValuesCommand(Log, Path.Combine(parentAsset.Path, parentProject.Name), tfm, "ResultOutput");
+            getValuesCommand.DependsOnTargets = "Build";
+            getValuesCommand.Execute().Should().Pass();
+
+            var valuesResult = getValuesCommand.GetValuesWithMetadata().Select(pair => pair.value);
+            if (copyConflictingTransitiveContent)
+            {
+                valuesResult.Count().Should().Be(2);
+                valuesResult.Should().BeEquivalentTo(Path.Combine(parentAsset.Path, parentProject.Name, contentName), Path.Combine(childAsset.Path, childProject.Name, contentName));
+            }
+            else
+            {
+                valuesResult.Count().Should().Be(1);
+                valuesResult.First().Should().Contain(Path.Combine(parentAsset.Path, parentProject.Name, contentName));
+            }
+        }
+
+        private void AddProjectChanges(XDocument project, string childPath = null)
+        {
+            var ns = project.Root.Name.Namespace;
+
+            var itemGroup = new XElement(ns + "ItemGroup");
+            project.Root.Add(itemGroup);
+
+            var content = new XElement(ns + "Content",
+                new XAttribute("Include", "script.sh"), new XAttribute("CopyToOutputDirectory", "PreserveNewest"));
+            itemGroup.Add(content);
+
+            if (childPath != null)
+            {
+                var projRef = new XElement(ns + "ProjectReference",
+                    new XAttribute("Include", childPath));
+                itemGroup.Add(projRef);
+
+                var target = new XElement(ns + "Target",
+                    new XAttribute("Name", "WriteOutput"),
+                    new XAttribute("DependsOnTargets", "GetCopyToOutputDirectoryItems"),
+                    new XAttribute("BeforeTargets", "_CopyOutOfDateSourceItemsToOutputDirectory"));
+
+                var propertyGroup = new XElement(ns + "PropertyGroup");
+                propertyGroup.Add(new XElement("ResultOutput", "@(AllItemsFullPathWithTargetPath)"));
+                target.Add(propertyGroup);
+                project.Root.Add(target);
+            }
         }
     }
 }
