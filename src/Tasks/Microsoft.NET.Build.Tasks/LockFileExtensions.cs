@@ -113,7 +113,7 @@ namespace Microsoft.NET.Build.Tasks
         public static HashSet<string> GetProjectFileDependencySet(this LockFile lockFile)
         {
             // Get package name from e.g. Microsoft.VSSDK.BuildTools >= 15.0.25604-Preview4
-            string GetPackageNameFromDependency(string dependency)
+            static string GetPackageNameFromDependency(string dependency)
             {
                 int indexOfWhiteSpace = IndexOfWhiteSpace(dependency);
                 if (indexOfWhiteSpace < 0)
@@ -124,7 +124,7 @@ namespace Microsoft.NET.Build.Tasks
                 return dependency.Substring(0, indexOfWhiteSpace);
             }
 
-            int IndexOfWhiteSpace(string s)
+            static int IndexOfWhiteSpace(string s)
             {
                 for (int i = 0; i < s.Length; i++)
                 {
