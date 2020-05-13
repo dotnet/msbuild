@@ -195,7 +195,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp5.0")]
+        [InlineData("net5.0")]
         public void It_can_publish_readytorun_using_crossgen2(string targetFramework)
         {
             // Crossgen2 only supported for Linux/Windows x64 scenarios for now
@@ -206,7 +206,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp5.0")]
+        [InlineData("net5.0")]
         public void It_only_supports_selfcontained_when_using_crossgen2(string targetFramework)
         {
             // Crossgen2 only supported for Linux/Windows x64 scenarios for now

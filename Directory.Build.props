@@ -8,7 +8,7 @@
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <DebugSymbols>true</DebugSymbols>
     <IsShippingPackage>false</IsShippingPackage>
-    <SdkTargetFramework>netcoreapp5.0</SdkTargetFramework>
+    <SdkTargetFramework>net5.0</SdkTargetFramework>
     <ToolsetTargetFramework>$(SdkTargetFramework)</ToolsetTargetFramework>
 
     <!-- Disable implict package target fallback, and disable warning for when we explicitly add it (currently needed for

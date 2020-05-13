@@ -177,7 +177,7 @@ namespace Microsoft.NET.Build.Tasks
                 return false;
             }
 
-            // Crossgen2 only supports the following host->target compilation scenarios in netcoreapp5.0:
+            // Crossgen2 only supports the following host->target compilation scenarios in net5.0:
             //      win-x64 -> win-x64
             //      linux-x64 -> linux-x64
             //      linux-musl-x64 -> linux-musl-x64

@@ -37,7 +37,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{73B24404-97DE-467A-8251-6542819BCEB4}</ProjectGuid>
-    <TargetFramework>netcoreapp5.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <Keyword>ManagedCProj</Keyword>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <RootNamespace>NETCoreCppCliTest</RootNamespace>

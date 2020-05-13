@@ -37,8 +37,8 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             Version osVersion = Version.Parse(RuntimeEnvironment.OperatingSystemVersion);
 
-            Assert.Equal(10, osVersion.Major);
-            Assert.Equal(Environment.OSVersion.Version.Major - 4, osVersion.Minor);
+            Assert.Equal(Environment.OSVersion.Version.Major, osVersion.Major);
+            Assert.Equal(Environment.OSVersion.Version.Minor, osVersion.Minor);
         }
 
         [LinuxOnlyFact]

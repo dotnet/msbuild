@@ -103,7 +103,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = ProjectName,
-                TargetFrameworks = "netcoreapp5.0",
+                TargetFrameworks = "net5.0",
                 IsSdkProject = true,
                 IsExe = true,
             };
