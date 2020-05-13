@@ -161,7 +161,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- Add conditional compilation symbols for the target framework (for example NET461, NETSTANDARD2_0, NETCOREAPP1_0) -->
   <PropertyGroup Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetFrameworkIdentifier)' != '.NETPortable' and '$(TargetFrameworkIdentifier)' != ''">
-    <_FrameworkVersionForImplicitDefine>$(TargetFrameworkVersion.TrimStart('vV'))</_FrameworkVersionForImplicitDefine>
+    <_FrameworkVersionNumberForImplicitDefine>$(TargetFrameworkVersion.TrimStart('vV'))</_FrameworkVersionNumberForImplicitDefine>
+    <_FrameworkVersionForImplicitDefine>$(_FrameworkVersionNumberForImplicitDefine)</_FrameworkVersionForImplicitDefine>
     <_FrameworkIdentifierForImplicitDefine>$(TargetFrameworkIdentifier.Replace('.', '').ToUpperInvariant())</_FrameworkIdentifierForImplicitDefine>
     <VersionlessImplicitFrameworkDefine>$(_FrameworkIdentifierForImplicitDefine)</VersionlessImplicitFrameworkDefine>
     <_FrameworkIdentifierForImplicitDefine Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_FrameworkVersionForImplicitDefine)' >= '5.0' ">NET</_FrameworkIdentifierForImplicitDefine>
@@ -183,6 +184,21 @@ Copyright (c) .NET Foundation. All rights reserved.
     
     <ImplicitFrameworkDefine>$(ImplicitFrameworkDefine);$(ImplicitPlatformDefine)</ImplicitFrameworkDefine>
   </PropertyGroup>
+  
+  <!-- Add conditional compilation symbols for target framework backwards compatibility with .NET 5.0 and later (for example .NET 6.0 defines NET5_0 and NETCOREAPP3_1) -->
+  <Target Name="GenerateNETCompatibleDefineConstants"
+          Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetFrameworkIdentifier)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and 
+                      '$(_FrameworkVersionNumberForImplicitDefine)' != '' and '$(_FrameworkVersionNumberForImplicitDefine)' >= '5.0' "
+          BeforeTargets="Build" >
+    <ItemGroup>
+      <_NetCoreAppFrameworkVersions Include="@(SupportedNETCoreAppTargetFramework->'%(Identity)'->TrimStart('.NETCoreApp,Version=v'))" />
+      <_NetCoreAppCompatibleVersions Include="@(_NetCoreAppFrameworkVersions)" Condition=" '%(Identity)' > '3.1' and '$(_FrameworkVersionNumberForImplicitDefine)' > '%(Identity)' " />
+    </ItemGroup>
+    <PropertyGroup>
+      <_NetCoreAppCompatibleDefine>NETCOREAPP3_1;@(_NetCoreAppCompatibleVersions->'NET%(Identity)'->Replace('.', '_'))</_NetCoreAppCompatibleDefine>
+      <DefineConstants>$(DefineConstants);$(_NetCoreAppCompatibleDefine)</DefineConstants>
+    </PropertyGroup>
+  </Target>
 
   <!-- Handle XML documentation file settings -->
   <PropertyGroup Condition="'$(GenerateDocumentationFile)' == ''">

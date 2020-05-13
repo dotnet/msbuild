@@ -323,7 +323,6 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("net461", new[] { "NETFRAMEWORK", "NET461" }, true)]
         [InlineData("netcoreapp1.0", new[] { "NETCOREAPP", "NETCOREAPP1_0" }, false)]
         [InlineData("netcoreapp3.0", new[] { "NETCOREAPP", "NETCOREAPP3_0" }, false)]
-        [InlineData("net5.0", new[] { "NETCOREAPP", "NET", "NET5_0" }, false)]
         [InlineData(".NETPortable,Version=v4.5,Profile=Profile78", new string[] { }, false)]
         [InlineData(".NETFramework,Version=v4.0,Profile=Client", new string[] { "NETFRAMEWORK", "NET40" }, false)]
         [InlineData("Xamarin.iOS,Version=v1.0", new string[] { "XAMARINIOS", "XAMARINIOS1_0" }, false)]
@@ -381,6 +380,34 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
+        [InlineData("net5.0", new[] { "NETCOREAPP3_1", "NET5_0" })]
+        [InlineData("net6.0", new[] { "NETCOREAPP3_1", "NET5_0", "NET6_0" })]
+        public void It_implicitly_defines_compilation_constants_for_the_target_framework_with_backwards_compatibility(string targetFramework, string[] expectedDefines)
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", targetFramework)
+                .WithSource()
+                .WithTargetFramework(targetFramework)
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propGroup = new XElement(ns + "PropertyGroup");
+                    project.Root.Add(propGroup);
+                    var maxVersion = new XElement(ns + "NETCoreAppMaximumVersion", "6.0");
+                    propGroup.Add(maxVersion);
+
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    project.Root.Add(itemGroup);
+                    var supportedFramework = new XElement(ns + "SupportedNETCoreAppTargetFramework",
+                        new XAttribute("Include", ".NETCoreApp,Version=v6.0"),
+                        new XAttribute("DisplayName", ".NET 6.0"));
+                    itemGroup.Add(supportedFramework);
+                });
+
+            AssertDefinedConstantsOutput(testAsset, targetFramework, new[] { "NETCOREAPP", "NET" }.Concat(expectedDefines).ToArray(), true);
+        }
+
+        [Theory]
         [InlineData("ios", "1.1", new[] { "IOS", "IOS1_1" })]
         [InlineData("android", "2.2", new[] { "ANDROID", "ANDROID2_2" })]
         [InlineData("windows", "10.1", new[] { "WINDOWS", "WINDOWS10_1" })]
@@ -404,7 +431,7 @@ namespace Microsoft.NET.Build.Tests
                     propGroup.Add(platformVersion);
                 });
 
-            AssertDefinedConstantsOutput(testAsset, targetFramework, new[] { "NETCOREAPP", "NET", "NET5_0" }.Concat(expectedDefines).ToArray(), true);
+            AssertDefinedConstantsOutput(testAsset, targetFramework, new[] { "NETCOREAPP", "NET", "NET5_0", "NETCOREAPP3_1" }.Concat(expectedDefines).ToArray(), true);
         }
 
         private void AssertDefinedConstantsOutput(TestAsset testAsset, string targetFramework, string[] expectedDefines, bool shouldCompile)
@@ -414,7 +441,8 @@ namespace Microsoft.NET.Build.Tests
             var getValuesCommand = new GetValuesCommand(Log, libraryProjectDirectory,
                 targetFramework, "DefineConstants")
             {
-                ShouldCompile = shouldCompile
+                ShouldCompile = shouldCompile,
+                DependsOnTargets = "GenerateNETCompatibleDefineConstants"
             };
 
             getValuesCommand
