@@ -19,10 +19,6 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public bool IncludeSymbols { get; set; }
         [Required]
-        public bool IncludeNativeLibraries { get; set; }
-        [Required]
-        public bool IncludeAllContent { get; set; }
-        [Required]
         public string TargetFrameworkVersion { get; set; }
         [Required]
         public string RuntimeIdentifier { get; set; }
@@ -38,12 +34,6 @@ namespace Microsoft.NET.Build.Tasks
         {
             OSPlatform targetOS = RuntimeIdentifier.StartsWith("win") ? OSPlatform.Windows :
                 RuntimeIdentifier.StartsWith("osx") ? OSPlatform.OSX : OSPlatform.Linux;
-
-            // The default option is temporarily set to BundleOptions.BundleAllContent, which bundles and extracts all published files.
-            // Once the runtime can load assemblies directly from bundle, bundle options should be computed as:
-            //   BundleOptions options = BundleOptions.None;
-            //   options |= IncludeNativeLibraries ? BundleOptions.BundleNativeBinaries : BundleOptions.None;
-            //   options |= IncludeAllContent ? BundleOptions.BundleAllContent : BundleOptions.None;
 
             BundleOptions options = BundleOptions.BundleAllContent;
             options |= IncludeSymbols ? BundleOptions.BundleSymbolFiles : BundleOptions.None;

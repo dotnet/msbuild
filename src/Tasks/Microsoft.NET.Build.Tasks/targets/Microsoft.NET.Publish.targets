@@ -967,8 +967,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateBundle FilesToBundle="@(_FilesToBundle)"
                     AppHostName="$(PublishedSingleFileName)"
                     IncludeSymbols="$(IncludeSymbolsInSingleFile)"
-                    IncludeNativeLibraries="$(IncludeNativeLibrariesInSingleFile)"
-                    IncludeAllContent="$(IncludeAllContentInSingleFile)"
                     TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
                     RuntimeIdentifier="$(RuntimeIdentifier)"
                     OutputDir="$(PublishDir)"
