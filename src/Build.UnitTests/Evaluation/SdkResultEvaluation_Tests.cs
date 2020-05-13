@@ -1,6 +1,7 @@
 ﻿using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Unittest;
 using Shouldly;
@@ -11,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {
@@ -20,11 +22,17 @@ namespace Microsoft.Build.UnitTests.Evaluation
         private readonly string _testFolder;
         private MockLogger _logger;
         private ProjectCollection _projectCollection;
+        private ITestOutputHelper _log;
+        private bool _originalWarnOnUnitializedProperty;
 
-
-        public SdkResultEvaluation_Tests()
+        public SdkResultEvaluation_Tests(ITestOutputHelper log)
         {
+            _log = log;
+    
             _env = TestEnvironment.Create();
+
+            _originalWarnOnUnitializedProperty = BuildParameters.WarnOnUninitializedProperty;
+            BuildParameters.WarnOnUninitializedProperty = false;
 
             _testFolder = _env.CreateFolder().Path;
             _logger = new MockLogger();
@@ -310,6 +318,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 project.GetItems("ItemsFromSdkResolverAfter").ShouldBeEmpty();
             }
 
+            if (_logger.ErrorCount > 0 || _logger.WarningCount > 0)
+            {
+                _log.WriteLine(_logger.FullLog);
+            }
+
             _logger.ErrorCount.ShouldBe(0);
             _logger.WarningCount.ShouldBe(0);
         }
@@ -388,6 +401,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void Dispose()
         {
             _env.Dispose();
+            BuildParameters.WarnOnUninitializedProperty = _originalWarnOnUnitializedProperty;
         }
     }
 }
