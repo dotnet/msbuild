@@ -49,7 +49,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <EmitAssetsLogMessages Condition="'$(EmitAssetsLogMessages)' == ''">true</EmitAssetsLogMessages>
 
-    <!-- Setting this property restores pre-16.7 behaviour of ResolvePackageDependencies to produce
+    <!-- Setting this property to true restores pre-16.7 behaviour of ResolvePackageDependencies to produce
          TargetDefinitions, FileDefinitions and FileDependencies items. -->
     <EmitLegacyAssetsFileItems Condition="'$(EmitLegacyAssetsFileItems)' == ''">false</EmitLegacyAssetsFileItems>
   </PropertyGroup>
