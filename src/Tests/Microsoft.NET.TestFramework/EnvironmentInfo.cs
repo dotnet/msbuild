@@ -32,19 +32,16 @@ namespace Microsoft.NET.TestFramework
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    Version osVersion;
-                    if (Version.TryParse(DotNet.Cli.Utils.RuntimeEnvironment.OperatingSystemVersion, out osVersion))
+                    Version osVersion = Environment.OSVersion.Version;
+                    if (osVersion > new Version(10, 11))
                     {
-                        if (osVersion > new Version(10, 11))
-                        {
-                            //  netcoreapp1.0 only supports osx.10.10 and osx.10.11
-                            rid = "osx.10.11-x64";
-                        }
-                        else if (osVersion > new Version(10, 12))
-                        {
-                            //  netcoreapp1.1 only supports up to osx.10.12
-                            rid = "osx.10.12-x64";
-                        }
+                        //  netcoreapp1.0 only supports osx.10.10 and osx.10.11
+                        rid = "osx.10.11-x64";
+                    }
+                    else if (osVersion > new Version(10, 12))
+                    {
+                        //  netcoreapp1.1 only supports up to osx.10.12
+                        rid = "osx.10.12-x64";
                     }
                 }
             }
