@@ -323,6 +323,27 @@ namespace Microsoft.Build.Evaluation
 
                 return needToExpandMetadataForEachItem;
             }
+
+            protected static bool ItemspecContainsASingleItemReference(ItemSpec<P, I> itemSpec, string referencedItemType)
+            {
+                if (itemSpec.Fragments.Count != 1)
+                {
+                    return false;
+                }
+
+                var itemExpressionFragment = itemSpec.Fragments[0] as ItemSpec<P, I>.ItemExpressionFragment;
+                if (itemExpressionFragment == null)
+                {
+                    return false;
+                }
+
+                if (!itemExpressionFragment.Capture.ItemType.Equals(referencedItemType, StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+
+                return true;
+            }
         }
     }
 }
