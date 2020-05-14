@@ -4259,7 +4259,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 // Allow fully-qualified enum, e.g. "System.StringComparison.OrdinalIgnoreCase"
-                if (comparisonType.Contains("."))
+                if (comparisonType.Contains('.'))
                 {
                     comparisonType = comparisonType.Replace("System.StringComparison.", "").Replace("StringComparison.", "");
                 }
