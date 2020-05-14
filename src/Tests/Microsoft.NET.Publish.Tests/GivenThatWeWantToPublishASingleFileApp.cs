@@ -11,6 +11,7 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
 using Xunit.Abstractions;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -353,6 +354,67 @@ namespace Microsoft.NET.Publish.Tests
             appHostSize.Should().BeLessThan(singleFileSize);
         }
 
+        //  Core MSBuild only due to https://github.com/dotnet/sdk/issues/4244
+        [CoreMSBuildOnlyTheory]
+        [InlineData("netcoreapp3.0", false)]
+        [InlineData("netcoreapp3.0", true)]
+        [InlineData("netcoreapp3.1", false)]
+        [InlineData("netcoreapp3.1", true)]
+        [InlineData("netcoreapp5.0", false)]
+        [InlineData("netcoreapp5.0", true)]
+        public void It_leaves_host_components_unbundled_when_necessary(string targetFramework, bool selfContained)
+        {
+            // In.net 5, Single-file bundles are processed in the framework.
+            // Therefore, in self-contained builds, hostpolicy and hostfxr DLLs cannot themselves be in the bundle.
+            // This check is temporary until until statically linked singlefilehost is supported: 
+            // * https://github.com/dotnet/runtime/issues/32823
+            // * https://github.com/dotnet/sdk/issues/11567
+
+            var testProject = new TestProject()
+            {
+                Name = "SingleFileTest",
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true,
+                IsExe = true,
+            };
+            testProject.AdditionalProperties.Add("SelfContained", $"{selfContained}");
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            publishCommand.Execute(PublishSingleFile, RuntimeIdentifier)
+                .Should()
+                .Pass();
+
+            List<string> expectedFiles = new List<string>();
+            expectedFiles.Add($"{testProject.Name}{Constants.ExeSuffix}");
+            expectedFiles.Add($"{testProject.Name}.pdb");
+
+            if (selfContained && targetFramework.Equals("netcoreapp5.0"))
+            {
+                if (RuntimeInformation.RuntimeIdentifier.StartsWith("win"))
+                {
+                    expectedFiles.Add("hostfxr.dll");
+                    expectedFiles.Add("hostpolicy.dll");
+                }
+                else if (RuntimeInformation.RuntimeIdentifier.StartsWith("osx"))
+                {
+                    expectedFiles.Add("libhostfxr.dylib");
+                    expectedFiles.Add("libhostpolicy.dylib");
+                }
+                else
+                {
+                    expectedFiles.Add("libhostfxr.so");
+                    expectedFiles.Add("libhostpolicy.so");
+                }
+            }
+
+            GetPublishDirectory(publishCommand, targetFramework)
+                .Should()
+                .OnlyHaveFiles(expectedFiles);
+        }
+
+        //  Core MSBuild only due to https://github.com/dotnet/sdk/issues/4244
         [CoreMSBuildOnlyTheory]
         [InlineData("netcoreapp3.0", false)]
         [InlineData("netcoreapp3.0", true)]

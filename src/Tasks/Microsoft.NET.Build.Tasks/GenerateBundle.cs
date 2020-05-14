@@ -33,7 +33,7 @@ namespace Microsoft.NET.Build.Tasks
         protected override void ExecuteCore()
         {
             OSPlatform targetOS = RuntimeIdentifier.StartsWith("win") ? OSPlatform.Windows :
-                RuntimeIdentifier.StartsWith("osx") ? OSPlatform.OSX : OSPlatform.Linux;
+                                  RuntimeIdentifier.StartsWith("osx") ? OSPlatform.OSX : OSPlatform.Linux;
 
             BundleOptions options = BundleOptions.BundleAllContent;
             options |= IncludeSymbols ? BundleOptions.BundleSymbolFiles : BundleOptions.None;
