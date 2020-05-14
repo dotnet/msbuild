@@ -5,6 +5,10 @@ using System.Text;
 
 namespace Microsoft.Build.BackEnd
 {
+    /// <summary>
+    /// This class provides helper methods to adapt from <see cref="NodePacketValueFactory{T}"/> to
+    /// <see cref="ObjectTranslator{T}"/>.
+    /// </summary>
     internal static class TranslatorHelpers
     {
         /// <summary>

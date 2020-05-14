@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Framework
 {
+    /// <summary>
+    /// The value of an item and any associated metadata to be added by an SDK resolver.  See <see cref="SdkResult.ItemsToAdd"/>
+    /// </summary>
     public class SdkResultItem
     {
         public string ItemSpec { get; set; }
@@ -16,6 +19,11 @@ namespace Microsoft.Build.Framework
             Metadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
 
+        /// <summary>
+        /// Creates an <see cref="SdkResultItem"/>
+        /// </summary>
+        /// <param name="itemSpec">The value (itemspec) for the item</param>
+        /// <param name="metadata">A dictionary of item metadata.  This should be created with <see cref="StringComparer.OrdinalIgnoreCase"/> for the comparer.</param>
         public SdkResultItem(string itemSpec, Dictionary<string, string> metadata)
         {
             ItemSpec = itemSpec;

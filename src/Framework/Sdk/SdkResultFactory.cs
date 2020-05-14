@@ -21,6 +21,20 @@ namespace Microsoft.Build.Framework
         /// <returns></returns>
         public abstract SdkResult IndicateSuccess(string path, string version, IEnumerable<string> warnings = null);
 
+        /// <summary>
+        ///     Create an <see cref="SdkResolver" /> object indicating success.
+        /// </summary>
+        /// <remarks>
+        /// This overload allows any number (zero, one, or many) of SDK paths to be returned.  This means allows a "successful" result
+        /// to not resolve to any SDKs.  The resolver can also supply properties or items to communicate information to the build.  This
+        /// can allow resolvers to report SDKs that could not be resolved without hard-failing the evaluation, which can allow other
+        /// components to take more appropriate action (for example installing optional workloads or downloading NuGet SDKs).
+        /// </remarks>
+        /// <param name="paths">SDK paths which should be imported</param>
+        /// <param name="propertiesToAdd">Properties to set in the evaluation</param>
+        /// <param name="itemsToAdd">Items to add to the evaluation</param>
+        /// <param name="warnings">Optional warnings to display during resolution.</param>
+        /// <returns></returns>
         public abstract SdkResult IndicateSuccess(IEnumerable<SdkResultPathAndVersion> paths,
             IDictionary<string, string> propertiesToAdd = null,
             IDictionary<string, SdkResultItem> itemsToAdd = null,

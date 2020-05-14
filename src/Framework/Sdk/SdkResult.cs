@@ -43,10 +43,22 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public virtual string Version { get => _version; protected set => _version = value; }
 
+        /// <summary>
+        /// Additional resolved SDK paths beyond the one specified in <see cref="Path"/>
+        /// </summary>
+        /// <remarks>
+        /// This allows an SDK resolver to return multiple SDK paths, which will all be imported.
+        /// </remarks>
         public virtual IList<SdkResultPathAndVersion> AdditionalPaths { get => _additionalPaths; set => _additionalPaths = value; }
 
+        /// <summary>
+        /// Properties that should be added to the evaluation.  This allows an SDK resolver to provide information to the build
+        /// </summary>
         public virtual IDictionary<string, string> PropertiesToAdd { get => _propertiesToAdd; protected set => _propertiesToAdd = value; }
 
+        /// <summary>
+        /// Items that should be added to the evaluation.  This allows an SDK resolver to provide information to the build
+        /// </summary>
         public virtual IDictionary<string, SdkResultItem> ItemsToAdd { get => _itemsToAdd; protected set => _itemsToAdd = value; }
 
         /// <summary>

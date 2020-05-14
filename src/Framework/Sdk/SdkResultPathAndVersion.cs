@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Framework
 {
+    /// <summary>
+    /// Encapsulates both the path to an SDK returned by an SDK resolver, and its version
+    /// </summary>
     public sealed class SdkResultPathAndVersion
     {
         public string Path { get; }
