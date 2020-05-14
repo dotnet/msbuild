@@ -106,7 +106,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <SelfContained Condition="'$(SelfContained)' == '' and '$(RuntimeIdentifier)' != ''">true</SelfContained>
     <SelfContained Condition="'$(SelfContained)' == ''">false</SelfContained>
     <_OnOsx>$(NETCoreSdkRuntimeIdentifier.StartsWith('osx'))</_OnOsx>
-    <_RuntimeIdentifierUsesAppHost Condition="'$(RuntimeIdentifier)' != '' and ($(RuntimeIdentifier.StartsWith('ios')) or $(RuntimeIdentifier.StartsWith('tvos')) or $(RuntimeIdentifier.StartsWith('android')))">false</_RuntimeIdentifierUsesAppHost>
+    <_RuntimeIdentifierUsesAppHost Condition="$(RuntimeIdentifier.StartsWith('ios')) or $(RuntimeIdentifier.StartsWith('tvos')) or $(RuntimeIdentifier.StartsWith('android')) or $(RuntimeIdentifier.StartsWith('browser'))">false</_RuntimeIdentifierUsesAppHost>
     <_RuntimeIdentifierUsesAppHost Condition="'$(_RuntimeIdentifierUsesAppHost)' == ''">true</_RuntimeIdentifierUsesAppHost>
     <UseAppHost Condition="'$(UseAppHost)' == '' and
                            '$(_RuntimeIdentifierUsesAppHost)' == 'true' and
