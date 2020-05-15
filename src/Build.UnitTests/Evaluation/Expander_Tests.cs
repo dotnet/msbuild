@@ -2800,34 +2800,23 @@ namespace Microsoft.Build.UnitTests.Evaluation
             var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
             string expectedMessage = ResourceUtilities.GetResourceString("InvalidVersionFormat");
 
-            AssertThrows($"$([MSBuild]::VersionGreaterThan('{badVersion}', '1.0.0'))");
-            AssertThrows($"$([MSBuild]::VersionGreaterThan('1.0.0', '{badVersion}'))");
+            AssertThrows(expander, $"$([MSBuild]::VersionGreaterThan('{badVersion}', '1.0.0'))", expectedMessage);
+            AssertThrows(expander, $"$([MSBuild]::VersionGreaterThan('1.0.0', '{badVersion}'))", expectedMessage);
 
-            AssertThrows($"$([MSBuild]::VersionGreaterThanOrEquals('{badVersion}', '1.0.0'))");
-            AssertThrows($"$([MSBuild]::VersionGreaterThanOrEquals('1.0.0', '{badVersion}'))");
+            AssertThrows(expander, $"$([MSBuild]::VersionGreaterThanOrEquals('{badVersion}', '1.0.0'))", expectedMessage);
+            AssertThrows(expander, $"$([MSBuild]::VersionGreaterThanOrEquals('1.0.0', '{badVersion}'))", expectedMessage);
 
-            AssertThrows($"$([MSBuild]::VersionLessThan('{badVersion}', '1.0.0'))");
-            AssertThrows($"$([MSBuild]::VersionLessThan('1.0.0', '{badVersion}'))");
+            AssertThrows(expander, $"$([MSBuild]::VersionLessThan('{badVersion}', '1.0.0'))", expectedMessage);
+            AssertThrows(expander, $"$([MSBuild]::VersionLessThan('1.0.0', '{badVersion}'))", expectedMessage);
 
-            AssertThrows($"$([MSBuild]::VersionLessThanOrEquals('{badVersion}', '1.0.0'))");
-            AssertThrows($"$([MSBuild]::VersionLessThanOrEquals('1.0.0', '{badVersion}'))");
+            AssertThrows(expander, $"$([MSBuild]::VersionLessThanOrEquals('{badVersion}', '1.0.0'))", expectedMessage);
+            AssertThrows(expander, $"$([MSBuild]::VersionLessThanOrEquals('1.0.0', '{badVersion}'))", expectedMessage);
 
-            AssertThrows($"$([MSBuild]::VersionEquals('{badVersion}', '1.0.0'))");
-            AssertThrows($"$([MSBuild]::VersionEquals('1.0.0', '{badVersion}'))");
+            AssertThrows(expander, $"$([MSBuild]::VersionEquals('{badVersion}', '1.0.0'))", expectedMessage);
+            AssertThrows(expander, $"$([MSBuild]::VersionEquals('1.0.0', '{badVersion}'))", expectedMessage);
 
-            AssertThrows($"$([MSBuild]::VersionNotEquals('{badVersion}', '1.0.0'))");
-            AssertThrows($"$([MSBuild]::VersionNotEquals('1.0.0', '{badVersion}'))");
-
-            void AssertThrows(string expression)
-            {
-                var ex = Assert.Throws<InvalidProjectFileException>(
-                    () => expander.ExpandPropertiesLeaveTypedAndEscaped(
-                        expression,
-                        ExpanderOptions.ExpandProperties,
-                        MockElementLocation.Instance));
-
-                Assert.Contains(expectedMessage, ex.Message);
-            }
+            AssertThrows(expander, $"$([MSBuild]::VersionNotEquals('{badVersion}', '1.0.0'))", expectedMessage);
+            AssertThrows(expander, $"$([MSBuild]::VersionNotEquals('1.0.0', '{badVersion}'))", expectedMessage);
         }
 
         [Theory]
@@ -2843,22 +2832,33 @@ namespace Microsoft.Build.UnitTests.Evaluation
             var pg = new PropertyDictionary<ProjectPropertyInstance>();
             var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-            AssertSuccess(expectedSign >  0, $"$([MSBuild]::VersionGreaterThan('{a}', '{b}'))");
-            AssertSuccess(expectedSign >= 0, $"$([MSBuild]::VersionGreaterThanOrEquals('{a}', '{b}'))");
-            AssertSuccess(expectedSign <  0, $"$([MSBuild]::VersionLessThan('{a}', '{b}'))");
-            AssertSuccess(expectedSign <= 0, $"$([MSBuild]::VersionLessThanOrEquals('{a}', '{b}'))");
-            AssertSuccess(expectedSign == 0, $"$([MSBuild]::VersionEquals('{a}', '{b}'))");
-            AssertSuccess(expectedSign != 0, $"$([MSBuild]::VersionNotEquals('{a}', '{b}'))");
+            AssertSuccess(expander, expectedSign >  0, $"$([MSBuild]::VersionGreaterThan('{a}', '{b}'))");
+            AssertSuccess(expander, expectedSign >= 0, $"$([MSBuild]::VersionGreaterThanOrEquals('{a}', '{b}'))");
+            AssertSuccess(expander, expectedSign <  0, $"$([MSBuild]::VersionLessThan('{a}', '{b}'))");
+            AssertSuccess(expander, expectedSign <= 0, $"$([MSBuild]::VersionLessThanOrEquals('{a}', '{b}'))");
+            AssertSuccess(expander, expectedSign == 0, $"$([MSBuild]::VersionEquals('{a}', '{b}'))");
+            AssertSuccess(expander, expectedSign != 0, $"$([MSBuild]::VersionNotEquals('{a}', '{b}'))");
+        }
 
-            void AssertSuccess(bool expected, string expression)
-            {
-                bool actual = (bool)expander.ExpandPropertiesLeaveTypedAndEscaped(
+        private void AssertThrows(Expander<ProjectPropertyInstance, ProjectItemInstance> expander, string expression, string expectedMessage)
+        {
+            var ex = Assert.Throws<InvalidProjectFileException>(
+                () => expander.ExpandPropertiesLeaveTypedAndEscaped(
                     expression,
                     ExpanderOptions.ExpandProperties,
-                    MockElementLocation.Instance);
+                    MockElementLocation.Instance));
 
-                Assert.Equal(expected, actual);
-            }
+            Assert.Contains(expectedMessage, ex.Message);
+        }
+
+        private void AssertSuccess(Expander<ProjectPropertyInstance, ProjectItemInstance> expander, object expected, string expression)
+        {
+            var actual = expander.ExpandPropertiesLeaveTypedAndEscaped(
+                expression,
+                ExpanderOptions.ExpandProperties,
+                MockElementLocation.Instance);
+
+            Assert.Equal(expected, actual);
         }
 
         /// <summary>
