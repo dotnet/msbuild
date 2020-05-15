@@ -11,6 +11,7 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
 using Xunit.Abstractions;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -66,9 +67,9 @@ namespace Microsoft.NET.Publish.Tests
             return new PublishCommand(Log, testAsset.TestRoot);
         }
 
-        private DirectoryInfo GetPublishDirectory(PublishCommand publishCommand)
+        private DirectoryInfo GetPublishDirectory(PublishCommand publishCommand, string targetFramework = "netcoreapp3.0")
         {
-            return publishCommand.GetOutputDirectory(targetFramework: "netcoreapp3.0",
+            return publishCommand.GetOutputDirectory(targetFramework: targetFramework,
                                                      runtimeIdentifier: RuntimeInformation.RuntimeIdentifier);
         }
 
@@ -351,6 +352,81 @@ namespace Microsoft.NET.Publish.Tests
             var appHostSize = new FileInfo(appHostPath).Length;
 
             appHostSize.Should().BeLessThan(singleFileSize);
+        }
+
+        //  Core MSBuild only due to https://github.com/dotnet/sdk/issues/4244
+        [CoreMSBuildOnlyFact]
+        public void It_leaves_host_components_unbundled_when_necessary()
+        {
+            // In.net 5, Single-file bundles are processed in the framework.
+            // Therefore, in self-contained builds, hostpolicy and hostfxr DLLs cannot themselves be in the bundle.
+            // This check is temporary until until statically linked singlefilehost is supported: 
+            // * https://github.com/dotnet/runtime/issues/32823
+            // * https://github.com/dotnet/sdk/issues/11567
+
+            var testProject = new TestProject()
+            {
+                Name = "SingleFileTest",
+                TargetFrameworks = "netcoreapp5.0",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            publishCommand.Execute(PublishSingleFile, RuntimeIdentifier)
+                .Should()
+                .Pass();
+
+            string hostfxr = RuntimeInformation.RuntimeIdentifier.StartsWith("win") ? "hostfxr.dll" :
+                             RuntimeInformation.RuntimeIdentifier.StartsWith("osx") ? "libhostfxr.dylib" : "libhostfxr.so";
+
+            string hostpolicy = RuntimeInformation.RuntimeIdentifier.StartsWith("win") ? "hostpolicy.dll" :
+                                RuntimeInformation.RuntimeIdentifier.StartsWith("osx") ? "libhostpolicy.dylib" : "libhostpolicy.so";
+
+            string[] expectedFiles = { $"{testProject.Name}{Constants.ExeSuffix}", $"{testProject.Name}.pdb", hostfxr, hostpolicy };
+
+            GetPublishDirectory(publishCommand, "netcoreapp5.0")
+                .Should()
+                .OnlyHaveFiles(expectedFiles);
+        }
+
+        //  Core MSBuild only due to https://github.com/dotnet/sdk/issues/4244
+        [CoreMSBuildOnlyTheory]
+        [InlineData("netcoreapp3.0", false)]
+        [InlineData("netcoreapp3.0", true)]
+        [InlineData("netcoreapp3.1", false)]
+        [InlineData("netcoreapp3.1", true)]
+        [InlineData("netcoreapp5.0", false)]
+        [InlineData("netcoreapp5.0", true)]
+        public void It_runs_single_file_apps(string targetFramework, bool selfContained)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "SingleFileTest",
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true,
+                IsExe = true,
+            };
+            testProject.AdditionalProperties.Add("SelfContained", $"{selfContained}");
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            publishCommand.Execute(PublishSingleFile, RuntimeIdentifier)
+                .Should()
+                .Pass();
+
+            var publishDir = GetPublishDirectory(publishCommand, targetFramework).FullName;
+            var singleFilePath = Path.Combine(publishDir, $"{testProject.Name}{Constants.ExeSuffix}");
+
+            var command = new RunExeCommand(Log, singleFilePath);
+            command.Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World");
         }
     }
 }
