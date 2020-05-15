@@ -1776,7 +1776,7 @@ namespace Microsoft.Build.Evaluation
 
             string project = importElement.Project;
 
-            if (importElement.ParsedSdkReference != null)
+            if (importElement.SdkReference != null)
             {
                 // Try to get the path to the solution and project being built. The solution path is not directly known
                 // in MSBuild. It is passed in as a property either by the VS project system or by MSBuild's solution
@@ -1788,7 +1788,7 @@ namespace Microsoft.Build.Evaluation
                 var projectPath = _data.GetProperty(ReservedPropertyNames.projectFullPath)?.EvaluatedValue;
 
                 // Combine SDK path with the "project" relative path
-                sdkResult = _sdkResolverService.ResolveSdk(_submissionId, importElement.ParsedSdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive);
+                sdkResult = _sdkResolverService.ResolveSdk(_submissionId, importElement.SdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive);
 
                 if (!sdkResult.Success)
                 {
@@ -1798,7 +1798,7 @@ namespace Microsoft.Build.Evaluation
                             importElement.Location.Line,
                             importElement.Location.Column,
                             ResourceUtilities.GetResourceString("CouldNotResolveSdk"),
-                            importElement.ParsedSdkReference.ToString())
+                            importElement.SdkReference.ToString())
                         {
                             BuildEventContext = _evaluationLoggingContext.BuildEventContext,
                             UnexpandedProject = importElement.Project,
@@ -1814,7 +1814,7 @@ namespace Microsoft.Build.Evaluation
                         return;
                     }
 
-                    ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "CouldNotResolveSdk", importElement.ParsedSdkReference.ToString());
+                    ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "CouldNotResolveSdk", importElement.SdkReference.ToString());
                 }
 
                 project = Path.Combine(sdkResult.Path, project);
