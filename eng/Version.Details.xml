@@ -60,9 +60,9 @@
       <Uri>https://github.com/dotnet/CliCommandLineParser</Uri>
       <Sha>0e89c2116ad28e404ba56c14d1c3f938caa25a01</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="5.7.0-preview.1.6592">
+    <Dependency Name="NuGet.Build.Tasks" Version="5.7.0-preview.1.6609">
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
-      <Sha>4dbf16e68eabf507b9f156c801b1b7c3b0586e43</Sha>
+      <Sha>12a375a8a02764b772a20371abaf797639a7f961</Sha>
     </Dependency>
   </ProductDependencies>
 </Dependencies>
