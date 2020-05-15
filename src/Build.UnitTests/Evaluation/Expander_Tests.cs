@@ -2840,6 +2840,37 @@ namespace Microsoft.Build.UnitTests.Evaluation
             AssertSuccess(expander, expectedSign != 0, $"$([MSBuild]::VersionNotEquals('{a}', '{b}'))");
         }
 
+        [Theory]
+        [InlineData("net45", ".NETFramework", "4.5")]
+        [InlineData("netcoreapp3.1", ".NETCoreApp", "3.1")]
+        [InlineData("netstandard2.1", ".NETStandard", "2.1")]
+        [InlineData("foo", "Unsupported", "0.0")]
+        public void PropertyFunctionTargetFrameworkParsing(string tfm, string expectedIdentifier, string expectedVersion)
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            AssertSuccess(expander, expectedIdentifier, $"$([MSBuild]::GetTargetFrameworkIdentifier('{tfm}'))");
+            AssertSuccess(expander, expectedVersion, $"$([MSBuild]::GetTargetFrameworkVersion('{tfm}'))");
+        }
+
+        [Theory]
+        [InlineData("net5.0", "net5.0", true)]
+        [InlineData("net45", "net46", false)]
+        [InlineData("net46", "net45", true)]
+        [InlineData("netcoreapp3.1", "netcoreapp1.0", true)]
+        [InlineData("netstandard1.6", "netstandard2.1", false)]
+        [InlineData("netcoreapp3.0", "netstandard2.1", true)]
+        [InlineData("net461", "netstandard1.0", true)]
+        [InlineData("foo", "netstandard1.0", false)]
+        public void PropertyFunctionTargetFrameworkComparisons(string tfm1, string tfm2, bool expectedFrameworkCompatible)
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            AssertSuccess(expander, expectedFrameworkCompatible, $"$([MSBuild]::IsTargetFrameworkCompatible('{tfm1}', '{tfm2}'))");
+        }
+
         private void AssertThrows(Expander<ProjectPropertyInstance, ProjectItemInstance> expander, string expression, string expectedMessage)
         {
             var ex = Assert.Throws<InvalidProjectFileException>(

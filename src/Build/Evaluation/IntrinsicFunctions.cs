@@ -14,6 +14,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
+using NuGet.Frameworks;
 
 // Needed for DoesTaskHostExistForParameters
 using NodeProviderOutOfProcTaskHost = Microsoft.Build.BackEnd.NodeProviderOutOfProcTaskHost;
@@ -478,6 +479,21 @@ namespace Microsoft.Build.Evaluation
         internal static bool VersionLessThanOrEquals(string a, string b)
         {
             return SimpleVersion.Parse(a) <= SimpleVersion.Parse(b);
+        }
+
+        internal static string GetTargetFrameworkIdentifier(string tfm)
+        {
+            return NuGetFramework.Parse(tfm).Framework;
+        }
+
+        internal static string GetTargetFrameworkVersion(string tfm)
+        {
+            return NuGetFramework.Parse(tfm).Version.ToString(2);
+        }
+
+        internal static bool IsTargetFrameworkCompatible(string tfm1, string tfm2)
+        {
+            return NuGetFrameworkUtility.IsCompatibleWithFallbackCheck(NuGetFramework.Parse(tfm1), NuGetFramework.Parse(tfm2));
         }
 
         public static string GetCurrentToolsDirectory()
