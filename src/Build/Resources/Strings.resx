@@ -1101,9 +1101,9 @@
       LOCALIZATION: "{2}" is a localized message from a CLR/FX exception. Also, Microsoft.Build.Framework should not be localized
     </comment>
   </data>
-  <data name="TaskReturnedFalseButDidNotLogError" xml:space="preserve">
-    <value>MSB4132: The "{0}" task returned false but did not log an error.</value>
-    <comment>{StrBegin="MSB4132: "}</comment>
+  <data name="TaskReturnedFalseButDidNotLogError">
+    <value>MSB4181: The "{0}" task returned false but did not log an error.</value>
+    <comment>{StrBegin="MSB4181: "}</comment>
   </data>
   <data name="LoggerCreationError" xml:space="preserve">
     <value>MSB1021: Cannot create an instance of the logger. {0}</value>
@@ -1531,6 +1531,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="OM_MatchingProjectAlreadyInCollection" xml:space="preserve">
     <value>An equivalent project (a project with the same global properties and tools version) is already present in the project collection, with the path "{0}". To load an equivalent into this project collection, unload this project first.</value>
   </data>
+  <data name="OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem" xml:space="preserve">
+    <value>Only one item type may be referenced when removing with MatchOnMetadata.</value>
+  </data>
   <data name="OM_ProjectWasNotLoaded" xml:space="preserve">
     <value>The project provided was not loaded in the collection.</value>
   </data>
@@ -1557,6 +1560,15 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse" xml:space="preserve">
     <value>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</value>
+  </data>
+  <data name="OM_NoMatchOnMetadataOutsideTargets" xml:space="preserve">
+    <value>MatchOnMetadata cannot be used outside of a &lt;Target&gt;.</value>
+  </data>
+  <data name="OM_MatchOnMetadataOnlyApplicableToRemoveItems" xml:space="preserve">
+    <value>MatchOnMetadata only applies to Remove operations on items.</value>
+  </data>
+  <data name="OM_MatchOnMetadataOptionsOnlyApplicableToItemsWithMatchOnMetadata" xml:space="preserve">
+    <value>MatchOnMetadataOptions is valid only when removing items using MatchOnMetadata.</value>
   </data>
   <data name="OM_BuildSubmissionsMultipleProjectCollections" xml:space="preserve">
     <value>All build submissions in a build must use project instances originating from the same project collection.</value>
@@ -1648,6 +1660,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="NoReloadOnUnsavedChanges" xml:space="preserve">
     <value>MSB4231: ProjectRootElement can't reload if it contains unsaved changes.</value>
     <comment>{StrBegin="MSB4231: "}</comment>
+  </data>
+  <data name="LogTaskInputs.Truncated">
+    <value>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</value>
   </data>
   <data name="MetaprojectGenerated" xml:space="preserve">
     <value>Metaproject "{0}" generated.</value>

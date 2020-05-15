@@ -96,18 +96,18 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Compare target to string. 
         /// </summary>
-        bool OpportunisticIntern.IInternable.IsOrdinalEqualToStringOfSameLength(string other)
+        bool OpportunisticIntern.IInternable.StartsWithStringByOrdinalComparison(string other)
         {
 #if DEBUG
-            ErrorUtilities.VerifyThrow(other.Length == _borrowedBuilder.Length, "should be same length");
+            ErrorUtilities.VerifyThrow(other.Length <= _borrowedBuilder.Length, "should be at most as long as target");
 #endif
             if (other.Length > MaxByCharCompareLength)
             {
-                return String.Equals( ((OpportunisticIntern.IInternable) this).ExpensiveConvertToString(), other, StringComparison.Ordinal);
+                return ((OpportunisticIntern.IInternable) this).ExpensiveConvertToString().StartsWith(other, StringComparison.Ordinal);
             }
             // Backwards because the end of the string is (by observation of Australian Government build) more likely to be different earlier in the loop.
             // For example, C:\project1, C:\project2
-            for (int i = _borrowedBuilder.Length - 1; i >= 0; --i)
+            for (int i = other.Length - 1; i >= 0; --i)
             {
                 if (_borrowedBuilder[i] != other[i])
                 {

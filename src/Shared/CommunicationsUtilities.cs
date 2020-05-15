@@ -13,8 +13,6 @@ using System.Threading;
 
 using Microsoft.Build.Shared;
 using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
 
 #if !FEATURE_APM
 using System.Threading.Tasks;
@@ -23,34 +21,37 @@ using System.Threading.Tasks;
 namespace Microsoft.Build.Internal
 {
     /// <summary>
-    /// Enumeration of all possible (currently supported) types of task host context.
+    /// Enumeration of all possible (currently supported) options for handshakes.
     /// </summary>
-    internal enum TaskHostContext
+    [Flags]
+    internal enum HandshakeOptions
     {
-        /// <summary>
-        /// 32-bit Intel process, using the 2.0 CLR.
-        /// </summary>
-        X32CLR2,
+        None = 0,
 
         /// <summary>
-        /// 64-bit Intel process, using the 2.0 CLR.
+        /// Process is a TaskHost
         /// </summary>
-        X64CLR2,
+        TaskHost = 1,
 
         /// <summary>
-        /// 32-bit Intel process, using the 4.0 CLR.
+        /// Using the 2.0 CLR
         /// </summary>
-        X32CLR4,
+        CLR2 = 2,
 
         /// <summary>
-        /// 64-bit Intel process, using the 4.0 CLR.
+        /// 64-bit Intel process
         /// </summary>
-        X64CLR4,
+        X64 = 4,
 
         /// <summary>
-        /// Invalid task host context
+        /// Node reuse enabled
         /// </summary>
-        Invalid
+        NodeReuse = 8,
+
+        /// <summary>
+        /// Building with BelowNormal priority
+        /// </summary>
+        LowPriority = 16
     }
 
     /// <summary>
@@ -292,9 +293,8 @@ namespace Microsoft.Build.Internal
 
         /// <summary>
         /// Given a base handshake, generates the real handshake based on e.g. elevation level.  
-        /// Client handshake required for comparison purposes only.  Returns the update handshake.  
         /// </summary>
-        internal static long GenerateHostHandshakeFromBase(long baseHandshake, long clientHandshake)
+        private static long GenerateHostHandshakeFromBase(long baseHandshake)
         {
 #if FEATURE_SECURITY_PRINCIPAL_WINDOWS
             // If we are running in elevated privs, we will only accept a handshake from an elevated process as well.
@@ -309,41 +309,44 @@ namespace Microsoft.Build.Internal
                 {
                     baseHandshake = baseHandshake ^ 0x5c5c5c5c5c5c5c5c + Process.GetCurrentProcess().SessionId;
                 }
-
-                if ((baseHandshake & 0x00FFFFFFFFFFFFFF) == clientHandshake)
-                {
-                    baseHandshake = ~baseHandshake;
-                }
             }
 #endif
 
             // Mask out the first byte. That's because old
             // builds used a single, non zero initial byte,
             // and we don't want to risk communicating with them
-            return baseHandshake & 0x00FFFFFFFFFFFFFF;
+            return baseHandshake;
         }
 
         /// <summary>
         /// Magic number sent by the host to the client during the handshake.
         /// Derived from the binary timestamp to avoid mixing binary versions.
         /// </summary>
-        internal static long GetHostHandshake(TaskHostContext hostContext)
+        internal static long GetHostHandshake(HandshakeOptions nodeType)
         {
-            long baseHandshake = GenerateHostHandshakeFromBase(GetBaseHandshakeForContext(hostContext), GetClientHandshake(hostContext));
-            return baseHandshake;
+            string salt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
+            string toolsDirectory = (nodeType & HandshakeOptions.X64) == HandshakeOptions.X64 ? BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64 : BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
+            int nodeHandshakeSalt = GetHandshakeHashCode(salt + toolsDirectory);
+
+            Trace("MSBUILDNODEHANDSHAKESALT=\"{0}\", msbuildDirectory=\"{1}\", nodeType={2}, FileVersionHash={3}", salt, toolsDirectory, nodeType, FileVersionHash);
+
+            //FileVersionHash (32 bits) is shifted 8 bits to avoid session ID collision
+            //nodeType (4 bits) is shifted just after the FileVersionHash
+            //nodeHandshakeSalt (32 bits) is shifted just after hostContext
+            //the most significant byte (leftmost 8 bits) will get zero'd out to avoid connecting to older builds.
+            //| masked out | nodeHandshakeSalt | hostContext |              fileVersionHash             | SessionID
+            //  0000 0000     0000 0000 0000        0000        0000 0000 0000 0000 0000 0000 0000 0000   0000 0000
+            long baseHandshake = ((long)nodeHandshakeSalt << 44) | ((long)nodeType << 40) | ((long)FileVersionHash << 8);
+            return GenerateHostHandshakeFromBase(baseHandshake);
         }
 
         /// <summary>
         /// Magic number sent by the client to the host during the handshake.
         /// Munged version of the host handshake.
         /// </summary>
-        internal static long GetClientHandshake(TaskHostContext hostContext)
+        internal static long GetClientHandshake(HandshakeOptions hostContext)
         {
-            // Mask out the first byte. That's because old
-            // builds used a single, non zero initial byte,
-            // and we don't want to risk communicating with them
-            long clientHandshake = ((GetBaseHandshakeForContext(hostContext) ^ Int64.MaxValue) & 0x00FFFFFFFFFFFFFF);
-            return clientHandshake;
+            return ~GetHostHandshake(hostContext);
         }
 
         /// <summary>
@@ -369,13 +372,13 @@ namespace Microsoft.Build.Internal
         /// Extension method to read a series of bytes from a stream
         /// </summary>
         internal static long ReadLongForHandshake(this PipeStream stream
-#if NETCOREAPP2_1
+#if NETCOREAPP2_1 || MONO
             , int handshakeReadTimeout
 #endif
             )
         {
             return stream.ReadLongForHandshake((byte[])null, 0
-#if NETCOREAPP2_1
+#if NETCOREAPP2_1 || MONO
                 , handshakeReadTimeout
 #endif
                 );
@@ -387,14 +390,14 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static long ReadLongForHandshake(this PipeStream stream, byte[] leadingBytesToReject,
             byte rejectionByteToReturn
-#if NETCOREAPP2_1
+#if NETCOREAPP2_1 || MONO
             , int timeout
 #endif
             )
         {
             byte[] bytes = new byte[8];
 
-#if NETCOREAPP2_1
+#if NETCOREAPP2_1 || MONO
             if (!NativeMethodsShared.IsWindows)
             {
                 // Enforce a minimum timeout because the Windows code can pass
@@ -488,86 +491,47 @@ namespace Microsoft.Build.Internal
 #endif
 
         /// <summary>
-        /// Given the appropriate information, return the equivalent TaskHostContext.  
+        /// Given the appropriate information, return the equivalent HandshakeOptions.
         /// </summary>
-        internal static TaskHostContext GetTaskHostContext(IDictionary<string, string> taskHostParameters)
+        internal static HandshakeOptions GetHandshakeOptions(bool taskHost, bool is64Bit = false, int clrVersion = 0, bool nodeReuse = false, bool lowPriority = false, IDictionary<string, string> taskHostParameters = null)
         {
-            ErrorUtilities.VerifyThrow(taskHostParameters.ContainsKey(XMakeAttributes.runtime), "Should always have an explicit runtime when we call this method.");
-            ErrorUtilities.VerifyThrow(taskHostParameters.ContainsKey(XMakeAttributes.architecture), "Should always have an explicit architecture when we call this method.");
+            HandshakeOptions context = taskHost ? HandshakeOptions.TaskHost : HandshakeOptions.None;
 
-            string runtime = taskHostParameters[XMakeAttributes.runtime];
-            string architecture = taskHostParameters[XMakeAttributes.architecture];
-
-            bool is64BitProcess = false;
-            int clrVersion = 0;
-
-            if (architecture.Equals(XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase))
+            // We don't know about the TaskHost. Figure it out.
+            if (taskHost && clrVersion == 0)
             {
-                is64BitProcess = true;
+                // Take the current TaskHost context
+                if (taskHostParameters == null)
+                {
+                    clrVersion = typeof(bool).GetTypeInfo().Assembly.GetName().Version.Major;
+                    is64Bit = XMakeAttributes.GetCurrentMSBuildArchitecture().Equals(XMakeAttributes.MSBuildArchitectureValues.x64);
+                }
+                else
+                {
+                    ErrorUtilities.VerifyThrow(taskHostParameters.ContainsKey(XMakeAttributes.runtime), "Should always have an explicit runtime when we call this method.");
+                    ErrorUtilities.VerifyThrow(taskHostParameters.ContainsKey(XMakeAttributes.architecture), "Should always have an explicit architecture when we call this method.");
+
+                    clrVersion = taskHostParameters[XMakeAttributes.runtime].Equals(XMakeAttributes.MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase) ? 4 : 2;
+                    is64Bit = taskHostParameters[XMakeAttributes.architecture].Equals(XMakeAttributes.MSBuildArchitectureValues.x64);
+                }
             }
-            else if (architecture.Equals(XMakeAttributes.MSBuildArchitectureValues.x86, StringComparison.OrdinalIgnoreCase))
+            if (is64Bit)
             {
-                is64BitProcess = false;
+                context |= HandshakeOptions.X64;
             }
-            else
+            if (clrVersion == 2)
             {
-                ErrorUtilities.ThrowInternalError("Should always have an explicit architecture when calling this method");
+                context |= HandshakeOptions.CLR2;
             }
-
-            if (runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase))
+            if (nodeReuse)
             {
-                clrVersion = 4;
+                context |= HandshakeOptions.NodeReuse;
             }
-            else if (runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.clr2, StringComparison.OrdinalIgnoreCase))
+            if (lowPriority)
             {
-                clrVersion = 2;
+                context |= HandshakeOptions.LowPriority;
             }
-            else
-            {
-                ErrorUtilities.ThrowInternalError("Should always have an explicit runtime when calling this method");
-            }
-
-            TaskHostContext hostContext = GetTaskHostContext(is64BitProcess, clrVersion);
-            return hostContext;
-        }
-
-        /// <summary>
-        /// Given the appropriate information, return the equivalent TaskHostContext.  
-        /// </summary>
-        internal static TaskHostContext GetTaskHostContext(bool is64BitProcess, int clrVersion)
-        {
-            TaskHostContext hostContext = TaskHostContext.Invalid;
-            switch (clrVersion)
-            {
-                case 2:
-                    hostContext = is64BitProcess ? TaskHostContext.X64CLR2 : TaskHostContext.X32CLR2;
-                    break;
-                case 4:
-                    hostContext = is64BitProcess ? TaskHostContext.X64CLR4 : TaskHostContext.X32CLR4;
-                    break;
-                default:
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
-                    hostContext = TaskHostContext.Invalid;
-                    break;
-            }
-
-            return hostContext;
-        }
-
-        /// <summary>
-        /// Returns the TaskHostContext corresponding to this process
-        /// </summary>
-        internal static TaskHostContext GetCurrentTaskHostContext()
-        {
-            // We know that whichever assembly is executing this code -- whether it's MSBuildTaskHost.exe or 
-            // Microsoft.Build.dll -- is of the version of the CLR that this process is running.  So grab
-            // the version of mscorlib currently in use and call that good enough.  
-            Version mscorlibVersion = typeof(bool).GetTypeInfo().Assembly.GetName().Version;
-
-            string currentMSBuildArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture();
-            TaskHostContext hostContext = GetTaskHostContext(currentMSBuildArchitecture.Equals(XMakeAttributes.MSBuildArchitectureValues.x64), mscorlibVersion.Major);
-
-            return hostContext;
+            return context;
         }
 
         /// <summary>
@@ -653,7 +617,7 @@ namespace Microsoft.Build.Internal
         /// </summary>
         /// <param name="hostContext">TaskHostContext</param>
         /// <returns>Base Handshake</returns>
-        private static long GetBaseHandshakeForContext(TaskHostContext hostContext)
+        private static long GetBaseHandshakeForContext(HandshakeOptions hostContext)
         {
             string salt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") + BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
             long nodeHandshakeSalt = GetHandshakeHashCode(salt);
@@ -677,7 +641,7 @@ namespace Microsoft.Build.Internal
         /// but stripped out architecture specific defines
         /// that causes the hashcode to be different and this causes problem in cross-architecture handshaking
         /// </summary>
-        private static int GetHandshakeHashCode(string fileVersion)
+        internal static int GetHandshakeHashCode(string fileVersion)
         {
             unsafe
             {

@@ -46,6 +46,11 @@ namespace Microsoft.Build.Construction
         private string _remove;
 
         /// <summary>
+        /// MatchOnMetadata value cached for performance
+        /// </summary>
+        private string _matchOnMetadata;
+
+        /// <summary>
         /// Update value cached for performance
         /// </summary>
         private string _update;
@@ -168,6 +173,49 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// Gets of sets the MatchOnMetadata value.
+        /// Returns empty string if it is not present.
+        /// Removes the attribute if the value to set is empty or null.
+        /// </summary>
+        public string MatchOnMetadata
+        {
+            [DebuggerStepThrough]
+            get
+            {
+                return GetAttributeValue(XMakeAttributes.matchOnMetadata, ref _matchOnMetadata);
+            }
+
+            set
+            {
+                // MatchOnMetadata must be inside of a target
+                ErrorUtilities.VerifyThrowInvalidOperation(Parent == null || Parent.Parent is ProjectTargetElement || Parent.Parent is ProjectRootElement, "OM_NoMatchOnMetadataOutsideTargets");
+                // MatchOnMetadata must be inside of a remove item
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || RemoveMetadata.Length != 0, "OM_MatchOnMetadataOnlyApplicableToRemoveItems", ElementName, XMakeAttributes.matchOnMetadata);
+                SetOrRemoveAttribute(XMakeAttributes.matchOnMetadata, value, ref _matchOnMetadata, "Set item MatchOnMetadata {0}", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets of sets the MatchOnMetadataOptions value.
+        /// Returns empty string if it is not present.
+        /// Removes the attribute if the value to set is empty or null.
+        /// </summary>
+        public string MatchOnMetadataOptions
+        {
+            [DebuggerStepThrough]
+            get
+            {
+                return GetAttributeValue(XMakeAttributes.matchOnMetadataOptions);
+            }
+
+            set
+            {
+                ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(value) || MatchOnMetadata.Length != 0, "OM_MatchOnMetadataOptionsOnlyApplicableToItemsWithMatchOnMetadata", ElementName, XMakeAttributes.matchOnMetadataOptions);
+                SetOrRemoveAttribute(XMakeAttributes.matchOnMetadataOptions, value, "Set item MatchOnMetadataOptions {0}", value);
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the KeepMetadata value.
         /// Returns empty string if it is not present.
         /// Removes the attribute if the value to set is empty or null.
@@ -258,6 +306,16 @@ namespace Microsoft.Build.Construction
         /// Location of the update attribute
         /// </summary>
         public ElementLocation UpdateLocation => GetAttributeLocation(XMakeAttributes.update);
+
+        /// <summary>
+        /// Location of the MatchOnMetadata attribute
+        /// </summary>
+        public ElementLocation MatchOnMetadataLocation => GetAttributeLocation(XMakeAttributes.matchOnMetadata);
+
+        /// <summary>
+        /// Location of the MatchOnMetadataOptions attribute
+        /// </summary>
+        public ElementLocation MatchOnMetadataOptionsLocation => GetAttributeLocation(XMakeAttributes.matchOnMetadataOptions);
 
         /// <summary>
         /// Location of the keepMetadata attribute
@@ -405,6 +463,7 @@ namespace Microsoft.Build.Construction
             _include = null;
             _exclude = null;
             _remove = null;
+            _matchOnMetadata = null;
             _update = null;
             _includeHasWildcards = null;
         }
