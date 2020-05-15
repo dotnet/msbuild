@@ -117,6 +117,11 @@
         <target state="translated">A operação não pode ser concluída porque BeginBuild ainda não foi chamado.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NuGetAssemblyNotFound">
+        <source>A required NuGet assembly was not found. Expected Path: {0}</source>
+        <target state="new">A required NuGet assembly was not found. Expected Path: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
         <source>MSB4253: A null reference was returned from a user-provided ProjectInstanceFactoryFunc callback. This is not allowed.</source>
         <target state="translated">MSB4253: Uma referência nula foi devolvida de um retorno de chamada do ProjectInstanceFactoryFunc fornecido pelo usuário. Isso não é permitido.</target>
@@ -151,8 +156,8 @@
     </note>
       </trans-unit>
       <trans-unit id="StaticGraphAcceptsSingleSolutionEntryPoint">
-        <source>MSB4261: Static graph only accepts a solution as the only entry point. Multiple entry points detected: {0}</source>
-        <target state="translated">MSB4261: o grafo estático aceita apenas uma solução como o único ponto de entrada. Vários pontos de entrada detectados: {0}</target>
+        <source>MSB4261: Multiple entry points with solutions detected: {0}. If static graph is loaded from a solution, that that solution must be the only entry point.</source>
+        <target state="needs-review-translation">MSB4261: o grafo estático aceita apenas uma solução como o único ponto de entrada. Vários pontos de entrada detectados: {0}</target>
         <note>
       LOCALIZATION: {0} is a semicolon delimited list of files
     </note>

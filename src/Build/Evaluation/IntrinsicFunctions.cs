@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
@@ -32,22 +30,7 @@ namespace Microsoft.Build.Evaluation
         private static readonly Lazy<Regex> RegistrySdkRegex = new Lazy<Regex>(() => new Regex(@"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$", RegexOptions.IgnoreCase));
 #endif // FEATURE_WIN32_REGISTRY
 
-        /// <summary>
-        /// Resolve the location of the NuGet.Frameworks assembly
-        /// </summary>
-        private static Assembly GetNuGetAssembly()
-        {
-            var assemblyDirectory = IsRunningFromVisualStudio() ?
-                Path.Combine(GetVsInstallRoot(), "Common7", "IDE", "CommonExtensions", "Microsoft", "NuGet") :
-                BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
-            return Assembly.LoadFile(Path.Combine(assemblyDirectory, "NuGet.Frameworks.dll"));
-        }
-
-        /// <summary>
-        ///  NuGet Types
-        /// </summary>
-        private static Type NuGetFramework = GetNuGetAssembly().GetType("NuGet.Frameworks.NuGetFramework");
-        private static Type NuGetFrameworkUtility = GetNuGetAssembly().GetType("NuGet.Frameworks.NuGetFrameworkUtility");
+        private static readonly Lazy<NuGetFrameworkWrapper> NuGetFramework = new Lazy<NuGetFrameworkWrapper>(() => new NuGetFrameworkWrapper());
 
         /// <summary>
         /// Add two doubles
@@ -497,24 +480,19 @@ namespace Microsoft.Build.Evaluation
             return SimpleVersion.Parse(a) <= SimpleVersion.Parse(b);
         }
 
-        private static object ParseNuGetFramework(string tfm)
-        {
-            return NuGetFramework.GetMethod("Parse", new Type[] { typeof(string) }).Invoke(null, new object[] { tfm });
-        }
-
         internal static string GetTargetFrameworkIdentifier(string tfm)
         {
-            return NuGetFramework.GetProperty("Framework").GetValue(ParseNuGetFramework(tfm)) as string;
+            return NuGetFramework.Value.GetTargetFrameworkIdentifier(tfm);
         }
 
         internal static string GetTargetFrameworkVersion(string tfm)
         {
-            return (NuGetFramework.GetProperty("Version").GetValue(ParseNuGetFramework(tfm)) as Version).ToString(2);
+            return NuGetFramework.Value.GetTargetFrameworkVersion(tfm);
         }
 
         internal static bool IsTargetFrameworkCompatible(string tfm1, string tfm2)
         {
-            return Convert.ToBoolean(NuGetFrameworkUtility.GetMethod("IsCompatibleWithFallbackCheck").Invoke(null, new object[] { ParseNuGetFramework(tfm1), ParseNuGetFramework(tfm2) }));
+            return NuGetFramework.Value.IsCompatible(tfm1, tfm2);
         }
 
         public static string GetCurrentToolsDirectory()
