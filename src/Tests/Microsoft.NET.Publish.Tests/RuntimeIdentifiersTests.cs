@@ -59,7 +59,7 @@ namespace Microsoft.NET.Publish.Tests
                 var buildCommand = new BuildCommand(Log, testAsset.Path, testProject.Name);
 
                 buildCommand
-                    .Execute($"/p:RuntimeIdentifier={runtimeIdentifier}")
+                    .ExecuteWithoutRestore($"/p:RuntimeIdentifier={runtimeIdentifier}")
                     .Should()
                     .Pass();
 
