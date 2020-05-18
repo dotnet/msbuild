@@ -39,7 +39,7 @@ namespace Microsoft.Build
 
             /// <summary>
             /// Overflow area used for additional strings sharing the same hash code. Since hash collisions should
-            /// to be very rare, this field is expected to be null in most buckets.
+            /// be very rare, this field is expected to be null in most buckets.
             /// </summary>
             public List<GCHandle> WeakHandleOverflow;
 
