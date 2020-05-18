@@ -528,46 +528,6 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Fact]
-        public void It_gives_the_correct_error_if_duplicate_compile_items_are_included_and_default_items_are_disabled()
-        {
-            var testProject = new TestProject()
-            {
-                Name = "DuplicateCompileItems",
-                TargetFrameworks = "netstandard1.6",
-                IsSdkProject = true
-            };
-
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, "DuplicateCompileItemsWithDefaultItemsDisabled")
-                .WithProjectChanges(project =>
-                {
-                    var ns = project.Root.Name.Namespace;
-
-                    project.Root.Element(ns + "PropertyGroup").Add(
-                        new XElement(ns + "EnableDefaultCompileItems", "false"));
-
-                    var itemGroup = new XElement(ns + "ItemGroup");
-                    project.Root.Add(itemGroup);
-                    itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", @"**\*.cs")));
-                    itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", @"DuplicateCompileItems.cs")));
-                });
-
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
-
-            WriteFile(Path.Combine(buildCommand.ProjectRootPath, "Class1.cs"), "public class Class1 {}");
-
-            buildCommand
-                .Execute()
-                .Should()
-                .Fail()
-                .And.HaveStdOutContaining("DuplicateCompileItems.cs")
-                //  Class1.cs wasn't included multiple times, so it shouldn't be mentioned
-                .And.NotHaveStdOutMatching("Class1.cs")
-                //  Default items weren't enabled, so the error message should come from the C# compiler and shouldn't include the information about default compile items
-                .And.HaveStdOutContaining("MSB3105")
-                .And.NotHaveStdOutMatching("EnableDefaultCompileItems");
-        }
-
-        [Fact]
         public void Implicit_package_references_are_overridden_by_PackageReference_includes_in_the_project_file()
         {
             var testProject = new TestProject()
