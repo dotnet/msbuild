@@ -7,11 +7,24 @@ using System.IO;
 using Microsoft.Build;
 using Microsoft.Build.Shared;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
-    public class OpportunisticIntern_Tests
+    public abstract class OpportunisticInternTestBase : IDisposable
     {
+        protected TestEnvironment _env;
+
+        public void Dispose()
+        {
+            _env.Dispose();
+        }
+
+        protected OpportunisticInternTestBase(ITestOutputHelper testOutput)
+        {
+            _env = TestEnvironment.Create(testOutput);
+        }
+
         private static bool IsInternable(IInternable internable)
         {
             string i1 = OpportunisticIntern.InternableToString(internable);
@@ -39,7 +52,7 @@ namespace Microsoft.Build.UnitTests
             return target.ExpensiveConvertToString();
         }
 
-        private static void AssertInternable(string value)
+        protected static void AssertInternable(string value)
         {
             AssertInternable(new StringBuilder(value));
             AssertInternable(value.ToCharArray(), 0, value.ToCharArray().Length);
@@ -60,7 +73,7 @@ namespace Microsoft.Build.UnitTests
             AssertNotInternable(new CharArrayInternTarget(ch, ch.Length));
         }
 
-        private static void AssertNotInternable(string value)
+        protected static void AssertNotInternable(string value)
         {
             AssertNotInternable(new StringBuilder(value));
             AssertNotInternable(value.ToCharArray());
@@ -153,6 +166,60 @@ namespace Microsoft.Build.UnitTests
         public void DoubleDoubleQuotes()
         {
             AssertInternable("");
+        }
+    }
+
+    /// <summary>
+    /// Tests the new (default) implementation of OpportunisticIntern.
+    /// </summary>
+    public class OpportunisticIntern_Tests : OpportunisticInternTestBase
+    {
+        public OpportunisticIntern_Tests(ITestOutputHelper testOutput)
+            : base(testOutput)
+        {
+        }
+    }
+
+    /// <summary>
+    /// Tests the legacy implementation of OpportunisticIntern.
+    /// </summary>
+    public class OpportunisticInternLegacy_Tests : OpportunisticInternTestBase
+    {
+        public OpportunisticInternLegacy_Tests(ITestOutputHelper testOutput)
+            : base(testOutput)
+        {
+            _env.SetEnvironmentVariable("MsBuildUseLegacyStringInterner", "1");
+        }
+
+        /// <summary>
+        /// Test a single know-to-intern tiny string to verify the mechanism.
+        /// </summary>
+        [Fact]
+        public void InternableTinyString()
+        {
+            AssertInternable("true");
+        }
+
+        /// <summary>
+        /// Test a single known-to-not-intern tiny string to verify the mechanism.
+        /// </summary>
+        [Fact]
+        public void NonInternableTinyString()
+        {
+            AssertNotInternable("1234");
+        }
+    }
+
+    /// <summary>
+    /// Tests the legacy implementation of OpportunisticIntern with simple concurrency enabled.
+    /// </summary>
+    public class OpportunisticInternLegacySimpleConcurrecy_Tests : OpportunisticInternTestBase
+    {
+        public OpportunisticInternLegacySimpleConcurrecy_Tests(ITestOutputHelper testOutput)
+            : base(testOutput)
+        {
+            _env.SetEnvironmentVariable("MsBuildUseLegacyStringInterner", "1");
+            _env.SetEnvironmentVariable("MsBuildUseSimpleInternConcurrency", "1");
         }
     }
 }
