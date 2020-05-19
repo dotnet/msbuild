@@ -32,7 +32,7 @@ namespace Microsoft.Build
     ///
     /// The new implementation interns all strings but maintains only weak references so it doesn't keep the strings alive.
     /// </summary>
-    internal static class OpportunisticIntern
+    internal class OpportunisticIntern
     {
         /// <summary>
         /// Defines the interner interface as we currently implement more than one.
@@ -45,85 +45,118 @@ namespace Microsoft.Build
             /// </summary>
             string InterningToString<T>(T candidate) where T : IInternable;
 
+#if DEBUG
             /// <summary>
             /// Prints implementation specific interning statistics to the console.
             /// </summary>
             /// <param name="heading">A string identifying the interner in the output.</param>
             void ReportStatistics(string heading);
+#endif
         }
 
-        private static readonly bool s_useLegacyInterner = Traits.Instance.UseLegacyStringInterner;
-        private static readonly bool s_useSimpleConcurrency = Traits.Instance.UseSimpleInternConcurrency;
+        /// <summary>
+        /// The singleton instance of OpportunisticIntern.
+        /// </summary>
+        private static OpportunisticIntern _instance = new OpportunisticIntern();
+        internal static OpportunisticIntern Instance => _instance;
+
+        private readonly bool _useLegacyInterner = Traits.Instance.UseLegacyStringInterner;
+        private readonly bool _useSimpleConcurrency = Traits.Instance.UseSimpleInternConcurrency;
 
         /// <summary>
         /// The size of the small mru list.
         /// </summary>
-        private static readonly int s_smallMruSize = AssignViaEnvironment("MSBUILDSMALLINTERNSIZE", 50);
+        private readonly int _smallMruSize;
 
         /// <summary>
         /// The size of the large mru list.
         /// </summary>
-        private static readonly int s_largeMruSize = AssignViaEnvironment("MSBUILDLARGEINTERNSIZE", 100);
+        private readonly int _largeMruSize;
 
         /// <summary>
         /// The size of the huge mru list.
         /// </summary>
-        private static readonly int s_hugeMruSize = AssignViaEnvironment("MSBUILDHUGEINTERNSIZE", 100);
+        private readonly int _hugeMruSize;
 
         /// <summary>
         /// The smallest size a string can be to be considered small.
         /// </summary>
-        private static readonly int s_smallMruThreshold = AssignViaEnvironment("MSBUILDSMALLINTERNTHRESHOLD", 50);
+        private readonly int _smallMruThreshold;
 
         /// <summary>
         /// The smallest size a string can be to be considered large.
         /// </summary>
-        private static readonly int s_largeMruThreshold = AssignViaEnvironment("MSBUILDLARGEINTERNTHRESHOLD", 70);
+        private readonly int _largeMruThreshold;
 
         /// <summary>
         /// The smallest size a string can be to be considered huge.
         /// </summary>
-        private static readonly int s_hugeMruThreshold = AssignViaEnvironment("MSBUILDHUGEINTERNTHRESHOLD", 200);
+        private readonly int _hugeMruThreshold;
 
         /// <summary>
         /// The smallest size a string can be to be ginormous.
         /// 8K for large object heap.
         /// </summary>
-        private static readonly int s_ginormousThreshold = AssignViaEnvironment("MSBUILDGINORMOUSINTERNTHRESHOLD", 8000);
+        private readonly int _ginormousThreshold;
 
         /// <summary>
         /// The interner implementation in use.
         /// </summary>
-        private static IInternerImplementation s_si = s_useLegacyInterner
-            ? (IInternerImplementation)new BucketedPrioritizedStringList(gatherStatistics: false, s_smallMruSize, s_largeMruSize, s_hugeMruSize, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency)
-            : (IInternerImplementation)new WeakStringCacheInterner(gatherStatistics: false);
+        private IInternerImplementation s_si;
 
+#if DEBUG
         #region Statistics
         /// <summary>
         /// What if Mru lists were infinitely long?
         /// </summary>
-        private static BucketedPrioritizedStringList s_whatIfInfinite;
+        private BucketedPrioritizedStringList _whatIfInfinite;
 
         /// <summary>
         /// What if we doubled the size of the Mru lists?
         /// </summary>
-        private static BucketedPrioritizedStringList s_whatIfDoubled;
+        private BucketedPrioritizedStringList _whatIfDoubled;
 
         /// <summary>
         /// What if we halved the size of the Mru lists?
         /// </summary>
-        private static BucketedPrioritizedStringList s_whatIfHalved;
+        private BucketedPrioritizedStringList _whatIfHalved;
 
         /// <summary>
         /// What if the size of Mru lists was zero? (We still intern tiny strings in this case)
         /// </summary>
-        private static BucketedPrioritizedStringList s_whatIfZero;
+        private BucketedPrioritizedStringList _whatIfZero;
         #endregion
+#endif
+
+        private OpportunisticIntern()
+        {
+            _smallMruSize = AssignViaEnvironment("MSBUILDSMALLINTERNSIZE", 50);
+            _largeMruSize = AssignViaEnvironment("MSBUILDLARGEINTERNSIZE", 100);
+            _hugeMruSize = AssignViaEnvironment("MSBUILDHUGEINTERNSIZE", 100);
+            _smallMruThreshold = AssignViaEnvironment("MSBUILDSMALLINTERNTHRESHOLD", 50);
+            _largeMruThreshold = AssignViaEnvironment("MSBUILDLARGEINTERNTHRESHOLD", 70);
+            _hugeMruThreshold = AssignViaEnvironment("MSBUILDHUGEINTERNTHRESHOLD", 200);
+            _ginormousThreshold = AssignViaEnvironment("MSBUILDGINORMOUSINTERNTHRESHOLD", 8000);
+
+            s_si = _useLegacyInterner
+               ? (IInternerImplementation)new BucketedPrioritizedStringList(gatherStatistics: false, _smallMruSize, _largeMruSize, _hugeMruSize,
+                    _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency)
+               : (IInternerImplementation)new WeakStringCacheInterner(gatherStatistics: false);
+        }
+
+        /// <summary>
+        /// Recreates the singleton instance based on the current environment (test only).
+        /// </summary>
+        internal static void ResetForTests()
+        {
+            Debug.Assert(BuildEnvironmentHelper.Instance.RunningTests);
+            _instance = new OpportunisticIntern();
+        }
 
         /// <summary>
         /// Assign an int from an environment variable. If its not present, use the default.
         /// </summary>
-        internal static int AssignViaEnvironment(string env, int @default)
+        private int AssignViaEnvironment(string env, int @default)
         {
             string threshold = Environment.GetEnvironmentVariable(env);
             if (!string.IsNullOrEmpty(threshold))
@@ -138,36 +171,58 @@ namespace Microsoft.Build
         }
 
         /// <summary>
-        /// Turn on statistics gathering.
+        /// Intern the given internable.
         /// </summary>
-        internal static void EnableStatisticsGathering()
+        internal static string InternableToString<T>(T candidate) where T : IInternable
         {
-            if (s_useLegacyInterner)
-            {
-                // Statistics include several 'what if' scenarios such as doubling the size of the MRU lists.
-                s_si = new BucketedPrioritizedStringList(gatherStatistics: true, s_smallMruSize, s_largeMruSize, s_hugeMruSize, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
-                s_whatIfInfinite = new BucketedPrioritizedStringList(gatherStatistics: true, int.MaxValue, int.MaxValue, int.MaxValue, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
-                s_whatIfDoubled = new BucketedPrioritizedStringList(gatherStatistics: true, s_smallMruSize * 2, s_largeMruSize * 2, s_hugeMruSize * 2, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
-                s_whatIfHalved = new BucketedPrioritizedStringList(gatherStatistics: true, s_smallMruSize / 2, s_largeMruSize / 2, s_hugeMruSize / 2, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
-                s_whatIfZero = new BucketedPrioritizedStringList(gatherStatistics: true, 0, 0, 0, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
-            }
-            else
-            {
-                s_si = new WeakStringCacheInterner(gatherStatistics: true);
-            }
+            return Instance.InternableToStringImpl(candidate);
+        }
+
+        /// <summary>
+        /// Potentially Intern the given string builder.
+        /// </summary>
+        internal static string StringBuilderToString(StringBuilder candidate)
+        {
+            return Instance.InternableToStringImpl(new StringBuilderInternTarget(candidate));
+        }
+
+        /// <summary>
+        /// Potentially Intern the given char array.
+        /// </summary>
+        internal static string CharArrayToString(char[] candidate, int count)
+        {
+            return Instance.InternableToStringImpl(new CharArrayInternTarget(candidate, count));
+        }
+
+        /// <summary>
+        /// Potentially Intern the given char array.
+        /// </summary>
+        internal static string CharArrayToString(char[] candidate, int startIndex, int count)
+        {
+            return Instance.InternableToStringImpl(new CharArrayInternTarget(candidate, startIndex, count));
+        }
+
+        /// <summary>
+        /// Potentially Intern the given string.
+        /// </summary>
+        /// <param name="candidate">The string to intern.</param>
+        /// <returns>The interned string, or the same string if it could not be interned.</returns>
+        internal static string InternStringIfPossible(string candidate)
+        {
+            return Instance.InternableToStringImpl(new StringInternTarget(candidate));
         }
 
         /// <summary>
         /// Intern the given internable.
         /// </summary>
-        internal static string InternableToString<T>(T candidate) where T : IInternable
+        private string InternableToStringImpl<T>(T candidate) where T : IInternable
         {
-            if (s_whatIfInfinite != null)
+            if (_whatIfInfinite != null)
             {
-                s_whatIfInfinite.InterningToString(candidate);
-                s_whatIfDoubled.InterningToString(candidate);
-                s_whatIfHalved.InterningToString(candidate);
-                s_whatIfZero.InterningToString(candidate);
+                _whatIfInfinite.InterningToString(candidate);
+                _whatIfDoubled.InterningToString(candidate);
+                _whatIfHalved.InterningToString(candidate);
+                _whatIfZero.InterningToString(candidate);
             }
 
             string result = s_si.InterningToString(candidate);
@@ -181,56 +236,45 @@ namespace Microsoft.Build
             return result;
         }
 
+#if DEBUG
         /// <summary>
-        /// Potentially Intern the given string builder.
+        /// Turn on statistics gathering.
         /// </summary>
-        internal static string StringBuilderToString(StringBuilder candidate)
+        internal void EnableStatisticsGathering()
         {
-            return InternableToString(new StringBuilderInternTarget(candidate));
+            if (_useLegacyInterner)
+            {
+                // Statistics include several 'what if' scenarios such as doubling the size of the MRU lists.
+                s_si = new BucketedPrioritizedStringList(gatherStatistics: true, _smallMruSize, _largeMruSize, _hugeMruSize, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
+                _whatIfInfinite = new BucketedPrioritizedStringList(gatherStatistics: true, int.MaxValue, int.MaxValue, int.MaxValue, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
+                _whatIfDoubled = new BucketedPrioritizedStringList(gatherStatistics: true, _smallMruSize * 2, _largeMruSize * 2, _hugeMruSize * 2, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
+                _whatIfHalved = new BucketedPrioritizedStringList(gatherStatistics: true, _smallMruSize / 2, _largeMruSize / 2, _hugeMruSize / 2, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
+                _whatIfZero = new BucketedPrioritizedStringList(gatherStatistics: true, 0, 0, 0, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
+            }
+            else
+            {
+                s_si = new WeakStringCacheInterner(gatherStatistics: true);
+            }
         }
 
-        /// <summary>
-        /// Potentially Intern the given char array.
-        /// </summary>
-        internal static string CharArrayToString(char[] candidate, int count)
-        {
-            return InternableToString(new CharArrayInternTarget(candidate, count));
-        }
-
-        /// <summary>
-        /// Potentially Intern the given char array.
-        /// </summary>
-        internal static string CharArrayToString(char[] candidate, int startIndex, int count)
-        {
-            return InternableToString(new CharArrayInternTarget(candidate, startIndex, count));
-        }
-
-        /// <summary>
-        /// Potentially Intern the given string.
-        /// </summary>
-        /// <param name="candidate">The string to intern.</param>
-        /// <returns>The interned string, or the same string if it could not be interned.</returns>
-        internal static string InternStringIfPossible(string candidate)
-        {
-            return InternableToString(new StringInternTarget(candidate));
-        }
 
         /// <summary>
         /// Report statistics about interning. Don't call unless GatherStatistics has been called beforehand.
         /// </summary>
-        internal static void ReportStatistics()
+        internal void ReportStatistics()
         {
             s_si.ReportStatistics("Main");
-            if (s_useLegacyInterner)
+            if (_useLegacyInterner)
             {
-                s_whatIfInfinite.ReportStatistics("if Infinite");
-                s_whatIfDoubled.ReportStatistics("if Doubled");
-                s_whatIfHalved.ReportStatistics("if Halved");
-                s_whatIfZero.ReportStatistics("if Zero");
+                _whatIfInfinite.ReportStatistics("if Infinite");
+                _whatIfDoubled.ReportStatistics("if Doubled");
+                _whatIfHalved.ReportStatistics("if Halved");
+                _whatIfZero.ReportStatistics("if Zero");
                 Console.WriteLine(" * Even for MRU size of zero there will still be some intern hits because of the tiny ");
                 Console.WriteLine("   string matching (eg. 'true')");
             }
         }
+#endif
 
         private static bool TryInternHardcodedString<T>(T candidate, string str, ref string interned) where T : IInternable
         {
@@ -433,6 +477,7 @@ namespace Microsoft.Build
                 }
             }
 
+#if DEBUG
             /// <summary>
             /// Report statistics to the console.
             /// </summary>
@@ -466,6 +511,7 @@ namespace Microsoft.Build
                 Console.WriteLine("String count live/collected/total = {0}/{1}/{2}", debugInfo.LiveStringCount, debugInfo.CollectedStringCount, debugInfo.LiveStringCount + debugInfo.CollectedStringCount);
                 Console.WriteLine("Hash collisions                   = {0}", debugInfo.HashCollisionCount);
             }
+#endif
 
             /// <summary>
             /// Try to intern the string.
@@ -714,6 +760,7 @@ namespace Microsoft.Build
                 }
             }
 
+#if DEBUG
             /// <summary>
             /// Report statistics to the console.
             /// </summary>
@@ -723,24 +770,24 @@ namespace Microsoft.Build
                 Console.WriteLine("\n{0}{1}{0}", new string('=', 41 - (title.Length / 2)), title);
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Intern Hits", _internHits, "hits");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Intern Misses", _internMisses, "misses");
-                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Intern Rejects (as shorter than " + s_smallMruThreshold + " bytes)", _internRejects, "rejects");
+                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Intern Rejects (as shorter than " + _smallMruThreshold + " bytes)", _internRejects, "rejects");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Eliminated Strings*", _internEliminatedStrings, "strings");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Eliminated Chars", _internEliminatedChars, "chars");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Estimated Eliminated Bytes", _internEliminatedChars * 2, "bytes");
                 Console.WriteLine("Elimination assumes that strings provided were unique objects.");
                 Console.WriteLine("|---------------------------------------------------------------------------------|");
                 KeyValuePair<int, int> held = _smallMru.Statistics();
-                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Small Strings MRU Size", s_smallMruSize, "strings");
+                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Small Strings MRU Size", Instance._smallMruSize, "strings");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Small Strings (>=" + _smallMruThreshold + " chars) Held", held.Key, "strings");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Small Estimated Bytes Held", held.Value * 2, "bytes");
                 Console.WriteLine("|---------------------------------------------------------------------------------|");
                 held = _largeMru.Statistics();
-                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Large Strings MRU Size", s_largeMruSize, "strings");
+                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Large Strings MRU Size", Instance._largeMruSize, "strings");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Large Strings  (>=" + _largeMruThreshold + " chars) Held", held.Key, "strings");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Large Estimated Bytes Held", held.Value * 2, "bytes");
                 Console.WriteLine("|---------------------------------------------------------------------------------|");
                 held = _hugeMru.Statistics();
-                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Huge Strings MRU Size", s_hugeMruSize, "strings");
+                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Huge Strings MRU Size", Instance._hugeMruSize, "strings");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Huge Strings  (>=" + _hugeMruThreshold + " chars) Held", held.Key, "strings");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Huge Estimated Bytes Held", held.Value * 2, "bytes");
                 Console.WriteLine("|---------------------------------------------------------------------------------|");
@@ -773,6 +820,7 @@ namespace Microsoft.Build
 
                 Console.WriteLine("##########Top Rejected Strings: \n{0} ", string.Join("\n==============\n", topRejectedString.ToArray()));
             }
+#endif
 
             /// <summary>
             /// Try to intern the string.

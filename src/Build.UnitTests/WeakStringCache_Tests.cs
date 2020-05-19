@@ -10,6 +10,7 @@ using Xunit;
 using Shouldly;
 using System.Runtime.CompilerServices;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -83,45 +84,44 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Adds two strings that are known to have a hash code collision to the cache under test.
+        /// Adds strings that are known to have a hash code collision to the cache under test.
         /// </summary>
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private void AddTwoStringsWithHashCollision()
+        private void AddStringsWithHashCollision(int numberOfStrings)
         {
-            string firstCachedString = null;
+            string[] cachedStrings = new string[numberOfStrings];
+            int[] hashCodes = new int[numberOfStrings];
 
-            // Add strings to the cache using a non-inlinable method to make sure they're not reachable from a GC root.
-            int hashCode1 = AddString("Random string ", "1", (string cachedString) =>
+            for (int i = 0; i < numberOfStrings; i++)
             {
-                _cache.GetDebugInfo().ShouldBe(new WeakStringCache.DebugInfo()
+                string strPart2 = "1" + String.Concat(Enumerable.Repeat("4858396876", i));
+                hashCodes[i] = AddString("Random string ", strPart2, (string cachedString) =>
                 {
-                    UsedBucketCount = 1,
-                    UnusedBucketCount = 0,
-                    LiveStringCount = 1,
-                    CollectedStringCount = 0,
-                    HashCollisionCount = 0
-                });
-                firstCachedString = cachedString;
-            });
+                    _cache.GetDebugInfo().ShouldBe(new WeakStringCache.DebugInfo()
+                    {
+                        UsedBucketCount = 1,
+                        UnusedBucketCount = 0,
+                        LiveStringCount = i + 1,
+                        CollectedStringCount = 0,
+                        HashCollisionCount = i
+                    });
+                    cachedStrings[i] = cachedString;
 
-            int hashCode2 = AddString("Random string ", "14858396876", (string cachedString) =>
-            {
-                _cache.GetDebugInfo().ShouldBe(new WeakStringCache.DebugInfo()
+                    // All previously cached strings are still alive and retrievable.
+                    for (int j = i - 1; j >= 0; j--)
+                    {
+                        string cachedStringFromCache = _cache.GetOrCreateEntry(new StringInternTarget(cachedStrings[j]), out bool cacheHit);
+                        cacheHit.ShouldBeTrue();
+                        cachedStringFromCache.ShouldBeSameAs(cachedStrings[j]);
+                    }
+                });
+
+                if (i > 0)
                 {
-                    UsedBucketCount = 1,
-                    UnusedBucketCount = 0,
-                    LiveStringCount = 2,
-                    CollectedStringCount = 0,
-                    HashCollisionCount = 1
-                });
-
-                string firstCachedStringFromCache = _cache.GetOrCreateEntry(new StringInternTarget(firstCachedString), out bool cacheHit);
-                cacheHit.ShouldBeTrue();
-                firstCachedStringFromCache.ShouldBeSameAs(firstCachedString);
-            });
-
-            // The two string have been carefully chosen to have the same hash code.
-            hashCode2.ShouldBe(hashCode1);
+                    // The strings have been carefully constructed to have the same hash code.
+                    hashCodes[i].ShouldBe(hashCodes[i - 1]);
+                }
+            }
         }
 
         /// <summary>
@@ -180,7 +180,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void RetainsStringsWithHashCollisions()
         {
-            AddTwoStringsWithHashCollision();
+            // Add 3 strings.
+            AddStringsWithHashCollision(3);
 
             // Trigger full GC.
             RunGC();
@@ -191,8 +192,8 @@ namespace Microsoft.Build.UnitTests
                 UsedBucketCount = 0,
                 UnusedBucketCount = 1,
                 LiveStringCount = 0,
-                CollectedStringCount = 2,
-                HashCollisionCount = 1
+                CollectedStringCount = 3,
+                HashCollisionCount = 2
             });
 
             // Ask the cache to get rid of unused buckets.

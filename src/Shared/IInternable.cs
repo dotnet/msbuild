@@ -96,7 +96,7 @@ namespace Microsoft.Build
 #endif
             int length = other.Length;
 
-            // Backwards because the end of the string is (by observation of Australian Government build) more likely to be different earlier in the loop.
+            // Backwards because the end of the string is more likely to be different earlier in the loop.
             // For example, C:\project1, C:\project2
             for (int i = length - 1; i >= 0; --i)
             {
@@ -166,10 +166,12 @@ namespace Microsoft.Build
         {
             get
             {
+#if DEBUG
                 if (index > _startIndex + Length - 1 || index < 0)
                 {
                     ErrorUtilities.ThrowInternalError("past end");
                 }
+#endif
 
                 return _target[index + _startIndex];
             }

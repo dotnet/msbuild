@@ -177,6 +177,7 @@ namespace Microsoft.Build.UnitTests
         public OpportunisticIntern_Tests(ITestOutputHelper testOutput)
             : base(testOutput)
         {
+            OpportunisticIntern.ResetForTests();
         }
     }
 
@@ -189,6 +190,7 @@ namespace Microsoft.Build.UnitTests
             : base(testOutput)
         {
             _env.SetEnvironmentVariable("MsBuildUseLegacyStringInterner", "1");
+            OpportunisticIntern.ResetForTests();
         }
 
         /// <summary>
@@ -220,6 +222,7 @@ namespace Microsoft.Build.UnitTests
         {
             _env.SetEnvironmentVariable("MsBuildUseLegacyStringInterner", "1");
             _env.SetEnvironmentVariable("MsBuildUseSimpleInternConcurrency", "1");
+            OpportunisticIntern.ResetForTests();
         }
     }
 }

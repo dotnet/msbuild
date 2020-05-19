@@ -404,10 +404,12 @@ namespace Microsoft.Build.Execution
 
                 MSBuildEventSource.Log.BuildStart();
 
+#if DEBUG
                 if (BuildParameters.DumpOpportunisticInternStats)
                 {
-                    OpportunisticIntern.EnableStatisticsGathering();
+                    OpportunisticIntern.Instance.EnableStatisticsGathering();
                 }
+#endif
 
                 _overallBuildSuccess = true;
 
@@ -822,10 +824,12 @@ namespace Microsoft.Build.Execution
                         _threadException.Throw();
                     }
 
+#if DEBUG
                     if (BuildParameters.DumpOpportunisticInternStats)
                     {
-                        OpportunisticIntern.ReportStatistics();
+                        OpportunisticIntern.Instance.ReportStatistics();
                     }
+#endif
                 }
             }
 
