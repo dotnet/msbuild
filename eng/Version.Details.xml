@@ -65,9 +65,9 @@
       <Uri>https://github.com/microsoft/vstest</Uri>
       <Sha>59354e1f9c366b40d06ecf62372fc455d7f1ba18</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Web" Version="5.0.100-preview.6.20263.1">
+    <Dependency Name="Microsoft.NET.Sdk.Web" Version="5.0.100-preview.6.20267.1">
       <Uri>https://github.com/dotnet/websdk</Uri>
-      <Sha>01ae4c9cd230feed075c8483c44ddb0764ad43ac</Sha>
+      <Sha>ed791125e2f7855b5a8b4a29da4a4eacfbbc345b</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="5.0.0-preview.3.20264.1">
       <Uri>https://github.com/mono/linker</Uri>
