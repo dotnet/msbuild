@@ -404,7 +404,7 @@ namespace Microsoft.NET.Build.Tests
                     itemGroup.Add(supportedFramework);
                 });
 
-            AssertDefinedConstantsOutput(testAsset, targetFramework, new[] { "NETCOREAPP", "NET" }.Concat(expectedDefines).ToArray(), true);
+            AssertDefinedConstantsOutput(testAsset, targetFramework, new[] { "NETCOREAPP", "NET", "WINDOWS", "WINDOWS7_0" }.Concat(expectedDefines).ToArray(), true);
         }
 
         [Theory]
@@ -442,7 +442,7 @@ namespace Microsoft.NET.Build.Tests
                 targetFramework, "DefineConstants")
             {
                 ShouldCompile = shouldCompile,
-                DependsOnTargets = "GenerateNETCompatibleDefineConstants"
+                DependsOnTargets = "GenerateNETCompatibleDefineConstants;GenerateTargetPlatformDefineConstants"
             };
 
             getValuesCommand
