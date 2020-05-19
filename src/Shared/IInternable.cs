@@ -166,13 +166,6 @@ namespace Microsoft.Build
         {
             get
             {
-#if DEBUG
-                if (index > _startIndex + Length - 1 || index < 0)
-                {
-                    ErrorUtilities.ThrowInternalError("past end");
-                }
-#endif
-
                 return _target[index + _startIndex];
             }
         }

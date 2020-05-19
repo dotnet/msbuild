@@ -45,13 +45,11 @@ namespace Microsoft.Build
             /// </summary>
             string InterningToString<T>(T candidate) where T : IInternable;
 
-#if DEBUG
             /// <summary>
             /// Prints implementation specific interning statistics to the console.
             /// </summary>
             /// <param name="heading">A string identifying the interner in the output.</param>
             void ReportStatistics(string heading);
-#endif
         }
 
         /// <summary>
@@ -104,7 +102,6 @@ namespace Microsoft.Build
         /// </summary>
         private IInternerImplementation s_si;
 
-#if DEBUG
         #region Statistics
         /// <summary>
         /// What if Mru lists were infinitely long?
@@ -126,7 +123,6 @@ namespace Microsoft.Build
         /// </summary>
         private BucketedPrioritizedStringList _whatIfZero;
         #endregion
-#endif
 
         private OpportunisticIntern()
         {
@@ -151,6 +147,26 @@ namespace Microsoft.Build
         {
             Debug.Assert(BuildEnvironmentHelper.Instance.RunningTests);
             _instance = new OpportunisticIntern();
+        }
+
+        /// <summary>
+        /// Turn on statistics gathering.
+        /// </summary>
+        internal void EnableStatisticsGathering()
+        {
+            if (_useLegacyInterner)
+            {
+                // Statistics include several 'what if' scenarios such as doubling the size of the MRU lists.
+                s_si = new BucketedPrioritizedStringList(gatherStatistics: true, _smallMruSize, _largeMruSize, _hugeMruSize, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
+                _whatIfInfinite = new BucketedPrioritizedStringList(gatherStatistics: true, int.MaxValue, int.MaxValue, int.MaxValue, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
+                _whatIfDoubled = new BucketedPrioritizedStringList(gatherStatistics: true, _smallMruSize * 2, _largeMruSize * 2, _hugeMruSize * 2, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
+                _whatIfHalved = new BucketedPrioritizedStringList(gatherStatistics: true, _smallMruSize / 2, _largeMruSize / 2, _hugeMruSize / 2, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
+                _whatIfZero = new BucketedPrioritizedStringList(gatherStatistics: true, 0, 0, 0, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
+            }
+            else
+            {
+                s_si = new WeakStringCacheInterner(gatherStatistics: true);
+            }
         }
 
         /// <summary>
@@ -236,28 +252,6 @@ namespace Microsoft.Build
             return result;
         }
 
-#if DEBUG
-        /// <summary>
-        /// Turn on statistics gathering.
-        /// </summary>
-        internal void EnableStatisticsGathering()
-        {
-            if (_useLegacyInterner)
-            {
-                // Statistics include several 'what if' scenarios such as doubling the size of the MRU lists.
-                s_si = new BucketedPrioritizedStringList(gatherStatistics: true, _smallMruSize, _largeMruSize, _hugeMruSize, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
-                _whatIfInfinite = new BucketedPrioritizedStringList(gatherStatistics: true, int.MaxValue, int.MaxValue, int.MaxValue, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
-                _whatIfDoubled = new BucketedPrioritizedStringList(gatherStatistics: true, _smallMruSize * 2, _largeMruSize * 2, _hugeMruSize * 2, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
-                _whatIfHalved = new BucketedPrioritizedStringList(gatherStatistics: true, _smallMruSize / 2, _largeMruSize / 2, _hugeMruSize / 2, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
-                _whatIfZero = new BucketedPrioritizedStringList(gatherStatistics: true, 0, 0, 0, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
-            }
-            else
-            {
-                s_si = new WeakStringCacheInterner(gatherStatistics: true);
-            }
-        }
-
-
         /// <summary>
         /// Report statistics about interning. Don't call unless GatherStatistics has been called beforehand.
         /// </summary>
@@ -274,7 +268,6 @@ namespace Microsoft.Build
                 Console.WriteLine("   string matching (eg. 'true')");
             }
         }
-#endif
 
         private static bool TryInternHardcodedString<T>(T candidate, string str, ref string interned) where T : IInternable
         {
@@ -402,7 +395,7 @@ namespace Microsoft.Build
             /// </summary>
             private readonly WeakStringCache _weakStringCache = new WeakStringCache();
 
-            #region Statistics
+#region Statistics
             /// <summary>
             /// Whether or not to gather statistics.
             /// </summary>
@@ -444,7 +437,7 @@ namespace Microsoft.Build
             /// </summary>
             private Dictionary<string, int> _missedHardcodedStrings;
 
-            #endregion
+#endregion
 
             public WeakStringCacheInterner(bool gatherStatistics)
             {
@@ -477,7 +470,6 @@ namespace Microsoft.Build
                 }
             }
 
-#if DEBUG
             /// <summary>
             /// Report statistics to the console.
             /// </summary>
@@ -511,7 +503,6 @@ namespace Microsoft.Build
                 Console.WriteLine("String count live/collected/total = {0}/{1}/{2}", debugInfo.LiveStringCount, debugInfo.CollectedStringCount, debugInfo.LiveStringCount + debugInfo.CollectedStringCount);
                 Console.WriteLine("Hash collisions                   = {0}", debugInfo.HashCollisionCount);
             }
-#endif
 
             /// <summary>
             /// Try to intern the string.
@@ -630,7 +621,7 @@ namespace Microsoft.Build
             private readonly ConcurrentDictionary<string, string> _internedStrings = new ConcurrentDictionary<string, string>(Environment.ProcessorCount, InitialCapacity, StringComparer.Ordinal);
 #endif
 
-            #region Statistics
+#region Statistics
             /// <summary>
             /// Whether or not to gather statistics
             /// </summary>
@@ -703,7 +694,7 @@ namespace Microsoft.Build
             /// </summary>
             private const int GinormousSize = 10;
 
-            #endregion
+#endregion
 
             /// <summary>
             /// Construct.
@@ -760,7 +751,6 @@ namespace Microsoft.Build
                 }
             }
 
-#if DEBUG
             /// <summary>
             /// Report statistics to the console.
             /// </summary>
@@ -820,7 +810,6 @@ namespace Microsoft.Build
 
                 Console.WriteLine("##########Top Rejected Strings: \n{0} ", string.Join("\n==============\n", topRejectedString.ToArray()));
             }
-#endif
 
             /// <summary>
             /// Try to intern the string.
