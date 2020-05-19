@@ -34,9 +34,7 @@ namespace FrameworkReferenceTest
     }
 }";
 
-        //  Tests in this class are currently Core MSBuild only, as they check for PackageDownload items,
-        //  which are currently only used in Core MSBuild
-        [CoreMSBuildAndWindowsOnlyFact]
+        [WindowsOnlyFact]
         public void Multiple_frameworks_are_written_to_runtimeconfig_when_there_are_multiple_FrameworkReferences()
         {
             var testProject = new TestProject()
@@ -71,7 +69,7 @@ namespace FrameworkReferenceTest
             runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App", "Microsoft.WindowsDesktop.App");
         }
 
-        [CoreMSBuildOnlyTheory]
+        [Theory]
         [InlineData("netcoreapp3.0", false)]
         [InlineData("netcoreapp3.1", true)]
         public void Multiple_frameworks_are_written_to_runtimeconfig_for_self_contained_apps(string tfm, bool shouldHaveIncludedFrameworks)
@@ -118,7 +116,7 @@ namespace FrameworkReferenceTest
             }
         }
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void ForceGenerateRuntimeConfigurationFiles_works_even_on_netFramework_tfm()
         {
             var testProject = new TestProject()
@@ -147,7 +145,7 @@ namespace FrameworkReferenceTest
             Assert.True(File.Exists(runtimeConfigFile), $"Expected to generate runtime config file '{runtimeConfigFile}'");
         }
 
-        [CoreMSBuildAndWindowsOnlyFact]
+        [WindowsOnlyFact]
         public void DuplicateFrameworksAreNotWrittenToRuntimeConfigWhenThereAreDifferentProfiles()
         {
             var testProject = new TestProject()
@@ -182,7 +180,7 @@ namespace FrameworkReferenceTest
             runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.WindowsDesktop.App");
         }
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void The_build_fails_when_there_is_an_unknown_FrameworkReference()
         {
             var testProject = new TestProject()
@@ -220,7 +218,7 @@ namespace FrameworkReferenceTest
                 ;
         }
 
-        [CoreMSBuildOnlyTheory]
+        [Theory]
         [InlineData("netcoreapp2.1", false)]
         [InlineData("netcoreapp3.0", true)]
         public void KnownFrameworkReferencesOnlyApplyToCorrectTargetFramework(string targetFramework, bool shouldPass)
@@ -263,7 +261,7 @@ namespace FrameworkReferenceTest
             }
         }
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void TargetingPackDownloadCanBeDisabled()
         {
             var testProject = new TestProject()
@@ -389,7 +387,7 @@ namespace FrameworkReferenceTest
             }
         }
 
-        [CoreMSBuildAndWindowsOnlyFact]
+        [WindowsOnlyFact]
         public void BuildFailsIfRuntimePackIsNotAvailableForRuntimeIdentifier()
         {
             var testProject = new TestProject()
@@ -427,7 +425,7 @@ namespace FrameworkReferenceTest
                 .HaveStdOutContaining("1 Error(s)");
         }
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void BuildFailsIfInvalidRuntimeIdentifierIsSpecified()
         {
             var testProject = new TestProject()
@@ -454,7 +452,7 @@ namespace FrameworkReferenceTest
                 .HaveStdOutContaining("1 Error(s)");
         }
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void BuildFailsIfRuntimePackHasNotBeenRestored()
         {
             var testProject = new TestProject()
@@ -495,7 +493,7 @@ namespace FrameworkReferenceTest
 
         }
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void RuntimeFrameworkVersionCanBeSpecifiedOnFrameworkReference()
         {
             var testProject = new TestProject();
@@ -527,7 +525,7 @@ namespace FrameworkReferenceTest
             resolvedVersions.AppHostPack["AppHost"].Should().Be("3.0.0-runtimeframeworkversion-property");
         }
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void RuntimeFrameworkVersionCanBeSpecifiedViaProperty()
         {
             var testProject = new TestProject();
@@ -550,7 +548,7 @@ namespace FrameworkReferenceTest
             resolvedVersions.AppHostPack["AppHost"].Should().Be(runtimeFrameworkVersion);
         }
 
-        [CoreMSBuildOnlyTheory]
+        [Theory]
         [InlineData(true)]
         [InlineData(false)]
         public void TargetLatestPatchCanBeSpecifiedOnFrameworkReference(bool attributeValue)
@@ -586,7 +584,7 @@ namespace FrameworkReferenceTest
             resolvedVersions.AppHostPack["AppHost"].Should().Be("3.0.0-apphostversion");
         }
 
-        [CoreMSBuildOnlyTheory]
+        [Theory]
         [InlineData(true)]
         [InlineData(false)]
         public void TargetLatestPatchCanBeSpecifiedViaProperty(bool propertyValue)
@@ -612,7 +610,7 @@ namespace FrameworkReferenceTest
             resolvedVersions.AppHostPack["AppHost"].Should().Be("3.0.0-apphostversion");
         }
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void TargetingPackVersionCanBeSpecifiedOnFrameworkReference()
         {
             var testProject = new TestProject();
@@ -646,7 +644,7 @@ namespace FrameworkReferenceTest
         //  Transitive framework references require NuGet support, which isn't currently
         //  in the full Framework MSBuild we use in CI, so only run these tests for
         //  core MSBuild for now
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void TransitiveFrameworkReferenceFromProjectReference()
         {
             var testProject = new TestProject()
@@ -687,7 +685,7 @@ namespace FrameworkReferenceTest
             runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App");
         }
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void TransitiveFrameworkReferenceFromPackageReference()
         {
             var referencedPackage = new TestProject()
@@ -742,7 +740,7 @@ namespace FrameworkReferenceTest
             runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App");
         }
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void IsTrimmableDefaultsComeFromKnownFrameworkReference()
         {
             var testProject = new TestProject();
@@ -759,7 +757,7 @@ namespace FrameworkReferenceTest
             }
         }
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void IsTrimmableCanBeSpecifiedOnFrameworkReference()
         {
             var testProject = new TestProject();

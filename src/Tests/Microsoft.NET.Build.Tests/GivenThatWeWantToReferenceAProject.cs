@@ -154,7 +154,7 @@ namespace Microsoft.NET.Build.Tests
             return ret;
         }
 
-        [CoreMSBuildOnlyTheory]
+        [RequiresMSBuildVersionTheory("16.7.0-preview-20228-01")]
         [InlineData(true, true)]
         [InlineData(false, true)]
         [InlineData(false, false)]

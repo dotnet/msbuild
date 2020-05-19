@@ -20,8 +20,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        //  Core MSBuild only until VS build we use has NuGet changes for net5.0
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void Net50TargetFrameworkParsesAsNetCoreAppTargetFrameworkIdentifier()
         {
             var testProject = new TestProject()

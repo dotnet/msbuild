@@ -134,8 +134,7 @@ namespace Microsoft.NET.Publish.Tests
             DoesImageHaveMethod(unusedDll, "UnusedMethodToRoot").Should().BeTrue();
         }
 
-        //  Core MSBuild only until VS build we use has NuGet changes for net5.0
-        [CoreMSBuildOnlyTheory]
+        [Theory]
         [InlineData("_TrimmerBeforeFieldInit")]
         [InlineData("_TrimmerOverrideRemoval")]
         [InlineData("_TrimmerUnreachableBodies")]
