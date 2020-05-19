@@ -199,8 +199,17 @@ RunSettings arguments:
                                         More info here: https://aka.ms/vstest-collect</value>
   </data>
   <data name="CmdBlameDescription" xml:space="preserve">
-    <value>Run the tests in blame mode. This option is helpful in isolating a problematic test causing the test host to crash.
-Outputs a 'Sequence.xml' file in the current directory that captures the order of execution of test before the crash.</value>
+    <value>Runs the tests in blame mode. This option is helpful in isolating problematic tests that cause the test host to crash or hang. 
+When a crash is detected, it creates an sequence file in TestResults/guid/guid_Sequence.xml that captures the order of tests that were run before the crash.
+Based on the additional settings, hang dump or crash dump can also be collected.
+Example: 
+  Timeout the test run when test takes more than the default timeout of 1 hour, and collect crash dump when the test host exits unexpectedly. 
+  (Crash dumps require additional setup, see below.)
+  dotnet test --blame-hang --blame-crash
+Example: 
+  Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
+  dotnet test --blame-hang-timeout 20min
+</value>
   </data>
   <data name="FrameworkOptionDescription" xml:space="preserve">
     <value>The target framework to run tests for. The target framework must also be specified in the project file.</value>
@@ -216,5 +225,40 @@ Outputs a 'Sequence.xml' file in the current directory that captures the order o
   </data>
   <data name="IgnoredArgumentsMessage" xml:space="preserve">
     <value>The following arguments have been ignored : "{0}"</value>
+  </data>
+  <data name="CmdBlameCrashCollectAlwaysDescription" xml:space="preserve">
+    <value>Enables collecting crash dump on expected as well as unexpected testhost exit.</value>
+  </data>
+  <data name="CmdBlameCrashDescription" xml:space="preserve">
+    <value>Runs the tests in blame mode and enables collecting crash dump when testhost exits unexpectedly. 
+This option is currently only supported on Windows, and requires procdump.exe and procdump64.exe to be available in PATH.
+Or PROCDUMP_PATH environment variable to be set, and point to a directory that contains procdump.exe and procdump64.exe. 
+The tools can be downloaded here: https://docs.microsoft.com/en-us/sysinternals/downloads/procdump 
+Implies --blame.</value>
+  </data>
+  <data name="CmdBlameCrashDumpTypeDescription" xml:space="preserve">
+    <value>The type of crash dump to be collected. Implies --blame-crash.</value>
+  </data>
+  <data name="CmdBlameHangDescription" xml:space="preserve">
+    <value>Run the tests in blame mode and enables collecting hang dump when test exceeds the given timeout. Implies --blame-hang.</value>
+  </data>
+  <data name="CmdBlameHangDumpTypeDescription" xml:space="preserve">
+    <value>The type of crash dump to be collected. When None, is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</value>
+  </data>
+  <data name="CmdBlameHangTimeoutDescription" xml:space="preserve">
+    <value>Per-test timeout, after which hang dump is triggered and the testhost process is terminated. 
+The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
+When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit and NUnit the timeout is renewed after every test case,
+For MSTest, the timeout is used for all testcases.
+This option is currently supported only on Windows together with netcoreapp2.1 and newer. And on Linux with netcoreapp3.1 and newer. OSX and UWP are not supported.</value>
+  </data>
+  <data name="CrashDumpTypeArgumentName" xml:space="preserve">
+    <value>DUMP_TYPE</value>
+  </data>
+  <data name="HangDumpTypeArgumentName" xml:space="preserve">
+    <value>DUMP_TYPE</value>
+  </data>
+  <data name="HangTimeoutArgumentName" xml:space="preserve">
+    <value>TIMESPAN</value>
   </data>
 </root>

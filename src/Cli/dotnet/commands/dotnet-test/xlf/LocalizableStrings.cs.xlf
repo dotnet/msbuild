@@ -12,6 +12,52 @@
         <target state="translated">Testovací ovladač pro platformu .NET</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdBlameCrashCollectAlwaysDescription">
+        <source>Enables collecting crash dump on expected as well as unexpected testhost exit.</source>
+        <target state="new">Enables collecting crash dump on expected as well as unexpected testhost exit.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdBlameCrashDescription">
+        <source>Runs the tests in blame mode and enables collecting crash dump when testhost exits unexpectedly. 
+This option is currently only supported on Windows, and requires procdump.exe and procdump64.exe to be available in PATH.
+Or PROCDUMP_PATH environment variable to be set, and point to a directory that contains procdump.exe and procdump64.exe. 
+The tools can be downloaded here: https://docs.microsoft.com/en-us/sysinternals/downloads/procdump 
+Implies --blame.</source>
+        <target state="new">Runs the tests in blame mode and enables collecting crash dump when testhost exits unexpectedly. 
+This option is currently only supported on Windows, and requires procdump.exe and procdump64.exe to be available in PATH.
+Or PROCDUMP_PATH environment variable to be set, and point to a directory that contains procdump.exe and procdump64.exe. 
+The tools can be downloaded here: https://docs.microsoft.com/en-us/sysinternals/downloads/procdump 
+Implies --blame.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdBlameCrashDumpTypeDescription">
+        <source>The type of crash dump to be collected. Implies --blame-crash.</source>
+        <target state="new">The type of crash dump to be collected. Implies --blame-crash.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdBlameHangDescription">
+        <source>Run the tests in blame mode and enables collecting hang dump when test exceeds the given timeout. Implies --blame-hang.</source>
+        <target state="new">Run the tests in blame mode and enables collecting hang dump when test exceeds the given timeout. Implies --blame-hang.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdBlameHangDumpTypeDescription">
+        <source>The type of crash dump to be collected. When None, is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</source>
+        <target state="new">The type of crash dump to be collected. When None, is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdBlameHangTimeoutDescription">
+        <source>Per-test timeout, after which hang dump is triggered and the testhost process is terminated. 
+The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
+When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit and NUnit the timeout is renewed after every test case,
+For MSTest, the timeout is used for all testcases.
+This option is currently supported only on Windows together with netcoreapp2.1 and newer. And on Linux with netcoreapp3.1 and newer. OSX and UWP are not supported.</source>
+        <target state="new">Per-test timeout, after which hang dump is triggered and the testhost process is terminated. 
+The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
+When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit and NUnit the timeout is renewed after every test case,
+For MSTest, the timeout is used for all testcases.
+This option is currently supported only on Windows together with netcoreapp2.1 and newer. And on Linux with netcoreapp3.1 and newer. OSX and UWP are not supported.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdNoLogo">
         <source>Run test(s), without displaying Microsoft Testplatform banner</source>
         <target state="translated">Spustit testy bez zobrazení nápisu Microsoft Testplatform</target>
@@ -119,6 +165,21 @@ Pokud zadaný adresář neexistuje, bude vytvořen.</target>
         <target state="translated">RESULTS_DIR</target>
         <note />
       </trans-unit>
+      <trans-unit id="CrashDumpTypeArgumentName">
+        <source>DUMP_TYPE</source>
+        <target state="new">DUMP_TYPE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="HangDumpTypeArgumentName">
+        <source>DUMP_TYPE</source>
+        <target state="new">DUMP_TYPE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="HangTimeoutArgumentName">
+        <source>TIMESPAN</source>
+        <target state="new">TIMESPAN</target>
+        <note />
+      </trans-unit>
       <trans-unit id="IgnoredArgumentsMessage">
         <source>The following arguments have been ignored : "{0}"</source>
         <target state="translated">Následující argumenty se ignorovaly: {0}</target>
@@ -154,9 +215,18 @@ Argumenty RunSettings:
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameDescription">
-        <source>Run the tests in blame mode. This option is helpful in isolating a problematic test causing the test host to crash.
-Outputs a 'Sequence.xml' file in the current directory that captures the order of execution of test before the crash.</source>
-        <target state="translated">Spustí testy v režimu blame. Tato možnost je užitečná pro izolování problematického testu, který způsobuje chybové ukončení hostitele testů.
+        <source>Runs the tests in blame mode. This option is helpful in isolating problematic tests that cause the test host to crash or hang. 
+When a crash is detected, it creates an sequence file in TestResults/guid/guid_Sequence.xml that captures the order of tests that were run before the crash.
+Based on the additional settings, hang dump or crash dump can also be collected.
+Example: 
+  Timeout the test run when test takes more than the default timeout of 1 hour, and collect crash dump when the test host exits unexpectedly. 
+  (Crash dumps require additional setup, see below.)
+  dotnet test --blame-hang --blame-crash
+Example: 
+  Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
+  dotnet test --blame-hang-timeout 20min
+</source>
+        <target state="needs-review-translation">Spustí testy v režimu blame. Tato možnost je užitečná pro izolování problematického testu, který způsobuje chybové ukončení hostitele testů.
 Výstupem je soubor Sequence.xml v aktuálním adresáři, do kterého se zaznamená pořadí provádění testů před chybovým ukončením.</target>
         <note />
       </trans-unit>

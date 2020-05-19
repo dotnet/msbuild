@@ -50,9 +50,9 @@ namespace Microsoft.DotNet.Cli
                               .With(name: LocalizableStrings.CmdLoggerOption)
                               .ForwardAsSingle(o =>
                                     {
-                                          var loggersString = string.Join(";", GetSemiColonEscapedArgs(o.Arguments));
+                                        var loggersString = string.Join(";", GetSemiColonEscapedArgs(o.Arguments));
 
-                                          return $"-property:VSTestLogger=\"{loggersString}\"";
+                                        return $"-property:VSTestLogger=\"{loggersString}\"";
                                     })),
                   CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription),
                   CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription),
@@ -91,6 +91,55 @@ namespace Microsoft.DotNet.Cli
                         LocalizableStrings.CmdBlameDescription,
                         Accept.NoArguments()
                               .ForwardAsSingle(o => "-property:VSTestBlame=true")),
+                  Create.Option(
+                        "--blame-crash",
+                        LocalizableStrings.CmdBlameCrashDescription,
+                        Accept.NoArguments()
+                              .ForwardAsSingle(o => "-property:VSTestBlameCrash=true")),
+                  Create.Option(
+                        "--blame-crash-dump-type",
+                        LocalizableStrings.CmdBlameCrashDumpTypeDescription,
+                        Accept.AnyOneOf(
+                            "full",
+                            "mini")
+                              .With(name: LocalizableStrings.CrashDumpTypeArgumentName, defaultValue: () => "full")
+                              .ForwardAsMany(o => new[] {
+                                  "-property:VSTestBlameCrash=true",
+                                  $"-property:VSTestBlameCrashDumpType={o.Arguments.Single()}" })),
+                   Create.Option(
+                        "--blame-crash-collect-always",
+                        LocalizableStrings.CmdBlameCrashCollectAlwaysDescription,
+                        Accept.NoArguments()
+                              .ForwardAsMany(o => new[] {
+                                  "-property:VSTestBlameCrash=true",
+                                  "-property:VSTestBlameCrashCollectAlways=true"
+                              })),
+                Create.Option(
+                        "--blame-hang",
+                        LocalizableStrings.CmdBlameHangDescription,
+                        Accept.NoArguments()
+                              .ForwardAsSingle(o => "-property:VSTestBlameHang=true")),
+                  Create.Option(
+                        "--blame-hang-dump-type",
+                        LocalizableStrings.CmdBlameHangDumpTypeDescription,
+                        Accept.AnyOneOf(
+                            "full",
+                            "mini",
+                            "none")
+                              .With(name: LocalizableStrings.HangDumpTypeArgumentName, defaultValue: () => "full")
+                              .ForwardAsMany(o => new[] {
+                                  "-property:VSTestBlameHang=true",
+                                  $"-property:VSTestBlameHangDumpType={o.Arguments.Single()}" })),
+                   Create.Option(
+                        "--blame-hang-timeout",
+                        LocalizableStrings.CmdBlameHangTimeoutDescription,
+                        Accept.ExactlyOneArgument()
+                              .With(name: LocalizableStrings.HangTimeoutArgumentName)
+                              .ForwardAsMany(o => new[] {
+                                  "-property:VSTestBlameHang=true",
+                                  $"-property:VSTestBlameHangTimeout={o.Arguments.Single()}"
+                              })),
+
                   Create.Option(
                         "--nologo|/nologo",
                         LocalizableStrings.CmdNoLogo,
