@@ -32,7 +32,7 @@ namespace Microsoft.Build
     ///
     /// The new implementation interns all strings but maintains only weak references so it doesn't keep the strings alive.
     /// </summary>
-    internal class OpportunisticIntern
+    internal sealed class OpportunisticIntern
     {
         /// <summary>
         /// Defines the interner interface as we currently implement more than one.
@@ -150,6 +150,23 @@ namespace Microsoft.Build
         }
 
         /// <summary>
+        /// Assign an int from an environment variable. If its not present, use the default.
+        /// </summary>
+        private int AssignViaEnvironment(string env, int @default)
+        {
+            string threshold = Environment.GetEnvironmentVariable(env);
+            if (!string.IsNullOrEmpty(threshold))
+            {
+                if (int.TryParse(threshold, out int result))
+                {
+                    return result;
+                }
+            }
+
+            return @default;
+        }
+
+        /// <summary>
         /// Turn on statistics gathering.
         /// </summary>
         internal void EnableStatisticsGathering()
@@ -167,23 +184,6 @@ namespace Microsoft.Build
             {
                 s_si = new WeakStringCacheInterner(gatherStatistics: true);
             }
-        }
-
-        /// <summary>
-        /// Assign an int from an environment variable. If its not present, use the default.
-        /// </summary>
-        private int AssignViaEnvironment(string env, int @default)
-        {
-            string threshold = Environment.GetEnvironmentVariable(env);
-            if (!string.IsNullOrEmpty(threshold))
-            {
-                if (int.TryParse(threshold, out int result))
-                {
-                    return result;
-                }
-            }
-
-            return @default;
         }
 
         /// <summary>
@@ -233,6 +233,12 @@ namespace Microsoft.Build
         /// </summary>
         private string InternableToStringImpl<T>(T candidate) where T : IInternable
         {
+            if (candidate.Length == 0)
+            {
+                // As in the case that a property or itemlist has evaluated to empty.
+                return string.Empty;
+            }
+
             if (_whatIfInfinite != null)
             {
                 _whatIfInfinite.InterningToString(candidate);
@@ -453,12 +459,6 @@ namespace Microsoft.Build
             /// </summary>
             public string InterningToString<T>(T candidate) where T : IInternable
             {
-                if (candidate.Length == 0)
-                {
-                    // As in the case that a property or itemlist has evaluated to empty.
-                    return string.Empty;
-                }
-
                 if (_gatherStatistics)
                 {
                     return InternWithStatistics(candidate);
@@ -734,12 +734,6 @@ namespace Microsoft.Build
             /// </summary>
             public string InterningToString<T>(T candidate) where T : IInternable
             {
-                if (candidate.Length == 0)
-                {
-                    // As in the case that a property or itemlist has evaluated to empty.
-                    return string.Empty;
-                }
-
                 if (_gatherStatistics)
                 {
                     return InternWithStatistics(candidate);

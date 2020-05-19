@@ -2,15 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Text;
-using System.IO;
-using Microsoft.Build;
-using Microsoft.Build.Shared;
-using Xunit;
-using Shouldly;
-using System.Runtime.CompilerServices;
-using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text;
+
+using Shouldly;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -174,7 +171,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Same as RetainsStringUntilCollected but with two strings with the same hash code. Verifies that the bucket overflow area
+        /// Same as RetainsStringUntilCollected but with multiple strings with the same hash code. Verifies that the bucket overflow area
         /// works correctly.
         /// </summary>
         [Fact]

@@ -127,8 +127,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Convert to a string.
         /// </summary>
-        public override string ToString
-            ()
+        public override string ToString()
         {
             if (_borrowedBuilder == null)
             {
