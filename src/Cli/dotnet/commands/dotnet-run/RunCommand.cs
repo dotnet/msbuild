@@ -100,7 +100,21 @@ namespace Microsoft.DotNet.Tools.Run
             }
 
             var buildPathContainer = File.Exists(Project) ? Path.GetDirectoryName(Project) : Project;
-            var launchSettingsPath = Path.Combine(buildPathContainer, "Properties", "launchSettings.json");
+            string propsDirectory;
+
+            // VB.NET projects store the launch settings file in the
+            // "My Project" directory instead of a "Properties" directory.
+            if (string.Equals(Path.GetExtension(Project), ".vbproj", StringComparison.OrdinalIgnoreCase))
+            {
+                propsDirectory = "My Project";
+            }
+            else
+            {
+                propsDirectory = "Properties";
+            }
+
+            var launchSettingsPath = Path.Combine(buildPathContainer, propsDirectory, "launchSettings.json");
+
             if (File.Exists(launchSettingsPath))
             {
                 if (!HasQuietVerbosity) {
