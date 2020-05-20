@@ -68,6 +68,10 @@
     <SystemResourcesExtensionsPackageVersion>5.0.0-preview.5.20253.7</SystemResourcesExtensionsPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
+    <!-- Dependencies from https://github.com/dotnet/roslyn-analyzers -->
+    <MicrosoftNetCoreAnalyzersVersion>3.3.0-beta1.20270.1</MicrosoftNetCoreAnalyzersVersion>
+  </PropertyGroup>
+  <PropertyGroup>
     <!-- Dependencies from https://github.com/Microsoft/msbuild -->
     <MicrosoftBuildPackageVersion>16.7.0-preview-20258-02</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>

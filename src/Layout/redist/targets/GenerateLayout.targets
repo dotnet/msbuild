@@ -30,6 +30,20 @@
     <Delete Files="@(RoslynFrameworkAssemblies)" />
   </Target>
 
+  <Target Name="PublishNETAnalyzers"
+          BeforeTargets="Build">
+     <PropertyGroup>
+      <AnalyzersDirectory>$(OutputPath)/Sdks/Microsoft.NET.Sdk/analyzers</AnalyzersDirectory>
+    </PropertyGroup>
+    <ItemGroup>
+      <AnalyzerAssemblies Include="$(NuGetPackageRoot)Microsoft.NetCore.Analyzers/$(MicrosoftNetCoreAnalyzersVersion)/analyzers/dotnet/cs/Microsoft.NetCore.Analyzers.dll" />
+      <AnalyzerAssemblies Include="$(NuGetPackageRoot)Microsoft.NetCore.Analyzers/$(MicrosoftNetCoreAnalyzersVersion)/analyzers/dotnet/cs/Microsoft.NetCore.CSharp.Analyzers.dll" />
+      <AnalyzerAssemblies Include="$(NuGetPackageRoot)Microsoft.NetCore.Analyzers/$(MicrosoftNetCoreAnalyzersVersion)/analyzers/dotnet/vb/Microsoft.NetCore.VisualBasic.Analyzers.dll" />
+    </ItemGroup>
+    <Error Condition="'@(AnalyzerAssemblies)' == ''" Text="Something moved around in Analyzer package, adjust code here accordingly. TFM change?" />
+    <Copy SourceFiles="@(AnalyzerAssemblies)" DestinationFiles="@(AnalyzerAssemblies->'$(AnalyzersDirectory)/%(Filename)%(Extension)')" />
+  </Target>
+
   <Target Name="PublishMSBuildExtensions"
           DependsOnTargets="GenerateMSBuildExtensions"
           BeforeTargets="Build">
