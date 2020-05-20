@@ -21,8 +21,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultContentItems)' == 'true' ">
     <!-- Publish all JSON and config files -->
-    <Content Include="**\*.config" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
-    <Content Include="**\*.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+    <Content Include="**\*.config" ExcludeFromSingleFile="true" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+    <Content Include="**\*.json" ExcludeFromSingleFile="true" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
 
     <!-- Set CopyToOutputDirectory and CopyToPublishDirectory to Never for items under AppDesignerFolder ("Properties", by default) to avoid publishing launchSettings.json -->
     <Content Update="$(AppDesignerFolder)\**" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" Condition="'$(AppDesignerFolder)' != ''"/>
