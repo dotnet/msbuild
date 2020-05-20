@@ -162,9 +162,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Add conditional compilation symbols for the target framework (for example NET461, NETSTANDARD2_0, NETCOREAPP1_0) -->
   <PropertyGroup Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetFrameworkIdentifier)' != '.NETPortable' and '$(TargetFrameworkIdentifier)' != ''">
     <_FrameworkIdentifierForImplicitDefine>$(TargetFrameworkIdentifier.Replace('.', '').ToUpperInvariant())</_FrameworkIdentifierForImplicitDefine>
-    <VersionlessImplicitFrameworkDefine>$(_FrameworkIdentifierForImplicitDefine)</VersionlessImplicitFrameworkDefine>
     <_FrameworkIdentifierForImplicitDefine Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionLessThanOrEquals(5.0, $(TargetFrameworkVersion))) ">NET</_FrameworkIdentifierForImplicitDefine>
-    <VersionlessImplicitFrameworkDefine Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionLessThanOrEquals(5.0, $(TargetFrameworkVersion))) ">NETCOREAPP;NET</VersionlessImplicitFrameworkDefine>
+    <VersionlessImplicitFrameworkDefine>$(_FrameworkIdentifierForImplicitDefine)</VersionlessImplicitFrameworkDefine>
     <_FrameworkIdentifierForImplicitDefine Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework'">NET</_FrameworkIdentifierForImplicitDefine>
 
     <_FrameworkVersionForImplicitDefine>$(TargetFrameworkVersion.TrimStart('vV'))</_FrameworkVersionForImplicitDefine>
@@ -183,10 +182,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PropertyGroup>
       <_PlatformIdentifierForImplicitDefine>$(TargetPlatformIdentifier.ToUpperInvariant())</_PlatformIdentifierForImplicitDefine>
       <_PlatformVersionForImplicitDefine>$(TargetPlatformVersion.Replace('.', '_'))</_PlatformVersionForImplicitDefine>
-      <ImplicitPlatformDefine>$(_PlatformIdentifierForImplicitDefine);$(_PlatformIdentifierForImplicitDefine)$(_PlatformVersionForImplicitDefine)</ImplicitPlatformDefine>
-
-      <DefineConstants>$(DefineConstants);$(ImplicitPlatformDefine)</DefineConstants>
     </PropertyGroup>
+    <ItemGroup>
+      <_ImplicitDefineConstant Include="$(_PlatformIdentifierForImplicitDefine)" />
+      <_ImplicitDefineConstant Include="$(_PlatformIdentifierForImplicitDefine)$(_PlatformVersionForImplicitDefine)" />
+    </ItemGroup>
   </Target>
   
   <!-- Add conditional compilation symbols for target framework backwards compatibility with .NET 5.0 and later (for example .NET 6.0 defines NET5_0 and NETCOREAPP3_1) -->
@@ -196,10 +196,20 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <_NetCoreAppFrameworkVersions Include="@(SupportedNETCoreAppTargetFramework->'%(Identity)'->TrimStart('.NETCoreApp,Version=v'))" />
       <_NetCoreAppCompatibleVersions Include="@(_NetCoreAppFrameworkVersions)" Condition=" $([MSBuild]::VersionGreaterThan(%(Identity), 3.1)) and $([MSBuild]::VersionLessThan(%(Identity), $(TargetFrameworkVersion))) " />
+      <_ImplicitDefineConstant Include="NETCOREAPP" />
+      <_ImplicitDefineConstant Include="NETCOREAPP3_1" />
+      <_ImplicitDefineConstant Include="@(_NetCoreAppCompatibleVersions->'NET%(Identity)'->Replace('.', '_'))" />
     </ItemGroup>
+  </Target>
+
+  <!-- Add implicitly defined preprocessor symbols to DefineConstants -->
+  <Target Name="AddImplicitDefineConstants"
+          Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' "
+          DependsOnTargets="GenerateTargetPlatformDefineConstants;GenerateNETCompatibleDefineConstants"
+          BeforeTargets="Build" >
     <PropertyGroup>
-      <_NetCoreAppCompatibleDefine>NETCOREAPP3_1;@(_NetCoreAppCompatibleVersions->'NET%(Identity)'->Replace('.', '_'))</_NetCoreAppCompatibleDefine>
-      <DefineConstants>$(DefineConstants);$(_NetCoreAppCompatibleDefine)</DefineConstants>
+      <DefineConstants Condition=" '@(_ImplicitDefineConstant)' != '' " >$(DefineConstants);@(_ImplicitDefineConstant)</DefineConstants>
+      <FinalDefineConstants Condition=" '@(_ImplicitDefineConstant)' != '' and '$(Language)' == 'VB' " >$(FinalDefineConstants),@(_ImplicitDefineConstant->'%(Identity)=-1', ',')</FinalDefineConstants>
     </PropertyGroup>
   </Target>
 

@@ -442,7 +442,7 @@ namespace Microsoft.NET.Build.Tests
                 targetFramework, "DefineConstants")
             {
                 ShouldCompile = shouldCompile,
-                DependsOnTargets = "GenerateNETCompatibleDefineConstants;GenerateTargetPlatformDefineConstants"
+                DependsOnTargets = "AddImplicitDefineConstants"
             };
 
             getValuesCommand
