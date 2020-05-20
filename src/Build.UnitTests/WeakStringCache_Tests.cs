@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests
         /// Adds strings that are known to have a hash code collision to the cache under test.
         /// </summary>
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private void RetainsLastStringWithSameHashCode(int numberOfStrings)
+        private void AddStringsWithSameHashCode(int numberOfStrings)
         {
             string[] cachedStrings = new string[numberOfStrings];
             int[] hashCodes = new int[numberOfStrings];
@@ -166,7 +166,7 @@ namespace Microsoft.Build.UnitTests
         public void RetainsLastStringWithGivenHashCode()
         {
             // Add 3 strings with the same hash code.
-            RetainsLastStringWithSameHashCode(3);
+            AddStringsWithSameHashCode(3);
 
             // Trigger full GC.
             RunGC();

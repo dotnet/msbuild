@@ -100,7 +100,7 @@ namespace Microsoft.Build
         /// <summary>
         /// The interner implementation in use.
         /// </summary>
-        private IInternerImplementation s_si;
+        private IInternerImplementation _interner;
 
         #region Statistics
         /// <summary>
@@ -134,7 +134,7 @@ namespace Microsoft.Build
             _hugeMruThreshold = AssignViaEnvironment("MSBUILDHUGEINTERNTHRESHOLD", 200);
             _ginormousThreshold = AssignViaEnvironment("MSBUILDGINORMOUSINTERNTHRESHOLD", 8000);
 
-            s_si = _useLegacyInterner
+            _interner = _useLegacyInterner
                ? (IInternerImplementation)new BucketedPrioritizedStringList(gatherStatistics: false, _smallMruSize, _largeMruSize, _hugeMruSize,
                     _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency)
                : (IInternerImplementation)new WeakStringCacheInterner(gatherStatistics: false);
@@ -174,7 +174,7 @@ namespace Microsoft.Build
             if (_useLegacyInterner)
             {
                 // Statistics include several 'what if' scenarios such as doubling the size of the MRU lists.
-                s_si = new BucketedPrioritizedStringList(gatherStatistics: true, _smallMruSize, _largeMruSize, _hugeMruSize, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
+                _interner = new BucketedPrioritizedStringList(gatherStatistics: true, _smallMruSize, _largeMruSize, _hugeMruSize, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
                 _whatIfInfinite = new BucketedPrioritizedStringList(gatherStatistics: true, int.MaxValue, int.MaxValue, int.MaxValue, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
                 _whatIfDoubled = new BucketedPrioritizedStringList(gatherStatistics: true, _smallMruSize * 2, _largeMruSize * 2, _hugeMruSize * 2, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
                 _whatIfHalved = new BucketedPrioritizedStringList(gatherStatistics: true, _smallMruSize / 2, _largeMruSize / 2, _hugeMruSize / 2, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
@@ -182,7 +182,7 @@ namespace Microsoft.Build
             }
             else
             {
-                s_si = new WeakStringCacheInterner(gatherStatistics: true);
+                _interner = new WeakStringCacheInterner(gatherStatistics: true);
             }
         }
 
@@ -247,7 +247,7 @@ namespace Microsoft.Build
                 _whatIfZero.InterningToString(candidate);
             }
 
-            string result = s_si.InterningToString(candidate);
+            string result = _interner.InterningToString(candidate);
 #if DEBUG
             string expected = candidate.ExpensiveConvertToString();
             if (!String.Equals(result, expected))
@@ -263,7 +263,7 @@ namespace Microsoft.Build
         /// </summary>
         internal void ReportStatistics()
         {
-            s_si.ReportStatistics("Main");
+            _interner.ReportStatistics("Main");
             if (_useLegacyInterner)
             {
                 _whatIfInfinite.ReportStatistics("if Infinite");

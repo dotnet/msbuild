@@ -45,7 +45,7 @@ namespace Microsoft.Build
     /// <summary>
     /// A wrapper over StringBuilder.
     /// </summary>
-    internal struct StringBuilderInternTarget : IInternable
+    internal readonly struct StringBuilderInternTarget : IInternable
     {
         /// <summary>
         /// The held StringBuilder
@@ -118,7 +118,7 @@ namespace Microsoft.Build
     /// <summary>
     /// A wrapper over char[].
     /// </summary>
-    internal struct CharArrayInternTarget : IInternable
+    internal readonly struct CharArrayInternTarget : IInternable
     {
         /// <summary>
         /// Start index for the string
@@ -222,7 +222,7 @@ namespace Microsoft.Build
     /// <summary>
     /// Wrapper over a string.
     /// </summary>
-    internal struct StringInternTarget : IInternable
+    internal readonly struct StringInternTarget : IInternable
     {
         /// <summary>
         /// Stores the wrapped string.
@@ -275,7 +275,7 @@ namespace Microsoft.Build
     /// <summary>
     /// Wrapper over a substring of a string.
     /// </summary>
-    internal struct SubstringInternTarget : IInternable
+    internal readonly struct SubstringInternTarget : IInternable
     {
         /// <summary>
         /// Stores the wrapped string.

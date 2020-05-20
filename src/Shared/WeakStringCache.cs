@@ -136,7 +136,7 @@ namespace Microsoft.Build
                 if (_stringsByHashCode.Count >= _capacity)
                 {
                     // Get rid of unused handles.
-                    Scavenge();
+                    ScavengeUnderLock();
                     // And do this again when the number of handles reaches double the current after-scavenge number.
                     _capacity = _stringsByHashCode.Count * 2;
                 }
@@ -169,7 +169,7 @@ namespace Microsoft.Build
         /// This is expensive so try to call such that the cost is amortized to O(1) per GetOrCreateEntry() invocation.
         /// Assumes exclusive access to the dictionary, i.e. the lock is taken.
         /// </summary>
-        public void Scavenge()
+        private void ScavengeUnderLock()
         {
             List<int> keysToRemove = null;
             foreach (KeyValuePair<int, StringWeakHandle> entry in _stringsByHashCode)
@@ -187,6 +187,17 @@ namespace Microsoft.Build
                 {
                     _stringsByHashCode.Remove(keysToRemove[i]);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Public version of ScavengeUnderLock() which takes the lock.
+        /// </summary>
+        public void Scavenge()
+        {
+            lock (_stringsByHashCode)
+            {
+                ScavengeUnderLock();
             }
         }
 
