@@ -24,23 +24,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Triggers full GC that reliably collects all objects without strong GC roots and also nulls out weak GC handles.
-        /// </summary>
-        /// <remarks>
-        /// While a simple GC.Collect() would be enough when running on .NET Framework or .NET Core, the Mono runtime appears to have
-        /// GC handles implemented differently and requires a bit more effort. We don't care when exactly our handles are nulled out
-        /// as long as it eventually happens for otherwise unreachable strings.
-        /// </remarks>
-        private void RunGC()
-        {
-            for (int i = 0; i < 2; i++)
-            {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-            }
-        }
-
-        /// <summary>
         /// Adds a string to the cache under test.
         /// </summary>
         /// <param name="strPart1">Part one of the string (split to prevent runtime interning and unintended GC roots).</param>
@@ -69,7 +52,7 @@ namespace Microsoft.Build.UnitTests
             cachedString.ShouldBeSameAs(testString);
 
             // Trigger full GC and verify that nothing has changed since we're still keeping testString alive.
-            RunGC();
+            GC.Collect();
 
             callbackToRunWithTheStringAlive(cachedString);
 
@@ -144,7 +127,7 @@ namespace Microsoft.Build.UnitTests
             });
 
             // Trigger full GC.
-            RunGC();
+            GC.Collect();
 
             // The handle is still in the cache but it's unused now as the string has been collected.
             _cache.GetDebugInfo().ShouldBe(new WeakStringCache.DebugInfo()
@@ -179,7 +162,7 @@ namespace Microsoft.Build.UnitTests
             AddStringsWithSameHashCode(3);
 
             // Trigger full GC.
-            RunGC();
+            GC.Collect();
 
             // The handle is still in the cache but it's unused now as the strings have been collected.
             _cache.GetDebugInfo().ShouldBe(new WeakStringCache.DebugInfo()
