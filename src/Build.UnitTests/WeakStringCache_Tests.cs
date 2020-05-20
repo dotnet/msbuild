@@ -125,7 +125,12 @@ namespace Microsoft.Build.UnitTests
         /// 2. The string is no longer retrievable after all strong GC refs are gone.
         /// 3. The cache completely removes the handle after calling Scavenge on it.
         /// </summary>
+        /// <remarks>
+        /// Disabled on MacOS Mono because it doesn't play well with conservative GC scanning.
+        /// https://www.mono-project.com/docs/advanced/garbage-collector/sgen/#precise-stack-marking
+        /// </remarks>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void RetainsStringUntilCollected()
         {
             // Add a string to the cache using a non-inlinable method to make sure it's not reachable from a GC root.
@@ -162,7 +167,12 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Same as RetainsStringUntilCollected but with multiple strings sharing the same hash code.
         /// </summary>
+        /// <remarks>
+        /// Disabled on MacOS Mono because it doesn't play well with conservative GC scanning.
+        /// https://www.mono-project.com/docs/advanced/garbage-collector/sgen/#precise-stack-marking
+        /// </remarks>
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
         public void RetainsLastStringWithGivenHashCode()
         {
             // Add 3 strings with the same hash code.

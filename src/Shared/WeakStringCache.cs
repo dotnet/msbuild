@@ -147,7 +147,7 @@ namespace Microsoft.Build
         }
 
         /// <summary>
-        /// Implements the simple yet very decently performing djb2 hash function.
+        /// Implements the simple yet very decently performing djb2 hash function (xor version).
         /// </summary>
         /// <param name="internable">The internable to compute the hash code for.</param>
         /// <returns>The 32-bit hash code.</returns>
@@ -158,7 +158,7 @@ namespace Microsoft.Build
             {
                 unchecked
                 {
-                    hashCode = hashCode * 33 + internable[i];
+                    hashCode = hashCode * 33 ^ internable[i];
                 }
             }
             return hashCode;
