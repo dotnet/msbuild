@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests
         /// Adds strings that are known to have a hash code collision to the cache under test.
         /// </summary>
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private void AddStringsWithHashCollision(int numberOfStrings)
+        private void RetainsLastStringWithSameHashCode(int numberOfStrings)
         {
             string[] cachedStrings = new string[numberOfStrings];
             int[] hashCodes = new int[numberOfStrings];
@@ -96,21 +96,10 @@ namespace Microsoft.Build.UnitTests
                 {
                     _cache.GetDebugInfo().ShouldBe(new WeakStringCache.DebugInfo()
                     {
-                        UsedBucketCount = 1,
-                        UnusedBucketCount = 0,
-                        LiveStringCount = i + 1,
+                        LiveStringCount = 1,
                         CollectedStringCount = 0,
-                        HashCollisionCount = i
                     });
                     cachedStrings[i] = cachedString;
-
-                    // All previously cached strings are still alive and retrievable.
-                    for (int j = i - 1; j >= 0; j--)
-                    {
-                        string cachedStringFromCache = _cache.GetOrCreateEntry(new StringInternTarget(cachedStrings[j]), out bool cacheHit);
-                        cacheHit.ShouldBeTrue();
-                        cachedStringFromCache.ShouldBeSameAs(cachedStrings[j]);
-                    }
                 });
 
                 if (i > 0)
@@ -119,13 +108,22 @@ namespace Microsoft.Build.UnitTests
                     hashCodes[i].ShouldBe(hashCodes[i - 1]);
                 }
             }
+
+            // There are no cache hits when iterating over our strings again because the last one always wins and steals the slot.
+            for (int i = 0; i < numberOfStrings; i++)
+            {
+                StringBuilder sb = new StringBuilder(cachedStrings[i]);
+                string cachedStringFromCache =_cache.GetOrCreateEntry(new StringBuilderInternTarget(sb), out bool cacheHit);
+                cacheHit.ShouldBeFalse();
+                cachedStringFromCache.ShouldNotBeSameAs(cachedStrings[i]);
+            }
         }
 
         /// <summary>
         /// Simple test case to verify that:
         /// 1. A string added to the cache stays in the cache as long as it's alive.
         /// 2. The string is no longer retrievable after all strong GC refs are gone.
-        /// 3. The cache completely removes the bucket with the string after calling Scavenge on it.
+        /// 3. The cache completely removes the handle after calling Scavenge on it.
         /// </summary>
         [Fact]
         public void RetainsStringUntilCollected()
@@ -135,75 +133,59 @@ namespace Microsoft.Build.UnitTests
             {
                 _cache.GetDebugInfo().ShouldBe(new WeakStringCache.DebugInfo()
                 {
-                    UsedBucketCount = 1,
-                    UnusedBucketCount = 0,
                     LiveStringCount = 1,
                     CollectedStringCount = 0,
-                    HashCollisionCount = 0
                 });
             });
 
             // Trigger full GC.
             RunGC();
 
-            // The bucket is still in the cache but it's unused now as the string has been collected.
+            // The handle is still in the cache but it's unused now as the string has been collected.
             _cache.GetDebugInfo().ShouldBe(new WeakStringCache.DebugInfo()
             {
-                UsedBucketCount = 0,
-                UnusedBucketCount = 1,
                 LiveStringCount = 0,
                 CollectedStringCount = 1,
-                HashCollisionCount = 0
             });
 
-            // Ask the cache to get rid of unused buckets.
+            // Ask the cache to get rid of unused handles.
             _cache.Scavenge();
 
             // The cache should be empty now.
             _cache.GetDebugInfo().ShouldBe(new WeakStringCache.DebugInfo()
             {
-                UsedBucketCount = 0,
-                UnusedBucketCount = 0,
                 LiveStringCount = 0,
                 CollectedStringCount = 0,
-                HashCollisionCount = 0
             });
         }
 
         /// <summary>
-        /// Same as RetainsStringUntilCollected but with multiple strings with the same hash code. Verifies that the bucket overflow area
-        /// works correctly.
+        /// Same as RetainsStringUntilCollected but with multiple strings sharing the same hash code.
         /// </summary>
         [Fact]
-        public void RetainsStringsWithHashCollisions()
+        public void RetainsLastStringWithGivenHashCode()
         {
-            // Add 3 strings.
-            AddStringsWithHashCollision(3);
+            // Add 3 strings with the same hash code.
+            RetainsLastStringWithSameHashCode(3);
 
             // Trigger full GC.
             RunGC();
 
-            // The bucket is still in the cache but it's unused now as the strings have been collected.
+            // The handle is still in the cache but it's unused now as the strings have been collected.
             _cache.GetDebugInfo().ShouldBe(new WeakStringCache.DebugInfo()
             {
-                UsedBucketCount = 0,
-                UnusedBucketCount = 1,
                 LiveStringCount = 0,
-                CollectedStringCount = 3,
-                HashCollisionCount = 2
+                CollectedStringCount = 1,
             });
 
-            // Ask the cache to get rid of unused buckets.
+            // Ask the cache to get rid of unused handles.
             _cache.Scavenge();
 
             // The cache should be empty now.
             _cache.GetDebugInfo().ShouldBe(new WeakStringCache.DebugInfo()
             {
-                UsedBucketCount = 0,
-                UnusedBucketCount = 0,
                 LiveStringCount = 0,
                 CollectedStringCount = 0,
-                HashCollisionCount = 0
             });
         }
     }

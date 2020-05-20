@@ -499,9 +499,7 @@ namespace Microsoft.Build
 
                 WeakStringCache.DebugInfo debugInfo = _weakStringCache.GetDebugInfo();
                 Console.WriteLine("WeakStringCache statistics:");
-                Console.WriteLine("Bucket count used/unused/total    = {0}/{1}/{2}", debugInfo.UsedBucketCount, debugInfo.UnusedBucketCount, debugInfo.UsedBucketCount + debugInfo.UnusedBucketCount);
                 Console.WriteLine("String count live/collected/total = {0}/{1}/{2}", debugInfo.LiveStringCount, debugInfo.CollectedStringCount, debugInfo.LiveStringCount + debugInfo.CollectedStringCount);
-                Console.WriteLine("Hash collisions                   = {0}", debugInfo.HashCollisionCount);
             }
 
             /// <summary>
