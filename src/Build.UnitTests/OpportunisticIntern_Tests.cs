@@ -52,7 +52,7 @@ namespace Microsoft.Build.UnitTests
             return target.ExpensiveConvertToString();
         }
 
-        protected static void AssertInternable(string value)
+        private static void AssertInternable(string value)
         {
             AssertInternable(new StringBuilder(value));
             AssertInternable(value.ToCharArray(), 0, value.ToCharArray().Length);
@@ -189,21 +189,12 @@ namespace Microsoft.Build.UnitTests
         public OpportunisticInternLegacy_Tests(ITestOutputHelper testOutput)
             : base(testOutput)
         {
-            _env.SetEnvironmentVariable("MsBuildUseLegacyStringInterner", "1");
+            _env.SetEnvironmentVariable("MSBuildUseLegacyStringInterner", "1");
             OpportunisticIntern.ResetForTests();
         }
 
         /// <summary>
-        /// Test a single know-to-intern tiny string to verify the mechanism.
-        /// </summary>
-        [Fact]
-        public void InternableTinyString()
-        {
-            AssertInternable("true");
-        }
-
-        /// <summary>
-        /// Test a single known-to-not-intern tiny string to verify the mechanism.
+        /// The legacy implementation does not intern tiny strings unless they are on the hard-coded list.
         /// </summary>
         [Fact]
         public void NonInternableTinyString()
@@ -220,8 +211,8 @@ namespace Microsoft.Build.UnitTests
         public OpportunisticInternLegacySimpleConcurrecy_Tests(ITestOutputHelper testOutput)
             : base(testOutput)
         {
-            _env.SetEnvironmentVariable("MsBuildUseLegacyStringInterner", "1");
-            _env.SetEnvironmentVariable("MsBuildUseSimpleInternConcurrency", "1");
+            _env.SetEnvironmentVariable("MSBuildUseLegacyStringInterner", "1");
+            _env.SetEnvironmentVariable("MSBuildUseSimpleInternConcurrency", "1");
             OpportunisticIntern.ResetForTests();
         }
     }
