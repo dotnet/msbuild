@@ -4252,19 +4252,33 @@ namespace Microsoft.Build.Evaluation
 
                 arg0 = args[0] as string;
 
-                if (arg0 == null || !(args[1] is string comparisonType))
+                // reject enums as ints. In C# this would require a cast, which is not supported in msbuild expressions
+                if (arg0 == null || !(args[1] is string comparisonTypeName) || ContainsDigits(comparisonTypeName))
                 {
                     arg1 = default;
                     return false;
                 }
 
                 // Allow fully-qualified enum, e.g. "System.StringComparison.OrdinalIgnoreCase"
-                if (comparisonType.Contains('.'))
+                if (comparisonTypeName.Contains('.'))
                 {
-                    comparisonType = comparisonType.Replace("System.StringComparison.", "").Replace("StringComparison.", "");
+                    comparisonTypeName = comparisonTypeName.Replace("System.StringComparison.", "").Replace("StringComparison.", "");
                 }
 
-                return Enum.TryParse<StringComparison>(comparisonType, out arg1);
+                return Enum.TryParse(comparisonTypeName, out arg1);
+
+                bool ContainsDigits(string aString)
+                {
+                    foreach (var c in aString)
+                    {
+                        if (char.IsDigit(c))
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
             }
 
             private static bool TryGetArgs(object[] args, out int arg0, out int arg1)
