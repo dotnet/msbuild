@@ -15,10 +15,10 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
   <ItemGroup Condition="'$(DisableNetAnalyzers)' != 'true' And '$(_TargetFrameworkVersionWithoutV)' >= '5.0'">
     <Analyzer
-      Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))\analyzers\cs\Microsoft.NetCore.CSharp.Analyzers.dll"
+      Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))\analyzers\cs\Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll"
       IsImplicitlyDefined="true" />
     <Analyzer
-      Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))\analyzers\cs\Microsoft.NetCore.Analyzers.dll"
+      Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))\analyzers\cs\Microsoft.CodeAnalysis.NetAnalyzers.dll"
       IsImplicitlyDefined="true" />
   </ItemGroup>
 </Project>

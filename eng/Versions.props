@@ -69,7 +69,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/roslyn-analyzers -->
-    <MicrosoftNetCoreAnalyzersVersion>3.3.0-beta1.20270.1</MicrosoftNetCoreAnalyzersVersion>
+    <MicrosoftCodeAnalysisNetAnalyzersVersion>3.3.0-beta1.20270.1</MicrosoftCodeAnalysisNetAnalyzersVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/Microsoft/msbuild -->

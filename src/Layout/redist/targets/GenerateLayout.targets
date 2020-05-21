@@ -36,7 +36,7 @@
       <AnalyzersDirectory>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk\analyzers</AnalyzersDirectory>
     </PropertyGroup>
     <ItemGroup>
-      <AnalyzerAssemblies Include="$(NuGetPackageRoot)Microsoft.NetCore.Analyzers/$(MicrosoftNetCoreAnalyzersVersion)/analyzers/dotnet/**/*" />
+      <AnalyzerAssemblies Include="$(NuGetPackageRoot)/microsoft.codeanalysis.netanalyzers/$(MicrosoftCodeAnalysisNetAnalyzersVersion)/analyzers/dotnet/**/*" />
     </ItemGroup>
     <Error Condition="'@(AnalyzerAssemblies)' == ''" Text="Something moved around in Analyzer package, adjust code here accordingly. TFM change?" />
     <Copy SourceFiles="@(AnalyzerAssemblies)" DestinationFiles="@(AnalyzerAssemblies->'$(AnalyzersDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
