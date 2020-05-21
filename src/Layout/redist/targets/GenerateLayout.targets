@@ -31,17 +31,15 @@
   </Target>
 
   <Target Name="PublishNETAnalyzers"
-          BeforeTargets="Build">
+          BeforeTargets="Build;PublishNetSdk">
      <PropertyGroup>
-      <AnalyzersDirectory>$(OutputPath)/Sdks/Microsoft.NET.Sdk/analyzers</AnalyzersDirectory>
+      <AnalyzersDirectory>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk\analyzers</AnalyzersDirectory>
     </PropertyGroup>
     <ItemGroup>
-      <AnalyzerAssemblies Include="$(NuGetPackageRoot)Microsoft.NetCore.Analyzers/$(MicrosoftNetCoreAnalyzersVersion)/analyzers/dotnet/cs/Microsoft.NetCore.Analyzers.dll" />
-      <AnalyzerAssemblies Include="$(NuGetPackageRoot)Microsoft.NetCore.Analyzers/$(MicrosoftNetCoreAnalyzersVersion)/analyzers/dotnet/cs/Microsoft.NetCore.CSharp.Analyzers.dll" />
-      <AnalyzerAssemblies Include="$(NuGetPackageRoot)Microsoft.NetCore.Analyzers/$(MicrosoftNetCoreAnalyzersVersion)/analyzers/dotnet/vb/Microsoft.NetCore.VisualBasic.Analyzers.dll" />
+      <AnalyzerAssemblies Include="$(NuGetPackageRoot)Microsoft.NetCore.Analyzers/$(MicrosoftNetCoreAnalyzersVersion)/analyzers/dotnet/**/*" />
     </ItemGroup>
     <Error Condition="'@(AnalyzerAssemblies)' == ''" Text="Something moved around in Analyzer package, adjust code here accordingly. TFM change?" />
-    <Copy SourceFiles="@(AnalyzerAssemblies)" DestinationFiles="@(AnalyzerAssemblies->'$(AnalyzersDirectory)/%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(AnalyzerAssemblies)" DestinationFiles="@(AnalyzerAssemblies->'$(AnalyzersDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
   <Target Name="PublishMSBuildExtensions"
