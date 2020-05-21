@@ -302,7 +302,7 @@ namespace Microsoft.Build.BackEnd
         /// <typeparam name="D">The reference type for the dictionary.</typeparam>
         /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
         /// <param name="dictionary">The dictionary to be translated.</param>
-        /// <param name="objectTranslator">The translator to use for the values in the dictionary</param>
+        /// <param name="objectTranslator">The translator to use for the values in the dictionary.</param>
         void TranslateDictionary<D, T>(ref D dictionary, ObjectTranslator<T> objectTranslator)
             where D : IDictionary<string, T>, new()
             where T : class;

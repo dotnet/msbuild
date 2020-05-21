@@ -61,8 +61,8 @@ namespace Microsoft.Build.Framework
             {
                 foreach (var kvp in Metadata)
                 {
-                    hashCode = hashCode * 1521134295 + kvp.Key.GetHashCode();
-                    hashCode = hashCode * 1521134295 + kvp.Value.GetHashCode();
+                    hashCode = hashCode * -1521134295 + kvp.Key.GetHashCode();
+                    hashCode = hashCode * -1521134295 + kvp.Value.GetHashCode();
                 }
             }
 
