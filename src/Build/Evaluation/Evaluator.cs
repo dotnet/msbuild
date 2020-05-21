@@ -1927,7 +1927,6 @@ namespace Microsoft.Build.Evaluation
                 return project;
             }
 
-            //  TODO: Is it worth using the cache for these?
             return _projectRootElementCache.Get(
                 projectPath,
                 InnerCreate,
