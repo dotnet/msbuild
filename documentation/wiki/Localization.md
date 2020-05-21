@@ -28,3 +28,24 @@
 
 - send a PR with an updated `<target>` element of the xlf resource (do not include other non-localization changes)
 - we will notify the localization team, which will then take over and review the PR
+
+## Localizing XSD "IntelliSense"
+
+Code completion ("IntelliSense") for MSBuild project files is provided minimally in Visual Studio by XML Schema files like [`Microsoft.Build.CommonTypes.xsd`](https://github.com/microsoft/msbuild/blob/ba9a1d64a7abf15a8505827c00413156a3eb7f62/src/MSBuild/MSBuild/Microsoft.Build.CommonTypes.xsd). These files are English-only in the GitHub repo; their localization is managed in the Microsoft-internal `VS` repo.
+
+### If there is a bug in XSD localization
+
+File xsd localization bugs in this repo. The MSBuild team will coordinate with the Visual Studio localization team to redirect it appropriately.
+
+### When an XSD has been updated
+
+After updating an XSD in the GitHub repo, someone with internal access must update the copy in the `VS` repo. To do so:
+
+1. Locally clone VS following the standard instructions.
+2. Locally update your clone of the GitHub msbuild repo to include the merge of the change.
+3. Start a new branch in the VS repository from the current working branch (probably `master`).
+4. Copy from the msbuild path `src/MSBuild/MSBuild/*.xsd` to the VS path `src/xmake/XMakeCommandLine`.
+5. Ensure that the commit message has a full link to the commit used to update the `.xsd` files, like `https://github.com/microsoft/msbuild/commit/ba9a1d64a7abf15a8505827c00413156a3eb7f62`.
+6. Push and submit through the usual VS PR process, including the `MSBuild` team as reviewers.
+
+Example PR doing this: https://dev.azure.com/devdiv/DevDiv/_git/VS/pullrequest/186890.
