@@ -915,4 +915,5 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.FSharp.targets" Condition="'$(Language)' == 'F#'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ILLink.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.CSharp.Analyzers.targets" Condition="'$(Language)' == 'C#'" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.VisualBasic.Analyzers.targets" Condition="'$(Language)' == 'VB'" />
 </Project>
