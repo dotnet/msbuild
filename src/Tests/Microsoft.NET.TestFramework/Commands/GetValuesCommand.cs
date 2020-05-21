@@ -27,6 +27,8 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public string DependsOnTargets { get; set; } = "Compile";
 
+        public string TargetName { get; set; } = "WriteValuesToFile";
+
         public string Configuration { get; set; }
 
         public List<string> MetadataNames { get; set; } = new List<string>();
@@ -71,7 +73,7 @@ namespace Microsoft.NET.TestFramework.Commands
 
             string injectTargetContents =
 $@"<Project ToolsVersion=`14.0` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
-  <Target Name=`WriteValuesToFile` {(ShouldCompile ? $"DependsOnTargets=`{DependsOnTargets}`" : "")}>
+  <Target Name=`{TargetName}` {(ShouldCompile ? $"DependsOnTargets=`{DependsOnTargets}`" : "")}>
     <ItemGroup>
       <LinesToWrite Include=`{linesAttribute}`/>
     </ItemGroup>
@@ -90,7 +92,7 @@ $@"<Project ToolsVersion=`14.0` xmlns=`http://schemas.microsoft.com/developer/ms
             var outputDirectory = GetOutputDirectory(_targetFramework);
             outputDirectory.Create();
 
-            return TestContext.Current.ToolsetUnderTest.CreateCommandForTarget("WriteValuesToFile", newArgs);
+            return TestContext.Current.ToolsetUnderTest.CreateCommandForTarget(TargetName, newArgs);
         }
 
         public List<string> GetValues()

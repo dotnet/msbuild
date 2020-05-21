@@ -260,8 +260,7 @@ namespace Microsoft.NET.Build.Tests
             var getValuesCommand = new GetValuesCommand(Log, libraryProjectDirectory,
                 targetFramework, "FinalDefineConstants")
             {
-                ShouldCompile = shouldCompile,
-                DependsOnTargets = "AddImplicitDefineConstants"
+                ShouldCompile = shouldCompile
             };
 
             getValuesCommand

@@ -375,8 +375,23 @@ namespace Microsoft.NET.Build.Tests
             {
                 shouldCompile = false;
             }
+            
+            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
-            AssertDefinedConstantsOutput(testAsset, targetFramework, expectedDefines, shouldCompile);
+            var getValuesCommand = new GetValuesCommand(Log, libraryProjectDirectory,
+                targetFramework, "DefineConstants")
+            {
+                ShouldCompile = shouldCompile
+            };
+
+            getValuesCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var definedConstants = getValuesCommand.GetValues();
+
+            definedConstants.Should().BeEquivalentTo(new[] { "DEBUG", "TRACE" }.Concat(expectedDefines).ToArray());
         }
 
         [Theory]
@@ -395,6 +410,8 @@ namespace Microsoft.NET.Build.Tests
                     project.Root.Add(propGroup);
                     var maxVersion = new XElement(ns + "NETCoreAppMaximumVersion", "6.0");
                     propGroup.Add(maxVersion);
+                    var errorOnMissing = new XElement(ns + "GenerateErrorForMissingTargetingPacks", "false");
+                    propGroup.Add(errorOnMissing);
 
                     var itemGroup = new XElement(ns + "ItemGroup");
                     project.Root.Add(itemGroup);
@@ -404,7 +421,7 @@ namespace Microsoft.NET.Build.Tests
                     itemGroup.Add(supportedFramework);
                 });
 
-            AssertDefinedConstantsOutput(testAsset, targetFramework, new[] { "NETCOREAPP", "NET", "WINDOWS", "WINDOWS7_0" }.Concat(expectedDefines).ToArray(), true);
+            AssertDefinedConstantsOutput(testAsset, targetFramework, new[] { "NETCOREAPP", "NET", "WINDOWS", "WINDOWS7_0" }.Concat(expectedDefines).ToArray());
         }
 
         [Theory]
@@ -431,18 +448,18 @@ namespace Microsoft.NET.Build.Tests
                     propGroup.Add(platformVersion);
                 });
 
-            AssertDefinedConstantsOutput(testAsset, targetFramework, new[] { "NETCOREAPP", "NET", "NET5_0", "NETCOREAPP3_1" }.Concat(expectedDefines).ToArray(), true);
+            AssertDefinedConstantsOutput(testAsset, targetFramework, new[] { "NETCOREAPP", "NET", "NET5_0", "NETCOREAPP3_1" }.Concat(expectedDefines).ToArray());
         }
 
-        private void AssertDefinedConstantsOutput(TestAsset testAsset, string targetFramework, string[] expectedDefines, bool shouldCompile)
+        private void AssertDefinedConstantsOutput(TestAsset testAsset, string targetFramework, string[] expectedDefines)
         {
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
             var getValuesCommand = new GetValuesCommand(Log, libraryProjectDirectory,
                 targetFramework, "DefineConstants")
             {
-                ShouldCompile = shouldCompile,
-                DependsOnTargets = "AddImplicitDefineConstants"
+                ShouldCompile = false,
+                TargetName = "CoreCompile" // Overwrite core compile with our target to get DefineConstants
             };
 
             getValuesCommand
