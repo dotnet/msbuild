@@ -13,6 +13,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(DisableNetAnalyzers)' != 'true' And '$(_TargetFrameworkVersionWithoutV)' >= '5.0'">
     <UsingNETAnalyzers>true</UsingNETAnalyzers>
   </PropertyGroup>
+  <Import Project="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.targets" Condition="'$(DisableNetAnalyzers)' != 'true' And '$(_TargetFrameworkVersionWithoutV)' >= '5.0'" />
   <ItemGroup Condition="'$(DisableNetAnalyzers)' != 'true' And '$(_TargetFrameworkVersionWithoutV)' >= '5.0'">
     <Analyzer
       Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))\analyzers\vb\Microsoft.CodeAnalysis.VisualBasic.NetAnalyzers.dll"
