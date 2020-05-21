@@ -16,8 +16,10 @@ namespace Microsoft.DotNet.Restore.Test
     {
         private static string RepoRootNuGetConfig = Path.Combine(RepoDirectoriesProvider.RepoRoot, "NuGet.config");
 
-        [Fact]
-        public void ItRestoresAppToSpecificDirectory()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ItRestoresAppToSpecificDirectory(bool useStaticGraphEvaluation)
         {
             var rootPath = TestAssets.CreateTestDirectory().FullName;
 
@@ -33,6 +35,7 @@ namespace Microsoft.DotNet.Restore.Test
                 .FullName;
 
             string args = $"--configfile {RepoRootNuGetConfig} --packages \"{fullPath}\"";
+            args = HandleStaticGraphEvaluation(useStaticGraphEvaluation, args);
             new RestoreCommand()
                  .WithWorkingDirectory(projectDirectory)
                  .ExecuteWithCapturedOutput(args)
@@ -44,8 +47,10 @@ namespace Microsoft.DotNet.Restore.Test
             Directory.EnumerateFiles(fullPath, "*.dll", SearchOption.AllDirectories).Count().Should().BeGreaterThan(0);
         }
 
-        [Fact]
-        public void ItRestoresLibToSpecificDirectory()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ItRestoresLibToSpecificDirectory(bool useStaticGraphEvaluation)
         {
             var rootPath = TestAssets.CreateTestDirectory().FullName;
 
@@ -60,6 +65,7 @@ namespace Microsoft.DotNet.Restore.Test
                 .Pass();
 
             string args = $"--configfile {RepoRootNuGetConfig} --packages \"{dir}\"";
+            args = HandleStaticGraphEvaluation(useStaticGraphEvaluation, args);
             new RestoreCommand()
                 .WithWorkingDirectory(rootPath)
                 .ExecuteWithCapturedOutput(args)
@@ -71,8 +77,10 @@ namespace Microsoft.DotNet.Restore.Test
             Directory.EnumerateFiles(fullPath, "*.dll", SearchOption.AllDirectories).Count().Should().BeGreaterThan(0);
         }
 
-        [Fact]
-        public void ItRestoresTestAppToSpecificDirectory()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ItRestoresTestAppToSpecificDirectory(bool useStaticGraphEvaluation)
         {
             var rootPath = TestAssets.Get("VSTestCore").CreateInstance().WithSourceFiles().Root.FullName;
 
@@ -80,6 +88,7 @@ namespace Microsoft.DotNet.Restore.Test
             string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));
 
             string args = $"--configfile {RepoRootNuGetConfig} --packages \"{dir}\"";
+            args = HandleStaticGraphEvaluation(useStaticGraphEvaluation, args);
             new RestoreCommand()
                 .WithWorkingDirectory(rootPath)
                 .ExecuteWithCapturedOutput(args)
@@ -91,8 +100,10 @@ namespace Microsoft.DotNet.Restore.Test
             Directory.EnumerateFiles(fullPath, "*.dll", SearchOption.AllDirectories).Count().Should().BeGreaterThan(0);
         }
 
-        [Fact]
-        public void ItRestoresWithTheSpecifiedVerbosity()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ItRestoresWithTheSpecifiedVerbosity(bool useStaticGraphEvaluation)
         {
             var rootPath = TestAssets.CreateTestDirectory().FullName;
 
@@ -107,6 +118,7 @@ namespace Microsoft.DotNet.Restore.Test
                 .Pass();
 
             string args = $"--configfile {RepoRootNuGetConfig} --packages \"{dir}\" --verbosity quiet";
+            args = HandleStaticGraphEvaluation(useStaticGraphEvaluation, args);
             new RestoreCommand()
                  .WithWorkingDirectory(rootPath)
                  .ExecuteWithCapturedOutput(args)
@@ -115,5 +127,9 @@ namespace Microsoft.DotNet.Restore.Test
                  .And.NotHaveStdErr()
                  .And.NotHaveStdOut();
         }
+
+        private static string HandleStaticGraphEvaluation(bool useStaticGraphEvaluation, string args) =>
+            useStaticGraphEvaluation ?
+                args + " /p:RestoreUseStaticGraphEvaluation=true" : args;
     }
 }
