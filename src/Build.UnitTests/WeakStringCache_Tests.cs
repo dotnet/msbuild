@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests
 
             for (int i = 0; i < numberOfStrings; i++)
             {
-                string strPart2 = "1" + String.Concat(Enumerable.Repeat("4858396876", i));
+                string strPart2 = "1" + String.Concat(Enumerable.Repeat("4428939786", i));
                 hashCodes[i] = AddString("Random string ", strPart2, (string cachedString) =>
                 {
                     _cache.GetDebugInfo().ShouldBe(new WeakStringCache.DebugInfo()

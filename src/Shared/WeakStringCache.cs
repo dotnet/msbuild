@@ -2,6 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+#if !CLR2COMPATIBILITY
+using System.Collections.Concurrent;
+#endif
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
@@ -86,16 +89,24 @@ namespace Microsoft.Build
         /// <summary>
         /// Improvised capacity for the scavenging heuristics.
         /// </summary>
-        private int _capacity = 100;
+        private int _capacity = 101;
 
         /// <summary>
         /// A dictionary mapping string hash codes to weak GC handles.
         /// </summary>
+#if CLR2COMPATIBILITY
         private Dictionary<int, StringWeakHandle> _stringsByHashCode;
+#else
+        private ConcurrentDictionary<int, StringWeakHandle> _stringsByHashCode;
+#endif
 
         public WeakStringCache()
         {
+#if CLR2COMPATIBILITY
             _stringsByHashCode = new Dictionary<int, StringWeakHandle>(_capacity);
+#else
+            _stringsByHashCode = new ConcurrentDictionary<int, StringWeakHandle>(Environment.ProcessorCount, _capacity);
+#endif
         }
 
         /// <summary>
@@ -111,37 +122,62 @@ namespace Microsoft.Build
 
             StringWeakHandle handle;
             string result;
+
+#if CLR2COMPATIBILITY
             lock (_stringsByHashCode)
+#endif
             {
-                if (!_stringsByHashCode.TryGetValue(hashCode, out handle))
+                if (_stringsByHashCode.TryGetValue(hashCode, out handle))
+                {
+                    result = handle.GetString(internable);
+                    if (result != null)
+                    {
+                        cacheHit = true;
+                        return result;
+                    }
+                }
+                else
                 {
                     handle = new StringWeakHandle();
-                }
-                result = handle.GetString(internable);
-                if (result != null)
-                {
-                    cacheHit = true;
-                    return result;
                 }
             }
 
             // We don't have the string in the dictionary - create it.
             result = internable.ExpensiveConvertToString();
 
+#if CLR2COMPATIBILITY
             lock (_stringsByHashCode)
             {
+                // Re-read the handle under the lock to prevent leaks if somebody else has modified it.
+                if (_stringsByHashCode.TryGetValue(hashCode, out StringWeakHandle newHandle))
+                {
+                    handle = newHandle;
+                }
+#else
+            {
+#endif
                 handle.SetString(result);
 
                 // Prevent the dictionary from growing forever with GC handles that don't reference any live strings anymore.
                 if (_stringsByHashCode.Count >= _capacity)
                 {
                     // Get rid of unused handles.
-                    ScavengeUnderLock();
+                    ScavengeNoLock();
                     // And do this again when the number of handles reaches double the current after-scavenge number.
                     _capacity = _stringsByHashCode.Count * 2;
                 }
+
+#if CLR2COMPATIBILITY
                 _stringsByHashCode[hashCode] = handle;
+#else
+                if (!_stringsByHashCode.TryAdd(hashCode, handle))
+                {
+                    // If somebody beat us to it and the new handle has not been added, free it.
+                    handle.Free();
+                }
+#endif
             }
+
             cacheHit = false;
             return result;
         }
@@ -167,10 +203,11 @@ namespace Microsoft.Build
         /// <summary>
         /// Iterates over the cache and removes unused GC handles, i.e. handles that don't reference live strings.
         /// This is expensive so try to call such that the cost is amortized to O(1) per GetOrCreateEntry() invocation.
-        /// Assumes exclusive access to the dictionary, i.e. the lock is taken.
+        /// Assumes lock-free access to the dictionary, i.e. the lock is taken or the dictionary supports concurrency.
         /// </summary>
-        private void ScavengeUnderLock()
+        private void ScavengeNoLock()
         {
+#if CLR2COMPATIBILITY
             List<int> keysToRemove = null;
             foreach (KeyValuePair<int, StringWeakHandle> entry in _stringsByHashCode)
             {
@@ -188,6 +225,19 @@ namespace Microsoft.Build
                     _stringsByHashCode.Remove(keysToRemove[i]);
                 }
             }
+#else
+            foreach (KeyValuePair<int, StringWeakHandle> entry in _stringsByHashCode)
+            {
+                if (!entry.Value.IsUsed && _stringsByHashCode.TryRemove(entry.Key, out StringWeakHandle removedHandle))
+                {
+                    // Note that the removed handle may be different from the one we got from the enumerator so it
+                    // is possible that it is actually used. We are fine with these races as long as
+                    // 1) We never leak handles.
+                    // 2) The data structures remain consistent internally.
+                    removedHandle.Free();
+                }
+            }
+#endif
         }
 
         /// <summary>
@@ -195,9 +245,11 @@ namespace Microsoft.Build
         /// </summary>
         public void Scavenge()
         {
+#if CLR2COMPATIBILITY
             lock (_stringsByHashCode)
+#endif
             {
-                ScavengeUnderLock();
+                ScavengeNoLock();
             }
         }
 
@@ -220,7 +272,9 @@ namespace Microsoft.Build
         {
             DebugInfo debugInfo = new DebugInfo();
 
+#if CLR2COMPATIBILITY
             lock (_stringsByHashCode)
+#endif
             {
                 foreach (KeyValuePair<int, StringWeakHandle> entry in _stringsByHashCode)
                 {
