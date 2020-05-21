@@ -102,8 +102,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         {
             if (obj is SdkResult result &&
                   _success == result._success &&
-                  _path == result._path &&
-                  _version == result._version &&
+                  StringComparer.OrdinalIgnoreCase.Equals(_path, result._path) &&
+                  StringComparer.OrdinalIgnoreCase.Equals(_version, result._version) &&
                   _additionalPaths?.Count == result._additionalPaths?.Count &&
                   _propertiesToAdd?.Count == result._propertiesToAdd?.Count &&
                   _itemsToAdd?.Count == result._propertiesToAdd?.Count &&
@@ -113,7 +113,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 {
                     for (int i = 0; i < _additionalPaths.Count; i++)
                     {
-                        if (!_additionalPaths[i].Equals(result._additionalPaths[i]))
+                        if (!_additionalPaths[i].Equals(result._additionalPaths[i], StringComparison.OrdinalIgnoreCase))
                         {
                             return false;
                         }
@@ -153,15 +153,15 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         {
             int hashCode = -1043047289;
             hashCode = hashCode * -1521134295 + _success.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(_path);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(_version);
+            hashCode = hashCode * -1521134295 + StringComparer.OrdinalIgnoreCase.GetHashCode(_path);
+            hashCode = hashCode * -1521134295 + StringComparer.OrdinalIgnoreCase.GetHashCode(_version);
             hashCode = hashCode * -1521134295 + EqualityComparer<SdkReference>.Default.GetHashCode(_sdkReference);
 
             if (_additionalPaths != null)
             {
                 foreach (var additionalPath in _additionalPaths)
                 {
-                    hashCode = hashCode * -1521134295 + additionalPath.GetHashCode();
+                    hashCode = hashCode * -1521134295 + StringComparer.OrdinalIgnoreCase.GetHashCode(additionalPath);
                 }
             }
             if (_propertiesToAdd != null)
