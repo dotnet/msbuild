@@ -273,7 +273,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var resolver = new SdkUtilities.ConfigurableMockSdkResolver(
                 new SdkResultImpl(
                     sdk,
-                    Enumerable.Empty<SdkResultPathAndVersion>(),
+                    Enumerable.Empty<string>(),
+                    version: null,
                     propertiesToAdd,
                     itemsToAdd,
                     warnings: null
@@ -309,7 +310,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var resolver = new SdkUtilities.ConfigurableMockSdkResolver(
                 new SdkResultImpl(
                     sdk,
-                    new[] { new SdkResultPathAndVersion(expectedPath, "1.0") },
+                    new[] { expectedPath },
+                    version: "1.0",
                     propertiesToAdd,
                     itemsToAdd,
                     warnings: null
@@ -353,9 +355,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     sdk,
                     new []
                     {
-                        new SdkResultPathAndVersion(expectedPath1, "1.0"),
-                        new SdkResultPathAndVersion(expectedPath2, "1.0")
+                        expectedPath1,
+                        expectedPath2
                     },
+                    version: "1.0",
                     propertiesToAdd,
                     itemsToAdd,
                     warnings: null
@@ -367,14 +370,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             result.Success.ShouldBeTrue();
 
-            var resultPaths = new List<SdkResultPathAndVersion>();
-            resultPaths.Add(new SdkResultPathAndVersion(result.Path, result.Version));
+            var resultPaths = new List<string>();
+            resultPaths.Add(result.Path);
             resultPaths.AddRange(result.AdditionalPaths);
 
             resultPaths.ShouldBeEquivalentTo(new[]
             {
-                new SdkResultPathAndVersion(expectedPath1, "1.0"),
-                new SdkResultPathAndVersion(expectedPath2, "1.0")
+                expectedPath1,
+                expectedPath2
             });
 
             ValidateExpectedPropertiesAndItems(includePropertiesAndItems, result);
@@ -382,14 +385,11 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             _logger.WarningCount.ShouldBe(0);
         }
 
-        [Theory]
-        [InlineData(true, false)]
-        [InlineData(false, true)]
-        [InlineData(true, true)]
-        public void AssertResolutionWarnsIfResolvedVersionIsDifferentFromReferencedVersionWithMultipleReturnPaths(bool mismatch1, bool mismatch2)
+        [Fact]
+        public void AssertResolutionWarnsIfResolvedVersionIsDifferentFromReferencedVersionWithMultipleReturnPaths()
         {
-            var expectedPath1 = new SdkResultPathAndVersion("First/Path/To/Return/From/Resolver", mismatch1 ? "1.1" : "1.0");
-            var expectedPath2 = new SdkResultPathAndVersion("Second/Path/To/Return/From/Resolver", mismatch2 ? "1.1" : "1.0");
+            var expectedPath1 = "First/Path/To/Return/From/Resolver";
+            var expectedPath2 = "Second/Path/To/Return/From/Resolver";
 
             var sdk = new SdkReference("foo", "1.0", null);
 
@@ -406,6 +406,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                         expectedPath1,
                         expectedPath2
                     },
+                    version: "1.1",
                     propertiesToAdd,
                     itemsToAdd,
                     warnings: null
@@ -417,8 +418,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             result.Success.ShouldBeTrue();
 
-            var resultPaths = new List<SdkResultPathAndVersion>();
-            resultPaths.Add(new SdkResultPathAndVersion(result.Path, result.Version));
+            var resultPaths = new List<string>();
+            resultPaths.Add(result.Path);
             resultPaths.AddRange(result.AdditionalPaths);
 
             resultPaths.ShouldBeEquivalentTo(new[]
@@ -429,15 +430,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             ValidateExpectedPropertiesAndItems(true, result);
 
-            if (mismatch1 && mismatch2)
-            {
-                _logger.WarningCount.ShouldBe(2);
-                _logger.Warnings.ElementAt(1).Code.ShouldStartWith("MSB4241");
-            }
-            else
-            {
-                _logger.WarningCount.ShouldBe(1);
-            }
+            _logger.WarningCount.ShouldBe(1);
             _logger.Warnings.First().Code.ShouldStartWith("MSB4241");
         }
 

@@ -1830,7 +1830,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         foreach (var additionalPath in sdkResult.AdditionalPaths)
                         {
-                            ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, Path.Combine(additionalPath.Path, project),
+                            ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, Path.Combine(additionalPath, project),
                                 throwOnFileNotExistsError, out var additionalProjects);
 
                             projects.AddRange(additionalProjects);

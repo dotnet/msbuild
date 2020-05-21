@@ -43,24 +43,25 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         }
 
-        public SdkResult(SdkReference sdkReference, IEnumerable<SdkResultPathAndVersion> paths, IDictionary<string, string> propertiesToAdd,
+        public SdkResult(SdkReference sdkReference, IEnumerable<string> paths, string version, IDictionary<string, string> propertiesToAdd,
                          IDictionary<string, SdkResultItem> itemsToAdd, IEnumerable<string> warnings)
         {
             Success = true;
             SdkReference = sdkReference;
             if (paths != null)
             {
-                var firstPathAndVersion = paths.FirstOrDefault();
-                if (firstPathAndVersion != null)
+                var firstPath = paths.FirstOrDefault();
+                if (firstPath != null)
                 {
-                    Path = firstPathAndVersion.Path;
-                    Version = firstPathAndVersion.Version;
+                    Path = firstPath;
                 }
                 if (paths.Count() > 1)
                 {
                     AdditionalPaths = paths.Skip(1).ToList();
                 }
             }
+
+            Version = version;
 
             //  Note: these dictionaries should use StringComparison.OrdinalIgnoreCase
             PropertiesToAdd = propertiesToAdd;
@@ -80,7 +81,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             translator.Translate(ref _path);
             translator.Translate(ref _version);
 
-            translator.Translate(ref _additionalPaths, SdkResultTranslationHelpers.Translate, count => new List<SdkResultPathAndVersion>(count));
+            translator.Translate(ref _additionalPaths, (ITranslator t, ref string s) => t.Translate(ref s), count => new List<string>(count));
             translator.TranslateDictionary(ref _propertiesToAdd, count => new Dictionary<string, string>(count, StringComparer.OrdinalIgnoreCase));
             translator.TranslateDictionary(ref _itemsToAdd,
                                            keyTranslator: (ITranslator t, ref string s) => t.Translate(ref s),

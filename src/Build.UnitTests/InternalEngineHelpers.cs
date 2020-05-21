@@ -79,20 +79,20 @@ namespace Microsoft.Build.Unittest
                     return new SdkResult(sdkResult.SdkReference, sdkResult.Warnings, sdkResult.Errors);
                 }
 
-                IEnumerable<SdkResultPathAndVersion> sdkResultPathAndVersions;
+                IEnumerable<string> sdkResultPaths;
                 if (sdkResult.Path == null)
                 {
-                    sdkResultPathAndVersions = Enumerable.Empty<SdkResultPathAndVersion>();
+                    sdkResultPaths = Enumerable.Empty<string>();
                 }
                 else
                 {
-                    List<SdkResultPathAndVersion> pathAndVersionList = new List<SdkResultPathAndVersion>();
-                    pathAndVersionList.Add(new SdkResultPathAndVersion(sdkResult.Path, sdkResult.Version));
+                    List<string> pathAndVersionList = new List<string>();
+                    pathAndVersionList.Add(sdkResult.Path);
                     if (sdkResult.AdditionalPaths != null)
                     {
                         pathAndVersionList.AddRange(sdkResult.AdditionalPaths);
                     }
-                    sdkResultPathAndVersions = pathAndVersionList;
+                    sdkResultPaths = pathAndVersionList;
                 }
 
                 Dictionary<string, SdkResultItem> sdkResultItems;
@@ -116,7 +116,8 @@ namespace Microsoft.Build.Unittest
                 }
 
                 return new SdkResult(sdkResult.SdkReference,
-                                     sdkResultPathAndVersions,
+                                     sdkResultPaths,
+                                     version: sdkResult.Version,
                                      sdkResult.PropertiesToAdd == null ? null : new Dictionary<string, string>(sdkResult.PropertiesToAdd, StringComparer.OrdinalIgnoreCase),
                                      sdkResultItems,
                                      sdkResult.Warnings);

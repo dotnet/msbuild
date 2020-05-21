@@ -18,7 +18,7 @@ namespace Microsoft.Build.Framework
         private protected bool _success;
         private protected string _path;
         private protected string _version;
-        private protected IList<SdkResultPathAndVersion> _additionalPaths;
+        private protected IList<string> _additionalPaths;
         private protected IDictionary<string, string> _propertiesToAdd;
         private protected IDictionary<string, SdkResultItem> _itemsToAdd;
         private protected SdkReference _sdkReference;
@@ -49,7 +49,7 @@ namespace Microsoft.Build.Framework
         /// <remarks>
         /// This allows an SDK resolver to return multiple SDK paths, which will all be imported.
         /// </remarks>
-        public virtual IList<SdkResultPathAndVersion> AdditionalPaths { get => _additionalPaths; set => _additionalPaths = value; }
+        public virtual IList<string> AdditionalPaths { get => _additionalPaths; set => _additionalPaths = value; }
 
         /// <summary>
         /// Properties that should be added to the evaluation.  This allows an SDK resolver to provide information to the build

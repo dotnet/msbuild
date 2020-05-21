@@ -112,7 +112,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(
                 new Build.BackEnd.SdkResolution.SdkResult(
                         new SdkReference("TestPropsAndItemsFromResolverSdk", null, null),
-                        Enumerable.Empty<SdkResultPathAndVersion>(),
+                        Enumerable.Empty<string>(),
+                        version: null,
                         propertiesToAdd,
                         itemsToAdd,
                         warnings: null
@@ -151,7 +152,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(
                 new Build.BackEnd.SdkResolution.SdkResult(
                         new SdkReference("TestPropsAndItemsFromResolverSdk", null, null),
-                        new[] { new SdkResultPathAndVersion(Path.Combine(_testFolder, "Sdk")) },
+                        new[] { Path.Combine(_testFolder, "Sdk") },
+                        version: null,
                         propertiesToAdd,
                         itemsToAdd,
                         warnings: null
@@ -238,9 +240,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 new Build.BackEnd.SdkResolution.SdkResult(
                         new SdkReference("TestPropsAndItemsFromResolverSdk", null, null),
                         new[] {
-                            new SdkResultPathAndVersion(Path.Combine(_testFolder, "Sdk1")),
-                            new SdkResultPathAndVersion(Path.Combine(_testFolder, "Sdk2"))
+                            Path.Combine(_testFolder, "Sdk1"),
+                            Path.Combine(_testFolder, "Sdk2")
                         },
+                        version: null,
                         propertiesToAdd,
                         itemsToAdd,
                         warnings: null
@@ -341,7 +344,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(
                 new Build.BackEnd.SdkResolution.SdkResult(
                         new SdkReference("TestPropsAndItemsFromResolverSdk", null, null),
-                        new[] { new SdkResultPathAndVersion(Path.Combine(_testFolder, "Sdk")) },
+                        new[] { Path.Combine(_testFolder, "Sdk") },
+                        version: null,
                         propertiesToAdd,
                         itemsToAdd,
                         warnings: null

@@ -32,12 +32,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return new SdkResult(_sdkReference, path, version, warnings);
         }
 
-        public override SdkResultBase IndicateSuccess(IEnumerable<SdkResultPathAndVersion> paths,
+        public override SdkResultBase IndicateSuccess(IEnumerable<string> paths,
+                                                      string version,
                                                       IDictionary<string, string> propertiesToAdd = null,
                                                       IDictionary<string, SdkResultItem> itemsToAdd = null,
                                                       IEnumerable<string> warnings = null)
         {
-            return new SdkResult(_sdkReference, paths, propertiesToAdd, itemsToAdd, warnings);
+            return new SdkResult(_sdkReference, paths, version, propertiesToAdd, itemsToAdd, warnings);
         }
     }
 }

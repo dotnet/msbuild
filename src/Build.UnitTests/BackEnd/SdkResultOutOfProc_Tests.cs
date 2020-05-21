@@ -238,9 +238,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         new SdkReference("TestSdk", null, null),
                         new[]
                         {
-                            new SdkResultPathAndVersion(Path.Combine(projectFolder, "Sdk1")),
-                            new SdkResultPathAndVersion(Path.Combine(projectFolder, "Sdk2"))
+                            Path.Combine(projectFolder, "Sdk1"),
+                            Path.Combine(projectFolder, "Sdk2")
                         },
+                        version: null,
                         propertiesToAdd: new Dictionary<string, string>()
                             { {"PropertyNameFromResolver","PropertyValueFromResolver" } },
                         itemsToAdd: new Dictionary<string, SdkResultItem>()

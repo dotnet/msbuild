@@ -32,26 +32,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             }
         }
 
-        public static void Translate(this ITranslator t, ref SdkResultPathAndVersion pathAndVersion)
-        {
-            string path = null;
-            string version = null;
-
-            if (t.Mode == TranslationDirection.WriteToStream)
-            {
-                path = pathAndVersion.Path;
-                version = pathAndVersion.Version;
-            }
-
-            t.Translate(ref path);
-            t.Translate(ref version);
-
-            if (t.Mode == TranslationDirection.ReadFromStream)
-            {
-                pathAndVersion = new SdkResultPathAndVersion(path, version);
-            }
-        }
-
         public static void Translate(this ITranslator t, ref SdkResultItem item)
         {
             string itemSpec = null;

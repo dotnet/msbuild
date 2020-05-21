@@ -35,7 +35,8 @@ namespace Microsoft.Build.Framework
         /// <param name="itemsToAdd">Items to add to the evaluation</param>
         /// <param name="warnings">Optional warnings to display during resolution.</param>
         /// <returns></returns>
-        public abstract SdkResult IndicateSuccess(IEnumerable<SdkResultPathAndVersion> paths,
+        public abstract SdkResult IndicateSuccess(IEnumerable<string> paths,
+            string version,
             IDictionary<string, string> propertiesToAdd = null,
             IDictionary<string, SdkResultItem> itemsToAdd = null,
             IEnumerable<string> warnings = null);
