@@ -117,6 +117,10 @@ namespace Microsoft.Build.UnitTests.Shared
                 successfulExit = p.ExitCode == 0;
             }
 
+            outputHelper?.WriteLine("==== OUTPUT ====");
+            outputHelper?.WriteLine(output);
+            outputHelper?.WriteLine("==============");
+
             Console.WriteLine("==== OUTPUT ====");
             Console.WriteLine(output);
             Console.WriteLine("==============");
