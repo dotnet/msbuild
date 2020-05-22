@@ -186,7 +186,23 @@ namespace Microsoft.Build.Shared
 #if !FEATURE_ASSEMBLYLOADCONTEXT
             try
             {
-                assemblyName = AssemblyName.GetAssemblyName(path);
+                try
+                {
+                    assemblyName = AssemblyName.GetAssemblyName(path);
+                }
+                catch (OutOfMemoryException)
+                {
+                    // Force a full GC and try one more time
+                    // https://github.com/microsoft/msbuild/issues/5150
+                    GC.GetTotalMemory(forceFullCollection: true);
+#if NET35
+                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
+                    GC.WaitForFullGCComplete();
+#else
+                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+#endif
+                    assemblyName = AssemblyName.GetAssemblyName(path);
+                }
             }
             catch (FileLoadException)
             {
