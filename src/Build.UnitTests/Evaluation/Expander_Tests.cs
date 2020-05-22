@@ -2779,6 +2779,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         [Theory]
         [InlineData("AString", "x12x456789x11", "$(AString.IndexOf('x', 1))", "3")]
+        [InlineData("AString", "x12x456789x11", "$(AString.IndexOf('x45', 1))", "3")]
         [InlineData("AString", "x12x456789x11", "$(AString.IndexOf('x', 1, 4))", "3")]
         // 9 is not a valid StringComparison enum value
         [InlineData("AString", "x12x456789x11", "$(AString.IndexOf('x', 9))", "10")]
