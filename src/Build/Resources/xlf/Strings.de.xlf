@@ -187,6 +187,11 @@
       LOCALIZATION: {0} is a semicolon delimited list of files
     </note>
       </trans-unit>
+      <trans-unit id="StaticGraphConstructionMetrics">
+        <source>"Static graph loaded in {0} seconds: {1} nodes, {2} edges"</source>
+        <target state="new">"Static graph loaded in {0} seconds: {1} nodes, {2} edges"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
         <source>MSB4263: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
     </source>

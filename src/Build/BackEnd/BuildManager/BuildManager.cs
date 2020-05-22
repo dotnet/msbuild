@@ -1446,7 +1446,12 @@ namespace Microsoft.Build.Execution
                         });
                 }
 
-                LogMessage($"Static graph loaded in {Math.Round(projectGraph.ConstructionMetrics.ConstructionTime.TotalSeconds, 3)} seconds: {projectGraph.ConstructionMetrics.NodeCount} nodes, {projectGraph.ConstructionMetrics.EdgeCount} edges");
+                LogMessage(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "StaticGraphConstructionMetrics",
+                        Math.Round(projectGraph.ConstructionMetrics.ConstructionTime.TotalSeconds, 3),
+                        projectGraph.ConstructionMetrics.NodeCount,
+                        projectGraph.ConstructionMetrics.EdgeCount));
 
                 IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames);
 
