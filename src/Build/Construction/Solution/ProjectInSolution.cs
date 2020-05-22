@@ -96,7 +96,8 @@ namespace Microsoft.Build.Construction
         private string _relativePath;         // Relative from .SLN file.  For example, "WindowsApplication1\WindowsApplication1.csproj"
         private readonly List<string> _dependencies;     // A list of strings representing the Guids of the dependent projects.
         private IReadOnlyList<string> _dependenciesAsReadonly;
-        private string _uniqueProjectName;    // For example, "MySlnFolder\MySubSlnFolder\WindowsApplication1"
+        private string _uniqueProjectName;    // For example, "MySlnFolder\MySubSlnFolder\Windows_Application1"
+        private string _projectNameWithoutNormalization;    // For example, "MySlnFolder\MySubSlnFolder\Windows.Application1"
 
         /// <summary>
         /// The project configuration in given solution configuration
@@ -345,7 +346,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Find the unique name for this project, e.g. SolutionFolder\SubSolutionFolder\ProjectName
+        /// Find the unique name for this project, e.g. SolutionFolder\SubSolutionFolder\Project_Name
         /// </summary>
         internal string GetUniqueProjectName()
         {
@@ -381,6 +382,45 @@ namespace Microsoft.Build.Construction
             }
 
             return _uniqueProjectName;
+        }
+
+        /// <summary>
+        /// Get the project name with the parent project without normalization, e.g. SolutionFolder\SubSolutionFolder\Project.Name
+        /// </summary>
+        internal string GetProjectNameWithoutNormalization()
+        {
+            if (_projectNameWithoutNormalization == null)
+            {
+                // EtpSubProject and Venus projects have names that are already unique.  No need to prepend the SLN folder.
+                if ((ProjectType == SolutionProjectType.WebProject) || (ProjectType == SolutionProjectType.EtpSubProject))
+                {
+                    _projectNameWithoutNormalization = ProjectName;
+                }
+                else
+                {
+                    // This is "normal" project, which in this context means anything non-Venus and non-EtpSubProject.
+
+                    // If this project has a parent SLN folder, first get the full project name for the SLN folder,
+                    // and tack on trailing backslash.
+                    string projectName = String.Empty;
+
+                    if (ParentProjectGuid != null)
+                    {
+                        if (!ParentSolution.ProjectsByGuid.TryGetValue(ParentProjectGuid, out ProjectInSolution proj))
+                        {
+                            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(proj != null, "SubCategoryForSolutionParsingErrors",
+                                new BuildEventFileInfo(ParentSolution.FullPath), "SolutionParseNestedProjectError");
+                        }
+
+                        projectName = proj.GetProjectNameWithoutNormalization() + "\\";
+                    }
+
+                    // Now tack on our own project name, and cache it in the ProjectInSolution object for future quick access.
+                    _projectNameWithoutNormalization = projectName + ProjectName;
+                }
+            }
+
+            return _projectNameWithoutNormalization;
         }
 
         /// <summary>

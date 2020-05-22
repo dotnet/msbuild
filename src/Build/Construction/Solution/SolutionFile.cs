@@ -199,9 +199,12 @@ namespace Microsoft.Build.Construction
             }
         }
 
-        internal string SolutionFileDirectory { get;
+        internal string SolutionFileDirectory
+        {
+            get;
             // This setter is only used by the unit tests
-            set; }
+            set;
+        }
 
         /// <summary>
         /// For unit-testing only.
@@ -467,7 +470,8 @@ namespace Microsoft.Build.Construction
             }
 
             // Cache the unique name of each project, and check that we don't have any duplicates.
-            var projectsByUniqueName = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var projectsByUniqueName = new Dictionary<string, ProjectInSolution>(StringComparer.OrdinalIgnoreCase);
+            var projectsByProjectName = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (ProjectInSolution proj in _projectsInOrder)
             {
@@ -502,15 +506,47 @@ namespace Microsoft.Build.Construction
                     }
                 }
 
-                // Update the hash table with this unique name
-                bool didntAlreadyExist = projectsByUniqueName.Add(uniqueName);
+                // Detect collision caused by unique name's normalization
+                if (projectsByUniqueName.ContainsKey(uniqueName))
+                {
+                    // Is normalization occured in the current project?
+                    if (uniqueName != proj.ProjectName)
+                    {
+                        // Generates a new unique name
+                        string tempUniqueName = $"{uniqueName}_{proj.ProjectGuid}";
+                        proj.UpdateUniqueProjectName(tempUniqueName);
+                        uniqueName = tempUniqueName;
+                    }
+                    // Is normalization occured in a previous project?
+                    else if (uniqueName != projectsByUniqueName[uniqueName].ProjectName)
+                    {
+                        var projTemp = projectsByUniqueName[uniqueName];
+
+                        // Generates a new unique name
+                        string tempUniqueName = $"{uniqueName}_{projTemp.ProjectGuid}";
+                        projTemp.UpdateUniqueProjectName(tempUniqueName);
+
+                        projectsByUniqueName.Remove(uniqueName);
+                        projectsByUniqueName.Add(tempUniqueName, projTemp);
+                    }
+                }
+
+                bool uniqueNameExists = projectsByUniqueName.ContainsKey(uniqueName);
+
+                // Add the unique name (if it not exists) to the hash table 
+                if (!uniqueNameExists)
+                {
+                    projectsByUniqueName.Add(uniqueName, proj);
+                }
+
+                bool didntAlreadyExist = !uniqueNameExists && projectsByProjectName.Add(proj.GetProjectNameWithoutNormalization());
+
                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
                     didntAlreadyExist,
                     "SubCategoryForSolutionParsingErrors",
                     new BuildEventFileInfo(FullPath),
                     "SolutionParseDuplicateProject",
-                    uniqueName);
-
+                    (uniqueNameExists) ? uniqueName : proj.ProjectName);
             }
         } // ParseSolutionFile()
 

@@ -1913,5 +1913,339 @@ EndGlobal
             Assert.Equal("Debug", solution.GetDefaultConfigurationName()); // "Default solution configuration"
             Assert.Equal(".NET", solution.GetDefaultPlatformName()); // "Default solution platform"
         }
+
+        [Fact]
+        public void ParseSolutionFileContainingProjectsWithSimilarNames_TwoProjects()
+        {
+            string solutionFileContents =
+                @"
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio 15
+                VisualStudioVersion = 15.0.27130.2010
+                MinimumVisualStudioVersion = 10.0.40219.1
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project.Named.With.Dots', 'Project.Named.With.Dots.csproj', '{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}'
+                EndProject
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With_Dots', 'Project_Named_With_Dots.csproj', '{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}'
+                EndProject
+                Global
+	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		                Release|Any CPU = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(SolutionProperties) = preSolution
+		                HideSolutionNode = FALSE
+	                EndGlobalSection
+	                GlobalSection(ExtensibilityGlobals) = postSolution
+		                SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
+	                EndGlobalSection
+                EndGlobal
+                ";
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+
+            ProjectInSolution project1 = (ProjectInSolution)solution.ProjectsByGuid["{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}"];
+            ProjectInSolution project2 = (ProjectInSolution)solution.ProjectsByGuid["{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}"];
+
+            Assert.NotEqual(project1.GetUniqueProjectName(), project2.GetUniqueProjectName());
+            Assert.Equal("Project_Named_With_Dots_{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}", project1.GetUniqueProjectName());
+            Assert.Equal("Project_Named_With_Dots", project2.GetUniqueProjectName());
+
+            Assert.Equal("Project.Named.With.Dots", project1.GetProjectNameWithoutNormalization());
+            Assert.Equal("Project_Named_With_Dots", project2.GetProjectNameWithoutNormalization());
+        }
+
+        [Fact]
+        public void ParseSolutionFileContainingProjectsWithSimilarNames_TwoProjects_DifferentOrder()
+        {
+            string solutionFileContents =
+                @"
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio 15
+                VisualStudioVersion = 15.0.27130.2010
+                MinimumVisualStudioVersion = 10.0.40219.1
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With_Dots', 'Project_Named_With_Dots.csproj', '{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}'
+                EndProject
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project.Named.With.Dots', 'Project.Named.With.Dots.csproj', '{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}'
+                EndProject
+                Global
+	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		                Release|Any CPU = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(SolutionProperties) = preSolution
+		                HideSolutionNode = FALSE
+	                EndGlobalSection
+	                GlobalSection(ExtensibilityGlobals) = postSolution
+		                SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
+	                EndGlobalSection
+                EndGlobal
+                ";
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+
+            ProjectInSolution project1 = (ProjectInSolution)solution.ProjectsByGuid["{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}"];
+            ProjectInSolution project2 = (ProjectInSolution)solution.ProjectsByGuid["{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}"];
+
+            Assert.NotEqual(project1.GetUniqueProjectName(), project2.GetUniqueProjectName());
+            Assert.Equal("Project_Named_With_Dots_{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}", project1.GetUniqueProjectName());
+            Assert.Equal("Project_Named_With_Dots", project2.GetUniqueProjectName());
+
+            Assert.Equal("Project.Named.With.Dots", project1.GetProjectNameWithoutNormalization());
+            Assert.Equal("Project_Named_With_Dots", project2.GetProjectNameWithoutNormalization());
+        }
+
+        [Fact]
+        public void ParseSolutionFileContainingProjectsWithSimilarNames_ThreeProjects()
+        {
+            string solutionFileContents =
+                @"
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio 15
+                VisualStudioVersion = 15.0.27130.2010
+                MinimumVisualStudioVersion = 10.0.40219.1
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With_Dots', 'Project_Named_With_Dots.csproj', '{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}'
+                EndProject
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With.Dots', 'Project_Named_With.Dots.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
+                EndProject
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project.Named.With.Dots', 'Project.Named.With.Dots.csproj', '{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}'
+                EndProject
+                Global
+	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		                Release|Any CPU = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(SolutionProperties) = preSolution
+		                HideSolutionNode = FALSE
+	                EndGlobalSection
+	                GlobalSection(ExtensibilityGlobals) = postSolution
+		                SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
+	                EndGlobalSection
+                EndGlobal
+                ";
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+
+            ProjectInSolution project1 = (ProjectInSolution)solution.ProjectsByGuid["{6185CC21-BE89-448A-B3C0-D1C27112E595}"];
+            ProjectInSolution project2 = (ProjectInSolution)solution.ProjectsByGuid["{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}"];
+            ProjectInSolution project3 = (ProjectInSolution)solution.ProjectsByGuid["{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}"];
+
+            Assert.NotEqual(project1.GetUniqueProjectName(), project2.GetUniqueProjectName());
+            Assert.NotEqual(project2.GetUniqueProjectName(), project3.GetUniqueProjectName());
+            Assert.NotEqual(project1.GetUniqueProjectName(), project3.GetUniqueProjectName());
+
+            Assert.Equal("Project_Named_With_Dots_{6185CC21-BE89-448A-B3C0-D1C27112E595}", project1.GetUniqueProjectName());
+            Assert.Equal("Project_Named_With_Dots_{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}", project2.GetUniqueProjectName());
+            Assert.Equal("Project_Named_With_Dots", project3.GetUniqueProjectName());
+
+            Assert.Equal("Project_Named_With.Dots", project1.GetProjectNameWithoutNormalization());
+            Assert.Equal("Project.Named.With.Dots", project2.GetProjectNameWithoutNormalization());
+            Assert.Equal("Project_Named_With_Dots", project3.GetProjectNameWithoutNormalization());
+        }
+
+        [Fact]
+        public void ParseSolutionFileContainingProjectsWithSimilarNames_ThreeProjects_DifferentOrder()
+        {
+            string solutionFileContents =
+                @"
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio 15
+                VisualStudioVersion = 15.0.27130.2010
+                MinimumVisualStudioVersion = 10.0.40219.1
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project.Named.With.Dots', 'Project.Named.With.Dots.csproj', '{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}'
+                EndProject
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With_Dots', 'Project_Named_With_Dots.csproj', '{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}'
+                EndProject
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With.Dots', 'Project_Named_With.Dots.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
+                EndProject
+                Global
+	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		                Release|Any CPU = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(SolutionProperties) = preSolution
+		                HideSolutionNode = FALSE
+	                EndGlobalSection
+	                GlobalSection(ExtensibilityGlobals) = postSolution
+		                SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
+	                EndGlobalSection
+                EndGlobal
+                ";
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+
+            ProjectInSolution project1 = (ProjectInSolution)solution.ProjectsByGuid["{6185CC21-BE89-448A-B3C0-D1C27112E595}"];
+            ProjectInSolution project2 = (ProjectInSolution)solution.ProjectsByGuid["{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}"];
+            ProjectInSolution project3 = (ProjectInSolution)solution.ProjectsByGuid["{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}"];
+
+            Assert.NotEqual(project1.GetUniqueProjectName(), project2.GetUniqueProjectName());
+            Assert.NotEqual(project2.GetUniqueProjectName(), project3.GetUniqueProjectName());
+            Assert.NotEqual(project1.GetUniqueProjectName(), project3.GetUniqueProjectName());
+
+            Assert.Equal("Project_Named_With_Dots_{6185CC21-BE89-448A-B3C0-D1C27112E595}", project1.GetUniqueProjectName());
+            Assert.Equal("Project_Named_With_Dots_{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}", project2.GetUniqueProjectName());
+            Assert.Equal("Project_Named_With_Dots", project3.GetUniqueProjectName());
+
+            Assert.Equal("Project_Named_With.Dots", project1.GetProjectNameWithoutNormalization());
+            Assert.Equal("Project.Named.With.Dots", project2.GetProjectNameWithoutNormalization());
+            Assert.Equal("Project_Named_With_Dots", project3.GetProjectNameWithoutNormalization());
+        }
+
+        [Fact]
+        public void ParseSolutionFileContainingProjectsWithSimilarNames_ThreeProjects_OneNormalizedDuplicated()
+        {
+            string solutionFileContents =
+                @"
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio 15
+                VisualStudioVersion = 15.0.27130.2010
+                MinimumVisualStudioVersion = 10.0.40219.1
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project.Named.With.Dots', 'Project.Named.With.Dots.csproj', '{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}'
+                EndProject
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With_Dots', 'Project_Named_With_Dots.csproj', '{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}'
+                EndProject
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project.Named.With.Dots', 'Project.Named.With.Dots.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
+                EndProject
+                Global
+	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		                Release|Any CPU = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(SolutionProperties) = preSolution
+		                HideSolutionNode = FALSE
+	                EndGlobalSection
+	                GlobalSection(ExtensibilityGlobals) = postSolution
+		                SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
+	                EndGlobalSection
+                EndGlobal
+                ";
+
+            Action parseSolution = () => ParseSolutionHelper(solutionFileContents);
+            var exception = Assert.Throws<InvalidProjectFileException>(parseSolution);
+
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out string helpKeyword, "SolutionParseDuplicateProject", "Project.Named.With.Dots");
+
+            Assert.StartsWith(message, exception.Message);
+        }
+
+        [Fact]
+        public void ParseSolutionFileContainingProjectsWithSimilarNames_ThreeProjects_OneDuplicated()
+        {
+            string solutionFileContents =
+                @"
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio 15
+                VisualStudioVersion = 15.0.27130.2010
+                MinimumVisualStudioVersion = 10.0.40219.1
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project.Named.With.Dots', 'Project.Named.With.Dots.csproj', '{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}'
+                EndProject
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With_Dots', 'Project_Named_With_Dots.csproj', '{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}'
+                EndProject
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With_Dots', 'Project_Named_With_Dots.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
+                EndProject
+                Global
+	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		                Release|Any CPU = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(SolutionProperties) = preSolution
+		                HideSolutionNode = FALSE
+	                EndGlobalSection
+	                GlobalSection(ExtensibilityGlobals) = postSolution
+		                SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
+	                EndGlobalSection
+                EndGlobal
+                ";
+
+            Action parseSolution = () => ParseSolutionHelper(solutionFileContents);
+            var exception = Assert.Throws<InvalidProjectFileException>(parseSolution);
+
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out string helpKeyword, "SolutionParseDuplicateProject", "Project_Named_With_Dots");
+
+            Assert.StartsWith(message, exception.Message);
+        }
+
+        [Fact]
+        public void ParseSolutionFileContainingProjectsWithSimilarNames_FourProjects_OneDuplicated()
+        {
+            string solutionFileContents =
+                @"
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio 15
+                VisualStudioVersion = 15.0.27130.2010
+                MinimumVisualStudioVersion = 10.0.40219.1
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project.Named.With.Dots', 'Project.Named.With.Dots.csproj', '{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}'
+                EndProject
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With_Dots', 'Project_Named_With_Dots.csproj', '{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}'
+                EndProject
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With.Dots', 'Project_Named_With.Dots.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
+                EndProject
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With_Dots', 'Project_Named_With_Dots.csproj', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
+                EndProject
+                Global
+	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		                Release|Any CPU = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(SolutionProperties) = preSolution
+		                HideSolutionNode = FALSE
+	                EndGlobalSection
+	                GlobalSection(ExtensibilityGlobals) = postSolution
+		                SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
+	                EndGlobalSection
+                EndGlobal
+                ";
+
+            Action parseSolution = () => ParseSolutionHelper(solutionFileContents);
+            var exception = Assert.Throws<InvalidProjectFileException>(parseSolution);
+
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out string helpKeyword, "SolutionParseDuplicateProject", "Project_Named_With_Dots");
+
+            Assert.StartsWith(message, exception.Message);
+        }
     }
 }
