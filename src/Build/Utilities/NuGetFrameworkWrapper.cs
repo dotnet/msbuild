@@ -61,9 +61,9 @@ namespace Microsoft.Build.Evaluation
             return (VersionProperty.GetValue(Parse(tfm)) as Version).ToString(2);
         }
 
-        public bool IsCompatible(string tfm1, string tfm2)
+        public bool IsCompatible(string target, string candidate)
         {
-            return Convert.ToBoolean(IsCompatibleMethod.Invoke(DefaultCompatibilityProvider, new object[] { Parse(tfm1), Parse(tfm2) }));
+            return Convert.ToBoolean(IsCompatibleMethod.Invoke(DefaultCompatibilityProvider, new object[] { Parse(target), Parse(candidate) }));
         }
     }
 }

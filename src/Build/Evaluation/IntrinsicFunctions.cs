@@ -490,9 +490,9 @@ namespace Microsoft.Build.Evaluation
             return NuGetFramework.Value.GetTargetFrameworkVersion(tfm);
         }
 
-        internal static bool IsTargetFrameworkCompatible(string tfm1, string tfm2)
+        internal static bool IsTargetFrameworkCompatible(string target, string candidate)
         {
-            return NuGetFramework.Value.IsCompatible(tfm1, tfm2);
+            return NuGetFramework.Value.IsCompatible(target, candidate);
         }
 
         public static string GetCurrentToolsDirectory()
