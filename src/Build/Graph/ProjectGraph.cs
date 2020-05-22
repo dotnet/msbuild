@@ -58,6 +58,25 @@ namespace Microsoft.Build.Graph
 
         internal GraphBuilder.GraphEdges TestOnly_Edges => Edges;
 
+        public GraphConstructionMetrics ConstructionMetrics { get; private set;}
+
+        /// <summary>
+        /// Various metrics on graph construction.
+        /// </summary>
+        public readonly struct GraphConstructionMetrics
+        {
+            public GraphConstructionMetrics(TimeSpan constructionTime, int nodeCount, int edgeCount)
+            {
+                ConstructionTime = constructionTime;
+                NodeCount = nodeCount;
+                EdgeCount = edgeCount;
+            }
+
+            public TimeSpan ConstructionTime { get; }
+            public int NodeCount { get; }
+            public int EdgeCount { get; }
+        }
+
         /// <summary>
         ///     Gets the project nodes representing the entry points.
         /// </summary>
@@ -396,7 +415,9 @@ namespace Microsoft.Build.Graph
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
 
-            projectInstanceFactory = projectInstanceFactory ?? DefaultProjectInstanceFactory;
+            var timer = Stopwatch.StartNew();
+
+            projectInstanceFactory ??= DefaultProjectInstanceFactory;
 
             var graphBuilder = new GraphBuilder(
                 entryPoints,
@@ -413,6 +434,10 @@ namespace Microsoft.Build.Graph
             Edges = graphBuilder.Edges;
 
             _projectNodesTopologicallySorted = new Lazy<IReadOnlyCollection<ProjectGraphNode>>(() => TopologicalSort(GraphRoots, ProjectNodes));
+
+            timer.Stop();
+
+            ConstructionMetrics = new GraphConstructionMetrics(timer.Elapsed, ProjectNodes.Count, Edges.Count);
         }
 
         internal string ToDot()
