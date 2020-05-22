@@ -747,6 +747,12 @@ namespace Microsoft.Build.BackEnd
                 // Logger threw arbitrary exception
                 thrownException = ex;
             }
+            catch (OutOfMemoryException ex)
+            {
+                // This is normally treated as a critical exception, but here at the top level we want to handle it to
+                // ensure proper logging when possible. https://github.com/microsoft/msbuild/issues/5150
+                thrownException = ex;
+            }
             catch (Exception ex)
             {
                 thrownException = ex;
