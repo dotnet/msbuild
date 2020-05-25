@@ -122,6 +122,9 @@ namespace Microsoft.Build
 
             StringWeakHandle handle;
             string result;
+#if !CLR2COMPATIBILITY
+            bool addNewHandle = false;
+#endif
 
 #if CLR2COMPATIBILITY
             lock (_stringsByHashCode)
@@ -139,6 +142,9 @@ namespace Microsoft.Build
                 else
                 {
                     handle = new StringWeakHandle();
+#if !CLR2COMPATIBILITY
+                    addNewHandle = true;
+#endif
                 }
             }
 
@@ -170,7 +176,7 @@ namespace Microsoft.Build
 #if CLR2COMPATIBILITY
                 _stringsByHashCode[hashCode] = handle;
 #else
-                if (!_stringsByHashCode.TryAdd(hashCode, handle))
+                if (addNewHandle && !_stringsByHashCode.TryAdd(hashCode, handle))
                 {
                     // If somebody beat us to it and the new handle has not been added, free it.
                     handle.Free();
