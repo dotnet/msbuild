@@ -107,7 +107,7 @@ namespace Microsoft.NET.TestFramework
         private void InitMSBuildVersion()
         {
             var logger = new StringTestLogger();
-            var command = new DotnetCommand(logger, "msbuild", "-version");
+            var command = new MSBuildVersionCommand(logger);
 
             command.WorkingDirectory = TestContext.Current.TestExecutionDirectory;
 
