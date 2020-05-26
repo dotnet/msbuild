@@ -2479,10 +2479,6 @@ namespace Microsoft.Build.Evaluation
 
                     if (!string.IsNullOrEmpty(itemElement.Include))
                     {
-                        if (NativeMethodsShared.IsWindows && FileUtilities.InvalidFileNameChars.Any(c => itemElement.Include.Contains(c)))
-                        {
-                            continue;
-                        }
                         var globResult = BuildGlobResultFromIncludeItem(itemElement, removeElementCache);
 
                         if (globResult != null)
@@ -2492,10 +2488,6 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (!string.IsNullOrEmpty(itemElement.Remove))
                     {
-                        if (NativeMethodsShared.IsWindows && FileUtilities.InvalidFileNameChars.Any(c => itemElement.Include.Contains(c)))
-                        {
-                            continue;
-                        }
                         CacheInformationFromRemoveItem(itemElement, removeElementCache);
                     }
                 }
@@ -2511,6 +2503,11 @@ namespace Microsoft.Build.Evaluation
 
                 ImmutableArray<ItemSpecFragment> includeGlobFragments = includeItemspec.Fragments.Where(f => f is GlobFragment).ToImmutableArray();
                 if (includeGlobFragments.Length == 0)
+                {
+                    return null;
+                }
+
+                if (NativeMethodsShared.IsWindows && itemElement.Include.IndexOfAny(FileUtilities.InvalidFileNameChars) != -1)
                 {
                     return null;
                 }
