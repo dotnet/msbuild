@@ -471,7 +471,7 @@ namespace Microsoft.Build.Construction
 
             // Cache the unique name of each project, and check that we don't have any duplicates.
             var projectsByUniqueName = new Dictionary<string, ProjectInSolution>(StringComparer.OrdinalIgnoreCase);
-            var projectsByProjectName = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var projectsByOriginalName = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (ProjectInSolution proj in _projectsInOrder)
             {

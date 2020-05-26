@@ -97,7 +97,7 @@ namespace Microsoft.Build.Construction
         private readonly List<string> _dependencies;     // A list of strings representing the Guids of the dependent projects.
         private IReadOnlyList<string> _dependenciesAsReadonly;
         private string _uniqueProjectName;    // For example, "MySlnFolder\MySubSlnFolder\Windows_Application1"
-        private string _projectNameWithoutNormalization;    // For example, "MySlnFolder\MySubSlnFolder\Windows.Application1"
+        private string _originalProjectName;    // For example, "MySlnFolder\MySubSlnFolder\Windows.Application1"
 
         /// <summary>
         /// The project configuration in given solution configuration
@@ -387,7 +387,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Get the project name with the parent project without normalization, e.g. SolutionFolder\SubSolutionFolder\Project.Name
         /// </summary>
-        internal string GetProjectNameWithoutNormalization()
+        internal string GetOriginalProjectName()
         {
             if (_projectNameWithoutNormalization == null)
             {
