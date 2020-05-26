@@ -539,7 +539,7 @@ namespace Microsoft.Build.Construction
                     projectsByUniqueName.Add(uniqueName, proj);
                 }
 
-                bool didntAlreadyExist = !uniqueNameExists && projectsByProjectName.Add(proj.GetProjectNameWithoutNormalization());
+                bool didntAlreadyExist = !uniqueNameExists && projectsByOriginalName.Add(proj.GetOriginalProjectName());
 
                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
                     didntAlreadyExist,

@@ -389,12 +389,12 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal string GetOriginalProjectName()
         {
-            if (_projectNameWithoutNormalization == null)
+            if (_originalProjectName == null)
             {
                 // EtpSubProject and Venus projects have names that are already unique.  No need to prepend the SLN folder.
                 if ((ProjectType == SolutionProjectType.WebProject) || (ProjectType == SolutionProjectType.EtpSubProject))
                 {
-                    _projectNameWithoutNormalization = ProjectName;
+                    _originalProjectName = ProjectName;
                 }
                 else
                 {
@@ -412,15 +412,15 @@ namespace Microsoft.Build.Construction
                                 new BuildEventFileInfo(ParentSolution.FullPath), "SolutionParseNestedProjectError");
                         }
 
-                        projectName = proj.GetProjectNameWithoutNormalization() + "\\";
+                        projectName = proj.GetOriginalProjectName() + "\\";
                     }
 
                     // Now tack on our own project name, and cache it in the ProjectInSolution object for future quick access.
-                    _projectNameWithoutNormalization = projectName + ProjectName;
+                    _originalProjectName = projectName + ProjectName;
                 }
             }
 
-            return _projectNameWithoutNormalization;
+            return _originalProjectName;
         }
 
         /// <summary>

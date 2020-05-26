@@ -1955,8 +1955,8 @@ EndGlobal
             Assert.Equal("Project_Named_With_Dots_{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}", project1.GetUniqueProjectName());
             Assert.Equal("Project_Named_With_Dots", project2.GetUniqueProjectName());
 
-            Assert.Equal("Project.Named.With.Dots", project1.GetProjectNameWithoutNormalization());
-            Assert.Equal("Project_Named_With_Dots", project2.GetProjectNameWithoutNormalization());
+            Assert.Equal("Project.Named.With.Dots", project1.GetOriginalProjectName());
+            Assert.Equal("Project_Named_With_Dots", project2.GetOriginalProjectName());
         }
 
         [Fact]
@@ -2000,8 +2000,8 @@ EndGlobal
             Assert.Equal("Project_Named_With_Dots_{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}", project1.GetUniqueProjectName());
             Assert.Equal("Project_Named_With_Dots", project2.GetUniqueProjectName());
 
-            Assert.Equal("Project.Named.With.Dots", project1.GetProjectNameWithoutNormalization());
-            Assert.Equal("Project_Named_With_Dots", project2.GetProjectNameWithoutNormalization());
+            Assert.Equal("Project.Named.With.Dots", project1.GetOriginalProjectName());
+            Assert.Equal("Project_Named_With_Dots", project2.GetOriginalProjectName());
         }
 
         [Fact]
@@ -2054,9 +2054,9 @@ EndGlobal
             Assert.Equal("Project_Named_With_Dots_{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}", project2.GetUniqueProjectName());
             Assert.Equal("Project_Named_With_Dots", project3.GetUniqueProjectName());
 
-            Assert.Equal("Project_Named_With.Dots", project1.GetProjectNameWithoutNormalization());
-            Assert.Equal("Project.Named.With.Dots", project2.GetProjectNameWithoutNormalization());
-            Assert.Equal("Project_Named_With_Dots", project3.GetProjectNameWithoutNormalization());
+            Assert.Equal("Project_Named_With.Dots", project1.GetOriginalProjectName());
+            Assert.Equal("Project.Named.With.Dots", project2.GetOriginalProjectName());
+            Assert.Equal("Project_Named_With_Dots", project3.GetOriginalProjectName());
         }
 
         [Fact]
@@ -2109,9 +2109,9 @@ EndGlobal
             Assert.Equal("Project_Named_With_Dots_{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}", project2.GetUniqueProjectName());
             Assert.Equal("Project_Named_With_Dots", project3.GetUniqueProjectName());
 
-            Assert.Equal("Project_Named_With.Dots", project1.GetProjectNameWithoutNormalization());
-            Assert.Equal("Project.Named.With.Dots", project2.GetProjectNameWithoutNormalization());
-            Assert.Equal("Project_Named_With_Dots", project3.GetProjectNameWithoutNormalization());
+            Assert.Equal("Project_Named_With.Dots", project1.GetOriginalProjectName());
+            Assert.Equal("Project.Named.With.Dots", project2.GetOriginalProjectName());
+            Assert.Equal("Project_Named_With_Dots", project3.GetOriginalProjectName());
         }
 
         [Fact]
