@@ -1852,52 +1852,59 @@ namespace Microsoft.Build.Construction
             IsExplicitlyLoaded = true;
         }
 
+#nullable enable
+
         /// <summary>
         /// Creates and returns a list of <see cref="ProjectImportElement"/> nodes which are implicitly
         /// referenced by the Project.
         /// </summary>
         /// <param name="currentProjectOrImport">Current project</param>
-        /// <returns>An <see cref="IEnumerable{SdkReference}"/> containing details of the SDKs referenced by the project.</returns>
+        /// <returns>A <see cref="List{ProjectImportElement}"/> of implicit &lt;Import /&gt; elements for the SDKs referenced by the project.</returns>
         internal List<ProjectImportElement> GetImplicitImportNodes(ProjectRootElement currentProjectOrImport)
         {
             var nodes = new List<ProjectImportElement>();
 
-            string sdkAttribute = Sdk;
+            var sdkAttribute = Sdk;
             if (!string.IsNullOrWhiteSpace(sdkAttribute))
             {
-                foreach (var referencedSdk in ParseSdks(sdkAttribute, SdkLocation))
+                var location = SdkLocation;
+                var origin = new SdkReferenceOrigin(location, location, location);
+
+                foreach (var sdk in sdkAttribute.Split(MSBuildConstants.SemicolonChar).Select(i => i.Trim()))
                 {
-                    nodes.Add(ProjectImportElement.CreateImplicit("Sdk.props", currentProjectOrImport, ImplicitImportLocation.Top, referencedSdk, this));
-                    nodes.Add(ProjectImportElement.CreateImplicit("Sdk.targets", currentProjectOrImport, ImplicitImportLocation.Bottom, referencedSdk, this));
+                    if (!SdkReference.TryParse(sdk, out var reference))
+                    {
+                        ProjectErrorUtilities.ThrowInvalidProject(location, "InvalidSdkFormat", sdkAttribute);
+                        break;
+                    }
+
+                    var sdkReferenceWithOrigin = new SdkReferenceWithOrigin(reference, origin);
+                    AddImplicitImports(new SdkReferenceConstantSource(in sdkReferenceWithOrigin), this);
                 }
             }
 
             foreach (var sdkNode in Children.OfType<ProjectSdkElement>())
-            {
-                var referencedSdk = new SdkReference(
-                    sdkNode.XmlElement.GetAttribute("Name"),
-                    sdkNode.XmlElement.GetAttribute("Version"),
-                    sdkNode.XmlElement.GetAttribute("MinimumVersion"));
-
-                nodes.Add(ProjectImportElement.CreateImplicit("Sdk.props", currentProjectOrImport, ImplicitImportLocation.Top, referencedSdk, sdkNode));
-                nodes.Add(ProjectImportElement.CreateImplicit("Sdk.targets", currentProjectOrImport, ImplicitImportLocation.Bottom, referencedSdk, sdkNode));
-            }
+                AddImplicitImports(sdkNode, sdkNode);
 
             return nodes;
-        }
 
-        private static IEnumerable<SdkReference> ParseSdks(string sdks, IElementLocation sdkLocation)
-        {
-            foreach (string sdk in sdks.Split(MSBuildConstants.SemicolonChar).Select(i => i.Trim()))
+            void AddImplicitImports(ISdkReferenceSource? sdkReferenceSource, ProjectElement originalElement)
             {
-                if (!SdkReference.TryParse(sdk, out SdkReference sdkReference))
-                {
-                    ProjectErrorUtilities.ThrowInvalidProject(sdkLocation, "InvalidSdkFormat", sdks);
-                }
+                const string sdkProps = "Sdk.props";
+                const string sdkTargets = "Sdk.targets";
 
-                yield return sdkReference;
+                var props = ProjectImportElement.CreateImplicit(sdkProps, currentProjectOrImport,
+                                                                ImplicitImportLocation.Top,
+                                                                sdkReferenceSource, originalElement);
+                var targets = ProjectImportElement.CreateImplicit(sdkTargets, currentProjectOrImport,
+                                                                  ImplicitImportLocation.Bottom,
+                                                                  sdkReferenceSource, originalElement);
+                nodes.Add(props);
+                nodes.Add(targets);
             }
         }
+
+#nullable restore
 
         /// <summary>
         /// Determines if the specified file is an empty XML file meaning it has no contents, contains only whitespace, or

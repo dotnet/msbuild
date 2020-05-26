@@ -9,14 +9,13 @@ using System.Reflection;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
-using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
 using Shouldly;
 using Xunit;
-using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -131,7 +130,6 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ResolvedImport initialResolvedImport = project.Imports[0];
             Assert.Equal(_sdkPropsPath, initialResolvedImport.ImportedProject.FullPath);
 
-
             ResolvedImport finalResolvedImport = project.Imports[1];
             Assert.Equal(_sdkTargetsPath, finalResolvedImport.ImportedProject.FullPath);
 
@@ -139,6 +137,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             VerifyPropertyFromImplicitImport(project, "FinalImportProperty", _sdkTargetsPath, "World");
 
             // TODO: Check the location of the import, maybe it should point to the location of the SDK attribute?
+            initialResolvedImport.ImportingElement.SdkLocation.ShouldNotBeNull();
+            initialResolvedImport.ImportingElement.SdkLocation.ShouldNotBe(ElementLocation.EmptyLocation);
+            finalResolvedImport.ImportingElement.SdkLocation.ShouldNotBeNull();
+            finalResolvedImport.ImportingElement.SdkLocation.ShouldNotBe(ElementLocation.EmptyLocation);
         }
 
         /// <summary>
@@ -291,7 +293,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 Project project = new Project(ProjectRootElement.Create(XmlReader.Create(new StringReader(content))));
             });
-            
+
             Assert.Equal("MSB4229", exception.ErrorCode);
         }
 
@@ -469,7 +471,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 loadSettings: ProjectLoadSettings.IgnoreMissingImports);
 
             project.GetPropertyValue("Success").ShouldBe("true");
-            
+
             ProjectImportedEventArgs[] events = logger.BuildMessageEvents.OfType<ProjectImportedEventArgs>().ToArray();
 
             // There are two implicit imports so there should be two logged ProjectImportedEventArgs
@@ -485,53 +487,118 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         }
 
         [Theory]
-        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, "min=1.0.0", null, null, "1.0.0", typeof(ProjectRootElement))]
-        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, "1.0.0", null, "1.0.0", null, typeof(ProjectRootElement))]
-        [InlineData(ProjectTemplateSdkAsElementWithVersion, "2.0.0", "1.0.0", "2.0.0", "1.0.0", typeof(ProjectSdkElement))]
-        public void ImplicitImportsShouldHaveParsedSdkInfo(
-            string projectTemplate,
+        [InlineData("min=1.0.0", null, "1.0.0")]
+        [InlineData("1.0.0", "1.0.0", null)]
+        public void ImplicitProjectSdkImportsShouldHaveParsedSdkInfo(
             string version,
-            string minimumVersion,
             string expectedVersion,
-            string expectedMinimumVersion,
-            Type expectedOriginalElementType)
+            string expectedMinimumVersion)
         {
             _env.SetEnvironmentVariable("MSBuildSDKsPath", _testSdkRoot);
             File.WriteAllText(_sdkPropsPath, _sdkPropsContent);
             File.WriteAllText(_sdkTargetsPath, _sdkTargetsContent);
-            string projectContents = string.Format(projectTemplate, SdkName, _projectInnerContents, version, minimumVersion);
+            var projectContents = string.Format(
+                ProjectTemplateSdkAsAttributeWithVersion,
+                SdkName,
+                _projectInnerContents,
+                version
+            );
 
-            var project = Project.FromXmlReader(XmlReader.Create(new StringReader(projectContents)), new ProjectOptions());
+            using var xmlReader = XmlReader.Create(new StringReader(projectContents));
+            var project = Project.FromXmlReader(xmlReader, new ProjectOptions());
 
-            project.Imports.Count.ShouldBe(2);
+            var expectedReference = new SdkReference(SdkName, expectedVersion, expectedMinimumVersion);
+            var expectedOrigin = new SdkReferenceOrigin(
+                project.Xml.SdkLocation,
+                project.Xml.SdkLocation,
+                project.Xml.SdkLocation
+            );
+
             var imports = project.Imports;
 
-            for (var i = 0; i < 2; i++)
+            imports.Count.ShouldBe(2);
+
+            AssertImplicitImportElement(imports[0], ImplicitImportLocation.Top);
+            AssertImplicitImportElement(imports[1], ImplicitImportLocation.Bottom);
+
+            void AssertImplicitImportElement(ResolvedImport import, ImplicitImportLocation location) =>
+                AssertImplicitImportElement<ProjectRootElement>(expectedReference, expectedOrigin, import, location);
+        }
+
+        [Theory]
+        [InlineData("2.0.0", "1.0.0", "2.0.0", "1.0.0")]
+        public void ImplicitSdkElementImportsShouldHaveParsedSdkInfo(
+            string version,
+            string minimumVersion,
+            string expectedVersion,
+            string expectedMinimumVersion)
+        {
+            _env.SetEnvironmentVariable("MSBuildSDKsPath", _testSdkRoot);
+            File.WriteAllText(_sdkPropsPath, _sdkPropsContent);
+            File.WriteAllText(_sdkTargetsPath, _sdkTargetsContent);
+            var projectContents = string.Format(
+                ProjectTemplateSdkAsElementWithVersion,
+                SdkName,
+                _projectInnerContents,
+                version,
+                minimumVersion
+            );
+
+            using var xmlReader = XmlReader.Create(new StringReader(projectContents));
+            var project = Project.FromXmlReader(xmlReader, new ProjectOptions());
+
+            var projectSdkElement = project.Xml.Children.OfType<ProjectSdkElement>().Single();
+
+            var expectedReference = new SdkReference(SdkName, expectedVersion, expectedMinimumVersion);
+            var expectedOrigin = new SdkReferenceOrigin(
+                projectSdkElement.GetAttributeLocation(XMakeAttributes.sdkName),
+                projectSdkElement.GetAttributeLocation(XMakeAttributes.sdkVersion),
+                projectSdkElement.GetAttributeLocation(XMakeAttributes.sdkMinimumVersion)
+            );
+
+            expectedOrigin.ShouldNotBeNull();
+            expectedOrigin.Name.ShouldNotBeNull();
+            expectedOrigin.Version.ShouldNotBeNull();
+            expectedOrigin.MinimumVersion.ShouldNotBeNull();
+
+            var imports = project.Imports;
+
+            imports.Count.ShouldBe(2);
+
+            AssertImplicitImportElement(imports[0], ImplicitImportLocation.Top);
+            AssertImplicitImportElement(imports[1], ImplicitImportLocation.Bottom);
+
+            void AssertImplicitImportElement(ResolvedImport import, ImplicitImportLocation location) =>
+                AssertImplicitImportElement<ProjectSdkElement>(expectedReference, expectedOrigin, import, location);
+        }
+
+        private void AssertImplicitImportElement<T>(SdkReference expectedReference, SdkReferenceOrigin expectedOrigin,
+            ResolvedImport import, ImplicitImportLocation implicitLocation)
+        {
+            var importingElement = import.ImportingElement;
+            importingElement.Sdk.ShouldBe(expectedReference.Name);
+
+            var sdkReference = importingElement.SdkReferenceWithOrigin;
+            sdkReference.ShouldNotBeNull();
+            sdkReference.Value.Reference.ShouldBe(expectedReference);
+            sdkReference.Value.Origin.ShouldBe(expectedOrigin);
+
+            importingElement.SdkReference.ShouldNotBeNull();
+            importingElement.SdkReference.ShouldBe(expectedReference);
+            importingElement.SdkLocation.ShouldBe(expectedOrigin.Name);
+            importingElement.OriginalElement.ShouldBeOfType<T>();
+            importingElement.ImplicitImportLocation.ShouldBe(implicitLocation);
+
+            var expectedSdkPath = implicitLocation switch
             {
-                var import = imports[i];
-                var importingElement = import.ImportingElement;
-                importingElement.Sdk.ShouldBe(SdkName + $"/{version}");
-                importingElement.SdkReference.Name.ShouldBe(SdkName);
-                importingElement.SdkReference.Version.ShouldBe(expectedVersion);
-                importingElement.SdkReference.MinimumVersion.ShouldBe(expectedMinimumVersion);
-                importingElement.SdkLocation.ShouldBe(ElementLocation.EmptyLocation);
-                importingElement.OriginalElement.ShouldBeOfType(expectedOriginalElementType);
+                ImplicitImportLocation.Top => _sdkPropsPath,
+                ImplicitImportLocation.Bottom => _sdkTargetsPath,
+                _ => throw new ArgumentOutOfRangeException(nameof(implicitLocation))
+            };
 
-                var implicitLocation = i == 0
-                    ? ImplicitImportLocation.Top
-                    : ImplicitImportLocation.Bottom;
-
-                importingElement.ImplicitImportLocation.ShouldBe(implicitLocation);
-
-                import.SdkResult.SdkReference.ShouldBeSameAs(importingElement.SdkReference);
-
-                var expectedSdkPath = i == 0
-                    ? _sdkPropsPath
-                    : _sdkTargetsPath;
-
-                import.SdkResult.Path.ShouldBe(Path.GetDirectoryName(expectedSdkPath));
-                import.SdkResult.Version.ShouldBeEmpty();
-            }
+            import.SdkResult.SdkReference.ShouldBe(expectedReference);
+            import.SdkResult.Path.ShouldBe(Path.GetDirectoryName(expectedSdkPath));
+            import.SdkResult.Version.ShouldBeEmpty();
         }
 
         public void Dispose()

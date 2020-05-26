@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -241,8 +241,6 @@
     <Compile Include="Collections\RetrievableEntryHashSet\HashHelpers.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="Construction\ImplicitImportLocation.cs" />
-    <Compile Include="Construction\ProjectSdkElement.cs" />
     <Compile Include="Definition\ProjectOptions.cs" />
     <Compile Include="Definition\NewProjectFileOptions.cs" />
     <Compile Include="Definition\ProjectCollectionChangedEventArgs.cs" />
@@ -378,26 +376,27 @@
     <!-- ######################## -->
     <Compile Include="Collections\WeakValueDictionary.cs" />
     <!-- #### CONSTRUCTION MODEL ### -->
+    <Compile Include="Construction\ProjectChooseElement.cs" />
     <Compile Include="Construction\ProjectElement.cs" />
     <Compile Include="Construction\ProjectElementContainer.cs" />
+    <Compile Include="Construction\ProjectExtensionsElement.cs" />
     <Compile Include="Construction\ProjectImportElement.cs" />
     <Compile Include="Construction\ProjectImportGroupElement.cs" />
-    <Compile Include="Construction\ProjectItemDefinitionGroupElement.cs" />
     <Compile Include="Construction\ProjectItemDefinitionElement.cs" />
-    <Compile Include="Construction\ProjectItemGroupElement.cs" />
+    <Compile Include="Construction\ProjectItemDefinitionGroupElement.cs" />
     <Compile Include="Construction\ProjectItemElement.cs" />
+    <Compile Include="Construction\ProjectItemGroupElement.cs" />
     <Compile Include="Construction\ProjectMetadataElement.cs" />
     <Compile Include="Construction\ProjectOnErrorElement.cs" />
     <Compile Include="Construction\ProjectOtherwiseElement.cs" />
     <Compile Include="Construction\ProjectOutputElement.cs" />
-    <Compile Include="Construction\ProjectExtensionsElement.cs" />
-    <Compile Include="Construction\ProjectPropertyGroupElement.cs" />
     <Compile Include="Construction\ProjectPropertyElement.cs" />
+    <Compile Include="Construction\ProjectPropertyGroupElement.cs" />
+    <Compile Include="Construction\ProjectRootElement.cs" />
+    <Compile Include="Construction\ProjectSdkElement.cs" />
     <Compile Include="Construction\ProjectTargetElement.cs" />
     <Compile Include="Construction\ProjectTaskElement.cs" />
     <Compile Include="Construction\ProjectUsingTaskElement.cs" />
-    <Compile Include="Construction\ProjectRootElement.cs" />
-    <Compile Include="Construction\ProjectChooseElement.cs" />
     <Compile Include="Construction\ProjectWhenElement.cs" />
     <Compile Include="Construction\UsingTaskParameterGroupElement.cs" />
     <Compile Include="Construction\ProjectUsingTaskParameterElement.cs" />
@@ -410,6 +409,15 @@
     <Compile Include="Construction\Solution\SolutionFile.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Construction\ISdkReferenceMutableSource.cs" />
+    <Compile Include="Construction\ISdkReferenceSource.cs" />
+    <Compile Include="Construction\ImplicitImportLocation.cs" />
+    <Compile Include="Construction\SdkReferenceAttribute.cs" />
+    <Compile Include="Construction\SdkReferenceConstantSource.cs" />
+    <Compile Include="Construction\SdkReferenceOrigin.cs" />
+    <Compile Include="Construction\SdkReferenceSourceFullQuery.cs" />
+    <Compile Include="Construction\SdkReferenceSourceQuery.cs" />
+    <Compile Include="Construction\SdkReferenceWithOrigin.cs" />
     <!-- #### DEFINITION MODEL ### -->
     <Compile Include="Definition\BuiltInMetadata.cs" />
     <Compile Include="Definition\ProjectCollection.cs" />

@@ -177,7 +177,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         }
 
         /// <summary>
-        /// Used for unit tests only.  This is currently only called through reflection in Microsoft.Build.Engine.UnitTests.TransientSdkResolution.CallResetForTests
+        /// Used for unit tests only.
         /// </summary>
         /// <param name="resolverLoader">An <see cref="SdkResolverLoader"/> to use for loading SDK resolvers.</param>
         /// <param name="resolvers">Explicit set of SdkResolvers to use for all SDK resolution.</param>

@@ -457,16 +457,7 @@ namespace Microsoft.Build.Construction
             ProjectXmlUtilities.VerifyThrowProjectRequiredAttribute(element, XMakeAttributes.project);
             ProjectXmlUtilities.VerifyThrowProjectNoChildElements(element);
 
-            SdkReference sdk = null;
-            if (element.HasAttribute(XMakeAttributes.sdk))
-            {
-                sdk = new SdkReference(
-                    ProjectXmlUtilities.GetAttributeValue(element, XMakeAttributes.sdk, nullIfNotExists: true),
-                    ProjectXmlUtilities.GetAttributeValue(element, XMakeAttributes.sdkVersion, nullIfNotExists: true),
-                    ProjectXmlUtilities.GetAttributeValue(element, XMakeAttributes.sdkMinimumVersion, nullIfNotExists: true));
-            }
-
-            return new ProjectImportElement(element, parent, _project, sdk);
+            return new ProjectImportElement(element, parent, _project);
         }
 
         /// <summary>
