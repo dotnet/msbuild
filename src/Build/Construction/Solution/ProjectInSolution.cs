@@ -385,7 +385,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Get the project name with the parent project without normalization, e.g. SolutionFolder\SubSolutionFolder\Project.Name
+        /// Gets the original project name with the parent project as it is declared in the solution file, e.g. SolutionFolder\SubSolutionFolder\Project.Name
         /// </summary>
         internal string GetOriginalProjectName()
         {
