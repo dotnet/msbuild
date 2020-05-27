@@ -165,8 +165,7 @@ namespace Microsoft.NET.Publish.Tests
                 .HaveStdOutContaining(Strings.PublishSingleFileRequiresVersion30);
         }
 
-        //  Core MSBuild only due to https://github.com/dotnet/sdk/issues/4244
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_generates_a_single_file_for_framework_dependent_apps()
         {
             var publishCommand = GetPublishCommand();
@@ -181,8 +180,7 @@ namespace Microsoft.NET.Publish.Tests
                 .OnlyHaveFiles(expectedFiles);
         }
 
-        //  Core MSBuild only due to https://github.com/dotnet/sdk/issues/4244
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_generates_a_single_file_for_self_contained_apps()
         {
             var publishCommand = GetPublishCommand();
@@ -197,8 +195,7 @@ namespace Microsoft.NET.Publish.Tests
                 .OnlyHaveFiles(expectedFiles);
         }
 
-        //  Core MSBuild only due to https://github.com/dotnet/sdk/issues/4244
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_generates_a_single_file_including_pdbs()
         {
             var publishCommand = GetPublishCommand();
@@ -213,8 +210,7 @@ namespace Microsoft.NET.Publish.Tests
                 .OnlyHaveFiles(expectedFiles);
         }
 
-        //  Core MSBuild only due to https://github.com/dotnet/sdk/issues/4244
-        [CoreMSBuildAndWindowsOnlyFact]
+        [WindowsOnlyFact]
         public void It_excludes_ni_pdbs_from_single_file()
         {
             var publishCommand = GetPublishCommand();
@@ -230,8 +226,7 @@ namespace Microsoft.NET.Publish.Tests
                 .HaveFiles(expectedFiles);
         }
 
-        //  Core MSBuild only due to https://github.com/dotnet/sdk/issues/4244
-        [CoreMSBuildAndWindowsOnlyFact]
+        [WindowsOnlyFact]
         public void It_can_include_ni_pdbs_in_single_file()
         {
             var publishCommand = GetPublishCommand();
@@ -246,8 +241,7 @@ namespace Microsoft.NET.Publish.Tests
                 .OnlyHaveFiles(expectedFiles);
         }
 
-        //  Core MSBuild only due to https://github.com/dotnet/sdk/issues/4244
-        [CoreMSBuildOnlyTheory]
+        [Theory]
         [InlineData(ExcludeNewest, NewestContent)]
         [InlineData(ExcludeAlways, AlwaysContent)]
         public void It_generates_a_single_file_excluding_content(string exclusion, string content)
@@ -264,8 +258,7 @@ namespace Microsoft.NET.Publish.Tests
                 .OnlyHaveFiles(expectedFiles);
         }
 
-        //  Core MSBuild only due to https://github.com/dotnet/sdk/issues/4244
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_generates_a_single_file_for_R2R_compiled_Apps()
         {
             var publishCommand = GetPublishCommand();
@@ -280,8 +273,7 @@ namespace Microsoft.NET.Publish.Tests
                 .OnlyHaveFiles(expectedFiles);
         }
 
-        //  Core MSBuild only due to https://github.com/dotnet/sdk/issues/4244
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_does_not_rewrite_the_single_file_unnecessarily()
         {
             var publishCommand = GetPublishCommand();
@@ -304,8 +296,7 @@ namespace Microsoft.NET.Publish.Tests
             fileWriteTimeAfterSecondRun.Should().Be(fileWriteTimeAfterFirstRun);
         }
 
-        //  Core MSBuild only due to https://github.com/dotnet/sdk/issues/4244
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_rewrites_the_apphost_for_single_file_publish()
         {
             var publishCommand = GetPublishCommand();
@@ -329,8 +320,7 @@ namespace Microsoft.NET.Publish.Tests
             singleFileSize.Should().BeGreaterThan(appHostSize);
         }
 
-        //  Core MSBuild only due to https://github.com/dotnet/sdk/issues/4244
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_rewrites_the_apphost_for_non_single_file_publish()
         {
             var publishCommand = GetPublishCommand();
@@ -354,8 +344,7 @@ namespace Microsoft.NET.Publish.Tests
             appHostSize.Should().BeLessThan(singleFileSize);
         }
 
-        //  Core MSBuild only due to https://github.com/dotnet/sdk/issues/4244
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_leaves_host_components_unbundled_when_necessary()
         {
             // In.net 5, Single-file bundles are processed in the framework.
@@ -392,8 +381,7 @@ namespace Microsoft.NET.Publish.Tests
                 .OnlyHaveFiles(expectedFiles);
         }
 
-        //  Core MSBuild only due to https://github.com/dotnet/sdk/issues/4244
-        [CoreMSBuildOnlyTheory]
+        [Theory]
         [InlineData("netcoreapp3.0", false)]
         [InlineData("netcoreapp3.0", true)]
         [InlineData("netcoreapp3.1", false)]

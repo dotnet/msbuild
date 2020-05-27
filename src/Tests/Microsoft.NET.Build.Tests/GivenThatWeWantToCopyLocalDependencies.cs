@@ -105,8 +105,7 @@ namespace Microsoft.NET.Build.Tests
             }));
         }
 
-        //  Core MSBuild only because CI machines don't have updated VS (with support for RuntimeIdentifierGraphPath)
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_copies_local_specific_runtime_package_dependencies_on_build()
         {
             const string ProjectName = "TestProjWithPackageDependencies";
@@ -325,8 +324,7 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
-        //  Core MSBuild only because CI machines don't have updated VS (with support for RuntimeIdentifierGraphPath)
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_copies_local_all_assets_on_self_contained_build()
         {
             const string ProjectName = "TestProjWithPackageDependencies";

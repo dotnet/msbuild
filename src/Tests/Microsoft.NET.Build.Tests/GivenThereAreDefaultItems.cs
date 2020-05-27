@@ -469,9 +469,7 @@ namespace Microsoft.NET.Build.Tests
             });
         }
  
-        //  Disable this test on full framework, as generating strong named satellite assemblies with AL.exe requires Admin permissions
-        //  See https://github.com/dotnet/sdk/issues/732
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void Compile_items_can_be_explicitly_specified_while_default_EmbeddedResource_items_are_used()
         {
             Action<XDocument> projectChanges = project =>

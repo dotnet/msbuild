@@ -35,6 +35,21 @@ namespace Microsoft.NET.TestFramework
             }
         }
 
+        private string _msbuildVersion;
+        public string MSBuildVersion
+        {
+            get
+            {
+                if (_msbuildVersion == null)
+                {
+                    //  Initialize MSBuildVersion lazily, as we call `dotnet msbuild -version` to get it, so we need to wait
+                    //  for the TestContext to finish being initialize
+                    InitMSBuildVersion();
+                }
+                return _msbuildVersion;
+            }
+        }
+
         Lazy<string> _sdkFolderUnderTest;
 
         public string SdkFolderUnderTest => _sdkFolderUnderTest.Value;
@@ -87,6 +102,23 @@ namespace Microsoft.NET.TestFramework
             {
                 FullFrameworkMSBuildPath = oldFullFrameworkMSBuildPath;
             }
+        }
+
+        private void InitMSBuildVersion()
+        {
+            var logger = new StringTestLogger();
+            var command = new MSBuildVersionCommand(logger);
+
+            command.WorkingDirectory = TestContext.Current.TestExecutionDirectory;
+
+            var result = command.Execute();
+
+            if (result.ExitCode != 0)
+            {
+                throw new Exception("Failed to get msbuild version" + Environment.NewLine + logger.ToString());
+            }
+
+            _msbuildVersion = result.StdOut.Split().Last();
         }
 
         public string GetMicrosoftNETBuildExtensionsPath()
