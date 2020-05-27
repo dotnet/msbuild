@@ -57,9 +57,9 @@ Il progetto è destinato a più framework. Specificare il framework da eseguire 
       <trans-unit id="RunCommandExceptionUnableToRun">
         <source>Unable to run your project.
 Ensure you have a runnable project type and ensure '{0}' supports this project.
-A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
+A runnable project should target a runnable TFM (for instance, net5.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="translated">Non è possibile eseguire il progetto.
+        <target state="needs-review-translation">Non è possibile eseguire il progetto.
 Assicurarsi che sia presente un tipo di progetto eseguibile e che '{0}' supporti tale progetto.
 Un progetto eseguibile deve essere destinato a un TFM eseguibile, ad esempio netcoreapp2.0, inoltre OutputType deve essere impostato su 'Exe'.
 Il valore corrente di {1} è '{2}'.</target>

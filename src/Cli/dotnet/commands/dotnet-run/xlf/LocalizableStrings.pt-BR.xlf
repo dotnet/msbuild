@@ -57,9 +57,9 @@ Ele tem diversas estruturas como destino. Especifique que estrutura executar usa
       <trans-unit id="RunCommandExceptionUnableToRun">
         <source>Unable to run your project.
 Ensure you have a runnable project type and ensure '{0}' supports this project.
-A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
+A runnable project should target a runnable TFM (for instance, net5.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="translated">Não é possível executar o seu projeto.
+        <target state="needs-review-translation">Não é possível executar o seu projeto.
 Verifique se você tem um tipo de projeto executável e se '{0}' dá suporte a esse projeto.
 Um projeto executável deve ter como destino um TFM executável (por exemplo, netcoreapp2.0) e ter OutputType 'Exe'.
 O {1} atual é '{2}'.</target>
