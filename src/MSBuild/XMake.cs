@@ -627,8 +627,10 @@ namespace Microsoft.Build.CommandLine
 
                     // Honor the low priority flag, we place our selves below normal
                     // priority and let sub processes inherit that priority.
-                    ProcessPriorityClass priority = lowPriority ? ProcessPriorityClass.BelowNormal : Process.GetCurrentProcess().PriorityClass;
-                    Process.GetCurrentProcess().PriorityClass = priority;
+                    if (lowPriority && Process.GetCurrentProcess().PriorityClass != ProcessPriorityClass.Idle)
+                    {
+                        Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.BelowNormal;
+                    }
 
                     DateTime t1 = DateTime.Now;
 
