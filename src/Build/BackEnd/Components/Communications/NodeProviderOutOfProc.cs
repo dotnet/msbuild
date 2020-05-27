@@ -85,7 +85,7 @@ namespace Microsoft.Build.BackEnd
             // Mask out the first byte. That's because old
             // builds used a single, non zero initial byte,
             // and we don't want to risk communicating with them
-            return (Constants.AssemblyTimestamp ^ Int64.MaxValue) & 0x00FFFFFFFFFFFFFF;
+            return (CommunicationsUtilities.FileVersionHash ^ Int64.MaxValue) & 0x00FFFFFFFFFFFFFF;
         }
 
         /// <summary>
