@@ -5,11 +5,17 @@
   <!-- This is a smaller build of Microsoft.NET.Build.Tasks to be used outside of SDK projects -->
 
   <PropertyGroup>
+    <PackageId>Microsoft.NET.Build.Extensions</PackageId>
+    <OutDirName>$(Configuration)\Sdks\$(PackageId)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools</OutDirName>
+  </PropertyGroup>
+  
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
+  <PropertyGroup>
     <Description>The MSBuild targets and tasks which extend MSBuild's common targets.</Description>
     <OutputType>Library</OutputType>
-    <PackageId>Microsoft.NET.Build.Extensions</PackageId>
     <RootNamespace>Microsoft.NET.Build.Tasks</RootNamespace>
-    <TargetFrameworks>netcoreapp3.1;net472</TargetFrameworks>
+    <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -17,14 +23,12 @@
     <EnableDefaultItems>false</EnableDefaultItems>
     <GenerateDependencyFile>false</GenerateDependencyFile>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <OutDirName>$(Configuration)\Sdks\$(PackageId)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools</OutDirName>
+
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <!-- MSBuild Task DLLs need to be versioned with every build -->
     <AutoGenerateAssemblyVersion>true</AutoGenerateAssemblyVersion>
   </PropertyGroup>
-
-  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
-
+  
   <PropertyGroup>
     <OutputPath>$(BaseOutputPath)</OutputPath>
     <DefineConstants>$(DefineConstants);EXTENSIONS</DefineConstants>
