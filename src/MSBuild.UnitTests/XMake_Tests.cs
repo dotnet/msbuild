@@ -1212,11 +1212,10 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        /* These tests hung repeatedly. See https://github.com/microsoft/msbuild/issues/5368
         /// <summary>
         /// Test that low priority builds actually execute with low priority.
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/microsoft/msbuild/issues/5229")]
         public void LowPriorityBuild()
         {
             RunPriorityBuildTest(expectedPrority: ProcessPriorityClass.BelowNormal, arguments: "/low");
@@ -1225,7 +1224,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test that normal builds execute with normal priority.
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/microsoft/msbuild/issues/5229")]
         public void NormalPriorityBuild()
         {
             // In case we are already running at a  different priority, validate
@@ -1251,6 +1250,7 @@ namespace Microsoft.Build.UnitTests
             IDictionary<string, string> environmentVars = new Dictionary<string, string>
             {
                 { "MSBUILDNOINPROCNODE", "1"},
+                { "DISABLECONSOLECOLOR", "1"},
                 { "MSBUILDENABLEALLPROPERTYFUNCTIONS", "1" },
             };
 
@@ -1259,9 +1259,8 @@ namespace Microsoft.Build.UnitTests
             string expected = string.Format(@"Task priority is '{0}'", expectedPrority);
             logContents.ShouldContain(expected, () => logContents);
         }
-        */
 
-        #region IgnoreProjectExtensionTests
+#region IgnoreProjectExtensionTests
 
         /// <summary>
         /// Test the case where the extension is a valid extension but is not a project
