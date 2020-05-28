@@ -133,6 +133,9 @@
     <Compile Include="..\Shared\WeakStringCache.cs">
       <Link>Shared\WeakStringCache.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\WeakStringCache.Concurrent.cs">
+      <Link>Shared\WeakStringCache.Concurrent.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\OpportunisticIntern.cs">
       <Link>Shared\OpportunisticIntern.cs</Link>
     </Compile>
