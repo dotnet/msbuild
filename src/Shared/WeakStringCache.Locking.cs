@@ -56,12 +56,9 @@ namespace Microsoft.Build
                 // Set the handle to reference the new string.
                 handle.SetString(result);
 
-                // If the handle is already in the cache, we are done. Note that we rely on the fact that setting a GC handle target
-                // does not mutate the GCHandle structure itself so there is no need to perform another dictionary access.
-
                 if (addingNewHandle)
                 {
-                    // Prevent the dictionary from growing forever with GC handles that don't reference any live strings anymore.
+                    // Prevent the dictionary from growing forever with GC handles that don't reference live strings anymore.
                     if (_stringsByHashCode.Count >= _capacity)
                     {
                         // Get rid of unused handles.
@@ -69,9 +66,8 @@ namespace Microsoft.Build
                         // And do this again when the number of handles reaches double the current after-scavenge number.
                         _capacity = _stringsByHashCode.Count * 2;
                     }
-
-                    _stringsByHashCode[hashCode] = handle;
                 }
+                _stringsByHashCode[hashCode] = handle;
             }
 
             cacheHit = false;
