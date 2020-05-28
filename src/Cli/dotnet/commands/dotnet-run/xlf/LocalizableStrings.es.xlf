@@ -57,9 +57,9 @@ Su proyecto tiene como destino varias plataformas. Especifique la que quiere usa
       <trans-unit id="RunCommandExceptionUnableToRun">
         <source>Unable to run your project.
 Ensure you have a runnable project type and ensure '{0}' supports this project.
-A runnable project should target a runnable TFM (for instance, netcoreapp2.0) and have OutputType 'Exe'.
+A runnable project should target a runnable TFM (for instance, net5.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="translated">No se puede ejecutar el proyecto.
+        <target state="needs-review-translation">No se puede ejecutar el proyecto.
 Asegúrese de tener un tipo de proyecto ejecutable y asegúrese de que "{0}" admita este proyecto.
 Un proyecto ejecutable debe tener como destino un TFM ejecutable (por ejemplo, netcoreapp2.0) y tener OutputType "Exe".
 El actual {1} es "{2}".</target>
