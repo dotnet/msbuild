@@ -625,10 +625,13 @@ namespace Microsoft.Build.CommandLine
                         Environment.SetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE", "1");
                     }
 
-                    // Honor the low priority flag, we place our selves below normal
-                    // priority and let sub processes inherit that priority.
-                    ProcessPriorityClass priority = lowPriority ? ProcessPriorityClass.BelowNormal : ProcessPriorityClass.Normal;
-                    Process.GetCurrentProcess().PriorityClass = priority;
+                    // Honor the low priority flag, we place our selves below normal priority and let sub processes inherit
+                    // that priority. Idle priority would prevent the build from proceeding as the user does normal actions.
+                    // We avoid increasing priority because that causes failures on mac/linux.
+                    if (lowPriority && Process.GetCurrentProcess().PriorityClass != ProcessPriorityClass.Idle)
+                    {
+                        Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.BelowNormal;
+                    }
 
                     DateTime t1 = DateTime.Now;
 
