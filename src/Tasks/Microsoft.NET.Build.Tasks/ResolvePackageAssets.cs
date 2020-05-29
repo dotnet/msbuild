@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection.Metadata;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Build.Evaluation;
@@ -869,7 +868,15 @@ namespace Microsoft.NET.Build.Tasks
             {
                 WriteItems(
                     _compileTimeTarget,
-                    package => package.CompileTimeAssemblies);
+                    package => package.CompileTimeAssemblies,
+                    filter: null,
+                    writeMetadata: (package, asset) =>
+                    {
+                        if (asset.Properties.TryGetValue(LockFileItem.AliasesProperty, out var aliases))
+                        {
+                            WriteMetadata(MetadataKeys.Aliases, aliases);
+                        }
+                    });
             }
 
             private void WriteContentFilesToPreprocess()

@@ -99,6 +99,8 @@ namespace Microsoft.NET.Build.Tasks
         public const string DestinationSubPath = "DestinationSubPath";
         public const string AssetType = "AssetType";
 
-        public const string ReferenceOnly = "ReferenceOnly";  
+        public const string ReferenceOnly = "ReferenceOnly";
+
+        public const string Aliases = "Aliases";
     }
 }

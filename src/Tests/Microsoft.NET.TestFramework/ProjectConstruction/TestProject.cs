@@ -154,6 +154,10 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 {
                     packageReferenceElement.Add(new XAttribute("PrivateAssets", packageReference.PrivateAssets));
                 }
+                if (packageReference.Aliases != null)
+                {
+                    packageReferenceElement.Add(new XAttribute("Aliases", packageReference.Aliases));
+                }
                 packageReferenceItemGroup.Add(packageReferenceElement);
             }
 

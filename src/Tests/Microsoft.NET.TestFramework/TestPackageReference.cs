@@ -11,19 +11,20 @@ namespace Microsoft.NET.TestFramework
 {
     public class TestPackageReference
     {
-        public TestPackageReference(string id, string version = null, string nupkgPath = null, string privateAssets = null)
+        public TestPackageReference(string id, string version = null, string nupkgPath = null, string privateAssets = null, string aliases = null)
         {
             ID = id;
             Version = version;
             NupkgPath = nupkgPath;
             PrivateAssets = privateAssets;
+            Aliases = aliases;
         }
 
         public string ID { get; private set; }
         public string Version { get; private set; }
         public string NupkgPath { get; private set; }
         public string PrivateAssets { get; private set; }
-
+        public string Aliases { get; private set; }
         public bool NuGetPackageExists()
         {
             return File.Exists(Path.Combine(this.NupkgPath, String.Concat(this.ID + "." + this.Version + ".nupkg")));
