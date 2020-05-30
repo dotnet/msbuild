@@ -58,6 +58,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ProcessFrameworkReferences FrameworkReferences="@(FrameworkReference)"
                                 KnownFrameworkReferences="@(KnownFrameworkReference)"
+                                KnownRuntimePacks="@(KnownRuntimePack)"
                                 TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
                                 TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
                                 TargetingPackRoot="$(NetCoreTargetingPackRoot)"
