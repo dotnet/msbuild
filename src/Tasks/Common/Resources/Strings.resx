@@ -628,4 +628,13 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1131: Producing a managed Windows Metadata component with WinMDExp is not supported when targeting {0}.</value>
     <comment>{StrBegin="NETSDK1131: "}</comment>
   </data>
+  <data name="NoRuntimePackInformation" xml:space="preserve">
+    <value>NETSDK1132: No runtime pack information was available for {0}.</value>
+    <comment>{StrBegin="NETSDK1132: "}</comment>
+  </data>
+  <data name="ConflictingRuntimePackInformation" xml:space="preserve">
+    <value>NETSDK1133: There was conflicting information about runtime packs available for {0}:
+{1}</value>
+    <comment>{StrBegin="NETSDK1133: "}</comment>
+  </data>
 </root>

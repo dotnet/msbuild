@@ -192,6 +192,13 @@
         <note>{StrBegin="NETSDK1090: "}
 {0} - The path to the invalid assembly.</note>
       </trans-unit>
+      <trans-unit id="ConflictingRuntimePackInformation">
+        <source>NETSDK1133: There was conflicting information about runtime packs available for {0}:
+{1}</source>
+        <target state="new">NETSDK1133: There was conflicting information about runtime packs available for {0}:
+{1}</target>
+        <note>{StrBegin="NETSDK1133: "}</note>
+      </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
         <source>NETSDK1014: Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</source>
         <target state="translated">NETSDK1014: '{0}'의 콘텐츠 항목이 '{1}'을(를) 설정하지만, '{2}' 또는 '{3}'을(를) 제공하지 않습니다.</target>
@@ -425,6 +432,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1082: There was no runtime pack for {0} available for the specified RuntimeIdentifier '{1}'.</source>
         <target state="translated">NETSDK1082: 지정된 RuntimeIdentifier '{1}'에 사용할 수 있는 {0}용 런타임 팩이 없습니다.</target>
         <note>{StrBegin="NETSDK1082: "}</note>
+      </trans-unit>
+      <trans-unit id="NoRuntimePackInformation">
+        <source>NETSDK1132: No runtime pack information was available for {0}.</source>
+        <target state="new">NETSDK1132: No runtime pack information was available for {0}.</target>
+        <note>{StrBegin="NETSDK1132: "}</note>
       </trans-unit>
       <trans-unit id="NoSupportComSelfContained">
         <source>NETSDK1128: COM hosting does not support self-contained deployments.</source>
