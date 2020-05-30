@@ -863,6 +863,27 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
   ============================================================
+               _BlockWinMDsOnUnsupportedTFMs
+  Block referencing or producing
+  Windows Metadata files (.winmd) for target frameworks
+  that do not support loading winmds directly
+  into the runtime as assemblies
+  ============================================================
+  -->
+  <Target Name="_BlockWinMDsOnUnsupportedTFMs"
+          BeforeTargets="CoreCompile"
+          DependsOnTargets="ResolveReferences"
+          Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '5.0'))">
+    <NETSdkError Condition="'%(ReferencePath.Extension)' == '.winmd'"
+      ResourceName="WinMDReferenceNotSupportedOnTargetFramework"
+      FormatArguments="$(TargetFrameworkMoniker)" />
+    <NETSdkError Condition="'$(OutputType)' == 'winmdobj'"
+      ResourceName="WinMDObjNotSupportedOnTargetFramework"
+      FormatArguments="$(TargetFrameworkMoniker)" />
+  </Target>
+
+  <!--
+  ============================================================
                                       InjectTargetPathMetadata
 
   Update TargetPathWithTargetPlatformMoniker with target framework

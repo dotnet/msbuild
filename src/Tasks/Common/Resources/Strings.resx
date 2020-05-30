@@ -620,4 +620,12 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify the framework for the published application.</value>
     <comment>{StrBegin="NETSDK1129: "}</comment>
   </data>
+  <data name="WinMDReferenceNotSupportedOnTargetFramework" xml:space="preserve">
+    <value>NETSDK1130: Referencing a Windows Metadata component directly when targeting {0} is not supported. Use the C#/WinRT projection tool (https://aka.ms/cswinrt) or a provided projection for this target.</value>
+    <comment>{StrBegin="NETSDK1130: "}</comment>
+  </data>
+  <data name="WinMDObjNotSupportedOnTargetFramework" xml:space="preserve">
+    <value>NETSDK1131: Producing a managed Windows Metadata component with WinMDExp is not supported when targeting {0}.</value>
+    <comment>{StrBegin="NETSDK1131: "}</comment>
+  </data>
 </root>

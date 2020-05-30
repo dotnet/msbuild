@@ -631,6 +631,16 @@ The following are names of parameters or literal values and should not be transl
         <target state="needs-review-translation">プレビュー版の .NET Core を使用しています。https://aka.ms/dotnet-core-preview をご覧ください</target>
         <note />
       </trans-unit>
+      <trans-unit id="WinMDObjNotSupportedOnTargetFramework">
+        <source>NETSDK1131: Producing a managed Windows Metadata component with WinMDExp is not supported when targeting {0}.</source>
+        <target state="new">NETSDK1131: Producing a managed Windows Metadata component with WinMDExp is not supported when targeting {0}.</target>
+        <note>{StrBegin="NETSDK1131: "}</note>
+      </trans-unit>
+      <trans-unit id="WinMDReferenceNotSupportedOnTargetFramework">
+        <source>NETSDK1130: Referencing a Windows Metadata component directly when targeting {0} is not supported. Use the C#/WinRT projection tool (https://aka.ms/cswinrt) or a provided projection for this target.</source>
+        <target state="new">NETSDK1130: Referencing a Windows Metadata component directly when targeting {0} is not supported. Use the C#/WinRT projection tool (https://aka.ms/cswinrt) or a provided projection for this target.</target>
+        <note>{StrBegin="NETSDK1130: "}</note>
+      </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresUseWpfOrUseWindowsForms">
         <source>NETSDK1106: Microsoft.NET.Sdk.WindowsDesktop requires 'UseWpf' or 'UseWindowsForms' to be set to 'true'</source>
         <target state="translated">NETSDK1106: Microsoft.NET.Sdk.WindowsDesktop では、'UseWpf' または 'UseWindowsForms' を 'true' に設定する必要があります</target>
