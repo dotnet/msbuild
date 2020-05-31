@@ -9,7 +9,7 @@ If you notice the ordering, ResolveAssemblyReferences is happening before Compil
 
 ## Source Code
 You can browse Microsoft's MSBuild targets online at:
-http://source.roslyn.io/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/bin_/amd64/Microsoft.Common.CurrentVersion.targets,1820
+https://referencesource.microsoft.com/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/bin_/amd64/Microsoft.Common.CurrentVersion.targets,1820
 This is where the RAR task is invoked in the targets file.
 
 The source code for RAR is at:
