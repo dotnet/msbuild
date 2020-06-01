@@ -146,7 +146,9 @@ namespace Microsoft.DotNet.Tools.Sln.Add
 
         private static string TrimProjectDirectory(string path)
         {
-            return Path.GetDirectoryName(path);
+            var directory = Path.GetDirectoryName(path);
+            if(string.IsNullOrEmpty(directory)) return path;
+            else return directory;
         }
     }
 }
