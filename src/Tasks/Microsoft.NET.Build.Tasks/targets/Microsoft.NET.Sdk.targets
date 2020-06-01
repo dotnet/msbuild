@@ -83,6 +83,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_DotNetAppHostExecutableNameWithoutExtension>apphost</_DotNetAppHostExecutableNameWithoutExtension>
     <_DotNetAppHostExecutableName>$(_DotNetAppHostExecutableNameWithoutExtension)$(_NativeExecutableExtension)</_DotNetAppHostExecutableName>
 
+    <_DotNetSingleFileHostExecutableNameWithoutExtension>singlefilehost</_DotNetSingleFileHostExecutableNameWithoutExtension>
     <_DotNetComHostLibraryNameWithoutExtension>comhost</_DotNetComHostLibraryNameWithoutExtension>
     <_DotNetComHostLibraryName>$(_DotNetComHostLibraryNameWithoutExtension)$(_ComHostLibraryExtension)</_DotNetComHostLibraryName>
     <_DotNetIjwHostLibraryNameWithoutExtension>Ijwhost</_DotNetIjwHostLibraryNameWithoutExtension>
@@ -415,7 +416,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_CreateAppHost"
           Inputs="@(IntermediateAssembly);$(AppHostSourcePath)"
           Outputs="$(AppHostIntermediatePath)"
-          DependsOnTargets="_GetAppHostPaths;CoreCompile"
+          DependsOnTargets="_ChooseAppHost;CoreCompile"
           Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true' and
                      '$(AppHostSourcePath)' != '' and
                      Exists('@(IntermediateAssembly)') and
@@ -432,6 +433,25 @@ Copyright (c) .NET Foundation. All rights reserved.
                    Retries="$(CopyRetryCount)"
                    RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
                    />
+  </Target>
+
+  <!--
+    ============================================================
+                                        _ChooseAppHost
+      Choose the correct app-host for the build scenario:
+      * SingleFileHost if an app being published as a self-contained single-file .net5+ app 
+      * AppHost otherwise
+    ============================================================
+     -->
+  <Target Name="_ChooseAppHost"
+          DependsOnTargets="_GetAppHostPaths"
+          Condition="'$(UseAppHost)' == 'true' and '$(_IsExecutable)' == 'true'">
+    <PropertyGroup>
+      <AppHostSourcePath Condition="'$(PublishSingleFile)' == 'true' and 
+                                  '$(SelfContained)' == 'true' and
+                                  '$(_TargetFrameworkVersionWithoutV)' >= '5.0' and
+                                  '$(SingleFileHostSourcePath)' != ''">$(SingleFileHostSourcePath)</AppHostSourcePath>
+    </PropertyGroup>
   </Target>
 
   <!--

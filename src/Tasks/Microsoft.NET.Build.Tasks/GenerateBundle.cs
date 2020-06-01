@@ -19,6 +19,10 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public bool IncludeSymbols { get; set; }
         [Required]
+        public bool IncludeNativeLibraries { get; set; }
+        [Required]
+        public bool IncludeAllContent { get; set; }
+        [Required]
         public string TargetFrameworkVersion { get; set; }
         [Required]
         public string RuntimeIdentifier { get; set; }
@@ -35,7 +39,9 @@ namespace Microsoft.NET.Build.Tasks
             OSPlatform targetOS = RuntimeIdentifier.StartsWith("win") ? OSPlatform.Windows :
                                   RuntimeIdentifier.StartsWith("osx") ? OSPlatform.OSX : OSPlatform.Linux;
 
-            BundleOptions options = BundleOptions.BundleAllContent;
+            BundleOptions options = BundleOptions.None;
+            options |= IncludeNativeLibraries ? BundleOptions.BundleNativeBinaries : BundleOptions.None;
+            options |= IncludeAllContent ? BundleOptions.BundleAllContent : BundleOptions.None;
             options |= IncludeSymbols ? BundleOptions.BundleSymbolFiles : BundleOptions.None;
 
             var bundler = new Bundler(AppHostName, OutputDir, options, targetOS, new Version(TargetFrameworkVersion), ShowDiagnosticOutput);

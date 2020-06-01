@@ -31,6 +31,9 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string DotNetAppHostExecutableNameWithoutExtension { get; set; }
 
+        [Required]
+        public string DotNetSingleFileHostExecutableNameWithoutExtension { get; set; }
+
         /// <summary>
         /// The file name of comhost asset.
         /// </summary>
@@ -56,6 +59,9 @@ namespace Microsoft.NET.Build.Tasks
         //  we can resolve the full path later)
         [Output]
         public ITaskItem[] AppHost { get; set; }
+
+        [Output]
+        public ITaskItem[] SingleFileHost { get; set; }
 
         [Output]
         public ITaskItem[] ComHost { get; set; }
@@ -105,6 +111,20 @@ namespace Microsoft.NET.Build.Tasks
                 if (appHostItem != null)
                 {
                     AppHost = new ITaskItem[] { appHostItem };
+                }
+
+                var singlefileHostItem = GetHostItem(
+                    AppHostRuntimeIdentifier,
+                    knownAppHostPacksForTargetFramework,
+                    packagesToDownload,
+                    DotNetSingleFileHostExecutableNameWithoutExtension,
+                    "SingleFileHost",
+                    isExecutable: true,
+                    errorIfNotFound: true);
+
+                if (singlefileHostItem != null)
+                {
+                    SingleFileHost = new ITaskItem[] { singlefileHostItem };
                 }
 
                 var comHostItem = GetHostItem(

@@ -80,6 +80,9 @@ namespace Microsoft.NET.Build.Tasks
         //  Targeting packs
         public const string PackageConflictPreferredPackages = "PackageConflictPreferredPackages";
 
+        //  Runtime packs
+        public const string DropFromSingleFile = "DropFromSingleFile";
+
         // Content files
         public const string PPOutputPath = "PPOutputPath";
         public const string CodeLanguage = "CodeLanguage";

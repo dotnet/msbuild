@@ -547,6 +547,12 @@ Copyright (c) .NET Foundation. All rights reserved.
         <RelativePath>shims/%(_EmbeddedApphostPaths.ShimRuntimeIdentifier)/%(_EmbeddedApphostPaths.Filename)%(_EmbeddedApphostPaths.Extension)</RelativePath>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
+
+      <!-- Filter files for PublishSingleFiles scenario -->
+      <_FilesToDrop Include="@(ResolvedFileToPublish)"
+                    Condition="'$(PublishSingleFile)' == 'true' and
+                               '%(ResolvedFileToPublish.DropFromSingleFile)' == 'true'"/>
+      <ResolvedFileToPublish Remove="@(_FilesToDrop)"/>
     </ItemGroup>
 
   </Target>
@@ -917,10 +923,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Check to see whether we can re-use the .deps.json file from the build for publish, or whether we have to
          generate a different one. -->
     <PropertyGroup>
+      <_TrimRuntimeAssets Condition="'$(PublishSingleFile)' == 'true' and '$(SelfContained)' == 'true'">true</_TrimRuntimeAssets>
       <_UseBuildDependencyFile Condition="'@(_ExcludeFromPublishPackageReference)' == '' and
                                           '@(RuntimeStorePackages)' == '' and
                                           '$(PreserveStoreLayout)' != 'true' and
-                                          '$(PublishTrimmed)' != 'true'">true</_UseBuildDependencyFile>
+                                          '$(PublishTrimmed)' != 'true' and 
+                                          '$(_TrimRuntimeAssets)' != 'true'">true</_UseBuildDependencyFile>
     </PropertyGroup>
 
   </Target>
@@ -937,17 +945,17 @@ Copyright (c) .NET Foundation. All rights reserved.
         Condition="'$(PublishSingleFile)' == 'true'">
 
     <ItemGroup>
-      <_FilesToBundle Include="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.ExcludeFromSingleFile)' != 'true'"/>
+      <_FilesToBundle Include="@(ResolvedFileToPublish)" 
+                      Condition="'%(ResolvedFileToPublish.ExcludeFromSingleFile)' != 'true'"/>
+      
+      <ResolvedFileToPublish Remove="@(_FilesToBundle)"/>
     </ItemGroup>
 
     <PropertyGroup>
       <PublishedSingleFileName>$(AssemblyName)$(_NativeExecutableExtension)</PublishedSingleFileName>
       <PublishedSingleFilePath>$(PublishDir)$(PublishedSingleFileName)</PublishedSingleFilePath>
     </PropertyGroup>
-
-    <ItemGroup>
-      <ResolvedFileToPublish Remove="@(_FilesToBundle)"/>
-    </ItemGroup>
+    
   </Target>
 
   <UsingTask TaskName="GenerateBundle" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
@@ -960,11 +968,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PropertyGroup>
       <TraceSingleFileBundler Condition="'$(TraceSingleFileBundler)' == ''">false</TraceSingleFileBundler>
       <IncludeSymbolsInSingleFile Condition="'$(IncludeSymbolsInSingleFile)' == ''">false</IncludeSymbolsInSingleFile>
+      <IncludeNativeLibrariesInSingleFile Condition="'$(IncludeNativeLibrariesInSingleFile)' == ''">false</IncludeNativeLibrariesInSingleFile>
+      <IncludeAllContentInSingleFile Condition="'$(IncludeAllContentInSingleFile)' == ''">false</IncludeAllContentInSingleFile>
     </PropertyGroup>    
 
     <GenerateBundle FilesToBundle="@(_FilesToBundle)"
                     AppHostName="$(PublishedSingleFileName)"
                     IncludeSymbols="$(IncludeSymbolsInSingleFile)"
+                    IncludeNativeLibraries="$(IncludeNativeLibrariesInSingleFile)"
+                    IncludeAllContent="$(IncludeAllContentInSingleFile)"                    
                     TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
                     RuntimeIdentifier="$(RuntimeIdentifier)"
                     OutputDir="$(PublishDir)"
@@ -1002,7 +1014,9 @@ Copyright (c) .NET Foundation. All rights reserved.
            PublishDepsFilePath is empty (by default) for PublishSingleFile, since the deps.json file is embedde within the single-file bundle -->      
       <IntermediateDepsFilePath Condition=" '$(PublishDepsFilePath)' != ''">$(PublishDepsFilePath)</IntermediateDepsFilePath >
       <IntermediateDepsFilePath Condition=" '$(PublishDepsFilePath)' == ''">$(IntermediateOutputPath)$(ProjectDepsFileName)</IntermediateDepsFilePath >
-      <PublishDepsFilePath Condition=" '$(PublishDepsFilePath)' == '' And '$(PublishSingleFile)' != 'true'">$(PublishDir)$(ProjectDepsFileName)</PublishDepsFilePath>      
+      <PublishDepsFilePath Condition=" '$(PublishDepsFilePath)' == '' And '$(PublishSingleFile)' != 'true'">$(PublishDir)$(ProjectDepsFileName)</PublishDepsFilePath>
+      <_IsSingleFilePublish Condition="'$(PublishSingleFile)' == ''">false</_IsSingleFilePublish>
+      <_IsSingleFilePublish Condition="'$(PublishSingleFile)' != ''">$(PublishSingleFile)</_IsSingleFilePublish>
     </PropertyGroup>
     <ItemGroup>
       <ResolvedCompileFileDefinitions Remove="@(_PublishConflictPackageFiles)" Condition="'%(_PublishConflictPackageFiles.ConflictItemType)' == 'Reference'" />
@@ -1013,6 +1027,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_ResolvedNuGetFilesForPublish Include="@(ResourceCopyLocalItems)" Condition="'%(ResourceCopyLocalItems.CopyToPublishDirectory)' != 'false'" />
       <_ResolvedNuGetFilesForPublish Include="@(RuntimeCopyLocalItems)" Condition="'%(RuntimeCopyLocalItems.CopyToPublishDirectory)' != 'false'" />
       <_ResolvedNuGetFilesForPublish Remove="@(_PublishConflictPackageFiles)" Condition="'%(_PublishConflictPackageFiles.ConflictItemType)' != 'Reference'" />
+     
     </ItemGroup>
 
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
@@ -1039,6 +1054,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       ResolvedRuntimeTargetsFiles="@(RuntimeTargetsCopyLocalItems)"
                       UserRuntimeAssemblies="@(UserRuntimeAssembly)"
                       IsSelfContained="$(SelfContained)"
+                      IsSingleFile="$(_IsSingleFilePublish)"
                       IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)"
                       RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"/>
 

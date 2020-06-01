@@ -194,9 +194,9 @@ namespace Microsoft.NET.Publish.Tests
             TestProjectPublishing_Internal("LibraryProject2", targetFramework, isSelfContained:true, makeExeProject: false);
         }
 
-        [Theory]
+        [Theory(Skip = "https://github.com/dotnet/runtime/issues/37196")]
         [InlineData("net5.0")]
-        public void It_can_publish_readytorun_using_crossgen2(string targetFramework)
+        void It_can_publish_readytorun_using_crossgen2(string targetFramework)
         {
             // Crossgen2 only supported for Linux/Windows x64 scenarios for now
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.OSArchitecture != Architecture.X64)

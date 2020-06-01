@@ -60,9 +60,9 @@ namespace Microsoft.NET.Publish.Tests
                 "\"CompileListCount\":\"[1-9]\\d?\"");  // Do not hardcode number of assemblies being compiled here, due to ILTrimmer
         }
 
-        [CoreMSBuildOnlyTheory]
-        [InlineData("net5.0")]
-        public void It_collects_crossgen2_publishing_properties(string targetFramework)
+        [CoreMSBuildOnlyTheory(Skip = "https://github.com/dotnet/runtime/issues/37196")]
+        [InlineData("net5.0")] 
+        void It_collects_crossgen2_publishing_properties(string targetFramework)
         {
             // Crossgen2 only supported for Linux/Windows x64 scenarios for now
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.OSArchitecture != Architecture.X64)
