@@ -49,6 +49,8 @@ namespace Microsoft.Build.Utilities
         private readonly HashSet<string> _excludedInputPaths = new HashSet<string>(StringComparer.Ordinal);
         // Cache of last write times
         private readonly ConcurrentDictionary<string, DateTime> _lastWriteTimeCache = new ConcurrentDictionary<string, DateTime>(StringComparer.Ordinal);
+        //
+        private HashSet<string> fileCache = new HashSet<string>();
         #endregion
 
         #region Properties
@@ -1071,9 +1073,11 @@ namespace Microsoft.Build.Utilities
                     if (keyIndex++ > 0)
                     {
                         // If we are ignoring missing files, then only record those that exist
-                        if (FileUtilities.FileExistsNoThrow(file))
+                        // Cache the files as we find them to save time (On^2), at the expense of storing data O(n).
+                        if (!fileCache.Contains(file) && FileUtilities.FileExistsNoThrow(file))
                         {
                             dependenciesWithoutMissingFiles.Add(file, dependencies[file]);
+                            fileCache.Add(file);
                         }
                     }
                     else
