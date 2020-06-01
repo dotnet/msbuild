@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.ShellShim
     internal static class EnvironmentPathFactory
     {
         public static IEnvironmentPath CreateEnvironmentPath(
-            bool hasSuperUserAccess = false,
+            bool isDotnetBeingInvokedFromNativeInstaller = false,
             IEnvironmentProvider environmentProvider = null)
         {
             if (environmentProvider == null)
@@ -25,12 +25,22 @@ namespace Microsoft.DotNet.ShellShim
             IEnvironmentPath environmentPath = new DoNothingEnvironmentPath();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                environmentPath = new WindowsEnvironmentPath(
-                    CliFolderPathCalculator.ToolsShimPath,
-                    Reporter.Output,
-                    environmentProvider);
+                if (isDotnetBeingInvokedFromNativeInstaller)
+                {
+                    // On Windows MSI will in charge of appending ToolShimPath
+                    environmentPath = new DoNothingEnvironmentPath();
+                }
+                else
+                {
+                    environmentPath = new WindowsEnvironmentPath(
+                        CliFolderPathCalculator.ToolsShimPath,
+                        CliFolderPathCalculator.WindowsNonExpandedToolsShimPath,
+                        environmentProvider,
+                        new WindowsRegistryEnvironmentPathEditor(),
+                        Reporter.Output);
+                }
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && hasSuperUserAccess)
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && isDotnetBeingInvokedFromNativeInstaller)
             {
                 environmentPath = new LinuxEnvironmentPath(
                     CliFolderPathCalculator.ToolsShimPathInUnix,
@@ -38,7 +48,7 @@ namespace Microsoft.DotNet.ShellShim
                     environmentProvider,
                     new FileWrapper());
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && hasSuperUserAccess)
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && isDotnetBeingInvokedFromNativeInstaller)
             {
                 environmentPath = new OsxBashEnvironmentPath(
                     executablePath: CliFolderPathCalculator.ToolsShimPathInUnix,
@@ -64,6 +74,16 @@ namespace Microsoft.DotNet.ShellShim
                     executablePath: CliFolderPathCalculator.ToolsShimPathInUnix,
                     reporter: Reporter.Output,
                     environmentProvider: environmentProvider);
+            }
+
+			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return new WindowsEnvironmentPath(
+                    CliFolderPathCalculator.ToolsShimPath,
+                    nonExpandedPackageExecutablePath: CliFolderPathCalculator.WindowsNonExpandedToolsShimPath,
+                    expandedEnvironmentReader: environmentProvider,
+                    environmentPathEditor: new WindowsRegistryEnvironmentPathEditor(),
+                    reporter: Reporter.Output);
             }
 
             return CreateEnvironmentPath(true, environmentProvider);
