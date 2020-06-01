@@ -4253,7 +4253,7 @@ namespace Microsoft.Build.Evaluation
                 arg0 = args[0] as string;
 
                 // reject enums as ints. In C# this would require a cast, which is not supported in msbuild expressions
-                if (arg0 == null || !(args[1] is string comparisonTypeName) || ContainsDigits(comparisonTypeName))
+                if (arg0 == null || !(args[1] is string comparisonTypeName) || int.TryParse(comparisonTypeName, out _))
                 {
                     arg1 = default;
                     return false;
@@ -4266,19 +4266,6 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 return Enum.TryParse(comparisonTypeName, out arg1);
-
-                bool ContainsDigits(string aString)
-                {
-                    foreach (var c in aString)
-                    {
-                        if (char.IsDigit(c))
-                        {
-                            return true;
-                        }
-                    }
-
-                    return false;
-                }
             }
 
             private static bool TryGetArgs(object[] args, out int arg0, out int arg1)
