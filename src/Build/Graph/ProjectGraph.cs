@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
@@ -416,6 +417,7 @@ namespace Microsoft.Build.Graph
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
 
             var timer = Stopwatch.StartNew();
+            MSBuildEventSource.Log.ProjectGraphConstructionStart();
 
             projectInstanceFactory ??= DefaultProjectInstanceFactory;
 
@@ -435,6 +437,7 @@ namespace Microsoft.Build.Graph
 
             _projectNodesTopologicallySorted = new Lazy<IReadOnlyCollection<ProjectGraphNode>>(() => TopologicalSort(GraphRoots, ProjectNodes));
 
+            MSBuildEventSource.Log.ProjectGraphConstructionStop();
             timer.Stop();
 
             ConstructionMetrics = new GraphConstructionMetrics(timer.Elapsed, ProjectNodes.Count, Edges.Count);

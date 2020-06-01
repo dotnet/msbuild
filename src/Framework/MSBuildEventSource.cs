@@ -398,6 +398,18 @@ namespace Microsoft.Build.Eventing
         {
             WriteEvent(52, taskName, taskID);
         }
+
+        [Event(53)]
+        public void ProjectGraphConstructionStart()
+        {
+            WriteEvent(53);
+        }
+
+        [Event(54)]
+        public void ProjectGraphConstructionStop()
+        {
+            WriteEvent(54);
+        }
         #endregion
     }
 }
