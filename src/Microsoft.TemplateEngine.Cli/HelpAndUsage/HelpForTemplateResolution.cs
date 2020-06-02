@@ -133,8 +133,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 DisplayParametersInvalidForSomeTemplates(invalidForSomeTemplates, LocalizableStrings.PartialTemplateMatchSwitchesNotValidForAllMatches);
             }
 
-            ShowContextAndTemplateNameMismatchHelp(templateResolutionResult, commandInput.TemplateName, commandInput.TypeFilter);
-            DisplayTemplateList(templatesForDisplay, environmentSettings, commandInput.Language, defaultLanguage);
+            ShowContextAndTemplateNameMismatchHelp(templateResolutionResult, commandInput.TemplateName, commandInput.TypeFilter, out bool shouldShowTemplateList);
+            if (shouldShowTemplateList)
+            {
+                DisplayTemplateList(templatesForDisplay, environmentSettings, commandInput.Language, defaultLanguage);
+            }
 
             if (!commandInput.IsListFlagSpecified)
             {
@@ -301,18 +304,20 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
         }
 
-        private static void ShowContextAndTemplateNameMismatchHelp(TemplateListResolutionResult templateResolutionResult, string templateName, string context)
+        private static void ShowContextAndTemplateNameMismatchHelp(TemplateListResolutionResult templateResolutionResult, string templateName, string context, out bool shouldShowTemplateList)
         {
+            shouldShowTemplateList = true; // by default, show the list of all templates installed
             if (string.IsNullOrEmpty(templateName))
             {
                 return;
             }
-
-            DisplayPartialNameMatchAndContextProblems(templateName, context, templateResolutionResult);
+            DisplayPartialNameMatchAndContextProblems(templateName, context, templateResolutionResult, out shouldShowTemplateList);
         }
 
-        private static void DisplayPartialNameMatchAndContextProblems(string templateName, string context, TemplateListResolutionResult templateResolutionResult)
+        private static void DisplayPartialNameMatchAndContextProblems(string templateName, string context, TemplateListResolutionResult templateResolutionResult, out bool shouldShowTemplateList)
         {
+            shouldShowTemplateList = false;
+
             if (templateResolutionResult.IsTemplateAmbiguous)
             {
                 // Unable to determine the desired template from the input template name: {0}..
@@ -356,6 +361,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 // The following templates partially match the input. Be more specific with the template name and/or language
                 Reporter.Error.WriteLine(LocalizableStrings.TemplateMultiplePartialNameMatches.Bold().Red());
                 anythingReported = true;
+                shouldShowTemplateList = true;
             }
 
             if (anythingReported)
