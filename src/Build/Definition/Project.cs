@@ -2506,13 +2506,8 @@ namespace Microsoft.Build.Evaluation
             {
                 var includeItemspec = new EvaluationItemSpec(itemElement.Include, _data.Expander, itemElement.IncludeLocation, itemElement.ContainingProject.DirectoryPath);
 
-                ImmutableArray<ItemSpecFragment> includeGlobFragments = includeItemspec.Fragments.Where(f => f is GlobFragment).ToImmutableArray();
+                ImmutableArray<ItemSpecFragment> includeGlobFragments = includeItemspec.Fragments.Where(f => f is GlobFragment && (NativeMethodsShared.IsWindows ? f.TextFragment.IndexOfAny(s_invalidGlobChars) == -1 : true)).ToImmutableArray();
                 if (includeGlobFragments.Length == 0)
-                {
-                    return null;
-                }
-
-                if (NativeMethodsShared.IsWindows && itemElement.Include.IndexOfAny(s_invalidGlobChars) != -1)
                 {
                     return null;
                 }
