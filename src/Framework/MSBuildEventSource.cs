@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -400,15 +401,15 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(53)]
-        public void ProjectGraphConstructionStart()
+        public void ProjectGraphConstructionStart(string graphEntryPoints)
         {
-            WriteEvent(53);
+            WriteEvent(53, graphEntryPoints);
         }
 
         [Event(54)]
-        public void ProjectGraphConstructionStop()
+        public void ProjectGraphConstructionStop(string graphEntryPoints)
         {
-            WriteEvent(54);
+            WriteEvent(54, graphEntryPoints);
         }
         #endregion
     }

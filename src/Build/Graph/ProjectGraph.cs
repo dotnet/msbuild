@@ -416,8 +416,7 @@ namespace Microsoft.Build.Graph
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
 
-            var timer = Stopwatch.StartNew();
-            MSBuildEventSource.Log.ProjectGraphConstructionStart();
+            var measurementInfo = BeginMeasurement();
 
             projectInstanceFactory ??= DefaultProjectInstanceFactory;
 
@@ -437,10 +436,44 @@ namespace Microsoft.Build.Graph
 
             _projectNodesTopologicallySorted = new Lazy<IReadOnlyCollection<ProjectGraphNode>>(() => TopologicalSort(GraphRoots, ProjectNodes));
 
-            MSBuildEventSource.Log.ProjectGraphConstructionStop();
-            timer.Stop();
+            ConstructionMetrics = EndMeasurement();
 
-            ConstructionMetrics = new GraphConstructionMetrics(timer.Elapsed, ProjectNodes.Count, Edges.Count);
+            (Stopwatch Timer, string ETWArgs) BeginMeasurement()
+            {
+                string etwArgs = null;
+
+                if (MSBuildEventSource.Log.IsEnabled())
+                {
+                    etwArgs = string.Join(";", entryPoints.Select(
+                        e =>
+                        {
+                            var globalPropertyString = e.GlobalProperties == null
+                                ? string.Empty
+                                : string.Join(", ", e.GlobalProperties.Select(kvp => $"{kvp.Key} = {kvp.Value}"));
+
+                            return $"{e.ProjectFile}({globalPropertyString})";
+                        }));
+
+                    MSBuildEventSource.Log.ProjectGraphConstructionStart(etwArgs);
+                }
+
+                return (Stopwatch.StartNew(), etwArgs);
+            }
+
+            GraphConstructionMetrics EndMeasurement()
+            {
+                if (MSBuildEventSource.Log.IsEnabled())
+                {
+                    MSBuildEventSource.Log.ProjectGraphConstructionStop(measurementInfo.ETWArgs);
+                }
+
+                measurementInfo.Timer.Stop();
+
+                return new GraphConstructionMetrics(
+                    measurementInfo.Timer.Elapsed,
+                    ProjectNodes.Count,
+                    Edges.Count);
+            }
         }
 
         internal string ToDot()
