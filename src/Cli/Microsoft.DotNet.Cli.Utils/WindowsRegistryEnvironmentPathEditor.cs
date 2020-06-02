@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
-using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.Win32;
 
 namespace Microsoft.DotNet.Cli.Utils
