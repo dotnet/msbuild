@@ -22,6 +22,11 @@ From that shell your SDK will be available in:
 - `dotnet build`
 - `msbuild`
 
+## Installing the SDK
+[Official builds](https://dotnet.microsoft.com/download/dotnet-core)
+
+[Latest builds](https://github.com/dotnet/installer#installers-and-binaries)
+
 ## How do I engage and contribute?
 
 We welcome you to try things out, [file issues](https://github.com/dotnet/sdk/issues), make feature requests and join us in design conversations. Also be sure to check out our [project documentation](toolset/Documentation) and [Developer Guide](toolset/Documentation/project-docs/developer-guide.md).
