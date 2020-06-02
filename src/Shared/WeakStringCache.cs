@@ -8,10 +8,11 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Build
 {
     /// <summary>
-    /// A cache of weak GC handles (equivalent to weak references) pointing to strings. As long as a string has an ordinary strong GC root
-    /// elsewhere in the process and another string with the same hashcode hasn't reused the entry, the cache has a reference to it and can
-    /// match it to an internable. When the string is collected, it is also automatically "removed" from the cache by becoming unrecoverable
-    /// from the GC handle. GC handles that do not reference a live string anymore are freed lazily.
+    /// A cache of weak GC handles pointing to strings. Weak GC handles are functionally equivalent to WeakReference's but have less overhead
+    /// (they're a struct as opposed to WR which is a finalizable class) at the expense of requiring manual lifetime management. As long as
+    /// a string has an ordinary strong GC root elsewhere in the process and another string with the same hashcode hasn't reused the entry,
+    /// the cache has a reference to it and can match it to an internable. When the string is collected, it is also automatically "removed"
+    /// from the cache by becoming unrecoverable from the GC handle. GC handles that do not reference a live string anymore are freed lazily.
     /// </summary>
     internal sealed partial class WeakStringCache : IDisposable
     {
@@ -84,9 +85,10 @@ namespace Microsoft.Build
         }
 
         /// <summary>
-        /// Improvised capacity for the scavenging heuristics.
+        /// Improvised capacity for the scavenging heuristics. We use this number as the initial capacity of the underlying collection
+        /// and then as the maximum size we let the collection grow before scavenging unused entries.
         /// </summary>
-        private int _capacity = 101;
+        private int _capacity = 503;
 
         /// <summary>
         /// Implements the simple yet very decently performing djb2 hash function (xor version).

@@ -13,7 +13,7 @@ namespace Microsoft.Build
     /// </summary>
     internal sealed partial class WeakStringCache : IDisposable
     {
-        private ConcurrentDictionary<int, StringWeakHandle> _stringsByHashCode;
+        private readonly ConcurrentDictionary<int, StringWeakHandle> _stringsByHashCode;
 
         public WeakStringCache()
         {
