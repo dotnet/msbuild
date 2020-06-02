@@ -770,10 +770,14 @@ namespace Microsoft.Build.Utilities
                     if (keyIndex++ > 0)
                     {
                         // If we are ignoring missing files, then only record those that exist
-                        if (!fileCache.Contains(file) && FileUtilities.FileExistsNoThrow(file))
+                        if (fileCache.Contains(file) || FileUtilities.FileExistsNoThrow(file))
                         {
                             dependenciesWithoutMissingFiles.Add(file, dependencies[file]);
-                            fileCache.Add(file);
+
+                            if(!fileCache.Contains(file))
+                            {
+                                fileCache.Add(file);
+                            }
                         }
                     }
                     else

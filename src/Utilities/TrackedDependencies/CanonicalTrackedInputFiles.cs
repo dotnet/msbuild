@@ -1074,10 +1074,14 @@ namespace Microsoft.Build.Utilities
                     {
                         // If we are ignoring missing files, then only record those that exist
                         // Cache the files as we find them to save time (On^2), at the expense of storing data O(n).
-                        if (!fileCache.Contains(file) && FileUtilities.FileExistsNoThrow(file))
+                        if (fileCache.Contains(file) || FileUtilities.FileExistsNoThrow(file))
                         {
                             dependenciesWithoutMissingFiles.Add(file, dependencies[file]);
-                            fileCache.Add(file);
+
+                            if (!fileCache.Contains(file))
+                            {
+                                fileCache.Add(file);
+                            }
                         }
                     }
                     else
