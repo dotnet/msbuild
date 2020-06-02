@@ -106,7 +106,7 @@ namespace Microsoft.Build.Internal
         /// Looks up the file version and caches the hashcode
         /// This file version hashcode is used in calculating the handshake
         /// </summary>
-        internal static int FileVersionHash
+        private static int FileVersionHash
         {
             get
             {
