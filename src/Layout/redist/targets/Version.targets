@@ -1,20 +1,10 @@
 <Project>
   <Target Name="GetCoreSdkGitCommitInfo">
-    <Exec Command="git rev-list --count HEAD"
-          ConsoleToMSBuild="true"
-          Condition=" '$(GitCommitCount)' == '' ">
-      <Output TaskParameter="ConsoleOutput" PropertyName="GitCommitCount" />
-    </Exec>
-
     <Exec Command="git rev-parse HEAD"
           ConsoleToMSBuild="true"
           Condition=" '$(GitCommitHash)' == '' ">
       <Output TaskParameter="ConsoleOutput" PropertyName="GitCommitHash" />
     </Exec>
-
-    <PropertyGroup>
-      <GitCommitCount>$(GitCommitCount.PadLeft(6,'0'))</GitCommitCount>
-    </PropertyGroup>
   </Target>
 
   <PropertyGroup>

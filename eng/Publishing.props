@@ -30,9 +30,9 @@
        a relative path inside the blob storage. -->
   <Target Name="PublishToolsetAssets" DependsOnTargets="ReadToolsetVersion" BeforeTargets="Publish" Condition="'$(PublishToAzure)' == 'true'">
     <ItemGroup>
-      <ToolsetAssetsToPushToBlobFeed Include="@(ToolsetAssetsToPublish)" IsShipping="false" >
+      <ToolsetAssetsToPushToBlobFeed Include="@(ToolsetAssetsToPublish)">
         <RelativeBlobPath>$(BlobStoragePartialRelativePath)/$(ToolsetVersionValue)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
-        <ManifestArtifactData>ShipInstaller=dotnetcli</ManifestArtifactData>
+        <ManifestArtifactData>NonShipping=true</ManifestArtifactData>
       </ToolsetAssetsToPushToBlobFeed>
     </ItemGroup>
 
