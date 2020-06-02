@@ -26,6 +26,8 @@ namespace Microsoft.Build.Utilities
         private TaskLoggingHelper _log;
         // Are the tracking logs that we were constructed with actually available
         private bool _tlogAvailable;
+        // Cache of files that have been checked and exist.
+        private HashSet<string> fileCache = new HashSet<string>();
         #endregion
 
         #region Properties
@@ -768,9 +770,10 @@ namespace Microsoft.Build.Utilities
                     if (keyIndex++ > 0)
                     {
                         // If we are ignoring missing files, then only record those that exist
-                        if (FileUtilities.FileExistsNoThrow(file))
+                        if (!fileCache.Contains(file) && FileUtilities.FileExistsNoThrow(file))
                         {
                             dependenciesWithoutMissingFiles.Add(file, dependencies[file]);
+                            fileCache.Add(file);
                         }
                     }
                     else
