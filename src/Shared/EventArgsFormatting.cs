@@ -20,15 +20,16 @@ namespace Microsoft.Build.Shared
         /// a single string.
         /// </summary>
         /// <param name="e">Error to format</param>
+        /// <param name="target_framework">Framwork error is occuring on</param>
         /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildErrorEventArgs e)
+        internal static string FormatEventMessage(BuildErrorEventArgs e, string target_framework)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
             // "error" should not be localized
             return FormatEventMessage("error", e.Subcategory, e.Message,
                             e.Code, e.File, null, e.LineNumber, e.EndLineNumber,
-                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId);
+                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, target_framework);
         }
 
         /// <summary>
@@ -36,16 +37,17 @@ namespace Microsoft.Build.Shared
         /// a single string.
         /// </summary>
         /// <param name="e">Error to format</param>
+        /// <param name = "target_framework" > Framwork error is occuring on</param>
         /// <param name="showProjectFile"><code>true</code> to show the project file which issued the event, otherwise <code>false</code>.</param>
         /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildErrorEventArgs e, bool showProjectFile)
+        internal static string FormatEventMessage(BuildErrorEventArgs e, string target_framework, bool showProjectFile)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
             // "error" should not be localized
             return FormatEventMessage("error", e.Subcategory, e.Message,
                 e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
-                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId);
+                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, target_framework);
         }
 
         /// <summary>
@@ -53,15 +55,16 @@ namespace Microsoft.Build.Shared
         /// single string.
         /// </summary>
         /// <param name="e">Warning to format</param>
+        /// <param name="target_framework">Framwork error is occuring on</param>
         /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildWarningEventArgs e)
+        internal static string FormatEventMessage(BuildWarningEventArgs e, string target_framework)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
             // "warning" should not be localized
             return FormatEventMessage("warning", e.Subcategory, e.Message,
                 e.Code, e.File, null, e.LineNumber, e.EndLineNumber,
-                           e.ColumnNumber, e.EndColumnNumber, e.ThreadId);
+                           e.ColumnNumber, e.EndColumnNumber, e.ThreadId, target_framework);
         }
 
         /// <summary>
@@ -69,16 +72,17 @@ namespace Microsoft.Build.Shared
         /// single string.
         /// </summary>
         /// <param name="e">Warning to format</param>
+        /// <param name="target_framework">Framwork error is occuring on</param>
         /// <param name="showProjectFile"><code>true</code> to show the project file which issued the event, otherwise <code>false</code>.</param>
         /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildWarningEventArgs e, bool showProjectFile)
+        internal static string FormatEventMessage(BuildWarningEventArgs e, string target_framework, bool showProjectFile)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
             // "warning" should not be localized
             return FormatEventMessage("warning", e.Subcategory, e.Message,
                 e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
-                           e.ColumnNumber, e.EndColumnNumber, e.ThreadId);
+                           e.ColumnNumber, e.EndColumnNumber, e.ThreadId, target_framework);
         }
 
         /// <summary>
@@ -86,10 +90,11 @@ namespace Microsoft.Build.Shared
         /// single string.
         /// </summary>
         /// <param name="e">Message to format</param>
+        /// <param name = "target_framework" > Framwork error is occuring on</param>
         /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildMessageEventArgs e)
+        internal static string FormatEventMessage(BuildMessageEventArgs e, string target_framework)
         {
-            return FormatEventMessage(e, false);
+            return FormatEventMessage(e, target_framework, false);
         }
 
         /// <summary>
@@ -97,15 +102,16 @@ namespace Microsoft.Build.Shared
         /// single string.
         /// </summary>
         /// <param name="e">Message to format</param>
+        /// <param name = "target_framework" > Framwork error is occuring on</param>
         /// <param name="showProjectFile">Show project file or not</param>
         /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildMessageEventArgs e, bool showProjectFile)
+        internal static string FormatEventMessage(BuildMessageEventArgs e, string target_framework, bool showProjectFile)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
             // "message" should not be localized
             return FormatEventMessage("message", e.Subcategory, e.Message,
-                e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber, e.ColumnNumber, e.EndColumnNumber, e.ThreadId);
+                e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber, e.ColumnNumber, e.EndColumnNumber, e.ThreadId, target_framework);
         }
 
         /// <summary>
@@ -122,6 +128,7 @@ namespace Microsoft.Build.Shared
         /// <param name="columnNumber">column number (0 if n/a)</param>
         /// <param name="endColumnNumber">end column number (0 if n/a)</param>
         /// <param name="threadId">thread id</param>
+        /// <param name = "target_framework" > Framwork error is occuring on</param>
         /// <returns>The formatted message string.</returns>
         internal static string FormatEventMessage
         (
@@ -134,10 +141,11 @@ namespace Microsoft.Build.Shared
             int endLineNumber,
             int columnNumber,
             int endColumnNumber,
-            int threadId
+            int threadId,
+            string target_framework
         )
         {
-            return FormatEventMessage(category, subcategory, message, code, file, null, lineNumber, endLineNumber, columnNumber, endColumnNumber, threadId);
+            return FormatEventMessage(category, subcategory, message, code, file, null, lineNumber, endLineNumber, columnNumber, endColumnNumber, threadId, target_framework);
         }
 
         /// <summary>
@@ -155,6 +163,7 @@ namespace Microsoft.Build.Shared
         /// <param name="columnNumber">column number (0 if n/a)</param>
         /// <param name="endColumnNumber">end column number (0 if n/a)</param>
         /// <param name="threadId">thread id</param>
+        /// <param name = "target_framework" > Framwork error is occuring on</param>
         /// <returns>The formatted message string.</returns>
         internal static string FormatEventMessage
         (
@@ -168,7 +177,8 @@ namespace Microsoft.Build.Shared
             int endLineNumber,
             int columnNumber,
             int endColumnNumber,
-            int threadId
+            int threadId,
+            string target_framework
         )
         {
             StringBuilder format = new StringBuilder();
@@ -180,6 +190,11 @@ namespace Microsoft.Build.Shared
                 format.Append("{0}>");
             }
             */
+
+            if (target_framework != null)
+            {
+                format.Append("Target Framework: " + target_framework + " ");
+            }
 
             if ((file == null) || (file.Length == 0))
             {
