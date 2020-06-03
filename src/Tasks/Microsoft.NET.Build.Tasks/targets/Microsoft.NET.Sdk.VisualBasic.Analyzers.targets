@@ -10,13 +10,15 @@ Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Condition="'$(DisableNetAnalyzers)' != 'true' And $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">
-    <UsingNETAnalyzers>true</UsingNETAnalyzers>
+  <PropertyGroup Condition="'$(EnableNETAnalyzers )' == '' And 
+                            '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
+                             $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
   </PropertyGroup>
   <Import Project="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.targets"
-          Condition="'$(DisableNetAnalyzers)' != 'true' And $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))" />
+          Condition="$(EnableNETAnalyzers)" />
 
-  <ItemGroup Condition="'$(DisableNetAnalyzers)' != 'true' And $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">
+  <ItemGroup Condition="$(EnableNETAnalyzers)" />
     <Analyzer
       Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))\analyzers\vb\Microsoft.CodeAnalysis.VisualBasic.NetAnalyzers.dll"
       IsImplicitlyDefined="true" />
