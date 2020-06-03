@@ -37,8 +37,8 @@
       <AnalyzerTargetsDirectory>$(AnalyzerAssembliesDirectory)\build</AnalyzerTargetsDirectory>
     </PropertyGroup>
     <ItemGroup>
-      <AnalyzerAssemblies Include="$(NuGetPackageRoot)/microsoft.codeanalysis.netanalyzers/$(MicrosoftCodeAnalysisNetAnalyzersVersion)/analyzers/dotnet/**/*" />
-      <AnalyzerTargets Include="$(NuGetPackageRoot)/microsoft.codeanalysis.netanalyzers/$(MicrosoftCodeAnalysisNetAnalyzersVersion)/build/**/*" />
+      <AnalyzerAssemblies Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/analyzers/dotnet/**/*" />
+      <AnalyzerTargets Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/build/**/*" />
     </ItemGroup>
     <Error Condition="'@(AnalyzerAssemblies)' == ''" Text="Something moved around in Analyzer package, adjust code here accordingly. TFM change?" />
     <Error Condition="'@(AnalyzerTargets)' == ''" Text="Something moved around in Analyzer package, adjust code here accordingly. TFM change?" />
