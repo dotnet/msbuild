@@ -328,7 +328,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="globalProperties">The global properties to use for each project</param>
         /// <param name="undefineProperties">The list of global properties to undefine</param>
         /// <param name="toolsVersion">The tools versions to use</param>
-        /// <param name="returnTargetOutputs">Should the target outputs be returned in teh BuildEngineResult</param>
+        /// <param name="returnTargetOutputs">Should the target outputs be returned in the BuildEngineResult</param>
         /// <returns>A structure containing the result of the build, success or failure and the list of target outputs per project</returns>
         public BuildEngineResult BuildProjectFilesInParallel(string[] projectFileNames, string[] targetNames, System.Collections.IDictionary[] globalProperties, IList<String>[] undefineProperties, string[] toolsVersion, bool returnTargetOutputs)
         {
@@ -846,7 +846,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="globalProperties">The global properties to use for each project</param>
         /// <param name="undefineProperties">The list of global properties to undefine</param>
         /// <param name="toolsVersion">The tools versions to use</param>
-        /// <param name="returnTargetOutputs">Should the target outputs be returned in teh BuildEngineResult</param>
+        /// <param name="returnTargetOutputs">Should the target outputs be returned in the BuildEngineResult</param>
         /// <param name="skipNonexistentTargets">If set, skip targets that are not defined in the projects to be built.</param>
         /// <returns>A Task returning a structure containing the result of the build, success or failure and the list of target outputs per project</returns>
         private async Task<BuildEngineResult> BuildProjectFilesInParallelAsync(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<String>[] undefineProperties, string[] toolsVersion, bool returnTargetOutputs, bool skipNonexistentTargets = false)
