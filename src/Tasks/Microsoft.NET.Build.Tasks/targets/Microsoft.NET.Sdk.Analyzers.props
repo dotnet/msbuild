@@ -10,6 +10,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.props" Condition="'$(MSBuildProjectExtension)' == '.csproj'" />
-  <Import Project="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.props" Condition="'$(MSBuildProjectExtension)' == '.vbproj'" />
+  <Import Project="..\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.props"
+          Condition="'$(MSBuildProjectExtension)' == '.csproj' Or '$(MSBuildProjectExtension)' == '.vbproj'" />
 </Project>
