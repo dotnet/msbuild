@@ -165,7 +165,7 @@ namespace Microsoft.Build.Internal
                     // Get the file version from the currently executing assembly.
                     // Use .CodeBase instead of .Location, because .Location doesn't
                     // work when Microsoft.Build.dll has been shadow-copied, for example
-                    // in scenarios where NUnit is loading Microsoft.Build.
+                    // in scenarios where NUnit is loading Microsoft.Build. 
                     string path = FileUtilities.ExecutingAssemblyPath;
 
                     assemblyTimestamp = new FileInfo(path).LastWriteTime.Ticks;
