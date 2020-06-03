@@ -55,8 +55,8 @@ namespace Microsoft.Build.Utilities
         protected Logger() { }
         public virtual string Parameters { get { throw null; } set { } }
         public virtual Microsoft.Build.Framework.LoggerVerbosity Verbosity { get { throw null; } set { } }
-        public virtual string FormatErrorEvent(Microsoft.Build.Framework.BuildErrorEventArgs args) { throw null; }
-        public virtual string FormatWarningEvent(Microsoft.Build.Framework.BuildWarningEventArgs args) { throw null; }
+        public virtual string FormatErrorEvent(Microsoft.Build.Framework.BuildErrorEventArgs args, string target_framework) { throw null; }
+        public virtual string FormatWarningEvent(Microsoft.Build.Framework.BuildWarningEventArgs args, string target_framework) { throw null; }
         public abstract void Initialize(Microsoft.Build.Framework.IEventSource eventSource);
         public bool IsVerbosityAtLeast(Microsoft.Build.Framework.LoggerVerbosity checkVerbosity) { throw null; }
         public virtual void Shutdown() { }
