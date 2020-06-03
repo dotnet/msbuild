@@ -29,6 +29,15 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private static bool _supportReadingBackgroundColor = true;
 
+        ///<summary>
+        /// target_framework_mapping is the map between a (nodeID and project_context_id) to a target framework
+        /// target_framework_errorwarning is the map between a target framwork and the number of errors and warnings
+        /// These are used to give more direction as to where an error is happening when multi targetted
+        ///</summary>
+        protected Dictionary<(int nodeId, int contextId), string> target_framework_mapping = new Dictionary<(int nodeId, int contextId), string>();
+        protected Dictionary<string, (int warningCount, int errorCount)> target_framwork_errorwarning =
+            new Dictionary<string, (int warningCount, int errorCount)>();
+
         #region Properties
 
         /// <summary>
