@@ -42,15 +42,17 @@ namespace Microsoft.Build.Utilities
         /// Generates a message in the default format from a BuildErrorEventArgs object.
         /// </summary>
         /// <param name="args">Error event arguments</param>
+        /// <param name="target_framework">target framework error occurred on </param>
         /// <returns>Error message in canonical format</returns>
-        public virtual string FormatErrorEvent(BuildErrorEventArgs args) => EventArgsFormatting.FormatEventMessage(args);
+        public virtual string FormatErrorEvent(BuildErrorEventArgs args, string target_framework) => EventArgsFormatting.FormatEventMessage(args, target_framework);
 
         /// <summary>
         /// Generates a message in the default format from a BuildWarningEventArgs object.
         /// </summary>
         /// <param name="args">Warning event arguments</param>
+        /// <param name="target_framework">target framework error occurred on </param>
         /// <returns>Warning message in canonical format</returns>
-        public virtual string FormatWarningEvent(BuildWarningEventArgs args) => EventArgsFormatting.FormatEventMessage(args);
+        public virtual string FormatWarningEvent(BuildWarningEventArgs args, string target_framework) => EventArgsFormatting.FormatEventMessage(args, target_framework);
 
         /// <summary>
         /// Determines whether the current verbosity setting is at least the value
