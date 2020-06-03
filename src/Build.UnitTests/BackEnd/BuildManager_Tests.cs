@@ -1517,7 +1517,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             asyncResult.ExecuteAsync(null, null);
             _buildManager.CancelAllSubmissions();
-            asyncResult.WaitHandle.WaitOne();
+            // This test intermittently hangs. This timeout is designed to prevent that, turning a hang into a failure.
+            // Todo: Investigate why this test sometimes hangs.
+            asyncResult.WaitHandle.WaitOne(TimeSpan.FromSeconds(10));
+            asyncResult.IsCompleted.ShouldBeTrue("Failing to complete by this point indicates a hang.");
             BuildResult result = asyncResult.BuildResult;
             _buildManager.EndBuild();
 
@@ -2297,8 +2300,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// overall build result -- and thus the return value of the MSBuild task -- should reflect
         /// that failure. 
         /// </summary>
-        [Fact]
-        public void FailedAfterTargetInP2PShouldCauseOverallBuildFailure()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void FailedAfterTargetInP2PShouldCauseOverallBuildFailure(bool disableInProcNode)
         {
             var projA = _env.CreateFile(".proj").Path;
             var projB = _env.CreateFile(".proj").Path;
@@ -2328,6 +2333,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             File.WriteAllText(projA, CleanupFileContents(contentsA));
             File.WriteAllText(projB, CleanupFileContents(contentsB));
 
+            _parameters.DisableInProcNode = disableInProcNode;
             _buildManager.BeginBuild(_parameters);
             var data = new BuildRequestData(projA, new Dictionary<string, string>(), null, new[] { "Build" }, new HostServices());
             BuildResult result = _buildManager.PendBuildRequest(data).Execute();
@@ -2343,8 +2349,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// that failure.  Specifically tests where there are multiple entrypoint targets with 
         /// AfterTargets, only one of which fails. 
         /// </summary>
-        [Fact]
-        public void FailedAfterTargetInP2PShouldCauseOverallBuildFailure_MultipleEntrypoints()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void FailedAfterTargetInP2PShouldCauseOverallBuildFailure_MultipleEntrypoints(bool disableInProcNode)
         {
             var projA = _env.CreateFile(".proj").Path;
             var projB = _env.CreateFile(".proj").Path;
@@ -2386,6 +2394,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             File.WriteAllText(projA, CleanupFileContents(contentsA));
             File.WriteAllText(projB, CleanupFileContents(contentsB));
 
+            _parameters.DisableInProcNode = disableInProcNode;
             _buildManager.BeginBuild(_parameters);
             var data = new BuildRequestData(projA, new Dictionary<string, string>(), null, new[] { "Build" }, new HostServices());
             BuildResult result = _buildManager.PendBuildRequest(data).Execute();
@@ -2406,8 +2415,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// that failure. This should also be true if the AfterTarget is an AfterTarget of the 
         /// entrypoint target.
         /// </summary>
-        [Fact]
-        public void FailedNestedAfterTargetInP2PShouldCauseOverallBuildFailure()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void FailedNestedAfterTargetInP2PShouldCauseOverallBuildFailure(bool disableInProcNode)
         {
             var projA = _env.CreateFile(".proj").Path;
             var projB = _env.CreateFile(".proj").Path;
@@ -2441,6 +2452,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             File.WriteAllText(projA, CleanupFileContents(contentsA));
             File.WriteAllText(projB, CleanupFileContents(contentsB));
 
+            _parameters.DisableInProcNode = disableInProcNode;
             _buildManager.BeginBuild(_parameters);
             var data = new BuildRequestData(projA, new Dictionary<string, string>(), null, new[] { "Build" }, new HostServices());
             BuildResult result = _buildManager.PendBuildRequest(data).Execute();

@@ -26,6 +26,8 @@ namespace Microsoft.Build.Shared
         internal const string exclude = "Exclude";
         internal const string remove = "Remove";
         internal const string update = "Update";
+        internal const string matchOnMetadata = "MatchOnMetadata";
+        internal const string matchOnMetadataOptions = "MatchOnMetadataOptions";
         internal const string keepMetadata = "KeepMetadata";
         internal const string removeMetadata = "RemoveMetadata";
         internal const string keepDuplicates = "KeepDuplicates";

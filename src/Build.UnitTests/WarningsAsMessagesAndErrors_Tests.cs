@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
@@ -288,7 +289,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 MockLogger logger = proj.BuildProjectExpectFailure();
 
-                logger.AssertLogContains("MSB4132");
+                logger.AssertLogContains("MSB4181");
             }
         }
 
@@ -311,7 +312,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 logger.WarningCount.ShouldBe(1);
 
-                logger.AssertLogContains("MSB4132");
+                logger.AssertLogContains("MSB4181");
             }
         }
 
@@ -332,7 +333,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 MockLogger logger = proj.BuildProjectExpectSuccess();
 
-                logger.AssertLogContains("MSB4132");
+                logger.AssertLogContains("MSB4181");
             }
         }
 
@@ -353,7 +354,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 MockLogger logger = proj.BuildProjectExpectFailure();
 
-                logger.AssertLogContains("MSB4132");
+                logger.AssertLogContains("MSB4181");
             }
         }
 
@@ -374,7 +375,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 MockLogger logger = proj.BuildProjectExpectFailure();
 
-                logger.AssertLogContains("MSB4132");
+                logger.AssertLogContains("MSB4181");
             }
         }
     }

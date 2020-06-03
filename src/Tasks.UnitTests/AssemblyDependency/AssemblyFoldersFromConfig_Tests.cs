@@ -93,7 +93,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
         }
 
         [Fact]
-        public void AasemblyFoldersFromConfigNormalizeNetFrameworkVersion()
+        public void AssemblyFoldersFromConfigNormalizeNetFrameworkVersion()
         {
             var assemblyConfig = Path.GetTempFileName();
             File.WriteAllText(assemblyConfig, TestFile);

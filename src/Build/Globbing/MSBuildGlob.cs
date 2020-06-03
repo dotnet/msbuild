@@ -195,7 +195,7 @@ namespace Microsoft.Build.Globbing
                     {
                         var normalizedFixedPart = NormalizeTheFixedDirectoryPartAgainstTheGlobRoot(fixedDirPart, globRoot);
 
-                        return Tuple.Create(normalizedFixedPart, wildcardDirPart, filePart);
+                        return (normalizedFixedPart, wildcardDirPart, filePart);
                     });
 
                 // compile the regex since it's expected to be used multiple times

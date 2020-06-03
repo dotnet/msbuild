@@ -31,6 +31,7 @@ stages:
       name: VSEng-MicroBuildVS2019
       demands:
       - agent.os -equals Windows_NT
+      - VSTS_OS -equals Windows_Server_2019_Data_Center_with_Containers
 
     timeoutInMinutes: 180
 

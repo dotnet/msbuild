@@ -14,7 +14,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestData
     {
         public static ProjectItemGroupTaskInstance CreateTargetItemGroup(int? counter = null, List<ProjectItemGroupTaskItemInstance> items = null)
         {
-            items = items ?? new List<ProjectItemGroupTaskItemInstance>();
+            items ??= new List<ProjectItemGroupTaskItemInstance>();
             var stringCounter = CounterToString(counter);
 
             return new ProjectItemGroupTaskInstance(
@@ -26,27 +26,31 @@ namespace Microsoft.Build.Engine.UnitTests.TestData
 
         public static ProjectItemGroupTaskItemInstance CreateTargetItem(int? counter = null, List<ProjectItemGroupTaskMetadataInstance> metadata = null)
         {
-            metadata = metadata ?? new List<ProjectItemGroupTaskMetadataInstance>();
+            metadata ??= new List<ProjectItemGroupTaskMetadataInstance>();
             var stringCounter = CounterToString(counter);
 
             return new ProjectItemGroupTaskItemInstance(
-                $"i{stringCounter}",
-                $"v{stringCounter}",
-                $"e{stringCounter}",
-                $"r{stringCounter}",
-                $"km{stringCounter}",
-                $"rm{stringCounter}",
-                $"kd{stringCounter}",
-                $"c{stringCounter}",
-                new MockElementLocation($"location{stringCounter}"),
-                new MockElementLocation($"include{stringCounter}"),
-                new MockElementLocation($"remove{stringCounter}"),
-                new MockElementLocation($"exclude{stringCounter}"),
-                new MockElementLocation($"km{stringCounter}"),
-                new MockElementLocation($"rm{stringCounter}"),
-                new MockElementLocation($"kd{stringCounter}"),
-                new MockElementLocation($"cl{stringCounter}"),
-                metadata
+                itemType: $"i{stringCounter}",
+                include: $"v{stringCounter}",
+                exclude: $"e{stringCounter}",
+                remove: $"r{stringCounter}",
+                matchOnMetadata: $"mm{stringCounter}",
+                matchOnMetadataOptions: $"mmo{stringCounter}",
+                keepMetadata: $"km{stringCounter}",
+                removeMetadata: $"rm{stringCounter}",
+                keepDuplicates: $"kd{stringCounter}",
+                condition: $"c{stringCounter}",
+                location: new MockElementLocation($"location{stringCounter}"),
+                includeLocation: new MockElementLocation($"include{stringCounter}"),
+                excludeLocation: new MockElementLocation($"remove{stringCounter}"),
+                removeLocation: new MockElementLocation($"exclude{stringCounter}"),
+                matchOnMetadataLocation: new MockElementLocation($"mm{stringCounter}"),
+                matchOnMetadataOptionsLocation: new MockElementLocation($"mmo{stringCounter}"),
+                keepMetadataLocation: new MockElementLocation($"km{stringCounter}"),
+                removeMetadataLocation: new MockElementLocation($"rm{stringCounter}"),
+                keepDuplicatesLocation: new MockElementLocation($"kd{stringCounter}"),
+                conditionLocation: new MockElementLocation($"cl{stringCounter}"),
+                metadata: metadata
             );
         }
 
@@ -67,7 +71,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestData
             int? counter = null,
             List<ProjectPropertyGroupTaskPropertyInstance> properties = null)
         {
-            properties = properties ?? new List<ProjectPropertyGroupTaskPropertyInstance>();
+            properties ??= new List<ProjectPropertyGroupTaskPropertyInstance>();
             var stringCounter = CounterToString(counter);
 
             return new ProjectPropertyGroupTaskInstance(
@@ -105,16 +109,16 @@ namespace Microsoft.Build.Engine.UnitTests.TestData
 
         public static ProjectTaskInstance CreateTargetTask(
             int? counter = null,
-            IDictionary<string, Tuple<string, ElementLocation>> parameters = null,
+            IDictionary<string, (string, ElementLocation)> parameters = null,
             List<ProjectTaskInstanceChild> outputs = null)
         {
             var stringCounter = CounterToString(counter);
 
             var readonlyParameters = parameters != null
-                ? new CopyOnWriteDictionary<string, Tuple<string, ElementLocation>>(parameters)
-                : new CopyOnWriteDictionary<string, Tuple<string, ElementLocation>>();
+                ? new CopyOnWriteDictionary<string, (string, ElementLocation)>(parameters)
+                : new CopyOnWriteDictionary<string, (string, ElementLocation)>();
 
-            outputs = outputs ?? new List<ProjectTaskInstanceChild>();
+            outputs ??= new List<ProjectTaskInstanceChild>();
 
             return new ProjectTaskInstance(
                 $"n{stringCounter}",
@@ -167,8 +171,8 @@ namespace Microsoft.Build.Engine.UnitTests.TestData
             System.Collections.ObjectModel.ReadOnlyCollection<ProjectTargetInstanceChild> children,
             System.Collections.ObjectModel.ReadOnlyCollection<ProjectOnErrorInstance> errorChildren)
         {
-            children = children ?? new System.Collections.ObjectModel.ReadOnlyCollection<ProjectTargetInstanceChild>(new List<ProjectTargetInstanceChild>());
-            errorChildren = errorChildren ?? new System.Collections.ObjectModel.ReadOnlyCollection<ProjectOnErrorInstance>(new List<ProjectOnErrorInstance>());
+            children ??= new System.Collections.ObjectModel.ReadOnlyCollection<ProjectTargetInstanceChild>(new List<ProjectTargetInstanceChild>());
+            errorChildren ??= new System.Collections.ObjectModel.ReadOnlyCollection<ProjectOnErrorInstance>(new List<ProjectOnErrorInstance>());
             var stringCounter = CounterToString(counter);
 
             return new ProjectTargetInstance(

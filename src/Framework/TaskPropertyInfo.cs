@@ -46,5 +46,20 @@ namespace Microsoft.Build.Framework
         /// This task parameter is required (analogous to the [Required] attribute)
         /// </summary>
         public bool Required { get; private set; }
+
+        /// <summary>
+        /// This task parameter should be logged when LogTaskInputs is set. Defaults to true.
+        /// </summary>
+        public bool Log { get; set; } = true;
+
+        /// <summary>
+        /// When this task parameter is an item list, determines whether to log item metadata. Defaults to true.
+        /// </summary>
+        public bool LogItemMetadata { get; set; } = true;
+
+        /// <summary>
+        /// Whether the Log and LogItemMetadata properties have been assigned already.
+        /// </summary>
+        internal bool Initialized = false;
     }
 }

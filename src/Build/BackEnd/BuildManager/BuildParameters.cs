@@ -296,6 +296,7 @@ namespace Microsoft.Build.Execution
             _inputResultsCacheFiles = other._inputResultsCacheFiles;
             _outputResultsCacheFile = other._outputResultsCacheFile;
             DiscardBuildResults = other.DiscardBuildResults;
+            LowPriority = other.LowPriority;
         }
 
 #if FEATURE_THREAD_PRIORITY
@@ -315,6 +316,12 @@ namespace Microsoft.Build.Execution
             get => _useSynchronousLogging;
             set => _useSynchronousLogging = value;
         }
+
+
+        /// <summary>
+        /// Indicates whether to emit a default error if a task returns false without logging an error.
+        /// </summary>
+        public bool AllowFailureWithoutError { get; set; } = true;
 
         /// <summary>
         /// Gets the environment variables which were set when this build was created.
@@ -770,6 +777,11 @@ namespace Microsoft.Build.Execution
         public bool DiscardBuildResults { get; set; } = false;
 
         /// <summary>
+        /// Gets or sets a value indicating whether the build process should run as low priority.
+        /// </summary>
+        public bool LowPriority { get; set; }
+
+        /// <summary>
         /// Retrieves a toolset.
         /// </summary>
         public Toolset GetToolset(string toolsVersion)
@@ -833,6 +845,7 @@ namespace Microsoft.Build.Execution
             // LegacyThreadingSemantics is not transmitted.
             // InputResultsCacheFiles and OutputResultsCacheFile are not transmitted, as they are only used by the BuildManager
             // DiscardBuildResults is not transmitted.
+            // LowPriority is passed as an argument to new nodes, so it doesn't need to be transmitted here.
         }
 
 #region INodePacketTranslatable Members

@@ -35,7 +35,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// The parameters (excepting condition and continue-on-error)
         /// </summary>
-        private CopyOnWriteDictionary<string, Tuple<string, ElementLocation>> _parameters;
+        private CopyOnWriteDictionary<string, (string, ElementLocation)> _parameters;
 
         /// <summary>
         /// Protection for the parameters cache
@@ -150,7 +150,7 @@ namespace Microsoft.Build.Construction
 
                     var parametersClone = new Dictionary<string, string>(_parameters.Count, StringComparer.OrdinalIgnoreCase);
 
-                    foreach (KeyValuePair<string, Tuple<string, ElementLocation>> entry in _parameters)
+                    foreach (KeyValuePair<string, (string, ElementLocation)> entry in _parameters)
                     {
                         parametersClone[entry.Key] = entry.Value.Item1;
                     }
@@ -179,7 +179,7 @@ namespace Microsoft.Build.Construction
                     EnsureParametersInitialized();
                     var parameterLocations = new List<KeyValuePair<string, ElementLocation>>();
 
-                    foreach (KeyValuePair<string, Tuple<string, ElementLocation>> entry in _parameters)
+                    foreach (KeyValuePair<string, (string, ElementLocation)> entry in _parameters)
                     {
                         parameterLocations.Add(new KeyValuePair<string, ElementLocation>(entry.Key, entry.Value.Item2));
                     }
@@ -210,7 +210,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Retrieves a copy of the parameters as used during evaluation.
         /// </summary>
-        internal CopyOnWriteDictionary<string, Tuple<string, ElementLocation>> ParametersForEvaluation
+        internal CopyOnWriteDictionary<string, (string, ElementLocation)> ParametersForEvaluation
         {
             get
             {
@@ -302,7 +302,7 @@ namespace Microsoft.Build.Construction
 
                 EnsureParametersInitialized();
 
-                if (_parameters.TryGetValue(name, out Tuple<string, ElementLocation> parameter))
+                if (_parameters.TryGetValue(name, out (string, ElementLocation) parameter))
                 {
                     return parameter.Item1;
                 }
@@ -443,7 +443,7 @@ namespace Microsoft.Build.Construction
         {
             if (_parameters == null)
             {
-                _parameters = new CopyOnWriteDictionary<string, Tuple<string, ElementLocation>>(XmlElement.Attributes.Count, StringComparer.OrdinalIgnoreCase);
+                _parameters = new CopyOnWriteDictionary<string, (string, ElementLocation)>(XmlElement.Attributes.Count, StringComparer.OrdinalIgnoreCase);
 
                 foreach (XmlAttributeWithLocation attribute in XmlElement.Attributes)
                 {
@@ -453,7 +453,7 @@ namespace Microsoft.Build.Construction
                         // That means that if the name of the file is changed after first load (possibly from null) it will
                         // remain the old value here. Correctly, this should cache the attribute not the location. Fixing 
                         // that will need profiling, though, as this cache was added for performance.
-                        _parameters[attribute.Name] = new Tuple<string, ElementLocation>(attribute.Value, attribute.Location);
+                        _parameters[attribute.Name] = (attribute.Value, attribute.Location);
                     }
                 }
             }

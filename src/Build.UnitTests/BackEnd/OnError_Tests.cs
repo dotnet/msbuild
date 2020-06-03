@@ -11,6 +11,9 @@ using System.Collections;
 using System.Xml;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using System.Reflection;
+using Shouldly;
+using System.Linq;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -557,6 +560,29 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 /* No build required */
             }
            );
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ErrorWhenTaskFailsWithoutLoggingErrorEscapeHatch(bool emitError)
+        {
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectFailure($@"
+<Project>
+    <UsingTask TaskName=""FailingTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
+    <Target Name=""MyTarget"">
+        <FailingTask EnableDefaultFailure=""{emitError}"" />
+    </Target>
+</Project>");
+            if (emitError)
+            {
+                logger.ErrorCount.ShouldBe(1);
+                logger.Errors.First().Code.ShouldBe("MSB4181");
+            }
+            else
+            {
+                logger.ErrorCount.ShouldBe(0);
+            }
         }
 
         #region Postbuild
