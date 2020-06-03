@@ -41,15 +41,15 @@ namespace Microsoft.Build.UnitTests
 
         public void LogErrorEvent(BuildErrorEventArgs eventArgs)
         {
-            Console.WriteLine(EventArgsFormatting.FormatEventMessage(eventArgs));
-            _log.AppendLine(EventArgsFormatting.FormatEventMessage(eventArgs));
+            Console.WriteLine(EventArgsFormatting.FormatEventMessage(eventArgs, "netcore"));
+            _log.AppendLine(EventArgsFormatting.FormatEventMessage(eventArgs, "netcore"));
             ++Errors;
         }
 
         public void LogWarningEvent(BuildWarningEventArgs eventArgs)
         {
-            Console.WriteLine(EventArgsFormatting.FormatEventMessage(eventArgs));
-            _log.AppendLine(EventArgsFormatting.FormatEventMessage(eventArgs));
+            Console.WriteLine(EventArgsFormatting.FormatEventMessage(eventArgs, "netcore"));
+            _log.AppendLine(EventArgsFormatting.FormatEventMessage(eventArgs, "netcore"));
             ++Warnings;
         }
 

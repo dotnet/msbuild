@@ -296,22 +296,32 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
 
                 // Emit text like:
+                //   Framewook: ------
                 //     1 Warning(s)
                 //     0 Error(s)
                 // Don't color the line if it's zero. (Per Whidbey behavior.)
-                if (warningCount > 0)
+                // separate counts by framework
+                foreach (var counts in target_framwork_errorwarning)
                 {
-                    setColor(ConsoleColor.Yellow);
-                }
-                WriteLinePrettyFromResource(2, "WarningCount", warningCount);
-                resetColor();
+                    if (counts.Key == null || counts.Key.Length <= 0) continue;
 
-                if (errorCount > 0)
-                {
-                    setColor(ConsoleColor.Red);
+                    Console.WriteLine("Target Framwork: " + counts.Key);
+                    resetColor();
+                    if (counts.Value.warningCount > 0)
+                    {
+                        setColor(ConsoleColor.Yellow);
+                    }
+                    WriteLinePrettyFromResource(2, "WarningCount", counts.Value.warningCount);
+                    resetColor();
+
+                    if (counts.Value.errorCount > 0)
+                    {
+                        setColor(ConsoleColor.Red);
+                    }
+                    WriteLinePrettyFromResource(2, "ErrorCount", counts.Value.errorCount);
+                    resetColor();
                 }
-                WriteLinePrettyFromResource(2, "ErrorCount", errorCount);
-                resetColor();
+                
             }
 
             // Show build time if verbosity is normal, detailed or diagnostic or the user specified to

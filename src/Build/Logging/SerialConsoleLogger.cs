@@ -152,22 +152,31 @@ namespace Microsoft.Build.BackEnd.Logging
                 if (IsVerbosityAtLeast(LoggerVerbosity.Normal))
                 {
                     // Emit text like:
+                    //   Framewook: ------
                     //     1 Warning(s)
                     //     0 Error(s)
                     // Don't color the line if it's zero. (Per Whidbey behavior.)
-                    if (warningCount > 0)
+                    // separate counts by framework
+                    foreach (var counts in target_framwork_errorwarning)
                     {
-                        setColor(ConsoleColor.Yellow);
-                    }
-                    WriteLinePrettyFromResource(2, "WarningCount", warningCount);
-                    resetColor();
+                        if (counts.Key == null || counts.Key.Length <= 0) continue;
+                        Console.WriteLine("Target Framwork: " + counts.Key);
 
-                    if (errorCount > 0)
-                    {
-                        setColor(ConsoleColor.Red);
+                        if (counts.Value.Item1 > 0)
+                        {
+                            setColor(ConsoleColor.Yellow);
+                        }
+                        WriteLinePrettyFromResource(2, "WarningCount", counts.Value.warningCount);
+                        resetColor();
+
+                        if (counts.Value.Item2 > 0)
+                        {
+                            setColor(ConsoleColor.Red);
+                        }
+                        WriteLinePrettyFromResource(2, "ErrorCount", counts.Value.errorCount);
+                        resetColor();
                     }
-                    WriteLinePrettyFromResource(2, "ErrorCount", errorCount);
-                    resetColor();
+                    
                 }
             }
 

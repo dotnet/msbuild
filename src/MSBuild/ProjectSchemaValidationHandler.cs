@@ -260,7 +260,8 @@ namespace Microsoft.Build.CommandLine
                     fileEndLine,
                     fileColumn,
                     fileEndColumn,
-                    0 /* thread id */
+                    0,
+                    "netcore"/* thread id */
                 );
         }
 

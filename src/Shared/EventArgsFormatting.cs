@@ -193,7 +193,7 @@ namespace Microsoft.Build.Shared
 
             if (target_framework != null)
             {
-                format.Append("Target Framework: " + target_framework + " ");
+                format.Append("TargetFramework: " + target_framework + " ");
             }
 
             if ((file == null) || (file.Length == 0))
