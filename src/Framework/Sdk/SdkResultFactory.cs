@@ -25,8 +25,8 @@ namespace Microsoft.Build.Framework
         ///     Create an <see cref="SdkResolver" /> object indicating success.
         /// </summary>
         /// <remarks>
-        /// This overload allows any number (zero, one, or many) of SDK paths to be returned.  This means allows a "successful" result
-        /// to not resolve to any SDKs.  The resolver can also supply properties or items to communicate information to the build.  This
+        /// This overload allows any number (zero, one, or many) of SDK paths to be returned.  This means a "successful" result
+        /// may not resolve to any SDKs.  The resolver can also supply properties or items to communicate information to the build.  This
         /// can allow resolvers to report SDKs that could not be resolved without hard-failing the evaluation, which can allow other
         /// components to take more appropriate action (for example installing optional workloads or downloading NuGet SDKs).
         /// </remarks>
