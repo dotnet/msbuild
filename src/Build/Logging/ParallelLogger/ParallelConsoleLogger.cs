@@ -205,8 +205,8 @@ namespace Microsoft.Build.BackEnd.Logging
             _hasBuildStarted = false;
 
             // Reset the two data structures created when the logger was created
-            target_framework_mapping = new Dictionary<(int, int), string>();
-            target_framwork_errorwarning = new Dictionary<string, (int warningCount, int errorCount)>();
+            TargetFramework_mapping = new Dictionary<(int, int), string>();
+            TargetFramework_errorwarning = new Dictionary<string, (int warningCount, int errorCount)>();
             _buildEventManager = new BuildEventManager();
             _deferredMessages = new Dictionary<BuildEventContext, List<BuildMessageEventArgs>>(s_compareContextNodeId);
             _prefixWidth = 0;
@@ -301,7 +301,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 //     0 Error(s)
                 // Don't color the line if it's zero. (Per Whidbey behavior.)
                 // separate counts by framework
-                foreach (var counts in target_framwork_errorwarning)
+                foreach (var counts in TargetFramework_errorwarning)
                 {
                     if (counts.Key == null || counts.Key.Length <= 0) continue;
 
@@ -363,12 +363,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Yellow);
                 foreach (BuildWarningEventArgs warning in warningList)
                 {
-                    string target_framework = null;
-                    if (this.target_framework_mapping.ContainsKey((warning.BuildEventContext.NodeId, warning.BuildEventContext.ProjectContextId)))
+                    string TargetFramework = null;
+                    if (this.TargetFramework_mapping.ContainsKey((warning.BuildEventContext.NodeId, warning.BuildEventContext.ProjectContextId)))
                     {
-                        target_framework = this.target_framework_mapping[(warning.BuildEventContext.NodeId, warning.BuildEventContext.ProjectContextId)];
+                        TargetFramework = this.TargetFramework_mapping[(warning.BuildEventContext.NodeId, warning.BuildEventContext.ProjectContextId)];
                     }
-                    WriteMessageAligned(EventArgsFormatting.FormatEventMessage(warning, target_framework, showProjectFile), true);
+                    WriteMessageAligned(EventArgsFormatting.FormatEventMessage(warning, TargetFramework, showProjectFile), true);
                 }
             }
 
@@ -377,12 +377,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Red);
                 foreach (BuildErrorEventArgs error in errorList)
                 {
-                    string target_framework = null;
-                    if (this.target_framework_mapping.ContainsKey((error.BuildEventContext.NodeId, error.BuildEventContext.ProjectContextId)))
+                    string TargetFramework = null;
+                    if (this.TargetFramework_mapping.ContainsKey((error.BuildEventContext.NodeId, error.BuildEventContext.ProjectContextId)))
                     {
-                        target_framework = this.target_framework_mapping[(error.BuildEventContext.NodeId, error.BuildEventContext.ProjectContextId)];
+                        TargetFramework = this.TargetFramework_mapping[(error.BuildEventContext.NodeId, error.BuildEventContext.ProjectContextId)];
                     }
-                    WriteMessageAligned(EventArgsFormatting.FormatEventMessage(error, target_framework, showProjectFile), true);
+                    WriteMessageAligned(EventArgsFormatting.FormatEventMessage(error, TargetFramework, showProjectFile), true);
                 }
             }
 
@@ -491,18 +491,18 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Print out all of the errors under the ProjectEntryPoint / target
                 foreach (BuildEventArgs errorWarningEvent in valuePair.Value)
                 {
-                    string target_framework = null;
-                    if (this.target_framework_mapping.ContainsKey((errorWarningEvent.BuildEventContext.NodeId, errorWarningEvent.BuildEventContext.ProjectContextId)))
+                    string TargetFramework = null;
+                    if (this.TargetFramework_mapping.ContainsKey((errorWarningEvent.BuildEventContext.NodeId, errorWarningEvent.BuildEventContext.ProjectContextId)))
                     {
-                        target_framework = this.target_framework_mapping[(errorWarningEvent.BuildEventContext.NodeId, errorWarningEvent.BuildEventContext.ProjectContextId)];
+                        TargetFramework = this.TargetFramework_mapping[(errorWarningEvent.BuildEventContext.NodeId, errorWarningEvent.BuildEventContext.ProjectContextId)];
                     }
                     if (errorWarningEvent is BuildErrorEventArgs)
                     {
-                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildErrorEventArgs, target_framework, showProjectFile), false);
+                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildErrorEventArgs, TargetFramework, showProjectFile), false);
                     }
                     else if (errorWarningEvent is BuildWarningEventArgs)
                     {
-                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildWarningEventArgs, target_framework, showProjectFile), false);
+                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildWarningEventArgs, TargetFramework, showProjectFile), false);
                     }
                 }
                 WriteNewLine();
@@ -564,26 +564,19 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             
-            string target_framework = "";
-
-            foreach (KeyValuePair<string, string> prop in e.GlobalProperties)
-            {
-                if ((string)prop.Key == "TargetFramework")
-                {
-                    target_framework = (string)prop.Value;
-                }
-            }
+            string TargetFramework;
+            e.GlobalProperties.TryGetValue("TargetFramework", out TargetFramework);
             int node = e.BuildEventContext.NodeId;
             int project_context_id = e.BuildEventContext.ProjectContextId;
             //adding target framework to mapping
-            if (!this.target_framework_mapping.ContainsKey((node, project_context_id)))
+            if (!this.TargetFramework_mapping.ContainsKey((node, project_context_id)))
             {
-                target_framework_mapping.Add((node, project_context_id), target_framework);
+                TargetFramework_mapping.Add((node, project_context_id), TargetFramework);
             }
             //initializes error and warning count in framework mapping
-            if (!this.target_framwork_errorwarning.ContainsKey(target_framework))
+            if (!this.TargetFramework_errorwarning.ContainsKey(TargetFramework))
             {
-                target_framwork_errorwarning.Add(target_framework, (0, 0));
+                TargetFramework_errorwarning.Add(TargetFramework, (0, 0));
             }
         }
 
@@ -979,20 +972,20 @@ namespace Microsoft.Build.BackEnd.Logging
             _buildEventManager.SetErrorWarningFlagOnCallStack(e.BuildEventContext);
 
             //determining the framework the error is occurring on
-            string target_framework = null;
-            if (target_framework_mapping.ContainsKey((e.BuildEventContext.NodeId, e.BuildEventContext.ProjectContextId)))
+            string TargetFramework = null;
+            if (TargetFramework_mapping.ContainsKey((e.BuildEventContext.NodeId, e.BuildEventContext.ProjectContextId)))
             {
-                target_framework = this.target_framework_mapping[(e.BuildEventContext.NodeId, e.BuildEventContext.ProjectContextId)];
+                TargetFramework = this.TargetFramework_mapping[(e.BuildEventContext.NodeId, e.BuildEventContext.ProjectContextId)];
 
                 //updates error count
-                if (target_framwork_errorwarning.ContainsKey(target_framework))
+                if (TargetFramework_errorwarning.ContainsKey(TargetFramework))
                 {
-                    var counts = target_framwork_errorwarning[target_framework];
-                    target_framwork_errorwarning[target_framework] = (counts.warningCount, counts.errorCount + 1);
+                    var counts = TargetFramework_errorwarning[TargetFramework];
+                    TargetFramework_errorwarning[TargetFramework] = (counts.warningCount, counts.errorCount + 1);
                 }
                 else
                 {
-                    target_framwork_errorwarning.Add(target_framework, (0, 1));
+                    TargetFramework_errorwarning.Add(TargetFramework, (0, 1));
                 }
             }
 
@@ -1015,7 +1008,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
 
                 setColor(ConsoleColor.Red);
-                WriteMessageAligned(EventArgsFormatting.FormatEventMessage(e, target_framework, showProjectFile), true);
+                WriteMessageAligned(EventArgsFormatting.FormatEventMessage(e, TargetFramework, showProjectFile), true);
                 ShownBuildEventContext(e.BuildEventContext);
                 if (ShowSummary == true)
                 {
@@ -1038,19 +1031,19 @@ namespace Microsoft.Build.BackEnd.Logging
             warningCount++;
 
             //finds the framework associated with the warning
-            string target_framework = null;
-            if (target_framework_mapping.ContainsKey((e.BuildEventContext.NodeId, e.BuildEventContext.ProjectContextId)))
+            string TargetFramework = null;
+            if (TargetFramework_mapping.ContainsKey((e.BuildEventContext.NodeId, e.BuildEventContext.ProjectContextId)))
             {
-                target_framework = this.target_framework_mapping[(e.BuildEventContext.NodeId, e.BuildEventContext.ProjectContextId)];
+                TargetFramework = this.TargetFramework_mapping[(e.BuildEventContext.NodeId, e.BuildEventContext.ProjectContextId)];
                 //updates the warning count
-                if (target_framwork_errorwarning.ContainsKey(target_framework))
+                if (TargetFramework_errorwarning.ContainsKey(TargetFramework))
                 {
-                    var counts = target_framwork_errorwarning[target_framework];
-                    target_framwork_errorwarning[target_framework] = (counts.warningCount + 1, counts.errorCount);
+                    var counts = TargetFramework_errorwarning[TargetFramework];
+                    TargetFramework_errorwarning[TargetFramework] = (counts.warningCount + 1, counts.errorCount);
                 }
                 else
                 {
-                    target_framwork_errorwarning.Add(target_framework, (1, 0));
+                    TargetFramework_errorwarning.Add(TargetFramework, (1, 0));
                 }
             }
 
@@ -1078,7 +1071,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
 
                 setColor(ConsoleColor.Yellow);
-                WriteMessageAligned(EventArgsFormatting.FormatEventMessage(e, target_framework, showProjectFile), true);
+                WriteMessageAligned(EventArgsFormatting.FormatEventMessage(e, TargetFramework, showProjectFile), true);
             }
 
             ShownBuildEventContext(e.BuildEventContext);
@@ -1217,17 +1210,17 @@ namespace Microsoft.Build.BackEnd.Logging
             string nonNullMessage;
 
             //will usually be null but is good to check in case future updates changes this
-            string target_framework = null;
-            if (target_framework_mapping.ContainsKey((e.BuildEventContext.NodeId, e.BuildEventContext.ProjectContextId)))
+            string TargetFramework = null;
+            if (TargetFramework_mapping.ContainsKey((e.BuildEventContext.NodeId, e.BuildEventContext.ProjectContextId)))
             {
-                target_framework = this.target_framework_mapping[(e.BuildEventContext.NodeId, e.BuildEventContext.ProjectContextId)];
+                TargetFramework = this.TargetFramework_mapping[(e.BuildEventContext.NodeId, e.BuildEventContext.ProjectContextId)];
 
             }
 
             // Include file information if present.
             if (e.File != null)
             {
-                nonNullMessage = EventArgsFormatting.FormatEventMessage(e, target_framework, showProjectFile);
+                nonNullMessage = EventArgsFormatting.FormatEventMessage(e, TargetFramework, showProjectFile);
             }
             else
             {
