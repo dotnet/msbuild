@@ -47,6 +47,22 @@ namespace Microsoft.DotNet.Tests
 
             Guid.TryParse(assignedMachineId, out var _).Should().BeTrue("it should be a guid");
         }
+        
+        [Fact]
+        public void TelemetryCommonPropertiesShouldReturnHashedMachineIdOld()
+        {
+            var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => "plaintext", userLevelCacheWriter: new NothingCache());
+            unitUnderTest.GetTelemetryCommonProperties()["Machine ID Old"].Should().NotBe("plaintext");
+        }
+
+        [Fact]
+        public void TelemetryCommonPropertiesShouldReturnNewGuidWhenCannotGetMacAddressOld()
+        {
+            var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => null, userLevelCacheWriter: new NothingCache());
+            var assignedMachineId = unitUnderTest.GetTelemetryCommonProperties()["Machine ID Old"];
+
+            Guid.TryParse(assignedMachineId, out var _).Should().BeTrue("it should be a guid");
+        }
 
         [Fact]
         public void TelemetryCommonPropertiesShouldReturnIsOutputRedirected()
