@@ -49,13 +49,13 @@
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>6f2112b58316c97c4f1b97e0f282aef4346947fc</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="5.0.0-preview.6.20303.1">
+    <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="5.0.0-preview.6.20303.13">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>1c908e5920e4408cbea0223548316caaa5e383bb</Sha>
+      <Sha>e271b833fa256a817e005cbda556bb8628de1726</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Razor" Version="5.0.0-preview.6.20303.1">
+    <Dependency Name="Microsoft.NET.Sdk.Razor" Version="5.0.0-preview.6.20303.13">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>1c908e5920e4408cbea0223548316caaa5e383bb</Sha>
+      <Sha>e271b833fa256a817e005cbda556bb8628de1726</Sha>
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="5.7.0-preview.2.6618">
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
