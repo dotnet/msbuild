@@ -527,7 +527,7 @@ namespace Microsoft.Build.BackEnd.Logging
             ShowDeferredMessages();
             setColor(ConsoleColor.Yellow);
 
-            //finding the target framework for thewarning and updating the warning count for the framwork
+            //finding the target framework for the warning and updating the warning count for the framwork
             string TargetFramework;
             TargetFramework_mapping.TryGetValue((e.BuildEventContext.NodeId, e.BuildEventContext.ProjectContextId), out TargetFramework);
             if (TargetFramework != null)
