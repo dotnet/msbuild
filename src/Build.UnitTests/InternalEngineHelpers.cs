@@ -86,13 +86,13 @@ namespace Microsoft.Build.Unittest
                 }
                 else
                 {
-                    List<string> pathAndVersionList = new List<string>();
-                    pathAndVersionList.Add(sdkResult.Path);
+                    List<string> pathList = new List<string>();
+                    pathList.Add(sdkResult.Path);
                     if (sdkResult.AdditionalPaths != null)
                     {
-                        pathAndVersionList.AddRange(sdkResult.AdditionalPaths);
+                        pathList.AddRange(sdkResult.AdditionalPaths);
                     }
-                    sdkResultPaths = pathAndVersionList;
+                    sdkResultPaths = pathList;
                 }
 
                 Dictionary<string, SdkResultItem> sdkResultItems;

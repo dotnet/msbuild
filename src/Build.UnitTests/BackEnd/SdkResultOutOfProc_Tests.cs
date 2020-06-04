@@ -1,4 +1,7 @@
-﻿using Microsoft.Build.BackEnd;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
@@ -121,7 +124,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             BuildResult result = _buildManager.Build(customparameters, data);
 
-            Assert.Equal(BuildResultCode.Success, result.OverallResult);
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
             ValidateRanInSeparateProcess(result);
             ValidateResolverResults(result);
         }
@@ -166,7 +170,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result = _buildManager.Build(customparameters, data);
 
 
-            Assert.Equal(BuildResultCode.Success, result.OverallResult);
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
             ValidateRanInSeparateProcess(result);
             ValidateResolverResults(result);
         }
@@ -177,9 +182,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TargetResult targetresult = result.ResultsByTarget["GetCurrentProcessId"];
             ITaskItem[] item = targetresult.Items;
 
-            Assert.Single(item);
-            Assert.True(int.TryParse(item[0].ItemSpec, out int processId), $"Process ID passed from the 'test' target is not a valid integer (actual is '{item[0].ItemSpec}')");
-            Assert.NotEqual(Process.GetCurrentProcess().Id, processId); // "Build is expected to be out-of-proc. In fact it was in-proc."
+            item.ShouldHaveSingleItem();
+
+            int.TryParse(item[0].ItemSpec, out int processId)
+                .ShouldBeTrue($"Process ID passed from the 'test' target is not a valid integer (actual is '{item[0].ItemSpec}')");
+            processId.ShouldNotBe(Process.GetCurrentProcess().Id);
         }
 
         private void ValidateResolverResults(BuildResult result)

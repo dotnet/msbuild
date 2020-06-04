@@ -1,4 +1,7 @@
-﻿using Microsoft.Build.BackEnd.Logging;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
@@ -239,7 +242,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             if (includePropertiesAndItems)
             {
-                result.PropertiesToAdd.Count().ShouldBe(1);
+                result.PropertiesToAdd.Count.ShouldBe(1);
                 result.PropertiesToAdd["PropertyFromSdkResolver"].ShouldBe("ValueFromSdkResolver");
 
                 result.ItemsToAdd.Count().ShouldBe(1);
@@ -250,8 +253,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
             else
             {
-                result.PropertiesToAdd.ShouldBe(null);
-                result.ItemsToAdd.ShouldBe(null);
+                result.PropertiesToAdd.ShouldBeNull();
+                result.ItemsToAdd.ShouldBeNull();
             }
         }
 
@@ -285,10 +288,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false);
 
             result.Success.ShouldBeTrue();
-            result.Path.ShouldBe(null);
-            result.Version.ShouldBe(null);
+            result.Path.ShouldBeNull();
+            result.Version.ShouldBeNull();
 
-            result.AdditionalPaths.ShouldBe(null);
+            result.AdditionalPaths.ShouldBeNull();
 
             ValidateExpectedPropertiesAndItems(includePropertiesAndItems, result);
 
@@ -322,10 +325,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false);
 
             result.Success.ShouldBeTrue();
-            result.Path.ShouldBe("Path/To/Return/From/Resolver");
+            result.Path.ShouldBe(expectedPath);
             result.Version.ShouldBe("1.0");
 
-            result.AdditionalPaths.ShouldBe(null);
+            result.AdditionalPaths.ShouldBeNull();
 
             ValidateExpectedPropertiesAndItems(true, result);
 

@@ -102,7 +102,7 @@ namespace Microsoft.Build.Framework
         {
             unchecked
             {
-                var hashCode = (Name != null ? Name.GetHashCode() : 0);
+                var hashCode = (Name != null ? Name.ToLowerInvariant().GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (Version != null ? Version.ToLowerInvariant().GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (MinimumVersion != null ? MinimumVersion.ToLowerInvariant().GetHashCode() : 0);
                 return hashCode;

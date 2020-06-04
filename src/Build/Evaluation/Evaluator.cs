@@ -1896,7 +1896,8 @@ namespace Microsoft.Build.Evaluation
             propertiesAndItemsHash = hash.ToHashCode();
 #endif
 
-            string projectPath = _projectRootElement.FullPath + ".SdkResolver." + (propertiesAndItemsHash++) + ".proj";
+            //  Generate a unique filename for the generated project for each unique set of properties and items.
+            string projectPath = _projectRootElement.FullPath + ".SdkResolver." + propertiesAndItemsHash + ".proj";
 
             ProjectRootElement InnerCreate(string _, ProjectRootElementCacheBase __)
             {
