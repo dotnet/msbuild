@@ -1917,8 +1917,18 @@ namespace Microsoft.Build.Evaluation
                     var itemGroup = project.AddItemGroup();
                     foreach (var item in sdkResult.ItemsToAdd)
                     {
-                        //  TODO: Does the itemspec or metadata need to be escaped?
-                        itemGroup.AddItem(item.Key, item.Value.ItemSpec, item.Value.Metadata);
+                        Dictionary<string, string> escapedMetadata = null;
+
+                        if (item.Value.Metadata != null)
+                        {
+                            escapedMetadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                            foreach (var metadata in item.Value.Metadata)
+                            {
+                                escapedMetadata[metadata.Key] = EscapingUtilities.Escape(metadata.Value);
+                            }
+                        }
+
+                        itemGroup.AddItem(item.Key, EscapingUtilities.Escape(item.Value.ItemSpec), escapedMetadata);
                     }
                 }
 

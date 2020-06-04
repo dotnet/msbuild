@@ -402,6 +402,64 @@ namespace Microsoft.Build.UnitTests.Evaluation
             _logger.WarningCount.ShouldBe(0);
         }
 
+        [Fact]
+        public void SdkResolverCanReturnSpecialCharacters()
+        {
+            //  %3B - semicolon
+            //  %24 - $
+            //  %0A - LF
+
+            string specialString = "%3B;%24$%0A\\\"'";
+
+            Dictionary<string, string> propertiesToAdd = new Dictionary<string, string>()
+            {
+                { "PropertyName", "PropertyValue" + specialString }
+            };
+
+            Dictionary<string, SdkResultItem> itemsToAdd = new Dictionary<string, SdkResultItem>()
+            {
+                {
+                    "ItemName",
+                    new SdkResultItem(itemSpec: "ItemValue" + specialString, new Dictionary<string, string>()
+                        { { "MetadataName", "MetadataValue" + specialString } })
+                }
+            };
+
+            var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(
+                new Build.BackEnd.SdkResolution.SdkResult(
+                        new SdkReference("TestSpecialCharactersFromSdkResolver", null, null),
+                        Enumerable.Empty<string>(),
+                        version: null,
+                        propertiesToAdd,
+                        itemsToAdd,
+                        warnings: null
+                    ))
+                );
+
+            string projectContent = @"
+                    <Project>
+                        <Import Project=""Sdk.props"" Sdk=""TestSpecialCharactersFromSdkResolver""/>
+                    </Project>";
+
+            string projectPath = Path.Combine(_testFolder, "project.proj");
+            File.WriteAllText(projectPath, projectContent);
+
+            var project = CreateProject(projectPath, projectOptions);
+
+            project.GetPropertyValue("PropertyName").ShouldBe("PropertyValue" + specialString);
+
+            var itemsFromResolver = project.GetItems("ItemName");
+            var item = itemsFromResolver.ShouldHaveSingleItem();
+            item.EvaluatedInclude.ShouldBe("ItemValue" + specialString);
+            //item.UnevaluatedInclude.ShouldBe("ItemValue" + specialString);
+            item.Metadata.Select(m => (m.Name, m.EvaluatedValue))
+                .ShouldBeEquivalentTo(new[] { (Name: "MetadataName", EvaluatedValue: "MetadataValue" + specialString) });
+
+            _logger.ErrorCount.ShouldBe(0);
+            _logger.WarningCount.ShouldBe(0);
+
+        }
+
         public void Dispose()
         {
             _env.Dispose();
