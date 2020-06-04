@@ -15,6 +15,7 @@ using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
 using Microsoft.Build.Exceptions;
+using System.Collections.Concurrent;
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -34,9 +35,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// TargetFramework_errorwarning is the map between a target framwork and the number of errors and warnings
         /// These are used to give more direction as to where an error is happening when multi targetted
         ///</summary>
-        protected Dictionary<(int nodeId, int contextId), string> TargetFramework_mapping = new Dictionary<(int nodeId, int contextId), string>();
-        protected Dictionary<string, (int warningCount, int errorCount)> TargetFramework_errorwarning =
-            new Dictionary<string, (int warningCount, int errorCount)>();
+        protected ConcurrentDictionary<(int nodeId, int contextId), string> TargetFramework_mapping = new ConcurrentDictionary<(int nodeId, int contextId), string>();
+        protected ConcurrentDictionary<string, (int warningCount, int errorCount)> TargetFramework_errorwarning =
+            new ConcurrentDictionary<string, (int warningCount, int errorCount)>();
 
         #region Properties
 

@@ -16,6 +16,7 @@ using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
 using Microsoft.Build.Exceptions;
+using System.Collections.Concurrent;
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -205,8 +206,8 @@ namespace Microsoft.Build.BackEnd.Logging
             _hasBuildStarted = false;
 
             // Reset the two data structures created when the logger was created
-            TargetFramework_mapping = new Dictionary<(int, int), string>();
-            TargetFramework_errorwarning = new Dictionary<string, (int warningCount, int errorCount)>();
+            TargetFramework_mapping = new ConcurrentDictionary<(int, int), string>();
+            TargetFramework_errorwarning = new ConcurrentDictionary<string, (int warningCount, int errorCount)>();
             _buildEventManager = new BuildEventManager();
             _deferredMessages = new Dictionary<BuildEventContext, List<BuildMessageEventArgs>>(s_compareContextNodeId);
             _prefixWidth = 0;
@@ -363,11 +364,10 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Yellow);
                 foreach (BuildWarningEventArgs warning in warningList)
                 {
-                    string TargetFramework = null;
-                    if (this.TargetFramework_mapping.ContainsKey((warning.BuildEventContext.NodeId, warning.BuildEventContext.ProjectContextId)))
-                    {
-                        TargetFramework = this.TargetFramework_mapping[(warning.BuildEventContext.NodeId, warning.BuildEventContext.ProjectContextId)];
-                    }
+                    string TargetFramework;
+                    int projectContextID = warning.BuildEventContext.ProjectContextId;
+                    int nodeId = warning.BuildEventContext.NodeId;
+                    TargetFramework_mapping.TryGetValue((nodeId, projectContextID), out TargetFramework);
                     WriteMessageAligned(EventArgsFormatting.FormatEventMessage(warning, TargetFramework, showProjectFile), true);
                 }
             }
@@ -377,11 +377,10 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Red);
                 foreach (BuildErrorEventArgs error in errorList)
                 {
-                    string TargetFramework = null;
-                    if (this.TargetFramework_mapping.ContainsKey((error.BuildEventContext.NodeId, error.BuildEventContext.ProjectContextId)))
-                    {
-                        TargetFramework = this.TargetFramework_mapping[(error.BuildEventContext.NodeId, error.BuildEventContext.ProjectContextId)];
-                    }
+                    string TargetFramework;
+                    int projectContextID = error.BuildEventContext.ProjectContextId;
+                    int nodeId = error.BuildEventContext.NodeId;
+                    TargetFramework_mapping.TryGetValue((nodeId, projectContextID), out TargetFramework);
                     WriteMessageAligned(EventArgsFormatting.FormatEventMessage(error, TargetFramework, showProjectFile), true);
                 }
             }
@@ -421,7 +420,7 @@ namespace Microsoft.Build.BackEnd.Logging
         private void ShowErrorWarningSummary(IEnumerable<BuildEventArgs> listToProcess)
         {
             // Group the build warning event args based on the entry point and the target in which the warning occurred
-            var groupByProjectEntryPoint = new Dictionary<ErrorWarningSummaryDictionaryKey, List<BuildEventArgs>>();
+            var groupByProjectEntryPoint = new ConcurrentDictionary<ErrorWarningSummaryDictionaryKey, List<BuildEventArgs>>();
 
             // Loop through each of the warnings and put them into the correct buckets
             foreach (BuildEventArgs errorWarningEventArgs in listToProcess)
@@ -447,14 +446,10 @@ namespace Microsoft.Build.BackEnd.Logging
                 ErrorWarningSummaryDictionaryKey key = new ErrorWarningSummaryDictionaryKey(errorWarningEventArgs.BuildEventContext, targetName);
 
                 // Check to see if there is a bucket for the warning
-                if (!groupByProjectEntryPoint.ContainsKey(key))
-                {
-                    // If there is no bucket create a new one which contains a list of all the errors which
-                    // happened for a given buildEventContext / target
-                    var errorWarningEventListByTarget = new List<BuildEventArgs>();
-                    groupByProjectEntryPoint.Add(key, errorWarningEventListByTarget);
-                }
-
+                // If there is no bucket create a new one which contains a list of all the errors which
+                // happened for a given buildEventContext / target
+                groupByProjectEntryPoint.TryAdd(key, new List<BuildEventArgs>());
+                
                 // Add the error event to the correct bucket
                 groupByProjectEntryPoint[key].Add(errorWarningEventArgs);
             }
@@ -491,11 +486,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Print out all of the errors under the ProjectEntryPoint / target
                 foreach (BuildEventArgs errorWarningEvent in valuePair.Value)
                 {
-                    string TargetFramework = null;
-                    if (this.TargetFramework_mapping.ContainsKey((errorWarningEvent.BuildEventContext.NodeId, errorWarningEvent.BuildEventContext.ProjectContextId)))
-                    {
-                        TargetFramework = this.TargetFramework_mapping[(errorWarningEvent.BuildEventContext.NodeId, errorWarningEvent.BuildEventContext.ProjectContextId)];
-                    }
+                    string TargetFramework;
+                    int nodeId = errorWarningEvent.BuildEventContext.NodeId;
+                    int projectContextId = errorWarningEvent.BuildEventContext.ProjectContextId;
+                    TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out TargetFramework);
+
                     if (errorWarningEvent is BuildErrorEventArgs)
                     {
                         WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildErrorEventArgs, TargetFramework, showProjectFile), false);
@@ -569,15 +564,11 @@ namespace Microsoft.Build.BackEnd.Logging
             int node = e.BuildEventContext.NodeId;
             int project_context_id = e.BuildEventContext.ProjectContextId;
             //adding target framework to mapping
-            if (!this.TargetFramework_mapping.ContainsKey((node, project_context_id)))
-            {
-                TargetFramework_mapping.Add((node, project_context_id), TargetFramework);
-            }
+            TargetFramework_mapping.TryAdd((node, project_context_id),TargetFramework);
+
             //initializes error and warning count in framework mapping
-            if (!this.TargetFramework_errorwarning.ContainsKey(TargetFramework))
-            {
-                TargetFramework_errorwarning.Add(TargetFramework, (0, 0));
-            }
+            if (TargetFramework != null)
+                TargetFramework_errorwarning.TryAdd(TargetFramework, (0, 0));
         }
 
         /// <summary>
@@ -972,22 +963,14 @@ namespace Microsoft.Build.BackEnd.Logging
             _buildEventManager.SetErrorWarningFlagOnCallStack(e.BuildEventContext);
 
             //determining the framework the error is occurring on
-            string TargetFramework = null;
-            if (TargetFramework_mapping.ContainsKey((e.BuildEventContext.NodeId, e.BuildEventContext.ProjectContextId)))
-            {
-                TargetFramework = this.TargetFramework_mapping[(e.BuildEventContext.NodeId, e.BuildEventContext.ProjectContextId)];
+            string TargetFramework;
+            int nodeId = e.BuildEventContext.NodeId;
+            int projectContextId = e.BuildEventContext.ProjectContextId;
+            TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out TargetFramework);
 
-                //updates error count
-                if (TargetFramework_errorwarning.ContainsKey(TargetFramework))
-                {
-                    var counts = TargetFramework_errorwarning[TargetFramework];
-                    TargetFramework_errorwarning[TargetFramework] = (counts.warningCount, counts.errorCount + 1);
-                }
-                else
-                {
-                    TargetFramework_errorwarning.Add(TargetFramework, (0, 1));
-                }
-            }
+            //updates error count
+            if (TargetFramework != null)
+                TargetFramework_errorwarning.AddOrUpdate(TargetFramework, (0, 1), (key, oldValue) => (oldValue.warningCount, oldValue.errorCount + 1));
 
             TargetStartedEventMinimumFields targetStartedEvent = _buildEventManager.GetTargetStartedEvent(e.BuildEventContext);
             // Can be null if the error occurred outside of a target, or the error occurred before the targetStartedEvent
@@ -1031,22 +1014,15 @@ namespace Microsoft.Build.BackEnd.Logging
             warningCount++;
 
             //finds the framework associated with the warning
-            string TargetFramework = null;
-            if (TargetFramework_mapping.ContainsKey((e.BuildEventContext.NodeId, e.BuildEventContext.ProjectContextId)))
-            {
-                TargetFramework = this.TargetFramework_mapping[(e.BuildEventContext.NodeId, e.BuildEventContext.ProjectContextId)];
-                //updates the warning count
-                if (TargetFramework_errorwarning.ContainsKey(TargetFramework))
-                {
-                    var counts = TargetFramework_errorwarning[TargetFramework];
-                    TargetFramework_errorwarning[TargetFramework] = (counts.warningCount + 1, counts.errorCount);
-                }
-                else
-                {
-                    TargetFramework_errorwarning.Add(TargetFramework, (1, 0));
-                }
-            }
+            string TargetFramework;
+            int nodeId = e.BuildEventContext.NodeId;
+            int projectContextId = e.BuildEventContext.ProjectContextId;
+            TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out TargetFramework);
 
+            //updates the warning count
+            if (TargetFramework != null)
+                TargetFramework_errorwarning.AddOrUpdate(TargetFramework, (1, 0), (key, oldValue) => (oldValue.warningCount + 1, oldValue.errorCount));
+           
             // If there is a warning we need to walk up the call stack and make sure that 
             // the project started events back to the root project know a warning has occurred
             // and are not removed when they finish
@@ -1209,13 +1185,11 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             string nonNullMessage;
 
-            //will usually be null but is good to check in case future updates changes this
-            string TargetFramework = null;
-            if (TargetFramework_mapping.ContainsKey((e.BuildEventContext.NodeId, e.BuildEventContext.ProjectContextId)))
-            {
-                TargetFramework = this.TargetFramework_mapping[(e.BuildEventContext.NodeId, e.BuildEventContext.ProjectContextId)];
-
-            }
+            //gets target framework message occurred on
+            string TargetFramework;
+            int nodeId = e.BuildEventContext.NodeId;
+            int projectContextId = e.BuildEventContext.ProjectContextId;
+            TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out TargetFramework);
 
             // Include file information if present.
             if (e.File != null)

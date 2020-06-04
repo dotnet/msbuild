@@ -8,7 +8,6 @@ using System.Text;
 
 using Microsoft.Build.Framework;
 using System.Linq;
-using Microsoft.SqlServer.Server;
 
 namespace Microsoft.Build.Shared
 {
@@ -29,8 +28,8 @@ namespace Microsoft.Build.Shared
         internal static string FormatEventMessage(BuildErrorEventArgs e, string TargetFramework, bool showProjectFile)
         {
             StringBuilder eventMessage = new StringBuilder();
-            if(TargetFramework != null && TargetFramework.Length > 0)
-                eventMessage.Append("TargetFramework: {2} ");
+            if (TargetFramework != null && TargetFramework.Length > 0)
+                eventMessage.Append("TargetFramework: ").Append(TargetFramework).Append(" ");
             return eventMessage.Append(FormatEventMessage(e, showProjectFile)).ToString();
         }
 
