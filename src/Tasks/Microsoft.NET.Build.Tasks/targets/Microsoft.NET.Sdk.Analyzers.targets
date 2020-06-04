@@ -1,0 +1,34 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.Analyzers.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers )' == '' And 
+                                   '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
+                                   $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">true</EnableNETAnalyzers>
+    <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers )' == ''">false</EnableNETAnalyzers>
+  </PropertyGroup>
+  <Import Project="..\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.targets"
+          Condition="$(EnableNETAnalyzers)" />
+  <ItemGroup Condition="$(EnableNETAnalyzers)">
+    <Analyzer
+      Condition="'$(Language)' == 'VB'"
+      Include="..\analyzers\Microsoft.CodeAnalysis.VisualBasic.NetAnalyzers.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Condition="'$(Language)' == 'C#'"
+      Include="..\analyzers\Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Include="..\analyzers\Microsoft.CodeAnalysis.NetAnalyzers.dll"
+      IsImplicitlyDefined="true" />
+  </ItemGroup>
+</Project>

@@ -97,6 +97,10 @@
       <Uri>https://github.com/dotnet/wpf</Uri>
       <Sha>751153802c4e4d06484743c351266c9831ade85d</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.CodeAnalysis.NetAnalyzers" Version="">
+      <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
+      <Sha>03d8e7dbfc82a440aa6b08792693c1a0ea89fe64</Sha>
+    </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="5.0.0-beta.20280.1">

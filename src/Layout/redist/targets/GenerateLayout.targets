@@ -30,6 +30,23 @@
     <Delete Files="@(RoslynFrameworkAssemblies)" />
   </Target>
 
+  <Target Name="PublishNETAnalyzers"
+          BeforeTargets="Build;PublishNetSdk">
+     <PropertyGroup>
+      <AnalyzerAssembliesDirectory>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk\analyzers</AnalyzerAssembliesDirectory>
+      <AnalyzerTargetsDirectory>$(AnalyzerAssembliesDirectory)\build</AnalyzerTargetsDirectory>
+    </PropertyGroup>
+    <ItemGroup>
+      <AnalyzerAssemblies Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/analyzers/dotnet/cs/**/*.dll" />
+      <AnalyzerAssemblies Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/analyzers/dotnet/vb/Microsoft.CodeAnalysis.VisualBasic.NetAnalyzers.dll" />
+      <AnalyzerTargets Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/build/**/*" />
+    </ItemGroup>
+    <Error Condition="'@(AnalyzerAssemblies)' == ''" Text="Something moved around in Analyzer package, adjust code here accordingly. TFM change?" />
+    <Error Condition="'@(AnalyzerTargets)' == ''" Text="Something moved around in Analyzer package, adjust code here accordingly. TFM change?" />
+    <Copy SourceFiles="@(AnalyzerAssemblies)" DestinationFiles="@(AnalyzerAssemblies->'$(AnalyzerAssembliesDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(AnalyzerTargets)" DestinationFiles="@(AnalyzerTargets->'$(AnalyzerTargetsDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
   <Target Name="PublishMSBuildExtensions"
           DependsOnTargets="GenerateMSBuildExtensions"
           BeforeTargets="Build">
