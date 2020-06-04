@@ -516,9 +516,34 @@ namespace Microsoft.Build.Evaluation
 
         private RemoveOperation BuildRemoveOperation(string rootDirectory, ProjectItemElement itemElement, bool conditionResult)
         {
-            OperationBuilder operationBuilder = new OperationBuilder(itemElement, conditionResult);
+            RemoveOperationBuilder operationBuilder = new RemoveOperationBuilder(itemElement, conditionResult);
 
             ProcessItemSpec(rootDirectory, itemElement.Remove, itemElement.RemoveLocation, operationBuilder);
+
+            // Process MatchOnMetadata
+            if (itemElement.MatchOnMetadata.Length > 0)
+            {
+                string evaluatedmatchOnMetadata = _expander.ExpandIntoStringLeaveEscaped(itemElement.MatchOnMetadata, ExpanderOptions.ExpandProperties, itemElement.MatchOnMetadataLocation);
+
+                if (evaluatedmatchOnMetadata.Length > 0)
+                {
+                    var matchOnMetadataSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedmatchOnMetadata);
+
+                    foreach (var matchOnMetadataSplit in matchOnMetadataSplits)
+                    {
+                        AddItemReferences(matchOnMetadataSplit, operationBuilder, itemElement.MatchOnMetadataLocation);
+                        string metadataExpanded = _expander.ExpandIntoStringLeaveEscaped(matchOnMetadataSplit, ExpanderOptions.ExpandPropertiesAndItems, itemElement.MatchOnMetadataLocation);
+                        var metadataSplits = ExpressionShredder.SplitSemiColonSeparatedList(metadataExpanded);
+                        operationBuilder.MatchOnMetadata.AddRange(metadataSplits);
+                    }
+                }
+            }
+
+            operationBuilder.MatchOnMetadataOptions = MatchOnMetadataOptions.CaseSensitive;
+            if (Enum.TryParse(itemElement.MatchOnMetadataOptions, out MatchOnMetadataOptions options))
+            {
+                operationBuilder.MatchOnMetadataOptions = options;
+            }
 
             return new RemoveOperation(operationBuilder, this);
         }
@@ -578,7 +603,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private void AddItemReferences(string expression, IncludeOperationBuilder operationBuilder, IElementLocation elementLocation)
+        private void AddItemReferences(string expression, OperationBuilder operationBuilder, IElementLocation elementLocation)
         {
             if (expression.Length == 0)
             {

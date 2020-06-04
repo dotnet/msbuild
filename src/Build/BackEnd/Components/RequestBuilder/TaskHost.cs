@@ -34,7 +34,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IBuildEngine6
+        IBuildEngine7
     {
         /// <summary>
         /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set. 
@@ -241,6 +241,8 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        public bool BuildRequestsSucceeded { get; private set; } = true;
+
         #region IBuildEngine2 Members
 
         /// <summary>
@@ -308,6 +310,8 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+            BuildRequestsSucceeded = result.Result;
+
             return result.Result;
         }
 
@@ -324,7 +328,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="globalProperties">The global properties to use for each project</param>
         /// <param name="undefineProperties">The list of global properties to undefine</param>
         /// <param name="toolsVersion">The tools versions to use</param>
-        /// <param name="returnTargetOutputs">Should the target outputs be returned in teh BuildEngineResult</param>
+        /// <param name="returnTargetOutputs">Should the target outputs be returned in the BuildEngineResult</param>
         /// <returns>A structure containing the result of the build, success or failure and the list of target outputs per project</returns>
         public BuildEngineResult BuildProjectFilesInParallel(string[] projectFileNames, string[] targetNames, System.Collections.IDictionary[] globalProperties, IList<String>[] undefineProperties, string[] toolsVersion, bool returnTargetOutputs)
         {
@@ -666,6 +670,13 @@ namespace Microsoft.Build.BackEnd
 
         #endregion
 
+        #region IBuildEngine7 Members
+        /// <summary>
+        /// Enables or disables emitting a default error when a task fails without logging errors
+        /// </summary>
+        public bool AllowFailureWithoutError { get; set; } = true;
+        #endregion
+
         /// <summary>
         /// Called by the internal MSBuild task.
         /// Does not take the lock because it is called by another request builder thread.
@@ -701,6 +712,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 result = new BuildEngineResult(overallSuccess, targetOutputsPerProject);
+                BuildRequestsSucceeded = overallSuccess;
             }
             else
             {
@@ -834,7 +846,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="globalProperties">The global properties to use for each project</param>
         /// <param name="undefineProperties">The list of global properties to undefine</param>
         /// <param name="toolsVersion">The tools versions to use</param>
-        /// <param name="returnTargetOutputs">Should the target outputs be returned in teh BuildEngineResult</param>
+        /// <param name="returnTargetOutputs">Should the target outputs be returned in the BuildEngineResult</param>
         /// <param name="skipNonexistentTargets">If set, skip targets that are not defined in the projects to be built.</param>
         /// <returns>A Task returning a structure containing the result of the build, success or failure and the list of target outputs per project</returns>
         private async Task<BuildEngineResult> BuildProjectFilesInParallelAsync(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<String>[] undefineProperties, string[] toolsVersion, bool returnTargetOutputs, bool skipNonexistentTargets = false)
@@ -962,6 +974,8 @@ namespace Microsoft.Build.BackEnd
 
                     ErrorUtilities.VerifyThrow(results.Length == projectFileNames.Length || overallSuccess == false, "The number of results returned {0} cannot be less than the number of project files {1} unless one of the results indicated failure.", results.Length, projectFileNames.Length);
                 }
+
+                BuildRequestsSucceeded = overallSuccess;
 
                 return new BuildEngineResult(overallSuccess, targetOutputsPerProject);
             }

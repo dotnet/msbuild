@@ -1465,7 +1465,7 @@ namespace Microsoft.Build.Shared
                 : null;
         }
 
-        internal delegate Tuple<string, string, string> FixupParts(
+        internal delegate (string fixedDirectoryPart, string recursiveDirectoryPart, string fileNamePart) FixupParts(
             string fixedDirectoryPart,
             string recursiveDirectoryPart,
             string filenamePart);
@@ -1491,7 +1491,6 @@ namespace Microsoft.Build.Shared
             out bool isLegalFileSpec,
             FixupParts fixupParts = null)
         {
-            isLegalFileSpec = true;
             needsRecursion = false;
             fixedDirectoryPart = String.Empty;
             wildcardDirectoryPart = String.Empty;
@@ -1513,10 +1512,9 @@ namespace Microsoft.Build.Shared
             {
                 var newParts = fixupParts(fixedDirectoryPart, wildcardDirectoryPart, filenamePart);
 
-                // todo use named tuples when they'll be available
-                fixedDirectoryPart = newParts.Item1;
-                wildcardDirectoryPart = newParts.Item2;
-                filenamePart = newParts.Item3;
+                fixedDirectoryPart = newParts.fixedDirectoryPart;
+                wildcardDirectoryPart = newParts.recursiveDirectoryPart;
+                filenamePart = newParts.fileNamePart;
             }
 
             /*

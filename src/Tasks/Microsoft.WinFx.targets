@@ -9,6 +9,6 @@
         the shim will internally simply redirect to the real copy of the targets file in the .NET Framework. 
    -->
 
-   <Import Project="$(MSBuildFrameworkToolsPath)\Microsoft.WinFx.targets" Condition="Exists('$(MSBuildFrameworkToolsPath)\Microsoft.WinFx.targets')" />
+   <Import Project="$(MSBuildFrameworkToolsPath)\Microsoft.WinFx.targets" Condition="'$(ImportFrameworkWinFXTargets)' != 'false' and Exists('$(MSBuildFrameworkToolsPath)\Microsoft.WinFx.targets')" />
 
 </Project>

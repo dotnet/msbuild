@@ -677,43 +677,6 @@ namespace Microsoft.Build.BackEnd
             return allTargets;
         }
 
-        /// <summary>
-        /// Returns the list of targets that are AfterTargets (or AfterTargets of the AfterTargets) 
-        /// of the entrypoint targets.  
-        /// </summary>
-        public List<string> GetAfterTargetsForDefaultTargets(BuildRequest request)
-        {
-            // We may not have a project available.  In which case, return nothing -- we simply don't have 
-            // enough information to figure out what the correct answer is.
-            if (!IsCached && Project != null)
-            {
-                var afterTargetsFound = new HashSet<string>();
-
-                var targetsToCheckForAfterTargets = new Queue<string>((request.Targets.Count == 0) ? ProjectDefaultTargets : request.Targets);
-
-                while (targetsToCheckForAfterTargets.Count > 0)
-                {
-                    string targetToCheck = targetsToCheckForAfterTargets.Dequeue();
-
-                    IList<TargetSpecification> targetsWhichRunAfter = Project.GetTargetsWhichRunAfter(targetToCheck);
-
-                    foreach (TargetSpecification targetWhichRunsAfter in targetsWhichRunAfter)
-                    {
-                        if (afterTargetsFound.Add(targetWhichRunsAfter.TargetName))
-                        {
-                            // If it's already in there, we've already looked into it so no need to do so again.  Otherwise, add it 
-                            // to the list to check.
-                            targetsToCheckForAfterTargets.Enqueue(targetWhichRunsAfter.TargetName);
-                        }
-                    }
-                }
-
-                return new List<string>(afterTargetsFound);
-            }
-
-            return null;
-        }
-
         private Func<string, bool> shouldSkipStaticGraphIsolationOnReference;
 
         public bool ShouldSkipIsolationConstraintsForReference(string referenceFullPath)

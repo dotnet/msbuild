@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="CommandLine">
         <source>Command line arguments = "{0}"</source>
-        <target state="new">Command line arguments = "{0}"</target>
+        <target state="translated">Argumentos de linha de comando = "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationFailurePrefixNoErrorCode">
@@ -39,7 +39,7 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
       </trans-unit>
       <trans-unit id="CurrentDirectory">
         <source>Current directory = "{0}"</source>
-        <target state="new">Current directory = "{0}"</target>
+        <target state="translated">Diretório atual = "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateOutputResultsCache">
@@ -186,7 +186,7 @@ isoladamente.
       </trans-unit>
       <trans-unit id="HelpMessage_37_DocsLink">
         <source>For more detailed information, see https://aka.ms/msbuild/docs</source>
-        <target state="new">For more detailed information, see https://aka.ms/msbuild/docs</target>
+        <target state="translated">Para obter informações detalhadas, consulte https://aka.ms/msbuild/docs</target>
         <note />
       </trans-unit>
       <trans-unit id="HelpMessage_38_TargetsSwitch">
@@ -199,18 +199,39 @@ isoladamente.
                      Example:
                        -ts:out.txt
     </source>
-        <target state="new">  -targets[:file]
-                     Prints a list of available targets without executing the
-                     actual build process. By default the output is written to
-                     the console window. If the path to an output file
-                     is provided that will be used instead.
-                     (Short form: -ts)
-                     Example:
+        <target state="translated">  -targets [:arquivo]
+                     Imprime uma lista de destinos disponíveis sem executar o
+                     processo de compilação real. Por padrão, a saída é gravada na
+                     janela do console. Se o caminho para um arquivo de saída
+                     for fornecido, isso será usado.
+                     (Forma abreviada:-ts)
+                     Exemplo:
                        -ts:out.txt
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
       LOCALIZATION: "-targets" and "-ts" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_39_LowPrioritySwitch">
+        <source>  -lowPriority[:True|False]
+                     Causes MSBuild to run at low process priority.
+
+                     Specifying -lowPriority is the same as specifying
+                     -lowPriority:True.
+                     (Short form: -low)
+    </source>
+        <target state="translated">  -lowPriority[:True|False]
+                     Faz com que o MSBuild seja executado a uma prioridade baixa de processo.
+
+                     A especificação de -lowPriority é igual à especificação de
+                     -lowPriority:True.
+                     (Forma abreviada: -low)
+    </target>
+        <note>
+      LOCALIZATION: "MSBuild" should not be localized.
+      LOCALIZATION: "-lowPriority" and "-low" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
@@ -1092,12 +1113,12 @@ isoladamente.
       </trans-unit>
       <trans-unit id="MSBExePath">
         <source>MSBuild executable path = "{0}"</source>
-        <target state="new">MSBuild executable path = "{0}"</target>
+        <target state="translated">Caminho executável do MSBuild = "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBVersion">
         <source>MSBuild version = "{0}"</source>
-        <target state="new">MSBuild version = "{0}"</target>
+        <target state="translated">Versão do MSBuild = "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingLoggerError">
@@ -1200,7 +1221,7 @@ isoladamente.
       </trans-unit>
       <trans-unit id="Process">
         <source>Process = "{0}"</source>
-        <target state="new">Process = "{0}"</target>
+        <target state="translated">Processo = "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectNotFoundError">
@@ -1272,7 +1293,7 @@ isoladamente.
       </trans-unit>
       <trans-unit id="TargetsCouldNotBePrinted">
         <source>MSBUILD : error MSB1059: Targets could not be printed. {0}</source>
-        <target state="new">MSBUILD : error MSB1059: Targets could not be printed. {0}</target>
+        <target state="translated">MSBUILD : error MSB1059: não foi possível imprimir destinos. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">

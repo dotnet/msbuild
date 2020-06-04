@@ -182,6 +182,7 @@ folder InstallDir:\MSBuild\Current\Bin\amd64
   file source=$(X86BinPath)Microsoft.Build.dll vs.file.ngenArchitecture=all
   file source=$(MSBuildConversionBinPath)Microsoft.Build.Engine.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.Framework.dll vs.file.ngenArchitecture=all
+  file source=$(FrameworkBinPath)x64\Microsoft.Build.Framework.tlb
   file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.Utilities.Core.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Buffers.dll vs.file.ngenArchitecture=all
@@ -314,6 +315,7 @@ folder InstallDir:\MSBuild\Current\Bin\amd64\zh-Hant
   file source=$(TaskHostX64BinPath)zh-Hant\MSBuildTaskHost.resources.dll vs.file.ngenArchitecture=all
 
 folder InstallDir:\Common7\IDE\CommonExtensions\MSBuild
+  file source=$(SourceDir)Package\MSBuild.VSSetup\MSBuild.clientenabledpkg
   file source=$(SourceDir)Framework\Microsoft.Build.Framework.pkgdef
   file source=$(SourceDir)Build\Microsoft.Build.pkgdef
   file source=$(SourceDir)Tasks\Microsoft.Build.Tasks.Core.pkgdef
