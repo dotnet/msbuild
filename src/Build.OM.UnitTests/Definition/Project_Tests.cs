@@ -3740,14 +3740,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         new[] {"b", "c"}
         )]
         [InlineData(
-            @"<A Include=`ab*;bc|*;de*`/>",
+            @"<A Include=`ab*;b|c*;de*`/>",
             new[] {"ab", "de"},
-            new[] {"bc", "bc|"}
-            )]
-        [InlineData(
-            @"<A Include=`\ab*;bc*;de*`/>",
-            new[] { "bc", "de" },
-            new[] { "ab", "\\ab" }
+            new[] {"bc", "b|c", "b", "c"}
             )]
         [InlineData(
             @"<A Include=`ab*;bc*;:de*`/>",

@@ -57,7 +57,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// * and ? are invalid file name characters, but they occur in globs as wild cards.
         /// </summary>
-        private static readonly char[] s_invalidGlobChars = FileUtilities.InvalidFileNameChars.Where(c => c != '*' && c != '?').ToArray();
+        private static readonly char[] s_invalidGlobChars = FileUtilities.InvalidFileNameChars.Where(c => c != '*' && c != '?' && c!= '/' && c != '\\').ToArray();
 
         /// <summary>
         /// Context to log messages and events in
@@ -2506,7 +2506,7 @@ namespace Microsoft.Build.Evaluation
             {
                 var includeItemspec = new EvaluationItemSpec(itemElement.Include, _data.Expander, itemElement.IncludeLocation, itemElement.ContainingProject.DirectoryPath);
 
-                ImmutableArray<ItemSpecFragment> includeGlobFragments = includeItemspec.Fragments.Where(f => f is GlobFragment && (NativeMethodsShared.IsWindows ? f.TextFragment.IndexOfAny(s_invalidGlobChars) == -1 : true)).ToImmutableArray();
+                ImmutableArray<ItemSpecFragment> includeGlobFragments = includeItemspec.Fragments.Where(f => f is GlobFragment && f.TextFragment.IndexOfAny(s_invalidGlobChars) == -1).ToImmutableArray();
                 if (includeGlobFragments.Length == 0)
                 {
                     return null;
