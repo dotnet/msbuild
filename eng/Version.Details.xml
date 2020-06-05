@@ -89,13 +89,13 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>d0889f1159b6ea044b5e491921b7a37a688ce465</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.WindowsDesktop.App" Version="5.0.0-preview.7.20303.5">
+    <Dependency Name="Microsoft.WindowsDesktop.App" Version="5.0.0-preview.7.20304.1">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
-      <Sha>d413eb7fa21c3fabbf9024e1a25156cf5a763138</Sha>
+      <Sha>72321b8cdd95e18ab2729146cdcab893ea20dafa</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="5.0.0-preview.7.20303.3" CoherentParentDependency="Microsoft.WindowsDesktop.App">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="5.0.0-preview.7.20304.1" CoherentParentDependency="Microsoft.WindowsDesktop.App">
       <Uri>https://github.com/dotnet/wpf</Uri>
-      <Sha>751153802c4e4d06484743c351266c9831ade85d</Sha>
+      <Sha>1c8bfb18b3835e6a345c651461db505fd69bbcd8</Sha>
     </Dependency>
     <Dependency Name="Microsoft.CodeAnalysis.NetAnalyzers" Version="">
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
