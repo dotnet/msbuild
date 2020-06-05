@@ -15,7 +15,7 @@ namespace Microsoft.Build
 
         public WeakStringCache()
         {
-            _stringsByHashCode = new Dictionary<int, StringWeakHandle>(_capacity);
+            _stringsByHashCode = new Dictionary<int, StringWeakHandle>(_initialCapacity);
         }
 
         /// <summary>
@@ -59,12 +59,12 @@ namespace Microsoft.Build
                 if (addingNewHandle)
                 {
                     // Prevent the dictionary from growing forever with GC handles that don't reference live strings anymore.
-                    if (_stringsByHashCode.Count >= _capacity)
+                    if (_stringsByHashCode.Count >= _scavengeThreshold)
                     {
                         // Get rid of unused handles.
                         ScavengeNoLock();
                         // And do this again when the number of handles reaches double the current after-scavenge number.
-                        _capacity = _stringsByHashCode.Count * 2;
+                        _scavengeThreshold = _stringsByHashCode.Count * 2;
                     }
                 }
                 _stringsByHashCode[hashCode] = handle;

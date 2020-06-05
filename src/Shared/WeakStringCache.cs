@@ -85,10 +85,14 @@ namespace Microsoft.Build
         }
 
         /// <summary>
-        /// Improvised capacity for the scavenging heuristics. We use this number as the initial capacity of the underlying collection
-        /// and then as the maximum size we let the collection grow before scavenging unused entries.
+        /// Initial capacity of the underlying dictionary.
         /// </summary>
-        private int _capacity = 503;
+        private const int _initialCapacity = 503;
+
+        /// <summary>
+        /// The maximum size we let the collection grow before scavenging unused entries.
+        /// </summary>
+        private int _scavengeThreshold = _initialCapacity;
 
         /// <summary>
         /// Implements the simple yet very decently performing djb2 hash function (xor version).

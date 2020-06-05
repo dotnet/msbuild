@@ -131,9 +131,6 @@
     <Compile Include="..\Shared\WeakStringCache.cs">
       <Link>WeakStringCache.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\WeakStringCache.Locking.cs">
-      <Link>WeakStringCache.Locking.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\OpportunisticIntern.cs">
       <Link>OpportunisticIntern.cs</Link>
     </Compile>
@@ -167,6 +164,7 @@
     <Compile Include="Concurrent\ConcurrentQueue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeLoader.cs" />
+    <Compile Include="WeakStringCache.Locking.cs" />
     <Compile Include="..\MSBuild\LogMessagePacket.cs">
       <Link>LogMessagePacket.cs</Link>
     </Compile>
