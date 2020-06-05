@@ -93,7 +93,6 @@ namespace Microsoft.Build.BackEnd.Logging
             warningCount = 0;
 
             TargetFramework_mapping = new ConcurrentDictionary<(int nodeId, int contextId), string>();
-            TargetFramework_errorwarning = new ConcurrentDictionary<string, (int warningCount, int errorCount)>();
             projectPerformanceCounters = null;
             targetPerformanceCounters = null;
             taskPerformanceCounters = null;
@@ -153,30 +152,24 @@ namespace Microsoft.Build.BackEnd.Logging
                 if (IsVerbosityAtLeast(LoggerVerbosity.Normal))
                 {
                     // Emit text like:
-                    //   Framewook: ------
                     //     1 Warning(s)
                     //     0 Error(s)
                     // Don't color the line if it's zero. (Per Whidbey behavior.)
                     // separate counts by framework
-                    foreach (var counts in TargetFramework_errorwarning)
+
+                    if (warningCount > 0)
                     {
-                        if (counts.Key == null || counts.Key.Length <= 0) continue;
-                        Console.WriteLine("Target Framwork: " + counts.Key);
-
-                        if (counts.Value.Item1 > 0)
-                        {
-                            setColor(ConsoleColor.Yellow);
-                        }
-                        WriteLinePrettyFromResource(2, "WarningCount", counts.Value.warningCount);
-                        resetColor();
-
-                        if (counts.Value.Item2 > 0)
-                        {
-                            setColor(ConsoleColor.Red);
-                        }
-                        WriteLinePrettyFromResource(2, "ErrorCount", counts.Value.errorCount);
-                        resetColor();
+                        setColor(ConsoleColor.Yellow);
                     }
+                    WriteLinePrettyFromResource(2, "WarningCount", warningCount);
+                    resetColor();
+
+                    if (errorCount > 0)
+                    {
+                        setColor(ConsoleColor.Red);
+                    }
+                    WriteLinePrettyFromResource(2, "ErrorCount", errorCount);
+                    resetColor();
                     
                 }
             }
@@ -503,13 +496,7 @@ namespace Microsoft.Build.BackEnd.Logging
             ShowDeferredMessages();
             setColor(ConsoleColor.Red);
 
-            //finding the target framework for the error and updating the errors for that framework
-            string TargetFramework;
-            TargetFramework_mapping.TryGetValue((e.BuildEventContext.NodeId, e.BuildEventContext.ProjectContextId), out TargetFramework);
-            if (TargetFramework != null)
-                TargetFramework_errorwarning.AddOrUpdate(TargetFramework, (0,1), (key, oldValue) => (oldValue.warningCount, oldValue.errorCount + 1));
-
-            WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, TargetFramework, showProjectFile));
+            WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile));
             if (ShowSummary == true)
             {
                 errorList.Add(e);
@@ -527,13 +514,7 @@ namespace Microsoft.Build.BackEnd.Logging
             ShowDeferredMessages();
             setColor(ConsoleColor.Yellow);
 
-            //finding the target framework for the warning and updating the warning count for the framwork
-            string TargetFramework;
-            TargetFramework_mapping.TryGetValue((e.BuildEventContext.NodeId, e.BuildEventContext.ProjectContextId), out TargetFramework);
-            if (TargetFramework != null)
-                TargetFramework_errorwarning.AddOrUpdate(TargetFramework, (1, 0), (key, oldValue) => (oldValue.warningCount + 1, oldValue.errorCount));
-
-            WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, TargetFramework, showProjectFile));
+            WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile));
             if (ShowSummary == true)
             {
                 warningList.Add(e);

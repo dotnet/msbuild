@@ -207,7 +207,6 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Reset the two data structures created when the logger was created
             TargetFramework_mapping = new ConcurrentDictionary<(int, int), string>();
-            TargetFramework_errorwarning = new ConcurrentDictionary<string, (int warningCount, int errorCount)>();
             _buildEventManager = new BuildEventManager();
             _deferredMessages = new Dictionary<BuildEventContext, List<BuildMessageEventArgs>>(s_compareContextNodeId);
             _prefixWidth = 0;
@@ -297,31 +296,24 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
 
                 // Emit text like:
-                //   Framewook: ------
                 //     1 Warning(s)
                 //     0 Error(s)
                 // Don't color the line if it's zero. (Per Whidbey behavior.)
-                // separate counts by framework
-                foreach (var counts in TargetFramework_errorwarning)
+
+                resetColor();
+                if (warningCount > 0)
                 {
-                    if (counts.Key == null || counts.Key.Length <= 0) continue;
-
-                    Console.WriteLine("Target Framwork: " + counts.Key);
-                    resetColor();
-                    if (counts.Value.warningCount > 0)
-                    {
-                        setColor(ConsoleColor.Yellow);
-                    }
-                    WriteLinePrettyFromResource(2, "WarningCount", counts.Value.warningCount);
-                    resetColor();
-
-                    if (counts.Value.errorCount > 0)
-                    {
-                        setColor(ConsoleColor.Red);
-                    }
-                    WriteLinePrettyFromResource(2, "ErrorCount", counts.Value.errorCount);
-                    resetColor();
+                    setColor(ConsoleColor.Yellow);
                 }
+                WriteLinePrettyFromResource(2, "WarningCount", warningCount);
+                resetColor();
+
+                if (errorCount > 0)
+                {
+                    setColor(ConsoleColor.Red);
+                }
+                WriteLinePrettyFromResource(2, "ErrorCount", errorCount);
+                resetColor();
                 
             }
 
@@ -962,16 +954,6 @@ namespace Microsoft.Build.BackEnd.Logging
             // and are not removed when they finish
             _buildEventManager.SetErrorWarningFlagOnCallStack(e.BuildEventContext);
 
-            //determining the framework the error is occurring on
-            string TargetFramework;
-            int nodeId = e.BuildEventContext.NodeId;
-            int projectContextId = e.BuildEventContext.ProjectContextId;
-            TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out TargetFramework);
-
-            //updates error count
-            if (TargetFramework != null)
-                TargetFramework_errorwarning.AddOrUpdate(TargetFramework, (0, 1), (key, oldValue) => (oldValue.warningCount, oldValue.errorCount + 1));
-
             TargetStartedEventMinimumFields targetStartedEvent = _buildEventManager.GetTargetStartedEvent(e.BuildEventContext);
             // Can be null if the error occurred outside of a target, or the error occurred before the targetStartedEvent
             if (targetStartedEvent != null)
@@ -991,7 +973,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
 
                 setColor(ConsoleColor.Red);
-                WriteMessageAligned(EventArgsFormatting.FormatEventMessage(e, TargetFramework, showProjectFile), true);
+                WriteMessageAligned(EventArgsFormatting.FormatEventMessage(e, showProjectFile), true);
                 ShownBuildEventContext(e.BuildEventContext);
                 if (ShowSummary == true)
                 {
@@ -1012,16 +994,6 @@ namespace Microsoft.Build.BackEnd.Logging
             ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
             // Keep track of the number of warning events raised during the build
             warningCount++;
-
-            //finds the framework associated with the warning
-            string TargetFramework;
-            int nodeId = e.BuildEventContext.NodeId;
-            int projectContextId = e.BuildEventContext.ProjectContextId;
-            TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out TargetFramework);
-
-            //updates the warning count
-            if (TargetFramework != null)
-                TargetFramework_errorwarning.AddOrUpdate(TargetFramework, (1, 0), (key, oldValue) => (oldValue.warningCount + 1, oldValue.errorCount));
            
             // If there is a warning we need to walk up the call stack and make sure that 
             // the project started events back to the root project know a warning has occurred
@@ -1047,7 +1019,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
 
                 setColor(ConsoleColor.Yellow);
-                WriteMessageAligned(EventArgsFormatting.FormatEventMessage(e, TargetFramework, showProjectFile), true);
+                WriteMessageAligned(EventArgsFormatting.FormatEventMessage(e, showProjectFile), true);
             }
 
             ShownBuildEventContext(e.BuildEventContext);

@@ -36,8 +36,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// These are used to give more direction as to where an error is happening when multi targetted
         ///</summary>
         protected ConcurrentDictionary<(int nodeId, int contextId), string> TargetFramework_mapping = new ConcurrentDictionary<(int nodeId, int contextId), string>();
-        protected ConcurrentDictionary<string, (int warningCount, int errorCount)> TargetFramework_errorwarning =
-            new ConcurrentDictionary<string, (int warningCount, int errorCount)>();
 
         #region Properties
 
