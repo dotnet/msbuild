@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
@@ -14,6 +15,11 @@ namespace Microsoft.Build.Framework
     [Serializable]
     public class LazyFormattedBuildEventArgs : BuildEventArgs
     {
+        //dictionary storing the parameters to print along
+        //with a warning or error message.
+        //key = parameter name value = parameter value
+        protected ConcurrentDictionary<string, string> outputParameters;
+
         /// <summary>
         /// Stores the message arguments.
         /// </summary>
@@ -74,6 +80,7 @@ namespace Microsoft.Build.Framework
             originalCultureName = CultureInfo.CurrentCulture.Name;
             originalCultureInfo = CultureInfo.CurrentCulture;
             locker = new Object();
+            outputParameters = new ConcurrentDictionary<string, string>();
         }
 
         /// <summary>

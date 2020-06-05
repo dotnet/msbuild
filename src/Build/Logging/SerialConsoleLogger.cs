@@ -299,8 +299,6 @@ namespace Microsoft.Build.BackEnd.Logging
             //adding the nodeID and contextID into the framework mapping
             TargetFramework_mapping.TryAdd((node, project_context_id), TargetFramework);
 
-            //if necessary initializing the number of errors and warning for the framework
-            TargetFramework_errorwarning.TryAdd(TargetFramework, (0, 0));
         }
 
         /// <summary>
