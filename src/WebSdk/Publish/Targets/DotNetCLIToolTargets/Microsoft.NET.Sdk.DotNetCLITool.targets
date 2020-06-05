@@ -1,0 +1,108 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.DotNetCLITool.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your web deploy projects from the command-line or the IDE.
+
+This file defines the steps in the standard package/publish process for collecting only files to run the web appliation.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+
+  <Target Name="_InitProjectCapabilityProperties">
+    <PropertyGroup>
+      <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
+    </PropertyGroup>
+  </Target>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : DotNet CLI Publish Command : Pre-Publish
+  ***********************************************************************************************
+ -->
+
+  <PropertyGroup>
+    <_DotNetCLIPrePublishDependsOn>
+      _InitProjectCapabilityProperties;
+      _AspNetCoreProjectSystemPrePublish;
+    </_DotNetCLIPrePublishDependsOn>
+  </PropertyGroup>
+
+  <Target Name ="_DotNetCLIPrePublish"
+          DependsOnTargets="$(_DotNetCLIPrePublishDependsOn)"
+          BeforeTargets="PrepareForPublish"
+          Condition="'$(DeployOnBuild)' != 'true'">
+  </Target>
+
+  <PropertyGroup>
+    <_AspNetCoreProjectSystemPrePublishDependsOn>
+      BeforePublish;
+      $(_DotNetPublishComputeFiles);
+    </_AspNetCoreProjectSystemPrePublishDependsOn>
+  </PropertyGroup>
+
+  <Target Name="_AspNetCoreProjectSystemPrePublish"
+          Condition="'$(_IsAspNetCoreProject)' == 'true'"
+          DependsOnTargets="$(_AspNetCoreProjectSystemPrePublishDependsOn)">
+  </Target>
+
+  <!--
+  ***********************************************************************************************
+  TARGET : DotNet CLI Publish Command: Post-Publish
+  ***********************************************************************************************
+ -->
+  <PropertyGroup>
+    <_DotNetCLIPostPublishDependsOn>
+      _InitProjectCapabilityProperties;
+      _AspNetCoreProjectSystemPostPublish;
+      AfterPublish;
+    </_DotNetCLIPostPublishDependsOn>
+  </PropertyGroup>
+
+  <Target Name ="_DotNetCLIPostPublish"
+          DependsOnTargets="$(_DotNetCLIPostPublishDependsOn)"
+          AfterTargets="Publish"
+          Condition="'$(DeployOnBuild)' != 'true'">
+  </Target>
+
+
+  <PropertyGroup>
+    <_AspNetCoreProjectSystemPostPublishDependsOn>
+      _InitPublishIntermediateOutputPath;
+      $(_DotNetPublishTransformFiles);
+      _PublishFiles;
+    </_AspNetCoreProjectSystemPostPublishDependsOn>
+  </PropertyGroup>
+
+  <Target Name="_AspNetCoreProjectSystemPostPublish"
+          Condition="'$(_IsAspNetCoreProject)' == 'true'"
+          DependsOnTargets="$(_AspNetCoreProjectSystemPostPublishDependsOn)">
+  </Target>
+
+  <Target Name="_InitPublishIntermediateOutputPath">
+    <ConvertToAbsolutePath Paths="$(PublishDir)">
+      <Output TaskParameter="AbsolutePaths" PropertyName="PublishDirFullPath"/>
+    </ConvertToAbsolutePath>
+    
+    <PropertyGroup>
+      <PublishIntermediateOutputPath>$(PublishDirFullPath)</PublishIntermediateOutputPath>
+    </PropertyGroup>
+  </Target>
+
+  <PropertyGroup>
+    <_PublishFilesDependsOn>
+      $(_DotNetPublishFiles);
+    </_PublishFilesDependsOn>
+  </PropertyGroup>
+
+  <Target Name="_PublishFiles" 
+          DependsOnTargets="$(_PublishFilesDependsOn)"
+          Condition="'$(PublishProtocol)' != 'FileSystem' And '$(PublishProtocol)' != ''"> 
+  </Target>
+  
+</Project>

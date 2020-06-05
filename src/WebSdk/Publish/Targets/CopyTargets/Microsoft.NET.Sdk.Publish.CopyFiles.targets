@@ -1,0 +1,129 @@
+﻿<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.Publish.CopyFiles.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your web deploy projects from the command-line or the IDE.
+
+This file defines the steps in the standard package/publish process for collecting only files to run the web appliation.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <_DotNetPublishCopyFiles>
+      _RemoveExcludeFiles;
+      _DeletePublishIntermediateOutputPath;
+      _CopyFilesToPublishIntermediateOutputPath;
+      _CopyAspNetCoreFilesToIntermediateOutputPath;
+      _CopyWebJobFilesToIntermediateOutputPath;
+    </_DotNetPublishCopyFiles>
+  </PropertyGroup>
+
+
+  <!--********************************************************************-->
+  <!-- Target _RemoveExcludeFiles -->
+  <!--********************************************************************-->
+  <Target Name="_RemoveExcludeFiles" >
+    
+    <ItemGroup>
+      <DotNetPublishFiles Remove="@(DotNetPublishFiles)"  Condition="'%(Exclude)' == 'true'" />
+    </ItemGroup>
+    
+  </Target>
+
+  <!--********************************************************************-->
+  <!-- Target _DeletePublishIntermediateOutputPath -->
+  <!--********************************************************************-->
+
+  <Target Name="_DeletePublishIntermediateOutputPath">
+
+    <!-- Remove all the files from the temp directory first-->
+    <ItemGroup>
+      <_PublishTempFiles Include="$(PublishIntermediateOutputPath)**\*.*" />
+    </ItemGroup>
+
+    <Delete Files="@(_PublishTempFiles)" ContinueOnError="true" />
+    <RemoveDir Directories="$(PublishIntermediateOutputPath)" ContinueOnError="true" Condition="Exists('$(PublishIntermediateOutputPath)')" />
+    <MakeDir Directories="$(PublishIntermediateOutputPath)" Condition="!Exists('$(PublishIntermediateOutputPath)')"/>
+
+  </Target>
+         
+  
+  <!--********************************************************************-->
+  <!-- Target _CopyAllFilesToPublishIntermediateOutputPath -->
+  <!--********************************************************************-->
+  <Target Name="_CopyFilesToPublishIntermediateOutputPath">
+    
+    <Copy
+    SourceFiles="@(DotNetPublishFiles)"
+    DestinationFiles="@(DotNetPublishFiles ->'$(PublishIntermediateOutputPath)%(DestinationRelativePath)')"  />
+    
+  </Target>
+  
+  <!--********************************************************************-->
+  <!-- Target _CopyAspNetCoreFilesToIntermediateOutputPath -->
+  <!--********************************************************************-->
+  <PropertyGroup>
+    <_CopyAspNetCoreFilesToIntermediateOutputPathDependsOn>
+      $(_CopyAspNetCoreFilesToIntermediateOutputPathDependsOn);
+      _PrepareForAspNetCoreProjectSystemPublish;
+      Publish;
+    </_CopyAspNetCoreFilesToIntermediateOutputPathDependsOn>
+  </PropertyGroup>
+  
+  <Target Name="_CopyAspNetCoreFilesToIntermediateOutputPath" 
+    Condition="'$(_PublishProjectType)' == 'AspNetCore'"
+    DependsOnTargets="$(_CopyAspNetCoreFilesToIntermediateOutputPathDependsOn)">
+  </Target>
+
+  <!--********************************************************************-->
+  <!-- Target _PrepareForAspNetCoreProjectSystemPublish -->
+  <!--********************************************************************-->
+  <Target Name="_PrepareForAspNetCoreProjectSystemPublish">
+    <PropertyGroup>
+      <PublishDir>$(PublishIntermediateOutputPath)</PublishDir>
+      <Configuration>$(PublishConfiguration)</Configuration>
+    </PropertyGroup>
+  </Target>
+  
+   <!--********************************************************************-->
+  <!-- Target _CopyWebJobFilesToIntermediateOutputPath -->
+  <!--********************************************************************-->
+  <PropertyGroup>
+    <_CopyWebJobFilesToIntermediateOutputPathDependsOn>
+      $(_CopyWebJobFilesToIntermediateOutputPathDependsOn);
+      _PrepareForWebJobPublish;
+      Publish;
+    </_CopyWebJobFilesToIntermediateOutputPathDependsOn>
+  </PropertyGroup>
+
+  <Target Name="_CopyWebJobFilesToIntermediateOutputPath"
+    Condition="'$(_PublishProjectType)' == 'WebJob'"
+    DependsOnTargets="$(_CopyWebJobFilesToIntermediateOutputPathDependsOn)">
+  </Target>
+
+  <!--********************************************************************-->
+  <!-- Target _PrepareForWebJobPublish -->
+  <!--********************************************************************-->
+  <Target Name="_PrepareForWebJobPublish">
+    <PropertyGroup>
+      <PublishDir>$(PublishIntermediateOutputPath)\app_data\Jobs\$(WebJobType)\$(WebJobName)\</PublishDir>
+      <Configuration>$(PublishConfiguration)</Configuration>
+    </PropertyGroup>
+  </Target>
+
+  <!--********************************************************************-->
+  <!-- This will ensure that all values have the required metadata -->
+  <!--********************************************************************-->
+  <ItemDefinitionGroup>
+    <DotNetPublishFiles>
+      <DestinationRelativePath></DestinationRelativePath>
+      <Exclude>False</Exclude>
+    </DotNetPublishFiles>
+  </ItemDefinitionGroup>
+
+</Project>
