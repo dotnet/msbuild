@@ -25,8 +25,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
         }
 
         [Theory]
-        [InlineData("netcoreapp3.1", "Release", "core")]
-        [InlineData("netcoreapp3.1", "Debug", "core")]
+        [InlineData("netcoreapp5.0", "Release", "core")]
+        [InlineData("netcoreapp5.0", "Debug", "core")]
         public void EmptyWebCore(string templateFramework, string configuration, string msBuildType)
         {
             string projectName = $"{nameof(EmptyWebCore)}_{Path.GetRandomFileName()}";
@@ -44,8 +44,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
 
 
         [Theory]
-        [InlineData("netcoreapp3.1", "Release", "core")]
-        [InlineData("netcoreapp3.1", "Debug", "core")]
+        [InlineData("netcoreapp5.0", "Release", "core")]
+        [InlineData("netcoreapp5.0", "Debug", "core")]
         public void WebAPICore(string templateFramework, string configuration, string msBuildType)
         {
             string projectName = $"{nameof(WebAPICore)}_{Path.GetRandomFileName()}";
@@ -61,12 +61,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
         }
 
         [Theory]
-        [InlineData("netcoreapp3.1", "Release", "core", "none", "false")]
-        [InlineData("netcoreapp3.1", "Debug", "core", "none", "false")]
-        [InlineData("netcoreapp3.1", "Release", "core", "Individual", "false")]
-        [InlineData("netcoreapp3.1", "Debug", "core", "Individual", "false")]
-        [InlineData("netcoreapp3.1", "Release", "core", "Individual", "true")]
-        [InlineData("netcoreapp3.1", "Debug", "core", "Individual", "true")]
+        [InlineData("netcoreapp5.0", "Release", "core", "none", "false")]
+        [InlineData("netcoreapp5.0", "Debug", "core", "none", "false")]
+        [InlineData("netcoreapp5.0", "Release", "core", "Individual", "false")]
+        [InlineData("netcoreapp5.0", "Debug", "core", "Individual", "false")]
+        [InlineData("netcoreapp5.0", "Release", "core", "Individual", "true")]
+        [InlineData("netcoreapp5.0", "Debug", "core", "Individual", "true")]
         public void MvcCore(string templateFramework, string configuration, string msBuildType, string auth, string useLocalDB)
         {
             string projectName = $"{nameof(MvcCore)}_{Path.GetRandomFileName()}";
@@ -88,12 +88,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
         }
 
         [Theory]
-        [InlineData("netcoreapp3.1", "Release", "core", "none", "false")]
-        [InlineData("netcoreapp3.1", "Debug", "core", "none", "false")]
-        [InlineData("netcoreapp3.1", "Release", "core", "Individual", "false")]
-        [InlineData("netcoreapp3.1", "Debug", "core", "Individual", "false")]
-        [InlineData("netcoreapp3.1", "Release", "core", "Individual", "true")]
-        [InlineData("netcoreapp3.1", "Debug", "core", "Individual", "true")]
+        [InlineData("netcoreapp5.0", "Release", "core", "none", "false")]
+        [InlineData("netcoreapp5.0", "Debug", "core", "none", "false")]
+        [InlineData("netcoreapp5.0", "Release", "core", "Individual", "false")]
+        [InlineData("netcoreapp5.0", "Debug", "core", "Individual", "false")]
+        [InlineData("netcoreapp5.0", "Release", "core", "Individual", "true")]
+        [InlineData("netcoreapp5.0", "Debug", "core", "Individual", "true")]
         public void RazorCore(string templateFramework, string configuration, string msBuildType, string auth, string useLocalDB)
         {
             string projectName = $"{nameof(RazorCore)}_{Path.GetRandomFileName()}";
