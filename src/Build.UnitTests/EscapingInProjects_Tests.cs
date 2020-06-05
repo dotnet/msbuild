@@ -58,6 +58,13 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
     public class SimpleScenarios : IDisposable
     {
+        private readonly ITestOutputHelper _output;
+
+        public SimpleScenarios(ITestOutputHelper testOutputHelper)
+        {
+            _output = testOutputHelper;
+        }
+
         /// <summary>
         /// Since we create a project with the same name in many of these tests, and two projects with
         /// the same name cannot be loaded in a ProjectCollection at the same time, we should unload the
@@ -604,7 +611,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                     </Target>
                 </Project>
 
-                ");
+                ", logger: new MockLogger(_output));
 
             logger.AssertLogContains("Transformed item list: 'X;X%3bX.txt    Y;Y%3bY.txt    Z;Z%3bZ.txt'");
         }
