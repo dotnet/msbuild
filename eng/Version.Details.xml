@@ -69,9 +69,9 @@
       <Uri>https://github.com/dotnet/websdk</Uri>
       <Sha>7832a01cff8a27a0ff2c846896e821f8d204bb41</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="5.0.0-preview.3.20304.3">
+    <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="5.0.0-preview.3.20305.2">
       <Uri>https://github.com/mono/linker</Uri>
-      <Sha>7e11c5112c40ca6fa98b366c740bfa36842e56e8</Sha>
+      <Sha>6ec3d0f671618589c22e2acb82d85ffc9bd161f1</Sha>
     </Dependency>
     <Dependency Name="System.CodeDom" Version="5.0.0-preview.7.20305.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
