@@ -49,8 +49,8 @@ namespace Microsoft.Build.Utilities
         private readonly HashSet<string> _excludedInputPaths = new HashSet<string>(StringComparer.Ordinal);
         // Cache of last write times
         private readonly ConcurrentDictionary<string, DateTime> _lastWriteTimeCache = new ConcurrentDictionary<string, DateTime>(StringComparer.Ordinal);
-        // Cache of files that have been checked and exist.
-        private HashSet<string> fileCache = new HashSet<string>();
+        // Cache of files that have been checked and whether or not they exist.
+        private Dictionary<string, bool> fileCache = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
         #endregion
 
         #region Properties
@@ -1072,16 +1072,20 @@ namespace Microsoft.Build.Utilities
                 {
                     if (keyIndex++ > 0)
                     {
-                        // If we are ignoring missing files, then only record those that exist
-                        // Cache the files as we find them to save time (On^2), at the expense of storing data O(n).
-                        if (fileCache.Contains(file) || FileUtilities.FileExistsNoThrow(file))
+                        // Record whether or not each file exists and cache it.
+                        // We do this to save time (On^2), at the expense of data O(n).
+                        bool inFileCache = fileCache.ContainsKey(file);
+
+                        if(!inFileCache)
+                        {
+                            fileCache.Add(file, FileUtilities.FileExistsNoThrow(file));
+                        }
+
+                        bool fileExists = fileCache[file];
+
+                        if (fileExists)
                         {
                             dependenciesWithoutMissingFiles.Add(file, dependencies[file]);
-
-                            if (!fileCache.Contains(file))
-                            {
-                                fileCache.Add(file);
-                            }
                         }
                     }
                     else
