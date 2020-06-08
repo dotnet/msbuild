@@ -1,0 +1,1913 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../Resources.resx">
+    <body>
+      <trans-unit id="BUILDTASK_ColectFilesInFolder_RootIsNotValid">
+        <source>The root folder for cllecting files is not a valid directory.({0})</source>
+        <target state="new">The root folder for cllecting files is not a valid directory.({0})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_CopyFilesToFolders_CopyFailed">
+        <source>Copying file {0} to {1} failed. {2}</source>
+        <target state="new">Copying file {0} to {1} failed. {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_CopyFilesToFolders_Copying">
+        <source>Copying {0} to {1}.</source>
+        <target state="new">Copying {0} to {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_CopyFilesToFolders_DeleteFailed">
+        <source>Deleting file {0} failed. {1}</source>
+        <target state="new">Deleting file {0} failed. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_CopyFilesToFolders_Deleting">
+        <source>Deleting {0}.</source>
+        <target state="new">Deleting {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_CopyFilesToFolders_RetryDelayOutOfRange">
+        <source>RetryDelay should be greater than zero.</source>
+        <target state="new">RetryDelay should be greater than zero.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_CopyFilesToFolders_UpToDate">
+        <source>Skip copying {0} to {1}, File {1} is up to date</source>
+        <target state="new">Skip copying {0} to {1}, File {1} is up to date</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_CreateFolder_Failed">
+        <source>Create Folder {0} failed. {1}</source>
+        <target state="new">Create Folder {0} failed. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_DetectAntaresCLR45Error">
+        <source>Your hosting provider does not yet support ASP.NET 4.6, which your application is configured to use. To learn more about this please visit: http://go.microsoft.com/fwlink/?LinkID=615797&amp;clcid=0x409</source>
+        <target state="new">Your hosting provider does not yet support ASP.NET 4.6, which your application is configured to use. To learn more about this please visit: http://go.microsoft.com/fwlink/?LinkID=615797&amp;clcid=0x409</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_FailedToLoadThisVersionMsDeployTryingTheNext">
+        <source>Failed to load this version Microsoft.Web.Deployment ({0}) reason: {1}.
+ Trying the next one specified in $(_MSDeployVersionsToTry)..</source>
+        <target state="new">Failed to load this version Microsoft.Web.Deployment ({0}) reason: {1}.
+ Trying the next one specified in $(_MSDeployVersionsToTry)..</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_IISSetting_RequireWebAdminDLL">
+        <source>To include IIS setting, it is required to have assembly Microsoft.Web.Administration installed on the machine.</source>
+        <target state="new">To include IIS setting, it is required to have assembly Microsoft.Web.Administration installed on the machine.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_IsCleanMSDeployPackageNeeded_PackageByDifferentVersion">
+        <source>Existing package/archiveDir is created by different version of Msdeploy. It is not compatible for incremental build. Mark as Clean needed({0}).</source>
+        <target state="new">Existing package/archiveDir is created by different version of Msdeploy. It is not compatible for incremental build. Mark as Clean needed({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_ManifestFile_IISSettingNotInFirst">
+        <source>Validation failure.IIS Setting should be the first element in the Manifest file.({0})</source>
+        <target state="new">Validation failure.IIS Setting should be the first element in the Manifest file.({0})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_MapProjectURLToIisWeb_InvalidProjectURL">
+        <source>The project URL is not well formed.({0})</source>
+        <target state="new">The project URL is not well formed.({0})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_MapProjectURLToIisWeb_UnsupportedProjectURL">
+        <source>The project URL url host name type is not supported.({0})</source>
+        <target state="new">The project URL url host name type is not supported.({0})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_MapURIToIisWebServer_AdminRequired">
+        <source>Retrieving local IIS properties from the URI requires Administrator permission.  Please elevate to Administrator before executing the program.</source>
+        <target state="new">Retrieving local IIS properties from the URI requires Administrator permission.  Please elevate to Administrator before executing the program.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_RemoveEmptyDirectories_Deleting">
+        <source>Deleting empty directory {0}.</source>
+        <target state="new">Deleting empty directory {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_SqlScriptPreprocessFile">
+        <source>Scanning sql command variable(s) from sql script ({0}).</source>
+        <target state="new">Scanning sql command variable(s) from sql script ({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_SqlScriptPreprocessFileDone">
+        <source>Found {0} sql command variable(s){1}.</source>
+        <target state="new">Found {0} sql command variable(s){1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_SqlScriptPreprocessFileFailed">
+        <source>Failed to parse sql command variable sql script ({0}).</source>
+        <target state="new">Failed to parse sql command variable sql script ({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_SqlScriptPreprocessFoundMsDeployUnsupportedCommands">
+        <source>Found {0} unsupported sql command(s) in {1}. The unsupported sql command(s) are: {2}.
+Please note ':EXIT' without argument is treated as ':QUIT' command.</source>
+        <target state="new">Found {0} unsupported sql command(s) in {1}. The unsupported sql command(s) are: {2}.
+Please note ':EXIT' without argument is treated as ':QUIT' command.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_SqlScriptPreprocessInvalidSqlScript">
+        <source>Failed to parse the sql script file {0}. Please make sure the SQL script syntax is correct.
+Detail:
+{1}.</source>
+        <target state="new">Failed to parse the sql script file {0}. Please make sure the SQL script syntax is correct.
+Detail:
+{1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_DestinationWriteFailed">
+        <source>Could not write Destination file: {0}</source>
+        <target state="new">Could not write Destination file: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_SourceLoadFailed">
+        <source>Could not open Source file: {0}</source>
+        <target state="new">Could not open Source file: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_TransformLoadFailed">
+        <source>Could not open Transform file: {0}</source>
+        <target state="new">Could not open Transform file: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_TransformOutput">
+        <source>Output File: {0}</source>
+        <target state="new">Output File: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_TransformationApply">
+        <source>Applying Transform File: {0}</source>
+        <target state="new">Applying Transform File: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_TransformationFailed">
+        <source>Transformation failed</source>
+        <target state="new">Transformation failed</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_TransformationNoChange">
+        <source>No transformation occurred, not saving output file</source>
+        <target state="new">No transformation occurred, not saving output file</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_TransformationStart">
+        <source>Transforming Source File: {0}</source>
+        <target state="new">Transforming Source File: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BUILDTASK_TransformXml_TransformationSucceeded">
+        <source>Transformation succeeded</source>
+        <target state="new">Transformation succeeded</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_FailToCopyFile">
+        <source>Failded to copy file from '{0}' to '{1}' for SQLExpress Data Publish</source>
+        <target state="new">Failded to copy file from '{0}' to '{1}' for SQLExpress Data Publish</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_ImportPublishDatabaseSettingNotFound">
+        <source>Publish Database Setting Source Verification Error: The publish profile specified '{1} ({2})' for '{0}' does not have a corresponding connection string in '{3}'. Because of this publishing has been blocked. If this was intended you can disable this check by specifying the value of "True" for the MSBuild property "IgnoreDatabaseSettingOutOfSync." If this was not intended, open the Publish dialog in Visual Studio with this profile to correct the discrepancy. For more information visit http://go.microsoft.com/fwlink/?LinkId=241526 </source>
+        <target state="new">Publish Database Setting Source Verification Error: The publish profile specified '{1} ({2})' for '{0}' does not have a corresponding connection string in '{3}'. Because of this publishing has been blocked. If this was intended you can disable this check by specifying the value of "True" for the MSBuild property "IgnoreDatabaseSettingOutOfSync." If this was not intended, open the Publish dialog in Visual Studio with this profile to correct the discrepancy. For more information visit http://go.microsoft.com/fwlink/?LinkId=241526 </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_ImportValidationSourceNotFound">
+        <source>Publish Database Setting Source Verification Error: The source connection string for '{0}' no longer exists in the source '{1}'. Because of this publishing has been blocked. If this was intended you can disable this check by specifying the value of "True" for the MSBuild property "IgnoreDatabaseSettingOutOfSync." If this was not intended, open the Publish dialog in Visual Studio with this profile to correct the discrepancy. For more information visit http://go.microsoft.com/fwlink/?LinkId=241526 </source>
+        <target state="new">Publish Database Setting Source Verification Error: The source connection string for '{0}' no longer exists in the source '{1}'. Because of this publishing has been blocked. If this was intended you can disable this check by specifying the value of "True" for the MSBuild property "IgnoreDatabaseSettingOutOfSync." If this was not intended, open the Publish dialog in Visual Studio with this profile to correct the discrepancy. For more information visit http://go.microsoft.com/fwlink/?LinkId=241526 </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_InvalidMSBuildFormat">
+        <source>Publish Database Setting Source Verification Error: The publish profile specified '{1}' for '{0}' is not valid and could not be loaded. Review the file for any errors and try again.</source>
+        <target state="new">Publish Database Setting Source Verification Error: The publish profile specified '{1}' for '{0}' is not valid and could not be loaded. Review the file for any errors and try again.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_InvalidPublishDatabaseSetting">
+        <source>Publish Database Setting Source Verification Error:The publish profile specified '{1} ({2})' for '{0}' does not have valid $(PublishDatabaseSettings) value. Because of this publishing has been blocked. If this was intended you can disable this check by specifying the value of "True" for the MSBuild property "IgnoreDatabaseSettingOutOfSync." If this was not intended, open the Publish dialog in Visual Studio with this profile to correct the discrepancy. For more information visit http://go.microsoft.com/fwlink/?LinkId=241526 </source>
+        <target state="new">Publish Database Setting Source Verification Error:The publish profile specified '{1} ({2})' for '{0}' does not have valid $(PublishDatabaseSettings) value. Because of this publishing has been blocked. If this was intended you can disable this check by specifying the value of "True" for the MSBuild property "IgnoreDatabaseSettingOutOfSync." If this was not intended, open the Publish dialog in Visual Studio with this profile to correct the discrepancy. For more information visit http://go.microsoft.com/fwlink/?LinkId=241526 </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_MustProviderProvidersXMLorProvidersFile">
+        <source>CreateProviderList expected either ProvidersXml or ProvidersFile parameter</source>
+        <target state="new">CreateProviderList expected either ProvidersXml or ProvidersFile parameter</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_NotExpectingAdditionalParameter">
+        <source>Publish Database Setting encountered an unexpected error. The provider '{0}' doesn't expect any addition arguments '{1}'.</source>
+        <target state="new">Publish Database Setting encountered an unexpected error. The provider '{0}' doesn't expect any addition arguments '{1}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_NotSupportBothProvidersXMLAndProvidersFile">
+        <source>CreateProviderList does not support ProvidersXml and ProvidersFile parameters at the same time</source>
+        <target state="new">CreateProviderList does not support ProvidersXml and ProvidersFile parameters at the same time</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_OutofSyncWithSourcePublishDatabaseSetting">
+        <source>Publish Database Setting Source Verification Error: The connection '{0}' in the publish profile has changed from what is currently declared for '{1} ({2})'. Because of this publishing has been blocked. If this was intended you can disable this check by specifying the value of "True" for the MSBuild property "IgnoreDatabaseSettingOutOfSync." If this was not intended, open the Publish dialog in Visual Studio with this profile to correct the discrepancy. For more information visit http://go.microsoft.com/fwlink/?LinkId=241526 </source>
+        <target state="new">Publish Database Setting Source Verification Error: The connection '{0}' in the publish profile has changed from what is currently declared for '{1} ({2})'. Because of this publishing has been blocked. If this was intended you can disable this check by specifying the value of "True" for the MSBuild property "IgnoreDatabaseSettingOutOfSync." If this was not intended, open the Publish dialog in Visual Studio with this profile to correct the discrepancy. For more information visit http://go.microsoft.com/fwlink/?LinkId=241526 </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CREATEPROVIDERLIST_SqlExpressPublishRequireLocalDB">
+        <source>SQL Server Express LocalDB is required in order to publish one or more of your databases. To learn more and install it, follow this link http://go.microsoft.com/fwlink/?LinkId=245956 </source>
+        <target state="new">SQL Server Express LocalDB is required in order to publish one or more of your databases. To learn more and install it, follow this link http://go.microsoft.com/fwlink/?LinkId=245956 </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DeploymentError_MissingDbDacFx">
+        <source>The remote host does not have the dbDacFx Web Deploy provider installed, which is required for database publishing. To learn more about this visit this link.
+
+FWLink: http://go.microsoft.com/fwlink/?LinkId=246068</source>
+        <target state="new">The remote host does not have the dbDacFx Web Deploy provider installed, which is required for database publishing. To learn more about this visit this link.
+
+FWLink: http://go.microsoft.com/fwlink/?LinkId=246068</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_AddingFile">
+        <source>Adding file ({0}).</source>
+        <target state="new">Adding file ({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_AddingFileFailed">
+        <source>Adding file ({0}) failed. Reason: {1}.</source>
+        <target state="new">Adding file ({0}) failed. Reason: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_AzurePublishErrorReason">
+        <source>Unable to publish to Azure. Error Details : '{0}'.</source>
+        <target state="new">Unable to publish to Azure. Error Details : '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_ConnectionInfoMissing">
+        <source>Azure connection information cannot be empty.</source>
+        <target state="new">Azure connection information cannot be empty.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_CopyingToTempLocation">
+        <source>Copying all files to temporary location for publish: '{0}'.</source>
+        <target state="new">Copying all files to temporary location for publish: '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_CopyingToTempLocationCompleted">
+        <source>Copying all files to temporary location completed.</source>
+        <target state="new">Copying all files to temporary location completed.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_DeployOutputPathEmpty">
+        <source>DeployOutputPath property cannot be empty.</source>
+        <target state="new">DeployOutputPath property cannot be empty.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_OperationTimeout">
+        <source>Publish operation timed out.</source>
+        <target state="new">Publish operation timed out.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_PublishAzure">
+        <source>Publishing to Azure.</source>
+        <target state="new">Publishing to Azure.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_PublishFailed">
+        <source>Publish Failed.</source>
+        <target state="new">Publish Failed.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_PublishSucceeded">
+        <source>Publish Succeeded.</source>
+        <target state="new">Publish Succeeded.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KUDUDEPLOY_PublishZipFailedReason">
+        <source>Publishing to site '{0}' failed. Reason: '{1}'.</source>
+        <target state="new">Publishing to site '{0}' failed. Reason: '{1}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSDEPLOY_EXE_Failed">
+        <source>Failed to execute msdeploy.exe.</source>
+        <target state="new">Failed to execute msdeploy.exe.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSDEPLOY_EXE_PreviewOnly">
+        <source>Generate msdeploy.exe command line for preview only.</source>
+        <target state="new">Generate msdeploy.exe command line for preview only.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSDEPLOY_EXE_Start">
+        <source>Running msdeploy.exe.</source>
+        <target state="new">Running msdeploy.exe.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSDEPLOY_EXE_Succeeded">
+        <source>Successfully execute msdeploy.exe.</source>
+        <target state="new">Successfully execute msdeploy.exe.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSDEPLOY_InvalidDestinationCount">
+        <source>Invalidate destination item count: {0}</source>
+        <target state="new">Invalidate destination item count: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSDEPLOY_InvalidSourceCount">
+        <source>Invalidate source items count: {0}</source>
+        <target state="new">Invalidate source items count: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSDEPLOY_InvalidVerbForTheInput">
+        <source>Invalid verb({0}) for supplied source ({1}) and destination ({2}).</source>
+        <target state="new">Invalid verb({0}) for supplied source ({1}) and destination ({2}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MsDeployBatchFile">
+        <source>@rem ---------------------------------------------------------------------------------
+@rem This is provided as sample to deploy the package using msdeploy.exe
+@rem For information about IIS Web Deploy technology,
+@rem please visit https://go.microsoft.com/?linkid=9278654
+@rem Note: This batch file assumes the package and setparameters.xml are in the same folder with this file
+@rem ---------------------------------------------------------------------------------
+@if %_echo%!==! echo off
+setlocal
+@rem ---------------------------------------------------------------------------------
+@rem Please Make sure you have Web Deploy install in your machine. 
+@rem Alternatively, you can explicit set the MsDeployPath to the location it is on your machine
+@rem set MSDeployPath="C:\Program Files (x86)\IIS\Microsoft Web Deploy V3\"
+@rem ---------------------------------------------------------------------------------
+                      
+@rem ---------------------------------------------------------------------------------
+@rem if user does not set MsDeployPath environment variable, we will try to retrieve it from registry.
+@rem ---------------------------------------------------------------------------------
+if "%MSDeployPath%" == "" (
+for /F "usebackq tokens=1,2,*" %%h  in (`reg query "HKLM\SOFTWARE\Microsoft\IIS Extensions\MSDeploy" /s  ^| findstr -i "InstallPath"`) do (
+if /I "%%h" == "InstallPath" ( 
+if /I "%%i" == "REG_SZ" ( 
+if not "%%j" == "" ( 
+if "%%~dpj" == "%%j" ( 
+set MSDeployPath=%%j
+))))))
+
+@rem ------------------------------------------
+
+@rem ------------------------------------------
+
+                      
+if not exist "%MSDeployPath%msdeploy.exe" (
+echo. msdeploy.exe is not found on this machine. Please install Web Deploy before execute the script. 
+echo. Please visit https://go.microsoft.com/?linkid=9278654
+goto :usage
+)
+
+set RootPath=%~dp0
+if /I "%_DeploySetParametersFile%" == "" (
+set _DeploySetParametersFile=%RootPath%$$ProjectName$$.SetParameters.xml
+)
+
+@rem ------------------------------------------
+
+@rem ------------------------------------------
+
+                      
+set _ArgTestDeploy=
+set _ArgDestinationType=auto
+set _ArgComputerNameWithQuote=""
+set _ArgUserNameWithQuote=""
+set _ArgPasswordWithQuote=""
+set _ArgEncryptPasswordWithQuote=""
+set _ArgIncludeAclsWithQuote="False"
+set _ArgAuthTypeWithQuote=""
+set _ArgtempAgentWithQuote=""
+set _ArgLocalIIS=
+set _ArgLocalIISVersion=
+set _HaveArgMSDeployAdditonalFlags=
+                      
+                      
+@rem ---------------------------------------------------------------------------------
+@rem Simple Parse the arguments
+@rem ---------------------------------------------------------------------------------
+:NextArgument
+set _ArgCurrent=%~1
+set _ArgFlagFirst=%_ArgCurrent:~0,1%
+set _ArgFlag=%_ArgCurrent:~0,3%
+set _ArgValue=%_ArgCurrent:~3%
+
+if /I "%_ArgFlag%" == "" goto :GetStarted
+if /I "%_ArgFlag%" == "~0,3" goto :GetStarted
+if /I "%_ArgFlag%" == "/T" set _ArgTestDeploy=true&amp;goto :ArgumentOK
+if /I "%_ArgFlag%" == "/Y" set _ArgTestDeploy=false&amp;goto :ArgumentOK
+if /I "%_ArgFlag%" == "/L" set _ArgLocalIIS=true&amp;goto :ArgumentOK
+
+if /I "%_ArgFlag%" == "/M:" set _ArgComputerNameWithQuote="%_ArgValue%"&amp;goto :ArgumentOK
+if /I "%_ArgFlag%" == "/U:" set _ArgUserNameWithQuote="%_ArgValue%"&amp;goto :ArgumentOK
+if /I "%_ArgFlag%" == "/P:" set _ArgPasswordWithQuote="%_ArgValue%"&amp;goto :ArgumentOK
+if /I "%_ArgFlag%" == "/E:" set _ArgEncryptPasswordWithQuote="%_ArgValue%"&amp;goto :ArgumentOK
+if /I "%_ArgFlag%" == "/I:" set _ArgIncludeAclsWithQuote="%_ArgValue%"&amp;goto :ArgumentOK
+if /I "%_ArgFlag%" == "/A:" set _ArgAuthTypeWithQuote="%_ArgValue%"&amp;goto :ArgumentOK
+if /I "%_ArgFlag%" == "/G:" set _ArgtempAgentWithQuote="%_ArgValue%"&amp;goto :ArgumentOK
+
+@rem Any addition flags, pass through to the msdeploy
+if "%_HaveArgMSDeployAdditonalFlags%" == "" (
+goto :Assign_ArgMsDeployAdditionalFlags
+)
+set _ArgMsDeployAdditionalFlags=%_ArgMsDeployAdditionalFlags:&amp;=^&amp;% %_ArgCurrent:&amp;=^&amp;%
+set _HaveArgMSDeployAdditonalFlags=1
+goto :ArgumentOK
+
+
+:Assign_ArgMsDeployAdditionalFlags
+set _ArgMsDeployAdditionalFlags=%_ArgCurrent:&amp;=^&amp;%
+set _HaveArgMSDeployAdditonalFlags=1
+goto :ArgumentOK
+
+:ArgumentOK
+shift
+goto :NextArgument
+
+:GetStarted
+@rem ------------------------------------------
+
+@rem ------------------------------------------
+if /I "%_ArgTestDeploy%" == "" goto :usage
+if /I "%_ArgDestinationType%" == ""  goto :usage
+
+set _Destination=%_ArgDestinationType%
+if not %_ArgComputerNameWithQuote% == "" set _Destination=%_Destination%,computerName=%_ArgComputerNameWithQuote%
+if not %_ArgUserNameWithQuote% == "" set _Destination=%_Destination%,userName=%_ArgUserNameWithQuote%
+if not %_ArgPasswordWithQuote% == "" set _Destination=%_Destination%,password=%_ArgPasswordWithQuote%
+if not %_ArgAuthTypeWithQuote% == "" set _Destination=%_Destination%,authtype=%_ArgAuthTypeWithQuote%
+if not %_ArgEncryptPasswordWithQuote% == "" set _Destination=%_Destination%,encryptPassword=%_ArgEncryptPasswordWithQuote%
+if not %_ArgIncludeAclsWithQuote% == "" set _Destination=%_Destination%,includeAcls=%_ArgIncludeAclsWithQuote%
+if not %_ArgtempAgentWithQuote% == "" set _Destination=%_Destination%,tempAgent=%_ArgtempAgentWithQuote%
+
+@rem ------------------------------------------
+
+@rem ------------------------------------------
+
+                      
+@rem ---------------------------------------------------------------------------------
+@rem add -whatif when -T is specified                      
+@rem ---------------------------------------------------------------------------------
+if /I "%_ArgTestDeploy%" NEQ "false" (
+set _MsDeployAdditionalFlags=-whatif %_MsDeployAdditionalFlags%
+)
+
+@rem ------------------------------------------
+
+@rem ------------------------------------------
+
+@rem ---------------------------------------------------------------------------------
+@rem add flags for IISExpress when -L is specified                      
+@rem ---------------------------------------------------------------------------------
+
+if /I "%_ArgLocalIIS%" == "true" (
+call :SetIISExpressArguments
+)
+if /I "%_ArgLocalIIS%" == "true" (
+if not exist "%IISExpressPath%%IISExpressManifest%" (
+echo. IISExpress is not found on this machine. Please install through Web Platform Installer before execute the script. 
+echo. or remove /L flag
+echo. Please visit https://go.microsoft.com/?linkid=9278654
+goto :usage
+)
+if not exist "%IISExpressUserProfileDirectory%" (
+echo. %IISExpressUserProfileDirectory% is not exists
+echo. IISExpress is found on the machine. But the user have run IISExpress at least once.
+echo. Please visit https://go.microsoft.com/?linkid=9278654 for detail
+goto :usage
+)
+                      
+set _MsDeployAdditionalFlags=%_MsDeployAdditionalFlags% -appHostConfigDir:%IISExpressUserProfileDirectory% -WebServerDir:"%IISExpressPath%" -webServerManifest:"%IISExpressManifest%"
+)
+
+@rem ---------------------------------------------------------------------------------
+@rem check the existence of the package file
+@rem ---------------------------------------------------------------------------------
+if not exist "%RootPath%$$ProjectName$$.zip" (
+echo "%RootPath%$$ProjectName$$.zip" does not exist. 
+echo This batch file relies on this deploy source file^(s^) in the same folder.
+goto :usage
+)
+
+@rem ---------------------------------------------
+
+@rem ---------------------------------------------
+
+@rem ---------------------------------------------------------------------------------
+@rem Execute msdeploy.exe command line
+@rem ---------------------------------------------------------------------------------
+call :CheckParameterFile
+echo. Start executing msdeploy.exe
+echo -------------------------------------------------------
+if  not exist "%_DeploySetParametersFile%" (
+set _MSDeployCommandline="%MSDeployPath%msdeploy.exe" -source:package='%RootPath%$$ProjectName$$.zip' -dest:%_Destination% -verb:sync -disableLink:AppPoolExtension -disableLink:ContentExtension -disableLink:CertificateExtension
+) else (
+set _MSDeployCommandline="%MSDeployPath%msdeploy.exe" -source:package='%RootPath%$$ProjectName$$.zip' -dest:%_Destination% -verb:sync -disableLink:AppPoolExtension -disableLink:ContentExtension -disableLink:CertificateExtension -setParamFile:"%_DeploySetParametersFile%"
+)
+
+if "%_HaveArgMSDeployAdditonalFlags%" == "" (
+goto :MSDeployWithOutArgMsDeployAdditionalFlag
+) 
+goto :MSDeployWithArgMsDeployAdditionalFlag
+goto :eof
+
+@rem ---------------------------------------------------------------------------------
+@rem MSDeployWithArgMsDeployAdditionalFlag
+@rem ---------------------------------------------------------------------------------
+:MSDeployWithArgMsDeployAdditionalFlag
+echo. %_MSDeployCommandline% %_MsDeployAdditionalFlags% %_ArgMsDeployAdditionalFlags:&amp;=^&amp;%
+%_MSDeployCommandline% %_MsDeployAdditionalFlags% %_ArgMsDeployAdditionalFlags:&amp;=^&amp;%
+IF %ERRORLEVEL% NEQ 0 (
+  exit 1
+)
+goto :eof
+
+@rem ---------------------------------------------------------------------------------
+@rem MSDeployWithOutArgMsDeployAdditionalFlag
+@rem ---------------------------------------------------------------------------------
+:MSDeployWithOutArgMsDeployAdditionalFlag
+echo. %_MSDeployCommandline% %_MsDeployAdditionalFlags%
+%_MSDeployCommandline% %_MsDeployAdditionalFlags%
+IF %ERRORLEVEL% NEQ 0 (
+  exit 1
+)
+goto :eof
+
+@rem ---------------------------------------------------------------------------------
+@rem Find and set IISExpress argument.
+@rem ---------------------------------------------------------------------------------
+:SetIISExpressArguments
+                      
+if "%IISExpressPath%" == "" (
+for /F "usebackq tokens=1,2,*" %%h  in (`reg query "HKLM\SOFTWARE\Microsoft\IISExpress" /s  ^| findstr -i "InstallPath"`) do (
+if /I "%%h" == "InstallPath" ( 
+if /I "%%i" == "REG_SZ" ( 
+if not "%%j" == "" ( 
+if "%%~dpj" == "%%j" ( 
+set IISExpressPath=%%j
+))))))
+
+if "%IISExpressPath%" == "" (
+for /F "usebackq tokens=1,2,*" %%h  in (`reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\IISExpress" /s  ^| findstr -i "InstallPath"`) do (
+if /I "%%h" == "InstallPath" ( 
+if /I "%%i" == "REG_SZ" ( 
+if not "%%j" == "" ( 
+if "%%~dpj" == "%%j" ( 
+set IISExpressPath=%%j
+))))))
+
+if "%PersonalDocumentFolder%" == "" (
+for /F "usebackq tokens=2*" %%i  in (`reg query "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v Personal`) do (
+set PersonalDocumentFolder=%%j
+))
+
+if "%IISExpressManifest%" == "" (
+for /F "usebackq tokens=1,2,*" %%h  in (`reg query "HKLM\SOFTWARE\Microsoft\IISExpress" /s  ^| findstr -i "Manifest"`) do (
+if /I "%%h" == "Manifest" ( 
+if /I "%%i" == "REG_SZ" ( 
+if not "%%j" == "" ( 
+set IISExpressManifest=%%j
+)))))
+
+if "%IISExpressManifest%" == "" (
+for /F "usebackq tokens=1,2,*" %%h  in (`reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\IISExpress" /s  ^| findstr -i "Manifest"`) do (
+if /I "%%h" == "Manifest" ( 
+if /I "%%i" == "REG_SZ" ( 
+if not "%%j" == "" ( 
+set IISExpressManifest=%%j
+)))))
+                      
+set IISExpressUserProfileDirectory="%PersonalDocumentFolder%\IISExpress\config"
+
+@rem ---------------------------------------------
+
+@rem ---------------------------------------------
+
+goto :eof                      
+                      
+@rem ---------------------------------------------------------------------------------
+@rem CheckParameterFile -- check if the package's setparamters.xml exists or not
+@rem ---------------------------------------------------------------------------------
+:CheckParameterFile
+if exist "%_DeploySetParametersFile%" (
+echo SetParameters from:
+echo "%_DeploySetParametersFile%"
+echo You can change IIS Application Name, Physical path, connectionString
+echo or other deploy parameters in the above file.
+) else (
+echo SetParamterFiles does not exist in package location.
+echo Use package embedded defaultValue to deploy.
+)
+echo -------------------------------------------------------
+goto :eof
+
+@rem ---------------------------------------------------------------------------------
+@rem Usage
+@rem ---------------------------------------------------------------------------------
+:usage
+echo =========================================================
+if not exist "%RootPath%$$ProjectName$$.deploy-readme.txt" (
+echo Usage:%~nx0 [/T^|/Y] [/M:ComputerName] [/U:userName] [/P:password] [/G:tempAgent] [additional msdeploy flags ...]
+echo Required flags:
+echo /T  Calls msdeploy.exe with the "-whatif" flag, which simulates deployment. 
+echo /Y  Calls msdeploy.exe without the "-whatif" flag, which deploys the package to the current machine or destination server 
+echo Optional flags:  
+echo. By Default, this script deploy to the current machine where this script is invoked which will use current user credential without tempAgent. 
+echo.   Only pass these arguments when in advance scenario.
+echo /M:  Msdeploy destination name of remote computer or proxy-URL. Default is local.
+echo /U:  Msdeploy destination user name. 
+echo /P:  Msdeploy destination password.
+echo /G:  Msdeploy destination tempAgent. True or False. Default is false.
+echo /A:  specifies the type of authentication to be used. The possible values are NTLM and Basic. If the wmsvc provider setting is specified, the default authentication type is Basic
+otherwise, the default authentication type is NTLM.
+echo /L:  Deploy to Local IISExpress User Instance.  
+
+echo.[additional msdeploy flags]: note: " is required for passing = through command line.
+echo  "-skip:objectName=setAcl" "-skip:objectName=dbFullSql"
+echo.Alternative environment variable _MsDeployAdditionalFlags is also honored.
+echo.
+echo. Please make sure MSDeploy is installed in the box https://go.microsoft.com/?linkid=9278654
+echo.
+echo In addition, you can change IIS Application Name, Physical path, 
+echo connectionString and other deploy parameters in the following file:
+echo "%_DeploySetParametersFile%"
+echo.
+echo For more information about this batch file, visit https://go.microsoft.com/fwlink/?LinkID=183544 
+) else (
+start notepad "%RootPath%$$ProjectName$$.deploy-readme.txt"
+)
+echo =========================================================
+goto :eof</source>
+        <target state="new">@rem ---------------------------------------------------------------------------------
+@rem This is provided as sample to deploy the package using msdeploy.exe
+@rem For information about IIS Web Deploy technology,
+@rem please visit https://go.microsoft.com/?linkid=9278654
+@rem Note: This batch file assumes the package and setparameters.xml are in the same folder with this file
+@rem ---------------------------------------------------------------------------------
+@if %_echo%!==! echo off
+setlocal
+@rem ---------------------------------------------------------------------------------
+@rem Please Make sure you have Web Deploy install in your machine. 
+@rem Alternatively, you can explicit set the MsDeployPath to the location it is on your machine
+@rem set MSDeployPath="C:\Program Files (x86)\IIS\Microsoft Web Deploy V3\"
+@rem ---------------------------------------------------------------------------------
+                      
+@rem ---------------------------------------------------------------------------------
+@rem if user does not set MsDeployPath environment variable, we will try to retrieve it from registry.
+@rem ---------------------------------------------------------------------------------
+if "%MSDeployPath%" == "" (
+for /F "usebackq tokens=1,2,*" %%h  in (`reg query "HKLM\SOFTWARE\Microsoft\IIS Extensions\MSDeploy" /s  ^| findstr -i "InstallPath"`) do (
+if /I "%%h" == "InstallPath" ( 
+if /I "%%i" == "REG_SZ" ( 
+if not "%%j" == "" ( 
+if "%%~dpj" == "%%j" ( 
+set MSDeployPath=%%j
+))))))
+
+@rem ------------------------------------------
+
+@rem ------------------------------------------
+
+                      
+if not exist "%MSDeployPath%msdeploy.exe" (
+echo. msdeploy.exe is not found on this machine. Please install Web Deploy before execute the script. 
+echo. Please visit https://go.microsoft.com/?linkid=9278654
+goto :usage
+)
+
+set RootPath=%~dp0
+if /I "%_DeploySetParametersFile%" == "" (
+set _DeploySetParametersFile=%RootPath%$$ProjectName$$.SetParameters.xml
+)
+
+@rem ------------------------------------------
+
+@rem ------------------------------------------
+
+                      
+set _ArgTestDeploy=
+set _ArgDestinationType=auto
+set _ArgComputerNameWithQuote=""
+set _ArgUserNameWithQuote=""
+set _ArgPasswordWithQuote=""
+set _ArgEncryptPasswordWithQuote=""
+set _ArgIncludeAclsWithQuote="False"
+set _ArgAuthTypeWithQuote=""
+set _ArgtempAgentWithQuote=""
+set _ArgLocalIIS=
+set _ArgLocalIISVersion=
+set _HaveArgMSDeployAdditonalFlags=
+                      
+                      
+@rem ---------------------------------------------------------------------------------
+@rem Simple Parse the arguments
+@rem ---------------------------------------------------------------------------------
+:NextArgument
+set _ArgCurrent=%~1
+set _ArgFlagFirst=%_ArgCurrent:~0,1%
+set _ArgFlag=%_ArgCurrent:~0,3%
+set _ArgValue=%_ArgCurrent:~3%
+
+if /I "%_ArgFlag%" == "" goto :GetStarted
+if /I "%_ArgFlag%" == "~0,3" goto :GetStarted
+if /I "%_ArgFlag%" == "/T" set _ArgTestDeploy=true&amp;goto :ArgumentOK
+if /I "%_ArgFlag%" == "/Y" set _ArgTestDeploy=false&amp;goto :ArgumentOK
+if /I "%_ArgFlag%" == "/L" set _ArgLocalIIS=true&amp;goto :ArgumentOK
+
+if /I "%_ArgFlag%" == "/M:" set _ArgComputerNameWithQuote="%_ArgValue%"&amp;goto :ArgumentOK
+if /I "%_ArgFlag%" == "/U:" set _ArgUserNameWithQuote="%_ArgValue%"&amp;goto :ArgumentOK
+if /I "%_ArgFlag%" == "/P:" set _ArgPasswordWithQuote="%_ArgValue%"&amp;goto :ArgumentOK
+if /I "%_ArgFlag%" == "/E:" set _ArgEncryptPasswordWithQuote="%_ArgValue%"&amp;goto :ArgumentOK
+if /I "%_ArgFlag%" == "/I:" set _ArgIncludeAclsWithQuote="%_ArgValue%"&amp;goto :ArgumentOK
+if /I "%_ArgFlag%" == "/A:" set _ArgAuthTypeWithQuote="%_ArgValue%"&amp;goto :ArgumentOK
+if /I "%_ArgFlag%" == "/G:" set _ArgtempAgentWithQuote="%_ArgValue%"&amp;goto :ArgumentOK
+
+@rem Any addition flags, pass through to the msdeploy
+if "%_HaveArgMSDeployAdditonalFlags%" == "" (
+goto :Assign_ArgMsDeployAdditionalFlags
+)
+set _ArgMsDeployAdditionalFlags=%_ArgMsDeployAdditionalFlags:&amp;=^&amp;% %_ArgCurrent:&amp;=^&amp;%
+set _HaveArgMSDeployAdditonalFlags=1
+goto :ArgumentOK
+
+
+:Assign_ArgMsDeployAdditionalFlags
+set _ArgMsDeployAdditionalFlags=%_ArgCurrent:&amp;=^&amp;%
+set _HaveArgMSDeployAdditonalFlags=1
+goto :ArgumentOK
+
+:ArgumentOK
+shift
+goto :NextArgument
+
+:GetStarted
+@rem ------------------------------------------
+
+@rem ------------------------------------------
+if /I "%_ArgTestDeploy%" == "" goto :usage
+if /I "%_ArgDestinationType%" == ""  goto :usage
+
+set _Destination=%_ArgDestinationType%
+if not %_ArgComputerNameWithQuote% == "" set _Destination=%_Destination%,computerName=%_ArgComputerNameWithQuote%
+if not %_ArgUserNameWithQuote% == "" set _Destination=%_Destination%,userName=%_ArgUserNameWithQuote%
+if not %_ArgPasswordWithQuote% == "" set _Destination=%_Destination%,password=%_ArgPasswordWithQuote%
+if not %_ArgAuthTypeWithQuote% == "" set _Destination=%_Destination%,authtype=%_ArgAuthTypeWithQuote%
+if not %_ArgEncryptPasswordWithQuote% == "" set _Destination=%_Destination%,encryptPassword=%_ArgEncryptPasswordWithQuote%
+if not %_ArgIncludeAclsWithQuote% == "" set _Destination=%_Destination%,includeAcls=%_ArgIncludeAclsWithQuote%
+if not %_ArgtempAgentWithQuote% == "" set _Destination=%_Destination%,tempAgent=%_ArgtempAgentWithQuote%
+
+@rem ------------------------------------------
+
+@rem ------------------------------------------
+
+                      
+@rem ---------------------------------------------------------------------------------
+@rem add -whatif when -T is specified                      
+@rem ---------------------------------------------------------------------------------
+if /I "%_ArgTestDeploy%" NEQ "false" (
+set _MsDeployAdditionalFlags=-whatif %_MsDeployAdditionalFlags%
+)
+
+@rem ------------------------------------------
+
+@rem ------------------------------------------
+
+@rem ---------------------------------------------------------------------------------
+@rem add flags for IISExpress when -L is specified                      
+@rem ---------------------------------------------------------------------------------
+
+if /I "%_ArgLocalIIS%" == "true" (
+call :SetIISExpressArguments
+)
+if /I "%_ArgLocalIIS%" == "true" (
+if not exist "%IISExpressPath%%IISExpressManifest%" (
+echo. IISExpress is not found on this machine. Please install through Web Platform Installer before execute the script. 
+echo. or remove /L flag
+echo. Please visit https://go.microsoft.com/?linkid=9278654
+goto :usage
+)
+if not exist "%IISExpressUserProfileDirectory%" (
+echo. %IISExpressUserProfileDirectory% is not exists
+echo. IISExpress is found on the machine. But the user have run IISExpress at least once.
+echo. Please visit https://go.microsoft.com/?linkid=9278654 for detail
+goto :usage
+)
+                      
+set _MsDeployAdditionalFlags=%_MsDeployAdditionalFlags% -appHostConfigDir:%IISExpressUserProfileDirectory% -WebServerDir:"%IISExpressPath%" -webServerManifest:"%IISExpressManifest%"
+)
+
+@rem ---------------------------------------------------------------------------------
+@rem check the existence of the package file
+@rem ---------------------------------------------------------------------------------
+if not exist "%RootPath%$$ProjectName$$.zip" (
+echo "%RootPath%$$ProjectName$$.zip" does not exist. 
+echo This batch file relies on this deploy source file^(s^) in the same folder.
+goto :usage
+)
+
+@rem ---------------------------------------------
+
+@rem ---------------------------------------------
+
+@rem ---------------------------------------------------------------------------------
+@rem Execute msdeploy.exe command line
+@rem ---------------------------------------------------------------------------------
+call :CheckParameterFile
+echo. Start executing msdeploy.exe
+echo -------------------------------------------------------
+if  not exist "%_DeploySetParametersFile%" (
+set _MSDeployCommandline="%MSDeployPath%msdeploy.exe" -source:package='%RootPath%$$ProjectName$$.zip' -dest:%_Destination% -verb:sync -disableLink:AppPoolExtension -disableLink:ContentExtension -disableLink:CertificateExtension
+) else (
+set _MSDeployCommandline="%MSDeployPath%msdeploy.exe" -source:package='%RootPath%$$ProjectName$$.zip' -dest:%_Destination% -verb:sync -disableLink:AppPoolExtension -disableLink:ContentExtension -disableLink:CertificateExtension -setParamFile:"%_DeploySetParametersFile%"
+)
+
+if "%_HaveArgMSDeployAdditonalFlags%" == "" (
+goto :MSDeployWithOutArgMsDeployAdditionalFlag
+) 
+goto :MSDeployWithArgMsDeployAdditionalFlag
+goto :eof
+
+@rem ---------------------------------------------------------------------------------
+@rem MSDeployWithArgMsDeployAdditionalFlag
+@rem ---------------------------------------------------------------------------------
+:MSDeployWithArgMsDeployAdditionalFlag
+echo. %_MSDeployCommandline% %_MsDeployAdditionalFlags% %_ArgMsDeployAdditionalFlags:&amp;=^&amp;%
+%_MSDeployCommandline% %_MsDeployAdditionalFlags% %_ArgMsDeployAdditionalFlags:&amp;=^&amp;%
+IF %ERRORLEVEL% NEQ 0 (
+  exit 1
+)
+goto :eof
+
+@rem ---------------------------------------------------------------------------------
+@rem MSDeployWithOutArgMsDeployAdditionalFlag
+@rem ---------------------------------------------------------------------------------
+:MSDeployWithOutArgMsDeployAdditionalFlag
+echo. %_MSDeployCommandline% %_MsDeployAdditionalFlags%
+%_MSDeployCommandline% %_MsDeployAdditionalFlags%
+IF %ERRORLEVEL% NEQ 0 (
+  exit 1
+)
+goto :eof
+
+@rem ---------------------------------------------------------------------------------
+@rem Find and set IISExpress argument.
+@rem ---------------------------------------------------------------------------------
+:SetIISExpressArguments
+                      
+if "%IISExpressPath%" == "" (
+for /F "usebackq tokens=1,2,*" %%h  in (`reg query "HKLM\SOFTWARE\Microsoft\IISExpress" /s  ^| findstr -i "InstallPath"`) do (
+if /I "%%h" == "InstallPath" ( 
+if /I "%%i" == "REG_SZ" ( 
+if not "%%j" == "" ( 
+if "%%~dpj" == "%%j" ( 
+set IISExpressPath=%%j
+))))))
+
+if "%IISExpressPath%" == "" (
+for /F "usebackq tokens=1,2,*" %%h  in (`reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\IISExpress" /s  ^| findstr -i "InstallPath"`) do (
+if /I "%%h" == "InstallPath" ( 
+if /I "%%i" == "REG_SZ" ( 
+if not "%%j" == "" ( 
+if "%%~dpj" == "%%j" ( 
+set IISExpressPath=%%j
+))))))
+
+if "%PersonalDocumentFolder%" == "" (
+for /F "usebackq tokens=2*" %%i  in (`reg query "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v Personal`) do (
+set PersonalDocumentFolder=%%j
+))
+
+if "%IISExpressManifest%" == "" (
+for /F "usebackq tokens=1,2,*" %%h  in (`reg query "HKLM\SOFTWARE\Microsoft\IISExpress" /s  ^| findstr -i "Manifest"`) do (
+if /I "%%h" == "Manifest" ( 
+if /I "%%i" == "REG_SZ" ( 
+if not "%%j" == "" ( 
+set IISExpressManifest=%%j
+)))))
+
+if "%IISExpressManifest%" == "" (
+for /F "usebackq tokens=1,2,*" %%h  in (`reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\IISExpress" /s  ^| findstr -i "Manifest"`) do (
+if /I "%%h" == "Manifest" ( 
+if /I "%%i" == "REG_SZ" ( 
+if not "%%j" == "" ( 
+set IISExpressManifest=%%j
+)))))
+                      
+set IISExpressUserProfileDirectory="%PersonalDocumentFolder%\IISExpress\config"
+
+@rem ---------------------------------------------
+
+@rem ---------------------------------------------
+
+goto :eof                      
+                      
+@rem ---------------------------------------------------------------------------------
+@rem CheckParameterFile -- check if the package's setparamters.xml exists or not
+@rem ---------------------------------------------------------------------------------
+:CheckParameterFile
+if exist "%_DeploySetParametersFile%" (
+echo SetParameters from:
+echo "%_DeploySetParametersFile%"
+echo You can change IIS Application Name, Physical path, connectionString
+echo or other deploy parameters in the above file.
+) else (
+echo SetParamterFiles does not exist in package location.
+echo Use package embedded defaultValue to deploy.
+)
+echo -------------------------------------------------------
+goto :eof
+
+@rem ---------------------------------------------------------------------------------
+@rem Usage
+@rem ---------------------------------------------------------------------------------
+:usage
+echo =========================================================
+if not exist "%RootPath%$$ProjectName$$.deploy-readme.txt" (
+echo Usage:%~nx0 [/T^|/Y] [/M:ComputerName] [/U:userName] [/P:password] [/G:tempAgent] [additional msdeploy flags ...]
+echo Required flags:
+echo /T  Calls msdeploy.exe with the "-whatif" flag, which simulates deployment. 
+echo /Y  Calls msdeploy.exe without the "-whatif" flag, which deploys the package to the current machine or destination server 
+echo Optional flags:  
+echo. By Default, this script deploy to the current machine where this script is invoked which will use current user credential without tempAgent. 
+echo.   Only pass these arguments when in advance scenario.
+echo /M:  Msdeploy destination name of remote computer or proxy-URL. Default is local.
+echo /U:  Msdeploy destination user name. 
+echo /P:  Msdeploy destination password.
+echo /G:  Msdeploy destination tempAgent. True or False. Default is false.
+echo /A:  specifies the type of authentication to be used. The possible values are NTLM and Basic. If the wmsvc provider setting is specified, the default authentication type is Basic
+otherwise, the default authentication type is NTLM.
+echo /L:  Deploy to Local IISExpress User Instance.  
+
+echo.[additional msdeploy flags]: note: " is required for passing = through command line.
+echo  "-skip:objectName=setAcl" "-skip:objectName=dbFullSql"
+echo.Alternative environment variable _MsDeployAdditionalFlags is also honored.
+echo.
+echo. Please make sure MSDeploy is installed in the box https://go.microsoft.com/?linkid=9278654
+echo.
+echo In addition, you can change IIS Application Name, Physical path, 
+echo connectionString and other deploy parameters in the following file:
+echo "%_DeploySetParametersFile%"
+echo.
+echo For more information about this batch file, visit https://go.microsoft.com/fwlink/?LinkID=183544 
+) else (
+start notepad "%RootPath%$$ProjectName$$.deploy-readme.txt"
+)
+echo =========================================================
+goto :eof</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MsDeployReadMe">
+        <source>===========================
+Prerequisites :
+--------------------------
+To deploy this Web package, Web Deploy (msdeploy.exe) must be installed on the computer that runs the .cmd file. For information about how to install Web Deploy, see the following URL:
+https://go.microsoft.com/?linkid=9278654
+This batch file requires that the package file "$$ProjectName$$.zip" and optionally provided the parameters file "$$ProjectName$$.SetParameters.xml" in the same folder or destination folder by environment variable.
+
+===========================
+Usage:
+--------------------------
+$$ProjectName$$.deploy.cmd [/T|/Y] [/M:ComputerName] [/U:UserName] [/P:Password] [/G:&lt;True | False&gt;] [/A:&lt;Basic | NTLM&gt;] [Additional msdeploy.exe flags ...]
+
+
+===========================
+Required Flags:
+--------------------------
+/T:
+	Calls msdeploy.exe with the "-whatif" flag, which simulates deployment. This does not deploy the package. Instead, it creates a report of what will happen when you actually deploy the package.
+/Y:
+	Calls msdeploy.exe without the "-whatif" flag, which deploys the package to the current machine or a destination server. Use /Y after you have verified the output that was generated by using the /T flag.
+
+Note: Do not use /T and /Y in the same command.
+
+===========================
+Optional Flags:
+--------------------------
+ By Default, this script deploy on the current machine where this script is called with current user credential without agent service. Only pass the following value for advance scenario.
+
+/M:&lt;Destination server name or Service URL&gt;
+	If this flag is not specified, the package is installed on the computer where the command is run. The Service URL can be in the following format:
+		https://&lt;DestinationServer&gt;:8172/MSDeploy.axd 
+	This format requires that IIS 7 be installed on the destination server and that IIS 7 Web Management Service(WMSvc) and Web Deployment Handler be set up.
+	The service URL can also be in the following format:
+		http://&lt;DestinationServer&gt;/MSDeployAgentService 
+	This format requires administrative rights on the destination server, and it requires that Web Deploy Remote Service (MsDepSvc) be installed on the destination server. IIS 7 does not have to be installed on the destination server.
+
+/U:&lt;UserName&gt;
+/P:&lt;Password&gt;
+/G:&lt;True | False&gt;
+	Specifies that the package is deployed by creating a temporary listener on the destination server. This requires no special installation on the destination server, but it requires you to be an administrator on that server. The default value of this flag is False. 
+
+/A:&lt;Basic | NTLM&gt;
+	Specifies the type of authentication to be used. The possible values are NTLM and Basic. If the wmsvc provider setting is specified, the default authentication type is Basic; otherwise, the default authentication type is NTLM. 
+
+/L 
+	Specifies that the package is deployed to local IISExpress user instance.
+
+[Additional msdeploy.exe flags]
+	The msdeploy.exe command supports additional flags. You can include any of these additional flags in the "$$ProjectName$$.Deploy.cmd" file, and the flags are passed through to msdeploy.exe during execution.
+	Alternatively, you can specify additional flags by setting the "_MsDeployAdditionalFlags" environment variable. These settings are used by this batch file.
+	Note: Any flag value that includes an equal sign (=) must be enclosed in double quotation marks, as shown in the following example, which will skip deploying the databases that are included in the package:
+		"-skip:objectName=dbFullSql" 
+
+===========================
+Environment-Specific Settings:
+--------------------------
+
+	To customize application-specific settings for each deployment environment (for example, the IIS application name, the physical path, and any connection strings), edit the settings in the following file: 
+		 "$$ProjectName$$.SetParameters.xml"
+===========================
+For more information on this deploy script visit:	https://go.microsoft.com/fwlink/?LinkID=183544</source>
+        <target state="new">===========================
+Prerequisites :
+--------------------------
+To deploy this Web package, Web Deploy (msdeploy.exe) must be installed on the computer that runs the .cmd file. For information about how to install Web Deploy, see the following URL:
+https://go.microsoft.com/?linkid=9278654
+This batch file requires that the package file "$$ProjectName$$.zip" and optionally provided the parameters file "$$ProjectName$$.SetParameters.xml" in the same folder or destination folder by environment variable.
+
+===========================
+Usage:
+--------------------------
+$$ProjectName$$.deploy.cmd [/T|/Y] [/M:ComputerName] [/U:UserName] [/P:Password] [/G:&lt;True | False&gt;] [/A:&lt;Basic | NTLM&gt;] [Additional msdeploy.exe flags ...]
+
+
+===========================
+Required Flags:
+--------------------------
+/T:
+	Calls msdeploy.exe with the "-whatif" flag, which simulates deployment. This does not deploy the package. Instead, it creates a report of what will happen when you actually deploy the package.
+/Y:
+	Calls msdeploy.exe without the "-whatif" flag, which deploys the package to the current machine or a destination server. Use /Y after you have verified the output that was generated by using the /T flag.
+
+Note: Do not use /T and /Y in the same command.
+
+===========================
+Optional Flags:
+--------------------------
+ By Default, this script deploy on the current machine where this script is called with current user credential without agent service. Only pass the following value for advance scenario.
+
+/M:&lt;Destination server name or Service URL&gt;
+	If this flag is not specified, the package is installed on the computer where the command is run. The Service URL can be in the following format:
+		https://&lt;DestinationServer&gt;:8172/MSDeploy.axd 
+	This format requires that IIS 7 be installed on the destination server and that IIS 7 Web Management Service(WMSvc) and Web Deployment Handler be set up.
+	The service URL can also be in the following format:
+		http://&lt;DestinationServer&gt;/MSDeployAgentService 
+	This format requires administrative rights on the destination server, and it requires that Web Deploy Remote Service (MsDepSvc) be installed on the destination server. IIS 7 does not have to be installed on the destination server.
+
+/U:&lt;UserName&gt;
+/P:&lt;Password&gt;
+/G:&lt;True | False&gt;
+	Specifies that the package is deployed by creating a temporary listener on the destination server. This requires no special installation on the destination server, but it requires you to be an administrator on that server. The default value of this flag is False. 
+
+/A:&lt;Basic | NTLM&gt;
+	Specifies the type of authentication to be used. The possible values are NTLM and Basic. If the wmsvc provider setting is specified, the default authentication type is Basic; otherwise, the default authentication type is NTLM. 
+
+/L 
+	Specifies that the package is deployed to local IISExpress user instance.
+
+[Additional msdeploy.exe flags]
+	The msdeploy.exe command supports additional flags. You can include any of these additional flags in the "$$ProjectName$$.Deploy.cmd" file, and the flags are passed through to msdeploy.exe during execution.
+	Alternatively, you can specify additional flags by setting the "_MsDeployAdditionalFlags" environment variable. These settings are used by this batch file.
+	Note: Any flag value that includes an equal sign (=) must be enclosed in double quotation marks, as shown in the following example, which will skip deploying the databases that are included in the package:
+		"-skip:objectName=dbFullSql" 
+
+===========================
+Environment-Specific Settings:
+--------------------------
+
+	To customize application-specific settings for each deployment environment (for example, the IIS application name, the physical path, and any connection strings), edit the settings in the following file: 
+		 "$$ProjectName$$.SetParameters.xml"
+===========================
+For more information on this deploy script visit:	https://go.microsoft.com/fwlink/?LinkID=183544</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="POWERSHELL_PublishProfileParsingError">
+        <source>Unable to parse the pubxml file {0}.</source>
+        <target state="new">Unable to parse the pubxml file {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Publich_InvalidPublishToolsVersion_Error">
+        <source>The publish profile used for publishing was created in a newer version of the Visual Studio Web Publish features. In order to publish using this profile you will need to update your web publish components. To learn more about this, please visit http://go.microsoft.com/fwlink/?LinkId=256245</source>
+        <target state="new">The publish profile used for publishing was created in a newer version of the Visual Studio Web Publish features. In order to publish using this profile you will need to update your web publish components. To learn more about this, please visit http://go.microsoft.com/fwlink/?LinkId=256245</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishArgumentError_InvalidRemoteServiceUrl">
+        <source>Invalid Web Deploy service URL</source>
+        <target state="new">Invalid Web Deploy service URL</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishArgumentError_InvalidSiteAppName">
+        <source>Invalid site/application name</source>
+        <target state="new">Invalid site/application name</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_AutoConnectionStringTransformConfigToTransformOutputFile">
+        <source>Auto ConnectionString Transformed {0} into {1}.</source>
+        <target state="new">Auto ConnectionString Transformed {0} into {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_CheckingForValidMsBuildPropertyValue">
+        <source>$({0}) is {1}. Validating...</source>
+        <target state="new">$({0}) is {1}. Validating...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_DatabaseConnectionStringParameterDescription">
+        <source>Connection string for setting up this application database.</source>
+        <target state="new">Connection string for setting up this application database.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_DefaultExcludeFileExtentionOutMessage">
+        <source>Exclude *.out files under root folder.</source>
+        <target state="new">Exclude *.out files under root folder.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_DefaultExcludeIntermediateOutputFolderMessage">
+        <source>Exclude all files under obj folder.</source>
+        <target state="new">Exclude all files under obj folder.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_DefaultExcludeSourceControlItems">
+        <source>Set all .scc .vspscc file as _IgnorableFilesInProjectFolder.  Set _CollectFiles_IncludeIgnorableFile to True to include in the packaging.</source>
+        <target state="new">Set all .scc .vspscc file as _IgnorableFilesInProjectFolder.  Set _CollectFiles_IncludeIgnorableFile to True to include in the packaging.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_EFCodeFirstConnectionStringParameterDescription">
+        <source>Connection String used by Entity Framework Code First Model to deploy the database.</source>
+        <target state="new">Connection String used by Entity Framework Code First Model to deploy the database.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ErrorCannotDeployFromIIS7AboveToLowerIIS">
+        <source>Deploy with IIS Setting from a IIS 7 or above to a lower verstion of IIS server is not supported. To fix the problem, please set the %24(IncludeIisSettings) to false. Your current setting are $(IncludeIisSettings) is {0}, $(DestinationIisVersion) is {1} and $(LocalIisVersion) is  {2}.</source>
+        <target state="new">Deploy with IIS Setting from a IIS 7 or above to a lower verstion of IIS server is not supported. To fix the problem, please set the %24(IncludeIisSettings) to false. Your current setting are $(IncludeIisSettings) is {0}, $(DestinationIisVersion) is {1} and $(LocalIisVersion) is  {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ErrorInvalidMSBuildItemCollectionCount">
+        <source>@({0}) have {1} item(s) in the collection. It should only have {2} item(s).</source>
+        <target state="new">@({0}) have {1} item(s) in the collection. It should only have {2} item(s).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ErrorInvalidPropertyWhenSettingPropertyIsTrue">
+        <source>Invalid $({0}): When $({1}) is set True. It is required to have a valid $({0}) to be use for creating parameters correctly.</source>
+        <target state="new">Invalid $({0}): When $({1}) is set True. It is required to have a valid $({0}) to be use for creating parameters correctly.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ErrorPackageAsFilePointToAnExistingFolder">
+        <source>'{0}' exists as a folder. You can't package as a single file to be the same path as an existing folder. Please delete the folder before packaging. Alternative,you can call msbuild with /t:CleanWebsitesPackage target to remove it.</source>
+        <target state="new">'{0}' exists as a folder. You can't package as a single file to be the same path as an existing folder. Please delete the folder before packaging. Alternative,you can call msbuild with /t:CleanWebsitesPackage target to remove it.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ErrorPackageAsFolderPointToAnExistingFile">
+        <source>'{0}' exists as a file. You can't package as an archive directory to be the same path as an existing file. Please delete the file before packaging. Alternative,you can call msbuild with /t:CleanWebsitesPackage target to remove it.</source>
+        <target state="new">'{0}' exists as a file. You can't package as an archive directory to be the same path as an existing file. Please delete the file before packaging. Alternative,you can call msbuild with /t:CleanWebsitesPackage target to remove it.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ErrorUseIisIsTrueButIisUrlIsEmpty">
+        <source>IisUrl property is required when UseIis property is True</source>
+        <target state="new">IisUrl property is required when UseIis property is True</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ErrorUseWPP_CopyWebApplicationAndPipelineDependsOnBuildBothTrue">
+        <source>These two Properties are not compatable: $(UseWPP_CopyWebApplication) and  $(PipelineDependsOnBuild) both are True.
+Please correct the problem by either set $(Disable_CopyWebApplication) to true or set $(PipelineDependsOnBuild) to false to break the circular build dependency.
+Detail: $(UseWPP_CopyWebApplication) make the publsih pipeline (WPP) to be Part of the build and $(PipelineDependsOnBuild) make the WPP depend on build thus cause the build circular build dependency.</source>
+        <target state="new">These two Properties are not compatable: $(UseWPP_CopyWebApplication) and  $(PipelineDependsOnBuild) both are True.
+Please correct the problem by either set $(Disable_CopyWebApplication) to true or set $(PipelineDependsOnBuild) to false to break the circular build dependency.
+Detail: $(UseWPP_CopyWebApplication) make the publsih pipeline (WPP) to be Part of the build and $(PipelineDependsOnBuild) make the WPP depend on build thus cause the build circular build dependency.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ExcludeAllDebugSymbols">
+        <source>Exclude All Debug Symbols</source>
+        <target state="new">Exclude All Debug Symbols</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ExcludeAllFilesUnderFolder">
+        <source>Exclude All files under {0}</source>
+        <target state="new">Exclude All files under {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_FinishGenerateSampleMsDeployBatchScript">
+        <source>Sample script for deploying this package is generated at the following location:
+{0}
+For this sample script, you can change the deploy parameters by changing the following file: 
+{1}</source>
+        <target state="new">Sample script for deploying this package is generated at the following location:
+{0}
+For this sample script, you can change the deploy parameters by changing the following file: 
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_FoundApplicationConfigForTransformation">
+        <source>Found The following for Config tranformation:
+{0}</source>
+        <target state="new">Found The following for Config tranformation:
+{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_GatherAllFilesInProjectFolderExceptExclusion">
+        <source>Gather all files from project folder except in the exclusion list.</source>
+        <target state="new">Gather all files from project folder except in the exclusion list.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_GatherSpecificItemsFromProject">
+        <source>Gather all files from Project items @({0}). Adding:</source>
+        <target state="new">Gather all files from Project items @({0}). Adding:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_GatherSpecificItemsFromProjectNoDetail">
+        <source>Gather all files from Project items @({0}).</source>
+        <target state="new">Gather all files from Project items @({0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_GatherSpecificOutputsFromProject">
+        <source>Gather all files from Project output ({0}). Adding:</source>
+        <target state="new">Gather all files from Project output ({0}). Adding:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_GenerateMsdeploySourceManifestFile">
+        <source>Generate source manifest file for Web Deploy package/publish ...</source>
+        <target state="new">Generate source manifest file for Web Deploy package/publish ...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_GenerateSampleMsdeployBatchScript">
+        <source>Generating a sample batch commandline script for deploying this package...</source>
+        <target state="new">Generating a sample batch commandline script for deploying this package...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_IISAppParameterDescription">
+        <source>IIS Web Site/Application name</source>
+        <target state="new">IIS Web Site/Application name</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_IISAppPhysicalPathDescription">
+        <source>Physical path for this Web Application.</source>
+        <target state="new">Physical path for this Web Application.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_InsertAdditionalConnectionStringTransformConfigToTransformOutputFile">
+        <source>Insert additional ConnectionString Transformed {0} into {1}.</source>
+        <target state="new">Insert additional ConnectionString Transformed {0} into {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_InsertEFCodeFirstDeployContextTransformConfigToTransformOutputFile">
+        <source>Insert additional EFCodeFirst Database Deployment Transformed {0} into {1}.</source>
+        <target state="new">Insert additional EFCodeFirst Database Deployment Transformed {0} into {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_InvalidArgument">
+        <source>GetPublishingLocalizedString Task encounter invalid argument ID;</source>
+        <target state="new">GetPublishingLocalizedString Task encounter invalid argument ID;</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_MSBuildTargetFailed">
+        <source>Target {0} failed.</source>
+        <target state="new">Target {0} failed.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_MsBuildPropertySettingValue">
+        <source>$({0}) is {1}</source>
+        <target state="new">$({0}) is {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_PackagingIntoLocation">
+        <source>Packaging into {0}.</source>
+        <target state="new">Packaging into {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpEnviroment">
+        <source>
+===========================
+Environment-Specific Settings:
+--------------------------
+</source>
+        <target state="new">
+===========================
+Environment-Specific Settings:
+--------------------------
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpEnviromentExplained">
+        <source>
+	To customize application-specific settings for each deployment environment (for example, the IIS application name, the physical path, and any connection strings), edit the settings in the following file: 
+		 "{0}"</source>
+        <target state="new">
+	To customize application-specific settings for each deployment environment (for example, the IIS application name, the physical path, and any connection strings), edit the settings in the following file: 
+		 "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpMoreInfo">
+        <source>
+===========================
+For more information on this deploy script visit:	{0}
+</source>
+        <target state="new">
+===========================
+For more information on this deploy script visit:	{0}
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpOptional">
+        <source>
+===========================
+Optional Flags:
+--------------------------
+ By Default, this script deploy on the current machine where this script is called with current user credential without agent service. Only pass the following value for advance scenario.
+</source>
+        <target state="new">
+===========================
+Optional Flags:
+--------------------------
+ By Default, this script deploy on the current machine where this script is called with current user credential without agent service. Only pass the following value for advance scenario.
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpOptionalExplainedAdditionalFlags">
+        <source>
+[Additional msdeploy.exe flags]
+	The msdeploy.exe command supports additional flags. You can include any of these additional flags in the "$(ProjectName).Deploy.cmd" file, and the flags are passed through to msdeploy.exe during execution.
+	Alternatively, you can specify additional flags by setting the "_MsDeployAdditionalFlags" environment variable. These settings are used by this batch file.
+	Note: Any flag value that includes an equal sign (=) must be enclosed in double quotation marks, as shown in the following example, which will skip deploying the databases that are included in the package:
+		"-skip:objectName=dbFullSql" 
+</source>
+        <target state="new">
+[Additional msdeploy.exe flags]
+	The msdeploy.exe command supports additional flags. You can include any of these additional flags in the "$(ProjectName).Deploy.cmd" file, and the flags are passed through to msdeploy.exe during execution.
+	Alternatively, you can specify additional flags by setting the "_MsDeployAdditionalFlags" environment variable. These settings are used by this batch file.
+	Note: Any flag value that includes an equal sign (=) must be enclosed in double quotation marks, as shown in the following example, which will skip deploying the databases that are included in the package:
+		"-skip:objectName=dbFullSql" 
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagA">
+        <source>
+/A:&lt;Basic | NTLM&gt;
+	Specifies the type of authentication to be used. The possible values are NTLM and Basic. If the wmsvc provider setting is specified, the default authentication type is Basic; otherwise, the default authentication type is NTLM. 
+</source>
+        <target state="new">
+/A:&lt;Basic | NTLM&gt;
+	Specifies the type of authentication to be used. The possible values are NTLM and Basic. If the wmsvc provider setting is specified, the default authentication type is Basic; otherwise, the default authentication type is NTLM. 
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagG">
+        <source>
+/G:&lt;True | False&gt;
+	Specifies that the package is deployed by creating a temporary listener on the destination server. This requires no special installation on the destination server, but it requires you to be an administrator on that server. The default value of this flag is False. 
+</source>
+        <target state="new">
+/G:&lt;True | False&gt;
+	Specifies that the package is deployed by creating a temporary listener on the destination server. This requires no special installation on the destination server, but it requires you to be an administrator on that server. The default value of this flag is False. 
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagL">
+        <source>
+/L 
+	Specifies that the package is deployed to local IISExpress user instance.
+</source>
+        <target state="new">
+/L 
+	Specifies that the package is deployed to local IISExpress user instance.
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagM">
+        <source>
+/M:&lt;Destination server name or Service URL&gt;
+	If this flag is not specified, the package is installed on the computer where the command is run. The Service URL can be in the following format:
+		https://&lt;DestinationServer&gt;:8172/MSDeploy.axd 
+	This format requires that IIS 7 be installed on the destination server and that IIS 7 Web Management Service(WMSvc) and Web Deployment Handler be set up.
+	The service URL can also be in the following format:
+		http://&lt;DestinationServer&gt;/MSDeployAgentService 
+	This format requires administrative rights on the destination server, and it requires that Web Deploy Remote Service (MsDepSvc) be installed on the destination server. IIS 7 does not have to be installed on the destination server.
+</source>
+        <target state="new">
+/M:&lt;Destination server name or Service URL&gt;
+	If this flag is not specified, the package is installed on the computer where the command is run. The Service URL can be in the following format:
+		https://&lt;DestinationServer&gt;:8172/MSDeploy.axd 
+	This format requires that IIS 7 be installed on the destination server and that IIS 7 Web Management Service(WMSvc) and Web Deployment Handler be set up.
+	The service URL can also be in the following format:
+		http://&lt;DestinationServer&gt;/MSDeployAgentService 
+	This format requires administrative rights on the destination server, and it requires that Web Deploy Remote Service (MsDepSvc) be installed on the destination server. IIS 7 does not have to be installed on the destination server.
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpOptionalExplainedFlagUP">
+        <source>
+/U:&lt;UserName&gt;
+/P:&lt;Password&gt;</source>
+        <target state="new">
+/U:&lt;UserName&gt;
+/P:&lt;Password&gt;</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpPrerequisites">
+        <source>
+===========================
+Prerequisites :
+--------------------------
+To deploy this Web package, Web Deploy (msdeploy.exe) must be installed on the computer that runs the .cmd file. For information about how to install Web Deploy, see the following URL:
+{0}
+This batch file requires that the package file "{1}" and optionally provided the parameters file "{2}" in the same folder or destination folder by environment variable.
+</source>
+        <target state="new">
+===========================
+Prerequisites :
+--------------------------
+To deploy this Web package, Web Deploy (msdeploy.exe) must be installed on the computer that runs the .cmd file. For information about how to install Web Deploy, see the following URL:
+{0}
+This batch file requires that the package file "{1}" and optionally provided the parameters file "{2}" in the same folder or destination folder by environment variable.
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpRequired">
+        <source>
+===========================
+Required Flags:
+--------------------------</source>
+        <target state="new">
+===========================
+Required Flags:
+--------------------------</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpRequiredExplainedFlagT">
+        <source>
+/T:
+	Calls msdeploy.exe with the "-whatif" flag, which simulates deployment. This does not deploy the package. Instead, it creates a report of what will happen when you actually deploy the package.</source>
+        <target state="new">
+/T:
+	Calls msdeploy.exe with the "-whatif" flag, which simulates deployment. This does not deploy the package. Instead, it creates a report of what will happen when you actually deploy the package.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpRequiredExplainedFlagY">
+        <source>
+/Y:
+	Calls msdeploy.exe without the "-whatif" flag, which deploys the package to the current machine or a destination server. Use /Y after you have verified the output that was generated by using the /T flag.
+
+Note: Do not use /T and /Y in the same command.
+</source>
+        <target state="new">
+/Y:
+	Calls msdeploy.exe without the "-whatif" flag, which deploys the package to the current machine or a destination server. Use /Y after you have verified the output that was generated by using the /T flag.
+
+Note: Do not use /T and /Y in the same command.
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SampleScriptHelpSection1">
+        <source>
+===========================
+Usage:
+--------------------------
+{0} [/T|/Y] [/M:ComputerName] [/U:UserName] [/P:Password] [/G:UseTempAgent] [Additional msdeploy.exe flags ...]
+
+</source>
+        <target state="new">
+===========================
+Usage:
+--------------------------
+{0} [/T|/Y] [/M:ComputerName] [/U:UserName] [/P:Password] [/G:UseTempAgent] [Additional msdeploy.exe flags ...]
+
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_SqlCommandVariableParameterDescription">
+        <source>Sql Command Variable for setting up this application database.</source>
+        <target state="new">Sql Command Variable for setting up this application database.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_StartMsDeployPublishToRemote">
+        <source>Start Web Deploy Publish the Application/package to {0} ...</source>
+        <target state="new">Start Web Deploy Publish the Application/package to {0} ...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_TestDeployPackageOnCurrentMachine">
+        <source>Test deploy this Web Deploy package onto current machine.</source>
+        <target state="new">Test deploy this Web Deploy package onto current machine.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_TransformConfigUsingTransformFileToTransformOutputFile">
+        <source>Transformed {0} using {1} into {2}.</source>
+        <target state="new">Transformed {0} using {1} into {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ValidateErrorMsDeployPublishSetting">
+        <source>Web Deploy publish/package validating error: Missing or Invalid property value for $({0})</source>
+        <target state="new">Web Deploy publish/package validating error: Missing or Invalid property value for $({0})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_ValidatingMsDeployPublishSettings">
+        <source>Validating Web Deploy package/publish related properties...</source>
+        <target state="new">Validating Web Deploy package/publish related properties...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WarningOnSettingBothIncludeIisSettingsOnPublishAndDeployAsIisApp">
+        <source>Setting both property values of DeployAsIisApp and IncludeIisSettingsOnPublish to true is not recommended, as IncludeIisSettingsOnPublish is a superset of DeployAsIisApp</source>
+        <target state="new">Setting both property values of DeployAsIisApp and IncludeIisSettingsOnPublish to true is not recommended, as IncludeIisSettingsOnPublish is a superset of DeployAsIisApp</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WarningOnSettingRemoteSitePhysicalPathWhenIISSettingIsNotInclude">
+        <source>Setting value to $(RemoteSitePhysicalPath) might not work if IIS setting is not included</source>
+        <target state="new">Setting value to $(RemoteSitePhysicalPath) might not work if IIS setting is not included</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebConfigConnectionStringParameterDescription">
+        <source>Connection String used in web.config by the application to access the database.</source>
+        <target state="new">Connection String used in web.config by the application to access the database.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishInvalidatePublishProfileSettings">
+        <source>The value for PublishProfile is set to '{0}', expected to find the file at '{1}' but it could not be found.</source>
+        <target state="new">The value for PublishProfile is set to '{0}', expected to find the file at '{1}' but it could not be found.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishMethodIsNotSupportedInCmdLine">
+        <source>This specific WebPublishMethod({0}) is not yet supported on msbuild command line.  Please use Visual Studio to publish.</source>
+        <target state="new">This specific WebPublishMethod({0}) is not yet supported on msbuild command line.  Please use Visual Studio to publish.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelineCollectFilesPhase">
+        <source>Publish Pipeline Collect Files Phase</source>
+        <target state="new">Publish Pipeline Collect Files Phase</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelineCopyWebApplication">
+        <source>Copying Web Application Project Files for {0} to {1}.</source>
+        <target state="new">Copying Web Application Project Files for {0} to {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelineDeployPhase">
+        <source>Publish Pipeline Deploy Phase</source>
+        <target state="new">Publish Pipeline Deploy Phase</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelineDeployPhaseStage1">
+        <source>Publish Pipeline Deploy phase Stage {0}</source>
+        <target state="new">Publish Pipeline Deploy phase Stage {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelineMSDeploySettings">
+        <source>Invoking Web Deploy to generate the package with the following settings:</source>
+        <target state="new">Invoking Web Deploy to generate the package with the following settings:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelineMaterializeAllFilesToTempDir">
+        <source>Copying all files to temporary location below for package/publish:
+{0}.</source>
+        <target state="new">Copying all files to temporary location below for package/publish:
+{0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelinePhase">
+        <source>Publish Pipeline {0} Phase</source>
+        <target state="new">Publish Pipeline {0} Phase</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishPipelineTransformPhase">
+        <source>Publish Pipeline Transform Phase</source>
+        <target state="new">Publish Pipeline Transform Phase</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishProfileInvalidPropertyValue">
+        <source>PublishProfile({0}) is set. But the $({1}) does not have a valid value.  Current Value is "{2}".</source>
+        <target state="new">PublishProfile({0}) is set. But the $({1}) does not have a valid value.  Current Value is "{2}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishLocalizedString_WebPublishValidatePublishProfileSettings">
+        <source>Validating PublishProfile({0}) settings.</source>
+        <target state="new">Validating PublishProfile({0}) settings.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_AddParameterIntoObject">
+        <source>Adding Parameter ({0}) with value ({1}) into to object ({2}).</source>
+        <target state="new">Adding Parameter ({0}) with value ({1}) into to object ({2}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_Canceled">
+        <source>User cancel Web deployment operation.</source>
+        <target state="new">User cancel Web deployment operation.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_DuplicateItemMetadata">
+        <source>The following two items have duplicate item metadata %({0}). The two items data are {1} and {2}.</source>
+        <target state="new">The following two items have duplicate item metadata %({0}). The two items data are {1} and {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_EncryptionExceptionMessage">
+        <source>An IIS secure setting was detected while packaging/publishing. An encryption password is required to proceed.
+In Visual Studio, the password can be entered in the project's Package/Publish property page.
+In team build or command line, password can be provided by setting MsBuild $(DeployEncryptKey) property.
+Error details:</source>
+        <target state="new">An IIS secure setting was detected while packaging/publishing. An encryption password is required to proceed.
+In Visual Studio, the password can be entered in the project's Package/Publish property page.
+In team build or command line, password can be provided by setting MsBuild $(DeployEncryptKey) property.
+Error details:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_FailedDeploy">
+        <source>Publish failed to deploy.</source>
+        <target state="new">Publish failed to deploy.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_FailedPackage">
+        <source>Package failed.</source>
+        <target state="new">Package failed.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_FailedWithException">
+        <source>Web deployment task failed. ({0})</source>
+        <target state="new">Web deployment task failed. ({0})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_FailedWithExceptionWithDetail">
+        <source>Web deployment task failed. ({0})
+{1}</source>
+        <target state="new">Web deployment task failed. ({0})
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_InvalidOperation">
+        <source>Source ({0}) and destination ({1}) are not compatible for given operation.</source>
+        <target state="new">Source ({0}) and destination ({1}) are not compatible for given operation.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_InvalidProviderName">
+        <source>Provider({0})is not a recognized provider.</source>
+        <target state="new">Provider({0})is not a recognized provider.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_InvalidProviderOption">
+        <source>Unknown ProviderOption:{0}. Known ProviderOptions are:{1}.</source>
+        <target state="new">Unknown ProviderOption:{0}. Known ProviderOptions are:{1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_LoadVSCertUIFailed">
+        <source>Failed to load publish certificate dialog due to error of {0}</source>
+        <target state="new">Failed to load publish certificate dialog due to error of {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MSDEPLOY32bit">
+        <source>For x86(32 bit): http://go.microsoft.com/fwlink/?LinkId=109365.</source>
+        <target state="new">For x86(32 bit): http://go.microsoft.com/fwlink/?LinkId=109365.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MSDEPLOY64bit">
+        <source>For x64(64 bit): http://go.microsoft.com/fwlink/?LinkId=109366.</source>
+        <target state="new">For x64(64 bit): http://go.microsoft.com/fwlink/?LinkId=109366.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MSDEPLOYASSEMBLYLOAD_FAIL">
+        <source>Package/Publish task {0} failed to load Web Deploy assemblies. Microsoft Web Deploy is not correctly installed on this machine. Microsoft Web Deploy v3 or higher is recommended.</source>
+        <target state="new">Package/Publish task {0} failed to load Web Deploy assemblies. Microsoft Web Deploy is not correctly installed on this machine. Microsoft Web Deploy v3 or higher is recommended.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MSDEPLOYLOADFAIL">
+        <source>Package/Publish depends on Microsoft Web Deploy technology. Microsoft Web Deploy is not correctly installed on this machine. Please install from following link: {0}{1}. ({2})</source>
+        <target state="new">Package/Publish depends on Microsoft Web Deploy technology. Microsoft Web Deploy is not correctly installed on this machine. Please install from following link: {0}{1}. ({2})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MSDEPLOYMinVersion">
+        <source>Package/Publish depends on Microsoft Web Deployment technology. Microsoft Web Deployment is installed but doesn't meet the minimum version requirement. Please reinstall from following link: {0}{1}. (Current Version:{2}, Minimum Version needed:{3})</source>
+        <target state="new">Package/Publish depends on Microsoft Web Deployment technology. Microsoft Web Deployment is installed but doesn't meet the minimum version requirement. Please reinstall from following link: {0}{1}. (Current Version:{2}, Minimum Version needed:{3})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MSDEPLOYVERSIONLOAD">
+        <source>Package/Publish task {0} load assembly {1}</source>
+        <target state="new">Package/Publish task {0} load assembly {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MsDeployExceptionFwlink1Message">
+        <source>Failed to invoke or execute {0} provider on the web server.  The Web Deployment Tool's {0} provider is either not enabled or failed to executed specific commands on the server.  Please contact your server administrator for assistance. (Web Deploy Provider is "{0}").
+Error details:</source>
+        <target state="new">Failed to invoke or execute {0} provider on the web server.  The Web Deployment Tool's {0} provider is either not enabled or failed to executed specific commands on the server.  Please contact your server administrator for assistance. (Web Deploy Provider is "{0}").
+Error details:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MsDeployExceptionFwlink1SQLMessage">
+        <source>Make sure the database connection string for the server is correct and that you have appropriate permission to access the database. (Web Deploy Provider is "{0}").
+Error details:</source>
+        <target state="new">Make sure the database connection string for the server is correct and that you have appropriate permission to access the database. (Web Deploy Provider is "{0}").
+Error details:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MsDeployExceptionFwlink1SiteMessage">
+        <source>Make sure you have appropriate permissions on the server to publish IIS settings. Alternatively, exclude settings that require administrative permissions on the server. (Web Deploy Provider is "{0}").
+Error details:</source>
+        <target state="new">Make sure you have appropriate permissions on the server to publish IIS settings. Alternatively, exclude settings that require administrative permissions on the server. (Web Deploy Provider is "{0}").
+Error details:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MsDeployExceptionFwlink2Message">
+        <source>Make sure you have appropriate permissions on the server to publish IIS settings. Alternatively, exclude settings that require administrative permission on the server.
+Error details:</source>
+        <target state="new">Make sure you have appropriate permissions on the server to publish IIS settings. Alternatively, exclude settings that require administrative permission on the server.
+Error details:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MsDeployExceptionFwlink3Message">
+        <source>This can occur if the publish process cannot connect to the database on the server. Make sure the database connection string is correct.
+Error details:</source>
+        <target state="new">This can occur if the publish process cannot connect to the database on the server. Make sure the database connection string is correct.
+Error details:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_MsDeployExceptionFwlink4Message">
+        <source>Failed to publish the database. This can happen if the remote database cannot run the script. Try modifying the database scripts, or disabling database publishing in the Package/Publish Web properties page. If the script failed due to database tables already exist, try dropping existing database objects before creating new ones. For more information on doing these options from Visual Studio, see http://go.microsoft.com/fwlink/?LinkId=179181.
+Error details:</source>
+        <target state="new">Failed to publish the database. This can happen if the remote database cannot run the script. Try modifying the database scripts, or disabling database publishing in the Package/Publish Web properties page. If the script failed due to database tables already exist, try dropping existing database objects before creating new ones. For more information on doing these options from Visual Studio, see http://go.microsoft.com/fwlink/?LinkId=179181.
+Error details:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_ObjectIdentity">
+        <source>{0}({1})</source>
+        <target state="new">{0}({1})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_SQLCEMigrationNeedLatestMSDeploy">
+        <source>Generate schema/data sql scripts from SQLCE require Web Deploy 2.0 and up to function properly.  Please install the latest Web Deploy from {0}.</source>
+        <target state="new">Generate schema/data sql scripts from SQLCE require Web Deploy 2.0 and up to function properly.  Please install the latest Web Deploy from {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_SkipDirectiveSetEnable">
+        <source>Skip Directive {0} enable state is changed to {1}.</source>
+        <target state="new">Skip Directive {0} enable state is changed to {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_Start">
+        <source>Starting Web deployment task from source: {0} to Destination: {1}.</source>
+        <target state="new">Starting Web deployment task from source: {0} to Destination: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_SucceedArchiveDir">
+        <source>Package is successfully created as archive directory at the following location:
+{0}</source>
+        <target state="new">Package is successfully created as archive directory at the following location:
+{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_SucceedDeploy">
+        <source>Publish Succeeded.</source>
+        <target state="new">Publish Succeeded.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_SucceedPackage">
+        <source>Package "{0}" is successfully created as single file at the following location:
+{1}</source>
+        <target state="new">Package "{0}" is successfully created as single file at the following location:
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_Succeeded">
+        <source>Successfully executed Web deployment task.</source>
+        <target state="new">Successfully executed Web deployment task.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_UnknownParameter">
+        <source>Unknown Parameter {0}. Source Known Parameters are: {1}.</source>
+        <target state="new">Unknown Parameter {0}. Source Known Parameters are: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_UnknownSkipDirective">
+        <source>Skip Directive {0} can not be identified.</source>
+        <target state="new">Skip Directive {0} can not be identified.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebException401Message">
+        <source>Make sure the site name, user name, and password are correct. If the issue is not resolved, please contact your local or server administrator.
+Error details:</source>
+        <target state="new">Make sure the site name, user name, and password are correct. If the issue is not resolved, please contact your local or server administrator.
+Error details:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebException404Message">
+        <source>The requested resource does not exist, or the requested URL is incorrect.
+Error details:</source>
+        <target state="new">The requested resource does not exist, or the requested URL is incorrect.
+Error details:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebException502Message">
+        <source>Make sure firewall and network settings on your computer and on the server are configured to allow connections between them. If the issue is not resolved, please contact your local or server administrator.
+Error details:</source>
+        <target state="new">Make sure firewall and network settings on your computer and on the server are configured to allow connections between them. If the issue is not resolved, please contact your local or server administrator.
+Error details:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebException550Message">
+        <source>Make sure the site that you are deploying to is a valid site on the destination server. If the issue is not resolved, please contact your server administrator.
+Error details:</source>
+        <target state="new">Make sure the site that you are deploying to is a valid site on the destination server. If the issue is not resolved, please contact your server administrator.
+Error details:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebException551Message">
+        <source>Make sure the appliction that you are deploying to is a valide application on the destination server. If the issue is not resolved, please contact your server administrator.
+Error details:</source>
+        <target state="new">Make sure the appliction that you are deploying to is a valide application on the destination server. If the issue is not resolved, please contact your server administrator.
+Error details:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebExceptionConnectFailureMessage">
+        <source>This error indicates that you cannot connect to the server. Make sure the service URL is correct, firewall and network settings on this computer and on the server computer are configured properly, and the appropriate services have been started on the server.
+Error details:</source>
+        <target state="new">This error indicates that you cannot connect to the server. Make sure the service URL is correct, firewall and network settings on this computer and on the server computer are configured properly, and the appropriate services have been started on the server.
+Error details:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebPackageHelpLink">
+        <source>http://go.microsoft.com/fwlink/?LinkId=124618</source>
+        <target state="new">http://go.microsoft.com/fwlink/?LinkId=124618</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VSMSDEPLOY_WebPackageHelpLinkMessage">
+        <source>To get the instructions on how to deploy the web package please visit the following link:</source>
+        <target state="new">To get the instructions on how to deploy the web package please visit the following link:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ValidateParameter_ArgumentNullError">
+        <source>Property '{0}' must be non-empty.</source>
+        <target state="new">Property '{0}' must be non-empty.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_AssemblyInfo_Attribute">
+        <source>Setting {0}</source>
+        <target state="new">Setting {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_AssemblyInfo_Failed">
+        <source>Failed to Generate AssemblyInfo file.</source>
+        <target state="new">Failed to Generate AssemblyInfo file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_AssemblyInfo_Start">
+        <source>Generating AssemblyInfo.</source>
+        <target state="new">Generating AssemblyInfo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_AssemblyInfo_Succeeded">
+        <source>Successfully generated AssemblyInfo file.</source>
+        <target state="new">Successfully generated AssemblyInfo file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_MERGE_ApplicationPath">
+        <source>Missing ApplicationPath parameter (the physical path of the precompiled application).</source>
+        <target state="new">Missing ApplicationPath parameter (the physical path of the precompiled application).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_MERGE_ContentAssemblyName">
+        <source>ContentAssembly parameter cannot be combined with the Prefix or NameSingleAssemblyName parameter. If specified, the entire application will be merged to a single assembly with the given name.</source>
+        <target state="new">ContentAssembly parameter cannot be combined with the Prefix or NameSingleAssemblyName parameter. If specified, the entire application will be merged to a single assembly with the given name.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_MERGE_Failed">
+        <source>Failed to merge '{0}'.</source>
+        <target state="new">Failed to merge '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_MERGE_SingleAssemblyName">
+        <source>SingleAssemblyName parameter cannot be combined with the Prefix or ContentAssemblyName parameter. If specified, the entire application will be merged to a single assembly with the given name.</source>
+        <target state="new">SingleAssemblyName parameter cannot be combined with the Prefix or ContentAssemblyName parameter. If specified, the entire application will be merged to a single assembly with the given name.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_MERGE_Start">
+        <source>Running aspnet_merge.exe.</source>
+        <target state="new">Running aspnet_merge.exe.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WEBDEPLOY_MERGE_Succeeded">
+        <source>Successfully merged '{0}'.</source>
+        <target state="new">Successfully merged '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WebConfigTransform_HostingModel_Error">
+        <source>The acceptable value for AspNetCoreHostingModel property is either "InProcess" or "OutOfProcess".</source>
+        <target state="new">The acceptable value for AspNetCoreHostingModel property is either "InProcess" or "OutOfProcess".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WebConfigTransform_InvalidHostingOption">
+        <source>In process hosting is not supported for AspNetCoreModule. Change the AspNetCoreModule to at least AspNetCoreModuleV2.</source>
+        <target state="new">In process hosting is not supported for AspNetCoreModule. Change the AspNetCoreModule to at least AspNetCoreModuleV2.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_FailedDeploy">
+        <source>The attempt to publish the ZIP file through {0} failed with HTTP status code {1}.</source>
+        <target state="new">The attempt to publish the ZIP file through {0} failed with HTTP status code {1}.</target>
+        <note>{0} - URL to deploy zip, {1} - HTTP response code</note>
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_FailedToRetrieveCred">
+        <source>Failed to retrieve credentials.</source>
+        <target state="new">Failed to retrieve credentials.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_InvalidSiteNamePublishUrl">
+        <source>Neither SiteName nor PublishUrl was given a value.</source>
+        <target state="new">Neither SiteName nor PublishUrl was given a value.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_PublishingZip">
+        <source>Publishing {0} to {1}...</source>
+        <target state="new">Publishing {0} to {1}...</target>
+        <note>{0} - Path of zip to publish, {1} - URL to deploy zip</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

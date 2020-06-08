@@ -1,0 +1,61 @@
+<!--
+***********************************************************************************************
+Sdk.props
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <!--
+      Indicate to other targets that Microsoft.NET.Sdk.Web is being used.
+    -->
+  <PropertyGroup>
+    <UsingMicrosoftNETSdkWeb>true</UsingMicrosoftNETSdkWeb>
+    <EnableRazorSdkContent>true</EnableRazorSdkContent>
+  </PropertyGroup>
+
+  <!-- Default properties that shouldn't be replaced by the microsoft.net.sdk.props -->
+  <PropertyGroup>
+    <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
+  </PropertyGroup>
+
+  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
+
+  <Import Sdk="Microsoft.NET.Sdk.Razor" Project="Sdk.props" />
+
+  <Import Sdk="Microsoft.NET.Sdk.Web.ProjectSystem" Project="Sdk.props" />
+
+  <Import Sdk="Microsoft.NET.Sdk.Publish" Project="Sdk.props" />
+
+  <ItemGroup Condition="'$(DisableImplicitFrameworkReferences)' != 'true' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' >= '3.0'">
+    <FrameworkReference Include="Microsoft.AspNetCore.App" IsImplicitlyDefined="true" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(DisableImplicitAspNetCoreAnalyzers)' != 'true' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' >= '3.0'">
+    <Analyzer
+      Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))\analyzers\cs\Microsoft.AspNetCore.Analyzers.dll"
+      Condition="'$(Language)'=='C#'"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))\analyzers\cs\Microsoft.AspNetCore.Mvc.Analyzers.dll"
+      Condition="'$(Language)'=='C#'"
+      IsImplicitlyDefined="true" />
+
+    <Analyzer
+      Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))\analyzers\cs\Microsoft.AspNetCore.Mvc.Api.Analyzers.dll"
+      Condition="'$(Language)'=='C#' AND '$(IncludeOpenAPIAnalyzers)' == 'true'"
+      IsImplicitlyDefined="true" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(DisableImplicitComponentsAnalyzers)' != 'true' And '$(DisableImplicitAspNetCoreAnalyzers)' != 'true' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' >= '3.0'">
+    <Analyzer
+      Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))\analyzers\cs\Microsoft.AspNetCore.Components.Analyzers.dll"
+      Condition="'$(Language)'=='C#'"
+      IsImplicitlyDefined="true" />
+  </ItemGroup>
+
+</Project>

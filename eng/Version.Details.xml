@@ -45,9 +45,9 @@
       <Uri>https://github.com/dotnet/fsharp</Uri>
       <Sha>d46f53a60ad1bc6d04627a502fadde59ee6ce919</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="3.6.0-2.20153.4">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="3.7.0-3.20271.4">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>6f2112b58316c97c4f1b97e0f282aef4346947fc</Sha>
+      <Sha>f598328fb99345233f52a67f5a65cd39affa9fd4</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="5.0.0-preview.7.20308.1">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
@@ -65,13 +65,9 @@
       <Uri>https://github.com/microsoft/vstest</Uri>
       <Sha>ef615ae48aa04a90dc98071cc82893c849dde97c</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Web" Version="5.0.100-preview.7.20307.1">
-      <Uri>https://github.com/dotnet/websdk</Uri>
-      <Sha>43a3e5d514049fb680eebbb193e764148dcae404</Sha>
-    </Dependency>
-    <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="5.0.0-preview.3.20306.1">
+    <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="5.0.0-preview.3.20308.1">
       <Uri>https://github.com/mono/linker</Uri>
-      <Sha>934da9dc125cd110ee28685529624fbbf3152ab5</Sha>
+      <Sha>7fad77f2a147d757e9a248b8e11c061ff1051d4d</Sha>
     </Dependency>
     <Dependency Name="System.CodeDom" Version="5.0.0-preview.7.20307.4">
       <Uri>https://github.com/dotnet/runtime</Uri>
@@ -97,9 +93,29 @@
       <Uri>https://github.com/dotnet/wpf</Uri>
       <Sha>62244a29f1f0cd04a3166433de501a95425ccba2</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.CodeAnalysis.NetAnalyzers" Version="">
+    <Dependency Name="Microsoft.AspNetCore.Analyzers" Version="5.0.0-preview.7.20308.1">
+      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Sha>ed135e6115e70c611ead25b1cfc2a20fec8a36b3</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.AspNetCore.Components.Analyzers" Version="5.0.0-preview.7.20308.1">
+      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Sha>ed135e6115e70c611ead25b1cfc2a20fec8a36b3</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.AspNetCore.Mvc.Analyzers" Version="5.0.0-preview.7.20308.1">
+      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Sha>ed135e6115e70c611ead25b1cfc2a20fec8a36b3</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.AspNetCore.Mvc.Api.Analyzers" Version="5.0.0-preview.7.20308.1">
+      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Sha>ed135e6115e70c611ead25b1cfc2a20fec8a36b3</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.Web.Xdt" Version="3.0.0" Pinned="true">
+      <Uri>https://github.com/aspnet/xdt</Uri>
+      <Sha>c01a538851a8ab1a1fbeb2e6243f391fff7587b4</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.CodeAnalysis.NetAnalyzers" Version="3.3.0-beta1.20305.4">
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
-      <Sha>03d8e7dbfc82a440aa6b08792693c1a0ea89fe64</Sha>
+      <Sha>596f8f422003d89b65e2bd50dc5a1aea7ce4ce91</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>

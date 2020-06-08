@@ -1,0 +1,46 @@
+<Project>
+  <PropertyGroup>
+    <TargetFrameworks>net472;$(SdkTargetFramework)</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(DotNetBuildFromSource)' == 'true' ">net5.0</TargetFrameworks>
+    <AssemblyName>Microsoft.NET.Sdk.Publish.Tasks.Tests</AssemblyName>
+    <ExcludeFromSourceBuild>true</ExcludeFromSourceBuild>
+    <EndToEndTestsDisabled>true</EndToEndTestsDisabled>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+  
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkPackageVersion)" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
+    <PackageReference Include="Moq" Version="4.8.2" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(EndToEndTestsDisabled)' == 'true'">
+    <Compile Remove="EndToEnd\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Resources\TestPublishContents.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
+    <Reference Include="System" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Management" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\WebSdk\Publish\Tasks\Microsoft.NET.Sdk.Publish.Tasks.csproj" />
+  </ItemGroup>
+  
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
+</Project>

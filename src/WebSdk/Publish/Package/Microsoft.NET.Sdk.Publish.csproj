@@ -1,0 +1,57 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PublishRoot Condition="'$(PublishRoot)' == ''">$(RepoRoot)\src\WebSdk\Publish\</PublishRoot>
+    <!-- The transform file is used by the publish process -->
+    <NoWarn>NU5108</NoWarn>
+  </PropertyGroup>
+
+  <Import Project="$(RepoRoot)\src\WebSdk\Package.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Publish task assembly -->
+    <Content Include="$(ArtifactsBinDir)\Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\net472\Microsoft.NET.Sdk.Publish.Tasks.dll" Condition=" '$(DotNetBuildFromSource)' != 'true' ">
+      <Pack>true</Pack>
+      <PackagePath>tools\net472</PackagePath>
+    </Content>
+
+    <Content Include="$(ArtifactsBinDir)\Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\net472\Microsoft.Web.XmlTransform.dll" Condition=" '$(DotNetBuildFromSource)' != 'true' ">
+      <Pack>true</Pack>
+      <PackagePath>tools\net472</PackagePath>
+    </Content>
+
+    <Content Include="$(ArtifactsBinDir)\Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\net472\Microsoft.Web.Deployment.dll;
+                      $(ArtifactsBinDir)\Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\net472\Microsoft.Web.Delegation.dll"
+             Condition=" '$(DotNetBuildFromSource)' != 'true' ">
+      <Pack>true</Pack>
+      <PackagePath>tools\net472</PackagePath>
+    </Content>
+
+    <Content Include="$(ArtifactsBinDir)\Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\netcoreapp2.1\Microsoft.NET.Sdk.Publish.Tasks.dll">
+      <Pack>true</Pack>
+      <PackagePath>tools\netcoreapp2.1</PackagePath>
+    </Content>
+
+    <Content Include="$(ArtifactsBinDir)\Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\netcoreapp2.1\Microsoft.Web.XmlTransform.dll">
+      <Pack>true</Pack>
+      <PackagePath>tools\netcoreapp2.1</PackagePath>
+    </Content>
+
+    <Content Include="$(PublishRoot)\Targets\**\*.*">
+      <Pack>true</Pack>
+      <PackagePath>targets</PackagePath>
+    </Content>
+
+    <Content Include="$(PublishRoot)\Sdk\**\*.*">
+      <Pack>true</Pack>
+      <PackagePath>Sdk</PackagePath>
+    </Content>
+  </ItemGroup>
+
+</Project>
+

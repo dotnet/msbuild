@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net472;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(DotNetBuildFromSource)' == 'true' ">netcoreapp2.1</TargetFrameworks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkPackageVersion)" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="$(SystemSecurityCryptographyProtectedDataPackageVersion)" />
+    <PackageReference Include="Microsoft.Web.Xdt" Version="$(MicrosoftWebXdtPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
+    <PackageReference Include="System.Collections.Specialized" Version="$(SystemCollectionsSpecializedPackageVersion)" />
+    <PackageReference Include="System.Xml.XmlDocument" Version="$(SystemXmlXmlDocumentPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
+    <Reference Include="System" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <PackageReference Include="Microsoft.WebSdk.WebDeploy" Version="1.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+</Project>

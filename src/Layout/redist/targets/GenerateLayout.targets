@@ -55,19 +55,29 @@
     
   </Target>
 
-  <Target Name="PublishNetSdk"
+  <Target Name="PublishNetSdks"
           BeforeTargets="Build">
     <PropertyGroup>
       <NETSdkSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk</NETSdkSourceRoot>
+      <NETSdkWebSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Web</NETSdkWebSourceRoot>
+      <NETSdkPublishSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Publish</NETSdkPublishSourceRoot>
+      <NETSdkWebProjectSystemSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Web.ProjectSystem</NETSdkWebProjectSystemSourceRoot>
+      <NETSdkWorkerSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Worker</NETSdkWorkerSourceRoot>
     </PropertyGroup>
     <ItemGroup>
-      <NETSdkContent Include="$(NETSdkSourceRoot)\**\*.*" 
+      <NETSdksContent Include="$(NETSdkSourceRoot)\**\*.*" 
                      DeploymentSubPath="Sdks\Microsoft.NET.Sdk"/>
+      <NETSdksContent Include="$(NETSdkWebSourceRoot)\**\*.*" 
+                     DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Web"/>
+      <NETSdksContent Include="$(NETSdkPublishSourceRoot)\**\*.*" 
+                     DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Publish"/>
+      <NETSdksContent Include="$(NETSdkWebProjectSystemSourceRoot)\**\*.*" 
+                     DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Web.ProjectSystem"/>
+      <NETSdksContent Include="$(NETSdkWorkerSourceRoot)\**\*.*" 
+                     DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Worker"/>
     </ItemGroup>
-    <Copy SourceFiles="@(NETSdkContent)"
-      DestinationFiles="@(NETSdkContent->'$(OutputPath)\%(DeploymentSubpath)\%(RecursiveDir)%(Filename)%(Extension)')" />
-
-
+    <Copy SourceFiles="@(NETSdksContent)"
+      DestinationFiles="@(NETSdksContent->'$(OutputPath)\%(DeploymentSubpath)\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
   <Target Name="PublishTestCli"

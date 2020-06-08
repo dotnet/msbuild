@@ -1,0 +1,28 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.Worker.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <EnableDefaultContentItems Condition=" '$(EnableDefaultContentItems)' == '' ">true</EnableDefaultContentItems>
+    <RunWorkingDirectory Condition=" '$(RunWorkingDirectory)' == '' and '$(EnableDefaultRunWorkingDirectory)' != 'false' ">$(MSBuildProjectDirectory)</RunWorkingDirectory>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectCapability Include="DotNetCoreWorker" />
+    <ProjectCapability Include="SupportHierarchyContextSvc" />
+    <ProjectCapability Include="DynamicDependentFile" />
+    <ProjectCapability Include="DynamicFileNesting" />
+    <ProjectCapability Include="LocalUserSecrets" />
+    <ProjectCapability Include="WebNestingDefaults" />
+  </ItemGroup>
+
+</Project>
