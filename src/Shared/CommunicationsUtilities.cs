@@ -312,9 +312,9 @@ namespace Microsoft.Build.Internal
             }
 #endif
 
-            // Mask out the first byte. That's because old
-            // builds used a single, non zero initial byte,
-            // and we don't want to risk communicating with them
+            // Mask out the first byte. Modern builds expect the first byte to be zero to indicate that they are modern
+            // and should be treated as such. Older builds used a non-zero initial byte. See here:
+            // https://github.com/microsoft/msbuild/blob/584ca5f11b28971f5651b4b8de5f173ad1cb2786/src/Shared/NodeEndpointOutOfProcBase.cs#L403.
             return baseHandshake & 0x00FFFFFFFFFFFFFF;
         }
 
