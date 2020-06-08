@@ -201,40 +201,7 @@ namespace Microsoft.Build.Construction
                 ErrorUtilities.VerifyThrowInternalRooted(value);
                 if (FileUtilities.IsSolutionFilterFilename(value))
                 {
-                    try
-                    {
-                        using JsonDocument text = JsonDocument.Parse(File.ReadAllText(value));
-                        JsonElement solution = text.RootElement.GetProperty("solution");
-                        _solutionFile = Path.GetFullPath(solution.GetProperty("path").GetString());
-                        if (!FileSystems.Default.FileExists(_solutionFile))
-                        {
-                            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
-                            (
-                                "SubCategoryForSolutionParsingErrors",
-                                new BuildEventFileInfo(_solutionFile),
-                                "SolutionFilterMissingSolutionError",
-                                value,
-                                _solutionFile
-                            );
-                        }
-                        _solutionFilter = new HashSet<string>(NativeMethodsShared.OSUsesCaseSensitivePaths ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
-                        foreach (JsonElement project in solution.GetProperty("projects").EnumerateArray())
-                        {
-                            _solutionFilter.Add(project.GetString());
-                        }
-                    }
-                    catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
-                    {
-                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
-                        (
-                            false, /* Just throw the exception */
-                            "SubCategoryForSolutionParsingErrors",
-                            new BuildEventFileInfo(value),
-                            e,
-                            "SolutionFilterJsonParsingError",
-                            value
-                        );
-                    }
+                    ParseSolutionFilter(value);
                 }
                 else
                 {
@@ -389,6 +356,44 @@ namespace Microsoft.Build.Construction
                     new BuildEventFileInfo(solutionFile),
                     "SolutionParseNoHeaderError"
                  );
+        }
+
+        private void ParseSolutionFilter(string solutionFilterFile)
+        {
+            try
+            {
+                using JsonDocument text = JsonDocument.Parse(File.ReadAllText(solutionFilterFile));
+                JsonElement solution = text.RootElement.GetProperty("solution");
+                _solutionFile = Path.GetFullPath(solution.GetProperty("path").GetString());
+                if (!FileSystems.Default.FileExists(_solutionFile))
+                {
+                    ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                    (
+                        "SubCategoryForSolutionParsingErrors",
+                        new BuildEventFileInfo(_solutionFile),
+                        "SolutionFilterMissingSolutionError",
+                        solutionFilterFile,
+                        _solutionFile
+                    );
+                }
+                _solutionFilter = new HashSet<string>(NativeMethodsShared.OSUsesCaseSensitivePaths ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
+                foreach (JsonElement project in solution.GetProperty("projects").EnumerateArray())
+                {
+                    _solutionFilter.Add(project.GetString());
+                }
+            }
+            catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
+            {
+                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                (
+                    false, /* Just throw the exception */
+                    "SubCategoryForSolutionParsingErrors",
+                    new BuildEventFileInfo(solutionFilterFile),
+                    e,
+                    "SolutionFilterJsonParsingError",
+                    solutionFilterFile
+                );
+            }
         }
 
         /// <summary>
