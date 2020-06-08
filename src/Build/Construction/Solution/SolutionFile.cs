@@ -303,7 +303,7 @@ namespace Microsoft.Build.Construction
 
                         if (!System.Version.TryParse(fileVersionFromHeader, out Version version))
                         {
-                            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                            ProjectFileErrorUtilities.ThrowInvalidProjectFile
                                 (
                                     "SubCategoryForSolutionParsingErrors",
                                     new BuildEventFileInfo(solutionFile),
@@ -350,7 +350,7 @@ namespace Microsoft.Build.Construction
             }
 
             // Didn't find the header in lines 1-4, so the solution file is invalid.
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+            ProjectFileErrorUtilities.ThrowInvalidProjectFile
                 (
                     "SubCategoryForSolutionParsingErrors",
                     new BuildEventFileInfo(solutionFile),
@@ -367,7 +367,7 @@ namespace Microsoft.Build.Construction
                 _solutionFile = Path.GetFullPath(solution.GetProperty("path").GetString());
                 if (!FileSystems.Default.FileExists(_solutionFile))
                 {
-                    ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                    ProjectFileErrorUtilities.ThrowInvalidProjectFile
                     (
                         "SubCategoryForSolutionParsingErrors",
                         new BuildEventFileInfo(_solutionFile),
@@ -525,7 +525,7 @@ namespace Microsoft.Build.Construction
                 {
                     if (!projectPaths.Contains(project))
                     {
-                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                        ProjectFileErrorUtilities.ThrowInvalidProjectFile
                         (
                             "SubCategoryForSolutionParsingErrors",
                             new BuildEventFileInfo(project),

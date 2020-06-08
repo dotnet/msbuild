@@ -89,7 +89,7 @@ namespace Microsoft.Build.Shared
         /// <param name="projectFile">The invalid project file.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="args">Extra arguments for formatting the error message.</param>
-        internal static void VerifyThrowInvalidProjectFile
+        internal static void ThrowInvalidProjectFile
         (
             string errorSubCategoryResourceName,
             BuildEventFileInfo projectFile,
