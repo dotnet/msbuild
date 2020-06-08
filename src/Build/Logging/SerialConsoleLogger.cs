@@ -16,6 +16,7 @@ using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
 using System.Collections.Concurrent;
+using System.Linq;
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -92,7 +93,7 @@ namespace Microsoft.Build.BackEnd.Logging
             errorCount = 0;
             warningCount = 0;
 
-            TargetFramework_mapping = new ConcurrentDictionary<(int nodeId, int contextId), string>();
+            TargetFramework_mapping = new ConcurrentDictionary<(int nodeId, int contextId), ConcurrentDictionary<string,string>>();
             projectPerformanceCounters = null;
             targetPerformanceCounters = null;
             taskPerformanceCounters = null;
@@ -201,11 +202,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Yellow);
                 foreach (BuildWarningEventArgs warningEventArgs in warningList)
                 {
-                    string TargetFramework;
-                    int projectContextID = warningEventArgs.BuildEventContext.ProjectContextId;
-                    int nodeId = warningEventArgs.BuildEventContext.NodeId;
-                    TargetFramework_mapping.TryGetValue((nodeId, projectContextID), out TargetFramework);
-                    WriteLinePretty(EventArgsFormatting.FormatEventMessage(warningEventArgs, TargetFramework,showProjectFile));
+                    WriteLinePretty(EventArgsFormatting.FormatEventMessage(warningEventArgs, showProjectFile));
                 }
             }
 
@@ -214,11 +211,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Red);
                 foreach (BuildErrorEventArgs errorEventArgs in errorList)
                 {
-                    string TargetFramework;
-                    int projectContextID = errorEventArgs.BuildEventContext.ProjectContextId;
-                    int nodeId = errorEventArgs.BuildEventContext.NodeId;
-                    TargetFramework_mapping.TryGetValue((nodeId, projectContextID), out TargetFramework);
-                    WriteLinePretty(EventArgsFormatting.FormatEventMessage(errorEventArgs, TargetFramework, showProjectFile));
+                    WriteLinePretty(EventArgsFormatting.FormatEventMessage(errorEventArgs, showProjectFile));
                 }
             }
 
@@ -290,15 +283,47 @@ namespace Microsoft.Build.BackEnd.Logging
                     WriteItems(itemList);
                 }
             }
-
-            string TargetFramework;
-            e.GlobalProperties.TryGetValue("TargetFramework", out TargetFramework);
-
+            //node and project context ids for the TargetFramework_mapping key
             int node = e.BuildEventContext.NodeId;
             int project_context_id = e.BuildEventContext.ProjectContextId;
-            //adding the nodeID and contextID into the framework mapping
-            TargetFramework_mapping.TryAdd((node, project_context_id), TargetFramework);
+            //creating the value to be added to the TargetFramework_mapping
+            ConcurrentDictionary<string, string> propertyOutputs = new ConcurrentDictionary<string, string>();
 
+            foreach (DictionaryEntry item in e.Items)
+            {
+                ITaskItem itemVal = (ITaskItem)item.Value;
+                //finding if the outputProperties item has been used
+                if ((string)item.Key == "outputProperties")
+                {
+                    //looking for the property value associated with the property key
+                    //Note: the property key is the item value
+                    string value = null;
+                    e.GlobalProperties.TryGetValue(itemVal.ItemSpec, out value);
+
+                    //looking for the property in local properties if it wasn't found in global properties
+                    if (value == null)
+                    {
+                        foreach (DictionaryEntry prop in e.Properties)
+                        {
+
+                            if ((string)prop.Key == itemVal.ItemSpec)
+                            {
+                                value = (string)prop.Value;
+                                break;
+                            }
+                        }
+                    }
+
+                    //adding the property key and value pair to the propertyOutputs
+                    if (value != null)
+                    {
+                        propertyOutputs.TryAdd(itemVal.ItemSpec, value);
+                    }
+                }
+            }
+            //adding the finished dictionary to TargetFramework_mapping
+            //this creates a mapping of a specific project/node to a dictionary of property values
+            TargetFramework_mapping.TryAdd((node, project_context_id), propertyOutputs);
         }
 
         /// <summary>
@@ -494,6 +519,13 @@ namespace Microsoft.Build.BackEnd.Logging
             ShowDeferredMessages();
             setColor(ConsoleColor.Red);
 
+            //determine the mapping of properties to output
+            int nodeId = e.BuildEventContext.NodeId;
+            int projectContextId = e.BuildEventContext.ProjectContextId;
+            ConcurrentDictionary<string, string> outputProperties;
+            TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
+            e.outputProperties = outputProperties;
+
             WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile));
             if (ShowSummary == true)
             {
@@ -512,6 +544,13 @@ namespace Microsoft.Build.BackEnd.Logging
             ShowDeferredMessages();
             setColor(ConsoleColor.Yellow);
 
+            //determine the mapping of properties to output
+            int nodeId = e.BuildEventContext.NodeId;
+            int projectContextId = e.BuildEventContext.ProjectContextId;
+            ConcurrentDictionary<string, string> outputProperties;
+            TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
+            e.outputProperties = outputProperties;
+
             WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile));
             if (ShowSummary == true)
             {
@@ -525,6 +564,13 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public override void MessageHandler(object sender, BuildMessageEventArgs e)
         {
+            //determine the mapping of properties to output
+            int nodeId = e.BuildEventContext.NodeId;
+            int projectContextId = e.BuildEventContext.ProjectContextId;
+            ConcurrentDictionary<string, string> outputProperties;
+            TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
+            e.outputProperties = outputProperties;
+
             bool print = false;
             bool lightenText = false;
             switch (e.Importance)
@@ -559,13 +605,10 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 string nonNullMessage = null;
 
-                string TargetFramework;
-                TargetFramework_mapping.TryGetValue((e.BuildEventContext.NodeId, e.BuildEventContext.ProjectContextId), out TargetFramework);
-
                 // Include file information if present.
                 if (e.File != null)
                 {
-                    nonNullMessage = EventArgsFormatting.FormatEventMessage(e, TargetFramework, showProjectFile);
+                    nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile);
                 }
                 else
                 {

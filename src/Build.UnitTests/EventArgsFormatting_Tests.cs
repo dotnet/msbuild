@@ -110,8 +110,8 @@ namespace Microsoft.Build.UnitTests
             BuildWarningEventArgs warning = new BuildWarningEventArgs("CS", "312", "source.cs", 42, 0, 0, 0, "message\r Hello", "help", "sender");
 
             // Testing the method in Shared.EventArgsFormatting directly
-            string errorString = EventArgsFormatting.FormatEventMessage(error, "netcoreapp3.1", true);
-            string warningString = EventArgsFormatting.FormatEventMessage(warning, "netcoreapp3.1", true);
+            string errorString = EventArgsFormatting.FormatEventMessage(error, true);
+            string warningString = EventArgsFormatting.FormatEventMessage(warning, true);
 
             Assert.Equal("TargetFramework: netcoreapp3.1 source.cs(42): CS error 312: message\r Hello", errorString);
             Assert.Equal("TargetFramework: netcoreapp3.1 source.cs(42): CS warning 312: message\r Hello", warningString);

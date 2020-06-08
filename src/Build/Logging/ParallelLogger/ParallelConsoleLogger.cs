@@ -206,7 +206,7 @@ namespace Microsoft.Build.BackEnd.Logging
             _hasBuildStarted = false;
 
             // Reset the two data structures created when the logger was created
-            TargetFramework_mapping = new ConcurrentDictionary<(int, int), string>();
+            TargetFramework_mapping = new ConcurrentDictionary<(int, int), ConcurrentDictionary<string, string>>();
             _buildEventManager = new BuildEventManager();
             _deferredMessages = new Dictionary<BuildEventContext, List<BuildMessageEventArgs>>(s_compareContextNodeId);
             _prefixWidth = 0;
@@ -355,12 +355,8 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 setColor(ConsoleColor.Yellow);
                 foreach (BuildWarningEventArgs warning in warningList)
-                {
-                    string TargetFramework;
-                    int projectContextID = warning.BuildEventContext.ProjectContextId;
-                    int nodeId = warning.BuildEventContext.NodeId;
-                    TargetFramework_mapping.TryGetValue((nodeId, projectContextID), out TargetFramework);
-                    WriteMessageAligned(EventArgsFormatting.FormatEventMessage(warning, TargetFramework, showProjectFile), true);
+                { 
+                    WriteMessageAligned(EventArgsFormatting.FormatEventMessage(warning, showProjectFile), true);
                 }
             }
 
@@ -369,11 +365,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Red);
                 foreach (BuildErrorEventArgs error in errorList)
                 {
-                    string TargetFramework;
-                    int projectContextID = error.BuildEventContext.ProjectContextId;
-                    int nodeId = error.BuildEventContext.NodeId;
-                    TargetFramework_mapping.TryGetValue((nodeId, projectContextID), out TargetFramework);
-                    WriteMessageAligned(EventArgsFormatting.FormatEventMessage(error, TargetFramework, showProjectFile), true);
+                    WriteMessageAligned(EventArgsFormatting.FormatEventMessage(error, showProjectFile), true);
                 }
             }
 
@@ -478,18 +470,13 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Print out all of the errors under the ProjectEntryPoint / target
                 foreach (BuildEventArgs errorWarningEvent in valuePair.Value)
                 {
-                    string TargetFramework;
-                    int nodeId = errorWarningEvent.BuildEventContext.NodeId;
-                    int projectContextId = errorWarningEvent.BuildEventContext.ProjectContextId;
-                    TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out TargetFramework);
-
                     if (errorWarningEvent is BuildErrorEventArgs)
                     {
-                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildErrorEventArgs, TargetFramework, showProjectFile), false);
+                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildErrorEventArgs, showProjectFile), false);
                     }
                     else if (errorWarningEvent is BuildWarningEventArgs)
                     {
-                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildWarningEventArgs, TargetFramework, showProjectFile), false);
+                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildWarningEventArgs, showProjectFile), false);
                     }
                 }
                 WriteNewLine();
@@ -550,17 +537,47 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
 
-            
-            string TargetFramework;
-            e.GlobalProperties.TryGetValue("TargetFramework", out TargetFramework);
+            //node and project context ids for the TargetFramework_mapping key
             int node = e.BuildEventContext.NodeId;
             int project_context_id = e.BuildEventContext.ProjectContextId;
-            //adding target framework to mapping
-            TargetFramework_mapping.TryAdd((node, project_context_id),TargetFramework);
+            //creating the value to be added to the TargetFramework_mapping
+            ConcurrentDictionary<string, string> propertyOutputs = new ConcurrentDictionary<string, string>();
 
-            //initializes error and warning count in framework mapping
-            if (TargetFramework != null)
-                TargetFramework_errorwarning.TryAdd(TargetFramework, (0, 0));
+            foreach (DictionaryEntry item in e.Items)
+            {
+                ITaskItem itemVal = (ITaskItem)item.Value;
+                //finding if the outputProperties item has been used
+                if ((string)item.Key == "outputProperties")
+                {
+                    //looking for the property value associated with the property key
+                    //Note: the property key is the item value
+                    string value = null;
+                    e.GlobalProperties.TryGetValue(itemVal.ItemSpec, out value);
+
+                    //looking for the property in local properties if it wasn't found in global properties
+                    if (value == null)
+                    {
+                        foreach (DictionaryEntry prop in e.Properties)
+                        {
+                            
+                            if ((string)prop.Key == itemVal.ItemSpec)
+                            {
+                               value = (string)prop.Value;
+                               break;
+                            }
+                        }
+                    }
+
+                    //adding the property key and value pair to the propertyOutputs
+                    if (value != null)
+                    {
+                        propertyOutputs.TryAdd(itemVal.ItemSpec, value);
+                    }
+                }
+            }
+            //adding the finished dictionary to TargetFramework_mapping
+            //this creates a mapping of a specific project/node to a dictionary of property values
+            TargetFramework_mapping.TryAdd((node, project_context_id), propertyOutputs);
         }
 
         /// <summary>
@@ -949,6 +966,13 @@ namespace Microsoft.Build.BackEnd.Logging
             // Keep track of the number of error events raised 
             errorCount++;
 
+            //determine the mapping of properties to output
+            int nodeId = e.BuildEventContext.NodeId;
+            int projectContextId = e.BuildEventContext.ProjectContextId;
+            ConcurrentDictionary<string, string> outputProperties;
+            TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
+            e.outputProperties = outputProperties;
+
             // If there is an error we need to walk up the call stack and make sure that 
             // the project started events back to the root project know an error has occurred
             // and are not removed when they finish
@@ -994,7 +1018,14 @@ namespace Microsoft.Build.BackEnd.Logging
             ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
             // Keep track of the number of warning events raised during the build
             warningCount++;
-           
+
+            //determine the mapping of properties to output
+            int nodeId = e.BuildEventContext.NodeId;
+            int projectContextId = e.BuildEventContext.ProjectContextId;
+            ConcurrentDictionary<string, string> outputProperties;
+            TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
+            e.outputProperties = outputProperties;
+
             // If there is a warning we need to walk up the call stack and make sure that 
             // the project started events back to the root project know a warning has occurred
             // and are not removed when they finish
@@ -1039,6 +1070,13 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public override void MessageHandler(object sender, BuildMessageEventArgs e)
         {
+            //determine the mapping of properties to output
+            int nodeId = e.BuildEventContext.NodeId;
+            int projectContextId = e.BuildEventContext.ProjectContextId;
+            ConcurrentDictionary<string, string> outputProperties;
+            TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
+            e.outputProperties = outputProperties;
+
             if (showOnlyErrors || showOnlyWarnings) return;
 
             ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
@@ -1157,16 +1195,10 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             string nonNullMessage;
 
-            //gets target framework message occurred on
-            string TargetFramework;
-            int nodeId = e.BuildEventContext.NodeId;
-            int projectContextId = e.BuildEventContext.ProjectContextId;
-            TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out TargetFramework);
-
             // Include file information if present.
             if (e.File != null)
             {
-                nonNullMessage = EventArgsFormatting.FormatEventMessage(e, TargetFramework, showProjectFile);
+                nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile);
             }
             else
             {

@@ -15,11 +15,6 @@ namespace Microsoft.Build.Framework
     [Serializable]
     public class LazyFormattedBuildEventArgs : BuildEventArgs
     {
-        //dictionary storing the parameters to print along
-        //with a warning or error message.
-        //key = parameter name value = parameter value
-        protected ConcurrentDictionary<string, string> outputParameters;
-
         /// <summary>
         /// Stores the message arguments.
         /// </summary>
@@ -80,7 +75,6 @@ namespace Microsoft.Build.Framework
             originalCultureName = CultureInfo.CurrentCulture.Name;
             originalCultureInfo = CultureInfo.CurrentCulture;
             locker = new Object();
-            outputParameters = new ConcurrentDictionary<string, string>();
         }
 
         /// <summary>
@@ -184,6 +178,13 @@ namespace Microsoft.Build.Framework
 
                 originalCultureName = reader.ReadString();
             }
+        }
+
+        private ConcurrentDictionary<string, string> _outputProperties = new ConcurrentDictionary<string, string>();
+        public ConcurrentDictionary<string, string> outputProperties
+        {
+            get => _outputProperties;
+            set => _outputProperties = value;
         }
 
         /// <summary>

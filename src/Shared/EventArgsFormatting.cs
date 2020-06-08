@@ -8,6 +8,8 @@ using System.Text;
 
 using Microsoft.Build.Framework;
 using System.Linq;
+using System.Collections.Concurrent;
+using System.Collections;
 
 namespace Microsoft.Build.Shared
 {
@@ -16,55 +18,6 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class EventArgsFormatting
     {
-
-        /// <summary>
-        /// Format the error event message and all the other event data into
-        /// a single string.
-        /// </summary>
-        /// <param name="e">Error to format</param>
-        /// <param name="TargetFramework">TargetFramework error occurred on</param>
-        /// <param name="showProjectFile"><code>true</code> to show the project file which issued the event, otherwise <code>false</code>.</param>
-        /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildErrorEventArgs e, string TargetFramework, bool showProjectFile)
-        {
-            StringBuilder eventMessage = new StringBuilder();
-            if (TargetFramework != null && TargetFramework.Length > 0)
-                eventMessage.Append("TargetFramework: ").Append(TargetFramework).Append(" ");
-            return eventMessage.Append(FormatEventMessage(e, showProjectFile)).ToString();
-        }
-
-        /// <summary>
-        /// Format the warning message and all the other event data into a
-        /// single string.
-        /// </summary>
-        /// <param name="e">Warning to format</param>
-        /// <param name="TargetFramework">TargetFramework warning occurred on</param>
-        /// <param name="showProjectFile"><code>true</code> to show the project file which issued the event, otherwise <code>false</code>.</param>
-        /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildWarningEventArgs e, string TargetFramework, bool showProjectFile)
-        {
-            StringBuilder eventMessage = new StringBuilder();
-            if (TargetFramework != null && TargetFramework.Length > 0)
-                eventMessage.Append("TargetFramework: {2} ");
-            return eventMessage.Append(FormatEventMessage(e, showProjectFile)).ToString();
-        }
-
-        /// <summary>
-        /// Format the message and all the other event data into a
-        /// single string.
-        /// </summary>
-        /// <param name="e">Message to format</param>
-        /// <param name="TargetFramework">TargetFramework message occurred on</param>
-        /// <param name="showProjectFile">Show project file or not</param>
-        /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildMessageEventArgs e, string TargetFramework, bool showProjectFile)
-        {
-            StringBuilder eventMessage = new StringBuilder();
-            if (TargetFramework != null && TargetFramework.Length > 0)
-                eventMessage.Append("TargetFramework: {2} ");
-            return eventMessage.Append(FormatEventMessage(e, showProjectFile)).ToString();
-        }
-
         /// <summary>
         /// Format the error event message and all the other event data into
         /// a single string.
@@ -78,7 +31,7 @@ namespace Microsoft.Build.Shared
             // "error" should not be localized
             return FormatEventMessage("error", e.Subcategory, e.Message,
                             e.Code, e.File, null, e.LineNumber, e.EndLineNumber,
-                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId);
+                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, e.outputProperties);
         }
 
         /// <summary>
@@ -95,7 +48,7 @@ namespace Microsoft.Build.Shared
             // "error" should not be localized
             return FormatEventMessage("error", e.Subcategory, e.Message,
                 e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
-                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId);
+                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, e.outputProperties);
         }
 
         /// <summary>
@@ -111,7 +64,7 @@ namespace Microsoft.Build.Shared
             // "warning" should not be localized
             return FormatEventMessage("warning", e.Subcategory, e.Message,
                 e.Code, e.File, null, e.LineNumber, e.EndLineNumber,
-                           e.ColumnNumber, e.EndColumnNumber, e.ThreadId);
+                           e.ColumnNumber, e.EndColumnNumber, e.ThreadId, e.outputProperties);
         }
 
         /// <summary>
@@ -128,7 +81,7 @@ namespace Microsoft.Build.Shared
             // "warning" should not be localized
             return FormatEventMessage("warning", e.Subcategory, e.Message,
                 e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
-                           e.ColumnNumber, e.EndColumnNumber, e.ThreadId);
+                           e.ColumnNumber, e.EndColumnNumber, e.ThreadId, e.outputProperties);
         }
 
         /// <summary>
@@ -155,7 +108,7 @@ namespace Microsoft.Build.Shared
 
             // "message" should not be localized
             return FormatEventMessage("message", e.Subcategory, e.Message,
-                e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber, e.ColumnNumber, e.EndColumnNumber, e.ThreadId);
+                e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber, e.ColumnNumber, e.EndColumnNumber, e.ThreadId, e.outputProperties);
         }
 
         /// <summary>
@@ -187,7 +140,7 @@ namespace Microsoft.Build.Shared
             int threadId
         )
         {
-            return FormatEventMessage(category, subcategory, message, code, file, null, lineNumber, endLineNumber, columnNumber, endColumnNumber, threadId);
+            return FormatEventMessage(category, subcategory, message, code, file, null, lineNumber, endLineNumber, columnNumber, endColumnNumber, threadId, null);
         }
 
         /// <summary>
@@ -218,7 +171,8 @@ namespace Microsoft.Build.Shared
             int endLineNumber,
             int columnNumber,
             int endColumnNumber,
-            int threadId
+            int threadId,
+            ConcurrentDictionary<string, string> outputProperties
         )
         {
             StringBuilder format = new StringBuilder();
@@ -308,10 +262,17 @@ namespace Microsoft.Build.Shared
                 format.Append("{6}");
             }
 
+            StringBuilder projectProperties = new StringBuilder();
+
             // If the project file was specified, tack that onto the very end.
+            foreach (KeyValuePair<string, string> prop in outputProperties)
+            {
+                projectProperties.Append(prop.Key).Append(":").Append(prop.Value).Append(" ");
+            }
+
             if (projectFile != null && !String.Equals(projectFile, file))
             {
-                format.Append(" [{10}]");
+                format.Append(" [{10} ").Append(projectProperties).Append("]");
             }
 
             // A null message is allowed and is to be treated as a blank line.
