@@ -375,13 +375,91 @@ namespace Microsoft.NET.Build.Tests
             {
                 shouldCompile = false;
             }
-
+            
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
             var getValuesCommand = new GetValuesCommand(Log, libraryProjectDirectory,
                 targetFramework, "DefineConstants")
             {
                 ShouldCompile = shouldCompile
+            };
+
+            getValuesCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var definedConstants = getValuesCommand.GetValues();
+
+            definedConstants.Should().BeEquivalentTo(new[] { "DEBUG", "TRACE" }.Concat(expectedDefines).ToArray());
+        }
+
+        [Theory]
+        [InlineData("net5.0", new[] { "NETCOREAPP3_1", "NET5_0" })]
+        [InlineData("net6.0", new[] { "NETCOREAPP3_1", "NET5_0", "NET6_0" })]
+        public void It_implicitly_defines_compilation_constants_for_the_target_framework_with_backwards_compatibility(string targetFramework, string[] expectedDefines)
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", targetFramework)
+                .WithSource()
+                .WithTargetFramework(targetFramework)
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propGroup = new XElement(ns + "PropertyGroup");
+                    project.Root.Add(propGroup);
+                    var maxVersion = new XElement(ns + "NETCoreAppMaximumVersion", "6.0");
+                    propGroup.Add(maxVersion);
+                    var errorOnMissing = new XElement(ns + "GenerateErrorForMissingTargetingPacks", "false");
+                    propGroup.Add(errorOnMissing);
+
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    project.Root.Add(itemGroup);
+                    var supportedFramework = new XElement(ns + "SupportedNETCoreAppTargetFramework",
+                        new XAttribute("Include", ".NETCoreApp,Version=v6.0"),
+                        new XAttribute("DisplayName", ".NET 6.0"));
+                    itemGroup.Add(supportedFramework);
+                });
+
+            AssertDefinedConstantsOutput(testAsset, targetFramework, new[] { "NETCOREAPP", "NET", "WINDOWS", "WINDOWS7_0" }.Concat(expectedDefines).ToArray());
+        }
+
+        [Theory]
+        [InlineData("ios", "1.1", new[] { "IOS", "IOS1_1" })]
+        [InlineData("android", "2.2", new[] { "ANDROID", "ANDROID2_2" })]
+        [InlineData("windows", "10.1", new[] { "WINDOWS", "WINDOWS10_1" })]
+        public void It_implicitly_defines_compilation_constants_for_the_target_platform(string targetPlatformIdentifier, string targetPlatformVersion, string[] expectedDefines)
+        {
+            var targetFramework = "net5.0";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", targetFramework)
+                .WithSource()
+                .WithTargetFramework(targetFramework)
+                .WithProjectChanges(project =>
+                {
+                    //  Manually set target plaform properties
+                    var ns = project.Root.Name.Namespace;
+                    var propGroup = new XElement(ns + "PropertyGroup");
+                    project.Root.Add(propGroup);
+
+                    var platformIdentifier = new XElement(ns + "TargetPlatformIdentifier", targetPlatformIdentifier);
+                    propGroup.Add(platformIdentifier);
+                    var platformVersion = new XElement(ns + "TargetPlatformVersion", targetPlatformVersion);
+                    propGroup.Add(platformVersion);
+                });
+
+            AssertDefinedConstantsOutput(testAsset, targetFramework, new[] { "NETCOREAPP", "NET", "NET5_0", "NETCOREAPP3_1" }.Concat(expectedDefines).ToArray());
+        }
+
+        private void AssertDefinedConstantsOutput(TestAsset testAsset, string targetFramework, string[] expectedDefines)
+        {
+            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
+
+            var getValuesCommand = new GetValuesCommand(Log, libraryProjectDirectory,
+                targetFramework, "DefineConstants")
+            {
+                ShouldCompile = false,
+                TargetName = "CoreCompile" // Overwrite core compile with our target to get DefineConstants
             };
 
             getValuesCommand
