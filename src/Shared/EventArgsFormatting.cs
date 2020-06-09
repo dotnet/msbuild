@@ -275,7 +275,7 @@ namespace Microsoft.Build.Shared
 
             if (projectFile != null && !String.Equals(projectFile, file))
             {
-                if(projectProperties != null && projectProperties.Length > 0) format.Append(" [{10} ").Append(projectProperties).Append("]");
+                if(projectProperties != null && projectProperties.Length > 0) format.Append(" [{10} > ").Append(projectProperties).Append("]");
                 else format.Append(" [{10}]");
             }
 
