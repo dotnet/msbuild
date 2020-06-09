@@ -266,9 +266,12 @@ namespace Microsoft.Build.Shared
 
             // If the project file was specified, tack that onto the very end.
             // Check for additional properties that should be outputted as well
-            foreach (KeyValuePair<string, string> prop in outputProperties)
+            if (outputProperties != null)
             {
-                projectProperties.Append(prop.Key).Append(":").Append(prop.Value).Append(" ");
+                foreach (KeyValuePair<string, string> prop in outputProperties)
+                {
+                    projectProperties.Append(prop.Key).Append(":").Append(prop.Value).Append(" ");
+                }
             }
 
             if (projectFile != null && !String.Equals(projectFile, file))
