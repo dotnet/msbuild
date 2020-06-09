@@ -384,20 +384,6 @@ namespace Microsoft.Build.BackEnd
                     // respond with another long.  Once the handshake is complete, both sides can be assured the
                     // other is ready to accept data.
                     // To avoid mixing client and server builds, the long is the MSBuild binary timestamp.
-
-                    // Compatibility issue here.
-                    // Previous builds of MSBuild 4.0 would exchange just a byte.
-                    // Host would send either 0x5F or 0x60 depending on whether it was the toolset or not respectively.
-                    // Client would return either 0xF5 or 0x06 respectively.
-                    // Therefore an old host on a machine with new clients running will hang, 
-                    // sending a byte and waiting for a byte until it eventually times out;
-                    // because the new client will want 7 more bytes before it returns anything.
-                    // The other way around is not a problem, because the old client would immediately return the (wrong)
-                    // byte on receiving the first byte of the long sent by the new host, and the new host would disconnect.
-                    // To avoid the hang, special case here:
-                    // Make sure our handshakes always start with 00.
-                    // If we received ONLY one byte AND it's 0x5F or 0x60, return 0xFF (it doesn't matter what as long as
-                    // it will cause the host to reject us; new hosts expect 00 and old hosts expect F5 or 06).
                     try
                     {
                         long handshake = localReadPipe.ReadLongForHandshake(0xFF /* this will disconnect the host; it expects leading 00 or F5 or 06 */
