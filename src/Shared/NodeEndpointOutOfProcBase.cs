@@ -386,7 +386,7 @@ namespace Microsoft.Build.BackEnd
                     // To avoid mixing client and server builds, the long is the MSBuild binary timestamp.
                     try
                     {
-                        long handshake = localReadPipe.ReadLongForHandshake(0xFF /* this will disconnect the host; it expects leading 00 or F5 or 06 */
+                        long handshake = localReadPipe.ReadLongForHandshake(0xFF /* this will disconnect a < 4.5 host; it expects leading 00 or F5 or 06 */
 #if NETCOREAPP2_1 || MONO
                             , ClientConnectTimeout /* wait a long time for the handshake from this side */
 #endif
