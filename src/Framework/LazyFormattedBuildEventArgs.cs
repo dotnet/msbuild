@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
@@ -180,8 +180,8 @@ namespace Microsoft.Build.Framework
             }
         }
 
-        private ConcurrentDictionary<string, string> _outputProperties = new ConcurrentDictionary<string, string>();
-        public ConcurrentDictionary<string, string> outputProperties
+        private Dictionary<string, string> _outputProperties = new Dictionary<string, string>();
+        public Dictionary<string, string> outputProperties
         {
             get => _outputProperties;
             set => _outputProperties = value;

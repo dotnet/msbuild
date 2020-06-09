@@ -16,8 +16,6 @@ using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
 using Microsoft.Build.Exceptions;
-using System.Collections.Concurrent;
-
 namespace Microsoft.Build.BackEnd.Logging
 {
     /// <summary>
@@ -206,7 +204,7 @@ namespace Microsoft.Build.BackEnd.Logging
             _hasBuildStarted = false;
 
             // Reset the two data structures created when the logger was created
-            TargetFramework_mapping = new ConcurrentDictionary<(int, int), ConcurrentDictionary<string, string>>();
+            TargetFramework_mapping = new Dictionary<(int, int), Dictionary<string, string>>();
             _buildEventManager = new BuildEventManager();
             _deferredMessages = new Dictionary<BuildEventContext, List<BuildMessageEventArgs>>(s_compareContextNodeId);
             _prefixWidth = 0;
@@ -404,7 +402,7 @@ namespace Microsoft.Build.BackEnd.Logging
         private void ShowErrorWarningSummary(IEnumerable<BuildEventArgs> listToProcess)
         {
             // Group the build warning event args based on the entry point and the target in which the warning occurred
-            var groupByProjectEntryPoint = new ConcurrentDictionary<ErrorWarningSummaryDictionaryKey, List<BuildEventArgs>>();
+            var groupByProjectEntryPoint = new Dictionary<ErrorWarningSummaryDictionaryKey, List<BuildEventArgs>>();
 
             // Loop through each of the warnings and put them into the correct buckets
             foreach (BuildEventArgs errorWarningEventArgs in listToProcess)
@@ -432,8 +430,14 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Check to see if there is a bucket for the warning
                 // If there is no bucket create a new one which contains a list of all the errors which
                 // happened for a given buildEventContext / target
-                groupByProjectEntryPoint.TryAdd(key, new List<BuildEventArgs>());
-                
+
+#if NET472
+                if (!groupByProjectEntryPoint.ContainsKey(key))
+                    groupByProjectEntryPoint.Add(key, new List<BuildEventArgs>());
+#else
+                        groupByProjectEntryPoint.TryAdd(key, new List<BuildEventArgs>());
+#endif
+
                 // Add the error event to the correct bucket
                 groupByProjectEntryPoint[key].Add(errorWarningEventArgs);
             }
@@ -541,7 +545,7 @@ namespace Microsoft.Build.BackEnd.Logging
             int node = e.BuildEventContext.NodeId;
             int project_context_id = e.BuildEventContext.ProjectContextId;
             //creating the value to be added to the TargetFramework_mapping
-            ConcurrentDictionary<string, string> propertyOutputs = new ConcurrentDictionary<string, string>();
+            Dictionary<string, string> propertyOutputs = new Dictionary<string, string>();
 
             foreach (DictionaryEntry item in e.Items)
             {
@@ -571,13 +575,23 @@ namespace Microsoft.Build.BackEnd.Logging
                     //adding the property key and value pair to the propertyOutputs
                     if (value != null)
                     {
+#if NET472
+                        if(!propertyOutputs.ContainsKey(itemVal.ItemSpec))
+                            propertyOutputs.Add(itemVal.ItemSpec, value);
+#else
                         propertyOutputs.TryAdd(itemVal.ItemSpec, value);
+#endif
                     }
                 }
             }
             //adding the finished dictionary to TargetFramework_mapping
             //this creates a mapping of a specific project/node to a dictionary of property values
+#if NET472
+            if (!TargetFramework_mapping.ContainsKey((node, project_context_id)))
+                TargetFramework_mapping.Add((node, project_context_id), propertyOutputs);
+#else
             TargetFramework_mapping.TryAdd((node, project_context_id), propertyOutputs);
+#endif
         }
 
         /// <summary>
@@ -969,7 +983,7 @@ namespace Microsoft.Build.BackEnd.Logging
             //determine the mapping of properties to output
             int nodeId = e.BuildEventContext.NodeId;
             int projectContextId = e.BuildEventContext.ProjectContextId;
-            ConcurrentDictionary<string, string> outputProperties;
+            Dictionary<string, string> outputProperties;
             TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
             e.outputProperties = outputProperties;
 
@@ -1022,7 +1036,7 @@ namespace Microsoft.Build.BackEnd.Logging
             //determine the mapping of properties to output
             int nodeId = e.BuildEventContext.NodeId;
             int projectContextId = e.BuildEventContext.ProjectContextId;
-            ConcurrentDictionary<string, string> outputProperties;
+            Dictionary<string, string> outputProperties;
             TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
             e.outputProperties = outputProperties;
 
@@ -1073,7 +1087,7 @@ namespace Microsoft.Build.BackEnd.Logging
             //determine the mapping of properties to output
             int nodeId = e.BuildEventContext.NodeId;
             int projectContextId = e.BuildEventContext.ProjectContextId;
-            ConcurrentDictionary<string, string> outputProperties;
+            Dictionary<string, string> outputProperties;
             TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
             e.outputProperties = outputProperties;
 
@@ -1647,9 +1661,9 @@ namespace Microsoft.Build.BackEnd.Logging
 
             return (MPPerformanceCounter)counter;
         }
-        #endregion
+#endregion
 
-        #region InternalClass
+#region InternalClass
         /// <summary>
         /// Stores and calculates the performance numbers for the different events
         /// </summary>
@@ -1751,9 +1765,9 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
         }
-        #endregion
+#endregion
 
-        #region internal MemberData
+#region internal MemberData
         private static readonly ComparerContextNodeId<BuildEventContext> s_compareContextNodeId = new ComparerContextNodeId<BuildEventContext>();
         private static readonly ComparerContextNodeIdTargetId<BuildEventContext> s_compareContextNodeIdTargetId = new ComparerContextNodeIdTargetId<BuildEventContext>();
         private BuildEventContext _lastDisplayedBuildEventContext;
@@ -1766,9 +1780,9 @@ namespace Microsoft.Build.BackEnd.Logging
         private bool _showEventId;
         // According to the documentation for ENABLE_PROCESSED_OUTPUT tab width for the console is 8 characters
         private const string consoleTab = "        ";
-        #endregion
+#endregion
 
-        #region Per-build Members
+#region Per-build Members
         //Holds messages that were going to be shown before the project started event, buffer them until the project started event is shown
         private Dictionary<BuildEventContext, List<BuildMessageEventArgs>> _deferredMessages;
         private BuildEventManager _buildEventManager;
@@ -1776,6 +1790,6 @@ namespace Microsoft.Build.BackEnd.Logging
         private bool _hasBuildStarted;
         private bool? _showCommandLine;
         private bool _showTimeStamp;
-        #endregion
+#endregion
     }
 }

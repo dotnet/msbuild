@@ -15,7 +15,6 @@ using Microsoft.Build.Shared;
 using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
-using System.Collections.Concurrent;
 using System.Linq;
 
 namespace Microsoft.Build.BackEnd.Logging
@@ -93,7 +92,7 @@ namespace Microsoft.Build.BackEnd.Logging
             errorCount = 0;
             warningCount = 0;
 
-            TargetFramework_mapping = new ConcurrentDictionary<(int nodeId, int contextId), ConcurrentDictionary<string,string>>();
+            TargetFramework_mapping = new Dictionary<(int nodeId, int contextId), Dictionary<string,string>>();
             projectPerformanceCounters = null;
             targetPerformanceCounters = null;
             taskPerformanceCounters = null;
@@ -287,7 +286,7 @@ namespace Microsoft.Build.BackEnd.Logging
             int node = e.BuildEventContext.NodeId;
             int project_context_id = e.BuildEventContext.ProjectContextId;
             //creating the value to be added to the TargetFramework_mapping
-            ConcurrentDictionary<string, string> propertyOutputs = new ConcurrentDictionary<string, string>();
+            Dictionary<string, string> propertyOutputs = new Dictionary<string, string>();
 
             foreach (DictionaryEntry item in e.Items)
             {
@@ -317,13 +316,23 @@ namespace Microsoft.Build.BackEnd.Logging
                     //adding the property key and value pair to the propertyOutputs
                     if (value != null)
                     {
+#if NET472
+                        if (!propertyOutputs.ContainsKey(itemVal.ItemSpec))
+                            propertyOutputs.Add(itemVal.ItemSpec, value);
+#else
                         propertyOutputs.TryAdd(itemVal.ItemSpec, value);
+#endif
                     }
                 }
             }
             //adding the finished dictionary to TargetFramework_mapping
             //this creates a mapping of a specific project/node to a dictionary of property values
+        #if NET472
+            if (!TargetFramework_mapping.ContainsKey((node, project_context_id)))
+                TargetFramework_mapping.Add((node, project_context_id), propertyOutputs);
+        #else
             TargetFramework_mapping.TryAdd((node, project_context_id), propertyOutputs);
+        #endif
         }
 
         /// <summary>
@@ -522,7 +531,7 @@ namespace Microsoft.Build.BackEnd.Logging
             //determine the mapping of properties to output
             int nodeId = e.BuildEventContext.NodeId;
             int projectContextId = e.BuildEventContext.ProjectContextId;
-            ConcurrentDictionary<string, string> outputProperties;
+            Dictionary<string, string> outputProperties;
             TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
             e.outputProperties = outputProperties;
 
@@ -547,7 +556,7 @@ namespace Microsoft.Build.BackEnd.Logging
             //determine the mapping of properties to output
             int nodeId = e.BuildEventContext.NodeId;
             int projectContextId = e.BuildEventContext.ProjectContextId;
-            ConcurrentDictionary<string, string> outputProperties;
+            Dictionary<string, string> outputProperties;
             TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
             e.outputProperties = outputProperties;
 
@@ -567,7 +576,7 @@ namespace Microsoft.Build.BackEnd.Logging
             //determine the mapping of properties to output
             int nodeId = e.BuildEventContext.NodeId;
             int projectContextId = e.BuildEventContext.ProjectContextId;
-            ConcurrentDictionary<string, string> outputProperties;
+            Dictionary<string, string> outputProperties;
             TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
             e.outputProperties = outputProperties;
 

@@ -8,7 +8,6 @@ using System.Text;
 
 using Microsoft.Build.Framework;
 using System.Linq;
-using System.Collections.Concurrent;
 using System.Collections;
 
 namespace Microsoft.Build.Shared
@@ -140,7 +139,7 @@ namespace Microsoft.Build.Shared
             int threadId
         )
         {
-            return FormatEventMessage(category, subcategory, message, code, file, null, lineNumber, endLineNumber, columnNumber, endColumnNumber, threadId, new ConcurrentDictionary<string, string>());
+            return FormatEventMessage(category, subcategory, message, code, file, null, lineNumber, endLineNumber, columnNumber, endColumnNumber, threadId, new Dictionary<string, string>());
         }
 
         /// <summary>
@@ -172,7 +171,7 @@ namespace Microsoft.Build.Shared
             int columnNumber,
             int endColumnNumber,
             int threadId,
-            ConcurrentDictionary<string, string> outputProperties
+            Dictionary<string, string> outputProperties
         )
         {
             StringBuilder format = new StringBuilder();
