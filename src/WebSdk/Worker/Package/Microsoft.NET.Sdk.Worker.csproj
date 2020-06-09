@@ -1,26 +1,16 @@
 ﻿<Project>
 
   <PropertyGroup>
+    <WorkerRoot Condition="'$(WorkerRoot)' == ''">$(RepoRoot)\src\WebSdk\Worker\</WorkerRoot>
     <PackageId>Microsoft.NET.Sdk.Worker</PackageId>
     <OutDirName>$(Configuration)\Sdks\$(PackageId)\tools</OutDirName>
-    <WorkerRoot Condition="'$(WorkerRoot)' == ''">$(RepoRoot)\src\WebSdk\Worker\</WorkerRoot>
   </PropertyGroup>
 
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   <Import Project="$(RepoRoot)\src\WebSdk\Package.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <OutputType>Library</OutputType>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <EnableDefaultItems>false</EnableDefaultItems>
-    <GenerateDependencyFile>false</GenerateDependencyFile>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
-    <NoPackageAnalysis>true</NoPackageAnalysis>
-    
-    <IsPackable>true</IsPackable>
-    <OutputPath>$(BaseOutputPath)</OutputPath>
-    <PackageLayoutOutputPath>$(ArtifactsBinDir)$(Configuration)\Sdks\$(PackageId)\</PackageLayoutOutputPath>
+    <TargetFrameworks>$(SdkTargetFramework)</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>

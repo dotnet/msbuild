@@ -140,6 +140,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelixTasks", "src\Tests\HelixTasks\HelixTasks.csproj", "{818165C4-6D22-4FA6-AAAF-DC66DA72450A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebSdk", "WebSdk", "{974F9450-8895-41D9-8328-D55AFF81A814}"
+	ProjectSection(SolutionItems) = preProject
+		src\WebSdk\CopyPackageLayout.targets = src\WebSdk\CopyPackageLayout.targets
+		src\WebSdk\Package.props = src\WebSdk\Package.props
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ProjectSystem", "ProjectSystem", "{B1C96E63-6F34-4BFE-AD5B-091F8A86A704}"
 EndProject

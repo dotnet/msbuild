@@ -1,10 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project>
 
 <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
   <ItemGroup>
-    <LayoutFile Include="@(Content)" Condition="'%(Content.PackagePath)' != '' and '%(Content.PackagePath)' != 'Icon.png'">
+    <LayoutFile Include="@(Content)" Condition="'%(Content.PackagePath)' != '' and '%(Content.PackagePath)' != 'Icon.png' and '%(Content.PackagePath)' != 'analyzers/cs'">
       <TargetPath>%(Content.PackagePath)\%(Content.RecursiveDir)%(Content.Filename)%(Content.Extension)</TargetPath>
+    </LayoutFile>
+    <!-- Analyzers needs to be copied to the root -->
+    <LayoutFile Include="@(Content)" Condition="'%(Content.PackagePath)' != '' and '%(Content.PackagePath)' != 'Icon.png' and '%(Content.PackagePath)' == 'analyzers/cs'">
+      <TargetPath>%(Content.PackagePath)\%(Content.Filename)%(Content.Extension)</TargetPath>
     </LayoutFile>
   </ItemGroup>
 </Target>
