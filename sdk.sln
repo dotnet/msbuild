@@ -164,6 +164,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Worker", "Worker", "{60D66F66-3B2B-4418-9BE3-AD9270012703}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.Publish", "src\WebSdk\Publish\Package\Microsoft.NET.Sdk.Publish.csproj", "{48AC8353-2AFB-4600-A3B2-0620240E795C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{518B88F4-D9C0-4865-8D33-9BB09F7D4A3E} = {518B88F4-D9C0-4865-8D33-9BB09F7D4A3E}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.Publish.Tasks", "src\WebSdk\Publish\Tasks\Microsoft.NET.Sdk.Publish.Tasks.csproj", "{518B88F4-D9C0-4865-8D33-9BB09F7D4A3E}"
 EndProject

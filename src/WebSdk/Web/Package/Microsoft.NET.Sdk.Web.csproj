@@ -1,14 +1,26 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project>
 
   <PropertyGroup>
+    <PackageId>Microsoft.NET.Sdk.Web</PackageId>
+    <OutDirName>$(Configuration)\Sdks\$(PackageId)\tools</OutDirName>
     <WebRoot Condition="'$(WebRoot)' == ''">$(RepoRoot)\src\WebSdk\Web\</WebRoot>
   </PropertyGroup>
 
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   <Import Project="$(RepoRoot)\src\WebSdk\Package.props" />
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <OutputType>Library</OutputType>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+
     <IsPackable>true</IsPackable>
+    <OutputPath>$(BaseOutputPath)</OutputPath>
+    <PackageLayoutOutputPath>$(ArtifactsBinDir)$(Configuration)\Sdks\$(PackageId)\</PackageLayoutOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -35,19 +47,22 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Api.Analyzers" Version="$(MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion)" PrivateAssets="All" BundleAsAnalyzer="true" />
   </ItemGroup>
 
-  <Target Name="_PackBundledAnalyzers" Inputs="@(PackageReference-&gt;HasMetadata('BundleAsAnalyzer'))" Outputs="%(PackageReference.Identity)" BeforeTargets="Build">
+  <Target Name="_PackBundledAnalyzers" Inputs="@(PackageReference->HasMetadata('BundleAsAnalyzer'))" Outputs="%(PackageReference.Identity)" BeforeTargets="Build">
     <PropertyGroup>
-      <_AnalyzerPath>$(NuGetPackageRoot)@(PackageReference-&gt;ToLower())\@(PackageReference-&gt;Metadata('Version')-&gt;ToLower())\analyzers\</_AnalyzerPath>
+      <_AnalyzerPath>$(NuGetPackageRoot)@(PackageReference->ToLower())\@(PackageReference->Metadata('Version')->ToLower())\analyzers\</_AnalyzerPath>
     </PropertyGroup>
     <ItemGroup>
       <_AnalyzerFile Include="$(_AnalyzerPath)**\*.dll" />
     </ItemGroup>
 
-    <Error Text="No files found for analyzer for @(PackageReference) at path $(_AnalyzerPath)" Condition="'@(_AnalyzerFile-&gt;Count())' == '0'" />
+    <Error Text="No files found for analyzer for @(PackageReference) at path $(_AnalyzerPath)" Condition="'@(_AnalyzerFile->Count())' == '0'" />
 
     <ItemGroup>
       <None Include="@(_AnalyzerFile)" Pack="true" PackagePath="analyzers/cs/%(_AnalyzerFile.Filename)%(_AnalyzerFile.Extension)" />
     </ItemGroup>
   </Target>
+
+  <Import Project="$(RepoRoot)\src\WebSdk\CopyPackageLayout.targets" />
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
 </Project>
