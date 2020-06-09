@@ -48,8 +48,13 @@ namespace Microsoft.NET.Build.Tasks
             {
                 if (!frameworkReferenceNames.Contains(runtimePack.GetMetadata(MetadataKeys.FrameworkName)))
                 {
-                    //  This is a runtime pack for a shared framework that ultimately wasn't referenced, so don't include its assets
-                    continue;
+                    var additionalFrameworkReferences = runtimePack.GetMetadata(MetadataKeys.AdditionalFrameworkReferences);
+                    if (additionalFrameworkReferences == null ||
+                        !additionalFrameworkReferences.Split(';').Any(afr => frameworkReferenceNames.Contains(afr)))
+                    {
+                        //  This is a runtime pack for a shared framework that ultimately wasn't referenced, so don't include its assets
+                        continue;
+                    }
                 }
 
                 string runtimePackRoot = runtimePack.GetMetadata(MetadataKeys.PackageDirectory);
