@@ -31,6 +31,7 @@
     <SystemSecurityCryptographyProtectedDataPackageVersion>5.0.0-preview.7.20309.9</SystemSecurityCryptographyProtectedDataPackageVersion>
     <SystemCollectionsSpecializedPackageVersion>4.3.0</SystemCollectionsSpecializedPackageVersion>
     <SystemXmlXmlDocumentPackageVersion>4.3.0</SystemXmlXmlDocumentPackageVersion>
+    <WebDeploymentPackageVersion>3.6.0</WebDeploymentPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/core-setup -->

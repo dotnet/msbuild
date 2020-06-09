@@ -10,7 +10,7 @@
   <Import Project="$(RepoRoot)\src\WebSdk\Package.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>$(SdkTargetFramework)</TargetFrameworks>
+    <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,11 +23,6 @@
       <Pack>true</Pack>
       <PackagePath>Sdk</PackagePath>
     </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="$(RepoRoot)\src\WebSdk\ProjectSystem\Package\Microsoft.NET.Sdk.Web.ProjectSystem.csproj" />
-    <ProjectReference Include="$(RepoRoot)\src\WebSdk\Publish\Package\Microsoft.NET.Sdk.Publish.csproj" />
   </ItemGroup>
 
   <ItemGroup>

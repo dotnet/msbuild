@@ -10,7 +10,7 @@
   <Import Project="$(RepoRoot)\src\WebSdk\Package.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>$(SdkTargetFramework)</TargetFrameworks>
+    <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
