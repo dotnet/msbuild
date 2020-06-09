@@ -542,11 +542,16 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             //node and project context ids for the TargetFramework_mapping key
-            int node = e.BuildEventContext.NodeId;
-            int project_context_id = e.BuildEventContext.ProjectContextId;
+            int node = -1;
+            int project_context_id = -1;
+            if (e.BuildEventContext != null)
+            {
+                node = e.BuildEventContext.NodeId;
+                project_context_id = e.BuildEventContext.ProjectContextId;
+            }
             //creating the value to be added to the TargetFramework_mapping
             Dictionary<string, string> propertyOutputs = new Dictionary<string, string>();
-            if (e.Items != null)
+            if (e.BuildEventContext != null && e.Items != null)
             {
                 foreach (DictionaryEntry item in e.Items)
                 {
@@ -575,7 +580,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
 
                         //adding the property key and value pair to the propertyOutputs
-                        if (value != null)
+                        if (e.BuildEventContext != null && value != null)
                         {
 #if NET472
                             if (!propertyOutputs.ContainsKey(itemVal.ItemSpec))
@@ -984,10 +989,13 @@ namespace Microsoft.Build.BackEnd.Logging
             errorCount++;
 
             //determine the mapping of properties to output
-            int nodeId = e.BuildEventContext.NodeId;
-            int projectContextId = e.BuildEventContext.ProjectContextId;
-            Dictionary<string, string> outputProperties;
-            TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
+            Dictionary<string, string> outputProperties = new Dictionary<string, string>();
+            if (e.BuildEventContext != null)
+            {
+                int nodeId = e.BuildEventContext.NodeId;
+                int projectContextId = e.BuildEventContext.ProjectContextId;
+                TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
+            }
             e.outputProperties = outputProperties;
 
             // If there is an error we need to walk up the call stack and make sure that 
@@ -1037,10 +1045,13 @@ namespace Microsoft.Build.BackEnd.Logging
             warningCount++;
 
             //determine the mapping of properties to output
-            int nodeId = e.BuildEventContext.NodeId;
-            int projectContextId = e.BuildEventContext.ProjectContextId;
-            Dictionary<string, string> outputProperties;
-            TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
+            Dictionary<string, string> outputProperties = new Dictionary<string, string>();
+            if (e.BuildEventContext != null)
+            {
+                int nodeId = e.BuildEventContext.NodeId;
+                int projectContextId = e.BuildEventContext.ProjectContextId;
+                TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
+            }
             e.outputProperties = outputProperties;
 
             // If there is a warning we need to walk up the call stack and make sure that 
@@ -1088,10 +1099,13 @@ namespace Microsoft.Build.BackEnd.Logging
         public override void MessageHandler(object sender, BuildMessageEventArgs e)
         {
             //determine the mapping of properties to output
-            int nodeId = e.BuildEventContext.NodeId;
-            int projectContextId = e.BuildEventContext.ProjectContextId;
-            Dictionary<string, string> outputProperties;
-            TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
+            Dictionary<string, string> outputProperties = new Dictionary<string, string>();
+            if (e.BuildEventContext != null)
+            {
+                int nodeId = e.BuildEventContext.NodeId;
+                int projectContextId = e.BuildEventContext.ProjectContextId;
+                TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
+            }
             e.outputProperties = outputProperties;
 
             if (showOnlyErrors || showOnlyWarnings) return;

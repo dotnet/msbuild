@@ -1210,6 +1210,7 @@ namespace Microsoft.Build.UnitTests
         public void ProcessProfileEvaluationInvalidFilename(string filename)
         {
             bool enableProfiler = false;
+            
             Should.Throw(
                 () => MSBuildApp.ProcessProfileEvaluationSwitch(new[] {filename}, new ArrayList(), out enableProfiler),
                 typeof(CommandLineSwitchException));

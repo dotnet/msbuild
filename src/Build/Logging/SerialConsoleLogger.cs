@@ -283,12 +283,17 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
             //node and project context ids for the TargetFramework_mapping key
-            int node = e.BuildEventContext.NodeId;
-            int project_context_id = e.BuildEventContext.ProjectContextId;
+            int node = -1;
+            int project_context_id = -1;
+            if (e.BuildEventContext != null)
+            {
+                node = e.BuildEventContext.NodeId;
+                project_context_id = e.BuildEventContext.ProjectContextId;
+            }
             //creating the value to be added to the TargetFramework_mapping
             Dictionary<string, string> propertyOutputs = new Dictionary<string, string>();
 
-            if (e.Items != null)
+            if (e.BuildEventContext != null && e.Items != null)
             {
                 foreach (DictionaryEntry item in e.Items)
                 {
@@ -331,10 +336,12 @@ namespace Microsoft.Build.BackEnd.Logging
             //adding the finished dictionary to TargetFramework_mapping
             //this creates a mapping of a specific project/node to a dictionary of property values
         #if NET472
-            if (!TargetFramework_mapping.ContainsKey((node, project_context_id)))
-                TargetFramework_mapping.Add((node, project_context_id), propertyOutputs);
+            if (e.BuildEventContext != null)
+                if (!TargetFramework_mapping.ContainsKey((node, project_context_id)))
+                    TargetFramework_mapping.Add((node, project_context_id), propertyOutputs);
         #else
-            TargetFramework_mapping.TryAdd((node, project_context_id), propertyOutputs);
+            if(e.BuildEventContext != null)
+                TargetFramework_mapping.TryAdd((node, project_context_id), propertyOutputs);
         #endif
         }
 
@@ -532,10 +539,13 @@ namespace Microsoft.Build.BackEnd.Logging
             setColor(ConsoleColor.Red);
 
             //determine the mapping of properties to output
-            int nodeId = e.BuildEventContext.NodeId;
-            int projectContextId = e.BuildEventContext.ProjectContextId;
-            Dictionary<string, string> outputProperties;
-            TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
+            Dictionary<string, string> outputProperties = new Dictionary<string, string>();
+            if (e.BuildEventContext != null)
+            {
+                int nodeId = e.BuildEventContext.NodeId;
+                int projectContextId = e.BuildEventContext.ProjectContextId;
+                TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
+            }
             e.outputProperties = outputProperties;
 
             WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile));
@@ -557,10 +567,13 @@ namespace Microsoft.Build.BackEnd.Logging
             setColor(ConsoleColor.Yellow);
 
             //determine the mapping of properties to output
-            int nodeId = e.BuildEventContext.NodeId;
-            int projectContextId = e.BuildEventContext.ProjectContextId;
-            Dictionary<string, string> outputProperties;
-            TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
+            Dictionary<string, string> outputProperties = new Dictionary<string, string>();
+            if (e.BuildEventContext != null)
+            {
+                int nodeId = e.BuildEventContext.NodeId;
+                int projectContextId = e.BuildEventContext.ProjectContextId;
+                TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
+            }
             e.outputProperties = outputProperties;
 
             WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile));
@@ -577,10 +590,13 @@ namespace Microsoft.Build.BackEnd.Logging
         public override void MessageHandler(object sender, BuildMessageEventArgs e)
         {
             //determine the mapping of properties to output
-            int nodeId = e.BuildEventContext.NodeId;
-            int projectContextId = e.BuildEventContext.ProjectContextId;
-            Dictionary<string, string> outputProperties;
-            TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
+            Dictionary<string, string> outputProperties = new Dictionary<string, string>();
+            if (e.BuildEventContext != null)
+            {
+                int nodeId = e.BuildEventContext.NodeId;
+                int projectContextId = e.BuildEventContext.ProjectContextId;
+                TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
+            }
             e.outputProperties = outputProperties;
 
             bool print = false;
