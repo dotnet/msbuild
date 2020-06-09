@@ -454,7 +454,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
             var itemsFromResolver = project.GetItems("ItemName");
             var item = itemsFromResolver.ShouldHaveSingleItem();
             item.EvaluatedInclude.ShouldBe("ItemValue" + specialString);
-            //item.UnevaluatedInclude.ShouldBe("ItemValue" + specialString);
             item.Metadata.Select(m => (m.Name, m.EvaluatedValue))
                 .ShouldBeEquivalentTo(new[] { (Name: "MetadataName", EvaluatedValue: "MetadataValue" + specialString) });
 

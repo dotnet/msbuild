@@ -1922,7 +1922,7 @@ namespace Microsoft.Build.Evaluation
 
                         if (item.Value.Metadata != null)
                         {
-                            escapedMetadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                            escapedMetadata = new Dictionary<string, string>(item.Value.Metadata.Count, StringComparer.OrdinalIgnoreCase);
                             foreach (var metadata in item.Value.Metadata)
                             {
                                 escapedMetadata[metadata.Key] = EscapingUtilities.Escape(metadata.Value);
