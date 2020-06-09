@@ -610,31 +610,6 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
-        /// Add the task host context to this handshake, to make sure that task hosts with different contexts 
-        /// will have different handshakes. Shift it into the upper 32-bits to avoid running into the 
-        /// session ID. The connection may be salted to allow MSBuild to only connect to nodes that come from the same
-        /// test environment.
-        /// </summary>
-        /// <param name="hostContext">TaskHostContext</param>
-        /// <returns>Base Handshake</returns>
-        private static long GetBaseHandshakeForContext(HandshakeOptions hostContext)
-        {
-            string salt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") + BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
-            long nodeHandshakeSalt = GetHandshakeHashCode(salt);
-
-            Trace("MSBUILDNODEHANDSHAKESALT=\"{0}\", msbuildDirectory=\"{1}\", hostContext={2}, FileVersionHash={3}", Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT"), BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, hostContext, FileVersionHash);
-
-            //FileVersionHash (32 bits) is shifted 8 bits to avoid session ID collision
-            //hostContext (4 bits) is shifted just after the FileVersionHash
-            //nodeHandshakeSalt (32 bits) is shifted just after hostContext
-            //the most significant byte (leftmost 8 bits) will get zero'd out to avoid connecting to older builds.
-            //| masked out | nodeHandshakeSalt | hostContext |              fileVersionHash             | SessionID
-            //  0000 0000     0000 0000 0000        0000        0000 0000 0000 0000 0000 0000 0000 0000   0000 0000
-            long baseHandshake = (nodeHandshakeSalt << 44) | ((long)hostContext << 40) | ((long)FileVersionHash << 8);
-            return baseHandshake;
-        }
-
-        /// <summary>
         /// Gets a hash code for this string.  If strings A and B are such that A.Equals(B), then
         /// they will return the same hash code.
         /// This is as implemented in CLR String.GetHashCode() [ndp\clr\src\BCL\system\String.cs]
