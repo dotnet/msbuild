@@ -276,7 +276,8 @@ namespace Microsoft.Build.Shared
 
             if (projectFile != null && !String.Equals(projectFile, file))
             {
-                format.Append(" [{10} ").Append(projectProperties).Append("]");
+                if(projectProperties != null && projectProperties.Length > 0) format.Append(" [{10} ").Append(projectProperties).Append("]");
+                else format.Append(" [{10}]");
             }
 
             // A null message is allowed and is to be treated as a blank line.
