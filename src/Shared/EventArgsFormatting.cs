@@ -140,7 +140,7 @@ namespace Microsoft.Build.Shared
             int threadId
         )
         {
-            return FormatEventMessage(category, subcategory, message, code, file, null, lineNumber, endLineNumber, columnNumber, endColumnNumber, threadId, null);
+            return FormatEventMessage(category, subcategory, message, code, file, null, lineNumber, endLineNumber, columnNumber, endColumnNumber, threadId, new ConcurrentDictionary<string, string>());
         }
 
         /// <summary>
