@@ -377,7 +377,7 @@ namespace Microsoft.Build.Internal
 #endif
             )
         {
-            return stream.ReadLongForHandshake((byte[])null, 0
+            return stream.ReadLongForHandshake(0
 #if NETCOREAPP2_1 || MONO
                 , handshakeReadTimeout
 #endif
@@ -388,7 +388,7 @@ namespace Microsoft.Build.Internal
         /// Extension method to read a series of bytes from a stream.
         /// If specified, leading byte matches one in the supplied array if any, returns rejection byte and throws IOException.
         /// </summary>
-        internal static long ReadLongForHandshake(this PipeStream stream, byte[] leadingBytesToReject,
+        internal static long ReadLongForHandshake(this PipeStream stream,
             byte rejectionByteToReturn
 #if NETCOREAPP2_1 || MONO
             , int timeout
@@ -433,19 +433,6 @@ namespace Microsoft.Build.Internal
                         // We've unexpectly reached end of stream.
                         // We are now in a bad state, disconnect on our end
                         throw new IOException(String.Format(CultureInfo.InvariantCulture, "Unexpected end of stream while reading for handshake"));
-                    }
-
-                    if (i == 0 && leadingBytesToReject != null)
-                    {
-                        foreach (byte reject in leadingBytesToReject)
-                        {
-                            if (read == reject)
-                            {
-                                stream.WriteByte(rejectionByteToReturn); // disconnect the host
-
-                                throw new IOException(String.Format(CultureInfo.InvariantCulture, "Client: rejected old host. Received byte {0} but this matched a byte to reject.", bytes[i]));  // disconnect and quit
-                            }
-                        }
                     }
 
                     bytes[i] = Convert.ToByte(read);
