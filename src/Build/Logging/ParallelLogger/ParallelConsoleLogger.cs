@@ -546,41 +546,44 @@ namespace Microsoft.Build.BackEnd.Logging
             int project_context_id = e.BuildEventContext.ProjectContextId;
             //creating the value to be added to the TargetFramework_mapping
             Dictionary<string, string> propertyOutputs = new Dictionary<string, string>();
-
-            foreach (DictionaryEntry item in e.Items)
+            if (e.Items != null)
             {
-                ITaskItem itemVal = (ITaskItem)item.Value;
-                //finding if the outputProperties item has been used
-                if ((string)item.Key == "outputProperties")
+                foreach (DictionaryEntry item in e.Items)
                 {
-                    //looking for the property value associated with the property key
-                    //Note: the property key is the item value
-                    string value = null;
-                    e.GlobalProperties.TryGetValue(itemVal.ItemSpec, out value);
-
-                    //looking for the property in local properties if it wasn't found in global properties
-                    if (value == null)
+                    ITaskItem itemVal = (ITaskItem)item.Value;
+                    //finding if the outputProperties item has been used
+                    if ((string)item.Key == "outputProperties")
                     {
-                        foreach (DictionaryEntry prop in e.Properties)
+                        //looking for the property value associated with the property key
+                        //Note: the property key is the item value
+                        string value = null;
+                        e.GlobalProperties.TryGetValue(itemVal.ItemSpec, out value);
+
+                        //looking for the property in local properties if it wasn't found in global properties
+                        if (value == null)
                         {
-                            
-                            if ((string)prop.Key == itemVal.ItemSpec)
+                            foreach (DictionaryEntry prop in e.Properties)
                             {
-                               value = (string)prop.Value;
-                               break;
+
+                                if ((string)prop.Key == itemVal.ItemSpec)
+                                {
+                                    value = (string)prop.Value;
+                                    break;
+                                }
                             }
                         }
-                    }
 
-                    //adding the property key and value pair to the propertyOutputs
-                    if (value != null)
-                    {
+
+                        //adding the property key and value pair to the propertyOutputs
+                        if (value != null)
+                        {
 #if NET472
-                        if(!propertyOutputs.ContainsKey(itemVal.ItemSpec))
-                            propertyOutputs.Add(itemVal.ItemSpec, value);
+                            if (!propertyOutputs.ContainsKey(itemVal.ItemSpec))
+                                propertyOutputs.Add(itemVal.ItemSpec, value);
 #else
                         propertyOutputs.TryAdd(itemVal.ItemSpec, value);
 #endif
+                        }
                     }
                 }
             }
