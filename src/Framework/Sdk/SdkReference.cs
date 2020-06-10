@@ -52,8 +52,9 @@ namespace Microsoft.Build.Framework
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return string.Equals(Name, other.Name) && string.Equals(Version, other.Version) &&
-                   string.Equals(MinimumVersion, other.MinimumVersion);
+            return string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
+                   string.Equals(Version, other.Version, StringComparison.OrdinalIgnoreCase) &&
+                   string.Equals(MinimumVersion, other.MinimumVersion, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -103,9 +104,9 @@ namespace Microsoft.Build.Framework
         {
             unchecked
             {
-                var hashCode = (Name != null ? Name.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (Version != null ? Version.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (MinimumVersion != null ? MinimumVersion.GetHashCode() : 0);
+                var hashCode = (Name != null ? Name.ToLowerInvariant().GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Version != null ? Version.ToLowerInvariant().GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (MinimumVersion != null ? MinimumVersion.ToLowerInvariant().GetHashCode() : 0);
                 return hashCode;
             }
         }

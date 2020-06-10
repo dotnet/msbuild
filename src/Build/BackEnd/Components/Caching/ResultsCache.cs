@@ -243,8 +243,8 @@ namespace Microsoft.Build.BackEnd
 
             translator.TranslateDictionary(
                 ref localReference,
-                (ref int i, ITranslator aTranslator) => aTranslator.Translate(ref i),
-                (ref BuildResult result, ITranslator aTranslator) => aTranslator.Translate(ref result),
+                (ITranslator aTranslator, ref int i) => aTranslator.Translate(ref i),
+                (ITranslator aTranslator, ref BuildResult result) => aTranslator.Translate(ref result),
                 capacity => new ConcurrentDictionary<int, BuildResult>(Environment.ProcessorCount, capacity));
 
             if (translator.Mode == TranslationDirection.ReadFromStream)

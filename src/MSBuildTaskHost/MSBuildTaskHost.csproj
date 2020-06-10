@@ -92,6 +92,7 @@
     <Compile Include="..\Shared\ITranslator.cs">
       <Link>ITranslator.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\TranslatorHelpers.cs" />
     <Compile Include="..\Shared\InternalErrorException.cs">
       <Link>InternalErrorException.cs</Link>
     </Compile>

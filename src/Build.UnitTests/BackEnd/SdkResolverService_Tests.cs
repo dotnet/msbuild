@@ -1,4 +1,7 @@
-﻿using Microsoft.Build.BackEnd.Logging;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
@@ -215,6 +218,223 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             resolver.ResolvedCalls.First().Key.ShouldBe("foo");
             resolver.ResolvedCalls.Count.ShouldBe(1);
+        }
+
+        private void CreateMockSdkResultPropertiesAndItems(out Dictionary<string, string> propertiesToAdd, out Dictionary<string, SdkResultItem> itemsToAdd)
+        {
+            propertiesToAdd = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    {"PropertyFromSdkResolver", "ValueFromSdkResolver" }
+                };
+
+            itemsToAdd = new Dictionary<string, SdkResultItem>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "ItemNameFromSdkResolver", new SdkResultItem( "ItemValueFromSdkResolver",
+                        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                        {
+                            { "MetadataName", "MetadataValue" }
+                        })
+                    }
+                };
+        }
+
+        private void ValidateExpectedPropertiesAndItems(bool includePropertiesAndItems, SdkResultBase result)
+        {
+            if (includePropertiesAndItems)
+            {
+                result.PropertiesToAdd.Count.ShouldBe(1);
+                result.PropertiesToAdd["PropertyFromSdkResolver"].ShouldBe("ValueFromSdkResolver");
+
+                result.ItemsToAdd.Count().ShouldBe(1);
+                result.ItemsToAdd.Keys.Single().ShouldBe("ItemNameFromSdkResolver");
+                result.ItemsToAdd.Values.Single().ItemSpec.ShouldBe("ItemValueFromSdkResolver");
+                var metadata = result.ItemsToAdd.Values.Single().Metadata;
+                metadata.ShouldBeSameIgnoringOrder(new[] { new KeyValuePair<string, string>("MetadataName", "MetadataValue") });
+            }
+            else
+            {
+                result.PropertiesToAdd.ShouldBeNull();
+                result.ItemsToAdd.ShouldBeNull();
+            }
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void SdkResolverCanReturnNoPaths(bool includePropertiesAndItems)
+        {
+            var sdk = new SdkReference("foo", null, null);
+
+            Dictionary<string, string> propertiesToAdd = null;
+            Dictionary<string, SdkResultItem> itemsToAdd = null;
+
+            if (includePropertiesAndItems)
+            {
+                CreateMockSdkResultPropertiesAndItems(out propertiesToAdd, out itemsToAdd);
+            }
+
+            var resolver = new SdkUtilities.ConfigurableMockSdkResolver(
+                new SdkResultImpl(
+                    sdk,
+                    Enumerable.Empty<string>(),
+                    version: null,
+                    propertiesToAdd,
+                    itemsToAdd,
+                    warnings: null
+                    ));
+
+            SdkResolverService.Instance.InitializeForTests(null, new List<SdkResolver>() { resolver });
+
+            var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false);
+
+            result.Success.ShouldBeTrue();
+            result.Path.ShouldBeNull();
+            result.Version.ShouldBeNull();
+
+            result.AdditionalPaths.ShouldBeNull();
+
+            ValidateExpectedPropertiesAndItems(includePropertiesAndItems, result);
+
+            _logger.WarningCount.ShouldBe(0);
+        }
+
+        [Fact]
+        public void SdkResultCanReturnPropertiesAndItems()
+        {
+            string expectedPath = "Path/To/Return/From/Resolver";
+
+            var sdk = new SdkReference("foo", null, null);
+
+            Dictionary<string, string> propertiesToAdd;
+            Dictionary<string, SdkResultItem> itemsToAdd;
+           
+            CreateMockSdkResultPropertiesAndItems(out propertiesToAdd, out itemsToAdd);
+
+            var resolver = new SdkUtilities.ConfigurableMockSdkResolver(
+                new SdkResultImpl(
+                    sdk,
+                    new[] { expectedPath },
+                    version: "1.0",
+                    propertiesToAdd,
+                    itemsToAdd,
+                    warnings: null
+                    ));
+
+            SdkResolverService.Instance.InitializeForTests(null, new List<SdkResolver>() { resolver });
+
+            var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false);
+
+            result.Success.ShouldBeTrue();
+            result.Path.ShouldBe(expectedPath);
+            result.Version.ShouldBe("1.0");
+
+            result.AdditionalPaths.ShouldBeNull();
+
+            ValidateExpectedPropertiesAndItems(true, result);
+
+            _logger.WarningCount.ShouldBe(0);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void SdkResultCanReturnMultiplePaths(bool includePropertiesAndItems)
+        {
+            string expectedPath1 = "First/Path/To/Return/From/Resolver";
+            string expectedPath2 = "Second/Path/To/Return/From/Resolver";
+
+            var sdk = new SdkReference("foo", "1.0", null);
+
+            Dictionary<string, string> propertiesToAdd = null;
+            Dictionary<string, SdkResultItem> itemsToAdd = null;
+
+            if (includePropertiesAndItems)
+            {
+                CreateMockSdkResultPropertiesAndItems(out propertiesToAdd, out itemsToAdd);
+            }
+
+            var resolver = new SdkUtilities.ConfigurableMockSdkResolver(
+                new SdkResultImpl(
+                    sdk,
+                    new []
+                    {
+                        expectedPath1,
+                        expectedPath2
+                    },
+                    version: "1.0",
+                    propertiesToAdd,
+                    itemsToAdd,
+                    warnings: null
+                    ));
+
+            SdkResolverService.Instance.InitializeForTests(null, new List<SdkResolver>() { resolver });
+
+            var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false);
+
+            result.Success.ShouldBeTrue();
+
+            var resultPaths = new List<string>();
+            resultPaths.Add(result.Path);
+            resultPaths.AddRange(result.AdditionalPaths);
+
+            resultPaths.ShouldBeSameIgnoringOrder(new[]
+            {
+                expectedPath1,
+                expectedPath2
+            });
+
+            ValidateExpectedPropertiesAndItems(includePropertiesAndItems, result);
+
+            _logger.WarningCount.ShouldBe(0);
+        }
+
+        [Fact]
+        public void AssertResolutionWarnsIfResolvedVersionIsDifferentFromReferencedVersionWithMultipleReturnPaths()
+        {
+            var expectedPath1 = "First/Path/To/Return/From/Resolver";
+            var expectedPath2 = "Second/Path/To/Return/From/Resolver";
+
+            var sdk = new SdkReference("foo", "1.0", null);
+
+            Dictionary<string, string> propertiesToAdd = null;
+            Dictionary<string, SdkResultItem> itemsToAdd = null;
+            
+            CreateMockSdkResultPropertiesAndItems(out propertiesToAdd, out itemsToAdd);
+
+            var resolver = new SdkUtilities.ConfigurableMockSdkResolver(
+                new SdkResultImpl(
+                    sdk,
+                    new[]
+                    {
+                        expectedPath1,
+                        expectedPath2
+                    },
+                    version: "1.1",
+                    propertiesToAdd,
+                    itemsToAdd,
+                    warnings: null
+                    ));
+
+            SdkResolverService.Instance.InitializeForTests(null, new List<SdkResolver>() { resolver });
+
+            var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false);
+
+            result.Success.ShouldBeTrue();
+
+            var resultPaths = new List<string>();
+            resultPaths.Add(result.Path);
+            resultPaths.AddRange(result.AdditionalPaths);
+
+            resultPaths.ShouldBeSameIgnoringOrder(new[]
+            {
+                expectedPath1,
+                expectedPath2
+            });
+
+            ValidateExpectedPropertiesAndItems(true, result);
+
+            _logger.WarningCount.ShouldBe(1);
+            _logger.Warnings.First().Code.ShouldStartWith("MSB4241");
         }
 
         /// <summary>

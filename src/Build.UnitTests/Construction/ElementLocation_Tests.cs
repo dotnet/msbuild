@@ -18,6 +18,7 @@ using System.IO;
 using System.Reflection;
 using Xunit;
 using System.Text;
+using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.UnitTests.Construction
 {

@@ -9,6 +9,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
 using Microsoft.Build.UnitTests.BackEnd;
 using Xunit;
+using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
