@@ -122,6 +122,11 @@
         <target state="translated">Не удается завершить операцию, так как ещё не был вызван BeginBuild.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NuGetAssemblyNotFound">
+        <source>A required NuGet assembly was not found. Expected Path: {0}</source>
+        <target state="new">A required NuGet assembly was not found. Expected Path: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
         <source>MSB4253: A null reference was returned from a user-provided ProjectInstanceFactoryFunc callback. This is not allowed.</source>
         <target state="translated">MSB4253: ссылка со значением NULL была возвращена из предоставленного пользователем вызова ProjectInstanceFactoryFunc. Это недопустимо.</target>
