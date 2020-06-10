@@ -63,6 +63,15 @@
     <Compile Include="..\Shared\NativeMethodsShared.cs">
       <Link>NativeMethodsShared.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\IInternable.cs">
+      <Link>IInternable.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\WeakStringCache.cs">
+      <Link>WeakStringCache.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\WeakStringCache.Concurrent.cs">
+      <Link>WeakStringCache.Concurrent.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\OpportunisticIntern.cs">
       <Link>OpportunisticIntern.cs</Link>
     </Compile>

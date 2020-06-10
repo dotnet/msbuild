@@ -226,11 +226,7 @@ namespace Microsoft.Build.BackEnd
             long hostHandshake = NodeProviderOutOfProc.GetHostHandshake(nodeReuse, enableLowPriority: false);
             long hostHandshakeWithLow = NodeProviderOutOfProc.GetHostHandshake(nodeReuse, enableLowPriority: true);
 
-            ShutdownAllNodes(
-                hostHandshake,
-                hostHandshakeWithLow,
-                NodeProviderOutOfProc.GetClientHandshake(),
-                NodeContextTerminated);
+            ShutdownAllNodes(nodeReuse, NodeContextTerminated);
         }
         #endregion
 

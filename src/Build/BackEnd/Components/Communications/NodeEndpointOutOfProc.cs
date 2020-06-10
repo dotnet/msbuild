@@ -77,7 +77,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         protected override long GetClientHandshake()
         {
-            return NodeProviderOutOfProc.GetClientHandshake();
+            return NodeProviderOutOfProc.GetClientHandshake(_enableReuse, _lowPriority);
         }
 
         #region Structs

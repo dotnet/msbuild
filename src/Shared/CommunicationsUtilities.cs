@@ -312,10 +312,10 @@ namespace Microsoft.Build.Internal
             }
 #endif
 
-            // Mask out the first byte. That's because old
-            // builds used a single, non zero initial byte,
-            // and we don't want to risk communicating with them
-            return baseHandshake;
+            // Mask out the first byte. Modern builds expect the first byte to be zero to indicate that they are modern
+            // and should be treated as such. Older builds used a non-zero initial byte. See here:
+            // https://github.com/microsoft/msbuild/blob/584ca5f11b28971f5651b4b8de5f173ad1cb2786/src/Shared/NodeEndpointOutOfProcBase.cs#L403.
+            return baseHandshake & 0x00FFFFFFFFFFFFFF;
         }
 
         /// <summary>
@@ -607,31 +607,6 @@ namespace Microsoft.Build.Internal
                     // Ignore
                 }
             }
-        }
-
-        /// <summary>
-        /// Add the task host context to this handshake, to make sure that task hosts with different contexts 
-        /// will have different handshakes. Shift it into the upper 32-bits to avoid running into the 
-        /// session ID. The connection may be salted to allow MSBuild to only connect to nodes that come from the same
-        /// test environment.
-        /// </summary>
-        /// <param name="hostContext">TaskHostContext</param>
-        /// <returns>Base Handshake</returns>
-        private static long GetBaseHandshakeForContext(HandshakeOptions hostContext)
-        {
-            string salt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") + BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
-            long nodeHandshakeSalt = GetHandshakeHashCode(salt);
-
-            Trace("MSBUILDNODEHANDSHAKESALT=\"{0}\", msbuildDirectory=\"{1}\", hostContext={2}, FileVersionHash={3}", Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT"), BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, hostContext, FileVersionHash);
-
-            //FileVersionHash (32 bits) is shifted 8 bits to avoid session ID collision
-            //hostContext (4 bits) is shifted just after the FileVersionHash
-            //nodeHandshakeSalt (32 bits) is shifted just after hostContext
-            //the most significant byte (leftmost 8 bits) will get zero'd out to avoid connecting to older builds.
-            //| masked out | nodeHandshakeSalt | hostContext |              fileVersionHash             | SessionID
-            //  0000 0000     0000 0000 0000        0000        0000 0000 0000 0000 0000 0000 0000 0000   0000 0000
-            long baseHandshake = (nodeHandshakeSalt << 44) | ((long)hostContext << 40) | ((long)FileVersionHash << 8);
-            return baseHandshake;
         }
 
         /// <summary>
