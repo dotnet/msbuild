@@ -1078,7 +1078,7 @@ namespace Microsoft.Build.Utilities
                         bool inFileCache = fileCache.ContainsKey(file);
 
                         // Have we cached the file yet? If not, cache whether or not it exists.
-                        if(!fileCache.ContainsKey(file))
+                        if(!inFileCache)
                         {
                             fileCache.Add(file, FileUtilities.FileExistsNoThrow(file));
                         }
