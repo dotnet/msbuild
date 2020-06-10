@@ -200,9 +200,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     .ToList();
             }
 
-            GetResolverResults("PropertyNameFromResolver").ShouldBeEquivalentTo(new[] { "PropertyValueFromResolver" });
-            GetResolverResults("ItemFromResolver").ShouldBeEquivalentTo(new[] { "ItemValueFromResolver" });
-            GetResolverResults("SdksImported").ShouldBeEquivalentTo(new[] { "Sdk1", "Sdk2" });
+            GetResolverResults("PropertyNameFromResolver").ShouldBeSameIgnoringOrder(new[] { "PropertyValueFromResolver" });
+            GetResolverResults("ItemFromResolver").ShouldBeSameIgnoringOrder(new[] { "ItemValueFromResolver" });
+            GetResolverResults("SdksImported").ShouldBeSameIgnoringOrder(new[] { "Sdk1", "Sdk2" });
         }
 
         private ProjectInstance CreateProjectInstance(string projectPath, string toolsVersion, ProjectCollection projectCollection)

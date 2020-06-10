@@ -249,7 +249,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 result.ItemsToAdd.Keys.Single().ShouldBe("ItemNameFromSdkResolver");
                 result.ItemsToAdd.Values.Single().ItemSpec.ShouldBe("ItemValueFromSdkResolver");
                 var metadata = result.ItemsToAdd.Values.Single().Metadata;
-                metadata.ShouldBeEquivalentTo(new[] { new KeyValuePair<string, string>("MetadataName", "MetadataValue") });
+                metadata.ShouldBeSameIgnoringOrder(new[] { new KeyValuePair<string, string>("MetadataName", "MetadataValue") });
             }
             else
             {
@@ -377,7 +377,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             resultPaths.Add(result.Path);
             resultPaths.AddRange(result.AdditionalPaths);
 
-            resultPaths.ShouldBeEquivalentTo(new[]
+            resultPaths.ShouldBeSameIgnoringOrder(new[]
             {
                 expectedPath1,
                 expectedPath2
@@ -425,7 +425,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             resultPaths.Add(result.Path);
             resultPaths.AddRange(result.AdditionalPaths);
 
-            resultPaths.ShouldBeEquivalentTo(new[]
+            resultPaths.ShouldBeSameIgnoringOrder(new[]
             {
                 expectedPath1,
                 expectedPath2

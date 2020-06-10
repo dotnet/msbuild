@@ -96,7 +96,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             item.EvaluatedInclude.ShouldBe("ItemValueFromSdkResolver");
             item.Metadata.Select(m => (m.Name, m.EvaluatedValue))
-                .ShouldBeEquivalentTo(new[] { (Name: "MetadataName", EvaluatedValue: "MetadataValue") });
+                .ShouldBeSameIgnoringOrder(new[] { (Name: "MetadataName", EvaluatedValue: "MetadataValue") });
         }
 
         [Theory]
@@ -455,7 +455,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             var item = itemsFromResolver.ShouldHaveSingleItem();
             item.EvaluatedInclude.ShouldBe("ItemValue" + specialString);
             item.Metadata.Select(m => (m.Name, m.EvaluatedValue))
-                .ShouldBeEquivalentTo(new[] { (Name: "MetadataName", EvaluatedValue: "MetadataValue" + specialString) });
+                .ShouldBeSameIgnoringOrder(new[] { (Name: "MetadataName", EvaluatedValue: "MetadataValue" + specialString) });
 
             _logger.ErrorCount.ShouldBe(0);
             _logger.WarningCount.ShouldBe(0);
