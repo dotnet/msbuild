@@ -3916,6 +3916,30 @@ namespace Microsoft.Build.Evaluation
                                 return true;
                             }
                         }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetTargetFrameworkIdentifier), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.GetTargetFrameworkIdentifier(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetTargetFrameworkVersion), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.GetTargetFrameworkVersion(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.IsTargetFrameworkCompatible), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArgs(args, out string arg0, out string arg1))
+                            {
+                                returnVal = IntrinsicFunctions.IsTargetFrameworkCompatible(arg0, arg1);
+                                return true;
+                            }
+                        }
                     }
                     else if (_receiverType == typeof(Path))
                     {
