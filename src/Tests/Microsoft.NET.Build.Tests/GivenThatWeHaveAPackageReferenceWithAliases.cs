@@ -24,7 +24,7 @@ namespace Microsoft.NET.Build.Tests
         [CoreMSBuildOnlyFact]
         public void CanBuildProjectWithPackageReferencesWithConflictingTypes()
         {
-            var targetFramework = "netcoreapp5.0";
+            var targetFramework = "netcoreapp3.1";
             var packageReferences = GetPackageReferencesWithConflictingTypes(targetFramework, "A", "B");
 
             TestProject testProject = new TestProject()
@@ -62,7 +62,7 @@ namespace Microsoft.NET.Build.Tests
         [CoreMSBuildOnlyFact]
         public void CanBuildProjectWithMultiplePackageReferencesWithAliases()
         {
-            var targetFramework = "netcoreapp5.0";
+            var targetFramework = "netcoreapp3.1";
 
             var packageReferenceA = GetPackageReference(targetFramework, "A", ClassLibClassA);
             var packageReferenceB = GetPackageReference(targetFramework, "B", ClassLibClassB);
@@ -107,7 +107,7 @@ namespace Microsoft.NET.Build.Tests
         [CoreMSBuildOnlyFact]
         public void CanBuildProjectWithAPackageReferenceWithMultipleAliases()
         {
-            var targetFramework = "netcoreapp5.0";
+            var targetFramework = "netcoreapp3.1";
 
             var packageReferenceA = GetPackageReference(targetFramework, "A", ClassLibMultipleClasses);
 
