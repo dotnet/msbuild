@@ -1075,7 +1075,7 @@ namespace Microsoft.Build.Utilities
                     {
                         // Record whether or not each file exists and cache it.
                         // We do this to save time (On^2), at the expense of data O(n).
-                        bool inFileCache = fileCache.ContainsKey(file);
+                        bool inFileCache = fileCache.TryGetValue(file, out bool fileExists);
 
                         // Have we cached the file yet? If not, cache whether or not it exists.
                         if(!inFileCache)
@@ -1084,7 +1084,7 @@ namespace Microsoft.Build.Utilities
                         }
 
                         // Does the cached file exist?
-                        if (fileCache[file])
+                        if (fileExists)
                         {
                             dependenciesWithoutMissingFiles.Add(file, dependencies[file]);
                         }
