@@ -1707,13 +1707,13 @@ namespace Microsoft.Build.Execution
                 }
 
                 // todo move to nested function after C# 7
-                private static void TranslatorForTaskParametersKey(ref string key, ITranslator translator)
+                private static void TranslatorForTaskParametersKey(ITranslator translator, ref string key)
                 {
                     translator.Translate(ref key);
                 }
 
                 // todo move to nested function after C# 7
-                private static void TranslatorForTaskParameterValue(ref TaskPropertyInfo taskPropertyInfo, ITranslator translator)
+                private static void TranslatorForTaskParameterValue(ITranslator translator, ref TaskPropertyInfo taskPropertyInfo)
                 {
                     string name = null;
                     string propertyTypeName = null;
@@ -1783,13 +1783,13 @@ namespace Microsoft.Build.Execution
         }
 
         //todo make nested after C# 7
-        void TranslateTaskRegistrationKey(ref RegisteredTaskIdentity taskIdentity, ITranslator translator)
+        void TranslateTaskRegistrationKey(ITranslator translator, ref RegisteredTaskIdentity taskIdentity)
         {
             translator.Translate(ref taskIdentity);
         }
 
         //todo make nested after C# 7
-        void TranslateTaskRegistrationValue(ref List<RegisteredTaskRecord> taskRecords, ITranslator translator)
+        void TranslateTaskRegistrationValue(ITranslator translator, ref List<RegisteredTaskRecord> taskRecords)
         {
             translator.Translate(ref taskRecords, RegisteredTaskRecord.FactoryForDeserialization);
         }
