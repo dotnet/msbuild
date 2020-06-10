@@ -220,7 +220,8 @@ namespace Microsoft.Build.BackEnd
                 var itemGroupText = ItemGroupLoggingHelper.GetParameterText(
                     ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix,
                     child.ItemType,
-                    itemsToAdd);
+                    itemsToAdd,
+                    logItemMetadata: true);
                 LoggingContext.LogCommentFromText(MessageImportance.Low, itemGroupText);
             }
 
@@ -261,7 +262,8 @@ namespace Microsoft.Build.BackEnd
                     var itemGroupText = ItemGroupLoggingHelper.GetParameterText(
                         ItemGroupLoggingHelper.ItemGroupRemoveLogMessage,
                         child.ItemType,
-                        itemsToRemove);
+                        itemsToRemove,
+                        logItemMetadata: true);
                     LoggingContext.LogCommentFromText(MessageImportance.Low, itemGroupText);
                 }
 

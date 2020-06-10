@@ -86,8 +86,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetPlatformIdentifier Condition="'$(TargetPlatformIdentifier)' == ''">Windows</TargetPlatformIdentifier>
-    <TargetPlatformVersion Condition="'$(TargetPlatformVersion)' == ''">7.0</TargetPlatformVersion>
+    <TargetPlatformIdentifier Condition="'$(TargetPlatformIdentifier)' == '' and '$(_EnableDefaultWindowsPlatform)' != 'false'">Windows</TargetPlatformIdentifier>
+    <TargetPlatformVersion Condition="'$(TargetPlatformVersion)' == '' and '$(_EnableDefaultWindowsPlatform)' != 'false'">7.0</TargetPlatformVersion>
     <TargetPlatformSdkPath Condition="'$(TargetPlatformSdkPath)' == '' and '$(TargetPlatformSdkRootOverride)' != ''">$(TargetPlatformSdkRootOverride)\</TargetPlatformSdkPath>
     <TargetPlatformSdkPath Condition="'$(TargetPlatformSdkPath)' == '' and '$(TargetPlatformIdentifier)' == 'Windows' and '$(OS)' == 'Windows_NT' and '$(MSBuildRuntimeType)' != 'Core'">$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\Software\Microsoft\Microsoft SDKs\Windows\v$(TargetPlatformVersion)', InstallationFolder, null, RegistryView.Registry32, RegistryView.Default))</TargetPlatformSdkPath>
     <TargetPlatformSdkPath Condition="'$(TargetPlatformSdkPath)' == ''">$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKLocation($(TargetPlatformIdentifier), $(TargetPlatformVersion)))</TargetPlatformSdkPath>
@@ -2666,7 +2666,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
         [IN]
         @(COMReference) - The list of COM references
-        $(BaseIntermediateOutputPath) - The output directory in which to generate wrapper assemblies
+        $(InteropOutputPath) - The output directory in which to generate wrapper assemblies
+                               When $(InteropOutputPath) is not set, then it defaults to $(IntermediateOutputPath).
 
         [OUT]
         @(ReferencePath) - Paths to referenced wrappers.
@@ -4571,6 +4572,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <CallTarget Targets="_GetCopyToOutputDirectoryItemsFromThisProject">
       <Output TaskParameter="TargetOutputs" ItemName="_ThisProjectItemsToCopyToOutputDirectory" />
     </CallTarget>
+
+    <ItemGroup Condition="'$(CopyConflictingTransitiveContent)' == 'false'">
+      <_TransitiveItemsToCopyToOutputDirectory Remove="@(_ThisProjectItemsToCopyToOutputDirectory)" MatchOnMetadata="TargetPath" MatchOnMetadataOptions="PathLike" />
+    </ItemGroup>
 
     <ItemGroup>
       <_TransitiveItemsToCopyToOutputDirectoryAlways               KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_TransitiveItemsToCopyToOutputDirectory->'%(FullPath)')" Condition="'%(_TransitiveItemsToCopyToOutputDirectory.CopyToOutputDirectory)'=='Always'"/>

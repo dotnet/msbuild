@@ -427,15 +427,17 @@ namespace Microsoft.Build.BackEnd
                 // grab the outputs from the task's designated output parameter (which is a .NET property)
                 Type type = parameter.PropertyType;
 
+                EnsureParameterInitialized(parameter, _batchBucket.Lookup);
+
                 if (TaskParameterTypeVerifier.IsAssignableToITask(type))
                 {
                     ITaskItem[] outputs = GetItemOutputs(parameter);
-                    GatherTaskItemOutputs(outputTargetIsItem, outputTargetName, outputs, parameterLocation);
+                    GatherTaskItemOutputs(outputTargetIsItem, outputTargetName, outputs, parameterLocation, parameter);
                 }
                 else if (TaskParameterTypeVerifier.IsValueTypeOutputParameter(type))
                 {
                     string[] outputs = GetValueOutputs(parameter);
-                    GatherArrayStringAndValueOutputs(outputTargetIsItem, outputTargetName, outputs, parameterLocation);
+                    GatherArrayStringAndValueOutputs(outputTargetIsItem, outputTargetName, outputs, parameterLocation, parameter);
                 }
                 else
                 {
@@ -1042,6 +1044,8 @@ namespace Microsoft.Build.BackEnd
                 {
                     Type parameterType = parameter.PropertyType;
 
+                    EnsureParameterInitialized(parameter, _batchBucket.Lookup);
+
                     // try to set the parameter
                     if (TaskParameterTypeVerifier.IsValidScalarInputParameter(parameterType))
                     {
@@ -1222,6 +1226,29 @@ namespace Microsoft.Build.BackEnd
             return success;
         }
 
+        private void EnsureParameterInitialized(TaskPropertyInfo parameter, Lookup lookup)
+        {
+            if (parameter.Initialized)
+            {
+                return;
+            }
+
+            parameter.Initialized = true;
+
+            string taskAndParameterName = _taskName + "_" + parameter.Name;
+            string key = "DisableLogTaskParameter_" + taskAndParameterName;
+            string metadataKey = "DisableLogTaskParameterItemMetadata_" + taskAndParameterName;
+
+            if (string.Equals(lookup.GetProperty(key)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
+            {
+                parameter.Log = false;
+            }
+            else if (string.Equals(lookup.GetProperty(metadataKey)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
+            {
+                parameter.LogItemMetadata = false;
+            }
+        }
+
         /// <summary>
         /// Given an instantiated task, this helper method sets the specified vector parameter. Vector parameters can be composed
         /// of multiple item vectors. The semicolon is the only separator allowed, and white space around the semicolon is
@@ -1283,12 +1310,16 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         private bool InternalSetTaskParameter(TaskPropertyInfo parameter, IList parameterValue)
         {
-            if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && parameterValue.Count > 0)
+            if (LogTaskInputs &&
+                !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents &&
+                parameterValue.Count > 0 &&
+                parameter.Log)
             {
                 string parameterText = ItemGroupLoggingHelper.GetParameterText(
                     ItemGroupLoggingHelper.TaskParameterPrefix,
                     parameter.Name,
-                    parameterValue);
+                    parameterValue,
+                    parameter.LogItemMetadata);
                 _taskLoggingContext.LogCommentFromText(MessageImportance.Low, parameterText);
             }
 
@@ -1370,7 +1401,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets task item outputs
         /// </summary>
-        private void GatherTaskItemOutputs(bool outputTargetIsItem, string outputTargetName, ITaskItem[] outputs, ElementLocation parameterLocation)
+        private void GatherTaskItemOutputs(bool outputTargetIsItem, string outputTargetName, ITaskItem[] outputs, ElementLocation parameterLocation, TaskPropertyInfo parameter)
         {
             // if the task has generated outputs (if it didn't, don't do anything)
             if (outputs != null)
@@ -1425,12 +1456,13 @@ namespace Microsoft.Build.BackEnd
                         }
                     }
 
-                    if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && outputs.Length > 0)
+                    if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && outputs.Length > 0 && parameter.Log)
                     {
                         string parameterText = ItemGroupLoggingHelper.GetParameterText(
                             ItemGroupLoggingHelper.OutputItemParameterMessagePrefix,
                             outputTargetName,
-                            outputs);
+                            outputs,
+                            parameter.LogItemMetadata);
 
                         _taskLoggingContext.LogCommentFromText(MessageImportance.Low, parameterText);
                     }
@@ -1483,7 +1515,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gather task outputs in array form
         /// </summary>
-        private void GatherArrayStringAndValueOutputs(bool outputTargetIsItem, string outputTargetName, string[] outputs, ElementLocation parameterLocation)
+        private void GatherArrayStringAndValueOutputs(bool outputTargetIsItem, string outputTargetName, string[] outputs, ElementLocation parameterLocation, TaskPropertyInfo parameter)
         {
             // if the task has generated outputs (if it didn't, don't do anything)            
             if (outputs != null)
@@ -1501,12 +1533,13 @@ namespace Microsoft.Build.BackEnd
                         }
                     }
 
-                    if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && outputs.Length > 0)
+                    if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && outputs.Length > 0 && parameter.Log)
                     {
                         string parameterText = ItemGroupLoggingHelper.GetParameterText(
                             ItemGroupLoggingHelper.OutputItemParameterMessagePrefix,
                             outputTargetName,
-                            outputs);
+                            outputs,
+                            parameter.LogItemMetadata);
                         _taskLoggingContext.LogCommentFromText(MessageImportance.Low, parameterText);
                     }
                 }

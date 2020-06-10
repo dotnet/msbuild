@@ -3,6 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2009
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4900B3B8-4310-4D5B-B1F7-2FDF9199765F}"
+	ProjectSection(SolutionItems) = preProject
+		..\NuGet.Config = ..\NuGet.Config
+		..\targets\xunit.runner.json = ..\targets\xunit.runner.json
+	EndProjectSection
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build", "src\Build\Microsoft.Build.csproj", "{69BE05E2-CBDA-4D27-9733-44E12B0F5627}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Engine.OM.UnitTests", "src\Build.OM.UnitTests\Microsoft.Build.Engine.OM.UnitTests.csproj", "{5C53E4FD-0985-432D-B9E4-7BC354A057E5}"

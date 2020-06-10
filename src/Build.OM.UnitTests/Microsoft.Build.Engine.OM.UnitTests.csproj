@@ -13,8 +13,18 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <NuGetCommandLinePackageVersion>4.1.0</NuGetCommandLinePackageVersion>
+</PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Shouldly" />
+    <PackageDownload Include="NuGet.CommandLine" Version="[$(NuGetCommandLinePackageVersion)]" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- GeneratePathProperty currently isn't enabled for PackageDownload. -->
+    <Content Condition="'$(MSBuildRuntimeType)' != 'Core' and '$(Configuration)' == 'Release'" Include="$(NuGetPackageRoot)\nuget.commandline\$(NuGetCommandLinePackageVersion)\tools\NuGet.exe" CopyToOutputDirectory="PreserveNewest" Link="nuget\NuGet.exe" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
@@ -87,6 +97,9 @@
     <Compile Include="..\Shared\StringBuilderCache.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\IInternable.cs" />
+    <Compile Include="..\Shared\WeakStringCache.cs" />
+    <Compile Include="..\Shared\WeakStringCache.Concurrent.cs" />
     <Compile Include="..\Shared\OpportunisticIntern.cs" />
     <Compile Include="..\Shared\ExceptionHandling.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -94,6 +107,7 @@
     <Compile Include="..\Shared\UnitTests\TestData\GlobbingTestData.cs">
       <Link>TestData\GlobbingTestData.cs</Link>
     </Compile>
+    <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" />
 
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>

@@ -262,10 +262,22 @@
     <value>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</value>
     <comment></comment>
   </data>
+  <data name="SolutionFilterJsonParsingError" Visibility="Public">
+    <value>MSB5025: Json in solution filter file "{0}" is incorrectly formatted.</value>
+    <comment>{StrBegin="MSB5025: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionFilterMissingSolutionError" Visibility="Public">
+    <value>MSB5026: The solution filter file at "{0}" specifies there will be a solution file at "{1}", but that file does not exist.</value>
+    <comment>{StrBegin="MSB5026: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionFilterFilterContainsProjectNotInSolution" Visibility="Public">
+    <value>MSB5028: Solution filter file at "{0}" includes project "{1}" that is not in the solution file at "{2}".</value>
+    <comment>{StrBegin="MSB5028: "}UE: The project filename is provided separately to loggers.</comment>
+  </data>
   <!--
         The shared message bucket is: MSB5001 - MSB5999
 
-        Next message code should be MSB5025
+        Next message code should be MSB5029
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.Build.Shared;
 
@@ -10,6 +11,7 @@ namespace Microsoft.Build.Framework
     /// <summary>
     ///     Represents a software development kit (SDK) that is referenced in a &lt;Project /&gt; or &lt;Import /&gt; element.
     /// </summary>
+    [DebuggerDisplay("Name={Name} Version={Version} MinimumVersion={MinimumVersion}")]
     public sealed class SdkReference : IEquatable<SdkReference>
     {
         /// <summary>

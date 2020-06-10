@@ -406,7 +406,7 @@ namespace Microsoft.Build.Execution
 
                 if (BuildParameters.DumpOpportunisticInternStats)
                 {
-                    OpportunisticIntern.EnableStatisticsGathering();
+                    OpportunisticIntern.Instance.EnableStatisticsGathering();
                 }
 
                 _overallBuildSuccess = true;
@@ -824,7 +824,7 @@ namespace Microsoft.Build.Execution
 
                     if (BuildParameters.DumpOpportunisticInternStats)
                     {
-                        OpportunisticIntern.ReportStatistics();
+                        OpportunisticIntern.Instance.ReportStatistics();
                     }
                 }
             }

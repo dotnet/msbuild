@@ -37,7 +37,7 @@ namespace Microsoft.Build.CommandLine
 #if CLR2COMPATIBILITY
         IBuildEngine3
 #else
-        IBuildEngine6
+        IBuildEngine7
 #endif
     {
         /// <summary>
@@ -268,6 +268,13 @@ namespace Microsoft.Build.CommandLine
 
         #endregion // IBuildEngine2 Implementation (Properties)
 
+        #region IBuildEngine7 Implementation
+        /// <summary>
+        /// Enables or disables emitting a default error when a task fails without logging errors
+        /// </summary>
+        public bool AllowFailureWithoutError { get; set; } = true;
+        #endregion
+
         #region IBuildEngine Implementation (Methods)
 
         /// <summary>
@@ -455,7 +462,6 @@ namespace Microsoft.Build.CommandLine
         }
 
         #endregion
-
 #endif
 
         #region INodePacketFactory Members
