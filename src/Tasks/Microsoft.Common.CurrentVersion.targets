@@ -2666,7 +2666,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
         [IN]
         @(COMReference) - The list of COM references
-        $(BaseIntermediateOutputPath) - The output directory in which to generate wrapper assemblies
+        $(InteropOutputPath) - The output directory in which to generate wrapper assemblies
+                               When $(InteropOutputPath) is not set, then it defaults to $(IntermediateOutputPath).
 
         [OUT]
         @(ReferencePath) - Paths to referenced wrappers.

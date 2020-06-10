@@ -34,6 +34,7 @@
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
     <PackageReference Include="System.Memory" />
+    <PackageReference Include="System.Text.Json" />
 
     <PackageReference Include="System.Reflection.Metadata" Condition="'$(MonoBuild)' == 'true'" />
   </ItemGroup>
@@ -351,6 +352,9 @@
     <Compile Include="..\Shared\CollectionHelpers.cs" />
     <Compile Include="Collections\ConvertingEnumerable.cs" />
     <Compile Include="Collections\CopyOnReadEnumerable.cs" />
+    <Compile Include="..\Shared\IInternable.cs" />
+    <Compile Include="..\Shared\WeakStringCache.cs" />
+    <Compile Include="..\Shared\WeakStringCache.Concurrent.cs" />
     <Compile Include="..\Shared\OpportunisticIntern.cs" />
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs">
       <Link>Collections\CopyOnWriteDictionary.cs</Link>

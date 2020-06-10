@@ -511,9 +511,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 var import = imports[i];
                 var importingElement = import.ImportingElement;
                 importingElement.Sdk.ShouldBe(SdkName + $"/{version}");
-                importingElement.ParsedSdkReference.Name.ShouldBe(SdkName);
-                importingElement.ParsedSdkReference.Version.ShouldBe(expectedVersion);
-                importingElement.ParsedSdkReference.MinimumVersion.ShouldBe(expectedMinimumVersion);
+                importingElement.SdkReference.Name.ShouldBe(SdkName);
+                importingElement.SdkReference.Version.ShouldBe(expectedVersion);
+                importingElement.SdkReference.MinimumVersion.ShouldBe(expectedMinimumVersion);
                 importingElement.SdkLocation.ShouldBe(ElementLocation.EmptyLocation);
                 importingElement.OriginalElement.ShouldBeOfType(expectedOriginalElementType);
 
@@ -523,7 +523,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 importingElement.ImplicitImportLocation.ShouldBe(implicitLocation);
 
-                import.SdkResult.SdkReference.ShouldBeSameAs(importingElement.ParsedSdkReference);
+                import.SdkResult.SdkReference.ShouldBeSameAs(importingElement.SdkReference);
 
                 var expectedSdkPath = i == 0
                     ? _sdkPropsPath
@@ -554,7 +554,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         private SdkReference GetParsedSdk(ProjectImportElement element)
         {
-            PropertyInfo parsedSdkInfo = typeof(ProjectImportElement).GetProperty("ParsedSdkReference", BindingFlags.Instance | BindingFlags.NonPublic);
+            PropertyInfo parsedSdkInfo = typeof(ProjectImportElement).GetProperty("SdkReference", BindingFlags.Instance | BindingFlags.NonPublic);
             return (SdkReference)parsedSdkInfo.GetValue(element);
         }
     }

@@ -106,7 +106,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="hostHandshakeWithLowPriority">host handshake key with low priority added</param>
         /// <param name="clientHandshake">client handshake key</param>
         /// <param name="terminateNode">Delegate used to tell the node provider that a context has terminated</param>
-        protected void ShutdownAllNodes(long hostHandshake, long hostHandshakeWithLowPriority, long clientHandshake, NodeContextTerminateDelegate terminateNode)
+        protected void ShutdownAllNodes(bool nodeReuse, NodeContextTerminateDelegate terminateNode)
         {
             // INodePacketFactory
             INodePacketFactory factory = new NodePacketFactory();
@@ -126,12 +126,12 @@ namespace Microsoft.Build.BackEnd
                 int timeout = 30;
 
                 // Attempt to connect to the process with the handshake without low priority.
-                Stream nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, hostHandshake, clientHandshake);
+                Stream nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHostHandshake(nodeReuse, false), NodeProviderOutOfProc.GetClientHandshake(nodeReuse, false));
 
                 if (null == nodeStream)
                 {
                     // If we couldn't connect attempt to connect to the process with the handshake including low priority.
-                    nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, hostHandshakeWithLowPriority, clientHandshake);
+                    nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHostHandshake(nodeReuse, true), NodeProviderOutOfProc.GetClientHandshake(nodeReuse, true));
                 }
 
                 if (null != nodeStream)

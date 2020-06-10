@@ -43,9 +43,14 @@ namespace Microsoft.Build.Utilities
         public readonly bool CacheFileExistence = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildCacheFileExistence"));
 
         /// <summary>
-        /// Eliminate locking in OpportunisticIntern at the expense of memory
+        /// Use the legacy string interning implementation based on MRU lists.
         /// </summary>
-        public readonly bool UseSimpleInternConcurrency = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildUseSimpleInternConcurrency"));
+        public readonly bool UseLegacyStringInterner = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildUseLegacyStringInterner"));
+
+        /// <summary>
+        /// Eliminate locking in OpportunisticIntern at the expense of memory (in effect only if UseLegacyStringInterner is set).
+        /// </summary>
+        public readonly bool UseSimpleInternConcurrency = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildUseSimpleInternConcurrency"));
 
         public readonly bool UseSimpleProjectRootElementCacheConcurrency = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildUseSimpleProjectRootElementCacheConcurrency"));
 

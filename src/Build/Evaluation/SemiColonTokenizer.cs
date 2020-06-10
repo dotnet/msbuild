@@ -145,7 +145,7 @@ namespace Microsoft.Build.Evaluation
                 }
                 if (startIndex < endIndex)
                 {
-                    var target = new OpportunisticIntern.SubstringInternTarget(_expression, startIndex, endIndex - startIndex);
+                    var target = new SubstringInternTarget(_expression, startIndex, endIndex - startIndex);
                     return OpportunisticIntern.InternableToString(target);
                 }
                 return null;

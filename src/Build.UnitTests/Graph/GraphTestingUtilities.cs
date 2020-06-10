@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -218,13 +219,18 @@ namespace Microsoft.Build.Graph.UnitTests
 
         internal static IEnumerable<ProjectGraphNode> ComputeClosure(ProjectGraphNode node)
         {
-            foreach (var reference in node.ProjectReferences)
-            {
-                yield return reference;
+            return ComputeClosureRecursive(node).ToHashSet();
 
-                foreach (var closureReference in ComputeClosure(reference))
+            IEnumerable<ProjectGraphNode> ComputeClosureRecursive(ProjectGraphNode projectGraphNode)
+            {
+                foreach (var reference in projectGraphNode.ProjectReferences)
                 {
-                    yield return closureReference;
+                    yield return reference;
+
+                    foreach (var closureReference in ComputeClosureRecursive(reference))
+                    {
+                        yield return closureReference;
+                    }
                 }
             }
         }

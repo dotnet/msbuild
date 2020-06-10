@@ -129,6 +129,9 @@
     <Compile Include="..\Shared\BinaryTranslator.cs" />
     <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\InterningBinaryReader.cs" />
+    <Compile Include="..\Shared\IInternable.cs" />
+    <Compile Include="..\Shared\WeakStringCache.cs" />
+    <Compile Include="..\Shared\WeakStringCache.Concurrent.cs" />
     <Compile Include="..\Shared\OpportunisticIntern.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
