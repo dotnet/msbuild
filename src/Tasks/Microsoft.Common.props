@@ -174,4 +174,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <NuGetPropsFile Condition="'$(NuGetPropsFile)'==''">$(MSBuildToolsPath)\NuGet.props</NuGetPropsFile>
   </PropertyGroup>
   <Import Condition="Exists('$(NuGetPropsFile)')" Project="$(NuGetPropsFile)" />
+
+  <PropertyGroup Condition=" '$(MSBuildLogVerboseTaskParameters)' != 'true' ">
+    <DisableLogTaskParameter_ConvertToAbsolutePath_Path>true</DisableLogTaskParameter_ConvertToAbsolutePath_Path>
+    <DisableLogTaskParameter_FindUnderPath_OutOfPath>true</DisableLogTaskParameter_FindUnderPath_OutOfPath>
+    <DisableLogTaskParameter_RemoveDuplicates_Inputs>true</DisableLogTaskParameter_RemoveDuplicates_Inputs>
+    <DisableLogTaskParameterItemMetadata_ConvertToAbsolutePath_AbsolutePaths>true</DisableLogTaskParameterItemMetadata_ConvertToAbsolutePath_AbsolutePaths>
+    <DisableLogTaskParameterItemMetadata_Copy_CopiedFiles>true</DisableLogTaskParameterItemMetadata_Copy_CopiedFiles>
+    <DisableLogTaskParameterItemMetadata_Copy_DestinationFiles>true</DisableLogTaskParameterItemMetadata_Copy_DestinationFiles>
+    <DisableLogTaskParameterItemMetadata_Copy_SourceFiles>true</DisableLogTaskParameterItemMetadata_Copy_SourceFiles>
+    <DisableLogTaskParameterItemMetadata_FindUnderPath_Files>true</DisableLogTaskParameterItemMetadata_FindUnderPath_Files>
+    <DisableLogTaskParameterItemMetadata_FindUnderPath_InPath>true</DisableLogTaskParameterItemMetadata_FindUnderPath_InPath>
+    <DisableLogTaskParameterItemMetadata_GenerateResource_FilesWritten>true</DisableLogTaskParameterItemMetadata_GenerateResource_FilesWritten>
+    <DisableLogTaskParameterItemMetadata_Hash_ItemsToHash>true</DisableLogTaskParameterItemMetadata_Hash_ItemsToHash>
+    <DisableLogTaskParameterItemMetadata_RemoveDuplicates_Filtered>true</DisableLogTaskParameterItemMetadata_RemoveDuplicates_Filtered>
+    <DisableLogTaskParameterItemMetadata_WriteLinesToFile_Lines>true</DisableLogTaskParameterItemMetadata_WriteLinesToFile_Lines>
+  </PropertyGroup>
 </Project>

@@ -23,9 +23,14 @@ namespace Microsoft.Build.Evaluation
                 _matchOnMetadataOptions = builder.MatchOnMetadataOptions;
             }
 
-            // todo port the self referencing matching optimization (e.g. <I Remove="@(I)">) from Update to Remove as well. Ideally make one mechanism for both. https://github.com/Microsoft/msbuild/issues/2314
-            // todo Perf: do not match against the globs: https://github.com/Microsoft/msbuild/issues/2329
-            protected override ImmutableList<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            /// <summary>
+            /// Apply the Remove operation.
+            /// </summary>
+            /// <remarks>
+            /// This operation is mostly implemented in terms of the default <see cref="LazyItemOperation.ApplyImpl(ImmutableList{ItemData}.Builder, ImmutableHashSet{string})"/>.
+            /// This override exists to apply the removing-everything short-circuit.
+            /// </remarks>
+            protected override void ApplyImpl(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
                 var matchOnMetadataValid = !_matchOnMetadata.IsEmpty && _itemSpec.Fragments.Count == 1
                     && _itemSpec.Fragments.First() is ItemSpec<ProjectProperty, ProjectItem>.ItemExpressionFragment;
@@ -34,6 +39,20 @@ namespace Microsoft.Build.Evaluation
                     new BuildEventFileInfo(string.Empty),
                     "OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem");
 
+                if (_matchOnMetadata.IsEmpty && ItemspecContainsASingleItemReference(_itemSpec, _itemElement.ItemType))
+                {
+                    // Perf optimization: If the Remove operation references itself (e.g. <I Remove="@(I)"/>)
+                    // then all items are removed and matching is not necessary
+                    listBuilder.Clear();
+                    return;
+                }
+
+                base.ApplyImpl(listBuilder, globsToIgnore);
+            }
+
+            // todo Perf: do not match against the globs: https://github.com/Microsoft/msbuild/issues/2329
+            protected override ImmutableList<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            {
                 var items = ImmutableHashSet.CreateBuilder<I>();
                 foreach (ItemData item in listBuilder)
                 {

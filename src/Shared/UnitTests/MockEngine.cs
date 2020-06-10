@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests
      * is somewhat of a no-no for task assemblies.
      * 
      **************************************************************************/
-    internal sealed class MockEngine : IBuildEngine6
+    internal sealed class MockEngine : IBuildEngine7
     {
         private readonly object _lockObj = new object();  // Protects _log, _output
         private readonly ITestOutputHelper _output;
@@ -50,6 +50,8 @@ namespace Microsoft.Build.UnitTests
         internal int Warnings { get; set; }
 
         internal int Errors { get; set; }
+
+        public bool AllowFailureWithoutError { get; set; } = true;
 
         public BuildErrorEventArgs[] ErrorEvents => _errorEvents.ToArray();
 

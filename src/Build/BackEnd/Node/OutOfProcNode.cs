@@ -425,13 +425,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private NodeEngineShutdownReason HandleShutdown(out Exception exception)
         {
-            if (_debugCommunications)
-            {
-                using (StreamWriter writer = File.CreateText(String.Format(CultureInfo.CurrentCulture, Path.Combine(Path.GetTempPath(), @"MSBuild_NodeShutdown_{0}.txt"), Process.GetCurrentProcess().Id)))
-                {
-                    writer.WriteLine("Node shutting down with reason {0} and exception: {1}", _shutdownReason, _shutdownException);
-                }
-            }
+            CommunicationsUtilities.Trace("Shutting down with reason: {0}, and exception: {1}.", _shutdownReason, _shutdownException);
 
             // Clean up the engine
             if (null != _buildRequestEngine && _buildRequestEngine.Status != BuildRequestEngineStatus.Uninitialized)
@@ -514,6 +508,8 @@ namespace Microsoft.Build.Execution
                 _nodeEndpoint.Disconnect();
                 CleanupCaches();
             }
+
+            CommunicationsUtilities.Trace("Shut down complete.");
 
             return _shutdownReason;
         }

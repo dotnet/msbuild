@@ -1248,14 +1248,14 @@ namespace Microsoft.Build.UnitTests
                 });
         }
 
-        internal static void ShouldBeEquivalentTo<K, V>(this IDictionary<K, V> a, IReadOnlyDictionary<K, V> b)
+        internal static void ShouldBeSameIgnoringOrder<K, V>(this IDictionary<K, V> a, IReadOnlyDictionary<K, V> b)
         {
             a.ShouldBeSubsetOf(b);
             b.ShouldBeSubsetOf(a);
             a.Count.ShouldBe(b.Count);
         }
 
-        internal static void ShouldBeEquivalentTo<K>(this IEnumerable<K> a, IEnumerable<K> b)
+        internal static void ShouldBeSameIgnoringOrder<K>(this IEnumerable<K> a, IEnumerable<K> b)
         {
             a.ShouldBeSubsetOf(b);
             b.ShouldBeSubsetOf(a);
@@ -1293,11 +1293,9 @@ namespace Microsoft.Build.UnitTests
         /// Build a project with the provided content in memory.
         /// Assert that it succeeded, and return the mock logger with the output.
         /// </summary>
-        internal static MockLogger BuildProjectWithNewOMExpectSuccess(string content, Dictionary<string, string> globalProperties = null)
+        internal static MockLogger BuildProjectWithNewOMExpectSuccess(string content, Dictionary<string, string> globalProperties = null, MockLogger logger = null)
         {
-            MockLogger logger;
-            bool result;
-            BuildProjectWithNewOM(content, out logger, out result, false, globalProperties);
+            BuildProjectWithNewOM(content, ref logger, out bool result, false, globalProperties);
             Assert.True(result);
 
             return logger;
@@ -1306,14 +1304,16 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Build a project in memory using the new OM
         /// </summary>
-        private static void BuildProjectWithNewOM(string content, out MockLogger logger, out bool result, bool allowTaskCrash, Dictionary<string, string> globalProperties = null)
+        private static void BuildProjectWithNewOM(string content, ref MockLogger logger, out bool result, bool allowTaskCrash, Dictionary<string, string> globalProperties = null)
         {
             // Replace the crazy quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
 
             Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, toolsVersion: null);
-            logger = new MockLogger();
-            logger.AllowTaskCrashes = allowTaskCrash;
+            logger ??= new MockLogger
+            {
+                AllowTaskCrashes = allowTaskCrash
+            };
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             result = project.Build(loggers);
@@ -1375,11 +1375,10 @@ namespace Microsoft.Build.UnitTests
         /// Build a project with the provided content in memory.
         /// Assert that it fails, and return the mock logger with the output.
         /// </summary>
-        internal static MockLogger BuildProjectWithNewOMExpectFailure(string content, bool allowTaskCrash)
+        internal static MockLogger BuildProjectWithNewOMExpectFailure(string content, bool allowTaskCrash, MockLogger logger = null)
         {
-            MockLogger logger;
             bool result;
-            BuildProjectWithNewOM(content, out logger, out result, allowTaskCrash);
+            BuildProjectWithNewOM(content, ref logger, out result, allowTaskCrash);
             Assert.False(result);
             return logger;
         }
@@ -1565,6 +1564,34 @@ namespace Microsoft.Build.UnitTests
             sb.Append("</Project>");
 
             return env.CreateFile(projectNumber + ".proj", sb.ToString());
+        }
+
+        internal static ProjectGraph CreateProjectGraph(
+            TestEnvironment env,
+            IDictionary<int, int[]> dependencyEdges,
+            IDictionary<int, string> extraContentPerProjectNumber,
+            string extraContentForAllNodes = null)
+        {
+            return CreateProjectGraph(
+                env: env,
+                dependencyEdges: dependencyEdges,
+                globalProperties: null,
+                createProjectFile: (environment, projectNumber, references, projectReferenceTargets, defaultTargets, extraContent) =>
+                {
+                    extraContent = extraContentPerProjectNumber != null && extraContentPerProjectNumber.TryGetValue(projectNumber, out var content)
+                        ? content
+                        : string.Empty;
+
+                    extraContent += extraContentForAllNodes ?? string.Empty;
+
+                    return CreateProjectFile(
+                        environment,
+                        projectNumber,
+                        references,
+                        projectReferenceTargets,
+                        defaultTargets,
+                        extraContent.Cleanup());
+                });
         }
 
         internal static ProjectGraph CreateProjectGraph(

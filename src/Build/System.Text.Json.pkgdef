@@ -1,0 +1,7 @@
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{1F1A9DA4-9F25-4AB8-89BF-BCEF73875178}]
+"name"="System.Text.Json"
+"codeBase"="$BaseInstallDir$\MSBuild\Current\Bin\System.Text.Json.dll"
+"publicKeyToken"="cc7b13ffcd2ddd51"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-4.0.1.0"
+"newVersion"="4.0.1.0"
