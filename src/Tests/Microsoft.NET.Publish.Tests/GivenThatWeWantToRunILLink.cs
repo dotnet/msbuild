@@ -145,13 +145,79 @@ namespace Microsoft.NET.Publish.Tests
         public void ILLink_error_on_nonboolean_optimization_flag(string property)
         {
             var projectName = "HelloWorld";
+            var targetFramework = "net5.0";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
-            var testProject = CreateTestProjectForILLinkTesting("net5.0", projectName);
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: property);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
-            publishCommand.Execute("/p:PublishTrimmed=true", $"/p:SelfContained=true", "/p:PublishTrimmed=true", $"/p:{property}=NonBool")
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", $"/p:{property}=NonBool")
                 .Should().Fail().And.HaveStdOutContaining("MSB4030");
+        }
+
+        [Fact]
+        public void ILLink_respects_feature_settings_from_host_config()
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var targetFramework = "net5.0";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            // Set up a conditional feature substitution for the "FeatureDisabled" property
+            AddFeatureDefinition(testProject, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => EnableNonFrameworkTrimming(project))
+                .WithProjectChanges(project => EmbedSubstitutions(project))
+                // Set a matching RuntimeHostConfigurationOption, with Trim = "true"
+                .WithProjectChanges(project => AddRuntimeConfigOption(project, trim: true))
+                .WithProjectChanges(project => AddRootDescriptor(project, $"{referenceProjectName}.xml"));
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true",
+                                    $"/p:_ExtraTrimmerArgs=-p link {referenceProjectName}").Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var referenceDll = Path.Combine(publishDirectory, $"{referenceProjectName}.dll");
+
+            File.Exists(referenceDll).Should().BeTrue();
+            DoesImageHaveMethod(referenceDll, "FeatureAPI").Should().BeTrue();
+            DoesImageHaveMethod(referenceDll, "get_FeatureDisabled").Should().BeTrue();
+            // Check that this method is removed when the feature is disabled
+            DoesImageHaveMethod(referenceDll, "FeatureImplementation").Should().BeFalse();
+        }
+
+        [Fact]
+        public void ILLink_ignores_host_config_settings_with_link_false()
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var targetFramework = "net5.0";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            // Set up a conditional feature substitution for the "FeatureDisabled" property
+            AddFeatureDefinition(testProject, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => EnableNonFrameworkTrimming(project))
+                .WithProjectChanges(project => EmbedSubstitutions(project))
+                // Set a matching RuntimeHostConfigurationOption, with Trim = "false"
+                .WithProjectChanges(project => AddRuntimeConfigOption(project, trim: false))
+                .WithProjectChanges(project => AddRootDescriptor(project, $"{referenceProjectName}.xml"));
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true",
+                                    $"/p:_ExtraTrimmerArgs=-p link {referenceProjectName}").Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var referenceDll = Path.Combine(publishDirectory, $"{referenceProjectName}.dll");
+
+            File.Exists(referenceDll).Should().BeTrue();
+            DoesImageHaveMethod(referenceDll, "FeatureAPI").Should().BeTrue();
+            DoesImageHaveMethod(referenceDll, "get_FeatureDisabled").Should().BeTrue();
+            // Check that the feature substitution did not apply
+            DoesImageHaveMethod(referenceDll, "FeatureImplementation").Should().BeTrue();
         }
 
         [Theory]
@@ -454,6 +520,43 @@ namespace Microsoft.NET.Publish.Tests
                                                  new XElement("action"))));
         }
 
+        static readonly string substitutionsFilename = "ILLink.Substitutions.xml";
+
+        private void EmbedSubstitutions(XDocument project)
+        {
+            var ns = project.Root.Name.Namespace;
+
+            project.Root.Add (new XElement(ns + "ItemGroup",
+                                new XElement("EmbeddedResource",
+                                    new XAttribute("Include", substitutionsFilename),
+                                    new XElement("LogicalName", substitutionsFilename))));
+        }
+
+        private void AddFeatureDefinition(TestProject testProject, string referenceAssemblyName)
+        {
+            // Add a feature definition that replaces the FeatureDisabled property when DisableFeature is true.
+            testProject.EmbeddedResources[substitutionsFilename] = $@"
+<linker>
+  <assembly fullname=""{referenceAssemblyName}"" feature=""DisableFeature"" featurevalue=""true"">
+    <type fullname=""ClassLib"">
+      <method signature=""System.Boolean get_FeatureDisabled()"" body=""stub"" value=""true"" />
+    </type>
+  </assembly>
+</linker>
+";
+        }
+
+        private void AddRuntimeConfigOption(XDocument project, bool trim)
+        {
+            var ns = project.Root.Name.Namespace;
+
+            project.Root.Add (new XElement(ns + "ItemGroup",
+                                new XElement("RuntimeHostConfigurationOption",
+                                    new XAttribute("Include", "DisableFeature"),
+                                    new XAttribute("Value", "true"),
+                                    new XAttribute("Trim", trim.ToString ()))));
+        }
+
         private TestProject CreateTestProjectForILLinkTesting(
             string targetFramework,
             string mainProjectName,
@@ -487,7 +590,10 @@ public class Program
             var referenceProject = new TestProject()
             {
                 Name = referenceProjectName,
-                TargetFrameworks = targetFramework,
+                // NOTE: If using a package reference for the reference project, it will be retrieved
+                // from the nuget cache. Set the reference project TFM to the lowest common denominator
+                // of these tests to prevent conflicts.
+                TargetFrameworks = usePackageReference ? "netcoreapp3.0" : targetFramework,
                 IsSdkProject = true
             };
             referenceProject.SourceFiles[$"{referenceProjectName}.cs"] = @"
@@ -499,6 +605,20 @@ public class ClassLib
     }
 
     public void UnusedMethodToRoot()
+    {
+    }
+
+    public static bool FeatureDisabled { get; }
+
+    public static void FeatureAPI()
+    {
+        if (FeatureDisabled)
+            return;
+
+        FeatureImplementation();
+    }
+
+    public static void FeatureImplementation()
     {
     }
 }
@@ -523,6 +643,7 @@ public class ClassLib
   <assembly fullname=""{referenceProjectName}"">
     <type fullname=""ClassLib"">
       <method name=""UnusedMethodToRoot"" />
+      <method name=""FeatureAPI"" />
     </type>
   </assembly>
 </linker>

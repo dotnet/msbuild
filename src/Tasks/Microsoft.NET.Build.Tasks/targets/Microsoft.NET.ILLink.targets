@@ -85,6 +85,7 @@ Copyright (c) .NET Foundation. All rights reserved.
             RootAssemblyNames="@(TrimmerRootAssembly)"
             DefaultAction="$(_TrimmerDefaultAction)"
             LinkSymbols="$(_TrimmerLinkSymbols)"
+            FeatureSettings="@(_TrimmerFeatureSettings)"
 
             BeforeFieldInit="$(_TrimmerBeforeFieldInit)"
             OverrideRemoval="$(_TrimmerOverrideRemoval)"
@@ -130,6 +131,10 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_ManagedAssembliesToLink Condition=" '%(_ManagedAssembliesToLink.IsTrimmable)' != 'true' ">
         <action>copy</action>
       </_ManagedAssembliesToLink>
+    </ItemGroup>
+
+    <ItemGroup>
+      <_TrimmerFeatureSettings Include="@(RuntimeHostConfigurationOption)" Condition="'%(RuntimeHostConfigurationOption.Trim)' == 'true'" />
     </ItemGroup>
 
    </Target>
