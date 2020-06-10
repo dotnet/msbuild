@@ -49,8 +49,6 @@ namespace Microsoft.Build.Utilities
         private readonly HashSet<string> _excludedInputPaths = new HashSet<string>(StringComparer.Ordinal);
         // Cache of last write times
         private readonly ConcurrentDictionary<string, DateTime> _lastWriteTimeCache = new ConcurrentDictionary<string, DateTime>(StringComparer.Ordinal);
-        // Cache of files that have been checked and whether or not they exist.
-        private Dictionary<string, bool> fileCache = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
         #endregion
 
         #region Properties
@@ -1035,6 +1033,9 @@ namespace Microsoft.Build.Utilities
         /// <param name="correspondingOutputs">Outputs that correspond ot the sources (used for same file processing)</param>
         public void RemoveDependenciesFromEntryIfMissing(ITaskItem[] source, ITaskItem[] correspondingOutputs)
         {
+            // Cache of files that have been checked and exist.
+            Dictionary<string, bool> fileCache = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+
             if (correspondingOutputs != null)
             {
                 ErrorUtilities.VerifyThrowArgument(source.Length == correspondingOutputs.Length, "Tracking_SourcesAndCorrespondingOutputMismatch");
@@ -1043,7 +1044,7 @@ namespace Microsoft.Build.Utilities
             // construct a combined root marker for the sources and outputs to remove from the graph
             string rootingMarker = FileTracker.FormatRootingMarker(source, correspondingOutputs);
 
-            RemoveDependenciesFromEntryIfMissing(rootingMarker);
+            RemoveDependenciesFromEntryIfMissing(rootingMarker, fileCache);
 
             // Remove entries for each individual source
             for (int sourceIndex = 0; sourceIndex < source.Length; sourceIndex++)
@@ -1051,7 +1052,7 @@ namespace Microsoft.Build.Utilities
                 rootingMarker = correspondingOutputs != null
                     ? FileTracker.FormatRootingMarker(source[sourceIndex], correspondingOutputs[sourceIndex])
                     : FileTracker.FormatRootingMarker(source[sourceIndex]);
-                RemoveDependenciesFromEntryIfMissing(rootingMarker);
+                RemoveDependenciesFromEntryIfMissing(rootingMarker, fileCache);
             }
         }
 
@@ -1059,7 +1060,7 @@ namespace Microsoft.Build.Utilities
         /// Remove the output graph entries for the given rooting marker
         /// </summary>
         /// <param name="rootingMarker"></param>
-        private void RemoveDependenciesFromEntryIfMissing(string rootingMarker)
+        private void RemoveDependenciesFromEntryIfMissing(string rootingMarker, Dictionary<string, bool> fileCache)
         {
             // In the event of incomplete tracking information (i.e. this root was not present), just continue quietly
             // as the user could have killed the tool being tracked, or another error occurred during its execution.
@@ -1076,14 +1077,14 @@ namespace Microsoft.Build.Utilities
                         // We do this to save time (On^2), at the expense of data O(n).
                         bool inFileCache = fileCache.ContainsKey(file);
 
-                        if(!inFileCache)
+                        // Have we cached the file yet? If not, cache whether or not it exists.
+                        if(!fileCache.ContainsKey(file))
                         {
                             fileCache.Add(file, FileUtilities.FileExistsNoThrow(file));
                         }
 
-                        bool fileExists = fileCache[file];
-
-                        if (fileExists)
+                        // Does the cached file exist?
+                        if (fileCache[file])
                         {
                             dependenciesWithoutMissingFiles.Add(file, dependencies[file]);
                         }
