@@ -3537,6 +3537,14 @@ namespace Microsoft.Build.Evaluation
                             return true;
                         }
                     }
+                    else if (string.Equals(_methodMethodName, nameof(string.IndexOf), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (TryGetArgs(args, out string arg0, out StringComparison arg1))
+                        {
+                            returnVal = text.IndexOf(arg0, arg1);
+                            return true;
+                        }
+                    }
                     else if (string.Equals(_methodMethodName, nameof(string.IndexOfAny), StringComparison.OrdinalIgnoreCase))
                     {
                         if (TryGetArg(args, out string arg0))
@@ -3557,20 +3565,10 @@ namespace Microsoft.Build.Evaluation
                             returnVal = text.LastIndexOf(arg0, startIndex);
                             return true;
                         }
-                        else if (TryGetArgs(args, out arg0, out string arg1))
+                        else if (TryGetArgs(args, out arg0, out StringComparison arg1))
                         {
-                            string comparisonType = arg1;
-
-                            // Allow fully-qualified enum, e.g. "System.StringComparison.OrdinalIgnoreCase"
-                            if (comparisonType.Contains("."))
-                            {
-                                comparisonType = arg1.Replace("System.StringComparison.", "").Replace("StringComparison.", "");
-                            }
-                            if (Enum.TryParse<StringComparison>(comparisonType, out StringComparison comparison))
-                            {
-                                returnVal = text.LastIndexOf(arg0, comparison);
-                                return true;
-                            }
+                            returnVal = text.LastIndexOf(arg0, arg1);
+                            return true;
                         }
                     }
                     else if (string.Equals(_methodMethodName, nameof(string.Length), StringComparison.OrdinalIgnoreCase))
@@ -4264,6 +4262,34 @@ namespace Microsoft.Build.Evaluation
 
                 arg0 = args[0] as string;
                 return arg0 != null;
+            }
+
+            private static bool TryGetArgs(object[] args, out string arg0, out StringComparison arg1)
+            {
+                if (args.Length != 2)
+                {
+                    arg0 = null;
+                    arg1 = default;
+
+                    return false;
+                }
+
+                arg0 = args[0] as string;
+
+                // reject enums as ints. In C# this would require a cast, which is not supported in msbuild expressions
+                if (arg0 == null || !(args[1] is string comparisonTypeName) || int.TryParse(comparisonTypeName, out _))
+                {
+                    arg1 = default;
+                    return false;
+                }
+
+                // Allow fully-qualified enum, e.g. "System.StringComparison.OrdinalIgnoreCase"
+                if (comparisonTypeName.Contains('.'))
+                {
+                    comparisonTypeName = comparisonTypeName.Replace("System.StringComparison.", "").Replace("StringComparison.", "");
+                }
+
+                return Enum.TryParse(comparisonTypeName, out arg1);
             }
 
             private static bool TryGetArgs(object[] args, out int arg0, out int arg1)
