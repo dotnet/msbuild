@@ -214,6 +214,7 @@ namespace Microsoft.Build.Execution
         private string[] _inputResultsCacheFiles;
 
         private string _outputResultsCacheFile;
+        private string _resourceManagerSemaphoreName = $"MSBuild.{Guid.NewGuid().ToString()}";
 
         /// <summary>
         /// Constructor for those who intend to set all properties themselves.
@@ -765,6 +766,12 @@ namespace Microsoft.Build.Execution
             set => _outputResultsCacheFile = value;
         }
 
+        public string ResourceManagerSemaphoreName
+        {
+            get => _resourceManagerSemaphoreName;
+            set => _resourceManagerSemaphoreName = value;
+        }
+
         /// <summary>
         /// Determines whether MSBuild will save the results of builds after EndBuild to speed up future builds.
         /// </summary>
@@ -833,6 +840,7 @@ namespace Microsoft.Build.Execution
             translator.TranslateEnum(ref _projectLoadSettings, (int) _projectLoadSettings);
             translator.Translate(ref _interactive);
             translator.Translate(ref _isolateProjects);
+            translator.Translate(ref _resourceManagerSemaphoreName);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.

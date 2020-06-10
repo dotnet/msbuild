@@ -989,6 +989,7 @@ namespace Microsoft.Build.Execution
         public string OutputResultsCacheFile { get { throw null; } set { } }
         public Microsoft.Build.Evaluation.ProjectLoadSettings ProjectLoadSettings { get { throw null; } set { } }
         public bool ResetCaches { get { throw null; } set { } }
+        public string ResourceManagerSemaphoreName { get { throw null; } set { } }
         public bool SaveOperatingEnvironment { get { throw null; } set { } }
         public bool ShutdownInProcNodeOnBuildFinish { get { throw null; } set { } }
         public Microsoft.Build.Evaluation.ToolsetDefinitionLocations ToolsetDefinitionLocations { get { throw null; } set { } }

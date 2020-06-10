@@ -20,6 +20,7 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
 
 #if DEBUG
         public int TotalNumberHeld = -1;
+        public string? SemaphoreName;
 #endif
 
         internal static IBuildComponent CreateComponent(BuildComponentType type)
@@ -31,15 +32,16 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
 
         public void InitializeComponent(IBuildComponentHost host)
         {
-            const string SemaphoreName = "cpuCount"; // TODO
+            string semaphoreName = host.BuildParameters.ResourceManagerSemaphoreName;
 
             int resourceCount = host.BuildParameters.MaxNodeCount; // TODO: tweakability
 
 #if DEBUG
             TotalNumberHeld = 0;
+            SemaphoreName = semaphoreName;
 #endif
 
-            s = new Semaphore(resourceCount, resourceCount, SemaphoreName); // TODO: SemaphoreSecurity?
+            s = new Semaphore(resourceCount, resourceCount, semaphoreName); // TODO: SemaphoreSecurity?
         }
 
         public void ShutdownComponent()
