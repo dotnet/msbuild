@@ -626,7 +626,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Translates a dictionary of { string, T } for dictionaries with public parameterless constructors.
+            /// Translates a dictionary of { string, T }.
             /// </summary>
             /// <typeparam name="D">The reference type for the dictionary.</typeparam>
             /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
@@ -653,6 +653,41 @@ namespace Microsoft.Build.BackEnd
                     Translate(ref value, valueFactory);
                     dictionary[key] = value;
                 }
+            }
+
+            /// <summary>
+            /// Translates a dictionary of { string, T }.
+            /// </summary>
+            /// <typeparam name="D">The reference type for the dictionary.</typeparam>
+            /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
+            /// <typeparam name="TAccum">The reference type for the dictionary accumulator.</typeparam>
+            /// <param name="dictionary">The dictionary to be translated.</param>
+            /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
+            /// <param name="accumulatorFactory">The factory used to instantiate a dictionary accumulator.</param>
+            /// <param name="accumulate">The function used to accumulate values.</param>
+            /// <param name="complete">The function to complete accumulation.</param>
+            public void TranslateDictionary<D, T, TAccum>(ref D dictionary, NodePacketValueFactory<T> valueFactory, Func<TAccum> accumulatorFactory, Action<TAccum, string, T> accumulate, Func<TAccum, D> complete)
+                where D : IDictionary<string, T>
+                where T : class, ITranslatable
+            {
+                if (!TranslateNullable(dictionary))
+                {
+                    return;
+                }
+
+                int count = _reader.ReadInt32();
+                var builder = accumulatorFactory();
+
+                for (int i = 0; i < count; i++)
+                {
+                    string key = null;
+                    Translate(ref key);
+                    T value = null;
+                    Translate(ref value, valueFactory);
+                    accumulate(builder, key, value);
+                }
+
+                dictionary = complete(builder);
             }
 
             /// <summary>
@@ -1207,7 +1242,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Translates a dictionary of { string, T } for dictionaries with public parameterless constructors.
+            /// Translates a dictionary of { string, T }.
             /// </summary>
             /// <typeparam name="D">The reference type for the dictionary.</typeparam>
             /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
@@ -1215,6 +1250,38 @@ namespace Microsoft.Build.BackEnd
             /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
             /// <param name="dictionaryCreator">The delegate used to instantiate the dictionary.</param>
             public void TranslateDictionary<D, T>(ref D dictionary, NodePacketValueFactory<T> valueFactory, NodePacketCollectionCreator<D> dictionaryCreator)
+                where D : IDictionary<string, T>
+                where T : class, ITranslatable
+            {
+                if (!TranslateNullable(dictionary))
+                {
+                    return;
+                }
+
+                int count = dictionary.Count;
+                _writer.Write(count);
+
+                foreach (KeyValuePair<string, T> pair in dictionary)
+                {
+                    string key = pair.Key;
+                    Translate(ref key);
+                    T value = pair.Value;
+                    Translate(ref value, valueFactory);
+                }
+            }
+
+            /// <summary>
+            /// Translates a dictionary of { string, T }.
+            /// </summary>
+            /// <typeparam name="D">The reference type for the dictionary.</typeparam>
+            /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
+            /// <typeparam name="TAccum">The reference type for the dictionary accumulator.</typeparam>
+            /// <param name="dictionary">The dictionary to be translated.</param>
+            /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
+            /// <param name="accumulatorFactory">The factory used to instantiate a dictionary accumulator.</param>
+            /// <param name="accumulate">The function used to accumulate values.</param>
+            /// <param name="complete">The function to complete accumulation.</param>
+            public void TranslateDictionary<D, T, TAccum>(ref D dictionary, NodePacketValueFactory<T> valueFactory, Func<TAccum> accumulatorFactory, Action<TAccum, string, T> accumulate, Func<TAccum, D> complete)
                 where D : IDictionary<string, T>
                 where T : class, ITranslatable
             {

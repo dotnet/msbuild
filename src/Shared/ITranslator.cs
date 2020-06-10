@@ -312,7 +312,7 @@ namespace Microsoft.Build.BackEnd
             where T : class, ITranslatable;
 
         /// <summary>
-        /// Translates a dictionary of { string, T } for dictionaries with public parameterless constructors.
+        /// Translates a dictionary of { string, T }.
         /// </summary>
         /// <typeparam name="D">The reference type for the dictionary.</typeparam>
         /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
@@ -320,6 +320,21 @@ namespace Microsoft.Build.BackEnd
         /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
         /// <param name="collectionCreator">A factory used to create the dictionary.</param>
         void TranslateDictionary<D, T>(ref D dictionary, NodePacketValueFactory<T> valueFactory, NodePacketCollectionCreator<D> collectionCreator)
+            where D : IDictionary<string, T>
+            where T : class, ITranslatable;
+
+        /// <summary>
+        /// Translates a dictionary of { string, T }.
+        /// </summary>
+        /// <typeparam name="D">The reference type for the dictionary.</typeparam>
+        /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
+        /// <typeparam name="TAccum">The reference type for the dictionary accumulator.</typeparam>
+        /// <param name="dictionary">The dictionary to be translated.</param>
+        /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
+        /// <param name="accumulatorFactory">The factory used to instantiate a dictionary accumulator.</param>
+        /// <param name="accumulate">The function used to accumulate values.</param>
+        /// <param name="complete">The function to complete accumulation.</param>
+        void TranslateDictionary<D, T, TAccum>(ref D dictionary, NodePacketValueFactory<T> valueFactory, Func<TAccum> accumulatorFactory, Action<TAccum, string, T> accumulate, Func<TAccum, D> complete)
             where D : IDictionary<string, T>
             where T : class, ITranslatable;
 

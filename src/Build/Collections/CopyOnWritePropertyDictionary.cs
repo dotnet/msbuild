@@ -68,6 +68,26 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
+        /// Creates a dictionary from another dictionary.
+        /// </summary>
+        /// <param name="dictionary">The other dictionary.</param>
+        public CopyOnWritePropertyDictionary(IDictionary<string, T> dictionary)
+        {
+            if (dictionary == null)
+            {
+                _properties = new CopyOnWriteDictionary<string, T>(MSBuildNameIgnoreCaseComparer.Default);
+            }
+            else if (dictionary is CopyOnWritePropertyDictionary<T> copyOnWriteDictionary)
+            {
+                _properties = copyOnWriteDictionary._properties.Clone(); // copy on write!
+            }
+            else
+            {
+                _properties = new CopyOnWriteDictionary<string, T>(dictionary); // have to clone
+            }
+        }
+
+        /// <summary>
         /// Cloning constructor, with deferred cloning semantics
         /// </summary>
         private CopyOnWritePropertyDictionary(CopyOnWritePropertyDictionary<T> that)

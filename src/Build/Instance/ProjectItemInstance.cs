@@ -18,6 +18,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared.FileSystem;
+using System.Collections.Immutable;
 
 namespace Microsoft.Build.Execution
 {
@@ -86,7 +87,7 @@ namespace Microsoft.Build.Execution
         /// <remarks>
         /// Not public since the only creation scenario is setting on a project.
         /// </remarks>
-        internal ProjectItemInstance(ProjectInstance project, string itemType, string includeEscaped, string includeBeforeWildcardExpansionEscaped, CopyOnWritePropertyDictionary<ProjectMetadataInstance> directMetadata, List<ProjectItemDefinitionInstance> itemDefinitions, string definingFileEscaped)
+        internal ProjectItemInstance(ProjectInstance project, string itemType, string includeEscaped, string includeBeforeWildcardExpansionEscaped, IDictionary<string, ProjectMetadataInstance> directMetadata, List<ProjectItemDefinitionInstance> itemDefinitions, string definingFileEscaped)
         {
             CommonConstructor(project, itemType, includeEscaped, includeBeforeWildcardExpansionEscaped, directMetadata, itemDefinitions, definingFileEscaped);
         }
@@ -686,7 +687,7 @@ namespace Microsoft.Build.Execution
         /// Inherited item definition metadata may be null. It is assumed to ALREADY HAVE BEEN CLONED.
         /// Mutability follows the project.
         /// </summary>
-        private void CommonConstructor(ProjectInstance projectToUse, string itemTypeToUse, string includeEscaped, string includeBeforeWildcardExpansionEscaped, CopyOnWritePropertyDictionary<ProjectMetadataInstance> directMetadata, List<ProjectItemDefinitionInstance> itemDefinitions, string definingFileEscaped)
+        private void CommonConstructor(ProjectInstance projectToUse, string itemTypeToUse, string includeEscaped, string includeBeforeWildcardExpansionEscaped, IDictionary<string, ProjectMetadataInstance> directMetadata, List<ProjectItemDefinitionInstance> itemDefinitions, string definingFileEscaped)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectToUse, "project");
             ErrorUtilities.VerifyThrowArgumentLength(itemTypeToUse, "itemType");
@@ -706,14 +707,14 @@ namespace Microsoft.Build.Execution
             _project = projectToUse;
             _itemType = itemTypeToUse;
             _taskItem = new TaskItem(
-                                        includeEscaped,
-                                        includeBeforeWildcardExpansionEscaped,
-                                        (directMetadata == null) ? null : directMetadata.DeepClone(), // copy on write!
-                                        inheritedItemDefinitions,
-                                        _project.Directory,
-                                        _project.IsImmutable,
-                                        definingFileEscaped
-                                        );
+                                     includeEscaped,
+                                     includeBeforeWildcardExpansionEscaped,
+                                     directMetadata,
+                                     inheritedItemDefinitions,
+                                     _project.Directory,
+                                     _project.IsImmutable,
+                                     definingFileEscaped
+                                     );
         }
 
         /// <summary>
@@ -752,7 +753,7 @@ namespace Microsoft.Build.Execution
             /// Lazily created, as there are huge numbers of items generated in
             /// a build that have no metadata at all.
             /// </remarks>
-            private CopyOnWritePropertyDictionary<ProjectMetadataInstance> _directMetadata;
+            private IDictionary<string, ProjectMetadataInstance> _directMetadata;
 
             /// <summary>
             /// Cached value of the fullpath metadata. All other metadata are computed on demand.
@@ -795,7 +796,7 @@ namespace Microsoft.Build.Execution
             internal TaskItem(
                               string includeEscaped,
                               string includeBeforeWildcardExpansionEscaped,
-                              CopyOnWritePropertyDictionary<ProjectMetadataInstance> directMetadata,
+                              IDictionary<string, ProjectMetadataInstance> directMetadata,
                               List<ProjectItemDefinitionInstance> itemDefinitions,
                               string projectDirectory,
                               bool immutable,
@@ -807,7 +808,20 @@ namespace Microsoft.Build.Execution
 
                 _includeEscaped = FileUtilities.FixFilePath(includeEscaped);
                 _includeBeforeWildcardExpansionEscaped = FileUtilities.FixFilePath(includeBeforeWildcardExpansionEscaped);
-                _directMetadata = (directMetadata == null || directMetadata.Count == 0) ? null : directMetadata; // If the metadata was all removed, toss the dictionary
+                if (directMetadata == null || directMetadata.Count == 0)
+                {
+                    // If the metadata was all removed, toss the dictionary
+                    _directMetadata = null;
+                }
+                else if (immutable)
+                {
+                    // This instance is immutable, so the metadata can be too.
+                    _directMetadata = directMetadata.ToImmutableDictionary();
+                }
+                else
+                {
+                    _directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(directMetadata);
+                }
                 _itemDefinitions = itemDefinitions;
                 _projectDirectory = projectDirectory;
                 _isImmutable = immutable;
@@ -1067,7 +1081,7 @@ namespace Microsoft.Build.Execution
                     //  (last of which is any item definition metadata associated with the destination item's item type)
                     if (_itemDefinitions == null)
                     {
-                        return (_directMetadata == null) ? new CopyOnWritePropertyDictionary<ProjectMetadataInstance>() : _directMetadata.DeepClone(); // copy on write!
+                        return new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(_directMetadata);
                     }
 
                     CopyOnWritePropertyDictionary<ProjectMetadataInstance> allMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(_itemDefinitions.Count + (_directMetadata?.Count ?? 0));
@@ -1092,7 +1106,7 @@ namespace Microsoft.Build.Execution
                     // Finally any direct metadata win.
                     if (_directMetadata != null)
                     {
-                        foreach (ProjectMetadataInstance metadatum in _directMetadata)
+                        foreach (ProjectMetadataInstance metadatum in _directMetadata.Values)
                         {
                             if (metadatum != null)
                             {
@@ -1241,9 +1255,7 @@ namespace Microsoft.Build.Execution
                     ErrorUtilities.VerifyThrowArgumentLength(metadataName, "metadataName");
                 }
 
-                string value = null;
-                ProjectMetadataInstance metadatum = null;
-
+                ProjectMetadataInstance metadatum;
                 if (_directMetadata != null)
                 {
                     metadatum = _directMetadata[metadataName];
@@ -1255,6 +1267,7 @@ namespace Microsoft.Build.Execution
 
                 metadatum = GetItemDefinitionMetadata(metadataName);
 
+                string value;
                 if (null != metadatum && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
                 {
                     Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(null, null, new BuiltInMetadataTable(null, this), FileSystems.Default);
@@ -1307,7 +1320,7 @@ namespace Microsoft.Build.Execution
                 ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
 
                 // If the metadata was all removed, toss the dictionary
-                _directMetadata?.Remove(metadataName, clearIfEmpty: true);
+                (_directMetadata as CopyOnWritePropertyDictionary<ProjectMetadataInstance>)?.Remove(metadataName, clearIfEmpty: true);
             }
 
             /// <summary>
@@ -1355,7 +1368,7 @@ namespace Microsoft.Build.Execution
                     ProjectInstance.VerifyThrowNotImmutable(destinationAsTaskItem._isImmutable);
 
                     // This optimized path is hit most often
-                    destinationAsTaskItem._directMetadata = _directMetadata?.DeepClone(); // copy on write!
+                    destinationAsTaskItem._directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(_directMetadata);
 
                     // If the destination item already has item definitions then we want to maintain them
                     // But ours will be of less precedence than those already on the item
@@ -1445,7 +1458,23 @@ namespace Microsoft.Build.Execution
                 translator.Translate(ref _definingFileEscaped);
 
                 translator.Translate(ref _itemDefinitions, ProjectItemDefinitionInstance.FactoryForDeserialization);
-                translator.TranslateDictionary(ref _directMetadata, ProjectMetadataInstance.FactoryForDeserialization);
+                if (_isImmutable)
+                {
+                    var dictionary = _directMetadata as ImmutableDictionary<string, ProjectMetadataInstance>;
+                    translator.TranslateDictionary(
+                        ref dictionary,
+                        ProjectMetadataInstance.FactoryForDeserialization,
+                        () => ImmutableDictionary.CreateBuilder<string, ProjectMetadataInstance>(),
+                        (builder, key, value) => builder.Add(key, value),
+                        builder => builder.ToImmutable());
+                    _directMetadata = dictionary;
+                }
+                else
+                {
+                    var dictionary = _directMetadata as CopyOnWritePropertyDictionary<ProjectMetadataInstance>;
+                    translator.TranslateDictionary(ref dictionary, ProjectMetadataInstance.FactoryForDeserialization);
+                    _directMetadata = dictionary;
+                }
 
                 if (_itemDefinitions?.Count == 0)
                 {
@@ -1553,7 +1582,7 @@ namespace Microsoft.Build.Execution
             /// </remarks>
             public bool HasMetadata(string name)
             {
-                if ((_directMetadata != null && _directMetadata.Contains(name)) ||
+                if ((_directMetadata != null && _directMetadata.ContainsKey(name)) ||
                      FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name) ||
                     GetItemDefinitionMetadata(name) != null)
                 {
@@ -1630,9 +1659,9 @@ namespace Microsoft.Build.Execution
                         _directMetadata = (count == 0) ? null : new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(count);
                         for (int i = 0; i < count; i++)
                         {
-                            int key = translator.Reader.ReadInt32();
-                            int value = translator.Reader.ReadInt32();
-                            _directMetadata.Set(new ProjectMetadataInstance(interner.GetString(key), interner.GetString(value), allowItemSpecModifiers: true));
+                            string key = interner.GetString(translator.Reader.ReadInt32());
+                            string value = interner.GetString(translator.Reader.ReadInt32());
+                            _directMetadata[key] = (new ProjectMetadataInstance(key, value, allowItemSpecModifiers: true));
                         }
                     }
                 }
@@ -1678,7 +1707,7 @@ namespace Microsoft.Build.Execution
                 }
                 else
                 {
-                    _directMetadata.ImportProperties(metadata);
+                    (_directMetadata as CopyOnWritePropertyDictionary<ProjectMetadataInstance>).ImportProperties(metadata);
                 }
             }
 
@@ -1691,9 +1720,9 @@ namespace Microsoft.Build.Execution
             {
                 ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
 
-                _directMetadata = _directMetadata ?? new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+                _directMetadata ??= new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
                 ProjectMetadataInstance metadatum = new ProjectMetadataInstance(name, metadataValueEscaped, allowItemSpecModifiers /* may not be built-in metadata name */);
-                _directMetadata.Set(metadatum);
+                _directMetadata[name] = metadatum;
 
                 return metadatum;
             }
@@ -1713,9 +1742,9 @@ namespace Microsoft.Build.Execution
 
                 if (!FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(name))
                 {
-                    _directMetadata = _directMetadata ?? new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+                    _directMetadata ??= new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
                     ProjectMetadataInstance metadatum = new ProjectMetadataInstance(name, evaluatedValueEscaped, true /* may be built-in metadata name */);
-                    _directMetadata.Set(metadatum);
+                    _directMetadata[name] = metadatum;
                 }
             }
 
