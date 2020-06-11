@@ -724,7 +724,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="correspondingOutputs">Outputs that correspond ot the sources (used for same file processing)</param>
         public void RemoveDependenciesFromEntryIfMissing(ITaskItem[] source, ITaskItem[] correspondingOutputs)
         {
-            // Cache of files that have been checked and exist.
+            // Cache of files and whether or not they exist.
             Dictionary<string, bool> fileCache = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
 
             if (correspondingOutputs != null)
@@ -768,7 +768,7 @@ namespace Microsoft.Build.Utilities
                         // We do this to save time (On^2), at the expense of data O(n).
                         bool inFileCache = fileCache.TryGetValue(file, out bool fileExists);
 
-                        // Have we cached the file yet? If not, cache whether or not it exists.
+                        // Have we cached the file yet? If not, cache its existence.
                         if (!inFileCache)
                         {
                             fileExists = FileUtilities.FileExistsNoThrow(file);
