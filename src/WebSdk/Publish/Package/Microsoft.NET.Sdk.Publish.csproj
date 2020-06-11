@@ -42,8 +42,13 @@
       <PackagePath>Sdk</PackagePath>
     </Content>
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(RepoRoot)\src\WebSdk\Publish\Tasks\Microsoft.NET.Sdk.Publish.Tasks.csproj" ExcludeAssets="All" />
+  </ItemGroup>
   
   <Import Project="$(RepoRoot)\src\WebSdk\CopyPackageLayout.targets" />
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
   
 </Project>
+ 
