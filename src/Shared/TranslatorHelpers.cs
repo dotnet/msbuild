@@ -105,5 +105,18 @@ namespace Microsoft.Build.BackEnd
         {
             translator.TranslateDictionary(ref dictionary, AdaptFactory(valueFactory), collectionCreator);
         }
+
+        public static void TranslateDictionary<D, T, TAccum>(
+            this ITranslator translator,
+            ref D dictionary,
+            NodePacketValueFactory<T> valueFactory,
+            Func<TAccum> accumulatorFactory,
+            Action<TAccum, string, T> accumulate,
+            Func<TAccum, D> complete)
+            where D : IDictionary<string, T>
+            where T : class, ITranslatable
+        {
+            translator.TranslateDictionary(ref dictionary, AdaptFactory(valueFactory), accumulatorFactory, accumulate, complete);
+        }
     }
 }

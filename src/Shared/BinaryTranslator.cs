@@ -638,11 +638,11 @@ namespace Microsoft.Build.BackEnd
             /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
             /// <typeparam name="TAccum">The reference type for the dictionary accumulator.</typeparam>
             /// <param name="dictionary">The dictionary to be translated.</param>
-            /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
+            /// <param name="objectTranslator">The factory used to instantiate values in the dictionary.</param>
             /// <param name="accumulatorFactory">The factory used to instantiate a dictionary accumulator.</param>
             /// <param name="accumulate">The function used to accumulate values.</param>
             /// <param name="complete">The function to complete accumulation.</param>
-            public void TranslateDictionary<D, T, TAccum>(ref D dictionary, NodePacketValueFactory<T> valueFactory, Func<TAccum> accumulatorFactory, Action<TAccum, string, T> accumulate, Func<TAccum, D> complete)
+            public void TranslateDictionary<D, T, TAccum>(ref D dictionary, ObjectTranslator<T> objectTranslator, Func<TAccum> accumulatorFactory, Action<TAccum, string, T> accumulate, Func<TAccum, D> complete)
                 where D : IDictionary<string, T>
                 where T : class, ITranslatable
             {
@@ -659,7 +659,7 @@ namespace Microsoft.Build.BackEnd
                     string key = null;
                     Translate(ref key);
                     T value = null;
-                    Translate(ref value, valueFactory);
+                    objectTranslator(this, ref value);
                     accumulate(builder, key, value);
                 }
 
@@ -1234,11 +1234,11 @@ namespace Microsoft.Build.BackEnd
             /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
             /// <typeparam name="TAccum">The reference type for the dictionary accumulator.</typeparam>
             /// <param name="dictionary">The dictionary to be translated.</param>
-            /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
+            /// <param name="objectTranslator">The factory used to instantiate values in the dictionary.</param>
             /// <param name="accumulatorFactory">The factory used to instantiate a dictionary accumulator.</param>
             /// <param name="accumulate">The function used to accumulate values.</param>
             /// <param name="complete">The function to complete accumulation.</param>
-            public void TranslateDictionary<D, T, TAccum>(ref D dictionary, NodePacketValueFactory<T> valueFactory, Func<TAccum> accumulatorFactory, Action<TAccum, string, T> accumulate, Func<TAccum, D> complete)
+            public void TranslateDictionary<D, T, TAccum>(ref D dictionary, ObjectTranslator<T> objectTranslator, Func<TAccum> accumulatorFactory, Action<TAccum, string, T> accumulate, Func<TAccum, D> complete)
                 where D : IDictionary<string, T>
                 where T : class, ITranslatable
             {
@@ -1255,7 +1255,7 @@ namespace Microsoft.Build.BackEnd
                     string key = pair.Key;
                     Translate(ref key);
                     T value = pair.Value;
-                    Translate(ref value, valueFactory);
+                    objectTranslator(this, ref value);
                 }
             }
 

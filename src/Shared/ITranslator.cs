@@ -330,7 +330,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="accumulatorFactory">The factory used to instantiate a dictionary accumulator.</param>
         /// <param name="accumulate">The function used to accumulate values.</param>
         /// <param name="complete">The function to complete accumulation.</param>
-        void TranslateDictionary<D, T, TAccum>(ref D dictionary, NodePacketValueFactory<T> valueFactory, Func<TAccum> accumulatorFactory, Action<TAccum, string, T> accumulate, Func<TAccum, D> complete)
+        void TranslateDictionary<D, T, TAccum>(ref D dictionary, ObjectTranslator<T> objectTranslator, Func<TAccum> accumulatorFactory, Action<TAccum, string, T> accumulate, Func<TAccum, D> complete)
             where D : IDictionary<string, T>
             where T : class, ITranslatable;
 
