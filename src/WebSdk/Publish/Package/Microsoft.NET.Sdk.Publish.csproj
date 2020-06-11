@@ -18,6 +18,7 @@
   <ItemGroup>
     <!-- Publish task assembly -->
     <Content Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\net472\**\*.dll"
+             Exclude="$(ArtifactsBinDir)Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\net472\Newtonsoft.Json.dll"
              Condition=" '$(DotNetBuildFromSource)' != 'true' ">
       <Pack>true</Pack>
       <PackagePath>tools\net472</PackagePath>
@@ -25,6 +26,7 @@
 
     <Content Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\$(SdkTargetFramework)\**\*.dll"
              Exclude="$(ArtifactsBinDir)Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\$(SdkTargetFramework)\**\System.*;
+                      $(ArtifactsBinDir)Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\$(SdkTargetFramework)\Newtonsoft.Json.dll;
                       $(ArtifactsBinDir)Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\$(SdkTargetFramework)\runtimes\**">
       <Pack>true</Pack>
       <PackagePath>tools\$(SdkTargetFramework)</PackagePath>
