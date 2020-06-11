@@ -466,7 +466,7 @@ namespace Microsoft.Build.Execution
             this.CreateItemDefinitionsSnapshot(data);
 
             var keepEvaluationCache = (settings & ProjectInstanceSettings.ImmutableWithFastItemLookup) == ProjectInstanceSettings.ImmutableWithFastItemLookup;
-            var projectItemToInstanceMap = this.CreateItemsSnapshot(data, keepEvaluationCache);
+            var projectItemToInstanceMap = this.CreateItemsSnapshot(data, immutable, keepEvaluationCache);
 
             this.CreateEvaluatedIncludeSnapshotIfRequested(keepEvaluationCache, data, projectItemToInstanceMap);
             this.CreateGlobalPropertiesSnapshot(data);
@@ -2825,7 +2825,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Create Items snapshot
         /// </summary>
-        private Dictionary<ProjectItem, ProjectItemInstance> CreateItemsSnapshot(Evaluation.Project.Data data, bool keepEvaluationCache)
+        private Dictionary<ProjectItem, ProjectItemInstance> CreateItemsSnapshot(Evaluation.Project.Data data, bool immutable, bool keepEvaluationCache)
         {
             _items = new ItemDictionary<ProjectItemInstance>(data.ItemTypes.Count);
 
@@ -2859,7 +2859,7 @@ namespace Microsoft.Build.Execution
                     }
                 }
 
-                ProjectItemInstance instance = new ProjectItemInstance(this, item.ItemType, ((IItem)item).EvaluatedIncludeEscaped, item.EvaluatedIncludeBeforeWildcardExpansionEscaped, directMetadata, inheritedItemDefinitions, item.Xml.ContainingProject.EscapedFullPath);
+                ProjectItemInstance instance = new ProjectItemInstance(this, immutable, item.ItemType, ((IItem)item).EvaluatedIncludeEscaped, item.EvaluatedIncludeBeforeWildcardExpansionEscaped, directMetadata, inheritedItemDefinitions, item.Xml.ContainingProject.EscapedFullPath);
 
                 _items.Add(instance);
 

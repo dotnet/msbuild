@@ -89,7 +89,25 @@ namespace Microsoft.Build.Execution
         /// </remarks>
         internal ProjectItemInstance(ProjectInstance project, string itemType, string includeEscaped, string includeBeforeWildcardExpansionEscaped, IDictionary<string, ProjectMetadataInstance> directMetadata, List<ProjectItemDefinitionInstance> itemDefinitions, string definingFileEscaped)
         {
-            CommonConstructor(project, itemType, includeEscaped, includeBeforeWildcardExpansionEscaped, directMetadata, itemDefinitions, definingFileEscaped);
+            CommonConstructor(project, false, itemType, includeEscaped, includeBeforeWildcardExpansionEscaped, directMetadata, itemDefinitions, definingFileEscaped);
+        }
+
+        /// <summary>
+        /// Constructor for items with metadata.
+        /// Called before the build when virtual items are added, 
+        /// and during the build when tasks emit items.
+        /// Include may be empty.
+        /// Direct metadata may be null, indicating no metadata. It will be cloned.
+        /// Builtin metadata may be null, indicating it has not been populated. It will be cloned.
+        /// Inherited item definition metadata may be null. It is assumed to ALREADY HAVE BEEN CLONED.
+        /// Specifies mutability explicitly.
+        /// </summary>
+        /// <remarks>
+        /// Not public since the only creation scenario is setting on a project.
+        /// </remarks>
+        internal ProjectItemInstance(ProjectInstance project, bool immutable, string itemType, string includeEscaped, string includeBeforeWildcardExpansionEscaped, IDictionary<string, ProjectMetadataInstance> directMetadata, List<ProjectItemDefinitionInstance> itemDefinitions, string definingFileEscaped)
+        {
+            CommonConstructor(project, immutable, itemType, includeEscaped, includeBeforeWildcardExpansionEscaped, directMetadata, itemDefinitions, definingFileEscaped);
         }
 
         /// <summary>
@@ -116,7 +134,7 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            CommonConstructor(project, itemType, includeEscaped, includeEscaped, metadata, null /* need to add item definition metadata */, definingFileEscaped);
+            CommonConstructor(project, false, itemType, includeEscaped, includeEscaped, metadata, null /* need to add item definition metadata */, definingFileEscaped);
         }
 
         /// <summary>
@@ -687,7 +705,7 @@ namespace Microsoft.Build.Execution
         /// Inherited item definition metadata may be null. It is assumed to ALREADY HAVE BEEN CLONED.
         /// Mutability follows the project.
         /// </summary>
-        private void CommonConstructor(ProjectInstance projectToUse, string itemTypeToUse, string includeEscaped, string includeBeforeWildcardExpansionEscaped, IDictionary<string, ProjectMetadataInstance> directMetadata, List<ProjectItemDefinitionInstance> itemDefinitions, string definingFileEscaped)
+        private void CommonConstructor(ProjectInstance projectToUse, bool forceImmutable, string itemTypeToUse, string includeEscaped, string includeBeforeWildcardExpansionEscaped, IDictionary<string, ProjectMetadataInstance> directMetadata, List<ProjectItemDefinitionInstance> itemDefinitions, string definingFileEscaped)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectToUse, "project");
             ErrorUtilities.VerifyThrowArgumentLength(itemTypeToUse, "itemType");
@@ -712,7 +730,7 @@ namespace Microsoft.Build.Execution
                                      directMetadata,
                                      inheritedItemDefinitions,
                                      _project.Directory,
-                                     _project.IsImmutable,
+                                     _project.IsImmutable || forceImmutable,
                                      definingFileEscaped
                                      );
         }
