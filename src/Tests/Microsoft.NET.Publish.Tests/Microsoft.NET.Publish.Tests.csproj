@@ -25,7 +25,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
     <ProjectReference Include="..\TelemetryStdOutLogger\TelemetryStdOutLogger.csproj" />
-    <ProjectReference Include="..\..\WebSdk\Publish\Tasks\Microsoft.NET.Sdk.Publish.Tasks.csproj" />
   </ItemGroup>
 
   <ItemGroup>
