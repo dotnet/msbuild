@@ -32,7 +32,8 @@
   <ItemGroup>
     <!-- Make sure tasks project is built, but don't directly reference it as an assembly. -->
     <ProjectReference Include="..\..\Tasks\Microsoft.NET.Build.Tasks\Microsoft.NET.Build.Tasks.csproj" PrivateAssets="all" ReferenceOutputAssembly="false" />
-    
+    <ProjectReference Include="..\..\WebSdk\Publish\Tasks\Microsoft.NET.Sdk.Publish.Tasks.csproj" PrivateAssets="all" ReferenceOutputAssembly="false" />
+
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
     <ProjectReference Include="..\TelemetryStdOutLogger\TelemetryStdOutLogger.csproj" />
   </ItemGroup>
