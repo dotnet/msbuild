@@ -13,6 +13,7 @@ using System.Xml;
 using Microsoft.Build.Framework;
 using System.IO;
 using Xunit;
+using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
