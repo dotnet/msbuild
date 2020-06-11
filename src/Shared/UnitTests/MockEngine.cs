@@ -52,6 +52,8 @@ namespace Microsoft.Build.UnitTests
 
         internal int Errors { get; set; }
 
+        public bool AllowFailureWithoutError { get; set; } = true;
+
         public BuildErrorEventArgs[] ErrorEvents => _errorEvents.ToArray();
 
         public Dictionary<string, string> GlobalProperties { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);

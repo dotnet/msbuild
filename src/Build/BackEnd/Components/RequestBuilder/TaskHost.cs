@@ -38,7 +38,7 @@ namespace Microsoft.Build.BackEnd
         IBuildEngine7
     {
         /// <summary>
-        /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set. 
+        /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set.
         /// </summary>
         private static bool s_onlyUseOutOfProcNodes = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
 
@@ -132,7 +132,7 @@ namespace Microsoft.Build.BackEnd
         /// Returns true in the multiproc case
         /// </summary>
         /// <comment>
-        /// If MSBUILDNOINPROCNODE is set, then even if there's only one node in the buildparameters, it will be an out-of-proc node.  
+        /// If MSBUILDNOINPROCNODE is set, then even if there's only one node in the buildparameters, it will be an out-of-proc node.
         /// </comment>
         public bool IsRunningMultipleNodes
         {
@@ -321,7 +321,7 @@ namespace Microsoft.Build.BackEnd
         #region IBuildEngine3 Members
 
         /// <summary>
-        /// Builds multiple project files in parallel. 
+        /// Builds multiple project files in parallel.
         /// Thread safe.
         /// </summary>
         /// <param name="projectFileNames">The list of projects to build</param>
@@ -329,7 +329,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="globalProperties">The global properties to use for each project</param>
         /// <param name="undefineProperties">The list of global properties to undefine</param>
         /// <param name="toolsVersion">The tools versions to use</param>
-        /// <param name="returnTargetOutputs">Should the target outputs be returned in teh BuildEngineResult</param>
+        /// <param name="returnTargetOutputs">Should the target outputs be returned in the BuildEngineResult</param>
         /// <returns>A structure containing the result of the build, success or failure and the list of target outputs per project</returns>
         public BuildEngineResult BuildProjectFilesInParallel(string[] projectFileNames, string[] targetNames, System.Collections.IDictionary[] globalProperties, IList<String>[] undefineProperties, string[] toolsVersion, bool returnTargetOutputs)
         {
@@ -413,8 +413,8 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                // If we are in building across process we need the events to be serializable. This method will 
-                // check to see if we are building with multiple process and if the event is serializable. It will 
+                // If we are in building across process we need the events to be serializable. This method will
+                // check to see if we are building with multiple process and if the event is serializable. It will
                 // also log a warning if the event is not serializable and drop the logging message.
                 if (IsRunningMultipleNodes && !IsEventSerializable(e))
                 {
@@ -423,7 +423,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (_convertErrorsToWarnings)
                 {
-                    // Convert the error into a warning.  We do this because the whole point of 
+                    // Convert the error into a warning.  We do this because the whole point of
                     // ContinueOnError is that a project author expects that the task might fail,
                     // but wants to ignore the failures.  This implies that we shouldn't be logging
                     // errors either, because you should never have a successful build with errors.
@@ -451,6 +451,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     e.BuildEventContext = _taskLoggingContext.BuildEventContext;
                     _taskLoggingContext.LoggingService.LogBuildEvent(e);
+                    _taskLoggingContext.HasLoggedErrors = true;
                 }
             }
         }
@@ -483,8 +484,8 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                // If we are in building across process we need the events to be serializable. This method will 
-                // check to see if we are building with multiple process and if the event is serializable. It will 
+                // If we are in building across process we need the events to be serializable. This method will
+                // check to see if we are building with multiple process and if the event is serializable. It will
                 // also log a warning if the event is not serializable and drop the logging message.
                 if (IsRunningMultipleNodes && !IsEventSerializable(e))
                 {
@@ -524,8 +525,8 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                // If we are in building across process we need the events to be serializable. This method will 
-                // check to see if we are building with multiple process and if the event is serializable. It will 
+                // If we are in building across process we need the events to be serializable. This method will
+                // check to see if we are building with multiple process and if the event is serializable. It will
                 // also log a warning if the event is not serializable and drop the logging message.
                 if (IsRunningMultipleNodes && !IsEventSerializable(e))
                 {
@@ -565,8 +566,8 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                // If we are in building across process we need the events to be serializable. This method will 
-                // check to see if we are building with multiple process and if the event is serializable. It will 
+                // If we are in building across process we need the events to be serializable. This method will
+                // check to see if we are building with multiple process and if the event is serializable. It will
                 // also log a warning if the event is not serializable and drop the logging message.
                 if (IsRunningMultipleNodes && !IsEventSerializable(e))
                 {
@@ -675,6 +676,8 @@ namespace Microsoft.Build.BackEnd
 
         #endregion
 
+        #region IBuildEngine7 Members
+
         int runningTotal = 0;
 
         public int RequestCores(int requestedCores)
@@ -718,6 +721,12 @@ namespace Microsoft.Build.BackEnd
 
             runningTotal = 0;
         }
+
+        /// <summary>
+        /// Enables or disables emitting a default error when a task fails without logging errors
+        /// </summary>
+        public bool AllowFailureWithoutError { get; set; } = true;
+        #endregion
 
         /// <summary>
         /// Called by the internal MSBuild task.
@@ -768,7 +777,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         /// <inheritdoc />
         /// <summary>
-        /// InitializeLifetimeService is called when the remote object is activated. 
+        /// InitializeLifetimeService is called when the remote object is activated.
         /// This method will determine how long the lifetime for the object will be.
         /// </summary>
         /// <returns>The lease object to control this object's lifetime.</returns>
@@ -783,7 +792,7 @@ namespace Microsoft.Build.BackEnd
                 ILease lease = (ILease)base.InitializeLifetimeService();
 
                 // Set how long a lease should be initially. Once a lease expires
-                // the remote object will be disconnected and it will be marked as being availiable 
+                // the remote object will be disconnected and it will be marked as being availiable
                 // for garbage collection
                 int initialLeaseTime = 1;
 
@@ -805,7 +814,7 @@ namespace Microsoft.Build.BackEnd
                 // increase the lease time allowing the object to stay in memory
                 _sponsor = new ClientSponsor();
 
-                // When a new lease is requested lets make it last 1 minutes longer. 
+                // When a new lease is requested lets make it last 1 minutes longer.
                 int leaseExtensionTime = 1;
 
                 string leaseExtensionTimeFromEnvironment = Environment.GetEnvironmentVariable("MSBUILDENGINEPROXYLEASEEXTENSIONTIME");
@@ -842,7 +851,7 @@ namespace Microsoft.Build.BackEnd
                 ReleaseAllCores();
 
                 // Since the task has a pointer to this class it may store it in a static field. Null out
-                // internal data so the leak of this object doesn't lead to a major memory leak.            
+                // internal data so the leak of this object doesn't lead to a major memory leak.
                 _host = null;
                 _requestEntry = null;
 
@@ -892,7 +901,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="globalProperties">The global properties to use for each project</param>
         /// <param name="undefineProperties">The list of global properties to undefine</param>
         /// <param name="toolsVersion">The tools versions to use</param>
-        /// <param name="returnTargetOutputs">Should the target outputs be returned in teh BuildEngineResult</param>
+        /// <param name="returnTargetOutputs">Should the target outputs be returned in the BuildEngineResult</param>
         /// <param name="skipNonexistentTargets">If set, skip targets that are not defined in the projects to be built.</param>
         /// <returns>A Task returning a structure containing the result of the build, success or failure and the list of target outputs per project</returns>
         private async Task<BuildEngineResult> BuildProjectFilesInParallelAsync(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<String>[] undefineProperties, string[] toolsVersion, bool returnTargetOutputs, bool skipNonexistentTargets = false)
@@ -933,7 +942,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    // UNDONE: (Refactor) Investigate making this a ReadOnly collection of some sort.  
+                    // UNDONE: (Refactor) Investigate making this a ReadOnly collection of some sort.
                     PropertyDictionary<ProjectPropertyInstance>[] propertyDictionaries = new PropertyDictionary<ProjectPropertyInstance>[projectFileNames.Length];
 
                     for (int i = 0; i < projectFileNames.Length; i++)

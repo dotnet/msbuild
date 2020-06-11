@@ -1,16 +1,16 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
-
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// This interface extends IBuildEngine6 to allow tasks and build scheduler to coordinate resource (cores) usage.
+    /// This interface extends <see cref="IBuildEngine6" /> to allow tasks to set whether they want to
+    /// log an error when a task returns without logging an error.
     /// </summary>
-
     public interface IBuildEngine7 : IBuildEngine6
     {
+        public bool AllowFailureWithoutError { get; set; }
+
         /// <summary>
         /// If a task launches multiple parallel processes, it should ask how many cores it can use.
         /// </summary>
@@ -24,5 +24,6 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="coresToRelease">Number of cores no longer in use.</param>
         void ReleaseCores(int coresToRelease);
+
     }
 }

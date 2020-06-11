@@ -139,7 +139,14 @@ namespace Microsoft.Build.Construction
         {
             if (reader.BaseURI.Length > 0)
             {
-                DetermineWhetherToLoadReadOnly(new Uri(reader.BaseURI).LocalPath);
+                string adjustedLocalPath = null;
+
+                if (Uri.TryCreate(reader.BaseURI, UriKind.RelativeOrAbsolute, out Uri uri))
+                {
+                    adjustedLocalPath = uri.LocalPath;
+                }
+
+                DetermineWhetherToLoadReadOnly(adjustedLocalPath);
             }
 
             // Set the line info source if it is available given the specific implementation of XmlReader
@@ -340,7 +347,7 @@ namespace Microsoft.Build.Construction
                 {
                     _loadAsReadOnly = true;
                 }
-                else if (s_readOnlyFlags == ReadOnlyLoadFlags.LoadReadOnlyIfAppropriate)
+                else if (s_readOnlyFlags == ReadOnlyLoadFlags.LoadReadOnlyIfAppropriate && fullPath is object)
                 {
                     // Only files from Microsoft
                     if (Path.GetFileName(fullPath).StartsWith("Microsoft.", StringComparison.OrdinalIgnoreCase))
