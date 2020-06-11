@@ -1276,8 +1276,7 @@ namespace Microsoft.Build.Execution
                 ProjectMetadataInstance metadatum;
                 if (_directMetadata != null)
                 {
-                    metadatum = _directMetadata[metadataName];
-                    if (metadatum != null)
+                    if (_directMetadata.TryGetValue(metadataName, out metadatum))
                     {
                         return metadatum.EvaluatedValueEscaped;
                     }
@@ -1679,7 +1678,7 @@ namespace Microsoft.Build.Execution
                         {
                             string key = interner.GetString(translator.Reader.ReadInt32());
                             string value = interner.GetString(translator.Reader.ReadInt32());
-                            _directMetadata[key] = (new ProjectMetadataInstance(key, value, allowItemSpecModifiers: true));
+                            _directMetadata[key] = new ProjectMetadataInstance(key, value, allowItemSpecModifiers: true);
                         }
                     }
                 }
@@ -1693,10 +1692,7 @@ namespace Microsoft.Build.Execution
             {
                 ProjectMetadataInstance value = null;
 
-                if (_directMetadata != null)
-                {
-                    value = _directMetadata[name];
-                }
+                _directMetadata?.TryGetValue(name, out value);
 
                 if (value == null)
                 {
