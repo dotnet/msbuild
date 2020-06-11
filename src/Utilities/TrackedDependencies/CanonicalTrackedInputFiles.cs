@@ -1078,9 +1078,10 @@ namespace Microsoft.Build.Utilities
                         bool inFileCache = fileCache.TryGetValue(file, out bool fileExists);
 
                         // Have we cached the file yet? If not, cache whether or not it exists.
-                        if(!inFileCache)
+                        if (!inFileCache)
                         {
-                            fileCache.Add(file, FileUtilities.FileExistsNoThrow(file));
+                            fileExists = FileUtilities.FileExistsNoThrow(file);
+                            fileCache.Add(file, fileExists);
                         }
 
                         // Does the cached file exist?
