@@ -751,6 +751,7 @@ namespace Microsoft.Build.Utilities
         /// Remove the output graph entries for the given rooting marker
         /// </summary>
         /// <param name="rootingMarker"></param>
+        /// <param name="fileCache">The cache used to store whether each file exists or not.</param>
         private void RemoveDependenciesFromEntryIfMissing(string rootingMarker, Dictionary<string, bool> fileCache)
         {
             // In the event of incomplete tracking information (i.e. this root was not present), just continue quietly
