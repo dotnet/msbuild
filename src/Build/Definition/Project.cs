@@ -57,7 +57,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// * and ? are invalid file name characters, but they occur in globs as wild cards.
         /// </summary>
-        private static readonly char[] s_invalidGlobChars = FileUtilities.InvalidFileNameChars.Where(c => c != '*' && c != '?' && c!= '/' && c != '\\').ToArray();
+        private static readonly char[] s_invalidGlobChars = FileUtilities.InvalidFileNameChars.Where(c => c != '*' && c != '?' && c!= '/' && c != '\\' && c != ':').ToArray();
 
         /// <summary>
         /// Context to log messages and events in

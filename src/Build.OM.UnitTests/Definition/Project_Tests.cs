@@ -3744,11 +3744,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             new[] {"ab", "de"},
             new[] {"bc", "b|c", "b", "c"}
             )]
-        [InlineData(
-            @"<A Include=`ab*;bc*;:de*`/>",
-            new[] { "ab", "bc" },
-            new[] { "de", ":de" }
-            )]
         public void GetAllGlobsShouldProduceGlobThatMatches(string itemContents, string[] stringsThatShouldMatch, string[] stringsThatShouldNotMatch)
         {
             var projectTemplate =
