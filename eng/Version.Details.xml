@@ -42,9 +42,9 @@
       <Uri>https://github.com/dotnet/wpf</Uri>
       <Sha>589ace3c9fdfa0f1ea1640b82304a6a7ac597871</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="5.7.0-preview.2.6618">
+    <Dependency Name="NuGet.Build.Tasks" Version="5.7.0-preview.3.6645">
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
-      <Sha>721908c643a7806b630774e76b53e37507fec062</Sha>
+      <Sha>f548641f11f1a7a0bc27632e9534f1bb1e43a350</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.7.0-release-20200612-02">
       <Uri>https://github.com/microsoft/vstest</Uri>
