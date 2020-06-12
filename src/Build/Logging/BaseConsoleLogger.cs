@@ -35,7 +35,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// TargetFramework_errorwarning is the map between a target framwork and the number of errors and warnings
         /// These are used to give more direction as to where an error is happening when multi targetted
         ///</summary>
-        protected Dictionary<(int nodeId, int contextId), Dictionary<string, string>> TargetFramework_mapping = new Dictionary<(int nodeId, int contextId), Dictionary<string, string>> ();
+        protected Dictionary<(int nodeId, int contextId), StringBuilder> TargetFramework_mapping = new Dictionary<(int nodeId, int contextId), StringBuilder> ();
 
         #region Properties
 

@@ -7,8 +7,6 @@ using System.Collections.Generic;
 using System.Text;
 
 using Microsoft.Build.Framework;
-using System.Linq;
-using System.Collections;
 
 namespace Microsoft.Build.Shared
 {
@@ -139,7 +137,7 @@ namespace Microsoft.Build.Shared
             int threadId
         )
         {
-            return FormatEventMessage(category, subcategory, message, code, file, null, lineNumber, endLineNumber, columnNumber, endColumnNumber, threadId, new Dictionary<string, string>());
+            return FormatEventMessage(category, subcategory, message, code, file, null, lineNumber, endLineNumber, columnNumber, endColumnNumber, threadId, new StringBuilder());
         }
 
         /// <summary>
@@ -171,7 +169,7 @@ namespace Microsoft.Build.Shared
             int columnNumber,
             int endColumnNumber,
             int threadId,
-            Dictionary<string, string> outputProperties
+            StringBuilder outputProperties
         )
         {
             StringBuilder format = new StringBuilder();
@@ -260,23 +258,19 @@ namespace Microsoft.Build.Shared
             {
                 format.Append("{6}");
             }
-
-            StringBuilder projectProperties = new StringBuilder();
-
+;
             // If the project file was specified, tack that onto the very end.
             // Check for additional properties that should be outputted as well
-            if (outputProperties != null)
-            {
-                foreach (KeyValuePair<string, string> prop in outputProperties)
-                {
-                    projectProperties.Append(prop.Key).Append(":").Append(prop.Value).Append(" ");
-                }
-            }
-
             if (projectFile != null && !String.Equals(projectFile, file))
             {
-                if(projectProperties != null && projectProperties.Length > 0) format.Append(" [{10} > ").Append(projectProperties).Append("]");
-                else format.Append(" [{10}]");
+                if (outputProperties != null && outputProperties.Length > 0)
+                {
+                    format.Append(" [{10} > ").Append(outputProperties).Append("]");
+                }
+                else
+                {
+                    format.Append(" [{10}]");
+                }
             }
 
             // A null message is allowed and is to be treated as a blank line.

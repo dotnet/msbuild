@@ -15,7 +15,6 @@ using Microsoft.Build.Shared;
 using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
-using System.Linq;
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -92,7 +91,7 @@ namespace Microsoft.Build.BackEnd.Logging
             errorCount = 0;
             warningCount = 0;
 
-            TargetFramework_mapping = new Dictionary<(int nodeId, int contextId), Dictionary<string,string>>();
+            TargetFramework_mapping = new Dictionary<(int nodeId, int contextId), StringBuilder>();
             projectPerformanceCounters = null;
             targetPerformanceCounters = null;
             taskPerformanceCounters = null;
@@ -156,7 +155,6 @@ namespace Microsoft.Build.BackEnd.Logging
                     //     0 Error(s)
                     // Don't color the line if it's zero. (Per Whidbey behavior.)
                     // separate counts by framework
-
                     if (warningCount > 0)
                     {
                         setColor(ConsoleColor.Yellow);
@@ -170,7 +168,6 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
                     WriteLinePrettyFromResource(2, "ErrorCount", errorCount);
                     resetColor();
-                    
                 }
             }
 
@@ -291,7 +288,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 project_context_id = e.BuildEventContext.ProjectContextId;
             }
             //creating the value to be added to the TargetFramework_mapping
-            Dictionary<string, string> propertyOutputs = new Dictionary<string, string>();
+            StringBuilder outputProperties= new StringBuilder();
 
             if (e.BuildEventContext != null && e.Items != null)
             {
@@ -299,15 +296,15 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     ITaskItem itemVal = (ITaskItem)item.Value;
                     //finding if the outputProperties item has been used
-                    if ((string)item.Key == "outputProperties")
+                    if ("outputProperties".Equals(item.Key))
                     {
                         //looking for the property value associated with the property key
                         //Note: the property key is the item value
                         string value = null;
-                        e.GlobalProperties.TryGetValue(itemVal.ItemSpec, out value);
+                        bool foundProperties = e.GlobalProperties.TryGetValue(itemVal.ItemSpec, out value);
 
                         //looking for the property in local properties if it wasn't found in global properties
-                        if (value == null)
+                        if (!foundProperties)
                         {
                             foreach (DictionaryEntry prop in e.Properties)
                             {
@@ -315,34 +312,25 @@ namespace Microsoft.Build.BackEnd.Logging
                                 if ((string)prop.Key == itemVal.ItemSpec)
                                 {
                                     value = (string)prop.Value;
+                                    foundProperties = true;
                                     break;
                                 }
                             }
                         }
 
                         //adding the property key and value pair to the propertyOutputs
-                        if (value != null)
+                        if (foundProperties)
                         {
-#if NET472
-                            if (!propertyOutputs.ContainsKey(itemVal.ItemSpec))
-                                propertyOutputs.Add(itemVal.ItemSpec, value);
-#else
-                        propertyOutputs.TryAdd(itemVal.ItemSpec, value);
-#endif
+                            outputProperties.Append(itemVal.ItemSpec).Append(":").Append(value).Append(" ");
                         }
                     }
                 }
             }
             //adding the finished dictionary to TargetFramework_mapping
             //this creates a mapping of a specific project/node to a dictionary of property values
-        #if NET472
             if (e.BuildEventContext != null)
                 if (!TargetFramework_mapping.ContainsKey((node, project_context_id)))
-                    TargetFramework_mapping.Add((node, project_context_id), propertyOutputs);
-        #else
-            if(e.BuildEventContext != null)
-                TargetFramework_mapping.TryAdd((node, project_context_id), propertyOutputs);
-        #endif
+                    TargetFramework_mapping.Add((node, project_context_id), outputProperties);
         }
 
         /// <summary>
@@ -539,7 +527,7 @@ namespace Microsoft.Build.BackEnd.Logging
             setColor(ConsoleColor.Red);
 
             //determine the mapping of properties to output
-            Dictionary<string, string> outputProperties = new Dictionary<string, string>();
+            StringBuilder outputProperties = new StringBuilder();
             if (e.BuildEventContext != null)
             {
                 int nodeId = e.BuildEventContext.NodeId;
@@ -567,7 +555,7 @@ namespace Microsoft.Build.BackEnd.Logging
             setColor(ConsoleColor.Yellow);
 
             //determine the mapping of properties to output
-            Dictionary<string, string> outputProperties = new Dictionary<string, string>();
+            StringBuilder outputProperties = new StringBuilder();
             if (e.BuildEventContext != null)
             {
                 int nodeId = e.BuildEventContext.NodeId;
@@ -590,7 +578,7 @@ namespace Microsoft.Build.BackEnd.Logging
         public override void MessageHandler(object sender, BuildMessageEventArgs e)
         {
             //determine the mapping of properties to output
-            Dictionary<string, string> outputProperties = new Dictionary<string, string>();
+            StringBuilder outputProperties = new StringBuilder();
             if (e.BuildEventContext != null)
             {
                 int nodeId = e.BuildEventContext.NodeId;
@@ -910,9 +898,9 @@ namespace Microsoft.Build.BackEnd.Logging
                 ErrorUtilities.ThrowInternalError(errorMessage);
             }
         }
-#endregion
+        #endregion
 
-#region Supporting classes
+        #region Supporting classes
 
         /// <summary>
         /// This enumeration represents the kinds of context that can be
@@ -1072,9 +1060,9 @@ namespace Microsoft.Build.BackEnd.Logging
                 return (_frames.Count == 0);
             }
         }
-#endregion
+        #endregion
 
-#region Private member data
+        #region Private member data
 
         /// <summary>
         /// contextStack is the only interesting state in the console
@@ -1082,6 +1070,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// denoting current and previous containing projects and targets
         /// </summary>
         internal FrameStack contextStack = new FrameStack();
-#endregion
+        #endregion
+        #endregion
     }
 }

@@ -2,10 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
+using System.Text;
 
 namespace Microsoft.Build.Framework
 {
@@ -180,12 +180,7 @@ namespace Microsoft.Build.Framework
             }
         }
 
-        private Dictionary<string, string> _outputProperties = new Dictionary<string, string>();
-        public Dictionary<string, string> outputProperties
-        {
-            get => _outputProperties;
-            set => _outputProperties = value;
-        }
+        public StringBuilder outputProperties{ get;  set; }
 
         /// <summary>
         /// Formats the given string using the variable arguments passed in.
