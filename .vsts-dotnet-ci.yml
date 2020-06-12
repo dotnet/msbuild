@@ -33,19 +33,18 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: always()
-  - task: PublishPipelineArtifact@1
+  - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      targetPath: 'artifacts/log/Debug'
-      artifact: 'FullOnWindows build logs'
-      publishLocation: 'pipeline'
+      PathtoPublish: 'artifacts/log/Debug'
+      ArtifactName: 'FullOnWindows build logs'
     continueOnError: true
     condition: always()
-  - task: PublishPipelineArtifact@1
+  - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
-      path: 'artifacts/TestResults'
-      artifactName: 'FullOnWindows test logs'
+      PathtoPublish: 'artifacts/TestResults'
+      ArtifactName: 'FullOnWindows test logs'
     continueOnError: true
     condition: always()
 
@@ -79,18 +78,18 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: always()
-  - task: PublishPipelineArtifact@1
+  - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      path: 'artifacts/log/Debug'
-      artifactName: 'CoreOnWindows build logs'
+      PathtoPublish: 'artifacts/log/Debug'
+      ArtifactName: 'CoreOnWindows build logs'
     continueOnError: true
     condition: always()
-  - task: PublishPipelineArtifact@1
+  - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
-      path: 'artifacts/TestResults'
-      artifactName: 'CoreOnWindows test logs'
+      PathtoPublish: 'artifacts/TestResults'
+      ArtifactName: 'CoreOnWindows test logs'
     continueOnError: true
     condition: always()
 
@@ -124,18 +123,18 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: always()
-  - task: PublishPipelineArtifact@1
+  - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      path: 'artifacts/Log/Release'
-      artifactName: 'FullOnWindows Release build logs'
+      PathtoPublish: 'artifacts/Log/Release'
+      ArtifactName: 'FullOnWindows Release build logs'
     continueOnError: true
     condition: always()
-  - task: PublishPipelineArtifact@1
+  - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
-      path: 'artifacts/TestResults'
-      artifactName: 'FullOnWindows Release test logs'
+      PathtoPublish: 'artifacts/TestResults'
+      ArtifactName: 'FullOnWindows Release test logs'
     continueOnError: true
     condition: always()
 
@@ -156,18 +155,18 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: always()
-  - task: PublishPipelineArtifact@1
+  - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      path: 'artifacts/log/Debug'
-      artifactName: 'CoreOnLinux build logs'
+      PathtoPublish: 'artifacts/log/Debug'
+      ArtifactName: 'CoreOnLinux build logs'
     continueOnError: true
     condition: always()
-  - task: PublishPipelineArtifact@1
+  - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
-      path: 'artifacts/TestResults'
-      artifactName: 'CoreOnLinux test logs'
+      PathtoPublish: 'artifacts/TestResults'
+      ArtifactName: 'CoreOnLinux test logs'
     continueOnError: true
     condition: always()
 
@@ -188,18 +187,18 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: always()
-  - task: PublishPipelineArtifact@1
+  - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      path: 'artifacts/log/Debug'
-      artifactName: 'CoreOnMac build logs'
+      PathtoPublish: 'artifacts/log/Debug'
+      ArtifactName: 'CoreOnMac build logs'
     continueOnError: true
     condition: always()
-  - task: PublishPipelineArtifact@1
+  - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
-      path: 'artifacts/TestResults'
-      artifactName: 'CoreOnMac test logs'
+      PathtoPublish: 'artifacts/TestResults'
+      ArtifactName: 'CoreOnMac test logs'
     continueOnError: true
     condition: always()
 
@@ -228,16 +227,16 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: always()
-  - task: PublishPipelineArtifact@1
+  - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      path: 'artifacts/log'
-      artifactName: 'MonoOnMac build logs'
+      PathtoPublish: 'artifacts/log'
+      ArtifactName: 'MonoOnMac build logs'
     condition: always()
-  - task: PublishPipelineArtifact@1
+  - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
-      path: 'artifacts/TestResults'
-      artifactName: 'MonoOnMac test logs'
+      PathtoPublish: 'artifacts/TestResults'
+      ArtifactName: 'MonoOnMac test logs'
     continueOnError: true
     condition: always()
