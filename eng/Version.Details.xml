@@ -109,7 +109,7 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>3e6495fde363c66ed9730fb8651497bce6c721fd</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Web.Xdt" Version="3.0.0" Pinned="true">
+    <Dependency Name="Microsoft.Web.Xdt" Version="3.1.0" Pinned="true">
       <Uri>https://github.com/aspnet/xdt</Uri>
       <Sha>c01a538851a8ab1a1fbeb2e6243f391fff7587b4</Sha>
     </Dependency>
