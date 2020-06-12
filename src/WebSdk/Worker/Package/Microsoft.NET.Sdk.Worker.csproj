@@ -1,14 +1,16 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project>
 
   <PropertyGroup>
     <WorkerRoot Condition="'$(WorkerRoot)' == ''">$(RepoRoot)\src\WebSdk\Worker\</WorkerRoot>
+    <PackageId>Microsoft.NET.Sdk.Worker</PackageId>
+    <OutDirName>$(Configuration)\Sdks\$(PackageId)\tools</OutDirName>
   </PropertyGroup>
 
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   <Import Project="$(RepoRoot)\src\WebSdk\Package.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <IsPackable>true</IsPackable>
+    <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,5 +24,8 @@
       <PackagePath>Sdk</PackagePath>
     </Content>
   </ItemGroup>
+
+  <Import Project="$(RepoRoot)\src\WebSdk\CopyPackageLayout.targets" />
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
 </Project>

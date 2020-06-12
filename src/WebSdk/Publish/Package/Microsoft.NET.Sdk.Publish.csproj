@@ -1,45 +1,35 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project>
 
   <PropertyGroup>
     <PublishRoot Condition="'$(PublishRoot)' == ''">$(RepoRoot)\src\WebSdk\Publish\</PublishRoot>
+    <PackageId>Microsoft.NET.Sdk.Publish</PackageId>
+    <OutDirName>$(Configuration)\Sdks\$(PackageId)\tools</OutDirName>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="$(RepoRoot)\src\WebSdk\Package.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
     <!-- The transform file is used by the publish process -->
     <NoWarn>NU5108</NoWarn>
   </PropertyGroup>
 
-  <Import Project="$(RepoRoot)\src\WebSdk\Package.props" />
-
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <IsPackable>true</IsPackable>
-  </PropertyGroup>
-
   <ItemGroup>
     <!-- Publish task assembly -->
-    <Content Include="$(ArtifactsBinDir)\Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\net472\Microsoft.NET.Sdk.Publish.Tasks.dll" Condition=" '$(DotNetBuildFromSource)' != 'true' ">
-      <Pack>true</Pack>
-      <PackagePath>tools\net472</PackagePath>
-    </Content>
-
-    <Content Include="$(ArtifactsBinDir)\Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\net472\Microsoft.Web.XmlTransform.dll" Condition=" '$(DotNetBuildFromSource)' != 'true' ">
-      <Pack>true</Pack>
-      <PackagePath>tools\net472</PackagePath>
-    </Content>
-
-    <Content Include="$(ArtifactsBinDir)\Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\net472\Microsoft.Web.Deployment.dll;
-                      $(ArtifactsBinDir)\Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\net472\Microsoft.Web.Delegation.dll"
+    <Content Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\net472\**\*.dll"
+             Exclude="$(ArtifactsBinDir)Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\net472\Newtonsoft.Json.dll"
              Condition=" '$(DotNetBuildFromSource)' != 'true' ">
       <Pack>true</Pack>
       <PackagePath>tools\net472</PackagePath>
     </Content>
 
-    <Content Include="$(ArtifactsBinDir)\Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\netcoreapp2.1\Microsoft.NET.Sdk.Publish.Tasks.dll">
+    <Content Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\$(SdkTargetFramework)\**\*.dll"
+             Exclude="$(ArtifactsBinDir)Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\$(SdkTargetFramework)\**\System.*;
+                      $(ArtifactsBinDir)Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\$(SdkTargetFramework)\Newtonsoft.Json.dll;
+                      $(ArtifactsBinDir)Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\$(SdkTargetFramework)\runtimes\**">
       <Pack>true</Pack>
-      <PackagePath>tools\netcoreapp2.1</PackagePath>
-    </Content>
-
-    <Content Include="$(ArtifactsBinDir)\Microsoft.NET.Sdk.Publish.Tasks\$(Configuration)\netcoreapp2.1\Microsoft.Web.XmlTransform.dll">
-      <Pack>true</Pack>
-      <PackagePath>tools\netcoreapp2.1</PackagePath>
+      <PackagePath>tools\$(SdkTargetFramework)</PackagePath>
     </Content>
 
     <Content Include="$(PublishRoot)\Targets\**\*.*">
@@ -53,5 +43,12 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="$(RepoRoot)\src\WebSdk\Publish\Tasks\Microsoft.NET.Sdk.Publish.Tasks.csproj" ExcludeAssets="All" />
+  </ItemGroup>
+  
+  <Import Project="$(RepoRoot)\src\WebSdk\CopyPackageLayout.targets" />
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+  
 </Project>
-
+ 
