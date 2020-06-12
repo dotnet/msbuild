@@ -1071,6 +1071,5 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal FrameStack contextStack = new FrameStack();
         #endregion
-        #endregion
     }
 }
