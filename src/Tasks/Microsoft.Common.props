@@ -175,10 +175,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
   <Import Condition="Exists('$(NuGetPropsFile)')" Project="$(NuGetPropsFile)" />
 
-  <PropertyGroup Condition="'$(GenerateFullPaths)' == ''">
-    <GenerateFullPaths>true</GenerateFullPaths>
-  </PropertyGroup>
-
   <PropertyGroup Condition=" '$(MSBuildLogVerboseTaskParameters)' != 'true' ">
     <DisableLogTaskParameter_ConvertToAbsolutePath_Path>true</DisableLogTaskParameter_ConvertToAbsolutePath_Path>
     <DisableLogTaskParameter_FindUnderPath_OutOfPath>true</DisableLogTaskParameter_FindUnderPath_OutOfPath>
