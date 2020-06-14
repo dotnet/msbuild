@@ -300,6 +300,21 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </Target>
 
+  <UsingTask TaskName="ResolveReadyToRunCompilers" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <Target Name="ResolveReadyToRunCompilers">
+    <ResolveReadyToRunCompilers RuntimePacks="@(ResolvedRuntimePack)"
+                                Crossgen2Packs="@(ResolvedCrossgen2Pack)"
+                                TargetingPacks="@(ResolvedTargetingPack)"
+                                RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
+                                NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)"
+                                EmitSymbols="$(PublishReadyToRunEmitSymbols)"
+                                ReadyToRunUseCrossgen2="$(PublishReadyToRunUseCrossgen2)">
+
+      <Output TaskParameter="CrossgenTool" ItemName="CrossgenTool" />
+      <Output TaskParameter="Crossgen2Tool" ItemName="Crossgen2Tool" />
+    </ResolveReadyToRunCompilers>
+  </Target>
+
   <!--
     ============================================================
                                         _PrepareForReadyToRunCompilation
@@ -308,7 +323,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <UsingTask TaskName="PrepareForReadyToRunCompilation" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-  <Target Name="_PrepareForReadyToRunCompilation" DependsOnTargets="_ComputeManagedRuntimePackAssemblies;_ComputeAssembliesToPostprocessOnPublish">
+  <Target Name="_PrepareForReadyToRunCompilation" DependsOnTargets="ResolveReadyToRunCompilers;_ComputeManagedRuntimePackAssemblies;_ComputeAssembliesToPostprocessOnPublish">
 
     <PropertyGroup>
       <_ReadyToRunOutputPath>$(IntermediateOutputPath)R2R</_ReadyToRunOutputPath>
@@ -337,20 +352,14 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_ReadyToRunImplementationAssemblies Include="@(_ReadyToRunImplementationAssembliesWithoutConflicts)" />
     </ItemGroup>
 
-    <PrepareForReadyToRunCompilation RuntimePacks="@(ResolvedRuntimePack)" 
-                                     Crossgen2Packs="@(ResolvedCrossgen2Pack)"                                     
-                                     TargetingPacks="@(ResolvedTargetingPack)"
-                                     RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
-                                     NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)"
+    <PrepareForReadyToRunCompilation CrossgenTool="@(CrossgenTool)" 
+                                     Crossgen2Tool="@(Crossgen2Tool)"
                                      OutputPath="$(_ReadyToRunOutputPath)"
                                      Assemblies="@(_ReadyToRunImplementationAssemblies)"
                                      ExcludeList="@(PublishReadyToRunExclude)"
                                      EmitSymbols="$(PublishReadyToRunEmitSymbols)"
                                      IncludeSymbolsInSingleFile="$(IncludeSymbolsInSingleFile)"
                                      ReadyToRunUseCrossgen2="$(PublishReadyToRunUseCrossgen2)">
-
-      <Output TaskParameter="CrossgenTool" ItemName="_CrossgenTool" />
-      <Output TaskParameter="Crossgen2Tool" ItemName="_Crossgen2Tool" />
 
       <Output TaskParameter="ReadyToRunCompileList" ItemName="_ReadyToRunCompileList" />
       <Output TaskParameter="ReadyToRunSymbolsCompileList" ItemName="_ReadyToRunSymbolsCompileList" />
@@ -373,8 +382,8 @@ Copyright (c) .NET Foundation. All rights reserved.
           Inputs="@(_ReadyToRunCompileList)"
           Outputs="%(_ReadyToRunCompileList.OutputR2RImage)">
 
-    <RunReadyToRunCompiler CrossgenTool="@(_CrossgenTool)"
-                           Crossgen2Tool="@(_Crossgen2Tool)"
+    <RunReadyToRunCompiler CrossgenTool="@(CrossgenTool)"
+                           Crossgen2Tool="@(Crossgen2Tool)"
                            UseCrossgen2="$(PublishReadyToRunUseCrossgen2)"
                            Crossgen2ExtraCommandLineArgs="$(PublishReadyToRunCrossgen2ExtraArgs)"
                            ImplementationAssemblyReferences="@(_ReadyToRunAssembliesToReference)"
@@ -407,8 +416,8 @@ Copyright (c) .NET Foundation. All rights reserved.
           Inputs="@(_ReadyToRunSymbolsCompileList)"
           Outputs="%(_ReadyToRunSymbolsCompileList.OutputPDBImage)">
 
-    <RunReadyToRunCompiler CrossgenTool="@(_CrossgenTool)"
-                           Crossgen2Tool="@(_Crossgen2Tool)"
+    <RunReadyToRunCompiler CrossgenTool="@(CrossgenTool)"
+                           Crossgen2Tool="@(Crossgen2Tool)"
                            UseCrossgen2="$(PublishReadyToRunUseCrossgen2)"
                            Crossgen2ExtraCommandLineArgs="$(PublishReadyToRunCrossgen2ExtraArgs)"
                            ImplementationAssemblyReferences="@(_ReadyToRunAssembliesToReference)"
