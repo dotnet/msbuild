@@ -599,7 +599,11 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         [Trait("Category", "mono-osx-failing")]
         public void ItemTransformContainingSemicolon_InTaskHost()
         {
-            MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
+            try
+            {
+                Environment.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
+                Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", @"C:\commTracesPath\");
+                MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
 
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
                     <UsingTask TaskName=`Message` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` TaskFactory=`TaskHostFactory` />
@@ -615,8 +619,13 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 </Project>
 
                 ", logger: new MockLogger(_output));
-
-            logger.AssertLogContains("Transformed item list: 'X;X%3bX.txt    Y;Y%3bY.txt    Z;Z%3bZ.txt'");
+                logger.AssertLogContains("Transformed item list: 'X;X%3bX.txt    Y;Y%3bY.txt    Z;Z%3bZ.txt'");
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "");
+                Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", "");
+            }
         }
 #endif
 

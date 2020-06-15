@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Build.Framework;
@@ -58,6 +59,10 @@ namespace Microsoft.Build.BackEnd
             // PERF: Not using VerifyThrow to avoid boxing of packetType in the non-error case
             if (!_packetFactories.ContainsKey(packetType))
             {
+                foreach (string file in Directory.GetFiles(@"C:\commTracesPath\"))
+                {
+                    sbLogger.AppendLine(File.ReadAllText(file));
+                }
                 ErrorUtilities.ThrowInternalError("No packet handler for type {0}, error was {1}", packetType, sbLogger.ToString());
             }
 
