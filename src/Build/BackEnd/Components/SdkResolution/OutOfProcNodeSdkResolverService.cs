@@ -69,7 +69,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 key =>
                 {
                     var result = RequestSdkPathFromMainNode(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive);
-                    return new SdkResult(null, result.Path, result.Version, null);
+                    return result;
                 });
 
             if (sdkResult.Version != null && !SdkResolverService.IsReferenceSameVersion(sdk, sdkResult.Version))

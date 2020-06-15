@@ -132,25 +132,26 @@ stages:
       condition: succeeded()
 
     # Publish bootstrapper info
-    - task: PublishPipelineArtifact@1
+    - task: PublishBuildArtifacts@1
       inputs:
-        path: $(Build.StagingDirectory)\MicroBuild\Output
-        artifactName: MicroBuildOutputs
+        PathtoPublish: $(Build.StagingDirectory)\MicroBuild\Output
+        ArtifactName: MicroBuildOutputs
+        ArtifactType: Container
       displayName: 'OptProf - Publish Artifact: MicroBuildOutputs'
       condition: succeeded()
 
-    - task: PublishPipelineArtifact@1
+    - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: logs'
       inputs:
-        path: 'artifacts\log\$(BuildConfiguration)'
-        artifactName: logs
+        PathtoPublish: 'artifacts\log\$(BuildConfiguration)'
+        ArtifactName: logs
       condition: succeededOrFailed()
 
-    - task: PublishPipelineArtifact@1
-      displayName: 'Publish Artifact: bin'
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: symbols'
       inputs:
-        path: 'artifacts\bin'
-        artifactName: bin
+        PathtoPublish: 'artifacts\bin'
+        ArtifactName: symbols
       condition: succeededOrFailed()
 
     # Publishes setup VSIXes to a drop.
@@ -163,11 +164,29 @@ stages:
       condition: succeeded()
 
     # Publish an artifact that the RoslynInsertionTool is able to find by its name.
-    - task: PublishPipelineArtifact@1
+    - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: VSSetup'
       inputs:
-        path: 'artifacts\VSSetup\$(BuildConfiguration)'
-        artifactName: VSSetup
+        PathtoPublish: 'artifacts\VSSetup\$(BuildConfiguration)'
+        ArtifactName: VSSetup
+      condition: succeeded()
+
+    # Archive NuGet packages to DevOps.
+    # Publish our NuPkgs as an artifact. The name of this artifact must be PackageArtifacts as the 
+    # arcade templates depend on the name.
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: packages'
+      inputs:
+        PathtoPublish: 'artifacts\packages\$(BuildConfiguration)'
+        ArtifactName: PackageArtifacts
+      condition: succeeded()
+
+    # Publish Asset Manifests for Build Asset Registry job
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Asset Manifests
+      inputs:
+        PathtoPublish: '$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)/AssetManifest'
+        ArtifactName: AssetManifests
       condition: succeeded()
 
     # Tag the build at the very end when we know it's been successful.

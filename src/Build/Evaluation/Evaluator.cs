@@ -1817,11 +1817,132 @@ namespace Microsoft.Build.Evaluation
                     ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "CouldNotResolveSdk", importElement.SdkReference.ToString());
                 }
 
-                project = Path.Combine(sdkResult.Path, project);
+                if (sdkResult.Path == null)
+                {
+                    projects = new List<ProjectRootElement>();
+                }
+                else
+                {
+                    ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, Path.Combine(sdkResult.Path, project),
+                        throwOnFileNotExistsError, out projects);
+
+                    if (sdkResult.AdditionalPaths != null)
+                    {
+                        foreach (var additionalPath in sdkResult.AdditionalPaths)
+                        {
+                            ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, Path.Combine(additionalPath, project),
+                                throwOnFileNotExistsError, out var additionalProjects);
+
+                            projects.AddRange(additionalProjects);
+                        }
+                    }
+                }
+
+                if ((sdkResult.PropertiesToAdd != null && sdkResult.PropertiesToAdd.Any()) ||
+                    (sdkResult.ItemsToAdd != null && sdkResult.ItemsToAdd.Any()))
+                {
+                    //  Inserting at the beginning will mean that the properties or items from the SdkResult will be evaluated before
+                    //  any projects from paths returned by the SDK Resolver.
+                    projects.Insert(0, CreateProjectForSdkResult(sdkResult));
+                }
+            }
+            else
+            {
+                ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, project,
+                    throwOnFileNotExistsError, out projects);
+            }
+        }
+
+        //  Creates a project to set the properties and include the items from an SdkResult
+        private ProjectRootElement CreateProjectForSdkResult(SdkResult sdkResult)
+        {
+            int propertiesAndItemsHash;
+
+#if NETCOREAPP
+            HashCode hash = new HashCode();
+#else
+            propertiesAndItemsHash = -849885975;
+#endif
+
+            if (sdkResult.PropertiesToAdd != null)
+            {
+                foreach (var property in sdkResult.PropertiesToAdd)
+                {
+#if NETCOREAPP
+                    hash.Add(property.Key);
+                    hash.Add(property.Value);
+#else
+                    propertiesAndItemsHash = propertiesAndItemsHash * -1521134295 + property.Key.GetHashCode();
+                    propertiesAndItemsHash = propertiesAndItemsHash * -1521134295 + property.Value.GetHashCode();
+#endif
+                }
+            }
+            if (sdkResult.ItemsToAdd != null)
+            {
+                foreach (var item in sdkResult.ItemsToAdd)
+                {
+#if NETCOREAPP
+                    hash.Add(item.Key);
+                    hash.Add(item.Value);
+#else
+                    propertiesAndItemsHash = propertiesAndItemsHash * -1521134295 + item.Key.GetHashCode();
+                    propertiesAndItemsHash = propertiesAndItemsHash * -1521134295 + item.Value.GetHashCode();
+#endif
+
+                }
             }
 
-            ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, project,
-                throwOnFileNotExistsError, out projects);
+#if NETCOREAPP
+            propertiesAndItemsHash = hash.ToHashCode();
+#endif
+
+            //  Generate a unique filename for the generated project for each unique set of properties and items.
+            string projectPath = _projectRootElement.FullPath + ".SdkResolver." + propertiesAndItemsHash + ".proj";
+
+            ProjectRootElement InnerCreate(string _, ProjectRootElementCacheBase __)
+            {
+                ProjectRootElement project = ProjectRootElement.Create();
+                project.FullPath = projectPath;
+
+                if (sdkResult.PropertiesToAdd != null && sdkResult.PropertiesToAdd.Any())
+                {
+                    var propertyGroup = project.AddPropertyGroup();
+                    foreach (var propertyNameAndValue in sdkResult.PropertiesToAdd)
+                    {
+                        propertyGroup.AddProperty(propertyNameAndValue.Key, EscapingUtilities.Escape(propertyNameAndValue.Value));
+                    }
+                }
+
+                if (sdkResult.ItemsToAdd != null && sdkResult.ItemsToAdd.Any())
+                {
+                    var itemGroup = project.AddItemGroup();
+                    foreach (var item in sdkResult.ItemsToAdd)
+                    {
+                        Dictionary<string, string> escapedMetadata = null;
+
+                        if (item.Value.Metadata != null)
+                        {
+                            escapedMetadata = new Dictionary<string, string>(item.Value.Metadata.Count, StringComparer.OrdinalIgnoreCase);
+                            foreach (var metadata in item.Value.Metadata)
+                            {
+                                escapedMetadata[metadata.Key] = EscapingUtilities.Escape(metadata.Value);
+                            }
+                        }
+
+                        itemGroup.AddItem(item.Key, EscapingUtilities.Escape(item.Value.ItemSpec), escapedMetadata);
+                    }
+                }
+
+                _projectRootElementCache.AddEntry(project);
+
+                return project;
+            }
+
+            return _projectRootElementCache.Get(
+                projectPath,
+                InnerCreate,
+                _projectRootElement.IsExplicitlyLoaded,
+                preserveFormatting: null);
         }
 
         /// <summary>
