@@ -91,7 +91,7 @@ namespace Microsoft.Build.BackEnd.Logging
             errorCount = 0;
             warningCount = 0;
 
-            TargetFramework_mapping = new Dictionary<(int nodeId, int contextId), StringBuilder>();
+            propertyOutputMap = new Dictionary<(int nodeId, int contextId), StringBuilder>();
             projectPerformanceCounters = null;
             targetPerformanceCounters = null;
             taskPerformanceCounters = null;
@@ -279,7 +279,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     WriteItems(itemList);
                 }
             }
-            //node and project context ids for the TargetFramework_mapping key
+            //node and project context ids for the propertyOutputMap key
             int node = -1;
             int project_context_id = -1;
             if (e.BuildEventContext != null)
@@ -287,7 +287,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 node = e.BuildEventContext.NodeId;
                 project_context_id = e.BuildEventContext.ProjectContextId;
             }
-            //creating the value to be added to the TargetFramework_mapping
+            //creating the value to be added to the propertyOutputMap
             StringBuilder LogOutputProperties= new StringBuilder();
 
             if (e.BuildEventContext != null && e.Items != null)
@@ -326,11 +326,11 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
                 }
             }
-            //adding the finished dictionary to TargetFramework_mapping
+            //adding the finished dictionary to propertyOutputMap
             //this creates a mapping of a specific project/node to a dictionary of property values
             if (e.BuildEventContext != null)
-                if (!TargetFramework_mapping.ContainsKey((node, project_context_id)))
-                    TargetFramework_mapping.Add((node, project_context_id), LogOutputProperties);
+                if (!propertyOutputMap.ContainsKey((node, project_context_id)))
+                    propertyOutputMap.Add((node, project_context_id), LogOutputProperties);
         }
 
         /// <summary>
@@ -532,7 +532,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 int nodeId = e.BuildEventContext.NodeId;
                 int projectContextId = e.BuildEventContext.ProjectContextId;
-                TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out LogOutputProperties);
+                propertyOutputMap.TryGetValue((nodeId, projectContextId), out LogOutputProperties);
             }
             e.LogOutputProperties = LogOutputProperties;
 
@@ -560,7 +560,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 int nodeId = e.BuildEventContext.NodeId;
                 int projectContextId = e.BuildEventContext.ProjectContextId;
-                TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out LogOutputProperties);
+                propertyOutputMap.TryGetValue((nodeId, projectContextId), out LogOutputProperties);
             }
             e.LogOutputProperties = LogOutputProperties;
 
@@ -583,7 +583,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 int nodeId = e.BuildEventContext.NodeId;
                 int projectContextId = e.BuildEventContext.ProjectContextId;
-                TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out LogOutputProperties);
+                propertyOutputMap.TryGetValue((nodeId, projectContextId), out LogOutputProperties);
             }
             e.LogOutputProperties = LogOutputProperties;
 
