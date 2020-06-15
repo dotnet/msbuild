@@ -323,8 +323,8 @@ namespace Microsoft.Build.Framework
         protected LazyFormattedBuildEventArgs() { }
         public LazyFormattedBuildEventArgs(string message, string helpKeyword, string senderName) { }
         public LazyFormattedBuildEventArgs(string message, string helpKeyword, string senderName, System.DateTime eventTimestamp, params object[] messageArgs) { }
+        public System.Text.StringBuilder LogOutputProperties { get { throw null; } set { } }
         public override string Message { get { throw null; } }
-        public System.Text.StringBuilder outputProperties { get { throw null; } set { } }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple=false, Inherited=true)]
     public sealed partial class LoadInSeparateAppDomainAttribute : System.Attribute

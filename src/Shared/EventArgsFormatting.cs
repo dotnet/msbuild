@@ -28,7 +28,7 @@ namespace Microsoft.Build.Shared
             // "error" should not be localized
             return FormatEventMessage("error", e.Subcategory, e.Message,
                             e.Code, e.File, null, e.LineNumber, e.EndLineNumber,
-                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, e.outputProperties);
+                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, e.LogOutputProperties);
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace Microsoft.Build.Shared
             // "error" should not be localized
             return FormatEventMessage("error", e.Subcategory, e.Message,
                 e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
-                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, e.outputProperties);
+                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, e.LogOutputProperties);
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace Microsoft.Build.Shared
             // "warning" should not be localized
             return FormatEventMessage("warning", e.Subcategory, e.Message,
                 e.Code, e.File, null, e.LineNumber, e.EndLineNumber,
-                           e.ColumnNumber, e.EndColumnNumber, e.ThreadId, e.outputProperties);
+                           e.ColumnNumber, e.EndColumnNumber, e.ThreadId, e.LogOutputProperties);
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace Microsoft.Build.Shared
             // "warning" should not be localized
             return FormatEventMessage("warning", e.Subcategory, e.Message,
                 e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
-                           e.ColumnNumber, e.EndColumnNumber, e.ThreadId, e.outputProperties);
+                           e.ColumnNumber, e.EndColumnNumber, e.ThreadId, e.LogOutputProperties);
         }
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace Microsoft.Build.Shared
 
             // "message" should not be localized
             return FormatEventMessage("message", e.Subcategory, e.Message,
-                e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber, e.ColumnNumber, e.EndColumnNumber, e.ThreadId, e.outputProperties);
+                e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber, e.ColumnNumber, e.EndColumnNumber, e.ThreadId, e.LogOutputProperties);
         }
 
         /// <summary>
@@ -169,7 +169,7 @@ namespace Microsoft.Build.Shared
             int columnNumber,
             int endColumnNumber,
             int threadId,
-            StringBuilder outputProperties
+            StringBuilder LogOutputProperties
         )
         {
             StringBuilder format = new StringBuilder();
@@ -263,9 +263,9 @@ namespace Microsoft.Build.Shared
             // Check for additional properties that should be outputted as well
             if (projectFile != null && !String.Equals(projectFile, file))
             {
-                if (outputProperties != null && outputProperties.Length > 0)
+                if (LogOutputProperties != null && LogOutputProperties.Length > 0)
                 {
-                    format.Append(" [{10} > ").Append(outputProperties).Append("]");
+                    format.Append(" [{10}> ").Append(LogOutputProperties).Append("]");
                 }
                 else
                 {

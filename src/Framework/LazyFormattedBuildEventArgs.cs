@@ -180,7 +180,7 @@ namespace Microsoft.Build.Framework
             }
         }
 
-        public StringBuilder outputProperties{ get;  set; }
+        public StringBuilder LogOutputProperties{ get;  set; }
 
         /// <summary>
         /// Formats the given string using the variable arguments passed in.

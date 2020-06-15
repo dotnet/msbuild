@@ -288,15 +288,15 @@ namespace Microsoft.Build.BackEnd.Logging
                 project_context_id = e.BuildEventContext.ProjectContextId;
             }
             //creating the value to be added to the TargetFramework_mapping
-            StringBuilder outputProperties= new StringBuilder();
+            StringBuilder LogOutputProperties= new StringBuilder();
 
             if (e.BuildEventContext != null && e.Items != null)
             {
                 foreach (DictionaryEntry item in e.Items)
                 {
                     ITaskItem itemVal = (ITaskItem)item.Value;
-                    //finding if the outputProperties item has been used
-                    if ("outputProperties".Equals(item.Key))
+                    //finding if the LogOutputProperties item has been used
+                    if ("LogOutputProperties".Equals(item.Key))
                     {
                         //looking for the property value associated with the property key
                         //Note: the property key is the item value
@@ -321,7 +321,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         //adding the property key and value pair to the propertyOutputs
                         if (foundProperties)
                         {
-                            outputProperties.Append(itemVal.ItemSpec).Append(":").Append(value).Append(" ");
+                            LogOutputProperties.Append(itemVal.ItemSpec).Append(":").Append(value).Append(" ");
                         }
                     }
                 }
@@ -330,7 +330,7 @@ namespace Microsoft.Build.BackEnd.Logging
             //this creates a mapping of a specific project/node to a dictionary of property values
             if (e.BuildEventContext != null)
                 if (!TargetFramework_mapping.ContainsKey((node, project_context_id)))
-                    TargetFramework_mapping.Add((node, project_context_id), outputProperties);
+                    TargetFramework_mapping.Add((node, project_context_id), LogOutputProperties);
         }
 
         /// <summary>
@@ -527,14 +527,14 @@ namespace Microsoft.Build.BackEnd.Logging
             setColor(ConsoleColor.Red);
 
             //determine the mapping of properties to output
-            StringBuilder outputProperties = new StringBuilder();
+            StringBuilder LogOutputProperties = new StringBuilder();
             if (e.BuildEventContext != null)
             {
                 int nodeId = e.BuildEventContext.NodeId;
                 int projectContextId = e.BuildEventContext.ProjectContextId;
-                TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
+                TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out LogOutputProperties);
             }
-            e.outputProperties = outputProperties;
+            e.LogOutputProperties = LogOutputProperties;
 
             WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile));
             if (ShowSummary == true)
@@ -555,14 +555,14 @@ namespace Microsoft.Build.BackEnd.Logging
             setColor(ConsoleColor.Yellow);
 
             //determine the mapping of properties to output
-            StringBuilder outputProperties = new StringBuilder();
+            StringBuilder LogOutputProperties = new StringBuilder();
             if (e.BuildEventContext != null)
             {
                 int nodeId = e.BuildEventContext.NodeId;
                 int projectContextId = e.BuildEventContext.ProjectContextId;
-                TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
+                TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out LogOutputProperties);
             }
-            e.outputProperties = outputProperties;
+            e.LogOutputProperties = LogOutputProperties;
 
             WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile));
             if (ShowSummary == true)
@@ -578,14 +578,14 @@ namespace Microsoft.Build.BackEnd.Logging
         public override void MessageHandler(object sender, BuildMessageEventArgs e)
         {
             //determine the mapping of properties to output
-            StringBuilder outputProperties = new StringBuilder();
+            StringBuilder LogOutputProperties = new StringBuilder();
             if (e.BuildEventContext != null)
             {
                 int nodeId = e.BuildEventContext.NodeId;
                 int projectContextId = e.BuildEventContext.ProjectContextId;
-                TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out outputProperties);
+                TargetFramework_mapping.TryGetValue((nodeId, projectContextId), out LogOutputProperties);
             }
-            e.outputProperties = outputProperties;
+            e.LogOutputProperties = LogOutputProperties;
 
             bool print = false;
             bool lightenText = false;
