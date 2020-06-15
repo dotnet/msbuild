@@ -348,8 +348,8 @@ namespace Microsoft.Build.BackEnd
         {
             translator.TranslateDictionary(
                 ref _configurations,
-                (ref int configId, ITranslator aTranslator) => aTranslator.Translate(ref configId),
-                (ref BuildRequestConfiguration configuration, ITranslator aTranslator) =>
+                (ITranslator aTranslator, ref int configId) => aTranslator.Translate(ref configId),
+                (ITranslator aTranslator, ref BuildRequestConfiguration configuration) =>
                 {
                     if (translator.Mode == TranslationDirection.WriteToStream)
                     {
@@ -365,8 +365,8 @@ namespace Microsoft.Build.BackEnd
 
             translator.TranslateDictionary(
                 ref _configurationIdsByMetadata,
-                (ref ConfigurationMetadata configMetadata, ITranslator aTranslator) => aTranslator.Translate(ref configMetadata, ConfigurationMetadata.FactoryForDeserialization),
-                (ref int configId, ITranslator aTranslator) => aTranslator.Translate(ref configId),
+                (ITranslator aTranslator, ref ConfigurationMetadata configMetadata) => aTranslator.Translate(ref configMetadata, ConfigurationMetadata.FactoryForDeserialization),
+                (ITranslator aTranslator, ref int configId) => aTranslator.Translate(ref configId),
                 capacity => new Dictionary<ConfigurationMetadata, int>(capacity));
         }
 
