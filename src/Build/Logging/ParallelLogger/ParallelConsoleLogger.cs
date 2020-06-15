@@ -535,11 +535,11 @@ namespace Microsoft.Build.BackEnd.Logging
 
             //node and project context ids for the propertyOutputMap key
             int node = -1;
-            int project_context_id = -1;
+            int projectContextId = -1;
             if (e.BuildEventContext != null)
             {
                 node = e.BuildEventContext.NodeId;
-                project_context_id = e.BuildEventContext.ProjectContextId;
+                projectContextId = e.BuildEventContext.ProjectContextId;
             }
             //creating the value to be added to the propertyOutputMap
             StringBuilder LogOutputProperties = new StringBuilder();
@@ -549,7 +549,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     ITaskItem itemVal = (ITaskItem)item.Value;
                     //finding if the LogOutputProperties item has been used
-                    if ("outputProperties".Equals(item.Key))
+                    if (string.Equals((string)item.Key, "LogOutputProperties", StringComparison.OrdinalIgnoreCase))
                     {
                         //looking for the property value associated with the property key
                         //Note: the property key is the item value
@@ -582,8 +582,8 @@ namespace Microsoft.Build.BackEnd.Logging
             //adding the finished dictionary to propertyOutputMap
             //this creates a mapping of a specific project/node to a dictionary of property values
             if (e.BuildEventContext != null)
-                if (!propertyOutputMap.ContainsKey((node, project_context_id)))
-                    propertyOutputMap.Add((node, project_context_id), LogOutputProperties);
+                if (!propertyOutputMap.ContainsKey((node, projectContextId)))
+                    propertyOutputMap.Add((node, projectContextId), LogOutputProperties);
         }
 
         /// <summary>
