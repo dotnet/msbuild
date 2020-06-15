@@ -281,7 +281,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
             //node and project context ids for the TargetFramework_mapping key
             int node = -1;
-            int project_context_id = -1;
+            int projectContextId = -1;
             if (e.BuildEventContext != null)
             {
                 node = e.BuildEventContext.NodeId;
