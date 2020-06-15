@@ -604,20 +604,18 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 Environment.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
                 Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", @"C:\commTracesPath\");
                 MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
+                    <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                        <UsingTask TaskName=`Message` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` TaskFactory=`TaskHostFactory` />
 
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
-                    <UsingTask TaskName=`Message` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` TaskFactory=`TaskHostFactory` />
-
-                    <ItemGroup>
-                        <TextFile Include=`X.txt`/>
-                        <TextFile Include=`Y.txt`/>
-                        <TextFile Include=`Z.txt`/>
-                    </ItemGroup>
-                    <Target Name=`Build`>
-                        <Message Text=`Transformed item list: '@(TextFile->'%(FileName);%(FileName)%253b%(FileName)%(Extension)','    ')'` />
-                    </Target>
-                </Project>
-
+                        <ItemGroup>
+                            <TextFile Include=`X.txt`/>
+                            <TextFile Include=`Y.txt`/>
+                            <TextFile Include=`Z.txt`/>
+                        </ItemGroup>
+                        <Target Name=`Build`>
+                            <Message Text=`Transformed item list: '@(TextFile->'%(FileName);%(FileName)%253b%(FileName)%(Extension)','    ')'` />
+                        </Target>
+                    </Project>
                 ", logger: new MockLogger(_output));
                 logger.AssertLogContains("Transformed item list: 'X;X%3bX.txt    Y;Y%3bY.txt    Z;Z%3bZ.txt'");
             }
