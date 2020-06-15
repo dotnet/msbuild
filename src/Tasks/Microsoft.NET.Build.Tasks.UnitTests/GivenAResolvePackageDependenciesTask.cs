@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using NuGet.Common;
 using Xunit;
 using static Microsoft.NET.Build.Tasks.UnitTests.LockFileSnippets;
 
@@ -160,6 +161,39 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 .Should().Contain(new string[] {
                     ".NETCoreApp,Version=v1.0", ".NETCoreApp,Version=v1.0/osx.10.11-x64"
                 });
+        }
+
+        [Fact]
+        public void ItAssignsDiagnosticLevel()
+        {
+            string lockFileContent = CreateLockFileSnippet(
+                targets: new string[] {
+                    CreateTarget(".NETCoreApp,Version=v1.0", TargetLibA, TargetLibB, TargetLibC),
+                    CreateTarget(".NETCoreApp,Version=v1.0/osx.10.11-x64", TargetLibA, TargetLibB, TargetLibC),
+                },
+                libraries: new string[] { LibADefn, LibBDefn, LibCDefn },
+                projectFileDependencyGroups: new string[] { NETCoreGroup, NETCoreOsxGroup },
+                logs: new[]
+                {
+                    // LibA
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Information, "", libraryId: "LibA"),
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Warning,     "", libraryId: "LibA"),
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Error,       "", libraryId: "LibA"),
+                    // LibB
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Information, "", libraryId: "LibB"),
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Warning,     "", libraryId: "LibB")
+                }
+            );
+
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
+
+            var defs = task.PackageDefinitions.ToLookup(def => def.ItemSpec);
+
+            defs.Count().Should().Be(3);
+
+            defs["LibA/1.2.3"].Single().GetMetadata(MetadataKeys.DiagnosticLevel).Should().Be("Error");
+            defs["LibB/1.2.3"].Single().GetMetadata(MetadataKeys.DiagnosticLevel).Should().Be("Warning");
+            defs["LibC/1.2.3"].Single().GetMetadata(MetadataKeys.DiagnosticLevel).Should().BeEmpty();
         }
 
         [Fact]

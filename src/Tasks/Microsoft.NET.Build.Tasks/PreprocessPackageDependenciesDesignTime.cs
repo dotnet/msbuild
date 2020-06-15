@@ -32,6 +32,7 @@ namespace Microsoft.NET.Build.Tasks
         /// - ResolvedPath = "C:\Users\drnoakes\.nuget\packages\metadataextractor\1.0.0"
         /// - Type = "package"
         /// - Version = "2.3.0"
+        /// - DiagnosticLevel = ""
         /// </summary>
         [Required]
         public ITaskItem[] PackageDefinitions { get; set; }
@@ -122,12 +123,14 @@ namespace Microsoft.NET.Build.Tasks
                         ? resolvedPath
                         : packageDef.GetMetadata(MetadataKeys.Path)) ?? string.Empty;
                     var isImplicitlyDefined = implicitPackageReferences.Contains(name);
+                    var diagnosticLevel = packageDef.GetMetadata(MetadataKeys.DiagnosticLevel) ?? string.Empty;
 
                     var outputItem = new TaskItem(packageDef.ItemSpec);
                     outputItem.SetMetadata(MetadataKeys.Name, name);
                     outputItem.SetMetadata(MetadataKeys.Version, version);
                     outputItem.SetMetadata(MetadataKeys.Path, path);
                     outputItem.SetMetadata(MetadataKeys.IsImplicitlyDefined, isImplicitlyDefined.ToString());
+                    outputItem.SetMetadata(MetadataKeys.DiagnosticLevel, diagnosticLevel);
                     outputItem.SetMetadata(ResolvedMetadata, resolved.ToString());
 
                     outputItems.Add(outputItem);
