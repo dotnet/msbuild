@@ -549,7 +549,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     ITaskItem itemVal = (ITaskItem)item.Value;
                     //finding if the outputProperties item has been used
-                    if ("outputProperties".Equals(item.Key))
+                    if (string.Equals(item.Key, "LogOutputProperties", StringComparison.OrdinalIgnoreCase))
                     {
                         //looking for the property value associated with the property key
                         //Note: the property key is the item value
