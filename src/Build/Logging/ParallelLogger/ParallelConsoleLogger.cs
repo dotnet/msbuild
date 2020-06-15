@@ -582,8 +582,7 @@ namespace Microsoft.Build.BackEnd.Logging
             //adding the finished dictionary to propertyOutputMap
             //this creates a mapping of a specific project/node to a dictionary of property values
             if (e.BuildEventContext != null)
-                if (!propertyOutputMap.ContainsKey((node, projectContextId)))
-                    propertyOutputMap.Add((node, projectContextId), LogOutputProperties);
+                propertyOutputMap.Add((node, projectContextId), LogOutputProperties);
         }
 
         /// <summary>

@@ -265,7 +265,7 @@ namespace Microsoft.Build.Shared
             {
                 if (LogOutputProperties != null && LogOutputProperties.Length > 0)
                 {
-                    format.Append(" [{10}> ").Append(LogOutputProperties).Append("]");
+                    format.Append(" [{10}> {11}] ");
                 }
                 else
                 {
@@ -292,7 +292,7 @@ namespace Microsoft.Build.Shared
                         threadId, file,
                         lineNumber, columnNumber, category, code,
                         lines[i], endLineNumber, endColumnNumber,
-                        subcategory, projectFile));
+                        subcategory, projectFile, LogOutputProperties));
 
                 if (i < (lines.Length - 1))
                 {
