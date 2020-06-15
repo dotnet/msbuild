@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Microsoft.Build.Framework;
@@ -20,6 +21,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private Dictionary<NodePacketType, PacketFactoryRecord> _packetFactories;
 
+        public StringBuilder sbLogger = new StringBuilder();
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -35,6 +38,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void RegisterPacketHandler(NodePacketType packetType, NodePacketFactoryMethod factory, INodePacketHandler handler)
         {
+            sbLogger.Append(packetType).Append(" ").Append(factory).Append(" ").Append(handler).Append('\n');
             _packetFactories[packetType] = new PacketFactoryRecord(handler, factory);
         }
 
@@ -54,7 +58,7 @@ namespace Microsoft.Build.BackEnd
             // PERF: Not using VerifyThrow to avoid boxing of packetType in the non-error case
             if (!_packetFactories.ContainsKey(packetType))
             {
-                ErrorUtilities.ThrowInternalError("No packet handler for type {0}", packetType);
+                ErrorUtilities.ThrowInternalError("No packet handler for type {0}, error was {1}", packetType, sbLogger.ToString());
             }
 
             PacketFactoryRecord record = _packetFactories[packetType];
