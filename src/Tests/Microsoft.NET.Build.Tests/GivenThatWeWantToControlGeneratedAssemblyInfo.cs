@@ -654,7 +654,14 @@ namespace Microsoft.NET.Build.Tests
 
             var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(targetFramework).FullName, testProject.Name + ".dll");
 
-            AssemblyInfo.Get(assemblyPath).ContainsKey("AssemblyMetadataAttribute").Should().Be(containsAttribute);
+            if (containsAttribute)
+            {
+                AssemblyInfo.Get(assemblyPath)["AssemblyMetadataAttribute"].Should().Be("RepositoryUrl:" + fakeUrl);
+            }
+            else
+            {
+                AssemblyInfo.Get(assemblyPath).ContainsKey("AssemblyMetadataAttribute").Should().Be(false);
+            } 
         }
     }
 }
