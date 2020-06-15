@@ -16,6 +16,7 @@ namespace Microsoft.NET.Build.Tasks
         public const string IsTopLevelDependency = "IsTopLevelDependency";
         public const string AllowExplicitVersion = "AllowExplicitVersion";
         public const string RelativePath = "RelativePath";
+        public const string DiagnosticLevel = "DiagnosticLevel";
 
         // Target Metadata
         public const string RuntimeIdentifier = "RuntimeIdentifier";
