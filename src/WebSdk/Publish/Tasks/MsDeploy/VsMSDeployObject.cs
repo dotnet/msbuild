@@ -223,7 +223,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
             // maybe we should show the "secure data to display"
             // for now just supress it.
-#if NET46
+#if NET472
             if (0 == string.Compare(m_provider, MSWebDeploymentAssembly.DynamicAssembly.GetEnumValue(MSDeploy.TypeName.DeploymentWellKnownProvider, MSDeploy.Provider.DBFullSql).ToString(), System.StringComparison.InvariantCultureIgnoreCase)
                 || 0 == string.Compare(m_provider, MSDeploy.Provider.DbDacFx , System.StringComparison.InvariantCultureIgnoreCase))
                 m_fNoDisplayRoot = true;
@@ -554,7 +554,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
         public void SyncTo(VSMSDeployObject destObject, /*VSMSDeploySyncOption*/ dynamic syncOptions, IVSMSDeployHost _host)
         {
-#if NET46
+#if NET472
             //$BUGBUG lmchen, there is only set to source provider?
             // set up the provider setting
             /*Deployment.DeploymentProviderOptions*/

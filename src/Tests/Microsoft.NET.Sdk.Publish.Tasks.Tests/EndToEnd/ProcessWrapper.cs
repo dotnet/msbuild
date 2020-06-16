@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-#if NET46
+#if NET472
 using System.Management;
 #endif
 using Xunit.Abstractions;
@@ -64,7 +64,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
 
         private static void KillProcessTreeInternal(int pid)
         {
-#if NET46
+#if NET472
             ManagementObjectSearcher searcher = new ManagementObjectSearcher("Select * From Win32_Process Where ParentProcessID=" + pid);
             ManagementObjectCollection moc = searcher.Get();
             foreach (ManagementObject mo in moc)
