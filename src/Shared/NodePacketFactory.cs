@@ -22,7 +22,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private Dictionary<NodePacketType, PacketFactoryRecord> _packetFactories;
 
-        public StringBuilder sbLogger = new StringBuilder();
+        internal StringBuilder sbLogger = new StringBuilder();
 
         /// <summary>
         /// Constructor
@@ -59,7 +59,11 @@ namespace Microsoft.Build.BackEnd
             // PERF: Not using VerifyThrow to avoid boxing of packetType in the non-error case
             if (!_packetFactories.ContainsKey(packetType))
             {
-                foreach (string file in Directory.GetFiles(@"C:\commTracesPath\"))
+                if (!Directory.Exists(@"D:\commTracesPath\"))
+                {
+                    Directory.CreateDirectory(@"D:\commTracesPath");
+                }
+                foreach (string file in Directory.GetFiles(@"D:\commTracesPath\"))
                 {
                     sbLogger.AppendLine(File.ReadAllText(file));
                 }

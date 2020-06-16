@@ -132,8 +132,7 @@ namespace Microsoft.Build.BackEnd
         public void SendData(int node, INodePacket packet)
         {
             // Look up the node provider for this node in the mapping.
-            INodeProvider provider = null;
-            if (!_nodeIdToProvider.TryGetValue(node, out provider))
+            if (!_nodeIdToProvider.TryGetValue(node, out INodeProvider provider))
             {
                 ErrorUtilities.ThrowInternalError("Node {0} does not have a provider.", node);
             }

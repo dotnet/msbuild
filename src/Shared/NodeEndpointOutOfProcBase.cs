@@ -90,7 +90,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The factory used to create and route packets.
         /// </summary>
-        private INodePacketFactory _packetFactory;
+        private NodePacketFactory _packetFactory;
 
         /// <summary>
         /// The asynchronous packet queue.  
@@ -143,7 +143,7 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrow(_status == LinkStatus.Inactive, "Link not inactive.  Status is {0}", _status);
             ErrorUtilities.VerifyThrowArgumentNull(factory, "factory");
-            _packetFactory = factory;
+            _packetFactory = (NodePacketFactory) factory;
 
             InitializeAsyncPacketThread();
         }
@@ -409,8 +409,9 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_SECURITY_PERMISSIONS
                         WindowsIdentity currentIdentity = WindowsIdentity.GetCurrent();
 #endif
-
-                        if (handshake != GetHostHandshake())
+                        long expectedHandshake = GetHostHandshake();
+                        _packetFactory.sbLogger.Append("Expected: ").Append(expectedHandshake).Append(". Actual: ").AppendLine(handshake.ToString());
+                        if (handshake != expectedHandshake)
                         {
                             CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshake, GetHostHandshake());
                             localPipeServer.Disconnect();
