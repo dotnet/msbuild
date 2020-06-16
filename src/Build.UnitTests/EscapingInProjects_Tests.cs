@@ -602,11 +602,11 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             try
             {
                 Environment.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
-                if (!Directory.Exists(@"E:\commTracesPath\"))
+                if (!Directory.Exists(@"D:\commTracesPath\"))
                 {
-                    Directory.CreateDirectory(@"E:\commTracesPath\");
+                    Directory.CreateDirectory(@"D:\commTracesPath\");
                 }
-                Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", @"C:\commTracesPath\");
+                Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", @"D:\commTracesPath\");
                 MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
                     <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
                         <UsingTask TaskName=`Message` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` TaskFactory=`TaskHostFactory` />
