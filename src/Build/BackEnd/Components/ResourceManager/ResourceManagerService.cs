@@ -41,7 +41,15 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
             SemaphoreName = semaphoreName;
 #endif
 
-            s = new Semaphore(resourceCount, resourceCount, semaphoreName); // TODO: SemaphoreSecurity?
+            if (NativeMethodsShared.IsWindows)
+            {
+                s = new Semaphore(resourceCount, resourceCount, semaphoreName); // TODO: SemaphoreSecurity?
+            }
+            else
+            {
+                // UNDONE: just don't support gathering additional cores on non-Windows
+                s = new Semaphore(1, 1);
+            }
         }
 
         public void ShutdownComponent()
@@ -58,6 +66,11 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
         {
             if (s is null)
             {
+                if (!NativeMethodsShared.IsWindows)
+                {
+                    return 0;
+                }
+
                 // TODO: ErrorUtilities should be annotated so this can just be `ErrorUtilities.VerifyThrow`
                 // https://github.com/microsoft/msbuild/issues/5163
                 throw new InternalErrorException($"{nameof(ResourceManagerService)} was called while uninitialized");
