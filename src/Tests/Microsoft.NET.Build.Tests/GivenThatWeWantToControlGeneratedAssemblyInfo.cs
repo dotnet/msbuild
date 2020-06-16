@@ -628,5 +628,40 @@ namespace Microsoft.NET.Build.Tests
 
             AssemblyInfo.Get(assemblyPath)["AssemblyMetadataAttribute"].Should().Be("RepositoryUrl:" + fakeUrl);
         }
+
+        [Theory]
+        [InlineData("net40", false)]
+        [InlineData("net45", true)]
+        [InlineData("netcoreapp2.1", true)]
+        public void It_does_not_write_to_undefined_assembly_metadata_attribute(string targetFramework, bool containsAttribute)
+        {
+            var fakeUrl = "fakeUrl";
+            var testProject = new TestProject()
+            {
+                Name = "RepoUrlProject",
+                IsSdkProject = true,
+                TargetFrameworks = targetFramework
+            };
+
+            testProject.AdditionalProperties["RepositoryUrl"] = fakeUrl;
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(targetFramework).FullName, testProject.Name + ".dll");
+
+            if (containsAttribute)
+            {
+                AssemblyInfo.Get(assemblyPath)["AssemblyMetadataAttribute"].Should().Be("RepositoryUrl:" + fakeUrl);
+            }
+            else
+            {
+                AssemblyInfo.Get(assemblyPath).ContainsKey("AssemblyMetadataAttribute").Should().Be(false);
+            } 
+        }
     }
 }

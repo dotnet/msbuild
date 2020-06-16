@@ -32,6 +32,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateAssemblyProductAttribute Condition="'$(GenerateAssemblyProductAttribute)' == ''">true</GenerateAssemblyProductAttribute>
     <GenerateAssemblyTitleAttribute Condition="'$(GenerateAssemblyTitleAttribute)' == ''">true</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyVersionAttribute Condition="'$(GenerateAssemblyVersionAttribute)' == ''">true</GenerateAssemblyVersionAttribute>
+    <GenerateRepositoryUrlAttribute Condition="'$(GenerateRepositoryUrlAttribute)' == '' and !('$(TargetFrameworkIdentifier)' == '.NETFramework' and $([MSBuild]::VersionLessThan($(TargetFrameworkVersion), 4.5)))">true</GenerateRepositoryUrlAttribute>
     <GenerateNeutralResourcesLanguageAttribute Condition="'$(GenerateNeutralResourcesLanguageAttribute)' == ''">true</GenerateNeutralResourcesLanguageAttribute>
     <GenerateAssemblyMetadataAttributes Condition="'$(GenerateAssemblyMetadataAttributes)' == ''">true</GenerateAssemblyMetadataAttributes>
     <IncludeSourceRevisionInInformationalVersion Condition="'$(IncludeSourceRevisionInInformationalVersion)' == ''">true</IncludeSourceRevisionInInformationalVersion>
@@ -96,7 +97,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <AssemblyAttribute Include="System.Reflection.AssemblyVersionAttribute" Condition="'$(AssemblyVersion)' != '' and '$(GenerateAssemblyVersionAttribute)' == 'true'">
         <_Parameter1>$(AssemblyVersion)</_Parameter1>
       </AssemblyAttribute>
-      <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(RepositoryUrl)' != '' or '$(PublishRepositoryUrl)' == 'true'" >
+      <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(GenerateRepositoryUrlAttribute)' == 'true' and ('$(RepositoryUrl)' != '' or '$(PublishRepositoryUrl)' == 'true')" >
         <_Parameter1>RepositoryUrl</_Parameter1>
         <_Parameter2 Condition="'$(RepositoryUrl)' != ''">$(RepositoryUrl)</_Parameter2>
         <_Parameter2 Condition="'$(RepositoryUrl)' == ''">$(PrivateRepositoryUrl)</_Parameter2>
