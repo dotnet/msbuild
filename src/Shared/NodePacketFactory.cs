@@ -59,7 +59,11 @@ namespace Microsoft.Build.BackEnd
             // PERF: Not using VerifyThrow to avoid boxing of packetType in the non-error case
             if (!_packetFactories.ContainsKey(packetType))
             {
-                foreach (string file in Directory.GetFiles(@"C:\commTracesPath\"))
+                if (!Directory.Exists(@"E:\commTracesPath\"))
+                {
+                    Directory.CreateDirectory(@"E:\commTracesPath\");
+                }
+                foreach (string file in Directory.GetFiles(@"E:\commTracesPath\"))
                 {
                     sbLogger.AppendLine(File.ReadAllText(file));
                 }
