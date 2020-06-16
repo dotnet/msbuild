@@ -502,6 +502,38 @@ namespace Microsoft.NET.Build.Tests
                 $"The TargetFramework value '{targetFramework}' is not valid. To multi-target, use the 'TargetFrameworks' property instead");
         }
 
+        [Theory]
+        [InlineData("net5.0", false)]
+        [InlineData("netcoreapp3.1", true)]
+        public void It_defines_target_platform_defaults_correctly(string targetFramework, bool defaultsDefined)
+        {
+            TestProject testProject = new TestProject()
+            {
+                Name = "TargetPlatformDefaults",
+                IsSdkProject = true,
+                TargetFrameworks = targetFramework
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var getValuesCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), targetFramework, "TargetPlatformIdentifier");
+            getValuesCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var values = getValuesCommand.GetValues();
+            if (defaultsDefined)
+            {
+                values.Count().Should().Be(1);
+                values.FirstOrDefault().Should().Be("Windows");
+            }
+            else
+            {
+                values.Count().Should().Be(0);
+            }
+        }
+
         private void TestInvalidTargetFramework(string testName, string targetFramework, bool useSolution, string expectedOutput)
         {
             var testProject = new TestProject()

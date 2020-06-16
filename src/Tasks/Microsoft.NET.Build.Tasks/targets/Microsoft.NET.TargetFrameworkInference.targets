@@ -151,6 +151,10 @@ Copyright (c) .NET Foundation. All rights reserved.
       />
   </Target>
 
+  <PropertyGroup  Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">
+    <_EnableDefaultWindowsPlatform Condition="'$(_EnableDefaultWindowsPlatform)' == ''" >false</_EnableDefaultWindowsPlatform>
+  </PropertyGroup>
+    
   <PropertyGroup  Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(NETStandardMaximumVersion)' == ''">
     <NETStandardMaximumVersion>2.1</NETStandardMaximumVersion>
   </PropertyGroup>
