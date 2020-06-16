@@ -32,11 +32,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Api.Analyzers" Version="$(MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion)" PrivateAssets="All" BundleAsAnalyzer="true" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="$(RepoRoot)\src\WebSdk\ProjectSystem\Package\Microsoft.NET.Sdk.Web.ProjectSystem.csproj" ExcludeAssets="All" />
-    <ProjectReference Include="$(RepoRoot)\src\WebSdk\Publish\Package\Microsoft.NET.Sdk.Publish.csproj" ExcludeAssets="All" />
-  </ItemGroup>
-
   <Target Name="_PackBundledAnalyzers" Inputs="@(PackageReference-&gt;HasMetadata('BundleAsAnalyzer'))" Outputs="%(PackageReference.Identity)" BeforeTargets="Build">
     <PropertyGroup>
       <_AnalyzerPath>$(NuGetPackageRoot)@(PackageReference-&gt;ToLower())\@(PackageReference-&gt;Metadata('Version')-&gt;ToLower())\analyzers\</_AnalyzerPath>
