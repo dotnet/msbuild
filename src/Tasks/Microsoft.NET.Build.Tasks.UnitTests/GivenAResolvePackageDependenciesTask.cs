@@ -166,6 +166,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         [Fact]
         public void ItAssignsDiagnosticLevel()
         {
+            const string target1 = ".NETCoreApp,Version=v1.0";
+            const string target2 = ".NETCoreApp,Version=v2.0";
+
             string lockFileContent = CreateLockFileSnippet(
                 targets: new string[] {
                     CreateTarget(".NETCoreApp,Version=v1.0", TargetLibA, TargetLibB, TargetLibC),
@@ -176,16 +179,19 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 logs: new[]
                 {
                     // LibA
-                    CreateLog(NuGetLogCode.NU1000, LogLevel.Information, "", libraryId: "LibA"),
-                    CreateLog(NuGetLogCode.NU1000, LogLevel.Warning,     "", libraryId: "LibA"),
-                    CreateLog(NuGetLogCode.NU1000, LogLevel.Error,       "", libraryId: "LibA"),
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Information, "", libraryId: "LibA", targetGraphs: new[] { target1 }),
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Warning,     "", libraryId: "LibA", targetGraphs: new[] { target1 }),
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Error,       "", libraryId: "LibA", targetGraphs: new[] { target1 }),
                     // LibB
-                    CreateLog(NuGetLogCode.NU1000, LogLevel.Information, "", libraryId: "LibB"),
-                    CreateLog(NuGetLogCode.NU1000, LogLevel.Warning,     "", libraryId: "LibB")
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Information, "", libraryId: "LibB", targetGraphs: new[] { target1, target2 }),
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Warning,     "", libraryId: "LibB", targetGraphs: new[] { target1, target2 }),
+                    // LibC (wrong target)
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Information, "", libraryId: "LibB", targetGraphs: new[] { target2 }),
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Warning,     "", libraryId: "LibB", targetGraphs: new[] { target2 })
                 }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent, out _);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _, target: target1);
 
             var defs = task.PackageDefinitions.ToLookup(def => def.ItemSpec);
 
@@ -822,19 +828,19 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             others.Where(t => t.ItemSpec == "ProjF/1.0.0").Count().Should().Be(1);
         }
 
-        private static ResolvePackageDependencies GetExecutedTaskFromPrefix(string lockFilePrefix, out LockFile lockFile, bool emitLegacyAssetsFileItems = true)
+        private static ResolvePackageDependencies GetExecutedTaskFromPrefix(string lockFilePrefix, out LockFile lockFile, bool emitLegacyAssetsFileItems = true, string target = null)
         {
             lockFile = TestLockFiles.GetLockFile(lockFilePrefix);
-            return GetExecutedTask(lockFile, emitLegacyAssetsFileItems);
+            return GetExecutedTask(lockFile, emitLegacyAssetsFileItems, target);
         }
 
-        private static ResolvePackageDependencies GetExecutedTaskFromContents(string lockFileContents, out LockFile lockFile, bool emitLegacyAssetsFileItems = true)
+        private static ResolvePackageDependencies GetExecutedTaskFromContents(string lockFileContents, out LockFile lockFile, bool emitLegacyAssetsFileItems = true, string target = null)
         {
             lockFile = TestLockFiles.CreateLockFile(lockFileContents);
-            return GetExecutedTask(lockFile, emitLegacyAssetsFileItems);
+            return GetExecutedTask(lockFile, emitLegacyAssetsFileItems, target);
         }
 
-        private static ResolvePackageDependencies GetExecutedTask(LockFile lockFile, bool emitLegacyAssetsFileItems)
+        private static ResolvePackageDependencies GetExecutedTask(LockFile lockFile, bool emitLegacyAssetsFileItems, string target)
         {
             var resolver = new MockPackageResolver(_packageRoot);
 
@@ -843,7 +849,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 ProjectAssetsFile = lockFile.Path,
                 ProjectPath = _projectPath,
                 ProjectLanguage = null,
-                EmitLegacyAssetsFileItems = emitLegacyAssetsFileItems
+                EmitLegacyAssetsFileItems = emitLegacyAssetsFileItems,
+                TargetFrameworkMoniker = target
             };
 
             task.Execute().Should().BeTrue();

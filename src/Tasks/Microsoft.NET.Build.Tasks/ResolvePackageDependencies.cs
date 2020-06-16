@@ -119,6 +119,8 @@ namespace Microsoft.NET.Build.Tasks
         /// </summary>
         public bool EmitLegacyAssetsFileItems { get; set; } = false;
 
+        public string TargetFrameworkMoniker { get; set; }
+
         #endregion
 
         public ResolvePackageDependencies()
@@ -232,7 +234,9 @@ namespace Microsoft.NET.Build.Tasks
 
             string GetPackageDiagnosticLevel(LockFileLibrary package)
             {
-                var messages = LockFile.LogMessages.Where(log => log.LibraryId == package.Name);
+                string target = TargetFrameworkMoniker ?? "";
+
+                var messages = LockFile.LogMessages.Where(log => log.LibraryId == package.Name && log.TargetGraphs.Contains(target));
 
                 if (!messages.Any())
                 {
