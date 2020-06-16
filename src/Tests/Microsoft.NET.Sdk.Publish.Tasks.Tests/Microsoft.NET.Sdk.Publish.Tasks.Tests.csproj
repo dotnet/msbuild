@@ -6,6 +6,7 @@
     <ExcludeFromSourceBuild>true</ExcludeFromSourceBuild>
     <EndToEndTestsDisabled>true</EndToEndTestsDisabled>
     <OutputType>Library</OutputType>
+    <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
   </PropertyGroup>
   
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />

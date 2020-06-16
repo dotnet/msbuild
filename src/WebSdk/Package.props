@@ -10,6 +10,8 @@
 
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <!-- MSBuild Task DLLs need to be versioned with every build -->
     <AutoGenerateAssemblyVersion>true</AutoGenerateAssemblyVersion>
     
