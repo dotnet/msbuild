@@ -11,6 +11,7 @@ using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
+using Microsoft.Build.BackEnd.Components.ResourceManager;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -61,6 +62,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         private ISdkResolverService _sdkResolverService;
 
+        private readonly ResourceManagerService _taskResourceManager;
+
         #region SystemParameterFields
 
         #endregion;
@@ -104,6 +107,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             _sdkResolverService = new MockSdkResolverService();
             ((IBuildComponent)_sdkResolverService).InitializeComponent(this);
+
+            _taskResourceManager = new ResourceManagerService();
+            ((IBuildComponent)_taskResourceManager).InitializeComponent(this);
         }
 
         /// <summary>
@@ -172,6 +178,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildComponentType.ResultsCache => (IBuildComponent)_resultsCache,
                 BuildComponentType.RequestBuilder => (IBuildComponent)_requestBuilder,
                 BuildComponentType.SdkResolverService => (IBuildComponent)_sdkResolverService,
+                BuildComponentType.TaskResourceManager => (IBuildComponent)_taskResourceManager,
                 _ => throw new ArgumentException("Unexpected type " + type),
             };
         }
