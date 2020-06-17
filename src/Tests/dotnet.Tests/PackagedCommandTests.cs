@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Tests
 
             NuGetConfigWriter.Write(testInstance.Path, TestContext.Current.TestPackages);
 
-            new BuildCommand(Log, testInstance.Path)
+            new BuildCommand(testInstance)
                 .Execute()
                 .Should().Pass();
 
@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Tests
                     toolPrefersCLIRuntime ? "dotnet-portable-v1-prefercli" : "dotnet-portable-v1";
             });
 
-            new BuildCommand(Log, testInstance.Path)
+            new BuildCommand(testInstance)
                 .Execute()
                 .Should().Pass();
 
@@ -150,7 +150,7 @@ namespace Microsoft.DotNet.Tests
 
             NuGetConfigWriter.Write(testInstance.Path, TestContext.Current.TestPackages);
 
-            new BuildCommand(Log, testInstance.Path)
+            new BuildCommand(testInstance)
                 .Execute()
                 .Should().Pass();
 
@@ -236,7 +236,7 @@ namespace Microsoft.DotNet.Tests
 
             NuGetConfigWriter.Write(testInstance.Path, TestContext.Current.TestPackages);
 
-            new BuildCommand(Log, testInstance.Path)
+            new BuildCommand(testInstance)
                 .Execute()
                 .Should().Pass();
 

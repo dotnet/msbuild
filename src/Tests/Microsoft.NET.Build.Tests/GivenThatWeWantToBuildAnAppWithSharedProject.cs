@@ -63,7 +63,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppWithSharedProject")
                 .WithSource();
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, "TestApp");
+            var buildCommand = new BuildCommand(testAsset, "TestApp");
 
             buildCommand.Execute()
                 .Should()

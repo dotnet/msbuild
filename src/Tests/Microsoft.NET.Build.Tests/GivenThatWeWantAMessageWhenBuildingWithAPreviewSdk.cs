@@ -27,7 +27,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("HelloWorld")
                 .WithSource();
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/p:_NETCoreSdkIsPreview=true")
@@ -43,7 +43,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("HelloWorld")
                 .WithSource();
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/p:_NETCoreSdkIsPreview=")

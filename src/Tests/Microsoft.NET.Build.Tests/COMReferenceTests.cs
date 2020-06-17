@@ -77,7 +77,7 @@ namespace Microsoft.NET.Build.Tests
                 .CreateTestProject(testProject, identifier: embedInteropTypes.ToString())
                 .WithProjectChanges(doc => doc.Root.Add(reference));
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
             
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);

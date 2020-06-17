@@ -55,7 +55,7 @@ namespace Microsoft.NET.Build.Tests
                 }";
 
             var testAsset = _testAssetsManager.CreateTestProject(netFrameworkLibrary, "FacadesFromTargetFramework");
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, netFrameworkLibrary.Name));
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
         }
 
@@ -114,7 +114,7 @@ public class NETFramework
                     }
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, netFrameworkLibrary.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -162,7 +162,7 @@ public class NETFramework
 ";
             var testAsset = _testAssetsManager.CreateTestProject(netFrameworkLibrary, "ExchangeNETStandard2");
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, netFrameworkLibrary.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -220,7 +220,7 @@ public class NETFramework
 ";
             var testAsset = _testAssetsManager.CreateTestProject(netFrameworkLibrary, "ExchangeValueTuple");
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, netFrameworkLibrary.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -235,7 +235,7 @@ public class NETFramework
                 .CopyTestAsset("DesktopReferencingNetStandardLibrary")
                 .WithSource();
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute()
                 .Should().Pass();
@@ -285,9 +285,7 @@ public static class {project.Name}
 
                 });
 
-            string projectFolder = Path.Combine(testAsset.Path, project.Name);
-
-            var buildCommand = new BuildCommand(Log, projectFolder);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -407,7 +405,7 @@ public static class {project.Name}
                             new XElement("HintPath", $"   {Environment.NewLine}{hintPath}   {Environment.NewLine}")));
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, project.Name));
+            var buildCommand = new BuildCommand(testAsset);
             var msbuildBuildCommand = new MSBuildCommand(Log, "Build", buildCommand.FullPathProjectFile);
             msbuildBuildCommand.Execute().Should().Pass()
                 .And.NotHaveStdOutContaining("System.ArgumentException");
@@ -426,7 +424,7 @@ public static class {project.Name}
                 .CreateTestProject(referencedProject, "SimpleNamesWithHintPathsWithNewLinesReferenced");
 
             var referencedbuildCommand =
-                new BuildCommand(Log, Path.Combine(referencedTestAsset.TestRoot, referencedProject.Name));
+                new BuildCommand(referencedTestAsset);
 
             referencedbuildCommand.Execute();
 
@@ -458,7 +456,7 @@ public static class {project.Name}
                         new XAttribute("BeforeTargets", "BeforeBuild")));
                 });
 
-            var buildCommand = new BuildCommand(Log, testInstance.TestRoot, testProject.Name);
+            var buildCommand = new BuildCommand(testInstance);
 
             buildCommand.Execute()
                 .Should()

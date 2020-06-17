@@ -90,7 +90,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -143,7 +143,7 @@ namespace Microsoft.NET.Build.Tests
 
             NuGetConfigWriter.Write(testAsset.TestRoot, NuGetConfigWriter.DotnetCoreBlobFeed);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute(extraArgs)
@@ -214,7 +214,7 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .Restore(Log, testProject.Name);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             var result = buildCommand.ExecuteWithoutRestore($"/p:RuntimeIdentifier={runtimeIdentifier}");
 
@@ -351,9 +351,7 @@ public static class Program
                     }
                 });
 
-            string projectFolder = Path.Combine(testAsset.Path, project.Name);
-
-            var buildCommand = new BuildCommand(Log, projectFolder);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -414,9 +412,7 @@ public static class Program
 
                 });
 
-            string projectFolder = Path.Combine(testAsset.Path, project.Name);
-
-            var buildCommand = new BuildCommand(Log, projectFolder);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -455,9 +451,8 @@ public static class Program
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(project);
-            string projectFolder = Path.Combine(testAsset.Path, project.Name);
 
-            var buildCommand = new BuildCommand(Log, projectFolder);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute($"/p:SelfContained={isSelfContained}")
@@ -496,7 +491,7 @@ public static class Program
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/v:normal")
@@ -567,7 +562,7 @@ public static class Program
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute(extraArgs)
@@ -615,7 +610,7 @@ public static class Program
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -665,7 +660,7 @@ class Program
             var testAsset = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -693,7 +688,7 @@ class Program
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -746,7 +741,7 @@ class Program
             var testAsset = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -773,7 +768,7 @@ class Program
             var testAsset = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()

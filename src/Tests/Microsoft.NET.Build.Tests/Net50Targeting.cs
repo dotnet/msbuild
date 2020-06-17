@@ -32,7 +32,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand.Execute()
                 .Should()

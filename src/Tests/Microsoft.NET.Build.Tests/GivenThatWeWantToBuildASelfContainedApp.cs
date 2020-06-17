@@ -44,7 +44,7 @@ namespace Microsoft.NET.Build.Tests
                     propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", runtimeIdentifier));
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -105,7 +105,7 @@ namespace Microsoft.NET.Build.Tests
                     propertyGroup.Add(new XElement(ns + "PlatformTarget", PlatformTarget));
 				});
 
-			var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot));
+			var buildCommand = new BuildCommand(testAsset);
 
 			buildCommand
 				.Execute()
@@ -133,7 +133,7 @@ namespace Microsoft.NET.Build.Tests
 					propertyGroup.Add(new XElement(ns + "PlatformTarget", "AnyCPU"));
 				});
 
-			var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot));
+			var buildCommand = new BuildCommand(testAsset);
 
 			buildCommand
 				.Execute()

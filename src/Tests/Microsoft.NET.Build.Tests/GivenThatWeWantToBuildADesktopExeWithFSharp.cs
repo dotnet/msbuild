@@ -41,7 +41,7 @@ namespace Microsoft.NET.Build.Tests
                     propertyGroup.Element(ns + "TargetFramework").SetValue(targetFramework);
                 });
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute()
                 .Should()

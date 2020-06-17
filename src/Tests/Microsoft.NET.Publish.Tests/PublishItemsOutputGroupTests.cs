@@ -110,7 +110,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var buildCommand = new BuildCommand(Log, testAsset.Path, testProject.Name);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute("/p:RuntimeIdentifier=win-x86;DesignTimeBuild=true", "/t:PublishItemsOutputGroup")
                 .Should()

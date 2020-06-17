@@ -58,7 +58,7 @@ namespace Microsoft.NET.Build.Tests
                     }
                 });
 
-            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, testProject.Name);
+            var buildCommand = new BuildCommand(testProjectInstance);
 
             buildCommand.Execute()
                 .Should()

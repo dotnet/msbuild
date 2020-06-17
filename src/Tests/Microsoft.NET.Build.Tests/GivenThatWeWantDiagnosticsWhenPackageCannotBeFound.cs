@@ -43,9 +43,7 @@ namespace Microsoft.NET.Build.Tests
 
             RemovePackageFromCache(package);
 
-            var build = new BuildCommand(
-                Log,
-                Path.Combine(asset.TestRoot, project.Name));
+            var build = new BuildCommand(asset);
 
             build.ExecuteWithoutRestore()
                  .Should()

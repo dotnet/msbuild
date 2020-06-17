@@ -30,7 +30,7 @@ namespace Microsoft.NET.Build.Tests
 
             var asset = CreateWindowsDesktopSdkTestAsset(ProjectName, uiFrameworkProperty);
 
-            var command = new BuildCommand(Log, Path.Combine(asset.Path, ProjectName));
+            var command = new BuildCommand(asset);
 
             command
                 .Execute()
@@ -47,7 +47,7 @@ namespace Microsoft.NET.Build.Tests
 
             var asset = CreateWindowsDesktopSdkTestAsset(ProjectName, uiFrameworkProperty);
 
-            var command = new BuildCommand(Log, Path.Combine(asset.Path, ProjectName));
+            var command = new BuildCommand(asset);
 
             command
                 .Execute()
@@ -67,7 +67,7 @@ namespace Microsoft.NET.Build.Tests
 
             var asset = CreateWindowsDesktopReferenceTestAsset(ProjectName, desktopFramework);
 
-            var command = new BuildCommand(Log, Path.Combine(asset.Path, ProjectName));
+            var command = new BuildCommand(asset);
 
             command
                 .Execute()
@@ -85,7 +85,7 @@ namespace Microsoft.NET.Build.Tests
 
             var asset = CreateWindowsDesktopReferenceTestAsset(ProjectName, desktopFramework);
 
-            var command = new BuildCommand(Log, Path.Combine(asset.Path, ProjectName));
+            var command = new BuildCommand(asset);
 
             command
                 .Execute()
@@ -112,7 +112,7 @@ namespace Microsoft.NET.Build.Tests
 
             var asset = _testAssetsManager.CreateTestProject(testProject);
 
-            var command = new BuildCommand(Log, Path.Combine(asset.Path, ProjectName));
+            var command = new BuildCommand(asset);
 
             command
                 .Execute()

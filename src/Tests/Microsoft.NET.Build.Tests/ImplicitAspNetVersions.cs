@@ -41,7 +41,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: aspnetPackageName);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -75,7 +75,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: aspnetPackageName);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -107,7 +107,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: aspnetPackageName);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -138,7 +138,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -175,9 +175,9 @@ namespace Microsoft.NET.Build.Tests
                 .Pass()
                 .And
                 .NotHaveStdOutContaining("NETSDK1071");
-                
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -216,7 +216,7 @@ namespace Microsoft.NET.Build.Tests
                 .And
                 .HaveStdOutContaining("NETSDK1079");
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand.Execute()
                 .Should()
@@ -252,7 +252,7 @@ namespace Microsoft.NET.Build.Tests
                 .And
                 .HaveStdOutContaining("NETSDK1080");
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand.Execute()
                 .Should()

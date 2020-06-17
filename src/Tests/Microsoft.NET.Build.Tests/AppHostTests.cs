@@ -34,7 +34,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource()
                 .WithTargetFramework(targetFramework);
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute()
                 .Should()
@@ -73,7 +73,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource()
                 .WithTargetFramework(targetFramework);
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute(new string[] {
                     "/restore", "/p:UseAppHost=true",
@@ -110,7 +110,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource()
                 .WithTargetFramework(targetFramework);
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute()
                 .Should()
@@ -140,7 +140,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("HelloWorld")
                 .WithSource();
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute(new string[] {
                     $"/p:TargetFramework={targetFramework}",
@@ -184,7 +184,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand.Execute()
                 .Should()
@@ -212,7 +212,7 @@ namespace Microsoft.NET.Build.Tests
                     propertyGroup.Element(ns + "TargetFramework").SetValue(targetFramework);
                 });
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute("/p:CopyLocalLockFileAssemblies=false")
                 .Should()
@@ -247,7 +247,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand.Execute()
                 .Should()
@@ -273,9 +273,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var projectDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
-
-            var buildCommand = new BuildCommand(Log, projectDirectory);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand.Execute()
                 .Should()

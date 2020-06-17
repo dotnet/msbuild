@@ -46,7 +46,7 @@ namespace Microsoft.NET.Build.Tests
              var testProjectInstance = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
+            var buildCommand = new BuildCommand(testProjectInstance);
 
             buildCommand.Execute()
                 .Should()
@@ -91,7 +91,7 @@ namespace Microsoft.NET.Build.Tests
              var testProjectInstance = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
+            var buildCommand = new BuildCommand(testProjectInstance);
 
             buildCommand.Execute().Should().Pass();
 
@@ -128,7 +128,7 @@ namespace Microsoft.NET.Build.Tests
              var testProjectInstance = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
+            var buildCommand = new BuildCommand(testProjectInstance);
 
             buildCommand.Execute()
                 .Should()
@@ -168,7 +168,7 @@ namespace Microsoft.NET.Build.Tests
              var testProjectInstance = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
+            var buildCommand = new BuildCommand(testProjectInstance);
 
             buildCommand.Execute()
                 .Should()
@@ -202,7 +202,7 @@ namespace Microsoft.NET.Build.Tests
              var testProjectInstance = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
+            var buildCommand = new BuildCommand(testProjectInstance);
 
             buildCommand.Execute()
                 .Should()
@@ -239,7 +239,7 @@ namespace Microsoft.NET.Build.Tests
              var testProjectInstance = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
+            var buildCommand = new BuildCommand(testProjectInstance);
 
             buildCommand.Execute()
                 .Should()
@@ -273,7 +273,7 @@ namespace Microsoft.NET.Build.Tests
              var testProjectInstance = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
+            var buildCommand = new BuildCommand(testProjectInstance);
 
             buildCommand.Execute()
                 .Should()
@@ -310,7 +310,7 @@ namespace Microsoft.NET.Build.Tests
              var testProjectInstance = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
+            var buildCommand = new BuildCommand(testProjectInstance);
 
             buildCommand.Execute()
                 .Should()
@@ -346,7 +346,7 @@ namespace Microsoft.NET.Build.Tests
              var testProjectInstance = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, ProjectName);
+            var buildCommand = new BuildCommand(testProjectInstance);
 
             buildCommand.Execute()
                 .Should()

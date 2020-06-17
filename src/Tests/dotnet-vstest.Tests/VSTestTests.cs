@@ -25,14 +25,15 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
         public void TestsFromAGivenContainerShouldRunWithExpectedOutput()
         {
             var testAppName = "VSTestCore";
-            var testRoot = _testAssetsManager.CopyTestAsset(testAppName)
+            var testAsset = _testAssetsManager.CopyTestAsset(testAppName)
                 .WithSource()
-                .WithVersionVariables()
-                .Path;
+                .WithVersionVariables();
+
+            var testRoot = testAsset.Path;
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            new BuildCommand(Log, testRoot)
+            new BuildCommand(testAsset)
                 .Execute()
                 .Should().Pass();
 

@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             var testProjectDirectory = testInstance.Path;
 
-            new BuildCommand(Log, testProjectDirectory)
+            new BuildCommand(testInstance)
                 .Execute()
                 .Should().Pass();
 
@@ -148,7 +148,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
             var testInstance = _testAssetsManager.CopyTestAsset("MSBuildTestApp")
                 .WithSource();
 
-            new BuildCommand(Log, testInstance.Path)
+            new BuildCommand(testInstance)
                 .Execute()
                 .Should().Pass();
 

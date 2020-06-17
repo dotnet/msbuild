@@ -111,14 +111,14 @@ namespace Microsoft.NET.Build.Tests
             if (scenario != ReferenceScenario.ProjectReference)
             {
 
-                var libBuildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, LibraryName));
+                var libBuildCommand = new BuildCommand(testAsset, LibraryName);
                 libBuildCommand
                     .Execute()
                     .Should()
                     .Pass();
             }
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, AppName));
+            var buildCommand = new BuildCommand(testAsset, AppName);
             buildCommand
                 .Execute()
                 .Should()
@@ -244,7 +244,7 @@ namespace Microsoft.NET.Build.Tests
             }
 
             // build should succeed without duplicates
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, AppName));
+            var buildCommand = new BuildCommand(testAsset, AppName);
             buildCommand
                 .Execute()
                 .Should()
@@ -294,7 +294,7 @@ namespace Microsoft.NET.Build.Tests
                     }
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, AppName));
+            var buildCommand = new BuildCommand(testAsset, AppName);
             buildCommand
                 .Execute()
                 .Should()
@@ -355,7 +355,7 @@ namespace Microsoft.NET.Build.Tests
                     }
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, AppName));
+            var buildCommand = new BuildCommand(testAsset, AppName);
             buildCommand
                 .Execute()
                 .Should()
@@ -393,7 +393,7 @@ namespace Microsoft.NET.Build.Tests
                     }
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, AppName));
+            var buildCommand = new BuildCommand(testAsset, AppName);
             buildCommand
                 .Execute()
                 .Should()

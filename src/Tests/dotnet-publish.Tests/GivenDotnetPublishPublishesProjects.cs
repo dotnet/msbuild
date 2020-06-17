@@ -287,7 +287,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var rootPath = testInstance.Path;
 
-            new BuildCommand(Log, rootPath)
+            new BuildCommand(testInstance)
                 .Execute()
                 .Should()
                 .Pass();

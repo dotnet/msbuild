@@ -120,9 +120,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            string projectFolder = Path.Combine(testAsset.Path, testProject.Name);
-
-            var buildCommand = new BuildCommand(Log, projectFolder);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -166,9 +164,7 @@ namespace Microsoft.NET.Build.Tests
                         new XAttribute("Private", "true")));
                 });
 
-            string projectFolder = Path.Combine(testAsset.Path, testProject.Name);
-
-            var buildCommand = new BuildCommand(Log, projectFolder);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -192,9 +188,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            string projectFolder = Path.Combine(testAsset.Path, testProject.Name);
-
-            var buildCommand = new BuildCommand(Log, projectFolder);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -225,7 +219,7 @@ namespace Microsoft.NET.Build.Tests
                                     new XAttribute("Include", "Microsoft.AspNetCore.App")));
                 });
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()

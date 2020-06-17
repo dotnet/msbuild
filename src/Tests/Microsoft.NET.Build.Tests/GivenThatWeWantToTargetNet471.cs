@@ -57,7 +57,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/v:normal")
@@ -98,7 +98,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, "net471_ref_ns20");
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/v:normal")
@@ -134,7 +134,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/v:normal")
@@ -182,7 +182,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, "net471_ref_ns16");
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/v:normal")
@@ -234,7 +234,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, "net471_ref_net471_net461");
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/v:normal")
@@ -272,7 +272,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, "net471_with_override_property");
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/v:normal")
@@ -341,7 +341,7 @@ public static class Program
                     }
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -490,7 +490,7 @@ public static class NS16LibClass
                                 }
                             });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/v:m")
@@ -597,7 +597,7 @@ public class Startup
                     }
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand.Execute().Should().Pass();
         }

@@ -43,7 +43,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var buildCommand = new BuildCommand(Log, projectPath);
+            var buildCommand = new BuildCommand(testAsset, "App");
 
             buildCommand
                 .Execute(msbuildArgs)
@@ -92,7 +92,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var buildCommand = new BuildCommand(Log, projectPath);
+            var buildCommand = new BuildCommand(testAsset, "App");
 
             buildCommand
                 .Execute($"/p:RuntimeIdentifier={runtimeIdentifier}", $"/p:TestRuntimeIdentifier={runtimeIdentifier}", "/p:SelfContained=false")

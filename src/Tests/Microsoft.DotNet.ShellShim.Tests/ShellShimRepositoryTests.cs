@@ -485,7 +485,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
             var testInstance = _testAssetsManager.CopyTestAsset(testAppName, callingMethod: instanceName)
                 .WithSource();
 
-            new BuildCommand(Log, testInstance.TestRoot)
+            new BuildCommand(testInstance)
                 .Execute()
                 .Should()
                 .Pass();

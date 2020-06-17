@@ -24,7 +24,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("x64SolutionBuild")
                 .WithSource();
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, "x64SolutionBuild.sln");
+            var buildCommand = new BuildCommand(testAsset, "x64SolutionBuild.sln");
             buildCommand
                 .Execute()
                 .Should()

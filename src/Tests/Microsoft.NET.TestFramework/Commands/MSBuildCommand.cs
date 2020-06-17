@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.TestFramework.Commands
@@ -31,6 +32,11 @@ namespace Microsoft.NET.TestFramework.Commands
             _projectRootPath = projectRootPath;
 
             ProjectFile = FindProjectFile(ref _projectRootPath, relativePathToProject);
+        }
+
+        public MSBuildCommand(TestAsset testAsset, string target, string relativePathToProject = null)
+            : this(testAsset.Log, target, testAsset.TestRoot, relativePathToProject ?? testAsset.TestProject?.Name)
+        {
         }
 
         internal static string FindProjectFile(ref string projectRootPath, string relativePathToProject)
