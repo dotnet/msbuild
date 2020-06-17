@@ -119,6 +119,8 @@ namespace Microsoft.NET.Build.Tasks
         /// </summary>
         public bool EmitLegacyAssetsFileItems { get; set; } = false;
 
+        public string TargetFrameworkMoniker { get; set; }
+
         #endregion
 
         public ResolvePackageDependencies()
@@ -173,6 +175,8 @@ namespace Microsoft.NET.Build.Tasks
                 string resolvedPackagePath = ResolvePackagePath(package);
                 item.SetMetadata(MetadataKeys.ResolvedPath, resolvedPackagePath ?? string.Empty);
 
+                item.SetMetadata(MetadataKeys.DiagnosticLevel, GetPackageDiagnosticLevel(package));
+
                 _packageDefinitions.Add(item);
 
                 if (!EmitLegacyAssetsFileItems)
@@ -226,6 +230,20 @@ namespace Microsoft.NET.Build.Tasks
 
                     _fileDefinitions.Add(fileItem);
                 }
+            }
+
+            string GetPackageDiagnosticLevel(LockFileLibrary package)
+            {
+                string target = TargetFrameworkMoniker ?? "";
+
+                var messages = LockFile.LogMessages.Where(log => log.LibraryId == package.Name && log.TargetGraphs.Contains(target));
+
+                if (!messages.Any())
+                {
+                    return string.Empty;
+                }
+
+                return messages.Max(log => log.Level).ToString();
             }
         }
 

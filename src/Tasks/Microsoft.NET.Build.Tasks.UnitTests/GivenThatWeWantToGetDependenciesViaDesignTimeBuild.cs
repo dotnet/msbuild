@@ -77,7 +77,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                             { MetadataKeys.Version, "1.0.0" },
                             { MetadataKeys.Path, "some path" },
                             { MetadataKeys.ResolvedPath, "" },
-                            { MetadataKeys.Type, "Unresolved" }
+                            { MetadataKeys.Type, "Unresolved" },
+                            { MetadataKeys.DiagnosticLevel, "Warning" }
                         })
                 },
                 PackageDependencies = new ITaskItem[]
@@ -100,6 +101,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             Assert.Equal("1.0.0", item.GetMetadata(MetadataKeys.Version));
             Assert.Equal("some path", item.GetMetadata(MetadataKeys.Path));
             Assert.Equal("", item.GetMetadata(MetadataKeys.ResolvedPath));
+            Assert.Equal("Warning", item.GetMetadata(MetadataKeys.DiagnosticLevel));
             Assert.False(item.GetBooleanMetadata(MetadataKeys.IsImplicitlyDefined));
             Assert.False(item.GetBooleanMetadata(PreprocessPackageDependenciesDesignTime.ResolvedMetadata));
         }
