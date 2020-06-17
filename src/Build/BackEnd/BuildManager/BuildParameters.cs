@@ -394,7 +394,7 @@ namespace Microsoft.Build.Execution
         public bool EnableNodeReuse
         {
             get => _enableNodeReuse;
-            set => _enableNodeReuse = value;
+            set => _enableNodeReuse = Environment.GetEnvironmentVariable("MSBUILDDISABLENODEREUSE") == "1" ? false : value;
         }
 
         /// <summary>
