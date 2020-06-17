@@ -30,10 +30,10 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private static bool _supportReadingBackgroundColor = true;
 
-        ///<summary>
+        /// <summary>
         /// propertyOutputMap is the map between a (nodeID and project_context_id) to a target framework
-        ///</summary>
-        protected Dictionary<(int nodeId, int contextId), StringBuilder> propertyOutputMap = new Dictionary<(int nodeId, int contextId), StringBuilder> ();
+        /// </summary>
+        protected Dictionary<(int nodeId, int contextId), string> propertyOutputMap = new Dictionary<(int nodeId, int contextId), string> ();
 
         #region Properties
 

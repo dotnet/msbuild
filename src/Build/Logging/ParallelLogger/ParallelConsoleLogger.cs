@@ -204,7 +204,7 @@ namespace Microsoft.Build.BackEnd.Logging
             _hasBuildStarted = false;
 
             // Reset the two data structures created when the logger was created
-            propertyOutputMap = new Dictionary<(int, int), StringBuilder>();
+            propertyOutputMap = new Dictionary<(int, int), string>();
             _buildEventManager = new BuildEventManager();
             _deferredMessages = new Dictionary<BuildEventContext, List<BuildMessageEventArgs>>(s_compareContextNodeId);
             _prefixWidth = 0;
@@ -428,8 +428,10 @@ namespace Microsoft.Build.BackEnd.Logging
                 // If there is no bucket create a new one which contains a list of all the errors which
                 // happened for a given buildEventContext / target
                 if (!groupByProjectEntryPoint.ContainsKey(key))
+                {
                     groupByProjectEntryPoint.Add(key, new List<BuildEventArgs>());
-
+                }
+                    
                 // Add the error event to the correct bucket
                 groupByProjectEntryPoint[key].Add(errorWarningEventArgs);
             }
@@ -439,7 +441,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // Loop through each of the bucket and print out the stack trace information for the errors
             foreach (KeyValuePair<ErrorWarningSummaryDictionaryKey, List<BuildEventArgs>> valuePair in groupByProjectEntryPoint)
             {
-                //If the project entry point where the error occurred is the same as the previous message do not print the
+                // If the project entry point where the error occurred is the same as the previous message do not print the
                 // stack trace again
                 if (previousEntryPoint != valuePair.Key.EntryPointContext)
                 {
@@ -451,11 +453,11 @@ namespace Microsoft.Build.BackEnd.Logging
                     previousEntryPoint = valuePair.Key.EntryPointContext;
                 }
 
-                //If the target where the error occurred is the same as the previous message do not print the location
+                // If the target where the error occurred is the same as the previous message do not print the location
                 // where the error occurred again
                 if (String.Compare(previousTarget, valuePair.Key.TargetName, StringComparison.OrdinalIgnoreCase) != 0)
                 {
-                    //If no targetName was specified then do not show the target where the error occurred
+                    // If no targetName was specified then do not show the target where the error occurred
                     if (!string.IsNullOrEmpty(valuePair.Key.TargetName))
                     {
                         WriteMessageAligned(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ErrorWarningInTarget", valuePair.Key.TargetName), false);
@@ -513,11 +515,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 _deferredMessages.Remove(e.BuildEventContext);
             }
 
-            //If we are in diagnostic and are going to show items, show the project started event
+            // If we are in diagnostic and are going to show items, show the project started event
             // along with the items. The project started event will only be shown if it has not been shown before
             if (Verbosity == LoggerVerbosity.Diagnostic && showItemAndPropertyList)
             {
-                //Show the deferredProjectStartedEvent
+                // Show the deferredProjectStartedEvent
                 if (!showOnlyErrors && !showOnlyWarnings)
                 {
                     DisplayDeferredProjectStartedEvent(e.BuildEventContext);
@@ -533,56 +535,54 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
 
-            //node and project context ids for the propertyOutputMap key
-            int node = -1;
-            int projectContextId = -1;
-            if (e.BuildEventContext != null)
+            if (e.BuildEventContext == null || e.Items == null)
             {
-                node = e.BuildEventContext.NodeId;
-                projectContextId = e.BuildEventContext.ProjectContextId;
+                return;
             }
-            //creating the value to be added to the propertyOutputMap
-            StringBuilder LogOutputProperties = new StringBuilder();
-            if (e.BuildEventContext != null && e.Items != null)
-            {
-                foreach (DictionaryEntry item in e.Items)
-                {
-                    ITaskItem itemVal = (ITaskItem)item.Value;
-                    //finding if the LogOutputProperties item has been used
-                    if (string.Equals((string)item.Key, "LogOutputProperties", StringComparison.OrdinalIgnoreCase))
-                    {
-                        //looking for the property value associated with the property key
-                        //Note: the property key is the item value
-                        string value = null;
-                        bool foundProperty = e.GlobalProperties.TryGetValue(itemVal.ItemSpec, out value);
-     
-                        //looking for the property in local properties if it wasn't found in global properties
-                        if (!foundProperty)
-                        {
-                            foreach (DictionaryEntry prop in e.Properties)
-                            {
+            // node and project context ids for the propertyOutputMap key
+            int nodeID = -1;
+            int projectContextId = -1;
+            nodeID = e.BuildEventContext.NodeId;
+            projectContextId = e.BuildEventContext.ProjectContextId;
 
-                                if ((string)prop.Key == itemVal.ItemSpec)
-                                {
-                                    value = (string)prop.Value;
-                                    foundProperty = true;
-                                    break;
-                                }
+            // Create the value to be added to the propertyOutputMap
+            StringBuilder logOutputProperties = new StringBuilder();
+
+            foreach (DictionaryEntry item in e.Items)
+            {
+                ITaskItem itemVal = (ITaskItem)item.Value;
+                // Determine if the LogOutputProperties item has been used
+                if (string.Equals((string)item.Key, "LogOutputProperties", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Look for the property value associated with the property key
+                    // Note: the property key is the item value
+                    string value = null;
+                    bool foundProperty = e.GlobalProperties.TryGetValue(itemVal.ItemSpec, out value);
+     
+                    // Look for the property in local properties if it wasn't found in global properties
+                    if (!foundProperty)
+                    {
+                        foreach (DictionaryEntry prop in e.Properties)
+                        {
+                            if (string.Equals((string)prop.Key, itemVal.ItemSpec, StringComparison.OrdinalIgnoreCase))
+                            {
+                                value = (string)prop.Value;
+                                foundProperty = true;
+                                break;
                             }
                         }
+                    }
 
-                        //adding the property key and value pair to the propertyOutputs
-                        if (e.BuildEventContext != null && foundProperty)
-                        {
-                            LogOutputProperties.Append(itemVal.ItemSpec).Append(":").Append(value).Append(" ");
-                        }
+                    // Add the property key and value pair to the propertyOutputs
+                    if (foundProperty)
+                    {
+                        logOutputProperties.Append(itemVal.ItemSpec).Append(":").Append(value).Append(" ");
                     }
                 }
             }
-            //adding the finished dictionary to propertyOutputMap
-            //this creates a mapping of a specific project/node to a dictionary of property values
-            if (e.BuildEventContext != null)
-                propertyOutputMap.Add((node, projectContextId), LogOutputProperties);
+            // Add the finished dictionary to propertyOutputMap
+            // this creates a mapping of a specific project/node to a dictionary of property values
+            propertyOutputMap.Add((nodeID, projectContextId), logOutputProperties.ToString());
         }
 
         /// <summary>
@@ -595,7 +595,7 @@ namespace Microsoft.Build.BackEnd.Logging
             ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
 
 
-            //Get the project started event so we can use its information to properly display a project finished event
+            // Get the project started event so we can use its information to properly display a project finished event
             ProjectStartedEventMinimumFields startedEvent = _buildEventManager.GetProjectStartedEvent(e.BuildEventContext);
             ErrorUtilities.VerifyThrow(startedEvent != null, "Project finished event for {0} received without matching start event", e.ProjectFile);
 
@@ -742,7 +742,7 @@ namespace Microsoft.Build.BackEnd.Logging
             if (showOnlyErrors || showOnlyWarnings) return;
             SortedList itemList = ExtractItemList(items);
 
-            // if there are no Items to display return out of the method and don't print out anything related to displaying
+            // If there are no Items to display return out of the method and don't print out anything related to displaying
             // the items, this includes the multiproc prefix information or the Initial items header
             if (itemList.Count == 0)
             {
@@ -881,7 +881,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
 
-            //We no longer need this target started event, it can be removed
+            // We no longer need this target started event, it can be removed
             _buildEventManager.RemoveTargetStartedEvent(e.BuildEventContext);
         }
 
@@ -963,6 +963,22 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Finds the LogOutPropterty string to be printed in messages
+        /// </summary>
+        /// <param name="e"> the build event where the LogOutPutProperty string will be added</param>
+        internal void PropertyMapping(LazyFormattedBuildEventArgs e)
+        {
+            string logOutputProperties = "";
+            if (e.BuildEventContext != null)
+            {
+                int nodeId = e.BuildEventContext.NodeId;
+                int projectContextId = e.BuildEventContext.ProjectContextId;
+                propertyOutputMap.TryGetValue((nodeId, projectContextId), out logOutputProperties);
+            }
+            e.LogOutputProperties = logOutputProperties;
+        }
+
+        /// <summary>
         /// Prints an error event
         /// </summary>
         public override void ErrorHandler(object sender, BuildErrorEventArgs e)
@@ -971,15 +987,8 @@ namespace Microsoft.Build.BackEnd.Logging
             // Keep track of the number of error events raised 
             errorCount++;
 
-            //determine the mapping of properties to output
-            StringBuilder LogOutputProperties = new StringBuilder();
-            if (e.BuildEventContext != null)
-            {
-                int nodeId = e.BuildEventContext.NodeId;
-                int projectContextId = e.BuildEventContext.ProjectContextId;
-                propertyOutputMap.TryGetValue((nodeId, projectContextId), out LogOutputProperties);
-            }
-            e.LogOutputProperties = LogOutputProperties;
+            // Determine the mapping of properties to output
+            PropertyMapping(e);
 
             // If there is an error we need to walk up the call stack and make sure that 
             // the project started events back to the root project know an error has occurred
@@ -1027,15 +1036,8 @@ namespace Microsoft.Build.BackEnd.Logging
             // Keep track of the number of warning events raised during the build
             warningCount++;
 
-            //determine the mapping of properties to output
-            StringBuilder LogOutputProperties = new StringBuilder();
-            if (e.BuildEventContext != null)
-            {
-                int nodeId = e.BuildEventContext.NodeId;
-                int projectContextId = e.BuildEventContext.ProjectContextId;
-                propertyOutputMap.TryGetValue((nodeId, projectContextId), out LogOutputProperties);
-            }
-            e.LogOutputProperties = LogOutputProperties;
+            // Determine the mapping of properties to output
+            PropertyMapping(e);
 
             // If there is a warning we need to walk up the call stack and make sure that 
             // the project started events back to the root project know a warning has occurred
@@ -1081,15 +1083,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public override void MessageHandler(object sender, BuildMessageEventArgs e)
         {
-            //determine the mapping of properties to output
-            StringBuilder LogOutputProperties = new StringBuilder();
-            if (e.BuildEventContext != null)
-            {
-                int nodeId = e.BuildEventContext.NodeId;
-                int projectContextId = e.BuildEventContext.ProjectContextId;
-                propertyOutputMap.TryGetValue((nodeId, projectContextId), out LogOutputProperties);
-            }
-            e.LogOutputProperties = LogOutputProperties;
+            // Determine the mapping of properties to output
+            PropertyMapping(e);
 
             if (showOnlyErrors || showOnlyWarnings) return;
 
@@ -1243,7 +1238,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
             else
             {
-                //A time stamp may be shown on verbosities lower than diagnostic
+                // A time stamp may be shown on verbosities lower than diagnostic
                 if (_showTimeStamp || IsVerbosityAtLeast(LoggerVerbosity.Detailed))
                 {
                     bool prefixAlreadyWritten = WriteTargetMessagePrefix(e, e.BuildEventContext, e.Timestamp);
@@ -1420,10 +1415,10 @@ namespace Microsoft.Build.BackEnd.Logging
             // Get the deferred target started event
             TargetStartedEventMinimumFields targetStartedEvent = _buildEventManager.GetTargetStartedEvent(e);
 
-            //Make sure we have not shown the event before
+            // Make sure we have not shown the event before
             if (targetStartedEvent != null && !targetStartedEvent.ShowTargetFinishedEvent)
             {
-                //Since the target started event has been shows, the target finished event should also be shown
+                // Since the target started event has been shows, the target finished event should also be shown
                 targetStartedEvent.ShowTargetFinishedEvent = true;
 
                 // If there are any other started events waiting and we are the first message, show them
@@ -1502,7 +1497,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     ProjectStartedEventMinimumFields parentStartedEvent = projectStartedEvent.ParentProjectStartedEvent;
                     if (parentStartedEvent != null)
                     {
-                        //Make sure that if there are any events deferred on this event to show them first
+                        // Make sure that if there are any events deferred on this event to show them first
                         DisplayDeferredStartedEvents(parentStartedEvent.ProjectBuildEventContext);
                     }
 
@@ -1630,7 +1625,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 startedEvent = _buildEventManager.GetProjectStartedEvent(e);
             }
 
-            //Project started event can be null, if the message has come before the project started event
+            // Project started event can be null, if the message has come before the project started event
             // or the message is not part of a project such as if the message came from the engine
             return startedEvent == null
                 ? new ProjectFullKey(0, 0)

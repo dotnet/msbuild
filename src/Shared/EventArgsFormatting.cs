@@ -137,7 +137,7 @@ namespace Microsoft.Build.Shared
             int threadId
         )
         {
-            return FormatEventMessage(category, subcategory, message, code, file, null, lineNumber, endLineNumber, columnNumber, endColumnNumber, threadId, new StringBuilder());
+            return FormatEventMessage(category, subcategory, message, code, file, null, lineNumber, endLineNumber, columnNumber, endColumnNumber, threadId, null);
         }
 
         /// <summary>
@@ -169,7 +169,7 @@ namespace Microsoft.Build.Shared
             int columnNumber,
             int endColumnNumber,
             int threadId,
-            StringBuilder LogOutputProperties
+            string LogOutputProperties
         )
         {
             StringBuilder format = new StringBuilder();

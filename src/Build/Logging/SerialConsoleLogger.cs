@@ -91,7 +91,7 @@ namespace Microsoft.Build.BackEnd.Logging
             errorCount = 0;
             warningCount = 0;
 
-            propertyOutputMap = new Dictionary<(int nodeId, int contextId), StringBuilder>();
+            propertyOutputMap = new Dictionary<(int nodeId, int contextId), string>();
             projectPerformanceCounters = null;
             targetPerformanceCounters = null;
             taskPerformanceCounters = null;
@@ -226,12 +226,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 this.VerifyStack(contextStack.Peek().type == FrameType.Target, "Bad stack -- Top is project {0}", contextStack.Peek().ID);
             }
 
-            // if verbosity is normal, detailed or diagnostic
+            // If verbosity is normal, detailed or diagnostic
             if (IsVerbosityAtLeast(LoggerVerbosity.Normal) && ShowSummary != false)
             {
                 ShowDeferredMessages();
 
-                // check for stack corruption
+                // Check for stack corruption
                 if (!contextStack.IsEmpty())
                 {
                     this.VerifyStack(contextStack.Peek().type == FrameType.Target, "Bad stack -- Top is target {0}", contextStack.Peek().ID);
@@ -279,58 +279,54 @@ namespace Microsoft.Build.BackEnd.Logging
                     WriteItems(itemList);
                 }
             }
-            //node and project context ids for the propertyOutputMap key
-            int node = -1;
-            int projectContextId = -1;
-            if (e.BuildEventContext != null)
+            // The node and project context ids for the propertyOutputMap key
+            if (e.BuildEventContext == null || e.Items == null)
             {
-                node = e.BuildEventContext.NodeId;
-                projectContextId = e.BuildEventContext.ProjectContextId;
+                return;
             }
-            //creating the value to be added to the propertyOutputMap
-            StringBuilder LogOutputProperties= new StringBuilder();
+            int nodeID = -1;
+            int projectContextId = -1;
+            nodeID = e.BuildEventContext.NodeId;
+            projectContextId = e.BuildEventContext.ProjectContextId;
 
-            if (e.BuildEventContext != null && e.Items != null)
+            // Create the value to be added to the propertyOutputMap
+            StringBuilder logOutputProperties= new StringBuilder();
+            foreach (DictionaryEntry item in e.Items)
             {
-                foreach (DictionaryEntry item in e.Items)
+                ITaskItem itemVal = (ITaskItem)item.Value;
+
+                // Determine if the outputProperties item has been used
+                if (string.Equals((string)item.Key, "LogOutputProperties", StringComparison.OrdinalIgnoreCase))
                 {
-                    ITaskItem itemVal = (ITaskItem)item.Value;
+                    // Look for the property value associated with the property key
+                    // Note: the property key is the item value
+                    string value = null;
+                    bool foundProperties = e.GlobalProperties.TryGetValue(itemVal.ItemSpec, out value);
 
-                    //finding if the outputProperties item has been used
-                    if (string.Equals((string)item.Key, "LogOutputProperties", StringComparison.OrdinalIgnoreCase))
+                    // Look for the property in local properties if it wasn't found in global properties
+                    if (!foundProperties)
                     {
-                        //looking for the property value associated with the property key
-                        //Note: the property key is the item value
-                        string value = null;
-                        bool foundProperties = e.GlobalProperties.TryGetValue(itemVal.ItemSpec, out value);
-
-                        //looking for the property in local properties if it wasn't found in global properties
-                        if (!foundProperties)
+                        foreach (DictionaryEntry prop in e.Properties)
                         {
-                            foreach (DictionaryEntry prop in e.Properties)
+                            if (string.Equals((string)prop.Key, itemVal.ItemSpec, StringComparison.OrdinalIgnoreCase))
                             {
-
-                                if ((string)prop.Key == itemVal.ItemSpec)
-                                {
-                                    value = (string)prop.Value;
-                                    foundProperties = true;
-                                    break;
-                                }
+                                value = (string)prop.Value;
+                                foundProperties = true;
+                                break;
                             }
                         }
+                    }
 
-                        //adding the property key and value pair to the propertyOutputs
-                        if (foundProperties)
-                        {
-                            LogOutputProperties.Append(itemVal.ItemSpec).Append(":").Append(value).Append(" ");
-                        }
+                    // Add the property key and value pair to the propertyOutputs
+                    if (foundProperties)
+                    {
+                        logOutputProperties.Append(itemVal.ItemSpec).Append(":").Append(value).Append(" ");
                     }
                 }
             }
-            //adding the finished dictionary to propertyOutputMap
-            //this creates a mapping of a specific project/node to a dictionary of property values
-            if (e.BuildEventContext != null)
-                propertyOutputMap.Add((node, projectContextId), LogOutputProperties);
+            // Add the finished dictionary to propertyOutputMap
+            // this creates a mapping of a specific project/node to a dictionary of property values
+            propertyOutputMap.Add((nodeID, projectContextId), logOutputProperties.ToString());  
         }
 
         /// <summary>
@@ -517,6 +513,22 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Finds the LogOutPropterty string to be printed in messages
+        /// </summary>
+        /// <param name="e"> the build event where the LogOutPutProperty string will be added</param>
+        internal void PropertyMapping(LazyFormattedBuildEventArgs e)
+        {
+            string logOutputProperties = "";
+            if (e.BuildEventContext != null)
+            {
+                int nodeId = e.BuildEventContext.NodeId;
+                int projectContextId = e.BuildEventContext.ProjectContextId;
+                propertyOutputMap.TryGetValue((nodeId, projectContextId), out logOutputProperties);
+            }
+            e.LogOutputProperties = logOutputProperties;
+        }
+
+        /// <summary>
         /// Prints an error event
         /// </summary>
         public override void ErrorHandler(object sender, BuildErrorEventArgs e)
@@ -526,15 +538,8 @@ namespace Microsoft.Build.BackEnd.Logging
             ShowDeferredMessages();
             setColor(ConsoleColor.Red);
 
-            //determine the mapping of properties to output
-            StringBuilder LogOutputProperties = new StringBuilder();
-            if (e.BuildEventContext != null)
-            {
-                int nodeId = e.BuildEventContext.NodeId;
-                int projectContextId = e.BuildEventContext.ProjectContextId;
-                propertyOutputMap.TryGetValue((nodeId, projectContextId), out LogOutputProperties);
-            }
-            e.LogOutputProperties = LogOutputProperties;
+            // determine the mapping of properties to output
+            PropertyMapping(e);
 
             WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile));
             if (ShowSummary == true)
@@ -554,15 +559,8 @@ namespace Microsoft.Build.BackEnd.Logging
             ShowDeferredMessages();
             setColor(ConsoleColor.Yellow);
 
-            //determine the mapping of properties to output
-            StringBuilder LogOutputProperties = new StringBuilder();
-            if (e.BuildEventContext != null)
-            {
-                int nodeId = e.BuildEventContext.NodeId;
-                int projectContextId = e.BuildEventContext.ProjectContextId;
-                propertyOutputMap.TryGetValue((nodeId, projectContextId), out LogOutputProperties);
-            }
-            e.LogOutputProperties = LogOutputProperties;
+            // Determine the mapping of properties to output
+            PropertyMapping(e);
 
             WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile));
             if (ShowSummary == true)
@@ -577,15 +575,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public override void MessageHandler(object sender, BuildMessageEventArgs e)
         {
-            //determine the mapping of properties to output
-            StringBuilder LogOutputProperties = new StringBuilder();
-            if (e.BuildEventContext != null)
-            {
-                int nodeId = e.BuildEventContext.NodeId;
-                int projectContextId = e.BuildEventContext.ProjectContextId;
-                propertyOutputMap.TryGetValue((nodeId, projectContextId), out LogOutputProperties);
-            }
-            e.LogOutputProperties = LogOutputProperties;
+            // Determine the mapping of properties to output
+            PropertyMapping(e);
 
             bool print = false;
             bool lightenText = false;
@@ -690,7 +681,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             this.VerifyStack(!contextStack.IsEmpty(), "Bad project stack");
 
-            //Pop the current project
+            // Pop the current project
             Frame outerMost = contextStack.Pop();
 
             this.VerifyStack(!outerMost.displayed, "Bad project stack on {0}", outerMost.ID);
@@ -824,9 +815,9 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 ShowDeferredMessages();
 
-                //push now, so that the stack is in a good state
-                //for WriteProjectStarted() and WriteLinePretty()
-                //because we use the stack to control indenting
+                // push now, so that the stack is in a good state
+                // for WriteProjectStarted() and WriteLinePretty()
+                // because we use the stack to control indenting
                 contextStack.Push(f);
 
                 switch (f.type)
