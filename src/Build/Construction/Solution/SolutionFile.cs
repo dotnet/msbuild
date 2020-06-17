@@ -362,9 +362,7 @@ namespace Microsoft.Build.Construction
         {
             try
             {
-                using JsonDocument text = JsonDocument.Parse(File.ReadAllText(solutionFilterFile));
-                JsonElement solution = text.RootElement.GetProperty("solution");
-                _solutionFile = Path.GetFullPath(solution.GetProperty("path").GetString());
+                _solutionFile = ParseSolutionFromSolutionFilter(solutionFilterFile, out JsonElement solution);
                 if (!FileSystems.Default.FileExists(_solutionFile))
                 {
                     ProjectFileErrorUtilities.ThrowInvalidProjectFile
@@ -394,6 +392,30 @@ namespace Microsoft.Build.Construction
                     solutionFilterFile
                 );
             }
+        }
+
+        internal static string ParseSolutionFromSolutionFilter(string solutionFilterFile, out JsonElement solution)
+        {
+            try
+            {
+                JsonDocument text = JsonDocument.Parse(File.ReadAllText(solutionFilterFile));
+                solution = text.RootElement.GetProperty("solution");
+                return Path.GetFullPath(Path.Combine(Path.GetDirectoryName(solutionFilterFile), solution.GetProperty("path").GetString()));
+            }
+            catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
+            {
+                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                (
+                    false, /* Just throw the exception */
+                    "SubCategoryForSolutionParsingErrors",
+                    new BuildEventFileInfo(solutionFilterFile),
+                    e,
+                    "SolutionFilterJsonParsingError",
+                    solutionFilterFile
+                );
+            }
+            solution = new JsonElement();
+            return string.Empty;
         }
 
         /// <summary>
