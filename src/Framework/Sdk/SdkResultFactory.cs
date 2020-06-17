@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.Build.Framework
@@ -34,11 +35,14 @@ namespace Microsoft.Build.Framework
         /// <param name="itemsToAdd">Items to add to the evaluation</param>
         /// <param name="warnings">Optional warnings to display during resolution.</param>
         /// <returns></returns>
-        public abstract SdkResult IndicateSuccess(IEnumerable<string> paths,
+        public virtual SdkResult IndicateSuccess(IEnumerable<string> paths,
             string version,
             IDictionary<string, string> propertiesToAdd = null,
             IDictionary<string, SdkResultItem> itemsToAdd = null,
-            IEnumerable<string> warnings = null);
+            IEnumerable<string> warnings = null)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         ///     Create an <see cref="SdkResolver" /> object indicating failure resolving the SDK.
