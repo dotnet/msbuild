@@ -155,13 +155,14 @@ namespace Microsoft.Build.UnitTests.Construction
                     @"
                 {
                   ""solution"": {
-                    ""path"": """ + solutionFile.Path.Replace("\\", "\\\\") + @""",
+                    ""path"": """ + Path.Combine(".", "SimpleProject", "SimpleProject.sln").Replace("\\", "\\\\") + @""",
                     ""projects"": [
                       """ + Path.Combine("SimpleProject", "SimpleProject.csproj").Replace("\\", "\\\\") + @"""
                     ]
                     }
                 }
                 ");
+                Directory.GetCurrentDirectory().ShouldNotBe(Path.GetDirectoryName(filterFile.Path));
                 SolutionFile solution = SolutionFile.Parse(filterFile.Path);
                 ILoggingService mockLogger = CreateMockLoggingService();
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, mockLogger);
