@@ -394,7 +394,7 @@ namespace Microsoft.NET.Build.Tests
             definedConstants.Should().BeEquivalentTo(new[] { "DEBUG", "TRACE" }.Concat(expectedDefines).ToArray());
         }
 
-        [RequiresMSBuildVersionTheory("16.7.1")]
+        [RequiresMSBuildVersionTheory("16.7.0-preview-20310-07")]
         [InlineData("net5.0", new[] { "NETCOREAPP3_1", "NET5_0" })]
         [InlineData("net6.0", new[] { "NETCOREAPP3_1", "NET5_0", "NET6_0" })]
         public void It_implicitly_defines_compilation_constants_for_the_target_framework_with_backwards_compatibility(string targetFramework, string[] expectedDefines)
@@ -502,7 +502,7 @@ namespace Microsoft.NET.Build.Tests
                 $"The TargetFramework value '{targetFramework}' is not valid. To multi-target, use the 'TargetFrameworks' property instead");
         }
 
-        [RequiresMSBuildVersionTheory("16.7.1")]
+        [RequiresMSBuildVersionTheory("16.7.0-preview-20310-07")]
         [InlineData("net5.0", false)]
         [InlineData("netcoreapp3.1", true)]
         public void It_defines_target_platform_defaults_correctly(string targetFramework, bool defaultsDefined)

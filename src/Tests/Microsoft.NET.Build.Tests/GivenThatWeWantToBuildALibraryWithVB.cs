@@ -194,7 +194,7 @@ namespace Microsoft.NET.Build.Tests
             definedConstants.Should().BeEquivalentTo(expectedDefines.Concat(new[] { "PLATFORM=\"AnyCPU\"", "NETSTANDARD=-1", "NETSTANDARD1_5=-1" }));
         }
 
-        [RequiresMSBuildVersionTheory("16.7.1")]
+        [RequiresMSBuildVersionTheory("16.7.0-preview-20310-07")]
         [InlineData(".NETStandard,Version=v1.0", new[] { "NETSTANDARD=-1", "NETSTANDARD1_0=-1", "_MyType=\"Empty\"" }, false)]
         [InlineData("netstandard1.3", new[] { "NETSTANDARD=-1", "NETSTANDARD1_3=-1", "_MyType=\"Empty\"" }, false)]
         [InlineData("netstandard1.6", new[] { "NETSTANDARD=-1", "NETSTANDARD1_6=-1", "_MyType=\"Empty\"" }, false)]
