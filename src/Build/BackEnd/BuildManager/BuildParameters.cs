@@ -16,6 +16,7 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Execution
 {
@@ -394,7 +395,7 @@ namespace Microsoft.Build.Execution
         public bool EnableNodeReuse
         {
             get => _enableNodeReuse;
-            set => _enableNodeReuse = Environment.GetEnvironmentVariable("MSBUILDDISABLENODEREUSE") == "1" ? false : value;
+            set => _enableNodeReuse = Traits.Instance.DisableNodeReuse ? false : value;
         }
 
         /// <summary>
