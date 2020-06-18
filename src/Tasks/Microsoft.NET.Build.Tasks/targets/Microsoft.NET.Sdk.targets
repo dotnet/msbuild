@@ -891,7 +891,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   ============================================================
   -->
   <Target Name="_BlockWinMDsOnUnsupportedTFMs"
-          BeforeTargets="CoreCompile"
+          AfterTargets="PreBuildEvent"
           DependsOnTargets="ResolveReferences"
           Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '5.0'))">
     <NETSdkError Condition="'%(ReferencePath.Extension)' == '.winmd'"
