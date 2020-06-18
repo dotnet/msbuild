@@ -58,7 +58,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var restoreCommand = new RestoreCommand(Log, testAsset.Path, testProject.Name);
+            var restoreCommand = new RestoreCommand(testAsset);
             restoreCommand
                 .Execute()
                 .Should()

@@ -39,7 +39,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = this.SetupProject(specifyRid, singleFile);
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var restoreCommand = new RestoreCommand(Log, testAsset.Path, testProject.Name);
+            var restoreCommand = new RestoreCommand(testAsset);
             restoreCommand
                 .Execute()
                 .Should()
@@ -104,7 +104,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = this.SetupProject();
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var restoreCommand = new RestoreCommand(Log, testAsset.Path, testProject.Name);
+            var restoreCommand = new RestoreCommand(testAsset);
             restoreCommand
                 .Execute()
                 .Should()

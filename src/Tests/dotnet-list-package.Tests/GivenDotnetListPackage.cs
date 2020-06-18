@@ -24,11 +24,12 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         [Fact]
         public void RequestedAndResolvedVersionsMatch()
         {
-            var testAsset = "TestAppSimple";
-            var projectDirectory = _testAssetsManager
-                .CopyTestAsset(testAsset)
-                .WithSource()
-                .Path;
+            var testAssetName = "TestAppSimple";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset(testAssetName)
+                .WithSource();
+
+            var projectDirectory = testAsset.Path;
 
             var packageName = "Newtonsoft.Json";
             var packageVersion = "9.0.1";
@@ -37,7 +38,7 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
                 .Execute("add", "package", packageName, "--version", packageVersion);
             cmd.Should().Pass();
 
-            new RestoreCommand(Log, projectDirectory)
+            new RestoreCommand(testAsset)
                 .Execute()
                 .Should()
                 .Pass()
@@ -55,14 +56,14 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         [Fact]
         public void ItListsAutoReferencedPackages()
         {
-            var testAsset = "TestAppSimple";
-            var projectDirectory = _testAssetsManager
-                .CopyTestAsset(testAsset)
+            var testAssetName = "TestAppSimple";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset(testAssetName)
                 .WithSource()
-                .WithProjectChanges(ChangeTargetFrameworkTo2_1)
-                .Path;
+                .WithProjectChanges(ChangeTargetFrameworkTo2_1);
+            var projectDirectory = testAsset.Path;
 
-            new RestoreCommand(Log, projectDirectory)
+            new RestoreCommand(testAsset)
                 .Execute()
                 .Should()
                 .Pass()
@@ -89,12 +90,12 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         public void ItRunOnSolution()
         {
             var sln = "TestAppWithSlnAndSolutionFolders";
-            var projectDirectory = _testAssetsManager
+            var testAsset = _testAssetsManager
                 .CopyTestAsset(sln)
-                .WithSource()
-                .Path;
+                .WithSource();
+            var projectDirectory = testAsset.Path;
 
-            new RestoreCommand(Log, Path.Combine(projectDirectory, "App.sln"))
+            new RestoreCommand(testAsset, "App.sln")
                 .Execute()
                 .Should()
                 .Pass()
@@ -129,13 +130,13 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         [Fact]
         public void ItListsTransitivePackage()
         {
-            var testAsset = "NewtonSoftDependentProject";
-            var projectDirectory = _testAssetsManager
-                .CopyTestAsset(testAsset)
-                .WithSource()
-                .Path;
+            var testAssetName = "NewtonSoftDependentProject";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset(testAssetName)
+                .WithSource();
+            var projectDirectory = testAsset.Path;
 
-            new RestoreCommand(Log, projectDirectory)
+            new RestoreCommand(testAsset)
                 .Execute()
                 .Should()
                 .Pass()
@@ -167,13 +168,13 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         [InlineData("--framework net451", "[net451]", "[netcoreapp3.0]")]
         public void ItListsValidFrameworks(string args, string shouldInclude, string shouldntInclude)
         {
-            var testAsset = "MSBuildAppWithMultipleFrameworks";
-            var projectDirectory = _testAssetsManager
-                .CopyTestAsset(testAsset)
-                .WithSource()
-                .Path;
+            var testAssetName = "MSBuildAppWithMultipleFrameworks";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset(testAssetName)
+                .WithSource();
+            var projectDirectory = testAsset.Path;
 
-            new RestoreCommand(Log, projectDirectory)
+            new RestoreCommand(testAsset)
                 .Execute()
                 .Should()
                 .Pass()
@@ -206,13 +207,13 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         [Fact]
         public void ItDoesNotAcceptInvalidFramework()
         {
-            var testAsset = "MSBuildAppWithMultipleFrameworks";
-            var projectDirectory = _testAssetsManager
-                .CopyTestAsset(testAsset)
-                .WithSource()
-                .Path;
+            var testAssetName = "MSBuildAppWithMultipleFrameworks";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset(testAssetName)
+                .WithSource();
+            var projectDirectory = testAsset.Path;
 
-            new RestoreCommand(Log, projectDirectory)
+            new RestoreCommand(testAsset)
                 .Execute()
                 .Should()
                 .Pass();
@@ -227,13 +228,13 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         [Fact]
         public void ItListsFSharpProject()
         {
-            var testAsset = "FSharpTestAppSimple";
-            var projectDirectory = _testAssetsManager
-                .CopyTestAsset(testAsset)
-                .WithSource()
-                .Path;
+            var testAssetName = "FSharpTestAppSimple";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset(testAssetName)
+                .WithSource();
+            var projectDirectory = testAsset.Path;
 
-            new RestoreCommand(Log, projectDirectory)
+            new RestoreCommand(testAsset)
                 .Execute()
                 .Should()
                 .Pass()

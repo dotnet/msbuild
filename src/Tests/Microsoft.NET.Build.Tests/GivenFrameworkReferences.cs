@@ -282,7 +282,7 @@ namespace FrameworkReferenceTest
             string nugetPackagesFolder = Path.Combine(testAsset.TestRoot, "packages");
 
 
-            var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            var restoreCommand = new RestoreCommand(testAsset)
                 .WithEnvironmentVariable("NUGET_PACKAGES", nugetPackagesFolder);
             restoreCommand.Execute().Should().Pass();
 
@@ -439,7 +439,7 @@ namespace FrameworkReferenceTest
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var restoreCommand = new RestoreCommand(testAsset);
 
             restoreCommand
                 //  Pass "/clp:summary" so that we can check output for string "1 Error(s)"
@@ -470,7 +470,7 @@ namespace FrameworkReferenceTest
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var restoreCommand = new RestoreCommand(testAsset);
 
             restoreCommand
                 .Execute()

@@ -129,7 +129,7 @@ namespace Microsoft.DotNet.Tests
                                           toolName);
 
 
-            new RestoreCommand(Log, testInstance.Path)
+            new RestoreCommand(testInstance)
                 .Execute()
                 .Should()
                 .Pass();

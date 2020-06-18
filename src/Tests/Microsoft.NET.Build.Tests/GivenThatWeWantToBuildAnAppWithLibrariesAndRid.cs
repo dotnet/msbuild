@@ -35,9 +35,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppWithLibraryAndRid")
                 .WithSource();
 
-            var projectPath = Path.Combine(testAsset.TestRoot, "App");
-
-            var restoreCommand = new RestoreCommand(Log, projectPath, "App.csproj");
+            var restoreCommand = new RestoreCommand(testAsset, "App");
             restoreCommand
                 .Execute(msbuildArgs)
                 .Should()
@@ -84,9 +82,7 @@ namespace Microsoft.NET.Build.Tests
                 });
             }
 
-            var projectPath = Path.Combine(testAsset.TestRoot, "App");
-
-            var restoreCommand = new RestoreCommand(Log, projectPath, "App.csproj");
+            var restoreCommand = new RestoreCommand(testAsset, "App");
             restoreCommand
                 .Execute($"/p:TestRuntimeIdentifier={runtimeIdentifier}")
                 .Should()

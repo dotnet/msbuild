@@ -584,7 +584,7 @@ namespace Microsoft.NET.Build.Tests
                         new XAttribute("Include", "Microsoft.NETCore.App")));
                 });
 
-            var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var restoreCommand = new RestoreCommand(testAsset);
 
             restoreCommand
                 .Execute()
@@ -629,7 +629,7 @@ namespace Microsoft.NET.Build.Tests
                         new XAttribute("Include", "Microsoft.NETCore.App")));
                 });
 
-            var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var restoreCommand = new RestoreCommand(testAsset);
 
             restoreCommand
                 .Execute()

@@ -31,7 +31,7 @@ namespace Microsoft.NET.Publish.Tests
                 "-p:Configuration=Release"
             };
 
-            var restoreCommand = new RestoreCommand(Log, testAsset.TestRoot);
+            var restoreCommand = new RestoreCommand(testAsset);
             restoreCommand
                 .Execute(args)
                 .Should()
