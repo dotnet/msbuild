@@ -48,6 +48,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NuGetTargetMoniker Condition="'$(NuGetTargetMoniker)' == '' AND '$(UseTargetPlatformAsNuGetTargetMoniker)' != 'true'">$(TargetFrameworkMoniker)</NuGetTargetMoniker>
 
     <EmitAssetsLogMessages Condition="'$(EmitAssetsLogMessages)' == ''">true</EmitAssetsLogMessages>
+
+    <!-- Setting this property to true restores pre-16.7 behaviour of ResolvePackageDependencies to produce
+         TargetDefinitions, FileDefinitions and FileDependencies items. -->
+    <EmitLegacyAssetsFileItems Condition="'$(EmitLegacyAssetsFileItems)' == ''">false</EmitLegacyAssetsFileItems>
   </PropertyGroup>
 
   <!-- Target Moniker + RID-->
@@ -168,8 +172,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         the Visual Studio error list when a project is created before NuGet restore has
         run and created the assets file. -->
   <Target Name="RunResolvePackageDependencies"
-          Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')"
-          DependsOnTargets="ReportAssetsLogMessages">
+          Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')">
 
     <!-- Verify that the assets file has a target for the right framework.  Otherwise, if we restored for the
          wrong framework, we'd end up finding no references to pass to the compiler, and we'd get a ton of
@@ -184,12 +187,16 @@ Copyright (c) .NET Foundation. All rights reserved.
       ProjectPath="$(MSBuildProjectFullPath)"
       ProjectAssetsFile="$(ProjectAssetsFile)"
       ProjectLanguage="$(Language)"
+      EmitLegacyAssetsFileItems="$(EmitLegacyAssetsFileItems)"
+      TargetFrameworkMoniker="$(NuGetTargetMoniker)"
       ContinueOnError="ErrorAndContinue">
 
-      <Output TaskParameter="TargetDefinitions" ItemName="TargetDefinitions" />
       <Output TaskParameter="PackageDefinitions" ItemName="PackageDefinitions" />
-      <Output TaskParameter="FileDefinitions" ItemName="FileDefinitions" />
       <Output TaskParameter="PackageDependencies" ItemName="PackageDependencies" />
+
+      <!-- These outputs only produced when EmitLegacyAssetsFileItems is true -->
+      <Output TaskParameter="TargetDefinitions" ItemName="TargetDefinitions" />
+      <Output TaskParameter="FileDefinitions" ItemName="FileDefinitions" />
       <Output TaskParameter="FileDependencies" ItemName="FileDependencies" />
     </ResolvePackageDependencies>
 
@@ -299,21 +306,16 @@ Copyright (c) .NET Foundation. All rights reserved.
              AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   
   <Target Name="ResolvePackageDependenciesDesignTime"
-          Returns="@(_DependenciesDesignTime)"
+          Returns="@(_PackageDependenciesDesignTime)"
           DependsOnTargets="RunResolvePackageDependencies;ResolveAssemblyReferencesDesignTime">
 
     <PreprocessPackageDependenciesDesignTime
-          TargetDefinitions="@(TargetDefinitions)"
           PackageDefinitions="@(PackageDefinitions)"
-          FileDefinitions="@(FileDefinitions)"
           PackageDependencies="@(PackageDependencies)"
-          FileDependencies="@(FileDependencies)"
-          References="@(Reference)"
           DefaultImplicitPackages="$(DefaultImplicitPackages)"
-          InputDiagnosticMessages="@(DiagnosticMessages)"
           TargetFrameworkMoniker="$(NuGetTargetMoniker)">
 
-      <Output TaskParameter="DependenciesDesignTime" ItemName="_DependenciesDesignTime" />
+      <Output TaskParameter="PackageDependenciesDesignTime" ItemName="_PackageDependenciesDesignTime" />
     </PreprocessPackageDependenciesDesignTime>
 
   </Target>
@@ -398,41 +400,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <CreateItem Include="@(_ProcessedContentItems)" Condition="'@(_ProcessedContentItems)' != ''">
       <Output TaskParameter="Include" ItemName="%(_ProcessedContentItems.ProcessedItemType)" />
     </CreateItem>
-
-  </Target>
-
-  <!--
-    ============================================================
-                     ReportAssetsLogMessages
-
-    Report Log Messages in the assets file to MSBuild and raise them as
-    DiagnosticMessage items that can be consumed downstream (e.g. by the
-    dependency node in the solution explorer)
-    ============================================================
-    -->
-
-  <UsingTask TaskName="Microsoft.NET.Build.Tasks.ReportAssetsLogMessages"
-             AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-  <UsingTask TaskName="Microsoft.NET.Build.Tasks.LoadAssetsFile"
-             AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-
-  <!-- The condition on this target causes it to be skipped during design-time builds if
-        the restore operation hasn't run yet.  This is to avoid displaying an error in
-        the Visual Studio error list when a project is created before NuGet restore has
-        run and created the assets file. -->
-  <Target Name="ReportAssetsLogMessages"
-          Condition="'$(EmitAssetsLogMessages)' == 'true' And ('$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)'))">
-
-    <!-- Load the assets file in a separate task, so that if the file itself can't be loaded (or isn't set), we
-         can generate an error without continuing (since ReportAssetsLogMessages uses ContinueOnError="ErrorAndContinue" -->
-    <LoadAssetsFile ProjectAssetsFile="$(ProjectAssetsFile)" />
-    
-    <ReportAssetsLogMessages
-      ProjectAssetsFile="$(ProjectAssetsFile)"
-      ContinueOnError="ErrorAndContinue">
-
-      <Output TaskParameter="DiagnosticMessages" ItemName="DiagnosticMessages" />
-    </ReportAssetsLogMessages>
 
   </Target>
 

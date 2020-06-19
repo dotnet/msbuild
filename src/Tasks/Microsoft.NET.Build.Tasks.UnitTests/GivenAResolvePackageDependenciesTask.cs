@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using NuGet.Common;
 using Xunit;
 using static Microsoft.NET.Build.Tasks.UnitTests.LockFileSnippets;
 
@@ -20,9 +21,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
         [Theory]
         [MemberData(nameof(ItemCounts))]
-        public void ItRaisesLockFileToMSBuildItems(string projectName, int [] counts)
+        public void ItRaisesLockFileToMSBuildItems(string projectName, int[] counts, bool emitLegacyAssetsFileItems)
         {
-            var task = GetExecutedTaskFromPrefix(projectName);
+            var task = GetExecutedTaskFromPrefix(projectName, out _, emitLegacyAssetsFileItems);
 
             task.PackageDefinitions .Count().Should().Be(counts[0]);
             task.FileDefinitions    .Count().Should().Be(counts[1]);
@@ -39,14 +40,34 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 {
                     new object[] {
                         "dotnet.new",
-                        new int[] { 110, 2536, 1, 846, 73 }
+                        new int[] { 110, 2536, 1, 846, 73 },
+                        true
+                    },
+                    new object[] {
+                        "dotnet.new",
+                        new int[] { 110, 0, 0, 846, 0 },
+                        false
                     },
                     new object[] {
                         "simple.dependencies",
-                        new int[] { 113, 2613, 1, 878, 94}
+                        new int[] { 113, 2613, 1, 878, 94 },
+                        true
+                    },
+                    new object[] {
+                        "simple.dependencies",
+                        new int[] { 113, 0, 0, 878, 0 },
+                        false
                     },
                 };
             }
+        }
+
+        [Fact]
+        public void ItOmitsLegacyItemsByDefault()
+        {
+            var task = new ResolvePackageDependencies();
+
+            task.EmitLegacyAssetsFileItems.Should().Be(false);
         }
 
         [Theory]
@@ -54,7 +75,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         [InlineData("simple.dependencies")]
         public void ItAssignsTypeMetaDataToEachDefinition(string projectName)
         {
-            var task = GetExecutedTaskFromPrefix(projectName);
+            var task = GetExecutedTaskFromPrefix(projectName, out _);
 
             Func<ITaskItem[], bool> allTyped =
                 (items) => items.All(x => !string.IsNullOrEmpty(x.GetMetadata(MetadataKeys.Type)));
@@ -129,7 +150,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             var topLevels = task.PackageDependencies
                 .Where(t => string.IsNullOrEmpty(t.GetMetadata(MetadataKeys.ParentPackage)));
@@ -140,6 +161,45 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 .Should().Contain(new string[] {
                     ".NETCoreApp,Version=v1.0", ".NETCoreApp,Version=v1.0/osx.10.11-x64"
                 });
+        }
+
+        [Fact]
+        public void ItAssignsDiagnosticLevel()
+        {
+            const string target1 = ".NETCoreApp,Version=v1.0";
+            const string target2 = ".NETCoreApp,Version=v2.0";
+
+            string lockFileContent = CreateLockFileSnippet(
+                targets: new string[] {
+                    CreateTarget(".NETCoreApp,Version=v1.0", TargetLibA, TargetLibB, TargetLibC),
+                    CreateTarget(".NETCoreApp,Version=v1.0/osx.10.11-x64", TargetLibA, TargetLibB, TargetLibC),
+                },
+                libraries: new string[] { LibADefn, LibBDefn, LibCDefn },
+                projectFileDependencyGroups: new string[] { NETCoreGroup, NETCoreOsxGroup },
+                logs: new[]
+                {
+                    // LibA
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Information, "", libraryId: "LibA", targetGraphs: new[] { target1 }),
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Warning,     "", libraryId: "LibA", targetGraphs: new[] { target1 }),
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Error,       "", libraryId: "LibA", targetGraphs: new[] { target1 }),
+                    // LibB
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Information, "", libraryId: "LibB", targetGraphs: new[] { target1, target2 }),
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Warning,     "", libraryId: "LibB", targetGraphs: new[] { target1, target2 }),
+                    // LibC (wrong target)
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Information, "", libraryId: "LibB", targetGraphs: new[] { target2 }),
+                    CreateLog(NuGetLogCode.NU1000, LogLevel.Warning,     "", libraryId: "LibB", targetGraphs: new[] { target2 })
+                }
+            );
+
+            var task = GetExecutedTaskFromContents(lockFileContent, out _, target: target1);
+
+            var defs = task.PackageDefinitions.ToLookup(def => def.ItemSpec);
+
+            defs.Count().Should().Be(3);
+
+            defs["LibA/1.2.3"].Single().GetMetadata(MetadataKeys.DiagnosticLevel).Should().Be("Error");
+            defs["LibB/1.2.3"].Single().GetMetadata(MetadataKeys.DiagnosticLevel).Should().Be("Warning");
+            defs["LibC/1.2.3"].Single().GetMetadata(MetadataKeys.DiagnosticLevel).Should().BeEmpty();
         }
 
         [Fact]
@@ -166,7 +226,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             var topLevels = task.PackageDependencies
                 .Where(t => string.IsNullOrEmpty(t.GetMetadata(MetadataKeys.ParentPackage)));
@@ -199,7 +259,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             task.TargetDefinitions.Count().Should().Be(2);
 
@@ -338,7 +398,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             IEnumerable<ITaskItem> fileDefns;
 
@@ -385,7 +445,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             IEnumerable<ITaskItem> fileDeps;
 
@@ -426,7 +486,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             IEnumerable<ITaskItem> fileDeps;
 
@@ -474,7 +534,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             task.FileDefinitions
                 .Any(t => t.GetMetadata(MetadataKeys.Path) == "lib/file/Z.dll")
@@ -524,7 +584,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             {
                 ProjectAssetsFile = lockFile.Path,
                 ProjectPath = null,
-                ProjectLanguage = projectLanguage // set language
+                ProjectLanguage = projectLanguage, // set language
+                EmitLegacyAssetsFileItems = true
             };
             task.Execute().Should().BeTrue();
 
@@ -608,7 +669,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             {
                 ProjectAssetsFile = lockFile.Path,
                 ProjectPath = null,
-                ProjectLanguage = projectLanguage // set language
+                ProjectLanguage = projectLanguage, // set language
+                EmitLegacyAssetsFileItems = true
             };
             task.Execute().Should().BeTrue();
 
@@ -677,7 +739,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 projectFileDependencyGroups: new string[] { ProjectGroup, NETCoreGroup, NETCoreOsxGroup }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             var chiDeps = task.PackageDependencies
                 .Where(t => t.ItemSpec.StartsWith("Dep.Lib.Chi"));
@@ -749,7 +811,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent, out var lockFile);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _);
 
             task.PackageDependencies.Count().Should().Be(6);
 
@@ -766,31 +828,19 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             others.Where(t => t.ItemSpec == "ProjF/1.0.0").Count().Should().Be(1);
         }
 
-        private ResolvePackageDependencies GetExecutedTaskFromPrefix(string lockFilePrefix)
-        {
-            LockFile lockFile;
-            return GetExecutedTaskFromPrefix(lockFilePrefix, out lockFile);
-        }
-
-        private ResolvePackageDependencies GetExecutedTaskFromPrefix(string lockFilePrefix, out LockFile lockFile)
+        private static ResolvePackageDependencies GetExecutedTaskFromPrefix(string lockFilePrefix, out LockFile lockFile, bool emitLegacyAssetsFileItems = true, string target = null)
         {
             lockFile = TestLockFiles.GetLockFile(lockFilePrefix);
-            return GetExecutedTask(lockFile);
+            return GetExecutedTask(lockFile, emitLegacyAssetsFileItems, target);
         }
 
-        private ResolvePackageDependencies GetExecutedTaskFromContents(string lockFileContents)
-        {
-            LockFile lockFile;
-            return GetExecutedTaskFromContents(lockFileContents, out lockFile);
-        }
-
-        private ResolvePackageDependencies GetExecutedTaskFromContents(string lockFileContents, out LockFile lockFile)
+        private static ResolvePackageDependencies GetExecutedTaskFromContents(string lockFileContents, out LockFile lockFile, bool emitLegacyAssetsFileItems = true, string target = null)
         {
             lockFile = TestLockFiles.CreateLockFile(lockFileContents);
-            return GetExecutedTask(lockFile);
+            return GetExecutedTask(lockFile, emitLegacyAssetsFileItems, target);
         }
 
-        private ResolvePackageDependencies GetExecutedTask(LockFile lockFile)
+        private static ResolvePackageDependencies GetExecutedTask(LockFile lockFile, bool emitLegacyAssetsFileItems, string target)
         {
             var resolver = new MockPackageResolver(_packageRoot);
 
@@ -798,7 +848,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             {
                 ProjectAssetsFile = lockFile.Path,
                 ProjectPath = _projectPath,
-                ProjectLanguage = null
+                ProjectLanguage = null,
+                EmitLegacyAssetsFileItems = emitLegacyAssetsFileItems,
+                TargetFrameworkMoniker = target
             };
 
             task.Execute().Should().BeTrue();
