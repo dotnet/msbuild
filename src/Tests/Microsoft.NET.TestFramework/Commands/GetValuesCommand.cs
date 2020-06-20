@@ -34,11 +34,26 @@ namespace Microsoft.NET.TestFramework.Commands
         public List<string> MetadataNames { get; set; } = new List<string>();
         public Dictionary<string, string> Properties { get; } = new Dictionary<string, string>();
 
+        public bool ShouldRestore { get; set; } = true;
+
+        protected override bool ExecuteWithRestoreByDefault => ShouldRestore;
+
         public GetValuesCommand(ITestOutputHelper log, string projectPath, string targetFramework,
             string valueName, ValueType valueType = ValueType.Property)
             : base(log, "WriteValuesToFile", projectPath, relativePathToProject: null)
         {
             _targetFramework = targetFramework;
+
+            _valueName = valueName;
+            _valueType = valueType;
+        }
+
+        public GetValuesCommand(TestAsset testAsset,
+            string valueName, ValueType valueType = ValueType.Property,
+            string targetFramework = null)
+            : base(testAsset, "WriteValuesToFile", relativePathToProject: null)
+        {
+            _targetFramework = targetFramework ?? testAsset.TestProject?.TargetFrameworks;
 
             _valueName = valueName;
             _valueType = valueType;

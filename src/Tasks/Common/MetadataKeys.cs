@@ -82,7 +82,9 @@ namespace Microsoft.NET.Build.Tasks
         public const string PackageConflictPreferredPackages = "PackageConflictPreferredPackages";
 
         //  Runtime packs
-        public const string DropFromSingleFile = "DropFromSingleFile";
+		public const string DropFromSingleFile = "DropFromSingleFile";
+        public const string RuntimePackLabels = "RuntimePackLabels";
+        public const string AdditionalFrameworkReferences = "AdditionalFrameworkReferences";
 
         // Content files
         public const string PPOutputPath = "PPOutputPath";

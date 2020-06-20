@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Tests
             var testInstance = _testAssetsManager.CopyTestAsset("TestProjectWithUnresolvedPlatformDependency", testAssetSubdirectory: "NonRestoredTestProjects")
                             .WithSource();
 
-            new RestoreCommand(Log, testInstance.Path)
+            new RestoreCommand(testInstance)
                 .Execute("/p:SkipInvalidConfigurations=true")
                 .Should()
                 .Fail();

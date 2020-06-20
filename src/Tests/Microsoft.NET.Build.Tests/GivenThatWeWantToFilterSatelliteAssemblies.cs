@@ -51,7 +51,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testProjectInstance);
             var buildResult = buildCommand.Execute();
 
             buildResult.Should().Pass();
@@ -116,7 +116,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testProjectInstance);
             var buildResult = buildCommand.Execute();
 
             buildResult.Should().Pass();

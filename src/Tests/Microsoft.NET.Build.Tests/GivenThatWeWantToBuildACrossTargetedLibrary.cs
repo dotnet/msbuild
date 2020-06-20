@@ -27,9 +27,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("CrossTargeting")
                 .WithSource();
 
-            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "NetStandardAndNetCoreApp");
-
-            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "NetStandardAndNetCoreApp");
             buildCommand
                 .Execute()
                 .Should()
@@ -55,9 +53,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("CrossTargeting")
                 .WithSource();
 
-            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "DesktopAndNetStandard");
-
-            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "DesktopAndNetStandard");
             buildCommand
                 .Execute()
                 .Should()

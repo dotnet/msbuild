@@ -40,9 +40,7 @@ namespace Microsoft.NET.Build.Tests
 
         void VerifyAppBuilds(TestAsset testAsset)
         {
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
-
-            var buildCommand = new BuildCommand(Log, appProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "TestApp");
             var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp1.1");
 
             buildCommand
@@ -79,9 +77,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppWithTransitiveProjectRefs")
                 .WithSource();
 
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
-
-            var buildCommand = new BuildCommand(Log, appProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "TestApp");
 
             buildCommand
                 .Execute()
@@ -123,8 +119,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppWithTransitiveProjectRefs", "BuildAppWithTransitiveProjectRefDisabled")
                 .WithSource();
 
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
-            var buildCommand = new BuildCommand(Log, appProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "TestApp");
             buildCommand
                 .Execute("/p:DisableTransitiveProjectReferences=true")
                 .Should()

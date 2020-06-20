@@ -40,9 +40,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource()
                 .WithTargetFramework(targetFramework, "TestLibrary");
 
-            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
-
-            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "TestLibrary");
             buildCommand
                 .Execute()
                 .Should()
@@ -64,9 +62,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppWithLibrary")
                 .WithSource();
 
-            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
-
-            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "TestLibrary");
             buildCommand
                 .Execute()
                 .Should()
@@ -164,7 +160,7 @@ namespace Microsoft.NET.Build.Tests
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
-            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "TestLibrary");
 
             buildCommand
                 .Execute()
@@ -198,7 +194,7 @@ namespace Microsoft.NET.Build.Tests
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
-            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "TestLibrary");
 
             buildCommand
                 .Execute()
@@ -241,7 +237,7 @@ namespace Microsoft.NET.Build.Tests
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
-            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "TestLibrary");
 
             buildCommand
                 .Execute()
@@ -583,12 +579,12 @@ namespace Microsoft.NET.Build.Tests
                 var relativePathToSln = Path.GetFileName(testAsset.Path) + ".sln";
 
                 restoreCommand = testAsset.GetRestoreCommand(Log, relativePathToSln);
-                buildCommand = new BuildCommand(Log, testAsset.TestRoot, relativePathToSln);
+                buildCommand = new BuildCommand(testAsset, relativePathToSln);
             }
             else
             {
                 restoreCommand = testAsset.GetRestoreCommand(Log, testProject.Name);
-                buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                buildCommand = new BuildCommand(testAsset);
             }
 
             //  Set RestoreContinueOnError=ErrorAndContinue to force failure on error
@@ -639,7 +635,7 @@ namespace Microsoft.NET.Build.Tests
                 .Fail()
                 .And.HaveStdOutContaining("The current .NET SDK does not support targeting");
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -672,7 +668,7 @@ namespace Microsoft.NET.Build.Tests
                 })
                 .Restore(Log, testProject.Name);
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+            var buildCommand = new BuildCommand(testAsset);
 
             //  Test that compilation doesn't depend on any rid-specific assets by removing them from the assets file after it's been restored
             var assetsFilePath = Path.Combine(buildCommand.GetBaseIntermediateDirectory().FullName, "project.assets.json");
@@ -702,7 +698,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("UwpUsingSdkExtras")
                 .WithSource();
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute()
                 .Should()
@@ -788,7 +784,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()

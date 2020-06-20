@@ -73,7 +73,7 @@ namespace Microsoft.NET.Pack.Tests
                     project.Root.Add(XElement.Parse(@"<Target Name=""InvokeBuild"" DependsOnTargets=""Build"" BeforeTargets=""Pack"" />"));
                 });
 
-            new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new BuildCommand(testAsset)
                 .Execute()
                 .Should()
                 .Pass();

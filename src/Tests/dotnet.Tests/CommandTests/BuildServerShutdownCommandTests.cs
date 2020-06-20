@@ -176,7 +176,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 .CopyTestAsset("TestRazorApp")
                 .WithSource();
 
-            new BuildCommand(Log, testInstance.TestRoot)
+            new BuildCommand(testInstance)
                 .WithEnvironmentVariable(BuildServerProvider.PidFileDirectoryVariableName, pidDirectory)
                 .Execute($"/p:_RazorBuildServerPipeName={pipeName}")
                 .Should()

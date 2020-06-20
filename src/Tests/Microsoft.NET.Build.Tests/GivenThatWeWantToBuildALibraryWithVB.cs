@@ -35,9 +35,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppWithLibraryVB")
                 .WithSource();
 
-            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
-
-            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "TestLibrary");
             buildCommand
                 .Execute()
                 .Should()
@@ -59,9 +57,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppWithLibraryVB")
                 .WithSource();
 
-            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
-
-            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "TestLibrary");
             buildCommand
                 .Execute()
                 .Should()
@@ -134,9 +130,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppWithLibraryVB")
                 .WithSource();
 
-            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
-
-            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "TestLibrary");
             buildCommand
                 .ExecuteWithoutRestore()
                 .Should()

@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .WithSource()
                 .Restore(Log);
 
-            new BuildCommand(Log, testAsset.TestRoot)
+            new BuildCommand(testAsset)
                 .Execute()
                 .Should()
                 .Pass();

@@ -118,7 +118,7 @@ namespace Microsoft.NET.Publish.Tests
             MSBuildCommand command;
             if (build)
             {
-                command = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                command = new BuildCommand(testAsset);
             }
             else
             {

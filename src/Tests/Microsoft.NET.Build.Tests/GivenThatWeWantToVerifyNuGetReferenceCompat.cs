@@ -121,7 +121,7 @@ namespace Microsoft.NET.Build.Tests
                 referencerRestoreCommand.Execute().Should().Fail();
             }
 
-            var referencerBuildCommand = new BuildCommand(Log, Path.Combine(referencerTestAsset.TestRoot, referencerProject.Name));
+            var referencerBuildCommand = new BuildCommand(referencerTestAsset);
             var referencerBuildResult = referencerBuildCommand.Execute();
 
             if (buildSucceeds)
@@ -150,9 +150,7 @@ namespace Microsoft.NET.Build.Tests
 
             restoreCommand.Execute().Should().Pass();
 
-            var buildCommand = new BuildCommand(
-                Log,
-                Path.Combine(testProjectTestAsset.TestRoot, testProjectName));
+            var buildCommand = new BuildCommand(testProjectTestAsset);
             buildCommand.Execute().Should().Pass();
         }
 
@@ -204,7 +202,7 @@ namespace Microsoft.NET.Build.Tests
             var restoreCommand = testProjectTestAsset.GetRestoreCommand(Log, relativePath: testProjectName);
             restoreCommand.Execute().Should().Pass();
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testProjectTestAsset.TestRoot, testProjectName));
+            var buildCommand = new BuildCommand(testProjectTestAsset);
             buildCommand.Execute().Should().Pass();
 
             var referencedDll = buildCommand.GetOutputDirectory("netcoreapp3.0").File("net462_net472_pkg.dll").FullName;

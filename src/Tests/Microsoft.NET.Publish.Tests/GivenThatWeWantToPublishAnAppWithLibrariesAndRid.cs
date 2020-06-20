@@ -110,7 +110,7 @@ namespace Microsoft.NET.Publish.Tests
                 msbuildArgs.Add("/p:TargetLatestRuntimePatch=true");
             }
 
-            var restoreCommand = new RestoreCommand(Log, projectPath, "App.csproj");
+            var restoreCommand = new RestoreCommand(testAsset, "App");
             restoreCommand
                 .Execute(msbuildArgs.ToArray())
                 .Should()

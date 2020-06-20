@@ -24,7 +24,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("InferredTypeVariableName")
                 .WithSource();
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(asset.TestRoot));
+            var buildCommand = new BuildCommand(asset);
 
             buildCommand
                 .Execute()

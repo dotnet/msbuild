@@ -38,9 +38,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(project, identifier: targetFramework);
 
-            string projectFolder = Path.Combine(testAsset.Path, project.Name);
-
-            var buildCommand = new BuildCommand(Log, projectFolder);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -83,9 +81,7 @@ public static class {project.Name}
 
                 });
 
-            string projectFolder = Path.Combine(testAsset.Path, project.Name);
-
-            var buildCommand = new BuildCommand(Log, projectFolder);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()

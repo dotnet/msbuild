@@ -115,8 +115,7 @@ namespace Microsoft.NET.Build.Tests
                     .Pass();
             }
 
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "Referencer");
-            var buildCommand = new BuildCommand(Log, appProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "Referencer");
             var result = buildCommand.Execute();
 
             if (buildSucceeds)
@@ -186,7 +185,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithProjectChanges(project => AddProjectChanges(project, Path.Combine(childAsset.Path, childProject.Name, childProject.Name + ".csproj")));
             File.WriteAllText(Path.Combine(parentAsset.Path, parentProject.Name, contentName), parentProject.Name);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(parentAsset.Path, parentProject.Name));
+            var buildCommand = new BuildCommand(parentAsset);
             buildCommand.Execute().Should().Pass();
 
             var getValuesCommand = new GetValuesCommand(Log, Path.Combine(parentAsset.Path, parentProject.Name), tfm, "ResultOutput");

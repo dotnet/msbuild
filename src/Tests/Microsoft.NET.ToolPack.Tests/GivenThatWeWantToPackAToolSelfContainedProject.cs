@@ -41,7 +41,7 @@ namespace Microsoft.NET.ToolPack.Tests
         {
             TestAsset helloWorldAsset = CreateAsset();
 
-            var packCommand = new BuildCommand(Log, helloWorldAsset.TestRoot);
+            var packCommand = new BuildCommand(helloWorldAsset);
 
             CommandResult result = packCommand.Execute();
             result.ExitCode.Should().Be(0);

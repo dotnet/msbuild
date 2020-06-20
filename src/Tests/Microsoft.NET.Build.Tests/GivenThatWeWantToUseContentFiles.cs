@@ -55,7 +55,7 @@ namespace {project.Name}
             var asset = _testAssetsManager
                 .CreateTestProject(project);
 
-            var cmd = new BuildCommand(Log, Path.Combine(asset.Path, project.Name));
+            var cmd = new BuildCommand(asset);
             cmd.Execute().Should().Pass();
 
             cmd.GetOutputDirectory(targetFramework)

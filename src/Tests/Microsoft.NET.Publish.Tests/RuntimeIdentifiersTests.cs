@@ -47,7 +47,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var restoreCommand = new RestoreCommand(Log, testAsset.Path, testProject.Name);
+            var restoreCommand = new RestoreCommand(testAsset);
 
             restoreCommand
                 .Execute()
@@ -56,7 +56,7 @@ namespace Microsoft.NET.Publish.Tests
 
             foreach (var runtimeIdentifier in runtimeIdentifiers)
             {
-                var buildCommand = new BuildCommand(Log, testAsset.Path, testProject.Name);
+                var buildCommand = new BuildCommand(testAsset);
 
                 buildCommand
                     .ExecuteWithoutRestore($"/p:RuntimeIdentifier={runtimeIdentifier}")
@@ -110,7 +110,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: publishNoBuild ? "nobuild" : string.Empty);
 
-            var buildCommand = new BuildCommand(Log, testAsset.Path, testProject.Name);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -168,15 +168,12 @@ namespace Microsoft.NET.Publish.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, testAsset.Path, testProject.Name);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
                 .Should()
                 .Pass();
-
-
-
 
         }
     }

@@ -53,7 +53,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.SourceFiles[$"{testProject.Name}.cs"] = ConflictingClassLibUsage;
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute()
                 .Should()
                 .Pass();
@@ -98,7 +98,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.SourceFiles[$"{testProject.Name}.cs"] = ClassLibAandBUsage;
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute()
                 .Should()
                 .Pass();
@@ -135,7 +135,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.SourceFiles[$"{testProject.Name}.cs"] = ClassLibAandBUsage;
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute()
                 .Should()
                 .Pass();

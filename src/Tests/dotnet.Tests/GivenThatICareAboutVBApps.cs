@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tests
             var testInstance = _testAssetsManager.CopyTestAsset("VBTestApp")
                 .WithSource();
 
-            new BuildCommand(Log, testInstance.Path)
+            new BuildCommand(testInstance)
                 .Execute()
                 .Should().Pass();
         }

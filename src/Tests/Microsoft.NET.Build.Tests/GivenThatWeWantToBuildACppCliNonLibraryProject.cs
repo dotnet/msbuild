@@ -27,7 +27,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("NETCoreCppClApp")
                 .WithSource();
 
-            new BuildCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest.sln"))
+            new BuildCommand(testAsset, "NETCoreCppCliTest.sln")
                 .Execute()
                 .Should()
                 .Fail()
@@ -53,7 +53,7 @@ namespace Microsoft.NET.Build.Tests
                     }
                 });
 
-            new BuildCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest.sln"))
+            new BuildCommand(testAsset, "NETCoreCppCliTest.sln")
                 .Execute()
                 .Should()
                 .Fail()
