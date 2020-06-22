@@ -280,7 +280,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
             
-            if (e.BuildEventContext == null || e.Items == null || e.Items.Count == 0)
+            if (e.BuildEventContext == null || e.Items == null)
             {
                 return;
             }
