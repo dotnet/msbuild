@@ -132,6 +132,11 @@
         <target state="translated">NETSDK1099: 単一ファイルへの公開は実行可能アプリケーションに対してのみサポートされています。</target>
         <note>{StrBegin="NETSDK1099: "}</note>
       </trans-unit>
+      <trans-unit id="CannotHaveSolutionLevelRuntimeIdentifier">
+        <source>NETSDK1134: Building a solution with a specific RuntimeIdentifier is not supported. If you would like to publish for a single RID, specifiy the RID at the individual project level instead.</source>
+        <target state="new">NETSDK1134: Building a solution with a specific RuntimeIdentifier is not supported. If you would like to publish for a single RID, specifiy the RID at the individual project level instead.</target>
+        <note>{StrBegin="NETSDK1134: "}</note>
+      </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentifierAndVersion">
         <source>NETSDK1013: The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
         <target state="translated">NETSDK1013: TargetFramework 値 '{0}' が認識されませんでした。つづりが間違っている可能性があります。間違っていない場合は、TargetFrameworkIdentifier または TargetFrameworkVersion プロパティ (あるいはその両方) を明示的に指定する必要があります。</target>
