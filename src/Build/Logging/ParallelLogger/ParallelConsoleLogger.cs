@@ -351,7 +351,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Yellow);
                 foreach (BuildWarningEventArgs warning in warningList)
                 {
-                    WriteMessageAligned(EventArgsFormatting.FormatEventMessage(warning, showProjectFile), true);
+                    WriteMessageAligned(EventArgsFormatting.FormatEventMessage(warning, showProjectFile, PropertyMapping(warning)), true);
                 }
             }
 
@@ -360,7 +360,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Red);
                 foreach (BuildErrorEventArgs error in errorList)
                 {
-                    WriteMessageAligned(EventArgsFormatting.FormatEventMessage(error, showProjectFile), true);
+                    WriteMessageAligned(EventArgsFormatting.FormatEventMessage(error, showProjectFile, PropertyMapping(error)), true);
                 }
             }
 
@@ -470,11 +470,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     if (errorWarningEvent is BuildErrorEventArgs)
                     {
-                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildErrorEventArgs, showProjectFile), false);
+                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildErrorEventArgs, showProjectFile, PropertyMapping((BuildErrorEventArgs)errorWarningEvent)), false);
                     }
                     else if (errorWarningEvent is BuildWarningEventArgs)
                     {
-                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildWarningEventArgs, showProjectFile), false);
+                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildWarningEventArgs, showProjectFile, PropertyMapping((BuildWarningEventArgs)errorWarningEvent)), false);
                     }
                 }
                 WriteNewLine();
@@ -966,7 +966,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Finds the LogOutPropterty string to be printed in messages
         /// </summary>
         /// <param name="e"> the build event where the LogOutPutProperty string will be added</param>
-        internal void PropertyMapping(LazyFormattedBuildEventArgs e)
+        internal string PropertyMapping(LazyFormattedBuildEventArgs e)
         {
             string logOutputProperties = "";
             if (e.BuildEventContext != null)
@@ -975,7 +975,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 int projectContextId = e.BuildEventContext.ProjectContextId;
                 propertyOutputMap.TryGetValue((nodeId, projectContextId), out logOutputProperties);
             }
-            e.LogOutputProperties = logOutputProperties;
+            return logOutputProperties;
         }
 
         /// <summary>
@@ -986,9 +986,6 @@ namespace Microsoft.Build.BackEnd.Logging
             ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
             // Keep track of the number of error events raised 
             errorCount++;
-
-            // Determine the mapping of properties to output
-            PropertyMapping(e);
 
             // If there is an error we need to walk up the call stack and make sure that 
             // the project started events back to the root project know an error has occurred
@@ -1014,7 +1011,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
 
                 setColor(ConsoleColor.Red);
-                WriteMessageAligned(EventArgsFormatting.FormatEventMessage(e, showProjectFile), true);
+                WriteMessageAligned(EventArgsFormatting.FormatEventMessage(e, showProjectFile, PropertyMapping(e)), true);
                 ShownBuildEventContext(e.BuildEventContext);
                 if (ShowSummary == true)
                 {
@@ -1035,9 +1032,6 @@ namespace Microsoft.Build.BackEnd.Logging
             ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
             // Keep track of the number of warning events raised during the build
             warningCount++;
-
-            // Determine the mapping of properties to output
-            PropertyMapping(e);
 
             // If there is a warning we need to walk up the call stack and make sure that 
             // the project started events back to the root project know a warning has occurred
@@ -1063,7 +1057,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
 
                 setColor(ConsoleColor.Yellow);
-                WriteMessageAligned(EventArgsFormatting.FormatEventMessage(e, showProjectFile), true);
+                WriteMessageAligned(EventArgsFormatting.FormatEventMessage(e, showProjectFile, PropertyMapping(e)), true);
             }
 
             ShownBuildEventContext(e.BuildEventContext);
@@ -1083,9 +1077,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public override void MessageHandler(object sender, BuildMessageEventArgs e)
         {
-            // Determine the mapping of properties to output
-            PropertyMapping(e);
-
             if (showOnlyErrors || showOnlyWarnings) return;
 
             ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
@@ -1207,7 +1198,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // Include file information if present.
             if (e.File != null)
             {
-                nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile);
+                nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile, PropertyMapping(e));
             }
             else
             {

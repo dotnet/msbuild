@@ -198,7 +198,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Yellow);
                 foreach (BuildWarningEventArgs warningEventArgs in warningList)
                 {
-                    WriteLinePretty(EventArgsFormatting.FormatEventMessage(warningEventArgs, showProjectFile));
+                    WriteLinePretty(EventArgsFormatting.FormatEventMessage(warningEventArgs, showProjectFile, PropertyMapping(warningEventArgs)));
                 }
             }
 
@@ -207,7 +207,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Red);
                 foreach (BuildErrorEventArgs errorEventArgs in errorList)
                 {
-                    WriteLinePretty(EventArgsFormatting.FormatEventMessage(errorEventArgs, showProjectFile));
+                    WriteLinePretty(EventArgsFormatting.FormatEventMessage(errorEventArgs, showProjectFile, PropertyMapping(errorEventArgs)));
                 }
             }
 
@@ -516,7 +516,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Finds the LogOutPropterty string to be printed in messages
         /// </summary>
         /// <param name="e"> the build event where the LogOutPutProperty string will be added</param>
-        internal void PropertyMapping(LazyFormattedBuildEventArgs e)
+        internal string PropertyMapping(LazyFormattedBuildEventArgs e)
         {
             string logOutputProperties = "";
             if (e.BuildEventContext != null)
@@ -525,7 +525,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 int projectContextId = e.BuildEventContext.ProjectContextId;
                 propertyOutputMap.TryGetValue((nodeId, projectContextId), out logOutputProperties);
             }
-            e.LogOutputProperties = logOutputProperties;
+            return logOutputProperties;
         }
 
         /// <summary>
@@ -538,10 +538,7 @@ namespace Microsoft.Build.BackEnd.Logging
             ShowDeferredMessages();
             setColor(ConsoleColor.Red);
 
-            // determine the mapping of properties to output
-            PropertyMapping(e);
-
-            WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile));
+            WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile, PropertyMapping(e)));
             if (ShowSummary == true)
             {
                 errorList.Add(e);
@@ -559,10 +556,7 @@ namespace Microsoft.Build.BackEnd.Logging
             ShowDeferredMessages();
             setColor(ConsoleColor.Yellow);
 
-            // Determine the mapping of properties to output
-            PropertyMapping(e);
-
-            WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile));
+            WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile, PropertyMapping(e)));
             if (ShowSummary == true)
             {
                 warningList.Add(e);
@@ -575,9 +569,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public override void MessageHandler(object sender, BuildMessageEventArgs e)
         {
-            // Determine the mapping of properties to output
-            PropertyMapping(e);
-
             bool print = false;
             bool lightenText = false;
             switch (e.Importance)
@@ -615,7 +606,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Include file information if present.
                 if (e.File != null)
                 {
-                    nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile);
+                    nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile, PropertyMapping(e));
                 }
                 else
                 {

@@ -180,8 +180,6 @@ namespace Microsoft.Build.Framework
             }
         }
 
-        internal string LogOutputProperties{ get;  set; }
-
         /// <summary>
         /// Formats the given string using the variable arguments passed in.
         /// 

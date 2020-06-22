@@ -20,6 +20,51 @@ namespace Microsoft.Build.Shared
         /// a single string.
         /// </summary>
         /// <param name="e">Error to format</param>
+        /// <param name="showProjectFile"><code>true</code> to show the project file which issued the event, otherwise <code>false</code>.</param>
+        /// <param name="logOutputProperties">Properties to Print along with message</param>
+        /// <returns>The formatted message string.</returns>
+        internal static string FormatEventMessage(BuildErrorEventArgs e, bool showProjectFile, string logOutputProperties)
+        {
+            return FormatEventMessage("error", e.Subcategory, e.Message,
+                            e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
+                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, logOutputProperties);
+        }
+
+        /// <summary>
+        /// Format the warning message and all the other event data into a
+        /// single string.
+        /// </summary>
+        /// <param name="e">Warning to format</param>
+        /// <param name="showProjectFile"><code>true</code> to show the project file which issued the event, otherwise <code>false</code>.</param>
+        /// <param name="logOutputProperties">Properties to Print along with message</param>
+        /// <returns>The formatted message string.</returns>
+        internal static string FormatEventMessage(BuildWarningEventArgs e, bool showProjectFile, string logOutputProperties)
+        {
+            return FormatEventMessage("error", e.Subcategory, e.Message,
+                            e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
+                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, logOutputProperties);
+        }
+
+        /// <summary>
+        /// Format the message and all the other event data into a
+        /// single string.
+        /// </summary>
+        /// <param name="e">Message to format</param>
+        /// <param name="showProjectFile"><code>true</code> to show the project file which issued the event, otherwise <code>false</code>.</param>
+        /// <param name="logOutputProperties">Properties to Print along with message</param>
+        /// <returns>The formatted message string.</returns>
+        internal static string FormatEventMessage(BuildMessageEventArgs e, bool showProjectFile, string logOutputProperties)
+        {
+            return FormatEventMessage("error", e.Subcategory, e.Message,
+                            e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
+                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, logOutputProperties);
+        }
+
+        /// <summary>
+        /// Format the error event message and all the other event data into
+        /// a single string.
+        /// </summary>
+        /// <param name="e">Error to format</param>
         /// <returns>The formatted message string.</returns>
         internal static string FormatEventMessage(BuildErrorEventArgs e)
         {
@@ -28,7 +73,7 @@ namespace Microsoft.Build.Shared
             // "error" should not be localized
             return FormatEventMessage("error", e.Subcategory, e.Message,
                             e.Code, e.File, null, e.LineNumber, e.EndLineNumber,
-                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, e.LogOutputProperties);
+                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, null);
         }
 
         /// <summary>
@@ -45,7 +90,7 @@ namespace Microsoft.Build.Shared
             // "error" should not be localized
             return FormatEventMessage("error", e.Subcategory, e.Message,
                 e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
-                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, e.LogOutputProperties);
+                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, null);
         }
 
         /// <summary>
@@ -61,7 +106,7 @@ namespace Microsoft.Build.Shared
             // "warning" should not be localized
             return FormatEventMessage("warning", e.Subcategory, e.Message,
                 e.Code, e.File, null, e.LineNumber, e.EndLineNumber,
-                           e.ColumnNumber, e.EndColumnNumber, e.ThreadId, e.LogOutputProperties);
+                           e.ColumnNumber, e.EndColumnNumber, e.ThreadId, null);
         }
 
         /// <summary>
@@ -78,7 +123,7 @@ namespace Microsoft.Build.Shared
             // "warning" should not be localized
             return FormatEventMessage("warning", e.Subcategory, e.Message,
                 e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
-                           e.ColumnNumber, e.EndColumnNumber, e.ThreadId, e.LogOutputProperties);
+                           e.ColumnNumber, e.EndColumnNumber, e.ThreadId, null);
         }
 
         /// <summary>
@@ -105,7 +150,7 @@ namespace Microsoft.Build.Shared
 
             // "message" should not be localized
             return FormatEventMessage("message", e.Subcategory, e.Message,
-                e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber, e.ColumnNumber, e.EndColumnNumber, e.ThreadId, e.LogOutputProperties);
+                e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber, e.ColumnNumber, e.EndColumnNumber, e.ThreadId, null);
         }
 
         /// <summary>
