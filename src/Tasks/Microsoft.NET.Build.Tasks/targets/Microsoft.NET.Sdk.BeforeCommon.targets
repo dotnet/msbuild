@@ -206,10 +206,23 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
+  <!-- Add conditional compilation symbols for target platform backwards compatibility. -->
+  <Target Name="GeneratePlatformCompatibleDefineConstants"
+          Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetPlatformIdentifier)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) " >
+    <ItemGroup>
+      <_MatchingPlatformVersions Include="@(SupportedTargetPlatform)" Condition="$([System.String]::Copy('%(Identity)').ToUpper().Contains($(TargetPlatformIdentifier.ToUpper())))" />
+      <_SupportedPlatformVersions Include="$([System.Text.RegularExpressions.Regex]::Match('%(_MatchingPlatformVersions.Identity)', 'Version=v\d*.\d*'))" />
+      <_SupportedPlatformVersionNumbers Include="@(_SupportedPlatformVersions->'%(Identity)'->TrimStart('Version=v'))" />
+      <_SupportedPlatformCompatibleVersions Include="@(_SupportedPlatformVersionNumbers)" Condition=" $(TargetPlatformMinVersion) != '' and %(Identity) != '' and $([MSBuild]::VersionGreaterThanOrEquals(%(Identity), $(TargetPlatformMinVersion))) and $([MSBuild]::VersionLessThan(%(Identity), $(TargetPlatformVersion))) " />
+      <_SupportedPlatformCompatibleVersions Include="@(_SupportedPlatformVersionNumbers)" Condition=" $(TargetPlatformMinVersion) == '' and %(Identity) != '' and $([MSBuild]::VersionLessThan(%(Identity), $(TargetPlatformVersion))) " />
+      <_ImplicitDefineConstant Include="@(_SupportedPlatformCompatibleVersions->'$(TargetPlatformIdentifier.ToUpper())%(Identity)'->Replace('.', '_'))" />
+    </ItemGroup>
+  </Target>
+
   <!-- Add implicitly defined preprocessor symbols to DefineConstants -->
   <Target Name="AddImplicitDefineConstants"
           Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' "
-          DependsOnTargets="GenerateTargetPlatformDefineConstants;GenerateNETCompatibleDefineConstants"
+          DependsOnTargets="GenerateTargetPlatformDefineConstants;GenerateNETCompatibleDefineConstants;GeneratePlatformCompatibleDefineConstants"
           BeforeTargets="CoreCompile" >
     <PropertyGroup>
       <DefineConstants Condition=" '@(_ImplicitDefineConstant)' != '' " >$(DefineConstants);@(_ImplicitDefineConstant)</DefineConstants>
