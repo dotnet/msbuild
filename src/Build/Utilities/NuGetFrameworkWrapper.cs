@@ -21,6 +21,8 @@ namespace Microsoft.Build.Evaluation
         private static object DefaultCompatibilityProvider;
         private static PropertyInfo FrameworkProperty;
         private static PropertyInfo VersionProperty;
+        private static PropertyInfo PlatformProperty;
+        private static PropertyInfo PlatformVersionProperty;
 
         public NuGetFrameworkWrapper()
         {
@@ -39,6 +41,8 @@ namespace Microsoft.Build.Evaluation
                 DefaultCompatibilityProvider = NuGetFrameworkDefaultCompatibilityProvider.GetMethod("get_Instance").Invoke(null, new object[] { });
                 FrameworkProperty = NuGetFramework.GetProperty("Framework");
                 VersionProperty = NuGetFramework.GetProperty("Version");
+                PlatformProperty = NuGetFramework.GetProperty("Platform");
+                PlatformVersionProperty = NuGetFramework.GetProperty("PlatformVersion");
             }
             catch
             {
@@ -59,6 +63,16 @@ namespace Microsoft.Build.Evaluation
         public string GetTargetFrameworkVersion(string tfm)
         {
             return (VersionProperty.GetValue(Parse(tfm)) as Version).ToString(2);
+        }
+
+        public string GetTargetPlatformIdentifier(string tfm)
+        {
+            return PlatformProperty.GetValue(Parse(tfm)) as string;
+        }
+
+        public string GetTargetPlatformVersion(string tfm)
+        {
+            return (PlatformVersionProperty.GetValue(Parse(tfm)) as Version).ToString(2);
         }
 
         public bool IsCompatible(string target, string candidate)

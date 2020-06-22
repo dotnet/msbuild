@@ -495,6 +495,16 @@ namespace Microsoft.Build.Evaluation
             return NuGetFramework.Value.IsCompatible(target, candidate);
         }
 
+        internal static string GetTargetPlatformIdentifier(string tfm)
+        {
+            return NuGetFramework.Value.GetTargetPlatformIdentifier(tfm);
+        }
+
+        internal static string GetTargetPlatformVersion(string tfm)
+        {
+            return NuGetFramework.Value.GetTargetPlatformVersion(tfm);
+        }
+
         public static string GetCurrentToolsDirectory()
         {
             return BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
