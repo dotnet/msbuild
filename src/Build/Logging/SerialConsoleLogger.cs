@@ -278,11 +278,12 @@ namespace Microsoft.Build.BackEnd.Logging
                     WriteItems(itemList);
                 }
             }
-            // The node and project context ids for the propertyOutputMap key
+            
             if (e.BuildEventContext == null || e.Items == null)
             {
                 return;
             }
+            // The node and project context ids for the propertyOutputMap key
             int nodeID = -1;
             int projectContextId = -1;
             nodeID = e.BuildEventContext.NodeId;
