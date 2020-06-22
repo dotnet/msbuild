@@ -280,7 +280,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
             // The node and project context ids for the propertyOutputMap key
-            if (e.BuildEventContext == null || e.Items == null)
+            if (e.BuildEventContext == null || e.Items == null || e.Items.Count == 0)
             {
                 return;
             }
