@@ -906,7 +906,7 @@ namespace Microsoft.Build.Execution
             ResetCaches = true;
             _toolsetProvider = toolsetProvider;
 
-            if (Environment.GetEnvironmentVariable("MSBUILDDISABLENODEREUSE") == "1") // For example to disable node reuse within Visual Studio
+            if (Traits.Instance.DisableNodeReuse) // For example to disable node reuse within Visual Studio
             {
                 _enableNodeReuse = false;
             }
