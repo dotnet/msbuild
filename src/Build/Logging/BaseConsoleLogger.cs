@@ -15,7 +15,6 @@ using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
 using Microsoft.Build.Exceptions;
-using System.Collections.Concurrent;
 
 namespace Microsoft.Build.BackEnd.Logging
 {

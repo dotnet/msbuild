@@ -351,7 +351,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Yellow);
                 foreach (BuildWarningEventArgs warning in warningList)
                 {
-                    WriteMessageAligned(EventArgsFormatting.FormatEventMessage(warning, showProjectFile, PropertyMapping(warning)), true);
+                    WriteMessageAligned(EventArgsFormatting.FormatEventMessage(warning, showProjectFile, FindLogOutputProperties(warning)), true);
                 }
             }
 
@@ -360,7 +360,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Red);
                 foreach (BuildErrorEventArgs error in errorList)
                 {
-                    WriteMessageAligned(EventArgsFormatting.FormatEventMessage(error, showProjectFile, PropertyMapping(error)), true);
+                    WriteMessageAligned(EventArgsFormatting.FormatEventMessage(error, showProjectFile, FindLogOutputProperties(error)), true);
                 }
             }
 
@@ -431,7 +431,6 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     groupByProjectEntryPoint.Add(key, new List<BuildEventArgs>());
                 }
-                    
                 // Add the error event to the correct bucket
                 groupByProjectEntryPoint[key].Add(errorWarningEventArgs);
             }
@@ -470,11 +469,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     if (errorWarningEvent is BuildErrorEventArgs)
                     {
-                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildErrorEventArgs, showProjectFile, PropertyMapping((BuildErrorEventArgs)errorWarningEvent)), false);
+                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildErrorEventArgs, showProjectFile, FindLogOutputProperties((BuildErrorEventArgs)errorWarningEvent)), false);
                     }
                     else if (errorWarningEvent is BuildWarningEventArgs)
                     {
-                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildWarningEventArgs, showProjectFile, PropertyMapping((BuildWarningEventArgs)errorWarningEvent)), false);
+                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildWarningEventArgs, showProjectFile, FindLogOutputProperties((BuildWarningEventArgs)errorWarningEvent)), false);
                     }
                 }
                 WriteNewLine();
@@ -540,10 +539,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 return;
             }
             // node and project context ids for the propertyOutputMap key
-            int nodeID = -1;
-            int projectContextId = -1;
-            nodeID = e.BuildEventContext.NodeId;
-            projectContextId = e.BuildEventContext.ProjectContextId;
+            int nodeID = e.BuildEventContext.NodeId;
+            int projectContextId = e.BuildEventContext.ProjectContextId;
 
             // Create the value to be added to the propertyOutputMap
             StringBuilder logOutputProperties = new StringBuilder();
@@ -556,7 +553,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     // Look for the property value associated with the property key
                     // Note: the property key is the item value
-                    string value = null;
+                    string value;
                     bool foundProperty = e.GlobalProperties.TryGetValue(itemVal.ItemSpec, out value);
      
                     // Look for the property in local properties if it wasn't found in global properties
@@ -966,14 +963,14 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Finds the LogOutPropterty string to be printed in messages
         /// </summary>
         /// <param name="e"> the build event where the LogOutPutProperty string will be added</param>
-        internal string PropertyMapping(LazyFormattedBuildEventArgs e)
+        internal string FindLogOutputProperties(LazyFormattedBuildEventArgs e)
         {
-            string logOutputProperties = "";
+            string logOutputProperties = String.Empty;
             if (e.BuildEventContext != null)
             {
                 int nodeId = e.BuildEventContext.NodeId;
                 int projectContextId = e.BuildEventContext.ProjectContextId;
-                propertyOutputMap.TryGetValue((nodeId, projectContextId), out logOutputProperties);
+                logOutputProperties = propertyOutputMap[(nodeId, projectContextId)];
             }
             return logOutputProperties;
         }
@@ -1011,7 +1008,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
 
                 setColor(ConsoleColor.Red);
-                WriteMessageAligned(EventArgsFormatting.FormatEventMessage(e, showProjectFile, PropertyMapping(e)), true);
+                WriteMessageAligned(EventArgsFormatting.FormatEventMessage(e, showProjectFile, FindLogOutputProperties(e)), true);
                 ShownBuildEventContext(e.BuildEventContext);
                 if (ShowSummary == true)
                 {
@@ -1057,7 +1054,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
 
                 setColor(ConsoleColor.Yellow);
-                WriteMessageAligned(EventArgsFormatting.FormatEventMessage(e, showProjectFile, PropertyMapping(e)), true);
+                WriteMessageAligned(EventArgsFormatting.FormatEventMessage(e, showProjectFile, FindLogOutputProperties(e)), true);
             }
 
             ShownBuildEventContext(e.BuildEventContext);
@@ -1198,7 +1195,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // Include file information if present.
             if (e.File != null)
             {
-                nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile, PropertyMapping(e));
+                nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile, FindLogOutputProperties(e));
             }
             else
             {

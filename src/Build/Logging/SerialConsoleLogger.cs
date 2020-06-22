@@ -154,7 +154,6 @@ namespace Microsoft.Build.BackEnd.Logging
                     //     1 Warning(s)
                     //     0 Error(s)
                     // Don't color the line if it's zero. (Per Whidbey behavior.)
-                    // separate counts by framework
                     if (warningCount > 0)
                     {
                         setColor(ConsoleColor.Yellow);
@@ -198,7 +197,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Yellow);
                 foreach (BuildWarningEventArgs warningEventArgs in warningList)
                 {
-                    WriteLinePretty(EventArgsFormatting.FormatEventMessage(warningEventArgs, showProjectFile, PropertyMapping(warningEventArgs)));
+                    WriteLinePretty(EventArgsFormatting.FormatEventMessage(warningEventArgs, showProjectFile, FindLogOutputProperties(warningEventArgs)));
                 }
             }
 
@@ -207,7 +206,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Red);
                 foreach (BuildErrorEventArgs errorEventArgs in errorList)
                 {
-                    WriteLinePretty(EventArgsFormatting.FormatEventMessage(errorEventArgs, showProjectFile, PropertyMapping(errorEventArgs)));
+                    WriteLinePretty(EventArgsFormatting.FormatEventMessage(errorEventArgs, showProjectFile, FindLogOutputProperties(errorEventArgs)));
                 }
             }
 
@@ -300,7 +299,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     // Look for the property value associated with the property key
                     // Note: the property key is the item value
-                    string value = null;
+                    string value;
                     bool foundProperties = e.GlobalProperties.TryGetValue(itemVal.ItemSpec, out value);
 
                     // Look for the property in local properties if it wasn't found in global properties
@@ -516,14 +515,14 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Finds the LogOutPropterty string to be printed in messages
         /// </summary>
         /// <param name="e"> the build event where the LogOutPutProperty string will be added</param>
-        internal string PropertyMapping(LazyFormattedBuildEventArgs e)
+        internal string FindLogOutputProperties(LazyFormattedBuildEventArgs e)
         {
-            string logOutputProperties = "";
+            string logOutputProperties = String.Empty;
             if (e.BuildEventContext != null)
             {
                 int nodeId = e.BuildEventContext.NodeId;
                 int projectContextId = e.BuildEventContext.ProjectContextId;
-                propertyOutputMap.TryGetValue((nodeId, projectContextId), out logOutputProperties);
+                logOutputProperties = propertyOutputMap[(nodeId, projectContextId)];
             }
             return logOutputProperties;
         }
@@ -538,7 +537,7 @@ namespace Microsoft.Build.BackEnd.Logging
             ShowDeferredMessages();
             setColor(ConsoleColor.Red);
 
-            WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile, PropertyMapping(e)));
+            WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile, FindLogOutputProperties(e)));
             if (ShowSummary == true)
             {
                 errorList.Add(e);
@@ -556,7 +555,7 @@ namespace Microsoft.Build.BackEnd.Logging
             ShowDeferredMessages();
             setColor(ConsoleColor.Yellow);
 
-            WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile, PropertyMapping(e)));
+            WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile, FindLogOutputProperties(e)));
             if (ShowSummary == true)
             {
                 warningList.Add(e);
@@ -606,7 +605,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Include file information if present.
                 if (e.File != null)
                 {
-                    nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile, PropertyMapping(e));
+                    nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile, FindLogOutputProperties(e));
                 }
                 else
                 {
