@@ -760,9 +760,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     </When>
 
     <When Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(_IsExecutable)' == 'true'">
-      <PropertyGroup>
+      <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
         <RunCommand Condition="'$(RunCommand)' == ''">$(TargetPath)</RunCommand>
         <RunArguments Condition="'$(RunArguments)' == ''">$(StartArguments)</RunArguments>
+      </PropertyGroup>
+      <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
+        <RunCommand Condition="'$(RunCommand)' == ''">mono</RunCommand>
+        <RunArguments Condition="'$(RunArguments)' == ''">&quot;$(TargetPath)&quot; $(StartArguments)</RunArguments>
       </PropertyGroup>
     </When>
   </Choose>
