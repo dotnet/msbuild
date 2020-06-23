@@ -25,8 +25,14 @@ namespace Microsoft.Build.BackEnd.Logging
     /// <remarks>This class is not thread safe.</remarks>
     internal class ParallelConsoleLogger : BaseConsoleLogger
     {
-        #region Constructors
+        #region Properties
+        /// <summary>
+        /// propertyOutputMap is the map between a (nodeID and project_context_id) to a target framework
+        /// </summary>
+        protected Dictionary<(int nodeId, int contextId), string> propertyOutputMap = new Dictionary<(int nodeId, int contextId), string>();
+        #endregion
 
+        #region Constructors
         /// <summary>
         /// Default constructor.
         /// </summary>

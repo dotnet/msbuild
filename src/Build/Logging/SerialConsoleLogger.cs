@@ -91,7 +91,6 @@ namespace Microsoft.Build.BackEnd.Logging
             errorCount = 0;
             warningCount = 0;
 
-            propertyOutputMap = new Dictionary<(int nodeId, int contextId), string>();
             projectPerformanceCounters = null;
             targetPerformanceCounters = null;
             taskPerformanceCounters = null;
@@ -197,7 +196,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Yellow);
                 foreach (BuildWarningEventArgs warningEventArgs in warningList)
                 {
-                    WriteLinePretty(EventArgsFormatting.FormatEventMessage(warningEventArgs, showProjectFile, FindLogOutputProperties(warningEventArgs)));
+                    WriteLinePretty(EventArgsFormatting.FormatEventMessage(warningEventArgs, showProjectFile));
                 }
             }
 
@@ -206,7 +205,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Red);
                 foreach (BuildErrorEventArgs errorEventArgs in errorList)
                 {
-                    WriteLinePretty(EventArgsFormatting.FormatEventMessage(errorEventArgs, showProjectFile, FindLogOutputProperties(errorEventArgs)));
+                    WriteLinePretty(EventArgsFormatting.FormatEventMessage(errorEventArgs, showProjectFile));
                 }
             }
 
@@ -277,56 +276,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     SortedList itemList = ExtractItemList(e.Items);
                     WriteItems(itemList);
                 }
-            }
-            
-            if (e.BuildEventContext == null || e.Items == null)
-            {
-                return;
-            }
-            // The node and project context ids for the propertyOutputMap key
-            int nodeID = -1;
-            int projectContextId = -1;
-            nodeID = e.BuildEventContext.NodeId;
-            projectContextId = e.BuildEventContext.ProjectContextId;
-
-            // Create the value to be added to the propertyOutputMap
-            StringBuilder logOutputProperties= new StringBuilder();
-            foreach (DictionaryEntry item in e.Items)
-            {
-                ITaskItem itemVal = (ITaskItem)item.Value;
-
-                // Determine if the outputProperties item has been used
-                if (string.Equals((string)item.Key, "LogOutputProperties", StringComparison.OrdinalIgnoreCase))
-                {
-                    // Look for the property value associated with the property key
-                    // Note: the property key is the item value
-                    string value;
-                    bool foundProperties = e.GlobalProperties.TryGetValue(itemVal.ItemSpec, out value);
-
-                    // Look for the property in local properties if it wasn't found in global properties
-                    if (!foundProperties)
-                    {
-                        foreach (DictionaryEntry prop in e.Properties)
-                        {
-                            if (string.Equals((string)prop.Key, itemVal.ItemSpec, StringComparison.OrdinalIgnoreCase))
-                            {
-                                value = (string)prop.Value;
-                                foundProperties = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    // Add the property key and value pair to the propertyOutputs
-                    if (foundProperties)
-                    {
-                        logOutputProperties.Append(itemVal.ItemSpec).Append(":").Append(value).Append(" ");
-                    }
-                }
-            }
-            // Add the finished dictionary to propertyOutputMap
-            // this creates a mapping of a specific project/node to a dictionary of property values
-            propertyOutputMap.Add((nodeID, projectContextId), logOutputProperties.ToString());  
+            } 
         }
 
         /// <summary>
@@ -513,22 +463,6 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Finds the LogOutPropterty string to be printed in messages
-        /// </summary>
-        /// <param name="e"> the build event where the LogOutPutProperty string will be added</param>
-        internal string FindLogOutputProperties(LazyFormattedBuildEventArgs e)
-        {
-            string logOutputProperties = String.Empty;
-            if (e.BuildEventContext != null)
-            {
-                int nodeId = e.BuildEventContext.NodeId;
-                int projectContextId = e.BuildEventContext.ProjectContextId;
-                logOutputProperties = propertyOutputMap[(nodeId, projectContextId)];
-            }
-            return logOutputProperties;
-        }
-
-        /// <summary>
         /// Prints an error event
         /// </summary>
         public override void ErrorHandler(object sender, BuildErrorEventArgs e)
@@ -538,7 +472,7 @@ namespace Microsoft.Build.BackEnd.Logging
             ShowDeferredMessages();
             setColor(ConsoleColor.Red);
 
-            WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile, FindLogOutputProperties(e)));
+            WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile));
             if (ShowSummary == true)
             {
                 errorList.Add(e);
@@ -556,7 +490,7 @@ namespace Microsoft.Build.BackEnd.Logging
             ShowDeferredMessages();
             setColor(ConsoleColor.Yellow);
 
-            WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile, FindLogOutputProperties(e)));
+            WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile));
             if (ShowSummary == true)
             {
                 warningList.Add(e);
@@ -606,7 +540,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Include file information if present.
                 if (e.File != null)
                 {
-                    nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile, FindLogOutputProperties(e));
+                    nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile);
                 }
                 else
                 {
