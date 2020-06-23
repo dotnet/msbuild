@@ -53,6 +53,7 @@ Include as much of the following if possible:
 To help us figure out and fix the issue sooner, please include a binlog.
 * Follow the link for details on sharing binary logs: https://github.com/microsoft/msbuild/blob/master/documentation/wiki/Providing-Binary-Logs.md
 * Follow this link for more information on binary logs: https://github.com/microsoft/msbuild/blob/master/documentation/wiki/Binary-Log.md
+    NOTE: Binlogs can contain sensitive information. Don't attach anything you don't want to be public.
 
-Otherwise, you can delete this section.
+*   To view these binlogs yourself: https://msbuildlog.com/
 -->

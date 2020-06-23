@@ -1,5 +1,5 @@
 ---
-name: Performance Issue
+name: 📉 Performance Issue
 about: Report a performance issue or regression.
 title: ''
 labels: performance
@@ -19,7 +19,6 @@ Please include a clear and concise description of the problem.
     -Measurements
     -Call stacks
     -Dumps
-    -Regression?
     -etc.
 * If possible please include text as text rather than images (so it shows up in searches).
 * If applicable please include before and after measurements.
@@ -35,10 +34,18 @@ Please include a clear and concise description of the problem.
 ### Versions & Configurations
 <!--
 * In a visual studio developer command prompt, run `msbuild -version` and paste the output here.
-* If applicable, run `dotnet --version` and paste the output here.
+* If applicable, version of the tool that invokes MSBuild (Visual Studio, dotnet CLI, etc):
 
 Post any other relevant configuration settings here.
 * OS, architecture, etc.
+-->
+
+### Regression?
+<!--
+* Is this a regression from a previous build/release?
+* Please provide details on:
+*   What version of MSBuild or VS were you using before the regression?
+*   What version of MSBuild or VS are you on now that you discovered the regression?
 -->
 
 ### Steps to Reproduce
@@ -56,4 +63,7 @@ Include as much of the following if possible:
 To help us figure out and fix the issue sooner, please include a binlog.
 * Follow the link for details on sharing binary logs: https://github.com/microsoft/msbuild/blob/master/documentation/wiki/Providing-Binary-Logs.md
 * Follow this link for more information on binary logs: https://github.com/microsoft/msbuild/blob/master/documentation/wiki/Binary-Log.md
+    NOTE: Binlogs can contain sensitive information. Don't attach anything you don't want to be public.
+
+*   To view these binlogs yourself: https://msbuildlog.com/
 -->
