@@ -330,14 +330,16 @@ namespace Microsoft.Build.Internal
 
             Trace("MSBUILDNODEHANDSHAKESALT=\"{0}\", msbuildDirectory=\"{1}\", nodeType={2}, FileVersionHash={3}", salt, toolsDirectory, nodeType, FileVersionHash);
 
-            //FileVersionHash (32 bits) is shifted 8 bits to avoid session ID collision
-            //nodeType (4 bits) is shifted just after the FileVersionHash
-            //nodeHandshakeSalt (32 bits) is shifted just after hostContext
-            //the most significant byte (leftmost 8 bits) will get zero'd out to avoid connecting to older builds.
-            //| masked out | nodeHandshakeSalt | hostContext |              fileVersionHash             | SessionID
-            //  0000 0000     0000 0000 0000        0000        0000 0000 0000 0000 0000 0000 0000 0000   0000 0000
-            long baseHandshake = ((long)nodeHandshakeSalt << 44) | ((long)nodeType << 40) | ((long)FileVersionHash << 8);
-            return GenerateHostHandshakeFromBase(baseHandshake);
+            // FileVersionHash (32 bits) is shifted 8 bits to avoid session ID collision
+            // HandshakeOptions (5 bits) is shifted just after the FileVersionHash
+            // remaining bits of nodeHandshakeSalt (32 bits truncated to 11) are shifted next
+            //      nodeHandshakeSalt    | HandshakeOptions |             fileVersionHash           | SessionID
+            //  0000 0000 0000 0000 000        0 0000        0000 0000 0000 0000 0000 0000 0000 0000  0000 0000
+            unchecked
+            {
+                ulong baseHandshake = ((ulong)(uint)nodeHandshakeSalt << 45) | ((ulong)(uint)nodeType << 40) | ((ulong)(uint)FileVersionHash << 8);
+                return GenerateHostHandshakeFromBase((long)baseHandshake);
+            }
         }
 
         /// <summary>
