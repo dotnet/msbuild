@@ -557,34 +557,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Determine if the LogOutputProperties item has been used
                 if (string.Equals((string)item.Key, "LogOutputProperties", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Look for the property value associated with the property key
-                    // Note: the property key is the item value
-                    string value;
-                    bool foundProperty = e.GlobalProperties.TryGetValue(itemVal.ItemSpec, out value);
-     
-                    // Look for the property in local properties if it wasn't found in global properties
-                    if (!foundProperty)
-                    {
-                        foreach (DictionaryEntry prop in e.Properties)
-                        {
-                            if (string.Equals((string)prop.Key, itemVal.ItemSpec, StringComparison.OrdinalIgnoreCase))
-                            {
-                                value = (string)prop.Value;
-                                foundProperty = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    // Add the property key and value pair to the propertyOutputs
-                    if (foundProperty)
-                    {
-                        logOutputProperties.Append(itemVal.ItemSpec).Append(":").Append(value).Append(" ");
-                    }
+                    // Add the item value to the string to be printed in error/warning messages
+                    logOutputProperties.Append(itemVal.ItemSpec).Append(" ");
                 }
             }
             // Add the finished dictionary to propertyOutputMap
-            // this creates a mapping of a specific project/node to a dictionary of property values
             propertyOutputMap.Add((nodeID, projectContextId), logOutputProperties.ToString());
         }
 
