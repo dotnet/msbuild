@@ -953,7 +953,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 int nodeId = e.BuildEventContext.NodeId;
                 int projectContextId = e.BuildEventContext.ProjectContextId;
-                logOutputProperties = propertyOutputMap[(nodeId, projectContextId)];
+                propertyOutputMap.TryGetValue((nodeId, projectContextId), out logOutputProperties);
             }
             return logOutputProperties;
         }
