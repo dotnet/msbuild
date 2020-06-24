@@ -469,6 +469,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                             ILLink;
                             CreateReadyToRunImages;
                             GeneratePublishDependencyFile;
+                            PrepareForPublish;
                             GenerateSingleFileBundle">
   </Target>
 
@@ -962,7 +963,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <PropertyGroup>
       <PublishedSingleFileName>$(AssemblyName)$(_NativeExecutableExtension)</PublishedSingleFileName>
-      <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
       <PublishedSingleFilePath>$(PublishDir)$(PublishedSingleFileName)</PublishedSingleFilePath>
     </PropertyGroup>
     
