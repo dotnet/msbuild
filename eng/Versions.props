@@ -13,7 +13,7 @@
   <!-- Production Dependencies -->
   <PropertyGroup>
     <!-- "Stage 0" from https://github.com/dotnet/core-sdk -->
-    <DotNetCoreSdkLKGVersion>3.1.400-preview-015177</DotNetCoreSdkLKGVersion>
+    <DotNetCoreSdkLKGVersion>3.1.400-preview-015187</DotNetCoreSdkLKGVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/core-setup -->
@@ -57,7 +57,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/NuGet/NuGet.Client-->
-    <NuGetBuildTasksPackageVersion>5.7.0-preview.3.6653</NuGetBuildTasksPackageVersion>
+    <NuGetBuildTasksPackageVersion>5.7.0-rtm.6670</NuGetBuildTasksPackageVersion>
     <NuGetCommonPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetCommonPackageVersion>
     <NuGetConfigurationPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetConfigurationPackageVersion>
     <NuGetFrameworksPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetFrameworksPackageVersion>
