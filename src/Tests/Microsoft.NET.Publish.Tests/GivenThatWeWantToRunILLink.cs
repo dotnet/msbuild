@@ -100,6 +100,86 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Theory]
+        [InlineData("net5.0")]
+        public void PrepareForILLink_can_set_IsTrimmable(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => SetIsTrimmable(project, referenceProjectName));
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true").Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+
+            var publishedDll = Path.Combine(publishDirectory, $"{projectName}.dll");
+            var unusedIsTrimmableDll = Path.Combine(publishDirectory, $"{referenceProjectName}.dll");
+
+            File.Exists(publishedDll).Should().BeTrue();
+            // Check that the unused trimmable assembly was removed
+            File.Exists(unusedIsTrimmableDll).Should().BeFalse();
+        }
+
+        [Theory]
+        [InlineData("net5.0")]
+        public void PrepareForILLink_can_set_TrimMode(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => SetTrimMode(project, referenceProjectName, "link"));
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true").Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+
+            var publishedDll = Path.Combine(publishDirectory, $"{projectName}.dll");
+            var unusedTrimModeLinkDll = Path.Combine(publishDirectory, $"{referenceProjectName}.dll");
+
+            File.Exists(publishedDll).Should().BeTrue();
+            // Check that the unused "link" assembly was removed.
+            File.Exists(unusedTrimModeLinkDll).Should().BeFalse();
+        }
+
+        [Theory]
+        [InlineData("net5.0")]
+        public void ILLink_respects_global_TrimMode(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => SetGlobalTrimMode(project, "link"))
+                .WithProjectChanges(project => SetIsTrimmable(project, referenceProjectName))
+                .WithProjectChanges(project => AddRootDescriptor(project, $"{referenceProjectName}.xml"));
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true").Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+
+            var publishedDll = Path.Combine(publishDirectory, $"{projectName}.dll");
+            var isTrimmableDll = Path.Combine(publishDirectory, $"{referenceProjectName}.dll");
+
+            File.Exists(publishedDll).Should().BeTrue();
+            File.Exists(isTrimmableDll).Should().BeTrue();
+            // Check that the assembly was trimmed at the member level
+            DoesImageHaveMethod(isTrimmableDll, "UnusedMethodToRoot").Should().BeTrue();
+            DoesImageHaveMethod(isTrimmableDll, "UnusedMethod").Should().BeFalse();
+        }
+
+
+        [Theory]
         [InlineData("netcoreapp3.0")]
         public void ILLink_accepts_root_descriptor(string targetFramework)
         {
@@ -494,6 +574,44 @@ namespace Microsoft.NET.Publish.Tests
                 .HaveStdOutContaining(Strings.PublishTrimmedRequiresVersion30);
         }
 
+        private void SetIsTrimmable(XDocument project, string assemblyName)
+        {
+            var ns = project.Root.Name.Namespace;
+
+            var target = new XElement(ns + "Target",
+                                      new XAttribute("BeforeTargets", "PrepareForILLink"),
+                                      new XAttribute("Name", "SetIsTrimmable"));
+            project.Root.Add(target);
+            target.Add(new XElement(ns + "ItemGroup",
+                       new XElement("ManagedAssemblyToLink",
+                                    new XAttribute("Condition", $"'%(FileName)' == '{assemblyName}'"),
+                                    new XElement("IsTrimmable", "true"))));
+        }
+
+        private void SetTrimMode(XDocument project, string assemblyName, string trimMode)
+        {
+            var ns = project.Root.Name.Namespace;
+
+            var target = new XElement(ns + "Target",
+                                      new XAttribute("BeforeTargets", "PrepareForILLink"),
+                                      new XAttribute("Name", "SetTrimMode"));
+            project.Root.Add(target);
+            target.Add(new XElement(ns + "ItemGroup",
+                       new XElement("ManagedAssemblyToLink",
+                                    new XAttribute("Condition", $"'%(FileName)' == '{assemblyName}'"),
+                                    new XElement("TrimMode", trimMode))));
+        }
+
+        private void SetGlobalTrimMode(XDocument project, string trimMode)
+        {
+            var ns = project.Root.Name.Namespace;
+
+            var properties = new XElement(ns + "PropertyGroup");
+            project.Root.Add(properties);
+            properties.Add(new XElement(ns + "TrimMode",
+                                        trimMode));
+        }
+
         private void EnableNonFrameworkTrimming(XDocument project)
         {
             // Used to override the default linker options for testing
@@ -501,23 +619,20 @@ namespace Microsoft.NET.Publish.Tests
             // but we want to ensure that the linker is running
             // end-to-end by checking that it strips code from our
             // test projects.
-
+            SetGlobalTrimMode(project, "link");
             var ns = project.Root.Name.Namespace;
 
             var target = new XElement(ns + "Target",
-                                      new XAttribute("AfterTargets", "_SetILLinkDefaults"),
+                                      new XAttribute("BeforeTargets", "PrepareForILLink"),
                                       new XAttribute("Name", "_EnableNonFrameworkTrimming"));
             project.Root.Add(target);
-            target.Add(new XElement(ns + "PropertyGroup",
-                                     new XElement("_TrimmerDefaultAction", "link")));
-            target.Add(new XElement(ns + "ItemGroup",
-                                    new XElement("TrimmerRootAssembly",
-                                                 new XAttribute("Remove", "@(TrimmerRootAssembly)")),
-                                    new XElement("TrimmerRootAssembly",
-                                                 new XAttribute("Include", "@(IntermediateAssembly->'%(FileName)')")),
-                                    new XElement("_ManagedAssembliesToLink",
-                                                 new XAttribute("Update", "@(_ManagedAssembliesToLink)"),
-                                                 new XElement("action"))));
+            var items = new XElement(ns + "ItemGroup");
+            target.Add(items);
+            items.Add(new XElement("ManagedAssemblyToLink",
+                                   new XElement("Condition", "true"),
+                                   new XElement("IsTrimmable", "true")));
+            items.Add(new XElement(ns + "TrimmerRootAssembly",
+                                   new XAttribute("Include", "@(IntermediateAssembly->'%(FileName)')")));
         }
 
         static readonly string substitutionsFilename = "ILLink.Substitutions.xml";
