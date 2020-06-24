@@ -98,6 +98,5 @@ namespace Microsoft.Build.UnitTests
 
             warning.ShouldBe("file.vb(42): VBC warning 31415: Some long message [fname> frame schema]");
         }
-
     }
 }

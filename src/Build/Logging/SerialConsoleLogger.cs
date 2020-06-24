@@ -276,7 +276,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     SortedList itemList = ExtractItemList(e.Items);
                     WriteItems(itemList);
                 }
-            } 
+            }
         }
 
         /// <summary>
@@ -471,7 +471,6 @@ namespace Microsoft.Build.BackEnd.Logging
             SetErrorsOrWarningsOnCurrentFrame();
             ShowDeferredMessages();
             setColor(ConsoleColor.Red);
-
             WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile));
             if (ShowSummary == true)
             {
@@ -489,7 +488,6 @@ namespace Microsoft.Build.BackEnd.Logging
             SetErrorsOrWarningsOnCurrentFrame();
             ShowDeferredMessages();
             setColor(ConsoleColor.Yellow);
-
             WriteLinePretty(EventArgsFormatting.FormatEventMessage(e, showProjectFile));
             if (ShowSummary == true)
             {

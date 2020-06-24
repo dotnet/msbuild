@@ -303,7 +303,7 @@ namespace Microsoft.Build.Shared
             {
                 format.Append("{6}");
             }
-;
+
             // If the project file was specified, tack that onto the very end.
             // Check for additional properties that should be outputted as well
             if (projectFile != null && !String.Equals(projectFile, file))
