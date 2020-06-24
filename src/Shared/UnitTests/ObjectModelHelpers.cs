@@ -243,7 +243,10 @@ namespace Microsoft.Build.UnitTests
                 expectedItems.ShouldNotBeEmpty();
             }
 
-            for (var i = 0; i < expectedItems.Length; i++)
+            // iterate to the minimum length; if the lengths don't match but there's a prefix match the count assertion below will trigger
+            int minimumLength = Math.Min(expectedItems.Length, items.Count);
+
+            for (var i = 0; i < minimumLength; i++)
             {
                 if (!normalizeSlashes)
                 {
@@ -258,7 +261,8 @@ namespace Microsoft.Build.UnitTests
                 AssertItemHasMetadata(expectedDirectMetadataPerItem[i], items[i]);
             }
 
-            items.Count.ShouldBe(expectedItems.Length);
+            items.Count.ShouldBe(expectedItems.Length,
+                () => $"got items \"{string.Join(", ", items)}\", expected \"{string.Join(", ", expectedItems)}\"");
 
             expectedItems.Length.ShouldBe(expectedDirectMetadataPerItem.Length);
         }
@@ -422,7 +426,7 @@ namespace Microsoft.Build.UnitTests
         {
             expected ??= new Dictionary<string, string>();
 
-            item.DirectMetadataCount.ShouldBe(expected.Keys.Count);
+            item.DirectMetadataCount.ShouldBe(expected.Keys.Count, () => $"Expected {expected.Keys.Count} metadata, ({string.Join(", ", expected.Keys)}), got {item.DirectMetadataCount}");
 
             foreach (var key in expected.Keys)
             {
