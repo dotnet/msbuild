@@ -328,7 +328,7 @@ namespace Microsoft.Build.Evaluation
             /// Is this spec a single reference to a specific item?
             /// </summary>
             /// <returns>True if the item is a simple reference to the referenced item type.</returns>
-            protected static bool ItemspecContainsASingleItemReference(ItemSpec<P, I> itemSpec, string referencedItemType)
+            protected static bool ItemspecContainsASingleBareItemReference(ItemSpec<P, I> itemSpec, string referencedItemType)
             {
                 if (itemSpec.Fragments.Count != 1)
                 {
