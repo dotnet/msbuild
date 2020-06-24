@@ -154,6 +154,7 @@ namespace Microsoft.Build.Logging
         private void LogInitialInfo()
         {
             LogMessage("BinLogFilePath=" + FilePath);
+            LogMessage("CurrentUICulture=" + System.Globalization.CultureInfo.CurrentUICulture.Name);
         }
 
         private void LogMessage(string text)
