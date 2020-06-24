@@ -245,12 +245,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the host handshake for this node endpoint
         /// </summary>
-        protected abstract long GetHostHandshake();
-
-        /// <summary>
-        /// Returns the client handshake for this node endpoint
-        /// </summary>
-        protected abstract long GetClientHandshake();
+        protected abstract Handshake GetHandshake();
 
         /// <summary>
         /// Updates the current link status if it has changed and notifies any registered delegates.
@@ -346,6 +341,7 @@ namespace Microsoft.Build.BackEnd
             bool gotValidConnection = false;
             while (!gotValidConnection)
             {
+                gotValidConnection = true;
                 DateTime restartWaitTime = DateTime.UtcNow;
 
                 // We only wait to wait the difference between now and the last original start time, in case we have multiple hosts attempting
@@ -384,43 +380,14 @@ namespace Microsoft.Build.BackEnd
                     // respond with another long.  Once the handshake is complete, both sides can be assured the
                     // other is ready to accept data.
                     // To avoid mixing client and server builds, the long is the MSBuild binary timestamp.
-
-                    // Compatibility issue here.
-                    // Previous builds of MSBuild 4.0 would exchange just a byte.
-                    // Host would send either 0x5F or 0x60 depending on whether it was the toolset or not respectively.
-                    // Client would return either 0xF5 or 0x06 respectively.
-                    // Therefore an old host on a machine with new clients running will hang, 
-                    // sending a byte and waiting for a byte until it eventually times out;
-                    // because the new client will want 7 more bytes before it returns anything.
-                    // The other way around is not a problem, because the old client would immediately return the (wrong)
-                    // byte on receiving the first byte of the long sent by the new host, and the new host would disconnect.
-                    // To avoid the hang, special case here:
-                    // Make sure our handshakes always start with 00.
-                    // If we received ONLY one byte AND it's 0x5F or 0x60, return 0xFF (it doesn't matter what as long as
-                    // it will cause the host to reject us; new hosts expect 00 and old hosts expect F5 or 06).
+                    Handshake handshake = GetHandshake();
                     try
                     {
-                        long handshake = localReadPipe.ReadLongForHandshake(/* reject these leads */ new byte[] { 0x5F, 0x60 }, 0xFF /* this will disconnect the host; it expects leading 00 or F5 or 06 */
-#if NETCOREAPP2_1 || MONO
-                            , ClientConnectTimeout /* wait a long time for the handshake from this side */
-#endif
-                            );
-
-#if FEATURE_SECURITY_PERMISSIONS
-                        WindowsIdentity currentIdentity = WindowsIdentity.GetCurrent();
-#endif
-
-                        if (handshake != GetHostHandshake())
-                        {
-                            CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshake, GetHostHandshake());
-                            localPipeServer.Disconnect();
-                            continue;
-                        }
-
 #if FEATURE_SECURITY_PERMISSIONS
                         // We will only talk to a host that was started by the same user as us.  Even though the pipe access is set to only allow this user, we want to ensure they
                         // haven't attempted to change those permissions out from under us.  This ensures that the only way they can truly gain access is to be impersonating the
                         // user we were started by.
+                        WindowsIdentity currentIdentity = WindowsIdentity.GetCurrent();
                         WindowsIdentity clientIdentity = null;
                         localPipeServer.RunAsClient(delegate () { clientIdentity = WindowsIdentity.GetCurrent(true); });
 
@@ -431,6 +398,48 @@ namespace Microsoft.Build.BackEnd
                             continue;
                         }
 #endif
+                        int index = 1;
+                        foreach (int part in handshake.RetrieveHandshakeComponents())
+                        {
+
+                            int handshakePart = localReadPipe.ReadIntForHandshake(index == 1 ? 0x01 : 0x00 /* this will disconnect a < 4.5 host; it expects leading 00 or F5 or 06 */
+#if NETCOREAPP2_1 || MONO
+                            , ClientConnectTimeout /* wait a long time for the handshake from this side */
+#endif
+                            );
+
+                            if (handshakePart != part)
+                            {
+                                CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshakePart, part);
+                                localWritePipe.WriteIntForHandshake(index);
+                                gotValidConnection = false;
+                                break;
+                            }
+                            index++;
+                        }
+
+                        CommunicationsUtilities.Trace("Writing accept code to parent");
+                        localWritePipe.WriteIntForHandshake(0x39393939);
+
+                        // To ensure that our handshake and theirs have the same number of bytes, send and receive a magic number indicating EOS. This has to be different from the
+                        // previous "accept" magic number so that the provider knows this is beyond the end of the handshake for the endpoint as well.
+                        if (gotValidConnection)
+                        {
+                            if (localReadPipe.ReadIntForHandshake(0x01 /* this will disconnect a < 4.5 host; it expects leading 00 or F5 or 06 */
+#if NETCOREAPP2_1 || MONO
+                            , ClientConnectTimeout /* wait a long time for the handshake from this side */
+#endif
+                            ) == -0x2a2a2a2a)
+                            {
+                                CommunicationsUtilities.Trace("Successfully connected to parent.");
+                                localWritePipe.WriteIntForHandshake(0x12812812);
+                            }
+                            else
+                            {
+                                CommunicationsUtilities.Trace("Handshake was of a different length. Probably the host is a different MSBuild build.");
+                                gotValidConnection = false;
+                            }
+                        }
                     }
                     catch (IOException e)
                     {
@@ -439,18 +448,19 @@ namespace Microsoft.Build.BackEnd
                         //    and if they don't match it disconnects immediately leaving us still trying to read the blank handshake
                         // 2. The host is too old sending us bits we automatically reject in the handshake
                         CommunicationsUtilities.Trace("Client connection failed but we will wait for another connection. Exception: {0}", e.Message);
+                        
+                        gotValidConnection = false;
+                    }
+
+                    if (!gotValidConnection)
+                    {
                         if (localPipeServer.IsConnected)
                         {
                             localPipeServer.Disconnect();
                         }
-
                         continue;
                     }
 
-                    gotValidConnection = true;
-
-                    CommunicationsUtilities.Trace("Writing handshake to parent");
-                    localWritePipe.WriteLongForHandshake(GetClientHandshake());
                     ChangeLinkStatus(LinkStatus.Active);
                 }
                 catch (Exception e)

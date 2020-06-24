@@ -46,7 +46,7 @@ namespace Microsoft.Build.Evaluation
                 ItemSpecMatchesItem matchItemspec;
                 bool? needToExpandMetadataForEachItem = null;
 
-                if (ItemspecContainsASingleItemReference(_itemSpec, _itemElement.ItemType))
+                if (ItemspecContainsASingleBareItemReference(_itemSpec, _itemElement.ItemType))
                 {
                     // Perf optimization: If the Update operation references itself (e.g. <I Update="@(I)"/>)
                     // then all items are updated and matching is not necessary

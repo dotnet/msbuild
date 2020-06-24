@@ -20,6 +20,50 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Internal
 {
+    internal readonly struct Handshake
+    {
+        readonly int options;
+        readonly int salt;
+        readonly int fileVersionMajor;
+        readonly int fileVersionMinor;
+        readonly int fileVersionBuild;
+        readonly int fileVersionPrivate;
+        readonly int sessionId;
+
+        internal Handshake(HandshakeOptions nodeType)
+        {
+            // We currently use 6 bits of this 32-bit integer. Very old builds will instantly reject any handshake that does not start with F5 or 06; slightly old builds always lead with 00.
+            // This indicates in the first byte that we are a modern build.
+            options = (int)nodeType | 0x01000000;
+            string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
+            string toolsDirectory = (nodeType & HandshakeOptions.X64) == HandshakeOptions.X64 ? BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64 : BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
+            salt = CommunicationsUtilities.GetHandshakeHashCode(handshakeSalt + toolsDirectory);
+            Version fileVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
+            fileVersionMajor = fileVersion.Major;
+            fileVersionMinor = fileVersion.Minor;
+            fileVersionBuild = fileVersion.Build;
+            fileVersionPrivate = fileVersion.Revision;
+            sessionId = Process.GetCurrentProcess().SessionId;
+        }
+
+        // This is used as a key, so it does not need to be human readable.
+        public override string ToString()
+        {
+            return string.Empty + options + salt + fileVersionMajor + fileVersionMinor + fileVersionBuild + fileVersionPrivate + sessionId;
+        }
+
+        internal IEnumerable<int> RetrieveHandshakeComponents()
+        {
+            yield return options;
+            yield return salt;
+            yield return fileVersionMajor;
+            yield return fileVersionMinor;
+            yield return fileVersionBuild;
+            yield return fileVersionPrivate;
+            yield return sessionId;
+        }
+    }
+
     /// <summary>
     /// Enumeration of all possible (currently supported) options for handshakes.
     /// </summary>
@@ -51,7 +95,12 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Building with BelowNormal priority
         /// </summary>
-        LowPriority = 16
+        LowPriority = 16,
+
+        /// <summary>
+        /// Building with administrator privileges
+        /// </summary>
+        Administrator = 32
     }
 
     /// <summary>
@@ -63,16 +112,6 @@ namespace Microsoft.Build.Internal
         /// The timeout to connect to a node.
         /// </summary>
         private const int DefaultNodeConnectionTimeout = 900 * 1000; // 15 minutes; enough time that a dev will typically do another build in this time
-
-        /// <summary>
-        /// Flag if we have already calculated the FileVersion hashcode
-        /// </summary>
-        private static bool s_fileVersionChecked;
-
-        /// <summary>
-        /// A hashcode calculated from the fileversion
-        /// </summary>
-        private static int s_fileVersionHash;
 
         /// <summary>
         /// Whether to trace communications
@@ -100,48 +139,6 @@ namespace Microsoft.Build.Internal
         static internal int NodeConnectionTimeout
         {
             get { return GetIntegerVariableOrDefault("MSBUILDNODECONNECTIONTIMEOUT", DefaultNodeConnectionTimeout); }
-        }
-
-        /// <summary>
-        /// Looks up the file version and caches the hashcode
-        /// This file version hashcode is used in calculating the handshake
-        /// </summary>
-        private static int FileVersionHash
-        {
-            get
-            {
-                if (!s_fileVersionChecked)
-                {
-                    // We only hash in any complus_installroot value, not a file version.
-                    // This is because in general msbuildtaskhost.exe does not load any assembly that
-                    // the parent process loads, so they can't compare the version of a particular assembly.
-                    // They can't compare their own versions, because if one of them is serviced, they
-                    // won't match any more. The only known incompatibility is between a razzle and non-razzle
-                    // parent and child. COMPLUS_Version can (and typically will) differ legitimately between
-                    // them, so just check COMPLUS_InstallRoot.
-                    string complusInstallRoot = Environment.GetEnvironmentVariable("COMPLUS_INSTALLROOT");
-
-                    // This is easier in .NET 4+:
-                    //  var fileIdentity = typeof(CommunicationsUtilities).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
-                    // but we need to be 3.5 compatible here to work in MSBuildTaskHost
-                    string fileIdentity = null;
-                    foreach (var attribute in typeof(CommunicationsUtilities).GetTypeInfo().Assembly.GetCustomAttributes(false))
-                    {
-                        if (attribute is AssemblyInformationalVersionAttribute informationalVersionAttribute)
-                        {
-                            fileIdentity = informationalVersionAttribute.InformationalVersion;
-                            break;
-                        }
-                    }
-
-                    ErrorUtilities.VerifyThrow(fileIdentity != null, "Did not successfully retrieve InformationalVersion.");
-
-                    s_fileVersionHash = GetHandshakeHashCode(complusInstallRoot ?? fileIdentity);
-                    s_fileVersionChecked = true;
-                }
-
-                return s_fileVersionHash;
-            }
         }
 
         /// <summary>
@@ -292,67 +289,9 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
-        /// Given a base handshake, generates the real handshake based on e.g. elevation level.  
-        /// </summary>
-        private static long GenerateHostHandshakeFromBase(long baseHandshake)
-        {
-#if FEATURE_SECURITY_PRINCIPAL_WINDOWS
-            // If we are running in elevated privs, we will only accept a handshake from an elevated process as well.
-            WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
-
-            // Both the client and the host will calculate this separately, and the idea is that if they come out the same
-            // then we can be sufficiently confident that the other side has the same elevation level as us.  This is complementary
-            // to the username check which is also done on connection.
-            if (principal.IsInRole(WindowsBuiltInRole.Administrator))
-            {
-                unchecked
-                {
-                    baseHandshake = baseHandshake ^ 0x5c5c5c5c5c5c5c5c + Process.GetCurrentProcess().SessionId;
-                }
-            }
-#endif
-
-            // Mask out the first byte. Modern builds expect the first byte to be zero to indicate that they are modern
-            // and should be treated as such. Older builds used a non-zero initial byte. See here:
-            // https://github.com/microsoft/msbuild/blob/584ca5f11b28971f5651b4b8de5f173ad1cb2786/src/Shared/NodeEndpointOutOfProcBase.cs#L403.
-            return baseHandshake & 0x00FFFFFFFFFFFFFF;
-        }
-
-        /// <summary>
-        /// Magic number sent by the host to the client during the handshake.
-        /// Derived from the binary timestamp to avoid mixing binary versions.
-        /// </summary>
-        internal static long GetHostHandshake(HandshakeOptions nodeType)
-        {
-            string salt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
-            string toolsDirectory = (nodeType & HandshakeOptions.X64) == HandshakeOptions.X64 ? BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64 : BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
-            int nodeHandshakeSalt = GetHandshakeHashCode(salt + toolsDirectory);
-
-            Trace("MSBUILDNODEHANDSHAKESALT=\"{0}\", msbuildDirectory=\"{1}\", nodeType={2}, FileVersionHash={3}", salt, toolsDirectory, nodeType, FileVersionHash);
-
-            //FileVersionHash (32 bits) is shifted 8 bits to avoid session ID collision
-            //nodeType (4 bits) is shifted just after the FileVersionHash
-            //nodeHandshakeSalt (32 bits) is shifted just after hostContext
-            //the most significant byte (leftmost 8 bits) will get zero'd out to avoid connecting to older builds.
-            //| masked out | nodeHandshakeSalt | hostContext |              fileVersionHash             | SessionID
-            //  0000 0000     0000 0000 0000        0000        0000 0000 0000 0000 0000 0000 0000 0000   0000 0000
-            long baseHandshake = ((long)nodeHandshakeSalt << 44) | ((long)nodeType << 40) | ((long)FileVersionHash << 8);
-            return GenerateHostHandshakeFromBase(baseHandshake);
-        }
-
-        /// <summary>
-        /// Magic number sent by the client to the host during the handshake.
-        /// Munged version of the host handshake.
-        /// </summary>
-        internal static long GetClientHandshake(HandshakeOptions hostContext)
-        {
-            return ~GetHostHandshake(hostContext);
-        }
-
-        /// <summary>
         /// Extension method to write a series of bytes to a stream
         /// </summary>
-        internal static void WriteLongForHandshake(this PipeStream stream, long value)
+        internal static void WriteIntForHandshake(this PipeStream stream, int value)
         {
             byte[] bytes = BitConverter.GetBytes(value);
 
@@ -363,39 +302,22 @@ namespace Microsoft.Build.Internal
                 Array.Reverse(bytes);
             }
 
-            ErrorUtilities.VerifyThrow(bytes.Length == 8, "Long should be 8 bytes");
+            ErrorUtilities.VerifyThrow(bytes.Length == 4, "Int should be 4 bytes");
 
             stream.Write(bytes, 0, bytes.Length);
-        }
-
-        /// <summary>
-        /// Extension method to read a series of bytes from a stream
-        /// </summary>
-        internal static long ReadLongForHandshake(this PipeStream stream
-#if NETCOREAPP2_1 || MONO
-            , int handshakeReadTimeout
-#endif
-            )
-        {
-            return stream.ReadLongForHandshake((byte[])null, 0
-#if NETCOREAPP2_1 || MONO
-                , handshakeReadTimeout
-#endif
-                );
         }
 
         /// <summary>
         /// Extension method to read a series of bytes from a stream.
         /// If specified, leading byte matches one in the supplied array if any, returns rejection byte and throws IOException.
         /// </summary>
-        internal static long ReadLongForHandshake(this PipeStream stream, byte[] leadingBytesToReject,
-            byte rejectionByteToReturn
+        internal static int ReadIntForHandshake(this PipeStream stream, int byteToAccept
 #if NETCOREAPP2_1 || MONO
             , int timeout
 #endif
             )
         {
-            byte[] bytes = new byte[8];
+            byte[] bytes = new byte[4];
 
 #if NETCOREAPP2_1 || MONO
             if (!NativeMethodsShared.IsWindows)
@@ -435,24 +357,18 @@ namespace Microsoft.Build.Internal
                         throw new IOException(String.Format(CultureInfo.InvariantCulture, "Unexpected end of stream while reading for handshake"));
                     }
 
-                    if (i == 0 && leadingBytesToReject != null)
-                    {
-                        foreach (byte reject in leadingBytesToReject)
-                        {
-                            if (read == reject)
-                            {
-                                stream.WriteByte(rejectionByteToReturn); // disconnect the host
-
-                                throw new IOException(String.Format(CultureInfo.InvariantCulture, "Client: rejected old host. Received byte {0} but this matched a byte to reject.", bytes[i]));  // disconnect and quit
-                            }
-                        }
-                    }
-
                     bytes[i] = Convert.ToByte(read);
+                }
+
+                if (byteToAccept != 0x00 && byteToAccept != bytes[0])
+                {
+                    stream.WriteIntForHandshake(0x0F0F0F0F);
+                    stream.WriteIntForHandshake(0x0F0F0F0F);
+                    throw new IOException(String.Format(CultureInfo.InvariantCulture, "Client: rejected old host. Received byte {0} instead of {1}.", bytes[0], byteToAccept));
                 }
             }
 
-            long result;
+            int result;
 
             try
             {
@@ -463,7 +379,7 @@ namespace Microsoft.Build.Internal
                     Array.Reverse(bytes);
                 }
 
-                result = BitConverter.ToInt64(bytes, 0 /* start index */);
+                result = BitConverter.ToInt32(bytes, 0 /* start index */);
             }
             catch (ArgumentException ex)
             {
@@ -531,6 +447,16 @@ namespace Microsoft.Build.Internal
             {
                 context |= HandshakeOptions.LowPriority;
             }
+#if FEATURE_SECURITY_PRINCIPAL_WINDOWS
+            // If we are running in elevated privs, we will only accept a handshake from an elevated process as well.
+            // Both the client and the host will calculate this separately, and the idea is that if they come out the same
+            // then we can be sufficiently confident that the other side has the same elevation level as us.  This is complementary
+            // to the username check which is also done on connection.
+            if (new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
+            {
+                context |= HandshakeOptions.Administrator;
+            }
+#endif
             return context;
         }
 
