@@ -60,7 +60,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworks)' != ''">
-    <LogOutputProperties Include="TargetFramework"/>
+    <LogOutputProperties Include="TargetFramework:$(TargetFramework)"/>
   </ItemGroup>
   
   <PropertyGroup>
