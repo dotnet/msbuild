@@ -40,7 +40,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted message string.</returns>
         internal static string FormatEventMessage(BuildWarningEventArgs e, bool showProjectFile, string logOutputProperties)
         {
-            return FormatEventMessage("error", e.Subcategory, e.Message,
+            return FormatEventMessage("warning", e.Subcategory, e.Message,
                             e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
                             e.ColumnNumber, e.EndColumnNumber, e.ThreadId, logOutputProperties);
         }
@@ -55,7 +55,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted message string.</returns>
         internal static string FormatEventMessage(BuildMessageEventArgs e, bool showProjectFile, string logOutputProperties)
         {
-            return FormatEventMessage("error", e.Subcategory, e.Message,
+            return FormatEventMessage("message", e.Subcategory, e.Message,
                             e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
                             e.ColumnNumber, e.EndColumnNumber, e.ThreadId, logOutputProperties);
         }
@@ -310,7 +310,7 @@ namespace Microsoft.Build.Shared
             {
                 if (LogOutputProperties != null && LogOutputProperties.Length > 0)
                 {
-                    format.Append(" [{10}> {11}] ");
+                    format.Append(" [{10}>{11}]");
                 }
                 else
                 {

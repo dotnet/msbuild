@@ -29,7 +29,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// propertyOutputMap is the map between a (nodeID and project_context_id) to a target framework
         /// </summary>
-        protected Dictionary<(int nodeId, int contextId), string> propertyOutputMap = new Dictionary<(int nodeId, int contextId), string>();
+        internal Dictionary<(int nodeId, int contextId), string> propertyOutputMap = new Dictionary<(int nodeId, int contextId), string>();
         #endregion
 
         #region Constructors
@@ -558,7 +558,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 if (string.Equals((string)item.Key, "LogOutputProperties", StringComparison.OrdinalIgnoreCase))
                 {
                     // Add the item value to the string to be printed in error/warning messages
-                    logOutputProperties.Append(itemVal.ItemSpec).Append(" ");
+                    logOutputProperties.Append(" ").Append(itemVal.ItemSpec);
                 }
             }
             // Add the finished dictionary to propertyOutputMap
