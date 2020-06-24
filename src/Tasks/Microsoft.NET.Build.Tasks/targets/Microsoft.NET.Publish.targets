@@ -465,11 +465,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="ComputeFilesToPublish"
-          DependsOnTargets="ComputeResolvedFilesToPublishList;
+          DependsOnTargets="PrepareForPublish;
+                            ComputeResolvedFilesToPublishList;
                             ILLink;
                             CreateReadyToRunImages;
                             GeneratePublishDependencyFile;
-                            PrepareForPublish;
                             GenerateSingleFileBundle">
   </Target>
 
