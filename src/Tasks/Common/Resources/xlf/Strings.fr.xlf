@@ -374,6 +374,11 @@
         <target state="translated">NETSDK1003: Nom de framework non valide : '{0}'.</target>
         <note>{StrBegin="NETSDK1003: "}</note>
       </trans-unit>
+      <trans-unit id="InvalidFrameworkToDefinePlatformInTargetFramework">
+        <source>NETSDK1134: A target platform can only be specified in the target framework for applications targeting .NET 5 and above.</source>
+        <target state="new">NETSDK1134: A target platform can only be specified in the target framework for applications targeting .NET 5 and above.</target>
+        <note>{StrBegin="NETSDK1134: "}</note>
+      </trans-unit>
       <trans-unit id="InvalidItemSpecToUse">
         <source>NETSDK1058: Invalid value for ItemSpecToUse parameter: '{0}'.  This property must be blank or set to 'Left' or 'Right'</source>
         <target state="translated">NETSDK1058: Valeur non valide pour le paramètre ItemSpecToUse : '{0}'. Cette propriété doit être vide ou doit avoir la valeur 'Left' ou 'Right'</target>

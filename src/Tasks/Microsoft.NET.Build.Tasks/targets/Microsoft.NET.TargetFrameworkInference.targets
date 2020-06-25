@@ -78,6 +78,18 @@ Copyright (c) .NET Foundation. All rights reserved.
                                           $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '5.0'))">.NETCoreApp</TargetFrameworkIdentifier>
   </PropertyGroup>
 
+  <!--
+    Parse TargetFramework containing TargetPlatform properties.
+  -->
+  <PropertyGroup Condition="'$(TargetFramework)' != '' and $(TargetFramework.Contains('-')) and ('$(TargetFrameworkIdentifier)' == '' or '$(TargetFrameworkVersion)' == '')">
+    <TargetFrameworkIdentifier>$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)'))</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)'))</TargetFrameworkVersion>
+    <TargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
+    <TargetPlatformVersion>$([MSBuild]::GetTargetPlatformVersion('$(TargetFramework)'))</TargetPlatformVersion>
+    
+    <_InferredTargetPlatform>true</_InferredTargetPlatform>
+</PropertyGroup>
+
   <!-- 
     Trigger an error if we're unable to infer the framework identifier and version. 
 
@@ -112,6 +124,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="$(TargetFramework.Contains(';'))"
                  ResourceName="TargetFrameworkWithSemicolon"
                  FormatArguments="$([MSBuild]::Escape('$(TargetFramework)'))" />
+  </Target>
+
+  <Target Name="_CheckForUnsupportedTargetPlatform"
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform;RunResolvePackageDependencies;GetFrameworkPaths;GetReferenceAssemblyPaths"
+          Condition="'$(_InferredTargetPlatform)' == 'true'" >
+    
+    <NETSdkError Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp' or $([MSBuild]::VersionLessThan($(TargetFrameworkVersion), 5.0))"
+                 ResourceName="InvalidFrameworkToDefinePlatformInTargetFramework" />
   </Target>
 
   <UsingTask TaskName="AllowEmptyTelemetry" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
