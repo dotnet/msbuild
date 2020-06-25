@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.NET.TestFramework;
@@ -138,6 +135,43 @@ namespace Microsoft.NET.Build.Tests
                 project.Root.Add(itemGroup);
                 itemGroup.Add(item);
             });
+        }
+
+        [WindowsOnlyFact]
+        public void ItCanPublishArm64Winforms()
+        {
+            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+
+            var newCommand = new DotnetCommand(Log, "new", "winforms", "--no-restore");
+            newCommand.WorkingDirectory = testDirectory;
+            newCommand.Execute().Should().Pass();
+
+            new PublishCommand(Log, testDirectory)
+                .Execute("/p:RuntimeIdentifier=win-arm64")
+                .Should()
+                .Pass();
+
+            var selfContainedPublishDir = new DirectoryInfo(testDirectory)
+                .Sub("bin").Sub("Debug").GetDirectories().FirstOrDefault()
+                .Sub("win-arm64").Sub("publish");
+
+            selfContainedPublishDir.Should().HaveFilesMatching("System.Windows.Forms.dll", SearchOption.TopDirectoryOnly);
+            selfContainedPublishDir.Should().HaveFilesMatching($"{new DirectoryInfo(testDirectory).Name}.dll", SearchOption.TopDirectoryOnly);
+        }
+
+       [WindowsOnlyFact]
+        public void ItCantPublishArm64Wpf()
+        {
+            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+
+            var newCommand = new DotnetCommand(Log, "new", "wpf", "--no-restore");
+            newCommand.WorkingDirectory = testDirectory;
+            newCommand.Execute().Should().Pass();
+
+            new PublishCommand(Log, testDirectory)
+                .Execute("/p:RuntimeIdentifier=win-arm64")
+                .Should()
+                .Fail();
         }
     }
 }
