@@ -5,17 +5,9 @@ VisualStudioVersion = 16.0.29417.175
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{50A89C27-BA35-44B2-AC57-E54551791C64}"
 	ProjectSection(SolutionItems) = preProject
-		build\build.ps1 = build\build.ps1
-		build\build.sh = build\build.sh
-		build\cibuild.cmd = build\cibuild.cmd
-		build\cibuild.sh = build\cibuild.sh
-		build\dogfood.cmd = build\dogfood.cmd
-		build\dogfood.sh = build\dogfood.sh
-		build\NuGet.props = build\NuGet.props
-		build\SignToolData.json = build\SignToolData.json
-		build\Toolset.proj = build\Toolset.proj
-		build\uploadperfresult.cmd = build\uploadperfresult.cmd
-		build\Versions.props = build\Versions.props
+		eng\dogfood.cmd = eng\dogfood.cmd
+		eng\dogfood.sh = eng\dogfood.sh
+		eng\Versions.props = eng\Versions.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9CAEE03D-60F1-4E77-B25B-9CD8757E1F09}"
@@ -25,9 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		build.cmd = build.cmd
 		build.sh = build.sh
 		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
 		LICENSE.TXT = LICENSE.TXT
-		netci.groovy = netci.groovy
-		perf.groovy = perf.groovy
 		README.md = README.md
 		restore.cmd = restore.cmd
 		restore.sh = restore.sh
@@ -36,10 +27,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{22AB674F-ED91-4FBC-BFEE-8A1E82F9F05E}"
-	ProjectSection(SolutionItems) = preProject
-		src\Directory.Build.props = src\Directory.Build.props
-		src\Directory.Build.targets = src\Directory.Build.targets
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tasks", "Tasks", "{1FEED16D-E07D-47C1-BB4C-56CD9F42B53B}"
 EndProject
