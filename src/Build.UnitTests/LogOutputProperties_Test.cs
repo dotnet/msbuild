@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests
 
             Hashtable items = new Hashtable();
             Microsoft.Build.Utilities.TaskItem task = new Microsoft.Build.Utilities.TaskItem("frame");
-            items.Add("LogOutputProperties", task);
+            items.Add("MSBuildProjectConfigurationDescription", task);
             ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, items, new BuildEventContext(1, 2, 3, 4));
             pse.BuildEventContext = bec;
             L.ProjectStartedHandler(bec, pse);
@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests
 
             Hashtable items = new Hashtable();
             Microsoft.Build.Utilities.TaskItem task = new Microsoft.Build.Utilities.TaskItem("frame");
-            items.Add("LogOutputProperties", task);
+            items.Add("MSBuildProjectConfigurationDescription", task);
             ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, items, new BuildEventContext(1, 2, 3, 4));
             pse.BuildEventContext = bec;
             L.ProjectStartedHandler(bec, pse);
@@ -82,9 +82,9 @@ namespace Microsoft.Build.UnitTests
 
             List<DictionaryEntry> items = new List<DictionaryEntry>();
             Microsoft.Build.Utilities.TaskItem task = new Microsoft.Build.Utilities.TaskItem("frame");
-            items.Add(new DictionaryEntry("LogOutputProperties", task));
+            items.Add(new DictionaryEntry("MSBuildProjectConfigurationDescription", task));
             Microsoft.Build.Utilities.TaskItem task2 = new Microsoft.Build.Utilities.TaskItem("schema");
-            items.Add(new DictionaryEntry("LogOutputProperties", task2));
+            items.Add(new DictionaryEntry("MSBuildProjectConfigurationDescription", task2));
             ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, items, new BuildEventContext(1, 2, 3, 4));
             pse.BuildEventContext = bec;
             L.ProjectStartedHandler(bec, pse);
