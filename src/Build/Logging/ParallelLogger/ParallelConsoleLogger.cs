@@ -549,20 +549,20 @@ namespace Microsoft.Build.BackEnd.Logging
             int projectContextId = e.BuildEventContext.ProjectContextId;
 
             // Create the value to be added to the propertyOutputMap
-            StringBuilder logOutputProperties = new StringBuilder();
+            StringBuilder msBuildProjectConfigurationDescription = new StringBuilder();
 
             foreach (DictionaryEntry item in e.Items)
             {
                 ITaskItem itemVal = (ITaskItem)item.Value;
                 // Determine if the LogOutputProperties item has been used
-                if (string.Equals((string)item.Key, "LogOutputProperties", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals((string)item.Key, ItemMetadataNames.MSBuildProjectConfigurationDescription, StringComparison.OrdinalIgnoreCase))
                 {
                     // Add the item value to the string to be printed in error/warning messages
-                    logOutputProperties.Append(" ").Append(itemVal.ItemSpec);
+                    msBuildProjectConfigurationDescription.Append(" ").Append(itemVal.ItemSpec);
                 }
             }
             // Add the finished dictionary to propertyOutputMap
-            propertyOutputMap.Add((nodeID, projectContextId), logOutputProperties.ToString());
+            propertyOutputMap.Add((nodeID, projectContextId), msBuildProjectConfigurationDescription.ToString());
         }
 
         /// <summary>
@@ -948,14 +948,14 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="e"> the build event where the LogOutPutProperty string will be added</param>
         internal string FindLogOutputProperties(LazyFormattedBuildEventArgs e)
         {
-            string logOutputProperties = String.Empty;
+            string msBuildProjectConfigurationDescription = String.Empty;
             if (e.BuildEventContext != null)
             {
                 int nodeId = e.BuildEventContext.NodeId;
                 int projectContextId = e.BuildEventContext.ProjectContextId;
-                propertyOutputMap.TryGetValue((nodeId, projectContextId), out logOutputProperties);
+                propertyOutputMap.TryGetValue((nodeId, projectContextId), out msBuildProjectConfigurationDescription);
             }
-            return logOutputProperties;
+            return msBuildProjectConfigurationDescription;
         }
 
         /// <summary>
