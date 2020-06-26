@@ -204,6 +204,11 @@ namespace Microsoft.Build.Graph.UnitTests
             AssertSolutionBasedGraph(edges, currentSolutionConfiguration, solutionConfigurations);
         }
 
+        private void Log(string message)
+        {
+            _env.Output.WriteLine($"[{DateTime.Now}]: message");
+        }
+
         [Theory]
         [MemberData(nameof(GraphsWithUniformSolutionConfigurations))]
         public void SolutionBasedGraphCanMatchProjectSpecificConfigurations(
@@ -211,8 +216,13 @@ namespace Microsoft.Build.Graph.UnitTests
             SolutionConfigurationInSolution currentSolutionConfiguration,
             IReadOnlyCollection<SolutionConfigurationInSolution> solutionConfigurations)
         {
-            var graph = CreateProjectGraph(_env, edges);
+            Log("enter SolutionBasedGraphCanMatchProjectSpecificConfigurations");
 
+            Log("enter create graph 1");
+            var graph = CreateProjectGraph(_env, edges);
+            Log("exit create graph 1");
+
+            Log("enter solution builder");
             var projectSpecificConfigurations = graph.ProjectNodes.ToDictionary(
                 node => GetProjectNumber(node).ToString(),
                 n => solutionConfigurations.ToDictionary(
@@ -221,8 +231,11 @@ namespace Microsoft.Build.Graph.UnitTests
                         configurationName: $"{sc.ConfigurationName}_{GetProjectNumber(n)}",
                         platformName: $"{sc.PlatformName}_{GetProjectNumber(n)}",
                         includeInBuild: true)));
+            Log("exit solution builder");
 
             AssertSolutionBasedGraph(edges, currentSolutionConfiguration, solutionConfigurations, projectSpecificConfigurations);
+
+            Log("exit SolutionBasedGraphCanMatchProjectSpecificConfigurations");
         }
 
         [Fact]
@@ -658,12 +671,21 @@ namespace Microsoft.Build.Graph.UnitTests
             IReadOnlyCollection<SolutionConfigurationInSolution> solutionConfigurations,
             Dictionary<string, Dictionary<SolutionConfigurationInSolution, ProjectConfigurationInSolution>> projectConfigurations = null)
         {
+            Log("enter AssertSolutionBasedGraph");
+
+            Log("enter graph 2");
             var graph = CreateProjectGraph(_env, edges);
+            Log("exit graph 2");
+
             var graphEdges = graph.TestOnly_Edges.TestOnly_AsConfigurationMetadata();
 
+            Log("enter SolutionFileBuilder.FromGraph");
             var solutionFileBuilder = SolutionFileBuilder.FromGraph(graph, projectConfigurations);
+            Log("exit SolutionFileBuilder.FromGraph");
 
+            Log("enter solutionFileBuilder.BuildSolution");
             var solutionContents = solutionFileBuilder.BuildSolution();
+            Log("exit solutionFileBuilder.BuildSolution");
 
             var solutionPath = _env.CreateFile("TheSolution.sln", solutionContents).Path;
             var globalProperties = currentSolutionConfiguration != null
@@ -674,11 +696,13 @@ namespace Microsoft.Build.Graph.UnitTests
                 }
                 : new Dictionary<string, string>();
 
+            Log("enter graph 3");
             var graphFromSolution = new ProjectGraph(
                 new ProjectGraphEntryPoint(
                     solutionPath,
                     globalProperties),
                 _env.CreateProjectCollection().Collection);
+            Log("exit graph 3");
 
             // in the solution, all nodes are entry points
             graphFromSolution.EntryPointNodes.Select(GetProjectPath)
@@ -712,6 +736,8 @@ namespace Microsoft.Build.Graph.UnitTests
                     GetPlatform(node).ShouldBe(GetPlatform(node.ReferencingProjects.First()));
                 }
             }
+
+            Log("exit AssertSolutionBasedGraph");
         }
 
         private static string GetConfiguration(ProjectGraphNode node)
