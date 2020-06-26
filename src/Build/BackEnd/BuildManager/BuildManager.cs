@@ -1446,6 +1446,13 @@ namespace Microsoft.Build.Execution
                         });
                 }
 
+                LogMessage(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "StaticGraphConstructionMetrics",
+                        Math.Round(projectGraph.ConstructionMetrics.ConstructionTime.TotalSeconds, 3),
+                        projectGraph.ConstructionMetrics.NodeCount,
+                        projectGraph.ConstructionMetrics.EdgeCount));
+
                 IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames);
 
                 var waitHandle = new AutoResetEvent(true);
@@ -2497,6 +2504,13 @@ namespace Microsoft.Build.Execution
                 CancelAndMarkAsFailure();
                 throw;
             }
+        }
+
+        private void LogMessage(string message)
+        {
+            var loggingService = ((IBuildComponentHost)this).LoggingService;
+
+            loggingService?.LogCommentFromText(BuildEventContext.Invalid, MessageImportance.High, message);
         }
 
         private void LogErrorAndShutdown(string message)

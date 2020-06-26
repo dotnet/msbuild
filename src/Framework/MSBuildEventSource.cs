@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -397,6 +398,18 @@ namespace Microsoft.Build.Eventing
         public void ExecuteTaskReacquireStop(string taskName, int taskID)
         {
             WriteEvent(52, taskName, taskID);
+        }
+
+        [Event(53)]
+        public void ProjectGraphConstructionStart(string graphEntryPoints)
+        {
+            WriteEvent(53, graphEntryPoints);
+        }
+
+        [Event(54)]
+        public void ProjectGraphConstructionStop(string graphEntryPoints)
+        {
+            WriteEvent(54, graphEntryPoints);
         }
         #endregion
     }
