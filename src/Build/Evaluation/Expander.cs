@@ -3929,6 +3929,11 @@ namespace Microsoft.Build.Evaluation
                                 returnVal = IntrinsicFunctions.GetTargetFrameworkVersion(arg0);
                                 return true;
                             }
+                            if (TryGetArgs(args, out string arg1, out int arg2))
+                            {
+                                returnVal = IntrinsicFunctions.GetTargetFrameworkVersion(arg1, arg2);
+                                return true;
+                            }
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.IsTargetFrameworkCompatible), StringComparison.OrdinalIgnoreCase))
                         {
@@ -3951,6 +3956,11 @@ namespace Microsoft.Build.Evaluation
                             if (TryGetArg(args, out string arg0))
                             {
                                 returnVal = IntrinsicFunctions.GetTargetPlatformVersion(arg0);
+                                return true;
+                            }
+                            if (TryGetArgs(args, out string arg1, out int arg2))
+                            {
+                                returnVal = IntrinsicFunctions.GetTargetPlatformVersion(arg1, arg2);
                                 return true;
                             }
                         }

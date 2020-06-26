@@ -2877,6 +2877,29 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Theory]
+        [InlineData("net45", 2, "4.5")]
+        [InlineData("net45", 3, "4.5.0")]
+        [InlineData("net472", 3, "4.7.2")]
+        public void PropertyFunctionTargetFrameworkVersionMultipartParsing(string tfm, int versionPartCount, string expectedVersion)
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            AssertSuccess(expander, expectedVersion, $"$([MSBuild]::GetTargetFrameworkVersion('{tfm}', {versionPartCount}))");
+        }
+
+        [Theory]
+        [InlineData("net5.0-windows10.1.2.3", 4, "10.1.2.3")]
+        [InlineData("net5.0-windows10.1.2.3", 2, "10.1")]
+        public void PropertyFunctionTargetPlatformVersionMultipartParsing(string tfm, int versionPartCount, string expectedVersion)
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            AssertSuccess(expander, expectedVersion, $"$([MSBuild]::GetTargetPlatformVersion('{tfm}', {versionPartCount}))");
+        }
+
+        [Theory]
         [InlineData("net5.0-ios12.0", "ios", "12.0")]
         [InlineData("net5.1-android1.1", "android", "1.1")]
         [InlineData("net6.0-windows99.99", "windows", "99.99")]

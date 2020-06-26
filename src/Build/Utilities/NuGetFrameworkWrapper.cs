@@ -60,9 +60,9 @@ namespace Microsoft.Build.Evaluation
             return FrameworkProperty.GetValue(Parse(tfm)) as string;
         }
 
-        public string GetTargetFrameworkVersion(string tfm)
+        public string GetTargetFrameworkVersion(string tfm, int versionPartCount)
         {
-            return (VersionProperty.GetValue(Parse(tfm)) as Version).ToString(2);
+            return (VersionProperty.GetValue(Parse(tfm)) as Version).ToString(versionPartCount);
         }
 
         public string GetTargetPlatformIdentifier(string tfm)
@@ -70,9 +70,9 @@ namespace Microsoft.Build.Evaluation
             return PlatformProperty.GetValue(Parse(tfm)) as string;
         }
 
-        public string GetTargetPlatformVersion(string tfm)
+        public string GetTargetPlatformVersion(string tfm, int versionPartCount)
         {
-            return (PlatformVersionProperty.GetValue(Parse(tfm)) as Version).ToString(2);
+            return (PlatformVersionProperty.GetValue(Parse(tfm)) as Version).ToString(versionPartCount);
         }
 
         public bool IsCompatible(string target, string candidate)
