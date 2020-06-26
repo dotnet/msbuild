@@ -20,14 +20,14 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp3.1", "Windows", "7.0")] // Default values pre-5.0
-        [InlineData("net5.0-windows", "Windows", "7.0")] // Depends on https://github.com/dotnet/wpf/pull/3177
-        [InlineData("net5.0-android", "Android", "0.0")] // We don't set a default version for android
-        [InlineData("net5.0-ios1.1", "iOS", "1.1")]
-        [InlineData("net5.0-macos7.0", "MacOS", "7.0")]
-        [InlineData("net5.0-windows10.0", "Windows", "10.0")]
-        [InlineData("net5.0-ios14.0", "iOS", "14.0")]
-        public void It_defines_target_platform_from_target_framework(string targetFramework, string expectedTargetPlatformIdentifier, string expectedTargetPlatformVersion)
+        [InlineData("netcoreapp3.1", ".NETCoreApp", "v3.1", "Windows", "7.0")] // Default values pre-5.0
+        [InlineData("net5.0-windows", ".NETCoreApp", "v5.0", "Windows", "7.0")] // Depends on https://github.com/dotnet/wpf/pull/3177
+        [InlineData("net5.0-android", ".NETCoreApp", "v5.0", "Android", "0.0")] // We don't set a default version for android
+        [InlineData("net5.0-ios1.1", ".NETCoreApp", "v5.0", "iOS", "1.1")]
+        [InlineData("net5.0-macos7.0", ".NETCoreApp", "v5.0", "MacOS", "7.0")]
+        [InlineData("net5.0-windows10.0", ".NETCoreApp", "v5.0", "Windows", "10.0")]
+        [InlineData("net5.0-ios14.0", ".NETCoreApp", "v5.0", "iOS", "14.0")]
+        public void It_defines_target_platform_from_target_framework(string targetFramework, string expectedTargetFrameworkIdentifier, string expectedTargetFrameworkVersion, string expectedTargetPlatformIdentifier, string expectedTargetPlatformVersion)
         {
             var testProj = new TestProject()
             {
@@ -52,6 +52,9 @@ namespace Microsoft.NET.Build.Tests
                 values[0].ToUpperInvariant().Should().Be(expected.ToUpperInvariant());
             };
 
+            assertValue("TargetFrameworkIdentifier", expectedTargetFrameworkIdentifier);
+            assertValue("TargetFrameworkVersion", expectedTargetFrameworkVersion);
+            assertValue("TargetPlatformIdentifier", expectedTargetPlatformIdentifier);
             assertValue("TargetPlatformIdentifier", expectedTargetPlatformIdentifier);
             assertValue("TargetPlatformVersion", expectedTargetPlatformVersion);
             assertValue("TargetPlatformMoniker", $"{expectedTargetPlatformIdentifier},Version={expectedTargetPlatformVersion}");
