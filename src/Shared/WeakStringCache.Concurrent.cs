@@ -73,7 +73,7 @@ namespace Microsoft.Build
             handle.SetString(result);
             if (!_stringsByHashCode.TryAdd(hashCode, handle))
             {
-                // If somebody beat us to it and the handle has not been added, free it.
+                // Another thread has managed to add a handle for the same hash code, so the one we got can be freed.
                 handle.Free();
             }
 
