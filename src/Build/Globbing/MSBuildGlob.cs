@@ -19,7 +19,7 @@ namespace Microsoft.Build.Globbing
     /// </summary>
     public class MSBuildGlob : IMSBuildGlob
     {
-        private struct GlobState
+        private readonly struct GlobState
         {
             public string GlobRoot { get; }
             public string FileSpec { get; }
@@ -222,7 +222,7 @@ namespace Microsoft.Build.Globbing
                                 s_regexCache[matchFileExpression] = newRegex;
                             }
                         }
-                        regex = regex ?? newRegex;
+                        regex ??= newRegex;
                     }
                 }
                 return new GlobState(globRoot, fileSpec, isLegalFileSpec, fixedDirectoryPart, wildcardDirectoryPart, filenamePart, matchFileExpression, needsRecursion, regex);
