@@ -448,9 +448,9 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData(new[] { "iOS,Version=v1.0", "iOS,Version=v1.1" }, "1.0", "ios", "1.1", new[] { "IOS", "IOS1_1", "IOS1_0" })]
-        [InlineData(new[] { "Andriod,Version=v10.10", "Android,Version=v11.11", "Andriod,Version=v12.12", "Android,Version=v13.13" }, "11.11", "android", "12.12", new[] { "ANDROID", "ANDROID11_11", "ANDROID12_12" })]
-        [InlineData(new[] { "Windows,Version=v7.0", "Windows,Version=v8.0", "Andriod,Version=v1.0", "iOS,Version=v1.0" }, "1.0", "windows", "8.0", new[] { "WINDOWS", "WINDOWS7_0", "WINDOWS8_0" })]
+        [InlineData(new[] { "1.0", "1.1" }, "1.0", "ios", "1.1", new[] { "IOS", "IOS1_1", "IOS1_0" })]
+        [InlineData(new[] { "10.10", "11.11", "12.12", "13.13" }, "11.11", "android", "12.12", new[] { "ANDROID", "ANDROID11_11", "ANDROID12_12" })]
+        [InlineData(new[] { "7.0", "8.0", "10.0.19041", "11.0.0" }, "1.0", "windows", "11.0.0", new[] { "WINDOWS", "WINDOWS7_0", "WINDOWS8_0", "WINDOWS10_0_19041", "WINDOWS11_0_0" })]
         public void It_implicitly_defines_compilation_constants_for_the_target_platform_with_backwards_compatibility(string[] supportedTargetPlatform, string targetPlatformMinVersion, string targetPlatformIdentifier, string targetPlatformVersion, string[] expectedDefines)
         {
             var targetFramework = "net5.0";
