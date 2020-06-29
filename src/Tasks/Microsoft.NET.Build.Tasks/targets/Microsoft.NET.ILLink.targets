@@ -100,7 +100,6 @@ Copyright (c) .NET Foundation. All rights reserved.
             BeforeFieldInit="$(_TrimmerBeforeFieldInit)"
             OverrideRemoval="$(_TrimmerOverrideRemoval)"
             UnreachableBodies="$(_TrimmerUnreachableBodies)"
-            ClearInitLocals="$(_TrimmerClearInitLocals)"
             UnusedInterfaces="$(_TrimmerUnusedInterfaces)"
             IPConstProp="$(_TrimmerIPConstProp)"
             Sealer="$(_TrimmerSealer)"

@@ -218,7 +218,6 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData("_TrimmerBeforeFieldInit")]
         [InlineData("_TrimmerOverrideRemoval")]
         [InlineData("_TrimmerUnreachableBodies")]
-        [InlineData("_TrimmerClearInitLocals")]
         [InlineData("_TrimmerUnusedInterfaces")]
         [InlineData("_TrimmerIPConstProp")]
         [InlineData("_TrimmerSealer")]
