@@ -354,14 +354,11 @@ namespace Microsoft.Build.BackEnd
                     // Wait for a connection
 #if FEATURE_APM
                     IAsyncResult resultForConnection = localPipeServer.BeginWaitForConnection(null, null);
-#else
-                    Task connectionTask = localPipeServer.WaitForConnectionAsync();
-#endif
                     CommunicationsUtilities.Trace("Waiting for connection {0} ms...", waitTimeRemaining);
-
-#if FEATURE_APM
                     bool connected = resultForConnection.AsyncWaitHandle.WaitOne(waitTimeRemaining, false);
 #else
+                    Task connectionTask = localPipeServer.WaitForConnectionAsync();
+                    CommunicationsUtilities.Trace("Waiting for connection {0} ms...", waitTimeRemaining);
                     bool connected = connectionTask.Wait(waitTimeRemaining);
 #endif
                     if (!connected)
@@ -383,21 +380,6 @@ namespace Microsoft.Build.BackEnd
                     Handshake handshake = GetHandshake();
                     try
                     {
-#if FEATURE_SECURITY_PERMISSIONS
-                        // We will only talk to a host that was started by the same user as us.  Even though the pipe access is set to only allow this user, we want to ensure they
-                        // haven't attempted to change those permissions out from under us.  This ensures that the only way they can truly gain access is to be impersonating the
-                        // user we were started by.
-                        WindowsIdentity currentIdentity = WindowsIdentity.GetCurrent();
-                        WindowsIdentity clientIdentity = null;
-                        localPipeServer.RunAsClient(delegate () { clientIdentity = WindowsIdentity.GetCurrent(true); });
-
-                        if (clientIdentity == null || !String.Equals(clientIdentity.Name, currentIdentity.Name, StringComparison.OrdinalIgnoreCase))
-                        {
-                            CommunicationsUtilities.Trace("Handshake failed. Host user is {0} but we were created by {1}.", (clientIdentity == null) ? "<unknown>" : clientIdentity.Name, currentIdentity.Name);
-                            localPipeServer.Disconnect();
-                            continue;
-                        }
-#endif
                         int index = 1;
                         foreach (int part in handshake.RetrieveHandshakeComponents())
                         {
@@ -425,7 +407,7 @@ namespace Microsoft.Build.BackEnd
                         // previous "accept" magic number so that the provider knows this is beyond the end of the handshake for the endpoint as well.
                         if (gotValidConnection)
                         {
-                            if (localReadPipe.ReadIntForHandshake(0x01 /* this will disconnect a < 4.5 host; it expects leading 00 or F5 or 06 */
+                            if (localReadPipe.ReadIntForHandshake(0x00 /* this will disconnect a < 4.5 host; it expects leading 00 or F5 or 06 */
 #if NETCOREAPP2_1 || MONO
                             , ClientConnectTimeout /* wait a long time for the handshake from this side */
 #endif
@@ -433,6 +415,22 @@ namespace Microsoft.Build.BackEnd
                             {
                                 CommunicationsUtilities.Trace("Successfully connected to parent.");
                                 localWritePipe.WriteIntForHandshake(0x12812812);
+
+#if FEATURE_SECURITY_PERMISSIONS
+                                // We will only talk to a host that was started by the same user as us.  Even though the pipe access is set to only allow this user, we want to ensure they
+                                // haven't attempted to change those permissions out from under us.  This ensures that the only way they can truly gain access is to be impersonating the
+                                // user we were started by.
+                                WindowsIdentity currentIdentity = WindowsIdentity.GetCurrent();
+                                WindowsIdentity clientIdentity = null;
+                                localPipeServer.RunAsClient(delegate () { clientIdentity = WindowsIdentity.GetCurrent(true); });
+
+                                if (clientIdentity == null || !String.Equals(clientIdentity.Name, currentIdentity.Name, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    CommunicationsUtilities.Trace("Handshake failed. Host user is {0} but we were created by {1}.", (clientIdentity == null) ? "<unknown>" : clientIdentity.Name, currentIdentity.Name);
+                                    localPipeServer.Disconnect();
+                                    continue;
+                                }
+#endif
                             }
                             else
                             {
