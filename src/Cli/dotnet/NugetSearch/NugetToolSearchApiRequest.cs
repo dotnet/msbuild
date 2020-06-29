@@ -7,6 +7,8 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using NuGet.Protocol;
+using NuGet.Protocol.Core.Types;
 
 namespace Microsoft.DotNet.NugetSearch
 {
@@ -14,7 +16,7 @@ namespace Microsoft.DotNet.NugetSearch
     {
         public async Task<string> GetResult(NugetSearchApiParameter nugetSearchApiParameter)
         {
-            var queryUrl = ConstructUrl(
+            var queryUrl = await ConstructUrl(
                 nugetSearchApiParameter.SearchTerm,
                 nugetSearchApiParameter.Skip,
                 nugetSearchApiParameter.Take,
@@ -42,10 +44,10 @@ namespace Microsoft.DotNet.NugetSearch
             return await response.Content.ReadAsStringAsync(cancellation.Token);
         }
 
-        internal static Uri ConstructUrl(string searchTerm = null, int? skip = null, int? take = null,
-            bool prerelease = false)
+        internal static async Task<Uri> ConstructUrl(string searchTerm = null, int? skip = null, int? take = null,
+            bool prerelease = false, Uri domainAndPathOverride = null)
         {
-            var uriBuilder = new UriBuilder("https://azuresearch-usnc.nuget.org/query");
+            var uriBuilder = new UriBuilder(domainAndPathOverride ?? await DomainAndPath());
             NameValueCollection query = HttpUtility.ParseQueryString(uriBuilder.Query);
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
@@ -76,6 +78,15 @@ namespace Microsoft.DotNet.NugetSearch
             uriBuilder.Query = query.ToString();
 
             return uriBuilder.Uri;
+        }
+
+        // More detail on this API https://github.com/dotnet/sdk/issues/12038
+        private static async Task<Uri> DomainAndPath()
+        {
+            var repository = Repository.Factory.GetCoreV3("https://api.nuget.org/v3/index.json");
+            var resource = await repository.GetResourceAsync<ServiceIndexResourceV3>();
+            var uris = resource.GetServiceEntryUris("SearchQueryService/3.5.0");
+            return uris[0];
         }
     }
 }
