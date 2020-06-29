@@ -2,22 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 #if CLR2COMPATIBILITY
 using Microsoft.Build.Shared.Concurrent;
 #else
 using System.Collections.Concurrent;
 #endif
-using System.Globalization;
-using System.Text;
 using System.IO;
 using System.IO.Pipes;
 using System.Threading;
-using System.Diagnostics;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using System.Security;
 #if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
 using System.Security.AccessControl;
 #endif
