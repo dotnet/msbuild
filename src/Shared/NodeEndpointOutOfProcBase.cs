@@ -395,7 +395,7 @@ namespace Microsoft.Build.BackEnd
                         {
                             // To ensure that our handshake and theirs have the same number of bytes, receive and send a magic number indicating EOS.
 #if NETCOREAPP2_1 || MONO
-                            _pipeServer.ReadEndOfHandshakeSignal(ClientConnectTimeout); /* wait a long time for the handshake from this side */
+                            _pipeServer.ReadEndOfHandshakeSignal(false, ClientConnectTimeout); /* wait a long time for the handshake from this side */
 #else
                             _pipeServer.ReadEndOfHandshakeSignal(false);
 #endif

@@ -59,6 +59,50 @@ namespace Microsoft.Build.Internal
         Administrator = 32
     }
 
+    internal readonly struct Handshake
+    {
+        readonly int options;
+        readonly int salt;
+        readonly int fileVersionMajor;
+        readonly int fileVersionMinor;
+        readonly int fileVersionBuild;
+        readonly int fileVersionPrivate;
+        readonly int sessionId;
+
+        internal Handshake(HandshakeOptions nodeType)
+        {
+            // We currently use 6 bits of this 32-bit integer. Very old builds will instantly reject any handshake that does not start with F5 or 06; slightly old builds always lead with 00.
+            // This indicates in the first byte that we are a modern build.
+            options = (int)nodeType | 0x01000000;
+            string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
+            string toolsDirectory = (nodeType & HandshakeOptions.X64) == HandshakeOptions.X64 ? BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64 : BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
+            salt = CommunicationsUtilities.GetHandshakeHashCode(handshakeSalt + toolsDirectory);
+            Version fileVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
+            fileVersionMajor = fileVersion.Major;
+            fileVersionMinor = fileVersion.Minor;
+            fileVersionBuild = fileVersion.Build;
+            fileVersionPrivate = fileVersion.Revision;
+            sessionId = Process.GetCurrentProcess().SessionId;
+        }
+
+        // This is used as a key, so it does not need to be human readable.
+        public override string ToString()
+        {
+            return string.Empty + options + salt + fileVersionMajor + fileVersionMinor + fileVersionBuild + fileVersionPrivate + sessionId;
+        }
+
+        internal IEnumerable<int> RetrieveHandshakeComponents()
+        {
+            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(options);
+            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(salt);
+            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMajor);
+            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMinor);
+            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionBuild);
+            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionPrivate);
+            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(sessionId);
+        }
+    }
+
     /// <summary>
     /// This class contains utility methods for the MSBuild engine.
     /// </summary>
@@ -285,7 +329,7 @@ namespace Microsoft.Build.Internal
             // Accept only the first byte of the EndOfHandshakeSignal
             int valueRead = stream.ReadIntForHandshake(EndOfHandshakeSignal & 0xFF
 #if NETCOREAPP2_1 || MONO
-            , int timeout
+            , timeout
 #endif
                 );
 
@@ -570,50 +614,6 @@ namespace Microsoft.Build.Internal
         internal static int AvoidEndOfHandshakeSignal(int x)
         {
             return x == EndOfHandshakeSignal ? ~x : x;
-        }
-    }
-
-    internal readonly struct Handshake
-    {
-        readonly int options;
-        readonly int salt;
-        readonly int fileVersionMajor;
-        readonly int fileVersionMinor;
-        readonly int fileVersionBuild;
-        readonly int fileVersionPrivate;
-        readonly int sessionId;
-
-        internal Handshake(HandshakeOptions nodeType)
-        {
-            // We currently use 6 bits of this 32-bit integer. Very old builds will instantly reject any handshake that does not start with F5 or 06; slightly old builds always lead with 00.
-            // This indicates in the first byte that we are a modern build.
-            options = (int)nodeType | 0x01000000;
-            string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
-            string toolsDirectory = (nodeType & HandshakeOptions.X64) == HandshakeOptions.X64 ? BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64 : BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
-            salt = CommunicationsUtilities.GetHandshakeHashCode(handshakeSalt + toolsDirectory);
-            Version fileVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
-            fileVersionMajor = fileVersion.Major;
-            fileVersionMinor = fileVersion.Minor;
-            fileVersionBuild = fileVersion.Build;
-            fileVersionPrivate = fileVersion.Revision;
-            sessionId = Process.GetCurrentProcess().SessionId;
-        }
-
-        // This is used as a key, so it does not need to be human readable.
-        public override string ToString()
-        {
-            return string.Empty + options + salt + fileVersionMajor + fileVersionMinor + fileVersionBuild + fileVersionPrivate + sessionId;
-        }
-
-        internal IEnumerable<int> RetrieveHandshakeComponents()
-        {
-            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(options);
-            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(salt);
-            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMajor);
-            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMinor);
-            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionBuild);
-            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionPrivate);
-            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(sessionId);
         }
     }
 }
