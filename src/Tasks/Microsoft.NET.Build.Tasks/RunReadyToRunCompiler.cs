@@ -21,6 +21,7 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] ImplementationAssemblyReferences { get; set; }
         public bool ShowCompilerWarnings { get; set; }
         public bool UseCrossgen2 { get; set; }
+        public bool Crossgen2Composite { get; set; }
         public string Crossgen2ExtraCommandLineArgs { get; set; }
 
         [Output]
@@ -190,15 +191,35 @@ namespace Microsoft.NET.Build.Tasks
 
             result.AppendLine("-O");
             result.AppendLine($"--jitpath:\"{Crossgen2Tool.GetMetadata("JitPath")}\"");
-            result.Append(GetAssemblyReferencesCommands());
-            result.AppendLine($"--out:\"{_outputR2RImage}\"");
-            if (!String.IsNullOrEmpty(Crossgen2ExtraCommandLineArgs))
+            if (Crossgen2Composite)
             {
-                result.AppendLine(Crossgen2ExtraCommandLineArgs);
+                result.AppendLine("--composite");
+                result.AppendLine("--inputbubble");
+                result.AppendLine($"--out:\"{_outputR2RImage}\"");
+                if (!String.IsNullOrEmpty(Crossgen2ExtraCommandLineArgs))
+                {
+                    result.AppendLine(Crossgen2ExtraCommandLineArgs);
+                }
+
+                // Note: do not add double quotes around the input assembly, even if the file path contains spaces. The command line 
+                // parsing logic will append this string to the working directory if it's a relative path, so any double quotes will result in errors.
+                foreach (var reference in ImplementationAssemblyReferences)
+                {
+                    result.AppendLine(reference.ItemSpec);
+                }
             }
-            // Note: do not add double quotes around the input assembly, even if the file path contains spaces. The command line 
-            // parsing logic will append this string to the working directory if it's a relative path, so any double quotes will result in errors.
-            result.AppendLine($"{_inputAssembly}");
+            else
+            {
+                result.Append(GetAssemblyReferencesCommands());
+                result.AppendLine($"--out:\"{_outputR2RImage}\"");
+                if (!String.IsNullOrEmpty(Crossgen2ExtraCommandLineArgs))
+                {
+                    result.AppendLine(Crossgen2ExtraCommandLineArgs);
+                }
+                // Note: do not add double quotes around the input assembly, even if the file path contains spaces. The command line 
+                // parsing logic will append this string to the working directory if it's a relative path, so any double quotes will result in errors.
+                result.AppendLine($"{_inputAssembly}");
+            }
 
             return result.ToString();
         }

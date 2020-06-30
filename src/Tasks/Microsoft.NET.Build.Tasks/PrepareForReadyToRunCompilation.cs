@@ -17,10 +17,13 @@ namespace Microsoft.NET.Build.Tasks
 {
     public class PrepareForReadyToRunCompilation : TaskBase
     {
+        [Required]
+        public ITaskItem MainAssembly { get; set; }
         public ITaskItem[] Assemblies { get; set; }
         public string[] ExcludeList { get; set; }
         public bool EmitSymbols { get; set; }
         public bool ReadyToRunUseCrossgen2 { get; set; }
+        public bool Crossgen2Composite { get; set; }
 
         [Required]
         public string OutputPath { get; set; }
@@ -72,8 +75,9 @@ namespace Microsoft.NET.Build.Tasks
             {
                 return;
             }
-            
-            var exclusionSet = ExcludeList == null ? null : new HashSet<string>(ExcludeList, StringComparer.OrdinalIgnoreCase);
+
+            // TODO: ExcludeList for composite mode
+            var exclusionSet = ExcludeList == null || Crossgen2Composite ? null : new HashSet<string>(ExcludeList, StringComparer.OrdinalIgnoreCase);
 
             foreach (var file in inputFiles)
             {
@@ -86,7 +90,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 r2rReferenceList.Add(file);
 
-                if (eligibility == Eligibility.ReferenceOnly)
+                if (!Crossgen2Composite && (eligibility == Eligibility.ReferenceOnly))
                 {
                     continue;
                 }
@@ -94,12 +98,34 @@ namespace Microsoft.NET.Build.Tasks
                 var outputR2RImageRelativePath = file.GetMetadata(MetadataKeys.RelativePath);
                 var outputR2RImage = Path.Combine(OutputPath, outputR2RImageRelativePath);
 
-                // This TaskItem is the IL->R2R entry, for an input assembly that needs to be compiled into a R2R image. This will be used as
-                // an input to the ReadyToRunCompiler task
-                TaskItem r2rCompilationEntry = new TaskItem(file);
-                r2rCompilationEntry.SetMetadata("OutputR2RImage", outputR2RImage);
-                r2rCompilationEntry.RemoveMetadata(MetadataKeys.OriginalItemSpec);
-                imageCompilationList.Add(r2rCompilationEntry);
+                if (!Crossgen2Composite)
+                {
+                    // This TaskItem is the IL->R2R entry, for an input assembly that needs to be compiled into a R2R image. This will be used as
+                    // an input to the ReadyToRunCompiler task
+                    TaskItem r2rCompilationEntry = new TaskItem(file);
+                    r2rCompilationEntry.SetMetadata("OutputR2RImage", outputR2RImage);
+                    r2rCompilationEntry.RemoveMetadata(MetadataKeys.OriginalItemSpec);
+                    imageCompilationList.Add(r2rCompilationEntry);
+                }
+                else if (file.ItemSpec == MainAssembly.ItemSpec)
+                {
+                    // Create a TaskItem for <MainAssembly>.r2r.dll
+                    var compositeR2RImageRelativePath = file.GetMetadata(MetadataKeys.RelativePath);
+                    compositeR2RImageRelativePath = Path.ChangeExtension(compositeR2RImageRelativePath, "r2r" + Path.GetExtension(compositeR2RImageRelativePath));
+                    var compositeR2RImage = Path.Combine(OutputPath, compositeR2RImageRelativePath);
+
+                    TaskItem r2rCompilationEntry = new TaskItem(file);
+                    r2rCompilationEntry.SetMetadata("OutputR2RImage", compositeR2RImage);
+                    r2rCompilationEntry.RemoveMetadata(MetadataKeys.OriginalItemSpec);
+                    imageCompilationList.Add(r2rCompilationEntry);
+
+                    // Publish it
+                    TaskItem compositeR2RFileToPublish = new TaskItem(file);
+                    compositeR2RFileToPublish.ItemSpec = compositeR2RImage;
+                    compositeR2RFileToPublish.RemoveMetadata(MetadataKeys.OriginalItemSpec);
+                    compositeR2RFileToPublish.SetMetadata(MetadataKeys.RelativePath, compositeR2RImageRelativePath);
+                    r2rFilesPublishList.Add(compositeR2RFileToPublish);
+                }
 
                 // This TaskItem corresponds to the output R2R image. It is equivalent to the input TaskItem, only the ItemSpec for it points to the new path
                 // for the newly created R2R image
