@@ -1,5 +1,5 @@
 ---
-name: 😵☠🐱‍💻👩‍💻💔💢💥❌🚫❗❕ (Listed out emojis that fit here, need to choose one) My Build is Broken
+name: 😵 My Build is Broken
 about: Use this template for helping figure out what's wrong with your build.
 title: ''
 labels:
@@ -16,7 +16,7 @@ labels:
 
 ### Issue Description
 <!--
-Please include a clear and concise description of the problem.
+* Please include a clear and concise description of the problem.
 -->
 
 ### Expected Behavior
@@ -31,7 +31,7 @@ Please include a clear and concise description of the problem.
 
 ### Steps to Reproduce
 <!--
-Include as much of the following if possible:
+* Include as much of the following if possible:
 
 * A minimal sample project that reproduces the issue.
 * Your zipped project.

@@ -9,7 +9,7 @@ labels: performance
 
 ### Issue Description
 <!--
-Please include a clear and concise description of the problem.
+* Please include a clear and concise description of the problem.
 -->
 
 ### Data
@@ -28,13 +28,12 @@ Please include a clear and concise description of the problem.
 <!--
 * If you have an idea where the problem might lie, let us know that here.
 * Please include any pointers to code, relevant changes, or related issues you know of.
-* If you don't know, you can delete this section.
 -->
 
 ### Versions & Configurations
 <!--
-* In a visual studio developer command prompt, run `msbuild -version` and paste the output here.
-* If applicable, version of the tool that invokes MSBuild (Visual Studio, dotnet CLI, etc):
+* In a Visual Studio developer command prompt, run `msbuild -version` and paste the output here.
+* If applicable, include the version of the tool that invokes MSBuild (Visual Studio, dotnet CLI, etc):
 
 Post any other relevant configuration settings here.
 * OS, architecture, etc.
@@ -60,9 +59,9 @@ Include as much of the following if possible:
 
 ### Attach a binlog
 <!--
-To help us figure out and fix the issue sooner, please include a binlog.
-* Follow the link for details on sharing binary logs: https://github.com/microsoft/msbuild/blob/master/documentation/wiki/Providing-Binary-Logs.md
-* Follow this link for more information on binary logs: https://github.com/microsoft/msbuild/blob/master/documentation/wiki/Binary-Log.md
+* If providing us a project that reproduces the issue proves difficult, consider including a binlog.
+* Click [here](https://github.com/microsoft/msbuild/blob/master/documentation/wiki/Providing-Binary-Logs.md) for details on sharing binary logs.
+* Click [here](https://github.com/microsoft/msbuild/blob/master/documentation/wiki/Binary-Log.md) for more information on binary logs.
     NOTE: Binlogs can contain sensitive information. Don't attach anything you don't want to be public.
 
 *   To view these binlogs yourself: https://msbuildlog.com/
