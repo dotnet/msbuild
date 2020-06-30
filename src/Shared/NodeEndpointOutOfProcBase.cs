@@ -367,10 +367,9 @@ namespace Microsoft.Build.BackEnd
                     localPipeServer.EndWaitForConnection(resultForConnection);
 #endif
 
-                    // The handshake protocol is a simple long exchange.  The host sends us a long, and we
-                    // respond with another long.  Once the handshake is complete, both sides can be assured the
-                    // other is ready to accept data.
-                    // To avoid mixing client and server builds, the long is the MSBuild binary timestamp.
+                    // The handshake protocol is a series of int exchanges.  The host sends us a each component, and we
+                    // verify it. Afterwards, the host sends an "End of Handshake" signal, to which we respond in kind.
+                    // Once the handshake is complete, both sides can be assured the other is ready to accept data.
                     Handshake handshake = GetHandshake();
                     try
                     {
@@ -378,7 +377,7 @@ namespace Microsoft.Build.BackEnd
                         foreach (int part in handshake.RetrieveHandshakeComponents())
                         {
 
-                            int handshakePart = localReadPipe.ReadIntForHandshake(index == 1 ? 0x01 : 0x00 /* this will disconnect a < 4.5 host; it expects leading 00 or F5 or 06 */
+                            int handshakePart = localReadPipe.ReadIntForHandshake(index == 1 ? 0x01 : 0x00 /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
 #if NETCOREAPP2_1 || MONO
                             , ClientConnectTimeout /* wait a long time for the handshake from this side */
 #endif
@@ -394,43 +393,32 @@ namespace Microsoft.Build.BackEnd
                             index++;
                         }
 
-                        CommunicationsUtilities.Trace("Writing accept code to parent");
-                        localWritePipe.WriteIntForHandshake(0x39393939);
-
-                        // To ensure that our handshake and theirs have the same number of bytes, send and receive a magic number indicating EOS. This has to be different from the
-                        // previous "accept" magic number so that the provider knows this is beyond the end of the handshake for the endpoint as well.
                         if (gotValidConnection)
                         {
-                            if (localReadPipe.ReadIntForHandshake(0x00 /* this will disconnect a < 4.5 host; it expects leading 00 or F5 or 06 */
+                            // To ensure that our handshake and theirs have the same number of bytes, receive and send a magic number indicating EOS.
 #if NETCOREAPP2_1 || MONO
-                            , ClientConnectTimeout /* wait a long time for the handshake from this side */
+                            localReadPipe.ReadEndOfHandshakeSignal(ClientConnectTimeout); /* wait a long time for the handshake from this side */
+#else
+                            localReadPipe.ReadEndOfHandshakeSignal(false);
 #endif
-                            ) == -0x2a2a2a2a)
-                            {
-                                CommunicationsUtilities.Trace("Successfully connected to parent.");
-                                localWritePipe.WriteIntForHandshake(0x12812812);
+                            CommunicationsUtilities.Trace("Successfully connected to parent.");
+                            localWritePipe.WriteEndOfHandshakeSignal();
 
 #if FEATURE_SECURITY_PERMISSIONS
-                                // We will only talk to a host that was started by the same user as us.  Even though the pipe access is set to only allow this user, we want to ensure they
-                                // haven't attempted to change those permissions out from under us.  This ensures that the only way they can truly gain access is to be impersonating the
-                                // user we were started by.
-                                WindowsIdentity currentIdentity = WindowsIdentity.GetCurrent();
-                                WindowsIdentity clientIdentity = null;
-                                localPipeServer.RunAsClient(delegate () { clientIdentity = WindowsIdentity.GetCurrent(true); });
+                            // We will only talk to a host that was started by the same user as us.  Even though the pipe access is set to only allow this user, we want to ensure they
+                            // haven't attempted to change those permissions out from under us.  This ensures that the only way they can truly gain access is to be impersonating the
+                            // user we were started by.
+                            WindowsIdentity currentIdentity = WindowsIdentity.GetCurrent();
+                            WindowsIdentity clientIdentity = null;
+                            localPipeServer.RunAsClient(delegate () { clientIdentity = WindowsIdentity.GetCurrent(true); });
 
-                                if (clientIdentity == null || !String.Equals(clientIdentity.Name, currentIdentity.Name, StringComparison.OrdinalIgnoreCase))
-                                {
-                                    CommunicationsUtilities.Trace("Handshake failed. Host user is {0} but we were created by {1}.", (clientIdentity == null) ? "<unknown>" : clientIdentity.Name, currentIdentity.Name);
-                                    localPipeServer.Disconnect();
-                                    continue;
-                                }
-#endif
-                            }
-                            else
+                            if (clientIdentity == null || !String.Equals(clientIdentity.Name, currentIdentity.Name, StringComparison.OrdinalIgnoreCase))
                             {
-                                CommunicationsUtilities.Trace("Handshake was of a different length. Probably the host is a different MSBuild build.");
-                                gotValidConnection = false;
+                                CommunicationsUtilities.Trace("Handshake failed. Host user is {0} but we were created by {1}.", (clientIdentity == null) ? "<unknown>" : clientIdentity.Name, currentIdentity.Name);
+                                localPipeServer.Disconnect();
+                                continue;
                             }
+#endif
                         }
                     }
                     catch (IOException e)
@@ -439,6 +427,7 @@ namespace Microsoft.Build.BackEnd
                         // 1. The host (OOP main node) connects to us, it immediately checks for user privileges
                         //    and if they don't match it disconnects immediately leaving us still trying to read the blank handshake
                         // 2. The host is too old sending us bits we automatically reject in the handshake
+                        // 3. We expected to read the EndOfHandshake signal, but we received something else
                         CommunicationsUtilities.Trace("Client connection failed but we will wait for another connection. Exception: {0}", e.Message);
                         
                         gotValidConnection = false;

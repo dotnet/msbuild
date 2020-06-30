@@ -359,31 +359,16 @@ namespace Microsoft.Build.BackEnd
                     index++;
                 }
 
-                CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
-#if NETCOREAPP2_1 || MONO
-                int response = nodeStream.ReadIntForHandshake(0x39, timeout);
-#else
-                int response = nodeStream.ReadIntForHandshake(0x39);
-#endif
-
-                if (response != 0x39393939)
-                {
-                    CommunicationsUtilities.Trace("Handshake failed on part {0}. Probably the client is a different MSBuild build.", response, index);
-                    throw new InvalidOperationException();
-                }
-
                 // This indicates that we have finished all the parts of our handshake; hopefully the endpoint has as well.
-                nodeStream.WriteIntForHandshake(-0x2a2a2a2a);
-                if (nodeStream.ReadIntForHandshake(0x12
-#if NETCOREAPP2_1 || MONO
-                   , timeout
-#endif
-                    ) != 0x12812812)
-                {
-                    CommunicationsUtilities.Trace("Handshake failed. The client handshake has a different number of parts. Probably the client is a different MSBuild build.");
-                    throw new InvalidOperationException();
-                }
+                nodeStream.WriteEndOfHandshakeSignal();
 
+                CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
+
+#if NETCOREAPP2_1 || MONO
+                nodeStream.ReadEndOfHandshakeSignal(true, timeout);
+#else
+                nodeStream.ReadEndOfHandshakeSignal(true);
+#endif
                 // We got a connection.
                 CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
                 return nodeStream;

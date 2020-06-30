@@ -65,6 +65,11 @@ namespace Microsoft.Build.Internal
     static internal class CommunicationsUtilities
     {
         /// <summary>
+        /// Indicates to the NodeEndpoint that all the various parts of the Handshake have been sent.
+        /// </summary>
+        private const int EndOfHandshakeSignal = -0x2a2a2a2a;
+
+        /// <summary>
         /// The timeout to connect to a node.
         /// </summary>
         private const int DefaultNodeConnectionTimeout = 900 * 1000; // 15 minutes; enough time that a dev will typically do another build in this time
@@ -245,6 +250,14 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
+        /// Indicate to the client that all elements of the Handshake have been sent.
+        /// </summary>
+        internal static void WriteEndOfHandshakeSignal(this PipeStream stream)
+        {
+            stream.WriteIntForHandshake(EndOfHandshakeSignal);
+        }
+
+        /// <summary>
         /// Extension method to write a series of bytes to a stream
         /// </summary>
         internal static void WriteIntForHandshake(this PipeStream stream, int value)
@@ -261,6 +274,33 @@ namespace Microsoft.Build.Internal
             ErrorUtilities.VerifyThrow(bytes.Length == 4, "Int should be 4 bytes");
 
             stream.Write(bytes, 0, bytes.Length);
+        }
+
+        internal static void ReadEndOfHandshakeSignal(this PipeStream stream, bool isProvider
+#if NETCOREAPP2_1 || MONO
+            , int timeout
+#endif
+            )
+        {
+            // Accept only the first byte of the EndOfHandshakeSignal
+            int valueRead = stream.ReadIntForHandshake(EndOfHandshakeSignal & 0xFF
+#if NETCOREAPP2_1 || MONO
+            , int timeout
+#endif
+                );
+
+            if (valueRead != EndOfHandshakeSignal)
+            {
+                if (isProvider)
+                {
+                    CommunicationsUtilities.Trace("Handshake failed on part {0}. Probably the client is a different MSBuild build.", valueRead);
+                }
+                else
+                {
+                    CommunicationsUtilities.Trace("Expected end of handshake signal but received {0}. Probably the host is a different MSBuild build.", valueRead);
+                }
+                throw new InvalidOperationException();
+            }
         }
 
         /// <summary>
@@ -320,7 +360,7 @@ namespace Microsoft.Build.Internal
                 {
                     stream.WriteIntForHandshake(0x0F0F0F0F);
                     stream.WriteIntForHandshake(0x0F0F0F0F);
-                    throw new IOException(String.Format(CultureInfo.InvariantCulture, "Client: rejected old host. Received byte {0} instead of {1}.", bytes[0], byteToAccept));
+                    throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, "Client: rejected old host. Received byte {0} instead of {1}.", bytes[0], byteToAccept));
                 }
             }
 
@@ -526,6 +566,11 @@ namespace Microsoft.Build.Internal
                 }
             }
         }
+
+        internal static int AvoidEndOfHandshakeSignal(int x)
+        {
+            return x == EndOfHandshakeSignal ? ~x : x;
+        }
     }
 
     internal readonly struct Handshake
@@ -562,13 +607,13 @@ namespace Microsoft.Build.Internal
 
         internal IEnumerable<int> RetrieveHandshakeComponents()
         {
-            yield return options;
-            yield return salt;
-            yield return fileVersionMajor;
-            yield return fileVersionMinor;
-            yield return fileVersionBuild;
-            yield return fileVersionPrivate;
-            yield return sessionId;
+            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(options);
+            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(salt);
+            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMajor);
+            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMinor);
+            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionBuild);
+            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionPrivate);
+            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(sessionId);
         }
     }
 }
