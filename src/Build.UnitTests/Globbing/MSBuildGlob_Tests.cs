@@ -149,6 +149,17 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
         }
 
         [Fact]
+        public void GlobParsingShouldDeduplicateRegexes()
+        {
+            var globRoot = NativeMethodsShared.IsWindows ? @"c:\a" : "/a";
+            var fileSpec = $"b/**/*.cs";
+            var glob1 = MSBuildGlob.Parse(globRoot, fileSpec);
+            var glob2 = MSBuildGlob.Parse(globRoot, fileSpec);
+
+            Assert.Same(glob1.TestOnlyRegex, glob2.TestOnlyRegex);
+        }
+
+        [Fact]
         public void GlobIsNotUnescaped()
         {
             var glob = MSBuildGlob.Parse("%42/%42");
