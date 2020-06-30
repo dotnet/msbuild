@@ -430,6 +430,10 @@ namespace Microsoft.Build.BackEnd
                         
                         gotValidConnection = false;
                     }
+                    catch (InvalidOperationException)
+                    {
+                        gotValidConnection = false;
+                    }
 
                     if (!gotValidConnection)
                     {

@@ -327,7 +327,7 @@ namespace Microsoft.Build.Internal
             )
         {
             // Accept only the first byte of the EndOfHandshakeSignal
-            int valueRead = stream.ReadIntForHandshake(EndOfHandshakeSignal & 0xFF
+            int valueRead = stream.ReadIntForHandshake(0x00
 #if NETCOREAPP2_1 || MONO
             , timeout
 #endif
