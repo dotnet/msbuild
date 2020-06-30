@@ -354,13 +354,13 @@ namespace Microsoft.Build.Internal
                     }
 
                     bytes[i] = Convert.ToByte(read);
-                }
 
-                if (byteToAccept != 0x00 && byteToAccept != bytes[0])
-                {
-                    stream.WriteIntForHandshake(0x0F0F0F0F);
-                    stream.WriteIntForHandshake(0x0F0F0F0F);
-                    throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, "Client: rejected old host. Received byte {0} instead of {1}.", bytes[0], byteToAccept));
+                    if (i == 0 && byteToAccept != 0x00 && byteToAccept != bytes[0])
+                    {
+                        stream.WriteIntForHandshake(0x0F0F0F0F);
+                        stream.WriteIntForHandshake(0x0F0F0F0F);
+                        throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, "Client: rejected old host. Received byte {0} instead of {1}.", bytes[0], byteToAccept));
+                    }
                 }
             }
 

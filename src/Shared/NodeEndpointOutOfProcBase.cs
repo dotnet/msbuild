@@ -324,8 +324,6 @@ namespace Microsoft.Build.BackEnd
         private void PacketPumpProc()
         {
             NamedPipeServerStream localPipeServer = _pipeServer;
-            PipeStream localWritePipe = _pipeServer;
-            PipeStream localReadPipe = _pipeServer;
 
             AutoResetEvent localPacketAvailable = _packetAvailable;
             AutoResetEvent localTerminatePacketPump = _terminatePacketPump;
@@ -377,7 +375,7 @@ namespace Microsoft.Build.BackEnd
                         foreach (int part in handshake.RetrieveHandshakeComponents())
                         {
 
-                            int handshakePart = localReadPipe.ReadIntForHandshake(index == 1 ? 0x01 : 0x00 /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
+                            int handshakePart = _pipeServer.ReadIntForHandshake(index == 1 ? 0x01 : 0x00 /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
 #if NETCOREAPP2_1 || MONO
                             , ClientConnectTimeout /* wait a long time for the handshake from this side */
 #endif
@@ -386,7 +384,7 @@ namespace Microsoft.Build.BackEnd
                             if (handshakePart != part)
                             {
                                 CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshakePart, part);
-                                localWritePipe.WriteIntForHandshake(index);
+                                _pipeServer.WriteIntForHandshake(index);
                                 gotValidConnection = false;
                                 break;
                             }
@@ -397,12 +395,12 @@ namespace Microsoft.Build.BackEnd
                         {
                             // To ensure that our handshake and theirs have the same number of bytes, receive and send a magic number indicating EOS.
 #if NETCOREAPP2_1 || MONO
-                            localReadPipe.ReadEndOfHandshakeSignal(ClientConnectTimeout); /* wait a long time for the handshake from this side */
+                            _pipeServer.ReadEndOfHandshakeSignal(ClientConnectTimeout); /* wait a long time for the handshake from this side */
 #else
-                            localReadPipe.ReadEndOfHandshakeSignal(false);
+                            _pipeServer.ReadEndOfHandshakeSignal(false);
 #endif
                             CommunicationsUtilities.Trace("Successfully connected to parent.");
-                            localWritePipe.WriteEndOfHandshakeSignal();
+                            _pipeServer.WriteEndOfHandshakeSignal();
 
 #if FEATURE_SECURITY_PERMISSIONS
                             // We will only talk to a host that was started by the same user as us.  Even though the pipe access is set to only allow this user, we want to ensure they
@@ -464,8 +462,8 @@ namespace Microsoft.Build.BackEnd
             }
 
             RunReadLoop(
-                new BufferedReadStream(localReadPipe),
-                localWritePipe,
+                new BufferedReadStream(_pipeServer),
+                _pipeServer,
                 localPacketQueue, localPacketAvailable, localTerminatePacketPump);
 
             CommunicationsUtilities.Trace("Ending read loop");
