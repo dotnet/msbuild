@@ -28,16 +28,12 @@ namespace Microsoft.Build
         /// <param name="internable">The internable describing the string we're looking for.</param>
         /// <returns>A string matching the given internable.</returns>
         /// <remarks>
-        /// This method performs one operation on the underlying ConcurrentDictionary on cache hit, and two or three operations on cache miss.
-        /// 1. It checks whether the dictionary has a matching entry. This operations is common to all code paths.
-        ///    If there is a matching entry we are done.
-        /// 2. If the dictionary doesn't have an entry for the given hash code, we make a new one and add it (the second operation).
-        ///    Note that we could do 1. and 2. together using GetOrAdd() with the valueFactory callback but it wouldn't be much faster
-        ///    and would require allocating a closure object to share data with the callback.
-        /// 3. If the dictionary has an entry for the given hash code but it doesn't match the argument because it's either already
-        ///    collected or there is a hash collision, we have to first remove the existing handle to prevent other threads from
-        ///    freeing it (second operation). Only then can it have the target set to the new string and be added back to the dictionary
-        ///    (third operation).
+        /// This method performs two operations on the underlying ConcurrentDictionary on both cache hit and cache miss.
+        /// 1. It checks whether the dictionary has a matching entry. The entry is temporarily removed from the cache so it doesn't
+        ///    race with Scavenge() freeing GC handles. This is the first operation.
+        /// 2a. If there is a matching entry, we extract the string out of it and put it back in the cache (the second operation).
+        /// 2b. If there is an entry but it doesn't match, or there is no entry for the given hash code, we extract the string from
+        ///     the internable, set it on the entry, and add the entry (back) in the cache.
         /// </remarks>
         public string GetOrCreateEntry<T>(T internable, out bool cacheHit) where T : IInternable
         {
@@ -47,11 +43,19 @@ namespace Microsoft.Build
             string result;
             bool addingNewHandle = false;
 
-            if (_stringsByHashCode.TryGetValue(hashCode, out handle))
+            // Get the existing handle from the cache and assume ownership by removing it. We can't use the simple TryGetValue() here because
+            // the Scavenge method running on another thread could free the handle from underneath us.
+            if (_stringsByHashCode.TryRemove(hashCode, out handle))
             {
                 result = handle.GetString(internable);
                 if (result != null)
                 {
+                    // We have a hit, put the handle back in the cache.
+                    if (!_stringsByHashCode.TryAdd(hashCode, handle))
+                    {
+                        // Another thread has managed to add a handle for the same hash code, so the one we got can be freed.
+                        handle.Free();
+                    }
                     cacheHit = true;
                     return result;
                 }
@@ -65,37 +69,35 @@ namespace Microsoft.Build
             // We don't have the string in the cache - create it.
             result = internable.ExpensiveConvertToString();
 
-            // If the handle is new, we have to add it to the cache. We do it after removing unused handles if our heuristic
-            // indicates that it would be productive. Note that the _capacity field accesses are not protected from races. Being
-            // atomic (as guaranteed by the 32-bit data type) is enough here.
+            // Set the handle to reference the new string and put it in the cache.
+            handle.SetString(result);
+            if (!_stringsByHashCode.TryAdd(hashCode, handle))
+            {
+                // Another thread has managed to add a handle for the same hash code, so the one we got can be freed.
+                handle.Free();
+            }
+
+            // Remove unused handles if our heuristic indicates that it would be productive. Note that the _scavengeThreshold field
+            // accesses are not protected from races. Being atomic (as guaranteed by the 32-bit data type) is enough here.
             if (addingNewHandle)
             {
                 // Prevent the dictionary from growing forever with GC handles that don't reference live strings anymore.
                 if (_stringsByHashCode.Count >= _scavengeThreshold)
                 {
-                    // Get rid of unused handles.
-                    Scavenge();
-                    // And do this again when the number of handles reaches double the current after-scavenge number.
-                    _scavengeThreshold = _stringsByHashCode.Count * 2;
+                    // Before we start scavenging set _scavengeThreshold to a high value to effectively lock other threads from
+                    // running Scavenge at the same time (minus rare races).
+                    _scavengeThreshold = int.MaxValue;
+                    try
+                    {
+                        // Get rid of unused handles.
+                        Scavenge();
+                    }
+                    finally
+                    {
+                        // And do this again when the number of handles reaches double the current after-scavenge number.
+                        _scavengeThreshold = _stringsByHashCode.Count * 2;
+                    }
                 }
-            }
-            else
-            {
-                // If the handle is already in the cache, we have to be careful because other threads may be operating on it.
-                // In particular the Scavenge method may free the handle from underneath us if we leave it in the cache.
-                if (!_stringsByHashCode.TryRemove(hashCode, out handle))
-                {
-                    // The handle is no longer in the cache so we're creating a new one after all.
-                    handle = new StringWeakHandle();
-                }
-            }
-
-            // Set the handle to reference the new string and put it in the cache.
-            handle.SetString(result);
-            if (!_stringsByHashCode.TryAdd(hashCode, handle))
-            {
-                // If somebody beat us to it and the new handle has not been added, free it.
-                handle.Free();
             }
 
             cacheHit = false;
