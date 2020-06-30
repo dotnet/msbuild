@@ -21,12 +21,11 @@ namespace Microsoft.NET.Build.Tests
 
         [Theory]
         [InlineData("netcoreapp3.1", ".NETCoreApp", "v3.1", "Windows", "7.0")] // Default values pre-5.0
+        [InlineData("net5.0", ".NETCoreApp", "v5.0", "", "")]
+        [InlineData("net5.0-Windows7.0", ".NETCoreApp", "v5.0", "Windows", "7.0")]
+        [InlineData("net5.0-WINDOWS7.0", ".NETCoreApp", "v5.0", "Windows", "7.0")]
         [InlineData("net5.0-windows", ".NETCoreApp", "v5.0", "Windows", "7.0")] // Depends on https://github.com/dotnet/wpf/pull/3177
-        [InlineData("net5.0-android", ".NETCoreApp", "v5.0", "Android", "0.0")] // We don't set a default version for android
-        [InlineData("net5.0-ios1.1", ".NETCoreApp", "v5.0", "iOS", "1.1")]
-        [InlineData("net5.0-macos7.0", ".NETCoreApp", "v5.0", "MacOS", "7.0")]
-        [InlineData("net5.0-windows10.0", ".NETCoreApp", "v5.0", "Windows", "10.0")]
-        [InlineData("net5.0-ios14.0", ".NETCoreApp", "v5.0", "iOS", "14.0")]
+        [InlineData("net5.0-windows10.0.19041", ".NETCoreApp", "v5.0", "Windows", "10.0.19041")]
         public void It_defines_target_platform_from_target_framework(string targetFramework, string expectedTargetFrameworkIdentifier, string expectedTargetFrameworkVersion, string expectedTargetPlatformIdentifier, string expectedTargetPlatformVersion)
         {
             var testProj = new TestProject()
@@ -47,9 +46,14 @@ namespace Microsoft.NET.Build.Tests
                     .Execute()
                     .Should()
                     .Pass();
-                var values = getValuesCommand.GetValues();
-                values.Count.Should().Be(1);
-                values[0].ToUpperInvariant().Should().Be(expected.ToUpperInvariant());
+                if (expected.Trim().Equals(string.Empty))
+                {
+                    getValuesCommand.GetValues().Count.Should().Be(0);
+                }
+                else
+                {
+                    getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { expected });
+                }
             };
 
             assertValue("TargetFrameworkIdentifier", expectedTargetFrameworkIdentifier);
@@ -59,25 +63,6 @@ namespace Microsoft.NET.Build.Tests
             assertValue("TargetPlatformVersion", expectedTargetPlatformVersion);
             assertValue("TargetPlatformMoniker", $"{expectedTargetPlatformIdentifier},Version={expectedTargetPlatformVersion}");
             assertValue("TargetPlatformDisplayName", $"{expectedTargetPlatformIdentifier} {expectedTargetPlatformVersion}");
-        }
-
-        [Fact]
-        public void It_errors_on_invalid_target_framework()
-        {
-            var testProj = new TestProject()
-            {
-                Name = "TargetPlatformTests",
-                IsSdkProject = true,
-                TargetFrameworks = "netcoreapp3.1-windows"
-            };
-            var testAsset = _testAssetsManager.CreateTestProject(testProj);
-
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.Path, testProj.Name));
-            buildCommand.Execute()
-                .Should()
-                .Fail()
-                .And
-                .HaveStdOutContaining("NETSDK1134");
         }
     }
 }
