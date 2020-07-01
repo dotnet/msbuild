@@ -210,8 +210,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="GeneratePlatformCompatibleDefineConstants"
           Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetPlatformIdentifier)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) " >
     <ItemGroup>
-      <_SupportedPlatformCompatibleVersions Include="@(SupportedTargetPlatform)" Condition=" $(TargetPlatformMinVersion) != '' and %(Identity) != '' and $([MSBuild]::VersionGreaterThanOrEquals(%(Identity), $(TargetPlatformMinVersion))) and $([MSBuild]::VersionLessThan(%(Identity), $(TargetPlatformVersion))) " />
-      <_SupportedPlatformCompatibleVersions Include="@(SupportedTargetPlatform)" Condition=" $(TargetPlatformMinVersion) == '' and %(Identity) != '' and $([MSBuild]::VersionLessThan(%(Identity), $(TargetPlatformVersion))) " />
+      <_SupportedPlatformCompatibleVersions Include="@(SupportedTargetPlatform)" Condition=" %(Identity) != '' and $([MSBuild]::VersionLessThan(%(Identity), $(TargetPlatformVersion))) " />
       <_ImplicitDefineConstant Include="@(_SupportedPlatformCompatibleVersions->'$(TargetPlatformIdentifier.ToUpper())%(Identity)'->Replace('.', '_'))" />
     </ItemGroup>
   </Target>
