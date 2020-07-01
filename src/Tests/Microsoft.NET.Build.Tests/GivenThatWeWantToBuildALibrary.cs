@@ -442,6 +442,8 @@ namespace Microsoft.NET.Build.Tests
                     propGroup.Add(platformIdentifier);
                     var platformVersion = new XElement(ns + "TargetPlatformVersion", targetPlatformVersion);
                     propGroup.Add(platformVersion);
+                    var platformSupported = new XElement(ns + "TargetPlatformSupported", true);
+                    propGroup.Add(platformSupported);
                     var disableUnnecessaryImplicitFrameworkReferencesForThisTest = new XElement(ns + "DisableImplicitFrameworkReferences", "true");
                     propGroup.Add(disableUnnecessaryImplicitFrameworkReferencesForThisTest);
                 });
@@ -471,6 +473,8 @@ namespace Microsoft.NET.Build.Tests
                     propGroup.Add(platformIdentifier);
                     var platformVersion = new XElement(ns + "TargetPlatformVersion", targetPlatformVersion);
                     propGroup.Add(platformVersion);
+                    var platformSupported = new XElement(ns + "TargetPlatformSupported", true);
+                    propGroup.Add(platformSupported);
                     var disableUnnecessaryImplicitFrameworkReferencesForThisTest = new XElement(ns + "DisableImplicitFrameworkReferences", "true");
                     propGroup.Add(disableUnnecessaryImplicitFrameworkReferencesForThisTest);
 
@@ -786,6 +790,7 @@ class Program
                 .Pass();
         }
 
+        // TODO: need to set TargetPlatformSupported in MSBuild.SDK.Extras for this to pass
         [Fact]
         public void It_can_target_uwp_using_sdk_extras()
         {

@@ -68,9 +68,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <TargetPlatformVersion Condition="$(TargetPlatformVersion.EndsWith('.0'))" >$(TargetPlatformVersion.Substring(0, $(_TargetPlatformVersionLength)))</TargetPlatformVersion>
     <!-- Normalize casing of windows to Windows -->
     <TargetPlatformIdentifier Condition="'$(TargetPlatformIdentifier)' == 'Windows'">Windows</TargetPlatformIdentifier>
-    
-    <_InferredTargetPlatform>true</_InferredTargetPlatform>
-</PropertyGroup>
+  </PropertyGroup>
 
   <!-- 
     Trigger an error if we're unable to infer the framework identifier and version. 
@@ -106,6 +104,19 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="$(TargetFramework.Contains(';'))"
                  ResourceName="TargetFrameworkWithSemicolon"
                  FormatArguments="$([MSBuild]::Escape('$(TargetFramework)'))" />
+  </Target>
+
+  <Target Name="_CheckForUnsupportedTargetPlatformIdentifier"
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform;RunResolvePackageDependencies;GetFrameworkPaths;GetReferenceAssemblyPaths"
+          Condition="'$(TargetPlatformIdentifier)' != ''" >
+
+    <PropertyGroup>
+      <TargetPlatformSupported Condition="'$(TargetPlatformIdentifier)' == 'Windows'">true</TargetPlatformSupported>
+    </PropertyGroup>
+
+    <NETSdkError Condition="'$(TargetPlatformSupported)' != 'true'"
+                 ResourceName="UnsupportedTargetPlatformIdentifier"
+                 FormatArguments="$([MSBuild]::Escape('$(TargetPlatformIdentifier)'))" />
   </Target>
 
   <UsingTask TaskName="AllowEmptyTelemetry" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />

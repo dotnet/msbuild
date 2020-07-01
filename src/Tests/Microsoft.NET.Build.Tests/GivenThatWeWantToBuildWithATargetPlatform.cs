@@ -40,7 +40,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 var getValuesCommand = new GetValuesCommand(Log, Path.Combine(testAsset.Path, testProj.Name), targetFramework, valueName)
                 {
-                    DependsOnTargets = "Build"
+                    DependsOnTargets = "BeforeBuild"
                 };
                 getValuesCommand
                     .Execute()
@@ -63,6 +63,25 @@ namespace Microsoft.NET.Build.Tests
             assertValue("TargetPlatformVersion", expectedTargetPlatformVersion);
             assertValue("TargetPlatformMoniker", $"{expectedTargetPlatformIdentifier},Version={expectedTargetPlatformVersion}");
             assertValue("TargetPlatformDisplayName", $"{expectedTargetPlatformIdentifier} {expectedTargetPlatformVersion}");
+        }
+
+        [Fact]
+        public void It_fails_on_unsupported_os()
+        {
+            TestProject testProject = new TestProject()
+            {
+                Name = "UnsupportedOS",
+                IsSdkProject = true,
+                TargetFrameworks = "net5.0-unsupported"
+            };
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var build = new BuildCommand(Log, Path.Combine(testAsset.Path, testProject.Name));
+            build.Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1135");
         }
     }
 }
