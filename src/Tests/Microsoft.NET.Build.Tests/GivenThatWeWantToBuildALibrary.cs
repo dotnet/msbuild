@@ -442,6 +442,8 @@ namespace Microsoft.NET.Build.Tests
                     propGroup.Add(platformIdentifier);
                     var platformVersion = new XElement(ns + "TargetPlatformVersion", targetPlatformVersion);
                     propGroup.Add(platformVersion);
+                    var disableUnnecessaryImplicitFrameworkReferencesForThisTest = new XElement(ns + "DisableImplicitFrameworkReferences", "true");
+                    propGroup.Add(disableUnnecessaryImplicitFrameworkReferencesForThisTest);
                 });
 
             AssertDefinedConstantsOutput(testAsset, targetFramework, new[] { "NETCOREAPP", "NET", "NET5_0", "NETCOREAPP3_1" }.Concat(expectedDefines).ToArray());

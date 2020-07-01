@@ -50,7 +50,10 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
         public void CopyMetadataTo(ITaskItem destinationItem)
         {
-            throw new NotImplementedException();
+            foreach (var kv in _metadata)
+            {
+                destinationItem.SetMetadata(kv.Key, kv.Value);
+            }
         }
 
         public string GetMetadata(string metadataName)

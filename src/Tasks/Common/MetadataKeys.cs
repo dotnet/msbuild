@@ -32,6 +32,7 @@ namespace Microsoft.NET.Build.Tasks
         public const string OriginalItemSpec = "OriginalItemSpec";
         public const string SDKRootFolder = "SDKRootFolder";
         public const string ShimRuntimeIdentifier = "ShimRuntimeIdentifier";
+        public const string RuntimePackAlwaysCopyLocal = "RuntimePackAlwaysCopyLocal";
 
         // Foreign Keys
         public const string ParentTarget = "ParentTarget";
