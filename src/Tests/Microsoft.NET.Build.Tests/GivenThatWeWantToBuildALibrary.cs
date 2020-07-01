@@ -469,6 +469,8 @@ namespace Microsoft.NET.Build.Tests
                     propGroup.Add(platformIdentifier);
                     var platformVersion = new XElement(ns + "TargetPlatformVersion", targetPlatformVersion);
                     propGroup.Add(platformVersion);
+                    var disableUnnecessaryImplicitFrameworkReferencesForThisTest = new XElement(ns + "DisableImplicitFrameworkReferences", "true");
+                    propGroup.Add(disableUnnecessaryImplicitFrameworkReferencesForThisTest);
 
                     var itemGroup = new XElement(ns + "ItemGroup");
                     project.Root.Add(itemGroup);
