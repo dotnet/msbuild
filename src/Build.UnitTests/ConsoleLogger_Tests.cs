@@ -20,6 +20,7 @@ using Microsoft.Build.Evaluation;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -180,6 +181,52 @@ namespace Microsoft.Build.UnitTests
             ConsoleLogger logger = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
             logger.Parameters = "EnableMPLogging";
             ObjectModelHelpers.BuildProjectExpectSuccess(s_dummyProjectContents, logger);
+
+            sc.ToString().ShouldContain("XXX:");
+        }
+
+        [Fact]
+        public void FancyNew()
+        {
+            using var env = TestEnvironment.Create(_output);
+
+            var pc = env.CreateProjectCollection();
+
+            var project = env.CreateTestProjectWithFiles(@"
+         <Project>
+            <ItemGroup>
+                <P Include='$(MSBuildThisFileFullPath)' AdditionalProperties='Number=1' />
+                <P Include='$(MSBuildThisFileFullPath)' AdditionalProperties='Number=2' />
+
+                <MSBuildProjectConfigurationDescription Include='Number=$(Number)' />
+            </ItemGroup>
+            <Target Name='Spawn'>
+                <MSBuild Projects='@(P)' BuildInParallel='true' Targets='Inner' />
+            </Target>
+            <Target Name='Inner'>
+                <Warning Text='Hello from project $(Number)'
+                         File='source_of_warning' />
+            </Target>
+        </Project>");
+
+            SimulatedConsole sc = new SimulatedConsole();
+            ConsoleLogger logger = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
+            logger.Parameters = "EnableMPLogging;ShowProjectFile";
+
+            pc.Collection.RegisterLogger(logger);
+
+
+            var p = pc.Collection.LoadProject(project.ProjectFile);
+
+            BuildManager.DefaultBuildManager.Build(
+                new BuildParameters(pc.Collection)
+                {
+                    MaxNodeCount = 2,
+                },
+                new BuildRequestData(p.CreateProjectInstance(), new[] { "Spawn" }));
+
+            p.Build().ShouldBeTrue();
+
 
             sc.ToString().ShouldContain("XXX:");
         }
