@@ -207,10 +207,19 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
+  <!-- Add conditional compilation symbols for target platform backwards compatibility. -->
+  <Target Name="GeneratePlatformCompatibleDefineConstants"
+          Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetPlatformIdentifier)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) " >
+    <ItemGroup>
+      <_SupportedPlatformCompatibleVersions Include="@(SupportedTargetPlatform)" Condition=" %(Identity) != '' and $([MSBuild]::VersionLessThan(%(Identity), $(TargetPlatformVersion))) " />
+      <_ImplicitDefineConstant Include="@(_SupportedPlatformCompatibleVersions->'$(TargetPlatformIdentifier.ToUpper())%(Identity)'->Replace('.', '_'))" />
+    </ItemGroup>
+  </Target>
+
   <!-- Add implicitly defined preprocessor symbols to DefineConstants -->
   <Target Name="AddImplicitDefineConstants"
           Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' "
-          DependsOnTargets="GenerateTargetPlatformDefineConstants;GenerateNETCompatibleDefineConstants"
+          DependsOnTargets="GenerateTargetPlatformDefineConstants;GenerateNETCompatibleDefineConstants;GeneratePlatformCompatibleDefineConstants"
           BeforeTargets="CoreCompile" >
     <PropertyGroup>
       <DefineConstants Condition=" '@(_ImplicitDefineConstant)' != '' " >$(DefineConstants);@(_ImplicitDefineConstant)</DefineConstants>
