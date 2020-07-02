@@ -371,24 +371,23 @@ namespace Microsoft.Build.BackEnd
                     Handshake handshake = GetHandshake();
                     try
                     {
-                        int index = 1;
-                        foreach (int part in handshake.RetrieveHandshakeComponents())
+                        int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
+                        for (int i = 0; i < handshakeComponents.Length; i++)
                         {
 
-                            int handshakePart = _pipeServer.ReadIntForHandshake(index == 1 ? 0x01 : 0x00 /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
+                            int handshakePart = _pipeServer.ReadIntForHandshake(i == 1 ? 0x01 : 0x00 /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
 #if NETCOREAPP2_1 || MONO
                             , ClientConnectTimeout /* wait a long time for the handshake from this side */
 #endif
                             );
 
-                            if (handshakePart != part)
+                            if (handshakePart != handshakeComponents[i])
                             {
-                                CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshakePart, part);
-                                _pipeServer.WriteIntForHandshake(index);
+                                CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshakePart, handshakeComponents[i]);
+                                _pipeServer.WriteIntForHandshake(i);
                                 gotValidConnection = false;
                                 break;
                             }
-                            index++;
                         }
 
                         if (gotValidConnection)
@@ -413,7 +412,7 @@ namespace Microsoft.Build.BackEnd
                             if (clientIdentity == null || !String.Equals(clientIdentity.Name, currentIdentity.Name, StringComparison.OrdinalIgnoreCase))
                             {
                                 CommunicationsUtilities.Trace("Handshake failed. Host user is {0} but we were created by {1}.", (clientIdentity == null) ? "<unknown>" : clientIdentity.Name, currentIdentity.Name);
-                                localPipeServer.Disconnect();
+                                gotValidConnection = false;
                                 continue;
                             }
 #endif

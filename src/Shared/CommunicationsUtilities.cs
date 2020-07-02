@@ -88,18 +88,21 @@ namespace Microsoft.Build.Internal
         // This is used as a key, so it does not need to be human readable.
         public override string ToString()
         {
-            return string.Empty + options + salt + fileVersionMajor + fileVersionMinor + fileVersionBuild + fileVersionPrivate + sessionId;
+            return String.Format("{0} {1} {2} {3} {4} {5} {6}", options, salt, fileVersionMajor, fileVersionMinor, fileVersionBuild, fileVersionPrivate, sessionId);
         }
 
-        internal IEnumerable<int> RetrieveHandshakeComponents()
+        internal int[] RetrieveHandshakeComponents()
         {
-            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(options);
-            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(salt);
-            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMajor);
-            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMinor);
-            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionBuild);
-            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionPrivate);
-            yield return CommunicationsUtilities.AvoidEndOfHandshakeSignal(sessionId);
+            return new int[]
+            {
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(options),
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(salt),
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMajor),
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMinor),
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionBuild),
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionPrivate),
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(sessionId)
+            };
         }
     }
 
