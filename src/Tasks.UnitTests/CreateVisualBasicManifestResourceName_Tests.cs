@@ -247,7 +247,7 @@ End Namespace
                     null,
                     null);
 
-            Assert.Equal("RootNamespace.MyForm.en-GB", result);
+            Assert.Equal("RootNamespace.SubFolder.MyForm.en-GB", result);
         }
 
         /// <summary>
@@ -628,7 +628,7 @@ End Namespace
                     null,
                     null);
 
-            Assert.Equal(@"RootNamespace.MyResource.fr.resources", result);
+            Assert.Equal(@"RootNamespace.SubFolder.MyResource.fr.resources", result);
         }
 
         /// <summary>
