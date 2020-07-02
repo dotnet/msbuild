@@ -307,8 +307,7 @@ namespace Microsoft.Build.Tasks
             {
                 var lockobject = new Object();
 
-                var foldersToSearch = assemblyFoldersEx.UniqueDirectoryPaths();
-                Parallel.ForEach(foldersToSearch, assemblyFolder =>
+                Parallel.ForEach(assemblyFoldersEx.UniqueDirectoryPaths, assemblyFolder =>
                 {
                     if (FileUtilities.DirectoryExistsNoThrow(assemblyFolder))
                     {

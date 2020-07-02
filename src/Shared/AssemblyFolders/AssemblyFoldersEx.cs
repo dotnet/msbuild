@@ -489,9 +489,9 @@ namespace Microsoft.Build.Shared
             return ((IEnumerable<AssemblyFoldersExInfo>)this).GetEnumerator();
         }
 
-        internal IEnumerable<string> UniqueDirectoryPaths()
+        internal IEnumerable<string> UniqueDirectoryPaths
         {
-            return _uniqueDirectoryPaths;
+            get => _uniqueDirectoryPaths;
         }
     }
 }
