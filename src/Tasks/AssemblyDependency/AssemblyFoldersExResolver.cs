@@ -307,11 +307,18 @@ namespace Microsoft.Build.Tasks
             {
                 var lockobject = new Object();
 
-                Parallel.ForEach(assemblyFoldersEx, assemblyFolder =>
+                // Remove duplicate folders
+                var foldersToSearch = new HashSet<string>();
+                foreach (var assemblyFolder in assemblyFoldersEx)
                 {
-                    if (FileUtilities.DirectoryExistsNoThrow(assemblyFolder.DirectoryPath))
+                    foldersToSearch.Add(assemblyFolder.DirectoryPath);
+                }
+
+                Parallel.ForEach(foldersToSearch, assemblyFolder =>
+                {
+                    if (FileUtilities.DirectoryExistsNoThrow(assemblyFolder))
                     {
-                        string[] files = Directory.GetFiles(assemblyFolder.DirectoryPath, "*.*", SearchOption.TopDirectoryOnly);
+                        string[] files = Directory.GetFiles(assemblyFolder, "*.*", SearchOption.TopDirectoryOnly);
 
                         lock (lockobject)
                         {
