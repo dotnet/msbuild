@@ -132,7 +132,6 @@ namespace Microsoft.DotNet.Cli.Sln.Internal.FileManipulation
         }
 
         private static readonly Encoding[] table = new[] {
-            Encoding.UTF7,
             Encoding.UTF8,
             Encoding.UTF32,
             Encoding.ASCII,
