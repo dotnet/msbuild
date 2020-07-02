@@ -15,10 +15,9 @@
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>16.6.0</VersionPrefix>
+    <VersionPrefix>16.6.1</VersionPrefix>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
-    <DotNetFinalVersionKind>release</DotNetFinalVersionKind>
-    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+    <PreReleaseVersionLabel>qfe</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
     <SemanticVersioningV1>true</SemanticVersioningV1>
