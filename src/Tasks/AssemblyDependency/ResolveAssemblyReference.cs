@@ -1120,9 +1120,11 @@ namespace Microsoft.Build.Tasks
                         if (assemblyFoldersEx != null && _showAssemblyFoldersExLocations.TryGetValue(r.SearchPath, out messageImportance))
                         {
                             Log.LogMessageFromResources(messageImportance, "ResolveAssemblyReference.AssemblyFoldersExSearchLocations", r.SearchPath);
+                            var usedFolders = new HashSet<string>();
                             foreach (AssemblyFoldersExInfo info in assemblyFoldersEx)
                             {
-                                Log.LogMessageFromResources(messageImportance, "ResolveAssemblyReference.EightSpaceIndent", info.DirectoryPath);
+                                if (usedFolders.Add(info.DirectoryPath))
+                                    Log.LogMessageFromResources(messageImportance, "ResolveAssemblyReference.EightSpaceIndent", info.DirectoryPath);
                             }
                         }
                     }
