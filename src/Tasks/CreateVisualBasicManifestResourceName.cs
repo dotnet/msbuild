@@ -146,6 +146,10 @@ namespace Microsoft.Build.Tasks
                     manifestName.Append(rootNamespace).Append(".");
                 }
 
+                // Replace spaces in the directory name with underscores. Needed for compatibility with Everett.
+                // Note that spaces in the file name itself are preserved.
+                string everettCompatibleDirectoryName = MakeValidEverettIdentifier(Path.GetDirectoryName(info.cultureNeutralFilename));
+
                 // only strip extension for .resx and .restext files
                 string sourceExtension = Path.GetExtension(info.cultureNeutralFilename);
                 if (
@@ -156,7 +160,12 @@ namespace Microsoft.Build.Tasks
                         (0 == String.Compare(sourceExtension, ".resources", StringComparison.OrdinalIgnoreCase))
                     )
                 {
-                    manifestName.Append(Path.GetFileNameWithoutExtension(info.cultureNeutralFilename));
+                    // Take directory into account when forming manifest resource names
+                    manifestName.Append(Path.Combine(everettCompatibleDirectoryName, Path.GetFileNameWithoutExtension(info.cultureNeutralFilename)));
+
+                    // Replace all '\' with '.'
+                    manifestName.Replace(Path.DirectorySeparatorChar, '.');
+                    manifestName.Replace(Path.AltDirectorySeparatorChar, '.');
 
                     // Append the culture if there is one.        
                     if (!string.IsNullOrEmpty(info.culture))

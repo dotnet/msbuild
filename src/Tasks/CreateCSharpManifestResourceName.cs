@@ -147,7 +147,6 @@ namespace Microsoft.Build.Tasks
                 string everettCompatibleDirectoryName = MakeValidEverettIdentifier(Path.GetDirectoryName(info.cultureNeutralFilename));
 
                 // only strip extension for .resx and .restext files
-
                 string sourceExtension = Path.GetExtension(info.cultureNeutralFilename);
                 if (
                         (0 == String.Compare(sourceExtension, ".resx", StringComparison.OrdinalIgnoreCase))
@@ -157,6 +156,7 @@ namespace Microsoft.Build.Tasks
                         (0 == String.Compare(sourceExtension, ".resources", StringComparison.OrdinalIgnoreCase))
                     )
                 {
+                    // Take directory into account when forming manifest resource names
                     manifestName.Append(Path.Combine(everettCompatibleDirectoryName, Path.GetFileNameWithoutExtension(info.cultureNeutralFilename)));
 
                     // Replace all '\' with '.'
