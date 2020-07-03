@@ -417,6 +417,129 @@ namespace Microsoft.NET.Publish.Tests
 
         [Theory]
         [InlineData("netcoreapp3.0")]
+        public void ILLink_keeps_symbols_by_default(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => EnableNonFrameworkTrimming(project));
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true").Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var intermediateDirectory = publishCommand.GetIntermediateDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var linkedDirectory = Path.Combine(intermediateDirectory, "linked");
+
+            var intermediatePdb = Path.Combine(intermediateDirectory, $"{projectName}.pdb");
+            var linkedPdb = Path.Combine(linkedDirectory, $"{projectName}.pdb");
+            var publishedPdb = Path.Combine(publishDirectory, $"{projectName}.pdb");
+
+            File.Exists(linkedPdb).Should().BeTrue();
+
+            var intermediatePdbSize = new FileInfo(intermediatePdb).Length;
+            var linkedPdbSize = new FileInfo(linkedPdb).Length;
+            var publishPdbSize = new FileInfo(publishedPdb).Length;
+
+            linkedPdbSize.Should().BeLessThan(intermediatePdbSize);
+            publishPdbSize.Should().Be(linkedPdbSize);
+        }
+
+        [Theory]
+        [InlineData("netcoreapp3.0")]
+        public void ILLink_removes_symbols_when_debugger_support_is_disabled(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => EnableNonFrameworkTrimming(project));
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:DebuggerSupport=false").Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var intermediateDirectory = publishCommand.GetIntermediateDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var linkedDirectory = Path.Combine(intermediateDirectory, "linked");
+
+            var intermediatePdb = Path.Combine(intermediateDirectory, $"{projectName}.pdb");
+            var linkedPdb = Path.Combine(linkedDirectory, $"{projectName}.pdb");
+            var publishedPdb = Path.Combine(publishDirectory, $"{projectName}.pdb");
+
+            File.Exists(intermediatePdb).Should().BeTrue();
+            File.Exists(linkedPdb).Should().BeFalse();
+            File.Exists(publishedPdb).Should().BeFalse();
+        }
+
+        [Theory]
+        [InlineData("netcoreapp3.0")]
+        public void ILLink_accepts_option_to_remove_symbols(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => EnableNonFrameworkTrimming(project));
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:TrimmerRemoveSymbols=true").Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var intermediateDirectory = publishCommand.GetIntermediateDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var linkedDirectory = Path.Combine(intermediateDirectory, "linked");
+
+            var intermediatePdb = Path.Combine(intermediateDirectory, $"{projectName}.pdb");
+            var linkedPdb = Path.Combine(linkedDirectory, $"{projectName}.pdb");
+            var publishedPdb = Path.Combine(publishDirectory, $"{projectName}.pdb");
+
+            File.Exists(intermediatePdb).Should().BeTrue();
+            File.Exists(linkedPdb).Should().BeFalse();
+            File.Exists(publishedPdb).Should().BeFalse();
+        }
+
+        [Theory]
+        [InlineData("netcoreapp3.0")]
+        public void ILLink_symbols_option_can_override_defaults_from_debugger_support(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => EnableNonFrameworkTrimming(project));
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true",
+                                    "/p:DebuggerSupport=false", "/p:TrimmerRemoveSymbols=false").Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var intermediateDirectory = publishCommand.GetIntermediateDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var linkedDirectory = Path.Combine(intermediateDirectory, "linked");
+
+            var intermediatePdb = Path.Combine(intermediateDirectory, $"{projectName}.pdb");
+            var linkedPdb = Path.Combine(linkedDirectory, $"{projectName}.pdb");
+            var publishedPdb = Path.Combine(publishDirectory, $"{projectName}.pdb");
+
+            File.Exists(linkedPdb).Should().BeTrue();
+
+            var intermediatePdbSize = new FileInfo(intermediatePdb).Length;
+            var linkedPdbSize = new FileInfo(linkedPdb).Length;
+            var publishPdbSize = new FileInfo(publishedPdb).Length;
+
+            linkedPdbSize.Should().BeLessThan(intermediatePdbSize);
+            publishPdbSize.Should().Be(linkedPdbSize);
+        }
+
+        [Theory]
+        [InlineData("netcoreapp3.0")]
         public void ILLink_error_on_portable_app(string targetFramework)
         {
             var projectName = "HelloWorld";
