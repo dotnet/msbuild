@@ -244,13 +244,6 @@ namespace Microsoft.NET.Build.Tests
                 TargetFrameworks = targetFramework,
                 IsSdkProject = true
             };
-            var testAssetA = _testAssetsManager.CreateTestProject(testProjectA).WithProjectChanges((path, p) =>
-            {
-                var ns = p.Root.Name.Namespace;
-                p.Root.Add(new XElement(ns + "ItemGroup",
-                    new XElement(ns + "Content", new XAttribute("Include", "a.txt"), new XAttribute("CopyToOutputDirectory", "PreserveNewest"))));
-            });
-            File.WriteAllText(Path.Combine(testAssetA.Path, testProjectA.Name, "a.txt"), "A");
 
             var testProjectB = new TestProject()
             {
@@ -258,8 +251,7 @@ namespace Microsoft.NET.Build.Tests
                 TargetFrameworks = targetFramework,
                 IsSdkProject = true
             };
-            testProjectB.AdditionalItems.Add("ProjectReference", Path.Combine(testAssetA.Path, testProjectA.Name, $"{testProjectA.Name}.csproj"));
-            var testAssetB = _testAssetsManager.CreateTestProject(testProjectB);
+            testProjectB.ReferencedProjects.Add(testProjectA);
 
             var testProjectC = new TestProject()
             {
@@ -268,18 +260,27 @@ namespace Microsoft.NET.Build.Tests
                 IsSdkProject = true
             };
             testProjectC.AdditionalProperties.Add("DisableTransitiveProjectReferences", "true");
-            testProjectC.AdditionalItems.Add("ProjectReference", Path.Combine(testAssetB.Path, testProjectB.Name, $"{testProjectB.Name}.csproj"));
-            var testAssetC = _testAssetsManager.CreateTestProject(testProjectC);
+            testProjectC.ReferencedProjects.Add(testProjectB);
+            var testAsset = _testAssetsManager.CreateTestProject(testProjectC).WithProjectChanges((path, p) =>
+            { 
+                if (path.Contains(testProjectA.Name))
+                {
+                    var ns = p.Root.Name.Namespace;
+                    p.Root.Add(new XElement(ns + "ItemGroup",
+                        new XElement(ns + "Content", new XAttribute("Include", "a.txt"), new XAttribute("CopyToOutputDirectory", "PreserveNewest"))));
+                }
+            });
+            File.WriteAllText(Path.Combine(testAsset.Path, testProjectA.Name, "a.txt"), "A");
 
-            var buildCommand = new BuildCommand(testAssetC);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute()
                 .Should()
                 .Pass();
 
-            var contentPath = Path.Combine(testAssetC.Path, testProjectC.Name, "bin", "Debug", targetFramework, "a.txt");
+            var contentPath = Path.Combine(testAsset.Path, testProjectC.Name, "bin", "Debug", targetFramework, "a.txt");
             File.Exists(contentPath).Should().BeTrue();
-            var binDir = new DirectoryInfo(Path.Combine(testAssetC.Path, testProjectC.Name, "bin"));
+            var binDir = new DirectoryInfo(Path.Combine(testAsset.Path, testProjectC.Name, "bin"));
             binDir.Delete(true);
 
             buildCommand
