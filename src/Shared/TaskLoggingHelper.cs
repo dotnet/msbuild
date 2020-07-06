@@ -604,7 +604,7 @@ namespace Microsoft.Build.Utilities
             params object[] messageArgs
         )
         {
-            LogError(subcategory, errorCode, helpKeyword, null, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, messageArgs);
+            LogError(subcategory, errorCode, helpKeyword, null, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, messageArgs);
         }
 
         /// <summary>
