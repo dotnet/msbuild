@@ -31,7 +31,7 @@
     <SystemSecurityCryptographyProtectedDataPackageVersion>5.0.0-preview.8.20352.6</SystemSecurityCryptographyProtectedDataPackageVersion>
     <SystemCollectionsSpecializedPackageVersion>4.3.0</SystemCollectionsSpecializedPackageVersion>
     <SystemXmlXmlDocumentPackageVersion>4.3.0</SystemXmlXmlDocumentPackageVersion>
-    <WebDeploymentPackageVersion>3.6.0</WebDeploymentPackageVersion>
+    <WebDeploymentPackageVersion>4.0.5</WebDeploymentPackageVersion>
     <SystemTextJsonVersion>4.7.2</SystemTextJsonVersion>
   </PropertyGroup>
   <PropertyGroup>
