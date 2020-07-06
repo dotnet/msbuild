@@ -15,7 +15,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultCopyToPublishDirectoryMetadata Condition="'$(DefaultCopyToPublishDirectoryMetadata)' == ''">true</DefaultCopyToPublishDirectoryMetadata>
     <_GetChildProjectCopyToPublishDirectoryItems Condition="'$(_GetChildProjectCopyToPublishDirectoryItems)' == ''">true</_GetChildProjectCopyToPublishDirectoryItems>
 
-    <IsPublishable Condition="'$(IsPublishable)'==''">true</IsPublishable>
+    <IsPublishable Condition="'$(IsPublishable)' == ''">true</IsPublishable>
+    <PublishReadyToRunComposite Condition="'$(PublishReadyToRunComposite)' == ''">true</PublishReadyToRunComposite>
+    <PublishReadyToRunComposite Condition="'$(PublishReadyToRunUseCrossgen2)' != 'true' or '$(SelfContained)' != 'true'">false</PublishReadyToRunComposite>
   </PropertyGroup>
 
   <ItemDefinitionGroup>
@@ -294,6 +296,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       and do not replace them. IL PDBs are still required for debugging. Native PDBs emitted by the R2R compiler are
       only used for profiling purposes.
       -->
+      <ResolvedFileToPublish Remove="@(_ReadyToRunImplementationAssemblies)" Condition="'$(PublishReadyToRunComposite)' == 'true'"/>
       <ResolvedFileToPublish Remove="@(_ReadyToRunCompileList)" />
       <ResolvedFileToPublish Include="@(_ReadyToRunFilesToPublish)" />
     </ItemGroup>
@@ -338,11 +341,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Even if app is not self-contained, crossgen requires closure of implementation assemblies. Resolve conflicts
          of the runtime pack assets as though we were copying them locally, and add them to the R2R implementation
          assembly list. -->
-     <ItemGroup Condition="'$(SelfContained)' != 'true'">
-       <_ReadyToRunImplementationAssemblies Include="@(_ManagedRuntimePackAssembly)" ReferenceOnly="true" />
-     </ItemGroup>
+    <ItemGroup Condition="'$(SelfContained)' != 'true'">
+      <_ReadyToRunImplementationAssemblies Include="@(_ManagedRuntimePackAssembly)" ReferenceOnly="true" />
+    </ItemGroup>
 
-     <ResolvePackageFileConflicts Condition="'$(SelfContained)' != 'true'"
+    <ResolvePackageFileConflicts Condition="'$(SelfContained)' != 'true'"
                                  ReferenceCopyLocalPaths="@(_ReadyToRunImplementationAssemblies)">
       <Output TaskParameter="ReferenceCopyLocalPathsWithoutConflicts" ItemName="_ReadyToRunImplementationAssembliesWithoutConflicts" />
     </ResolvePackageFileConflicts>
@@ -355,11 +358,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PrepareForReadyToRunCompilation CrossgenTool="@(CrossgenTool)" 
                                      Crossgen2Tool="@(Crossgen2Tool)"
                                      OutputPath="$(_ReadyToRunOutputPath)"
+                                     MainAssembly="@(IntermediateAssembly)"
                                      Assemblies="@(_ReadyToRunImplementationAssemblies)"
                                      ExcludeList="@(PublishReadyToRunExclude)"
                                      EmitSymbols="$(PublishReadyToRunEmitSymbols)"
                                      IncludeSymbolsInSingleFile="$(IncludeSymbolsInSingleFile)"
-                                     ReadyToRunUseCrossgen2="$(PublishReadyToRunUseCrossgen2)">
+                                     ReadyToRunUseCrossgen2="$(PublishReadyToRunUseCrossgen2)"
+                                     Crossgen2Composite="$(PublishReadyToRunComposite)">
 
       <Output TaskParameter="ReadyToRunCompileList" ItemName="_ReadyToRunCompileList" />
       <Output TaskParameter="ReadyToRunSymbolsCompileList" ItemName="_ReadyToRunSymbolsCompileList" />
@@ -385,6 +390,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RunReadyToRunCompiler CrossgenTool="@(CrossgenTool)"
                            Crossgen2Tool="@(Crossgen2Tool)"
                            UseCrossgen2="$(PublishReadyToRunUseCrossgen2)"
+                           Crossgen2Composite="$(PublishReadyToRunComposite)"
                            Crossgen2ExtraCommandLineArgs="$(PublishReadyToRunCrossgen2ExtraArgs)"
                            ImplementationAssemblyReferences="@(_ReadyToRunAssembliesToReference)"
                            ShowCompilerWarnings="$(PublishReadyToRunShowWarnings)"
