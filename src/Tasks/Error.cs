@@ -21,7 +21,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Relevant file if any.
-        /// If none is provided, the file containing the Error 
+        /// If none is provided, the file containing the Error
         /// task will be used.
         /// </summary>
         public string File { get; set; }
@@ -30,6 +30,11 @@ namespace Microsoft.Build.Tasks
         /// Error help keyword
         /// </summary>
         public string HelpKeyword { get; set; }
+
+        /// <summary>
+        /// A link pointing to more information about the error
+        /// </summary>
+        public string HelpLink { get; set; }
 
         /// <summary>
         /// Main task method
