@@ -674,8 +674,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1100: "}</note>
       </trans-unit>
       <trans-unit id="WindowsDesktopTargetPlatformMustBeWindows">
-        <source>NETSDK1135: The TargetFramework must include '-windows' when using WindowsForms or WPF.</source>
-        <target state="new">NETSDK1135: The TargetFramework must include '-windows' when using WindowsForms or WPF.</target>
+        <source>NETSDK1135: The TargetFramework must include '-windows' when using or referencing projects that use WindowsForms or WPF.</source>
+        <target state="new">NETSDK1135: The TargetFramework must include '-windows' when using or referencing projects that use WindowsForms or WPF.</target>
         <note>{StrBegin="NETSDK1135: "}</note>
       </trans-unit>
     </body>

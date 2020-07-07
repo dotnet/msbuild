@@ -147,7 +147,7 @@ namespace Microsoft.NET.Build.Tests
             newCommand.Execute().Should().Pass();
 
             new PublishCommand(Log, testDirectory)
-                .Execute("/p:RuntimeIdentifier=win-arm64")
+                .Execute("/p:RuntimeIdentifier=win-arm64", "/p:TargetPlatformIdentifier=Windows", "/p:TargetPlatformVersion=7.0")
                 .Should()
                 .Pass();
 

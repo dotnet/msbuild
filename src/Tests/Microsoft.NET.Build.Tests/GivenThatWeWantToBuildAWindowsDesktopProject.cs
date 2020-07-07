@@ -38,5 +38,45 @@ namespace Microsoft.NET.Build.Tests
                 .And
                 .HaveStdOutContaining("NETSDK1135");
         }
+
+        [Fact]
+        public void It_errors_when_missing_transitive_windows_target_platform()
+        {
+            var targetFramework = "net5.0";
+            TestProject testProjectA = new TestProject()
+            {
+                Name = "A",
+                IsSdkProject = true,
+                TargetFrameworks = targetFramework
+            };
+            testProjectA.AdditionalProperties["TargetPlatformIdentifier"] = "Windows";
+            testProjectA.AdditionalProperties["TargetPlatformVersion"] = "7.0";
+            testProjectA.FrameworkReferences.Add("Microsoft.WindowsDesktop.App");
+
+            TestProject testProjectB = new TestProject()
+            {
+                Name = "B",
+                IsSdkProject = true,
+                TargetFrameworks = targetFramework
+            };
+            testProjectB.ReferencedProjects.Add(testProjectA);
+
+            TestProject testProjectC = new TestProject()
+            {
+                Name = "C",
+                IsSdkProject = true,
+                TargetFrameworks = targetFramework
+            };
+            testProjectC.ReferencedProjects.Add(testProjectB);
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProjectC);
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1135");
+        }
     }
 }

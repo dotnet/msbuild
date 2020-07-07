@@ -642,7 +642,7 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1134: "}</comment>
   </data>
   <data name="WindowsDesktopTargetPlatformMustBeWindows" xml:space="preserve">
-    <value>NETSDK1135: The TargetFramework must include '-windows' when using WindowsForms or WPF.</value>
+    <value>NETSDK1135: The TargetFramework must include '-windows' when using or referencing projects that use WindowsForms or WPF.</value>
     <comment>{StrBegin="NETSDK1135: "}</comment>
   </data>
 </root>

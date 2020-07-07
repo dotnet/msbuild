@@ -343,10 +343,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     
   </Target>
 
-  <Target Name="CheckWindowsDesktopSdkInUse" 
-          BeforeTargets="_CheckForInvalidConfigurationAndPlatform" 
-          Condition="'$(UseWpf)' == 'true' Or '$(UseWindowsForms)' == 'true'">
-    <NetSdkWarning Condition="'$(_MicrosoftNetSdkWindowsDesktop)' != 'true'" 
-                   ResourceName="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework" />
+  <Target Name="_CheckForTransitiveWindowsDesktopDependencies"
+          AfterTargets="ResolvePackageAssets"
+          Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0')) and '$(TargetPlatformIdentifier)' != 'Windows' and '@(TransitiveFrameworkReference)' != ''">
+    <NetSdkError Condition="'%(TransitiveFrameworkReference.Identity)' == 'Microsoft.WindowsDesktop.App'"
+                 ResourceName="WindowsDesktopTargetPlatformMustBeWindows" />
   </Target>
 </Project>
