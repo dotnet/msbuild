@@ -22,4 +22,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <RestoreAdditionalProjectFallbackFolders Condition=" '$(_IsNETCore1x)' != 'true' ">$(RestoreAdditionalProjectFallbackFolders);$(_NugetFallbackFolder)</RestoreAdditionalProjectFallbackFolders>
   </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(DisableImplicitLibraryPacksFolder)' != 'true' ">
+    <RestoreAdditionalProjectSources Condition="Exists('$(_WorkloadLibraryPacksFolder)')">$(RestoreAdditionalProjectSources);$(_WorkloadLibraryPacksFolder)</RestoreAdditionalProjectSources>
+  </PropertyGroup>
 </Project>
