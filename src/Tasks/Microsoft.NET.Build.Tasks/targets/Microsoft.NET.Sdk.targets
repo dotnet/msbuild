@@ -346,6 +346,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.Diagnostics.Tracing.EventSource.IsSupported"
+                                    Condition="'$(EventSourceSupport)' != ''"
+                                    Value="$(EventSourceSupport)"
+                                    Trim="true" />
+
     <RuntimeHostConfigurationOption Include="System.GC.Concurrent"
                                     Condition="'$(ConcurrentGarbageCollection)' != ''"
                                     Value="$(ConcurrentGarbageCollection)" />
@@ -357,6 +362,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeHostConfigurationOption Include="System.GC.RetainVM"
                                     Condition="'$(RetainVMGarbageCollection)' != ''"
                                     Value="$(RetainVMGarbageCollection)" />
+
+    <RuntimeHostConfigurationOption Include="System.Resources.UseSystemResourceKeys"
+                                    Condition="'$(UseSystemResourceKeys)' != ''"
+                                    Value="$(UseSystemResourceKeys)"
+                                    Trim="true" />
 
     <RuntimeHostConfigurationOption Include="System.Runtime.TieredCompilation"
                                     Condition="'$(TieredCompilation)' != ''"
@@ -370,6 +380,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                                     Condition="'$(TieredCompilationQuickJitForLoops)' != ''"
                                     Value="$(TieredCompilationQuickJitForLoops)" />
 
+    <RuntimeHostConfigurationOption Include="System.Text.Encoding.EnableUnsafeUTF7Encoding"
+                                    Condition="'$(EnableUnsafeUTF7Encoding)' != ''"
+                                    Value="$(EnableUnsafeUTF7Encoding)"
+                                    Trim="true" />
+
     <RuntimeHostConfigurationOption Include="System.Threading.ThreadPool.MinThreads"
                                     Condition="'$(ThreadPoolMinThreads)' != ''"
                                     Value="$(ThreadPoolMinThreads)" />
@@ -380,7 +395,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   
     <RuntimeHostConfigurationOption Include="System.Globalization.Invariant"
                                     Condition="'$(InvariantGlobalization)' != ''"
-                                    Value="$(InvariantGlobalization)" />
+                                    Value="$(InvariantGlobalization)"
+                                    Trim="true" />
+
   </ItemGroup>
 
   <!--
