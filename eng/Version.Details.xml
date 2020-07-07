@@ -17,11 +17,11 @@
       <Uri>https://github.com/dotnet/sdk</Uri>
       <Sha>a99cb0ac6abb55577041c096a75ff7008a807994</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="16.7.0-preview-20330-08">
+    <Dependency Name="Microsoft.Build" Version="16.7.0-preview-20356-03">
       <Uri>https://github.com/microsoft/msbuild</Uri>
       <Sha>96403c598a166e5a06933f78ace75528a1d1f3b0</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build.Localization" Version="16.7.0-preview-20330-08">
+    <Dependency Name="Microsoft.Build.Localization" Version="16.7.0-preview-20356-03">
       <Uri>https://github.com/microsoft/msbuild</Uri>
       <Sha>96403c598a166e5a06933f78ace75528a1d1f3b0</Sha>
     </Dependency>
