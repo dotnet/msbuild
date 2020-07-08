@@ -16,7 +16,7 @@ namespace Microsoft.NET.Build.Tests
         public GivenThatWeWantToBuildAWindowsDesktopProject(ITestOutputHelper log) : base(log)
         {}
 
-        [Theory]
+        [WindowsOnlyRequiresMSBuildVersionTheory("16.7.0-preview-20310-07")]
         [InlineData("UseWindowsForms")]
         [InlineData("UseWPF")]
         public void It_errors_when_missing_windows_target_platform(string propertyName)
@@ -39,7 +39,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("NETSDK1135");
         }
 
-        [Fact]
+        [WindowsOnlyRequiresMSBuildVersionFact("16.7.0-preview-20310-07")]
         public void It_errors_when_missing_transitive_windows_target_platform()
         {
             var targetFramework = "net5.0";
@@ -80,7 +80,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("NETSDK1135");
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_warns_when_specifying_windows_desktop_sdk()
         {
             var targetFramework = "net5.0";
