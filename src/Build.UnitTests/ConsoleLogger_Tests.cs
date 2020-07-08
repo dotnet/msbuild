@@ -198,7 +198,7 @@ namespace Microsoft.Build.UnitTests
                 <P Include='$(MSBuildThisFileFullPath)' AdditionalProperties='Number=1' />
                 <P Include='$(MSBuildThisFileFullPath)' AdditionalProperties='Number=2' />
 
-                <MSBuildProjectConfigurationDescription Include='Number=$(Number)' />
+                <ProjectConfigurationDescription Include='Number=$(Number)' />
             </ItemGroup>
             <Target Name='Spawn'>
                 <MSBuild Projects='@(P)' BuildInParallel='true' Targets='Inner' />
@@ -214,8 +214,6 @@ namespace Microsoft.Build.UnitTests
             logger.Parameters = "EnableMPLogging;ShowProjectFile";
 
             pc.Collection.RegisterLogger(logger);
-
-
             var p = pc.Collection.LoadProject(project.ProjectFile);
 
             BuildManager.DefaultBuildManager.Build(
@@ -243,7 +241,7 @@ namespace Microsoft.Build.UnitTests
                 <P Include='$(MSBuildThisFileFullPath)' AdditionalProperties='Number=1' />
                 <P Include='$(MSBuildThisFileFullPath)' AdditionalProperties='Number=2' />
 
-                <MSBuildProjectConfigurationDescription Include='Number=$(Number)' />
+                <ProjectConfigurationDescription Include='Number=$(Number)' />
             </ItemGroup>
             <Target Name='Spawn'>
                 <MSBuild Projects='@(P)' BuildInParallel='true' Targets='Inner' />
@@ -291,8 +289,8 @@ namespace Microsoft.Build.UnitTests
                 <P Include='$(MSBuildThisFileFullPath)' AdditionalProperties='Number=1' />
                 <P Include='$(MSBuildThisFileFullPath)' AdditionalProperties='Number=2' />
     
-                <MSBuildProjectConfigurationDescription Include='Number=$(Number)' />
-                <MSBuildProjectConfigurationDescription Include='TargetFramework=$(TargetFramework)' />
+                <ProjectConfigurationDescription Include='Number=$(Number)' />
+                <ProjectConfigurationDescription Include='TargetFramework=$(TargetFramework)' />
             </ItemGroup>
             <Target Name='Spawn'>
                 <MSBuild Projects='@(P)' BuildInParallel='true' Targets='Inner' />

@@ -224,12 +224,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 this.VerifyStack(contextStack.Peek().type == FrameType.Target, "Bad stack -- Top is project {0}", contextStack.Peek().ID);
             }
 
-            // If verbosity is normal, detailed or diagnostic
+            // if verbosity is normal, detailed or diagnostic
             if (IsVerbosityAtLeast(LoggerVerbosity.Normal) && ShowSummary != false)
             {
                 ShowDeferredMessages();
 
-                // Check for stack corruption
+                // check for stack corruption
                 if (!contextStack.IsEmpty())
                 {
                     this.VerifyStack(contextStack.Peek().type == FrameType.Target, "Bad stack -- Top is target {0}", contextStack.Peek().ID);
@@ -604,7 +604,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             this.VerifyStack(!contextStack.IsEmpty(), "Bad project stack");
 
-            // Pop the current project
+            //Pop the current project
             Frame outerMost = contextStack.Pop();
 
             this.VerifyStack(!outerMost.displayed, "Bad project stack on {0}", outerMost.ID);
@@ -738,9 +738,9 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 ShowDeferredMessages();
 
-                // push now, so that the stack is in a good state
-                // for WriteProjectStarted() and WriteLinePretty()
-                // because we use the stack to control indenting
+                //push now, so that the stack is in a good state
+                //for WriteProjectStarted() and WriteLinePretty()
+                //because we use the stack to control indenting
                 contextStack.Push(f);
 
                 switch (f.type)

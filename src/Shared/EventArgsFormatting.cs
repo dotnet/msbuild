@@ -21,13 +21,13 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="e">Error to format</param>
         /// <param name="showProjectFile"><code>true</code> to show the project file which issued the event, otherwise <code>false</code>.</param>
-        /// <param name="msBuildProjectConfigurationDescription">Properties to Print along with message</param>
+        /// <param name="projectConfigurationDescription">Properties to Print along with message</param>
         /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildErrorEventArgs e, bool showProjectFile, string msBuildProjectConfigurationDescription)
+        internal static string FormatEventMessage(BuildErrorEventArgs e, bool showProjectFile, string projectConfigurationDescription)
         {
             return FormatEventMessage("error", e.Subcategory, e.Message,
                             e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
-                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, msBuildProjectConfigurationDescription);
+                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, projectConfigurationDescription);
         }
 
         /// <summary>
@@ -36,13 +36,13 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="e">Warning to format</param>
         /// <param name="showProjectFile"><code>true</code> to show the project file which issued the event, otherwise <code>false</code>.</param>
-        /// <param name="msBuildProjectConfigurationDescription">Properties to Print along with message</param>
+        /// <param name="projectConfigurationDescription">Properties to Print along with message</param>
         /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildWarningEventArgs e, bool showProjectFile, string msBuildProjectConfigurationDescription)
+        internal static string FormatEventMessage(BuildWarningEventArgs e, bool showProjectFile, string projectConfigurationDescription)
         {
             return FormatEventMessage("warning", e.Subcategory, e.Message,
                             e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
-                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, msBuildProjectConfigurationDescription);
+                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, projectConfigurationDescription);
         }
 
         /// <summary>
@@ -51,13 +51,13 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="e">Message to format</param>
         /// <param name="showProjectFile"><code>true</code> to show the project file which issued the event, otherwise <code>false</code>.</param>
-        /// <param name="msBuildProjectConfigurationDescription">Properties to Print along with message</param>
+        /// <param name="projectConfigurationDescription">Properties to Print along with message</param>
         /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildMessageEventArgs e, bool showProjectFile, string msBuildProjectConfigurationDescription)
+        internal static string FormatEventMessage(BuildMessageEventArgs e, bool showProjectFile, string projectConfigurationDescription)
         {
             return FormatEventMessage("message", e.Subcategory, e.Message,
                             e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
-                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, msBuildProjectConfigurationDescription);
+                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, projectConfigurationDescription);
         }
 
         /// <summary>
@@ -214,7 +214,7 @@ namespace Microsoft.Build.Shared
             int columnNumber,
             int endColumnNumber,
             int threadId,
-            string LogOutputProperties
+            string logOutputProperties
         )
         {
             StringBuilder format = new StringBuilder();
@@ -305,10 +305,10 @@ namespace Microsoft.Build.Shared
             }
 
             // If the project file was specified, tack that onto the very end.
-            // Check for additional properties that should be outputted as well
+            // Check for additional properties that should be output as well
             if (projectFile != null && !String.Equals(projectFile, file))
             {
-                if (LogOutputProperties != null && LogOutputProperties.Length > 0)
+                if (logOutputProperties?.Length > 0)
                 {
                     format.Append(" [{10}>{11}]");
                 }
@@ -337,7 +337,7 @@ namespace Microsoft.Build.Shared
                         threadId, file,
                         lineNumber, columnNumber, category, code,
                         lines[i], endLineNumber, endColumnNumber,
-                        subcategory, projectFile, LogOutputProperties));
+                        subcategory, projectFile, logOutputProperties));
 
                 if (i < (lines.Length - 1))
                 {

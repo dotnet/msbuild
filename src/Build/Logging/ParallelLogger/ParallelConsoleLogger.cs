@@ -16,6 +16,7 @@ using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
 using Microsoft.Build.Exceptions;
+
 namespace Microsoft.Build.BackEnd.Logging
 {
     /// <summary>
@@ -25,12 +26,10 @@ namespace Microsoft.Build.BackEnd.Logging
     /// <remarks>This class is not thread safe.</remarks>
     internal class ParallelConsoleLogger : BaseConsoleLogger
     {
-        #region Properties
         /// <summary>
-        /// propertyOutputMap is the map between a (nodeID and project_context_id) to a target framework
+        /// Associate a (nodeID and project_context_id) to a target framework.
         /// </summary>
         internal Dictionary<(int nodeId, int contextId), string> propertyOutputMap = new Dictionary<(int nodeId, int contextId), string>();
-        #endregion
 
         #region Constructors
         /// <summary>
@@ -209,7 +208,7 @@ namespace Microsoft.Build.BackEnd.Logging
             taskPerformanceCounters = null;
             _hasBuildStarted = false;
 
-            // Reset the two data structures created when the logger was created
+            // Reset the data structures created when the logger was created
             propertyOutputMap = new Dictionary<(int, int), string>();
             _buildEventManager = new BuildEventManager();
             _deferredMessages = new Dictionary<BuildEventContext, List<BuildMessageEventArgs>>(s_compareContextNodeId);
@@ -435,7 +434,9 @@ namespace Microsoft.Build.BackEnd.Logging
                 // happened for a given buildEventContext / target
                 if (!groupByProjectEntryPoint.ContainsKey(key))
                 {
-                    groupByProjectEntryPoint.Add(key, new List<BuildEventArgs>());
+                    // happened for a given buildEventContext / target
+                    var errorWarningEventListByTarget = new List<BuildEventArgs>();
+                    groupByProjectEntryPoint.Add(key, errorWarningEventListByTarget);
                 }
                 // Add the error event to the correct bucket
                 groupByProjectEntryPoint[key].Add(errorWarningEventArgs);
@@ -475,11 +476,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     if (errorWarningEvent is BuildErrorEventArgs)
                     {
-                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildErrorEventArgs, showProjectFile, FindLogOutputProperties((BuildErrorEventArgs)errorWarningEvent)), false);
+                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildErrorEventArgs, showProjectFile, FindLogOutputProperties(errorWarningEvent)), false);
                     }
                     else if (errorWarningEvent is BuildWarningEventArgs)
                     {
-                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildWarningEventArgs, showProjectFile, FindLogOutputProperties((BuildWarningEventArgs)errorWarningEvent)), false);
+                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildWarningEventArgs, showProjectFile, FindLogOutputProperties(errorWarningEvent)), false);
                     }
                 }
                 WriteNewLine();
@@ -544,25 +545,26 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 return;
             }
-            // node and project context ids for the propertyOutputMap key
+
+            // node and project context ids for the propertyOutputMap key.
             int nodeID = e.BuildEventContext.NodeId;
             int projectContextId = e.BuildEventContext.ProjectContextId;
 
-            // Create the value to be added to the propertyOutputMap
-            StringBuilder msBuildProjectConfigurationDescription = new StringBuilder();
+            // Create the value to be added to the propertyOutputMap.
+            using var projectConfigurationDescription = new ReuseableStringBuilder();
 
             foreach (DictionaryEntry item in e.Items)
             {
                 ITaskItem itemVal = (ITaskItem)item.Value;
-                // Determine if the LogOutputProperties item has been used
-                if (string.Equals((string)item.Key, ItemMetadataNames.MSBuildProjectConfigurationDescription, StringComparison.OrdinalIgnoreCase))
+                // Determine if the LogOutputProperties item has been used.
+                if (string.Equals((string)item.Key, ItemMetadataNames.ProjectConfigurationDescription, StringComparison.OrdinalIgnoreCase))
                 {
-                    // Add the item value to the string to be printed in error/warning messages
-                    msBuildProjectConfigurationDescription.Append(" ").Append(itemVal.ItemSpec);
+                    // Add the item value to the string to be printed in error/warning messages.
+                    projectConfigurationDescription.Append(" ").Append(itemVal.ItemSpec);
                 }
             }
-            // Add the finished dictionary to propertyOutputMap
-            propertyOutputMap.Add((nodeID, projectContextId), msBuildProjectConfigurationDescription.ToString());
+            // Add the finished dictionary to propertyOutputMap.
+            propertyOutputMap.Add((nodeID, projectContextId), projectConfigurationDescription.ToString());
         }
 
         /// <summary>
@@ -943,19 +945,19 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Finds the LogOutPropterty string to be printed in messages
+        /// Finds the LogOutProperty string to be printed in messages.
         /// </summary>
-        /// <param name="e"> the build event where the LogOutPutProperty string will be added</param>
-        internal string FindLogOutputProperties(LazyFormattedBuildEventArgs e)
+        /// <param name="e"> Build event to extract context information from.</param>
+        internal string FindLogOutputProperties(BuildEventArgs e)
         {
-            string msBuildProjectConfigurationDescription = String.Empty;
+            string projectConfigurationDescription = String.Empty;
             if (e.BuildEventContext != null)
             {
                 int nodeId = e.BuildEventContext.NodeId;
                 int projectContextId = e.BuildEventContext.ProjectContextId;
-                propertyOutputMap.TryGetValue((nodeId, projectContextId), out msBuildProjectConfigurationDescription);
+                propertyOutputMap.TryGetValue((nodeId, projectContextId), out projectConfigurationDescription);
             }
-            return msBuildProjectConfigurationDescription;
+            return projectConfigurationDescription;
         }
 
         /// <summary>

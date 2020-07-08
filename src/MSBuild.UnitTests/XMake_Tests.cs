@@ -439,7 +439,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Help()
         {
-                MSBuildApp.Execute(
+            MSBuildApp.Execute(
 #if FEATURE_GET_COMMANDLINE
                     @"c:\bin\msbuild.exe -? "
 #else
@@ -1235,7 +1235,7 @@ namespace Microsoft.Build.UnitTests
 
         private void RunPriorityBuildTest(ProcessPriorityClass expectedPrority, params string[] arguments)
         {
-            string[] aggregateArguments = arguments.Union(new string[] { " /nr:false /v:diag "}).ToArray();
+            string[] aggregateArguments = arguments.Union(new string[] { " /nr:false /v:diag " }).ToArray();
 
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project DefaultTargets=""Build"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
@@ -1260,7 +1260,7 @@ namespace Microsoft.Build.UnitTests
             logContents.ShouldContain(expected, () => logContents);
         }
 
-#region IgnoreProjectExtensionTests
+        #region IgnoreProjectExtensionTests
 
         /// <summary>
         /// Test the case where the extension is a valid extension but is not a project
@@ -1650,9 +1650,9 @@ namespace Microsoft.Build.UnitTests
                 RobustDelete(projectDirectory);
             }
         }
-#endregion
+        #endregion
 
-#region ProcessFileLoggerSwitches
+        #region ProcessFileLoggerSwitches
         /// <summary>
         /// Test the case where no file logger switches are given, should be no file loggers attached
         /// </summary>
@@ -1895,9 +1895,9 @@ namespace Microsoft.Build.UnitTests
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
-#endregion
+        #endregion
 
-#region ProcessConsoleLoggerSwitches
+        #region ProcessConsoleLoggerSwitches
         [Fact]
         public void ProcessConsoleLoggerSwitches()
         {
@@ -1945,7 +1945,7 @@ namespace Microsoft.Build.UnitTests
             distributedLogger.CentralLogger.Parameters.ShouldBe("SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;parameter;Parameter", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameters passed in"
             distributedLogger.ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe("SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;Parameter;Parameter", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
         }
-#endregion
+        #endregion
 
         [Fact]
         public void RestoreFirstReevaluatesImportGraph()
@@ -1953,18 +1953,15 @@ namespace Microsoft.Build.UnitTests
             string guid = Guid.NewGuid().ToString("N");
 
             string projectContents = ObjectModelHelpers.CleanupFileContents($@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-
   <PropertyGroup>
     <RestoreFirstProps>{Guid.NewGuid():N}.props</RestoreFirstProps>
   </PropertyGroup>
   
   <Import Project=""$(RestoreFirstProps)"" Condition=""Exists($(RestoreFirstProps))""/>
-
   <Target Name=""Build"">
     <Error Text=""PropertyA does not have a value defined"" Condition="" '$(PropertyA)' == '' "" />
     <Message Text=""PropertyA's value is &quot;$(PropertyA)&quot;"" />
   </Target>
-
   <Target Name=""Restore"">
     <ItemGroup>
       <Lines Include=""&lt;Project ToolsVersion=&quot;Current&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;&lt;PropertyGroup&gt;&lt;PropertyA&gt;{guid}&lt;/PropertyA&gt;&lt;/PropertyGroup&gt;&lt;/Project&gt;"" />
@@ -1988,18 +1985,15 @@ namespace Microsoft.Build.UnitTests
             string restoreFirstProps = $"{Guid.NewGuid():N}.props";
 
             string projectContents = ObjectModelHelpers.CleanupFileContents($@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-
   <PropertyGroup>
     <RestoreFirstProps>{restoreFirstProps}</RestoreFirstProps>
   </PropertyGroup>
   
   <Import Project=""$(RestoreFirstProps)"" Condition=""Exists($(RestoreFirstProps))""/>
-
   <Target Name=""Build"">
     <Error Text=""PropertyA does not have a value defined"" Condition="" '$(PropertyA)' == '' "" />
     <Message Text=""PropertyA's value is &quot;$(PropertyA)&quot;"" />
   </Target>
-
   <Target Name=""Restore"">
     <Message Text=""PropertyA's value is &quot;$(PropertyA)&quot;"" />
     <ItemGroup>
@@ -2035,18 +2029,15 @@ namespace Microsoft.Build.UnitTests
             string restoreFirstProps = $"{Guid.NewGuid():N}.props";
 
             string projectContents = ObjectModelHelpers.CleanupFileContents($@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-
   <PropertyGroup>
     <RestoreFirstProps>{restoreFirstProps}</RestoreFirstProps>
   </PropertyGroup>
   
   <Import Project=""$(RestoreFirstProps)"" />
-
   <Target Name=""Build"">
     <Error Text=""PropertyA does not have a value defined"" Condition="" '$(PropertyA)' == '' "" />
     <Message Text=""PropertyA's value is &quot;$(PropertyA)&quot;"" />
   </Target>
-
   <Target Name=""Restore"">
     <Message Text=""PropertyA's value is &quot;$(PropertyA)&quot;"" />
     <ItemGroup>
@@ -2129,7 +2120,6 @@ namespace Microsoft.Build.UnitTests
         public void InteractiveSetsBuiltInProperty(string arguments)
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-
   <Target Name=""Build"">
     <Message Text=""MSBuildInteractive = [$(MSBuildInteractive)]"" />
   </Target>
@@ -2152,7 +2142,6 @@ namespace Microsoft.Build.UnitTests
                 var testProject = testEnvironment.CreateFile("Importer.proj", ObjectModelHelpers.CleanupFileContents(@"
                 <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
                     <Import Project=""TestProject.proj"" />
-
                     <Target Name=""Build"">
                     </Target>
   
@@ -2169,12 +2158,14 @@ namespace Microsoft.Build.UnitTests
                 string binLogLocation = testEnvironment.DefaultTestDirectory.Path;
 
                 string output = RunnerUtilities.ExecMSBuild($"\"{testProject.Path}\" \"/bl:{binLogLocation}/output.binlog\"", out var success, _output);
+
                 success.ShouldBeTrue(output);
+
                 RunnerUtilities.ExecMSBuild($"\"{binLogLocation}/output.binlog\" \"/bl:{binLogLocation}/replay.binlog;ProjectImports=ZipFile\"", out success, _output);
 
                 using (ZipArchive archive = ZipFile.OpenRead($"{binLogLocation}/replay.ProjectImports.zip"))
                 {
-                     archive.Entries.ShouldContain(e => e.FullName.EndsWith(".proj", StringComparison.OrdinalIgnoreCase), 2);
+                    archive.Entries.ShouldContain(e => e.FullName.EndsWith(".proj", StringComparison.OrdinalIgnoreCase), 2);
                 }
             }
         }
@@ -2195,7 +2186,6 @@ namespace Microsoft.Build.UnitTests
 
             string projectContents = $@"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
   <UsingTask TaskName=`ValidateAssemblyLoadContext` AssemblyFile=`{customTaskPath}` />
-
   <Target Name=`Build`>
     <ValidateAssemblyLoadContext />
   </Target>
@@ -2253,7 +2243,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        private string ExecuteMSBuildExeExpectSuccess(string projectContents, IDictionary<string, string> filesToCreate = null,  IDictionary<string, string> envsToCreate = null, params string[] arguments)
+        private string ExecuteMSBuildExeExpectSuccess(string projectContents, IDictionary<string, string> filesToCreate = null, IDictionary<string, string> envsToCreate = null, params string[] arguments)
         {
             using (TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create())
             {
