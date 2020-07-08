@@ -374,8 +374,7 @@ namespace Microsoft.Build.BackEnd
                         int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
                         for (int i = 0; i < handshakeComponents.Length; i++)
                         {
-
-                            int handshakePart = _pipeServer.ReadIntForHandshake(i == 1 ? 0x01 : 0x00 /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
+                            int handshakePart = _pipeServer.ReadIntForHandshake(i == 0 ? 0x01 : 0x00 /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
 #if NETCOREAPP2_1 || MONO
                             , ClientConnectTimeout /* wait a long time for the handshake from this side */
 #endif
@@ -384,7 +383,7 @@ namespace Microsoft.Build.BackEnd
                             if (handshakePart != handshakeComponents[i])
                             {
                                 CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshakePart, handshakeComponents[i]);
-                                _pipeServer.WriteIntForHandshake(i);
+                                _pipeServer.WriteIntForHandshake(i + 1);
                                 gotValidConnection = false;
                                 break;
                             }
