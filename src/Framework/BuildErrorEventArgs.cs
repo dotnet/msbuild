@@ -316,7 +316,14 @@ namespace Microsoft.Build.Framework
             endLineNumber = reader.ReadInt32();
             endColumnNumber = reader.ReadInt32();
 
-            helpLink = reader.ReadByte() == 0 ? null : reader.ReadString();
+            if (version >= 40)
+            {
+                helpLink = reader.ReadByte() == 0 ? null : reader.ReadString();
+            }
+            else
+            {
+                helpLink = null;
+            }
         }
         #endregion
     }
