@@ -305,7 +305,7 @@ namespace Microsoft.Build.Shared
             }
 
             // If the project file was specified, tack that onto the very end.
-            // Check for additional properties that should be output as well
+            // Check for additional properties that should be output with project file
             if (projectFile != null && !String.Equals(projectFile, file))
             {
                 if (logOutputProperties?.Length > 0)
