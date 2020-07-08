@@ -349,4 +349,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NetSdkError Condition="'%(TransitiveFrameworkReference.Identity)' == 'Microsoft.WindowsDesktop.App'"
                  ResourceName="WindowsDesktopTargetPlatformMustBeWindows" />
   </Target>
+
+  <Target Name="_CheckForInvalidWindowsDesktopTargetingConfiguration"
+        BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+        Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0')) and ('$(TargetPlatformIdentifier)' == 'Windows' or '$(UseWindowsForms)' == 'true' or '$(UseWPF)' == 'true')">
+    <NETSdkError Condition="('$(UseWindowsForms)' == 'true' or '$(UseWPF)' == 'true') and '$(TargetPlatformIdentifier)' != 'Windows'"
+                 ResourceName="WindowsDesktopTargetPlatformMustBeWindows" />
+  </Target>
+
+  <Target Name="_CheckForUnnecessaryWindowsDesktopSDK"
+        BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+        Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0')) and '$(MicrosoftWindowsDesktopSdkPath)' != ''">
+    <NETSdkWarning ResourceName="UnnecessaryWindowsDesktopSDK" />
+  </Target>
 </Project>

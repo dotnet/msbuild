@@ -608,6 +608,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1073: Die FrameworkReference "{0}" wurde nicht erkannt.</target>
         <note>{StrBegin="NETSDK1073: "}</note>
       </trans-unit>
+      <trans-unit id="UnnecessaryWindowsDesktopSDK">
+        <source>NETSDK1136: Explicitly referencing the WindowsDesktop SDK is not necessary, Microsoft.NET.Sdk can be used instead.</source>
+        <target state="new">NETSDK1136: Explicitly referencing the WindowsDesktop SDK is not necessary, Microsoft.NET.Sdk can be used instead.</target>
+        <note>{StrBegin="NETSDK1136: "}</note>
+      </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
         <source>NETSDK1009: Unrecognized preprocessor token '{0}' in '{1}'.</source>
         <target state="translated">NETSDK1009: Unbekanntes Präprozessortoken "{0}" in "{1}".</target>

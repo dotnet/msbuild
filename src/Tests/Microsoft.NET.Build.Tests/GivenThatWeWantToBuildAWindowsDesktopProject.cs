@@ -49,9 +49,10 @@ namespace Microsoft.NET.Build.Tests
                 IsSdkProject = true,
                 TargetFrameworks = targetFramework
             };
+            // TODO use net5.0-windows and UseWPF instead
             testProjectA.AdditionalProperties["TargetPlatformIdentifier"] = "Windows";
             testProjectA.AdditionalProperties["TargetPlatformVersion"] = "7.0";
-            testProjectA.FrameworkReferences.Add("Microsoft.WindowsDesktop.App");
+            testProjectA.FrameworkReferences.Add("Microsoft.WindowsDesktop.App"); 
 
             TestProject testProjectB = new TestProject()
             {
@@ -77,6 +78,27 @@ namespace Microsoft.NET.Build.Tests
                 .Fail()
                 .And
                 .HaveStdOutContaining("NETSDK1135");
+        }
+
+        [Fact]
+        public void It_warns_when_specifying_windows_desktop_sdk()
+        {
+            var targetFramework = "net5.0";
+            TestProject testProject = new TestProject()
+            {
+                Name = "windowsDesktopSdk",
+                IsSdkProject = true,
+                ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
+                TargetFrameworks = targetFramework
+            };
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("NETSDK1136");
         }
     }
 }

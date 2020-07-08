@@ -645,4 +645,8 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1135: The TargetFramework must include '-windows' when using or referencing projects that use WindowsForms or WPF.</value>
     <comment>{StrBegin="NETSDK1135: "}</comment>
   </data>
+  <data name="UnnecessaryWindowsDesktopSDK" xml:space="preserve">
+    <value>NETSDK1136: Explicitly referencing the WindowsDesktop SDK is not necessary, Microsoft.NET.Sdk can be used instead.</value>
+    <comment>{StrBegin="NETSDK1136: "}</comment>
+  </data>
 </root>
