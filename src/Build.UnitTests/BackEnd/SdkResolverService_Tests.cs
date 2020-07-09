@@ -73,6 +73,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                             sdk,
                             "path",
                             "2.0.0",
+                            null,
+                            null,
                             Enumerable.Empty<string>()
                             ))
                 });
@@ -192,6 +194,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     sdk,
                     "path",
                     "1.0.0",
+                    null,
+                    null,
                     Enumerable.Empty<string>()
                     ));
 
@@ -450,6 +454,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     sdk,
                     "path",
                     "1.0.0",
+                    null,
+                    null,
                     Enumerable.Empty<string>()
                 ));
 
@@ -572,7 +578,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 resolverContext.Logger.LogMessage("MockSdkResolver2 running", MessageImportance.Normal);
 
                 if (sdk.Name.StartsWith("2"))
-                    return factory.IndicateSuccess("resolverpath2", "version2", new[] {"WARNING2"});
+                    return factory.IndicateSuccess("resolverpath2", "version2", warnings: new[] {"WARNING2"});
 
                 return factory.IndicateFailure(new[] {"ERROR2"}, new[] {"WARNING2"});
             }

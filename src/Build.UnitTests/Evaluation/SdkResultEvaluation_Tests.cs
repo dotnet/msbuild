@@ -140,9 +140,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void SdkResolverCanReturnSinglePath(bool includePropertiesAndItems)
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        [InlineData(false, false)]
+        public void SdkResolverCanReturnSinglePath(bool includePropertiesAndItems, bool useSinglePathResult)
         {
             Dictionary<string, string> propertiesToAdd = null;
             Dictionary<string, SdkResultItem> itemsToAdd = null;
@@ -152,16 +153,23 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 CreateMockSdkResultPropertiesAndItems(out propertiesToAdd, out itemsToAdd);
             }
 
-            var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(
+            var sdkResult = useSinglePathResult ?
                 new Build.BackEnd.SdkResolution.SdkResult(
-                        new SdkReference("TestPropsAndItemsFromResolverSdk", null, null),
-                        new[] { Path.Combine(_testFolder, "Sdk") },
-                        version: null,
-                        propertiesToAdd,
-                        itemsToAdd,
-                        warnings: null
-                    ))
-                );
+                    new SdkReference("TestPropsAndItemsFromResolverSdk", null, null),
+                    Path.Combine(_testFolder, "Sdk"),
+                    version: null,
+                    propertiesToAdd,
+                    itemsToAdd,
+                    warnings: null) :
+                new Build.BackEnd.SdkResolution.SdkResult(
+                    new SdkReference("TestPropsAndItemsFromResolverSdk", null, null),
+                    new[] { Path.Combine(_testFolder, "Sdk") },
+                    version: null,
+                    propertiesToAdd,
+                    itemsToAdd,
+                    warnings: null);
+
+            var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(sdkResult));
 
             string projectContent = @"
                     <Project>

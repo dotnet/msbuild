@@ -17,9 +17,15 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="path">Path to the SDK.</param>
         /// <param name="version">Version of the SDK that was resolved.</param>
+        /// <param name="propertiesToAdd">Properties to set in the evaluation</param>
+        /// <param name="itemsToAdd">Items to add to the evaluation</param>
         /// <param name="warnings">Optional warnings to display during resolution.</param>
         /// <returns></returns>
-        public abstract SdkResult IndicateSuccess(string path, string version, IEnumerable<string> warnings = null);
+        public abstract SdkResult IndicateSuccess(string path,
+            string version,
+            IDictionary<string, string> propertiesToAdd = null,
+            IDictionary<string, SdkResultItem> itemsToAdd = null,
+            IEnumerable<string> warnings = null);
 
         /// <summary>
         ///     Create an <see cref="SdkResolver" /> object indicating success.

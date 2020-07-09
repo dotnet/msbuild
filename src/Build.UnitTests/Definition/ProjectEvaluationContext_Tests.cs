@@ -32,8 +32,8 @@ namespace Microsoft.Build.UnitTests.Definition
             _resolver = new SdkUtilities.ConfigurableMockSdkResolver(
                 new Dictionary<string, SdkResult>
                 {
-                    {"foo", new SdkResult(new SdkReference("foo", "1.0.0", null), "path", "1.0.0", null)},
-                    {"bar", new SdkResult(new SdkReference("bar", "1.0.0", null), "path", "1.0.0", null)}
+                    {"foo", new SdkResult(new SdkReference("foo", "1.0.0", null), "path", "1.0.0", null, null, null)},
+                    {"bar", new SdkResult(new SdkReference("bar", "1.0.0", null), "path", "1.0.0", null, null, null)}
                 });
         }
 

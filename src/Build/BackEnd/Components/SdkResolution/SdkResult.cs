@@ -29,12 +29,16 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             Warnings = warnings;
         }
 
-        public SdkResult(SdkReference sdkReference, string path, string version, IEnumerable<string> warnings)
+        public SdkResult(SdkReference sdkReference, string path, string version, IDictionary<string, string> propertiesToAdd,
+                         IDictionary<string, SdkResultItem> itemsToAdd, IEnumerable<string> warnings)
         {
             Success = true;
             SdkReference = sdkReference;
             Path = path;
             Version = version;
+
+            PropertiesToAdd = propertiesToAdd;
+            ItemsToAdd = itemsToAdd;
             Warnings = warnings;
         }
 

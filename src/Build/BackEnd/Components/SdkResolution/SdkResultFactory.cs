@@ -27,9 +27,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return new SdkResult(_sdkReference, errors, warnings);
         }
 
-        public override SdkResultBase IndicateSuccess(string path, string version, IEnumerable<string> warnings = null)
+        public override SdkResultBase IndicateSuccess(string path,
+                                                      string version,
+                                                      IDictionary<string, string> propertiesToAdd = null,
+                                                      IDictionary<string, SdkResultItem> itemsToAdd = null,
+                                                      IEnumerable<string> warnings = null)
         {
-            return new SdkResult(_sdkReference, path, version, warnings);
+            return new SdkResult(_sdkReference, path, version,propertiesToAdd, itemsToAdd, warnings);
         }
 
         public override SdkResultBase IndicateSuccess(IEnumerable<string> paths,
