@@ -175,7 +175,7 @@ namespace Microsoft.Build.UnitTests
 
             // Test using HelpLink
             _stream.Position = 0;
-            genericEvent = new BuildErrorEventArgs("Subcategory", "Code", "File", 1, 2, 3, 4, "Message", "HelpKeyword", "HelpLink", "SenderName", DateTime.Now);
+            genericEvent = new BuildErrorEventArgs("Subcategory", "Code", "File", 1, 2, 3, 4, "Message", "HelpKeyword", "SenderName", DateTime.Now, "HelpLink");
             genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
 
             // Serialize
@@ -184,7 +184,7 @@ namespace Microsoft.Build.UnitTests
 
             // Deserialize and Verify
             _stream.Position = 0;
-            newGenericEvent = new BuildErrorEventArgs("Something", "SomeThing", "SomeThing", -1, -1, -1, -1, "Something", "SomeThing", "Something");
+            newGenericEvent = new BuildErrorEventArgs("Something", "SomeThing", "SomeThing", -1, -1, -1, -1, "Something", "SomeThing", "Something", DateTime.Now, "HelpLink");
             newGenericEvent.CreateFromStream(_reader, _eventArgVersion);
             _stream.Position.ShouldBe(streamWriteEndPosition); // "Stream End Positions Should Match"
             VerifyGenericEventArg(genericEvent, newGenericEvent);

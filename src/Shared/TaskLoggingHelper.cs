@@ -572,7 +572,7 @@ namespace Microsoft.Build.Utilities
         /// <exception cref="ArgumentNullException">Thrown when <c>message</c> is null.</exception>
         public void LogError(string message, params object[] messageArgs)
         {
-            LogError(null, null, null, null, 0, 0, 0, 0, message, messageArgs);
+            LogError(null, null, null, null, 0, 0, 0, 0, message, null, messageArgs);
         }
 
         /// <summary>
@@ -604,7 +604,7 @@ namespace Microsoft.Build.Utilities
             params object[] messageArgs
         )
         {
-            LogError(subcategory, errorCode, helpKeyword, null, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, messageArgs);
+            LogError(subcategory, errorCode, helpKeyword, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, null, messageArgs);
         }
 
         /// <summary>
@@ -614,13 +614,13 @@ namespace Microsoft.Build.Utilities
         /// <param name="subcategory">Description of the error type (can be null).</param>
         /// <param name="errorCode">The error code (can be null).</param>
         /// <param name="helpKeyword">The help keyword for the host IDE (can be null).</param>
-        /// <param name="helpLink">A link pointing to more information about the error.</param>
         /// <param name="file">The path to the file containing the error (can be null).</param>
         /// <param name="lineNumber">The line in the file where the error occurs (set to zero if not available).</param>
         /// <param name="columnNumber">The column in the file where the error occurs (set to zero if not available).</param>
         /// <param name="endLineNumber">The last line of a range of lines in the file where the error occurs (set to zero if not available).</param>
         /// <param name="endColumnNumber">The last column of a range of columns in the file where the error occurs (set to zero if not available).</param>
         /// <param name="message">The message string.</param>
+        /// <param name="helpLink">A link pointing to more information about the error.</param>
         /// <param name="messageArgs">Optional arguments for formatting the message string.</param>
         /// <exception cref="ArgumentNullException">Thrown when <c>message</c> is null.</exception>
         public void LogError
@@ -628,13 +628,13 @@ namespace Microsoft.Build.Utilities
             string subcategory,
             string errorCode,
             string helpKeyword,
-            string helpLink,
             string file,
             int lineNumber,
             int columnNumber,
             int endLineNumber,
             int endColumnNumber,
             string message,
+            string helpLink,
             params object[] messageArgs
         )
         {
@@ -667,9 +667,9 @@ namespace Microsoft.Build.Utilities
                     endColumnNumber,
                     message,
                     helpKeyword,
-                    helpLink,
                     TaskName,
                     DateTime.UtcNow,
+                    helpLink,
                     messageArgs
                 );
             BuildEngine.LogErrorEvent(e);
