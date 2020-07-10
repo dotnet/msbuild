@@ -223,7 +223,7 @@ namespace Microsoft.Build.Execution
                     return;
                 }
 
-                if (_itemsStore.ItemsCount == 0)
+                if (_itemsStore.Items.Length == 0)
                 {
                     // Nothing to cache.
                     return;
@@ -340,52 +340,9 @@ namespace Microsoft.Build.Execution
         private class ItemsStore : ITranslatable
         {
             /// <summary>
-            /// The default compression threshold.
-            /// </summary>
-            private const int DefaultCompressionThreshold = 32;
-
-            /// <summary>
-            /// The count of items we will store before we start using compression.
-            /// </summary>
-            /// <remarks>
-            /// This value was determined empirically by looking at how many items tend to be transmitted for "normal" projects versus the ones
-            /// which benefit from this technique.
-            /// </remarks>
-            private static readonly int s_compressionThreshold;
-
-            /// <summary>
-            /// The compressed set of items, if any.
-            /// </summary>
-            private byte[] _compressedItems;
-
-            /// <summary>
-            /// The count of items, stored here so that we don't have to decompress the items if we are
-            /// only looking at the count.
-            /// </summary>
-            private int _itemsCount;
-
-            /// <summary>
             /// The items produced by this target.
             /// </summary>
-            private TaskItem[] _uncompressedItems;
-
-            /// <summary>
-            /// Static constructor.
-            /// </summary>
-            static ItemsStore()
-            {
-                if (Int32.TryParse(Environment.GetEnvironmentVariable("MSBUILDTARGETRESULTCOMPRESSIONTHRESHOLD"), out ItemsStore.s_compressionThreshold))
-                {
-                    if (s_compressionThreshold < 0)
-                    {
-                        s_compressionThreshold = 0;
-                    }
-                }
-                else
-                {
-                    s_compressionThreshold = DefaultCompressionThreshold;
-                }
-            }
+            private TaskItem[] _items;
 
             /// <summary>
             /// Constructor
@@ -393,8 +350,7 @@ namespace Microsoft.Build.Execution
             public ItemsStore(TaskItem[] items)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(items, "items");
-                _uncompressedItems = items;
-                _itemsCount = items.Length;
+                this._items = items;
             }
 
             /// <summary>
@@ -406,64 +362,16 @@ namespace Microsoft.Build.Execution
             }
 
             /// <summary>
-            /// Gets the count of items.
-            /// </summary>
-            public int ItemsCount => _itemsCount;
-
-            /// <summary>
             /// Retrieves the items.
             /// </summary>
-            /// <remarks>
-            /// It's important not to call this method merely to get a count of the items held in the collection.
-            /// Instead use ItemsCount (above) for that.
-            /// </remarks>
-            public TaskItem[] Items
-            {
-                get
-                {
-                    if (_uncompressedItems == null)
-                    {
-                        DecompressItems();
-                    }
-
-                    return _uncompressedItems;
-                }
-            }
-
-            /*
-            /// <summary>
-            /// Throws out the deserialized items.
-            /// </summary>
-            /// <remarks>
-            /// Not presently used, but could be used for a multi-stage caching mechanism which first throws out decompressed items,
-            /// then if more space is needed, starts throwing out the compressed ones.
-            /// </remarks>
-            public void ReleaseItems()
-            {
-                if (_compressedItems == null)
-                {
-                    CompressItems();
-                }
-            }
-            */
+            public TaskItem[] Items => _items;
 
             /// <summary>
             /// Translates an items store.
             /// </summary>
             public void Translate(ITranslator translator)
             {
-                if (_compressedItems == null && translator.Mode == TranslationDirection.WriteToStream)
-                {
-                    CompressItemsIfNecessary();
-                }
-
-                // Note we only translate the serialized buffer (which contains the compressed and interned
-                // representation of the items.)  If the actual items are needed (for instance on child nodes)
-                // then the Items accessor will reconstitute them at the point they are needed.
-                ErrorUtilities.VerifyThrow((translator.Mode == TranslationDirection.ReadFromStream) || ((_compressedItems == null) ^ (_uncompressedItems == null)), "One of the compressed or uncompressed items arrays should be null.");
-                translator.Translate(ref _itemsCount);
-                translator.Translate(ref _compressedItems);
-                translator.TranslateArray(ref _uncompressedItems, TaskItem.FactoryForDeserialization);
+                translator.TranslateArray(ref _items, TaskItem.FactoryForDeserialization);
             }
 
             /// <summary>
@@ -472,96 +380,6 @@ namespace Microsoft.Build.Execution
             internal static ItemsStore FactoryForDeserialization(ITranslator translator)
             {
                 return new ItemsStore(translator);
-            }
-
-            /// <summary>
-            /// Compresses the items, but only if we have reached the threshold where it makes sense to do so.
-            /// </summary>
-            private void CompressItemsIfNecessary()
-            {
-                if (_itemsCount > s_compressionThreshold)
-                {
-                    CompressItems();
-                }
-            }
-
-            /// <summary>
-            /// Decompresses the items.
-            /// </summary>
-            private void DecompressItems()
-            {
-                ErrorUtilities.VerifyThrow(_uncompressedItems == null, "Items already decompressed.");
-                using (MemoryStream serializedStream = new MemoryStream(_compressedItems, 0, _compressedItems.Length, writable: false, publiclyVisible: true))
-                {
-                    using (DeflateStream inflateStream = new DeflateStream(serializedStream, CompressionMode.Decompress))
-                    {
-                        ITranslator serializedBufferTranslator = BinaryTranslator.GetReadTranslator(inflateStream, null);
-                        LookasideStringInterner interner = new LookasideStringInterner(serializedBufferTranslator);
-
-                        byte[] buffer = null;
-                        serializedBufferTranslator.Translate(ref buffer);
-                        ErrorUtilities.VerifyThrow(buffer != null, "Unexpected null items buffer during decompression.");
-
-                        using (MemoryStream itemsStream = new MemoryStream(buffer, 0, buffer.Length, writable: false, publiclyVisible: true))
-                        {
-                            ITranslator itemTranslator = BinaryTranslator.GetReadTranslator(itemsStream, null);
-                            _uncompressedItems = new TaskItem[_itemsCount];
-                            for (int i = 0; i < _uncompressedItems.Length; i++)
-                            {
-                                _uncompressedItems[i] = TaskItem.FactoryForDeserialization(itemTranslator, interner);
-                            }
-                        }
-                    }
-                }
-
-                _compressedItems = null;
-            }
-
-            /// <summary>
-            /// Compresses the items.
-            /// </summary>
-            private void CompressItems()
-            {
-                ErrorUtilities.VerifyThrow(_compressedItems == null, "Items already compressed.");
-
-                // We will just calculate a very rough starting buffer size for the memory stream based on the number of items and a
-                // rough guess for an average number of bytes needed to store them compressed.  This doesn't have to be accurate, just
-                // big enough to avoid unnecessary buffer reallocations in most cases.
-                int defaultCompressedBufferCapacity = _uncompressedItems.Length * 64;
-                using (var serializedStream = new MemoryStream(defaultCompressedBufferCapacity))
-                {
-                    using (var deflateStream = new DeflateStream(serializedStream, CompressionMode.Compress))
-                    {
-                        ITranslator serializedBufferTranslator = BinaryTranslator.GetWriteTranslator(deflateStream);
-
-                        // Again, a rough calculation of buffer size, this time for an uncompressed buffer.  We assume compression 
-                        // will give us 2:1, as it's all text.
-                        int defaultUncompressedBufferCapacity = defaultCompressedBufferCapacity * 2;
-                        using (var itemsStream = new MemoryStream(defaultUncompressedBufferCapacity))
-                        {
-                            ITranslator itemTranslator = BinaryTranslator.GetWriteTranslator(itemsStream);
-
-                            // When creating the interner, we use the number of items as the initial size of the collections since the
-                            // number of strings will be of the order of the number of items in the collection.  This assumes basically
-                            // one unique string per item (frequently a path related to the item) with most of the rest of the metadata
-                            // being the same (and thus interning.)  This is a hueristic meant to get us in the ballpark to avoid 
-                            // too many reallocations when growing the collections.
-                            LookasideStringInterner interner = new LookasideStringInterner(StringComparer.Ordinal, _uncompressedItems.Length);
-                            foreach (TaskItem t in _uncompressedItems)
-                            {
-                                t.TranslateWithInterning(itemTranslator, interner);
-                            }
-
-                            interner.Translate(serializedBufferTranslator);
-                            byte[] buffer = itemsStream.ToArray();
-                            serializedBufferTranslator.Translate(ref buffer);
-                        }
-                    }
-
-                    _compressedItems = serializedStream.ToArray();
-                }
-
-                _uncompressedItems = null;
             }
         }
     }
