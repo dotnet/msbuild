@@ -115,6 +115,15 @@ Copyright (c) .NET Foundation. All rights reserved.
         <_Parameter2>%(AssemblyMetadata.Value)</_Parameter2>
       </AssemblyAttribute>
     </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetPlatformIdentifier)' != ''
+                         and '$(MinimumOSPlatform)' != ''
+                         and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
+                         and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">
+      <AssemblyAttribute Include="System.Runtime.Versioning.MinimumOSPlatformAttribute">
+        <_Parameter1>$(TargetPlatformIdentifier)$(MinimumOSPlatform)</_Parameter1>
+      </AssemblyAttribute>
+    </ItemGroup>
   </Target>
 
   <!-- 

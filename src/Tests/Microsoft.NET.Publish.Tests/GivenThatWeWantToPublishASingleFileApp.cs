@@ -202,7 +202,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            string[] expectedFiles = { SingleFile, PdbFile, SmallNameDirWord, LargeNameDirWord, GetNativeDll("coreclr"), GetNativeDll("clrjit") };
+            string[] expectedFiles = { SingleFile, PdbFile, SmallNameDirWord, LargeNameDirWord };
             string[] unexpectedFiles = { GetNativeDll("hostfxr"), GetNativeDll("hostpolicy") };
 
             GetPublishDirectory(publishCommand)
