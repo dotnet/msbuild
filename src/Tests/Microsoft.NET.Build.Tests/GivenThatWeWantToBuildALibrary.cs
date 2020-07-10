@@ -633,6 +633,30 @@ class Program
             }
         }
 
+        [Theory]
+        [InlineData("net5.0")]
+        [InlineData("netcoreapp3.1")]
+        public void It_defines_windows_version_default_correctly(string targetFramework)
+        {
+            TestProject testProject = new TestProject()
+            {
+                Name = "WindowsVersionDefault",
+                IsSdkProject = true,
+                ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
+                TargetFrameworks = targetFramework
+            };
+            testProject.AdditionalProperties["TargetPlatformIdentifier"] = "windows";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var getValuesCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), targetFramework, "TargetPlatformVersion");
+            getValuesCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { "7.0" });
+        }
+
         private void TestInvalidTargetFramework(string testName, string targetFramework, bool useSolution, string expectedOutput)
         {
             var testProject = new TestProject()

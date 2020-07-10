@@ -103,6 +103,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <AutomaticallyUseReferenceAssemblyPackages Condition="'$(AutomaticallyUseReferenceAssemblyPackages)'==''">true</AutomaticallyUseReferenceAssemblyPackages>
     <MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion>1.0.0</MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion>
     <CopyConflictingTransitiveContent>false</CopyConflictingTransitiveContent>
+    <MSBuildCopyContentTransitively Condition="'$(MSBuildCopyContentTransitively)' == ''">true</MSBuildCopyContentTransitively>
 
     <!-- Uncomment this once https://github.com/Microsoft/visualfsharp/issues/3207 gets fixed -->
     <!-- <WarningsAsErrors>$(WarningsAsErrors);NU1605</WarningsAsErrors> -->
@@ -126,5 +127,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackTool.props" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackProjectTool.props" />
+
+  <Import Project="$(MSBuildThisFileDirectory)../../Microsoft.NET.Sdk.WindowsDesktop/targets/Microsoft.NET.Sdk.WindowsDesktop.props" Condition="'$(_MicrosoftWindowsDesktopSdkImported)' != 'true'"/>
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Windows.props" />
 </Project>

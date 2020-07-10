@@ -11,7 +11,17 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0')) and '$(TargetPlatformIdentifier)' == 'Windows' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetPlatformVersion), '10.0')) ">
+  <PropertyGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true'
+                             and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
+                             and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))
+                             and '$(TargetPlatformIdentifier)' == 'Windows'
+                             and '$(TargetPlatformVersion)' != ''
+                             and $([MSBuild]::VersionGreaterThanOrEquals($(TargetPlatformVersion), '10.0')) ">
     <_IncludeWindowsSDKRefFrameworkReferences>true</_IncludeWindowsSDKRefFrameworkReferences>
+  </PropertyGroup>
+
+  <!-- Set 7.0 as the TargetPlatformVersion for windows. -->
+  <PropertyGroup Condition="'$(TargetPlatformIdentifier)' == 'windows' and '$(TargetPlatformVersion)' == ''" >
+    <TargetPlatformVersion>7.0</TargetPlatformVersion>
   </PropertyGroup>
 </Project>
