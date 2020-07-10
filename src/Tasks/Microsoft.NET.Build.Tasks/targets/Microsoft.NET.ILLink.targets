@@ -82,25 +82,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_DotNetHostFileName Condition=" '$(OS)' == 'Windows_NT' ">dotnet.exe</_DotNetHostFileName>
     </PropertyGroup>
 
-    <!-- Temporary workaround until the naming is finalized. Translate from TrimMode to Action metadata. -->
-    <ItemGroup>
-      <ManagedAssemblyToLink Condition=" '%(ManagedAssemblyToLink.TrimMode)' != '' ">
-        <Action>%(ManagedAssemblyToLink.TrimMode)</Action>
-      </ManagedAssemblyToLink>
-    </ItemGroup>
-
-    <!-- Map public properties to the task options -->
-    <PropertyGroup>
-      <_TrimmerLinkSymbols Condition=" '$(TrimmerRemoveSymbols)' == 'true' ">false</_TrimmerLinkSymbols>
-      <_TrimmerLinkSymbols Condition=" '$(TrimmerRemoveSymbols)' != 'true' ">true</_TrimmerLinkSymbols>
-    </PropertyGroup>
-
     <Delete Files="@(_LinkedResolvedFileToPublishCandidate)" />
     <ILLink AssemblyPaths="@(ManagedAssemblyToLink)"
             ReferenceAssemblyPaths="@(ReferencePath)"
             RootAssemblyNames="@(TrimmerRootAssembly)"
-            DefaultAction="$(TrimMode)"
-            LinkSymbols="$(_TrimmerLinkSymbols)"
+            TrimMode="$(TrimMode)"
+            RemoveSymbols="$(TrimmerRemoveSymbols)"
             FeatureSettings="@(_TrimmerFeatureSettings)"
             CustomData="@(_TrimmerCustomData)"
 
