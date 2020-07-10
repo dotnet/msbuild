@@ -15,10 +15,9 @@
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>16.6.0</VersionPrefix>
+    <VersionPrefix>16.6.2</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
-    <DotNetFinalVersionKind>release</DotNetFinalVersionKind>
-    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+    <PreReleaseVersionLabel>qfe</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
     <SemanticVersioningV1>true</SemanticVersioningV1>
@@ -35,6 +34,7 @@
   <!-- Toolset Dependencies -->
   <PropertyGroup>
     <DotNetCliVersion>3.1.100</DotNetCliVersion>
+    <DropAppVersion>18.165.29912-buildid11693003</DropAppVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386
