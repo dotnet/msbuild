@@ -870,6 +870,7 @@ Copyright (c) .NET Foundation. All rights reserved.
          WarningLevel="$(WarningLevel)"
          WarningsAsErrors="$(WarningsAsErrors)"
          WarningsNotAsErrors="$(WarningsNotAsErrors)"
+         WarnVersion="$(WarnVersion)"
          TargetType="Library"
          ToolExe="$(CscToolExe)"
          ToolPath="$(CscToolPath)"
