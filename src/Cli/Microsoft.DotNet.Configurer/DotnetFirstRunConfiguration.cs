@@ -8,16 +8,21 @@ namespace Microsoft.DotNet.Configurer
         public bool GenerateAspNetCertificate { get; }
 
         public bool TelemetryOptout { get; }
+
         public bool AddGlobalToolsToPath { get; }
+
+        public bool NoLogo { get; }
 
         public DotnetFirstRunConfiguration(
             bool generateAspNetCertificate,
             bool telemetryOptout,
-            bool addGlobalToolsToPath)
+            bool addGlobalToolsToPath, 
+            bool nologo)
         {
             GenerateAspNetCertificate = generateAspNetCertificate;
             TelemetryOptout = telemetryOptout;
             AddGlobalToolsToPath = addGlobalToolsToPath;
+            NoLogo = nologo;
         }
     }
 }
