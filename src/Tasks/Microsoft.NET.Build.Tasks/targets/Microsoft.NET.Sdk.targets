@@ -959,6 +959,20 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ProjectCapability Remove="ReferenceManagerAssemblies" />
   </ItemGroup>
 
+  <!--
+  ============================================================
+                            Set ImportWindowsDesktopTargets
+  ============================================================
+  -->
+
+  <PropertyGroup Condition=" '$(ImportWindowsDesktopTargets)' == ''
+                 and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
+                 and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))
+                 and '$(TargetPlatformIdentifier)' == 'Windows'
+                 and ('$(UseWpf)' == 'true' Or '$(UseWindowsForms)' == 'true')">
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+  </PropertyGroup>
+
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DisableStandardFrameworkResolution.targets" Condition="'$(DisableStandardFrameworkResolution)' == 'true'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DesignerSupport.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.GenerateAssemblyInfo.targets" Condition="'$(UsingNETSdkDefaults)' == 'true'"/>
@@ -978,4 +992,5 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ILLink.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.Analyzers.targets" Condition="'$(Language)' == 'C#' or '$(Language)' == 'VB'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Windows.targets" Condition="'$(TargetPlatformIdentifier)' == 'Windows'" />
+  <Import Project="$(MSBuildThisFileDirectory)../../Microsoft.NET.Sdk.WindowsDesktop/targets/Microsoft.NET.Sdk.WindowsDesktop.targets" Condition="'$(ImportWindowsDesktopTargets)' == 'true' and '$(_MicrosoftWindowsDesktopSdkImported)' != 'true'"/>
 </Project>

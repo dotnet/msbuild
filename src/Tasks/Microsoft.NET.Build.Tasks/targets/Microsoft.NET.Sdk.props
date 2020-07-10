@@ -127,5 +127,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackTool.props" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackProjectTool.props" />
+
+  <Import Project="$(MSBuildThisFileDirectory)../../Microsoft.NET.Sdk.WindowsDesktop/targets/Microsoft.NET.Sdk.WindowsDesktop.props" Condition="'$(_MicrosoftWindowsDesktopSdkImported)' != 'true'"/>
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Windows.props" />
 </Project>
