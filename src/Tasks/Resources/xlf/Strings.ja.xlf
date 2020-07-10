@@ -1273,7 +1273,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.MainAssemblyMissingNeutralResourcesLanguage">
         <source>MSB3817: The assembly "{0}" does not have a NeutralResourcesLanguageAttribute on it. To be used in an app package, portable libraries must define a NeutralResourcesLanguageAttribute on their main assembly (ie, the one containing code, not a satellite assembly).</source>
-        <target state="translated">MSB3817: アセンブリ "{0}" には NeutralResourcesLanguageAttribute が設定されていません。アプリケーション パッケージ内で使用するには、ポータブル ライブラリでメインのアセンブリ (たとえば、サテライト アセンブリではなく、コードを含んでいるもの) に対して NeutralResourcesLanguageAttribute を定義する必要があります。</target>
+        <target state="translated">MSB3817: アセンブリ "{0}" には NeutralResourcesLanguageAttribute が設定されていません。アプリケーション パッケージ内で使用するには、移植可能なライブラリでメインのアセンブリ (たとえば、サテライト アセンブリではなく、コードを含んでいるもの) に対して NeutralResourcesLanguageAttribute を定義する必要があります。</target>
         <note>{StrBegin="MSB3817: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ExecuteAsToolAndExtractResWNotSupported">
@@ -2295,7 +2295,7 @@
       </trans-unit>
       <trans-unit id="SGen.TaskNotSupported">
         <source>MSB3474: The task "{0}" is not supported on the .NET Core version of MSBuild. Use the Microsoft XML Serializer Generator package instead. See https://go.microsoft.com/fwlink/?linkid=858594 for more information.</source>
-        <target state="translated">MSB3474: タスク "{0}" は、MSBuild の .NET Core バージョンではサポートされていません。代わりに Microsoft XML Serializer Generator パッケージを使用してください。詳細については、https://go.microsoft.com/fwlink/?linkid=858594 をご覧ください。</target>
+        <target state="translated">MSB3474: タスク "{0}" は、MSBuild の .NET Core バージョンではサポートされていません。代わりに Microsoft XML Serializer ジェネレーター パッケージを使用してください。詳細については、https://go.microsoft.com/fwlink/?linkid=858594 をご覧ください。</target>
         <note>{StrBegin="MSB3474: "}</note>
       </trans-unit>
       <trans-unit id="SignFile.CertNotInStore">
