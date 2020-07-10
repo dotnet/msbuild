@@ -53,7 +53,7 @@ namespace Microsoft.Build.Execution
         /// Unordered set of task parameter names and unevaluated values.
         /// This is a dead, read-only collection.
         /// </summary>
-        private CopyOnWriteDictionary<string, Tuple<string, ElementLocation>> _parameters;
+        private CopyOnWriteDictionary<string, (string, ElementLocation)> _parameters;
 
         /// <summary>
         /// Output properties and items below this task. This is an ordered collection
@@ -138,7 +138,7 @@ namespace Microsoft.Build.Execution
             continueOnError,
             msbuildRuntime,
             msbuildArchitecture,
-            new CopyOnWriteDictionary<string, Tuple<string, ElementLocation>>(8, StringComparer.OrdinalIgnoreCase),
+            new CopyOnWriteDictionary<string, (string, ElementLocation)>(8, StringComparer.OrdinalIgnoreCase),
             new List<ProjectTaskInstanceChild>(),
             location,
             condition == string.Empty ? null : ElementLocation.EmptyLocation,
@@ -155,7 +155,7 @@ namespace Microsoft.Build.Execution
             string continueOnError,
             string msbuildRuntime,
             string msbuildArchitecture,
-            CopyOnWriteDictionary<string, Tuple<string, ElementLocation>> parameters,
+            CopyOnWriteDictionary<string, (string, ElementLocation)> parameters,
             List<ProjectTaskInstanceChild> outputs,
             ElementLocation location,
             ElementLocation conditionLocation,
@@ -238,7 +238,7 @@ namespace Microsoft.Build.Execution
             get
             {
                 Dictionary<string, string> filteredParameters = new Dictionary<string, string>(_parameters.Count, StringComparer.OrdinalIgnoreCase);
-                foreach (KeyValuePair<string, Tuple<string, ElementLocation>> parameter in _parameters)
+                foreach (KeyValuePair<string, (string, ElementLocation)> parameter in _parameters)
                 {
                     filteredParameters[parameter.Key] = parameter.Value.Item1;
                 }
@@ -247,7 +247,7 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        internal IDictionary<string, Tuple<string, ElementLocation>> TestGetParameters => _parameters;
+        internal IDictionary<string, (string, ElementLocation)> TestGetParameters => _parameters;
 
         /// <summary>
         /// Ordered set of output property and item objects.
@@ -301,7 +301,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Retrieves the parameters dictionary as used during the build.
         /// </summary>
-        internal IDictionary<string, Tuple<string, ElementLocation>> ParametersForBuild
+        internal IDictionary<string, (string, ElementLocation)> ParametersForBuild
         {
             get { return _parameters; }
         }
@@ -313,8 +313,7 @@ namespace Microsoft.Build.Execution
         /// <returns>The parameter value, or null if it does not exist.</returns>
         internal string GetParameter(string parameterName)
         {
-            Tuple<string, ElementLocation> parameterValue = null;
-            if (_parameters.TryGetValue(parameterName, out parameterValue))
+            if (_parameters.TryGetValue(parameterName, out var parameterValue))
             {
                 return parameterValue.Item1;
             }
@@ -329,7 +328,7 @@ namespace Microsoft.Build.Execution
         /// <param name="unevaluatedValue">The unevaluated value for the parameter.</param>
         internal void SetParameter(string parameterName, string unevaluatedValue)
         {
-            _parameters[parameterName] = new Tuple<string, ElementLocation>(unevaluatedValue, ElementLocation.EmptyLocation);
+            _parameters[parameterName] = (unevaluatedValue, ElementLocation.EmptyLocation);
         }
 
         /// <summary>
@@ -378,25 +377,25 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _msbuildRuntimeLocation, ElementLocation.FactoryForDeserialization);
             translator.Translate(ref _msbuildArchitectureLocation, ElementLocation.FactoryForDeserialization);
 
-            IDictionary<string, Tuple<string, ElementLocation>> localParameters = _parameters;
+            IDictionary<string, (string, ElementLocation)> localParameters = _parameters;
             translator.TranslateDictionary(
                 ref localParameters,
                 ParametersKeyTranslator,
                 ParametersValueTranslator,
-                count => new CopyOnWriteDictionary<string, Tuple<string, ElementLocation>>(count));
+                count => new CopyOnWriteDictionary<string, (string, ElementLocation)>(count));
 
             if (translator.Mode == TranslationDirection.ReadFromStream && localParameters != null)
             {
-                _parameters = (CopyOnWriteDictionary<string, Tuple<string, ElementLocation>>) localParameters;
+                _parameters = (CopyOnWriteDictionary<string, (string, ElementLocation)>) localParameters;
             }
         }
 
-        private static void ParametersKeyTranslator(ref string key, ITranslator translator)
+        private static void ParametersKeyTranslator(ITranslator translator, ref string key)
         {
             translator.Translate(ref key);
         }
 
-        private static void ParametersValueTranslator(ref Tuple<string, ElementLocation> value, ITranslator translator)
+        private static void ParametersValueTranslator(ITranslator translator, ref (string, ElementLocation) value)
         {
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
@@ -414,7 +413,7 @@ namespace Microsoft.Build.Execution
                 translator.Translate(ref item1);
                 translator.Translate(ref item2, ElementLocation.FactoryForDeserialization);
 
-                value = Tuple.Create(item1, item2);
+                value = (item1, item2);
             }
         }
 

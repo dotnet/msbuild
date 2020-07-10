@@ -38,6 +38,16 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        internal static bool ConvertStringToBool(string parameterValue, bool nullOrWhitespaceIsFalse)
+        {
+            if (nullOrWhitespaceIsFalse && string.IsNullOrWhiteSpace(parameterValue))
+            {
+                return false;
+            }
+
+            return ConvertStringToBool(parameterValue);
+        }
+
         /// <summary>
         /// Returns a hex representation of a byte array.
         /// </summary>

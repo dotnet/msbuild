@@ -89,6 +89,19 @@ namespace Microsoft.Build.Shared
         /// Indicates the code path followed should not have been possible.
         /// This is only for situations that would mean that there is a bug in MSBuild itself.
         /// </summary>
+        internal static void VerifyThrowInternalErrorUnreachable(bool condition)
+        {
+            if (s_throwExceptions && !condition)
+            {
+                throw new InternalErrorException("Unreachable?");
+            }
+        }
+
+        /// <summary>
+        /// Throws InternalErrorException. 
+        /// Indicates the code path followed should not have been possible.
+        /// This is only for situations that would mean that there is a bug in MSBuild itself.
+        /// </summary>
         internal static void ThrowIfTypeDoesNotImplementToString(object param)
         {
 #if DEBUG

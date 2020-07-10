@@ -1078,7 +1078,14 @@ namespace Microsoft.Build.Execution
                     {
                         foreach (ProjectMetadataInstance metadatum in _itemDefinitions[i].Metadata)
                         {
-                            allMetadata.Set(metadatum);
+                            if (metadatum != null)
+                            {
+                                allMetadata.Set(metadatum);
+                            }
+                            else
+                            {
+                                Debug.Fail($"metadatum from {_itemDefinitions[i]} is null, see https://github.com/microsoft/msbuild/issues/5267");
+                            }
                         }
                     }
 
@@ -1087,7 +1094,14 @@ namespace Microsoft.Build.Execution
                     {
                         foreach (ProjectMetadataInstance metadatum in _directMetadata)
                         {
-                            allMetadata.Set(metadatum);
+                            if (metadatum != null)
+                            {
+                                allMetadata.Set(metadatum);
+                            }
+                            else
+                            {
+                                Debug.Fail("metadatum in _directMetadata is null, see https://github.com/microsoft/msbuild/issues/5267");
+                            }
                         }
                     }
 

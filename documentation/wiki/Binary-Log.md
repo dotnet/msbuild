@@ -82,7 +82,7 @@ It is a `GZipStream`-compressed binary stream of serialized `BuildEventArgs` obj
 
 ## Incrementing the file format
 
-Every .binlog file has the first three bytes that indicate the file version. The current file format version is 2 (`00 00 02`).
+Every .binlog file has the first three bytes that indicate the file version. The current file format version is 9 (`00 00 09`).
 
 When incrementing the file format, keep this in mind:
  * Increment the version and add a summary of the changes: https://github.com/Microsoft/msbuild/blob/master/src/Build/Logging/BinaryLogger/BinaryLogger.cs#L22

@@ -38,6 +38,11 @@ folder InstallDir:\MSBuild\Current\Bin
   file source=$(TaskHostBinPath)MSBuildTaskHost.exe.config
   file source=$(X86BinPath)System.Buffers.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Memory.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.Text.Json.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)Microsoft.Bcl.AsyncInterfaces.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.Text.Encodings.Web.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.Threading.Tasks.Extensions.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.ValueTuple.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Numerics.Vectors.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Resources.Extensions.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Runtime.CompilerServices.Unsafe.dll vs.file.ngenArchitecture=all
@@ -177,10 +182,16 @@ folder InstallDir:\MSBuild\Current\Bin\amd64
   file source=$(X86BinPath)Microsoft.Build.dll vs.file.ngenArchitecture=all
   file source=$(MSBuildConversionBinPath)Microsoft.Build.Engine.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.Framework.dll vs.file.ngenArchitecture=all
+  file source=$(FrameworkBinPath)x64\Microsoft.Build.Framework.tlb
   file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.Utilities.Core.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Buffers.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Memory.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.Text.Json.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)Microsoft.Bcl.AsyncInterfaces.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.Text.Encodings.Web.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.Threading.Tasks.Extensions.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.ValueTuple.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Numerics.Vectors.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Resources.Extensions.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Runtime.CompilerServices.Unsafe.dll vs.file.ngenArchitecture=all
@@ -304,8 +315,11 @@ folder InstallDir:\MSBuild\Current\Bin\amd64\zh-Hant
   file source=$(TaskHostX64BinPath)zh-Hant\MSBuildTaskHost.resources.dll vs.file.ngenArchitecture=all
 
 folder InstallDir:\Common7\IDE\CommonExtensions\MSBuild
+  file source=$(SourceDir)Package\MSBuild.VSSetup\MSBuild.clientenabledpkg
   file source=$(SourceDir)Framework\Microsoft.Build.Framework.pkgdef
   file source=$(SourceDir)Build\Microsoft.Build.pkgdef
+  file source=$(SourceDir)Build\System.Text.Encodings.Web.pkgdef
+  file source=$(SourceDir)Build\System.Text.Json.pkgdef
   file source=$(SourceDir)Tasks\Microsoft.Build.Tasks.Core.pkgdef
   file source=$(SourceDir)Tasks\System.Resources.Extensions.pkgdef
   file source=$(SourceDir)Utilities\Microsoft.Build.Utilities.Core.pkgdef

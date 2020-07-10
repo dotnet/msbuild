@@ -9,6 +9,11 @@
                       OutputItemType="MSBuildResolvedProjectReferencePath"
                       SetTargetFramework="TargetFramework=$(TargetFramework)"/>
 
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Framework\Microsoft.Build.Framework.csproj"
+                      Private="false"
+                      ReferenceOutputAssembly="false"
+                      OutputItemType="FrameworkResolvedProjectReferencePath" />
+
     <ProjectReference Include="$(MSBuildThisFileDirectory)\..\MSBuildTaskHost\MSBuildTaskHost.csproj"
                       Private="false"
                       ReferenceOutputAssembly="false"
@@ -47,6 +52,7 @@
     <PropertyGroup>
       <X86BinPath>@(MSBuildResolvedProjectReferencePath->'%(RootDir)%(Directory)')</X86BinPath>
       <X64BinPath>@(MSBuildX64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</X64BinPath>
+      <FrameworkBinPath>@(FrameworkResolvedProjectReferencePath->'%(RootDir)%(Directory)')</FrameworkBinPath>
       <MSBuildTaskHostBinPath>@(MSBuildTaskHostResolvedProjectReferencePath->'%(RootDir)%(Directory)')</MSBuildTaskHostBinPath>
       <MSBuildTaskHostX64BinPath>@(MSBuildTaskHostX64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</MSBuildTaskHostX64BinPath>
       <MSBuildConversionBinPath>@(MSBuildConversionResolvedProjectReferencePath->'%(RootDir)%(Directory)')</MSBuildConversionBinPath>

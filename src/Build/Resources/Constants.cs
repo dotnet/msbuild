@@ -136,11 +136,6 @@ namespace Microsoft.Build.Internal
         internal const string Dev10SubToolsetValue = "10.0";
 
         /// <summary>
-        /// Number representing the current assembly's timestamp
-        /// </summary>
-        internal static long assemblyTimestamp;
-
-        /// <summary>
         /// Current version of this MSBuild Engine assembly in the 
         /// form, e.g, "4.0"
         /// </summary>
@@ -149,29 +144,6 @@ namespace Microsoft.Build.Internal
             get
             {
                 return MSBuildConstants.CurrentProductVersion;
-            }
-        }
-
-
-        /// <summary>
-        /// Number representing the current assembly's timestamp
-        /// </summary>
-        internal static long AssemblyTimestamp
-        {
-            get
-            {
-                if (assemblyTimestamp == 0)
-                {
-                    // Get the file version from the currently executing assembly.
-                    // Use .CodeBase instead of .Location, because .Location doesn't
-                    // work when Microsoft.Build.dll has been shadow-copied, for example
-                    // in scenarios where NUnit is loading Microsoft.Build.
-                    string path = FileUtilities.ExecutingAssemblyPath;
-
-                    assemblyTimestamp = new FileInfo(path).LastWriteTime.Ticks;
-                }
-
-                return assemblyTimestamp;
             }
         }
 

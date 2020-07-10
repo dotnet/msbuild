@@ -81,7 +81,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Sets a task parameter using an unevaluated value, which will be expanded by the batch bucket.
         /// </summary>
-        bool SetTaskParameters(IDictionary<string, Tuple<string, ElementLocation>> parameters);
+        bool SetTaskParameters(IDictionary<string, (string, ElementLocation)> parameters);
 
         /// <summary>
         /// Gets all of the outputs and stores them in the batch bucket.

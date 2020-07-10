@@ -84,9 +84,9 @@ namespace Microsoft.Build.Framework.UnitTests
             sdk.ShouldNotBe(new SdkReference("Name", "Version", null));
             sdk.ShouldNotBe(new SdkReference("Name", null, "Min"));
             sdk.ShouldNotBe(new SdkReference("Name", null, null));
-            sdk.ShouldNotBe(new SdkReference("Name", "version", "Min"));
-            sdk.ShouldNotBe(new SdkReference("name", "Version", "Min"));
-            sdk.ShouldNotBe(new SdkReference("Name", "Version", "min"));
+            sdk.ShouldBe(new SdkReference("Name", "version", "Min"));
+            sdk.ShouldBe(new SdkReference("name", "Version", "Min"));
+            sdk.ShouldBe(new SdkReference("Name", "Version", "min"));
             sdk.ShouldNotBe(new SdkReference("Name2", "Version", "Min"));
         }
     }

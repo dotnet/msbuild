@@ -10,6 +10,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
@@ -2045,13 +2046,13 @@ namespace Microsoft.Build.Execution
         }
 
         // todo move to nested function after c#7
-        private static void TranslatorForTargetSpecificDictionaryKey(ref string key, ITranslator translator)
+        private static void TranslatorForTargetSpecificDictionaryKey(ITranslator translator, ref string key)
         {
             translator.Translate(ref key);
         }
 
         // todo move to nested function after c#7
-        private static void TranslatorForTargetSpecificDictionaryValue(ref List<TargetSpecification> value, ITranslator translator)
+        private static void TranslatorForTargetSpecificDictionaryValue(ITranslator translator, ref List<TargetSpecification> value)
         {
             translator.Translate(ref value, TargetSpecification.FactoryForDeserialization);
         }
@@ -2142,9 +2143,12 @@ namespace Microsoft.Build.Execution
             // we should be generating a 4.0+ or a 3.5-style wrapper project based on the version of the solution. 
             else
             {
-                int solutionVersion;
-                int visualStudioVersion;
-                SolutionFile.GetSolutionFileAndVisualStudioMajorVersions(projectFile, out solutionVersion, out visualStudioVersion);
+                string solutionFile = projectFile;
+                if (FileUtilities.IsSolutionFilterFilename(projectFile))
+                {
+                    solutionFile = SolutionFile.ParseSolutionFromSolutionFilter(projectFile, out _);
+                }
+                SolutionFile.GetSolutionFileAndVisualStudioMajorVersions(solutionFile, out int solutionVersion, out int visualStudioVersion);
 
                 // If we get to this point, it's because it's a valid version.  Map the solution version 
                 // to the equivalent MSBuild ToolsVersion, and unless it's Dev10 or newer, spawn the old 
@@ -2172,7 +2176,7 @@ namespace Microsoft.Build.Execution
 
                     string toolsVersionToUse = Utilities.GenerateToolsVersionToUse(
                         explicitToolsVersion: null,
-                        toolsVersionFromProject: toolsVersion,
+                        toolsVersionFromProject: FileUtilities.IsSolutionFilterFilename(projectFile) ? "Current" : toolsVersion,
                         getToolset: buildParameters.GetToolset,
                         defaultToolsVersion: Constants.defaultSolutionWrapperProjectToolsVersion,
                         usingDifferentToolsVersionFromProjectFile: out _);

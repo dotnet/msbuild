@@ -1517,7 +1517,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             asyncResult.ExecuteAsync(null, null);
             _buildManager.CancelAllSubmissions();
-            asyncResult.WaitHandle.WaitOne();
+            // This test intermittently hangs. This timeout is designed to prevent that, turning a hang into a failure.
+            // Todo: Investigate why this test sometimes hangs.
+            asyncResult.WaitHandle.WaitOne(TimeSpan.FromSeconds(10));
+            asyncResult.IsCompleted.ShouldBeTrue("Failing to complete by this point indicates a hang.");
             BuildResult result = asyncResult.BuildResult;
             _buildManager.EndBuild();
 

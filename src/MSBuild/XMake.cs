@@ -2380,7 +2380,7 @@ namespace Microsoft.Build.CommandLine
             enableNodeReuse = false;
 #endif
 
-            if (Environment.GetEnvironmentVariable("MSBUILDDISABLENODEREUSE") == "1") // For example to disable node reuse in a gated checkin, without using the flag
+            if (Traits.Instance.DisableNodeReuse) // For example to disable node reuse in a gated checkin, without using the flag
             {
                 enableNodeReuse = false;
             }
@@ -3740,7 +3740,7 @@ namespace Microsoft.Build.CommandLine
         private static void DisplayCopyrightMessage()
         {
 #if RUNTIME_TYPE_NETCORE
-            const string frameworkName = ".NET Core";
+            const string frameworkName = ".NET";
 #elif MONO
             const string frameworkName = "Mono";
 #else

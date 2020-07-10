@@ -5,6 +5,7 @@
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Globbing
@@ -18,7 +19,7 @@ namespace Microsoft.Build.Globbing
     /// </summary>
     public class MSBuildGlob : IMSBuildGlob
     {
-        private struct GlobState
+        private readonly struct GlobState
         {
             public string GlobRoot { get; }
             public string FileSpec { get; }
@@ -44,11 +45,15 @@ namespace Microsoft.Build.Globbing
             }
         }
 
+        // Cache of Regex objects that we have created and are still alive.
+        private static WeakValueDictionary<string, Regex> s_regexCache = new WeakValueDictionary<string, Regex>();
+
         private readonly Lazy<GlobState> _state;
 
         internal string TestOnlyGlobRoot => _state.Value.GlobRoot;
         internal string TestOnlyFileSpec => _state.Value.FileSpec;
         internal bool TestOnlyNeedsRecursion => _state.Value.NeedsRecursion;
+        internal Regex TestOnlyRegex => _state.Value.Regex;
 
         /// <summary>
         ///     The fixed directory part.
@@ -195,14 +200,31 @@ namespace Microsoft.Build.Globbing
                     {
                         var normalizedFixedPart = NormalizeTheFixedDirectoryPartAgainstTheGlobRoot(fixedDirPart, globRoot);
 
-                        return Tuple.Create(normalizedFixedPart, wildcardDirPart, filePart);
+                        return (normalizedFixedPart, wildcardDirPart, filePart);
                     });
 
-                // compile the regex since it's expected to be used multiple times
-                var regex = isLegalFileSpec
-                    ? new Regex(matchFileExpression, FileMatcher.DefaultRegexOptions | RegexOptions.Compiled)
-                    : null;
+                Regex regex = null;
+                if (isLegalFileSpec)
+                {
+                    lock (s_regexCache)
+                    {
+                        s_regexCache.TryGetValue(matchFileExpression, out regex);
+                    }
 
+                    if (regex == null)
+                    {
+                        // compile the regex since it's expected to be used multiple times
+                        Regex newRegex = new Regex(matchFileExpression, FileMatcher.DefaultRegexOptions | RegexOptions.Compiled);
+                        lock (s_regexCache)
+                        {
+                            if (!s_regexCache.TryGetValue(matchFileExpression, out regex))
+                            {
+                                s_regexCache[matchFileExpression] = newRegex;
+                            }
+                        }
+                        regex ??= newRegex;
+                    }
+                }
                 return new GlobState(globRoot, fileSpec, isLegalFileSpec, fixedDirectoryPart, wildcardDirectoryPart, filenamePart, matchFileExpression, needsRecursion, regex);
             },
             true);

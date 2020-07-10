@@ -34,7 +34,7 @@ namespace Microsoft.Build.Collections
     /// be run in a separate appdomain.
     /// </comment>
     [Serializable]
-    internal class CopyOnWriteDictionary<K, V> : IDictionary<K, V>, IDictionary where V : class
+    internal class CopyOnWriteDictionary<K, V> : IDictionary<K, V>, IDictionary
     {
 #if DEBUG
         /// <summary>
@@ -488,7 +488,7 @@ namespace Microsoft.Build.Collections
         /// <typeparam name="K1">The key type.</typeparam>
         /// <typeparam name="V1">The value type.</typeparam>
         [Serializable]
-        private class CopyOnWriteBackingDictionary<K1, V1> : Dictionary<K1, V1> where V1 : class
+        private class CopyOnWriteBackingDictionary<K1, V1> : Dictionary<K1, V1>
         {
             /// <summary>
             /// An empty dictionary 

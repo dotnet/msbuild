@@ -21,116 +21,138 @@ namespace Microsoft.Build
     ///
     ///     string interned = OpportunisticIntern.Intern(String.Join(",",someStrings));
     ///
-    /// This class uses heuristics to decide whether it will be efficient to intern a string or not. There is no
+    /// There are currently two underlying implementations. The new default one in WeakStringCacheInterner is based on weak GC handles.
+    /// The legacy one in BucketedPrioritizedStringList is available only as an escape hatch by setting an environment variable.
+    ///
+    /// The legacy implementation uses heuristics to decide whether it will be efficient to intern a string or not. There is no
     /// guarantee that a string will intern.
     ///
     /// The thresholds and sizes were determined by experimentation to give the best number of bytes saved
     /// at reasonable elapsed time cost.
+    ///
+    /// The new implementation interns all strings but maintains only weak references so it doesn't keep the strings alive.
     /// </summary>
-    internal static class OpportunisticIntern
+    internal sealed class OpportunisticIntern
     {
-        private static readonly bool s_useSimpleConcurrency = Traits.Instance.UseSimpleInternConcurrency;
+        /// <summary>
+        /// Defines the interner interface as we currently implement more than one.
+        /// </summary>
+        private interface IInternerImplementation
+        {
+            /// <summary>
+            /// Converts the given internable candidate to its string representation. Efficient implementions have side-effects
+            /// of caching the results to end up with as few duplicates on the managed heap as practical.
+            /// </summary>
+            string InterningToString<T>(T candidate) where T : IInternable;
+
+            /// <summary>
+            /// Prints implementation specific interning statistics to the console.
+            /// </summary>
+            /// <param name="heading">A string identifying the interner in the output.</param>
+            void ReportStatistics(string heading);
+        }
+
+        /// <summary>
+        /// The singleton instance of OpportunisticIntern.
+        /// </summary>
+        private static OpportunisticIntern _instance = new OpportunisticIntern();
+        internal static OpportunisticIntern Instance => _instance;
+
+        private readonly bool _useLegacyInterner = Traits.Instance.UseLegacyStringInterner;
+        private readonly bool _useSimpleConcurrency = Traits.Instance.UseSimpleInternConcurrency;
 
         /// <summary>
         /// The size of the small mru list.
         /// </summary>
-        private static readonly int s_smallMruSize = AssignViaEnvironment("MSBUILDSMALLINTERNSIZE", 50);
+        private readonly int _smallMruSize;
 
         /// <summary>
         /// The size of the large mru list.
         /// </summary>
-        private static readonly int s_largeMruSize = AssignViaEnvironment("MSBUILDLARGEINTERNSIZE", 100);
+        private readonly int _largeMruSize;
 
         /// <summary>
         /// The size of the huge mru list.
         /// </summary>
-        private static readonly int s_hugeMruSize = AssignViaEnvironment("MSBUILDHUGEINTERNSIZE", 100);
+        private readonly int _hugeMruSize;
 
         /// <summary>
         /// The smallest size a string can be to be considered small.
         /// </summary>
-        private static readonly int s_smallMruThreshold = AssignViaEnvironment("MSBUILDSMALLINTERNTHRESHOLD", 50);
+        private readonly int _smallMruThreshold;
 
         /// <summary>
         /// The smallest size a string can be to be considered large.
         /// </summary>
-        private static readonly int s_largeMruThreshold = AssignViaEnvironment("MSBUILDLARGEINTERNTHRESHOLD", 70);
+        private readonly int _largeMruThreshold;
 
         /// <summary>
         /// The smallest size a string can be to be considered huge.
         /// </summary>
-        private static readonly int s_hugeMruThreshold = AssignViaEnvironment("MSBUILDHUGEINTERNTHRESHOLD", 200);
+        private readonly int _hugeMruThreshold;
 
         /// <summary>
         /// The smallest size a string can be to be ginormous.
         /// 8K for large object heap.
         /// </summary>
-        private static readonly int s_ginormousThreshold = AssignViaEnvironment("MSBUILDGINORMOUSINTERNTHRESHOLD", 8000);
+        private readonly int _ginormousThreshold;
 
         /// <summary>
-        /// Manages the separate MRU lists.
+        /// The interner implementation in use.
         /// </summary>
-        private static BucketedPrioritizedStringList s_si = new BucketedPrioritizedStringList(/*gatherStatistics*/ false, s_smallMruSize, s_largeMruSize, s_hugeMruSize, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
+        private IInternerImplementation _interner;
 
         #region Statistics
         /// <summary>
         /// What if Mru lists were infinitely long?
         /// </summary>
-        private static BucketedPrioritizedStringList s_whatIfInfinite;
+        private BucketedPrioritizedStringList _whatIfInfinite;
 
         /// <summary>
         /// What if we doubled the size of the Mru lists?
         /// </summary>
-        private static BucketedPrioritizedStringList s_whatIfDoubled;
+        private BucketedPrioritizedStringList _whatIfDoubled;
 
         /// <summary>
         /// What if we halved the size of the Mru lists?
         /// </summary>
-        private static BucketedPrioritizedStringList s_whatIfHalved;
+        private BucketedPrioritizedStringList _whatIfHalved;
 
         /// <summary>
         /// What if the size of Mru lists was zero? (We still intern tiny strings in this case)
         /// </summary>
-        private static BucketedPrioritizedStringList s_whatIfZero;
+        private BucketedPrioritizedStringList _whatIfZero;
         #endregion
 
-        #region IInternable
-        /// <summary>
-        /// Define the methods needed to intern something.
-        /// </summary>
-        internal interface IInternable
+        private OpportunisticIntern()
         {
-            /// <summary>
-            /// The length of the target.
-            /// </summary>
-            int Length { get; }
+            _smallMruSize = AssignViaEnvironment("MSBUILDSMALLINTERNSIZE", 50);
+            _largeMruSize = AssignViaEnvironment("MSBUILDLARGEINTERNSIZE", 100);
+            _hugeMruSize = AssignViaEnvironment("MSBUILDHUGEINTERNSIZE", 100);
+            _smallMruThreshold = AssignViaEnvironment("MSBUILDSMALLINTERNTHRESHOLD", 50);
+            _largeMruThreshold = AssignViaEnvironment("MSBUILDLARGEINTERNTHRESHOLD", 70);
+            _hugeMruThreshold = AssignViaEnvironment("MSBUILDHUGEINTERNTHRESHOLD", 200);
+            _ginormousThreshold = AssignViaEnvironment("MSBUILDGINORMOUSINTERNTHRESHOLD", 8000);
 
-            /// <summary>
-            /// Indexer into the target. Presumed to be fast.
-            /// </summary>
-            char this[int index] { get; }
-
-            /// <summary>
-            /// Convert target to string. Presumed to be slow (and will be called just once).
-            /// </summary>
-            string ExpensiveConvertToString();
-
-            /// <summary>
-            /// Compare target to string. Assumes lengths are equal.
-            /// </summary>
-            bool IsOrdinalEqualToStringOfSameLength(string other);
-
-            /// <summary>
-            /// Reference compare target to string. If target is non-string this should return false.
-            /// </summary>
-            bool ReferenceEquals(string other);
+            _interner = _useLegacyInterner
+               ? (IInternerImplementation)new BucketedPrioritizedStringList(gatherStatistics: false, _smallMruSize, _largeMruSize, _hugeMruSize,
+                    _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency)
+               : (IInternerImplementation)new WeakStringCacheInterner(gatherStatistics: false);
         }
-        #endregion
+
+        /// <summary>
+        /// Recreates the singleton instance based on the current environment (test only).
+        /// </summary>
+        internal static void ResetForTests()
+        {
+            Debug.Assert(BuildEnvironmentHelper.Instance.RunningTests);
+            _instance = new OpportunisticIntern();
+        }
 
         /// <summary>
         /// Assign an int from an environment variable. If its not present, use the default.
         /// </summary>
-        internal static int AssignViaEnvironment(string env, int @default)
+        private int AssignViaEnvironment(string env, int @default)
         {
             string threshold = Environment.GetEnvironmentVariable(env);
             if (!string.IsNullOrEmpty(threshold))
@@ -147,30 +169,85 @@ namespace Microsoft.Build
         /// <summary>
         /// Turn on statistics gathering.
         /// </summary>
-        internal static void EnableStatisticsGathering()
+        internal void EnableStatisticsGathering()
         {
-            // Statistics include several 'what if' scenarios such as doubling the size of the MRU lists.
-            s_si = new BucketedPrioritizedStringList(/*gatherStatistics*/ true, s_smallMruSize, s_largeMruSize, s_hugeMruSize, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
-            s_whatIfInfinite = new BucketedPrioritizedStringList(/*gatherStatistics*/ true, int.MaxValue, int.MaxValue, int.MaxValue, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
-            s_whatIfDoubled = new BucketedPrioritizedStringList(/*gatherStatistics*/ true, s_smallMruSize * 2, s_largeMruSize * 2, s_hugeMruSize * 2, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
-            s_whatIfHalved = new BucketedPrioritizedStringList(/*gatherStatistics*/ true, s_smallMruSize / 2, s_largeMruSize / 2, s_hugeMruSize / 2, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
-            s_whatIfZero = new BucketedPrioritizedStringList(/*gatherStatistics*/ true, 0, 0, 0, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
+            if (_useLegacyInterner)
+            {
+                // Statistics include several 'what if' scenarios such as doubling the size of the MRU lists.
+                _interner = new BucketedPrioritizedStringList(gatherStatistics: true, _smallMruSize, _largeMruSize, _hugeMruSize, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
+                _whatIfInfinite = new BucketedPrioritizedStringList(gatherStatistics: true, int.MaxValue, int.MaxValue, int.MaxValue, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
+                _whatIfDoubled = new BucketedPrioritizedStringList(gatherStatistics: true, _smallMruSize * 2, _largeMruSize * 2, _hugeMruSize * 2, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
+                _whatIfHalved = new BucketedPrioritizedStringList(gatherStatistics: true, _smallMruSize / 2, _largeMruSize / 2, _hugeMruSize / 2, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
+                _whatIfZero = new BucketedPrioritizedStringList(gatherStatistics: true, 0, 0, 0, _smallMruThreshold, _largeMruThreshold, _hugeMruThreshold, _ginormousThreshold, _useSimpleConcurrency);
+            }
+            else
+            {
+                _interner = new WeakStringCacheInterner(gatherStatistics: true);
+            }
         }
 
         /// <summary>
         /// Intern the given internable.
         /// </summary>
-        internal static string InternableToString(IInternable candidate)
+        internal static string InternableToString<T>(T candidate) where T : IInternable
         {
-            if (s_whatIfInfinite != null)
+            return Instance.InternableToStringImpl(candidate);
+        }
+
+        /// <summary>
+        /// Potentially Intern the given string builder.
+        /// </summary>
+        internal static string StringBuilderToString(StringBuilder candidate)
+        {
+            return Instance.InternableToStringImpl(new StringBuilderInternTarget(candidate));
+        }
+
+        /// <summary>
+        /// Potentially Intern the given char array.
+        /// </summary>
+        internal static string CharArrayToString(char[] candidate, int count)
+        {
+            return Instance.InternableToStringImpl(new CharArrayInternTarget(candidate, count));
+        }
+
+        /// <summary>
+        /// Potentially Intern the given char array.
+        /// </summary>
+        internal static string CharArrayToString(char[] candidate, int startIndex, int count)
+        {
+            return Instance.InternableToStringImpl(new CharArrayInternTarget(candidate, startIndex, count));
+        }
+
+        /// <summary>
+        /// Potentially Intern the given string.
+        /// </summary>
+        /// <param name="candidate">The string to intern.</param>
+        /// <returns>The interned string, or the same string if it could not be interned.</returns>
+        internal static string InternStringIfPossible(string candidate)
+        {
+            return Instance.InternableToStringImpl(new StringInternTarget(candidate));
+        }
+
+        /// <summary>
+        /// Intern the given internable.
+        /// </summary>
+        private string InternableToStringImpl<T>(T candidate) where T : IInternable
+        {
+            if (candidate.Length == 0)
             {
-                s_whatIfInfinite.InterningToString(candidate);
-                s_whatIfDoubled.InterningToString(candidate);
-                s_whatIfHalved.InterningToString(candidate);
-                s_whatIfZero.InterningToString(candidate);
+                // As in the case that a property or itemlist has evaluated to empty.
+                return string.Empty;
             }
 
-            string result = s_si.InterningToString(candidate);
+            if (_whatIfInfinite != null)
+            {
+                _whatIfInfinite.InterningToString(candidate);
+                _whatIfDoubled.InterningToString(candidate);
+                _whatIfHalved.InterningToString(candidate);
+                _whatIfZero.InterningToString(candidate);
+            }
+
+            string result = _interner.InterningToString(candidate);
 #if DEBUG
             string expected = candidate.ExpensiveConvertToString();
             if (!String.Equals(result, expected))
@@ -182,295 +259,314 @@ namespace Microsoft.Build
         }
 
         /// <summary>
-        /// Potentially Intern the given string builder.
-        /// </summary>
-        internal static string StringBuilderToString(StringBuilder candidate)
-        {
-            return InternableToString(new StringBuilderInternTarget(candidate));
-        }
-
-        /// <summary>
-        /// Potentially Intern the given char array.
-        /// </summary>
-        internal static string CharArrayToString(char[] candidate, int count)
-        {
-            return InternableToString(new CharArrayInternTarget(candidate, count));
-        }
-
-        /// <summary>
-        /// Potentially Intern the given char array.
-        /// </summary>
-        internal static string CharArrayToString(char[] candidate, int startIndex, int count)
-        {
-            return InternableToString(new CharArrayInternTarget(candidate, startIndex, count));
-        }
-
-        /// <summary>
-        /// Potentially Intern the given string.
-        /// </summary>
-        /// <param name="candidate">The string to intern.</param>
-        /// <returns>The interned string, or the same string if it could not be interned.</returns>
-        internal static string InternStringIfPossible(string candidate)
-        {
-            return InternableToString(new StringInternTarget(candidate));
-        }
-
-        /// <summary>
         /// Report statistics about interning. Don't call unless GatherStatistics has been called beforehand.
         /// </summary>
-        internal static void ReportStatistics()
+        internal void ReportStatistics()
         {
-            s_si.ReportStatistics("Main");
-            s_whatIfInfinite.ReportStatistics("if Infinite");
-            s_whatIfDoubled.ReportStatistics("if Doubled");
-            s_whatIfHalved.ReportStatistics("if Halved");
-            s_whatIfZero.ReportStatistics("if Zero");
-            Console.WriteLine(" * Even for MRU size of zero there will still be some intern hits because of the tiny ");
-            Console.WriteLine("   string matching (eg. 'true')");
+            _interner.ReportStatistics("Main");
+            if (_useLegacyInterner)
+            {
+                _whatIfInfinite.ReportStatistics("if Infinite");
+                _whatIfDoubled.ReportStatistics("if Doubled");
+                _whatIfHalved.ReportStatistics("if Halved");
+                _whatIfZero.ReportStatistics("if Zero");
+                Console.WriteLine(" * Even for MRU size of zero there will still be some intern hits because of the tiny ");
+                Console.WriteLine("   string matching (eg. 'true')");
+            }
         }
 
-        #region IInternable Implementations
-        /// <summary>
-        /// A wrapper over StringBuilder.
-        /// </summary>
-        internal struct StringBuilderInternTarget : IInternable
+        private static bool TryInternHardcodedString<T>(T candidate, string str, ref string interned) where T : IInternable
         {
-            /// <summary>
-            /// The held StringBuilder
-            /// </summary>
-            private readonly StringBuilder _target;
+            Debug.Assert(candidate.Length == str.Length);
 
-            /// <summary>
-            /// Pointless comment about constructor.
-            /// </summary>
-            internal StringBuilderInternTarget(StringBuilder target)
+            if (candidate.StartsWithStringByOrdinalComparison(str))
             {
-                _target = target;
-            }
-
-            /// <summary>
-            /// The length of the target.
-            /// </summary>
-            public int Length => _target.Length;
-
-            /// <summary>
-            /// Indexer into the target. Presumed to be fast.
-            /// </summary>
-            public char this[int index] => _target[index];
-
-            /// <summary>
-            /// Never reference equals to string.
-            /// </summary>
-            public bool ReferenceEquals(string other) => false;
-
-            /// <summary>
-            /// Convert target to string. Presumed to be slow (and will be called just once).
-            /// </summary>
-            public string ExpensiveConvertToString()
-            {
-                // PERF NOTE: This will be an allocation hot-spot because the StringBuilder is finally determined to
-                // not be internable. There is still only one conversion of StringBuilder into string it has just
-                // moved into this single spot.
-                return _target.ToString();
-            }
-
-            /// <summary>
-            /// Compare target to string. Assumes lengths are equal.
-            /// </summary>
-            public bool IsOrdinalEqualToStringOfSameLength(string other)
-            {
-#if DEBUG
-                ErrorUtilities.VerifyThrow(other.Length == _target.Length, "should be same length");
-#endif
-                int length = _target.Length;
-
-                // Backwards because the end of the string is (by observation of Australian Government build) more likely to be different earlier in the loop.
-                // For example, C:\project1, C:\project2
-                for (int i = length - 1; i >= 0; --i)
-                {
-                    if (_target[i] != other[i])
-                    {
-                        return false;
-                    }
-                }
-
+                interned = str;
                 return true;
             }
-
-            /// <summary>
-            /// Don't use this function. Use ExpensiveConvertToString
-            /// </summary>
-            public override string ToString() => throw new InvalidOperationException();
+            return false;
         }
 
         /// <summary>
-        /// A wrapper over char[].
+        /// Try to match the candidate with small number of hardcoded interned string literals.
+        /// The return value indicates how the string was interned (if at all).
         /// </summary>
-        internal struct CharArrayInternTarget : IInternable
+        /// <returns>
+        /// True if the candidate matched a hardcoded literal, null if it matched a "do not intern" string, false otherwise.
+        /// </returns>
+        private static bool? TryMatchHardcodedStrings<T>(T candidate, out string interned) where T : IInternable
         {
-            /// <summary>
-            /// Start index for the string
-            /// </summary>
-            private readonly int _startIndex;
+            int length = candidate.Length;
+            interned = null;
 
-            /// <summary>
-            /// The held array
-            /// </summary>
-            private readonly char[] _target;
-
-            /// <summary>
-            /// Pointless comment about constructor.
-            /// </summary>
-            internal CharArrayInternTarget(char[] target, int count)
-                : this(target, 0, count)
+            // Each of the hard-coded small strings below showed up in a profile run with considerable duplication in memory.
+            if (length == 2)
             {
-            }
-
-            /// <summary>
-            /// Pointless comment about constructor.
-            /// </summary>
-            internal CharArrayInternTarget(char[] target, int startIndex, int count)
-            {
-#if DEBUG
-                if (startIndex + count > target.Length)
+                if (candidate[1] == '#')
                 {
-                    ErrorUtilities.ThrowInternalError("wrong length");
-                }
-#endif
-                _target = target;
-                _startIndex = startIndex;
-                Length = count;
-            }
-
-            /// <summary>
-            /// The length of the target.
-            /// </summary>
-            public int Length { get; }
-
-            /// <summary>
-            /// Indexer into the target. Presumed to be fast.
-            /// </summary>
-            public char this[int index]
-            {
-                get
-                {
-                    if (index > _startIndex + Length - 1 || index < 0)
+                    if (candidate[0] == 'C')
                     {
-                        ErrorUtilities.ThrowInternalError("past end");
+                        interned = "C#";
+                        return true;
                     }
 
-                    return _target[index + _startIndex];
-                }
-            }
-
-            /// <summary>
-            /// Convert target to string. Presumed to be slow (and will be called just once).
-            /// </summary>
-            public bool ReferenceEquals(string other)
-            {
-                return false;
-            }
-
-            /// <summary>
-            /// Convert target to string. Presumed to be slow (and will be called just once).
-            /// </summary>
-            public string ExpensiveConvertToString()
-            {
-                // PERF NOTE: This will be an allocation hot-spot because the char[] is finally determined to
-                // not be internable. There is still only one conversion of char[] into string it has just
-                // moved into this single spot.
-                return new string(_target, _startIndex, Length);
-            }
-
-            /// <summary>
-            /// Compare target to string. Assumes lengths are equal.
-            /// </summary>
-            public bool IsOrdinalEqualToStringOfSameLength(string other)
-            {
-#if DEBUG
-                ErrorUtilities.VerifyThrow(other.Length == Length, "should be same length");
-#endif
-                // Backwards because the end of the string is (by observation of Australian Government build) more likely to be different earlier in the loop.
-                // For example, C:\project1, C:\project2
-                for (int i = Length - 1; i >= 0; --i)
-                {
-                    if (_target[i + _startIndex] != other[i])
+                    if (candidate[0] == 'F')
                     {
-                        return false;
+                        interned = "F#";
+                        return true;
                     }
                 }
 
-                return true;
+                if (candidate[0] == 'V' && candidate[1] == 'B')
+                {
+                    interned = "VB";
+                    return true;
+                }
             }
-
-            /// <summary>
-            /// Don't use this function. Use ExpensiveConvertToString
-            /// </summary>
-            public override string ToString()
+            else if (length == 4)
             {
-                throw new InvalidOperationException();
+                if (TryInternHardcodedString(candidate, "TRUE", ref interned) ||
+                    TryInternHardcodedString(candidate, "True", ref interned) ||
+                    TryInternHardcodedString(candidate, "Copy", ref interned) ||
+                    TryInternHardcodedString(candidate, "true", ref interned) ||
+                    TryInternHardcodedString(candidate, "v4.0", ref interned))
+                {
+                    return true;
+                }
             }
+            else if (length == 5)
+            {
+                if (TryInternHardcodedString(candidate, "FALSE", ref interned) ||
+                    TryInternHardcodedString(candidate, "false", ref interned) ||
+                    TryInternHardcodedString(candidate, "Debug", ref interned) ||
+                    TryInternHardcodedString(candidate, "Build", ref interned) ||
+                    TryInternHardcodedString(candidate, "Win32", ref interned))
+                {
+                    return true;
+                }
+            }
+            else if (length == 6)
+            {
+                if (TryInternHardcodedString(candidate, "''!=''", ref interned) ||
+                    TryInternHardcodedString(candidate, "AnyCPU", ref interned))
+                {
+                    return true;
+                }
+            }
+            else if (length == 7)
+            {
+                if (TryInternHardcodedString(candidate, "Library", ref interned) ||
+                    TryInternHardcodedString(candidate, "MSBuild", ref interned) ||
+                    TryInternHardcodedString(candidate, "Release", ref interned))
+                {
+                    return true;
+                }
+            }
+            // see Microsoft.Build.BackEnd.BuildRequestConfiguration.CreateUniqueGlobalProperty
+            else if (length > MSBuildConstants.MSBuildDummyGlobalPropertyHeader.Length &&
+                    candidate.StartsWithStringByOrdinalComparison(MSBuildConstants.MSBuildDummyGlobalPropertyHeader))
+            {
+                // don't want to leak unique strings into the cache
+                interned = candidate.ExpensiveConvertToString();
+                return null;
+            }
+            else if (length == 24)
+            {
+                if (TryInternHardcodedString(candidate, "ResolveAssemblyReference", ref interned))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>
-        /// Wrapper over a string.
+        /// Implements interning based on a WeakStringCache (new implementation).
         /// </summary>
-        internal struct StringInternTarget : IInternable
+        private class WeakStringCacheInterner : IInternerImplementation
         {
             /// <summary>
-            /// Stores the wrapped string.
+            /// Enumerates the possible interning results.
             /// </summary>
-            private readonly string _target;
-
-            /// <summary>
-            /// Constructor of the class
-            /// </summary>
-            /// <param name="target">The string to wrap</param>
-            internal StringInternTarget(string target)
+            private enum InternResult
             {
-                ErrorUtilities.VerifyThrowArgumentLength(target, nameof(target));
-                _target = target;
+                MatchedHardcodedString,
+                FoundInWeakStringCache,
+                AddedToWeakStringCache,
+                RejectedFromInterning
             }
 
             /// <summary>
-            /// Gets the length of the target string.
+            /// The cache to keep strings in.
             /// </summary>
-            public int Length => _target.Length;
+            private readonly WeakStringCache _weakStringCache = new WeakStringCache();
+
+#region Statistics
+            /// <summary>
+            /// Whether or not to gather statistics.
+            /// </summary>
+            private readonly bool _gatherStatistics;
 
             /// <summary>
-            /// Gets the n character in the target string.
+            /// Number of times interning with hardcoded string literals worked.
             /// </summary>
-            /// <param name="index">Index of the character to gather.</param>
-            /// <returns>The character in the position marked by index.</returns>
-            public char this[int index] => _target[index];
+            private int _hardcodedInternHits;
 
             /// <summary>
-            /// Returns the target which is already a string.
+            /// Number of times the regular interning path found the string in the cache.
             /// </summary>
-            /// <returns>The target string.</returns>
-            public string ExpensiveConvertToString() => _target;
+            private int _regularInternHits;
 
             /// <summary>
-            /// Compare if the target string is equal to the given string.
+            /// Number of times the regular interning path added the string to the cache.
             /// </summary>
-            /// <param name="other">The string to compare with the target.</param>
-            /// <returns>True if the strings are equal, false otherwise.</returns>
-            public bool IsOrdinalEqualToStringOfSameLength(string other) => _target.Equals(other, StringComparison.Ordinal);
+            private int _regularInternMisses;
 
             /// <summary>
-            /// Verifies if the reference of the target string is the same of the given string.
+            /// Number of times interning wasn't attempted.
             /// </summary>
-            /// <param name="other">The string reference to compare to.</param>
-            /// <returns>True if both references are equal, false otherwise.</returns>
-            public bool ReferenceEquals(string other) => ReferenceEquals(_target, other);
+            private int _rejectedStrings;
+
+            /// <summary>
+            /// Total number of strings eliminated by interning.
+            /// </summary>
+            private int _internEliminatedStrings;
+
+            /// <summary>
+            /// Total number of chars eliminated across all strings.
+            /// </summary>
+            private int _internEliminatedChars;
+
+            /// <summary>
+            /// Maps strings that went though the regular (i.e. not hardcoded) interning path to the number of times they have been
+            /// seen. The higher the number the better the payoff if the string had been hardcoded.
+            /// </summary>
+            private Dictionary<string, int> _missedHardcodedStrings;
+
+#endregion
+
+            public WeakStringCacheInterner(bool gatherStatistics)
+            {
+                if (gatherStatistics)
+                {
+                    _missedHardcodedStrings = new Dictionary<string, int>();
+                }
+                _gatherStatistics = gatherStatistics;
+            }
+
+            /// <summary>
+            /// Intern the given internable.
+            /// </summary>
+            public string InterningToString<T>(T candidate) where T : IInternable
+            {
+                if (_gatherStatistics)
+                {
+                    return InternWithStatistics(candidate);
+                }
+                else
+                {
+                    TryIntern(candidate, out string result);
+                    return result;
+                }
+            }
+
+            /// <summary>
+            /// Report statistics to the console.
+            /// </summary>
+            public void ReportStatistics(string heading)
+            {
+                string title = "Opportunistic Intern (" + heading + ")";
+                Console.WriteLine("\n{0}{1}{0}", new string('=', 41 - (title.Length / 2)), title);
+                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Hardcoded Hits", _hardcodedInternHits, "hits");
+                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Hardcoded Rejects", _rejectedStrings, "rejects");
+                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "WeakStringCache Hits", _regularInternHits, "hits");
+                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "WeakStringCache Misses", _regularInternMisses, "misses");
+                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Eliminated Strings*", _internEliminatedStrings, "strings");
+                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Eliminated Chars", _internEliminatedChars, "chars");
+                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Estimated Eliminated Bytes", _internEliminatedChars * 2, "bytes");
+                Console.WriteLine("Elimination assumes that strings provided were unique objects.");
+                Console.WriteLine("|---------------------------------------------------------------------------------|");
+
+                IEnumerable<string> topMissingHardcodedString =
+                    _missedHardcodedStrings
+                    .OrderByDescending(kv => kv.Value * kv.Key.Length)
+                    .Take(15)
+                    .Where(kv => kv.Value > 1)
+                    .Select(kv => string.Format(CultureInfo.InvariantCulture, "({1} instances x each {2} chars)\n{0}", kv.Key, kv.Value, kv.Key.Length));
+
+                Console.WriteLine("##########Top Missing Hardcoded Strings:  \n{0} ", string.Join("\n==============\n", topMissingHardcodedString.ToArray()));
+                Console.WriteLine();
+
+                WeakStringCache.DebugInfo debugInfo = _weakStringCache.GetDebugInfo();
+                Console.WriteLine("WeakStringCache statistics:");
+                Console.WriteLine("String count live/collected/total = {0}/{1}/{2}", debugInfo.LiveStringCount, debugInfo.CollectedStringCount, debugInfo.LiveStringCount + debugInfo.CollectedStringCount);
+            }
+
+            /// <summary>
+            /// Try to intern the string.
+            /// The return value indicates the how the string was interned (if at all).
+            /// </summary>
+            private InternResult TryIntern<T>(T candidate, out string interned) where T : IInternable
+            {
+                // First, try the hard coded intern strings.
+                bool? hardcodedMatchResult = TryMatchHardcodedStrings(candidate, out interned);
+                if (hardcodedMatchResult != false)
+                {
+                    // Either matched a hardcoded string or is explicitly not to be interned.
+                    return hardcodedMatchResult.HasValue ? InternResult.MatchedHardcodedString : InternResult.RejectedFromInterning;
+                }
+
+                interned = _weakStringCache.GetOrCreateEntry(candidate, out bool cacheHit);
+                return cacheHit ? InternResult.FoundInWeakStringCache : InternResult.AddedToWeakStringCache;
+            }
+
+            /// <summary>
+            /// Version of Intern that gathers statistics
+            /// </summary>
+            private string InternWithStatistics<T>(T candidate) where T : IInternable
+            {
+                lock (_missedHardcodedStrings)
+                {
+                    InternResult internResult = TryIntern(candidate, out string result);
+
+                    switch (internResult)
+                    {
+                        case InternResult.MatchedHardcodedString:
+                            _hardcodedInternHits++;
+                            break;
+                        case InternResult.FoundInWeakStringCache:
+                            _regularInternHits++;
+                            break;
+                        case InternResult.AddedToWeakStringCache:
+                            _regularInternMisses++;
+                            break;
+                        case InternResult.RejectedFromInterning:
+                            _rejectedStrings++;
+                            break;
+                    }
+
+                    if (internResult != InternResult.MatchedHardcodedString && internResult != InternResult.RejectedFromInterning)
+                    {
+                        _missedHardcodedStrings.TryGetValue(result, out int priorCount);
+                        _missedHardcodedStrings[result] = priorCount + 1;
+                    }
+
+                    if (!candidate.ReferenceEquals(result))
+                    {
+                        // Reference changed so 'candidate' is now released and should save memory.
+                        _internEliminatedStrings++;
+                        _internEliminatedChars += candidate.Length;
+                    }
+
+                    return result;
+                }
+            }
         }
 
-        #endregion
-
         /// <summary>
-        /// Manages a set of mru lists that hold strings in varying size ranges.
+        /// Manages a set of mru lists that hold strings in varying size ranges (legacy implementation).
         /// </summary>
-        private class BucketedPrioritizedStringList
+        private class BucketedPrioritizedStringList : IInternerImplementation
         {
             /// <summary>
             /// The small string Mru list.
@@ -523,7 +619,7 @@ namespace Microsoft.Build
             private readonly ConcurrentDictionary<string, string> _internedStrings = new ConcurrentDictionary<string, string>(Environment.ProcessorCount, InitialCapacity, StringComparer.Ordinal);
 #endif
 
-            #region Statistics
+#region Statistics
             /// <summary>
             /// Whether or not to gather statistics
             /// </summary>
@@ -596,7 +692,7 @@ namespace Microsoft.Build
             /// </summary>
             private const int GinormousSize = 10;
 
-            #endregion
+#endregion
 
             /// <summary>
             /// Construct.
@@ -634,14 +730,8 @@ namespace Microsoft.Build
             /// <summary>
             /// Intern the given internable.
             /// </summary>
-            internal string InterningToString(IInternable candidate)
+            public string InterningToString<T>(T candidate) where T : IInternable
             {
-                if (candidate.Length == 0)
-                {
-                    // As in the case that a property or itemlist has evaluated to empty.
-                    return string.Empty;
-                }
-
                 if (_gatherStatistics)
                 {
                     return InternWithStatistics(candidate);
@@ -656,30 +746,30 @@ namespace Microsoft.Build
             /// <summary>
             /// Report statistics to the console.
             /// </summary>
-            internal void ReportStatistics(string heading)
+            public void ReportStatistics(string heading)
             {
                 string title = "Opportunistic Intern (" + heading + ")";
                 Console.WriteLine("\n{0}{1}{0}", new string('=', 41 - (title.Length / 2)), title);
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Intern Hits", _internHits, "hits");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Intern Misses", _internMisses, "misses");
-                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Intern Rejects (as shorter than " + s_smallMruThreshold + " bytes)", _internRejects, "rejects");
+                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Intern Rejects (as shorter than " + _smallMruThreshold + " bytes)", _internRejects, "rejects");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Eliminated Strings*", _internEliminatedStrings, "strings");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Eliminated Chars", _internEliminatedChars, "chars");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Estimated Eliminated Bytes", _internEliminatedChars * 2, "bytes");
                 Console.WriteLine("Elimination assumes that strings provided were unique objects.");
                 Console.WriteLine("|---------------------------------------------------------------------------------|");
                 KeyValuePair<int, int> held = _smallMru.Statistics();
-                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Small Strings MRU Size", s_smallMruSize, "strings");
+                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Small Strings MRU Size", Instance._smallMruSize, "strings");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Small Strings (>=" + _smallMruThreshold + " chars) Held", held.Key, "strings");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Small Estimated Bytes Held", held.Value * 2, "bytes");
                 Console.WriteLine("|---------------------------------------------------------------------------------|");
                 held = _largeMru.Statistics();
-                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Large Strings MRU Size", s_largeMruSize, "strings");
+                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Large Strings MRU Size", Instance._largeMruSize, "strings");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Large Strings  (>=" + _largeMruThreshold + " chars) Held", held.Key, "strings");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Large Estimated Bytes Held", held.Value * 2, "bytes");
                 Console.WriteLine("|---------------------------------------------------------------------------------|");
                 held = _hugeMru.Statistics();
-                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Huge Strings MRU Size", s_hugeMruSize, "strings");
+                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Huge Strings MRU Size", Instance._hugeMruSize, "strings");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Huge Strings  (>=" + _hugeMruThreshold + " chars) Held", held.Key, "strings");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Huge Estimated Bytes Held", held.Value * 2, "bytes");
                 Console.WriteLine("|---------------------------------------------------------------------------------|");
@@ -719,183 +809,23 @@ namespace Microsoft.Build
             /// Return false if it was added to the intern list, but wasn't there already.
             /// Return null if it didn't meet the length criteria for any of the buckets. Interning was rejected
             /// </summary>
-            private bool? TryIntern(IInternable candidate, out string interned)
+            private bool? TryIntern<T>(T candidate, out string interned) where T : IInternable
             {
                 int length = candidate.Length;
+                interned = null;
 
                 // First, try the hard coded intern strings.
                 // Each of the hard-coded small strings below showed up in a profile run with considerable duplication in memory.
                 if (!_dontTrack)
                 {
-                    if (length == 2)
+                    bool? hardcodedMatchResult = TryMatchHardcodedStrings(candidate, out interned);
+                    if (hardcodedMatchResult != false)
                     {
-                        if (candidate[1] == '#')
-                        {
-                            if (candidate[0] == 'C')
-                            {
-                                interned = "C#";
-                                return true;
-                            }
-
-                            if (candidate[0] == 'F')
-                            {
-                                interned = "F#";
-                                return true;
-                            }
-                        }
-
-                        if (candidate[0] == 'V' && candidate[1] == 'B')
-                        {
-                            interned = "VB";
-                            return true;
-                        }
+                        // Either matched a hardcoded string or is explicitly not to be interned.
+                        return hardcodedMatchResult;
                     }
-                    else if (length == 4)
-                    {
-                        if (candidate[0] == 'T')
-                        {
-                            if (candidate[1] == 'R' && candidate[2] == 'U' && candidate[3] == 'E')
-                            {
-                                interned = "TRUE";
-                                return true;
-                            }
 
-                            if (candidate[1] == 'r' && candidate[2] == 'u' && candidate[3] == 'e')
-                            {
-                                interned = "True";
-                                return true;
-                            }
-                        }
-
-                        if (candidate[0] == 'C' && candidate[1] == 'o' && candidate[2] == 'p' && candidate[3] == 'y')
-                        {
-                            interned = "Copy";
-                            return true;
-                        }
-
-                        if (candidate[0] == 't' && candidate[1] == 'r' && candidate[2] == 'u' && candidate[3] == 'e')
-                        {
-                            interned = "true";
-                            return true;
-                        }
-
-                        if (candidate[0] == 'v' && candidate[1] == '4' && candidate[2] == '.' && candidate[3] == '0')
-                        {
-                            interned = "v4.0";
-                            return true;
-                        }
-                    }
-                    else if (length == 5)
-                    {
-                        if (candidate[0] == 'F' && candidate[1] == 'A' && candidate[2] == 'L' && candidate[3] == 'S' && candidate[4] == 'E')
-                        {
-                            interned = "FALSE";
-                            return true;
-                        }
-
-                        if (candidate[0] == 'f' && candidate[1] == 'a' && candidate[2] == 'l' && candidate[3] == 's' && candidate[4] == 'e')
-                        {
-                            interned = "false";
-                            return true;
-                        }
-
-                        if (candidate[0] == 'D' && candidate[1] == 'e' && candidate[2] == 'b' && candidate[3] == 'u' && candidate[4] == 'g')
-                        {
-                            interned = "Debug";
-                            return true;
-                        }
-
-                        if (candidate[0] == 'B' && candidate[1] == 'u' && candidate[2] == 'i' && candidate[3] == 'l' && candidate[4] == 'd')
-                        {
-                            interned = "Build";
-                            return true;
-                        }
-
-                        if (candidate[0] == 'W' && candidate[1] == 'i' && candidate[2] == 'n' && candidate[3] == '3' && candidate[4] == '2')
-                        {
-                            interned = "Win32";
-                            return true;
-                        }
-                    }
-                    else if (length == 6)
-                    {
-                        if (candidate[0] == '\'' && candidate[1] == '\'' && candidate[2] == '!' && candidate[3] == '=' && candidate[4] == '\'' && candidate[5] == '\'')
-                        {
-                            interned = "''!=''";
-                            return true;
-                        }
-
-                        if (candidate[0] == 'A' && candidate[1] == 'n' && candidate[2] == 'y' && candidate[3] == 'C' && candidate[4] == 'P' && candidate[5] == 'U')
-                        {
-                            interned = "AnyCPU";
-                            return true;
-                        }
-                    }
-                    else if (length == 7)
-                    {
-                        if (candidate[0] == 'L' && candidate[1] == 'i' && candidate[2] == 'b' && candidate[3] == 'r' && candidate[4] == 'a' && candidate[5] == 'r' && candidate[6] == 'y')
-                        {
-                            interned = "Library";
-                            return true;
-                        }
-
-                        if (candidate[0] == 'M' && candidate[1] == 'S' && candidate[2] == 'B' && candidate[3] == 'u' && candidate[4] == 'i' && candidate[5] == 'l' && candidate[6] == 'd')
-                        {
-                            interned = "MSBuild";
-                            return true;
-                        }
-
-                        if (candidate[0] == 'R' && candidate[1] == 'e' && candidate[2] == 'l' && candidate[3] == 'e' && candidate[4] == 'a' && candidate[5] == 's' && candidate[6] == 'e')
-                        {
-                            interned = "Release";
-                            return true;
-                        }
-                    }
-                    // see Microsoft.Build.BackEnd.BuildRequestConfiguration.CreateUniqueGlobalProperty
-                    else if (length > MSBuildConstants.MSBuildDummyGlobalPropertyHeader.Length &&
-                             candidate[0] == 'M' &&
-                             candidate[1] == 'S' &&
-                             candidate[2] == 'B' &&
-                             candidate[3] == 'u' &&
-                             candidate[4] == 'i' &&
-                             candidate[5] == 'l' &&
-                             candidate[6] == 'd' &&
-                             candidate[7] == 'P' &&
-                             candidate[8] == 'r' &&
-                             candidate[9] == 'o' &&
-                             candidate[10] == 'j' &&
-                             candidate[11] == 'e' &&
-                             candidate[12] == 'c' &&
-                             candidate[13] == 't' &&
-                             candidate[14] == 'I' &&
-                             candidate[15] == 'n' &&
-                             candidate[16] == 's' &&
-                             candidate[17] == 't' &&
-                             candidate[18] == 'a' &&
-                             candidate[19] == 'n' &&
-                             candidate[20] == 'c' &&
-                             candidate[21] == 'e'
-                    )
-                    {
-                        // don't want to leak unique strings into the cache
-                        interned = candidate.ExpensiveConvertToString();
-                        return null;
-                    }
-                    else if (length == 24)
-                    {
-                        if (candidate[0] == 'R' && candidate[1] == 'e' && candidate[2] == 's' && candidate[3] == 'o' && candidate[4] == 'l' && candidate[5] == 'v' && candidate[6] == 'e')
-                        {
-                            if (candidate[7] == 'A' && candidate[8] == 's' && candidate[9] == 's' && candidate[10] == 'e' && candidate[11] == 'm' && candidate[12] == 'b' && candidate[13] == 'l' && candidate[14] == 'y')
-                            {
-                                if (candidate[15] == 'R' && candidate[16] == 'e' && candidate[17] == 'f' && candidate[18] == 'e' && candidate[19] == 'r' && candidate[20] == 'e' && candidate[21] == 'n' && candidate[22] == 'c' && candidate[23] == 'e')
-                                {
-                                    interned = "ResolveAssemblyReference";
-                                    return true;
-                                }
-                            }
-                        }
-                    }
-                    else if (length > _ginormousThreshold)
+                    if (length > _ginormousThreshold)
                     {
                         lock (_ginormous)
                         {
@@ -903,7 +833,7 @@ namespace Microsoft.Build
 
                             while (current != null)
                             {
-                                if (current.Value.Target is string last && last.Length == candidate.Length && candidate.IsOrdinalEqualToStringOfSameLength(last))
+                                if (current.Value.Target is string last && last.Length == candidate.Length && candidate.StartsWithStringByOrdinalComparison(last))
                                 {
                                     interned = last;
                                     _ginormousHits++;
@@ -967,42 +897,45 @@ namespace Microsoft.Build
             /// <summary>
             /// Version of Intern that gathers statistics
             /// </summary>
-            private string InternWithStatistics(IInternable candidate)
+            private string InternWithStatistics<T>(T candidate) where T : IInternable
             {
-                _stopwatch.Start();
-                bool? interned = TryIntern(candidate, out string result);
-                _stopwatch.Stop();
-
-                if (interned.HasValue && !interned.Value)
+                lock (_missedStrings)
                 {
-                    // Could not intern.
-                    _internMisses++;
+                    _stopwatch.Start();
+                    bool? interned = TryIntern(candidate, out string result);
+                    _stopwatch.Stop();
 
-                    _missedStrings.TryGetValue(result, out int priorCount);
-                    _missedStrings[result] = priorCount + 1;
+                    if (interned.HasValue && !interned.Value)
+                    {
+                        // Could not intern.
+                        _internMisses++;
+
+                        _missedStrings.TryGetValue(result, out int priorCount);
+                        _missedStrings[result] = priorCount + 1;
+
+                        return result;
+                    }
+                    else if (interned == null)
+                    {
+                        // Decided not to attempt interning
+                        _internRejects++;
+
+                        _rejectedStrings.TryGetValue(result, out int priorCount);
+                        _rejectedStrings[result] = priorCount + 1;
+
+                        return result;
+                    }
+
+                    _internHits++;
+                    if (!candidate.ReferenceEquals(result))
+                    {
+                        // Reference changed so 'candidate' is now released and should save memory.
+                        _internEliminatedStrings++;
+                        _internEliminatedChars += candidate.Length;
+                    }
 
                     return result;
                 }
-                else if (interned == null)
-                {
-                    // Decided not to attempt interning
-                    _internRejects++;
-
-                    _rejectedStrings.TryGetValue(result, out int priorCount);
-                    _rejectedStrings[result] = priorCount + 1;
-
-                    return result;
-                }
-
-                _internHits++;
-                if (!candidate.ReferenceEquals(result))
-                {
-                    // Reference changed so 'candidate' is now released and should save memory.
-                    _internEliminatedStrings++;
-                    _internEliminatedChars += candidate.Length;
-                }
-
-                return result;
             }
 
             /// <summary>
@@ -1033,7 +966,7 @@ namespace Microsoft.Build
                 /// Try to get one element from the list. Upon leaving the function 'candidate' will be at the head of the Mru list.
                 /// This function is not thread-safe.
                 /// </summary>
-                internal bool TryGet(IInternable candidate, out string interned)
+                internal bool TryGet<T>(T candidate, out string interned) where T : IInternable
                 {
                     if (_size == 0)
                     {
@@ -1052,7 +985,7 @@ namespace Microsoft.Build
                     {
                         if (head.Value.Length == length)
                         {
-                            if (candidate.IsOrdinalEqualToStringOfSameLength(head.Value))
+                            if (candidate.StartsWithStringByOrdinalComparison(head.Value))
                             {
                                 found = true;
                             }

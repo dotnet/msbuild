@@ -6,10 +6,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Reflection;
 using System.Text;
 using System.Threading;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Shared
 {
@@ -19,7 +17,7 @@ namespace Microsoft.Build.Shared
     /// <remarks>
     /// You can add any properties or methods on the real StringBuilder that are needed.
     /// </remarks>
-    internal sealed class ReuseableStringBuilder : IDisposable, OpportunisticIntern.IInternable
+    internal sealed class ReuseableStringBuilder : IDisposable, IInternable
     {
         /// <summary>
         /// Captured string builder.
@@ -63,7 +61,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Indexer into the target. Presumed to be fast.
         /// </summary>
-        char OpportunisticIntern.IInternable.this[int index]
+        char IInternable.this[int index]
         {
             get
             {
@@ -75,7 +73,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Convert target to string. Presumed to be slow (and will be called just once).
         /// </summary>
-        string OpportunisticIntern.IInternable.ExpensiveConvertToString()
+        string IInternable.ExpensiveConvertToString()
         {
             if( _cachedString == null)
             {
@@ -96,18 +94,18 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Compare target to string. 
         /// </summary>
-        bool OpportunisticIntern.IInternable.IsOrdinalEqualToStringOfSameLength(string other)
+        bool IInternable.StartsWithStringByOrdinalComparison(string other)
         {
 #if DEBUG
-            ErrorUtilities.VerifyThrow(other.Length == _borrowedBuilder.Length, "should be same length");
+            ErrorUtilities.VerifyThrow(other.Length <= _borrowedBuilder.Length, "should be at most as long as target");
 #endif
             if (other.Length > MaxByCharCompareLength)
             {
-                return String.Equals( ((OpportunisticIntern.IInternable) this).ExpensiveConvertToString(), other, StringComparison.Ordinal);
+                return ((IInternable) this).ExpensiveConvertToString().StartsWith(other, StringComparison.Ordinal);
             }
             // Backwards because the end of the string is (by observation of Australian Government build) more likely to be different earlier in the loop.
             // For example, C:\project1, C:\project2
-            for (int i = _borrowedBuilder.Length - 1; i >= 0; --i)
+            for (int i = other.Length - 1; i >= 0; --i)
             {
                 if (_borrowedBuilder[i] != other[i])
                 {
@@ -121,7 +119,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Never reference equals to string.
         /// </summary>
-        bool OpportunisticIntern.IInternable.ReferenceEquals(string other)
+        bool IInternable.ReferenceEquals(string other)
         {
             return false;
         }

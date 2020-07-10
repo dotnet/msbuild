@@ -15,4 +15,16 @@
   </PropertyGroup>
   <Import Project="Sdk.targets" Sdk="Microsoft.Build.CentralPackageVersions" />
   <Import Project="Sdk.targets" Sdk="Microsoft.DotNet.Arcade.Sdk" />
+
+  <Target Name="DeleteDevPackage" AfterTargets="GenerateNuspec">
+    <!-- If package just built was already in global packages folder, delete it.  This helps support a local dev cycle where you are consuming
+         a package from another repo without having to update the package version each time. -->
+    
+    <PropertyGroup>
+      <_PackageFolderInGlobalPackages>$(NuGetPackageRoot)$(PackageId.ToLowerInvariant())\$(PackageVersion)</_PackageFolderInGlobalPackages>
+    </PropertyGroup>
+
+    <RemoveDir Directories="$(_PackageFolderInGlobalPackages)"
+               Condition="Exists('$(_PackageFolderInGlobalPackages)')" />
+  </Target>
 </Project>

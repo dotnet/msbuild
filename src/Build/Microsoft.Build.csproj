@@ -34,6 +34,7 @@
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
     <PackageReference Include="System.Memory" />
+    <PackageReference Include="System.Text.Json" />
 
     <PackageReference Include="System.Reflection.Metadata" Condition="'$(MonoBuild)' == 'true'" />
   </ItemGroup>
@@ -137,6 +138,7 @@
     </Compile>
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
+    <Compile Include="..\Shared\TranslatorHelpers.cs" />
     <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\InterningBinaryReader.cs" />
     <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs">
@@ -154,6 +156,8 @@
     <Compile Include="BackEnd\BuildManager\CacheAggregator.cs" />
     <Compile Include="BackEnd\Components\Caching\ConfigCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\TranslationHelpers.cs" />
+    <Compile Include="Utilities\NuGetFrameworkWrapper.cs" />
     <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectUsingTaskParameterElementLink.cs" />
     <Compile Include="ObjectModelRemoting\ExternalProjectsProvider.cs" />
     <Compile Include="ObjectModelRemoting\LinkedObjectFactory.cs" />
@@ -351,6 +355,9 @@
     <Compile Include="..\Shared\CollectionHelpers.cs" />
     <Compile Include="Collections\ConvertingEnumerable.cs" />
     <Compile Include="Collections\CopyOnReadEnumerable.cs" />
+    <Compile Include="..\Shared\IInternable.cs" />
+    <Compile Include="..\Shared\WeakStringCache.cs" />
+    <Compile Include="..\Shared\WeakStringCache.Concurrent.cs" />
     <Compile Include="..\Shared\OpportunisticIntern.cs" />
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs">
       <Link>Collections\CopyOnWriteDictionary.cs</Link>

@@ -203,6 +203,10 @@ namespace Microsoft.Build.Framework
     {
         System.Collections.Generic.IReadOnlyDictionary<string, string> GetGlobalProperties();
     }
+    public partial interface IBuildEngine7 : Microsoft.Build.Framework.IBuildEngine, Microsoft.Build.Framework.IBuildEngine2, Microsoft.Build.Framework.IBuildEngine3, Microsoft.Build.Framework.IBuildEngine4, Microsoft.Build.Framework.IBuildEngine5, Microsoft.Build.Framework.IBuildEngine6
+    {
+        bool AllowFailureWithoutError { get; set; }
+    }
     public partial interface ICancelableTask : Microsoft.Build.Framework.ITask
     {
         void Cancel();
@@ -491,7 +495,10 @@ namespace Microsoft.Build.Framework
     public abstract partial class SdkResult
     {
         protected SdkResult() { }
+        public virtual System.Collections.Generic.IList<string> AdditionalPaths { get { throw null; } set { } }
+        public virtual System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.SdkResultItem> ItemsToAdd { get { throw null; } protected set { } }
         public virtual string Path { get { throw null; } protected set { } }
+        public virtual System.Collections.Generic.IDictionary<string, string> PropertiesToAdd { get { throw null; } protected set { } }
         public virtual Microsoft.Build.Framework.SdkReference SdkReference { get { throw null; } protected set { } }
         public virtual bool Success { get { throw null; } protected set { } }
         public virtual string Version { get { throw null; } protected set { } }
@@ -500,7 +507,17 @@ namespace Microsoft.Build.Framework
     {
         protected SdkResultFactory() { }
         public abstract Microsoft.Build.Framework.SdkResult IndicateFailure(System.Collections.Generic.IEnumerable<string> errors, System.Collections.Generic.IEnumerable<string> warnings=null);
+        public virtual Microsoft.Build.Framework.SdkResult IndicateSuccess(System.Collections.Generic.IEnumerable<string> paths, string version, System.Collections.Generic.IDictionary<string, string> propertiesToAdd=null, System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.SdkResultItem> itemsToAdd=null, System.Collections.Generic.IEnumerable<string> warnings=null) { throw null; }
         public abstract Microsoft.Build.Framework.SdkResult IndicateSuccess(string path, string version, System.Collections.Generic.IEnumerable<string> warnings=null);
+    }
+    public partial class SdkResultItem
+    {
+        public SdkResultItem() { }
+        public SdkResultItem(string itemSpec, System.Collections.Generic.Dictionary<string, string> metadata) { }
+        public string ItemSpec { get { throw null; } set { } }
+        public System.Collections.Generic.Dictionary<string, string> Metadata { get { throw null; } }
+        public override bool Equals(object obj) { throw null; }
+        public override int GetHashCode() { throw null; }
     }
     public enum TargetBuiltReason
     {
@@ -566,6 +583,8 @@ namespace Microsoft.Build.Framework
     public partial class TaskPropertyInfo
     {
         public TaskPropertyInfo(string name, System.Type typeOfParameter, bool output, bool required) { }
+        public bool Log { get { throw null; } set { } }
+        public bool LogItemMetadata { get { throw null; } set { } }
         public string Name { get { throw null; } }
         public bool Output { get { throw null; } }
         public System.Type PropertyType { get { throw null; } }
