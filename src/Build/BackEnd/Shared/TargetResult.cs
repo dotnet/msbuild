@@ -5,13 +5,10 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Globalization;
-using System.IO.Compression;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Execution
@@ -39,7 +36,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The store of items in this result.
         /// </summary>
-        private ItemsStore _itemsStore;
+        private TaskItem[] _items;
 
         /// <summary>
         /// The context under which these results have been cached.
@@ -55,7 +52,7 @@ namespace Microsoft.Build.Execution
         {
             ErrorUtilities.VerifyThrowArgumentNull(items, nameof(items));
             ErrorUtilities.VerifyThrowArgumentNull(result, nameof(result));
-            _itemsStore = new ItemsStore(items);
+            _items = items;
             _result = result;
         }
 
@@ -90,10 +87,7 @@ namespace Microsoft.Build.Execution
                 {
                     RetrieveItemsFromCache();
 
-                    // NOTE: If the items in the ItemsStore were compressed, this will decompress them.  If the only purpose to
-                    // getting these items is to check the length, then that is inefficient and we should come up with a better
-                    // way of getting the count (such as another interface method which delegates to the ItemsStore itself.
-                    return _itemsStore.Items;
+                    return _items;
                 }
             }
         }
@@ -217,13 +211,13 @@ namespace Microsoft.Build.Execution
         {
             lock (_result)
             {
-                if (_itemsStore == null)
+                if (_items == null)
                 {
                     // Already cached.
                     return;
                 }
 
-                if (_itemsStore.Items.Length == 0)
+                if (_items.Length == 0)
                 {
                     // Nothing to cache.
                     return;
@@ -237,8 +231,8 @@ namespace Microsoft.Build.Execution
                 {
                     try
                     {
-                        translator.Translate(ref _itemsStore, ItemsStore.FactoryForDeserialization);
-                        _itemsStore = null;
+                        translator.TranslateArray(ref _items, TaskItem.FactoryForDeserialization);
+                        _items = null;
                         _cacheInfo = new CacheInfo(configId, targetName);
                     }
                     finally
@@ -257,7 +251,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _result, WorkUnitResult.FactoryForDeserialization);
             translator.Translate(ref _targetFailureDoesntCauseBuildFailure);
             translator.Translate(ref _afterTargetsHaveFailed);
-            translator.Translate(ref _itemsStore, ItemsStore.FactoryForDeserialization);
+            translator.TranslateArray(ref _items, TaskItem.FactoryForDeserialization);
         }
 
         /// <summary>
@@ -267,13 +261,13 @@ namespace Microsoft.Build.Execution
         {
             lock (_result)
             {
-                if (_itemsStore == null)
+                if (_items == null)
                 {
                     ITranslator translator = GetResultsCacheTranslator(_cacheInfo.ConfigId, _cacheInfo.TargetName, TranslationDirection.ReadFromStream);
 
                     try
                     {
-                        translator.Translate(ref _itemsStore, ItemsStore.FactoryForDeserialization);
+                        translator.TranslateArray(ref _items, TaskItem.FactoryForDeserialization);
                         _cacheInfo = new CacheInfo();
                     }
                     finally
@@ -330,57 +324,6 @@ namespace Microsoft.Build.Execution
             /// Retrieves the target name.
             /// </summary>
             public string TargetName { get; }
-        }
-
-        /// <summary>
-        /// The store of items for the target result.  This class is responsible for the serialization of the items collection, which is 
-        /// useful to keep separate as it is where we spend most of our time serializing for large projects, and these are the bits
-        /// we throw out of memory when the cache gets collected.
-        /// </summary>
-        private class ItemsStore : ITranslatable
-        {
-            /// <summary>
-            /// The items produced by this target.
-            /// </summary>
-            private TaskItem[] _items;
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            public ItemsStore(TaskItem[] items)
-            {
-                ErrorUtilities.VerifyThrowArgumentNull(items, "items");
-                this._items = items;
-            }
-
-            /// <summary>
-            /// Constructor for serialization.
-            /// </summary>
-            private ItemsStore(ITranslator translator)
-            {
-                Translate(translator);
-            }
-
-            /// <summary>
-            /// Retrieves the items.
-            /// </summary>
-            public TaskItem[] Items => _items;
-
-            /// <summary>
-            /// Translates an items store.
-            /// </summary>
-            public void Translate(ITranslator translator)
-            {
-                translator.TranslateArray(ref _items, TaskItem.FactoryForDeserialization);
-            }
-
-            /// <summary>
-            /// Factory for the serializer.
-            /// </summary>
-            internal static ItemsStore FactoryForDeserialization(ITranslator translator)
-            {
-                return new ItemsStore(translator);
-            }
         }
     }
 }
