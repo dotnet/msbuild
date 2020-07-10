@@ -27,11 +27,16 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return new SdkResult(_sdkReference, errors, warnings);
         }
 
+        public override SdkResultBase IndicateSuccess(string path, string version, IEnumerable<string> warnings = null)
+        {
+            return new SdkResult(_sdkReference, path, version, warnings);
+        }
+
         public override SdkResultBase IndicateSuccess(string path,
                                                       string version,
-                                                      IEnumerable<string> warnings = null,
-                                                      IDictionary<string, string> propertiesToAdd = null,
-                                                      IDictionary<string, SdkResultItem> itemsToAdd = null)
+                                                      IDictionary<string, string> propertiesToAdd,
+                                                      IDictionary<string, SdkResultItem> itemsToAdd,
+                                                      IEnumerable<string> warnings = null)
         {
             return new SdkResult(_sdkReference, path, version, warnings, propertiesToAdd, itemsToAdd);
         }

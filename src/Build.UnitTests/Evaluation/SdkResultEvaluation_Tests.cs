@@ -158,7 +158,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     new SdkReference("TestPropsAndItemsFromResolverSdk", null, null),
                     Path.Combine(_testFolder, "Sdk"),
                     version: null,
-                    warnings: null, propertiesToAdd,
+                    warnings: null,
+                    propertiesToAdd,
                     itemsToAdd) :
                 new Build.BackEnd.SdkResolution.SdkResult(
                     new SdkReference("TestPropsAndItemsFromResolverSdk", null, null),
