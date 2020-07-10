@@ -39,8 +39,10 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("NETSDK1135");
         }
 
-        [WindowsOnlyRequiresMSBuildVersionFact("16.7.0-preview-20310-07")]
-        public void It_errors_when_missing_transitive_windows_target_platform()
+        [WindowsOnlyRequiresMSBuildVersionTheory("16.7.0-preview-20310-07")]
+        [InlineData("UseWindowsForms")]
+        [InlineData("UseWPF")]
+        public void It_errors_when_missing_transitive_windows_target_platform(string propertyName)
         {
             var targetFramework = "net5.0";
             TestProject testProjectA = new TestProject()
@@ -49,10 +51,9 @@ namespace Microsoft.NET.Build.Tests
                 IsSdkProject = true,
                 TargetFrameworks = targetFramework
             };
-            // TODO use net5.0-windows and UseWPF instead
             testProjectA.AdditionalProperties["TargetPlatformIdentifier"] = "Windows";
             testProjectA.AdditionalProperties["TargetPlatformVersion"] = "7.0";
-            testProjectA.FrameworkReferences.Add("Microsoft.WindowsDesktop.App"); 
+            testProjectA.AdditionalProperties[propertyName] = "true";
 
             TestProject testProjectB = new TestProject()
             {

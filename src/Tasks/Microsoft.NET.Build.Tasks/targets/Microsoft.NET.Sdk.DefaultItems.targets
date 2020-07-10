@@ -346,7 +346,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_CheckForTransitiveWindowsDesktopDependencies"
           AfterTargets="ResolvePackageAssets"
           Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0')) and '$(TargetPlatformIdentifier)' != 'Windows' and '@(TransitiveFrameworkReference)' != ''">
-    <NetSdkError Condition="'%(TransitiveFrameworkReference.Identity)' == 'Microsoft.WindowsDesktop.App'"
+    <NetSdkError Condition="@(TransitiveFrameworkReference->'%(Identity)'->Contains('Microsoft.WindowsDesktop.App'))"
                  ResourceName="WindowsDesktopTargetPlatformMustBeWindows" />
   </Target>
 
