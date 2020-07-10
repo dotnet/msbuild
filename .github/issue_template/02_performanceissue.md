@@ -12,14 +12,25 @@ labels: performance
 * Please include a clear and concise description of the problem.
 -->
 
+### Steps to Reproduce
+<!--
+Include as much of the following if possible:
+
+* A minimal sample project that reproduces the issue.
+* Your zipped project.
+* IDE / CLI steps to create the project and reproduce the behaviour.
+* Your command line invocation
+-->
+
 ### Data
 <!--
 * Please include all information you've gathered about this performance issue. This includes:
-    -Timing
-    -Measurements
-    -Call stacks
-    -Dumps
-    -etc.
+    - Timing
+    - Measurements
+    - ETW Traces
+    - Call stacks
+    - Dumps
+    - etc.
 * If possible please include text as text rather than images (so it shows up in searches).
 * If applicable please include before and after measurements.
 -->
@@ -47,22 +58,12 @@ Post any other relevant configuration settings here.
 *   What version of MSBuild or VS are you on now that you discovered the regression?
 -->
 
-### Steps to Reproduce
-<!--
-Include as much of the following if possible:
-
-* A minimal sample project that reproduces the issue.
-* Your zipped project.
-* IDE / CLI steps to create the project and reproduce the behaviour.
-* Your command line invocation
--->
-
 ### Attach a binlog
 <!--
 * If providing us a project that reproduces the issue proves difficult, consider including a binlog.
-* Click [here](https://github.com/microsoft/msbuild/blob/master/documentation/wiki/Providing-Binary-Logs.md) for details on sharing binary logs.
+* Click [here](https://aka.ms/msbuild/binlog) for details on sharing binary logs.
 * Click [here](https://github.com/microsoft/msbuild/blob/master/documentation/wiki/Binary-Log.md) for more information on binary logs.
     NOTE: Binlogs can contain sensitive information. Don't attach anything you don't want to be public.
 
-*   To view these binlogs yourself: https://msbuildlog.com/
+*   To view the contents of the binlogs yourself, you may wish to use a tool like https://msbuildlog.com/.
 -->

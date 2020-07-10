@@ -5,6 +5,7 @@ title: ''
 labels:
 ---
 
+<!-- NOTE: The MSBuild team receives a lot of issues and we need to prioritize them accordingly. Please understand that we may not get to your issue for some time. -->
 <!-- This is a template that helps us provide quicker feedback. Please use any relevant sections and delete anything you don't need. -->
 
 <!--
@@ -19,16 +20,6 @@ labels:
 * Please include a clear and concise description of the problem.
 -->
 
-### Expected Behavior
-<!--
-* Include what you are trying to do, and the expected output or behavior.
--->
-
-### Actual Behavior
-<!--
-* Include the actual output or behavior.
--->
-
 ### Steps to Reproduce
 <!--
 * Include as much of the following if possible:
@@ -37,6 +28,16 @@ labels:
 * Your zipped project.
 * IDE / CLI steps to create the project and reproduce the behaviour.
 * Your command line invocation
+-->
+
+### Expected Behavior
+<!--
+* Include what you are trying to do, and the expected output or behavior.
+-->
+
+### Actual Behavior
+<!--
+* Include the actual output or behavior.
 -->
 
 ### Ask us questions

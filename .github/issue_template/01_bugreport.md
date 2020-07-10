@@ -2,7 +2,7 @@
 name: 🐞 Bug Report
 about: Report a bug to help us improve MSBuild.
 title: ''
-labels:
+labels: bug
 ---
 
 <!-- This is a template that helps us provide quicker feedback. Please use any relevant sections and delete anything you don't need. -->
@@ -10,6 +10,16 @@ labels:
 ### Issue Description
 <!--
 * Please include a clear and concise description of the problem.
+-->
+
+### Steps to Reproduce
+<!--
+* Include as much of the following as possible:
+
+* A minimal sample project that reproduces the issue.
+* Your zipped project.
+* IDE / CLI steps to create the project and reproduce the behaviour.
+* Your command line invocation
 -->
 
 ### Expected Behavior
@@ -37,22 +47,12 @@ labels:
 *   OS, architecture, etc.
 -->
 
-### Steps to Reproduce
-<!--
-* Include as much of the following if possible:
-
-* A minimal sample project that reproduces the issue.
-* Your zipped project.
-* IDE / CLI steps to create the project and reproduce the behaviour.
-* Your command line invocation
--->
-
 ### Attach a binlog
 <!--
 * If providing us a project that reproduces the issue proves difficult, consider including a binlog.
-* Click [here](https://github.com/microsoft/msbuild/blob/master/documentation/wiki/Providing-Binary-Logs.md) for details on sharing binary logs.
+* Click [here](https://aka.ms/msbuild/binlog) for details on sharing binary logs.
 * Click [here](https://github.com/microsoft/msbuild/blob/master/documentation/wiki/Binary-Log.md) for more information on binary logs.
     NOTE: Binlogs can contain sensitive information. Don't attach anything you don't want to be public.
 
-*   To view these binlogs yourself: https://msbuildlog.com/
+*   To view the contents of the binlogs yourself, you may wish to use a tool like https://msbuildlog.com/.
 -->
