@@ -4923,7 +4923,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <Target
        Name="IncrementalClean"
-       DependsOnTargets="_CleanGetCurrentAndPriorFileWrites">
+       DependsOnTargets="$(IncrementalCleanDependsOn);_CleanGetCurrentAndPriorFileWrites">
 
     <!-- Subtract list of files produced in prior builds from list of files produced in this build. -->
     <ItemGroup>
