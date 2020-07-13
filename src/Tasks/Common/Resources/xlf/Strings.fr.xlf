@@ -609,8 +609,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1073: "}</note>
       </trans-unit>
       <trans-unit id="UnnecessaryWindowsDesktopSDK">
-        <source>NETSDK1136: Explicitly referencing the WindowsDesktop SDK is not necessary, Microsoft.NET.Sdk can be used instead.</source>
-        <target state="new">NETSDK1136: Explicitly referencing the WindowsDesktop SDK is not necessary, Microsoft.NET.Sdk can be used instead.</target>
+        <source>NETSDK1136: It is no longer necessary to use the Microsoft.NET.Sdk.WindowsDesktop SDK. Microsoft.NET.Sdk can be used instead.</source>
+        <target state="new">NETSDK1136: It is no longer necessary to use the Microsoft.NET.Sdk.WindowsDesktop SDK. Microsoft.NET.Sdk can be used instead.</target>
         <note>{StrBegin="NETSDK1136: "}</note>
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
@@ -679,8 +679,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1100: "}</note>
       </trans-unit>
       <trans-unit id="WindowsDesktopTargetPlatformMustBeWindows">
-        <source>NETSDK1135: The TargetFramework must include '-windows' when using or referencing projects that use WindowsForms or WPF.</source>
-        <target state="new">NETSDK1135: The TargetFramework must include '-windows' when using or referencing projects that use WindowsForms or WPF.</target>
+        <source>NETSDK1135: The target platform must be set to Windows (usually by including '-windows' in the TargetFramework property) when using Windows Forms or WPF, or referencing projects or packages that do so.</source>
+        <target state="new">NETSDK1135: The target platform must be set to Windows (usually by including '-windows' in the TargetFramework property) when using Windows Forms or WPF, or referencing projects or packages that do so.</target>
         <note>{StrBegin="NETSDK1135: "}</note>
       </trans-unit>
     </body>

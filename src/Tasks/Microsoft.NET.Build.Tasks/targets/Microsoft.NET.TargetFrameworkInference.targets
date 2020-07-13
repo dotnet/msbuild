@@ -157,7 +157,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <PropertyGroup  Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">
-    <_EnableDefaultWindowsPlatform Condition="'$(_EnableDefaultWindowsPlatform)' == ''" >false</_EnableDefaultWindowsPlatform>
+    <_EnableDefaultWindowsPlatform Condition="'$(_EnableDefaultWindowsPlatform)' == '' and '$(UseWPF)' != 'true' and '$(UseWindowsForms)' != 'true'" >false</_EnableDefaultWindowsPlatform>
     <UseOSWinMdReferences>false</UseOSWinMdReferences>
   </PropertyGroup>
     

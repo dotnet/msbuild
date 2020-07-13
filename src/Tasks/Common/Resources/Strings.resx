@@ -642,11 +642,11 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1134: "}</comment>
   </data>
   <data name="WindowsDesktopTargetPlatformMustBeWindows" xml:space="preserve">
-    <value>NETSDK1135: The TargetFramework must include '-windows' when using or referencing projects that use WindowsForms or WPF.</value>
+    <value>NETSDK1135: The target platform must be set to Windows (usually by including '-windows' in the TargetFramework property) when using Windows Forms or WPF, or referencing projects or packages that do so.</value>
     <comment>{StrBegin="NETSDK1135: "}</comment>
   </data>
   <data name="UnnecessaryWindowsDesktopSDK" xml:space="preserve">
-    <value>NETSDK1136: Explicitly referencing the WindowsDesktop SDK is not necessary, Microsoft.NET.Sdk can be used instead.</value>
+    <value>NETSDK1136: It is no longer necessary to use the Microsoft.NET.Sdk.WindowsDesktop SDK. Microsoft.NET.Sdk can be used instead.</value>
     <comment>{StrBegin="NETSDK1136: "}</comment>
   </data>
 </root>

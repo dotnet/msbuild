@@ -29,7 +29,8 @@ namespace Microsoft.NET.Build.Tests
                 TargetFrameworks = targetFramework
             };
             testProject.AdditionalProperties[propertyName] = "true";
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            testProject.AdditionalProperties["TargetPlatformIdentifier"] = "custom"; // Make sure we don't get windows implicitly set as the TPI
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: propertyName);
 
             var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute()
@@ -44,22 +45,20 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("UseWPF")]
         public void It_errors_when_missing_transitive_windows_target_platform(string propertyName)
         {
-            var targetFramework = "net5.0";
             TestProject testProjectA = new TestProject()
             {
                 Name = "A",
                 IsSdkProject = true,
-                TargetFrameworks = targetFramework
+                ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
+                TargetFrameworks = "netcoreapp3.1"
             };
-            testProjectA.AdditionalProperties["TargetPlatformIdentifier"] = "Windows";
-            testProjectA.AdditionalProperties["TargetPlatformVersion"] = "7.0";
             testProjectA.AdditionalProperties[propertyName] = "true";
 
             TestProject testProjectB = new TestProject()
             {
                 Name = "B",
                 IsSdkProject = true,
-                TargetFrameworks = targetFramework
+                TargetFrameworks = "net5.0"
             };
             testProjectB.ReferencedProjects.Add(testProjectA);
 
@@ -67,7 +66,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "C",
                 IsSdkProject = true,
-                TargetFrameworks = targetFramework
+                TargetFrameworks = "net5.0"
             };
             testProjectC.ReferencedProjects.Add(testProjectB);
 
@@ -92,6 +91,7 @@ namespace Microsoft.NET.Build.Tests
                 ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
                 TargetFrameworks = targetFramework
             };
+            testProject.AdditionalProperties["UseWPF"] = "true";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(testAsset);
