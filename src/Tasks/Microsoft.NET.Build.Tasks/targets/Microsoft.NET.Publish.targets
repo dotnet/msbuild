@@ -1130,7 +1130,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="ComputeFilesCopiedToPublishDir"
-          DependsOnTargets="_ComputeResolvedFilesToPublishTypes;
+          DependsOnTargets="ComputeResolvedFilesToPublishList;
                             _ComputeFilesToBundle">
     <ItemGroup>
       <FilesCopiedToPublishDir Include="@(ResolvedFileToPublish)"/>
