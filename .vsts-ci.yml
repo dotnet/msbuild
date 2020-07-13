@@ -143,8 +143,11 @@ stages:
   - template: /eng/common/templates/post-build/post-build.yml
     parameters:
       enableSymbolValidation: false
+      enableSigningValidation: false
+      enableNugetValidation: false
+      enableSourceLinkValidation: false
       SDLValidationParameters:
-        enable: true
+        enable: false
         params: ' -SourceToolsList @("policheck","credscan")
         -TsaInstanceURL $(_TsaInstanceURL)
         -TsaProjectName $(_TsaProjectName)
