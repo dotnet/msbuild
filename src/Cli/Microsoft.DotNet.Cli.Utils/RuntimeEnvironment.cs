@@ -13,7 +13,9 @@ namespace Microsoft.DotNet.Cli.Utils
         Windows = 1,
         Linux = 2,
         Darwin = 3,
-        FreeBSD = 4
+        FreeBSD = 4,
+        illumos = 5,
+        Solaris = 6
     }
 
     internal static class RuntimeEnvironment
@@ -36,15 +38,19 @@ namespace Microsoft.DotNet.Cli.Utils
             switch (GetOSPlatform())
             {
                 case Platform.Windows:
-                    return "Windows";
+                    return nameof(Platform.Windows);
                 case Platform.Linux:
-                    return GetDistroId() ?? "Linux";
+                    return GetDistroId() ?? nameof(Platform.Linux);
                 case Platform.Darwin:
                     return "Mac OS X";
                 case Platform.FreeBSD:
-                    return "FreeBSD";
+                    return nameof(Platform.FreeBSD);
+                case Platform.illumos:
+                    return GetDistroId() ?? nameof(Platform.illumos);
+                case Platform.Solaris:
+                    return nameof(Platform.Solaris);
                 default:
-                    return "Unknown";
+                    return nameof(Platform.Unknown);
             }
         }
 
@@ -55,11 +61,16 @@ namespace Microsoft.DotNet.Cli.Utils
                 case Platform.Windows:
                     return Environment.OSVersion.Version.ToString(3);
                 case Platform.Linux:
+                case Platform.illumos:
                     return GetDistroVersionId() ?? string.Empty;
                 case Platform.Darwin:
                     return Environment.OSVersion.Version.ToString(2);
                 case Platform.FreeBSD:
                     return GetFreeBSDVersion() ?? string.Empty;
+                case Platform.Solaris:
+                    // RuntimeInformation.OSDescription example on Solaris 11.3:      SunOS 5.11 11.3
+                    // we only need the major version; 11
+                    return RuntimeInformation.OSDescription.Split(' ')[2].Split('.')[0];
                 default:
                     return string.Empty;
             }
@@ -99,6 +110,19 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private static DistroInfo LoadDistroInfo()
         {
+            switch (GetOSPlatform())
+            {
+                case Platform.Linux:
+                    return LoadDistroInfoFromLinux();
+                case Platform.illumos:
+                    return LoadDistroInfoFromIllumos();
+            }
+
+            return null;
+        }
+
+        private static DistroInfo LoadDistroInfoFromLinux()
+        {
             DistroInfo result = null;
 
             // Sample os-release file:
@@ -133,6 +157,36 @@ namespace Microsoft.DotNet.Cli.Utils
             if (result != null)
             {
                 result = NormalizeDistroInfo(result);
+            }
+
+            return result;
+        }
+
+        private static DistroInfo LoadDistroInfoFromIllumos()
+        {
+            DistroInfo result = null;
+            // examples:
+            //   on OmniOS
+            //       SunOS 5.11 omnios-r151018-95eaa7e
+            //   on OpenIndiana Hipster:
+            //       SunOS 5.11 illumos-63878f749f
+            //   on SmartOS:
+            //       SunOS 5.11 joyent_20200408T231825Z
+            var versionDescription = RuntimeInformation.OSDescription.Split(' ')[2];
+            switch (versionDescription)
+            {
+                case string version when version.StartsWith("omnios"):
+                    result.Id = "OmniOS";
+                    result.VersionId = version.Substring("omnios-r".Length, 2); // e.g. 15
+                    break;
+                case string version when version.StartsWith("joyent"):
+                    result.Id = "SmartOS";
+                    result.VersionId = version.Substring("joyent_".Length, 4); // e.g. 2020
+                    break;
+                case string version when version.StartsWith("illumos"):
+                    result.Id = "OpenIndiana";
+                    // version-less
+                    break;
             }
 
             return result;
@@ -179,10 +233,20 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 return Platform.Darwin;
             }
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD")))
+#if NETCOREAPP
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
             {
                 return Platform.FreeBSD;
             }
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Create("ILLUMOS")))
+            {
+                return Platform.illumos;
+            }
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Create("SOLARIS")))
+            {
+                return Platform.Solaris;
+            }
+#endif
 
             return Platform.Unknown;
         }
