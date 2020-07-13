@@ -190,7 +190,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData("net5.0", "TargetPlatformIdentifier", "Windows", "WinExe")]
+        [InlineData("net5.0", "TargetPlatformIdentifier", "Windows", "Exe")]
         [InlineData("netcoreapp3.1", "UseWindowsForms", "true", "WinExe")]
         [InlineData("netcoreapp3.1", "UseWPF", "true", "WinExe")]
         [InlineData("netcoreapp3.1", "UseWPF", "false", "Exe")]
