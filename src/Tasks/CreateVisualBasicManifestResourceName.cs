@@ -153,11 +153,11 @@ namespace Microsoft.Build.Tasks
                 // only strip extension for .resx and .restext files
                 string sourceExtension = Path.GetExtension(info.cultureNeutralFilename);
                 if (
-                        (0 == String.Compare(sourceExtension, ".resx", StringComparison.OrdinalIgnoreCase))
+                        (String.Equals(sourceExtension, ".resx", StringComparison.OrdinalIgnoreCase))
                         ||
-                        (0 == String.Compare(sourceExtension, ".restext", StringComparison.OrdinalIgnoreCase))
+                        (String.Equals(sourceExtension, ".restext", StringComparison.OrdinalIgnoreCase))
                         ||
-                        (0 == String.Compare(sourceExtension, ".resources", StringComparison.OrdinalIgnoreCase))
+                        (String.Equals(sourceExtension, ".resources", StringComparison.OrdinalIgnoreCase))
                     )
                 {
                     // Take directory into account when forming manifest resource names
@@ -167,7 +167,7 @@ namespace Microsoft.Build.Tasks
                     manifestName.Replace(Path.DirectorySeparatorChar, '.');
                     manifestName.Replace(Path.AltDirectorySeparatorChar, '.');
 
-                    // Append the culture if there is one.        
+                    // Append the culture if there is one.
                     if (!string.IsNullOrEmpty(info.culture))
                     {
                         manifestName.Append(".").Append(info.culture);
@@ -181,7 +181,11 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    manifestName.Append(Path.GetFileName(info.cultureNeutralFilename));
+                    manifestName.Append(Path.Combine(everettCompatibleDirectoryName, Path.GetFileName(info.cultureNeutralFilename)));
+
+                    // Replace all '\' with '.'
+                    manifestName.Replace(Path.DirectorySeparatorChar, '.');
+                    manifestName.Replace(Path.AltDirectorySeparatorChar, '.');
 
                     if (prependCultureAsDirectory)
                     {

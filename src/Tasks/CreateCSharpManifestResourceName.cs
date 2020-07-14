@@ -149,11 +149,11 @@ namespace Microsoft.Build.Tasks
                 // only strip extension for .resx and .restext files
                 string sourceExtension = Path.GetExtension(info.cultureNeutralFilename);
                 if (
-                        (0 == String.Compare(sourceExtension, ".resx", StringComparison.OrdinalIgnoreCase))
+                        (String.Equals(sourceExtension, ".resx", StringComparison.OrdinalIgnoreCase))
                         ||
-                        (0 == String.Compare(sourceExtension, ".restext", StringComparison.OrdinalIgnoreCase))
+                        (String.Equals(sourceExtension, ".restext", StringComparison.OrdinalIgnoreCase))
                         ||
-                        (0 == String.Compare(sourceExtension, ".resources", StringComparison.OrdinalIgnoreCase))
+                        (String.Equals(sourceExtension, ".resources", StringComparison.OrdinalIgnoreCase))
                     )
                 {
                     // Take directory into account when forming manifest resource names
