@@ -310,7 +310,7 @@ namespace Microsoft.Build.Shared
             {
                 if (logOutputProperties?.Length > 0)
                 {
-                    format.Append(" [{10}>{11}]");
+                    format.Append(" [{10}::{11}]");
                 }
                 else
                 {
