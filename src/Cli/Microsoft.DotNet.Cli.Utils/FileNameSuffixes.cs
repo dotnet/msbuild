@@ -24,17 +24,11 @@ namespace Microsoft.DotNet.Cli.Utils
                 {
                     return OSX;
                 }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    return Linux;
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD")))
-                {
-                    return FreeBSD;
-                }
                 else
                 {
-                    throw new InvalidOperationException("Unknown Platform");
+                    // assume everything else is Unix to avoid modifying this file
+                    // everytime a new platform is introduced in runtime.
+                    return Unix;
                 }
             }
         }
@@ -58,20 +52,18 @@ namespace Microsoft.DotNet.Cli.Utils
         public static PlatformFileNameSuffixes OSX { get; } = new PlatformFileNameSuffixes
         {
             DynamicLib = ".dylib",
-            Exe = "",
+            Exe = string.Empty,
             ProgramDatabase = ".pdb",
             StaticLib = ".a"
         };
 
-        public static PlatformFileNameSuffixes Linux { get; } = new PlatformFileNameSuffixes
+        public static PlatformFileNameSuffixes Unix { get; } = new PlatformFileNameSuffixes
         {
             DynamicLib = ".so",
-            Exe = "",
+            Exe = string.Empty,
             ProgramDatabase = ".pdb",
             StaticLib = ".a"
         };
-
-        public static PlatformFileNameSuffixes FreeBSD { get; } = Linux;
 
         public struct PlatformFileNameSuffixes
         {

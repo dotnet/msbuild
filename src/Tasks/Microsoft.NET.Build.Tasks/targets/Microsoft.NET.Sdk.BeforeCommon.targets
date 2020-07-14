@@ -30,7 +30,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <_IsExecutable Condition="'$(OutputType)' == 'Exe' or '$(OutputType)'=='WinExe'">true</_IsExecutable>
-    <OutputType Condition="'$(DisableWinExeOutputInference)' != 'true' and '$(OutputType)' == 'Exe' and ('$(TargetPlatformIdentifier)' == 'windows' or '$(UseWindowsForms)' == 'true' or '$(UseWPF)' == 'true')">WinExe</OutputType>
+    <OutputType Condition="'$(DisableWinExeOutputInference)' != 'true' and '$(OutputType)' == 'Exe' and ('$(UseWindowsForms)' == 'true' or '$(UseWPF)' == 'true')">WinExe</OutputType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(HasRuntimeOutput)' == ''">
