@@ -8,11 +8,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Versioning;
 using System.Security.Permissions;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.AssemblyDependency;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
@@ -115,7 +117,7 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// The last modified time for this file.
             /// </summary>
-            private DateTime lastModified;
+            internal DateTime lastModified;
 
             /// <summary>
             /// The fusion name of this file.
@@ -201,6 +203,7 @@ namespace Microsoft.Build.Tasks
             internal DateTime LastModified
             {
                 get { return lastModified; }
+                set { lastModified = value; }
             }
 
             /// <summary>
@@ -232,6 +235,8 @@ namespace Microsoft.Build.Tasks
                 get { return frameworkName; }
                 set { frameworkName = value; }
             }
+
+            internal Guid ModuleVersionID { get; set; }
         }
 
         /// <summary>
@@ -547,13 +552,58 @@ namespace Microsoft.Build.Tasks
             frameworkName = fileState.frameworkName;
         }
 
-        /// <summary>
-        /// Cached implementation of GetDirectories.
-        /// </summary>
-        /// <param name="path"></param>
-        /// <param name="pattern"></param>
-        /// <returns></returns>
-        private string[] GetDirectories(string path, string pattern)
+        internal static SystemState DeserializePrecomputedCaches(string[] stateFiles, TaskLoggingHelper log, Type requiredReturnType, GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo)
+        {
+            SystemState retVal = new SystemState();
+            retVal.SetGetLastWriteTime(getLastWriteTime);
+            retVal.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
+            retVal.isDirty = true;
+
+            foreach (string stateFile in stateFiles)
+            {
+                // Verify that it's a real stateFile; log message but do not error if not
+                SystemState sfBase = (SystemState)DeserializeCache(stateFile, log, requiredReturnType);
+                foreach (string s in sfBase.instanceLocalFileStateCache.Keys)
+                {
+                    if (!retVal.instanceLocalFileStateCache.ContainsKey(s))
+                    {
+                        FileState fileState = (FileState)sfBase.instanceLocalFileStateCache[s];
+                        // Verify that the assembly is correct
+                        if (File.Exists(s) && Assembly.LoadFile(s).ManifestModule.ModuleVersionId.Equals(fileState.ModuleVersionID))
+                        {
+                            // Correct file path and timestamp
+                            string fullPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), stateFile));
+                            fileState.LastModified = retVal.getLastWriteTime(fullPath);
+                            retVal.instanceLocalFileStateCache[fullPath] = fileState;
+                        }
+                    }
+                }
+            }
+
+            return retVal;
+        }
+
+        internal void SerializePrecomputedCache(string stateFile, TaskLoggingHelper log)
+        {
+            foreach (string path in instanceLocalFileStateCache.Keys)
+            {
+                FileState fileState = (FileState)instanceLocalFileStateCache[path];
+                fileState.ModuleVersionID = Assembly.LoadFrom(path).ManifestModule.ModuleVersionId;
+                instanceLocalFileStateCache.Remove(path);
+                string relativePath = new Uri(Path.GetDirectoryName(stateFile)).MakeRelativeUri(new Uri(path)).ToString();
+                instanceLocalFileStateCache[relativePath] = fileState;
+            }
+
+            SerializeCache(stateFile, log);
+        }
+
+            /// <summary>
+            /// Cached implementation of GetDirectories.
+            /// </summary>
+            /// <param name="path"></param>
+            /// <param name="pattern"></param>
+            /// <returns></returns>
+            private string[] GetDirectories(string path, string pattern)
         {
             // Only cache the *. pattern. This is by far the most common pattern
             // and generalized caching would require a call to Path.Combine which

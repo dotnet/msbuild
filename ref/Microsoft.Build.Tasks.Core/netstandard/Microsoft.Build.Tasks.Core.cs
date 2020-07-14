@@ -568,6 +568,8 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem[] InstalledAssemblySubsetTables { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem[] InstalledAssemblyTables { get { throw null; } set { } }
         public string[] LatestTargetFrameworkDirectories { get { throw null; } set { } }
+        public string[] PreComputedCacheFileList { get { throw null; } set { } }
+        public string PreComputedCacheOutputPath { get { throw null; } set { } }
         public string ProfileName { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem[] RelatedFiles { get { throw null; } }

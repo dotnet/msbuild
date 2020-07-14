@@ -441,6 +441,10 @@ namespace Microsoft.Build.Tasks
             set { _targetedRuntimeVersionRawValue = value; }
         }
 
+        public string PreComputedCacheOutputPath { get; set; }
+
+        public string[] PreComputedCacheFileList { get; set; }
+
         /// <summary>
         /// List of locations to search for assemblyFiles when resolving dependencies.
         /// The following types of things can be passed in here:
@@ -1845,15 +1849,24 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reads the state file (if present) into the cache.
         /// </summary>
-        private void ReadStateFile()
+        private void ReadStateFile(GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo)
         {
             _cache = (SystemState)StateFileBase.DeserializeCache(_stateFile, Log, typeof(SystemState));
+
+            if (_cache == null)
+            {
+                _cache = SystemState.DeserializePrecomputedCaches(PreComputedCacheFileList, Log, typeof(SystemState), getLastWriteTime, installedAssemblyTableInfo);
+                return;
+            }
 
             // Construct the cache if necessary.
             if (_cache == null)
             {
                 _cache = new SystemState();
             }
+
+            _cache.SetGetLastWriteTime(getLastWriteTime);
+            _cache.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
         }
 
         /// <summary>
@@ -1861,7 +1874,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void WriteStateFile()
         {
-            if (!string.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
+            if (!string.IsNullOrEmpty(PreComputedCacheOutputPath))
+            {
+                _cache.SerializePrecomputedCache(PreComputedCacheOutputPath, Log);
+            }
+            else if (!string.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
             {
                 _cache.SerializeCache(_stateFile, Log);
             }
@@ -2072,9 +2089,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // Load any prior saved state.
-                    ReadStateFile();
-                    _cache.SetGetLastWriteTime(getLastWriteTime);
-                    _cache.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
+                    ReadStateFile(getLastWriteTime, installedAssemblyTableInfo);
 
                     // Cache delegates.
                     getAssemblyName = _cache.CacheDelegate(getAssemblyName);
