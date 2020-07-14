@@ -107,6 +107,11 @@
         <target state="translated">NETSDK1007: не удается найти сведения о проекте "{0}". Возможно, отсутствует ссылка на проект.</target>
         <note>{StrBegin="NETSDK1007: "}</note>
       </trans-unit>
+      <trans-unit id="CannotHaveMinimumOSPlatformHigherThanTargetPlatformVersion">
+        <source>NETSDK1135: MinimumOSPlatform {0} cannot be higher than TargetPlatformVersion {1}.</source>
+        <target state="new">NETSDK1135: MinimumOSPlatform {0} cannot be higher than TargetPlatformVersion {1}.</target>
+        <note>{StrBegin="NETSDK1135: "}</note>
+      </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
         <source>NETSDK1032: The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
         <target state="translated">NETSDK1032: платформа RuntimeIdentifier "{0}" и PlatformTarget "{1}" должны быть совместимы.</target>

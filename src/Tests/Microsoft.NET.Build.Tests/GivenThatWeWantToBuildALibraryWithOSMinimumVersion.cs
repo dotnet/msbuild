@@ -68,6 +68,24 @@ namespace Microsoft.NET.Build.Tests
                 .Pass().And.HaveStdOutContaining("PlatformName:iOS13.2");
         }
 
+        [Fact]
+        public void WhenMinimumOSPlatformIsHigherThanTargetPlatformVersionItShouldError()
+        {
+            TestProject testProject = SetUpProject();
+
+            var targetPlatformIdentifier = "iOS";
+            testProject.AdditionalProperties["TargetPlatformIdentifier"] = targetPlatformIdentifier;
+            testProject.AdditionalProperties["TargetPlatformVersion"] = "13.2";
+            testProject.AdditionalProperties["MinimumOSPlatform"] = "14.0";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new DotnetBuildCommand(Log, Path.Combine(testAsset.Path, "Project", "Project.csproj"));
+            buildCommand.Execute()
+                .Should()
+                .Fail().And.HaveStdOutContaining("NETSDK1135");
+        }
+
         private static TestProject SetUpProject()
         {
             TestProject testProject = new TestProject()

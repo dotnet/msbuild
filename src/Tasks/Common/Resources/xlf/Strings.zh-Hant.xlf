@@ -107,6 +107,11 @@
         <target state="translated">NETSDK1007: 找不到 '{0}' 的專案資訊。這可能表示遺漏專案參考。</target>
         <note>{StrBegin="NETSDK1007: "}</note>
       </trans-unit>
+      <trans-unit id="CannotHaveMinimumOSPlatformHigherThanTargetPlatformVersion">
+        <source>NETSDK1135: MinimumOSPlatform {0} cannot be higher than TargetPlatformVersion {1}.</source>
+        <target state="new">NETSDK1135: MinimumOSPlatform {0} cannot be higher than TargetPlatformVersion {1}.</target>
+        <note>{StrBegin="NETSDK1135: "}</note>
+      </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
         <source>NETSDK1032: The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
         <target state="translated">NETSDK1032: RuntimeIdentifier 平台 '{0}' 必須與 PlatformTarget '{1}' 相容。</target>

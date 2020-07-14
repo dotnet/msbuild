@@ -107,6 +107,11 @@
         <target state="translated">NETSDK1007: '{0}' のプロジェクト情報が見つかりません。これは、プロジェクト参照がないことを示している可能性があります。</target>
         <note>{StrBegin="NETSDK1007: "}</note>
       </trans-unit>
+      <trans-unit id="CannotHaveMinimumOSPlatformHigherThanTargetPlatformVersion">
+        <source>NETSDK1135: MinimumOSPlatform {0} cannot be higher than TargetPlatformVersion {1}.</source>
+        <target state="new">NETSDK1135: MinimumOSPlatform {0} cannot be higher than TargetPlatformVersion {1}.</target>
+        <note>{StrBegin="NETSDK1135: "}</note>
+      </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
         <source>NETSDK1032: The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
         <target state="translated">NETSDK1032: RuntimeIdentifier プラットフォーム '{0}' と PlatformTarget '{1}' には互換性が必要です。</target>

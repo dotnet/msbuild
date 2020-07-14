@@ -641,4 +641,8 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1134: Building a solution with a specific RuntimeIdentifier is not supported. If you would like to publish for a single RID, specifiy the RID at the individual project level instead.</value>
     <comment>{StrBegin="NETSDK1134: "}</comment>
   </data>
+  <data name="CannotHaveMinimumOSPlatformHigherThanTargetPlatformVersion" xml:space="preserve">
+    <value>NETSDK1135: MinimumOSPlatform {0} cannot be higher than TargetPlatformVersion {1}.</value>
+    <comment>{StrBegin="NETSDK1135: "}</comment>
+  </data>
 </root>

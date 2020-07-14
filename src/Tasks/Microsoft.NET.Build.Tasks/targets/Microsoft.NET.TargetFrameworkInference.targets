@@ -181,6 +181,13 @@ Copyright (c) .NET Foundation. All rights reserved.
                  ResourceName="NETFrameworkWithoutUsingNETSdkDefaults" />
   </Target>
 
+  <Target Name="_CheckForMinimumOSPlatformHigherThanTargetPlatformVersion" BeforeTargets="_CheckForInvalidConfigurationAndPlatform" >
+
+    <NETSdkError Condition="'$(MinimumOSPlatform)' != '' and $(TargetPlatformVersion) != '' and $([MSBuild]::VersionGreaterThan($(MinimumOSPlatform), $(TargetPlatformVersion)))"
+                 ResourceName="CannotHaveMinimumOSPlatformHigherThanTargetPlatformVersion"
+                 FormatArguments="$(MinimumOSPlatform);$(TargetPlatformVersion)"/>
+  </Target>
+
   <!-- Exclude files from OutputPath and IntermediateOutputPath from default item globs.  Use the value
        of these properties before the TargetFramework is appended, so that if these values are specified
        in the project file, the specified value will be used for the exclude.
