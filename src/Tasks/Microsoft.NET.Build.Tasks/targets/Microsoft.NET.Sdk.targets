@@ -383,6 +383,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                                     Value="$(UseSystemResourceKeys)"
                                     Trim="true" />
 
+    <RuntimeHostConfigurationOption Include="System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization"
+                                    Condition="'$(EnableUnsafeBinaryFormatterSerialization)' != ''"
+                                    Value="$(EnableUnsafeBinaryFormatterSerialization)"
+                                    Trim="true" />
+
     <RuntimeHostConfigurationOption Include="System.Runtime.TieredCompilation"
                                     Condition="'$(TieredCompilation)' != ''"
                                     Value="$(TieredCompilation)" />
@@ -407,7 +412,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeHostConfigurationOption Include="System.Threading.ThreadPool.MaxThreads"
                                     Condition="'$(ThreadPoolMaxThreads)' != ''"
                                     Value="$(ThreadPoolMaxThreads)" />
-  
+
   </ItemGroup>
 
   <!--
