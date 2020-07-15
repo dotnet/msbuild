@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using Microsoft.Build.Shared;
 using Microsoft.Win32;
 
 namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
@@ -19,6 +20,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         private const string REGISTRY_DEFAULTPATH = "Path";
 
         private const string BOOTSTRAPPER_REGISTRY_ADDITIONAL_PACKAGE_PATHS_KEYNAME = "AdditionalPackagePaths";
+        private const string BOOTSTRAPPER_MSBUILD_ADDITIONAL_PACKAGES_PATH = "Microsoft\\VisualStudio\\BootstrapperPackages";
 
         private static string s_defaultPath;
         private static List<string> s_additionalPackagePaths;
@@ -179,6 +181,15 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                                     }
                                 }
                             }
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(BuildEnvironmentHelper.Instance.MSBuildExtensionsPath))
+                    {
+                        string msbuildExtensionPackagesPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildExtensionsPath, BOOTSTRAPPER_MSBUILD_ADDITIONAL_PACKAGES_PATH);
+                        if (Directory.Exists(msbuildExtensionPackagesPath))
+                        {
+                            additionalPackagePaths.Add(msbuildExtensionPackagesPath);
                         }
                     }
 

@@ -10,7 +10,6 @@ using System.Diagnostics;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
-using System.Security.Permissions;
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Exceptions;

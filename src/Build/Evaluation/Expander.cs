@@ -3929,12 +3929,38 @@ namespace Microsoft.Build.Evaluation
                                 returnVal = IntrinsicFunctions.GetTargetFrameworkVersion(arg0);
                                 return true;
                             }
+                            if (TryGetArgs(args, out string arg1, out int arg2))
+                            {
+                                returnVal = IntrinsicFunctions.GetTargetFrameworkVersion(arg1, arg2);
+                                return true;
+                            }
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.IsTargetFrameworkCompatible), StringComparison.OrdinalIgnoreCase))
                         {
                             if (TryGetArgs(args, out string arg0, out string arg1))
                             {
                                 returnVal = IntrinsicFunctions.IsTargetFrameworkCompatible(arg0, arg1);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetTargetPlatformIdentifier), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.GetTargetPlatformIdentifier(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetTargetPlatformVersion), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.GetTargetPlatformVersion(arg0);
+                                return true;
+                            }
+                            if (TryGetArgs(args, out string arg1, out int arg2))
+                            {
+                                returnVal = IntrinsicFunctions.GetTargetPlatformVersion(arg1, arg2);
                                 return true;
                             }
                         }

@@ -485,14 +485,24 @@ namespace Microsoft.Build.Evaluation
             return NuGetFramework.Value.GetTargetFrameworkIdentifier(tfm);
         }
 
-        internal static string GetTargetFrameworkVersion(string tfm)
+        internal static string GetTargetFrameworkVersion(string tfm, int versionPartCount = 2)
         {
-            return NuGetFramework.Value.GetTargetFrameworkVersion(tfm);
+            return NuGetFramework.Value.GetTargetFrameworkVersion(tfm, versionPartCount);
         }
 
         internal static bool IsTargetFrameworkCompatible(string target, string candidate)
         {
             return NuGetFramework.Value.IsCompatible(target, candidate);
+        }
+
+        internal static string GetTargetPlatformIdentifier(string tfm)
+        {
+            return NuGetFramework.Value.GetTargetPlatformIdentifier(tfm);
+        }
+
+        internal static string GetTargetPlatformVersion(string tfm, int versionPartCount = 2)
+        {
+            return NuGetFramework.Value.GetTargetPlatformVersion(tfm, versionPartCount);
         }
 
         public static string GetCurrentToolsDirectory()

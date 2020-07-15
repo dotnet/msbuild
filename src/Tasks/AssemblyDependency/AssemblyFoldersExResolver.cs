@@ -307,11 +307,11 @@ namespace Microsoft.Build.Tasks
             {
                 var lockobject = new Object();
 
-                Parallel.ForEach(assemblyFoldersEx, assemblyFolder =>
+                Parallel.ForEach(assemblyFoldersEx.UniqueDirectoryPaths, assemblyFolder =>
                 {
-                    if (FileUtilities.DirectoryExistsNoThrow(assemblyFolder.DirectoryPath))
+                    if (FileUtilities.DirectoryExistsNoThrow(assemblyFolder))
                     {
-                        string[] files = Directory.GetFiles(assemblyFolder.DirectoryPath, "*.*", SearchOption.TopDirectoryOnly);
+                        string[] files = Directory.GetFiles(assemblyFolder, "*.*", SearchOption.TopDirectoryOnly);
 
                         lock (lockobject)
                         {

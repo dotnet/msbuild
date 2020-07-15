@@ -2865,6 +2865,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [InlineData("net45", ".NETFramework", "4.5")]
         [InlineData("netcoreapp3.1", ".NETCoreApp", "3.1")]
         [InlineData("netstandard2.1", ".NETStandard", "2.1")]
+        [InlineData("net5.0-ios12.0", ".NETCoreApp", "5.0")]
         [InlineData("foo", "Unsupported", "0.0")]
         public void PropertyFunctionTargetFrameworkParsing(string tfm, string expectedIdentifier, string expectedVersion)
         {
@@ -2876,7 +2877,49 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Theory]
+        [InlineData("net45", 2, "4.5")]
+        [InlineData("net45", 3, "4.5.0")]
+        [InlineData("net472", 3, "4.7.2")]
+        public void PropertyFunctionTargetFrameworkVersionMultipartParsing(string tfm, int versionPartCount, string expectedVersion)
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            AssertSuccess(expander, expectedVersion, $"$([MSBuild]::GetTargetFrameworkVersion('{tfm}', {versionPartCount}))");
+        }
+
+        [Theory]
+        [InlineData("net5.0-windows10.1.2.3", 4, "10.1.2.3")]
+        [InlineData("net5.0-windows10.1.2.3", 2, "10.1")]
+        public void PropertyFunctionTargetPlatformVersionMultipartParsing(string tfm, int versionPartCount, string expectedVersion)
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            AssertSuccess(expander, expectedVersion, $"$([MSBuild]::GetTargetPlatformVersion('{tfm}', {versionPartCount}))");
+        }
+
+        [Theory]
+        [InlineData("net5.0-ios12.0", "ios", "12.0")]
+        [InlineData("net5.1-android1.1", "android", "1.1")]
+        [InlineData("net6.0-windows99.99", "windows", "99.99")]
+        [InlineData("net5.0-ios", "ios", "0.0")]
+        [InlineData("foo", "", "0.0")]
+        public void PropertyFunctionTargetPlatformParsing(string tfm, string expectedIdentifier, string expectedVersion)
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            AssertSuccess(expander, expectedIdentifier, $"$([MSBuild]::GetTargetPlatformIdentifier('{tfm}'))");
+            AssertSuccess(expander, expectedVersion, $"$([MSBuild]::GetTargetPlatformVersion('{tfm}'))");
+        }
+
+        [Theory]
         [InlineData("net5.0", "net5.0", true)]
+        [InlineData("net5.0-windows10.0", "net5.0-windows10.0", true)]
+        [InlineData("net5.0-ios", "net5.0-andriod", false)]
+        [InlineData("net5.0-ios12.0", "net5.0-ios11.0", true)]
+        [InlineData("net5.0-ios11.0", "net5.0-ios12.0", false)]
         [InlineData("net45", "net46", false)]
         [InlineData("net46", "net45", true)]
         [InlineData("netcoreapp3.1", "netcoreapp1.0", true)]
