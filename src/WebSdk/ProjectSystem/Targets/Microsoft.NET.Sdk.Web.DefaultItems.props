@@ -16,7 +16,7 @@ Copyright (c) .NET Foundation. All rights reserved.
              And '$(EnableDefaultNoneItems)' == 'true'
              And '$(AppDesignerFolder)' != ''">
 
-    <_webToolingArtifacts Include="$(AppDesignerFolder)\launchSettings.json;
+    <_WebToolingArtifacts Include="$(AppDesignerFolder)\launchSettings.json;
                           $(AppDesignerFolder)\serviceDependencies.json;
                           $(AppDesignerFolder)\serviceDependencies.*.json;
                           $(AppDesignerFolder)\ServiceDependencies\**;
@@ -25,15 +25,15 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Removing the tooling artifacts from all other globs and adding it to the none glob. This ensures that the 
          up-to-date check is unimpacted by the changes to the tooling artifacts -->
-    <None Remove="@(_webToolingArtifacts)" />
-    <None Include="@(_webToolingArtifacts)"
+    <None Remove="@(_WebToolingArtifacts)" />
+    <None Include="@(_WebToolingArtifacts)"
           CopyToOutputDirectory="Never"
           CopyToPublishDirectory="Never"
           ExcludeFromSingleFile="true" />
 
-    <Content Remove="@(_webToolingArtifacts)" />
-    <Compile Remove="@(_webToolingArtifacts)" />
-    <EmbeddedResource Remove="@(_webToolingArtifacts)" />
+    <Content Remove="@(_WebToolingArtifacts)" />
+    <Compile Remove="@(_WebToolingArtifacts)" />
+    <EmbeddedResource Remove="@(_WebToolingArtifacts)" />
 
     <!-- Keep track of the default content items for later to distinguish them from newly generated content items -->
     <_ContentIncludedByDefault Remove="@(_ContentIncludedByDefault)" />
