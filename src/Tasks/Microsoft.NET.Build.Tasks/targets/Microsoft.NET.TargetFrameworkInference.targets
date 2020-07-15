@@ -157,8 +157,13 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <PropertyGroup  Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">
-    <_EnableDefaultWindowsPlatform Condition="'$(_EnableDefaultWindowsPlatform)' == '' and '$(UseWPF)' != 'true' and '$(UseWindowsForms)' != 'true'" >false</_EnableDefaultWindowsPlatform>
+    <_EnableDefaultWindowsPlatform>false</_EnableDefaultWindowsPlatform>
     <UseOSWinMdReferences>false</UseOSWinMdReferences>
+  </PropertyGroup>
+
+  <!-- https://github.com/dotnet/sdk/issues/12492 -->
+  <PropertyGroup Condition="'$(TargetPlatformIdentifier)' == '' and ('$(UseWPF)' == 'true' or '$(UseWindowsForms)' == 'true')">
+    <TargetPlatformIdentifier>Windows</TargetPlatformIdentifier>
   </PropertyGroup>
     
   <PropertyGroup  Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(NETStandardMaximumVersion)' == ''">

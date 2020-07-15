@@ -37,7 +37,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining("NETSDK1135");
+                .HaveStdOutContaining("NETSDK1136");
         }
 
         [WindowsOnlyRequiresMSBuildVersionTheory("16.7.0-preview-20310-07")]
@@ -77,7 +77,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining("NETSDK1135");
+                .HaveStdOutContaining("NETSDK1136");
         }
 
         [WindowsOnlyFact]
@@ -99,7 +99,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass()
                 .And
-                .HaveStdOutContaining("NETSDK1136");
+                .HaveStdOutContaining("NETSDK1137");
         }
     }
 }
