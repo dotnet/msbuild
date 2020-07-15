@@ -1182,5 +1182,10 @@ namespace Microsoft.Build.CommandLine
         {
             throw new NotImplementedException();
         }
+
+        public void BlockingWaitForCore()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
