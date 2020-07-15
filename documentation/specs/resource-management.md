@@ -10,31 +10,27 @@ As a result, the standard guidance is to use only one multiproc option: MSBuild'
 
 ## Design
 
-`IBuildEngine` will be extended to allow a task to indicate to MSBuild that it would like to consume more than one CPU core (`RequestCores`). These will be advisory only—a task can still do as much work as it desires with as many threads and processes as it desires.
+`IBuildEngine` will be extended to allow a task to indicate to MSBuild that it would like to consume more than one CPU core (`BlockingWaitForCore`). These will be advisory only—a task can still do as much work as it desires with as many threads and processes as it desires.
 
 A cooperating task would limit its own parallelism to the number of CPU cores MSBuild can reserve for the requesting task.
 
-All resources acquired by a task will be automatically returned when the task's `Execute()` method returns, but a task can optionally return a subset by calling `ReleaseCores`.
+All resources acquired by a task will be automatically returned when the task's `Execute()` method returns, and a task can optionally return a subset by calling `ReleaseCores`.
 
-MSBuild will respect core reservations given to tasks for task execution only. If a project/task is eligible for execution but has not yet started when other tasks consume all resources, MSBuild will wait until a resource is freed before starting execution of the new task. This is required to allow tasks in multiprocess builds to acquire resources that are allocated to worker nodes that are currently blocked on references to other projects.
+MSBuild will respect core reservations given to tasks for tasks that opt into resource management only. If a project/task is eligible for execution, MSBuild will not wait until a resource is freed before starting execution of the new task. As a result, the machine can be oversubscribed, but only by a finite amount: the resource pool's core count.
 
-When a task `Yield()`s, it releases 1 core reservation. When a task requests that the engine build another project it does likewise. Otherwise there could be a deadlock: a task is started (requiring the default 1 core), then yields/builds another project, then that tries to start a task (requiring the default 1 core), but that resource is held by the now-yielded task.
+Task `Yield()`ing has no effect on the resources held by a task.
 
 ## Example
 
-In a 16-process build of a solution with 30 projects, 16 worker nodes are launched and begin executing work. Most block on dependencies to projects `A`, `B`, `C`, `D`, and `E`, releasing their resource reservation.
+In a 16-process build of a solution with 30 projects, 16 worker nodes are launched and begin executing work. Most block on dependencies to projects `A`, `B`, `C`, `D`, and `E`, so they don't have tasks running holding resources.
 
 Task `Work` is called in project `A` with 25 inputs. It would like to run as many as possible in parallel. It calls
+
+TODO: what's the best calling pattern here? the thread thing I hacked up in the sample task seems bad.
 
 ```C#
 int allowedParallelism = BuildEngine7.RequestCores(Inputs.Count); // Inputs.Count == 25
 ```
-
-MSBuild is busy building tasks in projects `B`, `C`, `D`, and `E`, but many nodes are blocked on references to `A`, `B`, `C`, `D`, and `E`, so it is actively building 4 other tasks. As a result, the engine can dedicate 12 cores to `Work`. The call to `RequestCores` returns `11` (total possible parallelism `16` - other running tasks `4` - default reservation for the current task `1`).
-
-`Work` can then do 12 cores worth of computation.
-
-While `Work` has the 12-core reservation, another project completes a task execution and calls a new task `Work2`. This task calls `RequestCores`, but MSBuild has no spare allocation and returns `0`, causing `Work2` to begin its computation serially.
 
 When `Work` returns, MSBuild automatically returns all resources reserved by the task to the pool. Before moving on with its processing, `Work2` calls `RequestCores` again, and this time receives a larger reservation.
 
