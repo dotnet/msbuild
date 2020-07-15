@@ -7,38 +7,77 @@ using System.IO;
 namespace Microsoft.Build.Shared.FileSystem
 {
     /// <summary>
-    /// Abstracts away some file system operations
+    /// Abstracts away some file system operations.
+    /// The underlying implementation may decide to cache some or all the calls.
     /// </summary>
     internal interface IFileSystem
     {
         /// <summary>
-        /// Returns an enumerable collection of file names that match a search pattern in a specified path, and optionally searches subdirectories.
+        /// Use this for var sr = new StreamReader(path)
+        /// </summary>
+        TextReader ReadFile(string path);
+
+        /// <summary>
+        /// Use this for new FileStream(path, mode, access, share)
+        /// </summary>
+        Stream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share);
+
+        /// <summary>
+        /// Use this for File.ReadAllText(path)
+        /// </summary>
+        string ReadFileAllText(string path);
+
+        /// <summary>
+        /// Use this for File.ReadAllBytes(path)
+        /// </summary>
+        byte[] ReadFileAllBytes(string path);
+
+        /// <summary>
+        /// Use this for Directory.EnumerateFiles(path, pattern, option)
         /// </summary>
         IEnumerable<string> EnumerateFiles(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly);
 
         /// <summary>
-        /// Returns an enumerable collection of directory names that match a search pattern in a specified path, and optionally searches subdirectories.
+        /// Use this for Directory.EnumerateFolders(path, pattern, option)
         /// </summary>
         IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly);
 
         /// <summary>
-        /// Returns an enumerable collection of file names and directory names that match a search pattern in a specified path, and optionally searches subdirectories.
+        /// Use this for Directory.EnumerateFileSystemEntries(path, pattern, option)
         /// </summary>
         IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly);
 
         /// <summary>
-        /// Determines whether the given path refers to an existing directory on disk.
+        /// Gets file or directory attributes for a path.
+        /// NOTE: The semantics here are different from File.GetAttributes() -
+        /// the attribute value will be -1 if cast to an integer when the file or directory
+        /// is missing, instead of throwing FileNotFoundException or DirectoryNotFoundException.
+        /// </summary>
+        FileAttributes GetAttributesNoMissingException(string path);
+
+        /// <summary>
+        /// Use this for Directory.Exists(path)
         /// </summary>
         bool DirectoryExists(string path);
 
         /// <summary>
-        /// Determines whether the given path refers to an existing file on disk.
+        /// Use this for File.Exists(path)
         /// </summary>
         bool FileExists(string path);
 
         /// <summary>
-        /// Determines whether the given path refers to an existing entry in the directory service.
+        /// Use this for File.Exists(path) || Directory.Exists(path)
         /// </summary>
         bool DirectoryEntryExists(string path);
+
+        /// <summary>
+        /// Clears cached information to reduce memory usage.
+        /// </summary>
+        void ClearCaches();
+
+        /// <summary>
+        /// Write usage statistics.
+        /// </summary>
+        void WriteStatistics(TextWriter writer);
     }
 }

@@ -23,6 +23,11 @@ namespace Microsoft.Build.Shared.FileSystem
             return CachedExistenceCheck(path, p => _fileSystem.DirectoryEntryExists(p));
         }
 
+        public FileAttributes GetAttributesNoMissingException(string path)
+        {
+            return _fileSystem.GetAttributesNoMissingException(path);
+        }
+
         public bool DirectoryExists(string path)
         {
             return CachedExistenceCheck(path, p => _fileSystem.DirectoryExists(p));
@@ -36,6 +41,26 @@ namespace Microsoft.Build.Shared.FileSystem
         public IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             return _fileSystem.EnumerateDirectories(path, searchPattern, searchOption);
+        }
+
+        public TextReader ReadFile(string path)
+        {
+            return _fileSystem.ReadFile(path);
+        }
+
+        public Stream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share)
+        {
+            return _fileSystem.GetFileStream(path, mode, access, share);
+        }
+
+        public string ReadFileAllText(string path)
+        {
+            return _fileSystem.ReadFileAllText(path);
+        }
+
+        public byte[] ReadFileAllBytes(string path)
+        {
+            return _fileSystem.ReadFileAllBytes(path);
         }
 
         public IEnumerable<string> EnumerateFiles(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
@@ -52,5 +77,13 @@ namespace Microsoft.Build.Shared.FileSystem
         {
             return _existenceCache.GetOrAdd(path, existenceCheck);
         }
+
+        public void ClearCaches()
+        {
+            _fileSystem.ClearCaches();
+            _existenceCache.Clear();
+        }
+
+        public void WriteStatistics(TextWriter writer) { }
     }
 }

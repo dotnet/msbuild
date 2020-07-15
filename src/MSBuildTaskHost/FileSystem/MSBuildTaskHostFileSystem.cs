@@ -21,6 +21,26 @@ namespace Microsoft.Build.Shared.FileSystem
             return NativeMethodsShared.FileOrDirectoryExists(path);
         }
 
+        public void ClearCaches() { }
+        public void WriteStatistics(TextWriter writer) { }
+
+        public FileAttributes GetAttributesNoMissingException(string path)
+        {
+            try
+            {
+                return File.GetAttributes(path);
+            }
+            catch
+            {
+                // ignored
+            }
+
+            // Convert any exceptions into a -1 attribute value result.
+            // If we got an ArgumentException on invalid path this will match
+            // the semantics of File.Exists() or Directory.Exists().
+            return (FileAttributes)(-1);
+        }
+
         public bool DirectoryExists(string path)
         {
             return NativeMethodsShared.DirectoryExists(path);
@@ -29,6 +49,26 @@ namespace Microsoft.Build.Shared.FileSystem
         public IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             return Directory.GetDirectories(path, searchPattern, searchOption);
+        }
+
+        public TextReader ReadFile(string path)
+        {
+            return new StreamReader(path);
+        }
+
+        public Stream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share)
+        {
+            return new FileStream(path, mode, access, share);
+        }
+
+        public string ReadFileAllText(string path)
+        {
+            return File.ReadAllText(path);
+        }
+
+        public byte[] ReadFileAllBytes(string path)
+        {
+            return File.ReadAllBytes(path);
         }
 
         public IEnumerable<string> EnumerateFiles(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
