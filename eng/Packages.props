@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-      <NuGetPackageVersion>5.4.0-rtm.6292</NuGetPackageVersion>
+      <NuGetPackageVersion>5.7.0-rtm.6710</NuGetPackageVersion>
       <NuGetBuildTasksVersion Condition="'$(NuGetBuildTasksVersion)' == ''">$(NuGetPackageVersion)</NuGetBuildTasksVersion>
       <NuGetCommandsVersion Condition="'$(NuGetCommandsVersion)' == ''">$(NuGetPackageVersion)</NuGetCommandsVersion>
       <NuGetProtocolVersion Condition="'$(NuGetProtocolVersion)' == ''">$(NuGetPackageVersion)</NuGetProtocolVersion>
