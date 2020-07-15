@@ -813,9 +813,7 @@ namespace Microsoft.Build.BackEnd
                         using (FullTracking.Track(taskLoggingContext.TargetLoggingContext.Target.Name, _taskNode.Name, _buildRequestEntry.ProjectRootDirectory, _buildRequestEntry.RequestConfiguration.Project.PropertiesToBuildWith))
 #endif
                         {
-                            taskHost?.RequireCores(1);
                             taskResult = taskExecutionHost.Execute();
-                            taskHost?.ReleaseCores(1);
                         }
                     }
                 }
