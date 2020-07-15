@@ -3,6 +3,7 @@
 
 using Microsoft.Build.Utilities;
 using System;
+using System.Diagnostics;
 using System.Threading;
 
 namespace Microsoft.Build.Tasks
@@ -13,6 +14,8 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
+            Log.LogMessageFromText($"Starting in {System.Diagnostics.Process.GetCurrentProcess().Id}", Framework.MessageImportance.High);
+
             BuildEngine7.Yield();
 
             //int initial = BuildEngine7.RequestCores(3123890);
@@ -56,10 +59,12 @@ namespace Microsoft.Build.Tasks
 
         void LaunchAndComplete(int i, Action completionCallback)
         {
+            Stopwatch s = new Stopwatch();
+            s.Start();
             BuildEngine7.BlockingWaitForCore();
-            Log.LogMessageFromText($"Action {i} started from {System.Diagnostics.Process.GetCurrentProcess().Id}", Framework.MessageImportance.High);
+            Log.LogMessageFromText($"Action {i} started from {System.Diagnostics.Process.GetCurrentProcess().Id}, waited {s.Elapsed}", Framework.MessageImportance.High);
             Thread.Sleep(2_000);
-            Log.LogMessageFromText($"Action {i} completed from {System.Diagnostics.Process.GetCurrentProcess().Id}", Framework.MessageImportance.High);
+            Log.LogMessageFromText($"Action {i} completed from {System.Diagnostics.Process.GetCurrentProcess().Id}, total {s.Elapsed}", Framework.MessageImportance.High);
 
             completionCallback.Invoke();
         }
