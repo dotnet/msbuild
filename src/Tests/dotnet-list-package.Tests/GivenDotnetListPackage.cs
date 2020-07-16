@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         }
 
         [Fact]
-        public void ItShowsPackagesOnQuietVerbosity()
+        public void ItShowsCoreOutputOnMinimalVerbosity()
         {
             var testAssetName = "NewtonSoftDependentProject";
             var testAsset = _testAssetsManager
@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
                 .Should()
                 .Pass()
                 .And.NotHaveStdErr()
-                .And.NotHaveStdOutContaining("Newtonsoft.Json");
+                .And.HaveStdOutContaining("NewtonSoft.Json");
         }
 
         [Fact]
