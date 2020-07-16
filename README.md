@@ -24,11 +24,6 @@ MSBuild 16.0 builds from the branch [`vs16.0`](https://github.com/Microsoft/msbu
 
 MSBuild 15.9 builds from the branch [`vs15.9`](https://github.com/Microsoft/msbuild/tree/vs15.9). Only very-high-priority bugfixes will be considered for servicing 15.9.
 
-| Runtime\OS | Windows | Ubuntu 16.04 |Mac OS X|
-|:------|:------:|:------:|:------:|
-| **Full Framework** |[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.9/innerloop_Windows_NT_Full)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.9/job/innerloop_Windows_NT_Full)| N/A | N/A | N/A |
-|**.NET Core**|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.9/innerloop_Windows_NT_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.9/job/innerloop_Windows_NT_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.9/innerloop_Ubuntu16.04_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.9/job/innerloop_Ubuntu16.04_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.9/innerloop_OSX10.13_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.9/job/innerloop_OSX10.13_CoreCLR)|
-
 ## Building
 
 ### Building MSBuild with Visual Studio 2019 on Windows
