@@ -35,7 +35,7 @@
     <Compile Include="XmlFileLogger.cs" /> -->
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Framework" Version="14.3.0" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="16.6.0" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="16.6.0" />
     <PackageReference Include="Microsoft.Build" Version="14.3.0" />
   </ItemGroup>
