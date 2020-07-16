@@ -331,12 +331,12 @@ namespace Microsoft.NET.Build.Tasks
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 _crossgen2Tool.ToolPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", "crossgen2.exe");
-                _crossgen2Tool.ClrJitPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", "clrjitilc.dll");
+                _crossgen2Tool.ClrJitPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", $"clrjit-{_targetRuntimeIdentifier}.dll");
             }
             else
             {
                 _crossgen2Tool.ToolPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", "crossgen2");
-                _crossgen2Tool.ClrJitPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", "libclrjitilc.so");
+                _crossgen2Tool.ClrJitPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", $"libclrjit-{_targetRuntimeIdentifier}.so");
             }
 
             return File.Exists(_crossgen2Tool.ToolPath) && File.Exists(_crossgen2Tool.ClrJitPath);
