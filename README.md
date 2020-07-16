@@ -37,7 +37,7 @@ To get started on **Visual Studio 2019**:
   - .NET Core cross-platform development
 2. Open a `Developer Command Prompt for VS 2019` prompt.
 3. Clone the source code: `git clone https://github.com/Microsoft/msbuild.git`
-  - You may have to [download git](https://git-scm.com/downloads) first.
+  - You may have to [download Git](https://git-scm.com/downloads) first.
 4. Run `.\build.cmd` from the root of the repo to build the code. This also restores packages needed to open the projects in Visual Studio.
 5. Open `MSBuild.sln` or `MSBuild.Dev.sln` in Visual Studio 2019.
 
@@ -64,7 +64,7 @@ Before you contribute, please read through the contributing and developer guides
 * [Contributing Guide](documentation/wiki/Contributing-Code.md)
 
 * **Developer Guide on:**
-   - [.Net Core](documentation/wiki/Building-Testing-and-Debugging-on-.Net-Core-MSBuild.md)
+   - [.NET Core](documentation/wiki/Building-Testing-and-Debugging-on-.Net-Core-MSBuild.md)
    - [Full Framework](documentation/wiki/Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md)
    - [Mono](documentation/wiki/Building-Testing-and-Debugging-on-Mono-MSBuild.md)
 
