@@ -19,6 +19,7 @@ using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 using System.Threading.Tasks;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+using Microsoft.Build.Eventing;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -887,6 +888,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 int packetLength = BitConverter.ToInt32(_headerByte, 1);
+                MSBuildEventSource.Log.PacketReadSize(packetLength);
 
                 byte[] packetData;
                 if (packetLength < _smallReadBuffer.Length)
