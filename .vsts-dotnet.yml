@@ -181,6 +181,15 @@ stages:
         ArtifactName: PackageArtifacts
       condition: succeeded()
 
+    # Publish "IntelliSense" XSD files to their own artifact
+    # so it can be consumed by the insertion-to-VS job
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish Artifact: xsd'
+      inputs:
+        path: 'artifacts\xsd'
+        artifactName: xsd
+      condition: succeeded()
+
     # Publish Asset Manifests for Build Asset Registry job
     - task: PublishBuildArtifacts@1
       displayName: Publish Asset Manifests
