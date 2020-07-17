@@ -224,8 +224,8 @@ namespace Microsoft.Build.UnitTests
                 new BuildRequestData(p.CreateProjectInstance(), new[] { "Spawn" }));
 
             p.Build().ShouldBeTrue();
-            sc.ToString().ShouldContain("source_of_warning : warning : Hello from project 1 [" + project.ProjectFile + "> Number=1]");
-            sc.ToString().ShouldContain("source_of_warning : warning : Hello from project 2 [" + project.ProjectFile + "> Number=2]");
+            sc.ToString().ShouldContain("source_of_warning : warning : Hello from project 1 [" + project.ProjectFile + ":: Number=1]");
+            sc.ToString().ShouldContain("source_of_warning : warning : Hello from project 2 [" + project.ProjectFile + ":: Number=2]");
         }
 
         [Fact]
@@ -269,8 +269,8 @@ namespace Microsoft.Build.UnitTests
                 new BuildRequestData(p.CreateProjectInstance(), new[] { "Spawn" }));
 
             p.Build().ShouldBeFalse();
-            sc.ToString().ShouldContain("source_of_error : error : Hello from project 1 [" + project.ProjectFile + "> Number=1]");
-            sc.ToString().ShouldContain("source_of_error : error : Hello from project 2 [" + project.ProjectFile + "> Number=2]");
+            sc.ToString().ShouldContain("source_of_error : error : Hello from project 1 [" + project.ProjectFile + ":: Number=1]");
+            sc.ToString().ShouldContain("source_of_error : error : Hello from project 2 [" + project.ProjectFile + ":: Number=2]");
         }
 
         [Fact]
@@ -318,8 +318,8 @@ namespace Microsoft.Build.UnitTests
                 new BuildRequestData(p.CreateProjectInstance(), new[] { "Spawn" }));
 
             p.Build().ShouldBeFalse();
-            sc.ToString().ShouldContain("source_of_error : error : Hello from project 1 [" + project.ProjectFile + "> Number=1 TargetFramework=netcoreapp2.1]");
-            sc.ToString().ShouldContain("source_of_error : error : Hello from project 2 [" + project.ProjectFile + "> Number=2 TargetFramework=netcoreapp2.1]");
+            sc.ToString().ShouldContain("source_of_error : error : Hello from project 1 [" + project.ProjectFile + ":: Number=1 TargetFramework=netcoreapp2.1]");
+            sc.ToString().ShouldContain("source_of_error : error : Hello from project 2 [" + project.ProjectFile + ":: Number=2 TargetFramework=netcoreapp2.1]");
         }
 
         [Fact]
