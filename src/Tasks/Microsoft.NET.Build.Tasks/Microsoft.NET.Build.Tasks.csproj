@@ -32,6 +32,9 @@
     <OutputPath>$(BaseOutputPath)</OutputPath>
     <IsPackable>true</IsPackable>
     <PackageLayoutOutputPath>$(ArtifactsBinDir)$(Configuration)\Sdks\$(PackageId)\</PackageLayoutOutputPath>
+
+    <!-- Allow .editorconfig file for analyzers to be packed -->
+    <NoDefaultExcludes>true</NoDefaultExcludes>
   </PropertyGroup>
 
   <ItemDefinitionGroup>
