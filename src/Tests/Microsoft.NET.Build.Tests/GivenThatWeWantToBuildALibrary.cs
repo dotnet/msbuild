@@ -790,7 +790,6 @@ class Program
                 .Pass();
         }
 
-        // TODO: need to set TargetPlatformSupported in MSBuild.SDK.Extras for this to pass
         [Fact]
         public void It_can_target_uwp_using_sdk_extras()
         {

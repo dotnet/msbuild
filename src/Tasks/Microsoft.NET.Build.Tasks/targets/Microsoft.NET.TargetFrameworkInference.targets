@@ -60,7 +60,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!--
     Parse TargetPlatform properties.
   -->
-  <PropertyGroup Condition="'$(TargetFramework)' != '' and ('$(TargetPlatformIdentifier)' == '' or '$(TargetPlatformVersion)' == '')">
+  <PropertyGroup Condition="'$(TargetFramework)' != '' and ('$(TargetPlatformIdentifier)' == '' and '$(TargetPlatformVersion)' == '')">
     <TargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
     <TargetPlatformVersion>$([MSBuild]::GetTargetPlatformVersion('$(TargetFramework)', 3))</TargetPlatformVersion>
     <TargetPlatformVersion Condition="'$(TargetPlatformVersion)' == '0.0.0'" ></TargetPlatformVersion>
@@ -108,7 +108,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="_CheckForUnsupportedTargetPlatformIdentifier"
           BeforeTargets="_CheckForInvalidConfigurationAndPlatform;RunResolvePackageDependencies;GetFrameworkPaths;GetReferenceAssemblyPaths"
-          Condition="'$(TargetPlatformIdentifier)' != ''" >
+          Condition="'$(TargetPlatformIdentifier)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))" >
 
     <PropertyGroup>
       <TargetPlatformSupported Condition="'$(TargetPlatformIdentifier)' == 'Windows'">true</TargetPlatformSupported>
@@ -116,7 +116,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <NETSdkError Condition="'$(TargetPlatformSupported)' != 'true'"
                  ResourceName="UnsupportedTargetPlatformIdentifier"
-                 FormatArguments="$([MSBuild]::Escape('$(TargetPlatformIdentifier)'))" />
+                 FormatArguments="$(TargetPlatformIdentifier)" />
   </Target>
 
   <UsingTask TaskName="AllowEmptyTelemetry" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
