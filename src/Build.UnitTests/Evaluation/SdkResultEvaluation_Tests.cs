@@ -140,8 +140,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Theory]
-        [InlineData(true, false)]
         [InlineData(true, true)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
         [InlineData(false, false)]
         public void SdkResolverCanReturnSinglePath(bool includePropertiesAndItems, bool useSinglePathResult)
         {
