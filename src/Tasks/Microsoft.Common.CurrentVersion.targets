@@ -3532,6 +3532,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         KeyContainer="$(KeyContainerName)"
         KeyFile="$(KeyOriginatorFile)"
         DelaySign="$(DelaySign)"
+        PublicSign="$(PublicSign)"
         ToolPath="$(SGenToolPath)"
         SdkToolsPath="$(TargetFrameworkSDKToolsDirectory)"
         EnvironmentVariables="$(SGenEnvironment)"

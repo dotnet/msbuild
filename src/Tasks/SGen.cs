@@ -41,6 +41,8 @@ namespace Microsoft.Build.Tasks
 
         bool DelaySign { get; set; }
 
+        bool PublicSign { get; set; }
+
         [Output]
         ITaskItem[] SerializationAssembly { get; set; }
 
@@ -87,6 +89,8 @@ namespace Microsoft.Build.Tasks
         public string KeyFile { get; set; }
 
         public bool DelaySign { get; set; }
+
+        public bool PublicSign { get; set; }
 
         [Output]
         public ITaskItem[] SerializationAssembly { get; set; }
@@ -217,6 +221,12 @@ namespace Microsoft.Build.Tasks
         {
             set => Bag[nameof(DelaySign)] = value;
             get => GetBoolParameterWithDefault(nameof(DelaySign), false);
+        }
+
+        public bool PublicSign
+        {
+            set => Bag[nameof(PublicSign)] = value;
+            get => GetBoolParameterWithDefault(nameof(PublicSign), false);
         }
 
         [Output]
@@ -403,6 +413,8 @@ namespace Microsoft.Build.Tasks
                 }
 
                 commandLineBuilder.AppendPlusOrMinusSwitch("/compiler:/delaysign", Bag, "DelaySign");
+
+                commandLineBuilder.AppendPlusOrMinusSwitch("/compiler:/publicsign", Bag, "PublicSign");
 
                 // Add the Platform switch to the compiler.
                 if (Platform != null)

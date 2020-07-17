@@ -92,6 +92,36 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void TestPublicSignTrue()
+        {
+            SGenExtension sgen = new SGenExtension();
+            sgen.BuildAssemblyName = "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null";
+            sgen.BuildAssemblyPath = "C:\\SomeFolder\\MyAsm.dll";
+            sgen.ShouldGenerateSerializer = true;
+            sgen.UseProxyTypes = false;
+            sgen.PublicSign = true;
+
+            string commandLine = sgen.CommandLine();
+
+            Assert.True(commandLine.IndexOf("/compiler:/publicsign+", StringComparison.OrdinalIgnoreCase) >= 0);
+        }
+
+        [Fact]
+        public void TestPublicSignFalse()
+        {
+            SGenExtension sgen = new SGenExtension();
+            sgen.BuildAssemblyName = "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null";
+            sgen.BuildAssemblyPath = "C:\\SomeFolder\\MyAsm.dll";
+            sgen.ShouldGenerateSerializer = true;
+            sgen.UseProxyTypes = false;
+            sgen.PublicSign = false;
+
+            string commandLine = sgen.CommandLine();
+
+            Assert.True(commandLine.IndexOf("/compiler:/publicsign-", StringComparison.OrdinalIgnoreCase) >= 0);
+        }
+
+        [Fact]
         public void TestKeepFlagFalse()
         {
             SGenExtension sgen = new SGenExtension();
