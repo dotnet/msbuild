@@ -24,11 +24,6 @@ MSBuild 16.0 builds from the branch [`vs16.0`](https://github.com/Microsoft/msbu
 
 MSBuild 15.9 builds from the branch [`vs15.9`](https://github.com/Microsoft/msbuild/tree/vs15.9). Only very-high-priority bugfixes will be considered for servicing 15.9.
 
-| Runtime\OS | Windows | Ubuntu 16.04 |Mac OS X|
-|:------|:------:|:------:|:------:|
-| **Full Framework** |[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.9/innerloop_Windows_NT_Full)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.9/job/innerloop_Windows_NT_Full)| N/A | N/A | N/A |
-|**.NET Core**|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.9/innerloop_Windows_NT_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.9/job/innerloop_Windows_NT_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.9/innerloop_Ubuntu16.04_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.9/job/innerloop_Ubuntu16.04_CoreCLR)|[![Build Status](https://ci2.dot.net/buildStatus/icon?job=Microsoft_msbuild/vs15.9/innerloop_OSX10.13_CoreCLR)](https://ci2.dot.net/job/Microsoft_msbuild/job/vs15.9/job/innerloop_OSX10.13_CoreCLR)|
-
 ## Building
 
 ### Building MSBuild with Visual Studio 2019 on Windows
@@ -42,7 +37,7 @@ To get started on **Visual Studio 2019**:
   - .NET Core cross-platform development
 2. Open a `Developer Command Prompt for VS 2019` prompt.
 3. Clone the source code: `git clone https://github.com/Microsoft/msbuild.git`
-  - You may have to [download git](https://git-scm.com/downloads) first.
+  - You may have to [download Git](https://git-scm.com/downloads) first.
 4. Run `.\build.cmd` from the root of the repo to build the code. This also restores packages needed to open the projects in Visual Studio.
 5. Open `MSBuild.sln` or `MSBuild.Dev.sln` in Visual Studio 2019.
 
@@ -69,7 +64,7 @@ Before you contribute, please read through the contributing and developer guides
 * [Contributing Guide](documentation/wiki/Contributing-Code.md)
 
 * **Developer Guide on:**
-   - [.Net Core](documentation/wiki/Building-Testing-and-Debugging-on-.Net-Core-MSBuild.md)
+   - [.NET Core](documentation/wiki/Building-Testing-and-Debugging-on-.Net-Core-MSBuild.md)
    - [Full Framework](documentation/wiki/Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md)
    - [Mono](documentation/wiki/Building-Testing-and-Debugging-on-Mono-MSBuild.md)
 
