@@ -395,6 +395,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1104: недопустимое значение RollForward "{0}". Разрешенные значения — {1}.</target>
         <note>{StrBegin="NETSDK1104: "}</note>
       </trans-unit>
+      <trans-unit id="InvalidWindowsTargetPlatformVersion">
+        <source>NETSDK1138: {0} is not a valid Windows TargetPlatformVersion.</source>
+        <target state="new">NETSDK1138: {0} is not a valid Windows TargetPlatformVersion.</target>
+        <note>{StrBegin="NETSDK1138: "}</note>
+      </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
         <source>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead. To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish. Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore. For more information, see https://aka.ms/dotnet-runtime-patch-selection.</source>
         <target state="translated">NETSDK1061: Проект был восстановлен с использованием {0} версии {1}, но с текущими параметрами вместо этой версии будет использована версия {2}. Чтобы устранить эту проблему, убедитесь, что для восстановления и последующих операций (таких как сборка или публикация) используются одинаковые параметры. Обычно эта проблема возникает, когда свойство RuntimeIdentifier устанавливается во время сборки или публикации, но не во время восстановления. Дополнительные сведения см. на странице https://aka.ms/dotnet-runtime-patch-selection.</target>

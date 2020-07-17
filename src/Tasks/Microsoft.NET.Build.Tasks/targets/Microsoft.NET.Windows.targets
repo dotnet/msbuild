@@ -27,4 +27,16 @@ Copyright (c) .NET Foundation. All rights reserved.
     <TargetPlatformMoniker>Windows,Version=7.0</TargetPlatformMoniker>
     <TargetPlatformDisplayName>Windows 7.0</TargetPlatformDisplayName>
   </PropertyGroup>
+
+  <Target Name="_CheckForInvalidWindowsTargetPlatformVersion"
+        BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+        Condition="'$(TargetPlatformIdentifier)' == 'Windows' and '$(TargetPlatformVersion)' != '' and '@(SupportedTargetPlatform)' != ''">
+    <ItemGroup>
+      <ValidWindowsTargetPlatformVersion Include="@(SupportedTargetPlatform)" Condition="'%(Identity)' == '$(TargetPlatformVersion)'" />
+    </ItemGroup>
+    
+    <NetSdkError Condition="'@(ValidWindowsTargetPlatformVersion)' == ''"
+                 ResourceName="InvalidWindowsTargetPlatformVersion"
+                 FormatArguments="$(TargetPlatformVersion)" />
+  </Target>
 </Project>

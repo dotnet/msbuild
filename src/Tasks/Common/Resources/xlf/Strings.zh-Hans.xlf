@@ -395,6 +395,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1104: RollForward 值“{0}”无效。允许的值为 {1}。</target>
         <note>{StrBegin="NETSDK1104: "}</note>
       </trans-unit>
+      <trans-unit id="InvalidWindowsTargetPlatformVersion">
+        <source>NETSDK1138: {0} is not a valid Windows TargetPlatformVersion.</source>
+        <target state="new">NETSDK1138: {0} is not a valid Windows TargetPlatformVersion.</target>
+        <note>{StrBegin="NETSDK1138: "}</note>
+      </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
         <source>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead. To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish. Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore. For more information, see https://aka.ms/dotnet-runtime-patch-selection.</source>
         <target state="translated">NETSDK1061: 项目是使用 {0} 版本 {1} 还原的, 但使用当前设置, 将改用版本 {2}。要解决此问题, 请确保将相同的设置用于还原和后续操作 (如生成或发布)。通常, 如果 RuntimeIdentifier 属性是在生成或发布过程中设置的, 而不是在还原过程中进行的, 则会发生此问题。有关详细信息, 请参阅 https://aka.ms/dotnet-runtime-patch-selection。</target>

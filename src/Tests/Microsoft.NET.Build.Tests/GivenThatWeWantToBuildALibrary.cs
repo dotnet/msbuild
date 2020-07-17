@@ -423,7 +423,7 @@ namespace Microsoft.NET.Build.Tests
         [Theory]
         [InlineData("ios", "1.1", new[] { "IOS", "IOS1_1" })]
         [InlineData("android", "2.2", new[] { "ANDROID", "ANDROID2_2" })]
-        [InlineData("windows", "10.1", new[] { "WINDOWS", "WINDOWS10_1" })]
+        [InlineData("windows", "7.0", new[] { "WINDOWS", "WINDOWS7_0" })]
         public void It_implicitly_defines_compilation_constants_for_the_target_platform(string targetPlatformIdentifier, string targetPlatformVersion, string[] expectedDefines)
         {
             var targetFramework = "net5.0";
@@ -454,7 +454,7 @@ namespace Microsoft.NET.Build.Tests
         [Theory]
         [InlineData(new[] { "1.0", "1.1" }, "ios", "1.1", new[] { "IOS", "IOS1_1", "IOS1_0" })]
         [InlineData(new[] { "11.11", "12.12", "13.13" }, "android", "12.12", new[] { "ANDROID", "ANDROID11_11", "ANDROID12_12" })]
-        [InlineData(new[] { "7.0", "8.0", "10.0.19041", "11.0.0" }, "windows", "11.0.0", new[] { "WINDOWS", "WINDOWS7_0", "WINDOWS8_0", "WINDOWS10_0_19041", "WINDOWS11_0_0" })]
+        [InlineData(new string[] { /* Use the built in SupportedTargetPlatform items */}, "windows", "10.0.19041", new[] { "WINDOWS", "WINDOWS7_0", "WINDOWS8_0", "WINDOWS10_0_17763", "WINDOWS10_0_18362", "WINDOWS10_0_19041" })]
         public void It_implicitly_defines_compilation_constants_for_the_target_platform_with_backwards_compatibility(string[] supportedTargetPlatform, string targetPlatformIdentifier, string targetPlatformVersion, string[] expectedDefines)
         {
             var targetFramework = "net5.0";
