@@ -19,7 +19,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData("netcoreapp3.1", ".NETCoreApp", "v3.1", "Windows", "7.0")] // Default values pre-5.0
         [InlineData("net5.0", ".NETCoreApp", "v5.0", "Windows", "7.0")]
         [InlineData("net5.0-Windows7.0", ".NETCoreApp", "v5.0", "Windows", "7.0")]
@@ -38,10 +38,7 @@ namespace Microsoft.NET.Build.Tests
 
             Action<string, string> assertValue = (string valueName, string expected) =>
             {
-                var getValuesCommand = new GetValuesCommand(Log, Path.Combine(testAsset.Path, testProj.Name), targetFramework, valueName)
-                {
-                    DependsOnTargets = "BeforeBuild"
-                };
+                var getValuesCommand = new GetValuesCommand(Log, Path.Combine(testAsset.Path, testProj.Name), targetFramework, valueName);
                 getValuesCommand
                     .Execute()
                     .Should()
