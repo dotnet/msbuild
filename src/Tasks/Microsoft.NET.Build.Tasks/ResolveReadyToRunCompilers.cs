@@ -46,6 +46,7 @@ namespace Microsoft.NET.Build.Tasks
         private ITaskItem _runtimePack;
         private ITaskItem _crossgen2Pack;
         private string _targetRuntimeIdentifier;
+        private string _targetPlatform;
         private string _hostRuntimeIdentifier;
 
         private CrossgenToolInfo _crossgenTool;
@@ -111,9 +112,9 @@ namespace Microsoft.NET.Build.Tasks
                 return false;
             }
 
-            if (!ExtractTargetPlatformAndArchitecture(_targetRuntimeIdentifier, out string targetPlatform, out _targetArchitecture) ||
+            if (!ExtractTargetPlatformAndArchitecture(_targetRuntimeIdentifier, out _targetPlatform, out _targetArchitecture) ||
                 !ExtractTargetPlatformAndArchitecture(_hostRuntimeIdentifier, out string hostPlatform, out Architecture hostArchitecture) ||
-                targetPlatform != hostPlatform)
+                _targetPlatform != hostPlatform)
             {
                 Log.LogError(Strings.ReadyToRunTargetNotSupportedError);
                 return false;
@@ -149,13 +150,15 @@ namespace Microsoft.NET.Build.Tasks
             //      win-x64 -> win-x64
             //      linux-x64 -> linux-x64
             //      linux-musl-x64 -> linux-musl-x64
-            if (_targetRuntimeIdentifier != _hostRuntimeIdentifier)
+            if (!ExtractTargetPlatformAndArchitecture(_targetRuntimeIdentifier, out _targetPlatform, out _targetArchitecture) ||
+                !GetTargetSpec(out string targetSpec) ||
+                _targetRuntimeIdentifier != _hostRuntimeIdentifier)
             {
                 Log.LogError(Strings.ReadyToRunTargetNotSupportedError);
                 return false;
             }
 
-            if (!GetCrossgen2ComponentsPaths())
+            if (!GetCrossgen2ComponentsPaths(targetSpec))
             {
                 Log.LogError(Strings.ReadyToRunTargetNotSupportedError);
                 return false;
@@ -326,20 +329,53 @@ namespace Microsoft.NET.Build.Tasks
             return File.Exists(_crossgenTool.ToolPath) && File.Exists(_crossgenTool.ClrJitPath);
         }
 
-        private bool GetCrossgen2ComponentsPaths()
+        private bool GetCrossgen2ComponentsPaths(string targetSpec)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 _crossgen2Tool.ToolPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", "crossgen2.exe");
-                _crossgen2Tool.ClrJitPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", "clrjitilc.dll");
+                _crossgen2Tool.ClrJitPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", $"clrjit-{targetSpec}.dll");
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                _crossgen2Tool.ToolPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", "crossgen2");
+                _crossgen2Tool.ClrJitPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", $"libclrjit-{targetSpec}.so");
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                _crossgen2Tool.ToolPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", "crossgen2");
+                _crossgen2Tool.ClrJitPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", $"libclrjit-{targetSpec}.dylib");
             }
             else
             {
-                _crossgen2Tool.ToolPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", "crossgen2");
-                _crossgen2Tool.ClrJitPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", "libclrjitilc.so");
+                // Unknown platform
+                return false;
             }
 
             return File.Exists(_crossgen2Tool.ToolPath) && File.Exists(_crossgen2Tool.ClrJitPath);
+        }
+
+        // Keep in sync with JitConfigProvider.GetTargetSpec
+        private bool GetTargetSpec(out string targetSpec)
+        {
+            string targetOSComponent = (_targetPlatform == "win" ? "win" : "unix");
+            string targetArchComponent = _targetArchitecture switch
+            {
+                Architecture.X86 => "x86",
+                Architecture.X64 => "x64",
+                Architecture.Arm => "arm",
+                Architecture.Arm64 => "arm64",
+                _ => null
+            };
+
+            if (targetArchComponent == null)
+            {
+                targetSpec = null;
+                return false;
+            }
+
+            targetSpec = targetOSComponent + '-' + targetArchComponent;
+            return true;
         }
     }
 }
