@@ -693,6 +693,7 @@ namespace Microsoft.Build.Tasks
         public string KeyContainer { get { throw null; } set { } }
         public string KeyFile { get { throw null; } set { } }
         public string Platform { get { throw null; } set { } }
+        public bool PublicSign { get { throw null; } set { } }
         public string[] References { get { throw null; } set { } }
         public string SdkToolsPath { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
