@@ -16,8 +16,8 @@ Copyright (c) .NET Foundation. All rights reserved.
              And '$(EnableDefaultNoneItems)' == 'true'
              And '$(AppDesignerFolder)' != ''">
 
-    <_WebToolingArtifacts Include="$(AppDesignerFolder)\launchSettings.json;
-                          $(AppDesignerFolder)\serviceDependencies.json;
+    <_WebToolingArtifacts Include="$(AppDesignerFolder)\launchSettings*.json;
+                          $(AppDesignerFolder)\serviceDependencies*.json;
                           $(AppDesignerFolder)\serviceDependencies.*.json;
                           $(AppDesignerFolder)\ServiceDependencies\**;
                           $(AppDesignerFolder)\PublishProfiles\**"
