@@ -217,10 +217,7 @@ namespace Microsoft.Build.UnitTests
             var p = pc.Collection.LoadProject(project.ProjectFile);
 
             BuildManager.DefaultBuildManager.Build(
-                new BuildParameters(pc.Collection)
-                {
-                    MaxNodeCount = 2,
-                },
+                new BuildParameters(pc.Collection),
                 new BuildRequestData(p.CreateProjectInstance(), new[] { "Spawn" }));
 
             p.Build().ShouldBeTrue();
@@ -262,10 +259,7 @@ namespace Microsoft.Build.UnitTests
             var p = pc.Collection.LoadProject(project.ProjectFile);
 
             BuildManager.DefaultBuildManager.Build(
-                new BuildParameters(pc.Collection)
-                {
-                    MaxNodeCount = 2,
-                },
+                new BuildParameters(pc.Collection),
                 new BuildRequestData(p.CreateProjectInstance(), new[] { "Spawn" }));
 
             p.Build().ShouldBeFalse();
@@ -311,10 +305,7 @@ namespace Microsoft.Build.UnitTests
             var p = pc.Collection.LoadProject(project.ProjectFile);
 
             BuildManager.DefaultBuildManager.Build(
-                new BuildParameters(pc.Collection)
-                {
-                    MaxNodeCount = 2,
-                },
+                new BuildParameters(pc.Collection),
                 new BuildRequestData(p.CreateProjectInstance(), new[] { "Spawn" }));
 
             p.Build().ShouldBeFalse();
