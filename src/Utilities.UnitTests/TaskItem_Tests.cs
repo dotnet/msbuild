@@ -378,7 +378,7 @@ namespace Microsoft.Build.UnitTests
                     itemsInThisAppDomain[i] = new TaskItem(creator.CreatedTaskItems[i]);
 
                     itemsInThisAppDomain[i].ItemSpec.ShouldBe(creator.CreatedTaskItems[i].ItemSpec);
-                    //itemsInThisAppDomain[i].MetadataCount.ShouldBe(creator.CreatedTaskItems[i].MetadataCount + 1);
+                    itemsInThisAppDomain[i].MetadataCount.ShouldBe(creator.CreatedTaskItems[i].MetadataCount + 1);
 
                     Dictionary<string, string> creatorMetadata = new Dictionary<string, string>(creator.CreatedTaskItems[i].MetadataCount);
                     foreach (string metadatum in creator.CreatedTaskItems[i].MetadataNames)
