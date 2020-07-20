@@ -178,6 +178,8 @@ namespace Microsoft.Build.Evaluation
 
         private readonly bool _interactive;
 
+        private readonly bool _isRunningInVisualStudio;
+
         /// <summary>
         /// Private constructor called by the static Evaluate method.
         /// </summary>
@@ -240,6 +242,7 @@ namespace Microsoft.Build.Evaluation
             _sdkResolverService = sdkResolverService;
             _submissionId = submissionId;
             _evaluationProfiler = new EvaluationProfiler(profileEvaluation);
+            _isRunningInVisualStudio = BuildEnvironmentHelper.Instance.RunningInVisualStudio;
 
             // In 15.9 we added support for the global property "NuGetInteractive" to allow SDK resolvers to be interactive.
             // In 16.0 we added the /interactive command-line argument so the line below keeps back-compat
@@ -1788,7 +1791,7 @@ namespace Microsoft.Build.Evaluation
                 var projectPath = _data.GetProperty(ReservedPropertyNames.projectFullPath)?.EvaluatedValue;
 
                 // Combine SDK path with the "project" relative path
-                sdkResult = _sdkResolverService.ResolveSdk(_submissionId, importElement.SdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive);
+                sdkResult = _sdkResolverService.ResolveSdk(_submissionId, importElement.SdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive, _isRunningInVisualStudio);
 
                 if (!sdkResult.Success)
                 {
