@@ -5624,7 +5624,7 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-
+<!-- a change made on GitHub that should flow -->
     <xs:element name="ValidateStoreManifest" substitutionGroup="msb:Task">
         <xs:complexType>
             <xs:complexContent>
