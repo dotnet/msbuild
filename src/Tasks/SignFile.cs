@@ -39,7 +39,7 @@ namespace Microsoft.Build.Tasks
             try
             {
                 SecurityUtilities.SignFile(CertificateThumbprint,
-                TimestampUrl == null ? null : new Uri(TimestampUrl),
+                string.IsNullOrEmpty(TimestampUrl) ? null : new Uri(TimestampUrl),
                 SigningTarget.ItemSpec, TargetFrameworkVersion);
                 return true;
             }
