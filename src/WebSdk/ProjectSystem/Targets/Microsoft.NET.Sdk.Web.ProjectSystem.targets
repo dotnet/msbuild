@@ -35,6 +35,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ProjectCapability Include="AspNetCoreInProcessHosting" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <!--
+      ASP.NET 5.0 explicitly disables this functionality by default, requiring the app author
+      to opt-in to re-enabling the feature. The way to opt back in is to specify the below
+      element with the value "true". It is anticipated that future releases of .NET will
+      disable this functionality by default across all project types, at which point this logic
+      can be removed from the ASP.NET-specific SDK.
+    -->
+    <EnableUnsafeBinaryFormatterSerialization Condition="'$(EnableUnsafeBinaryFormatterSerialization)' == ''">false</EnableUnsafeBinaryFormatterSerialization>
+  </PropertyGroup>
+
   <!--
     Newer versions of Visual Studio ship the designtime related properties in a targets file and all future design time only elements should be added there. If that file does not
     exist, it falls back to the default set of values defined here.

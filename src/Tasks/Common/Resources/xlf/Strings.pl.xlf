@@ -107,6 +107,11 @@
         <target state="translated">NETSDK1007: Nie odnaleziono informacji o projekcie dla elementu „{0}”. Może to wskazywać na brakujące odwołanie do projektu.</target>
         <note>{StrBegin="NETSDK1007: "}</note>
       </trans-unit>
+      <trans-unit id="CannotHaveMinimumOSPlatformHigherThanTargetPlatformVersion">
+        <source>NETSDK1135: MinimumOSPlatform {0} cannot be higher than TargetPlatformVersion {1}.</source>
+        <target state="new">NETSDK1135: MinimumOSPlatform {0} cannot be higher than TargetPlatformVersion {1}.</target>
+        <note>{StrBegin="NETSDK1135: "}</note>
+      </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
         <source>NETSDK1032: The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
         <target state="translated">NETSDK1032: Platforma elementu RuntimeIdentifier „{0}” i element PlatformTarget „{1}” muszą być zgodne.</target>
@@ -608,6 +613,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1073: Nie rozpoznano elementu FrameworkReference „{0}”</target>
         <note>{StrBegin="NETSDK1073: "}</note>
       </trans-unit>
+      <trans-unit id="UnnecessaryWindowsDesktopSDK">
+        <source>NETSDK1137: It is no longer necessary to use the Microsoft.NET.Sdk.WindowsDesktop SDK. Microsoft.NET.Sdk can be used instead.</source>
+        <target state="new">NETSDK1137: It is no longer necessary to use the Microsoft.NET.Sdk.WindowsDesktop SDK. Microsoft.NET.Sdk can be used instead.</target>
+        <note>{StrBegin="NETSDK1137: "}</note>
+      </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
         <source>NETSDK1009: Unrecognized preprocessor token '{0}' in '{1}'.</source>
         <target state="translated">NETSDK1009: Nierozpoznany token preprocesora „{0}” w elemencie „{1}”.</target>
@@ -672,6 +682,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1100: Windows is required to build Windows desktop applications.</source>
         <target state="translated">NETSDK1100: Do tworzenia aplikacji klasycznych systemu Windows wymagany jest system Windows.</target>
         <note>{StrBegin="NETSDK1100: "}</note>
+      </trans-unit>
+      <trans-unit id="WindowsDesktopTargetPlatformMustBeWindows">
+        <source>NETSDK1136: The target platform must be set to Windows (usually by including '-windows' in the TargetFramework property) when using Windows Forms or WPF, or referencing projects or packages that do so.</source>
+        <target state="new">NETSDK1136: The target platform must be set to Windows (usually by including '-windows' in the TargetFramework property) when using Windows Forms or WPF, or referencing projects or packages that do so.</target>
+        <note>{StrBegin="NETSDK1136: "}</note>
       </trans-unit>
     </body>
   </file>

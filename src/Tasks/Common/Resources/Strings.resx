@@ -641,4 +641,16 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1134: Building a solution with a specific RuntimeIdentifier is not supported. If you would like to publish for a single RID, specifiy the RID at the individual project level instead.</value>
     <comment>{StrBegin="NETSDK1134: "}</comment>
   </data>
+  <data name="CannotHaveMinimumOSPlatformHigherThanTargetPlatformVersion" xml:space="preserve">
+    <value>NETSDK1135: MinimumOSPlatform {0} cannot be higher than TargetPlatformVersion {1}.</value>
+    <comment>{StrBegin="NETSDK1135: "}</comment>
+  </data>
+  <data name="WindowsDesktopTargetPlatformMustBeWindows" xml:space="preserve">
+    <value>NETSDK1136: The target platform must be set to Windows (usually by including '-windows' in the TargetFramework property) when using Windows Forms or WPF, or referencing projects or packages that do so.</value>
+    <comment>{StrBegin="NETSDK1136: "}</comment>
+  </data>
+  <data name="UnnecessaryWindowsDesktopSDK" xml:space="preserve">
+    <value>NETSDK1137: It is no longer necessary to use the Microsoft.NET.Sdk.WindowsDesktop SDK. Microsoft.NET.Sdk can be used instead.</value>
+    <comment>{StrBegin="NETSDK1137: "}</comment>
+  </data>
 </root>

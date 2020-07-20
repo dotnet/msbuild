@@ -11,6 +11,13 @@
       <CopyToOutputDirectory Condition="'%(Filename)' == 'xunit.runner.utility.netcoreapp10'">false</CopyToOutputDirectory>
       <CopyToOutputDirectory Condition="'%(Filename)' == 'xunit.runner.reporters.netcoreapp10'">false</CopyToOutputDirectory>
     </None>
+
+    <!-- These files are included by the Microsoft.TestPlatform.TestHost package, but we don't want them in the .NET Tool NuGet package
+         (by default they would go in the content and contentFiles folders, generating NU5100 warnings. -->
+    <Content Update="@(Content)">
+      <Pack Condition="$([System.IO.Path]::GetFileName('%(Identity)')) == 'testhost.exe'">false</Pack>
+      <Pack Condition="$([System.IO.Path]::GetFileName('%(Identity)')) == 'testhost.dll'">false</Pack>
+    </Content>
     
   </ItemGroup>
 
