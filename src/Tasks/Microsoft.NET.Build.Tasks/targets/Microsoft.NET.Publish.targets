@@ -450,6 +450,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                         _ComputeResolvedFilesToPublishTypes
 
     Splits ResolvedFileToPublish items into 'PreserveNewest' and 'Always' buckets.
+    Then further splits those into 'Unbundled' buckets based on the single file setting.
     ============================================================
     -->
   <Target Name="_ComputeResolvedFilesToPublishTypes">
@@ -460,6 +461,19 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <_ResolvedFileToPublishAlways Include="@(ResolvedFileToPublish)"
                                     Condition="'%(ResolvedFileToPublish.CopyToPublishDirectory)'=='Always'" />
+    </ItemGroup>
+
+    <ItemGroup>
+
+      <_ResolvedUnbundledFileToPublishPreserveNewest
+                    Include="@(_ResolvedFileToPublishPreserveNewest)"
+                    Condition="'$(PublishSingleFile)' != 'true' or 
+                               '%(_ResolvedFileToPublishPreserveNewest.ExcludeFromSingleFile)'=='true'" />
+
+      <_ResolvedUnbundledFileToPublishAlways
+              Include="@(_ResolvedFileToPublishAlways)"
+              Condition="'$(PublishSingleFile)' != 'true' or 
+                         '%(_ResolvedFileToPublishAlways.ExcludeFromSingleFile)'=='true'" />
     </ItemGroup>
   </Target>
 
@@ -541,7 +555,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <!-- Copy generated COM References. -->
       <ResolvedFileToPublish Include="@(ReferenceComWrappersToCopyLocal)">
-        <RelativePath>@(ReferenceComWrappersToCopyLocal->'%(Filename)%(Extension)')</RelativePath>
+        <RelativePath>%(Filename)%(Extension)</RelativePath>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
 
@@ -1112,7 +1126,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
                                             ComputeFilesCopiedToPublishDir
 
-    Gathers all the files that were copied to the publish directory.  This is used by wapproj and is required for back compat.
+    Gathers all the files that will be copied to the publish directory.  This is used by wapproj and is required for back compat.
     ============================================================
     -->
   <Target Name="ComputeFilesCopiedToPublishDir"
