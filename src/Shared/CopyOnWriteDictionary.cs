@@ -21,14 +21,6 @@ namespace Microsoft.Build.Collections
     /// <typeparam name="K">The key type.</typeparam>
     /// <typeparam name="V">The value type.</typeparam>
     /// <remarks>
-    /// This dictionary works by having a backing dictionary which is ref-counted for each
-    /// COWDictionary which references it.  When a write operation is performed on any
-    /// COWDictionary, we check the reference count on the backing dictionary.  If it is 
-    /// greater than 1, it means any changes we make to it would be visible to other readers.
-    /// Therefore, we clone the backing dictionary and decrement the reference count on the
-    /// original.  From there on we use the cloned dictionary, which now has a reference count
-    /// of 1.
-    ///
     /// Thread safety: for all users, this class is as thread safe as the underlying Dictionary implementation, that is,
     /// safe for concurrent readers or one writer from EACH user. It achieves this by locking itself and cloning before
     /// any write, if it is being shared - i.e., stopping sharing before any writes occur.
@@ -187,7 +179,11 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Comparer used for keys
         /// </summary>
-        internal IEqualityComparer<K> Comparer { get => ReadOperation.KeyComparer; private set => backing = WriteOperation.WithComparers(keyComparer: value, valueComparer: backing.ValueComparer); }
+        internal IEqualityComparer<K> Comparer
+        {
+            get => ReadOperation.KeyComparer;
+            private set => backing = WriteOperation.WithComparers(keyComparer: value, valueComparer: backing.ValueComparer);
+        }
 
         /// <summary>
         /// Gets the backing dictionary for reading.
@@ -280,7 +276,7 @@ namespace Microsoft.Build.Collections
 
             backing = backing.Remove(key);
 
-            return initial != backing; // if the removal occured, the 
+            return initial != backing; // whether the removal occured
         }
 
         /// <summary>
@@ -338,7 +334,7 @@ namespace Microsoft.Build.Collections
 
             backing = backing.Remove(item.Key);
 
-            return initial != backing; // if the removal occured, the 
+            return initial != backing; // whether the removal occured
         }
 
         /// <summary>
@@ -429,7 +425,7 @@ namespace Microsoft.Build.Collections
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             ImmutableDictionary<K, V> snapshot = ReadOperation;
-            var array = snapshot.ToArray();
+            KeyValuePair<K, V>[] array = snapshot.ToArray();
 
             info.AddValue(nameof(backing), array);
             info.AddValue(nameof(Comparer), Comparer);
