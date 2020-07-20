@@ -620,7 +620,7 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine(content);
 
             // NOTE: order here is defined by dictionary traversal order and may change
-            // based on implementation details there, but attributes can have different
+            // based on implementation details there, but named parameters can have different
             // orders so that's ok.
             CheckContentCSharp(content, @"[assembly: AssemblyTrademarkAttribute(""Microsoft"", Copyright=""(C)"", Date=""2009"")]");
 
