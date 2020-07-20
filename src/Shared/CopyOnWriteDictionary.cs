@@ -38,7 +38,7 @@ namespace Microsoft.Build.Collections
     /// be run in a separate appdomain.
     /// </comment>
     [Serializable]
-    internal class CopyOnWriteDictionary<K, V> : IDictionary<K, V>, IDictionary, ISerializable where V : class
+    internal class CopyOnWriteDictionary<K, V> : IDictionary<K, V>, IDictionary, ISerializable
     {
         /// <summary>
         /// The backing dictionary.
@@ -236,6 +236,7 @@ namespace Microsoft.Build.Collections
             }
         }
 
+#nullable disable
         /// <summary>
         /// IDictionary implementation
         /// </summary>
@@ -249,6 +250,7 @@ namespace Microsoft.Build.Collections
 
             set => this[(K)key] = (V)value;
         }
+#nullable restore
 
         /// <summary>
         /// Adds a value to the dictionary.

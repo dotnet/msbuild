@@ -55,6 +55,11 @@ namespace Microsoft.Build.Evaluation
         private static readonly bool s_debugEvaluation = (Environment.GetEnvironmentVariable("MSBUILDDEBUGEVALUATION") != null);
 
         /// <summary>
+        /// * and ? are invalid file name characters, but they occur in globs as wild cards.
+        /// </summary>
+        private static readonly char[] s_invalidGlobChars = FileUtilities.InvalidFileNameChars.Where(c => c != '*' && c != '?' && c!= '/' && c != '\\' && c != ':').ToArray();
+
+        /// <summary>
         /// Context to log messages and events in
         /// </summary>
         private static readonly BuildEventContext s_buildEventContext = new BuildEventContext(0 /* node ID */, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
@@ -2501,7 +2506,7 @@ namespace Microsoft.Build.Evaluation
             {
                 var includeItemspec = new EvaluationItemSpec(itemElement.Include, _data.Expander, itemElement.IncludeLocation, itemElement.ContainingProject.DirectoryPath);
 
-                ImmutableArray<ItemSpecFragment> includeGlobFragments = includeItemspec.Fragments.Where(f => f is GlobFragment).ToImmutableArray();
+                ImmutableArray<ItemSpecFragment> includeGlobFragments = includeItemspec.Fragments.Where(f => f is GlobFragment && f.TextFragment.IndexOfAny(s_invalidGlobChars) == -1).ToImmutableArray();
                 if (includeGlobFragments.Length == 0)
                 {
                     return null;
@@ -2686,37 +2691,37 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     var matchOccurrences = ItemMatchesInItemSpecString(itemToMatch, itemSpec, elementLocation, itemElement.ContainingProject.DirectoryPath, _data.Expander, out Provenance provenance);
-                    Tuple<Provenance, int> result = matchOccurrences > 0 ? Tuple.Create(provenance, matchOccurrences) : null;
-
-                    return result?.Item2 > 0
-                        ? new ProvenanceResult(itemElement, operation, result.Item1, result.Item2)
-                        : null;
-                }
-
-                Func<ProvenanceResult>[] provenanceProviders =
-                {
-                // provenance provider for include item elements
-                () =>
-                {
-                    var includeResult = SingleItemSpecProvenance(itemElement.Include, itemElement.IncludeLocation, Operation.Include);
-                    if (includeResult == null)
+                    if (matchOccurrences > 0)
                     {
-                        return null;
+                        return new ProvenanceResult(itemElement, operation, provenance, matchOccurrences);
                     }
 
+                    return null;
+                }
+
+                var includeResult = SingleItemSpecProvenance(itemElement.Include, itemElement.IncludeLocation, Operation.Include);
+                if (includeResult != null)
+                {
                     var excludeResult = SingleItemSpecProvenance(itemElement.Exclude, itemElement.ExcludeLocation, Operation.Exclude);
+                    if (excludeResult != null)
+                    {
+                        return excludeResult;
+                    }
 
-                    return excludeResult ?? includeResult;
-                },
+                    if (includeResult != null)
+                    {
+                        return includeResult;
+                    }
+                }
 
-                // provenance provider for update item elements
-                () => SingleItemSpecProvenance(itemElement.Update, itemElement.UpdateLocation, Operation.Update),
-                
-                // provenance provider for remove item elements
-                () => SingleItemSpecProvenance(itemElement.Remove, itemElement.RemoveLocation, Operation.Remove)
-            };
+                var result = SingleItemSpecProvenance(itemElement.Update, itemElement.UpdateLocation, Operation.Update);
+                if (result != null)
+                {
+                    return result;
+                }
 
-                return provenanceProviders.Select(provider => provider()).FirstOrDefault(provenanceResult => provenanceResult != null);
+                result = SingleItemSpecProvenance(itemElement.Remove, itemElement.RemoveLocation, Operation.Remove);
+                return result;
             }
 
             /// <summary>

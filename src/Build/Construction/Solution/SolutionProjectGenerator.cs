@@ -163,7 +163,7 @@ namespace Microsoft.Build.Construction
 
             if (targetNames != null)
             {
-                _targetNames = targetNames.Select(i => i.Split(MSBuildConstants.ColonChar, 2, StringSplitOptions.RemoveEmptyEntries).Last()).ToList();
+                _targetNames = targetNames.Select(i => i.Split(new char[] { ':' }, 2, StringSplitOptions.RemoveEmptyEntries).Last()).ToList();
             }
         }
 
@@ -637,6 +637,12 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private static bool WouldProjectBuild(SolutionFile solutionFile, string selectedSolutionConfiguration, ProjectInSolution project, ProjectConfigurationInSolution projectConfiguration)
         {
+            // If the solution filter does not contain this project, do not build it.
+            if (!solutionFile.ProjectShouldBuild(project.RelativePath))
+            {
+                return false;
+            }
+
             if (projectConfiguration == null)
             {
                 if (project.ProjectType == SolutionProjectType.WebProject)
@@ -1347,7 +1353,7 @@ namespace Microsoft.Build.Construction
             }
 
             task.SetParameter("BuildInParallel", "True");
-            task.SetParameter("ToolsVersion", MSBuildConstants.CurrentToolsVersion);
+            task.SetParameter("ToolsVersion", "Current");
             task.SetParameter("Properties", SolutionProperties);
             task.SetParameter("SkipNonexistentProjects", "%(ProjectReference.SkipNonexistentProjects)");
 

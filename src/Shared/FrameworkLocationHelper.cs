@@ -308,28 +308,28 @@ namespace Microsoft.Build.Shared
         /// The rules are maintained in a 2-dimensions array. Each row defines a rule. The first column
         /// defines the trigger condition. The second column defines the fallback .net and VS versions.
         /// </remarks>
-        private static readonly Tuple<Version, Version>[,] s_explicitFallbackRulesForPathToDotNetFrameworkSdkTools =
+        private static readonly (Version, Version)[,] s_explicitFallbackRulesForPathToDotNetFrameworkSdkTools =
         {
             // VS12
-            { Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion120), Tuple.Create(dotNetFrameworkVersion45, visualStudioVersion120) },
-            { Tuple.Create(dotNetFrameworkVersion452, visualStudioVersion120), Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion120) },
+            { (dotNetFrameworkVersion451, visualStudioVersion120), (dotNetFrameworkVersion45, visualStudioVersion120) },
+            { (dotNetFrameworkVersion452, visualStudioVersion120), (dotNetFrameworkVersion451, visualStudioVersion120) },
 
             // VS14
-            { Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion140), Tuple.Create(dotNetFrameworkVersion45, visualStudioVersion140) },
-            { Tuple.Create(dotNetFrameworkVersion452, visualStudioVersion140), Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion140) },
-            { Tuple.Create(dotNetFrameworkVersion46, visualStudioVersion140), Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion140) },
-            { Tuple.Create(dotNetFrameworkVersion461, visualStudioVersion140), Tuple.Create(dotNetFrameworkVersion46, visualStudioVersion140) },
+            { (dotNetFrameworkVersion451, visualStudioVersion140), (dotNetFrameworkVersion45, visualStudioVersion140) },
+            { (dotNetFrameworkVersion452, visualStudioVersion140), (dotNetFrameworkVersion451, visualStudioVersion140) },
+            { (dotNetFrameworkVersion46, visualStudioVersion140), (dotNetFrameworkVersion451, visualStudioVersion140) },
+            { (dotNetFrameworkVersion461, visualStudioVersion140), (dotNetFrameworkVersion46, visualStudioVersion140) },
 
             // VS15
-            { Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion45, visualStudioVersion150) },
-            { Tuple.Create(dotNetFrameworkVersion452, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion150) },
-            { Tuple.Create(dotNetFrameworkVersion46, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion150) },
-            { Tuple.Create(dotNetFrameworkVersion461, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion46, visualStudioVersion150) },
-            { Tuple.Create(dotNetFrameworkVersion462, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion461, visualStudioVersion150) },
-            { Tuple.Create(dotNetFrameworkVersion47, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion462, visualStudioVersion150) },
-            { Tuple.Create(dotNetFrameworkVersion471, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion47, visualStudioVersion150) },
-            { Tuple.Create(dotNetFrameworkVersion472, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion471, visualStudioVersion150) },
-            { Tuple.Create(dotNetFrameworkVersion48, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion472, visualStudioVersion150) },
+            { (dotNetFrameworkVersion451, visualStudioVersion150), (dotNetFrameworkVersion45, visualStudioVersion150) },
+            { (dotNetFrameworkVersion452, visualStudioVersion150), (dotNetFrameworkVersion451, visualStudioVersion150) },
+            { (dotNetFrameworkVersion46, visualStudioVersion150), (dotNetFrameworkVersion451, visualStudioVersion150) },
+            { (dotNetFrameworkVersion461, visualStudioVersion150), (dotNetFrameworkVersion46, visualStudioVersion150) },
+            { (dotNetFrameworkVersion462, visualStudioVersion150), (dotNetFrameworkVersion461, visualStudioVersion150) },
+            { (dotNetFrameworkVersion47, visualStudioVersion150), (dotNetFrameworkVersion462, visualStudioVersion150) },
+            { (dotNetFrameworkVersion471, visualStudioVersion150), (dotNetFrameworkVersion47, visualStudioVersion150) },
+            { (dotNetFrameworkVersion472, visualStudioVersion150), (dotNetFrameworkVersion471, visualStudioVersion150) },
+            { (dotNetFrameworkVersion48, visualStudioVersion150), (dotNetFrameworkVersion472, visualStudioVersion150) },
        };
 #endif // FEATURE_WIN32_REGISTRY
 

@@ -65,6 +65,21 @@
         <target state="translated">경로: {0}은(는) OS 최대 경로 제한을 초과합니다. 정규화된 파일 이름은 {1}자 이하여야 합니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SolutionFilterFilterContainsProjectNotInSolution">
+        <source>MSB5028: Solution filter file at "{0}" includes project "{1}" that is not in the solution file at "{2}".</source>
+        <target state="translated">MSB5028: "{0}"의 솔루션 필터 파일에 "{2}"의 솔루션 파일에 없는 "{1}" 프로젝트가 포함되어 있습니다.</target>
+        <note>{StrBegin="MSB5028: "}UE: The project filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionFilterJsonParsingError">
+        <source>MSB5025: Json in solution filter file "{0}" is incorrectly formatted.</source>
+        <target state="translated">MSB5025: 솔루션 필터 파일 "{0}"의 Json 형식이 잘못되었습니다.</target>
+        <note>{StrBegin="MSB5025: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionFilterMissingSolutionError">
+        <source>MSB5026: The solution filter file at "{0}" specifies there will be a solution file at "{1}", but that file does not exist.</source>
+        <target state="translated">MSB5026: "{0}"의 솔루션 필터 파일이 "{1}"에 솔루션 파일이 있도록 지정하지만, 해당 파일이 없습니다.</target>
+        <note>{StrBegin="MSB5026: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
         <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
         <target state="translated">MSB4132: 도구 버전 "{0}"을(를) 인식할 수 없습니다. 사용할 수 있는 도구 버전은 {1}입니다.</target>

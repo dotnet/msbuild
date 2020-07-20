@@ -2295,7 +2295,7 @@
       </trans-unit>
       <trans-unit id="SGen.TaskNotSupported">
         <source>MSB3474: The task "{0}" is not supported on the .NET Core version of MSBuild. Use the Microsoft XML Serializer Generator package instead. See https://go.microsoft.com/fwlink/?linkid=858594 for more information.</source>
-        <target state="new">MSB3474: The task "{0}" is not supported on the .NET Core version of MSBuild. Use the Microsoft XML Serializer Generator package instead. See https://go.microsoft.com/fwlink/?linkid=858594 for more information.</target>
+        <target state="translated">MSB3474: MSBuild .NET Core 버전에서는 "{0}" 작업이 지원되지 않습니다. Microsoft XML Serializer Generator 패키지를 대신 사용합니다. 자세한 내용은 https://go.microsoft.com/fwlink/?linkid=858594를 참조하세요.</target>
         <note>{StrBegin="MSB3474: "}</note>
       </trans-unit>
       <trans-unit id="SignFile.CertNotInStore">

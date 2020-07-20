@@ -47,6 +47,11 @@ namespace Microsoft.Build.Shared
         private List<AssemblyFoldersExInfo> _directoryNames = new List<AssemblyFoldersExInfo>();
 
         /// <summary>
+        /// Set of unique paths to directories found from the registry
+        /// </summary>
+        private HashSet<string> _uniqueDirectoryPaths = new HashSet<string>();
+
+        /// <summary>
         /// Construct.
         /// </summary>
         /// <param name="registryKeyRoot">Like Software\Microsoft\[.NetFramework | .NetCompactFramework]</param>
@@ -258,6 +263,7 @@ namespace Microsoft.Build.Shared
 
                     if (null != directoryName)
                     {
+                        _uniqueDirectoryPaths.Add(directoryName);
                         _directoryNames.Add(new AssemblyFoldersExInfo(hive, view, directoryKey.RegistryKey, directoryName, directoryKey.TargetFrameworkVersion));
                     }
                 }
@@ -482,6 +488,11 @@ namespace Microsoft.Build.Shared
         IEnumerator IEnumerable.GetEnumerator()
         {
             return ((IEnumerable<AssemblyFoldersExInfo>)this).GetEnumerator();
+        }
+
+        internal IEnumerable<string> UniqueDirectoryPaths
+        {
+            get => _uniqueDirectoryPaths;
         }
     }
 }

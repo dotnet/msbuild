@@ -12,6 +12,8 @@ using System;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Unittest;
 using Xunit;
+using Microsoft.Build.Framework;
+using System.Linq;
 
 namespace Microsoft.Build.UnitTests.Preprocessor
 {
@@ -924,6 +926,122 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 -->
 </Project>");
                 Helpers.VerifyAssertLineByLine(expected, writer.ToString());
+            }
+        }
+
+        [Fact]
+        public void SdkResolverItemsAndPropertiesAreInPreprocessedOutput()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                string testDirectory = env.CreateFolder().Path;
+
+                var propertiesToAdd = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    {"PropertyFromSdkResolver", "ValueFromSdkResolver" }
+                };
+
+                var itemsToAdd = new Dictionary<string, SdkResultItem>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "ItemNameFromSdkResolver", new SdkResultItem( "ItemValueFromSdkResolver",
+                        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                        {
+                            { "MetadataName", "MetadataValue" }
+                        })
+                    }
+                };
+
+                var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(
+                    new Build.BackEnd.SdkResolution.SdkResult(
+                        new SdkReference("TestPropsAndItemsFromResolverSdk", null, null),
+                        new [] { testDirectory},
+                        version: null,
+                        propertiesToAdd,
+                        itemsToAdd,
+                        warnings: null
+                        )));
+
+                string content = @"<Project>
+<Import Project='Import.props' Sdk='TestPropsAndItemsFromResolverSdk' />
+<PropertyGroup>
+<p>v1</p>
+</PropertyGroup>
+</Project>";
+
+                string importedPropsPath = Path.Combine(testDirectory, "Import.props");
+                File.WriteAllText(importedPropsPath, @"<Project>
+    <PropertyGroup>
+        <SdkPropsImported>true</SdkPropsImported>
+    </PropertyGroup>
+</Project>");
+
+                string projectPath = Path.Combine(testDirectory, "TestProject.csproj");
+                File.WriteAllText(projectPath, content);
+
+                var project = Project.FromFile(projectPath, projectOptions);
+
+                StringWriter writer = new StringWriter();
+
+                project.SaveLogicalProject(writer);
+
+                string actual = writer.ToString();
+
+                //  File names for the projects including the properties and items from the SDK resolvers are based on a hash of
+                //  the values, so look up the filename here.
+                //  Sample filename: projectPath + ".SdkResolver.-171948414.proj"
+                var virtualImport = project.Imports.First(i => i.ImportedProject.FullPath.StartsWith(projectPath + ".SdkResolver"));
+                string virtualProjectPath = virtualImport.ImportedProject.FullPath;
+
+                string expected = ObjectModelHelpers.CleanupFileContents(
+                    $@"<?xml version=""1.0"" encoding=""utf-16""?>
+<!--
+============================================================================================================================================
+{projectPath.Replace("--", "__")}
+============================================================================================================================================
+-->
+<Project>
+  <!--
+============================================================================================================================================
+  <Import Project=""Import.props"" Sdk=""TestPropsAndItemsFromResolverSdk"">
+
+{virtualProjectPath.Replace("--", "__")}
+============================================================================================================================================
+-->
+  <PropertyGroup xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+    <PropertyFromSdkResolver>ValueFromSdkResolver</PropertyFromSdkResolver>
+  </PropertyGroup>
+  <ItemGroup xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+    <ItemNameFromSdkResolver Include=""ItemValueFromSdkResolver"">
+      <MetadataName>MetadataValue</MetadataName>
+    </ItemNameFromSdkResolver>
+  </ItemGroup>
+  <!--
+============================================================================================================================================
+  </Import>
+============================================================================================================================================
+-->
+  <!--
+============================================================================================================================================
+  <Import Project=""Import.props"" Sdk=""TestPropsAndItemsFromResolverSdk"">
+
+{importedPropsPath.Replace("--", "__")}
+============================================================================================================================================
+-->
+  <PropertyGroup>
+    <SdkPropsImported>true</SdkPropsImported>
+  </PropertyGroup>
+  <!--
+============================================================================================================================================
+  </Import>
+
+{projectPath.Replace("--", "__")}
+============================================================================================================================================
+-->
+  <PropertyGroup>
+    <p>v1</p>
+  </PropertyGroup>
+</Project>");
+                Helpers.VerifyAssertLineByLine(expected, actual);
             }
         }
 

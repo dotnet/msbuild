@@ -65,6 +65,21 @@
         <target state="translated">路径: {0} 超过 OS 最大路径限制。完全限定的文件名必须少于 {1} 个字符。</target>
         <note />
       </trans-unit>
+      <trans-unit id="SolutionFilterFilterContainsProjectNotInSolution">
+        <source>MSB5028: Solution filter file at "{0}" includes project "{1}" that is not in the solution file at "{2}".</source>
+        <target state="translated">MSB5028: 位于“{0}”的解决方案筛选器文件包含“{2}”处的解决方案文件中没有的项目“{1}”。</target>
+        <note>{StrBegin="MSB5028: "}UE: The project filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionFilterJsonParsingError">
+        <source>MSB5025: Json in solution filter file "{0}" is incorrectly formatted.</source>
+        <target state="translated">MSB5025: 解决方案筛选器文件“{0}”中的 JSON 的格式不正确。</target>
+        <note>{StrBegin="MSB5025: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionFilterMissingSolutionError">
+        <source>MSB5026: The solution filter file at "{0}" specifies there will be a solution file at "{1}", but that file does not exist.</source>
+        <target state="translated">MSB5026: 位于“{0}”的解决方案筛选器文件指定“{1}”处将存在一个解决方案文件，但该文件不存在。</target>
+        <note>{StrBegin="MSB5026: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
         <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
         <target state="translated">MSB4132: 无法识别工具版本“{0}”。可用的工具版本为 {1}。</target>

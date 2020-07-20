@@ -1141,6 +1141,16 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
+    <xs:element name="AndroidResource" substitutionGroup="msb:Item">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="AndroidResource" _locComment="" -->Android resource files to be used within a Xamarin.Android project.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="ProguardConfiguration" substitutionGroup="msb:Item">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="ProguardConfiguration" _locComment="" -->ProGuard configuration files to be used within a Xamarin.Android project.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <!-- ======================== PROPERTIES =====================================-->
     <!-- Possible Types include StringPropertyType (text with no subelements), GenericPropertyType (any content), or something more specific.-->
 
@@ -2051,6 +2061,79 @@ elementFormDefault="qualified">
     <xs:element name="TrimmerRootDescriptor" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
         <xs:documentation><!-- _locID_text="TrimmerRootDescriptor" _locComment="" -->Gives the linker a more specific list of types/methods, etc. to include. Path to an xml file.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+
+    <!-- ======================== XAMARIN.ANDROID PROPERTIES ======================== -->
+
+    <xs:element name="AndroidApplication" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="AndroidApplication" _locComment="" -->Used by Xamarin.Android projects. A boolean value that indicates whether the project is for an Android Application (True) or for an Android Library Project (False or not present).</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="AndroidDexTool" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="AndroidDexTool" _locComment="" -->Used by Xamarin.Android projects. A string property that indicates which Android dex compiler is used during the Xamarin.Android build process.</xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="d8" />
+          <xs:enumeration value="dx" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:element>
+    <xs:element name="AndroidEnableProfiledAot" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="AndroidEnableProfiledAot" _locComment="" -->Used by Xamarin.Android projects. A boolean property that determines whether or not AOT profiles are used during Ahead-of-Time compilation.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="AndroidLinkMode" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="AndroidLinkMode" _locComment="" -->Used by Xamarin.Android projects. A string property that specifies which type of linking should be performed on assemblies contained within the Android package. Only used in Android Application projects.</xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="None" />
+          <xs:enumeration value="SdkOnly" />
+          <xs:enumeration value="Full" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:element>
+    <xs:element name="AndroidLinkTool" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="AndroidLinkTool" _locComment="" -->Used by Xamarin.Android projects. A string property that indicates which code shrinker is used for Java code.</xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="r8" />
+          <xs:enumeration value="proguard" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:element>
+    <xs:element name="AndroidLinkSkip" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="AndroidLinkSkip" _locComment="" -->Used by Xamarin.Android projects. Specifies a semicolon-delimited (;) list of assembly names, without file extensions, of assemblies that should not be linked.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="AndroidPackageFormat" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="AndroidPackageFormat" _locComment="" -->Used by Xamarin.Android projects. A string property that indicates if you want to package the Android application as an APK file or Android App Bundle.</xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="apk" />
+          <xs:enumeration value="aab" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:element>
+    <xs:element name="AndroidSupportedAbis" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="AndroidSupportedAbis" _locComment="" -->Used by Xamarin.Android projects. A string property that contains a semicolon (;)-delimited list of ABIs which should be included into the application.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="AotAssemblies" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="AotAssemblies" _locComment="" -->Used by Xamarin.Android projects. A boolean property that determines whether or not assemblies will be Ahead-of-Time compiled into native code.</xs:documentation>
       </xs:annotation>
     </xs:element>
 

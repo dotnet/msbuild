@@ -65,6 +65,21 @@
         <target state="translated">Le chemin {0} dépasse la limite maximale de chemin du système d'exploitation. Le nom du fichier qualifié complet doit contenir moins de {1} caractères.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SolutionFilterFilterContainsProjectNotInSolution">
+        <source>MSB5028: Solution filter file at "{0}" includes project "{1}" that is not in the solution file at "{2}".</source>
+        <target state="translated">MSB5028: le fichier de filtre de solution sur "{0}" inclut le projet "{1}", qui ne figure pas dans le fichier solution sur "{2}".</target>
+        <note>{StrBegin="MSB5028: "}UE: The project filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionFilterJsonParsingError">
+        <source>MSB5025: Json in solution filter file "{0}" is incorrectly formatted.</source>
+        <target state="translated">MSB5025: les données JSON du fichier de filtre de solution "{0}" sont dans un format incorrect.</target>
+        <note>{StrBegin="MSB5025: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionFilterMissingSolutionError">
+        <source>MSB5026: The solution filter file at "{0}" specifies there will be a solution file at "{1}", but that file does not exist.</source>
+        <target state="translated">MSB5026: le fichier de filtre de solution sur "{0}" spécifie l'existence d'un fichier solution sur "{1}", mais ce fichier n'existe pas.</target>
+        <note>{StrBegin="MSB5026: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
         <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
         <target state="translated">MSB4132: La version des outils "{0}" n'est pas reconnue. Les versions disponibles sont {1}.</target>

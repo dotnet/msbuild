@@ -46,7 +46,7 @@ namespace Microsoft.Build.Evaluation
                 ItemSpecMatchesItem matchItemspec;
                 bool? needToExpandMetadataForEachItem = null;
 
-                if (ItemspecContainsASingleItemReference(_itemSpec, _itemElement.ItemType))
+                if (ItemspecContainsASingleBareItemReference(_itemSpec, _itemElement.ItemType))
                 {
                     // Perf optimization: If the Update operation references itself (e.g. <I Update="@(I)"/>)
                     // then all items are updated and matching is not necessary
@@ -133,27 +133,6 @@ namespace Microsoft.Build.Evaluation
             private static bool ItemSpecContainsItemReferences(ItemSpec<P, I> itemSpec)
             {
                 return itemSpec.Fragments.Any(f => f is ItemSpec<P,I>.ItemExpressionFragment);
-            }
-
-            private static bool ItemspecContainsASingleItemReference(ItemSpec<P, I> itemSpec, string referencedItemType)
-            {
-                if (itemSpec.Fragments.Count != 1)
-                {
-                    return false;
-                }
-
-                var itemExpressionFragment = itemSpec.Fragments[0] as ItemSpec<P,I>.ItemExpressionFragment;
-                if (itemExpressionFragment == null)
-                {
-                    return false;
-                }
-
-                if (!itemExpressionFragment.Capture.ItemType.Equals(referencedItemType, StringComparison.OrdinalIgnoreCase))
-                {
-                    return false;
-                }
-
-                return true;
             }
         }
     }

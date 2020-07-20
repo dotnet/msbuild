@@ -3341,7 +3341,10 @@ namespace Microsoft.Build.Evaluation
                     // need to locate an appropriate constructor and invoke it
                     if (String.Equals("new", _methodMethodName, StringComparison.OrdinalIgnoreCase))
                     {
-                        functionResult = LateBindExecute(null /* no previous exception */, BindingFlags.Public | BindingFlags.Instance, null /* no instance for a constructor */, args, true /* is constructor */);
+                        if (!TryExecuteWellKnownConstructorNoThrow(out functionResult, args))
+                        {
+                            functionResult = LateBindExecute(null /* no previous exception */, BindingFlags.Public | BindingFlags.Instance, null /* no instance for a constructor */, args, true /* is constructor */);
+                        }
                     }
                     else
                     {
@@ -3534,6 +3537,14 @@ namespace Microsoft.Build.Evaluation
                             return true;
                         }
                     }
+                    else if (string.Equals(_methodMethodName, nameof(string.IndexOf), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (TryGetArgs(args, out string arg0, out StringComparison arg1))
+                        {
+                            returnVal = text.IndexOf(arg0, arg1);
+                            return true;
+                        }
+                    }
                     else if (string.Equals(_methodMethodName, nameof(string.IndexOfAny), StringComparison.OrdinalIgnoreCase))
                     {
                         if (TryGetArg(args, out string arg0))
@@ -3554,20 +3565,10 @@ namespace Microsoft.Build.Evaluation
                             returnVal = text.LastIndexOf(arg0, startIndex);
                             return true;
                         }
-                        else if (TryGetArgs(args, out arg0, out string arg1))
+                        else if (TryGetArgs(args, out arg0, out StringComparison arg1))
                         {
-                            string comparisonType = arg1;
-
-                            // Allow fully-qualified enum, e.g. "System.StringComparison.OrdinalIgnoreCase"
-                            if (comparisonType.Contains("."))
-                            {
-                                comparisonType = arg1.Replace("System.StringComparison.", "").Replace("StringComparison.", "");
-                            }
-                            if (Enum.TryParse<StringComparison>(comparisonType, out StringComparison comparison))
-                            {
-                                returnVal = text.LastIndexOf(arg0, comparison);
-                                return true;
-                            }
+                            returnVal = text.LastIndexOf(arg0, arg1);
+                            return true;
                         }
                     }
                     else if (string.Equals(_methodMethodName, nameof(string.Length), StringComparison.OrdinalIgnoreCase))
@@ -3913,6 +3914,56 @@ namespace Microsoft.Build.Evaluation
                                 return true;
                             }
                         }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetTargetFrameworkIdentifier), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.GetTargetFrameworkIdentifier(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetTargetFrameworkVersion), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.GetTargetFrameworkVersion(arg0);
+                                return true;
+                            }
+                            if (TryGetArgs(args, out string arg1, out int arg2))
+                            {
+                                returnVal = IntrinsicFunctions.GetTargetFrameworkVersion(arg1, arg2);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.IsTargetFrameworkCompatible), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArgs(args, out string arg0, out string arg1))
+                            {
+                                returnVal = IntrinsicFunctions.IsTargetFrameworkCompatible(arg0, arg1);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetTargetPlatformIdentifier), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.GetTargetPlatformIdentifier(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetTargetPlatformVersion), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.GetTargetPlatformVersion(arg0);
+                                return true;
+                            }
+                            if (TryGetArgs(args, out string arg1, out int arg2))
+                            {
+                                returnVal = IntrinsicFunctions.GetTargetPlatformVersion(arg1, arg2);
+                                return true;
+                            }
+                        }
                     }
                     else if (_receiverType == typeof(Path))
                     {
@@ -4040,6 +4091,33 @@ namespace Microsoft.Build.Evaluation
                     LogFunctionCall("PropertyFunctionsRequiringReflection", objectInstance, args);
                 }
 
+                return false;
+            }
+
+            /// <summary>
+            /// Shortcut to avoid calling into binding if we recognize some most common constructors.
+            /// Analogous to TryExecuteWellKnownFunction but guaranteed to not throw.
+            /// </summary>
+            /// <param name="returnVal">The instance as created by the constructor call.</param>
+            /// <param name="args">Arguments.</param>
+            /// <returns>True if the well known constructor call binding was successful.</returns>
+            private bool TryExecuteWellKnownConstructorNoThrow(out object returnVal, object[] args)
+            {
+                returnVal = null;
+
+                if (_receiverType == typeof(string))
+                {
+                    if (args.Length == 0)
+                    {
+                        returnVal = String.Empty;
+                        return true;
+                    }
+                    if (TryGetArg(args, out string arg0))
+                    {
+                        returnVal = arg0;
+                        return true;
+                    }
+                }
                 return false;
             }
 
@@ -4210,6 +4288,34 @@ namespace Microsoft.Build.Evaluation
 
                 arg0 = args[0] as string;
                 return arg0 != null;
+            }
+
+            private static bool TryGetArgs(object[] args, out string arg0, out StringComparison arg1)
+            {
+                if (args.Length != 2)
+                {
+                    arg0 = null;
+                    arg1 = default;
+
+                    return false;
+                }
+
+                arg0 = args[0] as string;
+
+                // reject enums as ints. In C# this would require a cast, which is not supported in msbuild expressions
+                if (arg0 == null || !(args[1] is string comparisonTypeName) || int.TryParse(comparisonTypeName, out _))
+                {
+                    arg1 = default;
+                    return false;
+                }
+
+                // Allow fully-qualified enum, e.g. "System.StringComparison.OrdinalIgnoreCase"
+                if (comparisonTypeName.Contains('.'))
+                {
+                    comparisonTypeName = comparisonTypeName.Replace("System.StringComparison.", "").Replace("StringComparison.", "");
+                }
+
+                return Enum.TryParse(comparisonTypeName, out arg1);
             }
 
             private static bool TryGetArgs(object[] args, out int arg0, out int arg1)

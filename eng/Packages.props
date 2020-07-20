@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-      <NuGetPackageVersion>5.4.0-rtm.6292</NuGetPackageVersion>
+      <NuGetPackageVersion>5.7.0-rtm.6710</NuGetPackageVersion>
       <NuGetBuildTasksVersion Condition="'$(NuGetBuildTasksVersion)' == ''">$(NuGetPackageVersion)</NuGetBuildTasksVersion>
       <NuGetCommandsVersion Condition="'$(NuGetCommandsVersion)' == ''">$(NuGetPackageVersion)</NuGetCommandsVersion>
       <NuGetProtocolVersion Condition="'$(NuGetProtocolVersion)' == ''">$(NuGetPackageVersion)</NuGetProtocolVersion>
@@ -18,6 +18,7 @@
     <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.16.30" />
     <PackageReference Update="Microsoft.Win32.Registry" Version="4.3.0" />
     <PackageReference Update="NuGet.Build.Tasks" Version="$(NuGetBuildTasksVersion)" />
+    <PackageReference Update="NuGet.Frameworks" Version="$(NuGetBuildTasksVersion)" />
     <PackageReference Update="PdbGit" Version="3.0.41" />
     <PackageReference Update="Shouldly" Version="3.0.0" />
     <PackageReference Update="SourceLink.Create.CommandLine" Version="2.1.2" />
@@ -40,6 +41,7 @@
     <PackageReference Update="System.Security.Permissions" Version="4.7.0" />
     <PackageReference Update="System.Security.Principal.Windows" Version="4.7.0" />
     <PackageReference Update="System.Text.Encoding.CodePages" Version="4.0.1" />
+    <PackageReference Update="System.Text.Json" Version="4.7.0" />
     <PackageReference Update="System.Threading.Tasks.Dataflow" Version="4.9.0" />
     <PackageReference Update="System.Threading.Thread" Version="4.0.0" />
     <PackageReference Update="System.Xml.XPath" Version="4.3.0" />

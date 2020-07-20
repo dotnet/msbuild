@@ -15,7 +15,7 @@
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>16.7.0</VersionPrefix>
+    <VersionPrefix>16.8.0</VersionPrefix>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
@@ -30,6 +30,9 @@
     <UsingToolVisualStudioIbcTraining>true</UsingToolVisualStudioIbcTraining>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
     <UsingToolVSSDK>true</UsingToolVSSDK>
+    <!-- Override Arcade's default VSSDK version with one that supports client enablement.
+         Can be removed after Arcade moves up. -->
+    <MicrosoftVSSDKBuildToolsVersion>16.7.13</MicrosoftVSSDKBuildToolsVersion>
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>

@@ -65,6 +65,21 @@
         <target state="translated">Cesta: {0} překračuje maximální limit pro cestu k OS. Plně kvalifikovaný název souboru musí být kratší než {1} znaků.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SolutionFilterFilterContainsProjectNotInSolution">
+        <source>MSB5028: Solution filter file at "{0}" includes project "{1}" that is not in the solution file at "{2}".</source>
+        <target state="translated">MSB5028: Soubor filtru řešení v {0} obsahuje projekt {1}, který není v souboru řešení v {2}.</target>
+        <note>{StrBegin="MSB5028: "}UE: The project filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionFilterJsonParsingError">
+        <source>MSB5025: Json in solution filter file "{0}" is incorrectly formatted.</source>
+        <target state="translated">MSB5025: JSON v souboru filtru řešení {0} má nesprávný formát.</target>
+        <note>{StrBegin="MSB5025: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionFilterMissingSolutionError">
+        <source>MSB5026: The solution filter file at "{0}" specifies there will be a solution file at "{1}", but that file does not exist.</source>
+        <target state="translated">MSB5026: Soubor filtru řešení v {0} určuje, že v {1} se bude nacházet soubor řešení, ale tento soubor neexistuje.</target>
+        <note>{StrBegin="MSB5026: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
         <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
         <target state="translated">MSB4132: Verze nástrojů {0} je neznámá. Dostupné verze nástrojů jsou {1}.</target>

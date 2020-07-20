@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Microsoft.Build.Collections;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using Microsoft.Build.Execution;
@@ -82,6 +83,9 @@ namespace Microsoft.Build.BackEnd
                         {
                             HashSet<string> keepMetadata = null;
                             HashSet<string> removeMetadata = null;
+                            HashSet<string> matchOnMetadata = null;
+                            MatchOnMetadataOptions matchOnMetadataOptions = MatchOnMetadataConstants.MatchOnMetadataOptionsDefaultValue;
+
                             if (!String.IsNullOrEmpty(child.KeepMetadata))
                             {
                                 var keepMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.KeepMetadata, ExpanderOptions.ExpandAll, child.KeepMetadataLocation).ToList();
@@ -100,6 +104,17 @@ namespace Microsoft.Build.BackEnd
                                 }
                             }
 
+                            if (!String.IsNullOrEmpty(child.MatchOnMetadata))
+                            {
+                                var matchOnMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.MatchOnMetadata, ExpanderOptions.ExpandAll, child.MatchOnMetadataLocation).ToList();
+                                if (matchOnMetadataEvaluated.Count > 0)
+                                {
+                                    matchOnMetadata = new HashSet<string>(matchOnMetadataEvaluated);
+                                }
+
+                                Enum.TryParse(child.MatchOnMetadataOptions, out matchOnMetadataOptions);
+                            }
+
                             if ((child.Include.Length != 0) ||
                                 (child.Exclude.Length != 0))
                             {
@@ -109,7 +124,7 @@ namespace Microsoft.Build.BackEnd
                             else if (child.Remove.Length != 0)
                             {
                                 // It's a remove -- we're "removing" items from the world
-                                ExecuteRemove(child, bucket);
+                                ExecuteRemove(child, bucket, matchOnMetadata, matchOnMetadataOptions);
                             }
                             else
                             {
@@ -205,7 +220,8 @@ namespace Microsoft.Build.BackEnd
                 var itemGroupText = ItemGroupLoggingHelper.GetParameterText(
                     ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix,
                     child.ItemType,
-                    itemsToAdd);
+                    itemsToAdd,
+                    logItemMetadata: true);
                 LoggingContext.LogCommentFromText(MessageImportance.Low, itemGroupText);
             }
 
@@ -219,7 +235,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="child">The item specification to evaluate and remove.</param>
         /// <param name="bucket">The batching bucket.</param>
-        private void ExecuteRemove(ProjectItemGroupTaskItemInstance child, ItemBucket bucket)
+        private void ExecuteRemove(ProjectItemGroupTaskItemInstance child, ItemBucket bucket, HashSet<string> matchOnMetadata, MatchOnMetadataOptions matchingOptions)
         {
             ICollection<ProjectItemInstance> group = bucket.Lookup.GetItems(child.ItemType);
             if (group == null)
@@ -228,7 +244,16 @@ namespace Microsoft.Build.BackEnd
                 return;
             }
 
-            List<ProjectItemInstance> itemsToRemove = FindItemsMatchingSpecification(group, child.Remove, child.RemoveLocation, bucket.Expander);
+            List<ProjectItemInstance> itemsToRemove = null;
+
+            if (matchOnMetadata == null)
+            {
+                itemsToRemove = FindItemsMatchingSpecification(group, child.Remove, child.RemoveLocation, bucket.Expander);
+            }
+            else
+            {
+                itemsToRemove = FindItemsUsingMatchOnMetadata(group, child, bucket, matchOnMetadata, matchingOptions);
+            }
 
             if (itemsToRemove != null)
             {
@@ -237,12 +262,36 @@ namespace Microsoft.Build.BackEnd
                     var itemGroupText = ItemGroupLoggingHelper.GetParameterText(
                         ItemGroupLoggingHelper.ItemGroupRemoveLogMessage,
                         child.ItemType,
-                        itemsToRemove);
+                        itemsToRemove,
+                        logItemMetadata: true);
                     LoggingContext.LogCommentFromText(MessageImportance.Low, itemGroupText);
                 }
 
                 bucket.Lookup.RemoveItems(itemsToRemove);
             }
+        }
+
+        private List<ProjectItemInstance> FindItemsUsingMatchOnMetadata(
+            ICollection<ProjectItemInstance> items,
+            ProjectItemGroupTaskItemInstance child,
+            ItemBucket bucket,
+            HashSet<string> matchOnMetadata,
+            MatchOnMetadataOptions options)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(matchOnMetadata, nameof(matchOnMetadata));
+
+            var itemSpec = new ItemSpec<ProjectPropertyInstance, ProjectItemInstance>(child.Remove, bucket.Expander, child.RemoveLocation, Project.Directory, true);
+
+            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                itemSpec.Fragments.Count == 1
+                && itemSpec.Fragments.First() is ItemSpec<ProjectPropertyInstance, ProjectItemInstance>.ItemExpressionFragment
+                && matchOnMetadata.Count == 1,
+                new BuildEventFileInfo(string.Empty),
+                "OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem",
+                child.RemoveLocation,
+                child.Remove);
+
+            return items.Where(item => itemSpec.MatchesItemOnMetadata(item, matchOnMetadata, options)).ToList();
         }
 
         /// <summary>

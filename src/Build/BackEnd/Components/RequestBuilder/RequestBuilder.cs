@@ -1081,7 +1081,7 @@ namespace Microsoft.Build.BackEnd
 
             if (MSBuildEventSource.Log.IsEnabled())
             {
-                MSBuildEventSource.Log.BuildProjectStop(_requestEntry.RequestConfiguration.ProjectFullPath, allTargets.Aggregate((f, s) => f + ", " + s));
+                MSBuildEventSource.Log.BuildProjectStop(_requestEntry.RequestConfiguration.ProjectFullPath, string.Join(", ", allTargets));
             }
 
             return result;

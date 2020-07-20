@@ -58,6 +58,13 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
     public class SimpleScenarios : IDisposable
     {
+        private readonly ITestOutputHelper _output;
+
+        public SimpleScenarios(ITestOutputHelper testOutputHelper)
+        {
+            _output = testOutputHelper;
+        }
+
         /// <summary>
         /// Since we create a project with the same name in many of these tests, and two projects with
         /// the same name cannot be loaded in a ProjectCollection at the same time, we should unload the
@@ -84,7 +91,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                         <Message Text=`Property value is '$(MyPropertyWithSemicolons)'` />
                     </Target>
                 </Project>
-                ");
+                ", logger: new MockLogger(_output));
 
             logger.AssertLogContains("Property value is 'abc ; def ; ghi'");
         }
@@ -108,7 +115,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                         <Message Text=`Property value is '$(MyPropertyWithSemicolons)'` />
                     </Target>
                 </Project>
-                ");
+                ", logger: new MockLogger(_output));
 
             logger.AssertLogContains("Property value is 'abc ; def ; ghi'");
         }
@@ -138,7 +145,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
                 </Project>
 
-                ", new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath));
+                ", new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath),
+                logger: new MockLogger(_output));
 
             logger.AssertLogContains("Received TaskItemParam: 123 abc ; def ; ghi 789");
         }
@@ -167,7 +175,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
                 </Project>
 
-                ", new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath));
+                ", new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath),
+                logger: new MockLogger(_output));
 
             logger.AssertLogContains("Received TaskItemParam: 123 abc ; def ; ghi 789");
         }
@@ -544,7 +553,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
                 </Project>
 
-                ", inputFile, outputFile));
+                ", inputFile, outputFile),
+                logger: new MockLogger(_output));
 
                 logger.AssertLogContains("Resources = aaa%3bbbb.resx;ccc%3bddd.resx");
             }
@@ -575,7 +585,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                     </Target>
                 </Project>
 
-                ");
+                ", logger: new MockLogger(_output));
 
             logger.AssertLogContains("Transformed item list: 'X;X%3bX.txt    Y;Y%3bY.txt    Z;Z%3bZ.txt'");
         }
@@ -604,7 +614,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                     </Target>
                 </Project>
 
-                ");
+                ", logger: new MockLogger(_output));
 
             logger.AssertLogContains("Transformed item list: 'X;X%3bX.txt    Y;Y%3bY.txt    Z;Z%3bZ.txt'");
         }

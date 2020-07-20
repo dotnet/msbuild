@@ -323,6 +323,39 @@ namespace Microsoft.Build.Evaluation
 
                 return needToExpandMetadataForEachItem;
             }
+
+            /// <summary>
+            /// Is this spec a single reference to a specific item?
+            /// </summary>
+            /// <returns>True if the item is a simple reference to the referenced item type.</returns>
+            protected static bool ItemspecContainsASingleBareItemReference(ItemSpec<P, I> itemSpec, string referencedItemType)
+            {
+                if (itemSpec.Fragments.Count != 1)
+                {
+                    return false;
+                }
+
+                var itemExpressionFragment = itemSpec.Fragments[0] as ItemSpec<P, I>.ItemExpressionFragment;
+                if (itemExpressionFragment == null)
+                {
+                    return false;
+                }
+
+                if (!itemExpressionFragment.Capture.ItemType.Equals(referencedItemType, StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+
+                // If the itemSpec is a single call to an item function, like @(X->Something(...)), it may get this
+                // far, but shouldn't be treated as a single reference: the item function may return entirely
+                // different results from a bare reference like @(X).
+                if (itemExpressionFragment.Capture.Captures is object)
+                {
+                    return false;
+                }
+
+                return true;
+            }
         }
     }
 }

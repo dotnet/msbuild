@@ -126,9 +126,13 @@
     <Compile Include="..\Shared\INodePacketHandler.cs" />
     <Compile Include="..\Shared\ITranslatable.cs" />
     <Compile Include="..\Shared\ITranslator.cs" />
+    <Compile Include="..\Shared\TranslatorHelpers.cs" />
     <Compile Include="..\Shared\BinaryTranslator.cs" />
     <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\InterningBinaryReader.cs" />
+    <Compile Include="..\Shared\IInternable.cs" />
+    <Compile Include="..\Shared\WeakStringCache.cs" />
+    <Compile Include="..\Shared\WeakStringCache.Concurrent.cs" />
     <Compile Include="..\Shared\OpportunisticIntern.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskComplete.cs" />

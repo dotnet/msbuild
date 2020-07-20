@@ -20,13 +20,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
    </PropertyGroup>
 
    <PropertyGroup Condition="'$(IsGraphBuild)' == 'true'">
-      <!-- Microsoft.Net.Sdk adds all transitive project references to ProjectReference. It does this at build time
-           via a target. This fails the undeclared msbuild reference /isolate constraint, so disable transitive
-           references.
-           Do not disable transitive references if BuildProjectReferences is false. If building references is false,
-           then MSBuild won't try to build the transitive references, which won't trigger undeclared reference constraints.
-          -->
-      <DisableTransitiveProjectReferences Condition="'$(BuildProjectReferences)' != 'false' and '$(DisableTransitiveProjectReferences)' == ''">true</DisableTransitiveProjectReferences>
+      <AddTransitiveProjectReferencesInStaticGraph Condition="'$(AddTransitiveProjectReferencesInStaticGraph)' == '' and '$(UsingMicrosoftNETSdk)' == 'true' and '$(DisableTransitiveProjectReferences)' != 'true'">true</AddTransitiveProjectReferencesInStaticGraph>
    </PropertyGroup>
 
    <ItemGroup Condition="'$(IsGraphBuild)' == 'true'">
@@ -43,7 +37,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     Properties for extension of ProjectReferenceTargets.
     Append any current value which may have been provided in a Directory.Build.props since the intent was likely to append, not prepend.
   -->
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(IsGraphBuild)' == 'true'">
     <!-- Empty case is for outer builds which do not import the target files that set BuildProjectReferences -->
     <_MainReferenceTarget Condition="'$(BuildProjectReferences)' == '' or '$(BuildProjectReferences)' == 'true'">.projectReferenceTargetsOrDefaultTargets</_MainReferenceTarget>
     <_MainReferenceTarget Condition="'$(_MainReferenceTarget)' == ''">GetTargetPath</_MainReferenceTarget>
@@ -61,7 +55,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ProjectReferenceTargetsForGetCopyToPublishDirectoryItems>GetCopyToPublishDirectoryItems;$(ProjectReferenceTargetsForGetCopyToPublishDirectoryItems)</ProjectReferenceTargetsForGetCopyToPublishDirectoryItems>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(IsGraphBuild)' == 'true'">
     <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuildInOuterBuild)" Condition=" '$(ProjectReferenceTargetsForBuildInOuterBuild)' != '' " OuterBuild="true"/>
     <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuild)" Condition=" '$(ProjectReferenceTargetsForBuild)' != '' " />
 

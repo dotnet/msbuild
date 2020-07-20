@@ -75,8 +75,8 @@ namespace Microsoft.Build.Evaluation
                             if (!insideItemList)
                             {
                                 // End of segment, so add it to the list
-                                segment = _expression.Substring(segmentStart, _index - segmentStart).Trim();
-                                if (segment.Length > 0)
+                                segment = GetExpressionSubstring(segmentStart, _index - segmentStart);
+                                if (segment != null)
                                 {
                                     _current = segment;
                                     return true;
@@ -116,21 +116,39 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 // Reached the end of the string: what's left is another segment
-                segment = _expression.Substring(segmentStart, _expression.Length - segmentStart).Trim();
-                if (segment.Length > 0)
-                {
-                    _current = segment;
-                    return true;
-                }
-
-                _current = null;
-                return false;
+                _current = GetExpressionSubstring(segmentStart, _expression.Length - segmentStart);
+                return _current != null;
             }
 
             public void Reset()
             {
                 _current = default(string);
                 _index = 0;
+            }
+
+            /// <summary>
+            /// Returns a whitespace-trimmed and possibly interned substring of the expression.
+            /// </summary>
+            /// <param name="startIndex">Start index of the substring.</param>
+            /// <param name="length">Length of the substring.</param>
+            /// <returns>Equivalent to _expression.Substring(startIndex, length).Trim() or null if the trimmed substring is empty.</returns>
+            private string GetExpressionSubstring(int startIndex, int length)
+            {
+                int endIndex = startIndex + length;
+                while (startIndex < endIndex && char.IsWhiteSpace(_expression[startIndex]))
+                {
+                    startIndex++;
+                }
+                while (startIndex < endIndex && char.IsWhiteSpace(_expression[endIndex - 1]))
+                {
+                    endIndex--;
+                }
+                if (startIndex < endIndex)
+                {
+                    var target = new SubstringInternTarget(_expression, startIndex, endIndex - startIndex);
+                    return OpportunisticIntern.InternableToString(target);
+                }
+                return null;
             }
         }
     }

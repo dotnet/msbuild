@@ -1,6 +1,66 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
@@ -9,9 +69,16 @@
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="name" use="required" type="xsd:string" />
               <xsd:attribute name="type" type="xsd:string" />
               <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="data">
@@ -20,11 +87,10 @@
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
                 <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
-              <xsd:attribute name="UESanitized" type="xsd:boolean" msdata:Ordinal="3" />
-              <xsd:attribute name="Visibility" type="Visibility_Type" msdata:Ordinal="4" />
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="5" />
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="6" />
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
@@ -38,13 +104,6 @@
         </xsd:choice>
       </xsd:complexType>
     </xsd:element>
-    <xsd:simpleType name="Visibility_Type">
-      <xsd:restriction base="xsd:string">
-        <xsd:enumeration value="Public" />
-        <xsd:enumeration value="Obsolete" />
-        <xsd:enumeration value="Private_OM" />
-      </xsd:restriction>
-    </xsd:simpleType>
   </xsd:schema>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -53,214 +112,214 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AmbiguousTaskParameterError" UESanitized="false" Visibility="Public">
+  <data name="AmbiguousTaskParameterError" xml:space="preserve">
     <value>MSB4001: The "{0}" task has more than one parameter called "{1}".</value>
     <comment>{StrBegin="MSB4001: "}UE: This message is shown when a task has more than one .NET property with the same name -- it's unclear which of
     those properties the task wants to use as a parameter in project files.</comment>
   </data>
-  <data name="AttributeTypeLoadError" UESanitized="false" Visibility="Public">
+  <data name="AttributeTypeLoadError" xml:space="preserve">
     <value>MSB4002: There was a failure retrieving the attributes for parameters in the "{0}" task. {1}</value>
     <comment>{StrBegin="MSB4002: "}UE: This message is shown when the .NET attributes that a task's .NET properties are decorated with, cannot be
     retrieved -- this is typically because the .NET classes that define the .NET attributes cannot be loaded because the assembly
     they are defined in cannot be found, or the classes themselves cannot be found.</comment>
   </data>
-  <data name="BadlyCasedSpecialTaskAttribute" UESanitized="false" Visibility="Public">
+  <data name="BadlyCasedSpecialTaskAttribute" xml:space="preserve">
     <value>MSB4003: "{0}" is a reserved attribute of the &lt;{1}&gt; element, and must be spelled with the correct casing. This attribute cannot be used as a parameter to the "{2}" task.</value>
     <comment>{StrBegin="MSB4003: "}UE: Tasks are not allowed to use incorrect case for reserved attributes on the task nodes e.g. "continueonerror"
     instead of the "ContinueOnError".</comment>
   </data>
-  <data name="BuildInProgress" UESanitized="false" Visibility="Public">
+  <data name="BuildInProgress" xml:space="preserve">
     <value>The operation cannot be completed because a build is already in progress.</value>
   </data>
-  <data name="NoBuildInProgress" UESanitized="false" Visibility="Public">
+  <data name="NoBuildInProgress" xml:space="preserve">
     <value>The operation cannot be completed because BeginBuild has not yet been called.</value>
   </data>
-  <data name="WaitingForEndOfBuild" UESanitized="false" Visibility="Public">
+  <data name="WaitingForEndOfBuild" xml:space="preserve">
     <value>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</value>
   </data>
-  <data name="SubmissionAlreadyComplete" UESanitized="false" Visibility="Public">
+  <data name="SubmissionAlreadyComplete" xml:space="preserve">
     <value>The operation cannot be completed because the submission has already been executed.</value>
   </data>
-  <data name="ShouldNotDisposeWhenBuildManagerActive" UESanitized="false" Visibility="Public">
+  <data name="ShouldNotDisposeWhenBuildManagerActive" xml:space="preserve">
     <value>Cannot dispose the build manager because it is not idle.</value>
   </data>
-  <data name="BuildAbortedWithMessage" UESanitized="false" Visibility="Public">
+  <data name="BuildAbortedWithMessage" xml:space="preserve">
     <value>MSB4197: Build was canceled. {0}</value>
     <comment>{StrBegin="MSB4197: "} Error when the build stops suddenly for some reason. For example, because a child node died.</comment>
   </data>
-  <data name="BuildFinishedFailure" UESanitized="false" Visibility="Public">
+  <data name="BuildFinishedFailure" xml:space="preserve">
     <value>Build FAILED.</value>
   </data>
-  <data name="BuildFinishedSuccess" UESanitized="false" Visibility="Public">
+  <data name="BuildFinishedSuccess" xml:space="preserve">
     <value>Build succeeded.</value>
   </data>
-  <data name="BuildStartedWithTime" UESanitized="false" Visibility="Public">
+  <data name="BuildStartedWithTime" xml:space="preserve">
     <value>Build started {0}.</value>
   </data>
-  <data name="BuildTargetCompletely">
+  <data name="BuildTargetCompletely" xml:space="preserve">
     <value>Building target "{0}" completely.</value>
     <comment>{0} is the name of the target.</comment>
   </data>
-  <data name="BuildTargetCompletelyNoInputsSpecified">
+  <data name="BuildTargetCompletelyNoInputsSpecified" xml:space="preserve">
     <value>No input files were specified.</value>
   </data>
-  <data name="BuildTargetCompletelyInputNewer">
+  <data name="BuildTargetCompletelyInputNewer" xml:space="preserve">
     <value>Input file "{0}" is newer than output file "{1}".</value>
     <comment>{0} and {1} are filenames on disk.</comment>
   </data>
-  <data name="BuildTargetCompletelyOutputDoesntExist">
+  <data name="BuildTargetCompletelyOutputDoesntExist" xml:space="preserve">
     <value>Output file "{0}" does not exist.</value>
     <comment>{0} is a filename on disk.</comment>
   </data>
-  <data name="BuildTargetCompletelyInputDoesntExist">
+  <data name="BuildTargetCompletelyInputDoesntExist" xml:space="preserve">
     <value>Input file "{0}" does not exist.</value>
     <comment>{0} is a filename on disk.</comment>
   </data>
-  <data name="BuildTargetPartially">
+  <data name="BuildTargetPartially" xml:space="preserve">
     <value>Building target "{0}" partially, because some output files are out of date with respect to their input files.</value>
     <comment>{0} is the name of the target.</comment>
   </data>
-  <data name="BuildTargetPartiallyInputNewer">
+  <data name="BuildTargetPartiallyInputNewer" xml:space="preserve">
     <value>[{0}: Input={1}, Output={2}] Input file is newer than output file.</value>
     <comment>{0} is the name of an MSBuild item.  {1} and {2} are filenames on disk.</comment>
   </data>
-  <data name="BuildTargetPartiallyOutputDoesntExist">
+  <data name="BuildTargetPartiallyOutputDoesntExist" xml:space="preserve">
     <value>[{0}: Input={1}, Output={2}] Output file does not exist.</value>
     <comment>{0} is the name of an MSBuild item.  {1} and {2} are filenames on disk.</comment>
   </data>
-  <data name="BuildTargetPartiallyInputDoesntExist">
+  <data name="BuildTargetPartiallyInputDoesntExist" xml:space="preserve">
     <value>[{0}: Input={1}, Output={2}] Input file does not exist.</value>
     <comment>{0} is the name of an MSBuild item.  {1} and {2} are filenames on disk.</comment>
   </data>
-  <data name="CannotAccessKnownAttributes" UESanitized="false" Visibility="Private_OM">
+  <data name="CannotAccessKnownAttributes" xml:space="preserve">
     <value>The attribute "{0}" is a known MSBuild attribute, and cannot be accessed using this method.</value>
   </data>
-  <data name="CannotEvaluateItemMetadata" UESanitized="false" Visibility="Public">
+  <data name="CannotEvaluateItemMetadata" xml:space="preserve">
     <value>MSB4023: Cannot evaluate the item metadata "%({0})". {1}</value>
     <comment>{StrBegin="MSB4023: "}UE: This message is shown when the value of an item metadata cannot be computed for some reason e.g. trying to apply
     %(RootDir) to an item-spec that's not a valid path, would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</comment>
   </data>
-  <data name="CannotExpandItemMetadata" UESanitized="false" Visibility="Public">
+  <data name="CannotExpandItemMetadata" xml:space="preserve">
     <value>MSB4248: Cannot expand metadata in expression "{0}". {1}</value>
     <comment>{StrBegin="MSB4248: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</comment>
   </data>
-  <data name="CouldNotFindMSBuildExe">
+  <data name="CouldNotFindMSBuildExe" xml:space="preserve">
     <value>MSB4193: MSBuild.exe could not be launched as a child node as it could not be found at the location "{0}". If necessary, specify the correct location in the BuildParameters, or with the MSBUILD_EXE_PATH environment variable.</value>
     <comment>{StrBegin="MSB4193: "}</comment>
   </data>
-  <data name="CouldNotConnectToMSBuildExe">
+  <data name="CouldNotConnectToMSBuildExe" xml:space="preserve">
     <value>MSB4218: Failed to successfully launch or connect to a child MSBuild.exe process. Verify that the MSBuild.exe "{0}" launches successfully, and that it is loading the same microsoft.build.dll that the launching process loaded. If the location seems incorrect, try specifying the correct location in the BuildParameters object, or with the MSBUILD_EXE_PATH environment variable.</value>
     <comment>{StrBegin="MSB4218: "}</comment>
   </data>
-  <data name="CannotModifyReservedItem" UESanitized="false" Visibility="Public">
+  <data name="CannotModifyReservedItem" xml:space="preserve">
     <value>MSB4117: The "{0}" item name is reserved, and cannot be used.</value>
     <comment>{StrBegin="MSB4117: "}UE: This message is shown when the user tries to redefine one of the reserved MSBuild items e.g. @(Choose)</comment>
   </data>
-  <data name="CannotModifyReservedItemMetadata" UESanitized="false" Visibility="Public">
+  <data name="CannotModifyReservedItemMetadata" xml:space="preserve">
     <value>MSB4118: The "{0}" item metadata name is reserved, and cannot be used.</value>
     <comment>{StrBegin="MSB4118: "}UE: This message is shown when the user tries to redefine one of the reserved MSBuild item metadata names e.g. %(FullPath). Only MSBuild can set those.</comment>
   </data>
-  <data name="CannotModifyReservedProperty" UESanitized="false" Visibility="Public">
+  <data name="CannotModifyReservedProperty" xml:space="preserve">
     <value>MSB4004: The "{0}" property is reserved, and cannot be modified.</value>
     <comment>{StrBegin="MSB4004: "}UE: This message is shown when the user tries to redefine one of the reserved MSBuild properties e.g. $(MSBuildProjectFile)</comment>
   </data>
-  <data name="CannotPassMultipleItemsIntoScalarParameter" UESanitized="false" Visibility="Public">
+  <data name="CannotPassMultipleItemsIntoScalarParameter" xml:space="preserve">
     <value>MSB4094: "{0}" is an invalid value for the "{1}" parameter of the "{3}" task. Multiple items cannot be passed into a parameter of type "{2}".</value>
     <comment>{StrBegin="MSB4094: "}
             UE: This error is shown when a project tries to pass multiple items into a task parameter of type ITaskItem (singular).
     </comment>
   </data>
-  <data name="CannotPassMultipleItemsIntoScalarFunction" UESanitized="false" Visibility="Public">
+  <data name="CannotPassMultipleItemsIntoScalarFunction" xml:space="preserve">
     <value>MSB4115: The "{0}" function only accepts a scalar value, but its argument "{1}" evaluates to "{2}" which is not a scalar value.</value>
     <comment>{StrBegin="MSB4115: "}
         UE: This error is shown when a project tries to pass multiple items into a function in a conditional expression, that can only accept a scalar value (such as the "exists()" function).
     </comment>
   </data>
-  <data name="CannotReferenceItemMetadataWithoutItemName" UESanitized="false" Visibility="Public">
+  <data name="CannotReferenceItemMetadataWithoutItemName" xml:space="preserve">
     <value>MSB4095: The item metadata %({0}) is being referenced without an item name.  Specify the item name by using %(itemname.{0}).</value>
     <comment>{StrBegin="MSB4095: "}</comment>
   </data>
-  <data name="ChildElementsBelowRemoveNotAllowed" UESanitized="false" Visibility="Public">
+  <data name="ChildElementsBelowRemoveNotAllowed" xml:space="preserve">
     <value>MSB4162: &lt;{0}&gt; is not valid. Child elements are not allowed below a item remove element.</value>
     <comment>{StrBegin="MSB4162: "}</comment>
   </data>
-  <data name="ChildExitedPrematurely" UESanitized="false" Visibility="Public">
+  <data name="ChildExitedPrematurely" xml:space="preserve">
     <value>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.{2}</value>
     <comment>{StrBegin="MSB4166: "} {2} is exception text if any</comment>
   </data>
-  <data name="ChooseMustContainWhen" UESanitized="false" Visibility="Public">
+  <data name="ChooseMustContainWhen" xml:space="preserve">
     <value>MSB4085: A &lt;Choose&gt; must contain at least one &lt;When&gt;.</value>
     <comment>{StrBegin="MSB4085: "}</comment>
   </data>
-  <data name="ChooseOverflow" UESanitized="false" Visibility="Public">
+  <data name="ChooseOverflow" xml:space="preserve">
     <value>MSB4114: &lt;Choose&gt; elements cannot be nested more than {0} levels deep.</value>
     <comment>{StrBegin="MSB4114: "}UE: This message appears if the project file contains unreasonably nested Choose elements.
     LOCALIZATION: Do not localize "Choose" as it is an XML element name.</comment>
   </data>
-  <data name="CircularDependency" UESanitized="false" Visibility="Public">
+  <data name="CircularDependency" xml:space="preserve">
     <value>MSB4006: There is a circular dependency in the target dependency graph involving target "{0}".</value>
     <comment>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</comment>
   </data>
-  <data name="ComparisonOnNonNumericExpression" UESanitized="false" Visibility="Public">
+  <data name="ComparisonOnNonNumericExpression" xml:space="preserve">
     <value>MSB4086: A numeric comparison was attempted on "{1}" that evaluates to "{2}" instead of a number, in condition "{0}".</value>
     <comment>{StrBegin="MSB4086: "}</comment>
   </data>
-  <data name="ConditionMaybeEvaluatedIncorrectly" UESanitized="false" Visibility="Public">
+  <data name="ConditionMaybeEvaluatedIncorrectly" xml:space="preserve">
     <value>MSB4130: The condition "{0}" may have been evaluated incorrectly in an earlier version of MSBuild. Please verify that the order of the AND and OR clauses is written as intended. To avoid this warning, add parentheses to make the evaluation order explicit.</value>
     <comment>{StrBegin="MSB4130: "}</comment>
   </data>
-  <data name="ConditionNotBoolean" UESanitized="false" Visibility="Public">
+  <data name="ConditionNotBoolean" xml:space="preserve">
     <value>MSB4087: Specified condition "{0}" does not evaluate to a boolean.</value>
     <comment>{StrBegin="MSB4087: "}</comment>
   </data>
-  <data name="ConditionNotBooleanDetail" UESanitized="false" Visibility="Public">
+  <data name="ConditionNotBooleanDetail" xml:space="preserve">
     <value>MSB4113: Specified condition "{0}" evaluates to "{1}" instead of a boolean.</value>
     <comment>{StrBegin="MSB4113: "}</comment>
   </data>
-  <data name="ConfigFileReadError" UESanitized="false" Visibility="Public">
+  <data name="ConfigFileReadError" xml:space="preserve">
     <value>MSB4136: Error reading the toolset information from the configuration file "{0}". {1}</value>
     <comment>{StrBegin="MSB4136: "}</comment>
   </data>
-  <data name="ConflictingValuesOfMSBuildToolsPath" UESanitized="false" Visibility="Public">
+  <data name="ConflictingValuesOfMSBuildToolsPath" xml:space="preserve">
     <value>MSB4142: MSBuildToolsPath is not the same as MSBuildBinPath for the ToolsVersion "{0}" defined at "{1}". If both are present they must have the same value.</value>
     <comment>{StrBegin="MSB4142: "}</comment>
   </data>
-  <data name="DefaultTasksFileFailure" UESanitized="false" Visibility="Public">
+  <data name="DefaultTasksFileFailure" xml:space="preserve">
     <value>MSB4009: The default tasks file could not be successfully loaded. {0}</value>
     <comment>{StrBegin="MSB4009: "}UE: This message is shown when one of the default tasks file (*.tasks) located alongside the MSBuild binaries cannot
     be opened/parsed. "{0}" contains a message explaining why. The filename itself is not part of the message but is provided
     separately to loggers.
     LOCALIZATION: "{0}" is a message from some FX method and is already localized.</comment>
   </data>
-  <data name="DefaultTasksFileLoadFailureWarning" UESanitized="false" Visibility="Public">
+  <data name="DefaultTasksFileLoadFailureWarning" xml:space="preserve">
     <value>MSB4010: The "{0}" files could not be successfully loaded from their expected location "{1}". Default tasks will not be available. {2}</value>
     <comment>{StrBegin="MSB4010: "}UE: This message is shown when the default tasks files that are located alongside the MSBuild binaries cannot be
     found, either because they don't exist, or because of lack of permissions. "{2}" contains a message explaining why.
     LOCALIZATION: "{2}" is a message from some FX method and is already localized.</comment>
   </data>
-  <data name="ImportIntroducesCircularity">
+  <data name="ImportIntroducesCircularity" xml:space="preserve">
     <value>Importing the file "{0}" into the file "{1}" results in a circular dependency.</value>
     <comment>
        {0} is a file imported into the file "{1}" such that it results in a circular dependency. For e.g. if t1.targets imports
        t2.targets and t2.targets tries to import t1.targets, then it results in a circular dependency.
     </comment>
   </data>
-  <data name="SearchPathsForMSBuildExtensionsPath">
-      <value>Search paths being used for {0} are {1}</value>
+  <data name="SearchPathsForMSBuildExtensionsPath" xml:space="preserve">
+    <value>Search paths being used for {0} are {1}</value>
   </data>
-  <data name="TryingExtensionsPath">
-      <value>Trying to import {0} using extensions path {1}</value>
+  <data name="TryingExtensionsPath" xml:space="preserve">
+    <value>Trying to import {0} using extensions path {1}</value>
   </data>
-  <data name="OverrideTasksFileFailure" UESanitized="false" Visibility="Public">
+  <data name="OverrideTasksFileFailure" xml:space="preserve">
     <value>MSB4194: The override tasks file could not be successfully loaded. {0}</value>
     <comment>
       {StrBegin="MSB4194: "}UE: This message is shown when one of the override tasks file (*.overridetasks) located alongside the MSBuild binaries cannot
@@ -269,19 +328,19 @@
       LOCALIZATION: "{0}" is a message from some FX method and is already localized.
     </comment>
   </data>
-  <data name="OverrideTaskNotRootedPath" UESanitized="false" Visibility="Public">
+  <data name="OverrideTaskNotRootedPath" xml:space="preserve">
     <value>The override tasks path "{0}" must not be a relative path and must exist on disk. Default tasks will not be overridden.</value>
     <comment>
         UE: This message is shown when the override tasks path in the registry or passed to the toolset is not a full path.
     </comment>
   </data>
-  <data name="OverrideTaskProblemWithPath" UESanitized="false" Visibility="Public">
+  <data name="OverrideTaskProblemWithPath" xml:space="preserve">
     <value>A problem occurred loading the override tasks path "{0}". {1}</value>
     <comment>
         UE: This message is shown when the override tasks path in the registry or passed to the toolset is not a full path.
     </comment>
   </data>
- <data name="OverrideTasksFileLoadFailureWarning" UESanitized="false" Visibility="Public">
+  <data name="OverrideTasksFileLoadFailureWarning" xml:space="preserve">
     <value>MSB4196: The "{0}" files could not be successfully loaded from their expected location "{1}". Default tasks will not be overridden. {2}</value>
     <comment>
       {StrBegin="MSB4196: "}UE: This message is shown when the override tasks files that are located alongside the MSBuild binaries cannot be
@@ -289,228 +348,228 @@
       LOCALIZATION: "{2}" is a message from some FX method and is already localized.
     </comment>
   </data>
-  <data name="TasksPropertyBagError" UESanitized="false" Visibility="Public">
+  <data name="TasksPropertyBagError" xml:space="preserve">
     <value>MSB4195: There was an error gathering properties for tasks file evaluation. {0}</value>
     <comment>
       {StrBegin="MSB4195: "}UE: This message is shown when the gathering of properties for the evaluation of override and defaults tasks has an exception. "{0"} will be the exception message</comment>
   </data>
-  <data name="DefaultToolsVersionNotFound" UESanitized="false" Visibility="Public">
+  <data name="DefaultToolsVersionNotFound" xml:space="preserve">
     <value>MSB4133: A default tools version "{0}" was specified, but its definition could not be found.</value>
     <comment>{StrBegin="MSB4133: "}</comment>
   </data>
-  <data name="DuplicateImport" UESanitized="false" Visibility="Public">
+  <data name="DuplicateImport" xml:space="preserve">
     <value>MSB4011: "{0}" cannot be imported again. It was already imported at "{1}". This is most likely a build authoring error. This subsequent import will be ignored. {2}</value>
     <comment>{StrBegin="MSB4011: "}</comment>
   </data>
-  <data name="UsedUninitializedProperty" Visibility="Public">
+  <data name="UsedUninitializedProperty" xml:space="preserve">
     <value>MSB4211: The property "{0}" is being set to a value for the first time, but it was already consumed at "{1}".</value>
     <comment>{StrBegin="MSB4211: "}</comment>
   </data>
-  <data name="SelfImport" Visibility="Public">
+  <data name="SelfImport" xml:space="preserve">
     <value>MSB4210: "{0}" is attempting to import itself, directly or indirectly. This is most likely a build authoring error. The import will be ignored.</value>
     <comment>{StrBegin="MSB4210: "}</comment>
   </data>
-  <data name="DuplicateProjectExtensions" UESanitized="false" Visibility="Public">
+  <data name="DuplicateProjectExtensions" xml:space="preserve">
     <value>MSB4079: The &lt;ProjectExtensions&gt; element occurs more than once.</value>
     <comment>{StrBegin="MSB4079: "}</comment>
   </data>
-  <data name="EmbeddedItemVectorCannotBeItemized" UESanitized="false" Visibility="Public">
+  <data name="EmbeddedItemVectorCannotBeItemized" xml:space="preserve">
     <value>MSB4012: The expression "{0}" cannot be used in this context. Item lists cannot be concatenated with other strings where an item list is expected. Use a semicolon to separate multiple item lists.</value>
     <comment>{StrBegin="MSB4012: "}UE: This message is shown when the user does not properly specify an item list when an item list is expected
     e.g. "badprefix@(foo)badsuffix" instead of "prefix; @(foo); suffix"</comment>
   </data>
-  <data name="EndOfInputTokenName" UESanitized="false" Visibility="Public">
+  <data name="EndOfInputTokenName" xml:space="preserve">
     <value>end of input</value>
     <comment>This is the name of the "EndOfInput" token. It is displayed in quotes as the
     unexpected char or token when the end of a conditional was unexpectedly reached.</comment>
   </data>
-  <data name="ErrorConvertedIntoWarning" UESanitized="false" Visibility="Public">
+  <data name="ErrorConvertedIntoWarning" xml:space="preserve">
     <value>The previous error was converted to a warning because the task was called with ContinueOnError=true.</value>
   </data>
-  <data name="ErrorCount" UESanitized="false" Visibility="Public">
+  <data name="ErrorCount" xml:space="preserve">
     <value>{0} Error(s)</value>
   </data>
-  <data name="ErrorCreatingToolset" UESanitized="false" Visibility="Public">
+  <data name="ErrorCreatingToolset" xml:space="preserve">
     <value>MSB4159: Error creating the toolset "{0}". {1}</value>
     <comment>{StrBegin="MSB4159: "}</comment>
   </data>
-  <data name="ErrorEvaluatingToolsetPropertyExpression" UESanitized="false" Visibility="Public">
+  <data name="ErrorEvaluatingToolsetPropertyExpression" xml:space="preserve">
     <value>MSB4146: Cannot evaluate the property expression "{0}" found at "{1}". {2}</value>
     <comment>{StrBegin="MSB4146: "}</comment>
   </data>
-  <data name="ErrorWarningMessageNotSupported" UESanitized="false" Visibility="Public">
+  <data name="ErrorWarningMessageNotSupported" xml:space="preserve">
     <value>The &lt;{0}&gt; tag is no longer supported as a child of the &lt;Project&gt; element. Place this tag within a target, and add the name of the target to the "InitialTargets" attribute of the &lt;Project&gt; element.</value>
   </data>
-  <data name="EvaluationStarted" UESanitized="false" Visibility="Public">
+  <data name="EvaluationStarted" xml:space="preserve">
     <value>Evaluation started ("{0}")</value>
   </data>
-  <data name="EvaluationFinished" UESanitized="false" Visibility="Public">
+  <data name="EvaluationFinished" xml:space="preserve">
     <value>Evaluation finished ("{0}")</value>
   </data>
-  <data name="ExecutingTaskInTaskHost">
+  <data name="ExecutingTaskInTaskHost" xml:space="preserve">
     <value>Launching task "{0}" from assembly "{1}" in an external task host with a runtime of "{2}" and a process architecture of "{3}".</value>
   </data>
-  <data name="ExpressionDoesNotEvaluateToBoolean" UESanitized="false" Visibility="Public">
+  <data name="ExpressionDoesNotEvaluateToBoolean" xml:space="preserve">
     <value>MSB4100: Expected "{0}" to evaluate to a boolean instead of "{1}", in condition "{2}".</value>
     <comment>{StrBegin="MSB4100: "}</comment>
   </data>
-  <data name="FailedToRetrieveTaskOutputs" UESanitized="false" Visibility="Public">
+  <data name="FailedToRetrieveTaskOutputs" xml:space="preserve">
     <value>MSB4028: The "{0}" task's outputs could not be retrieved from the "{1}" parameter. {2}</value>
     <comment>{StrBegin="MSB4028: "}</comment>
   </data>
-  <data name="FatalBuildError" UESanitized="false" Visibility="Public">
+  <data name="FatalBuildError" xml:space="preserve">
     <value>MSB4014: The build stopped unexpectedly because of an internal failure.</value>
     <comment>{StrBegin="MSB4014: "}UE: This message is shown when an unhandled exception terminates the build. The cause is most likely a programming
     error in the build engine.</comment>
   </data>
-  <data name="FatalErrorDuringLoggerShutdown" UESanitized="false" Visibility="Public">
+  <data name="FatalErrorDuringLoggerShutdown" xml:space="preserve">
     <value>MSB4015: The build stopped unexpectedly because the "{0}" logger failed unexpectedly during shutdown.</value>
     <comment>{StrBegin="MSB4015: "}UE: This message is used for a special exception that is thrown when a logger fails while shutting down (most likely
     because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a special
     exception to abort the build.</comment>
   </data>
-  <data name="FatalErrorWhileInitializingLogger" UESanitized="false" Visibility="Public">
+  <data name="FatalErrorWhileInitializingLogger" xml:space="preserve">
     <value>MSB4016: The build stopped unexpectedly because the "{0}" logger failed unexpectedly during initialization.</value>
     <comment>{StrBegin="MSB4016: "}UE: This message is used for a special exception that is thrown when a logger fails while initializing itself (most
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
     special exception to abort the build.</comment>
   </data>
-  <data name="FatalErrorWhileLogging" UESanitized="false" Visibility="Public">
+  <data name="FatalErrorWhileLogging" xml:space="preserve">
     <value>MSB4017: The build stopped unexpectedly because of an unexpected logger failure.</value>
     <comment>{StrBegin="MSB4017: "}UE: This message is used for a special exception that is thrown when a logger fails while logging an event (most
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
     special exception to abort the build.</comment>
   </data>
-  <data name="FatalTaskError" UESanitized="false" Visibility="Public">
+  <data name="FatalTaskError" xml:space="preserve">
     <value>MSB4018: The "{0}" task failed unexpectedly.</value>
     <comment>{StrBegin="MSB4018: "}UE: This message is shown when a task terminates because of an unhandled exception. The cause is most likely a
     programming error in the task; however, it is also possible that the unhandled exception originated in the engine, and was
     surfaced through the task when the task called into the engine.</comment>
   </data>
-  <data name="FailedToReceiveTaskThreadStatus" UESanitized="false" Visibility="Public">
+  <data name="FailedToReceiveTaskThreadStatus" xml:space="preserve">
     <value>MSB4187: Failed to receive a response from the task thread in the timeout period "{0}" ms. Shutting down.</value>
     <comment>{StrBegin="MSB4187: "}</comment>
   </data>
-  <data name="IllFormedCondition" UESanitized="false" Visibility="Public">
+  <data name="IllFormedCondition" xml:space="preserve">
     <value>MSB4088: Condition "{0}" is improperly constructed.</value>
     <comment>{StrBegin="MSB4088: "}</comment>
   </data>
-  <data name="IllFormedEqualsInCondition" UESanitized="false" Visibility="Public">
+  <data name="IllFormedEqualsInCondition" xml:space="preserve">
     <value>MSB4105: Found an unexpected character '{2}' at position {1} in condition "{0}". Did you intend to use "=="?</value>
     <comment>{StrBegin="MSB4105: "}</comment>
   </data>
-  <data name="IllFormedItemListCloseParenthesisInCondition" UESanitized="false" Visibility="Public">
+  <data name="IllFormedItemListCloseParenthesisInCondition" xml:space="preserve">
     <value>MSB4106: Expected an item list at position {1} in condition "{0}". Did you forget the closing parenthesis?</value>
     <comment>{StrBegin="MSB4106: "}</comment>
   </data>
-  <data name="IllFormedItemListOpenParenthesisInCondition" UESanitized="false" Visibility="Public">
+  <data name="IllFormedItemListOpenParenthesisInCondition" xml:space="preserve">
     <value>MSB4107: Expected an item list at position {1} in condition "{0}". Did you forget the opening parenthesis after the '@'? To use a literal '@', use '%40' instead.</value>
     <comment>{StrBegin="MSB4107: "}</comment>
   </data>
-  <data name="IllFormedItemListQuoteInCondition" UESanitized="false" Visibility="Public">
+  <data name="IllFormedItemListQuoteInCondition" xml:space="preserve">
     <value>MSB4108: Expected an item list at position {1} in condition "{0}". Did you forget to close a quote inside the item list expression?</value>
     <comment>{StrBegin="MSB4108: "}</comment>
   </data>
-  <data name="IllFormedPropertyCloseParenthesisInCondition" UESanitized="false" Visibility="Public">
+  <data name="IllFormedPropertyCloseParenthesisInCondition" xml:space="preserve">
     <value>MSB4109: Expected a property at position {1} in condition "{0}". Did you forget the closing parenthesis?</value>
     <comment>{StrBegin="MSB4109: "}</comment>
   </data>
-  <data name="IllFormedPropertyOpenParenthesisInCondition" UESanitized="false" Visibility="Public">
+  <data name="IllFormedPropertyOpenParenthesisInCondition" xml:space="preserve">
     <value>MSB4110: Expected a property at position {1} in condition "{0}". Did you forget the opening parenthesis after the '$'? To use a literal '$', use '%24' instead.</value>
     <comment>{StrBegin="MSB4110: "}</comment>
   </data>
-  <data name="IllFormedQuotedStringInCondition" UESanitized="false" Visibility="Public">
+  <data name="IllFormedQuotedStringInCondition" xml:space="preserve">
     <value>MSB4101: Expected a closing quote after position {1} in condition "{0}".</value>
     <comment>{StrBegin="MSB4101: "}</comment>
   </data>
-  <data name="ImportedProjectNotFound" UESanitized="false" Visibility="Public">
+  <data name="ImportedProjectNotFound" xml:space="preserve">
     <value>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</value>
     <comment>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</comment>
   </data>
-  <data name="ImportedProjectFromExtensionsPathNotFoundFromAppConfig" UESanitized="false" Visibility="Public">
+  <data name="ImportedProjectFromExtensionsPathNotFoundFromAppConfig" xml:space="preserve">
     <value>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . These search paths are defined in "{4}". Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</value>
     <comment>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</comment>
   </data>
-  <data name="ImportedProjectFromExtensionsPathNotFound" UESanitized="false" Visibility="Public">
+  <data name="ImportedProjectFromExtensionsPathNotFound" xml:space="preserve">
     <value>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</value>
     <comment>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</comment>
   </data>
-  <data name="IncorrectNumberOfFunctionArguments" UESanitized="false" Visibility="Public">
+  <data name="IncorrectNumberOfFunctionArguments" xml:space="preserve">
     <value>MSB4089: Incorrect number of arguments to function in condition "{0}". Found {1} argument(s) when expecting {2}.</value>
     <comment>{StrBegin="MSB4089: "}</comment>
   </data>
-  <data name="InvalidAttributeValue" UESanitized="false" Visibility="Public">
+  <data name="InvalidAttributeValue" xml:space="preserve">
     <value>MSB4020: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; is invalid.</value>
     <comment>{StrBegin="MSB4020: "}UE: This is a generic message that is displayed when we find a project element with an incorrect value for one of its
     attributes e.g. &lt;Import Project=""&gt; -- the value of Project should not be an empty string.</comment>
   </data>
-  <data name="InvalidAttributeExclusive" UESanitized="false" Visibility="Public">
+  <data name="InvalidAttributeExclusive" xml:space="preserve">
     <value>MSB4111: At most one of the include, remove, and update attributes may be specified for an item element.</value>
   </data>
-  <data name="InvalidAttributeValueWithException" UESanitized="false" Visibility="Public">
+  <data name="InvalidAttributeValueWithException" xml:space="preserve">
     <value>MSB4102: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; is invalid. {3}</value>
     <comment>{StrBegin="MSB4102: "}UE: This is a generic message that is displayed when we find a project element with an incorrect value for one of its
         attributes. At the end of the message we show the exception text we got trying to use the value.</comment>
   </data>
-  <data name="InvalidBinaryLoggerParameters" UESanitized="false" Visibility="Public">
+  <data name="InvalidBinaryLoggerParameters" xml:space="preserve">
     <value>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</value>
   </data>
-  <data name="InvalidContinueOnErrorAttribute" UESanitized="false" Visibility="Public">
+  <data name="InvalidContinueOnErrorAttribute" xml:space="preserve">
     <value>MSB4021: The "ContinueOnError" attribute of the "{0}" task is not valid. {1}</value>
     <comment>{StrBegin="MSB4021: "}LOCALIZATION: "ContinueOnError" should not be localized. "{1}" is a message from another exception explaining the problem.</comment>
   </data>
-  <data name="InvalidEvaluatedAttributeValue" UESanitized="false" Visibility="Public">
+  <data name="InvalidEvaluatedAttributeValue" xml:space="preserve">
     <value>MSB4022: The result "{0}" of evaluating the value "{1}" of the "{2}" attribute in element &lt;{3}&gt; is not valid.</value>
     <comment>{StrBegin="MSB4022: "}UE: This message is shown when the engine is checking the correctness of the value (after evaluating embedded
     properties/items) assigned to an XML attribute of an XML element in the project file.</comment>
   </data>
-  <data name="InvalidFileLoggerFile" UESanitized="false" Visibility="Private_OM">
+  <data name="InvalidFileLoggerFile" xml:space="preserve">
     <value>MSB4104: Failed to write to log file "{0}". {1}</value>
     <comment>{StrBegin="MSB4104: "}UE: This is shown when the File Logger can't create or write to the file it was instructed to log to.</comment>
   </data>
-  <data name="InvalidImportedProjectFile" UESanitized="false" Visibility="Public">
+  <data name="InvalidImportedProjectFile" xml:space="preserve">
     <value>MSB4024: The imported project file "{0}" could not be loaded. {1}</value>
     <comment>{StrBegin="MSB4024: "}UE: This message is shown when an imported project file cannot be loaded because of incorrect XML. The project
     filename is not part of the message because it is provided separately to loggers.
     LOCALIZATION: {0} is a localized message from the CLR/FX explaining why the project is invalid.</comment>
   </data>
-  <data name="InvalidPropertyNameInToolset" UESanitized="false" Visibility="Private_OM">
+  <data name="InvalidPropertyNameInToolset" xml:space="preserve">
     <value>MSB4147: The property "{0}" at "{1}" is invalid. {2}</value>
     <comment>{StrBegin="MSB4147: "}</comment>
   </data>
-  <data name="InvalidProperty" UESanitized="false" Visibility="Private_OM">
+  <data name="InvalidProperty" xml:space="preserve">
     <value>MSB4177: Invalid property. {0}</value>
     <comment>{StrBegin="MSB4177: "}
       UE: {0} is a localized message indicating what the problem was.</comment>
   </data>
-  <data name="InvalidRegistryPropertyExpression" UESanitized="false" Visibility="Public">
+  <data name="InvalidRegistryPropertyExpression" xml:space="preserve">
     <value>MSB4143: The registry expression "{0}" cannot be evaluated. {1}</value>
     <comment>{StrBegin="MSB4143: "}
       UE: This message is shown when the user attempts to provide an expression like "$(Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation)"
       LOCALIZATION: "{0}" is the expression that was bad. "{1}" is a message from an FX exception that describes why the expression is bad.
     </comment>
   </data>
-  <data name="InvalidFunctionPropertyExpression" UESanitized="false" Visibility="Public">
+  <data name="InvalidFunctionPropertyExpression" xml:space="preserve">
     <value>MSB4184: The expression "{0}" cannot be evaluated. {1}</value>
     <comment>{StrBegin="MSB4184: "}
       Double quotes as the expression will typically have single quotes in it.
-      UE: This message is shown when the user attempts to provide an expression like "$(SomeProperty.ToLower())" or "@(Foo->Bar())"
+      UE: This message is shown when the user attempts to provide an expression like "$(SomeProperty.ToLower())" or "@(Foo-&gt;Bar())"
       LOCALIZATION: "{0}" is the expression that was bad. "{1}" is a message from an FX exception that describes why the expression is bad.
     </comment>
   </data>
-  <data name="InvalidFunctionPropertyExpressionDetailMismatchedQuote">
+  <data name="InvalidFunctionPropertyExpressionDetailMismatchedQuote" xml:space="preserve">
     <value>The quotes were mismatched.</value>
     <comment>This is a potential suffix to "InvalidFunctionPropertyExpression" so it has no error code.</comment>
   </data>
-  <data name="InvalidFunctionPropertyExpressionDetailMismatchedParenthesis">
+  <data name="InvalidFunctionPropertyExpressionDetailMismatchedParenthesis" xml:space="preserve">
     <value>The parentheses were mismatched.</value>
     <comment>This is a potential suffix to "InvalidFunctionPropertyExpression" so it has no error code.</comment>
   </data>
-  <data name="InvalidFunctionPropertyExpressionDetailMismatchedSquareBrackets">
+  <data name="InvalidFunctionPropertyExpressionDetailMismatchedSquareBrackets" xml:space="preserve">
     <value>The square brackets were mismatched.</value>
     <comment>This is a potential suffix to "InvalidFunctionPropertyExpression" so it has no error code.</comment>
   </data>
-  <data name="InvalidFunctionMethodUnavailable" UESanitized="false" Visibility="Public">
+  <data name="InvalidFunctionMethodUnavailable" xml:space="preserve">
     <value>MSB4185: The function "{0}" on type "{1}" is not available for execution as an MSBuild property function.</value>
     <comment>
       {StrBegin="MSB4185: "}
@@ -518,7 +577,7 @@
       LOCALIZATION: "{0}" is the static function name, "{1}" is the .NET Framework type name
     </comment>
   </data>
-  <data name="InvalidFunctionTypeUnavailable" UESanitized="false" Visibility="Public">
+  <data name="InvalidFunctionTypeUnavailable" xml:space="preserve">
     <value>MSB4212: Invalid static method invocation syntax: "{0}". The type "{1}" is either not available for execution in an MSBuild property function or could not be found.</value>
     <comment>
       {StrBegin="MSB4212: "}
@@ -526,23 +585,23 @@
       LOCALIZATION: "{0}" is the function expression which is in error. "{1}" is the .NET Framework type name
     </comment>
   </data>
-  <data name="InvalidFunctionStaticMethodSyntax" UESanitized="false" Visibility="Public">
+  <data name="InvalidFunctionStaticMethodSyntax" xml:space="preserve">
     <value>MSB4186: Invalid static method invocation syntax: "{0}". {1} Static method invocation should be of the form: $([FullTypeName]::Method()), e.g. $([System.IO.Path]::Combine(`a`, `b`)). Check that all parameters are defined, are of the correct type, and are specified in the right order.</value>
     <comment>{StrBegin="MSB4186: "}
       UE: This message is shown when the user attempts to call a static method on a type, but has used the incorrect syntax
       LOCALIZATION: "{0}" is the function expression which is in error. "{1}" is a message from an FX exception that describes why the expression is bad.
     </comment>
   </data>
-  <data name="InvalidItemFunctionExpression" UESanitized="false" Visibility="Public">
+  <data name="InvalidItemFunctionExpression" xml:space="preserve">
     <value>MSB4198: The expression "{0}" cannot be evaluated on item "{1}". {2}</value>
     <comment>
       {StrBegin="MSB4198: "}
       Double quotes as the expression will typically have single quotes in it.
-      UE: This message is shown when the user attempts to provide an expression like "@(SomeItem->DirectoryName())"
+      UE: This message is shown when the user attempts to provide an expression like "@(SomeItem-&gt;DirectoryName())"
       LOCALIZATION: "{0}" is the expression that was bad, "{1}" is the item or file that was being worked on. "{2}" is a message from an FX exception that describes why the expression is bad.
     </comment>
   </data>
-  <data name="InvalidItemFunctionSyntax" UESanitized="false" Visibility="Public">
+  <data name="InvalidItemFunctionSyntax" xml:space="preserve">
     <value>MSB4199: Invalid transformation syntax "{0}". An item function was not found with that name and {1} parameters.</value>
     <comment>
       {StrBegin="MSB4199: "}
@@ -550,530 +609,510 @@
       LOCALIZATION: "{0}" is the function which is in error
     </comment>
   </data>
-  <data name="UnknownItemFunction" UESanitized="false" Visibility="Public">
+  <data name="UnknownItemFunction" xml:space="preserve">
     <value>MSB4200: Unknown item transformation function "{0}".</value>
     <comment>
       {StrBegin="MSB4200: "}
-      UE: This message is shown when the user attempts to provide an expression like @(Item->SomeTransform()), but SomeTransform is unknown
+      UE: This message is shown when the user attempts to provide an expression like @(Item-&gt;SomeTransform()), but SomeTransform is unknown
       LOCALIZATION: "{0}" is the function name
     </comment>
   </data>
-  <data name="InvalidTaskAttributeError" UESanitized="false" Visibility="Public">
+  <data name="InvalidTaskAttributeError" xml:space="preserve">
     <value>MSB4026: The "{0}={1}" parameter for the "{2}" task is invalid.</value>
     <comment>{StrBegin="MSB4026: "}UE: This message is displayed when a task has an invalid parameter that cannot be initialized.</comment>
   </data>
-  <data name="InvalidTaskItemsInTaskOutputs" UESanitized="false" Visibility="Public">
+  <data name="InvalidTaskItemsInTaskOutputs" xml:space="preserve">
     <value>MSB4027: The "{0}" task generated invalid items from the "{1}" output parameter. {2}</value>
     <comment>{StrBegin="MSB4027: "}</comment>
   </data>
-  <data name="InvalidTaskOutputSpecification" UESanitized="false" Visibility="Public">
+  <data name="InvalidTaskOutputSpecification" xml:space="preserve">
     <value>MSB4029: The "{0}" task has an invalid output specification. The "TaskParameter" attribute is required, and either the "ItemName" or "PropertyName" attribute must be specified (but not both).</value>
     <comment>{StrBegin="MSB4029: "}LOCALIZATION: "TaskParameter", "ItemName" and "PropertyName" should not be localized.</comment>
   </data>
-  <data name="InvalidTaskParameterValueError" UESanitized="false" Visibility="Public">
+  <data name="InvalidTaskParameterValueError" xml:space="preserve">
     <value>MSB4030: "{0}" is an invalid value for the "{1}" parameter of the "{3}" task. The "{1}" parameter is of type "{2}".</value>
     <comment>{StrBegin="MSB4030: "}UE: This error is shown when a type mis-match occurs between the value assigned to task parameter in the project file
     and the type of the .NET property that corresponds to the task parameter. For example, if an int task parameter called "Count"
     is assigned the value "x", this error would be displayed: &lt;MyTask Count="x" /&gt;</comment>
   </data>
-  <data name="InvalidToolsetValueInConfigFileValue" UESanitized="false" Visibility="Public">
+  <data name="InvalidToolsetValueInConfigFileValue" xml:space="preserve">
     <value>MSB4137: Invalid value specified in the configuration file at "{0}". Property name or tools version name is an empty string.</value>
     <comment>{StrBegin="MSB4137: "}</comment>
   </data>
-  <data name="ItemDefinitionGroupNotLegalInsideTarget" UESanitized="false" Visibility="Public">
+  <data name="ItemDefinitionGroupNotLegalInsideTarget" xml:space="preserve">
     <value>MSB4163: &lt;ItemDefinitionGroup&gt; is not allowed inside a target.</value>
     <comment>{StrBegin="MSB4163: "}</comment>
   </data>
-  <data name="ItemDoesNotContainValueForUnqualifiedMetadata" UESanitized="false" Visibility="Public">
+  <data name="ItemDoesNotContainValueForUnqualifiedMetadata" xml:space="preserve">
     <value>MSB4096: The item "{0}" in item list "{1}" does not define a value for metadata "{2}".  In order to use this metadata, either qualify it by specifying %({1}.{2}), or ensure that all items in this list define a value for this metadata.</value>
     <comment>{StrBegin="MSB4096: "}</comment>
   </data>
-  <data name="ItemListNotAllowedInThisConditional" UESanitized="false" Visibility="Public">
+  <data name="ItemListNotAllowedInThisConditional" xml:space="preserve">
     <value>MSB4099: A reference to an item list at position {1} is not allowed in this condition "{0}".</value>
     <comment>{StrBegin="MSB4099: "}</comment>
   </data>
-  <data name="CustomMetadataNotAllowedInThisConditional" UESanitized="false" Visibility="Public">
+  <data name="CustomMetadataNotAllowedInThisConditional" xml:space="preserve">
     <value>MSB4191: The reference to custom metadata "{2}" at position {1} is not allowed in this condition "{0}".</value>
     <comment>{StrBegin="MSB4191: "}</comment>
   </data>
-  <data name="BuiltInMetadataNotAllowedInThisConditional" UESanitized="false" Visibility="Public">
+  <data name="BuiltInMetadataNotAllowedInThisConditional" xml:space="preserve">
     <value>MSB4190: The reference to the built-in metadata "{2}" at position {1} is not allowed in this condition "{0}".</value>
     <comment>{StrBegin="MSB4190: "}</comment>
   </data>
-  <data name="ItemSpecModifierCannotBeCustomMetadata" UESanitized="false" Visibility="Public">
+  <data name="ItemSpecModifierCannotBeCustomMetadata" xml:space="preserve">
     <value>MSB4033: "{0}" is a reserved item metadata, and cannot be redefined as a custom metadata on the item.</value>
     <comment>{StrBegin="MSB4033: "}</comment>
   </data>
-  <data name="InternalLoggerExceptionOnlyThrownByEngine" UESanitized="false" Visibility="Private_OM">
+  <data name="InternalLoggerExceptionOnlyThrownByEngine" xml:space="preserve">
     <value>An InternalLoggerException can only be thrown by the MSBuild engine. The public constructors of this class cannot be used to create an instance of the exception.</value>
     <comment>UE: This message is shown when a user tries to instantiate a special exception called InternalLoggerException through the OM --
     only the engine is allowed to create and throw this exception.
     LOCALIZATION: "InternalLoggerException" and "MSBuild" should not be localized.</comment>
   </data>
-  <data name="ItemListHeader" UESanitized="false" Visibility="Public">
+  <data name="ItemListHeader" xml:space="preserve">
     <value>Initial Items:</value>
   </data>
-  <data name="EnvironmentHeader" UESanitized="false" Visibility="Public">
+  <data name="EnvironmentHeader" xml:space="preserve">
     <value>Environment at start of build:</value>
   </data>
-  <data name="LogTaskInputs.Truncated" UESanitized="false" Visibility="Public">
-    <value>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</value>
-  </data>
-  <data name="MetadataDefinitionCannotContainItemVectorExpression" UESanitized="false" Visibility="Public">
+  <data name="MetadataDefinitionCannotContainItemVectorExpression" xml:space="preserve">
     <value>MSB4164: The value "{0}" of metadata "{1}" contains an item list expression. Item list expressions are not allowed on default metadata values.</value>
     <comment>{StrBegin="MSB4164: "}</comment>
   </data>
-  <data name="MissingRequiredAttribute" UESanitized="false" Visibility="Public">
+  <data name="MissingRequiredAttribute" xml:space="preserve">
     <value>MSB4035: The required attribute "{0}" is empty or missing from the element &lt;{1}&gt;.</value>
     <comment>{StrBegin="MSB4035: "}UE: This message is shown when a user leaves off a required attribute from a project element
     e.g. &lt;UsingTask AssemblyName="foo"&gt; -- this is missing the "TaskName" attribute.</comment>
   </data>
-  <data name="IncludeRemoveOrUpdate" UESanitized="false" Visibility="Public">
+  <data name="IncludeRemoveOrUpdate" xml:space="preserve">
     <value>MSB4232: Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.</value>
     <comment>{StrBegin="MSB4232: "} Target, Include, Update, and Remove should not be localized and their casing should not be changed</comment>
   </data>
-  <data name="MissingTaskError" UESanitized="false" Visibility="Public">
+  <data name="MissingTaskError" xml:space="preserve">
     <value>MSB4036: The "{0}" task was not found. Check the following: 1.) The name of the task in the project file is the same as the name of the task class. 2.) The task class is "public" and implements the Microsoft.Build.Framework.ITask interface. 3.) The task is correctly declared with &lt;UsingTask&gt; in the project file, or in the *.tasks files located in the "{1}" directory.</value>
     <comment>{StrBegin="MSB4036: "}LOCALIZATION: &lt;UsingTask&gt; and "*.tasks" should not be localized.</comment>
   </data>
-  <data name="MSBuildToolsPathIsNotSpecified" UESanitized="false" Visibility="Public">
+  <data name="MSBuildToolsPathIsNotSpecified" xml:space="preserve">
     <value>MSB4141: MSBuildToolsPath is not specified for the ToolsVersion "{0}" defined at "{1}", or the value specified evaluates to the empty string.</value>
     <comment>{StrBegin="MSB4141: "}</comment>
   </data>
-  <data name="MSBuildToolsPathNotSupportedInSubToolsets" UESanitized ="false" Visibility="Public">
+  <data name="MSBuildToolsPathNotSupportedInSubToolsets" xml:space="preserve">
     <value>MSB4222: ToolsVersion "{0}", defined at "{1}", contains sub-toolset "{2}" which sets MSBuildBinPath or MSBuildToolsPath. This is not supported in sub-toolsets.</value>
   </data>
-  <data name="MultipleDefinitionsForSameToolset" UESanitized="false" Visibility="Public">
+  <data name="MultipleDefinitionsForSameToolset" xml:space="preserve">
     <value>MSB4144: Multiple definitions were found for the toolset "{0}". </value>
     <comment>{StrBegin="MSB4144: "}</comment>
   </data>
-  <data name="MultipleDefinitionsForSameExtensionsPathOS" UESanitized="false" Visibility="Public">
-      <value>MSB4225: Toolset contains multiple definitions of searchPaths for the OS "{0}" at "{1}".</value>
+  <data name="MultipleDefinitionsForSameExtensionsPathOS" xml:space="preserve">
+    <value>MSB4225: Toolset contains multiple definitions of searchPaths for the OS "{0}" at "{1}".</value>
     <comment>{StrBegin="MSB4225: "}</comment>
   </data>
-  <data name="MultipleDefinitionsForSameProperty" UESanitized="false" Visibility="Public">
+  <data name="MultipleDefinitionsForSameProperty" xml:space="preserve">
     <value>MSB4145: Multiple definitions were found for the property "{0}".</value>
     <comment>{StrBegin="MSB4145: "}</comment>
   </data>
-  <data name="MultipleOtherwise" UESanitized="false" Visibility="Public">
+  <data name="MultipleOtherwise" xml:space="preserve">
     <value>MSB4082: Choose has more than one &lt;Otherwise&gt; element.</value>
     <comment>{StrBegin="MSB4082: "}</comment>
   </data>
-  <data name="NodeMustBeLastUnderElement" UESanitized="false" Visibility="Public">
+  <data name="NodeMustBeLastUnderElement" xml:space="preserve">
     <value>MSB4038: The element &lt;{0}&gt; must be last under element &lt;{1}&gt;. Found element &lt;{2}&gt; instead.</value>
     <comment>{StrBegin="MSB4038: "}</comment>
   </data>
-  <data name="NonStringDataInRegistry" UESanitized="false" Visibility="Public">
+  <data name="NonStringDataInRegistry" xml:space="preserve">
     <value>MSB4138: Non-string data was specified at the registry location "{0}".</value>
     <comment>{StrBegin="MSB4138: "}</comment>
   </data>
-  <data name="NoRootProjectElement" UESanitized="false" Visibility="Public">
+  <data name="NoRootProjectElement" xml:space="preserve">
     <value>MSB4039: No "{0}" element was found in the project file.</value>
     <comment>{StrBegin="MSB4039: "}</comment>
   </data>
-  <data name="NoTargetSpecified" UESanitized="false" Visibility="Public">
+  <data name="NoTargetSpecified" xml:space="preserve">
     <value>MSB4040: There is no target in the project.</value>
     <comment>{StrBegin="MSB4040: "}</comment>
   </data>
-  <data name="NullLoggerNotAllowed" UESanitized="false" Visibility="Private_OM">
+  <data name="NullLoggerNotAllowed" xml:space="preserve">
     <value>A null entry was found in the collection of loggers.</value>
   </data>
-  <data name="InvalidMaxNodeCount" UESanitized="false" Visibility="Private_OM">
+  <data name="InvalidMaxNodeCount" xml:space="preserve">
     <value>MaxNodeCount may only be assigned a value greater than zero.</value>
   </data>
-  <data name="OverridingTarget" UESanitized="false" Visibility="Public">
+  <data name="OverridingTarget" xml:space="preserve">
     <value>Overriding target "{0}" in project "{1}" with target "{2}" from project "{3}".</value>
   </data>
-  <data name="PerformanceLine" UESanitized="false" Visibility="Public">
+  <data name="PerformanceLine" xml:space="preserve">
     <value>{0} ms  {1} {2} calls</value>
   </data>
-  <data name="PerformanceReentrancyNote" UESanitized="false" Visibility="Public">
+  <data name="PerformanceReentrancyNote" xml:space="preserve">
     <value>(* = timing was not recorded because of reentrancy)</value>
   </data>
-  <data name="ProjectFileNotFound" UESanitized="false" Visibility="Private_OM">
+  <data name="ProjectFileNotFound" xml:space="preserve">
     <value>The project file "{0}" was not found.</value>
     <comment>UE: This message is shown when the user calls into the OM to build a project that doesn't exist on disk.</comment>
   </data>
-  <data name="ProjectFinishedFailure" UESanitized="false" Visibility="Public">
+  <data name="ProjectFinishedFailure" xml:space="preserve">
     <value>Done building project "{0}" -- FAILED.</value>
   </data>
-  <data name="ProjectFinishedSuccess" UESanitized="false" Visibility="Public">
+  <data name="ProjectFinishedSuccess" xml:space="preserve">
     <value>Done building project "{0}".</value>
   </data>
-  <data name="ProjectFinishedPrefixWithTargetNamesMultiProc" UESanitized="false" Visibility="Public">
+  <data name="ProjectFinishedPrefixWithTargetNamesMultiProc" xml:space="preserve">
     <value>Done Building Project "{0}" ({1} target(s)).</value>
   </data>
-  <data name="ProjectFinishedPrefixWithDefaultTargetsMultiProc" UESanitized="false" Visibility="Public">
+  <data name="ProjectFinishedPrefixWithDefaultTargetsMultiProc" xml:space="preserve">
     <value>Done Building Project "{0}" (default targets).</value>
   </data>
-  <data name="ProjectFinishedPrefixWithTargetNamesMultiProcFailed" UESanitized="false" Visibility="Public">
+  <data name="ProjectFinishedPrefixWithTargetNamesMultiProcFailed" xml:space="preserve">
     <value>Done Building Project "{0}" ({1} target(s)) -- FAILED.</value>
   </data>
-  <data name="ProjectFinishedPrefixWithDefaultTargetsMultiProcFailed" UESanitized="false" Visibility="Public">
+  <data name="ProjectFinishedPrefixWithDefaultTargetsMultiProcFailed" xml:space="preserve">
     <value>Done Building Project "{0}" (default targets) -- FAILED.</value>
   </data>
-  <data name="ProjectMustBeInMSBuildXmlNamespace" UESanitized="false" Visibility="Public">
+  <data name="ProjectMustBeInMSBuildXmlNamespace" xml:space="preserve">
     <value>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</value>
     <comment>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</comment>
   </data>
-  <data name="ProjectPerformanceSummary" UESanitized="false" Visibility="Public">
+  <data name="ProjectPerformanceSummary" xml:space="preserve">
     <value>Project Performance Summary:</value>
   </data>
-  <data name="ProjectStartedPrefixForNestedProjectWithTargetNames" UESanitized="false" Visibility="Public">
+  <data name="ProjectStartedPrefixForNestedProjectWithTargetNames" xml:space="preserve">
     <value>Project "{0}" is building "{1}" ({2} target(s)):</value>
   </data>
-  <data name="ProjectStartedPrefixForNestedProjectWithDefaultTargets" UESanitized="false" Visibility="Public">
+  <data name="ProjectStartedPrefixForNestedProjectWithDefaultTargets" xml:space="preserve">
     <value>Project "{0}" is building "{1}" (default targets):</value>
   </data>
-  <data name="ProjectStartedPrefixForTopLevelProjectWithTargetNames" UESanitized="false" Visibility="Public">
+  <data name="ProjectStartedPrefixForTopLevelProjectWithTargetNames" xml:space="preserve">
     <value>Project "{0}" ({1} target(s)):</value>
   </data>
-  <data name="ProjectStartedPrefixForTopLevelProjectWithDefaultTargets" UESanitized="false" Visibility="Public">
+  <data name="ProjectStartedPrefixForTopLevelProjectWithDefaultTargets" xml:space="preserve">
     <value>Project "{0}" (default targets):</value>
   </data>
-  <data name="ProjectTaskNameEmpty" UESanitized="false" Visibility="Public">
+  <data name="ProjectTaskNameEmpty" xml:space="preserve">
     <value>Task name cannot be empty.</value>
   </data>
-  <data name="ProjectUpgradeNeeded">
+  <data name="ProjectUpgradeNeeded" xml:space="preserve">
     <value>MSB4075: The project file "{0}" must be opened in the Visual Studio IDE and converted to the latest version before it can be built by MSBuild.</value>
     <comment>{StrBegin="MSB4075: "}</comment>
   </data>
-  <data name="ProjectUpgradeNeededToVcxProj">
+  <data name="ProjectUpgradeNeededToVcxProj" xml:space="preserve">
     <value>MSB4192: The project file "{0}" is in the ".vcproj" file format, which MSBuild no longer supports. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or use MSBuild 3.5 or earlier to build it.</value>
     <comment>{StrBegin="MSB4192: "} LOC: ".vcproj" should not be localized</comment>
   </data>
-  <data name="PropertyListHeader" UESanitized="false" Visibility="Public">
+  <data name="PropertyListHeader" xml:space="preserve">
     <value>Initial Properties:</value>
   </data>
-  <data name="PropertyNameInRegistryHasZeroLength" UESanitized="false" Visibility="Public">
+  <data name="PropertyNameInRegistryHasZeroLength" xml:space="preserve">
     <value>MSB4148: The name of a property stored under the registry key "{0}" has zero length.</value>
     <comment>{StrBegin="MSB4148: "}</comment>
   </data>
-  <data name="PropertyReassignment" UESanitized="false" Visibility="Public">
+  <data name="PropertyReassignment" xml:space="preserve">
     <value>Property reassignment: $({0})="{1}" (previous value: "{2}") at {3}</value>
   </data>
-  <data name="QualifiedMetadataInTransformNotAllowed" UESanitized="false" Visibility="Public">
+  <data name="QualifiedMetadataInTransformNotAllowed" xml:space="preserve">
     <value>MSB4043: The item metadata reference "{0}" is invalid because it is qualified with an item name. Item metadata referenced in transforms do not need to be qualified, because the item name is automatically deduced from the items being transformed. Change "{0}" to "%({1})".</value>
-    <comment>{StrBegin="MSB4043: "}UE: This message is shown when the user does something like this: @(foo->'%(foo.metadata)'). There is no need to specify
+    <comment>{StrBegin="MSB4043: "}UE: This message is shown when the user does something like this: @(foo-&gt;'%(foo.metadata)'). There is no need to specify
     "foo.metadata", because "foo" is automatically deduced. In corollary, "bar.metadata" is not allowed either, where "bar" is a different
     item list type.</comment>
   </data>
-  <data name="RegistryReadError" UESanitized="false" Visibility="Public">
+  <data name="RegistryReadError" xml:space="preserve">
     <value>MSB4135: Error reading the toolset information from the registry location "{0}". {1}</value>
     <comment>{StrBegin="MSB4135: "}</comment>
   </data>
-  <data name="RequiredPropertyNotSetError" UESanitized="false" Visibility="Public">
+  <data name="RequiredPropertyNotSetError" xml:space="preserve">
     <value>MSB4044: The "{0}" task was not given a value for the required parameter "{1}".</value>
     <comment>{StrBegin="MSB4044: "}UE: This message is shown when a task parameter designated as "required" is not set in the project file.</comment>
   </data>
-  <data name="SecurityProjectBuildDisabled" UESanitized="false" Visibility="Public">
+  <data name="SecurityProjectBuildDisabled" xml:space="preserve">
     <value>MSB4112: The targets in this project have been disabled by the host and therefore cannot be built at this time. This may have been done for security reasons. To enable the targets, the host must set Project.BuildEnabled to "true".</value>
     <comment>{StrBegin="MSB4112: "}</comment>
   </data>
-  <data name="SetAccessorNotAvailableOnTaskParameter" UESanitized="false" Visibility="Public">
+  <data name="SetAccessorNotAvailableOnTaskParameter" xml:space="preserve">
     <value>MSB4093: The "{0}" parameter of the "{1}" task cannot be written to because it does not have a "set" accessor.</value>
     <comment>{StrBegin="MSB4093: "}UE: This error is shown when a project tries to assign a value to a task parameter that does not have a "set"
     accessor on the corresponding .NET property on the task class.</comment>
   </data>
-  <data name="SkipTargetBecauseNoInputs" UESanitized="false" Visibility="Public">
+  <data name="SkipTargetBecauseNoInputs" xml:space="preserve">
     <value>Skipping target "{0}" because it has no inputs.</value>
   </data>
-  <data name="SkipTargetBecauseNoInputsDetail" UESanitized="false" Visibility="Public">
+  <data name="SkipTargetBecauseNoInputsDetail" xml:space="preserve">
     <value>Though the target has declared its inputs, the input specification only references empty properties and/or empty item lists.</value>
   </data>
-  <data name="SkipTargetBecauseNoOutputs" UESanitized="false" Visibility="Public">
+  <data name="SkipTargetBecauseNoOutputs" xml:space="preserve">
     <value>Skipping target "{0}" because it has no outputs.</value>
   </data>
-  <data name="SkipTargetBecauseNoOutputsDetail" UESanitized="false" Visibility="Public">
+  <data name="SkipTargetBecauseNoOutputsDetail" xml:space="preserve">
     <value>Though the target has declared its outputs, the output specification only references empty properties and/or empty item lists.</value>
   </data>
-  <data name="SkipTargetBecauseOutputsUpToDate" UESanitized="false" Visibility="Public">
+  <data name="SkipTargetBecauseOutputsUpToDate" xml:space="preserve">
     <value>Skipping target "{0}" because all output files are up-to-date with respect to the input files.</value>
   </data>
-  <data name="SkipTargetUpToDateInputs" UESanitized="false" Visibility="Public">
+  <data name="SkipTargetUpToDateInputs" xml:space="preserve">
     <value>Input files: {0}</value>
     <comment>{0} is a semicolon-separated list of filenames.</comment>
   </data>
-  <data name="SkipTargetUpToDateOutputs" UESanitized="false" Visibility="Public">
+  <data name="SkipTargetUpToDateOutputs" xml:space="preserve">
     <value>Output files: {0}</value>
     <comment>{0} is a semicolon-separated list of filenames.</comment>
   </data>
-  <data name="AspNetCompiler.TargetingHigherFrameworksDefaultsTo40">
+  <data name="AspNetCompiler.TargetingHigherFrameworksDefaultsTo40" xml:space="preserve">
     <value>{0}: Defaulting .NET Framework v{1} to the .NET Framework v4.0 version of aspnet_compiler.exe. To change the version of the tool used, please set the "ToolPath" parameter with the correct path to the tool.</value>
   </data>
-  <data name="AspNetCompiler.InvalidTargetFrameworkMonikerNotDotNET">
+  <data name="AspNetCompiler.InvalidTargetFrameworkMonikerNotDotNET" xml:space="preserve">
     <value>MSB4203: {0}: Invalid TargetFrameworkMoniker {1}. The AspNetCompiler task only supports targeting the .NET Framework.</value>
     <comment>{StrBegin="MSB4203: "}</comment>
   </data>
-  <data name="AspNetCompiler.20NotInstalled">
+  <data name="AspNetCompiler.20NotInstalled" xml:space="preserve">
     <value>MSB4205: The website project in this solution is targeting the v2.0 runtime, but it is not installed.</value>
     <comment>{StrBegin="MSB4205: "}</comment>
   </data>
-  <data name="AspNetCompiler.UnsupportedMSBuildVersion">
+  <data name="AspNetCompiler.UnsupportedMSBuildVersion" xml:space="preserve">
     <value>MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</value>
     <comment>{StrBegin="MSB4249: "}</comment>
   </data>
-  <data name="AspNetCompiler.InvalidTargetFrameworkMonikerFromException">
+  <data name="AspNetCompiler.InvalidTargetFrameworkMonikerFromException" xml:space="preserve">
     <value>MSB4204: {0}: Invalid TargetFrameworkMoniker {1}. {2}.</value>
     <comment>{StrBegin="MSB4204: "}</comment>
   </data>
-  <data name="OldWrapperGeneratedExplicitToolsVersion">
+  <data name="OldWrapperGeneratedExplicitToolsVersion" xml:space="preserve">
     <value>Using the MSBuild v3.5 solution wrapper generator because the tools version was set to {0}.</value>
   </data>
-  <data name="OldWrapperGeneratedOldSolutionVersion">
+  <data name="OldWrapperGeneratedOldSolutionVersion" xml:space="preserve">
     <value>Using the MSBuild v3.5 solution wrapper generator with a tools version of {0} because the solution file format was version {1} and no tools version was supplied.</value>
   </data>
-  <data name="SolutionBuildingSolutionConfiguration" UESanitized="false" Visibility="Public">
+  <data name="SolutionBuildingSolutionConfiguration" xml:space="preserve">
     <value>Building solution configuration "{0}".</value>
     <comment>UE: This is not an error, so doesn't need an error code.</comment>
   </data>
-  <data name="SolutionCircularDependencyError" UESanitized="false" Visibility="Public">
+  <data name="SolutionCircularDependencyError" xml:space="preserve">
     <value>MSB4160: A circular dependency involving project "{0}" has been detected.</value>
     <comment>{StrBegin="MSB4160: "}</comment>
   </data>
-  <data name="SolutionInvalidSolutionConfiguration" UESanitized="false" Visibility="Public">
+  <data name="SolutionInvalidSolutionConfiguration" xml:space="preserve">
     <value>MSB4126: The specified solution configuration "{0}" is invalid. Please specify a valid solution configuration using the Configuration and Platform properties (e.g. MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform="Any CPU") or leave those properties blank to use the default solution configuration.</value>
     <comment>{StrBegin="MSB4126: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
-  <data name="SolutionParseErrorReadingProject" UESanitized="false" Visibility="Public">
+  <data name="SolutionParseErrorReadingProject" xml:space="preserve">
     <value>MSB4046: Error reading project file "{0}": {1}</value>
     <comment>{StrBegin="MSB4046: "}</comment>
   </data>
-  <data name="SolutionParseInvalidProjectFileName" UESanitized="false" Visibility="Public">
+  <data name="SolutionParseInvalidProjectFileName" xml:space="preserve">
     <value>MSB4125: The project file name "{0}" is invalid. {1}</value>
     <comment>{StrBegin="MSB4125: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
-  <data name="SolutionParseProjectDepNotFoundError" UESanitized="false" Visibility="Public">
+  <data name="SolutionParseProjectDepNotFoundError" xml:space="preserve">
     <value>MSB4051: Project {0} is referencing a project with GUID {1}, but a project with this GUID was not found in the .SLN file.</value>
     <comment>{StrBegin="MSB4051: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
-  <data name="SolutionParseUnknownProjectType" UESanitized="false" Visibility="Public">
+  <data name="SolutionParseUnknownProjectType" xml:space="preserve">
     <value>MSB4078: The project file "{0}" is not supported by MSBuild and cannot be built.</value>
     <comment>{StrBegin="MSB4078: "}</comment>
   </data>
-  <data name="SolutionParseUpgradeNeeded" UESanitized="false" Visibility="Public">
+  <data name="SolutionParseUpgradeNeeded" xml:space="preserve">
     <value>MSB4054: The solution file must be opened in the Visual Studio IDE and converted to the latest version before it can be built by MSBuild.</value>
     <comment>{StrBegin="MSB4054: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
-  <data name="SolutionProjectConfigurationMissing" UESanitized="false" Visibility="Public">
+  <data name="SolutionProjectConfigurationMissing" xml:space="preserve">
     <value>MSB4121: The project configuration for project "{0}" was not specified in the solution file for the solution configuration "{1}".</value>
     <comment>{StrBegin="MSB4121: "}</comment>
   </data>
-  <data name="SolutionProjectSkippedForBuilding" UESanitized="false" Visibility="Public">
+  <data name="SolutionProjectSkippedForBuilding" xml:space="preserve">
     <value>The project "{0}" is not selected for building in solution configuration "{1}".</value>
     <comment>
       UE: This is not an error, so doesn't need an error code.
     </comment>
   </data>
-  <data name="SolutionScanProjectDependenciesFailed" UESanitized="false" Visibility="Public">
+  <data name="SolutionScanProjectDependenciesFailed" xml:space="preserve">
     <value>MSB4122: Scanning project dependencies for project "{0}" failed. {1}</value>
     <comment>{StrBegin="MSB4122: "}</comment>
   </data>
-  <data name="SolutionToolsVersionDoesNotSupportProjectToolsVersion" UESanitized="false" Visibility="Public">
+  <data name="SolutionToolsVersionDoesNotSupportProjectToolsVersion" xml:space="preserve">
     <value>MSB4149: The tools version "{0}" of the solution does not support building projects with a different tools version.</value>
     <comment>{StrBegin="MSB4149: "}</comment>
   </data>
-  <data name="SolutionVenusProjectNoClean" UESanitized="false" Visibility="Public">
+  <data name="SolutionVenusProjectNoClean" xml:space="preserve">
     <value>Web projects do not support the "Clean" target.  Continuing with remaining projects ...</value>
     <comment>UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do not localize "Clean".</comment>
   </data>
-  <data name="SolutionVenusProjectNoPublish" UESanitized="false" Visibility="Public">
+  <data name="SolutionVenusProjectNoPublish" xml:space="preserve">
     <value>Web projects do not support the "Publish" target.  Continuing with remaining projects ...</value>
     <comment>UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do not localize "Publish".</comment>
   </data>
-  <data name="SolutionVenusProjectSkipped" UESanitized="false" Visibility="Public">
+  <data name="SolutionVenusProjectSkipped" xml:space="preserve">
     <value>Skipping because the "$(AspNetConfiguration)" configuration is not supported for this web project.  You can use the AspNetConfiguration property to override the configuration used for building web projects, by adding /p:AspNetConfiguration=&lt;value&gt; to the command line. Currently web projects only support Debug and Release configurations.</value>
     <comment>
     UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do NOT localize "AspNetConfiguration", "Debug", "Release".
     </comment>
   </data>
-  <data name="TargetAlreadyCompleteFailure" UESanitized="false" Visibility="Public">
+  <data name="TargetAlreadyCompleteFailure" xml:space="preserve">
     <value>Target "{0}" skipped. Previously built unsuccessfully.</value>
   </data>
-  <data name="TargetAlreadyCompleteSuccess" UESanitized="false" Visibility="Public">
+  <data name="TargetAlreadyCompleteSuccess" xml:space="preserve">
     <value>Target "{0}" skipped. Previously built successfully.</value>
   </data>
-  <data name="TargetConditionHasInvalidMetadataReference" UESanitized="false" Visibility="Public">
+  <data name="TargetConditionHasInvalidMetadataReference" xml:space="preserve">
     <value>MSB4116: The condition "{1}" on the "{0}" target has a reference to item metadata. References to item metadata are not allowed in target conditions unless they are part of an item transform.</value>
     <comment>{StrBegin="MSB4116: "}</comment>
   </data>
-  <data name="TargetDoesNotExist" UESanitized="false" Visibility="Public">
+  <data name="TargetDoesNotExist" xml:space="preserve">
     <value>MSB4057: The target "{0}" does not exist in the project.</value>
     <comment>{StrBegin="MSB4057: "}</comment>
   </data>
-  <data name="TargetDoesNotExistBeforeTargetMessage" UESanitized="false" Visibility="Public">
+  <data name="TargetDoesNotExistBeforeTargetMessage" xml:space="preserve">
     <value>The target "{0}" listed in a BeforeTargets attribute at "{1}" does not exist in the project, and will be ignored.</value>
   </data>
-  <data name="TargetDoesNotExistAfterTargetMessage" UESanitized="false" Visibility="Public">
+  <data name="TargetDoesNotExistAfterTargetMessage" xml:space="preserve">
     <value>The target "{0}" listed in an AfterTargets attribute at "{1}" does not exist in the project, and will be ignored.</value>
   </data>
-  <data name="TargetFinishedFailure" UESanitized="false" Visibility="Public">
+  <data name="TargetFinishedFailure" xml:space="preserve">
     <value>Done building target "{0}" in project "{1}" -- FAILED.</value>
   </data>
-  <data name="TargetFinishedSuccess" UESanitized="false" Visibility="Public">
+  <data name="TargetFinishedSuccess" xml:space="preserve">
     <value>Done building target "{0}" in project "{1}".</value>
   </data>
-  <data name="TargetMessageWithId" UESanitized="false" Visibility="Public">
+  <data name="TargetMessageWithId" xml:space="preserve">
     <value>{0}: (TargetId:{1})</value>
   </data>
-  <data name="TargetOutputItemsHeader" UESanitized="false" Visibility="Public">
+  <data name="TargetOutputItemsHeader" xml:space="preserve">
     <value>Target output items:</value>
   </data>
-  <data name="TargetOutputItem" UESanitized="false" Visibility="Public">
+  <data name="TargetOutputItem" xml:space="preserve">
     <value>    {0}</value>
   </data>
-  <data name="TargetInputsSpecifiedWithoutOutputs" UESanitized="false" Visibility="Public">
+  <data name="TargetInputsSpecifiedWithoutOutputs" xml:space="preserve">
     <value>MSB4058: The "{0}" target is missing its output specification. If a target declares inputs, it must also declare outputs.</value>
     <comment>{StrBegin="MSB4058: "}</comment>
   </data>
-  <data name="TargetPerformanceSummary" UESanitized="false" Visibility="Public">
+  <data name="TargetPerformanceSummary" xml:space="preserve">
     <value>Target Performance Summary:</value>
   </data>
-  <data name="TargetSkippedFalseCondition" UESanitized="false" Visibility="Public">
+  <data name="TargetSkippedFalseCondition" xml:space="preserve">
     <value>Target "{0}" skipped, due to false condition; ({1}) was evaluated as ({2}).</value>
   </data>
-  <data name="TargetSkippedWhenSkipNonexistentTargets" UESanitized="false" Visibility="Public">
+  <data name="TargetSkippedWhenSkipNonexistentTargets" xml:space="preserve">
     <value>Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</value>
     <comment>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</comment>
   </data>
-
-  <!-- ====================================================================== -->
-
-  <!-- TargetStartedEventArgs: Project and File paths are different -->
-  <data name="TargetStartedFileProject" UESanitized="false" Visibility="Public">
+  <data name="TargetStartedFileProject" xml:space="preserve">
     <value>Target "{0}" in file "{1}" from project "{2}":</value>
   </data>
-  <data name="TargetStartedFileProjectEntry" UESanitized="false" Visibility="Public">
+  <data name="TargetStartedFileProjectEntry" xml:space="preserve">
     <value>Target "{0}" in file "{1}" from project "{2}" (entry point):</value>
   </data>
-  <data name="TargetStartedFileProjectDepends" UESanitized="false" Visibility="Public">
+  <data name="TargetStartedFileProjectDepends" xml:space="preserve">
     <value>Target "{0}" in file "{1}" from project "{2}" (target "{3}" depends on it):</value>
   </data>
-  <data name="TargetStartedFileProjectBefore" UESanitized="false" Visibility="Public">
+  <data name="TargetStartedFileProjectBefore" xml:space="preserve">
     <value>Target "{0}" in file "{1}" from project "{2}" (designated to run before target "{3}"):</value>
   </data>
-  <data name="TargetStartedFileProjectAfter" UESanitized="false" Visibility="Public">
+  <data name="TargetStartedFileProjectAfter" xml:space="preserve">
     <value>Target "{0}" in file "{1}" from project "{2}" (designated to run after target "{3}"):</value>
   </data>
-
-  <!-- TargetStartedEventArgs: Project and File paths are the same -->
-  <data name="TargetStarted" UESanitized="false" Visibility="Public">
+  <data name="TargetStarted" xml:space="preserve">
     <value>Target "{0}" in project "{1}":</value>
   </data>
-  <data name="TargetStartedProjectEntry" UESanitized="false" Visibility="Public">
+  <data name="TargetStartedProjectEntry" xml:space="preserve">
     <value>Target "{0}" in project "{1}" (entry point):</value>
   </data>
-  <data name="TargetStartedProjectDepends" UESanitized="false" Visibility="Public">
+  <data name="TargetStartedProjectDepends" xml:space="preserve">
     <value>Target "{0}" in project "{1}" (target "{2}" depends on it):</value>
   </data>
-  <data name="TargetStartedProjectBefore" UESanitized="false" Visibility="Public">
+  <data name="TargetStartedProjectBefore" xml:space="preserve">
     <value>Target "{0}" in project "{1}" (designated to run before target "{2}"):</value>
   </data>
-  <data name="TargetStartedProjectAfter" UESanitized="false" Visibility="Public">
+  <data name="TargetStartedProjectAfter" xml:space="preserve">
     <value>Target "{0}" in project "{1}" (designated to run after target "{2}"):</value>
   </data>
-
-  <!-- Serial logger low verbosity -->
-  <data name="TargetStartedPrefix" UESanitized="false" Visibility="Public">
+  <data name="TargetStartedPrefix" xml:space="preserve">
     <value>Target {0}:</value>
   </data>
-
-  <!-- Serial logger high verbosity -->
-  <data name="TargetStartedFromFile" UESanitized="false" Visibility="Public">
+  <data name="TargetStartedFromFile" xml:space="preserve">
     <value>Target "{0}" in file "{1}":</value>
   </data>
-
-  <!-- Parallel logger low verbosity -->
-  <data name="TargetStartedPrefixInProject" UESanitized="false" Visibility="Public">
+  <data name="TargetStartedPrefixInProject" xml:space="preserve">
     <value>Target {0} from project "{1}":</value>
   </data>
-
-  <!-- Parallel logger high verbosity -->
-  <data name="TargetStartedFromFileInProject" UESanitized="false" Visibility="Public">
+  <data name="TargetStartedFromFileInProject" xml:space="preserve">
     <value>Target "{0}" in file "{1}" from project "{2}":</value>
   </data>
-
-  <!-- Log messages for item/property group -->
-  <data name="ItemGroupIncludeLogMessagePrefix" UESanitized="false" Visibility="Public">
+  <data name="ItemGroupIncludeLogMessagePrefix" xml:space="preserve">
     <value>Added Item(s): </value>
   </data>
-  <data name="ItemGroupRemoveLogMessage" UESanitized="false" Visibility="Public">
+  <data name="ItemGroupRemoveLogMessage" xml:space="preserve">
     <value>Removed Item(s): </value>
   </data>
-  <data name="PropertyGroupLogMessage" UESanitized="false" Visibility="Public">
+  <data name="PropertyGroupLogMessage" xml:space="preserve">
     <value>Set Property: {0}={1}</value>
   </data>
-
-  <!-- Log messages for target outputs -->
-  <data name="OutputItemParameterMessagePrefix" UESanitized="false" Visibility="Public">
+  <data name="OutputItemParameterMessagePrefix" xml:space="preserve">
     <value>Output Item(s): </value>
   </data>
-  <data name="OutputPropertyLogMessage" UESanitized="false" Visibility="Public">
+  <data name="OutputPropertyLogMessage" xml:space="preserve">
     <value>Output Property: {0}={1}</value>
   </data>
-
-  <!-- ====================================================================== -->
-
-  <data name="TaskContinuedDueToContinueOnError" UESanitized="false" Visibility="Public">
-      <value>Build continuing because "{0}" on the task "{1}" is set to "{2}".</value>
+  <data name="TaskContinuedDueToContinueOnError" xml:space="preserve">
+    <value>Build continuing because "{0}" on the task "{1}" is set to "{2}".</value>
   </data>
-  <data name="TaskDeclarationOrUsageError" UESanitized="false" Visibility="Public">
+  <data name="TaskDeclarationOrUsageError" xml:space="preserve">
     <value>MSB4060: The "{0}" task has been declared or used incorrectly, or failed during construction. Check the spelling of the task name and the assembly name.</value>
     <comment>{StrBegin="MSB4060: "}</comment>
   </data>
-  <data name="TaskExistsButHasMismatchedIdentityError">
+  <data name="TaskExistsButHasMismatchedIdentityError" xml:space="preserve">
     <value>MSB4214: The "{0}" task has been defined, but cannot be used due to the fact that the identity defined in the UsingTask declaration (Runtime="{1}", Architecture="{2}") does not match the identity specified by the task invocation (MSBuildRuntime="{3}", MSBuildArchitecture="{4}").</value>
     <comment>{StrBegin="MSB4214: "}LOCALIZATION: Runtime, Architecture, MSBuildRuntime, and MSBuildArchitecture should not be localized.</comment>
   </data>
-  <data name="TaskFinishedFailure" UESanitized="false" Visibility="Public">
+  <data name="TaskFinishedFailure" xml:space="preserve">
     <value>Done executing task "{0}" -- FAILED.</value>
   </data>
-  <data name="TaskFinishedSuccess" UESanitized="false" Visibility="Public">
+  <data name="TaskFinishedSuccess" xml:space="preserve">
     <value>Done executing task "{0}".</value>
   </data>
-  <data name="TaskMessageWithId" UESanitized="false" Visibility="Public">
+  <data name="TaskMessageWithId" xml:space="preserve">
     <value>{0} (TaskId:{1})</value>
   </data>
-  <data name="TaskFound" UESanitized="false" Visibility="Public">
+  <data name="TaskFound" xml:space="preserve">
     <value>Using "{0}" task from assembly "{1}".</value>
     <comment>UE: This informational message helps users determine which assemblies their tasks were loaded from.</comment>
   </data>
-  <data name="TaskFoundFromFactory" UESanitized="false" Visibility="Public">
+  <data name="TaskFoundFromFactory" xml:space="preserve">
     <value>Using "{0}" task from the task factory "{1}".</value>
     <comment>UE: This informational message helps users determine which assemblies their tasks were loaded from.</comment>
   </data>
-  <data name="TaskNeedsSTA" UESanitized="false" Visibility="Public">
+  <data name="TaskNeedsSTA" xml:space="preserve">
     <value>Task "{0}" will be run in a single-threaded apartment thread.</value>
     <comment>UE: This informational message helps users determine if their tasks are run in the STA or MTA.</comment>
   </data>
-  <data name="TaskInstantiationFailureError" UESanitized="false" Visibility="Public">
+  <data name="TaskInstantiationFailureError" xml:space="preserve">
     <value>MSB4061: The "{0}" task could not be instantiated from "{1}". {2}</value>
     <comment>{StrBegin="MSB4061: "}LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</comment>
   </data>
-  <data name="TaskInstantiationFailureErrorInvalidCast" UESanitized="false" Visibility="Public">
+  <data name="TaskInstantiationFailureErrorInvalidCast" xml:space="preserve">
     <value>MSB4127: The "{0}" task could not be instantiated from the assembly "{1}". Please verify the task assembly has been built using the same version of the Microsoft.Build.Framework assembly as the one installed on your computer and that your host application is not missing a binding redirect for Microsoft.Build.Framework. {2}</value>
     <comment>{StrBegin="MSB4127: "}UE: This message is a specialized version of the TaskInstantiationFailureError message and can probably reuse some of its docs.
       LOCALIZATION: "{2}" is a localized message from a CLR/FX exception. Also, Microsoft.Build.Framework should not be localized</comment>
   </data>
-  <data name="LoggerInstantiationFailureErrorInvalidCast" UESanitized="false" Visibility="Public">
+  <data name="LoggerInstantiationFailureErrorInvalidCast" xml:space="preserve">
     <value>MSB4180: The "{0}" logger could not be instantiated from the assembly "{1}". Please verify the logger assembly has been built using the same version of the Microsoft.Build.Framework assembly as the one installed on your computer and that your host application is not missing a binding redirect for Microsoft.Build.Framework. {2}</value>
     <comment>
       {StrBegin="MSB4180: "}
       LOCALIZATION: "{2}" is a localized message from a CLR/FX exception. Also, Microsoft.Build.Framework should not be localized
     </comment>
   </data>
-  <data name="LoggerCreationError" UESanitized="true" Visibility="Public">
+  <data name="TaskReturnedFalseButDidNotLogError">
+    <value>MSB4181: The "{0}" task returned false but did not log an error.</value>
+    <comment>{StrBegin="MSB4181: "}</comment>
+  </data>
+  <data name="LoggerCreationError" xml:space="preserve">
     <value>MSB1021: Cannot create an instance of the logger. {0}</value>
     <comment>{StrBegin="MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBxxxx: " should not be localized. {0} contains a message explaining why the
       logger could not be created -- this message comes from the CLR/FX and is localized.</comment>
   </data>
-  <data name="LoggerNotFoundError" UESanitized="false" Visibility="Public">
+  <data name="LoggerNotFoundError" xml:space="preserve">
     <value>MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</value>
     <comment>
       {StrBegin="MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1082,602 +1121,569 @@
       LOCALIZATION: The prefix "MSBxxxx: " should not be localized.
     </comment>
   </data>
-  <data name="TaskFactoryInstanceCreationError" UESanitized="false" Visibility="Public">
+  <data name="TaskFactoryInstanceCreationError" xml:space="preserve">
     <value>MSB4179: The task factory instance for the "{0}" task could not be instantiated from the task factory "{1}". {2}</value>
     <comment>{StrBegin="MSB4179: "}
       LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</comment>
   </data>
-  <data name="TaskFactoryInstantiationFailureErrorInvalidCast" UESanitized="false" Visibility="Public">
+  <data name="TaskFactoryInstantiationFailureErrorInvalidCast" xml:space="preserve">
     <value>MSB4176: The "{0}" task factory could not be instantiated from the assembly "{1}". Please verify the task assembly has been built using the same version of the Microsoft.Build.Framework assembly as the one installed on your computer and that your host application is not missing a binding redirect for Microsoft.Build.Framework. {2}</value>
     <comment>{StrBegin="MSB4176: "}UE: This message is a specialized version of the TaskFactoryInstantiationFailureError message and can probably reuse some of its docs.
       LOCALIZATION: "{2}" is a localized message from a CLR/FX exception. Also, Microsoft.Build.Framework should not be localized</comment>
   </data>
-  <data name="TaskFactoryWillIgnoreTaskFactoryParameters" UESanitized="false" Visibility="Public">
+  <data name="TaskFactoryWillIgnoreTaskFactoryParameters" xml:space="preserve">
     <value>MSB4219: The TaskFactory "{0}" does not implement ITaskFactory2. The attributes "{1}" and/or "{2}" on the UsingTask declaration for task "{3}" will be be ignored.</value>
     <comment>{StrBegin="MSB4219: "}
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>
-  <data name="TaskFactoryTaskTypeIsNotSet" UESanitized="false" Visibility="Public">
+  <data name="TaskFactoryTaskTypeIsNotSet" xml:space="preserve">
     <value>The task factory must return a value for the "TaskType" property.</value>
   </data>
-  <data name="TaskLoadFailure" UESanitized="false" Visibility="Public">
+  <data name="TaskLoadFailure" xml:space="preserve">
     <value>MSB4062: The "{0}" task could not be loaded from the assembly {1}. {2} Confirm that the &lt;UsingTask&gt; declaration is correct, that the assembly and all its dependencies are available, and that the task contains a public class that implements Microsoft.Build.Framework.ITask.</value>
     <comment>{StrBegin="MSB4062: "}UE: This message is shown when a task cannot be loaded from its assembly for various reasons e.g. corrupt assembly,
     invalid task declaration, disk error, etc. "{2}" contains a message explaining what happened.
     LOCALIZATION: "{2}" is a message from the CLR loader and is already localized. Also, &lt;UsingTask&gt; should not be localized.</comment>
   </data>
-  <data name="TaskLoadFailureInvalidTaskHostFactoryParameter">
+  <data name="TaskLoadFailureInvalidTaskHostFactoryParameter" xml:space="preserve">
     <value>MSB4215: The "{0}" task could not be loaded. "{1}" is an invalid value for the task host parameter "{2}". Valid values are:  "{3}", "{4}", "{5}", and "{6}"; not specifying a value is also valid.</value>
     <comment>{StrBegin="MSB4215: "}</comment>
   </data>
-  <data name="InvalidTaskHostFactoryParameter">
+  <data name="InvalidTaskHostFactoryParameter" xml:space="preserve">
     <value>"{0}" is an invalid value for the task host parameter "{1}". Valid values are: "{2}", "{3}", "{4}", and "{5}"; not specifying a value is also valid.</value>
   </data>
-  <data name="TaskHostAcquireFailed">
+  <data name="TaskHostAcquireFailed" xml:space="preserve">
     <value>MSB4216: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run.</value>
     <comment>{StrBegin="MSB4216: "}</comment>
   </data>
-  <data name="TaskHostNodeFailedToLaunch">
+  <data name="TaskHostNodeFailedToLaunch" xml:space="preserve">
     <value>MSB4221: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run. Error {4} {5}.</value>
     <comment>{StrBegin="MSB4221: "}</comment>
   </data>
-  <data name="TaskHostNodeFailedToLaunchErrorCodeNet35NotInstalled" UESanitized="false" Visibility="Public">
+  <data name="TaskHostNodeFailedToLaunchErrorCodeNet35NotInstalled" xml:space="preserve">
     <value>A task requested launch of the .NET 3.5 version of the MSBuild task host, but .NET 3.5 is not installed on this machine so the task host could not be launched.  To fix this error, please either install .NET 3.5 or retarget your project.</value>
   </data>
-  <data name="TaskHostExitedPrematurely" UESanitized="false" Visibility="Public">
+  <data name="TaskHostExitedPrematurely" xml:space="preserve">
     <value>MSB4217: Task host node exited prematurely. Diagnostic information may be found in files in the temporary files directory named MSBuild_*.failure.txt. {0}</value>
     <comment>{StrBegin="MSB4217: "}</comment>
   </data>
-  <data name="TaskParametersError" UESanitized="false" Visibility="Public">
+  <data name="TaskParametersError" xml:space="preserve">
     <value>MSB4063: The "{0}" task could not be initialized with its input parameters. {1}</value>
     <comment>{StrBegin="MSB4063: "}</comment>
   </data>
-  <data name="TaskParameterPrefix" UESanitized="false" Visibility="Public">
+  <data name="TaskParameterPrefix" xml:space="preserve">
     <value>Task Parameter:</value>
   </data>
-  <data name="TaskPerformanceSummary" UESanitized="false" Visibility="Public">
+  <data name="TaskPerformanceSummary" xml:space="preserve">
     <value>Task Performance Summary:</value>
   </data>
-  <data name="ProjectEvaluationPerformanceSummary" UESanitized="false" Visibility="Public">
+  <data name="ProjectEvaluationPerformanceSummary" xml:space="preserve">
     <value>Project Evaluation Performance Summary:</value>
   </data>
-  <data name="TaskSkippedFalseCondition" UESanitized="false" Visibility="Public">
+  <data name="TaskSkippedFalseCondition" xml:space="preserve">
     <value>Task "{0}" skipped, due to false condition; ({1}) was evaluated as ({2}).</value>
   </data>
-  <data name="TaskStarted" UESanitized="false" Visibility="Public">
+  <data name="TaskStarted" xml:space="preserve">
     <value>Task "{0}"</value>
   </data>
-  <data name="TimeElapsed" UESanitized="false" Visibility="Public">
+  <data name="TimeElapsed" xml:space="preserve">
     <value>Time Elapsed {0}</value>
   </data>
-  <data name="ToolsVersionInEffectForBuild" UESanitized="false" Visibility="Public">
+  <data name="ToolsVersionInEffectForBuild" xml:space="preserve">
     <value>Building with tools version "{0}".</value>
   </data>
-  <data name="UsingDifferentToolsVersionFromProjectFile" UESanitized="false" Visibility="Public">
+  <data name="UsingDifferentToolsVersionFromProjectFile" xml:space="preserve">
     <value>Project file contains ToolsVersion="{0}". This toolset may be unknown or missing, in which case you may be able to resolve this by installing the appropriate version of MSBuild, or the build may have been forced to a particular ToolsVersion for policy reasons. Treating the project as if it had ToolsVersion="{1}". For more information, please see http://go.microsoft.com/fwlink/?LinkId=293424.</value>
   </data>
-  <data name="DeferredMessages" UESanitized="false" Visibility="Public">
+  <data name="DeferredMessages" xml:space="preserve">
     <value>Deferred Messages</value>
   </data>
-  <data name="UnexpectedCharacterInCondition" UESanitized="false" Visibility="Public">
+  <data name="UnexpectedCharacterInCondition" xml:space="preserve">
     <value>MSB4090: Found an unexpected character '{2}' at position {1} in condition "{0}".</value>
     <comment>{StrBegin="MSB4090: "}</comment>
   </data>
-  <data name="UndefinedFunctionCall" UESanitized="false" Visibility="Public">
+  <data name="UndefinedFunctionCall" xml:space="preserve">
     <value>MSB4091: Found a call to an undefined function "{1}" in condition "{0}".</value>
     <comment>{StrBegin="MSB4091: "}</comment>
   </data>
-  <data name="UnexpectedTaskAttribute" UESanitized="false" Visibility="Public">
+  <data name="UnexpectedTaskAttribute" xml:space="preserve">
     <value>MSB4064: The "{0}" parameter is not supported by the "{1}" task. Verify the parameter exists on the task, and it is a settable public instance property.</value>
     <comment>{StrBegin="MSB4064: "}</comment>
   </data>
-  <data name="UnexpectedTaskOutputAttribute" UESanitized="false" Visibility="Public">
+  <data name="UnexpectedTaskOutputAttribute" xml:space="preserve">
     <value>MSB4131: The "{0}" parameter is not supported by the "{1}" task. Verify the parameter exists on the task, and it is a gettable public instance property.</value>
     <comment>{StrBegin="MSB4131: "}</comment>
   </data>
-  <data name="UnexpectedTokenInCondition" UESanitized="false" Visibility="Public">
+  <data name="UnexpectedTokenInCondition" xml:space="preserve">
     <value>MSB4092: An unexpected token "{1}" was found at character position {2} in condition "{0}".</value>
     <comment>{StrBegin="MSB4092: "}</comment>
   </data>
-  <data name="UnmarkedOutputTaskParameter" UESanitized="false" Visibility="Public">
+  <data name="UnmarkedOutputTaskParameter" xml:space="preserve">
     <value>MSB4065: The "{0}" parameter is not marked for output by the "{1}" task.</value>
     <comment>{StrBegin="MSB4065: "}</comment>
   </data>
-  <data name="UnrecognizedAttribute" UESanitized="false" Visibility="Public">
+  <data name="UnrecognizedAttribute" xml:space="preserve">
     <value>MSB4066: The attribute "{0}" in element &lt;{1}&gt; is unrecognized.</value>
     <comment>{StrBegin="MSB4066: "}</comment>
   </data>
-  <data name="UnrecognizedChildElement" UESanitized="false" Visibility="Public">
+  <data name="UnrecognizedChildElement" xml:space="preserve">
     <value>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized.</value>
     <comment>{StrBegin="MSB4067: "}</comment>
   </data>
-  <data name="InvalidChildElementDueToDuplication" UESanitized="false" Visibility="Public">
+  <data name="InvalidChildElementDueToDuplication" xml:space="preserve">
     <value>MSB4173: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is invalid because a child element with that name already exists</value>
     <comment>{StrBegin="MSB4173: "}</comment>
   </data>
-  <data name="InvalidAttributeDueToDuplication" UESanitized="false" Visibility="Public">
+  <data name="InvalidAttributeDueToDuplication" xml:space="preserve">
     <value>MSB4227: The attribute "{0}" on element &lt;{1}&gt; is invalid because an attribute with that name already exists</value>
     <comment>{StrBegin="MSB4227: "}</comment>
   </data>
-  <data name="InvalidMetadataAsAttribute" UESanitized="false" Visibility="Public">
+  <data name="InvalidMetadataAsAttribute" xml:space="preserve">
     <value>MSB4228: The name "{0}" is not valid for metadata expressed as an attribute (on element &lt;{1}&gt;)</value>
     <comment>{StrBegin="MSB4228: "}</comment>
   </data>
-  <data name="InvalidSdkFormat" UESanitized="false" Visibility="Public">
+  <data name="InvalidSdkFormat" xml:space="preserve">
     <value>MSB4229: The value "{0}" is not valid for an Sdk specification. The attribute should be a semicolon-delimited list of Sdk-name/minimum-version pairs, separated by a forward slash.</value>
     <comment>{StrBegin="MSB4229: "}</comment>
   </data>
-  <data name="CouldNotResolveSdk" UESanitized="false" Visibility="Public">
+  <data name="CouldNotResolveSdk" xml:space="preserve">
     <value>MSB4236: The SDK '{0}' specified could not be found.</value>
     <comment>{StrBegin="MSB4236: "}</comment>
   </data>
-  <data name="CouldNotLoadSdkResolver" UESanitized="false" Visibility="Public">
+  <data name="CouldNotLoadSdkResolver" xml:space="preserve">
     <value>MSB4237: The SDK resolver type "{0}" failed to load. {1}</value>
     <comment>{StrBegin="MSB4237: "}</comment>
   </data>
-  <data name="CouldNotLoadSdkResolverAssembly" UESanitized="false" Visibility="Public">
+  <data name="CouldNotLoadSdkResolverAssembly" xml:space="preserve">
     <value>MSB4244: The SDK resolver assembly "{0}" could not be loaded. {1}</value>
     <comment>{StrBegin="MSB4244: "}</comment>
   </data>
-  <data name="CouldNotRunSdkResolver" UESanitized="false" Visibility="Public">
+  <data name="CouldNotRunSdkResolver" xml:space="preserve">
     <value>MSB4242: The SDK resolver "{0}" failed to run. {1}</value>
     <comment>{StrBegin="MSB4242: "}</comment>
   </data>
-  <data name="CouldNotRunNuGetSdkResolver" UESanitized="false" Visibility="Public">
+  <data name="CouldNotRunNuGetSdkResolver" xml:space="preserve">
     <value>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</value>
     <comment>{StrBegin="MSB4243: "}</comment>
   </data>
-  <data name="SdkResolverManifestInvalid" UESanitized="false" Visibility="Public">
+  <data name="SdkResolverManifestInvalid" xml:space="preserve">
     <value>MSB4245: SDK Resolver manifest file is invalid. This may indicate a corrupt or invalid installation of MSBuild. Manifest file path '{0}'. Message: {1}</value>
     <comment>{StrBegin="MSB4245: "}</comment>
   </data>
-  <data name="SdkResolverNoDllOrManifest" UESanitized="false" Visibility="Public">
+  <data name="SdkResolverNoDllOrManifest" xml:space="preserve">
     <value>MSB4246: SDK Resolver folder exists but without an SDK Resolver DLL or manifest file. This may indicate a corrupt or invalid installation of MSBuild. SDK resolver path: {0}</value>
     <comment>{StrBegin="MSB4246: "}</comment>
   </data>
-  <data name="SdkResolverDllInManifestMissing" UESanitized="false" Visibility="Public">
+  <data name="SdkResolverDllInManifestMissing" xml:space="preserve">
     <value>MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</value>
     <comment>{StrBegin="MSB4247: "}</comment>
   </data>
-  <data name="InvalidSdkElementName" UESanitized="false" Visibility="Public">
+  <data name="InvalidSdkElementName" xml:space="preserve">
     <value>MSB4238: The name "{0}" is not a valid SDK name.</value>
     <comment>{StrBegin="MSB4238: "}</comment>
   </data>
-  <data name="UnrecognizedParentElement" UESanitized="true" Visibility="Public">
+  <data name="UnrecognizedParentElement" xml:space="preserve">
     <value>MSB4189: &lt;{1}&gt; is not a valid child of the &lt;{0}&gt; element.</value>
     <comment>{StrBegin="MSB4189: "}</comment>
   </data>
-  <data name="UnrecognizedElement" UESanitized="false" Visibility="Public">
+  <data name="UnrecognizedElement" xml:space="preserve">
     <value>MSB4068: The element &lt;{0}&gt; is unrecognized, or not supported in this context.</value>
     <comment>{StrBegin="MSB4068: "}</comment>
   </data>
-  <data name="UnsupportedLogFileFormat" UESanitized="false" Visibility="Public">
+  <data name="UnsupportedLogFileFormat" xml:space="preserve">
     <value>MSB4235: The log file format version is {0}, whereas this version of MSBuild only supports versions up to {1}.</value>
     <comment>{StrBegin="MSB4235: "}</comment>
   </data>
-  <data name="UnsupportedTaskParameterTypeError" UESanitized="false" Visibility="Public">
+  <data name="UnsupportedTaskParameterTypeError" xml:space="preserve">
     <value>MSB4069: The "{0}" type of the "{1}" parameter of the "{2}" task is not supported by MSBuild.</value>
     <comment>{StrBegin="MSB4069: "}LOCALIZATION: "MSBuild" should not be localized.</comment>
   </data>
-  <data name="UsingTaskAssemblySpecification" UESanitized="false" Visibility="Public">
+  <data name="UsingTaskAssemblySpecification" xml:space="preserve">
     <value>MSB4072: A &lt;{0}&gt; element must contain either the "{1}" attribute or the "{2}" attribute (but not both).</value>
     <comment>{StrBegin="MSB4072: "}</comment>
   </data>
-  <data name="WarningCount" UESanitized="false" Visibility="Public">
+  <data name="WarningCount" xml:space="preserve">
     <value>{0} Warning(s)</value>
   </data>
-  <data name="WhenNotAllowedAfterOtherwise" UESanitized="false" Visibility="Public">
+  <data name="WhenNotAllowedAfterOtherwise" xml:space="preserve">
     <value>MSB4084: A &lt;When&gt; element may not follow an &lt;Otherwise&gt; element in a &lt;Choose&gt;.</value>
     <comment>{StrBegin="MSB4084: "}</comment>
   </data>
-  <data name="MustCallInitializeBeforeApplyParameter" UESanitized="false" Visibility="Public">
+  <data name="MustCallInitializeBeforeApplyParameter" xml:space="preserve">
     <value>MSB4150: Must initialize the console logger using the initialize method before using ApplyParameter</value>
     <comment>{StrBegin="MSB4150: "}</comment>
   </data>
-  <data name="InvalidHostObjectOnOutOfProcProject" UESanitized="false" Visibility="Public">
+  <data name="InvalidHostObjectOnOutOfProcProject" xml:space="preserve">
     <value>MSB4206: A non-null host object cannot be specified for a project which has an affinity set to out-of-process.</value>
     <comment>{StrBegin="MSB4206: "}</comment>
   </data>
-  <data name="InvalidAffinityForProjectWithHostObject" UESanitized="false" Visibility="Public">
+  <data name="InvalidAffinityForProjectWithHostObject" xml:space="preserve">
     <value>MSB4207: Only an in-process affinity may be specified for projects which have registered host objects.</value>
     <comment>{StrBegin="MSB4207: "}</comment>
   </data>
-  <data name="ProjectInstanceConflictsWithAffinity" UESanitized="false" Visibility="Public">
+  <data name="ProjectInstanceConflictsWithAffinity" xml:space="preserve">
     <value>MSB4209: The specified project instance conflicts with the affinity specified in the HostServices.</value>
     <comment>{StrBegin="MSB4209: "}</comment>
   </data>
-  <data name="AffinityConflict" UESanitized="false" Visibility="Public">
+  <data name="AffinityConflict" xml:space="preserve">
     <value>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for this project.</value>
     <comment>{StrBegin="MSB4213: "}</comment>
   </data>
-  <data name="UnableToCreateNode" UESanitized="false" Visibility="Public">
+  <data name="UnableToCreateNode" xml:space="preserve">
     <value>MSB4223: A node of the required type {0} could not be created.</value>
     <comment>{StrBegin="MSB4223: "}</comment>
   </data>
-  <data name="KeepAndRemoveMetadataMutuallyExclusive" UESanitized="false" Visibility="Public">
+  <data name="KeepAndRemoveMetadataMutuallyExclusive" xml:space="preserve">
     <value>MSB4224: KeepMetadata and RemoveMetadata are mutually exclusive.</value>
     <comment>{StrBegin="MSB4224: "}</comment>
   </data>
-  <data name="ProjectStackWithTargetNames" UESanitized="false" Visibility="Public">
-    <value>"{0}" ({1} target) ({2}) -></value>
+  <data name="ProjectStackWithTargetNames" xml:space="preserve">
+    <value>"{0}" ({1} target) ({2}) -&gt;</value>
   </data>
-  <data name="ProjectStackWithDefaultTargets" UESanitized="false" Visibility="Public">
-    <value>"{0}" (default target) ({1}) -></value>
+  <data name="ProjectStackWithDefaultTargets" xml:space="preserve">
+    <value>"{0}" (default target) ({1}) -&gt;</value>
   </data>
-  <data name="BuildEventContext" UESanitized="false" Visibility="Public">
+  <data name="BuildEventContext" xml:space="preserve">
     <value>{0} {1,5}</value>
   </data>
-  <data name="ProjectStartedTopLevelProjectWithTargetNames" UESanitized="false" Visibility="Public">
+  <data name="ProjectStartedTopLevelProjectWithTargetNames" xml:space="preserve">
     <value>Project "{0}" on node {1} ({2} target(s)).</value>
   </data>
-  <data name="ProjectStartedTopLevelProjectWithDefaultTargets" UESanitized="false" Visibility="Public">
+  <data name="ProjectStartedTopLevelProjectWithDefaultTargets" xml:space="preserve">
     <value>Project "{0}" on node {1} (default targets).</value>
   </data>
-  <data name="ProjectStartedWithTargetsMultiProc" UESanitized="false" Visibility="Public">
+  <data name="ProjectStartedWithTargetsMultiProc" xml:space="preserve">
     <value>Project "{0}" ({1}) is building "{2}" ({3}) on node {4} ({5} target(s)).</value>
   </data>
-  <data name="ProjectStartedWithDefaultTargetsMultiProc" UESanitized="false" Visibility="Public">
+  <data name="ProjectStartedWithDefaultTargetsMultiProc" xml:space="preserve">
     <value>Project "{0}" ({1}) is building "{2}" ({3}) on node {4} (default targets).</value>
   </data>
-  <data name="ErrorWarningInTarget" UESanitized="false" Visibility="Public">
-    <value>({0} target) -> </value>
+  <data name="ErrorWarningInTarget" xml:space="preserve">
+    <value>({0} target) -&gt; </value>
   </data>
-  <data name="PropertyOutputOverridden" UESanitized="false" Visibility="Public">
+  <data name="PropertyOutputOverridden" xml:space="preserve">
     <value>The property "{0}" with value "{1}" is being overridden by another batch. The property is now: "{2}"</value>
   </data>
-  <data name="logfilePathNullOrEmpty" UESanitized="false" Visibility="Public">
+  <data name="logfilePathNullOrEmpty" xml:space="preserve">
     <value>The log file path cannot be null or empty.</value>
   </data>
-  <data name="DefaultTargets" UESanitized="false" Visibility="Public">
+  <data name="DefaultTargets" xml:space="preserve">
     <value>[default]</value>
   </data>
-  <data name="CouldNotFindFactory">
+  <data name="CouldNotFindFactory" xml:space="preserve">
     <value>MSB4174: The task factory "{0}" could not be found in the assembly "{1}".</value>
     <comment>{StrBegin="MSB4174: "}</comment>
   </data>
-  <data name="TaskFactoryLoadFailure">
+  <data name="TaskFactoryLoadFailure" xml:space="preserve">
     <value>MSB4175: The task factory "{0}" could not be loaded from the assembly "{1}". {2}</value>
     <comment>{StrBegin="MSB4175: "}</comment>
   </data>
-  <data name="UnableToCancel">
+  <data name="UnableToCancel" xml:space="preserve">
     <value>MSB4201: The cancel operation was unable to complete because the currently executing task is not responding.</value>
     <comment>{StrBegin="MSB4201: "}</comment>
   </data>
-  <data name="UnableToCancelTask">
+  <data name="UnableToCancelTask" xml:space="preserve">
     <value>MSB4220: Waiting for the currently executing task "{0}" to cancel.</value>
     <comment>{StrBegin="MSB4220: "}</comment>
   </data>
-  <data name="MainThreadInUse">
+  <data name="MainThreadInUse" xml:space="preserve">
     <value>MSB4202: The request to build submission {0} cannot proceed because submission {1} is already using the main thread.</value>
     <comment>{StrBegin="MSB4202: "}</comment>
   </data>
-  <data name="ProjectAlreadyBuilding">
+  <data name="ProjectAlreadyBuilding" xml:space="preserve">
     <value>The request to build this submission cannot proceed because a project with the same configuration is already building.</value>
   </data>
-  <data name="InitializingTaskFactory">
+  <data name="InitializingTaskFactory" xml:space="preserve">
     <value>Initializing task factory "{0}" from assembly "{1}".</value>
   </data>
-  <data name="InitializingTaskHostFactory">
+  <data name="InitializingTaskHostFactory" xml:space="preserve">
     <value>Initializing task host factory for task "{0}" from assembly "{1}"</value>
   </data>
-  <data name="CantWriteBuildPlan">
+  <data name="CantWriteBuildPlan" xml:space="preserve">
     <value>The build plan could not be written.  Check that the build process has permissions to write to {0}.</value>
   </data>
-  <data name="CacheFileInaccessible">
+  <data name="CacheFileInaccessible" xml:space="preserve">
     <value>The MSBuild cache file "{0}" is inaccessible.  Ensure you have access to the directory and that this file is not deleted during the build.  {1}</value>
     <comment>
       LOCALIZATION: "{1}" is a localized message from a CLR/FX exception.
     </comment>
   </data>
-  <data name="CantReadBuildPlan">
+  <data name="CantReadBuildPlan" xml:space="preserve">
     <value>The build plan could not be read.  Check that the build process has permissions to read {0}.</value>
   </data>
-  <data name="BuildPlanCorrupt">
+  <data name="BuildPlanCorrupt" xml:space="preserve">
     <value>The build plan at {0} appears to be corrupt and cannot be used.</value>
   </data>
-  <data name="DetailedSummaryHeader">
+  <data name="DetailedSummaryHeader" xml:space="preserve">
     <value>
 Detailed Build Summary
 ======================
     </value>
   </data>
-  <data name="BuildHierarchyHeader">
+  <data name="BuildHierarchyHeader" xml:space="preserve">
     <value>
 ============================== Build Hierarchy (IDs represent configurations) =====================================================
 Id                  : Exclusive Time   Total Time   Path (Targets)
 -----------------------------------------------------------------------------------------------------------------------------------</value>
   </data>
-  <data name="BuildHierarchyEntry">
+  <data name="BuildHierarchyEntry" xml:space="preserve">
     <value>{0}{1,-3}{2}: {3:0.000}s           {4:0.000}s       {5} ({6}) </value>
     <comment>Fields 3 and 4 represent seconds, and the 's' following them should reflect the localized abbreviation for seconds.</comment>
   </data>
-  <data name="NodeUtilizationHeader">
+  <data name="NodeUtilizationHeader" xml:space="preserve">
     <value>
 ============================== Node Utilization (IDs represent configurations) ====================================================
 Timestamp:            {0} Duration   Cumulative
 -----------------------------------------------------------------------------------------------------------------------------------</value>
     <comment>Spacing is important.  Preserve the number of characters between the start of each word.</comment>
   </data>
-  <data name="NodeUtilizationEntry">
+  <data name="NodeUtilizationEntry" xml:space="preserve">
     <value>{0} {1:0.000}s     {2:0.000}s {3}</value>
     <comment>Fields 1 and 2 represents seconds, and the 's' following it should reflect the localized abbreviation for seconds.</comment>
   </data>
-  <data name="NodeUtilizationSummary">
+  <data name="NodeUtilizationSummary" xml:space="preserve">
     <value>-----------------------------------------------------------------------------------------------------------------------------------
 Utilization:          {0} Average Utilization: {1:###.0}</value>
     <comment>Spacing is important.  Preserve the number of characters between the start of each word.</comment>
   </data>
-  <!-- #################################################################################################-->
-  <!-- ############################## Collection-related strings #######################################-->
-  <!-- #################################################################################################-->
-  <!-- The OM_ prefix indicates at the point of use that there is no error code in the message;
-       these should not be used in an InvalidProjectFileException -->
-  <data name="OM_NotSupportedConvertingCollectionValueToBacking">
+  <data name="OM_NotSupportedConvertingCollectionValueToBacking" xml:space="preserve">
     <value>This collection cannot convert from the specified value to the backing value.</value>
   </data>
-  <data name="OM_CannotCreateReservedProperty" UESanitized="false" Visibility="Public">
+  <data name="OM_CannotCreateReservedProperty" xml:space="preserve">
     <value>The "{0}" property name is reserved.</value>
     <comment>UE: This message is shown when the user tries to redefine one of the reserved MSBuild properties e.g. $(MSBuildProjectFile) through the object model</comment>
   </data>
-  <!-- #################################################################################################-->
-  <!-- ############################## Construction-model-related strings ###############################-->
-  <!-- #################################################################################################-->
-  <!-- The OM_ prefix indicates at the point of use that there is no error code in the message;
-       these should not be used in an InvalidProjectFileException -->
-  <data name="OM_EitherAttributeButNotBoth">
+  <data name="OM_EitherAttributeButNotBoth" xml:space="preserve">
     <value>The &lt;{0}&gt; element must have either the "{1}" attribute or the "{2}" attribute but not both.</value>
   </data>
-  <data name="OM_OneOfAttributeButNotMore">
+  <data name="OM_OneOfAttributeButNotMore" xml:space="preserve">
     <value>The &lt;{0}&gt; element must have either the "{1}" attribute, the "{2}" attribute, or the "{3}" attribute, but not more than one.</value>
   </data>
-  <data name="OM_NoRemoveOutsideTargets">
+  <data name="OM_NoRemoveOutsideTargets" xml:space="preserve">
     <value>The "Remove" attribute is not permitted on an item outside of a &lt;Target&gt;.</value>
   </data>
-  <data name="OM_NoKeepMetadataOutsideTargets">
+  <data name="OM_NoKeepMetadataOutsideTargets" xml:space="preserve">
     <value>The "KeepMetadata" attribute is not permitted on an item outside of a &lt;Target&gt;.</value>
   </data>
-  <data name="OM_NoRemoveMetadataOutsideTargets">
+  <data name="OM_NoRemoveMetadataOutsideTargets" xml:space="preserve">
     <value>The "RemoveMetadata" attribute is not permitted on an item outside of a &lt;Target&gt;.</value>
   </data>
-  <data name="OM_NoKeepDuplicatesOutsideTargets">
+  <data name="OM_NoKeepDuplicatesOutsideTargets" xml:space="preserve">
     <value>The "KeepDuplicates" attribute is not permitted on an item outside of a &lt;Target&gt;.</value>
   </data>
-  <data name="OM_CannotGetSetCondition">
+  <data name="OM_CannotGetSetCondition" xml:space="preserve">
     <value>Elements of this type do not have a condition.</value>
     <comment>For example, it is not legal for a &lt;ProjectExtensions&gt; element to have a condition attribute.</comment>
   </data>
-  <data name="OM_NodeAlreadyParented">
+  <data name="OM_NodeAlreadyParented" xml:space="preserve">
     <value>The node already has a parent. Remove it from its parent before moving it.</value>
   </data>
-  <data name="OM_NodeNotAlreadyParentedByThis">
+  <data name="OM_NodeNotAlreadyParentedByThis" xml:space="preserve">
     <value>The node is not parented by this object so it cannot be removed from it.</value>
   </data>
-  <data name="OM_ReferenceDoesNotHaveThisParent">
+  <data name="OM_ReferenceDoesNotHaveThisParent" xml:space="preserve">
     <value>The reference node is not a child of this node.</value>
   </data>
-  <data name="OM_SelfAncestor">
+  <data name="OM_SelfAncestor" xml:space="preserve">
     <value>Cannot make a node or an ancestor of that node a child of itself.</value>
   </data>
-  <data name="OM_MustBeSameProject">
+  <data name="OM_MustBeSameProject" xml:space="preserve">
     <value>Cannot create a relationship between nodes that were created from different projects.</value>
   </data>
-  <data name="OM_ParentNotParented">
+  <data name="OM_ParentNotParented" xml:space="preserve">
     <value>The parent node is not itself parented.</value>
   </data>
-  <data name="OM_CannotAcceptParent">
+  <data name="OM_CannotAcceptParent" xml:space="preserve">
     <value>This parent is not a valid parent for the item.</value>
   </data>
-  <data name="OM_ItemsOutsideTargetMustHaveIncludeOrUpdateOrRemove">
+  <data name="OM_ItemsOutsideTargetMustHaveIncludeOrUpdateOrRemove" xml:space="preserve">
     <value>An item not parented under a Target must have a value for Include or Update or Remove.</value>
     <comment>LOCALIZATION: Please do not localize "Target", "Include", "Update", and "Remove".</comment>
   </data>
-  <data name="OM_NameInvalid">
+  <data name="OM_NameInvalid" xml:space="preserve">
     <value>The name "{0}" contains an invalid character "{1}".</value>
   </data>
-  <data name="OM_TargetNameNullOrEmpty">
+  <data name="OM_TargetNameNullOrEmpty" xml:space="preserve">
     <value>Method {0} cannot be called with a collection containing null or empty target names.</value>
   </data>
-  <data name="OM_NoOtherwiseBeforeWhenOrOtherwise">
+  <data name="OM_NoOtherwiseBeforeWhenOrOtherwise" xml:space="preserve">
     <value>An &lt;Otherwise&gt; element cannot be located before a &lt;When&gt; or &lt;Otherwise&gt; element.</value>
   </data>
-  <data name="OM_MustSetFileNameBeforeSave">
+  <data name="OM_MustSetFileNameBeforeSave" xml:space="preserve">
     <value>Project has not been given a path to save to.</value>
   </data>
-  <data name="OM_MustSetRecordDuplicateInputs">
+  <data name="OM_MustSetRecordDuplicateInputs" xml:space="preserve">
     <value>Project was not loaded with the ProjectLoadSettings.RecordDuplicateImports flag.</value>
   </data>
-  <data name="OM_CannotSaveFileLoadedAsReadOnly">
+  <data name="OM_CannotSaveFileLoadedAsReadOnly" xml:space="preserve">
     <value>Project or targets file "{0}" was loaded in read-only mode, and cannot be saved.</value>
   </data>
-  <!-- #################################################################################################-->
-  <!-- ############################## Evaluation-model-related strings #################################-->
-  <!-- #################################################################################################-->
-  <!-- The OM_ prefix indicates at the point of use that there is no error code in the message;
-       these should not be used in an InvalidProjectFileException -->
-  <data name="OM_IncorrectObjectAssociation">
+  <data name="OM_IncorrectObjectAssociation" xml:space="preserve">
     <value>The "{0}" object specified does not belong to the correct "{1}" object.</value>
   </data>
-  <data name="OM_ReservedName">
+  <data name="OM_ReservedName" xml:space="preserve">
     <value>The "{0}" name is reserved, and cannot be used.</value>
   </data>
-  <data name="OM_GlobalProperty">
+  <data name="OM_GlobalProperty" xml:space="preserve">
     <value>The "{0}" property is a global property, and cannot be modified.</value>
   </data>
-  <data name="OM_MatchingProjectAlreadyInCollection">
+  <data name="OM_MatchingProjectAlreadyInCollection" xml:space="preserve">
     <value>An equivalent project (a project with the same global properties and tools version) is already present in the project collection, with the path "{0}". To load an equivalent into this project collection, unload this project first.</value>
   </data>
-  <data name="OM_ProjectWasNotLoaded">
+  <data name="OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem" xml:space="preserve">
+    <value>Only one item type may be referenced when removing with MatchOnMetadata.</value>
+  </data>
+  <data name="OM_ProjectWasNotLoaded" xml:space="preserve">
     <value>The project provided was not loaded in the collection.</value>
   </data>
-  <data name="OM_CannotModifyEvaluatedObjectInImportedFile">
+  <data name="OM_CannotModifyEvaluatedObjectInImportedFile" xml:space="preserve">
     <value>Cannot modify an evaluated object originating in an imported file "{0}".</value>
   </data>
-  <data name="OM_CannotRemoveMetadataOriginatingFromItemDefinition">
+  <data name="OM_CannotRemoveMetadataOriginatingFromItemDefinition" xml:space="preserve">
     <value>Cannot remove the metadata named "{0}" as it originates from an item definition, rather than being directly defined on this item.</value>
   </data>
-  <data name="OM_CannotSplitItemElementWhenSplittingIsDisabled">
+  <data name="OM_CannotSplitItemElementWhenSplittingIsDisabled" xml:space="preserve">
     <value>The requested operation needs to split the item element at location {0} into individual elements but item element splitting is disabled with {1}.</value>
   </data>
-  <data name="OM_ProjectIsNoLongerActive">
+  <data name="OM_ProjectIsNoLongerActive" xml:space="preserve">
     <value>The project cannot be used as it is no longer loaded into a project collection.</value>
   </data>
-  <data name="OM_ObjectIsNoLongerActive">
+  <data name="OM_ObjectIsNoLongerActive" xml:space="preserve">
     <value>The operation is not allowed because currently this object is not parented.</value>
   </data>
-  <data name="OM_ProjectXmlCannotBeUnloadedDueToLoadedProjects">
+  <data name="OM_ProjectXmlCannotBeUnloadedDueToLoadedProjects" xml:space="preserve">
     <value>The project XML file "{0}" cannot be unloaded because at least one project "{1}" is still loaded which references that project XML.</value>
   </data>
-  <data name="OM_ProjectInstanceImmutable">
+  <data name="OM_ProjectInstanceImmutable" xml:space="preserve">
     <value>Instance object was created as immutable.</value>
   </data>
-  <data name="OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse">
+  <data name="OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse" xml:space="preserve">
     <value>The specified API "{0}" is not available because ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition was set when loading this project.</value>
   </data>
-  <!-- #################################################################################################-->
-  <!-- ############################## Execution-model-related strings #################################-->
-  <!-- #################################################################################################-->
-  <!-- The OM_ prefix indicates at the point of use that there is no error code in the message;
-       these should not be used in an InvalidProjectFileException -->
-  <data name="OM_BuildSubmissionsMultipleProjectCollections">
+  <data name="OM_NoMatchOnMetadataOutsideTargets" xml:space="preserve">
+    <value>MatchOnMetadata cannot be used outside of a &lt;Target&gt;.</value>
+  </data>
+  <data name="OM_MatchOnMetadataOnlyApplicableToRemoveItems" xml:space="preserve">
+    <value>MatchOnMetadata only applies to Remove operations on items.</value>
+  </data>
+  <data name="OM_MatchOnMetadataOptionsOnlyApplicableToItemsWithMatchOnMetadata" xml:space="preserve">
+    <value>MatchOnMetadataOptions is valid only when removing items using MatchOnMetadata.</value>
+  </data>
+  <data name="OM_BuildSubmissionsMultipleProjectCollections" xml:space="preserve">
     <value>All build submissions in a build must use project instances originating from the same project collection.</value>
     <comment>This occurs if a client tries to add two BuildSubmissions to a build, each involving a ProjectInstance originating in different ProjectCollection. This is not allowed.</comment>
   </data>
-  <!-- #################################################################################################-->
-  <!-- ######################################## Shared strings #########################################-->
-  <!-- ###### These belong in Strings.shared.resx, but have been copied here for performance ###########-->
-  <!-- ##### If you change the string here, please also change it in Shared\Resources\Strings.shared.resx ########-->
-  <!-- ############################ and in XMakeCommandLine\Strings.resx ###############################-->
-  <!-- ############## Remove this block once ResourceManager bug 627270 has been fixed. ################-->
-  <!-- #################################################################################################-->
-  <data name="BuildStarted" UESanitized="false" Visibility="Public">
+  <data name="BuildStarted" xml:space="preserve">
     <value>Build started.</value>
   </data>
-  <data name="FileLocation" UESanitized="false" Visibility="Public">
+  <data name="FileLocation" xml:space="preserve">
     <value>{0} ({1},{2})</value>
     <comment>A file location to be embedded in a string.</comment>
   </data>
-
-  <!-- The MSBuild Intrinsic Task bucket is 3201 - 3210 -->
-  <!-- This supercedes the MSBuild resources in Tasks, but must be kept up to date until VS12 -->
-  <data name="MSBuild.CannotRebaseOutputItemPath" UESanitized="false" Visibility="Public">
+  <data name="MSBuild.CannotRebaseOutputItemPath" xml:space="preserve">
     <value>MSB3203: The output path "{0}" cannot be rebased. {1}</value>
     <comment>{StrBegin="MSB3203: "}UE: This message is shown when the user asks the "MSBuild" task to rebase the paths of its output items relative to the project from where the "MSBuild" task is called (as opposed to the project(s) on which the "MSBuild" task is called), and one of the output item paths is invalid. LOCALIZATION: "{1}" is a localized message from a CLR/FX exception explaining the problem.</comment>
   </data>
-  <data name="MSBuild.ProjectFileNotFound" UESanitized="false" Visibility="Public">
+  <data name="MSBuild.ProjectFileNotFound" xml:space="preserve">
     <value>MSB3202: The project file "{0}" was not found.</value>
     <comment>
       {StrBegin="MSB3202: "}UE: This message is shown when the user passes a non-existent project file to the MSBuild task, in the "Projects" parameter.
       and they have not specified the SkipNonexistentProjects parameter, or it is set to false.
     </comment>
   </data>
-  <data name="MSBuild.ProjectFileNotFoundMessage" UESanitized="false" Visibility="Public">
+  <data name="MSBuild.ProjectFileNotFoundMessage" xml:space="preserve">
     <value>Skipping project "{0}" because it was not found.</value>
     <comment>UE: This message is shown when the user passes a non-existent project file to the MSBuild task, in the "Projects" parameter, and they have specified the SkipNonexistentProjects parameter.</comment>
   </data>
-  <data name="MSBuild.ProjectUpgradeNeededToVcxProj">
+  <data name="MSBuild.ProjectUpgradeNeededToVcxProj" xml:space="preserve">
     <value>MSB3204: The project file "{0}" is in the ".vcproj" file format, which MSBuild no longer supports. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or use MSBuild 3.5 or earlier to build it.</value>
     <comment>{StrBegin="MSB3204: "} LOC: ".vcproj" should not be localized</comment>
   </data>
-  <data name="MSBuild.InvalidSkipNonexistentProjectValue">
+  <data name="MSBuild.InvalidSkipNonexistentProjectValue" xml:space="preserve">
     <value>MSB3205: SkipNonexistentProject can only accept values of "True", "False" and "Build".</value>
     <comment>{StrBegin="MSB3205: "} LOC: "SkipNonexistentProject", "True", "False" and "Build" should not be localized</comment>
   </data>
-  <data name="MSBuild.SkippingRemainingProjects">
+  <data name="MSBuild.SkippingRemainingProjects" xml:space="preserve">
     <value>The MSBuild task is skipping the remaining projects because the StopOnFirstFailure parameter was set to true.</value>
     <comment>LOCALIZATION:  Do not localize the words "MSBuild" or "StopOnFirstFailure".</comment>
   </data>
-  <data name="MSBuild.SkippingRemainingTargets">
+  <data name="MSBuild.SkippingRemainingTargets" xml:space="preserve">
     <value>The MSBuild task is skipping the remaining targets because the StopOnFirstFailure parameter was set to true.</value>
     <comment>LOCALIZATION:  Do not localize the words "MSBuild" or "StopOnFirstFailure".</comment>
   </data>
-  <data name="MSBuild.NotBuildingInParallel">
+  <data name="MSBuild.NotBuildingInParallel" xml:space="preserve">
     <value>Overriding the BuildingInParallel property by setting it to false. This is due to the system being run in single process mode with StopOnFirstFailure set to true.</value>
     <comment>LOCALIZATION:  Do not localize the words "MSBuild", "BuildingInParallel", or "StopOnFirstFailure".</comment>
   </data>
-  <data name="MSBuild.NoStopOnFirstFailure">
+  <data name="MSBuild.NoStopOnFirstFailure" xml:space="preserve">
     <value>StopOnFirstFailure will have no effect when the following conditions are all present: 1) The system is running in multiple process mode 2) The BuildInParallel property is true. 3) The RunEachTargetSeparately property is false.</value>
     <comment>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</comment>
   </data>
-
-  <!--
-  Some General properties replicated from tasks for MSBuild task
-  TODO: Are these ever used anywhere else?
-  -->
-  <data name="General.InvalidPropertyError" UESanitized="false" Visibility="Public">
+  <data name="General.InvalidPropertyError" xml:space="preserve">
     <value>MSB3100: Syntax for "{0}" parameter is not valid ({1}). Correct syntax is {0}="&lt;name&gt;=&lt;value&gt;".</value>
     <comment>{StrBegin="MSB3100: "}This error is shown if the user does any of the following:
     Properties="foo"              (missing property value)
     Properties="=4"               (missing property name)
     The user must pass in an actual property name and value, as in Properties="Configuration=Debug".</comment>
   </data>
-  <data name="General.GlobalProperties">
+  <data name="General.GlobalProperties" xml:space="preserve">
     <value>Global Properties:</value>
   </data>
-  <data name="General.UndefineProperties">
+  <data name="General.UndefineProperties" xml:space="preserve">
     <value>Removing Properties:</value>
   </data>
-  <data name="General.OverridingProperties">
+  <data name="General.OverridingProperties" xml:space="preserve">
     <value>Overriding Global Properties for project "{0}" with:</value>
   </data>
-  <data name="General.AdditionalProperties">
+  <data name="General.AdditionalProperties" xml:space="preserve">
     <value>Additional Properties for project "{0}":</value>
   </data>
-  <data name="General.ProjectUndefineProperties">
+  <data name="General.ProjectUndefineProperties" xml:space="preserve">
     <value>Removing Properties for project "{0}":</value>
   </data>
-
-  <!-- Engine errors for features not supported on .NET Core have the arbitrarily-chosen 48 prefix -->
   <data name="TaskInstantiationFailureNotSupported" xml:space="preserve">
     <value>MSB4802: The "{0}" task could not be instantiated from "{1}". This version of MSBuild does not support {2}.</value>
     <comment>{StrBegin="MSB4802: "}</comment>
   </data>
-
-  <data name="InvalidGetPathOfFileAboveParameter">
+  <data name="InvalidGetPathOfFileAboveParameter" xml:space="preserve">
     <value>The parameter '{0}' can only be a file name and cannot include a directory.</value>
   </data>
-
-  <data name="FileToReloadFromDoesNotExist">
+  <data name="FileToReloadFromDoesNotExist" xml:space="preserve">
     <value>MSB4229: File to reload from does not exist: {0}</value>
     <comment>{StrBegin="MSB4229: "}</comment>
   </data>
-
-  <data name="ValueNotSet">
+  <data name="ValueNotSet" xml:space="preserve">
     <value>MSB4230: Value not set: {0}</value>
     <comment>{StrBegin="MSB4230: "}</comment>
   </data>
-
-  <data name="NoReloadOnUnsavedChanges">
+  <data name="NoReloadOnUnsavedChanges" xml:space="preserve">
     <value>MSB4231: ProjectRootElement can't reload if it contains unsaved changes.</value>
     <comment>{StrBegin="MSB4231: "}</comment>
   </data>
-
-  <data name="MetaprojectGenerated">
-    <value>Metaproject &quot;{0}&quot; generated.</value>
+  <data name="LogTaskInputs.Truncated">
+    <value>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</value>
   </data>
-
-  <data name="ProjectImportSkippedFalseCondition">
-    <value>Project &quot;{0}&quot; was not imported by &quot;{1}&quot; at ({2},{3}), due to false condition; ({4}) was evaluated as ({5}).</value>
+  <data name="MetaprojectGenerated" xml:space="preserve">
+    <value>Metaproject "{0}" generated.</value>
   </data>
-
-  <data name="ProjectImportSkippedNoMatches">
-    <value>Project &quot;{0}&quot; was not imported by &quot;{1}&quot; at ({2},{3}), due to no matching files.</value>
+  <data name="ProjectImportSkippedFalseCondition" xml:space="preserve">
+    <value>Project "{0}" was not imported by "{1}" at ({2},{3}), due to false condition; ({4}) was evaluated as ({5}).</value>
   </data>
-
-  <data name="ProjectImportSkippedEmptyFile">
-    <value>Project &quot;{0}&quot; was not imported by &quot;{1}&quot; at ({2},{3}), due to the file being empty.</value>
+  <data name="ProjectImportSkippedNoMatches" xml:space="preserve">
+    <value>Project "{0}" was not imported by "{1}" at ({2},{3}), due to no matching files.</value>
   </data>
-
-  <data name="ProjectImportSkippedInvalidFile">
-    <value>Project &quot;{0}&quot; was not imported by &quot;{1}&quot; at ({2},{3}), due to the file being invalid.</value>
+  <data name="ProjectImportSkippedEmptyFile" xml:space="preserve">
+    <value>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being empty.</value>
   </data>
-
-  <data name="ProjectImportSkippedMissingFile">
-    <value>Project &quot;{0}&quot; was not imported by &quot;{1}&quot; at ({2},{3}), due to the file not existing.</value>
+  <data name="ProjectImportSkippedInvalidFile" xml:space="preserve">
+    <value>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being invalid.</value>
   </data>
-
-  <data name="ProjectImported">
-    <value>Importing project &quot;{0}&quot; into project &quot;{1}&quot; at ({2},{3}).</value>
+  <data name="ProjectImportSkippedMissingFile" xml:space="preserve">
+    <value>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file not existing.</value>
+  </data>
+  <data name="ProjectImported" xml:space="preserve">
+    <value>Importing project "{0}" into project "{1}" at ({2},{3}).</value>
   </data>
   <data name="ErrorWritingProfilerReport" xml:space="preserve">
     <value>MSBUILD : error MSB4239: Error writing profiling report. {0}</value>
@@ -1688,39 +1694,39 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="WritingProfilerReportDone" xml:space="preserve">
     <value>Done writing report.</value>
   </data>
-  <data name="ReferencingMultipleVersionsOfTheSameSdk" UESanitized="false" Visibility="Public">
+  <data name="ReferencingMultipleVersionsOfTheSameSdk" xml:space="preserve">
     <value>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</value>
     <comment>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </comment>
   </data>
-  <data name="SdkResultVersionDifferentThanReference" UESanitized="false" Visibility="Public">
+  <data name="SdkResultVersionDifferentThanReference" xml:space="preserve">
     <value>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</value>
     <comment>{StrBegin="MSB4241: "}
       LOCALIZATION:  Do not localize the word SDK.
     </comment>
   </data>
-  <data name="SdkResolving" UESanitized="false" Visibility="Public">
+  <data name="SdkResolving" xml:space="preserve">
     <value>Resolving SDK '{0}'...</value>
     <comment>
       LOCALIZATION:  Do not localize the word SDK.
     </comment>
   </data>
-  <data name="ProjectGraphDoesNotSupportProjectReferenceWithToolset" UESanitized="false" Visibility="Public">
+  <data name="ProjectGraphDoesNotSupportProjectReferenceWithToolset" xml:space="preserve">
     <value>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</value>
     <comment>
       {StrBegin="MSB4250: "}
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </comment>
   </data>
-  <data name="CircularDependencyInProjectGraph" UESanitized="false" Visibility="Public">
+  <data name="CircularDependencyInProjectGraph" xml:space="preserve">
     <value>MSB4251: There is a circular dependency involving the following projects: {0}</value>
     <comment>
       {StrBegin="MSB4251:"} This message is shown when a graph build detects a target referenced in a circular manner -- a project cannot
       request a target to build itself (perhaps via a chain of other targets)
     </comment>
   </data>
-  <data name="CacheMissesNotAllowedInIsolatedGraphBuilds" UESanitized="false" Visibility="Public">
+  <data name="CacheMissesNotAllowedInIsolatedGraphBuilds" xml:space="preserve">
     <value>MSB4252: Project "{0}" with global properties
     ({1})
     is building project "{2}" with global properties
@@ -1735,58 +1741,57 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION: Do not localize the following words: ProjectReference, ProjectReferenceTargets
     </comment>
   </data>
-  <data name="NullReferenceFromProjectInstanceFactory" UESanitized="false" Visibility="Public">
+  <data name="NullReferenceFromProjectInstanceFactory" xml:space="preserve">
     <value>MSB4253: A null reference was returned from a user-provided ProjectInstanceFactoryFunc callback. This is not allowed.</value>
     <comment>
       {StrBegin="MSB4253: "}
       LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
     </comment>
   </data>
-  <data name="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds" UESanitized="false" Visibility="Public">
+  <data name="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds" xml:space="preserve">
     <value>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</value>
     <comment>
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
     </comment>
   </data>
-  <data name="ErrorReadingCacheFile" UESanitized="false" Visibility="Public">
+  <data name="ErrorReadingCacheFile" xml:space="preserve">
     <value>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</value>
   </data>
-  <data name="InputCacheFilesDoNotExist" UESanitized="false" Visibility="Public">
+  <data name="InputCacheFilesDoNotExist" xml:space="preserve">
     <value>MSB4255: The following input result cache files do not exist: "{0}"</value>
   </data>
-  <data name="EmptyOutputCacheFile" UESanitized="false" Visibility="Public">
+  <data name="EmptyOutputCacheFile" xml:space="preserve">
     <value>MSB4257: The specified output result cache file is empty.</value>
   </data>
-  <data name="ErrorWritingCacheFile" UESanitized="false" Visibility="Public">
+  <data name="ErrorWritingCacheFile" xml:space="preserve">
     <value>MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</value>
   </data>
-  <data name="UsingInputCaches" UESanitized="false" Visibility="Public">
+  <data name="UsingInputCaches" xml:space="preserve">
     <value>Using input build results caches: {0}</value>
     <comment>
       LOCALIZATION: {0} is a list of semicolon separated file paths
     </comment>
   </data>
-  <data name="WritingToOutputCache" UESanitized="false" Visibility="Public">
+  <data name="WritingToOutputCache" xml:space="preserve">
     <value>Writing build results caches to: {0}</value>
     <comment>
       LOCALIZATION: {0} is a file path
     </comment>
   </data>
-  <data name="SkippedConstraintsOnRequest" UESanitized="false" Visibility="Public">
+  <data name="SkippedConstraintsOnRequest" xml:space="preserve">
     <value>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</value>
     <comment>
       LOCALIZATION: {0} and {1} are file paths
     </comment>
   </data>
-  <data name="StaticGraphAcceptsSingleSolutionEntryPoint" UESanitized="false" Visibility="Public">
-    <value>MSB4261: Static graph only accepts a solution as the only entry point. Multiple entry points detected: {0}</value>
+  <data name="StaticGraphAcceptsSingleSolutionEntryPoint" xml:space="preserve">
     <value>MSB4261: Multiple entry points with solutions detected: {0}. If static graph is loaded from a solution, that that solution must be the only entry point.</value>
     <comment>
       LOCALIZATION: {0} is a semicolon delimited list of files
     </comment>
   </data>
-  <data name="StaticGraphSolutionLoaderEncounteredSolutionWarningsAndErrors" UESanitized="false" Visibility="Public">
+  <data name="StaticGraphSolutionLoaderEncounteredSolutionWarningsAndErrors" xml:space="preserve">
     <value>MSB4262: Solution file "{0}" contains the following warnings and errors:
            Warnings: {1}
            Errors: {2}
@@ -1795,7 +1800,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
     </comment>
   </data>
-  <data name="StaticGraphDoesNotSupportSlnReferences" UESanitized="false" Visibility="Public">
+  <data name="StaticGraphDoesNotSupportSlnReferences" xml:space="preserve">
     <value>MSB4263: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
     </value>
     <comment>
@@ -1811,65 +1816,19 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="InvalidVersionFormat" xml:space="preserve">
     <value>Version string was not in a correct format.</value>
   </data>
-  <data name="UninitializedPropertyRead" UESanitized="false" Visibility="Public">
+  <data name="UninitializedPropertyRead" xml:space="preserve">
     <value>Read uninitialized property "{0}"</value>
-    <comment>
-    </comment>
   </data>
-  <data name="EnvironmentVariableRead" UESanitized="false" Visibility="Public">
+  <data name="EnvironmentVariableRead" xml:space="preserve">
     <value>Read environment variable "{0}"</value>
-    <comment>
-    </comment>
   </data>
-  <data name="PropertyAssignment" UESanitized="false" Visibility="Public">
+  <data name="PropertyAssignment" xml:space="preserve">
     <value>Property initial value: $({0})="{1}" Source: {2}</value>
-    <comment>
-    </comment>
   </data>
-  <!--
-        The engine message bucket is: MSB4001 - MSB4999
-
-        MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
-        MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
-
-        Next message code should be MSB4264.
-
-        Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
-            <none>
-
-Retired codes, which have already shipped, but are no longer needed and should not be re-used:
-MSB4056
-MSB4005
-MSB4007
-MSB4140
-MSB4165
-MSB4139
-MSB4071
-MSB4083
-MSB4031
-MSB4167
-MSB4178
-MSB4076
-MSB4097
-MSB4098
-MSB4168
-MSB4151
-MSB4152
-MSB4153
-MSB4154
-MSB4155
-MSB4156
-MSB4157
-MSB4158
-MSB4161
-MSB4169
-MSB4170
-MSB4171
-MSB4172
-
-
-        Don't forget to update this comment after using a new code.
-
-        Exceptions thrown out of the object model never have error codes.
-  -->
+  <data name="NuGetAssemblyNotFound" xml:space="preserve">
+    <value>A required NuGet assembly was not found. Expected Path: {0}</value>
+  </data>
+  <data name="StaticGraphConstructionMetrics" xml:space="preserve">
+    <value>"Static graph loaded in {0} seconds: {1} nodes, {2} edges"</value>
+  </data>
 </root>

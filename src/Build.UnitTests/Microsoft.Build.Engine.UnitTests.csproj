@@ -11,12 +11,17 @@
     
     <!-- Define a constant so we can skip tests that require MSBuildTaskHost -->
     <DefineConstants Condition="'$(MSBuildRuntimeType)' == 'Core' or '$(MonoBuild)' == 'true'">$(DefineConstants);NO_MSBUILDTASKHOST</DefineConstants>
+
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Collections.Concurrent" />
     <PackageReference Include="Shouldly" />
     <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" />
+    <PackageReference Include="NuGet.Frameworks" >
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
 
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />

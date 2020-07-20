@@ -2489,7 +2489,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Expand property function that is defined (on CoreFX) in an assembly named after its full namespace.
         /// </summary>
         [Fact]
-        public void PropertyStaticFunctioLocatedFromAssemblyWithNamespaceName()
+        public void PropertyStaticFunctionLocatedFromAssemblyWithNamespaceName()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
 
@@ -2777,6 +2777,27 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(expectedExpansion, result);
         }
 
+        [Theory]
+        [InlineData("AString", "x12x456789x11", "$(AString.IndexOf('x', 1))", "3")]
+        [InlineData("AString", "x12x456789x11", "$(AString.IndexOf('x45', 1))", "3")]
+        [InlineData("AString", "x12x456789x11", "$(AString.IndexOf('x', 1, 4))", "3")]
+        // 9 is not a valid StringComparison enum value
+        [InlineData("AString", "x12x456789x11", "$(AString.IndexOf('x', 9))", "10")]
+        [InlineData("AString", "x12x456789x11", "$(AString.IndexOf('X', 'StringComparison.Ordinal'))", "-1")]
+        [InlineData("AString", "x12x456789x11", "$(AString.IndexOf('X', 'StringComparison.OrdinalIgnoreCase'))", "0")]
+        [InlineData("AString", "x12x456789x11", "$(AString.IndexOf('X4', 'StringComparison.OrdinalIgnoreCase'))", "3")]
+        [InlineData("AString", "x12x456789x11", "$(AString.IndexOf('X4', 1, 'StringComparison.OrdinalIgnoreCase'))", "3")]
+        [InlineData("AString", "x12x456789x11", "$(AString.IndexOf('X', 1, 3, 'StringComparison.OrdinalIgnoreCase'))", "3")]
+        public void StringIndexOfTests(string propertyName, string properyValue, string propertyFunction, string expectedExpansion)
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>
+                {[propertyName] = ProjectPropertyInstance.Create(propertyName, properyValue)};
+
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance).ShouldBe(expectedExpansion);
+        }
+
         [Fact]
         public void IsOsPlatformShouldBeCaseInsensitiveToParameter()
         {
@@ -2800,34 +2821,23 @@ namespace Microsoft.Build.UnitTests.Evaluation
             var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
             string expectedMessage = ResourceUtilities.GetResourceString("InvalidVersionFormat");
 
-            AssertThrows($"$([MSBuild]::VersionGreaterThan('{badVersion}', '1.0.0'))");
-            AssertThrows($"$([MSBuild]::VersionGreaterThan('1.0.0', '{badVersion}'))");
+            AssertThrows(expander, $"$([MSBuild]::VersionGreaterThan('{badVersion}', '1.0.0'))", expectedMessage);
+            AssertThrows(expander, $"$([MSBuild]::VersionGreaterThan('1.0.0', '{badVersion}'))", expectedMessage);
 
-            AssertThrows($"$([MSBuild]::VersionGreaterThanOrEquals('{badVersion}', '1.0.0'))");
-            AssertThrows($"$([MSBuild]::VersionGreaterThanOrEquals('1.0.0', '{badVersion}'))");
+            AssertThrows(expander, $"$([MSBuild]::VersionGreaterThanOrEquals('{badVersion}', '1.0.0'))", expectedMessage);
+            AssertThrows(expander, $"$([MSBuild]::VersionGreaterThanOrEquals('1.0.0', '{badVersion}'))", expectedMessage);
 
-            AssertThrows($"$([MSBuild]::VersionLessThan('{badVersion}', '1.0.0'))");
-            AssertThrows($"$([MSBuild]::VersionLessThan('1.0.0', '{badVersion}'))");
+            AssertThrows(expander, $"$([MSBuild]::VersionLessThan('{badVersion}', '1.0.0'))", expectedMessage);
+            AssertThrows(expander, $"$([MSBuild]::VersionLessThan('1.0.0', '{badVersion}'))", expectedMessage);
 
-            AssertThrows($"$([MSBuild]::VersionLessThanOrEquals('{badVersion}', '1.0.0'))");
-            AssertThrows($"$([MSBuild]::VersionLessThanOrEquals('1.0.0', '{badVersion}'))");
+            AssertThrows(expander, $"$([MSBuild]::VersionLessThanOrEquals('{badVersion}', '1.0.0'))", expectedMessage);
+            AssertThrows(expander, $"$([MSBuild]::VersionLessThanOrEquals('1.0.0', '{badVersion}'))", expectedMessage);
 
-            AssertThrows($"$([MSBuild]::VersionEquals('{badVersion}', '1.0.0'))");
-            AssertThrows($"$([MSBuild]::VersionEquals('1.0.0', '{badVersion}'))");
+            AssertThrows(expander, $"$([MSBuild]::VersionEquals('{badVersion}', '1.0.0'))", expectedMessage);
+            AssertThrows(expander, $"$([MSBuild]::VersionEquals('1.0.0', '{badVersion}'))", expectedMessage);
 
-            AssertThrows($"$([MSBuild]::VersionNotEquals('{badVersion}', '1.0.0'))");
-            AssertThrows($"$([MSBuild]::VersionNotEquals('1.0.0', '{badVersion}'))");
-
-            void AssertThrows(string expression)
-            {
-                var ex = Assert.Throws<InvalidProjectFileException>(
-                    () => expander.ExpandPropertiesLeaveTypedAndEscaped(
-                        expression,
-                        ExpanderOptions.ExpandProperties,
-                        MockElementLocation.Instance));
-
-                Assert.Contains(expectedMessage, ex.Message);
-            }
+            AssertThrows(expander, $"$([MSBuild]::VersionNotEquals('{badVersion}', '1.0.0'))", expectedMessage);
+            AssertThrows(expander, $"$([MSBuild]::VersionNotEquals('1.0.0', '{badVersion}'))", expectedMessage);
         }
 
         [Theory]
@@ -2843,22 +2853,107 @@ namespace Microsoft.Build.UnitTests.Evaluation
             var pg = new PropertyDictionary<ProjectPropertyInstance>();
             var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-            AssertSuccess(expectedSign >  0, $"$([MSBuild]::VersionGreaterThan('{a}', '{b}'))");
-            AssertSuccess(expectedSign >= 0, $"$([MSBuild]::VersionGreaterThanOrEquals('{a}', '{b}'))");
-            AssertSuccess(expectedSign <  0, $"$([MSBuild]::VersionLessThan('{a}', '{b}'))");
-            AssertSuccess(expectedSign <= 0, $"$([MSBuild]::VersionLessThanOrEquals('{a}', '{b}'))");
-            AssertSuccess(expectedSign == 0, $"$([MSBuild]::VersionEquals('{a}', '{b}'))");
-            AssertSuccess(expectedSign != 0, $"$([MSBuild]::VersionNotEquals('{a}', '{b}'))");
+            AssertSuccess(expander, expectedSign >  0, $"$([MSBuild]::VersionGreaterThan('{a}', '{b}'))");
+            AssertSuccess(expander, expectedSign >= 0, $"$([MSBuild]::VersionGreaterThanOrEquals('{a}', '{b}'))");
+            AssertSuccess(expander, expectedSign <  0, $"$([MSBuild]::VersionLessThan('{a}', '{b}'))");
+            AssertSuccess(expander, expectedSign <= 0, $"$([MSBuild]::VersionLessThanOrEquals('{a}', '{b}'))");
+            AssertSuccess(expander, expectedSign == 0, $"$([MSBuild]::VersionEquals('{a}', '{b}'))");
+            AssertSuccess(expander, expectedSign != 0, $"$([MSBuild]::VersionNotEquals('{a}', '{b}'))");
+        }
 
-            void AssertSuccess(bool expected, string expression)
-            {
-                bool actual = (bool)expander.ExpandPropertiesLeaveTypedAndEscaped(
+        [Theory]
+        [InlineData("net45", ".NETFramework", "4.5")]
+        [InlineData("netcoreapp3.1", ".NETCoreApp", "3.1")]
+        [InlineData("netstandard2.1", ".NETStandard", "2.1")]
+        [InlineData("net5.0-ios12.0", ".NETCoreApp", "5.0")]
+        [InlineData("foo", "Unsupported", "0.0")]
+        public void PropertyFunctionTargetFrameworkParsing(string tfm, string expectedIdentifier, string expectedVersion)
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            AssertSuccess(expander, expectedIdentifier, $"$([MSBuild]::GetTargetFrameworkIdentifier('{tfm}'))");
+            AssertSuccess(expander, expectedVersion, $"$([MSBuild]::GetTargetFrameworkVersion('{tfm}'))");
+        }
+
+        [Theory]
+        [InlineData("net45", 2, "4.5")]
+        [InlineData("net45", 3, "4.5.0")]
+        [InlineData("net472", 3, "4.7.2")]
+        public void PropertyFunctionTargetFrameworkVersionMultipartParsing(string tfm, int versionPartCount, string expectedVersion)
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            AssertSuccess(expander, expectedVersion, $"$([MSBuild]::GetTargetFrameworkVersion('{tfm}', {versionPartCount}))");
+        }
+
+        [Theory]
+        [InlineData("net5.0-windows10.1.2.3", 4, "10.1.2.3")]
+        [InlineData("net5.0-windows10.1.2.3", 2, "10.1")]
+        public void PropertyFunctionTargetPlatformVersionMultipartParsing(string tfm, int versionPartCount, string expectedVersion)
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            AssertSuccess(expander, expectedVersion, $"$([MSBuild]::GetTargetPlatformVersion('{tfm}', {versionPartCount}))");
+        }
+
+        [Theory]
+        [InlineData("net5.0-ios12.0", "ios", "12.0")]
+        [InlineData("net5.1-android1.1", "android", "1.1")]
+        [InlineData("net6.0-windows99.99", "windows", "99.99")]
+        [InlineData("net5.0-ios", "ios", "0.0")]
+        [InlineData("foo", "", "0.0")]
+        public void PropertyFunctionTargetPlatformParsing(string tfm, string expectedIdentifier, string expectedVersion)
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            AssertSuccess(expander, expectedIdentifier, $"$([MSBuild]::GetTargetPlatformIdentifier('{tfm}'))");
+            AssertSuccess(expander, expectedVersion, $"$([MSBuild]::GetTargetPlatformVersion('{tfm}'))");
+        }
+
+        [Theory]
+        [InlineData("net5.0", "net5.0", true)]
+        [InlineData("net5.0-windows10.0", "net5.0-windows10.0", true)]
+        [InlineData("net5.0-ios", "net5.0-andriod", false)]
+        [InlineData("net5.0-ios12.0", "net5.0-ios11.0", true)]
+        [InlineData("net5.0-ios11.0", "net5.0-ios12.0", false)]
+        [InlineData("net45", "net46", false)]
+        [InlineData("net46", "net45", true)]
+        [InlineData("netcoreapp3.1", "netcoreapp1.0", true)]
+        [InlineData("netstandard1.6", "netstandard2.1", false)]
+        [InlineData("netcoreapp3.0", "netstandard2.1", true)]
+        [InlineData("net461", "netstandard1.0", true)]
+        [InlineData("foo", "netstandard1.0", false)]
+        public void PropertyFunctionTargetFrameworkComparisons(string tfm1, string tfm2, bool expectedFrameworkCompatible)
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            AssertSuccess(expander, expectedFrameworkCompatible, $"$([MSBuild]::IsTargetFrameworkCompatible('{tfm1}', '{tfm2}'))");
+        }
+
+        private void AssertThrows(Expander<ProjectPropertyInstance, ProjectItemInstance> expander, string expression, string expectedMessage)
+        {
+            var ex = Assert.Throws<InvalidProjectFileException>(
+                () => expander.ExpandPropertiesLeaveTypedAndEscaped(
                     expression,
                     ExpanderOptions.ExpandProperties,
-                    MockElementLocation.Instance);
+                    MockElementLocation.Instance));
 
-                Assert.Equal(expected, actual);
-            }
+            Assert.Contains(expectedMessage, ex.Message);
+        }
+
+        private void AssertSuccess(Expander<ProjectPropertyInstance, ProjectItemInstance> expander, object expected, string expression)
+        {
+            var actual = expander.ExpandPropertiesLeaveTypedAndEscaped(
+                expression,
+                ExpanderOptions.ExpandProperties,
+                MockElementLocation.Instance);
+
+            Assert.Equal(expected, actual);
         }
 
         /// <summary>
@@ -3430,6 +3525,26 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string result = expander.ExpandIntoStringLeaveEscaped(@"$([System.IO.Path]::Combine($(SomePath),%(Compile.Identity)))", ExpanderOptions.ExpandAll, MockElementLocation.Instance);
 
             Assert.Equal(Path.Combine(s_rootPathPrefix, "some", "path", "fOo.Cs"), result);
+        }
+
+        /// <summary>
+        /// Expand a property function which is a string constructor referencing item metadata.
+        /// </summary>
+        /// <remarks>
+        /// Note that referencing a non-existent metadatum results in binding to a parameter-less String constructor. This constructor
+        /// does not exist in BCL but it is special-cased in the expander logic and handled to return an empty string.
+        /// </remarks>
+        [Theory]
+        [InlineData("language", "english")]
+        [InlineData("nonexistent", "")]
+        public void PropertyStringConstructorConsumingItemMetadata(string metadatumName, string metadatumValue)
+        {
+            ProjectHelpers.CreateEmptyProjectInstance();
+            var expander = CreateItemFunctionExpander();
+
+            string result = expander.ExpandIntoStringLeaveEscaped($"$([System.String]::new(%({metadatumName})))", ExpanderOptions.ExpandAll, MockElementLocation.Instance);
+
+            result.ShouldBe(metadatumValue);
         }
 
         /// <summary>

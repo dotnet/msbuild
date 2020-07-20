@@ -16,6 +16,7 @@ using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
 using ObjectModel = System.Collections.ObjectModel;
 using Xunit;
+using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.UnitTests.OM.Collections
 {

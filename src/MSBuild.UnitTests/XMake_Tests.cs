@@ -1215,7 +1215,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test that low priority builds actually execute with low priority.
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/microsoft/msbuild/issues/5229")]
         public void LowPriorityBuild()
         {
             RunPriorityBuildTest(expectedPrority: ProcessPriorityClass.BelowNormal, arguments: "/low");
@@ -1224,7 +1224,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test that normal builds execute with normal priority.
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/microsoft/msbuild/issues/5229")]
         public void NormalPriorityBuild()
         {
             // In case we are already running at a  different priority, validate
