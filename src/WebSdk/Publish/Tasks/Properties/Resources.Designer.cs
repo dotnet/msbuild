@@ -445,7 +445,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Generating Entity framework SQL Scripts....
+        ///   Looks up a localized string similar to Generating Entity Framework SQL Scripts....
         /// </summary>
         public static string EFSCRIPT_Generating {
             get {
@@ -454,7 +454,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Generating Entity framework SQL Scripts completed successfully.
+        ///   Looks up a localized string similar to Generating Entity Framework SQL Scripts completed successfully.
         /// </summary>
         public static string EFSCRIPT_GenerationCompleted {
             get {
@@ -463,7 +463,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Entity framework SQL Script generation failed.
+        ///   Looks up a localized string similar to Entity Framework SQL Script generation failed.
         /// </summary>
         public static string EFSCRIPT_GenerationFailed {
             get {
