@@ -8,8 +8,6 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
 {
     public static class AppSettingsTransform
     {
-        private const string ConnectionStringsId = "ConnectionStrings";
-
         public static string GenerateDefaultAppSettingsJsonFile()
         {
             string tempFileFullPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
