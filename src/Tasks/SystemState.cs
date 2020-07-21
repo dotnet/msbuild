@@ -9,11 +9,14 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
 using System.Runtime.Serialization;
 using System.Runtime.Versioning;
 using System.Security.Permissions;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.AssemblyDependency;
+using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
@@ -557,22 +560,28 @@ namespace Microsoft.Build.Tasks
             SystemState retVal = new SystemState();
             retVal.SetGetLastWriteTime(getLastWriteTime);
             retVal.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
-            retVal.isDirty = true;
+            retVal.isDirty = stateFiles.Length > 0;
 
             foreach (string stateFile in stateFiles)
             {
                 // Verify that it's a real stateFile; log message but do not error if not
                 SystemState sfBase = (SystemState)DeserializeCache(stateFile, log, requiredReturnType);
-                foreach (string s in sfBase.instanceLocalFileStateCache.Keys)
+                foreach (string relativePath in sfBase.instanceLocalFileStateCache.Keys)
                 {
-                    if (!retVal.instanceLocalFileStateCache.ContainsKey(s))
+                    if (!retVal.instanceLocalFileStateCache.ContainsKey(relativePath))
                     {
-                        FileState fileState = (FileState)sfBase.instanceLocalFileStateCache[s];
+                        FileState fileState = (FileState)sfBase.instanceLocalFileStateCache[relativePath];
                         // Verify that the assembly is correct
-                        if (File.Exists(s) && Assembly.LoadFile(s).ManifestModule.ModuleVersionId.Equals(fileState.ModuleVersionID))
+                        Guid mvid;
+                        using (var reader = new PEReader(File.OpenRead(relativePath)))
+                        {
+                            var metadataReader = reader.GetMetadataReader();
+                            mvid = metadataReader.GetGuid(metadataReader.GetModuleDefinition().Mvid);
+                        }
+                        if (File.Exists(relativePath) && Assembly.Load(File.ReadAllBytes(relativePath)).ManifestModule.ModuleVersionId.Equals(fileState.ModuleVersionID))
                         {
                             // Correct file path and timestamp
-                            string fullPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), stateFile));
+                            string fullPath = Path.GetFullPath(Path.Combine(stateFile, relativePath));
                             fileState.LastModified = retVal.getLastWriteTime(fullPath);
                             retVal.instanceLocalFileStateCache[fullPath] = fileState;
                         }
@@ -588,7 +597,11 @@ namespace Microsoft.Build.Tasks
             foreach (string path in instanceLocalFileStateCache.Keys)
             {
                 FileState fileState = (FileState)instanceLocalFileStateCache[path];
-                fileState.ModuleVersionID = Assembly.LoadFrom(path).ManifestModule.ModuleVersionId;
+                using (var reader = new PEReader(File.OpenRead(path)))
+                {
+                    var metadataReader = reader.GetMetadataReader();
+                    fileState.ModuleVersionID = metadataReader.GetGuid(metadataReader.GetModuleDefinition().Mvid);
+                }
                 instanceLocalFileStateCache.Remove(path);
                 string relativePath = new Uri(Path.GetDirectoryName(stateFile)).MakeRelativeUri(new Uri(path)).ToString();
                 instanceLocalFileStateCache[relativePath] = fileState;

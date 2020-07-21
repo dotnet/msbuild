@@ -1855,18 +1855,13 @@ namespace Microsoft.Build.Tasks
 
             if (_cache == null)
             {
-                _cache = SystemState.DeserializePrecomputedCaches(PreComputedCacheFileList, Log, typeof(SystemState), getLastWriteTime, installedAssemblyTableInfo);
-                return;
+                _cache = SystemState.DeserializePrecomputedCaches(PreComputedCacheFileList ?? new string[0], Log, typeof(SystemState), getLastWriteTime, installedAssemblyTableInfo);
             }
-
-            // Construct the cache if necessary.
-            if (_cache == null)
+            else
             {
-                _cache = new SystemState();
+                _cache.SetGetLastWriteTime(getLastWriteTime);
+                _cache.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
             }
-
-            _cache.SetGetLastWriteTime(getLastWriteTime);
-            _cache.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
         }
 
         /// <summary>
