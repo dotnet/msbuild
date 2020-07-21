@@ -583,6 +583,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1048: Für GenerateRuntimeConfigurationFiles wurden "AdditionalProbingPaths" angegeben, sie werden jedoch übersprungen, weil "RuntimeConfigDevPath" leer ist.</target>
         <note>{StrBegin="NETSDK1048: "}</note>
       </trans-unit>
+      <trans-unit id="TargetFrameworkIsEol">
+        <source>NETSDK1138: The target framework '{0}' is out of support and may not receive security updates in the future. Please refer to {1} for more information about the support policy.</source>
+        <target state="new">NETSDK1138: The target framework '{0}' is out of support and may not receive security updates in the future. Please refer to {1} for more information about the support policy.</target>
+        <note>{StrBegin="NETSDK1138: "}</note>
+      </trans-unit>
       <trans-unit id="TargetFrameworkWithSemicolon">
         <source>NETSDK1046: The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</source>
         <target state="translated">NETSDK1046: Der TargetFramework-Wert "{0}" ist nicht gültig. Verwenden Sie für mehrere Ziele die Eigenschaft "TargetFrameworks".</target>
