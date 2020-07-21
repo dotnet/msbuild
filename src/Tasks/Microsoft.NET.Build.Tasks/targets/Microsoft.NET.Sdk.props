@@ -30,7 +30,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <FileAlignment Condition=" '$(FileAlignment)' == '' ">512</FileAlignment>
     <ErrorReport Condition=" '$(ErrorReport)' == '' ">prompt</ErrorReport>
     <AssemblyName Condition=" '$(AssemblyName)' == '' ">$(MSBuildProjectName)</AssemblyName>
-    <RootNamespace Condition=" '$(RootNamespace)' == '' ">$(MSBuildProjectName)</RootNamespace>
+    <RootNamespace Condition=" '$(RootNamespace)' == '' ">$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
     <Deterministic Condition=" '$(Deterministic)' == '' ">true</Deterministic>
   </PropertyGroup>
 
