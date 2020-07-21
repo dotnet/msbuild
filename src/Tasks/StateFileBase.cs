@@ -64,7 +64,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reads the specified file from disk into a StateFileBase derived object.
         /// </summary>
-        internal static StateFileBase DeserializeCache(string stateFile, TaskLoggingHelper log, Type requiredReturnType)
+        internal static StateFileBase DeserializeCache(string stateFile, TaskLoggingHelper log, Type requiredReturnType, bool logWarnings = true)
         {
             StateFileBase retVal = null;
 
@@ -89,16 +89,20 @@ namespace Microsoft.Build.Tasks
                             // If there is an invalid cast, a message rather than a warning should be emitted.
                             log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
                         }
-
-                        if ((retVal != null) && (!requiredReturnType.IsInstanceOfType(retVal)))
+                        else if (retVal != null && (!requiredReturnType.IsInstanceOfType(retVal)))
                         {
-                            log.LogWarningWithCodeFromResources("General.CouldNotReadStateFile", stateFile,
-                                log.FormatResourceString("General.IncompatibleStateFileType"));
+                            if (logWarnings)
+                            {
+                                log.LogWarningWithCodeFromResources("General.CouldNotReadStateFile", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
+                            }
+                            else
+                            {
+                                log.LogMessageFromResources("General.CouldNotReadStateFile", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
+                            }
                             retVal = null;
                         }
-
                         // If we get back a valid object and internals were changed, things are likely to be null. Check the version before we use it.
-                        if (retVal != null && retVal._serializedVersion != CurrentSerializationVersion)
+                        else if (retVal != null && retVal._serializedVersion != CurrentSerializationVersion)
                         {
                             log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
                             retVal = null;

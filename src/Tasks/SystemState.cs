@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Runtime.Serialization;
@@ -16,7 +15,6 @@ using System.Runtime.Versioning;
 using System.Security.Permissions;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.AssemblyDependency;
-using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
@@ -239,6 +237,9 @@ namespace Microsoft.Build.Tasks
                 set { frameworkName = value; }
             }
 
+            /// <summary>
+            /// Get or set the ID of this assembly. Used to verify it is the same version.
+            /// </summary>
             internal Guid ModuleVersionID { get; set; }
         }
 
@@ -555,6 +556,9 @@ namespace Microsoft.Build.Tasks
             frameworkName = fileState.frameworkName;
         }
 
+        /// <summary>
+        /// Reads in cached data from stateFiles to build an initial cache. Avoids logging warnings or errors.
+        /// </summary>
         internal static SystemState DeserializePrecomputedCaches(string[] stateFiles, TaskLoggingHelper log, Type requiredReturnType, GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo)
         {
             SystemState retVal = new SystemState();
@@ -565,7 +569,7 @@ namespace Microsoft.Build.Tasks
             foreach (string stateFile in stateFiles)
             {
                 // Verify that it's a real stateFile; log message but do not error if not
-                SystemState sfBase = (SystemState)DeserializeCache(stateFile, log, requiredReturnType);
+                SystemState sfBase = (SystemState)DeserializeCache(stateFile, log, requiredReturnType, false);
                 foreach (string relativePath in sfBase.instanceLocalFileStateCache.Keys)
                 {
                     if (!retVal.instanceLocalFileStateCache.ContainsKey(relativePath))
@@ -578,7 +582,7 @@ namespace Microsoft.Build.Tasks
                             var metadataReader = reader.GetMetadataReader();
                             mvid = metadataReader.GetGuid(metadataReader.GetModuleDefinition().Mvid);
                         }
-                        if (File.Exists(relativePath) && Assembly.Load(File.ReadAllBytes(relativePath)).ManifestModule.ModuleVersionId.Equals(fileState.ModuleVersionID))
+                        if (File.Exists(relativePath) && mvid.Equals(fileState.ModuleVersionID))
                         {
                             // Correct file path and timestamp
                             string fullPath = Path.GetFullPath(Path.Combine(stateFile, relativePath));
@@ -592,16 +596,21 @@ namespace Microsoft.Build.Tasks
             return retVal;
         }
 
+        /// <summary>
+        /// Modifies this object to be more portable across machines, then writes it to stateFile.
+        /// </summary>
         internal void SerializePrecomputedCache(string stateFile, TaskLoggingHelper log)
         {
             foreach (string path in instanceLocalFileStateCache.Keys)
             {
+                // Add MVID to allow us to verify that we are using the same assembly later
                 FileState fileState = (FileState)instanceLocalFileStateCache[path];
                 using (var reader = new PEReader(File.OpenRead(path)))
                 {
                     var metadataReader = reader.GetMetadataReader();
                     fileState.ModuleVersionID = metadataReader.GetGuid(metadataReader.GetModuleDefinition().Mvid);
                 }
+
                 instanceLocalFileStateCache.Remove(path);
                 string relativePath = new Uri(Path.GetDirectoryName(stateFile)).MakeRelativeUri(new Uri(path)).ToString();
                 instanceLocalFileStateCache[relativePath] = fileState;

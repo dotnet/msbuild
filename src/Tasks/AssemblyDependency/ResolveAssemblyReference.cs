@@ -441,9 +441,17 @@ namespace Microsoft.Build.Tasks
             set { _targetedRuntimeVersionRawValue = value; }
         }
 
-        public string PreComputedCacheOutputPath { get; set; }
+        /// <summary>
+        /// If not null, serializes a cache to this location. This overrides the usual cache, so only use this if you will
+        /// not have access to the usual cache at the next build.
+        /// </summary>
+        public string CacheOutputPath { get; set; }
 
-        public string[] PreComputedCacheFileList { get; set; }
+        /// <summary>
+        /// If not null, uses this set of caches as inputs if RAR cannot find the usual cache in the obj folder. Typically
+        /// used for demos and first-run scenarios.
+        /// </summary>
+        public string[] CacheInputPaths { get; set; }
 
         /// <summary>
         /// List of locations to search for assemblyFiles when resolving dependencies.
@@ -1847,7 +1855,7 @@ namespace Microsoft.Build.Tasks
 
         #region StateFile
         /// <summary>
-        /// Reads the state file (if present) into the cache.
+        /// Reads the state file (if present) into the cache. If not present, attempts to read from CacheInputPaths, then creates a new cache if necessary.
         /// </summary>
         private void ReadStateFile(GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo)
         {
@@ -1855,7 +1863,7 @@ namespace Microsoft.Build.Tasks
 
             if (_cache == null)
             {
-                _cache = SystemState.DeserializePrecomputedCaches(PreComputedCacheFileList ?? new string[0], Log, typeof(SystemState), getLastWriteTime, installedAssemblyTableInfo);
+                _cache = SystemState.DeserializePrecomputedCaches(CacheInputPaths ?? new string[0], Log, typeof(SystemState), getLastWriteTime, installedAssemblyTableInfo);
             }
             else
             {
@@ -1865,13 +1873,13 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Write out the state file if a state name was supplied and the cache is dirty.
+        /// If CacheOutputPath is non-null, writes out a cache to that location. Otherwise, writes out the state file if a state name was supplied and the cache is dirty.
         /// </summary>
         private void WriteStateFile()
         {
-            if (!string.IsNullOrEmpty(PreComputedCacheOutputPath))
+            if (!string.IsNullOrEmpty(CacheOutputPath))
             {
-                _cache.SerializePrecomputedCache(PreComputedCacheOutputPath, Log);
+                _cache.SerializePrecomputedCache(CacheOutputPath, Log);
             }
             else if (!string.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
             {
