@@ -395,9 +395,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1104: '{0}' RollForward değeri geçersiz. İzin verilen değerler {1}.</target>
         <note>{StrBegin="NETSDK1104: "}</note>
       </trans-unit>
-      <trans-unit id="InvalidWindowsTargetPlatformVersion">
-        <source>NETSDK1138: {0} is not a valid Windows TargetPlatformVersion.</source>
-        <target state="new">NETSDK1138: {0} is not a valid Windows TargetPlatformVersion.</target>
+      <trans-unit id="InvalidTargetPlatformVersion">
+        <source>NETSDK1138: {0} is not a valid TargetPlatformVersion for {1}. Valid versions include:
+{2}</source>
+        <target state="new">NETSDK1138: {0} is not a valid TargetPlatformVersion for {1}. Valid versions include:
+{2}</target>
         <note>{StrBegin="NETSDK1138: "}</note>
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">

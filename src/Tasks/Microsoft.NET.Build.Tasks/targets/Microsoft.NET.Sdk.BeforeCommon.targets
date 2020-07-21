@@ -16,7 +16,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <ImportGroup Condition="'$(UsingNETSdkDefaults)' != 'true'">
     <Import Project="Microsoft.NET.Sdk.DefaultItems.props" />
     <Import Project="Microsoft.NET.SupportedTargetFrameworks.props" />
-    <Import Project="Microsoft.NET.SupportedTargetPlatforms.props" />
+    <Import Project="Microsoft.NET.WindowsSupportedTargetPlatforms.props" />
   </ImportGroup>
 
   <!--

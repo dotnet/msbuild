@@ -188,6 +188,24 @@ Copyright (c) .NET Foundation. All rights reserved.
                  FormatArguments="$(MinimumOSPlatform);$(TargetPlatformVersion)"/>
   </Target>
 
+  <Target Name="_CheckForInvalidTargetPlatformVersion"
+      BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+      Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">
+    <ItemGroup>
+      <ValidTargetPlatformVersion Include="@(SupportedTargetPlatform)" Condition="'@(SupportedTargetPlatform)' != '' and '%(Identity)' == '$(TargetPlatformVersion)'" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <TargetPlatformVersionSupported Condition="'$(TargetPlatformVersionSupported)' == '' and '@(ValidTargetPlatformVersion)' != ''" >true</TargetPlatformVersionSupported>
+      <ValidTargetPlatformVersions Condition="'@(SupportedTargetPlatform)' != ''" >@(SupportedTargetPlatform, ', ')</ValidTargetPlatformVersions>
+      <ValidTargetPlatformVersions Condition="'@(SupportedTargetPlatform)' == ''" >None</ValidTargetPlatformVersions>
+    </PropertyGroup>
+
+    <NetSdkError Condition="'$(TargetPlatformVersionSupported)' != 'true'"
+                 ResourceName="InvalidTargetPlatformVersion"
+                 FormatArguments="$(TargetPlatformVersion);$(TargetPlatformIdentifier);$(ValidTargetPlatformVersions)" />
+  </Target>
+
   <!-- Exclude files from OutputPath and IntermediateOutputPath from default item globs.  Use the value
        of these properties before the TargetFramework is appended, so that if these values are specified
        in the project file, the specified value will be used for the exclude.

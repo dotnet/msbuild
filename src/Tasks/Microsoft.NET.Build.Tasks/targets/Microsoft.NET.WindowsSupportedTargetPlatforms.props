@@ -1,6 +1,6 @@
 <!--
 ***********************************************************************************************
-Microsoft.NET.SupportedTargetPlatforms.props
+Microsoft.NET.WindowsSupportedTargetPlatforms.props
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
           created a backup copy.  Incorrect changes to this file will make it
@@ -10,7 +10,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 
-<!-- This file contains a list of the target platforms that are supported by this SDK for .NET. -->
+<!-- This file contains a list of the windows target platform versions that are supported by this SDK for .NET. -->
 <Project>
     <ItemGroup>
         <WindowsSupportedTargetPlatform Include="7.0" />
