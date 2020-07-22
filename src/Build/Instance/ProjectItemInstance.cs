@@ -1114,7 +1114,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// This allows an explicit typecast from a "TaskItem" to a "string", returning the ItemSpec for this item.
             /// </summary>
-            public static explicit operator string (TaskItem that)
+            public static explicit operator string(TaskItem that)
             {
                 return that._includeEscaped;
             }
@@ -1596,16 +1596,34 @@ namespace Microsoft.Build.Execution
                 return new TaskItem(translator, interner);
             }
 
+            private void WriteInternString(ITranslator translator, LookasideStringInterner interner, ref string str)
+            {
+                var key = interner.Intern(str);
+                translator.Writer.Write(key);
+            }
+            private void ReadInternString(ITranslator translator, LookasideStringInterner interner, ref string str)
+            {
+                var val = translator.Reader.ReadInt32();
+                str = interner.GetString(val);
+            }
+
             /// <summary>
             /// Reads or writes the task item to the translator using an interner for metadata.
             /// </summary>
             internal void TranslateWithInterning(ITranslator translator, LookasideStringInterner interner)
             {
-                translator.Translate(ref _includeEscaped);
-                translator.Translate(ref _includeBeforeWildcardExpansionEscaped);
+                translator.Translate(ref _itemDefinitions, ProjectItemDefinitionInstance.FactoryForDeserialization);
+                translator.Translate(ref _isImmutable);
 
                 if (translator.Mode == TranslationDirection.WriteToStream)
                 {
+                    var fileName = Path.GetFileName(_includeEscaped);
+                    var directory = Path.GetDirectoryName(_includeEscaped);
+                    WriteInternString(translator, interner, ref fileName);
+                    WriteInternString(translator, interner, ref directory);
+                    WriteInternString(translator, interner, ref _includeBeforeWildcardExpansionEscaped);
+                    WriteInternString(translator, interner, ref _definingFileEscaped);
+
                     CopyOnWritePropertyDictionary<ProjectMetadataInstance> temp = MetadataCollection;
 
                     // Intern the metadata
@@ -1624,6 +1642,14 @@ namespace Microsoft.Build.Execution
                 }
                 else
                 {
+                    string fileName = string.Empty, directory = string.Empty;
+                    ReadInternString(translator, interner, ref fileName);
+                    ReadInternString(translator, interner, ref directory);
+
+                    _includeEscaped = Path.Combine(directory, fileName);
+
+                    ReadInternString(translator, interner, ref _includeBeforeWildcardExpansionEscaped);
+                    ReadInternString(translator, interner, ref _definingFileEscaped);
                     if (translator.TranslateNullable(_directMetadata))
                     {
                         int count = translator.Reader.ReadInt32();

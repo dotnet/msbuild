@@ -10,6 +10,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Collections;
 
 namespace Microsoft.Build.Execution
 {
@@ -231,7 +232,7 @@ namespace Microsoft.Build.Execution
                 {
                     try
                     {
-                        translator.TranslateArray(ref _items, TaskItem.FactoryForDeserialization);
+                        TranslateItems(translator);
                         _items = null;
                         _cacheInfo = new CacheInfo(configId, targetName);
                     }
@@ -251,7 +252,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _result, WorkUnitResult.FactoryForDeserialization);
             translator.Translate(ref _targetFailureDoesntCauseBuildFailure);
             translator.Translate(ref _afterTargetsHaveFailed);
-            translator.TranslateArray(ref _items, TaskItem.FactoryForDeserialization);
+            TranslateItems(translator);
         }
 
         /// <summary>
@@ -267,7 +268,7 @@ namespace Microsoft.Build.Execution
 
                     try
                     {
-                        translator.TranslateArray(ref _items, TaskItem.FactoryForDeserialization);
+                        TranslateItems(translator);
                         _cacheInfo = new CacheInfo();
                     }
                     finally
@@ -275,6 +276,46 @@ namespace Microsoft.Build.Execution
                         translator.Reader.BaseStream.Dispose();
                     }
                 }
+            }
+        }
+
+        private void TranslateItems(ITranslator translator)
+        {
+            var itemsCount = _items?.Length ?? 0;
+            translator.Translate(ref itemsCount);
+
+            if (translator.Mode == TranslationDirection.ReadFromStream)
+            {
+                LookasideStringInterner interner = new LookasideStringInterner(translator);
+                byte[] buffer = null;
+                translator.Translate(ref buffer);
+                ErrorUtilities.VerifyThrow(buffer != null, "Unexpected null items buffer during decompression.");
+
+                using MemoryStream itemsStream = new MemoryStream(buffer, 0, buffer.Length, writable: false, publiclyVisible: true);
+                var itemTranslator = BinaryTranslator.GetReadTranslator(itemsStream, null);
+
+                _items = new TaskItem[itemsCount];
+                for (int i = 0; i < _items.Length; i++)
+                {
+                    _items[i] = TaskItem.FactoryForDeserialization(itemTranslator, interner);
+                }
+            }
+            else
+            {
+                var interner = new LookasideStringInterner(StringComparer.Ordinal, _items.Length);
+                var capacity = itemsCount * 128; // Rough estimate 
+
+                using var itemsStream = new MemoryStream(capacity);
+                var itemTranslator = BinaryTranslator.GetWriteTranslator(itemsStream);
+
+                foreach (var taskItem in _items)
+                {
+                    taskItem.TranslateWithInterning(itemTranslator, interner);
+                }
+
+                interner.Translate(translator);
+                var itemsBuffer = itemsStream.ToArray();
+                translator.Translate(ref itemsBuffer);
             }
         }
 
