@@ -18,7 +18,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [FullMSBuildOnlyFact]
+        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/12560")]
         public void It_should_fail_with_error_message()
         {
             var testAsset = _testAssetsManager
