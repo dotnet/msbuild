@@ -202,6 +202,20 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
+            /// Translates a byte array
+            /// </summary>
+            /// <param name="byteArray">The array to be translated.</param>
+            /// <param name="length">The length of array which will be used in translation. This parameter is not used when reading</param>
+            /// <remarks>
+            /// This method should be used only for serilization, not for reading from stream.
+            /// Typical usage will be for example in combination with <see cref="MemoryStream.GetBuffer"> when we get array, but we want to use only part of it.
+            /// </remarks>
+            public void Translate(ref byte[] byteArray, int length) 
+            {
+                Translate(ref byteArray);
+            }
+
+            /// <summary>
             /// Translates a string array.
             /// </summary>
             /// <param name="array">The array to be translated.</param>
@@ -998,14 +1012,28 @@ namespace Microsoft.Build.BackEnd
             /// <param name="byteArray">The byte array to be translated</param>
             public void Translate(ref byte[] byteArray)
             {
+                Translate(ref byteArray, byteArray?.Length ?? 0);
+            }
+
+
+            /// <summary>
+            /// Translates a byte array
+            /// </summary>
+            /// <param name="byteArray">The array to be translated.</param>
+            /// <param name="length">The length of array which will be used in translation</param>
+            /// <remarks>
+            /// This method should be used only for serilization, not for reading from stream.
+            /// Typical usage will be for example in combination with <see cref="MemoryStream.GetBuffer"> when we get array, but we want to use only part of it.
+            /// </remarks>
+            public void Translate(ref byte[] byteArray, int length) 
+            {
                 if (!TranslateNullable(byteArray))
                 {
                     return;
                 }
 
-                int count = byteArray.Length;
-                _writer.Write(count);
-                if (count > 0)
+                _writer.Write(length);
+                if (length > 0)
                 {
                     _writer.Write(byteArray);
                 }

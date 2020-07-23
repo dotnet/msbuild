@@ -259,6 +259,18 @@ namespace Microsoft.Build.BackEnd
         /// <param name="byteArray">The array to be translated.</param>
         void Translate(ref byte[] byteArray);
 
+        
+        /// <summary>
+        /// Translates a byte array
+        /// </summary>
+        /// <param name="byteArray">The array to be translated.</param>
+        /// <param name="length">The length of array which will be used in translation</param>
+        /// <remarks>
+        /// This method should be used only for serilization, not for reading from stream.
+        /// Typical usage will be for example in combination with <see cref="MemoryStream.GetBuffer"> when we get array, but we want to use only part of it.
+        /// </remarks>
+        void Translate(ref byte[] byteArray, int length);
+
         /// <summary>
         /// Translates an array of objects implementing INodePacketTranslatable.
         /// </summary>
