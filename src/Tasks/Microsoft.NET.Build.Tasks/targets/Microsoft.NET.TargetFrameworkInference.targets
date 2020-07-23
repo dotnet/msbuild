@@ -197,7 +197,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <PropertyGroup>
       <TargetPlatformVersionSupported Condition="'$(TargetPlatformVersionSupported)' == '' and '@(ValidTargetPlatformVersion)' != ''" >true</TargetPlatformVersionSupported>
-      <ValidTargetPlatformVersions Condition="'@(SupportedTargetPlatform)' != ''" >@(SupportedTargetPlatform, ', ')</ValidTargetPlatformVersions>
+      <ValidTargetPlatformVersions Condition="'@(SupportedTargetPlatform)' != ''" >@(SupportedTargetPlatform, '%0a')</ValidTargetPlatformVersions>
       <ValidTargetPlatformVersions Condition="'@(SupportedTargetPlatform)' == ''" >None</ValidTargetPlatformVersions>
     </PropertyGroup>
 

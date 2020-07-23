@@ -23,10 +23,8 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "InvalidWindowsVersion",
                 IsSdkProject = true,
-                TargetFrameworks = "net5.0"
+                TargetFrameworks = "net5.0-windows1.0"
             };
-            testProject.AdditionalProperties["TargetPlatformIdentifier"] = "Windows";
-            testProject.AdditionalProperties["TargetPlatformVersion"] = "1.0";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(testAsset);
@@ -35,6 +33,27 @@ namespace Microsoft.NET.Build.Tests
                 .Fail()
                 .And
                 .HaveStdOutContaining("NETSDK1137");
+        }
+
+        [Fact]
+        public void It_fails_if_target_platform_identifier_and_version_are_invalid()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "InvalidTargetPlatform",
+                IsSdkProject = true,
+                TargetFrameworks = "net5.0-custom1.0"
+            };
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1136")
+                .And
+                .NotHaveStdOutContaining("NETSDK1137");
         }
     }
 }
