@@ -57,6 +57,10 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>8b7972064f068f76452eff7994263a5e4ee3ca46</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.NET.Sdk.BlazorWebAssembly" Version="5.0.0-rc.1.20372.2">
+      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Sha>113805aba8162ba7bac42943bcb1324801c20f46</Sha>
+    </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="5.8.0-preview.1.6718">
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
       <Sha>d428c2a79aae81ade1caa326e04f65a119025f42</Sha>
