@@ -1614,13 +1614,10 @@ namespace Microsoft.Build.Execution
             {
                 translator.Translate(ref _itemDefinitions, ProjectItemDefinitionInstance.FactoryForDeserialization);
                 translator.Translate(ref _isImmutable);
+                translator.Translate(ref _includeEscaped);
 
                 if (translator.Mode == TranslationDirection.WriteToStream)
                 {
-                    var fileName = Path.GetFileName(_includeEscaped);
-                    var directory = Path.GetDirectoryName(_includeEscaped);
-                    WriteInternString(translator, interner, ref fileName);
-                    WriteInternString(translator, interner, ref directory);
                     WriteInternString(translator, interner, ref _includeBeforeWildcardExpansionEscaped);
                     WriteInternString(translator, interner, ref _definingFileEscaped);
 
@@ -1642,12 +1639,6 @@ namespace Microsoft.Build.Execution
                 }
                 else
                 {
-                    string fileName = string.Empty, directory = string.Empty;
-                    ReadInternString(translator, interner, ref fileName);
-                    ReadInternString(translator, interner, ref directory);
-
-                    _includeEscaped = Path.Combine(directory, fileName);
-
                     ReadInternString(translator, interner, ref _includeBeforeWildcardExpansionEscaped);
                     ReadInternString(translator, interner, ref _definingFileEscaped);
                     if (translator.TranslateNullable(_directMetadata))
