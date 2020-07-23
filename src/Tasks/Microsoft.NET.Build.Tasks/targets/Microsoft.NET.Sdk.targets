@@ -60,7 +60,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworks)' != '' And '$(TargetFramework)' != ''">
-    <ProjectConfigurationDescription Include="TargetFramework:$(TargetFramework)"/>
+    <ProjectConfigurationDescription Include="TargetFramework=$(TargetFramework)"/>
   </ItemGroup>
   
   <PropertyGroup>
