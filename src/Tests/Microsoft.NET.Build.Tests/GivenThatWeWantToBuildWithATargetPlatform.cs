@@ -21,10 +21,10 @@ namespace Microsoft.NET.Build.Tests
 
         [Theory]
         [InlineData("netcoreapp3.1", ".NETCoreApp", "v3.1", "Windows", "7.0")] // Default values pre-5.0
-        [InlineData("net5.0", ".NETCoreApp", "v5.0", "", "")]
+        [InlineData("net5.0", ".NETCoreApp", "v5.0", "Windows", "7.0")]
         [InlineData("net5.0-Windows7.0", ".NETCoreApp", "v5.0", "Windows", "7.0")]
         [InlineData("net5.0-WINDOWS7.0", ".NETCoreApp", "v5.0", "Windows", "7.0")]
-        [InlineData("net5.0-windows", ".NETCoreApp", "v5.0", "Windows", "7.0")] // Depends on https://github.com/dotnet/wpf/pull/3177
+        [InlineData("net5.0-windows", ".NETCoreApp", "v5.0", "Windows", "7.0")]
         [InlineData("net5.0-windows10.0.19041", ".NETCoreApp", "v5.0", "Windows", "10.0.19041")]
         public void It_defines_target_platform_from_target_framework(string targetFramework, string expectedTargetFrameworkIdentifier, string expectedTargetFrameworkVersion, string expectedTargetPlatformIdentifier, string expectedTargetPlatformVersion)
         {
@@ -81,7 +81,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining("NETSDK1135");
+                .HaveStdOutContaining("NETSDK1136");
         }
     }
 }
