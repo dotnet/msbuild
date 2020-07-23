@@ -296,60 +296,55 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Make a folder subname into an Everett-compatible identifier 
         /// </summary>
-        private static string MakeValidEverettSubFolderIdentifier(string subName)
+        private static void MakeValidEverettSubFolderIdentifier(StringBuilder builder, string subName)
         {
             ErrorUtilities.VerifyThrowArgumentNull(subName, nameof(subName));
 
             if (subName.Length == 0)
             {
-                return subName;
-            }
-
-            // give string length to avoid reallocations; +1 since the resulting string may be one char longer than the
-            // original - if the first character is an invalid first identifier character but a valid subsequent one,
-            // we prepend an underscore to it.
-            var everettId = new StringBuilder(subName.Length + 1);
-
-            // the first character has stronger restrictions than the rest
-            if (!IsValidEverettIdFirstChar(subName[0]))
-            {
-                // if the first character is not even a valid subsequent character, replace it with an underscore
-                if (!IsValidEverettIdChar(subName[0]))
-                {
-                    everettId.Append('_');
-                }
-                // if it is a valid subsequent character, prepend an underscore to it
-                else
-                {
-                    everettId.Append('_');
-                    everettId.Append(subName[0]);
-                }
+                builder.Append(subName);
             }
             else
             {
-                everettId.Append(subName[0]);
-            }
-
-            // process the rest of the subname
-            for (int i = 1; i < subName.Length; i++)
-            {
-                if (!IsValidEverettIdChar(subName[i]))
+                // the first character has stronger restrictions than the rest
+                if (!IsValidEverettIdFirstChar(subName[0]))
                 {
-                    everettId.Append('_');
+                    // if the first character is not even a valid subsequent character, replace it with an underscore
+                    if (!IsValidEverettIdChar(subName[0]))
+                    {
+                        builder.Append('_');
+                    }
+                    // if it is a valid subsequent character, prepend an underscore to it
+                    else
+                    {
+                        builder.Append('_');
+                        builder.Append(subName[0]);
+                    }
                 }
                 else
                 {
-                    everettId.Append(subName[i]);
+                    builder.Append(subName[0]);
+                }
+
+                // process the rest of the subname
+                for (int i = 1; i < subName.Length; i++)
+                {
+                    if (!IsValidEverettIdChar(subName[i]))
+                    {
+                        builder.Append('_');
+                    }
+                    else
+                    {
+                        builder.Append(subName[i]);
+                    }
                 }
             }
-
-            return everettId.ToString();
         }
 
         /// <summary>
         /// Make a folder name into an Everett-compatible identifier
         /// </summary>
-        internal static string MakeValidEverettFolderIdentifier(string name)
+        internal static void MakeValidEverettFolderIdentifier(StringBuilder builder, string name)
         {
             ErrorUtilities.VerifyThrowArgumentNull(name, nameof(name));
 
@@ -361,12 +356,15 @@ namespace Microsoft.Build.Tasks
             string[] subNames = name.Split(MSBuildConstants.DotChar);
 
             // convert each subname separately
-            everettId.Append(MakeValidEverettSubFolderIdentifier(subNames[0]));
+            if (!string.IsNullOrEmpty(subNames[0]))
+            {
+                MakeValidEverettSubFolderIdentifier(everettId, subNames[0]);
+            }
 
             for (int i = 1; i < subNames.Length; i++)
             {
                 everettId.Append('.');
-                everettId.Append(MakeValidEverettSubFolderIdentifier(subNames[i]));
+                MakeValidEverettSubFolderIdentifier(everettId, subNames[i]);
             }
 
             // folder name cannot be a single underscore - add another underscore to it
@@ -375,32 +373,31 @@ namespace Microsoft.Build.Tasks
                 everettId.Append('_');
             }
 
-            return everettId.ToString();
+            builder.Append(everettId.ToString());
         }
 
         /// <summary>
         /// This method is provided for compatibility with Everett which used to convert parts of resource names into
         /// valid identifiers
         /// </summary>
-        public static string MakeValidEverettIdentifier(string name)
+        public static void MakeValidEverettIdentifier(StringBuilder builder, string name)
         {
             ErrorUtilities.VerifyThrowArgumentNull(name, nameof(name));
-
-            var everettId = new StringBuilder(name.Length);
 
             // split the name into folder names
             string[] subNames = name.Split(MSBuildConstants.ForwardSlashBackslash);
 
             // convert every folder name
-            everettId.Append(MakeValidEverettFolderIdentifier(subNames[0]));
+            if (!string.IsNullOrEmpty(subNames[0]))
+            {
+                MakeValidEverettFolderIdentifier(builder, subNames[0]);
+            }
 
             for (int i = 1; i < subNames.Length; i++)
             {
-                everettId.Append('.');
-                everettId.Append(MakeValidEverettFolderIdentifier(subNames[i]));
+                builder.Append('.');
+                MakeValidEverettFolderIdentifier(builder, subNames[i]);
             }
-
-            return everettId.ToString();
         }
 
         #endregion

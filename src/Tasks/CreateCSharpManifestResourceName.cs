@@ -142,22 +142,26 @@ namespace Microsoft.Build.Tasks
                     manifestName.Append(rootNamespace).Append(".");
                 }
 
-                // Replace spaces in the directory name with underscores. Needed for compatibility with Everett.
-                // Note that spaces in the file name itself are preserved.
-                string everettCompatibleDirectoryName = MakeValidEverettIdentifier(Path.GetDirectoryName(info.cultureNeutralFilename));
-
                 // only strip extension for .resx and .restext files
-
                 string sourceExtension = Path.GetExtension(info.cultureNeutralFilename);
                 if (
-                        (0 == String.Compare(sourceExtension, ".resx", StringComparison.OrdinalIgnoreCase))
+                        (String.Equals(sourceExtension, ".resx", StringComparison.OrdinalIgnoreCase))
                         ||
-                        (0 == String.Compare(sourceExtension, ".restext", StringComparison.OrdinalIgnoreCase))
+                        (String.Equals(sourceExtension, ".restext", StringComparison.OrdinalIgnoreCase))
                         ||
-                        (0 == String.Compare(sourceExtension, ".resources", StringComparison.OrdinalIgnoreCase))
+                        (String.Equals(sourceExtension, ".resources", StringComparison.OrdinalIgnoreCase))
                     )
                 {
-                    manifestName.Append(Path.Combine(everettCompatibleDirectoryName, Path.GetFileNameWithoutExtension(info.cultureNeutralFilename)));
+                    var directoryName = Path.GetDirectoryName(info.cultureNeutralFilename);
+                    if (!string.IsNullOrEmpty(directoryName))
+                    {
+                        MakeValidEverettIdentifier(manifestName, directoryName);
+                        manifestName.Append('.').Append(Path.GetFileNameWithoutExtension(info.cultureNeutralFilename));
+                    }
+                    else
+                    {
+                        manifestName.Append(Path.GetFileNameWithoutExtension(info.cultureNeutralFilename));
+                    }
 
                     // Replace all '\' with '.'
                     manifestName.Replace(Path.DirectorySeparatorChar, '.');
@@ -177,7 +181,16 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    manifestName.Append(Path.Combine(everettCompatibleDirectoryName, Path.GetFileName(info.cultureNeutralFilename)));
+                    var directoryName = Path.GetDirectoryName(info.cultureNeutralFilename);
+                    if (!string.IsNullOrEmpty(directoryName))
+                    {
+                        MakeValidEverettIdentifier(manifestName, directoryName);
+                        manifestName.Append('.').Append(Path.GetFileName(info.cultureNeutralFilename));
+                    }
+                    else
+                    {
+                        manifestName.Append(Path.GetFileName(info.cultureNeutralFilename));
+                    }
 
                     // Replace all '\' with '.'
                     manifestName.Replace(Path.DirectorySeparatorChar, '.');
