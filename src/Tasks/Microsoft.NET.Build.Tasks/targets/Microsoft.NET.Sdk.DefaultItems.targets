@@ -343,6 +343,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     
   </Target>
 
+  <Target Name="_CheckForFailedSDKResolution"
+        BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+        Condition="'$(SdkResolverHonoredGlobalJson)' == 'false'">
+    <NetSdkError ResourceName="GlobalJsonSDKResolutionFailed"
+                 FormatArguments="$(SdkResolverGlobalJsonPath)" />
+  </Target>
+
   <Target Name="_CheckForTransitiveWindowsDesktopDependencies"
           AfterTargets="ResolvePackageAssets"
           Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0')) and '$(TargetPlatformIdentifier)' != 'Windows' and '@(TransitiveFrameworkReference)' != ''">
