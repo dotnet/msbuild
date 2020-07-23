@@ -207,7 +207,7 @@ namespace Microsoft.Build.BuildEngine
             globalNodeActive = new EventWaitHandle(false, EventResetMode.ManualReset, LocalNodeProviderGlobalNames.NodeActiveEventName(nodeNumber));
             globalNodeActive.Set();
 
-            // Indicate to the parent process, this node is currently is ready to start to recieve requests
+            // Indicate to the parent process, this node is currently is ready to start to receive requests
             globalNodeInUse = new EventWaitHandle(false, EventResetMode.ManualReset, LocalNodeProviderGlobalNames.NodeInUseEventName(nodeNumber));
             
             // Used by the parent process to inform the child process to shutdown due to the child process
