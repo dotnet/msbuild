@@ -207,7 +207,7 @@ namespace Microsoft.Build.BackEnd
             /// <param name="byteArray">The array to be translated.</param>
             /// <param name="length">The length of array which will be used in translation. This parameter is not used when reading</param>
             /// <remarks>
-            /// This method should be used only for serilization, not for reading from stream.
+            /// This method should be used only for serialization, not for reading from stream.
             /// Typical usage will be for example in combination with <see cref="MemoryStream.GetBuffer"> when we get array, but we want to use only part of it.
             /// </remarks>
             public void Translate(ref byte[] byteArray, int length) 
@@ -1022,7 +1022,7 @@ namespace Microsoft.Build.BackEnd
             /// <param name="byteArray">The array to be translated.</param>
             /// <param name="length">The length of array which will be used in translation</param>
             /// <remarks>
-            /// This method should be used only for serilization, not for reading from stream.
+            /// This method should be used only for serialization, not for reading from stream.
             /// Typical usage will be for example in combination with <see cref="MemoryStream.GetBuffer"> when we get array, but we want to use only part of it.
             /// </remarks>
             public void Translate(ref byte[] byteArray, int length) 

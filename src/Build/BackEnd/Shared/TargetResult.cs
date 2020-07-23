@@ -315,7 +315,7 @@ namespace Microsoft.Build.Execution
 
                 interner.Translate(translator);
                 var itemsBuffer = itemsStream.GetBuffer();
-                translator.Translate(ref itemsBuffer, itemsBuffer.Length);
+                translator.Translate(ref itemsBuffer, (int)itemsStream.Length);
             }
         }
 
