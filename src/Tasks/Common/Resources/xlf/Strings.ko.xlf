@@ -643,6 +643,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1045: 현재 .NET SDK에서는 {0} {1}을(를) 대상으로 하는 것을 지원하지 않습니다. {0} {2} 이하를 대상으로 하거나 {0} {1}을(를) 지원하는 .NET SDK 버전을 사용하세요.</target>
         <note>{StrBegin="NETSDK1045: "}</note>
       </trans-unit>
+      <trans-unit id="UnsupportedTargetPlatformIdentifier">
+        <source>NETSDK1136: The target platform identifier {0} was not recognized.</source>
+        <target state="new">NETSDK1136: The target platform identifier {0} was not recognized.</target>
+        <note>{StrBegin="NETSDK1136: "}</note>
+      </trans-unit>
       <trans-unit id="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework">
         <source>NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop is required to build Windows desktop applications. 'UseWpf' and 'UseWindowsForms' are not supported by the current SDK.</source>
         <target state="translated">NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop을 사용하려면 Windows 데스크톱 애플리케이션을 빌드해야 합니다. 'UseWpf' 및 'UseWindowsForms'는 현재 SDK에서 지원하지 않습니다.</target>
