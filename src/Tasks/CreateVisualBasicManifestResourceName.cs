@@ -198,7 +198,7 @@ namespace Microsoft.Build.Tasks
         {
             string extension = Path.GetExtension(fileName);
 
-            return (String.Compare(extension, ".vb", StringComparison.OrdinalIgnoreCase) == 0);
+            return (String.Compare(extension, SourceFileExtension, StringComparison.OrdinalIgnoreCase) == 0);
         }
     }
 }

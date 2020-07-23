@@ -219,7 +219,7 @@ namespace Microsoft.Build.Tasks
         protected override bool IsSourceFile(string fileName)
         {
             string extension = Path.GetExtension(fileName);
-            return (String.Compare(extension, ".cs", StringComparison.OrdinalIgnoreCase) == 0);
+            return (String.Compare(extension, SourceFileExtension, StringComparison.OrdinalIgnoreCase) == 0);
         }
     }
 }
