@@ -1,6 +1,8 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Linq;
 using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
@@ -27,8 +29,8 @@ namespace Microsoft.NET.Build.Tests
         {
             var testProject = new TestProject()
             {
-                Name = $"Eol{targetFrameworks.Replace(";", "_")}",
-                TargetFrameworks = "netcoreapp1.0;netcoreapp3.1;net472",
+                Name = $"Eol{targetFrameworks}",
+                TargetFrameworks = targetFrameworks,
                 IsSdkProject = true,
                 IsExe = true
             };
@@ -55,7 +57,6 @@ namespace Microsoft.NET.Build.Tests
                 Name = $"EolOnlyNetCore",
                 TargetFrameworks = "netcoreapp1.0;netcoreapp3.1;net472",
                 IsSdkProject = true,
-                IsExe = true
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -65,15 +66,11 @@ namespace Microsoft.NET.Build.Tests
             var result = buildCommand
                 .Execute();
 
-            result
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("NETSDK1138: The target framework 'netcoreapp1.0' is out of support")
-                .And
-                .NotHaveStdOutContaining("NETSDK1138: The target framework 'netcoreapp3.1' is out of support")
-                .And
-                .NotHaveStdOutContaining("NETSDK1138: The target framework 'net472' is out of support");
+            var lines = (result.StdOut.Split(Environment.NewLine)).Where(line => line.Contains("NETSDK1138"));
+
+            Assert.NotNull(lines.FirstOrDefault(line => line.IndexOf("netcoreapp1.0") >= 0));
+            Assert.All(lines, line => Assert.DoesNotContain("netcoreapp3.1", line));
+            Assert.All(lines, line => Assert.DoesNotContain("net472", line));
         }
 
         [Fact]
