@@ -408,11 +408,11 @@ namespace Microsoft.Build.Construction
                     {
                         if (!ParentSolution.ProjectsByGuid.TryGetValue(ParentProjectGuid, out ProjectInSolution parent))
                         {
-                            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(proj != null, "SubCategoryForSolutionParsingErrors",
+                            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(parent != null, "SubCategoryForSolutionParsingErrors",
                                 new BuildEventFileInfo(ParentSolution.FullPath), "SolutionParseNestedProjectError");
                         }
 
-                        projectName = proj.GetOriginalProjectName() + "\\";
+                        projectName = parent.GetOriginalProjectName() + "\\";
                     }
 
                     // Now tack on our own project name, and cache it in the ProjectInSolution object for future quick access.
