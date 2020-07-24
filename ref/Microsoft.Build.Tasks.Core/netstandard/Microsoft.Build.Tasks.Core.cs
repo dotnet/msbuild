@@ -156,7 +156,7 @@ namespace Microsoft.Build.Tasks
         protected abstract string CreateManifestName(string fileName, string linkFileName, string rootNamespaceName, string dependentUponFileName, System.IO.Stream binaryStream);
         public override bool Execute() { throw null; }
         protected abstract bool IsSourceFile(string fileName);
-        public static string MakeValidEverettIdentifier(string name) { throw null; }
+        public static void MakeValidEverettIdentifier(System.Text.StringBuilder builder, string name) { }
     }
     public partial class CreateProperty : Microsoft.Build.Tasks.TaskExtension
     {
