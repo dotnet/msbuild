@@ -513,7 +513,7 @@ namespace Microsoft.Build.Construction
                     if (uniqueName != proj.ProjectName)
                     {
                         // Generates a new unique name
-                        string tempUniqueName = $"{uniqueName}_{proj.ProjectGuid}";
+                        string tempUniqueName = $"{uniqueName}_{proj.GetProjectGuidWithoutCurlyBrackets()}";
                         proj.UpdateUniqueProjectName(tempUniqueName);
                         uniqueName = tempUniqueName;
                     }
@@ -523,7 +523,7 @@ namespace Microsoft.Build.Construction
                         var projTemp = projectsByUniqueName[uniqueName];
 
                         // Generates a new unique name
-                        string tempUniqueName = $"{uniqueName}_{projTemp.ProjectGuid}";
+                        string tempUniqueName = $"{uniqueName}_{projTemp.GetProjectGuidWithoutCurlyBrackets()}";
                         projTemp.UpdateUniqueProjectName(tempUniqueName);
 
                         projectsByUniqueName.Remove(uniqueName);

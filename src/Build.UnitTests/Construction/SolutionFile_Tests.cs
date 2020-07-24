@@ -1952,7 +1952,7 @@ EndGlobal
             ProjectInSolution project2 = (ProjectInSolution)solution.ProjectsByGuid["{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}"];
 
             Assert.NotEqual(project1.GetUniqueProjectName(), project2.GetUniqueProjectName());
-            Assert.Equal("Project_Named_With_Dots_{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}", project1.GetUniqueProjectName());
+            Assert.Equal("Project_Named_With_Dots_FC2889D9-6050-4D2E-B022-979CCFEEAAAC", project1.GetUniqueProjectName());
             Assert.Equal("Project_Named_With_Dots", project2.GetUniqueProjectName());
 
             Assert.Equal("Project.Named.With.Dots", project1.GetOriginalProjectName());
@@ -1997,7 +1997,7 @@ EndGlobal
             ProjectInSolution project2 = (ProjectInSolution)solution.ProjectsByGuid["{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}"];
 
             Assert.NotEqual(project1.GetUniqueProjectName(), project2.GetUniqueProjectName());
-            Assert.Equal("Project_Named_With_Dots_{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}", project1.GetUniqueProjectName());
+            Assert.Equal("Project_Named_With_Dots_FC2889D9-6050-4D2E-B022-979CCFEEAAAC", project1.GetUniqueProjectName());
             Assert.Equal("Project_Named_With_Dots", project2.GetUniqueProjectName());
 
             Assert.Equal("Project.Named.With.Dots", project1.GetOriginalProjectName());
@@ -2050,8 +2050,8 @@ EndGlobal
             Assert.NotEqual(project2.GetUniqueProjectName(), project3.GetUniqueProjectName());
             Assert.NotEqual(project1.GetUniqueProjectName(), project3.GetUniqueProjectName());
 
-            Assert.Equal("Project_Named_With_Dots_{6185CC21-BE89-448A-B3C0-D1C27112E595}", project1.GetUniqueProjectName());
-            Assert.Equal("Project_Named_With_Dots_{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}", project2.GetUniqueProjectName());
+            Assert.Equal("Project_Named_With_Dots_6185CC21-BE89-448A-B3C0-D1C27112E595", project1.GetUniqueProjectName());
+            Assert.Equal("Project_Named_With_Dots_FC2889D9-6050-4D2E-B022-979CCFEEAAAC", project2.GetUniqueProjectName());
             Assert.Equal("Project_Named_With_Dots", project3.GetUniqueProjectName());
 
             Assert.Equal("Project_Named_With.Dots", project1.GetOriginalProjectName());
@@ -2105,8 +2105,8 @@ EndGlobal
             Assert.NotEqual(project2.GetUniqueProjectName(), project3.GetUniqueProjectName());
             Assert.NotEqual(project1.GetUniqueProjectName(), project3.GetUniqueProjectName());
 
-            Assert.Equal("Project_Named_With_Dots_{6185CC21-BE89-448A-B3C0-D1C27112E595}", project1.GetUniqueProjectName());
-            Assert.Equal("Project_Named_With_Dots_{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}", project2.GetUniqueProjectName());
+            Assert.Equal("Project_Named_With_Dots_6185CC21-BE89-448A-B3C0-D1C27112E595", project1.GetUniqueProjectName());
+            Assert.Equal("Project_Named_With_Dots_FC2889D9-6050-4D2E-B022-979CCFEEAAAC", project2.GetUniqueProjectName());
             Assert.Equal("Project_Named_With_Dots", project3.GetUniqueProjectName());
 
             Assert.Equal("Project_Named_With.Dots", project1.GetOriginalProjectName());

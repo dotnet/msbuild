@@ -423,6 +423,16 @@ namespace Microsoft.Build.Construction
             return _originalProjectName;
         }
 
+        internal string GetProjectGuidWithoutCurlyBrackets()
+        {
+            if (string.IsNullOrEmpty(ProjectGuid))
+            {
+                return null;
+            }
+
+            return ProjectGuid.Trim(new char[] { '{', '}' });
+        }
+
         /// <summary>
         /// Changes the unique name of the project.
         /// </summary>
