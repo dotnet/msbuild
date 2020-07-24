@@ -406,7 +406,7 @@ namespace Microsoft.Build.Construction
 
                     if (ParentProjectGuid != null)
                     {
-                        if (!ParentSolution.ProjectsByGuid.TryGetValue(ParentProjectGuid, out ProjectInSolution proj))
+                        if (!ParentSolution.ProjectsByGuid.TryGetValue(ParentProjectGuid, out ProjectInSolution parent))
                         {
                             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(proj != null, "SubCategoryForSolutionParsingErrors",
                                 new BuildEventFileInfo(ParentSolution.FullPath), "SolutionParseNestedProjectError");
