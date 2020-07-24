@@ -51,7 +51,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var publishCommand = new PublishCommand(Log, testDir.Path);
 
-            publishCommand.Execute($"/p:RuntimeIdentifier={rid}")
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:TargetPlatformIdentifier=Windows", "/p:TargetPlatformVersion=7.0")
                 .Should()
                 .Pass();
 

@@ -39,9 +39,9 @@ namespace Microsoft.NET.Build.Tests
             var targetPlatformIdentifier = "iOS";
             testProject.AdditionalProperties["TargetPlatformIdentifier"] = targetPlatformIdentifier;
             testProject.AdditionalProperties["TargetPlatformSupported"] = "true";
+            testProject.AdditionalProperties["TargetPlatformVersionSupported"] = "true";
             testProject.AdditionalProperties["MinimumOSPlatform"] = "13.2";
             testProject.AdditionalProperties["TargetPlatformVersion"] = "14.0";
-            testProject.AdditionalProperties["TargetPlatformSupported"] = "true";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -60,8 +60,8 @@ namespace Microsoft.NET.Build.Tests
             var targetPlatformIdentifier = "iOS";
             testProject.AdditionalProperties["TargetPlatformIdentifier"] = targetPlatformIdentifier;
             testProject.AdditionalProperties["TargetPlatformSupported"] = "true";
+            testProject.AdditionalProperties["TargetPlatformVersionSupported"] = "true";
             testProject.AdditionalProperties["TargetPlatformVersion"] = "13.2";
-            testProject.AdditionalProperties["TargetPlatformSupported"] = "true";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -79,7 +79,7 @@ namespace Microsoft.NET.Build.Tests
 
             var targetPlatformIdentifier = "iOS";
             testProject.AdditionalProperties["TargetPlatformIdentifier"] = targetPlatformIdentifier;
-            testProject.AdditionalProperties["TargetPlatformSupported"] = "true";
+            testProject.AdditionalProperties["TargetPlatformVersionSupported"] = "true";
             testProject.AdditionalProperties["TargetPlatformVersion"] = "13.2";
             testProject.AdditionalProperties["MinimumOSPlatform"] = "14.0";
             testProject.AdditionalProperties["TargetPlatformSupported"] = "true";
