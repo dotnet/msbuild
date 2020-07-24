@@ -73,7 +73,7 @@ namespace Microsoft.Build.Internal
         {
             // We currently use 6 bits of this 32-bit integer. Very old builds will instantly reject any handshake that does not start with F5 or 06; slightly old builds always lead with 00.
             // This indicates in the first byte that we are a modern build.
-            options = (int)nodeType | 0x01000000;
+            options = (int)nodeType | CommunicationsUtilities.handshakeVersion;
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
             string toolsDirectory = (nodeType & HandshakeOptions.X64) == HandshakeOptions.X64 ? BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64 : BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
             salt = CommunicationsUtilities.GetHandshakeHashCode(handshakeSalt + toolsDirectory);
@@ -115,6 +115,11 @@ namespace Microsoft.Build.Internal
         /// Indicates to the NodeEndpoint that all the various parts of the Handshake have been sent.
         /// </summary>
         private const int EndOfHandshakeSignal = -0x2a2a2a2a;
+
+        /// <summary>
+        /// The version of the handshake. This should be updated each time the handshake structure is altered.
+        /// </summary>
+        internal const int handshakeVersion = 0x01000000;
 
         /// <summary>
         /// The timeout to connect to a node.
@@ -296,6 +301,7 @@ namespace Microsoft.Build.Internal
             }
         }
 
+#nullable enable
         /// <summary>
         /// Indicate to the client that all elements of the Handshake have been sent.
         /// </summary>
@@ -330,7 +336,7 @@ namespace Microsoft.Build.Internal
             )
         {
             // Accept only the first byte of the EndOfHandshakeSignal
-            int valueRead = stream.ReadIntForHandshake(0x00
+            int valueRead = stream.ReadIntForHandshake(null
 #if NETCOREAPP2_1 || MONO
             , timeout
 #endif
@@ -354,7 +360,7 @@ namespace Microsoft.Build.Internal
         /// Extension method to read a series of bytes from a stream.
         /// If specified, leading byte matches one in the supplied array if any, returns rejection byte and throws IOException.
         /// </summary>
-        internal static int ReadIntForHandshake(this PipeStream stream, int byteToAccept
+        internal static int ReadIntForHandshake(this PipeStream stream, int? byteToAccept
 #if NETCOREAPP2_1 || MONO
             , int timeout
 #endif
@@ -402,7 +408,7 @@ namespace Microsoft.Build.Internal
 
                     bytes[i] = Convert.ToByte(read);
 
-                    if (i == 0 && byteToAccept != 0x00 && byteToAccept != bytes[0])
+                    if (i == 0 && byteToAccept != null && byteToAccept != bytes[0])
                     {
                         stream.WriteIntForHandshake(0x0F0F0F0F);
                         stream.WriteIntForHandshake(0x0F0F0F0F);
@@ -431,6 +437,7 @@ namespace Microsoft.Build.Internal
 
             return result;
         }
+#nullable disable
 
 #if !FEATURE_APM
         internal static async Task<int> ReadAsync(Stream stream, byte[] buffer, int bytesToRead)
