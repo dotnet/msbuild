@@ -1972,6 +1972,52 @@ EndGlobal
             Assert.Equal(".NET", solution.GetDefaultPlatformName()); // "Default solution platform"
         }
 
+        [Fact]
+        public void ParseSolutionFileContainingProjectsWithParentSlnFolder()
+        {
+            string solutionFileContents = @"
+                Microsoft Visual Studio Solution File, Format Version 9.00
+                # Visual Studio 2005
+                Project('{2150E333-8FDC-42A3-9474-1A3956D46DE8}') = 'MySlnFolder', 'MySlnFolder', '{E0F97730-25D2-418A-A7BD-02CAFDC6E470}'
+                EndProject
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project.Named.With.Dots', 'MyPhysicalFolder\Folder1\Project.Named.With.Dots.csproj', '{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}'
+                EndProject
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With_Dots', 'MyPhysicalFolder\Folder2\Project_Named_With_Dots.csproj', '{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}'
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                        Release|Any CPU = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		        {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		        {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		        {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		        {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(SolutionProperties) = preSolution
+                        HideSolutionNode = FALSE
+                    EndGlobalSection
+                    GlobalSection(NestedProjects) = preSolution
+                        {FC2889D9-6050-4D2E-B022-979CCFEEAAAC} = {E0F97730-25D2-418A-A7BD-02CAFDC6E470}
+                        {ED30D4A3-1214-410B-82BB-B61E5A9D05CA} = {E0F97730-25D2-418A-A7BD-02CAFDC6E470}
+                    EndGlobalSection
+                EndGlobal
+                ";
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+
+            ProjectInSolution project1 = (ProjectInSolution)solution.ProjectsByGuid["{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}"];
+            ProjectInSolution project2 = (ProjectInSolution)solution.ProjectsByGuid["{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}"];
+
+            Assert.NotEqual(project1.GetUniqueProjectName(), project2.GetUniqueProjectName());
+            Assert.Equal(@"MySlnFolder\Project_Named_With_Dots", project1.GetUniqueProjectName());
+            Assert.Equal(@"MySlnFolder\Project_Named_With_Dots_ED30D4A3-1214-410B-82BB-B61E5A9D05CA", project2.GetUniqueProjectName());
+
+            Assert.Equal(@"MySlnFolder\Project.Named.With.Dots", project1.GetOriginalProjectName());
+            Assert.Equal(@"MySlnFolder\Project_Named_With_Dots", project2.GetOriginalProjectName());
+        }
+
         [Theory]
         [InlineData(@"
                 Microsoft Visual Studio Solution File, Format Version 12.00
