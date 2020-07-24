@@ -5,10 +5,11 @@ using Microsoft.Build.Collections;
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
+using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 namespace Microsoft.Build.Evaluation
 {

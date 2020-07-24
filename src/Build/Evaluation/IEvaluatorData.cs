@@ -9,8 +9,9 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Collections;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
+using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 namespace Microsoft.Build.Evaluation
 {

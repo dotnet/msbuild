@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Evaluation
 {

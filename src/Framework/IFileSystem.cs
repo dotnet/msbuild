@@ -4,13 +4,16 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace Microsoft.Build.Shared.FileSystem
+namespace Microsoft.Build.Framework
 {
     /// <summary>
     /// Abstracts away some file system operations.
-    /// The underlying implementation may decide to cache some or all the calls.
+    ///
+    /// Implementations:
+    /// - must be thread safe
+    /// - may cache some or all the calls.
     /// </summary>
-    internal interface IFileSystem
+    public interface IFileSystem
     {
         /// <summary>
         /// Use this for var sr = new StreamReader(path)

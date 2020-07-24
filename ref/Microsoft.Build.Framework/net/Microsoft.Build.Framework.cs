@@ -242,6 +242,22 @@ namespace Microsoft.Build.Framework
         void IncludeEvaluationProfiles();
         void IncludeTaskInputs();
     }
+    public partial interface IFileSystem
+    {
+        void ClearCaches();
+        bool DirectoryEntryExists(string path);
+        bool DirectoryExists(string path);
+        System.Collections.Generic.IEnumerable<string> EnumerateDirectories(string path, string searchPattern="*", System.IO.SearchOption searchOption=(System.IO.SearchOption)(0));
+        System.Collections.Generic.IEnumerable<string> EnumerateFiles(string path, string searchPattern="*", System.IO.SearchOption searchOption=(System.IO.SearchOption)(0));
+        System.Collections.Generic.IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern="*", System.IO.SearchOption searchOption=(System.IO.SearchOption)(0));
+        bool FileExists(string path);
+        System.IO.FileAttributes GetAttributesNoMissingException(string path);
+        System.IO.Stream GetFileStream(string path, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share);
+        System.IO.TextReader ReadFile(string path);
+        byte[] ReadFileAllBytes(string path);
+        string ReadFileAllText(string path);
+        void WriteStatistics(System.IO.TextWriter writer);
+    }
     public partial interface IForwardingLogger : Microsoft.Build.Framework.ILogger, Microsoft.Build.Framework.INodeLogger
     {
         Microsoft.Build.Framework.IEventRedirector BuildEventRedirector { get; set; }
