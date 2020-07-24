@@ -32,6 +32,11 @@
         <target state="translated">Nie można przekonwertować wartości właściwości „{0}” na ciąg.</target>
         <note />
       </trans-unit>
+      <trans-unit id="RunCommandBuilding">
+        <source>Building...</source>
+        <target state="new">Building...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RunCommandException">
         <source>The build failed. Fix the build errors and run again.</source>
         <target state="translated">Kompilacja nie powiodła się. Napraw błędy kompilacji i uruchom ją ponownie.</target>

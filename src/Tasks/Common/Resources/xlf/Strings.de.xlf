@@ -395,6 +395,13 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1104: Der RollForward-Wert "{0}" ist ungültig. Zulässige Werte: {1}.</target>
         <note>{StrBegin="NETSDK1104: "}</note>
       </trans-unit>
+      <trans-unit id="InvalidTargetPlatformVersion">
+        <source>NETSDK1137: {0} is not a valid TargetPlatformVersion for {1}. Valid versions include:
+{2}</source>
+        <target state="new">NETSDK1137: {0} is not a valid TargetPlatformVersion for {1}. Valid versions include:
+{2}</target>
+        <note>{StrBegin="NETSDK1137: "}</note>
+      </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
         <source>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead. To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish. Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore. For more information, see https://aka.ms/dotnet-runtime-patch-selection.</source>
         <target state="translated">NETSDK1061: Das Projekt wurde mit {0}, Version {1} wiederhergestellt, aber mit den aktuellen Einstellungen würde stattdessen Version {2} verwendet werden. Um dieses Problem zu beheben, müssen Sie sicherstellen, dass für die Wiederherstellung und für nachfolgende Vorgänge wie das Kompilieren oder Veröffentlichen dieselben Einstellungen verwendet werden. Dieses Problem tritt typischerweise auf, wenn die RuntimeIdentifier-Eigenschaft bei der Kompilierung oder Veröffentlichung, aber nicht bei der Wiederherstellung festgelegt wird. Weitere Informationen finden Sie unter https://aka.ms/dotnet-runtime-patch-selection.</target>
@@ -647,6 +654,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
         <target state="translated">NETSDK1045: Das aktuelle .NET SDK unterstützt {0} {1} nicht als Ziel. Geben Sie entweder {0} {2} oder niedriger als Ziel an, oder verwenden Sie eine .NET SDK-Version, die {0} {1} unterstützt.</target>
         <note>{StrBegin="NETSDK1045: "}</note>
+      </trans-unit>
+      <trans-unit id="UnsupportedTargetPlatformIdentifier">
+        <source>NETSDK1136: The target platform identifier {0} was not recognized.</source>
+        <target state="new">NETSDK1136: The target platform identifier {0} was not recognized.</target>
+        <note>{StrBegin="NETSDK1136: "}</note>
       </trans-unit>
       <trans-unit id="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework">
         <source>NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop is required to build Windows desktop applications. 'UseWpf' and 'UseWindowsForms' are not supported by the current SDK.</source>
