@@ -1984,11 +1984,8 @@ EndGlobal
             Assert.Equal("Project_Named_With_Dots", project2.GetOriginalProjectName());
         }
 
-        [Fact]
-        public void ParseSolutionFileContainingProjectsWithSimilarNames_ThreeProjects()
-        {
-            string solutionFileContents =
-                @"
+        [Theory]
+        [InlineData(@"
                 Microsoft Visual Studio Solution File, Format Version 12.00
                 # Visual Studio 15
                 VisualStudioVersion = 15.0.27130.2010
@@ -2018,32 +2015,8 @@ EndGlobal
 		                SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
 	                EndGlobalSection
                 EndGlobal
-                ";
-
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
-
-            ProjectInSolution project1 = (ProjectInSolution)solution.ProjectsByGuid["{6185CC21-BE89-448A-B3C0-D1C27112E595}"];
-            ProjectInSolution project2 = (ProjectInSolution)solution.ProjectsByGuid["{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}"];
-            ProjectInSolution project3 = (ProjectInSolution)solution.ProjectsByGuid["{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}"];
-
-            Assert.NotEqual(project1.GetUniqueProjectName(), project2.GetUniqueProjectName());
-            Assert.NotEqual(project2.GetUniqueProjectName(), project3.GetUniqueProjectName());
-            Assert.NotEqual(project1.GetUniqueProjectName(), project3.GetUniqueProjectName());
-
-            Assert.Equal("Project_Named_With_Dots_6185CC21-BE89-448A-B3C0-D1C27112E595", project1.GetUniqueProjectName());
-            Assert.Equal("Project_Named_With_Dots_FC2889D9-6050-4D2E-B022-979CCFEEAAAC", project2.GetUniqueProjectName());
-            Assert.Equal("Project_Named_With_Dots", project3.GetUniqueProjectName());
-
-            Assert.Equal("Project_Named_With.Dots", project1.GetOriginalProjectName());
-            Assert.Equal("Project.Named.With.Dots", project2.GetOriginalProjectName());
-            Assert.Equal("Project_Named_With_Dots", project3.GetOriginalProjectName());
-        }
-
-        [Fact]
-        public void ParseSolutionFileContainingProjectsWithSimilarNames_ThreeProjects_DifferentOrder()
-        {
-            string solutionFileContents =
-                @"
+                ")]
+        [InlineData(@"
                 Microsoft Visual Studio Solution File, Format Version 12.00
                 # Visual Studio 15
                 VisualStudioVersion = 15.0.27130.2010
@@ -2073,8 +2046,9 @@ EndGlobal
 		                SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
 	                EndGlobalSection
                 EndGlobal
-                ";
-
+                ")]
+        public void ParseSolutionFileContainingProjectsWithSimilarNames_ThreeProjects(string solutionFileContents)
+        {
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
             ProjectInSolution project1 = (ProjectInSolution)solution.ProjectsByGuid["{6185CC21-BE89-448A-B3C0-D1C27112E595}"];
