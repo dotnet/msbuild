@@ -1914,11 +1914,8 @@ EndGlobal
             Assert.Equal(".NET", solution.GetDefaultPlatformName()); // "Default solution platform"
         }
 
-        [Fact]
-        public void ParseSolutionFileContainingProjectsWithSimilarNames_TwoProjects()
-        {
-            string solutionFileContents =
-                @"
+        [Theory]
+        [InlineData(@"
                 Microsoft Visual Studio Solution File, Format Version 12.00
                 # Visual Studio 15
                 VisualStudioVersion = 15.0.27130.2010
@@ -1944,26 +1941,8 @@ EndGlobal
 		                SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
 	                EndGlobalSection
                 EndGlobal
-                ";
-
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
-
-            ProjectInSolution project1 = (ProjectInSolution)solution.ProjectsByGuid["{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}"];
-            ProjectInSolution project2 = (ProjectInSolution)solution.ProjectsByGuid["{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}"];
-
-            Assert.NotEqual(project1.GetUniqueProjectName(), project2.GetUniqueProjectName());
-            Assert.Equal("Project_Named_With_Dots_FC2889D9-6050-4D2E-B022-979CCFEEAAAC", project1.GetUniqueProjectName());
-            Assert.Equal("Project_Named_With_Dots", project2.GetUniqueProjectName());
-
-            Assert.Equal("Project.Named.With.Dots", project1.GetOriginalProjectName());
-            Assert.Equal("Project_Named_With_Dots", project2.GetOriginalProjectName());
-        }
-
-        [Fact]
-        public void ParseSolutionFileContainingProjectsWithSimilarNames_TwoProjects_DifferentOrder()
-        {
-            string solutionFileContents =
-                @"
+                ")]
+        [InlineData(@"
                 Microsoft Visual Studio Solution File, Format Version 12.00
                 # Visual Studio 15
                 VisualStudioVersion = 15.0.27130.2010
@@ -1989,8 +1968,9 @@ EndGlobal
 		                SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
 	                EndGlobalSection
                 EndGlobal
-                ";
-
+                ")]
+        public void ParseSolutionFileContainingProjectsWithSimilarNames_TwoProjects(string solutionFileContents)
+        {
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
             ProjectInSolution project1 = (ProjectInSolution)solution.ProjectsByGuid["{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}"];
