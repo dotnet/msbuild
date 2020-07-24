@@ -102,7 +102,7 @@ namespace Microsoft.Build.Tasks
             Culture.ItemCultureInfo info = Culture.GetItemCultureInfo(embeddedFileName, dependentUponFileName);
 
             // If the item has a culture override, respect that. 
-            if (!String.IsNullOrEmpty(culture))
+            if (!string.IsNullOrEmpty(culture))
             {
                 info.culture = culture;
             }
@@ -144,18 +144,21 @@ namespace Microsoft.Build.Tasks
 
                 // only strip extension for .resx and .restext files
                 string sourceExtension = Path.GetExtension(info.cultureNeutralFilename);
+                string directoryName = Path.GetDirectoryName(info.cultureNeutralFilename);
+
+                // append the directory name
+                MakeValidEverettIdentifier(manifestName, directoryName);
                 if (
-                        (String.Equals(sourceExtension, ".resx", StringComparison.OrdinalIgnoreCase))
+                        string.Equals(sourceExtension, ".resx", StringComparison.OrdinalIgnoreCase)
                         ||
-                        (String.Equals(sourceExtension, ".restext", StringComparison.OrdinalIgnoreCase))
+                        string.Equals(sourceExtension, ".restext", StringComparison.OrdinalIgnoreCase)
                         ||
-                        (String.Equals(sourceExtension, ".resources", StringComparison.OrdinalIgnoreCase))
+                        string.Equals(sourceExtension, ".resources", StringComparison.OrdinalIgnoreCase)
                     )
                 {
-                    var directoryName = Path.GetDirectoryName(info.cultureNeutralFilename);
+
                     if (!string.IsNullOrEmpty(directoryName))
                     {
-                        MakeValidEverettIdentifier(manifestName, directoryName);
                         manifestName.Append('.').Append(Path.GetFileNameWithoutExtension(info.cultureNeutralFilename));
                     }
                     else
@@ -174,17 +177,15 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // If the original extension was .resources, add it back
-                    if (String.Equals(sourceExtension, ".resources", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(sourceExtension, ".resources", StringComparison.OrdinalIgnoreCase))
                     {
                         manifestName.Append(sourceExtension);
                     }
                 }
                 else
                 {
-                    var directoryName = Path.GetDirectoryName(info.cultureNeutralFilename);
                     if (!string.IsNullOrEmpty(directoryName))
                     {
-                        MakeValidEverettIdentifier(manifestName, directoryName);
                         manifestName.Append('.').Append(Path.GetFileName(info.cultureNeutralFilename));
                     }
                     else
@@ -219,7 +220,7 @@ namespace Microsoft.Build.Tasks
         protected override bool IsSourceFile(string fileName)
         {
             string extension = Path.GetExtension(fileName);
-            return (String.Compare(extension, SourceFileExtension, StringComparison.OrdinalIgnoreCase) == 0);
+            return string.Equals(extension, SourceFileExtension, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

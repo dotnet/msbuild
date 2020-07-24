@@ -300,11 +300,7 @@ namespace Microsoft.Build.Tasks
         {
             ErrorUtilities.VerifyThrowArgumentNull(subName, nameof(subName));
 
-            if (subName.Length == 0)
-            {
-                builder.Append(subName);
-            }
-            else
+            if (!string.IsNullOrEmpty(subName))
             {
                 // the first character has stronger restrictions than the rest
                 if (!IsValidEverettIdFirstChar(subName[0]))
@@ -339,6 +335,10 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
+            else
+            {
+                return;
+            }
         }
 
         /// <summary>
@@ -348,32 +348,39 @@ namespace Microsoft.Build.Tasks
         {
             ErrorUtilities.VerifyThrowArgumentNull(name, nameof(name));
 
-            // give string length to avoid reallocations; +1 since the resulting string may be one char longer than the
-            // original - if the name is a single underscore we add another underscore to it
-            var everettId = new StringBuilder(name.Length + 1);
-
-            // split folder name into subnames separated by '.', if any
-            string[] subNames = name.Split(MSBuildConstants.DotChar);
-
-            // convert each subname separately
-            if (!string.IsNullOrEmpty(subNames[0]))
+            if (!string.IsNullOrEmpty(name))
             {
-                MakeValidEverettSubFolderIdentifier(everettId, subNames[0]);
-            }
+                // give string length to avoid reallocations; +1 since the resulting string may be one char longer than the
+                // original - if the name is a single underscore we add another underscore to it
+                var everettId = new StringBuilder(name.Length + 1);
 
-            for (int i = 1; i < subNames.Length; i++)
+                // split folder name into subnames separated by '.', if any
+                string[] subNames = name.Split(MSBuildConstants.DotChar);
+
+                // convert each subname separately
+                if (!string.IsNullOrEmpty(subNames[0]))
+                {
+                    MakeValidEverettSubFolderIdentifier(everettId, subNames[0]);
+                }
+
+                for (int i = 1; i < subNames.Length; i++)
+                {
+                    everettId.Append('.');
+                    MakeValidEverettSubFolderIdentifier(everettId, subNames[i]);
+                }
+
+                // folder name cannot be a single underscore - add another underscore to it
+                if (everettId.ToString() == "_")
+                {
+                    everettId.Append('_');
+                }
+
+                builder.Append(everettId.ToString());
+            }
+            else
             {
-                everettId.Append('.');
-                MakeValidEverettSubFolderIdentifier(everettId, subNames[i]);
+                return;
             }
-
-            // folder name cannot be a single underscore - add another underscore to it
-            if (everettId.ToString() == "_")
-            {
-                everettId.Append('_');
-            }
-
-            builder.Append(everettId.ToString());
         }
 
         /// <summary>
@@ -383,20 +390,25 @@ namespace Microsoft.Build.Tasks
         public static void MakeValidEverettIdentifier(StringBuilder builder, string name)
         {
             ErrorUtilities.VerifyThrowArgumentNull(name, nameof(name));
-
-            // split the name into folder names
-            string[] subNames = name.Split(MSBuildConstants.ForwardSlashBackslash);
-
-            // convert every folder name
-            if (!string.IsNullOrEmpty(subNames[0]))
+            if (!string.IsNullOrEmpty(name))
             {
-                MakeValidEverettFolderIdentifier(builder, subNames[0]);
+                // split the name into folder names
+                string[] subNames = name.Split(MSBuildConstants.ForwardSlashBackslash);
+
+                // convert every folder name
+                if (!string.IsNullOrEmpty(subNames[0]))
+                {
+                    MakeValidEverettFolderIdentifier(builder, subNames[0]);
+                }
+
+                for (int i = 1; i < subNames.Length; i++)
+                {
+                    builder.Append('.');
+                    MakeValidEverettFolderIdentifier(builder, subNames[i]);
+                }
             }
-
-            for (int i = 1; i < subNames.Length; i++)
-            {
-                builder.Append('.');
-                MakeValidEverettFolderIdentifier(builder, subNames[i]);
+            else {
+                return;
             }
         }
 
