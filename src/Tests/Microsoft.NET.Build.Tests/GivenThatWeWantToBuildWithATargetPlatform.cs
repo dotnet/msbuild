@@ -78,7 +78,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining("NETSDK1136");
+                .HaveStdOutContaining("NETSDK1138");
         }
     }
 }
