@@ -36,8 +36,7 @@ jobs:
       - _OfficialBuildIdArgs: ''
       - _PublishArgs: ''
       - _SignArgs: ''
-      - _InternalRuntimeDownloadArgs: ''
-      - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+      - ${{ if ne(variables['System.TeamProject'], 'public') }}:
         - group: DotNet-Symbol-Server-PATs
         - group: DotNet-HelixApi-Access
         - group: dotnet-benchview
@@ -53,21 +52,7 @@ jobs:
                     /p:PublishToAzure=$(_PublishToAzure)
         - _SignArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
         - _PerfIterations: 25
-
-      - ${{ if ne(variables['System.TeamProject'], 'public') }}:
-        - group: DotNet-MSRC-Storage
-        - name: _InternalRuntimeDownloadArgs
-          value: /p:DotNetRuntimeSourceFeed=https://dotnetclimsrc.blob.core.windows.net/dotnet
-            /p:DotNetRuntimeSourceFeedKey=$(dotnetclimsrc-read-sas-token-base64)
     steps:
-    - ${{ if ne(variables['System.TeamProject'], 'public') }}:
-      - task: PowerShell@2
-        displayName: Setup Private Feeds Credentials
-        inputs:
-          filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
-          arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
-        env:
-          Token: $(dn-bot-dnceng-artifact-feeds-rw)
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
       - script: eng\CIBuild.cmd
                   -configuration $(_BuildConfig)
@@ -75,7 +60,6 @@ jobs:
                   $(_SignArgs)
                   $(_OfficialBuildIdArgs)
                   $(_Test)
-                  $(_InternalRuntimeDownloadArgs)
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
@@ -104,7 +88,6 @@ jobs:
                   $(_SignArgs)
                   $(_OfficialBuildIdArgs)
                   $(_Test)
-                  $(_InternalRuntimeDownloadArgs)
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
@@ -135,7 +118,6 @@ jobs:
                   $(_SignArgs)
                   $(_OfficialBuildIdArgs)
                   $(_Test)
-                  $(_InternalRuntimeDownloadArgs)
                   /p:RunTestsAsTool=true
         displayName: Build
         env:
@@ -149,7 +131,6 @@ jobs:
                   $(_PublishArgs)
                   $(_SignArgs)
                   $(_OfficialBuildIdArgs)
-                  $(_InternalRuntimeDownloadArgs)
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
