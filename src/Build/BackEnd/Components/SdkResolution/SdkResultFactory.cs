@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Framework;
 using System.Collections.Generic;
 
 using SdkReference = Microsoft.Build.Framework.SdkReference;
@@ -29,6 +30,24 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         public override SdkResultBase IndicateSuccess(string path, string version, IEnumerable<string> warnings = null)
         {
             return new SdkResult(_sdkReference, path, version, warnings);
+        }
+
+        public override SdkResultBase IndicateSuccess(string path,
+                                                      string version,
+                                                      IDictionary<string, string> propertiesToAdd,
+                                                      IDictionary<string, SdkResultItem> itemsToAdd,
+                                                      IEnumerable<string> warnings = null)
+        {
+            return new SdkResult(_sdkReference, path, version, warnings, propertiesToAdd, itemsToAdd);
+        }
+
+        public override SdkResultBase IndicateSuccess(IEnumerable<string> paths,
+                                                      string version,
+                                                      IDictionary<string, string> propertiesToAdd = null,
+                                                      IDictionary<string, SdkResultItem> itemsToAdd = null,
+                                                      IEnumerable<string> warnings = null)
+        {
+            return new SdkResult(_sdkReference, paths, version, propertiesToAdd, itemsToAdd, warnings);
         }
     }
 }

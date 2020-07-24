@@ -31,7 +31,6 @@ stages:
       name: VSEng-MicroBuildVS2019
       demands:
       - agent.os -equals Windows_NT
-      - VSTS_OS -equals Windows_Server_2019_Data_Center_with_Containers
 
     timeoutInMinutes: 180
 
@@ -180,6 +179,15 @@ stages:
       inputs:
         PathtoPublish: 'artifacts\packages\$(BuildConfiguration)'
         ArtifactName: PackageArtifacts
+      condition: succeeded()
+
+    # Publish "IntelliSense" XSD files to their own artifact
+    # so it can be consumed by the insertion-to-VS job
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish Artifact: xsd'
+      inputs:
+        path: 'artifacts\xsd'
+        artifactName: xsd
       condition: succeeded()
 
     # Publish Asset Manifests for Build Asset Registry job

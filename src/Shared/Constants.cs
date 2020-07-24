@@ -177,5 +177,6 @@ namespace Microsoft.Build.Shared
         internal const string PropertiesMetadataName = "Properties";
         internal const string UndefinePropertiesMetadataName = "UndefineProperties";
         internal const string AdditionalPropertiesMetadataName = "AdditionalProperties";
+        internal const string ProjectConfigurationDescription = "ProjectConfigurationDescription";
     }
 }

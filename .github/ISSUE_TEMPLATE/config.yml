@@ -1,0 +1,26 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Issue with .NET (Core) SDK
+    url:  https://github.com/dotnet/sdk/issues/new/choose
+    about: Please open issues relating to the .NET Core SDK or .NET 5.0+ SDK in `dotnet/sdk`. If you're not sure whether a bug is more appropriate here or in the SDK, take your best guess and we can always move it.
+  - name: Issue with Project System
+    url:  https://github.com/dotnet/project-system/issues/new/choose
+    about: Please open issues relating to how Visual Studio interacts with MSBuild for C#/VB/F# projects in `dotnet/project-system`.
+  - name: Issue with Visual Studio
+    url:  https://developercommunity.visualstudio.com/spaces/8/index.html
+    about: Please open issues relating to Visual Studio using Visual Studio Feedback. If you're not sure whether the problem is with Visual Studio or MSBuild itself, please start with Visual Studio; we can move the bug here if necessary.
+  - name: Issue with Roslyn compiler
+    url:  https://github.com/dotnet/roslyn/issues/new/choose
+    about: Please open issues relating to the Roslyn C# and Visual Basic compiler or language features in `dotnet/roslyn`. These are often error code `CSxxxx` or `VBxxxx`.
+  - name: Issue with .NET runtime or core .NET libraries
+    url:  https://github.com/dotnet/runtime/issues/new/choose
+    about: Please open issues with the .NET runtime or core .NET libraries in the `dotnet/runtime` repo.
+  - name: Issue with Windows Forms
+    url:  https://github.com/dotnet/winforms/issues/new/choose
+    about: Please open issues relating to Windows Forms in `dotnet/winforms`, including build issues specific to forms.
+  - name: Issue with ASP.NET Core
+    url:  https://github.com/dotnet/aspnetcore/issues/new/choose
+    about: Please open issues relating to ASP.NET Core in `dotnet/aspnetcore`, including build issues specific to ASP.NET.
+  - name: Issue with WPF
+    url:  https://github.com/dotnet/wpf/issues/new/choose
+    about: Please open issues relating to WPF in `dotnet/wpf`, including build issues specific to WPF.

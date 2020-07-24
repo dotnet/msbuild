@@ -26,7 +26,6 @@ using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.FileSystem;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
@@ -406,7 +405,7 @@ namespace Microsoft.Build.Execution
 
                 if (BuildParameters.DumpOpportunisticInternStats)
                 {
-                    OpportunisticIntern.EnableStatisticsGathering();
+                    OpportunisticIntern.Instance.EnableStatisticsGathering();
                 }
 
                 _overallBuildSuccess = true;
@@ -824,7 +823,7 @@ namespace Microsoft.Build.Execution
 
                     if (BuildParameters.DumpOpportunisticInternStats)
                     {
-                        OpportunisticIntern.ReportStatistics();
+                        OpportunisticIntern.Instance.ReportStatistics();
                     }
                 }
             }
@@ -1445,6 +1444,13 @@ namespace Microsoft.Build.Execution
                                 projectLoadSettings);
                         });
                 }
+
+                LogMessage(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "StaticGraphConstructionMetrics",
+                        Math.Round(projectGraph.ConstructionMetrics.ConstructionTime.TotalSeconds, 3),
+                        projectGraph.ConstructionMetrics.NodeCount,
+                        projectGraph.ConstructionMetrics.EdgeCount));
 
                 IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames);
 
@@ -2497,6 +2503,13 @@ namespace Microsoft.Build.Execution
                 CancelAndMarkAsFailure();
                 throw;
             }
+        }
+
+        private void LogMessage(string message)
+        {
+            var loggingService = ((IBuildComponentHost)this).LoggingService;
+
+            loggingService?.LogCommentFromText(BuildEventContext.Invalid, MessageImportance.High, message);
         }
 
         private void LogErrorAndShutdown(string message)

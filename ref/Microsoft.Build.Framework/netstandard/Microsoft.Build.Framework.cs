@@ -486,6 +486,7 @@ namespace Microsoft.Build.Framework
     {
         protected SdkResolverContext() { }
         public virtual bool Interactive { get { throw null; } protected set { } }
+        public virtual bool IsRunningInVisualStudio { get { throw null; } protected set { } }
         public virtual Microsoft.Build.Framework.SdkLogger Logger { get { throw null; } protected set { } }
         public virtual System.Version MSBuildVersion { get { throw null; } protected set { } }
         public virtual string ProjectFilePath { get { throw null; } protected set { } }
@@ -495,7 +496,10 @@ namespace Microsoft.Build.Framework
     public abstract partial class SdkResult
     {
         protected SdkResult() { }
+        public virtual System.Collections.Generic.IList<string> AdditionalPaths { get { throw null; } set { } }
+        public virtual System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.SdkResultItem> ItemsToAdd { get { throw null; } protected set { } }
         public virtual string Path { get { throw null; } protected set { } }
+        public virtual System.Collections.Generic.IDictionary<string, string> PropertiesToAdd { get { throw null; } protected set { } }
         public virtual Microsoft.Build.Framework.SdkReference SdkReference { get { throw null; } protected set { } }
         public virtual bool Success { get { throw null; } protected set { } }
         public virtual string Version { get { throw null; } protected set { } }
@@ -504,7 +508,18 @@ namespace Microsoft.Build.Framework
     {
         protected SdkResultFactory() { }
         public abstract Microsoft.Build.Framework.SdkResult IndicateFailure(System.Collections.Generic.IEnumerable<string> errors, System.Collections.Generic.IEnumerable<string> warnings=null);
+        public virtual Microsoft.Build.Framework.SdkResult IndicateSuccess(System.Collections.Generic.IEnumerable<string> paths, string version, System.Collections.Generic.IDictionary<string, string> propertiesToAdd=null, System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.SdkResultItem> itemsToAdd=null, System.Collections.Generic.IEnumerable<string> warnings=null) { throw null; }
+        public virtual Microsoft.Build.Framework.SdkResult IndicateSuccess(string path, string version, System.Collections.Generic.IDictionary<string, string> propertiesToAdd, System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.SdkResultItem> itemsToAdd, System.Collections.Generic.IEnumerable<string> warnings=null) { throw null; }
         public abstract Microsoft.Build.Framework.SdkResult IndicateSuccess(string path, string version, System.Collections.Generic.IEnumerable<string> warnings=null);
+    }
+    public partial class SdkResultItem
+    {
+        public SdkResultItem() { }
+        public SdkResultItem(string itemSpec, System.Collections.Generic.Dictionary<string, string> metadata) { }
+        public string ItemSpec { get { throw null; } set { } }
+        public System.Collections.Generic.Dictionary<string, string> Metadata { get { throw null; } }
+        public override bool Equals(object obj) { throw null; }
+        public override int GetHashCode() { throw null; }
     }
     public enum TargetBuiltReason
     {

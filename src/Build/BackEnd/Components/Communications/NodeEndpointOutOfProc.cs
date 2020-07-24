@@ -1,24 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
-using System.IO;
-using System.IO.Pipes;
-using System.Threading;
-using System.Diagnostics;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using System.Security;
-#if FEATURE_SECURITY_PERMISSIONS
-using System.Security.AccessControl;
-#endif
-using System.Security.Principal;
-
-using BuildParameters = Microsoft.Build.Execution.BuildParameters;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -77,7 +60,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         protected override long GetClientHandshake()
         {
-            return NodeProviderOutOfProc.GetClientHandshake();
+            return NodeProviderOutOfProc.GetClientHandshake(_enableReuse, _lowPriority);
         }
 
         #region Structs

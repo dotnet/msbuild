@@ -44,12 +44,12 @@ namespace Microsoft.Build.Execution
             return new Dictionary<string, List<string>>(capacity, StringComparer.OrdinalIgnoreCase);
         }
 
-        private static void TranslateMetadataForItem(ref List<string> list, ITranslator translator)
+        private static void TranslateMetadataForItem(ITranslator translator, ref List<string> list)
         {
             translator.Translate(ref list);
         }
 
-        private static void TranslateString(ref string s, ITranslator translator)
+        private static void TranslateString(ITranslator translator, ref string s)
         {
             translator.Translate(ref s);
         }

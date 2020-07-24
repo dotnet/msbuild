@@ -3,29 +3,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
 using System.IO;
-using System.IO.Pipes;
 using System.Diagnostics;
 using System.Threading;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Security;
-#if FEATURE_SECURITY_PERMISSIONS
-using System.Security.AccessControl;
-#endif
-using System.Security.Principal;
-#if FEATURE_SECURITY_PERMISSIONS
-using System.Security.Permissions;
-#endif
 
 using Microsoft.Build.Shared;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Exceptions;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -226,11 +209,7 @@ namespace Microsoft.Build.BackEnd
             long hostHandshake = NodeProviderOutOfProc.GetHostHandshake(nodeReuse, enableLowPriority: false);
             long hostHandshakeWithLow = NodeProviderOutOfProc.GetHostHandshake(nodeReuse, enableLowPriority: true);
 
-            ShutdownAllNodes(
-                hostHandshake,
-                hostHandshakeWithLow,
-                NodeProviderOutOfProc.GetClientHandshake(),
-                NodeContextTerminated);
+            ShutdownAllNodes(nodeReuse, NodeContextTerminated);
         }
         #endregion
 

@@ -61,6 +61,122 @@ namespace Microsoft.Build.UnitTests.Construction
         }
 
         /// <summary>
+        /// Test that if a before.{sln}>.targets or after.{sln}.targets file has one of the default targets (Build, Clean, etc.) that it includes only the user-defined target.
+        /// </summary>
+        [Theory]
+        [InlineData("before.MySln.sln.targets")]
+        [InlineData("after.MySln.sln.targets")]
+        [InlineData("name.that.does.Not.Affect.The.Build.targets")]
+        public void SolutionProjectIgnoresDuplicateDefaultTargets(string name)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
+                TransientTestFile sln = testEnvironment.CreateFile(folder, "MySln.sln", @"Microsoft Visual Studio Solution File, Format Version 16.00");
+                TransientTestFile targetsFile = testEnvironment.CreateFile(folder, name,
+                    @"<Project>
+                        <Target Name=""Build"" AfterTargets=""NonsenseTarget"">
+                        </Target>
+                      </Project>");
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(SolutionFile.Parse(sln.Path), null, null, _buildEventContext, CreateMockLoggingService());
+                instances.ShouldHaveSingleItem();
+                instances[0].Targets["Build"].AfterTargets.ShouldBe(string.Empty);
+                MockLogger logger = new MockLogger(output);
+                instances[0].Build(targets: null, new List<ILogger> { logger }).ShouldBeTrue();
+            }
+        }
+
+        /// <summary>
+        /// Test that a solution filter file excludes projects not covered by its list of projects or their dependencies.
+        /// </summary>
+        [Fact]
+        public void SolutionFilterFiltersProjects()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);              
+                TransientTestFolder classLibFolder = testEnvironment.CreateFolder(Path.Combine(folder.Path, "ClassLibrary"), createFolder: true);
+                TransientTestFolder classLibSubFolder = testEnvironment.CreateFolder(Path.Combine(classLibFolder.Path, "ClassLibrary"), createFolder: true);
+                TransientTestFile classLibrary = testEnvironment.CreateFile(classLibSubFolder, "ClassLibrary.csproj",
+                    @"<Project>
+                  <Target Name=""ClassLibraryTarget"">
+                      <Message Text=""ClassLibraryBuilt""/>
+                  </Target>
+                  </Project>
+                    ");
+
+                TransientTestFolder simpleProjectFolder = testEnvironment.CreateFolder(Path.Combine(folder.Path, "SimpleProject"), createFolder: true);
+                TransientTestFolder simpleProjectSubFolder = testEnvironment.CreateFolder(Path.Combine(simpleProjectFolder.Path, "SimpleProject"), createFolder: true);
+                TransientTestFile simpleProject = testEnvironment.CreateFile(simpleProjectSubFolder, "SimpleProject.csproj",
+                    @"<Project DefaultTargets=""SimpleProjectTarget"">
+                  <Target Name=""SimpleProjectTarget"">
+                      <Message Text=""SimpleProjectBuilt""/>
+                  </Target>
+                  </Project>
+                    ");
+                TransientTestFile solutionFile = testEnvironment.CreateFile(simpleProjectFolder, "SimpleProject.sln",
+                    @"
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio Version 16
+                    VisualStudioVersion = 16.0.29326.124
+                    MinimumVisualStudioVersion = 10.0.40219.1
+                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""SimpleProject"", """ + Path.Combine("SimpleProject", "SimpleProject.csproj") + @""", ""{79B5EBA6-5D27-4976-BC31-14422245A59A}""
+                    EndProject
+                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""ClassLibrary"", """ + Path.Combine("..", "ClassLibrary", "ClassLibrary", "ClassLibrary.csproj") + @""", ""{8EFCCA22-9D51-4268-90F7-A595E11FCB2D}""
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug|Any CPU = Debug|Any CPU
+                            Release|Any CPU = Release|Any CPU
+                            EndGlobalSection
+                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                            {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                            {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                            {79B5EBA6-5D27-4976-BC31-14422245A59A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                            {79B5EBA6-5D27-4976-BC31-14422245A59A}.Release|Any CPU.Build.0 = Release|Any CPU
+                            {8EFCCA22-9D51-4268-90F7-A595E11FCB2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                            {8EFCCA22-9D51-4268-90F7-A595E11FCB2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                            {8EFCCA22-9D51-4268-90F7-A595E11FCB2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                            {8EFCCA22-9D51-4268-90F7-A595E11FCB2D}.Release|Any CPU.Build.0 = Release|Any CPU
+                            {06A4DD1B-5027-41EF-B72F-F586A5A83EA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                            {06A4DD1B-5027-41EF-B72F-F586A5A83EA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                            {06A4DD1B-5027-41EF-B72F-F586A5A83EA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                            {06A4DD1B-5027-41EF-B72F-F586A5A83EA5}.Release|Any CPU.Build.0 = Release|Any CPU
+                        EndGlobalSection
+                        GlobalSection(SolutionProperties) = preSolution
+                            HideSolutionNode = FALSE
+                        EndGlobalSection
+                        GlobalSection(ExtensibilityGlobals) = postSolution
+                            SolutionGuid = {DE7234EC-0C4D-4070-B66A-DCF1B4F0CFEF}
+                        EndGlobalSection
+                    EndGlobal
+                ");
+                TransientTestFile filterFile = testEnvironment.CreateFile(folder, "solutionFilter.slnf",
+                    @"
+                {
+                  ""solution"": {
+                    ""path"": """ + Path.Combine(".", "SimpleProject", "SimpleProject.sln").Replace("\\", "\\\\") + @""",
+                    ""projects"": [
+                      """ + Path.Combine("SimpleProject", "SimpleProject.csproj").Replace("\\", "\\\\") + @"""
+                    ]
+                    }
+                }
+                ");
+                Directory.GetCurrentDirectory().ShouldNotBe(Path.GetDirectoryName(filterFile.Path));
+                SolutionFile solution = SolutionFile.Parse(filterFile.Path);
+                ILoggingService mockLogger = CreateMockLoggingService();
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, mockLogger);
+                instances.ShouldHaveSingleItem();
+
+                // Check that dependencies are built, and non-dependencies in the .sln are not.
+                MockLogger logger = new MockLogger(output);
+                instances[0].Build(targets: null, new List<ILogger> { logger }).ShouldBeTrue();
+                logger.AssertLogContains(new string[] { "SimpleProjectBuilt" });
+                logger.AssertLogDoesntContain("ClassLibraryBuilt");
+            }
+        }
+
+        /// <summary>
         /// Verify the AddNewErrorWarningMessageElement method
         /// </summary>
         [Fact]
