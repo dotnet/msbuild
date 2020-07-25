@@ -147,7 +147,7 @@ namespace Microsoft.Build.Tasks
                 string directoryName = Path.GetDirectoryName(info.cultureNeutralFilename);
 
                 // append the directory name
-                MakeValidEverettIdentifier(manifestName, directoryName);
+                manifestName.Append(MakeValidEverettIdentifier(directoryName));
                 if (
                         string.Equals(sourceExtension, ".resx", StringComparison.OrdinalIgnoreCase)
                         ||

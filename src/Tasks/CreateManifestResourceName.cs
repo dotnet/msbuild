@@ -373,22 +373,30 @@ namespace Microsoft.Build.Tasks
         /// This method is provided for compatibility with Everett which used to convert parts of resource names into
         /// valid identifiers
         /// </summary>
-        public static void MakeValidEverettIdentifier(StringBuilder builder, string name)
+        public static string MakeValidEverettIdentifier(string name)
         {
             ErrorUtilities.VerifyThrowArgumentNull(name, nameof(name));
             if (!string.IsNullOrEmpty(name))
             {
+                var everettId = new StringBuilder(name.Length);
+
                 // split the name into folder names
                 string[] subNames = name.Split(MSBuildConstants.ForwardSlashBackslash);
 
                 // convert every folder name
-                MakeValidEverettFolderIdentifier(builder, subNames[0]);
+                MakeValidEverettFolderIdentifier(everettId, subNames[0]);
 
                 for (int i = 1; i < subNames.Length; i++)
                 {
-                    builder.Append('.');
-                    MakeValidEverettFolderIdentifier(builder, subNames[i]);
+                    everettId.Append('.');
+                    MakeValidEverettFolderIdentifier(everettId, subNames[i]);
                 }
+
+                return everettId.ToString();
+            }
+            else
+            {
+                return name;
             }
         }
 
