@@ -120,12 +120,11 @@ namespace Microsoft.Build.Tasks
                 {
                     if (!string.IsNullOrEmpty(rootNamespace))
                     {
-                        manifestName.Append(rootNamespace).Append('.').Append(result.Name);
+                        manifestName.Append(rootNamespace).Append('.');
                     }
-                    else
-                    {
-                        manifestName.Append(result.Name);
-                    }
+
+                    manifestName.Append(result.Name);
+
 
                     // Append the culture if there is one.        
                     if (!string.IsNullOrEmpty(info.culture))
