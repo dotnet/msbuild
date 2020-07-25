@@ -139,7 +139,7 @@ namespace Microsoft.Build.Tasks
                 // Empty namespaces are allowed.
                 if (!string.IsNullOrEmpty(rootNamespace))
                 {
-                    manifestName.Append(rootNamespace).Append(".");
+                    manifestName.Append(rootNamespace).Append('.');
                 }
 
                 // only strip extension for .resx and .restext files
@@ -173,7 +173,7 @@ namespace Microsoft.Build.Tasks
                     // Append the culture if there is one.        
                     if (!string.IsNullOrEmpty(info.culture))
                     {
-                        manifestName.Append(".").Append(info.culture);
+                        manifestName.Append('.').Append(info.culture);
                     }
 
                     // If the original extension was .resources, add it back

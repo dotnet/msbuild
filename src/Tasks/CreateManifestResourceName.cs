@@ -234,8 +234,8 @@ namespace Microsoft.Build.Tasks
                     // Add a LogicalName metadata to Non-Resx resources
                     // LogicalName isn't used for Resx resources because the ManifestResourceName metadata determines the filename of the 
                     // .resources file which then is used as the embedded resource manifest name                    
-                    if (String.IsNullOrEmpty(ResourceFilesWithManifestResourceNames[i].GetMetadata("LogicalName")) &&
-                        String.Equals(ResourceFilesWithManifestResourceNames[i].GetMetadata("Type"), "Non-Resx", StringComparison.OrdinalIgnoreCase))
+                    if (string.IsNullOrEmpty(ResourceFilesWithManifestResourceNames[i].GetMetadata("LogicalName")) &&
+                        string.Equals(ResourceFilesWithManifestResourceNames[i].GetMetadata("Type"), "Non-Resx", StringComparison.OrdinalIgnoreCase))
                     {
                         ResourceFilesWithManifestResourceNames[i].SetMetadata("LogicalName", manifestName);
                     }
@@ -370,7 +370,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // folder name cannot be a single underscore - add another underscore to it
-                if (everettId.ToString() == "_")
+                if (string.Equals(everettId.ToString(), "_"))
                 {
                     everettId.Append('_');
                 }
@@ -407,7 +407,8 @@ namespace Microsoft.Build.Tasks
                     MakeValidEverettFolderIdentifier(builder, subNames[i]);
                 }
             }
-            else {
+            else
+            {
                 return;
             }
         }
