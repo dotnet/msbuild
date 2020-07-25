@@ -41,24 +41,41 @@ namespace Microsoft.Build.Evaluation.Context
         /// <summary>
         /// Key to file entry list. Example usages: cache glob expansion and intermediary directory expansions during glob expansion.
         /// </summary>
-        internal ConcurrentDictionary<string, ImmutableArray<string>> FileEntryExpansionCache { get; }
+        private ConcurrentDictionary<string, ImmutableArray<string>> FileEntryExpansionCache { get; }
 
-        internal EvaluationContext(SharingPolicy policy)
+        private EvaluationContext(SharingPolicy policy, IFileSystem fileSystem)
         {
             Policy = policy;
 
             SdkResolverService = new CachingSdkResolverService();
             FileEntryExpansionCache = new ConcurrentDictionary<string, ImmutableArray<string>>();
-            FileSystem = new CachingFileSystemWrapper(FileSystems.Default);
+            FileSystem = fileSystem ?? new CachingFileSystemWrapper(FileSystems.Default);
             EngineFileUtilities = new EngineFileUtilities(new FileMatcher(FileSystem, FileEntryExpansionCache));
         }
 
         /// <summary>
         ///     Factory for <see cref="EvaluationContext" />
         /// </summary>
+        // do not remove this method to avoid breaking binary compatibility
         public static EvaluationContext Create(SharingPolicy policy)
         {
-            var context = new EvaluationContext(policy);
+            
+            return Create(policy, fileSystem: null);
+        }
+
+        /// <summary>
+        ///     Factory for <see cref="EvaluationContext" />
+        /// </summary>
+        /// <param name="fileSystem">The <see cref="IFileSystem"/> to use.
+        ///     When used with <see cref="SharingPolicy.Isolated"/> policy, only a single evaluation uses the given filesystem, and the rest use the
+        ///     default msbuild file system. If you want to reuse the same file system with multiple isolated evaluations then
+        ///     create a new isolated <see cref="EvaluationContext"/> instance for each one.
+        ///     Use <see cref="SharingPolicy.Shared"/> if you want the given file system to be shared between all evaluations without having to create
+        ///     different <see cref="EvaluationContext"/> instances.
+        /// </param>
+        public static EvaluationContext Create(SharingPolicy policy, IFileSystem fileSystem)
+        {
+            var context = new EvaluationContext(policy, fileSystem);
             TestOnlyHookOnCreate?.Invoke(context);
 
             return context;

@@ -3,11 +3,13 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Xml;
 
 using Microsoft.Build.Construction;
@@ -1940,6 +1942,134 @@ namespace Microsoft.Build.UnitTests
             {
                 _buildManager.EndBuild();
                 _buildManager.Dispose();
+            }
+        }
+
+        internal class LoggingFileSystem : IFileSystem
+        {
+            private readonly IFileSystem _wrappingFileSystem;
+            private int _fileSystemCalls;
+
+            public int FileSystemCalls => _fileSystemCalls;
+
+            public ConcurrentDictionary<string, int> ExistenceChecks { get; } = new ConcurrentDictionary<string, int>();
+
+            public LoggingFileSystem(IFileSystem wrappingFileSystem = null)
+            {
+                _wrappingFileSystem = wrappingFileSystem ?? FileSystems.Default;
+            }
+
+            public TextReader ReadFile(string path)
+            {
+                IncrementCalls(ref _fileSystemCalls);
+
+                return _wrappingFileSystem.ReadFile(path);
+            }
+
+            public Stream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share)
+            {
+                IncrementCalls(ref _fileSystemCalls);
+
+                return _wrappingFileSystem.GetFileStream(path, mode, access, share);
+            }
+
+            public string ReadFileAllText(string path)
+            {
+                IncrementCalls(ref _fileSystemCalls);
+
+                return _wrappingFileSystem.ReadFileAllText(path);
+            }
+
+            public byte[] ReadFileAllBytes(string path)
+            {
+                IncrementCalls(ref _fileSystemCalls);
+
+                return _wrappingFileSystem.ReadFileAllBytes(path);
+            }
+
+            public IEnumerable<string> EnumerateFiles(
+                string path,
+                string searchPattern = "*",
+                SearchOption searchOption = SearchOption.TopDirectoryOnly
+            )
+            {
+                IncrementCalls(ref _fileSystemCalls);
+
+                return _wrappingFileSystem.EnumerateFiles(path, searchPattern, searchOption);
+            }
+
+            public IEnumerable<string> EnumerateDirectories(
+                string path,
+                string searchPattern = "*",
+                SearchOption searchOption = SearchOption.TopDirectoryOnly
+            )
+            {
+                IncrementCalls(ref _fileSystemCalls);
+
+                return _wrappingFileSystem.EnumerateDirectories(path, searchPattern, searchOption);
+            }
+
+            public IEnumerable<string> EnumerateFileSystemEntries(
+                string path,
+                string searchPattern = "*",
+                SearchOption searchOption = SearchOption.TopDirectoryOnly
+            )
+            {
+                IncrementCalls(ref _fileSystemCalls);
+
+                return _wrappingFileSystem.EnumerateFileSystemEntries(path, searchPattern, searchOption);
+            }
+
+            public FileAttributes GetAttributesNoMissingException(string path)
+            {
+                IncrementCalls(ref _fileSystemCalls);
+
+                return _wrappingFileSystem.GetAttributesNoMissingException(path);
+            }
+
+            public bool DirectoryExists(string path)
+            {
+                IncrementCalls(ref _fileSystemCalls);
+                IncrementExistenceChecks(path);
+
+                return _wrappingFileSystem.DirectoryExists(path);
+            }
+
+            public bool FileExists(string path)
+            {
+                IncrementCalls(ref _fileSystemCalls);
+                IncrementExistenceChecks(path);
+
+                return _wrappingFileSystem.FileExists(path);
+            }
+
+            private int _directoryEntryExistsCalls;
+            public int DirectoryEntryExistsCalls => _directoryEntryExistsCalls;
+
+            public bool DirectoryEntryExists(string path)
+            {
+                IncrementCalls(ref _fileSystemCalls);
+                IncrementCalls(ref _directoryEntryExistsCalls);
+                IncrementExistenceChecks(path);
+
+                return _wrappingFileSystem.DirectoryEntryExists(path);
+            }
+
+            public void ClearCaches()
+            {
+                _wrappingFileSystem.ClearCaches();
+            }
+
+            public void WriteStatistics(TextWriter writer) => throw new NotImplementedException();
+
+            private void IncrementCalls(ref int incremented)
+            {
+                Interlocked.Increment(ref incremented);
+            }
+
+            private void IncrementExistenceChecks(string path)
+            {
+                ExistenceChecks.AddOrUpdate(path, p => 1, (p, c) => c + 1);
             }
         }
     }

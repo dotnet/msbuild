@@ -89,6 +89,61 @@ namespace Microsoft.Build.UnitTests.Definition
         [Theory]
         [InlineData(EvaluationContext.SharingPolicy.Shared)]
         [InlineData(EvaluationContext.SharingPolicy.Isolated)]
+        public void SpecifiedFilesystemShouldBeOnlyReusedInSharedContext(EvaluationContext.SharingPolicy policy)
+        {
+            var projectFiles = new[]
+            {
+                _env.CreateFile("1.proj", @"<Project> <PropertyGroup Condition=`Exists('1.file')`></PropertyGroup> </Project>".Cleanup()).Path,
+                _env.CreateFile("2.proj", @"<Project> <PropertyGroup Condition=`Exists('2.file')`></PropertyGroup> </Project>".Cleanup()).Path
+            };
+
+            var projectCollection = _env.CreateProjectCollection().Collection;
+            var fileSystem = new Helpers.LoggingFileSystem();
+            var evaluationContext = EvaluationContext.Create(policy, fileSystem);
+
+            foreach (var projectFile in projectFiles)
+            {
+                Project.FromFile(
+                    projectFile,
+                    new ProjectOptions
+                    {
+                        ProjectCollection = projectCollection,
+                        EvaluationContext = evaluationContext
+                    }
+                );
+            }
+
+            switch (policy)
+            {
+                case EvaluationContext.SharingPolicy.Shared:
+                    fileSystem.ExistenceChecks.OrderBy(kvp => kvp.Key)
+                        .ShouldBe(
+                            new Dictionary<string, int>
+                            {
+                                {Path.Combine(_env.DefaultTestDirectory.Path, "1.file"), 1},
+                                {Path.Combine(_env.DefaultTestDirectory.Path, "2.file"), 1}
+                            }.OrderBy(kvp => kvp.Key));
+                    fileSystem.DirectoryEntryExistsCalls.ShouldBe(2);
+                    break;
+
+                case EvaluationContext.SharingPolicy.Isolated:
+                    // in the isolated policy, only the first usage uses the given file system
+                    fileSystem.ExistenceChecks.ShouldBe(
+                        new Dictionary<string, int>
+                        {
+                            {Path.Combine(_env.DefaultTestDirectory.Path, "1.file"), 1},
+                        });
+                    fileSystem.DirectoryEntryExistsCalls.ShouldBe(1);
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(policy), policy, null);
+            }
+        }
+
+        [Theory]
+        [InlineData(EvaluationContext.SharingPolicy.Shared)]
+        [InlineData(EvaluationContext.SharingPolicy.Isolated)]
         public void ReevaluationShouldNotReuseInitialContext(EvaluationContext.SharingPolicy policy)
         {
             try
