@@ -362,7 +362,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // folder name cannot be a single underscore - add another underscore to it
-                if ((builder.Length - length) == 1 && builder.ToString(length, builder.Length - length).Equals("_"))
+                if ((builder.Length - length) == 1 && builder.ToString(length, builder.Length - length).StartsWith("_"))
                 {
                     builder.Append('_');
                 }

@@ -184,12 +184,10 @@ namespace Microsoft.Build.Tasks
                 {
                     if (!string.IsNullOrEmpty(directoryName))
                     {
-                        manifestName.Append('.').Append(Path.GetFileName(info.cultureNeutralFilename));
+                        manifestName.Append('.');
                     }
-                    else
-                    {
-                        manifestName.Append(Path.GetFileName(info.cultureNeutralFilename));
-                    }
+
+                    manifestName.Append(Path.GetFileName(info.cultureNeutralFilename));
 
                     // Replace all '\' with '.'
                     manifestName.Replace(Path.DirectorySeparatorChar, '.');
