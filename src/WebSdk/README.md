@@ -16,7 +16,7 @@ Project System package defines the following:
 
 Microsoft.NET.Sdk.Publish
 ======================
-Publish package contains the tasks and targets to publish an ASP.NET core web application.
+Publish package contains the tasks and targets to publish an ASP.NET Core web application.
 
 The following Publish methods are currently supported by the Publish package:
 - Folder Publish
