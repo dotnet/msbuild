@@ -313,8 +313,7 @@ namespace Microsoft.Build.Tasks
                     // if it is a valid subsequent character, prepend an underscore to it
                     else
                     {
-                        builder.Append('_');
-                        builder.Append(subName[0]);
+                        builder.Append('_').Append(subName[0]);
                     }
                 }
                 else
@@ -335,10 +334,6 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            else
-            {
-                return;
-            }
         }
 
         /// <summary>
@@ -358,10 +353,7 @@ namespace Microsoft.Build.Tasks
                 string[] subNames = name.Split(MSBuildConstants.DotChar);
 
                 // convert each subname separately
-                if (!string.IsNullOrEmpty(subNames[0]))
-                {
-                    MakeValidEverettSubFolderIdentifier(everettId, subNames[0]);
-                }
+                MakeValidEverettSubFolderIdentifier(everettId, subNames[0]);
 
                 for (int i = 1; i < subNames.Length; i++)
                 {
@@ -376,10 +368,6 @@ namespace Microsoft.Build.Tasks
                 }
 
                 builder.Append(everettId.ToString());
-            }
-            else
-            {
-                return;
             }
         }
 
@@ -396,20 +384,13 @@ namespace Microsoft.Build.Tasks
                 string[] subNames = name.Split(MSBuildConstants.ForwardSlashBackslash);
 
                 // convert every folder name
-                if (!string.IsNullOrEmpty(subNames[0]))
-                {
-                    MakeValidEverettFolderIdentifier(builder, subNames[0]);
-                }
+                MakeValidEverettFolderIdentifier(builder, subNames[0]);
 
                 for (int i = 1; i < subNames.Length; i++)
                 {
                     builder.Append('.');
                     MakeValidEverettFolderIdentifier(builder, subNames[i]);
                 }
-            }
-            else
-            {
-                return;
             }
         }
 

@@ -156,15 +156,13 @@ namespace Microsoft.Build.Tasks
                         string.Equals(sourceExtension, ".resources", StringComparison.OrdinalIgnoreCase)
                     )
                 {
-
                     if (!string.IsNullOrEmpty(directoryName))
                     {
-                        manifestName.Append('.').Append(Path.GetFileNameWithoutExtension(info.cultureNeutralFilename));
+                        manifestName.Append('.');
                     }
-                    else
-                    {
-                        manifestName.Append(Path.GetFileNameWithoutExtension(info.cultureNeutralFilename));
-                    }
+
+                    // append the file name without extension
+                    manifestName.Append(Path.GetFileNameWithoutExtension(info.cultureNeutralFilename));
 
                     // Replace all '\' with '.'
                     manifestName.Replace(Path.DirectorySeparatorChar, '.');
