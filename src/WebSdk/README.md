@@ -4,7 +4,7 @@ ASP.NET websdk repo contains the tasks, targets and packages required to build a
 
 The websdk repo contains code for the following packages
 1. Microsoft.NET.Sdk.Web.ProjectSystem
-2. Microsoft.NET.Sdk.Publish &
+2. Microsoft.NET.Sdk.Publish
 3. Microsoft.NET.Sdk.Web (Meta-package containing dependency to Microsoft.NET.Sdk.Web.ProjectSystem & Microsoft.NET.Sdk.Publish)
 
 Microsoft.NET.Sdk.Web.ProjectSystem
