@@ -347,27 +347,25 @@ namespace Microsoft.Build.Tasks
             {
                 // give string length to avoid reallocations; +1 since the resulting string may be one char longer than the
                 // original - if the name is a single underscore we add another underscore to it
-                var everettId = new StringBuilder(name.Length + 1);
+                int length = builder.Length;
 
                 // split folder name into subnames separated by '.', if any
                 string[] subNames = name.Split(MSBuildConstants.DotChar);
 
                 // convert each subname separately
-                MakeValidEverettSubFolderIdentifier(everettId, subNames[0]);
+                MakeValidEverettSubFolderIdentifier(builder, subNames[0]);
 
                 for (int i = 1; i < subNames.Length; i++)
                 {
-                    everettId.Append('.');
-                    MakeValidEverettSubFolderIdentifier(everettId, subNames[i]);
+                    builder.Append('.');
+                    MakeValidEverettSubFolderIdentifier(builder, subNames[i]);
                 }
 
                 // folder name cannot be a single underscore - add another underscore to it
-                if (string.Equals(everettId.ToString(), "_"))
+                if ((builder.Length - length) == 1 && builder.ToString(length, builder.Length - length).Equals("_"))
                 {
-                    everettId.Append('_');
+                    builder.Append('_');
                 }
-
-                builder.Append(everettId.ToString());
             }
         }
 
