@@ -126,7 +126,7 @@ namespace Microsoft.Build.Tasks
                     // Append the culture if there is one.        
                     if (!string.IsNullOrEmpty(info.culture))
                     {
-                        manifestName.Append(".").Append(info.culture);
+                        manifestName.Append('.').Append(info.culture);
                     }
                 }
             }
@@ -149,11 +149,11 @@ namespace Microsoft.Build.Tasks
                 // append the directory name
                 manifestName.Append(MakeValidEverettIdentifier(directoryName));
                 if (
-                        string.Equals(sourceExtension, ".resx", StringComparison.OrdinalIgnoreCase)
+                        string.Equals(sourceExtension, resxFileExtension, StringComparison.OrdinalIgnoreCase)
                         ||
-                        string.Equals(sourceExtension, ".restext", StringComparison.OrdinalIgnoreCase)
+                        string.Equals(sourceExtension, restextFileExtension, StringComparison.OrdinalIgnoreCase)
                         ||
-                        string.Equals(sourceExtension, ".resources", StringComparison.OrdinalIgnoreCase)
+                        string.Equals(sourceExtension, resourcesFileExtension, StringComparison.OrdinalIgnoreCase)
                     )
                 {
                     if (!string.IsNullOrEmpty(directoryName))
@@ -175,7 +175,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // If the original extension was .resources, add it back
-                    if (string.Equals(sourceExtension, ".resources", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(sourceExtension, resourcesFileExtension, StringComparison.OrdinalIgnoreCase))
                     {
                         manifestName.Append(sourceExtension);
                     }

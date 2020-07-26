@@ -21,6 +21,9 @@ namespace Microsoft.Build.Tasks
     public abstract class CreateManifestResourceName : TaskExtension
     {
         #region Properties
+        protected const string resxFileExtension = ".resx";
+        protected const string restextFileExtension = ".restext";
+        protected const string resourcesFileExtension = ".resources";
 
         private ITaskItem[] _resourceFiles;
 
@@ -157,7 +160,7 @@ namespace Microsoft.Build.Tasks
                     // If not, fall back onto the extension.
                     if (string.IsNullOrEmpty(fileType))
                     {
-                        isResxFile = Path.GetExtension(fileName) == ".resx";
+                        isResxFile = Path.GetExtension(fileName) == resxFileExtension;
                     }
 
                     // If opted into convention and no DependentUpon metadata and is a resx file, reference "<filename>.<ext>" (.cs or .vb) if it exists.
