@@ -212,9 +212,6 @@ namespace Microsoft.Build.Tasks
     public abstract partial class CreateManifestResourceName : Microsoft.Build.Tasks.TaskExtension
     {
         protected System.Collections.Generic.Dictionary<string, Microsoft.Build.Framework.ITaskItem> itemSpecToTaskitem;
-        protected const string resourcesFileExtension = ".resources";
-        protected const string restextFileExtension = ".restext";
-        protected const string resxFileExtension = ".resx";
         protected CreateManifestResourceName() { }
         [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem[] ManifestResourceNames { get { throw null; } }

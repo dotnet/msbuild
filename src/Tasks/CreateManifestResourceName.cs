@@ -21,9 +21,9 @@ namespace Microsoft.Build.Tasks
     public abstract class CreateManifestResourceName : TaskExtension
     {
         #region Properties
-        protected const string resxFileExtension = ".resx";
-        protected const string restextFileExtension = ".restext";
-        protected const string resourcesFileExtension = ".resources";
+        internal const string resxFileExtension = ".resx";
+        internal const string restextFileExtension = ".restext";
+        internal const string resourcesFileExtension = ".resources";
 
         private ITaskItem[] _resourceFiles;
 
