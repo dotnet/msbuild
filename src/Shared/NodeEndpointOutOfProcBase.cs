@@ -374,7 +374,7 @@ namespace Microsoft.Build.BackEnd
                         int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
                         for (int i = 0; i < handshakeComponents.Length; i++)
                         {
-                            int handshakePart = _pipeServer.ReadIntForHandshake(i == 0 ? (int?)CommunicationsUtilities.handshakeVersion >> 24 : null /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
+                            int handshakePart = _pipeServer.ReadIntForHandshake(i == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
 #if NETCOREAPP2_1 || MONO
                             , ClientConnectTimeout /* wait a long time for the handshake from this side */
 #endif

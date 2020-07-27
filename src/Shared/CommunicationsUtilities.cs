@@ -73,7 +73,7 @@ namespace Microsoft.Build.Internal
         {
             // We currently use 6 bits of this 32-bit integer. Very old builds will instantly reject any handshake that does not start with F5 or 06; slightly old builds always lead with 00.
             // This indicates in the first byte that we are a modern build.
-            options = (int)nodeType | CommunicationsUtilities.handshakeVersion;
+            options = (int)nodeType | (((int)CommunicationsUtilities.handshakeVersion) << 24);
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
             string toolsDirectory = (nodeType & HandshakeOptions.X64) == HandshakeOptions.X64 ? BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64 : BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
             salt = CommunicationsUtilities.GetHandshakeHashCode(handshakeSalt + toolsDirectory);
@@ -119,7 +119,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// The version of the handshake. This should be updated each time the handshake structure is altered.
         /// </summary>
-        internal const int handshakeVersion = 0x01000000;
+        internal const byte handshakeVersion = 0x01;
 
         /// <summary>
         /// The timeout to connect to a node.
@@ -360,7 +360,7 @@ namespace Microsoft.Build.Internal
         /// Extension method to read a series of bytes from a stream.
         /// If specified, leading byte matches one in the supplied array if any, returns rejection byte and throws IOException.
         /// </summary>
-        internal static int ReadIntForHandshake(this PipeStream stream, int? byteToAccept
+        internal static int ReadIntForHandshake(this PipeStream stream, byte? byteToAccept
 #if NETCOREAPP2_1 || MONO
             , int timeout
 #endif
@@ -459,12 +459,14 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Given the appropriate information, return the equivalent HandshakeOptions.
         /// </summary>
-        internal static HandshakeOptions GetHandshakeOptions(bool taskHost, bool is64Bit = false, int clrVersion = 0, bool nodeReuse = false, bool lowPriority = false, IDictionary<string, string> taskHostParameters = null)
+        internal static HandshakeOptions GetHandshakeOptions(bool taskHost, bool is64Bit = false, bool nodeReuse = false, bool lowPriority = false, IDictionary<string, string> taskHostParameters = null)
         {
             HandshakeOptions context = taskHost ? HandshakeOptions.TaskHost : HandshakeOptions.None;
 
+            int clrVersion = 0;
+
             // We don't know about the TaskHost. Figure it out.
-            if (taskHost && clrVersion == 0)
+            if (taskHost)
             {
                 // Take the current TaskHost context
                 if (taskHostParameters == null)
@@ -481,6 +483,7 @@ namespace Microsoft.Build.Internal
                     is64Bit = taskHostParameters[XMakeAttributes.architecture].Equals(XMakeAttributes.MSBuildArchitectureValues.x64);
                 }
             }
+
             if (is64Bit)
             {
                 context |= HandshakeOptions.X64;
