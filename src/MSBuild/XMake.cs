@@ -637,7 +637,7 @@ namespace Microsoft.Build.CommandLine
                     // We avoid increasing priority because that causes failures on mac/linux, but there is no good way to
                     // verify that a particular priority is lower than "BelowNormal." If the error appears, ignore it and
                     // leave priority where it was.
-                    catch (Exception) { }
+                    catch (Win32Exception) { }
 
 
                     DateTime t1 = DateTime.Now;
