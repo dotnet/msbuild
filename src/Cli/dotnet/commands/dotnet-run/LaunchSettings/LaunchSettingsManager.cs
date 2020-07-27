@@ -1,7 +1,4 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -24,7 +21,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
             };
         }
 
-        public static LaunchSettingsApplyResult TryApplyLaunchSettings(string launchSettingsJsonContents, string profileName = null)
+        public static LaunchSettingsApplyResult TryApplyLaunchSettings(string launchSettingsJsonContents, ref ICommand command, string profileName = null)
         {
             try
             {
@@ -93,7 +90,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                         return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.LaunchProfileHandlerCannotBeLocated, commandName));
                     }
 
-                    return provider.TryGetLaunchSettings(profileObject);
+                    return provider.TryApplySettings(profileObject, ref command);
                 }
             }
             catch (JsonException ex)

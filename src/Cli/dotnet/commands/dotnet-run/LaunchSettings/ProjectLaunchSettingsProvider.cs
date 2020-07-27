@@ -1,8 +1,7 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.Json;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 {
@@ -12,7 +11,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 
         public string CommandName => CommandNameValue;
 
-        public LaunchSettingsApplyResult TryGetLaunchSettings(JsonElement model)
+        public LaunchSettingsApplyResult TryApplySettings(JsonElement model, ref ICommand command)
         {
             var config = new ProjectLaunchSettingsModel();
             foreach (var property in model.EnumerateObject())
@@ -53,15 +52,6 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 
                     config.ApplicationUrl = applicationUrlValue;
                 }
-                else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.DotNetRunMessages), StringComparison.OrdinalIgnoreCase))
-                {
-                    if (!TryGetStringValue(property.Value, out var dotNetRunMessages))
-                    {
-                        return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.CouldNotConvertToString, property.Name));
-                    }
-
-                    config.DotNetRunMessages = dotNetRunMessages;
-                }
                 else if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.EnvironmentVariables), StringComparison.OrdinalIgnoreCase))
                 {
                     if (property.Value.ValueKind != JsonValueKind.Object)
@@ -69,7 +59,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                         return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.ValueMustBeAnObject, property.Name));
                     }
 
-                    foreach (var environmentVariable in property.Value.EnumerateObject())
+                    foreach(var environmentVariable in property.Value.EnumerateObject())
                     {
                         if (TryGetStringValue(environmentVariable.Value, out var environmentVariableValue))
                         {
@@ -79,7 +69,21 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                 }
             }
 
-            return new LaunchSettingsApplyResult(true, null, config);
+            if (!string.IsNullOrEmpty(config.ApplicationUrl))
+            {
+                command.EnvironmentVariable("ASPNETCORE_URLS", config.ApplicationUrl);
+            }
+
+            //For now, ignore everything but the environment variables section
+
+            foreach (var entry in config.EnvironmentVariables)
+            {
+                string value = Environment.ExpandEnvironmentVariables(entry.Value);
+                //NOTE: MSBuild variables are not expanded like they are in VS
+                command.EnvironmentVariable(entry.Key, value);
+            }
+
+            return new LaunchSettingsApplyResult(true, null, config.LaunchUrl);
         }
 
         private static bool TryGetBooleanValue(JsonElement element, out bool value)
@@ -131,6 +135,24 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                     value = null;
                     return false;
             }
+        }
+
+        private class ProjectLaunchSettingsModel
+        {
+            public ProjectLaunchSettingsModel()
+            {
+                EnvironmentVariables = new Dictionary<string, string>(StringComparer.Ordinal);
+            }
+
+            public string CommandLineArgs { get; set; }
+
+            public bool LaunchBrowser { get; set; }
+
+            public string LaunchUrl { get; set; }
+
+            public string ApplicationUrl { get; set; }
+
+            public Dictionary<string, string> EnvironmentVariables { get; }
         }
     }
 }

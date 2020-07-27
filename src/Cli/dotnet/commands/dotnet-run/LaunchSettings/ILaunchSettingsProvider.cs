@@ -5,7 +5,9 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 {
     internal interface ILaunchSettingsProvider
     {
-        LaunchSettingsApplyResult TryGetLaunchSettings(JsonElement model);
+        string CommandName { get; }
+
+        LaunchSettingsApplyResult TryApplySettings(JsonElement model, ref ICommand command);
     }
 
 }
