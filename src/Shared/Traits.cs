@@ -137,6 +137,11 @@ namespace Microsoft.Build.Utilities
         public readonly bool TruncateTaskInputs = Environment.GetEnvironmentVariable("MSBUILDTRUNCATETASKINPUTS") == "1";
 
         /// <summary>
+        /// Disables truncation of Condition messages in Tasks/Targets via ExpanderOptions.Truncate.
+        /// </summary>
+        public readonly bool DoNotTruncateConditions = Environment.GetEnvironmentVariable("MSBuildDoNotTruncateConditions") == "1";
+
+        /// <summary>
         /// Emit events for project imports.
         /// </summary>
         private bool? _logProjectImports;

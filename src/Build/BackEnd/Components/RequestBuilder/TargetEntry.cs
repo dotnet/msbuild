@@ -362,7 +362,7 @@ namespace Microsoft.Build.BackEnd
                 if (!projectLoggingContext.LoggingService.OnlyLogCriticalEvents)
                 {
                     // Expand the expression for the Log.  Since we know the condition evaluated to false, leave unexpandable properties in the condition so as not to cause an error
-                    string expanded = _expander.ExpandIntoStringAndUnescape(_target.Condition, ExpanderOptions.ExpandPropertiesAndItems | ExpanderOptions.LeavePropertiesUnexpandedOnError, _target.ConditionLocation);
+                    string expanded = _expander.ExpandIntoStringAndUnescape(_target.Condition, ExpanderOptions.ExpandPropertiesAndItems | ExpanderOptions.LeavePropertiesUnexpandedOnError | ExpanderOptions.Truncate, _target.ConditionLocation);
 
                     // By design: Not building dependencies. This is what NAnt does too.
                     // NOTE: In the original code, this was logged from the target logging context.  However, the target
