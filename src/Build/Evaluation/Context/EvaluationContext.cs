@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Threading;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -56,10 +57,11 @@ namespace Microsoft.Build.Evaluation.Context
         /// <summary>
         ///     Factory for <see cref="EvaluationContext" />
         /// </summary>
-        // do not remove this method to avoid breaking binary compatibility
         public static EvaluationContext Create(SharingPolicy policy)
         {
             
+            // ReSharper disable once IntroduceOptionalParameters.Global
+            // do not remove this method to avoid breaking binary compatibility
             return Create(policy, fileSystem: null);
         }
 
@@ -73,9 +75,12 @@ namespace Microsoft.Build.Evaluation.Context
         ///     Use <see cref="SharingPolicy.Shared"/> if you want the given file system to be shared between all evaluations without having to create
         ///     different <see cref="EvaluationContext"/> instances.
         /// </param>
-        public static EvaluationContext Create(SharingPolicy policy, IFileSystem fileSystem)
+        public static EvaluationContext Create(SharingPolicy policy, IMSBuildFileSystem fileSystem)
         {
-            var context = new EvaluationContext(policy, fileSystem);
+            var context = new EvaluationContext(
+                policy,
+                fileSystem == null ? null : new MSBuildFileSystemAdapter(fileSystem));
+
             TestOnlyHookOnCreate?.Invoke(context);
 
             return context;

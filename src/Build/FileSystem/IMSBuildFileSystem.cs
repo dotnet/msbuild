@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace Microsoft.Build.Framework
+namespace Microsoft.Build.FileSystem
 {
     /// <summary>
     /// Abstracts away some file system operations.
@@ -13,7 +13,7 @@ namespace Microsoft.Build.Framework
     /// - must be thread safe
     /// - may cache some or all the calls.
     /// </summary>
-    public interface IFileSystem
+    public interface IMSBuildFileSystem
     {
         /// <summary>
         /// Use this for var sr = new StreamReader(path)

@@ -15,6 +15,7 @@ using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
@@ -1945,7 +1946,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        internal class LoggingFileSystem : IFileSystem
+        internal class LoggingFileSystem : IMSBuildFileSystem
         {
             private readonly IFileSystem _wrappingFileSystem;
             private int _fileSystemCalls;

@@ -869,7 +869,7 @@ namespace Microsoft.Build.Evaluation.Context
     {
         internal EvaluationContext() { }
         public static Microsoft.Build.Evaluation.Context.EvaluationContext Create(Microsoft.Build.Evaluation.Context.EvaluationContext.SharingPolicy policy) { throw null; }
-        public static Microsoft.Build.Evaluation.Context.EvaluationContext Create(Microsoft.Build.Evaluation.Context.EvaluationContext.SharingPolicy policy, Microsoft.Build.Framework.IFileSystem fileSystem) { throw null; }
+        public static Microsoft.Build.Evaluation.Context.EvaluationContext Create(Microsoft.Build.Evaluation.Context.EvaluationContext.SharingPolicy policy, Microsoft.Build.FileSystem.IMSBuildFileSystem fileSystem) { throw null; }
         public enum SharingPolicy
         {
             Isolated = 1,
@@ -1395,6 +1395,42 @@ namespace Microsoft.Build.Execution
         Failure = (byte)2,
         Skipped = (byte)0,
         Success = (byte)1,
+    }
+}
+namespace Microsoft.Build.FileSystem
+{
+    public partial interface IMSBuildFileSystem
+    {
+        void ClearCaches();
+        bool DirectoryEntryExists(string path);
+        bool DirectoryExists(string path);
+        System.Collections.Generic.IEnumerable<string> EnumerateDirectories(string path, string searchPattern="*", System.IO.SearchOption searchOption=(System.IO.SearchOption)(0));
+        System.Collections.Generic.IEnumerable<string> EnumerateFiles(string path, string searchPattern="*", System.IO.SearchOption searchOption=(System.IO.SearchOption)(0));
+        System.Collections.Generic.IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern="*", System.IO.SearchOption searchOption=(System.IO.SearchOption)(0));
+        bool FileExists(string path);
+        System.IO.FileAttributes GetAttributesNoMissingException(string path);
+        System.IO.Stream GetFileStream(string path, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share);
+        System.IO.TextReader ReadFile(string path);
+        byte[] ReadFileAllBytes(string path);
+        string ReadFileAllText(string path);
+        void WriteStatistics(System.IO.TextWriter writer);
+    }
+    public partial class MSBuildFileSystemAdapter
+    {
+        public MSBuildFileSystemAdapter(Microsoft.Build.FileSystem.IMSBuildFileSystem publicFileSystemInterface) { }
+        public void ClearCaches() { }
+        public bool DirectoryEntryExists(string path) { throw null; }
+        public bool DirectoryExists(string path) { throw null; }
+        public System.Collections.Generic.IEnumerable<string> EnumerateDirectories(string path, string searchPattern="*", System.IO.SearchOption searchOption=(System.IO.SearchOption)(0)) { throw null; }
+        public System.Collections.Generic.IEnumerable<string> EnumerateFiles(string path, string searchPattern="*", System.IO.SearchOption searchOption=(System.IO.SearchOption)(0)) { throw null; }
+        public System.Collections.Generic.IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern="*", System.IO.SearchOption searchOption=(System.IO.SearchOption)(0)) { throw null; }
+        public bool FileExists(string path) { throw null; }
+        public System.IO.FileAttributes GetAttributesNoMissingException(string path) { throw null; }
+        public System.IO.Stream GetFileStream(string path, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share) { throw null; }
+        public System.IO.TextReader ReadFile(string path) { throw null; }
+        public byte[] ReadFileAllBytes(string path) { throw null; }
+        public string ReadFileAllText(string path) { throw null; }
+        public void WriteStatistics(System.IO.TextWriter writer) { }
     }
 }
 namespace Microsoft.Build.Globbing
