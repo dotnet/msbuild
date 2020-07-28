@@ -1035,7 +1035,7 @@ namespace Microsoft.Build.BackEnd
                 _writer.Write(length);
                 if (length > 0)
                 {
-                    _writer.Write(byteArray);
+                    _writer.Write(byteArray, 0, length);
                 }
             }
 

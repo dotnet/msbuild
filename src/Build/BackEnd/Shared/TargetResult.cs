@@ -69,7 +69,8 @@ namespace Microsoft.Build.Execution
         /// Returns the exception which aborted this target, if any.
         /// </summary>
         /// <value>The exception which aborted this target, if any.</value>
-        public Exception Exception {
+        public Exception Exception
+        {
             [DebuggerStepThrough]
             get => _result.Exception;
         }
@@ -284,38 +285,60 @@ namespace Microsoft.Build.Execution
             var itemsCount = _items?.Length ?? 0;
             translator.Translate(ref itemsCount);
 
-            if (translator.Mode == TranslationDirection.ReadFromStream)
+            if (translator.Mode == TranslationDirection.WriteToStream)
             {
-                LookasideStringInterner interner = new LookasideStringInterner(translator);
+                // We will just calculate a very rough starting buffer size for the memory stream based on the number of items and a
+                // rough guess for an average number of bytes needed to store them compressed.  This doesn't have to be accurate, just
+                // big enough to avoid unnecessary buffer reallocations in most cases.
+                var defaultCompressedBufferCapacity = _items.Length * 64;
+                // Again, a rough calculation of buffer size, this time for an uncompressed buffer.  We assume compression 
+                // will give us 2:1, as it's all text.
+                var defaultUncompressedBufferCapacity = defaultCompressedBufferCapacity * 2;
+                using var itemsStream = new MemoryStream(defaultUncompressedBufferCapacity);
+                var itemTranslator = BinaryTranslator.GetWriteTranslator(itemsStream);
+
+                // When creating the interner, we use the number of items as the initial size of the collections since the
+                // number of strings will be of the order of the number of items in the collection.  This assumes basically
+                // one unique string per item (frequently a path related to the item) with most of the rest of the metadata
+                // being the same (and thus interning.)  This is a hueristic meant to get us in the ballpark to avoid 
+                // too many reallocations when growing the collections.
+                var interner = new LookasideStringInterner(StringComparer.Ordinal, _items.Length);
+                foreach (TaskItem t in _items)
+                {
+                    t.TranslateWithInterning(itemTranslator, interner);
+                }
+
+                interner.Translate(translator);
+                if (itemsStream.TryGetBuffer(out var buffer))
+                {
+                    var offset = buffer.Offset;
+                    translator.Translate(ref offset);
+                    var array = buffer.Array;
+                    translator.Translate(ref array, buffer.Count);
+                }
+                else
+                {
+                    ErrorUtilities.ThrowInternalError("Couldn't get buffer");
+                }
+
+            }
+            else
+            {
+                var interner = new LookasideStringInterner(translator);
+
                 byte[] buffer = null;
+                int offset = 0;
+                translator.Translate(ref offset);
                 translator.Translate(ref buffer);
                 ErrorUtilities.VerifyThrow(buffer != null, "Unexpected null items buffer during decompression.");
 
-                using MemoryStream itemsStream = new MemoryStream(buffer, 0, buffer.Length, writable: false, publiclyVisible: true);
+                using MemoryStream itemsStream = new MemoryStream(buffer, offset, buffer.Length, writable: false, publiclyVisible: true);
                 var itemTranslator = BinaryTranslator.GetReadTranslator(itemsStream, null);
-
                 _items = new TaskItem[itemsCount];
                 for (int i = 0; i < _items.Length; i++)
                 {
                     _items[i] = TaskItem.FactoryForDeserialization(itemTranslator, interner);
                 }
-            }
-            else
-            {
-                var interner = new LookasideStringInterner(StringComparer.Ordinal, _items.Length);
-                var capacity = itemsCount * 128; // Rough estimate 
-
-                using var itemsStream = new MemoryStream(capacity);
-                var itemTranslator = BinaryTranslator.GetWriteTranslator(itemsStream);
-
-                foreach (var taskItem in _items)
-                {
-                    taskItem.TranslateWithInterning(itemTranslator, interner);
-                }
-
-                interner.Translate(translator);
-                var itemsBuffer = itemsStream.GetBuffer();
-                translator.Translate(ref itemsBuffer, (int)itemsStream.Length);
             }
         }
 
