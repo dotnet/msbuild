@@ -123,7 +123,7 @@ namespace Microsoft.Build.Framework
             string senderName,
             DateTime eventTimestamp,
             params object[] messageArgs
-        ) : this(subcategory, code, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, helpKeyword, null, senderName, eventTimestamp, null)
+        ) : this(subcategory, code, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, helpKeyword, senderName, null, eventTimestamp, messageArgs)
         {
             // do nothing
         }
@@ -155,8 +155,8 @@ namespace Microsoft.Build.Framework
             int endColumnNumber,
             string message,
             string helpKeyword,
-            string helpLink,
             string senderName,
+            string helpLink,
             DateTime eventTimestamp,
             params object[] messageArgs
         )
