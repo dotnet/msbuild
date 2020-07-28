@@ -16,11 +16,13 @@ namespace Microsoft.Build.Framework
         public BuildErrorEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName) { }
         public BuildErrorEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName, System.DateTime eventTimestamp) { }
         public BuildErrorEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName, System.DateTime eventTimestamp, params object[] messageArgs) { }
+        public BuildErrorEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName, string helpLink, System.DateTime eventTimestamp, params object[] messageArgs) { }
         public string Code { get { throw null; } }
         public int ColumnNumber { get { throw null; } }
         public int EndColumnNumber { get { throw null; } }
         public int EndLineNumber { get { throw null; } }
         public string File { get { throw null; } }
+        public string HelpLink { get { throw null; } }
         public int LineNumber { get { throw null; } }
         public string ProjectFile { get { throw null; } set { } }
         public string Subcategory { get { throw null; } }
@@ -118,11 +120,13 @@ namespace Microsoft.Build.Framework
         public BuildWarningEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName) { }
         public BuildWarningEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName, System.DateTime eventTimestamp) { }
         public BuildWarningEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName, System.DateTime eventTimestamp, params object[] messageArgs) { }
+        public BuildWarningEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName, string helpLink, System.DateTime eventTimestamp, params object[] messageArgs) { }
         public string Code { get { throw null; } }
         public int ColumnNumber { get { throw null; } }
         public int EndColumnNumber { get { throw null; } }
         public int EndLineNumber { get { throw null; } }
         public string File { get { throw null; } }
+        public string HelpLink { get { throw null; } }
         public int LineNumber { get { throw null; } }
         public string ProjectFile { get { throw null; } set { } }
         public string Subcategory { get { throw null; } }

@@ -23,9 +23,10 @@ namespace Microsoft.Build.UnitTests
             beea = new BuildErrorEventArgs("Subcategory", "Code", "File", 1, 2, 3, 4, "Message", "HelpKeyword", "sender");
             beea = new BuildErrorEventArgs("Subcategory", "Code", "File", 1, 2, 3, 4, "Message", "HelpKeyword", "sender", DateTime.Now);
             beea = new BuildErrorEventArgs("Subcategory", "Code", "File", 1, 2, 3, 4, "{0}", "HelpKeyword", "sender", DateTime.Now, "Message");
+            beea = new BuildErrorEventArgs("Subcategory", "Code", "File", 1, 2, 3, 4, "{0}", "HelpKeyword", "sender", "HelpLink", DateTime.Now, "Message");
             beea = new BuildErrorEventArgs(null, null, null, 1, 2, 3, 4, null, null, null);
             beea = new BuildErrorEventArgs(null, null, null, 1, 2, 3, 4, null, null, null, DateTime.Now);
-            beea = new BuildErrorEventArgs(null, null, null, 1, 2, 3, 4, null, null, null, DateTime.Now, null);
+            beea = new BuildErrorEventArgs(null, null, null, 1, 2, 3, 4, null, null, null, null, DateTime.Now, null);
         }
 
         /// <summary>
