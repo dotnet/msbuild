@@ -668,8 +668,8 @@ namespace Microsoft.Build.Utilities
                     message,
                     helpKeyword,
                     TaskName,
-                    DateTime.UtcNow,
                     helpLink,
+                    DateTime.UtcNow,
                     messageArgs
                 );
             BuildEngine.LogErrorEvent(e);
@@ -1021,8 +1021,8 @@ namespace Microsoft.Build.Utilities
                     endColumnNumber,
                     message,
                     helpKeyword,
-                    helpLink,
                     TaskName,
+                    helpLink,
                     DateTime.UtcNow,
                     messageArgs
                 );
