@@ -173,6 +173,13 @@
         <target state="translated">Anfangswert der Eigenschaft: $({0})="{1}", Quelle: {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="SdkPropertiesEvaluated">
+        <source>MSB4264: The SDK reference "{0}" has been evaluated to "{1}".</source>
+        <target state="new">MSB4264: The SDK reference "{0}" has been evaluated to "{1}".</target>
+        <note>{StrBegin="MSB4264: "}
+      LOCALIZATION: Do not localize the word SDK.
+    </note>
+      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: Das Projekt "{0}" hat Graphisolationseinschränkungen für das referenzierte Projekt "{1}" übersprungen.</target>

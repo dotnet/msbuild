@@ -1779,7 +1779,8 @@ namespace Microsoft.Build.Evaluation
 
             string project = importElement.Project;
 
-            if (importElement.SdkReference != null)
+            var sdkReference = importElement.SdkReference;
+            if (sdkReference != null)
             {
                 // Try to get the path to the solution and project being built. The solution path is not directly known
                 // in MSBuild. It is passed in as a property either by the VS project system or by MSBuild's solution
@@ -1790,8 +1791,53 @@ namespace Microsoft.Build.Evaluation
                 if (solutionPath == "*Undefined*") solutionPath = null;
                 var projectPath = _data.GetProperty(ReservedPropertyNames.projectFullPath)?.EvaluatedValue;
 
+                var compareInfo = CultureInfo.InvariantCulture.CompareInfo;
+
+                static bool HasProperty(string value, CompareInfo compareInfo) =>
+                    value != null && compareInfo.IndexOf(value, "$(") != -1;
+
+                if (HasProperty(sdkReference.Name, compareInfo) ||
+                    HasProperty(sdkReference.Version, compareInfo) ||
+                    HasProperty(sdkReference.MinimumVersion, compareInfo))
+                {
+                    static string EvaluateProperty(string value, IElementLocation location, Expander<P, I> expander) =>
+                        value != null
+                            ? expander.ExpandIntoStringAndUnescape(value,
+                                                                   ExpanderOptions.ExpandProperties,
+                                                                   location)
+                            : null;
+
+                    var sdkReferenceOrigin = importElement.SdkLocation;
+
+                    var expandedSdkReference = new SdkReference(
+                        EvaluateProperty(sdkReference.Name, sdkReferenceOrigin, _expander),
+                        EvaluateProperty(sdkReference.Version, sdkReferenceOrigin, _expander),
+                        EvaluateProperty(sdkReference.MinimumVersion, sdkReferenceOrigin, _expander)
+                    );
+
+                    if (!Equals(expandedSdkReference, sdkReference))
+                    {
+                        var eventArgs = new ProjectImportedEventArgs(
+                            importElement.Location.Line,
+                            importElement.Location.Column,
+                            ResourceUtilities.GetResourceString("SdkPropertiesEvaluated"),
+                            sdkReference.ToString(),
+                            expandedSdkReference.ToString()
+                        )
+                        {
+                            BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                            UnexpandedProject = importElement.Project,
+                            ProjectFile = importElement.ContainingProject.FullPath
+                        };
+
+                        _evaluationLoggingContext.LogBuildEvent(eventArgs);
+                    }
+
+                    sdkReference = expandedSdkReference;
+                }
+
                 // Combine SDK path with the "project" relative path
-                sdkResult = _sdkResolverService.ResolveSdk(_submissionId, importElement.SdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive, _isRunningInVisualStudio);
+                sdkResult = _sdkResolverService.ResolveSdk(_submissionId, sdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive, _isRunningInVisualStudio);
 
                 if (!sdkResult.Success)
                 {
@@ -1801,7 +1847,7 @@ namespace Microsoft.Build.Evaluation
                             importElement.Location.Line,
                             importElement.Location.Column,
                             ResourceUtilities.GetResourceString("CouldNotResolveSdk"),
-                            importElement.SdkReference.ToString())
+                            sdkReference.ToString())
                         {
                             BuildEventContext = _evaluationLoggingContext.BuildEventContext,
                             UnexpandedProject = importElement.Project,
@@ -1817,7 +1863,7 @@ namespace Microsoft.Build.Evaluation
                         return;
                     }
 
-                    ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "CouldNotResolveSdk", importElement.SdkReference.ToString());
+                    ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "CouldNotResolveSdk", sdkReference.ToString());
                 }
 
                 if (sdkResult.Path == null)
