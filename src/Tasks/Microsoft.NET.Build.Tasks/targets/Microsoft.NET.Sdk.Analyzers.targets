@@ -19,7 +19,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                                    $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0')) And
                                    $([MSBuild]::VersionGreaterThanOrEquals($(AnalysisLevel), '5.0'))">true</EnableNETAnalyzers>
     <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers )' == ''">false</EnableNETAnalyzers>
-    <WarningLevel Condition="$(EnableNETAnalyzers)">5</WarningLevel>
+    <WarningLevel Condition="'$(AnalysisLevel)' != '' And
+                              $([MSBuild]::VersionGreaterThanOrEquals($(AnalysisLevel), '5.0'))">5</WarningLevel>
   </PropertyGroup>
   <Import Project="..\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.targets"
           Condition="$(EnableNETAnalyzers)" />
