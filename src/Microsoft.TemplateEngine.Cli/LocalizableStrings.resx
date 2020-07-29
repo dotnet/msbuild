@@ -273,14 +273,17 @@
   <data name="NoParameters" xml:space="preserve">
     <value>    (No Parameters)</value>
   </data>
-  <data name="NoTemplatesMatchName" xml:space="preserve">
-    <value>No templates matched the input template name: {0}.</value>
+  <data name="NoTemplatesMatchingInputParameters" xml:space="preserve">
+    <value>No templates found matching the following input parameter(s): {0}.</value>
   </data>
   <data name="OptionalWorkloadsSynchronized" xml:space="preserve">
     <value>The list of templates was synchronized with the Optional SDK Workloads.</value>
   </data>
   <data name="OptionalWorkloadsSyncFailed" xml:space="preserve">
     <value>Error during synchronization with the Optional SDK Workloads.</value>
+  </data>
+  <data name="NoTemplatesMatchName" xml:space="preserve">
+    <value>No templates matched the input template name: {0}.</value>
   </data>
   <data name="NoUpdates" xml:space="preserve">
     <value>No updates were found.</value>
@@ -348,6 +351,9 @@ See https://aka.ms/dotnet-install-templates to learn how to install additional t
   </data>
   <data name="Templates" xml:space="preserve">
     <value>Templates</value>
+  </data>
+  <data name="TemplatesFoundMatchingInputParameters" xml:space="preserve">
+    <value>Templates found matching the following input parameter(s): {0}</value>
   </data>
   <data name="Type" xml:space="preserve">
     <value>Type</value>

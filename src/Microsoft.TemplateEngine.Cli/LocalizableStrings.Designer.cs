@@ -1034,13 +1034,13 @@ namespace Microsoft.TemplateEngine.Cli {
                 return ResourceManager.GetString("NoPrimaryOutputsToRestore", resourceCulture);
             }
         }
-        
+
         /// <summary>
-        ///   Looks up a localized string similar to No templates matched the input template name: {0}..
+        ///   Looks up a localized string similar to No templates found matching the following input parameter(s): {0}..
         /// </summary>
-        public static string NoTemplatesMatchName {
+        public static string NoTemplatesMatchingInputParameters {
             get {
-                return ResourceManager.GetString("NoTemplatesMatchName", resourceCulture);
+                return ResourceManager.GetString("NoTemplatesMatchingInputParameters", resourceCulture);
             }
         }
 
@@ -1061,6 +1061,14 @@ namespace Microsoft.TemplateEngine.Cli {
         {
             get {
                 return ResourceManager.GetString("OptionalWorkloadsSyncFailed", resourceCulture);
+            }
+        }
+
+        ///   Looks up a localized string similar to No templates matched the input template name: {0}..
+        /// </summary>
+        public static string NoTemplatesMatchName {
+            get {
+                return ResourceManager.GetString("NoTemplatesMatchName", resourceCulture);
             }
         }
 
@@ -1487,7 +1495,16 @@ namespace Microsoft.TemplateEngine.Cli {
                 return ResourceManager.GetString("Templates", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Templates found the following matching input parameter(s): {0}.
+        /// </summary>
+        public static string TemplatesFoundMatchingInputParameters {
+            get {
+                return ResourceManager.GetString("TemplatesFoundMatchingInputParameters", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to An error occured updating templates for: {0}.
         /// </summary>

@@ -18,6 +18,7 @@ namespace Microsoft.TemplateEngine.Cli
             _allTemplatesInContext = allTemplatesInContext;
             _bestTemplateMatchList = null;
             _usingContextMatches = false;
+            _usingPartialMatches = false;
             ComputeContextBasedAndOtherPartialMatches();
         }
 
@@ -28,6 +29,8 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly IReadOnlyCollection<ITemplateMatchInfo> _allTemplatesInContext;
 
         private bool _usingContextMatches;
+
+        private bool _usingPartialMatches;
 
         public bool TryGetCoreMatchedTemplatesWithDisposition(Func<ITemplateMatchInfo, bool> filter, out IReadOnlyList<ITemplateMatchInfo> matchingTemplates)
         {
@@ -215,9 +218,13 @@ namespace Microsoft.TemplateEngine.Cli
         private IReadOnlyList<ITemplateMatchInfo> BaseGetBestTemplateMatchList(bool ignoreDefaultLanguageFiltering)
         {
             IReadOnlyList<ITemplateMatchInfo> templateList;
-
             if (TryGetUnambiguousTemplateGroupToUse(out templateList, ignoreDefaultLanguageFiltering))
             {
+                // Unambiguous template group could be a partial match
+                if (!templateList.Any(x => x.IsMatch || x.IsMatchExceptContext()))
+                {
+                    _usingPartialMatches = true;
+                }
                 return templateList;
             }
             else if (!string.IsNullOrEmpty(_templateName) && TryGetAllInvokableTemplates(out templateList))
@@ -234,10 +241,12 @@ namespace Microsoft.TemplateEngine.Cli
             }
             else if (TryGetCoreMatchedTemplatesWithDisposition(x => x.IsPartialMatch, out templateList))
             {
+                _usingPartialMatches = true;
                 return templateList;
             }
             else if (TryGetCoreMatchedTemplatesWithDisposition(x => x.IsPartialMatchExceptContext(), out templateList))
             {
+                _usingPartialMatches = true;
                 return templateList;
             }
             else
@@ -257,6 +266,11 @@ namespace Microsoft.TemplateEngine.Cli
                 return _usingContextMatches;
             }
         }
+
+        /// <summary>
+        ///  The property gets whether or not <c>BaseGetBestTemplateMatchList</c> returned only partial matches with template name/lang.
+        /// </summary>
+        public bool UsingPartialMatches => _usingPartialMatches;
 
         public bool IsTemplateAmbiguous { get; private set; }
 
