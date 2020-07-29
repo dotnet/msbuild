@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
                 .Execute()
                 .Should().Pass();
 
-            var outputDll = Path.Combine(testRoot, "bin", configuration, "netcoreapp3.0", $"{testAppName}.dll");
+            var outputDll = Path.Combine(testRoot, "bin", configuration, "netcoreapp3.1", $"{testAppName}.dll");
 
             // Call vstest
             var result = new DotnetVSTestCommand(Log)
@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
                 .Execute()
                 .Should().Pass();
 
-            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp3.0", "VSTestTestRunParameters.dll");
+            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp3.1", "VSTestTestRunParameters.dll");
 
             // Call test
             CommandResult result = new DotnetVSTestCommand(Log)
