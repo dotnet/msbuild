@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 result.StdOut.Should().NotMatch("The test run parameter argument '*' is invalid.");
                 result.StdOut.Should().Contain("Total tests: 1");
                 result.StdOut.Should().Contain("Passed: 1");
-                result.StdOut.Should().Contain("\u221a VSTestTestRunParameters");
+                result.StdOut.Should().Contain("Passed VSTestTestRunParameters");
             }
 
             result.ExitCode.Should().Be(0);
@@ -86,7 +86,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 result.StdOut.Should().NotMatch("The test run parameter argument '*' is invalid.");
                 result.StdOut.Should().Contain("Total tests: 1");
                 result.StdOut.Should().Contain("Passed: 1");
-                result.StdOut.Should().Contain("\u221a VSTestTestRunParameters");
+                result.StdOut.Should().Contain("Passed VSTestTestRunParameters");
             }
 
             result.ExitCode.Should().Be(0);
