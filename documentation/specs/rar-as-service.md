@@ -11,8 +11,8 @@ RAR is the acronym behind ResolveAssemblyReference (an MSBuild task) and Resolve
 The RAR task has become very complex and slow over the years. It tends to rank high on the list of MSBuild's performance bottlenecks. There is an inherent cost to walking the assembly reference graph and computing the dependency closure, especially in terms of I/O operations. To address this, the task internally maintains caches, both in-memory and on disk. While it alleviates the problem somewhat, it is still a suboptimal solution because
 
 1. The task runs in build nodes which are generally created as separate processes, one per logical CPU, so the in-memory state is duplicated.
-1. Build nodes have limited lifetime and the in-memory state is lost when they die.
-2. No state exists when the task runs for the given project for the first time.
+2. Build nodes have limited lifetime and the in-memory state is lost when they die.
+3. No state exists when the task runs for the given project for the first time.
 
 Nathan Mytelka is working on 3. He is planning to ship pre-computed caches as part of VS/SDK so even clean build will be able to skip walking the reference graph for at least system assemblies.
 
