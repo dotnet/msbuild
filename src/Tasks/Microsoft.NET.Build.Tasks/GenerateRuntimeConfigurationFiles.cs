@@ -10,6 +10,7 @@ using Microsoft.Build.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
+using NuGet.Frameworks;
 using NuGet.ProjectModel;
 
 namespace Microsoft.NET.Build.Tasks
@@ -179,7 +180,8 @@ namespace Microsoft.NET.Build.Tasks
                                    LockFileTargetLibrary lockFilePlatformLibrary,
                                    bool isFrameworkDependent)
         {
-            runtimeOptions.Tfm = TargetFramework;
+            var targetPlatformSubstring = $"-{NuGetFramework.Parse(TargetFramework).Platform}";
+            runtimeOptions.Tfm = TargetFramework.Split(new[] { targetPlatformSubstring }, StringSplitOptions.RemoveEmptyEntries)[0];
 
             var frameworks = new List<RuntimeConfigFramework>();
             if (runtimeFrameworks == null || runtimeFrameworks.Length == 0)

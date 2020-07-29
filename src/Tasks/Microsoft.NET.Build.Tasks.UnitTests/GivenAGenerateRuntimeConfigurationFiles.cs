@@ -184,6 +184,47 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     "There is no Microsoft.NETCore.App.");
         }
 
+        [Theory]
+        [InlineData("windows")]
+        [InlineData("windows7.0")]
+        public void GivenTargetFrameworkItDoesNotIncludeTargetPlatform(string targetPlatform)
+        {
+            var task = new TestableGenerateRuntimeConfigurationFiles
+            {
+                BuildEngine = new MockNeverCacheBuildEngine4(),
+                TargetFrameworkMoniker = ".NETCoreApp,Version=v5.0",
+                TargetFramework = $"net5.0-{targetPlatform}",
+                RuntimeConfigPath = _runtimeConfigPath,
+                RuntimeConfigDevPath = _runtimeConfigDevPath,
+                RuntimeFrameworks = new[]
+                {
+                    new MockTaskItem(
+                        "Microsoft.NETCore.App",
+                        new Dictionary<string, string>
+                        {
+                            {"FrameworkName", "Microsoft.NETCore.App"}, {"Version", "5.0.0"}
+                        }
+                    )
+                },
+                RollForward = "LatestMinor"
+            };
+
+            Action a = () => task.PublicExecuteCore();
+            a.ShouldNotThrow();
+
+            File.ReadAllText(_runtimeConfigPath).Should()
+                .Be(
+                    @"{
+  ""runtimeOptions"": {
+    ""tfm"": ""net5.0"",
+    ""rollForward"": ""LatestMinor"",
+    ""framework"": {
+      ""name"": ""Microsoft.NETCore.App"",
+      ""version"": ""5.0.0""
+    }
+  }
+}");
+        }
 
         private class TestableGenerateRuntimeConfigurationFiles : GenerateRuntimeConfigurationFiles
         {
