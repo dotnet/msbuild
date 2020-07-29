@@ -506,7 +506,7 @@ namespace Microsoft.NET.Build.Tests
             definedConstants.Should().BeEquivalentTo(new[] { "DEBUG", "TRACE" }.Concat(expectedDefines).ToArray());
         }
 
-        [WindowsOnlyTheory]
+        [WindowsOnlyRequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("netcoreapp3.1", new[] { "NETCOREAPP", "NETCOREAPP3_1" })]
         [InlineData("net5.0", new[] { "NETCOREAPP", "NETCOREAPP3_1", "NET", "NET5_0", "WINDOWS", "WINDOWS7_0" }, "windows", "7.0")]
         public void It_can_use_implicitly_defined_compilation_constants(string targetFramework, string[] expectedOutput, string targetPlatformIdentifier = null, string targetPlatformVersion = null)
@@ -639,7 +639,7 @@ class Program
             }
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("net5.0")]
         [InlineData("netcoreapp3.1")]
         public void It_defines_windows_version_default_correctly(string targetFramework)
@@ -956,7 +956,7 @@ class Program
 
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("netcoreapp3.1")]
         [InlineData("netcoreapp5.0")]
         public void It_makes_RootNamespace_safe_when_project_name_has_spaces(string targetFramework)

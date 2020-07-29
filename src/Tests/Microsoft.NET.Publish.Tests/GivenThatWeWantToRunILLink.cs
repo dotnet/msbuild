@@ -99,7 +99,7 @@ namespace Microsoft.NET.Publish.Tests
             DoesDepsFileHaveAssembly(depsFile, unusedFrameworkAssembly).Should().BeFalse();
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("net5.0")]
         public void PrepareForILLink_can_set_IsTrimmable(string targetFramework)
         {
@@ -124,7 +124,7 @@ namespace Microsoft.NET.Publish.Tests
             File.Exists(unusedIsTrimmableDll).Should().BeFalse();
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("net5.0")]
         public void PrepareForILLink_can_set_TrimMode(string targetFramework)
         {
@@ -149,7 +149,7 @@ namespace Microsoft.NET.Publish.Tests
             File.Exists(unusedTrimModeLinkDll).Should().BeFalse();
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("net5.0")]
         public void ILLink_respects_global_TrimMode(string targetFramework)
         {
@@ -214,7 +214,7 @@ namespace Microsoft.NET.Publish.Tests
             DoesImageHaveMethod(unusedDll, "UnusedMethodToRoot").Should().BeTrue();
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("_TrimmerBeforeFieldInit")]
         [InlineData("_TrimmerOverrideRemoval")]
         [InlineData("_TrimmerUnreachableBodies")]
@@ -235,7 +235,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should().Fail().And.HaveStdOutContaining("MSB4030");
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("16.8.0")]
         public void ILLink_respects_feature_settings_from_host_config()
         {
             var projectName = "HelloWorld";
@@ -267,7 +267,7 @@ namespace Microsoft.NET.Publish.Tests
             DoesImageHaveMethod(referenceDll, "FeatureImplementation").Should().BeFalse();
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("16.8.0")]
         public void ILLink_ignores_host_config_settings_with_link_false()
         {
             var projectName = "HelloWorld";

@@ -17,7 +17,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("16.8.0")]
         public void BuildSucceedsWithRuntimePackWithDifferentLabel()
         {
             var testProject = new TestProject()
@@ -137,7 +137,7 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void ItCanPublishArm64Winforms()
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
