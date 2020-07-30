@@ -154,29 +154,6 @@ namespace Microsoft.Build.Collections
         object ICollection.SyncRoot => this;
 
         /// <summary>
-        /// A special single dummy instance that always appears empty.
-        /// </summary>
-        internal static CopyOnWriteDictionary<K, V> Dummy { get; } = new CopyOnWriteDictionary<K, V> { _isDummy = true };
-
-        /// <summary>
-        /// Whether this is a dummy instance that always appears empty.
-        /// </summary>
-        internal bool IsDummy
-        {
-            get
-            {
-                if (_isDummy)
-                {
-                    ErrorUtilities.VerifyThrow(backing == null || backing.Count == 0, "count"); // check count without recursion
-                }
-
-                return _isDummy;
-            }
-        }
-
-        private bool _isDummy;
-
-        /// <summary>
         /// Comparer used for keys
         /// </summary>
         internal IEqualityComparer<K> Comparer
@@ -192,7 +169,7 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                ErrorUtilities.VerifyThrow(!IsDummy || backing == null || backing.Count == 0, "count"); // check count without recursion
+                ErrorUtilities.VerifyThrow(backing == null || backing.Count == 0, "count"); // check count without recursion
 
                 return backing ?? ImmutableDictionary<K,V>.Empty;
             }
@@ -205,8 +182,6 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                ErrorUtilities.VerifyThrow(!IsDummy, "dummy");
-
                 if (backing == null)
                 {
                     backing = ImmutableDictionary.Create<K,V>(Comparer);
@@ -225,10 +200,7 @@ namespace Microsoft.Build.Collections
 
             set
             {
-                if (!IsDummy)
-                {
-                    backing = WriteOperation.SetItem(key, value);
-                }
+                backing = WriteOperation.SetItem(key, value);
             }
         }
 
@@ -253,10 +225,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Add(K key, V value)
         {
-            if (!IsDummy)
-            {
-                backing = WriteOperation.SetItem(key, value);
-            }
+            backing = WriteOperation.SetItem(key, value);
         }
 
         /// <summary>
@@ -292,10 +261,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Add(KeyValuePair<K, V> item)
         {
-            if (!IsDummy)
-            {
-                backing = backing.SetItem(item.Key, item.Value);
-            }
+            backing = backing.SetItem(item.Key, item.Value);
         }
 
         /// <summary>
@@ -303,10 +269,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Clear()
         {
-            if (!IsDummy)
-            {
-                backing = backing.Clear();
-            }
+            backing = backing.Clear();
         }
 
         /// <summary>
