@@ -14,9 +14,9 @@ The RAR task has become very complex and slow over the years. It tends to rank h
 2. Build nodes have limited lifetime and the in-memory state is lost when they die.
 3. No state exists when the task runs for the given project for the first time.
 
-Nathan Mytelka is working on 3. He is planning to ship pre-computed caches as part of VS/SDK so even clean build will be able to skip walking the reference graph for at least system assemblies.
+Point 3 is tracked by issue [#5247](https://github.com/dotnet/msbuild/issues/5247).
 
-There was already an attempt to introduce this to MSBuild ([[WIP] RAR-as-a-service prototype #3914](https://github.com/dotnet/msbuild/pull/3914)). This PR was not completed mainly because of discontinued development of Bond, which is in that PR used as method of communication between nodes.
+There was already an attempt to introduce this to MSBuild ([#3914](https://github.com/dotnet/msbuild/pull/3914)). This PR was not completed mainly because of discontinued development of Bond, which is in that PR used as method of communication between nodes.
 
 # Design
 
@@ -52,9 +52,9 @@ There is one big concern and that is how to handle multiple requests at once. As
 
 ### Shutdown RAR node
 
-If the user want's the node to not be reused, we have the ensure that node will be killed after the build ends. This should be done after the compilation end by main MSBuild node.
+If the user wants the node to not be reused, we have the ensure that node will be killed after the build ends. This should be done after the compilation end by main MSBuild node.
 
-The RAR node, also has to support accepting of already established commands for MSBuild nodes (for example Shutdown command). This will be done by creating two pipes inside node, one will be for communication 
+The RAR node, also has to support accepting of already established commands for MSBuild nodes (for example Shutdown command). This will be done by creating two pipes inside node, one will be for communication about RAR commands and second one for the servicing communication. 
 
 ### Execute task in MSBuild node
 
@@ -64,7 +64,9 @@ User opted out of using the RAR nodes so we will execute the RAR task in the MSB
 
 The new RAR node will not count toward total maximum CPU count specified by _/maxCpuCount_ switch, since the RAR task is taxing on IO operations not so much on CPU time. If we took one node from each instance of MSBuild it would lead to drastic decrease in performance.
 
-The RAR task will be affected by  _/m_ switch. When we run in single node mode, it will implicitly say that we want to run task inside current process. User would have to explicitly say that he wants to run with RAR node.
+The RAR task will be affected by the _/m_ switch. When we run in single node mode, it will implicitly say that we want to run the task inside current process. User would have to explicitly say that they want to use the RAR node.
+
+__NOTE:__ The behavior described above depend on fact that the feature is opt-out (is active by default). If not, the paragraph above is meaningless. This has to be yet decided/clarified. 
 
 ## Communication
 
@@ -75,10 +77,6 @@ Note that, the following snippets are probably not final version of the API and 
 ### RAR Input
 
 This is direct representation of all RAR inputs.
-
-As mentioned in original [PR](https://github.com/dotnet/msbuild/pull/3914), there should be some way to determine what thing we should log (by severity), and pass back to the original node.
-
-Providing the verbosity level to the task should not probably be part of this project, but the RAR node should be able to accept the required verbosity on its input. This verbosity level should be introduced into the RAR task by [#2700](https://github.com/dotnet/msbuild/issues/2700).
 
 ```csharp
 public sealed partial class ResolveAssemblyReferenceInput
@@ -163,8 +161,6 @@ public sealed partial class ResolveAssemblyReferenceInput
     public bool UnresolveFrameworkAssembliesFromHigherFrameworks { get { throw null; } set { } }
 
     public string WarnOrErrorOnTargetArchitectureMismatch { get { throw null; } set { } }
-
-    public Microsoft.Build.Framework.LoggerVerbosity Verbosity { get { throw null; } set { } }
 }
 ```
 
@@ -214,4 +210,7 @@ In the first phase of implementation the concurrency will be solved by serializi
 - File watchers: using them would decrease required IO operations when checking disc changes
 - Aggressive precomputation of results
 - Improved caching of requests
-- Providing verbosity to RAR task
+- Providing verbosity to RAR task:
+    As mentioned in original [PR](https://github.com/dotnet/msbuild/pull/3914), there should be some way to determine what thing we should log (by severity), and pass back to the original node.
+
+    Providing the verbosity level to the task should not probably be part of this project, but the RAR node should be able to accept the required verbosity on its input. This verbosity level should be introduced into the RAR task by [#2700](https://github.com/dotnet/msbuild/issues/2700).
