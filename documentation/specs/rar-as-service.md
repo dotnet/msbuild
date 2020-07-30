@@ -1,6 +1,6 @@
 # Resolve Assembly Reference as Service Design
 
-This document describes the Resolve Assembly Reference as Service
+This document describes Resolve Assembly Reference as a Service
 
 # Background
 
@@ -40,11 +40,11 @@ If the connection is successful, we can use this connection for execution of RAR
 
 This step will create new process which will act as RAR node. It will also pass necessary information to the node to know what its settings are (reusable, ...). Node will be another instance of the MSBuild.exe which will have set parameter **nodeMode** to some specific value. Probably it will be text value, so we can easily recognize which node is RAR node and which is normal MSBuild node.
 
-There will be mechanism which will ensure that we don't create two RAR nodes at once. It will be done via Mutex (as it is done in [Roslyn](https://github.com/dotnet/roslyn/blob/838874b1b817db84ce146bef690cc95a39c213a5/src/Compilers/Server/VBCSCompiler/BuildServerController.cs#L143)). The name of the mutex has to encode in some way, all the necessary information needed to decide if it is only one RAR node for user. There should be at least: User name, If is administrator and maybe some initial settings for the node. An example of that name could be: `MSBuild.RAR.ostorc.7`, where **MSBuild.RAR** is prefix, **ostorc** is username under which the MSBuild was invoked and **7** represents encoded settings (flagged enum).
+We will use Mutex (as in [Roslyn](https://github.com/dotnet/roslyn/blob/838874b1b817db84ce146bef690cc95a39c213a5/src/Compilers/Server/VBCSCompiler/BuildServerController.cs#L143)) to ensure we don't create two RAR nodes at once. Its name must encode whether it is the user's only RAR node, including user name, administrator privileges, and some initial settings for the node. Such a name could be: `MSBuild.RAR.ostorc.7`, where **MSBuild.RAR** is its prefix, **ostorc** is the user who called MSBuild, and **7** represents encoded settings (flag enum).
 
 ### Execute RAR task
 
-Execution of RAR task should be done in same way as it is done now.
+Execution should be the same as it is now.
 
 There is already some layer of separation between Task interface and actual execution method. We will leverage this, and put the decision logic if to run locally or not into the "wrapper" method and so we will not have to modify this and in server-side execution we will directly call the internal execution method.
 
@@ -52,7 +52,7 @@ There is one big concern and that is how to handle multiple requests at once. As
 
 ### Shutdown RAR node
 
-If the user wants the node to not be reused, we have the ensure that node will be killed after the build ends. This should be done after the compilation end by main MSBuild node.
+If the user does not want the node to be reused, we have the ensure that node will be killed after the build ends. This should be done after the main MSBuild node finishes building.
 
 The RAR node, also has to support accepting of already established commands for MSBuild nodes (for example Shutdown command). This will be done by creating two pipes inside node, one will be for communication about RAR commands and second one for the servicing communication. 
 
