@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         {
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("16.8.0")]
         public void ItCanNewRestoreBuildRunCleanMSBuildProject()
         {
             string projectDirectory = _testAssetsManager.CreateTestDirectory().Path;
@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             binDirectory.Should().NotHaveFilesMatching("*.dll", SearchOption.AllDirectories);
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("16.8.0")]
         public void ItCanRunToolsInACSProj()
         {
             var testInstance = _testAssetsManager.CopyTestAsset("MSBuildTestApp")
@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 .HaveStdOutContaining("Hello Portable World!");;
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("16.8.0")]
         public void ItCanRunToolsThatPrefersTheCliRuntimeEvenWhenTheToolItselfDeclaresADifferentRuntime()
         {
             var testInstance = _testAssetsManager.CopyTestAsset("MSBuildTestApp")
