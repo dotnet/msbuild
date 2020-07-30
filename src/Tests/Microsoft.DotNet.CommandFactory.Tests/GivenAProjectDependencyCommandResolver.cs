@@ -103,7 +103,7 @@ namespace Microsoft.DotNet.Tests
 
             NuGetConfigWriter.Write(testAsset.Path, TestContext.Current.TestPackages);
 
-            new RestoreCommand(Log, testAsset.TestRoot)
+            new RestoreCommand(testAsset)
                 .Execute()
                 .Should()
                 .Pass();
@@ -133,7 +133,7 @@ namespace Microsoft.DotNet.Tests
 
             NuGetConfigWriter.Write(testAsset.Path, TestContext.Current.TestPackages);
 
-            new RestoreCommand(Log, testAsset.TestRoot)
+            new RestoreCommand(testAsset)
                 .Execute()
                 .Should()
                 .Pass();

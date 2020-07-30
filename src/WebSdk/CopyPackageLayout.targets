@@ -1,0 +1,27 @@
+<Project>
+
+<Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
+  <ItemGroup>
+    <LayoutFile Include="@(Content)" Condition="'%(Content.PackagePath)' != '' and '%(Content.PackagePath)' != 'Icon.png' and '%(Content.PackagePath)' != 'analyzers/cs'">
+      <TargetPath>%(Content.PackagePath)\%(Content.RecursiveDir)%(Content.Filename)%(Content.Extension)</TargetPath>
+    </LayoutFile>
+    <!-- Analyzers needs to be copied to the root -->
+    <LayoutFile Include="@(Content)" Condition="'%(Content.PackagePath)' != '' and '%(Content.PackagePath)' != 'Icon.png' and '%(Content.PackagePath)' == 'analyzers/cs'">
+      <TargetPath>%(Content.PackagePath)\%(Content.Filename)%(Content.Extension)</TargetPath>
+    </LayoutFile>
+  </ItemGroup>
+</Target>
+
+<Target Name="CopyAdditionalFilesToLayout" Condition="'$(TargetFramework)' == ''" DependsOnTargets="PrepareAdditionalFilesToLayout" AfterTargets="Build" Inputs="@(LayoutFile)" Outputs="@(LayoutFile->'$(PackageLayoutOutputPath)%(TargetPath)')">
+  <Copy SourceFiles="@(LayoutFile)" DestinationFiles="@(LayoutFile->'$(PackageLayoutOutputPath)%(TargetPath)')">
+    <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
+  </Copy>
+</Target>
+
+<Target Name="PackLayout" DependsOnTargets="CopyAdditionalFilesToLayout" BeforeTargets="$(GenerateNuspecDependsOn)">
+  <ItemGroup>
+    <Content Include="$(PackageLayoutOutputPath)**\*" PackagePath="\" />
+  </ItemGroup>
+</Target>
+
+</Project>

@@ -190,9 +190,7 @@ namespace Microsoft.NET.Build.Tests
             string[] msbuildArguments
             )
         {
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "1");
-
-            var buildCommand = new BuildCommand(Log, appProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "1");
             var buildResult = buildCommand.ExecuteWithoutRestore(msbuildArguments);
 
             var outputDirectories = targetFrameworks.ToImmutableDictionary(tf => tf, tf => buildCommand.GetOutputDirectory(tf));

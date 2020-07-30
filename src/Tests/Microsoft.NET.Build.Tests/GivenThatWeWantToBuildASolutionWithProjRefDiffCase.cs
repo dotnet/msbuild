@@ -26,7 +26,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppWithProjRefCaseDiff")
                 .WithSource();
 
-            var command = new BuildCommand(Log, Path.Combine(asset.TestRoot, solutionFile));
+            var command = new BuildCommand(asset, solutionFile);
             command.Execute().Should().Pass();
         }
     }

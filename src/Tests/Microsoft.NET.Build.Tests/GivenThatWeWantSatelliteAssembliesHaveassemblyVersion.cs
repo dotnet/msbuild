@@ -27,7 +27,7 @@ namespace Microsoft.NET.Build.Tests
               .CopyTestAsset("AllResourcesInSatelliteDisableVersionGenerate")
               .WithSource();
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute()
                 .Should()

@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using Newtonsoft.Json;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks
 {

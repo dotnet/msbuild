@@ -6,8 +6,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Newtonsoft.Json;
 using NuGet.Frameworks;
 
 namespace Microsoft.NET.Build.Tasks
@@ -22,6 +24,10 @@ namespace Microsoft.NET.Build.Tasks
         public string TargetFrameworkIdentifier { get; set; }
 
         public string TargetFrameworkVersion { get; set; }
+
+        public string TargetPlatformIdentifier { get; set; }
+
+        public string TargetPlatformVersion { get; set; }
 
         public string TargetingPackRoot { get; set; }
 
@@ -50,6 +56,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] KnownFrameworkReferences { get; set; } = Array.Empty<ITaskItem>();
 
+        public ITaskItem[] KnownRuntimePacks { get; set; } = Array.Empty<ITaskItem>();
+
         public ITaskItem[] KnownCrossgen2Packs { get; set; } = Array.Empty<ITaskItem>();
 
         [Required]
@@ -74,6 +82,8 @@ namespace Microsoft.NET.Build.Tasks
         [Output]
         public ITaskItem[] UnavailableRuntimePacks { get; set; }
 
+        private Version _normalizedTargetFrameworkVersion;
+
         protected override void ExecuteCore()
         {
             //  Perf optimization: If there are no FrameworkReference items, then don't do anything
@@ -83,12 +93,28 @@ namespace Microsoft.NET.Build.Tasks
                 return;
             }
 
-            var normalizedTargetFrameworkVersion = NormalizeVersion(new Version(TargetFrameworkVersion));
+            _normalizedTargetFrameworkVersion = NormalizeVersion(new Version(TargetFrameworkVersion));
 
-            var knownFrameworkReferencesForTargetFramework = KnownFrameworkReferences.Select(item => new KnownFrameworkReference(item))
-                .Where(kfr => kfr.TargetFramework.Framework.Equals(TargetFrameworkIdentifier, StringComparison.OrdinalIgnoreCase) &&
-                              NormalizeVersion(kfr.TargetFramework.Version) == normalizedTargetFrameworkVersion)
-                .ToList();
+            var knownFrameworkReferencesForTargetFramework =
+                KnownFrameworkReferences
+                    .Select(item => new KnownFrameworkReference(item))
+                    .Where(KnownFrameworkReferenceAppliesToTargetFramework)
+                    .ToList();
+
+            //  Get known runtime packs from known framework references.
+            //  Only use items where the framework reference name matches the RuntimeFrameworkName.
+            //  This will filter out known framework references for "profiles", ie WindowsForms and WPF
+            var knownRuntimePacksForTargetFramework =
+                knownFrameworkReferencesForTargetFramework
+                    .Where(kfr => kfr.Name.Equals(kfr.RuntimeFrameworkName, StringComparison.OrdinalIgnoreCase))
+                    .Select(kfr => kfr.ToKnownRuntimePack())
+                    .ToList();
+
+            //  Add additional known runtime packs
+            knownRuntimePacksForTargetFramework.AddRange(
+                KnownRuntimePacks.Select(item => new KnownRuntimePack(item))
+                                 .Where(krp => krp.TargetFramework.Framework.Equals(TargetFrameworkIdentifier, StringComparison.OrdinalIgnoreCase) &&
+                                               NormalizeVersion(krp.TargetFramework.Version) == _normalizedTargetFrameworkVersion));
 
             var frameworkReferenceMap = FrameworkReferences.ToDictionary(fr => fr.ItemSpec, StringComparer.OrdinalIgnoreCase);
 
@@ -120,20 +146,26 @@ namespace Microsoft.NET.Build.Tasks
                     continue;
                 }
 
-                List<string> preferredPackages = new List<string>();
+                KnownRuntimePack? selectedRuntimePack = SelectRuntimePack(frameworkReference, knownFrameworkReference, knownRuntimePacksForTargetFramework);
+
+                //  Add targeting pack and all known runtime packs to "preferred packages" list.
+                //  These are packages that will win in conflict resolution for assets that have identical assembly and file versions
+                var preferredPackages = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
                 preferredPackages.Add(knownFrameworkReference.TargetingPackName);
 
-                var knownFrameworkReferenceRuntimePackRuntimeIdentifiers = knownFrameworkReference.RuntimePackRuntimeIdentifiers.Split(';');
-                foreach (var runtimeIdentifier in knownFrameworkReferenceRuntimePackRuntimeIdentifiers)
+                if (selectedRuntimePack != null)
                 {
-                    foreach (var runtimePackNamePattern in knownFrameworkReference.RuntimePackNamePatterns.Split(';'))
+                    var knownFrameworkReferenceRuntimePackRuntimeIdentifiers = selectedRuntimePack?.RuntimePackRuntimeIdentifiers.Split(';');
+                    foreach (var runtimeIdentifier in knownFrameworkReferenceRuntimePackRuntimeIdentifiers)
                     {
-                        string runtimePackName = runtimePackNamePattern.Replace("**RID**", runtimeIdentifier);
-                        preferredPackages.Add(runtimePackName);
+                        foreach (var runtimePackNamePattern in selectedRuntimePack?.RuntimePackNamePatterns.Split(';'))
+                        {
+                            string runtimePackName = runtimePackNamePattern.Replace("**RID**", runtimeIdentifier);
+                            preferredPackages.Add(runtimePackName);
+                        }
                     }
                 }
 
-                //  Get the path of the targeting pack in the targeting pack root (e.g. dotnet/ref)
                 TaskItem targetingPack = new TaskItem(knownFrameworkReference.Name);
                 targetingPack.SetMetadata(MetadataKeys.NuGetPackageId, knownFrameworkReference.TargetingPackName);
                 targetingPack.SetMetadata(MetadataKeys.PackageConflictPreferredPackages, string.Join(";", preferredPackages));
@@ -152,13 +184,17 @@ namespace Microsoft.NET.Build.Tasks
                 targetingPack.SetMetadata("TargetingPackFormat", knownFrameworkReference.TargetingPackFormat);
                 targetingPack.SetMetadata("TargetFramework", knownFrameworkReference.TargetFramework.GetShortFolderName());
                 targetingPack.SetMetadata(MetadataKeys.RuntimeFrameworkName, knownFrameworkReference.RuntimeFrameworkName);
-                targetingPack.SetMetadata(MetadataKeys.RuntimePackRuntimeIdentifiers, knownFrameworkReference.RuntimePackRuntimeIdentifiers);
+                if (selectedRuntimePack != null)
+                {
+                    targetingPack.SetMetadata(MetadataKeys.RuntimePackRuntimeIdentifiers, selectedRuntimePack?.RuntimePackRuntimeIdentifiers);
+                }
 
                 if (!string.IsNullOrEmpty(knownFrameworkReference.Profile))
                 {
                     targetingPack.SetMetadata("Profile", knownFrameworkReference.Profile);
                 }
 
+                //  Get the path of the targeting pack in the targeting pack root (e.g. dotnet/packs)
                 string targetingPackPath = null;
                 if (!string.IsNullOrEmpty(TargetingPackRoot))
                 {
@@ -185,8 +221,9 @@ namespace Microsoft.NET.Build.Tasks
                 targetingPacks.Add(targetingPack);
 
                 var runtimeFrameworkVersion = GetRuntimeFrameworkVersion(
-                    frameworkReference, 
-                    knownFrameworkReference, 
+                    frameworkReference,
+                    knownFrameworkReference,
+                    selectedRuntimePack,
                     out string runtimePackVersion);
 
                 string isTrimmable = null;
@@ -197,17 +234,60 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 if (string.IsNullOrEmpty(isTrimmable))
                 {
-                    isTrimmable = knownFrameworkReference.IsTrimmable;
+                    isTrimmable = selectedRuntimePack?.IsTrimmable;
+                }
+
+                bool includeInPackageDownload;
+                KnownRuntimePack runtimePackForRuntimeIDProcessing;
+                if (knownFrameworkReference.Name.Equals(knownFrameworkReference.RuntimeFrameworkName, StringComparison.OrdinalIgnoreCase))
+                {
+                    //  Only add runtime packs where the framework reference name matches the RuntimeFrameworkName
+                    //  Framework references for "profiles" will use the runtime pack from the corresponding non-profile framework
+                    runtimePackForRuntimeIDProcessing = selectedRuntimePack.Value;
+                    includeInPackageDownload = true;
+                }
+                else if (!knownFrameworkReference.RuntimePackRuntimeIdentifiers.Equals(selectedRuntimePack?.RuntimePackRuntimeIdentifiers))
+                {
+                    // If the profile has a different set of runtime identifiers than the runtime pack, use the profile.
+                    runtimePackForRuntimeIDProcessing = knownFrameworkReference.ToKnownRuntimePack();
+                    includeInPackageDownload = true;
+                }
+                else
+                {
+                    // For the remaining profiles, don't include them in package download but add them to unavaliable if necessary.
+                    runtimePackForRuntimeIDProcessing = knownFrameworkReference.ToKnownRuntimePack();
+                    includeInPackageDownload = false;
                 }
 
                 bool processedPrimaryRuntimeIdentifier = false;
 
-                if ((SelfContained || ReadyToRunEnabled) &&
-                    !string.IsNullOrEmpty(RuntimeIdentifier) &&
-                    !string.IsNullOrEmpty(knownFrameworkReference.RuntimePackNamePatterns))
+                var hasRuntimePackAlwaysCopyLocal =
+                    selectedRuntimePack != null && selectedRuntimePack.Value.RuntimePackAlwaysCopyLocal;
+                var runtimeRequiredByDeployment
+                    = (SelfContained || ReadyToRunEnabled) &&
+                      !string.IsNullOrEmpty(RuntimeIdentifier) &&
+                      selectedRuntimePack != null &&
+                      !string.IsNullOrEmpty(selectedRuntimePack.Value.RuntimePackNamePatterns);
+
+                if (hasRuntimePackAlwaysCopyLocal || runtimeRequiredByDeployment)
                 {
-                    ProcessRuntimeIdentifier(RuntimeIdentifier, knownFrameworkReference, runtimePackVersion,
-                        unrecognizedRuntimeIdentifiers, unavailableRuntimePacks, runtimePacks, packagesToDownload, isTrimmable);
+                    //  Find other KnownFrameworkReferences that map to the same runtime pack, if any
+                    List<string> additionalFrameworkReferencesForRuntimePack = null;
+                    foreach (var additionalKnownFrameworkReference in knownFrameworkReferencesForTargetFramework)
+                    {
+                        if (additionalKnownFrameworkReference.RuntimeFrameworkName.Equals(knownFrameworkReference.RuntimeFrameworkName, StringComparison.OrdinalIgnoreCase) &&
+                            !additionalKnownFrameworkReference.RuntimeFrameworkName.Equals(additionalKnownFrameworkReference.Name, StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (additionalFrameworkReferencesForRuntimePack == null)
+                            {
+                                additionalFrameworkReferencesForRuntimePack = new List<string>();
+                            }
+                            additionalFrameworkReferencesForRuntimePack.Add(additionalKnownFrameworkReference.Name);
+                        }
+                    }
+
+                    ProcessRuntimeIdentifier(hasRuntimePackAlwaysCopyLocal ? "any" : RuntimeIdentifier, runtimePackForRuntimeIDProcessing, runtimePackVersion, additionalFrameworkReferencesForRuntimePack,
+                        unrecognizedRuntimeIdentifiers, unavailableRuntimePacks, runtimePacks, packagesToDownload, isTrimmable, includeInPackageDownload);
 
                     processedPrimaryRuntimeIdentifier = true;
                 }
@@ -224,12 +304,12 @@ namespace Microsoft.NET.Build.Tasks
 
                         //  Pass in null for the runtimePacks list, as for these runtime identifiers we only want to
                         //  download the runtime packs, but not use the assets from them
-                        ProcessRuntimeIdentifier(runtimeIdentifier, knownFrameworkReference, runtimePackVersion,
-                            unrecognizedRuntimeIdentifiers, unavailableRuntimePacks, runtimePacks: null, packagesToDownload, isTrimmable);
+                        ProcessRuntimeIdentifier(runtimeIdentifier, runtimePackForRuntimeIDProcessing, runtimePackVersion, additionalFrameworkReferencesForRuntimePack: null,
+                            unrecognizedRuntimeIdentifiers, unavailableRuntimePacks, runtimePacks: null, packagesToDownload, isTrimmable, includeInPackageDownload);
                     }
                 }
 
-                if (!string.IsNullOrEmpty(knownFrameworkReference.RuntimeFrameworkName))
+                if (!string.IsNullOrEmpty(knownFrameworkReference.RuntimeFrameworkName) && !knownFrameworkReference.RuntimePackAlwaysCopyLocal)
                 {
                     TaskItem runtimeFramework = new TaskItem(knownFrameworkReference.RuntimeFrameworkName);
 
@@ -247,7 +327,7 @@ namespace Microsoft.NET.Build.Tasks
                     Log.LogError(Strings.Crossgen2RequiresSelfContained);
                     return;
                 }
-                if (!AddCrossgen2Package(normalizedTargetFrameworkVersion, packagesToDownload))
+                if (!AddCrossgen2Package(_normalizedTargetFrameworkVersion, packagesToDownload))
                 {
                     Log.LogError(Strings.ReadyToRunNoValidRuntimePackageError);
                     return;
@@ -256,7 +336,7 @@ namespace Microsoft.NET.Build.Tasks
 
             if (packagesToDownload.Any())
             {
-                PackagesToDownload = packagesToDownload.ToArray();
+                PackagesToDownload = packagesToDownload.Distinct(new PackageToDownloadComparer<ITaskItem>()).ToArray();
             }
 
             if (runtimeFrameworks.Any())
@@ -280,18 +360,91 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
+        private bool KnownFrameworkReferenceAppliesToTargetFramework(KnownFrameworkReference kfr)
+        {
+            if (!kfr.TargetFramework.Framework.Equals(TargetFrameworkIdentifier, StringComparison.OrdinalIgnoreCase)
+                || NormalizeVersion(kfr.TargetFramework.Version) != _normalizedTargetFrameworkVersion)
+            {
+                return false;
+            }
+
+            if (!string.IsNullOrEmpty(kfr.TargetFramework.Platform)
+                && kfr.TargetFramework.PlatformVersion != null)
+            {
+                if (!Version.TryParse(TargetPlatformVersion, out var targetPlatformVersionParsed))
+                {
+                    return false;
+                }
+
+                if (NormalizeVersion(targetPlatformVersionParsed) != NormalizeVersion(kfr.TargetFramework.PlatformVersion)
+                    || NormalizeVersion(kfr.TargetFramework.Version) != _normalizedTargetFrameworkVersion)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private KnownRuntimePack? SelectRuntimePack(ITaskItem frameworkReference, KnownFrameworkReference knownFrameworkReference, List<KnownRuntimePack> knownRuntimePacks)
+        {
+            var requiredLabelsMetadata = frameworkReference?.GetMetadata(MetadataKeys.RuntimePackLabels) ?? "";
+
+            HashSet<string> requiredRuntimePackLabels = null;
+            if (frameworkReference != null)
+            {
+                requiredRuntimePackLabels = new HashSet<string>(requiredLabelsMetadata.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries), StringComparer.OrdinalIgnoreCase);
+            }
+
+            //  The runtime pack name matches the RuntimeFrameworkName on the KnownFrameworkReference
+            var matchingRuntimePacks = knownRuntimePacks.Where(krp => krp.Name.Equals(knownFrameworkReference.RuntimeFrameworkName, StringComparison.OrdinalIgnoreCase))
+                .Where(krp =>
+                {
+                    if (requiredRuntimePackLabels == null)
+                    {
+                        return krp.RuntimePackLabels.Length == 0;
+                    }
+                    else
+                    {
+                        return requiredRuntimePackLabels.SetEquals(krp.RuntimePackLabels);
+                    }
+                })
+                .ToList();
+
+            if (matchingRuntimePacks.Count == 0)
+            {
+                return null;
+            }
+            else if (matchingRuntimePacks.Count == 1)
+            {
+                return matchingRuntimePacks[0];
+            }
+            else
+            {
+                string runtimePackDescriptionForErrorMessage = knownFrameworkReference.RuntimeFrameworkName +
+                    (requiredLabelsMetadata == string.Empty ? string.Empty : ":" + requiredLabelsMetadata);
+
+                Log.LogError(Strings.ConflictingRuntimePackInformation, runtimePackDescriptionForErrorMessage,
+                    string.Join(Environment.NewLine, matchingRuntimePacks.Select(rp => rp.RuntimePackNamePatterns)));
+
+                return knownFrameworkReference.ToKnownRuntimePack();
+            }
+        }
+
         private void ProcessRuntimeIdentifier(
             string runtimeIdentifier,
-            KnownFrameworkReference knownFrameworkReference,
+            KnownRuntimePack selectedRuntimePack,
             string runtimePackVersion,
+            List<string> additionalFrameworkReferencesForRuntimePack,
             HashSet<string> unrecognizedRuntimeIdentifiers,
             List<ITaskItem> unavailableRuntimePacks,
             List<ITaskItem> runtimePacks,
             List<ITaskItem> packagesToDownload,
-            string isTrimmable)
+            string isTrimmable,
+            bool addToPackageDownload)
         {
             var runtimeGraph = new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath);
-            var knownFrameworkReferenceRuntimePackRuntimeIdentifiers = knownFrameworkReference.RuntimePackRuntimeIdentifiers.Split(';');
+            var knownFrameworkReferenceRuntimePackRuntimeIdentifiers = selectedRuntimePack.RuntimePackRuntimeIdentifiers.Split(';');
 
             string runtimePackRuntimeIdentifier = NuGetUtils.GetBestMatchingRid(
                     runtimeGraph,
@@ -308,7 +461,7 @@ namespace Microsoft.NET.Build.Tasks
                     //  framework we don't directly reference.  But we don't want to immediately error out
                     //  here if a runtime pack that we might not need to reference isn't available for the
                     //  targeted RID (e.g. Microsoft.WindowsDesktop.App for a linux RID).
-                    var unavailableRuntimePack = new TaskItem(knownFrameworkReference.Name);
+                    var unavailableRuntimePack = new TaskItem(selectedRuntimePack.Name);
                     unavailableRuntimePack.SetMetadata(MetadataKeys.RuntimeIdentifier, runtimeIdentifier);
                     unavailableRuntimePacks.Add(unavailableRuntimePack);
                 }
@@ -319,9 +472,9 @@ namespace Microsoft.NET.Build.Tasks
                     unrecognizedRuntimeIdentifiers.Add(runtimeIdentifier);
                 }
             }
-            else
+            else if (addToPackageDownload)
             {
-                foreach (var runtimePackNamePattern in knownFrameworkReference.RuntimePackNamePatterns.Split(';'))
+                foreach (var runtimePackNamePattern in selectedRuntimePack.RuntimePackNamePatterns.Split(';'))
                 {
                     string runtimePackName = runtimePackNamePattern.Replace("**RID**", runtimePackRuntimeIdentifier);
 
@@ -330,9 +483,19 @@ namespace Microsoft.NET.Build.Tasks
                         TaskItem runtimePackItem = new TaskItem(runtimePackName);
                         runtimePackItem.SetMetadata(MetadataKeys.NuGetPackageId, runtimePackName);
                         runtimePackItem.SetMetadata(MetadataKeys.NuGetPackageVersion, runtimePackVersion);
-                        runtimePackItem.SetMetadata(MetadataKeys.FrameworkName, knownFrameworkReference.Name);
+                        runtimePackItem.SetMetadata(MetadataKeys.FrameworkName, selectedRuntimePack.Name);
                         runtimePackItem.SetMetadata(MetadataKeys.RuntimeIdentifier, runtimePackRuntimeIdentifier);
                         runtimePackItem.SetMetadata(MetadataKeys.IsTrimmable, isTrimmable);
+
+                        if (selectedRuntimePack.RuntimePackAlwaysCopyLocal)
+                        {
+                            runtimePackItem.SetMetadata(MetadataKeys.RuntimePackAlwaysCopyLocal, "true");
+                        }
+
+                        if (additionalFrameworkReferencesForRuntimePack != null)
+                        {
+                            runtimePackItem.SetMetadata(MetadataKeys.AdditionalFrameworkReferences, string.Join(";", additionalFrameworkReferencesForRuntimePack));
+                        }
 
                         runtimePacks.Add(runtimePackItem);
                     }
@@ -390,8 +553,9 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         private string GetRuntimeFrameworkVersion(
-            ITaskItem frameworkReference, 
+            ITaskItem frameworkReference,
             KnownFrameworkReference knownFrameworkReference,
+            KnownRuntimePack? knownRuntimePack,
             out string runtimePackVersion)
         {
             //  Precedence order for selecting runtime framework version
@@ -417,11 +581,25 @@ namespace Microsoft.NET.Build.Tasks
                     return knownFrameworkReference.DefaultRuntimeFrameworkVersion;
 
                 case RuntimePatchRequest.UseLatestVersion:
-                    runtimePackVersion = knownFrameworkReference.LatestRuntimeFrameworkVersion;
-                    return knownFrameworkReference.LatestRuntimeFrameworkVersion;
-
+                    if (knownRuntimePack != null)
+                    {
+                        runtimePackVersion = knownRuntimePack?.LatestRuntimeFrameworkVersion;
+                        return knownRuntimePack?.LatestRuntimeFrameworkVersion;
+                    }
+                    else
+                    {
+                        runtimePackVersion = knownFrameworkReference.DefaultRuntimeFrameworkVersion;
+                        return knownFrameworkReference.DefaultRuntimeFrameworkVersion;
+                    }
                 case RuntimePatchRequest.UseDefaultVersionWithLatestRuntimePack:
-                    runtimePackVersion = knownFrameworkReference.LatestRuntimeFrameworkVersion;
+                    if (knownRuntimePack != null)
+                    {
+                        runtimePackVersion = knownRuntimePack?.LatestRuntimeFrameworkVersion;
+                    }
+                    else
+                    {
+                        runtimePackVersion = knownFrameworkReference.DefaultRuntimeFrameworkVersion;
+                    }
                     return knownFrameworkReference.DefaultRuntimeFrameworkVersion;
 
                 default:
@@ -435,6 +613,34 @@ namespace Microsoft.NET.Build.Tasks
             UseDefaultVersionWithLatestRuntimePack,
             UseDefaultVersion,
             UseLatestVersion,
+        }
+
+        /// <summary>
+        /// Compare PackageToDownload by name and version.
+        /// Used to deduplicate PackageToDownloads
+        /// </summary>
+        private class PackageToDownloadComparer<T> : IEqualityComparer<T> where T : ITaskItem
+        {
+            public bool Equals(T x, T y)
+            {
+                if (x is null || y is null)
+                {
+                    return false;
+                }
+
+                return x.ItemSpec.Equals(y.ItemSpec,
+                           StringComparison.OrdinalIgnoreCase) &&
+                       x.GetMetadata(MetadataKeys.Version).Equals(
+                           y.GetMetadata(MetadataKeys.Version), StringComparison.OrdinalIgnoreCase);
+            }
+
+            public int GetHashCode(T obj)
+            {
+                var hashCode = -1923861349;
+                hashCode = hashCode * -1521134295 + obj.ItemSpec.GetHashCode();
+                hashCode = hashCode * -1521134295 + obj.GetMetadata(MetadataKeys.Version).GetHashCode();
+                return hashCode;
+            }
         }
 
         private RuntimePatchRequest GetRuntimePatchRequest(ITaskItem frameworkReference)
@@ -501,12 +707,53 @@ namespace Microsoft.NET.Build.Tasks
             //  The framework name to write to the runtimeconfig file (and the name of the folder under dotnet/shared)
             public string RuntimeFrameworkName => _item.GetMetadata(MetadataKeys.RuntimeFrameworkName);
             public string DefaultRuntimeFrameworkVersion => _item.GetMetadata("DefaultRuntimeFrameworkVersion");
-            public string LatestRuntimeFrameworkVersion => _item.GetMetadata("LatestRuntimeFrameworkVersion");
 
             //  The ID of the targeting pack NuGet package to reference
             public string TargetingPackName => _item.GetMetadata("TargetingPackName");
             public string TargetingPackVersion => _item.GetMetadata("TargetingPackVersion");
             public string TargetingPackFormat => _item.GetMetadata("TargetingPackFormat");
+
+            public string RuntimePackRuntimeIdentifiers => _item.GetMetadata(MetadataKeys.RuntimePackRuntimeIdentifiers);
+
+            public bool IsWindowsOnly => _item.HasMetadataValue("IsWindowsOnly", "true");
+            
+            public bool RuntimePackAlwaysCopyLocal =>
+                _item.HasMetadataValue(MetadataKeys.RuntimePackAlwaysCopyLocal, "true");
+
+            public string Profile => _item.GetMetadata("Profile");
+
+            public NuGetFramework TargetFramework { get; }
+
+            public KnownRuntimePack ToKnownRuntimePack()
+            {
+                return new KnownRuntimePack(_item);
+            }
+        }
+
+        private struct KnownRuntimePack
+        {
+            ITaskItem _item;
+
+            public KnownRuntimePack(ITaskItem item)
+            {
+                _item = item;
+                TargetFramework = NuGetFramework.Parse(item.GetMetadata("TargetFramework"));
+                string runtimePackLabels = item.GetMetadata(MetadataKeys.RuntimePackLabels);
+                if (string.IsNullOrEmpty(runtimePackLabels))
+                {
+                    RuntimePackLabels = Array.Empty<string>();
+                }
+                else
+                {
+                    RuntimePackLabels = runtimePackLabels.Split(';');
+                }
+            }
+
+            //  The name / itemspec of the FrameworkReference used in the project
+            public string Name => _item.ItemSpec;
+
+            ////  The framework name to write to the runtimeconfig file (and the name of the folder under dotnet/shared)
+            public string LatestRuntimeFrameworkVersion => _item.GetMetadata("LatestRuntimeFrameworkVersion");
 
             public string RuntimePackNamePatterns => _item.GetMetadata("RuntimePackNamePatterns");
 
@@ -516,7 +763,10 @@ namespace Microsoft.NET.Build.Tasks
 
             public bool IsWindowsOnly => _item.HasMetadataValue("IsWindowsOnly", "true");
 
-            public string Profile => _item.GetMetadata("Profile");
+            public bool RuntimePackAlwaysCopyLocal =>
+                _item.HasMetadataValue(MetadataKeys.RuntimePackAlwaysCopyLocal, "true");
+
+            public string[] RuntimePackLabels { get; }
 
             public NuGetFramework TargetFramework { get; }
         }

@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             //   Replace the 'TargetFramework'
             ChangeProjectTargetFramework(Path.Combine(testInstance.Path, $"{testAppName}.csproj"), target);
 
-            var buildCommand = new BuildCommand(Log, testInstance.Path);
+            var buildCommand = new BuildCommand(testInstance);
 
             buildCommand
                 .Execute()
@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             //   Replace the 'TargetFramework'
             ChangeProjectTargetFramework(Path.Combine(testInstance.Path, $"{testAppName}.csproj"), target);
 
-            new BuildCommand(Log, testInstance.Path)
+            new BuildCommand(testInstance)
                 .Execute()
                 .Should().Pass();
 
@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
 
             NuGetConfigWriter.Write(testInstance.Path, TestContext.Current.TestPackages);
 
-            new RestoreCommand(Log, testInstance.Path)
+            new RestoreCommand(testInstance)
                 .Execute()
                 .Should()
                 .Pass();

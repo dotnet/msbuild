@@ -246,7 +246,7 @@ namespace Microsoft.NET.ToolPack.Tests
 
             _testRoot = helloWorldAsset.TestRoot;
 
-            var buildCommand = new BuildCommand(Log, helloWorldAsset.TestRoot);
+            var buildCommand = new BuildCommand(helloWorldAsset);
             buildCommand.Execute().Should().Pass();
 
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
@@ -270,7 +270,7 @@ namespace Microsoft.NET.ToolPack.Tests
         {
             var testAsset = CreateTestAsset(multiTarget, nameof(It_contains_shim_with_no_build) + multiTarget + targetFramework, targetFramework);
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
 
             var packCommand = new PackCommand(Log, testAsset.TestRoot);
@@ -333,7 +333,7 @@ namespace Microsoft.NET.ToolPack.Tests
 
             var testRoot = helloWorldAsset.TestRoot;
 
-            var buildCommand = new BuildCommand(Log, helloWorldAsset.TestRoot);
+            var buildCommand = new BuildCommand(helloWorldAsset);
             buildCommand.Execute("/p:PackageId=wrongpackagefirstbuild");
 
             var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);

@@ -78,7 +78,7 @@ namespace Microsoft.NET.Publish.Tests
                     $"/p:TargetFramework={TargetFramework}",
                     $"/p:RuntimeIdentifier={runtimeIdentifier}"};
 
-            var restoreCommand = new RestoreCommand(Log, testAsset.TestRoot);
+            var restoreCommand = new RestoreCommand(testAsset);
 
             restoreCommand.Execute(msbuildArgs);
 
@@ -145,7 +145,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var projectRoot = Path.Combine(testAsset.TestRoot, "main");
 
-            new RestoreCommand(Log, projectRoot).Execute(args);
+            new RestoreCommand(testAsset, "main").Execute(args);
 
             new PublishCommand(Log, projectRoot)
                 .Execute(args)

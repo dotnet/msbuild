@@ -226,7 +226,7 @@
         public string ExePath
         {
             get {
-#if NET46
+#if NET472
                 if (string.IsNullOrEmpty(m_exePath))
                 {
                     // if path is not set, we optimize to latest version of msdeploy
@@ -797,7 +797,7 @@
                                 MsDeploy.Utility.BuildArgumentsBaseOnEnumTypeName(item, arguments, typeof(MsDeploy.ExistingDeclareParameterMetadata), valueQuote);
                                 if (arguments.Count > 0 && !string.IsNullOrEmpty(data))
                                 {
-#if NET46
+#if NET472
                                     arguments.Add(string.Concat(MsDeploy.ExistingSyncParameterMetadata.Value.ToString().ToLower(System.Globalization.CultureInfo.InvariantCulture),
                                                             "=", MsDeploy.Utility.PutValueInQuote(data, valueQuote)));
 #else

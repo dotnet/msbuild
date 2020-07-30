@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
 
             NuGetConfigWriter.Write(testInstance.Path, TestContext.Current.TestPackages);
 
-            new RestoreCommand(Log, testInstance.Path)
+            new RestoreCommand(testInstance)
                 .Execute()
                 .Should()
                 .Pass();
@@ -107,7 +107,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
 
             NuGetConfigWriter.Write(testInstance.Path, TestContext.Current.TestPackages);
 
-            new RestoreCommand(Log, testInstance.Path)
+            new RestoreCommand(testInstance)
                 .Execute()
                 .Should()
                 .Pass();

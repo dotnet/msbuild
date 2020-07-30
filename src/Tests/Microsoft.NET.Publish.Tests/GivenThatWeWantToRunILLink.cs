@@ -100,6 +100,86 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Theory]
+        [InlineData("net5.0")]
+        public void PrepareForILLink_can_set_IsTrimmable(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => SetIsTrimmable(project, referenceProjectName));
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true").Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+
+            var publishedDll = Path.Combine(publishDirectory, $"{projectName}.dll");
+            var unusedIsTrimmableDll = Path.Combine(publishDirectory, $"{referenceProjectName}.dll");
+
+            File.Exists(publishedDll).Should().BeTrue();
+            // Check that the unused trimmable assembly was removed
+            File.Exists(unusedIsTrimmableDll).Should().BeFalse();
+        }
+
+        [Theory]
+        [InlineData("net5.0")]
+        public void PrepareForILLink_can_set_TrimMode(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => SetTrimMode(project, referenceProjectName, "link"));
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true").Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+
+            var publishedDll = Path.Combine(publishDirectory, $"{projectName}.dll");
+            var unusedTrimModeLinkDll = Path.Combine(publishDirectory, $"{referenceProjectName}.dll");
+
+            File.Exists(publishedDll).Should().BeTrue();
+            // Check that the unused "link" assembly was removed.
+            File.Exists(unusedTrimModeLinkDll).Should().BeFalse();
+        }
+
+        [Theory]
+        [InlineData("net5.0")]
+        public void ILLink_respects_global_TrimMode(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => SetGlobalTrimMode(project, "link"))
+                .WithProjectChanges(project => SetIsTrimmable(project, referenceProjectName))
+                .WithProjectChanges(project => AddRootDescriptor(project, $"{referenceProjectName}.xml"));
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true").Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+
+            var publishedDll = Path.Combine(publishDirectory, $"{projectName}.dll");
+            var isTrimmableDll = Path.Combine(publishDirectory, $"{referenceProjectName}.dll");
+
+            File.Exists(publishedDll).Should().BeTrue();
+            File.Exists(isTrimmableDll).Should().BeTrue();
+            // Check that the assembly was trimmed at the member level
+            DoesImageHaveMethod(isTrimmableDll, "UnusedMethodToRoot").Should().BeTrue();
+            DoesImageHaveMethod(isTrimmableDll, "UnusedMethod").Should().BeFalse();
+        }
+
+
+        [Theory]
         [InlineData("netcoreapp3.0")]
         public void ILLink_accepts_root_descriptor(string targetFramework)
         {
@@ -138,20 +218,85 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData("_TrimmerBeforeFieldInit")]
         [InlineData("_TrimmerOverrideRemoval")]
         [InlineData("_TrimmerUnreachableBodies")]
-        [InlineData("_TrimmerClearInitLocals")]
         [InlineData("_TrimmerUnusedInterfaces")]
         [InlineData("_TrimmerIPConstProp")]
         [InlineData("_TrimmerSealer")]
         public void ILLink_error_on_nonboolean_optimization_flag(string property)
         {
             var projectName = "HelloWorld";
+            var targetFramework = "net5.0";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
-            var testProject = CreateTestProjectForILLinkTesting("net5.0", projectName);
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: property);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
-            publishCommand.Execute("/p:PublishTrimmed=true", $"/p:SelfContained=true", "/p:PublishTrimmed=true", $"/p:{property}=NonBool")
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", $"/p:{property}=NonBool")
                 .Should().Fail().And.HaveStdOutContaining("MSB4030");
+        }
+
+        [Fact]
+        public void ILLink_respects_feature_settings_from_host_config()
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var targetFramework = "net5.0";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            // Set up a conditional feature substitution for the "FeatureDisabled" property
+            AddFeatureDefinition(testProject, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => EnableNonFrameworkTrimming(project))
+                .WithProjectChanges(project => EmbedSubstitutions(project))
+                // Set a matching RuntimeHostConfigurationOption, with Trim = "true"
+                .WithProjectChanges(project => AddRuntimeConfigOption(project, trim: true))
+                .WithProjectChanges(project => AddRootDescriptor(project, $"{referenceProjectName}.xml"));
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true",
+                                    $"/p:_ExtraTrimmerArgs=-p link {referenceProjectName}").Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var referenceDll = Path.Combine(publishDirectory, $"{referenceProjectName}.dll");
+
+            File.Exists(referenceDll).Should().BeTrue();
+            DoesImageHaveMethod(referenceDll, "FeatureAPI").Should().BeTrue();
+            DoesImageHaveMethod(referenceDll, "get_FeatureDisabled").Should().BeTrue();
+            // Check that this method is removed when the feature is disabled
+            DoesImageHaveMethod(referenceDll, "FeatureImplementation").Should().BeFalse();
+        }
+
+        [Fact]
+        public void ILLink_ignores_host_config_settings_with_link_false()
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var targetFramework = "net5.0";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            // Set up a conditional feature substitution for the "FeatureDisabled" property
+            AddFeatureDefinition(testProject, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => EnableNonFrameworkTrimming(project))
+                .WithProjectChanges(project => EmbedSubstitutions(project))
+                // Set a matching RuntimeHostConfigurationOption, with Trim = "false"
+                .WithProjectChanges(project => AddRuntimeConfigOption(project, trim: false))
+                .WithProjectChanges(project => AddRootDescriptor(project, $"{referenceProjectName}.xml"));
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true",
+                                    $"/p:_ExtraTrimmerArgs=-p link {referenceProjectName}").Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var referenceDll = Path.Combine(publishDirectory, $"{referenceProjectName}.dll");
+
+            File.Exists(referenceDll).Should().BeTrue();
+            DoesImageHaveMethod(referenceDll, "FeatureAPI").Should().BeTrue();
+            DoesImageHaveMethod(referenceDll, "get_FeatureDisabled").Should().BeTrue();
+            // Check that the feature substitution did not apply
+            DoesImageHaveMethod(referenceDll, "FeatureImplementation").Should().BeTrue();
         }
 
         [Theory]
@@ -268,6 +413,129 @@ namespace Microsoft.NET.Publish.Tests
 
             // "linked" intermediate directory does not pollute the publish output
             Directory.Exists(Path.Combine(publishDirectory, "linked")).Should().BeFalse();
+        }
+
+        [Theory]
+        [InlineData("netcoreapp3.0")]
+        public void ILLink_keeps_symbols_by_default(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => EnableNonFrameworkTrimming(project));
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true").Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var intermediateDirectory = publishCommand.GetIntermediateDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var linkedDirectory = Path.Combine(intermediateDirectory, "linked");
+
+            var intermediatePdb = Path.Combine(intermediateDirectory, $"{projectName}.pdb");
+            var linkedPdb = Path.Combine(linkedDirectory, $"{projectName}.pdb");
+            var publishedPdb = Path.Combine(publishDirectory, $"{projectName}.pdb");
+
+            File.Exists(linkedPdb).Should().BeTrue();
+
+            var intermediatePdbSize = new FileInfo(intermediatePdb).Length;
+            var linkedPdbSize = new FileInfo(linkedPdb).Length;
+            var publishPdbSize = new FileInfo(publishedPdb).Length;
+
+            linkedPdbSize.Should().BeLessThan(intermediatePdbSize);
+            publishPdbSize.Should().Be(linkedPdbSize);
+        }
+
+        [Theory]
+        [InlineData("netcoreapp3.0")]
+        public void ILLink_removes_symbols_when_debugger_support_is_disabled(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => EnableNonFrameworkTrimming(project));
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:DebuggerSupport=false").Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var intermediateDirectory = publishCommand.GetIntermediateDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var linkedDirectory = Path.Combine(intermediateDirectory, "linked");
+
+            var intermediatePdb = Path.Combine(intermediateDirectory, $"{projectName}.pdb");
+            var linkedPdb = Path.Combine(linkedDirectory, $"{projectName}.pdb");
+            var publishedPdb = Path.Combine(publishDirectory, $"{projectName}.pdb");
+
+            File.Exists(intermediatePdb).Should().BeTrue();
+            File.Exists(linkedPdb).Should().BeFalse();
+            File.Exists(publishedPdb).Should().BeFalse();
+        }
+
+        [Theory]
+        [InlineData("netcoreapp3.0")]
+        public void ILLink_accepts_option_to_remove_symbols(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => EnableNonFrameworkTrimming(project));
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:TrimmerRemoveSymbols=true").Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var intermediateDirectory = publishCommand.GetIntermediateDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var linkedDirectory = Path.Combine(intermediateDirectory, "linked");
+
+            var intermediatePdb = Path.Combine(intermediateDirectory, $"{projectName}.pdb");
+            var linkedPdb = Path.Combine(linkedDirectory, $"{projectName}.pdb");
+            var publishedPdb = Path.Combine(publishDirectory, $"{projectName}.pdb");
+
+            File.Exists(intermediatePdb).Should().BeTrue();
+            File.Exists(linkedPdb).Should().BeFalse();
+            File.Exists(publishedPdb).Should().BeFalse();
+        }
+
+        [Theory]
+        [InlineData("netcoreapp3.0")]
+        public void ILLink_symbols_option_can_override_defaults_from_debugger_support(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var referenceProjectName = "ClassLibForILLink";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => EnableNonFrameworkTrimming(project));
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true",
+                                    "/p:DebuggerSupport=false", "/p:TrimmerRemoveSymbols=false").Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var intermediateDirectory = publishCommand.GetIntermediateDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var linkedDirectory = Path.Combine(intermediateDirectory, "linked");
+
+            var intermediatePdb = Path.Combine(intermediateDirectory, $"{projectName}.pdb");
+            var linkedPdb = Path.Combine(linkedDirectory, $"{projectName}.pdb");
+            var publishedPdb = Path.Combine(publishDirectory, $"{projectName}.pdb");
+
+            File.Exists(linkedPdb).Should().BeTrue();
+
+            var intermediatePdbSize = new FileInfo(intermediatePdb).Length;
+            var linkedPdbSize = new FileInfo(linkedPdb).Length;
+            var publishPdbSize = new FileInfo(publishedPdb).Length;
+
+            linkedPdbSize.Should().BeLessThan(intermediatePdbSize);
+            publishPdbSize.Should().Be(linkedPdbSize);
         }
 
         [Theory]
@@ -428,6 +696,44 @@ namespace Microsoft.NET.Publish.Tests
                 .HaveStdOutContaining(Strings.PublishTrimmedRequiresVersion30);
         }
 
+        private void SetIsTrimmable(XDocument project, string assemblyName)
+        {
+            var ns = project.Root.Name.Namespace;
+
+            var target = new XElement(ns + "Target",
+                                      new XAttribute("BeforeTargets", "PrepareForILLink"),
+                                      new XAttribute("Name", "SetIsTrimmable"));
+            project.Root.Add(target);
+            target.Add(new XElement(ns + "ItemGroup",
+                       new XElement("ManagedAssemblyToLink",
+                                    new XAttribute("Condition", $"'%(FileName)' == '{assemblyName}'"),
+                                    new XElement("IsTrimmable", "true"))));
+        }
+
+        private void SetTrimMode(XDocument project, string assemblyName, string trimMode)
+        {
+            var ns = project.Root.Name.Namespace;
+
+            var target = new XElement(ns + "Target",
+                                      new XAttribute("BeforeTargets", "PrepareForILLink"),
+                                      new XAttribute("Name", "SetTrimMode"));
+            project.Root.Add(target);
+            target.Add(new XElement(ns + "ItemGroup",
+                       new XElement("ManagedAssemblyToLink",
+                                    new XAttribute("Condition", $"'%(FileName)' == '{assemblyName}'"),
+                                    new XElement("TrimMode", trimMode))));
+        }
+
+        private void SetGlobalTrimMode(XDocument project, string trimMode)
+        {
+            var ns = project.Root.Name.Namespace;
+
+            var properties = new XElement(ns + "PropertyGroup");
+            project.Root.Add(properties);
+            properties.Add(new XElement(ns + "TrimMode",
+                                        trimMode));
+        }
+
         private void EnableNonFrameworkTrimming(XDocument project)
         {
             // Used to override the default linker options for testing
@@ -435,23 +741,57 @@ namespace Microsoft.NET.Publish.Tests
             // but we want to ensure that the linker is running
             // end-to-end by checking that it strips code from our
             // test projects.
-
+            SetGlobalTrimMode(project, "link");
             var ns = project.Root.Name.Namespace;
 
             var target = new XElement(ns + "Target",
-                                      new XAttribute("AfterTargets", "_SetILLinkDefaults"),
+                                      new XAttribute("BeforeTargets", "PrepareForILLink"),
                                       new XAttribute("Name", "_EnableNonFrameworkTrimming"));
             project.Root.Add(target);
-            target.Add(new XElement(ns + "PropertyGroup",
-                                     new XElement("_TrimmerDefaultAction", "link")));
-            target.Add(new XElement(ns + "ItemGroup",
-                                    new XElement("TrimmerRootAssembly",
-                                                 new XAttribute("Remove", "@(TrimmerRootAssembly)")),
-                                    new XElement("TrimmerRootAssembly",
-                                                 new XAttribute("Include", "@(IntermediateAssembly->'%(FileName)')")),
-                                    new XElement("_ManagedAssembliesToLink",
-                                                 new XAttribute("Update", "@(_ManagedAssembliesToLink)"),
-                                                 new XElement("action"))));
+            var items = new XElement(ns + "ItemGroup");
+            target.Add(items);
+            items.Add(new XElement("ManagedAssemblyToLink",
+                                   new XElement("Condition", "true"),
+                                   new XElement("IsTrimmable", "true")));
+            items.Add(new XElement(ns + "TrimmerRootAssembly",
+                                   new XAttribute("Include", "@(IntermediateAssembly->'%(FileName)')")));
+        }
+
+        static readonly string substitutionsFilename = "ILLink.Substitutions.xml";
+
+        private void EmbedSubstitutions(XDocument project)
+        {
+            var ns = project.Root.Name.Namespace;
+
+            project.Root.Add (new XElement(ns + "ItemGroup",
+                                new XElement("EmbeddedResource",
+                                    new XAttribute("Include", substitutionsFilename),
+                                    new XElement("LogicalName", substitutionsFilename))));
+        }
+
+        private void AddFeatureDefinition(TestProject testProject, string referenceAssemblyName)
+        {
+            // Add a feature definition that replaces the FeatureDisabled property when DisableFeature is true.
+            testProject.EmbeddedResources[substitutionsFilename] = $@"
+<linker>
+  <assembly fullname=""{referenceAssemblyName}"" feature=""DisableFeature"" featurevalue=""true"">
+    <type fullname=""ClassLib"">
+      <method signature=""System.Boolean get_FeatureDisabled()"" body=""stub"" value=""true"" />
+    </type>
+  </assembly>
+</linker>
+";
+        }
+
+        private void AddRuntimeConfigOption(XDocument project, bool trim)
+        {
+            var ns = project.Root.Name.Namespace;
+
+            project.Root.Add (new XElement(ns + "ItemGroup",
+                                new XElement("RuntimeHostConfigurationOption",
+                                    new XAttribute("Include", "DisableFeature"),
+                                    new XAttribute("Value", "true"),
+                                    new XAttribute("Trim", trim.ToString ()))));
         }
 
         private TestProject CreateTestProjectForILLinkTesting(
@@ -487,7 +827,10 @@ public class Program
             var referenceProject = new TestProject()
             {
                 Name = referenceProjectName,
-                TargetFrameworks = targetFramework,
+                // NOTE: If using a package reference for the reference project, it will be retrieved
+                // from the nuget cache. Set the reference project TFM to the lowest common denominator
+                // of these tests to prevent conflicts.
+                TargetFrameworks = usePackageReference ? "netcoreapp3.0" : targetFramework,
                 IsSdkProject = true
             };
             referenceProject.SourceFiles[$"{referenceProjectName}.cs"] = @"
@@ -499,6 +842,20 @@ public class ClassLib
     }
 
     public void UnusedMethodToRoot()
+    {
+    }
+
+    public static bool FeatureDisabled { get; }
+
+    public static void FeatureAPI()
+    {
+        if (FeatureDisabled)
+            return;
+
+        FeatureImplementation();
+    }
+
+    public static void FeatureImplementation()
     {
     }
 }
@@ -523,6 +880,7 @@ public class ClassLib
   <assembly fullname=""{referenceProjectName}"">
     <type fullname=""ClassLib"">
       <method name=""UnusedMethodToRoot"" />
+      <method name=""FeatureAPI"" />
     </type>
   </assembly>
 </linker>

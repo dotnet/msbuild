@@ -8,6 +8,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.TestFramework
 {
@@ -17,9 +18,12 @@ namespace Microsoft.NET.TestFramework
 
         private List<String> TestDestinationDirectories { get; } = new List<string>();
 
-        public TestAssetsManager()
+        protected ITestOutputHelper Log { get; }
+
+        public TestAssetsManager(ITestOutputHelper log)
         {
             var testAssetsDirectory = TestContext.Current.TestAssetsDirectory;
+            Log = log;
 
             if (!Directory.Exists(testAssetsDirectory))
             {
@@ -41,7 +45,7 @@ namespace Microsoft.NET.TestFramework
                 GetTestDestinationDirectoryPath(testProjectName, callingMethod, identifier);
             TestDestinationDirectories.Add(testDestinationDirectory);
 
-            var testAsset = new TestAsset(testProjectDirectory, testDestinationDirectory, TestContext.Current.SdkVersion);
+            var testAsset = new TestAsset(testProjectDirectory, testDestinationDirectory, TestContext.Current.SdkVersion, Log);
             return testAsset;
         }
 
@@ -55,7 +59,8 @@ namespace Microsoft.NET.TestFramework
                 GetTestDestinationDirectoryPath(testProject.Name, callingMethod, identifier);
             TestDestinationDirectories.Add(testDestinationDirectory);
 
-            var testAsset = new TestAsset(testDestinationDirectory, TestContext.Current.SdkVersion);
+            var testAsset = new TestAsset(testDestinationDirectory, TestContext.Current.SdkVersion, Log);
+            testAsset.TestProject = testProject;
 
             Stack<TestProject> projectStack = new Stack<TestProject>();
             projectStack.Push(testProject);

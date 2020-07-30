@@ -184,6 +184,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 "--help",
                 "--no-service-endpoint",
                 "--no-symbols",
+                "--skip-duplicate",
                 "--source",
                 "--symbol-api-key",
                 "--symbol-source",

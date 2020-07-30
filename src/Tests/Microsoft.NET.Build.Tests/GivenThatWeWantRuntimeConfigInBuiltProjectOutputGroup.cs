@@ -66,7 +66,7 @@ namespace Microsoft.NET.Build.Tests
             };
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
-            new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new BuildCommand(testAsset)
                 .Execute("/property:Configuration=Release")
                 .Should()
                 .Pass();
@@ -88,7 +88,7 @@ namespace Microsoft.NET.Build.Tests
                 propertyGroup.Add(new XElement(ns + "ThreadPoolMinThreads", "2"));
             });
 
-            new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new BuildCommand(testAsset)
                 .Execute("/property:Configuration=Release")
                 .Should()
                 .Pass();
@@ -122,7 +122,7 @@ namespace Microsoft.NET.Build.Tests
                 propertyGroup.Add(new XElement(ns + "ThreadPoolMinThreads", "3"));
             });
 
-            new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new BuildCommand(testAsset)
                 .Execute("/property:Configuration=Release")
                 .Should()
                 .Pass();
@@ -144,7 +144,7 @@ namespace Microsoft.NET.Build.Tests
                 propertyGroup.Add(new XElement(ns + "ThreadPoolMinThreads", "2"));
             });
 
-            new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new BuildCommand(testAsset)
                 .Execute("/property:Configuration=Release")
                 .Should()
                 .Pass();

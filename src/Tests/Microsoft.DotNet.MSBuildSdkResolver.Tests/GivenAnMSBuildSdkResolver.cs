@@ -13,6 +13,7 @@ using Xunit;
 using Xunit.Abstractions;
 using System;
 using Microsoft.NET.TestFramework;
+using System.Linq;
 
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
 
@@ -49,6 +50,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             result.Success.Should().BeFalse();
             result.Path.Should().BeNull();
+            result.AdditionalPaths.Should().BeNull();
             result.Version.Should().BeNull();
             result.Warnings.Should().BeNullOrEmpty();
             result.Errors.Should().NotBeEmpty();
@@ -72,6 +74,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             result.Success.Should().BeTrue();
             result.Path.Should().Be(expected.FullName);
+            result.AdditionalPaths.Should().BeNull();
             result.Version.Should().Be("99.99.98");
             result.Warnings.Should().BeNullOrEmpty();
             result.Errors.Should().BeNullOrEmpty();
@@ -92,6 +95,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             result.Success.Should().BeFalse();
             result.Path.Should().BeNull();
+            result.AdditionalPaths.Should().BeNull();
             result.Version.Should().BeNull();
             result.Warnings.Should().BeNullOrEmpty();
             result.Errors.Should().Contain(string.Format(Strings.NETCoreSDKSmallerThanMinimumRequestedVersion, "99.99.99", "999.99.99"));
@@ -117,6 +121,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             result.Success.Should().BeFalse();
             result.Path.Should().BeNull();
+            result.AdditionalPaths.Should().BeNull();
             result.Version.Should().BeNull();
             result.Warnings.Should().BeNullOrEmpty();
             result.Errors.Should().Contain(string.Format(Strings.MSBuildSmallerThanMinimumVersion, "99.99.99", "2.0", "1.0"));
@@ -150,6 +155,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             result.Success.Should().BeTrue();
             result.Path.Should().Be((disallowPreviews ? compatibleRtm : compatiblePreview).FullName);
+            result.AdditionalPaths.Should().BeNull();
             result.Version.Should().Be(disallowPreviews ? "98.98.98" : "99.99.99-preview");
             result.Warnings.Should().BeNullOrEmpty();
             result.Errors.Should().BeNullOrEmpty();
@@ -184,6 +190,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             result.Success.Should().BeFalse();
             result.Path.Should().BeNull();
+            result.AdditionalPaths.Should().BeNull();
             result.Version.Should().BeNull();;
             result.Warnings.Should().BeNullOrEmpty();
             result.Errors.Should().NotBeEmpty();
@@ -205,6 +212,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             result.Success.Should().BeFalse();
             result.Path.Should().BeNull();
+            result.AdditionalPaths.Should().BeNull();
             result.Version.Should().BeNull();
             result.Warnings.Should().BeNullOrEmpty();
             result.Errors.Should().Contain(string.Format(Strings.NETCoreSDKSmallerThanMinimumVersionRequiredByVisualStudio, "1.0.1", "1.0.4"));
@@ -227,6 +235,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             result.Success.Should().BeFalse();
             result.Path.Should().BeNull();
+            result.AdditionalPaths.Should().BeNull();
             result.Version.Should().BeNull();
             result.Warnings.Should().BeNullOrEmpty();
             result.Errors.Should().Contain(string.Format(Strings.NETCoreSDKSmallerThanMinimumVersionRequiredByVisualStudio, "1.0.1", "2.0.0"));
@@ -248,6 +257,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             result.Success.Should().BeTrue();
             result.Path.Should().Be(expected.FullName);
+            result.AdditionalPaths.Should().BeNull();
             result.Version.Should().Be("99.99.99");
             result.Warnings.Should().BeNullOrEmpty();
             result.Errors.Should().BeNullOrEmpty();
@@ -269,6 +279,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             result.Success.Should().BeTrue();
             result.Path.Should().Be(expected.FullName);
+            result.AdditionalPaths.Should().BeNull();
             result.Version.Should().Be("999.99.99");
             result.Warnings.Should().BeNullOrEmpty();
             result.Errors.Should().BeNullOrEmpty();
@@ -295,6 +306,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             result.Success.Should().BeTrue();
             result.Path.Should().Be(expected.FullName);
+            result.AdditionalPaths.Should().BeNull();
             result.Version.Should().Be(disallowPreviewsByDefault ? "10.0.0" : "11.0.0-preview1");
             result.Warnings.Should().BeNullOrEmpty();
             result.Errors.Should().BeNullOrEmpty();
@@ -322,6 +334,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             result.Success.Should().BeTrue();
             result.Path.Should().Be(expected.FullName);
+            result.AdditionalPaths.Should().BeNull();
             result.Version.Should().Be(disallowPreviews ? "10.0.0" : "11.0.0-preview1");
             result.Warnings.Should().BeNullOrEmpty();
             result.Errors.Should().BeNullOrEmpty();
@@ -353,6 +366,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                     var expected = disallowPreviews ? rtm : preview;
                     result.Success.Should().BeTrue(m);
                     result.Path.Should().Be(expected.FullName, m);
+                    result.AdditionalPaths.Should().BeNull();
                     result.Version.Should().Be(disallowPreviews ? "10.0.0" : "11.0.0-preview1", m);
                     result.Warnings.Should().BeNullOrEmpty(m);
                     result.Errors.Should().BeNullOrEmpty(m);
@@ -394,6 +408,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             result.Success.Should().BeTrue();
             result.Path.Should().Be(preview.FullName);
+            result.AdditionalPaths.Should().BeNull();
             result.Version.Should().Be("11.0.0-preview1");
             result.Warnings.Should().BeNullOrEmpty();
             result.Errors.Should().BeNullOrEmpty();
@@ -422,6 +437,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             result.Success.Should().BeTrue();
             result.Path.Should().Be(expected.FullName);
+            result.AdditionalPaths.Should().BeNull();
             result.Version.Should().Be(vsSettings.DisallowPrerelease() ? "10.0.0" : "11.0.0-preview1");
             result.Warnings.Should().BeNullOrEmpty();
             result.Errors.Should().BeNullOrEmpty();
@@ -613,6 +629,10 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             public override SdkResult IndicateSuccess(string path, string version, IEnumerable<string> warnings = null)
                 => new MockResult(success: true, path: path, version: version, warnings: warnings);
+
+            public override SdkResult IndicateSuccess(IEnumerable<string> paths, string version,
+                IDictionary<string, string> propertiesToAdd = null, IDictionary<string, SdkResultItem> itemsToAdd = null,
+                IEnumerable<string> warnings = null) => new MockResult(success: true, paths: paths, version: version, propertiesToAdd, itemsToAdd, warnings);
         }
 
         private sealed class MockResult : SdkResult
@@ -627,9 +647,34 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 Errors = errors;
             }
 
+            public MockResult(bool success, IEnumerable<string> paths, string version, 
+                IDictionary<string, string> propertiesToAdd, IDictionary<string, SdkResultItem> itemsToAdd, IEnumerable<string> warnings)
+            {
+                Success = success;
+                if (paths != null)
+                {
+                    var firstPath = paths.FirstOrDefault();
+                    if (firstPath != null)
+                    {
+                        Path = firstPath;
+                    }
+                    if (paths.Count() > 1)
+                    {
+                        AdditionalPaths = paths.Skip(1).ToList();
+                    }
+                }
+                Version = version;
+                Warnings = warnings;
+                PropertiesToAdd = propertiesToAdd;
+                ItemsToAdd = itemsToAdd;
+            }
+
             public override bool Success { get; protected set; }
             public override string Version { get; protected set; }
             public override string Path { get; protected set; }
+            public override IList<string> AdditionalPaths { get; set; }
+            public override IDictionary<string, string> PropertiesToAdd { get; protected set; }
+            public override IDictionary<string, SdkResultItem> ItemsToAdd { get; protected set; }
             public IEnumerable<string> Errors { get; }
             public IEnumerable<string> Warnings { get; }
         }

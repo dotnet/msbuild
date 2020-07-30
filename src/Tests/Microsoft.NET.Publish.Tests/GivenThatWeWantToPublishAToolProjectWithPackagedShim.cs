@@ -60,7 +60,7 @@ namespace Microsoft.NET.Publish.Tests
         public void It_contains_dependencies_shims_with_no_build()
         {
             var testAsset = SetupTestAsset();
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute();
 
             var publishCommand = new PublishCommand(Log, testAsset.TestRoot);

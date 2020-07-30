@@ -38,7 +38,7 @@ namespace Microsoft.NET.Build.Tests
                 });
 
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute(new[] { "/v:d", $"/p:Configuration={configuration}" })
                 .Should().HaveStdOutContaining($"$(ImplicitConfigurationDefine)=\"{expected}\"");

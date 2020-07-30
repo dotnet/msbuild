@@ -40,7 +40,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("HelloWorld", identifier: Path.DirectorySeparatorChar + attributeToOptOut)
                 .WithSource();
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute(
                     "/p:Version=1.2.3-beta",
@@ -263,7 +263,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("HelloWorld", identifier: targetFramework)
                 .WithSource();
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute($"/p:OutputType=Library", $"/p:TargetFramework={targetFramework}", $"/p:VersionPrefix=1.2.3")
                 .Should()
@@ -303,7 +303,7 @@ namespace Microsoft.NET.Build.Tests
 
             BuildCommand BuildProject(string versionPrefix)
             {
-                var command = new BuildCommand(Log, testAsset.TestRoot);
+                var command = new BuildCommand(testAsset);
                 command.Execute($"/p:OutputType=Library", $"/p:TargetFramework={targetFramework}", $"/p:VersionPrefix={versionPrefix}")
                        .Should()
                        .Pass();
@@ -342,7 +342,7 @@ namespace Microsoft.NET.Build.Tests
 
             BuildCommand BuildProject(string buildNumber)
             {
-                var command = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, "TestLibrary"));
+                var command = new BuildCommand(testAsset, "TestLibrary");
                 command.Execute($"/p:BuildNumber={buildNumber}")
                        .Should()
                        .Pass();
@@ -367,7 +367,7 @@ namespace Microsoft.NET.Build.Tests
                                 new XAttribute("Include", "Tests"))));
                 });
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
 
             var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netstandard2.0").FullName, "HelloWorld.dll");
@@ -394,7 +394,7 @@ namespace Microsoft.NET.Build.Tests
                                 new XAttribute("Include", "Tests"))));
                 });
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
 
             var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netstandard2.0").FullName, "HelloWorld.dll");
@@ -420,7 +420,7 @@ namespace Microsoft.NET.Build.Tests
                                 new XAttribute("Key", "00240000048000009400000006020000002400005253413100040000010001001d3e6bbb36e11ea61ceff6e1022b23dd779fc6230838db2d25a2c7c8433b3fcf86b16c25b281fc3db1027c0675395e7d0548e6add88b6a811962bf958101fa9e243b1618313bee11f5e3b3fefda7b1d1226311b6cc2d07e87ff893ba6890b20082df34a0aac14b605b8be055e81081a626f8c69e9ed4bbaa4eae9f94a35accd2"))));
                 });
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
 
             var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netstandard2.0").FullName, "HelloWorld.dll");
@@ -447,7 +447,7 @@ namespace Microsoft.NET.Build.Tests
                                 new XAttribute("Include", "Tests"))));
                 });
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
 
             var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netstandard2.0").FullName, "HelloWorld.dll");
@@ -473,7 +473,7 @@ namespace Microsoft.NET.Build.Tests
                                 new XAttribute("Value", "MetadataValue"))));
                 });
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
 
             var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netstandard2.0").FullName, "HelloWorld.dll");
@@ -501,7 +501,7 @@ namespace Microsoft.NET.Build.Tests
                                 new XAttribute("Value", "MetadataValue"))));
                 });
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
 
             var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netstandard2.0").FullName, "HelloWorld.dll");
@@ -537,7 +537,7 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: referenceAspNetCore.ToString() + referenceExtensionsUserSecrets.ToString())
                 .Restore(Log, testProject.Name);
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand.Execute()
                 .Should()
@@ -585,7 +585,7 @@ namespace Microsoft.NET.Build.Tests
 
 </Project>
 ");
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testTestProject.Name);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand.Execute("/restore")
                 .Should()
@@ -621,12 +621,47 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
 
             var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netcoreapp3.1").FullName, testProject.Name + ".dll");
 
             AssemblyInfo.Get(assemblyPath)["AssemblyMetadataAttribute"].Should().Be("RepositoryUrl:" + fakeUrl);
+        }
+
+        [Theory]
+        [InlineData("net40", false)]
+        [InlineData("net45", true)]
+        [InlineData("netcoreapp2.1", true)]
+        public void It_does_not_write_to_undefined_assembly_metadata_attribute(string targetFramework, bool containsAttribute)
+        {
+            var fakeUrl = "fakeUrl";
+            var testProject = new TestProject()
+            {
+                Name = "RepoUrlProject",
+                IsSdkProject = true,
+                TargetFrameworks = targetFramework
+            };
+
+            testProject.AdditionalProperties["RepositoryUrl"] = fakeUrl;
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(targetFramework).FullName, testProject.Name + ".dll");
+
+            if (containsAttribute)
+            {
+                AssemblyInfo.Get(assemblyPath)["AssemblyMetadataAttribute"].Should().Be("RepositoryUrl:" + fakeUrl);
+            }
+            else
+            {
+                AssemblyInfo.Get(assemblyPath).ContainsKey("AssemblyMetadataAttribute").Should().Be(false);
+            } 
         }
     }
 }

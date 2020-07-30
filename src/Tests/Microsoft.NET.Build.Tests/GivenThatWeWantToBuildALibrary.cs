@@ -40,9 +40,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource()
                 .WithTargetFramework(targetFramework, "TestLibrary");
 
-            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
-
-            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "TestLibrary");
             buildCommand
                 .Execute()
                 .Should()
@@ -64,9 +62,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("AppWithLibrary")
                 .WithSource();
 
-            var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
-
-            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "TestLibrary");
             buildCommand
                 .Execute()
                 .Should()
@@ -164,7 +160,7 @@ namespace Microsoft.NET.Build.Tests
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
-            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "TestLibrary");
 
             buildCommand
                 .Execute()
@@ -198,7 +194,7 @@ namespace Microsoft.NET.Build.Tests
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
-            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "TestLibrary");
 
             buildCommand
                 .Execute()
@@ -241,7 +237,7 @@ namespace Microsoft.NET.Build.Tests
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
-            var buildCommand = new BuildCommand(Log, libraryProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "TestLibrary");
 
             buildCommand
                 .Execute()
@@ -394,7 +390,7 @@ namespace Microsoft.NET.Build.Tests
             definedConstants.Should().BeEquivalentTo(new[] { "DEBUG", "TRACE" }.Concat(expectedDefines).ToArray());
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("16.7.0-preview-20310-07")]
         [InlineData("net5.0", new[] { "NETCOREAPP3_1", "NET5_0" })]
         [InlineData("net6.0", new[] { "NETCOREAPP3_1", "NET5_0", "NET6_0" })]
         public void It_implicitly_defines_compilation_constants_for_the_target_framework_with_backwards_compatibility(string targetFramework, string[] expectedDefines)
@@ -421,7 +417,7 @@ namespace Microsoft.NET.Build.Tests
                     itemGroup.Add(supportedFramework);
                 });
 
-            AssertDefinedConstantsOutput(testAsset, targetFramework, new[] { "NETCOREAPP", "NET", "WINDOWS", "WINDOWS7_0" }.Concat(expectedDefines).ToArray());
+            AssertDefinedConstantsOutput(testAsset, targetFramework, new[] { "NETCOREAPP", "NET" }.Concat(expectedDefines).ToArray());
         }
 
         [Theory]
@@ -446,6 +442,44 @@ namespace Microsoft.NET.Build.Tests
                     propGroup.Add(platformIdentifier);
                     var platformVersion = new XElement(ns + "TargetPlatformVersion", targetPlatformVersion);
                     propGroup.Add(platformVersion);
+                    var disableUnnecessaryImplicitFrameworkReferencesForThisTest = new XElement(ns + "DisableImplicitFrameworkReferences", "true");
+                    propGroup.Add(disableUnnecessaryImplicitFrameworkReferencesForThisTest);
+                });
+
+            AssertDefinedConstantsOutput(testAsset, targetFramework, new[] { "NETCOREAPP", "NET", "NET5_0", "NETCOREAPP3_1" }.Concat(expectedDefines).ToArray());
+        }
+
+        [Theory]
+        [InlineData(new[] { "1.0", "1.1" }, "ios", "1.1", new[] { "IOS", "IOS1_1", "IOS1_0" })]
+        [InlineData(new[] { "11.11", "12.12", "13.13" }, "android", "12.12", new[] { "ANDROID", "ANDROID11_11", "ANDROID12_12" })]
+        [InlineData(new[] { "7.0", "8.0", "10.0.19041", "11.0.0" }, "windows", "11.0.0", new[] { "WINDOWS", "WINDOWS7_0", "WINDOWS8_0", "WINDOWS10_0_19041", "WINDOWS11_0_0" })]
+        public void It_implicitly_defines_compilation_constants_for_the_target_platform_with_backwards_compatibility(string[] supportedTargetPlatform, string targetPlatformIdentifier, string targetPlatformVersion, string[] expectedDefines)
+        {
+            var targetFramework = "net5.0";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", targetFramework)
+                .WithSource()
+                .WithTargetFramework(targetFramework)
+                .WithProjectChanges(project =>
+                {
+                    //  Manually set target plaform properties
+                    var ns = project.Root.Name.Namespace;
+                    var propGroup = new XElement(ns + "PropertyGroup");
+                    project.Root.Add(propGroup);
+
+                    var platformIdentifier = new XElement(ns + "TargetPlatformIdentifier", targetPlatformIdentifier);
+                    propGroup.Add(platformIdentifier);
+                    var platformVersion = new XElement(ns + "TargetPlatformVersion", targetPlatformVersion);
+                    propGroup.Add(platformVersion);
+                    var disableUnnecessaryImplicitFrameworkReferencesForThisTest = new XElement(ns + "DisableImplicitFrameworkReferences", "true");
+                    propGroup.Add(disableUnnecessaryImplicitFrameworkReferencesForThisTest);
+
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    project.Root.Add(itemGroup);
+                    foreach (var targetPlatform in supportedTargetPlatform)
+                    {
+                        itemGroup.Add(new XElement(ns + "SupportedTargetPlatform", new XAttribute("Include", targetPlatform)));
+                    }
                 });
 
             AssertDefinedConstantsOutput(testAsset, targetFramework, new[] { "NETCOREAPP", "NET", "NET5_0", "NETCOREAPP3_1" }.Concat(expectedDefines).ToArray());
@@ -470,6 +504,71 @@ namespace Microsoft.NET.Build.Tests
             var definedConstants = getValuesCommand.GetValues();
 
             definedConstants.Should().BeEquivalentTo(new[] { "DEBUG", "TRACE" }.Concat(expectedDefines).ToArray());
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData("netcoreapp3.1", new[] { "NETCOREAPP", "NETCOREAPP3_1" })]
+        [InlineData("net5.0", new[] { "NETCOREAPP", "NETCOREAPP3_1", "NET", "NET5_0", "WINDOWS", "WINDOWS7_0" }, "windows", "7.0")]
+        public void It_can_use_implicitly_defined_compilation_constants(string targetFramework, string[] expectedOutput, string targetPlatformIdentifier = null, string targetPlatformVersion = null)
+        {
+            var testProj = new TestProject()
+            {
+                Name = "CompilationConstants",
+                TargetFrameworks = targetFramework,
+                IsExe = true,
+                IsSdkProject = true
+            };
+            if (targetPlatformIdentifier != null)
+            {
+                testProj.AdditionalProperties["TargetPlatformIdentifier"] = targetPlatformIdentifier;
+                testProj.AdditionalProperties["TargetPlatformVersion"] = targetPlatformVersion;
+            }
+            var testAsset = _testAssetsManager.CreateTestProject(testProj);
+            File.WriteAllText(Path.Combine(testAsset.Path, testProj.Name, $"{testProj.Name}.cs"), @"
+using System;
+class Program
+{
+    static void Main(string[] args)
+    {
+        #if NETCOREAPP
+            Console.WriteLine(""NETCOREAPP"");
+        #endif
+        #if NETCOREAPP2_1
+            Console.WriteLine(""NETCOREAPP2_1"");
+        #endif
+        #if NETCOREAPP3_1
+            Console.WriteLine(""NETCOREAPP3_1"");
+        #endif
+        #if NET
+            Console.WriteLine(""NET"");
+        #endif
+        #if NET5_0
+            Console.WriteLine(""NET5_0"");
+        #endif
+        #if WINDOWS
+            Console.WriteLine(""WINDOWS"");
+        #endif
+        #if WINDOWS7_0
+            Console.WriteLine(""WINDOWS7_0"");
+        #endif
+        #if IOS
+            Console.WriteLine(""IOS"");
+        #endif
+        #if IOS7_0
+            Console.WriteLine(""IOS7_0"");
+        #endif
+    }
+}");
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.Path, testProj.Name));
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var runCommand = new RunExeCommand(Log, Path.Combine(buildCommand.GetOutputDirectory(targetFramework).FullName, $"{testProj.Name}.exe"));
+            var stdOut = runCommand.Execute().StdOut.Split(Environment.NewLine.ToCharArray()).Where(line => !string.IsNullOrWhiteSpace(line));
+            stdOut.Should().BeEquivalentTo(expectedOutput);
         }
 
         [Theory]
@@ -500,6 +599,68 @@ namespace Microsoft.NET.Build.Tests
             string targetFramework = "netcoreapp2.0;net461";
             TestInvalidTargetFramework("InvalidTargetFramework", targetFramework, useSolution,
                 $"The TargetFramework value '{targetFramework}' is not valid. To multi-target, use the 'TargetFrameworks' property instead");
+        }
+
+        [WindowsOnlyRequiresMSBuildVersionTheory("16.7.0-preview-20310-07")]
+        [InlineData("net5.0", "", false)]
+        [InlineData("net5.0", "UseWPF", true)]
+        [InlineData("net5.0", "UseWindowsForms", true)]
+        [InlineData("netcoreapp3.1", "", true)]
+        public void It_defines_target_platform_defaults_correctly(string targetFramework, string propertyName, bool defaultsDefined)
+        {
+            TestProject testProject = new TestProject()
+            {
+                Name = "TargetPlatformDefaults",
+                IsSdkProject = true,
+                TargetFrameworks = targetFramework
+            };
+
+            if (!propertyName.Equals(string.Empty))
+            {
+                testProject.AdditionalProperties[propertyName] = "true";
+            }
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var getValuesCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), targetFramework, "TargetPlatformIdentifier");
+            getValuesCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var values = getValuesCommand.GetValues();
+            if (defaultsDefined)
+            {
+                values.Count().Should().Be(1);
+                values.FirstOrDefault().Should().Be("Windows");
+            }
+            else
+            {
+                values.Count().Should().Be(0);
+            }
+        }
+
+        [Theory]
+        [InlineData("net5.0")]
+        [InlineData("netcoreapp3.1")]
+        public void It_defines_windows_version_default_correctly(string targetFramework)
+        {
+            TestProject testProject = new TestProject()
+            {
+                Name = "WindowsVersionDefault",
+                IsSdkProject = true,
+                ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
+                TargetFrameworks = targetFramework
+            };
+            testProject.AdditionalProperties["TargetPlatformIdentifier"] = "windows";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var getValuesCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), targetFramework, "TargetPlatformVersion");
+            getValuesCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { "7.0" });
         }
 
         private void TestInvalidTargetFramework(string testName, string targetFramework, bool useSolution, string expectedOutput)
@@ -551,12 +712,12 @@ namespace Microsoft.NET.Build.Tests
                 var relativePathToSln = Path.GetFileName(testAsset.Path) + ".sln";
 
                 restoreCommand = testAsset.GetRestoreCommand(Log, relativePathToSln);
-                buildCommand = new BuildCommand(Log, testAsset.TestRoot, relativePathToSln);
+                buildCommand = new BuildCommand(testAsset, relativePathToSln);
             }
             else
             {
                 restoreCommand = testAsset.GetRestoreCommand(Log, testProject.Name);
-                buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                buildCommand = new BuildCommand(testAsset);
             }
 
             //  Set RestoreContinueOnError=ErrorAndContinue to force failure on error
@@ -607,7 +768,7 @@ namespace Microsoft.NET.Build.Tests
                 .Fail()
                 .And.HaveStdOutContaining("The current .NET SDK does not support targeting");
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -640,7 +801,7 @@ namespace Microsoft.NET.Build.Tests
                 })
                 .Restore(Log, testProject.Name);
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+            var buildCommand = new BuildCommand(testAsset);
 
             //  Test that compilation doesn't depend on any rid-specific assets by removing them from the assets file after it's been restored
             var assetsFilePath = Path.Combine(buildCommand.GetBaseIntermediateDirectory().FullName, "project.assets.json");
@@ -670,7 +831,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("UwpUsingSdkExtras")
                 .WithSource();
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute()
                 .Should()
@@ -756,7 +917,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -793,6 +954,64 @@ namespace Microsoft.NET.Build.Tests
             }
 
 
+        }
+
+        [Theory]
+        [InlineData("netcoreapp3.1")]
+        [InlineData("netcoreapp5.0")]
+        public void It_makes_RootNamespace_safe_when_project_name_has_spaces(string targetFramework)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "Project Name With Spaces",
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            // Overwrite the default file. CreateTestProject uses the defined project name for the namespace.
+            // We need a buildable project to extract the property to verify it
+            // since this issue only surfaces in VS when adding a new class through an item template.
+            File.WriteAllText(Path.Combine(testAsset.Path, testProject.Name, $"{testProject.Name}.cs"), @"
+using System;
+using System.Collections.Generic;
+
+namespace ProjectNameWithSpaces
+{
+    public class ProjectNameWithSpacesClass
+    {
+        public static string Name { get { return ""Project Name With Spaces""; } }
+        public static List<string> List { get { return null; } }
+    }
+}");
+            string projectFolder = Path.Combine(testAsset.Path, testProject.Name);
+
+            var buildCommand = new BuildCommand(testAsset, $"{ testProject.Name}");
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            string GetPropertyValue(string propertyName)
+            {
+                var getValuesCommand = new GetValuesCommand(Log, projectFolder,
+                    testProject.TargetFrameworks, propertyName, GetValuesCommand.ValueType.Property)
+                {
+                    Configuration = "Debug"
+                };
+
+                getValuesCommand
+                    .Execute()
+                    .Should()
+                    .Pass();
+
+                var values = getValuesCommand.GetValues();
+                values.Count.Should().Be(1);
+                return values[0];
+            }
+
+            GetPropertyValue("RootNamespace").Should().Be("Project_Name_With_Spaces");
         }
     }
 }

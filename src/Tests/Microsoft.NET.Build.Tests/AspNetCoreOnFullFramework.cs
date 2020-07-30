@@ -83,7 +83,7 @@ class Class1
             var testProjectInstance = _testAssetsManager
                 .CreateTestProject(testProject, identifier: aspnetVersion);
 
-            var buildCommand = new BuildCommand(Log, testProjectInstance.TestRoot, testProject.Name);
+            var buildCommand = new BuildCommand(testProjectInstance);
 
             buildCommand.Execute()
                 .Should()

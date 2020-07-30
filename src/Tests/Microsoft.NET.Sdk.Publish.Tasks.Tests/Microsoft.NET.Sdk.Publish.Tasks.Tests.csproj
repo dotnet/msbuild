@@ -6,6 +6,7 @@
     <ExcludeFromSourceBuild>true</ExcludeFromSourceBuild>
     <EndToEndTestsDisabled>true</EndToEndTestsDisabled>
     <OutputType>Library</OutputType>
+    <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
   </PropertyGroup>
   
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
@@ -14,6 +15,7 @@
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkPackageVersion)" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
     <PackageReference Include="Moq" Version="4.8.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(EndToEndTestsDisabled)' == 'true'">

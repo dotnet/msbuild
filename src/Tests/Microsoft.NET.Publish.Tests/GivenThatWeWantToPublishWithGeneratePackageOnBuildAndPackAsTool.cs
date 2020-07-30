@@ -70,8 +70,7 @@ namespace Microsoft.NET.ToolPack.Tests
                     propertyGroup.Add(new XElement(ns + "PackAsTool", packAsTool.ToString()));
                 });
 
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot);
-            var buildCommand = new BuildCommand(Log, appProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset);
 
             CommandResult result = buildCommand.Execute();
 

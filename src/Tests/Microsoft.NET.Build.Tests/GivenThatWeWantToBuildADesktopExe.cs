@@ -37,7 +37,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource()
                 .WithTargetFramework(targetFramework);
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute()
                 .Should()
@@ -81,7 +81,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: packageName + "_" + referencePlatformPackage.ToString());
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand.Execute()
                 .Should()
@@ -140,7 +140,7 @@ namespace Microsoft.NET.Build.Tests
                        }
                    });
 
-                var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+                var buildCommand = new BuildCommand(testAsset);
                 buildCommand
                     .Execute()
                     .Should()
@@ -188,7 +188,7 @@ namespace Microsoft.NET.Build.Tests
                         }
                     });
 
-                var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+                var buildCommand = new BuildCommand(testAsset);
                 buildCommand
                     .Execute()
                     .Should()
@@ -322,7 +322,7 @@ namespace DefaultReferences
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, "DefaultReferences"));
+            var buildCommand = new BuildCommand(testAsset, "DefaultReferences");
 
             buildCommand
                 .Execute()
@@ -347,7 +347,7 @@ namespace DefaultReferences
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             //  Pass "/clp:summary" so that we can check output for string "1 Error(s)"
             var result = buildCommand.Execute("/clp:summary");
@@ -386,7 +386,7 @@ namespace DefaultReferences
                     itemGroup.Add(new XElement(ns + "Reference", new XAttribute("Include", "System")));
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/v:normal")
@@ -420,7 +420,7 @@ namespace DefaultReferences
                                     new XAttribute("Version", "9.0.1")));
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/v:normal")
@@ -450,7 +450,7 @@ namespace DefaultReferences
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             //  Verify that ResolveAssemblyReference doesn't generate any conflicts
             buildCommand
@@ -486,7 +486,7 @@ namespace DefaultReferences
                                     new XAttribute("Version", "4.3.0")));
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             var buildResult = buildCommand
                 .Execute("/v:normal");
@@ -578,7 +578,7 @@ class Program
                     itemGroup.Add(httpReference);
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute("/v:normal")
@@ -645,7 +645,7 @@ class Program
                 });
 
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -660,7 +660,7 @@ class Program
                 .CopyTestAsset("DesktopNeedsBindingRedirects")
                 .WithSource();
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -696,7 +696,7 @@ class Program
                 .CopyTestAsset("DesktopNeedsBindingRedirects")
                 .WithSource();
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -785,7 +785,7 @@ class Program
 
         private XElement BuildTestAssetGetAppConfig(TestAsset testAsset)
         {
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -828,7 +828,7 @@ class Program
                     }
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute("/v:normal")
                 .Should()
@@ -854,7 +854,7 @@ class Program
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()

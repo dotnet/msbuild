@@ -13,7 +13,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="Sdk.props" Sdk="Microsoft.NET.ILLink.Tasks" />
 
-  <PropertyGroup Condition=" '$(PublishTrimmed)' == 'true' ">
+  <!-- These properties should be set even if PublishTrimmed != true, to allow SDK components to
+       set PublishTrimmed in targets which are imported after these targets. -->
+  <PropertyGroup>
     <IntermediateLinkDir Condition=" '$(IntermediateLinkDir)' == '' ">$(IntermediateOutputPath)linked\</IntermediateLinkDir>
     <IntermediateLinkDir Condition=" !HasTrailingSlash('$(IntermediateLinkDir)') ">$(IntermediateLinkDir)\</IntermediateLinkDir>
     <!-- Used to enable incremental build for the linker target. -->
@@ -37,21 +39,22 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkInformation ResourceName="ILLink_Info" />
 
     <ItemGroup>
-      <_LinkedResolvedFileToPublish Include="@(_LinkedResolvedFileToPublishCandidates)" Condition="Exists('%(Identity)')" />
-      <ResolvedFileToPublish Remove="@(_ManagedAssembliesToLink)" />
+      <_LinkedResolvedFileToPublish Include="@(_LinkedResolvedFileToPublishCandidate)" Condition="Exists('%(Identity)')" />
+      <ResolvedFileToPublish Remove="@(ManagedAssemblyToLink)" />
+      <ResolvedFileToPublish Remove="@(_PDBToLink)" />
       <ResolvedFileToPublish Include="@(_LinkedResolvedFileToPublish)" />
     </ItemGroup>
 
     <!-- Remove assemblies from inputs to GenerateDepsFile. See
          https://github.com/dotnet/sdk/pull/3086 -->
     <ItemGroup>
-      <_RemovedManagedAssemblies Include="@(_ManagedAssembliesToLink)" Condition="!Exists('$(IntermediateLinkDir)%(Filename)%(Extension)')" />
+      <_RemovedManagedAssembly Include="@(ManagedAssemblyToLink)" Condition="!Exists('$(IntermediateLinkDir)%(Filename)%(Extension)')" />
 
-      <ResolvedCompileFileDefinitions Remove="@(_RemovedManagedAssemblies)" />
-      <RuntimeCopyLocalItems Remove="@(_RemovedManagedAssemblies)" />
-      <RuntimeTargetsCopyLocalItems Remove="@(_RemovedManagedAssemblies)" />
-      <UserRuntimeAssembly Remove="@(_RemovedManagedAssemblies)" />
-      <RuntimePackAsset Remove="@(_RemovedManagedAssemblies)" />
+      <ResolvedCompileFileDefinitions Remove="@(_RemovedManagedAssembly)" />
+      <RuntimeCopyLocalItems Remove="@(_RemovedManagedAssembly)" />
+      <RuntimeTargetsCopyLocalItems Remove="@(_RemovedManagedAssembly)" />
+      <UserRuntimeAssembly Remove="@(_RemovedManagedAssembly)" />
+      <RuntimePackAsset Remove="@(_RemovedManagedAssembly)" />
     </ItemGroup>
 
   </Target>
@@ -67,8 +70,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <UsingTask TaskName="ILLink" AssemblyFile="$(ILLinkTasksAssembly)" />
   <Target Name="_RunILLink"
-          DependsOnTargets="_ComputeManagedAssembliesToLink;_SetILLinkDefaults"
-          Inputs="$(MSBuildAllProjects);@(_ManagedAssembliesToLink);@(TrimmerRootDescriptor);@(ReferencePath)"
+          DependsOnTargets="_ComputeManagedAssemblyToLink;PrepareForILLink"
+          Inputs="$(MSBuildAllProjects);@(ManagedAssemblyToLink);@(TrimmerRootDescriptor);@(ReferencePath)"
           Outputs="$(_LinkSemaphore)">
 
     <!-- When running from Desktop MSBuild, DOTNET_HOST_PATH is not set.
@@ -79,17 +82,18 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_DotNetHostFileName Condition=" '$(OS)' == 'Windows_NT' ">dotnet.exe</_DotNetHostFileName>
     </PropertyGroup>
 
-    <Delete Files="@(_LinkedResolvedFileToPublishCandidates)" />
-    <ILLink AssemblyPaths="@(_ManagedAssembliesToLink)"
+    <Delete Files="@(_LinkedResolvedFileToPublishCandidate)" />
+    <ILLink AssemblyPaths="@(ManagedAssemblyToLink)"
             ReferenceAssemblyPaths="@(ReferencePath)"
             RootAssemblyNames="@(TrimmerRootAssembly)"
-            DefaultAction="$(_TrimmerDefaultAction)"
-            LinkSymbols="$(_TrimmerLinkSymbols)"
+            TrimMode="$(TrimMode)"
+            RemoveSymbols="$(TrimmerRemoveSymbols)"
+            FeatureSettings="@(_TrimmerFeatureSettings)"
+            CustomData="@(_TrimmerCustomData)"
 
             BeforeFieldInit="$(_TrimmerBeforeFieldInit)"
             OverrideRemoval="$(_TrimmerOverrideRemoval)"
             UnreachableBodies="$(_TrimmerUnreachableBodies)"
-            ClearInitLocals="$(_TrimmerClearInitLocals)"
             UnusedInterfaces="$(_TrimmerUnusedInterfaces)"
             IPConstProp="$(_TrimmerIPConstProp)"
             Sealer="$(_TrimmerSealer)"
@@ -108,12 +112,18 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     ============================================================
-                     _SetILLinkDefaults
+                     PrepareForILLink
 
-    Set up the default options and inputs to ILLink.
+    Set up the default options and inputs to ILLink. Other targets are expected to hook into
+    this extension point via BeforeTargets/AfterTargets to opt assemblies into or out of trimming
+    using global ILLink options, or per-assembly IsTrimmable and TrimMode metadata.
+
+    Note that adding items to or removing items from ManagedAssemblyToLink is unsupported. To change
+    the set of inputs to the linker, instead use a different extension point to
+    set PostprocessAssembly metadata on ResolvedFileToPublish.
    -->
-   <Target Name="_SetILLinkDefaults"
-           DependsOnTargets="_ComputeManagedAssembliesToLink">
+   <Target Name="PrepareForILLink"
+           DependsOnTargets="_ComputeManagedAssemblyToLink">
 
     <!-- The defaults currently root non-framework assemblies, which
          is a no-op for portable apps. If we later support more ways
@@ -123,38 +133,60 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <PropertyGroup>
       <_ExtraTrimmerArgs>--skip-unresolved true $(_ExtraTrimmerArgs)</_ExtraTrimmerArgs>
-      <_TrimmerDefaultAction Condition=" '$(_TrimmerDefaultAction)' == '' ">copyused</_TrimmerDefaultAction>
+      <TrimMode Condition=" '$(TrimMode)' == '' ">copyused</TrimMode>
     </PropertyGroup>
+
+    <!-- Set a default value for TrimmerRemoveSymbols unless set explicitly. -->
+    <PropertyGroup Condition=" '$(TrimmerRemoveSymbols)' == '' ">
+      <!-- The default is to remove symbols when debugger support is disabled, and keep them otherwise. -->
+      <TrimmerRemoveSymbols Condition=" '$(DebuggerSupport)' == 'false' ">true</TrimmerRemoveSymbols>
+      <TrimmerRemoveSymbols Condition=" '$(DebuggerSupport)' != 'false' ">false</TrimmerRemoveSymbols>
+    </PropertyGroup>
+
     <ItemGroup>
-      <TrimmerRootAssembly Include="@(_ManagedAssembliesToLink)" Condition=" '%(_ManagedAssembliesToLink.IsTrimmable)' != 'true' " />
-      <_ManagedAssembliesToLink Condition=" '%(_ManagedAssembliesToLink.IsTrimmable)' != 'true' ">
-        <action>copy</action>
-      </_ManagedAssembliesToLink>
+      <!-- Treat any assemblies that already have customized TrimMode as trimmable. -->
+      <ManagedAssemblyToLink Condition=" '%(ManagedAssemblyToLink.TrimMode)' != '' ">
+        <IsTrimmable>true</IsTrimmable>
+      </ManagedAssemblyToLink>
+      <!-- Root and copy non-trimmable assemblies. -->
+      <TrimmerRootAssembly Include="@(ManagedAssemblyToLink)" Condition=" '%(ManagedAssemblyToLink.IsTrimmable)' != 'true' " />
+      <ManagedAssemblyToLink Condition=" '%(ManagedAssemblyToLink.IsTrimmable)' != 'true' ">
+        <TrimMode>copy</TrimMode>
+      </ManagedAssemblyToLink>
+    </ItemGroup>
+
+    <ItemGroup>
+      <_TrimmerFeatureSettings Include="@(RuntimeHostConfigurationOption)" Condition="'%(RuntimeHostConfigurationOption.Trim)' == 'true'" />
     </ItemGroup>
 
    </Target>
 
   <!--
     ============================================================
-                     _ComputeManagedAssembliesToLink
+                     _ComputeManagedAssemblyToLink
 
     Compute the set of inputs to the linker.
     ============================================================
     -->
   <UsingTask TaskName="ComputeManagedAssemblies" AssemblyFile="$(ILLinkTasksAssembly)" />
-  <Target Name="_ComputeManagedAssembliesToLink" DependsOnTargets="_ComputeAssembliesToPostprocessOnPublish">
+  <Target Name="_ComputeManagedAssemblyToLink" DependsOnTargets="_ComputeAssembliesToPostprocessOnPublish">
 
     <!-- NB: There should not be non-managed assemblies in this list, but we still give the linker a chance to
          further refine this list. It currently drops C++/CLI assemblies in ComputeManageAssemblies. -->
     <ComputeManagedAssemblies Assemblies="@(ResolvedFileToPublish->WithMetadataValue('PostprocessAssembly', 'true'))">
-      <Output TaskParameter="ManagedAssemblies" ItemName="_ManagedAssembliesToLink" />
+      <Output TaskParameter="ManagedAssemblies" ItemName="ManagedAssemblyToLink" />
     </ComputeManagedAssemblies>
 
     <ItemGroup>
-      <_LinkedResolvedFileToPublishCandidates Include="@(_ManagedAssembliesToLink->'$(IntermediateLinkDir)%(Filename)%(Extension)')" />
+      <!-- The linker implicitly picks up PDBs next to input assemblies. We will filter these out of the publish set. -->
+      <__PDBToLink Include="@(ResolvedFileToPublish)" Exclude="@(ManagedAssemblyToLink->'%(RelativeDir)%(Filename).pdb')" />
+      <_PDBToLink Include="@(ResolvedFileToPublish)" Exclude="@(__PDBToLink)" />
     </ItemGroup>
 
+    <ItemGroup>
+      <_LinkedResolvedFileToPublishCandidate Include="@(ManagedAssemblyToLink->'$(IntermediateLinkDir)%(Filename)%(Extension)')" />
+      <_LinkedResolvedFileToPublishCandidate Include="@(_PDBToLink->'$(IntermediateLinkDir)%(Filename)%(Extension)')" />
+    </ItemGroup>
   </Target>
-
 
 </Project>

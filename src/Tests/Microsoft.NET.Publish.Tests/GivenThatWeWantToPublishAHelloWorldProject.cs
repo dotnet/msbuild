@@ -400,7 +400,7 @@ public static class Program
                 .CopyTestAsset("DeployProjectReferencingSdkProject")
                 .WithSource();
 
-            var buildCommand = new BuildCommand(Log, helloWorldAsset.TestRoot, Path.Combine("DeployProj", "Deploy.proj"));
+            var buildCommand = new BuildCommand(helloWorldAsset, Path.Combine("DeployProj", "Deploy.proj"));
 
             buildCommand
                 .Execute()
@@ -483,7 +483,7 @@ public static class Program
                     project.Root.Add(XElement.Parse(@"<Target Name=""InvokeBuild"" DependsOnTargets=""Build"" BeforeTargets=""Publish"" />"));
                 });
 
-            new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new BuildCommand(testAsset)
                 .Execute()
                 .Should()
                 .Pass();

@@ -224,6 +224,21 @@ FWLink: http://go.microsoft.com/fwlink/?LinkId=246068</source>
 FWLink: http://go.microsoft.com/fwlink/?LinkId=246068</target>
         <note />
       </trans-unit>
+      <trans-unit id="EFSCRIPT_Generating">
+        <source>Generating Entity Framework SQL Scripts...</source>
+        <target state="new">Generating Entity Framework SQL Scripts...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EFSCRIPT_GenerationCompleted">
+        <source>Generating Entity Framework SQL Scripts completed successfully</source>
+        <target state="new">Generating Entity Framework SQL Scripts completed successfully</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EFSCRIPT_GenerationFailed">
+        <source>Entity Framework SQL Script generation failed</source>
+        <target state="new">Entity Framework SQL Script generation failed</target>
+        <note />
+      </trans-unit>
       <trans-unit id="KUDUDEPLOY_AddingFile">
         <source>Adding file ({0}).</source>
         <target state="new">Adding file ({0}).</target>

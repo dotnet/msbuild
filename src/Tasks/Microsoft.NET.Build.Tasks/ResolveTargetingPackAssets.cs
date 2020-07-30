@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Xml.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -88,7 +90,7 @@ namespace Microsoft.NET.Build.Tasks
                         string targetingPackDataPath = Path.Combine(targetingPackRoot, "data");
 
                         string targetingPackDllFolder = Path.Combine(targetingPackRoot, "ref", targetingPackTargetFramework);
-                        
+
                         //  Fall back to netcoreapp5.0 folder if looking for net5.0 and it's not found
                         if (!Directory.Exists(targetingPackDllFolder) &&
                             targetingPackTargetFramework.Equals("net5.0", StringComparison.OrdinalIgnoreCase))
@@ -103,7 +105,7 @@ namespace Microsoft.NET.Build.Tasks
 
                         string frameworkListPath = Path.Combine(targetingPackDataPath, "FrameworkList.xml");
 
-                        AddReferencesFromFrameworkList(frameworkListPath, targetingPackDllFolder,
+                        AddReferencesFromFrameworkList(frameworkListPath, targetingPackRoot, targetingPackDllFolder,
                                                         targetingPack, referencesToAdd);
 
                         if (File.Exists(platformManifestPath))
@@ -175,17 +177,19 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        private void AddReferencesFromFrameworkList(string frameworkListPath, string targetingPackDllFolder,
+        private void AddReferencesFromFrameworkList(string frameworkListPath, string targetingPackRoot,
+            string targetingPackDllFolder,
             ITaskItem targetingPack, List<TaskItem> referenceItems)
         {
             XDocument frameworkListDoc = XDocument.Load(frameworkListPath);
 
             string profile = targetingPack.GetMetadata("Profile");
 
+            bool usePathElementsInFrameworkListAsFallBack =
+                TestFirstFileInFrameworkListUsingAssemblyNameConvention(targetingPackDllFolder, frameworkListDoc);
+
             foreach (var fileElement in frameworkListDoc.Root.Elements("File"))
             {
-                string assemblyName = fileElement.Attribute("AssemblyName").Value;
-
                 if (!string.IsNullOrEmpty(profile))
                 {
                     var profileAttributeValue = fileElement.Attribute("Profile")?.Value;
@@ -212,7 +216,10 @@ namespace Microsoft.NET.Build.Tasks
                     continue;
                 }
 
-                var dllPath = Path.Combine(targetingPackDllFolder, assemblyName + ".dll");
+                string dllPath = usePathElementsInFrameworkListAsFallBack ?
+                    Path.Combine(targetingPackRoot, fileElement.Attribute("Path").Value) :
+                    GetDllPathViaAssemblyName(targetingPackDllFolder, fileElement);
+
                 var referenceItem = CreateReferenceItem(dllPath, targetingPack);
 
                 referenceItem.SetMetadata("AssemblyVersion", fileElement.Attribute("AssemblyVersion").Value);
@@ -221,6 +228,37 @@ namespace Microsoft.NET.Build.Tasks
 
                 referenceItems.Add(referenceItem);
             }
+        }
+
+        /// <summary>
+        /// Due to https://github.com/dotnet/sdk/issues/12098 we fall back to use "Path" when "AssemblyName" will
+        /// not resolve the actual dll.
+        /// </summary>
+        /// <returns>if use we should use "Path" element in frameworkList as a fallback</returns>
+        private static bool TestFirstFileInFrameworkListUsingAssemblyNameConvention(string targetingPackDllFolder,
+            XDocument frameworkListDoc)
+        {
+            bool usePathElementsInFrameworkListPathAsFallBack;
+            var firstFileElement = frameworkListDoc.Root.Elements("File").FirstOrDefault();
+            if (firstFileElement == null)
+            {
+                usePathElementsInFrameworkListPathAsFallBack = false;
+            }
+            else
+            {
+                string dllPath = GetDllPathViaAssemblyName(targetingPackDllFolder, firstFileElement);
+
+                usePathElementsInFrameworkListPathAsFallBack = !File.Exists(dllPath);
+            }
+
+            return usePathElementsInFrameworkListPathAsFallBack;
+        }
+
+        private static string GetDllPathViaAssemblyName(string targetingPackDllFolder, XElement fileElement)
+        {
+            string assemblyName = fileElement.Attribute("AssemblyName").Value;
+            var dllPath = Path.Combine(targetingPackDllFolder, assemblyName + ".dll");
+            return dllPath;
         }
 
         private TaskItem CreateReferenceItem(string dll, ITaskItem targetingPack)

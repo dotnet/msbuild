@@ -25,14 +25,15 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
         public void TestsFromAGivenContainerShouldRunWithExpectedOutput()
         {
             var testAppName = "VSTestCore";
-            var testRoot = _testAssetsManager.CopyTestAsset(testAppName)
+            var testAsset = _testAssetsManager.CopyTestAsset(testAppName)
                 .WithSource()
-                .WithVersionVariables()
-                .Path;
+                .WithVersionVariables();
+
+            var testRoot = testAsset.Path;
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            new BuildCommand(Log, testRoot)
+            new BuildCommand(testAsset)
                 .Execute()
                 .Should().Pass();
 
@@ -47,8 +48,8 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
                     .Should().Contain("Total tests: 2")
                     .And.Contain("Passed: 1")
                     .And.Contain("Failed: 1")
-                    .And.Contain("\u221a VSTestPassTest")
-                    .And.Contain("X VSTestFailTest");
+                    .And.Contain("Passed VSTestPassTest")
+                    .And.Contain("Failed VSTestFailTest");
             }
 
             result.ExitCode.Should().Be(1);
@@ -87,7 +88,7 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
                 result.StdOut.Should().NotMatch("The test run parameter argument '*' is invalid.");
                 result.StdOut.Should().Contain("Total tests: 1");
                 result.StdOut.Should().Contain("Passed: 1");
-                result.StdOut.Should().Contain("\u221a VSTestTestRunParameters");
+                result.StdOut.Should().Contain("Passed VSTestTestRunParameters");
             }
 
             result.ExitCode.Should().Be(0);
@@ -105,7 +106,7 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
             var testProjectDirectory = testInstance.Path;
 
             // Restore project VSTestCore
-            new RestoreCommand(Log, testProjectDirectory)
+            new RestoreCommand(testInstance)
                 .Execute()
                 .Should()
                 .Pass();

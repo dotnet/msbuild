@@ -52,7 +52,7 @@ namespace FrameworkReferenceTest
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -95,7 +95,7 @@ namespace FrameworkReferenceTest
             TestAsset testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .Restore(Log, testProject.Name);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -133,7 +133,7 @@ namespace FrameworkReferenceTest
             TestAsset testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .Restore(Log, testProject.Name);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -163,7 +163,7 @@ namespace FrameworkReferenceTest
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -206,7 +206,7 @@ namespace FrameworkReferenceTest
 
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -243,7 +243,7 @@ namespace FrameworkReferenceTest
                                                new XAttribute("Include", "Microsoft.ASPNETCORE.App")));
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             var result = buildCommand.Execute();
 
@@ -282,12 +282,12 @@ namespace FrameworkReferenceTest
             string nugetPackagesFolder = Path.Combine(testAsset.TestRoot, "packages");
 
 
-            var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            var restoreCommand = new RestoreCommand(testAsset)
                 .WithEnvironmentVariable("NUGET_PACKAGES", nugetPackagesFolder);
             restoreCommand.Execute().Should().Pass();
 
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            var buildCommand = new BuildCommand(testAsset)
                 .WithEnvironmentVariable("NUGET_PACKAGES", nugetPackagesFolder);
 
             buildCommand
@@ -317,7 +317,7 @@ namespace FrameworkReferenceTest
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             if (valid)
             {
@@ -367,7 +367,7 @@ namespace FrameworkReferenceTest
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             var result = buildCommand.Execute();
 
@@ -412,7 +412,7 @@ namespace FrameworkReferenceTest
                     itemGroup.Add(frameworkReference);
                 });
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 //  Pass "/clp:summary" so that we can check output for string "1 Error(s)"
@@ -439,7 +439,7 @@ namespace FrameworkReferenceTest
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var restoreCommand = new RestoreCommand(testAsset);
 
             restoreCommand
                 //  Pass "/clp:summary" so that we can check output for string "1 Error(s)"
@@ -470,14 +470,14 @@ namespace FrameworkReferenceTest
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var restoreCommand = new RestoreCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var restoreCommand = new RestoreCommand(testAsset);
 
             restoreCommand
                 .Execute()
                 .Should()
                 .Pass();
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot, testProject.Name);
+            var buildCommand = new BuildCommand(testAsset);
 
             //  If we do the work in https://github.com/dotnet/cli/issues/10528,
             //  then we should add a new error message here indicating that the runtime pack hasn't
@@ -668,7 +668,7 @@ namespace FrameworkReferenceTest
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()
@@ -722,7 +722,7 @@ namespace FrameworkReferenceTest
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
             string nugetPackagesFolder = Path.Combine(testAsset.TestRoot, "packages");
 
-            var buildCommand = (BuildCommand) new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            var buildCommand = (BuildCommand) new BuildCommand(testAsset)
                 .WithEnvironmentVariable("NUGET_PACKAGES", nugetPackagesFolder);
 
             buildCommand
@@ -804,7 +804,7 @@ namespace FrameworkReferenceTest
 
             var projectFolder = Path.Combine(testAsset.TestRoot, testProject.Name);
 
-            var buildCommand = new BuildCommand(Log, projectFolder);
+            var buildCommand = new BuildCommand(testAsset);
 
             var expectedMetadata = new[]
             {
@@ -930,7 +930,7 @@ namespace FrameworkReferenceTest
 
             string projectFolder = Path.Combine(testAsset.TestRoot, testProject.Name);
 
-            var buildCommand = new BuildCommand(Log, projectFolder);
+            var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
                 .Execute()

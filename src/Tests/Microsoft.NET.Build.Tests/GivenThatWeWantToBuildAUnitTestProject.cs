@@ -23,7 +23,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("XUnitTestProject")
                 .WithSource();
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute()
                 .Should()
@@ -42,7 +42,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("XUnitTestProject")
                 .WithSource();
 
-            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute(new string[] {
                     "/restore",

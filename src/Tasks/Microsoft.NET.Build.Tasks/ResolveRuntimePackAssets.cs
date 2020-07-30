@@ -48,8 +48,13 @@ namespace Microsoft.NET.Build.Tasks
             {
                 if (!frameworkReferenceNames.Contains(runtimePack.GetMetadata(MetadataKeys.FrameworkName)))
                 {
-                    //  This is a runtime pack for a shared framework that ultimately wasn't referenced, so don't include its assets
-                    continue;
+                    var additionalFrameworkReferences = runtimePack.GetMetadata(MetadataKeys.AdditionalFrameworkReferences);
+                    if (additionalFrameworkReferences == null ||
+                        !additionalFrameworkReferences.Split(';').Any(afr => frameworkReferenceNames.Contains(afr)))
+                    {
+                        //  This is a runtime pack for a shared framework that ultimately wasn't referenced, so don't include its assets
+                        continue;
+                    }
                 }
 
                 string runtimePackRoot = runtimePack.GetMetadata(MetadataKeys.PackageDirectory);
@@ -78,7 +83,9 @@ namespace Microsoft.NET.Build.Tasks
 
                 if (File.Exists(runtimeListPath))
                 {
-                    AddRuntimePackAssetsFromManifest(runtimePackAssets, runtimePackRoot, runtimeListPath, runtimePack);
+                    var runtimePackAlwaysCopyLocal = runtimePack.HasMetadataValue(MetadataKeys.RuntimePackAlwaysCopyLocal, "true");
+
+                    AddRuntimePackAssetsFromManifest(runtimePackAssets, runtimePackRoot, runtimeListPath, runtimePack, runtimePackAlwaysCopyLocal);
                 }
                 else
                 {
@@ -90,7 +97,7 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         private void AddRuntimePackAssetsFromManifest(List<ITaskItem> runtimePackAssets, string runtimePackRoot,
-            string runtimeListPath, ITaskItem runtimePack)
+            string runtimeListPath, ITaskItem runtimePack, bool runtimePackAlwaysCopyLocal)
         {
             var assetSubPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -144,6 +151,10 @@ namespace Microsoft.NET.Build.Tasks
                 assetItem.SetMetadata("FileVersion", fileElement.Attribute("FileVersion")?.Value);
                 assetItem.SetMetadata("PublicKeyToken", fileElement.Attribute("PublicKeyToken")?.Value);
                 assetItem.SetMetadata("DropFromSingleFile", fileElement.Attribute("DropFromSingleFile")?.Value);
+                if (runtimePackAlwaysCopyLocal)
+                {
+                    assetItem.SetMetadata(MetadataKeys.RuntimePackAlwaysCopyLocal, "true");
+                }
 
                 runtimePackAssets.Add(assetItem);
             }

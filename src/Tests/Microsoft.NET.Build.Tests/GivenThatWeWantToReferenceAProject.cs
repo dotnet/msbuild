@@ -115,8 +115,7 @@ namespace Microsoft.NET.Build.Tests
                     .Pass();
             }
 
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "Referencer");
-            var buildCommand = new BuildCommand(Log, appProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "Referencer");
             var result = buildCommand.Execute();
 
             if (buildSucceeds)
@@ -186,7 +185,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithProjectChanges(project => AddProjectChanges(project, Path.Combine(childAsset.Path, childProject.Name, childProject.Name + ".csproj")));
             File.WriteAllText(Path.Combine(parentAsset.Path, parentProject.Name, contentName), parentProject.Name);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(parentAsset.Path, parentProject.Name));
+            var buildCommand = new BuildCommand(parentAsset);
             buildCommand.Execute().Should().Pass();
 
             var getValuesCommand = new GetValuesCommand(Log, Path.Combine(parentAsset.Path, parentProject.Name), tfm, "ResultOutput");
@@ -233,6 +232,63 @@ namespace Microsoft.NET.Build.Tests
                 target.Add(propertyGroup);
                 project.Root.Add(target);
             }
+        }
+
+        [Fact]
+        public void It_copies_content_transitively()
+        {
+            var targetFramework = "net5.0";
+            var testProjectA = new TestProject()
+            {
+                Name = "A",
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true
+            };
+
+            var testProjectB = new TestProject()
+            {
+                Name = "B",
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true
+            };
+            testProjectB.ReferencedProjects.Add(testProjectA);
+
+            var testProjectC = new TestProject()
+            {
+                Name = "C",
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true
+            };
+            testProjectC.AdditionalProperties.Add("DisableTransitiveProjectReferences", "true");
+            testProjectC.ReferencedProjects.Add(testProjectB);
+            var testAsset = _testAssetsManager.CreateTestProject(testProjectC).WithProjectChanges((path, p) =>
+            { 
+                if (path.Contains(testProjectA.Name))
+                {
+                    var ns = p.Root.Name.Namespace;
+                    p.Root.Add(new XElement(ns + "ItemGroup",
+                        new XElement(ns + "Content", new XAttribute("Include", "a.txt"), new XAttribute("CopyToOutputDirectory", "PreserveNewest"))));
+                }
+            });
+            File.WriteAllText(Path.Combine(testAsset.Path, testProjectA.Name, "a.txt"), "A");
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var contentPath = Path.Combine(testAsset.Path, testProjectC.Name, "bin", "Debug", targetFramework, "a.txt");
+            File.Exists(contentPath).Should().BeTrue();
+            var binDir = new DirectoryInfo(Path.Combine(testAsset.Path, testProjectC.Name, "bin"));
+            binDir.Delete(true);
+
+            buildCommand
+                .Execute("/p:BuildProjectReferences=false")
+                .Should()
+                .Pass();
+
+            File.Exists(contentPath).Should().BeTrue();
         }
     }
 }

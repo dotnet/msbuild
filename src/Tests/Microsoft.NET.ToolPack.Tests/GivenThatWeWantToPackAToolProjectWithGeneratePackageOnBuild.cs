@@ -48,8 +48,7 @@ namespace Microsoft.NET.ToolPack.Tests
         public void It_builds_successfully()
         {
             TestAsset testAsset = SetupAndRestoreTestAsset();
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "App");
-            var buildCommand = new BuildCommand(Log, appProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "App");
 
             CommandResult result = buildCommand.Execute();
 
@@ -64,7 +63,7 @@ namespace Microsoft.NET.ToolPack.Tests
         {
             TestAsset testAsset = SetupAndRestoreTestAsset();
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "App");
-            var buildCommand = new BuildCommand(Log, appProjectDirectory);
+            var buildCommand = new BuildCommand(testAsset, "App");
             buildCommand.Execute();
 
             var packCommand = new PackCommand(Log, appProjectDirectory);
