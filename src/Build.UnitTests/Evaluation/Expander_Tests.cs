@@ -2892,6 +2892,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Theory]
         [InlineData("net5.0-windows10.1.2.3", 4, "10.1.2.3")]
         [InlineData("net5.0-windows10.1.2.3", 2, "10.1.2.3")]
+        [InlineData("net5.0-windows10.0.0.3", 2, "10.0.0.3")]
         [InlineData("net5.0-windows0.0.0.3", 2, "0.0.0.3")]
         public void PropertyFunctionTargetPlatformVersionMultipartParsing(string tfm, int versionPartCount, string expectedVersion)
         {
