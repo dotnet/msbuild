@@ -308,7 +308,8 @@ namespace Microsoft.Build.Execution
 
                 interner.Translate(translator);
                 var buffer = itemsStream.GetBuffer();
-                translator.Translate(ref buffer, (int)itemsStream.Length);
+                var bufferSize = (int)itemsStream.Length;
+                translator.Translate(ref buffer, ref bufferSize);
             }
             else
             {
@@ -316,7 +317,7 @@ namespace Microsoft.Build.Execution
 
                 byte[] buffer = null;
                 translator.Translate(ref buffer);
-                ErrorUtilities.VerifyThrow(buffer != null, "Unexpected null items buffer during decompression.");
+                ErrorUtilities.VerifyThrow(buffer != null, "Unexpected null items buffer during translation.");
 
                 using MemoryStream itemsStream = new MemoryStream(buffer, 0, buffer.Length, writable: false, publiclyVisible: true);
                 var itemTranslator = BinaryTranslator.GetReadTranslator(itemsStream, null);

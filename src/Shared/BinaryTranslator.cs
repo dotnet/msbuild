@@ -206,13 +206,10 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             /// <param name="byteArray">The array to be translated.</param>
             /// <param name="length">The length of array which will be used in translation. This parameter is not used when reading</param>
-            /// <remarks>
-            /// This method should be used only for serialization, not for reading from stream.
-            /// Typical usage will be for example in combination with <see cref="MemoryStream.GetBuffer"> when we get array, but we want to use only part of it.
-            /// </remarks>
-            public void Translate(ref byte[] byteArray, int length) 
+            public void Translate(ref byte[] byteArray, ref int length) 
             {
                 Translate(ref byteArray);
+                length = byteArray.Length;
             }
 
             /// <summary>
@@ -1012,20 +1009,16 @@ namespace Microsoft.Build.BackEnd
             /// <param name="byteArray">The byte array to be translated</param>
             public void Translate(ref byte[] byteArray)
             {
-                Translate(ref byteArray, byteArray?.Length ?? 0);
+                var length = byteArray?.Length ?? 0;
+                Translate(ref byteArray, ref length);
             }
-
 
             /// <summary>
             /// Translates a byte array
             /// </summary>
             /// <param name="byteArray">The array to be translated.</param>
             /// <param name="length">The length of array which will be used in translation</param>
-            /// <remarks>
-            /// This method should be used only for serialization, not for reading from stream.
-            /// Typical usage will be for example in combination with <see cref="MemoryStream.GetBuffer"> when we get array, but we want to use only part of it.
-            /// </remarks>
-            public void Translate(ref byte[] byteArray, int length) 
+            public void Translate(ref byte[] byteArray, ref int length) 
             {
                 if (!TranslateNullable(byteArray))
                 {
