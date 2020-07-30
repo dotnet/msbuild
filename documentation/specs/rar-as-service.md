@@ -4,7 +4,7 @@ This document describes Resolve Assembly Reference as a Service
 
 # Background
 
-[MSBuild](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild?view=vs-2019) is a universal build engine, used for building pretty much everything in the Microsoft world. It is available on command line (msbuild, [dotnet build](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-build)), runs under the covers when building projects and solutions in Visual Studio, and is used as the local build engine in "higher-order" distributed build systems. Essentially all .NET applications use MSBuild as their primary build engine.
+[MSBuild](https://docs.microsoft.com/visualstudio/msbuild/msbuild?view=vs-2019) is a universal build engine, used for building pretty much everything in the Microsoft world. It is available on command line (msbuild, [dotnet build](https://docs.microsoft.com/dotnet/core/tools/dotnet-build)), runs under the covers when building projects and solutions in Visual Studio, and is used as the local build engine in "higher-order" distributed build systems. Essentially all .NET applications use MSBuild as their primary build engine.
 
 RAR is the acronym behind ResolveAssemblyReference (an MSBuild task) and ResolveAssemblyReferences (an MSBuild target). RAR is used in all .NET builds. Quoting the official documentation, RAR "_Determines all assemblies that depend on the specified assemblies, including second and nth-order dependencies._"
 
@@ -14,9 +14,9 @@ The RAR task has become very complex and slow over the years. It tends to rank h
 2. Build nodes have limited lifetime and the in-memory state is lost when they die.
 3. No state exists when the task runs for the given project for the first time.
 
-Point 3 is tracked by issue [#5247](https://github.com/dotnet/msbuild/issues/5247).
+    *NOTE:* This is tracked by issue [#5247](https://github.com/dotnet/msbuild/issues/5247).
 
-There was already an attempt to introduce this to MSBuild ([#3914](https://github.com/dotnet/msbuild/pull/3914)). This PR was not completed mainly because of discontinued development of Bond, which is in that PR used as method of communication between nodes.
+There was already an attempt to introduce RAR as a service to MSBuild ([#3914](https://github.com/dotnet/msbuild/pull/3914)). This PR was not completed mainly because of discontinued development of Bond, which is in that PR used as method of communication between nodes.
 
 # Design
 
@@ -38,7 +38,7 @@ If the connection is successful, we can use this connection for execution of RAR
 
 ### Start new node
 
-This step will create new process which will act as RAR node. It will also pass necessary information to the node to know what its settings are (reusable, ...). Node will be another instance of the MSBuild.exe which will have set parameter **nodeMode** to some specific value. Probably it will be text value, so we can easily recognize which node is RAR node and which is normal MSBuild node.
+This step will create new process which will act as RAR node. It will also pass necessary information to the node to know what its settings are (reusable, ...). Node will be another instance of the MSBuild.exe which will have set parameter **nodeMode** to some specific value (it should be `/nodeMode:3`). 
 
 We will use Mutex (as in [Roslyn](https://github.com/dotnet/roslyn/blob/838874b1b817db84ce146bef690cc95a39c213a5/src/Compilers/Server/VBCSCompiler/BuildServerController.cs#L143)) to ensure we don't create two RAR nodes at once. Its name must encode whether it is the user's only RAR node, including user name, administrator privileges, and some initial settings for the node. Such a name could be: `MSBuild.RAR.ostorc.7`, where **MSBuild.RAR** is its prefix, **ostorc** is the user who called MSBuild, and **7** represents encoded settings (flag enum).
 
@@ -54,7 +54,7 @@ There is one big concern and that is how to handle multiple requests at once. As
 
 If the user does not want the node to be reused, we have the ensure that node will be killed after the build ends. This should be done after the main MSBuild node finishes building.
 
-The RAR node, also has to support accepting of already established commands for MSBuild nodes (for example Shutdown command). This will be done by creating two pipes inside node, one will be for communication about RAR commands and second one for the servicing communication. 
+The RAR node, also has to support accepting of already established commands for MSBuild nodes (for example Shutdown command). This will be done by creating two pipes inside node, one will be for communication about RAR commands and second one for the servicing communication.
 
 ### Execute task in MSBuild node
 
@@ -66,11 +66,11 @@ The new RAR node will not count toward total maximum CPU count specified by _/ma
 
 The RAR task will be affected by the _/m_ switch. When we run in single node mode, it will implicitly say that we want to run the task inside current process. User would have to explicitly say that they want to use the RAR node.
 
-__NOTE:__ The behavior described above depend on fact that the feature is opt-out (is active by default). If not, the paragraph above is meaningless. This has to be yet decided/clarified. 
+__NOTE:__ The behavior described above depend on fact that the feature is opt-out (is active by default). If not, the paragraph above is meaningless. This has to be yet decided/clarified.
 
 ## Communication
 
-The communication between nodes should be done over [StreamJsonRpc](https://github.com/microsoft/vs-streamjsonrpc/). The API over which two node will transfer data has to reflect inputs and outputs of RAR task as described in [docs](https://docs.microsoft.com/en-us/visualstudio/msbuild/resolveassemblyreference-task?view=vs-2019). It is possible that into the API may be added some additional data.
+The communication between nodes should be done over [StreamJsonRpc](https://github.com/microsoft/vs-streamjsonrpc/). The API over which two node will transfer data has to reflect inputs and outputs of RAR task as described in [docs](https://docs.microsoft.com/visualstudio/msbuild/resolveassemblyreference-task?view=vs-2019).
 
 Note that, the following snippets are probably not final version of the API and are here to give rough idea, what must be transferred.
 
