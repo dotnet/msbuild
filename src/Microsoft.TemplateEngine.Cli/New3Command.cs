@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.TemplateLocator;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Mount;
 using Microsoft.TemplateEngine.Abstractions.TemplateUpdates;
@@ -447,6 +448,19 @@ namespace Microsoft.TemplateEngine.Cli
                 return CreationResultStatus.Success;
             }
 
+            try
+            {
+                bool isHiveUpdated = SyncOptionalWorkloads();
+                if (isHiveUpdated)
+                {
+                    Reporter.Output.WriteLine(LocalizableStrings.OptionalWorkloadsSynchronized);
+                }
+            }
+            catch (HiveSynchronizationException hiex)
+            {
+                Reporter.Error.WriteLine(hiex.Message.Bold().Red());
+            }
+
             bool forceCacheRebuild = _commandInput.HasDebuggingFlag("--debug:rebuildcache");
             try
             {
@@ -506,6 +520,65 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             return true;
+        }
+
+        private bool SyncOptionalWorkloads()
+        {
+            bool isHiveUpdated = false;
+            bool isCustomHive = _commandInput.HasDebuggingFlag("--debug:ephemeral-hive") || _commandInput.HasDebuggingFlag("--debug:custom-hive");
+
+            if (!isCustomHive)
+            {
+                string sdkVersion = EnvironmentSettings.Host.Version;
+
+                try
+                {
+                    List<InstallationRequest> owInstallationRequests = new List<InstallationRequest>();
+                    Dictionary<string, string> owInstalledPkgs = new Dictionary<string, string>();  // packageId -> packageVersion
+                    TemplateLocator optionalWorkloadLocator = new TemplateLocator();
+
+                    IReadOnlyCollection<IOptionalSdkTemplatePackageInfo> owPkgsToSync = optionalWorkloadLocator.GetDotnetSdkTemplatePackages(sdkVersion);
+
+                    foreach (IInstallUnitDescriptor descriptor in _settingsLoader.InstallUnitDescriptorCache.Descriptors.Values)
+                    {
+
+                        if (descriptor.IsPartOfAnOptionalWorkload)
+                        {
+                            if (!descriptor.Details.TryGetValue("Version", out string pkgVersion))
+                            {
+                                pkgVersion = string.Empty;
+                            }
+                            owInstalledPkgs.Add(descriptor.Identifier, pkgVersion);
+                        }
+                    }
+
+                    foreach (IOptionalSdkTemplatePackageInfo packageInfo in owPkgsToSync)
+                    {
+                        if (!owInstalledPkgs.TryGetValue(packageInfo.TemplatePackageId, out string version) ||
+                            version != packageInfo.TemplateVersion)
+                        {
+                            isHiveUpdated = true;
+                            owInstallationRequests.Add(new InstallationRequest(packageInfo.Path, isPartOfAnOptionalWorkload: true));
+                        }
+                    }
+
+                    if (owInstallationRequests.Count != 0)
+                    {
+                        Installer.InstallPackages(owInstallationRequests);
+                    }
+
+                    /* TODO: add comparison of Optional SDK Workload templates from Hive and returned by TemplateLocator
+                     * implement templates removal if they are not returned by API anymore
+                     */
+
+                }
+                catch (Exception ex)
+                {
+                    throw new HiveSynchronizationException(LocalizableStrings.OptionalWorkloadsSyncFailed, sdkVersion, ex);
+                }
+            }
+
+            return isHiveUpdated;
         }
 
         private bool Initialize()

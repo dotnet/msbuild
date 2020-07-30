@@ -276,6 +276,12 @@
   <data name="NoTemplatesMatchName" xml:space="preserve">
     <value>No templates matched the input template name: {0}.</value>
   </data>
+  <data name="OptionalWorkloadsSynchronized" xml:space="preserve">
+    <value>The list of templates was synchronized with the Optional SDK Workloads.</value>
+  </data>
+  <data name="OptionalWorkloadsSyncFailed" xml:space="preserve">
+    <value>Error during synchronization with the Optional SDK Workloads.</value>
+  </data>
   <data name="NoUpdates" xml:space="preserve">
     <value>No updates were found.</value>
   </data>
