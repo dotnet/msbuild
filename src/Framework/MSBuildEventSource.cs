@@ -411,12 +411,6 @@ namespace Microsoft.Build.Eventing
         {
             WriteEvent(54, graphEntryPoints);
         }
-
-        [Event(55)]
-        public void PacketReadSize(int size)
-        {
-            WriteEvent(55, size);
-        }
         #endregion
     }
 }
