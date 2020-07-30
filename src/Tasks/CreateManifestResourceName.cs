@@ -306,22 +306,18 @@ namespace Microsoft.Build.Tasks
             if (string.IsNullOrEmpty(subName)) { return; }
 
             // the first character has stronger restrictions than the rest
-            if (!IsValidEverettIdFirstChar(subName[0]))
+            if (IsValidEverettIdFirstChar(subName[0]))
             {
-                // if the first character is not even a valid subsequent character, replace it with an underscore
-                if (!IsValidEverettIdChar(subName[0]))
-                {
-                    builder.Append('_');
-                }
-                // if it is a valid subsequent character, prepend an underscore to it
-                else
-                {
-                    builder.Append('_').Append(subName[0]);
-                }
+                builder.Append(subName[0]);
             }
             else
             {
-                builder.Append(subName[0]);
+                builder.Append('_');
+                if (IsValidEverettIdChar(subName[0]))
+                {
+                    // if it is a valid subsequent character, prepend an underscore to it
+                    builder.Append(subName[0]);
+                }
             }
 
             // process the rest of the subname
@@ -347,8 +343,7 @@ namespace Microsoft.Build.Tasks
 
             if (string.IsNullOrEmpty(name)) { return; }
 
-            // give string length to avoid reallocations; +1 since the resulting string may be one char longer than the
-            // original - if the name is a single underscore we add another underscore to it
+            // store the original length for use later
             int length = builder.Length;
 
             // split folder name into subnames separated by '.', if any
@@ -364,7 +359,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // folder name cannot be a single underscore - add another underscore to it
-            if ((builder.Length - length) == 1 && builder.ToString(length, builder.Length - length).StartsWith("_"))
+            if ((builder.Length - length) == 1 && builder[length] == '_')
             {
                 builder.Append('_');
             }
