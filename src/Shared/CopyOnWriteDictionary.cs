@@ -169,27 +169,16 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                ErrorUtilities.VerifyThrow(_backing == null || _backing.Count == 0, "count"); // check count without recursion
+                ErrorUtilities.VerifyThrow(_backing.Count == 0, "count"); // check count without recursion
 
-                return _backing ?? ImmutableDictionary<K,V>.Empty;
+                return _backing;
             }
         }
 
         /// <summary>
         /// Gets the backing dictionary for writing.
         /// </summary>
-        private ImmutableDictionary<K, V> WriteOperation
-        {
-            get
-            {
-                if (_backing == null)
-                {
-                    _backing = ImmutableDictionary.Create<K,V>(Comparer);
-                }
-
-                return _backing;
-            }
-        }
+        private ImmutableDictionary<K, V> WriteOperation => _backing;
 
         /// <summary>
         /// Accesses the value for the specified key.
