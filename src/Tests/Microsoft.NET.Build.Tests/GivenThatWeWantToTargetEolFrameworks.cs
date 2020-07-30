@@ -21,9 +21,6 @@ namespace Microsoft.NET.Build.Tests
 
         [Theory]
         [InlineData("netcoreapp1.0")]
-        [InlineData("netcoreapp1.1")]
-        [InlineData("netcoreapp2.0")]
-        [InlineData("netcoreapp2.2")]
         [InlineData("netcoreapp3.0")]
         public void It_warns_that_framework_is_out_of_support(string targetFrameworks)
         {
