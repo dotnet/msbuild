@@ -36,14 +36,14 @@ namespace Microsoft.Build.Collections
         /// The backing dictionary.
         /// Lazily created.
         /// </summary>
-        private ImmutableDictionary<K, V> backing;
+        private ImmutableDictionary<K, V> _backing;
 
         /// <summary>
         /// Constructor. Consider supplying a comparer instead.
         /// </summary>
         internal CopyOnWriteDictionary()
         {
-            backing = ImmutableDictionary<K, V>.Empty;
+            _backing = ImmutableDictionary<K, V>.Empty;
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal CopyOnWriteDictionary(int capacity, IEqualityComparer<K>? keyComparer)
         {
-            backing = ImmutableDictionary.Create<K, V>(keyComparer);
+            _backing = ImmutableDictionary.Create<K, V>(keyComparer);
         }
 
         /// <summary>
@@ -76,13 +76,13 @@ namespace Microsoft.Build.Collections
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "context", Justification = "Not needed")]
         protected CopyOnWriteDictionary(SerializationInfo info, StreamingContext context)
         {
-            object v = info.GetValue(nameof(backing), typeof(KeyValuePair<K, V>[]));
+            object v = info.GetValue(nameof(_backing), typeof(KeyValuePair<K, V>[]));
 
             object comparer = info.GetValue(nameof(Comparer), typeof(IEqualityComparer<K>));
 
             var b = ImmutableDictionary.Create<K, V>((IEqualityComparer<K>)comparer);
 
-            backing = b.AddRange((KeyValuePair<K, V>[])v);
+            _backing = b.AddRange((KeyValuePair<K, V>[])v);
         }
 
         /// <summary>
@@ -90,12 +90,12 @@ namespace Microsoft.Build.Collections
         /// </summary>
         private CopyOnWriteDictionary(CopyOnWriteDictionary<K, V> that)
         {
-            backing = that.backing;
+            _backing = that._backing;
         }
 
         public CopyOnWriteDictionary(IDictionary<K, V> dictionary)
         {
-            backing = dictionary.ToImmutableDictionary();
+            _backing = dictionary.ToImmutableDictionary();
         }
 
         /// <summary>
@@ -159,7 +159,7 @@ namespace Microsoft.Build.Collections
         internal IEqualityComparer<K> Comparer
         {
             get => ReadOperation.KeyComparer;
-            private set => backing = WriteOperation.WithComparers(keyComparer: value, valueComparer: backing.ValueComparer);
+            private set => _backing = WriteOperation.WithComparers(keyComparer: value, valueComparer: _backing.ValueComparer);
         }
 
         /// <summary>
@@ -169,9 +169,9 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                ErrorUtilities.VerifyThrow(backing == null || backing.Count == 0, "count"); // check count without recursion
+                ErrorUtilities.VerifyThrow(_backing == null || _backing.Count == 0, "count"); // check count without recursion
 
-                return backing ?? ImmutableDictionary<K,V>.Empty;
+                return _backing ?? ImmutableDictionary<K,V>.Empty;
             }
         }
 
@@ -182,12 +182,12 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                if (backing == null)
+                if (_backing == null)
                 {
-                    backing = ImmutableDictionary.Create<K,V>(Comparer);
+                    _backing = ImmutableDictionary.Create<K,V>(Comparer);
                 }
 
-                return backing;
+                return _backing;
             }
         }
 
@@ -200,7 +200,7 @@ namespace Microsoft.Build.Collections
 
             set
             {
-                backing = WriteOperation.SetItem(key, value);
+                _backing = WriteOperation.SetItem(key, value);
             }
         }
 
@@ -225,7 +225,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Add(K key, V value)
         {
-            backing = WriteOperation.SetItem(key, value);
+            _backing = WriteOperation.SetItem(key, value);
         }
 
         /// <summary>
@@ -241,11 +241,11 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Remove(K key)
         {
-            ImmutableDictionary<K, V> initial = backing;
+            ImmutableDictionary<K, V> initial = _backing;
 
-            backing = backing.Remove(key);
+            _backing = _backing.Remove(key);
 
-            return initial != backing; // whether the removal occured
+            return initial != _backing; // whether the removal occured
         }
 
         /// <summary>
@@ -261,7 +261,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Add(KeyValuePair<K, V> item)
         {
-            backing = backing.SetItem(item.Key, item.Value);
+            _backing = _backing.SetItem(item.Key, item.Value);
         }
 
         /// <summary>
@@ -269,7 +269,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Clear()
         {
-            backing = backing.Clear();
+            _backing = _backing.Clear();
         }
 
         /// <summary>
@@ -293,11 +293,11 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Remove(KeyValuePair<K, V> item)
         {
-            ImmutableDictionary<K, V> initial = backing;
+            ImmutableDictionary<K, V> initial = _backing;
 
-            backing = backing.Remove(item.Key);
+            _backing = _backing.Remove(item.Key);
 
-            return initial != backing; // whether the removal occured
+            return initial != _backing; // whether the removal occured
         }
 
         /// <summary>
@@ -382,7 +382,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal bool HasSameBacking(CopyOnWriteDictionary<K, V> other)
         {
-            return ReferenceEquals(other.backing, backing);
+            return ReferenceEquals(other._backing, _backing);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -390,7 +390,7 @@ namespace Microsoft.Build.Collections
             ImmutableDictionary<K, V> snapshot = ReadOperation;
             KeyValuePair<K, V>[] array = snapshot.ToArray();
 
-            info.AddValue(nameof(backing), array);
+            info.AddValue(nameof(_backing), array);
             info.AddValue(nameof(Comparer), Comparer);
         }
     }
