@@ -1442,7 +1442,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Given a cached portable library that is up to date, create ITaskItems to represent the output of the task, as if we did real work.
         /// </summary>
-        /// <param name="library">The portable library cache entry to extract output files & metadata from.</param>
+        /// <param name="library">The portable library cache entry to extract output files and metadata from.</param>
         /// <param name="cachedOutputFiles">List of output files produced from the cache.</param>
         private void AppendCachedOutputTaskItems(ResGenDependencies.PortableLibraryFile library, List<ITaskItem> cachedOutputFiles)
         {
@@ -3934,7 +3934,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// For flow of control & passing sufficient error context back
+        /// For flow of control and passing sufficient error context back
         /// from ReadTextResources
         /// </summary>
         [Serializable]

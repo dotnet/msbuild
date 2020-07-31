@@ -31,6 +31,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="pipeName">The name of the pipe to which we should connect.</param>
         /// <param name="host">The component host.</param>
         /// <param name="enableReuse">Whether this node may be reused for a later build.</param>
+        /// <param name="lowPriority">Whether this node is low priority.</param>
         internal NodeEndpointOutOfProc(
             string pipeName, 
             IBuildComponentHost host,
