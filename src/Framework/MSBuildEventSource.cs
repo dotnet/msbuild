@@ -333,7 +333,7 @@ namespace Microsoft.Build.Eventing
             WriteEvent(40, fileLocation);
         }
 
-        /// <param name="targetName"/>The name of the target being executed.</param>
+        /// <param name="targetName">The name of the target being executed.</param>
         [Event(43)]
         public void TargetStart(string targetName)
         {
