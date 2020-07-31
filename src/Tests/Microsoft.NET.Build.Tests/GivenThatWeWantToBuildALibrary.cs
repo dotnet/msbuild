@@ -506,7 +506,7 @@ namespace Microsoft.NET.Build.Tests
             definedConstants.Should().BeEquivalentTo(new[] { "DEBUG", "TRACE" }.Concat(expectedDefines).ToArray());
         }
 
-        [WindowsOnlyTheory]
+        [WindowsOnlyRequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("netcoreapp3.1", new[] { "NETCOREAPP", "NETCOREAPP3_1" })]
         [InlineData("net5.0", new[] { "NETCOREAPP", "NETCOREAPP3_1", "NET", "NET5_0", "WINDOWS", "WINDOWS7_0" }, "windows", "7.0")]
         public void It_can_use_implicitly_defined_compilation_constants(string targetFramework, string[] expectedOutput, string targetPlatformIdentifier = null, string targetPlatformVersion = null)
@@ -601,10 +601,12 @@ class Program
                 $"The TargetFramework value '{targetFramework}' is not valid. To multi-target, use the 'TargetFrameworks' property instead");
         }
 
-        [RequiresMSBuildVersionTheory("16.7.0-preview-20310-07")]
-        [InlineData("net5.0", false)]
-        [InlineData("netcoreapp3.1", true)]
-        public void It_defines_target_platform_defaults_correctly(string targetFramework, bool defaultsDefined)
+        [WindowsOnlyRequiresMSBuildVersionTheory("16.7.0-preview-20310-07")]
+        [InlineData("net5.0", "", false)]
+        [InlineData("net5.0", "UseWPF", true)]
+        [InlineData("net5.0", "UseWindowsForms", true)]
+        [InlineData("netcoreapp3.1", "", true)]
+        public void It_defines_target_platform_defaults_correctly(string targetFramework, string propertyName, bool defaultsDefined)
         {
             TestProject testProject = new TestProject()
             {
@@ -613,6 +615,10 @@ class Program
                 TargetFrameworks = targetFramework
             };
 
+            if (!propertyName.Equals(string.Empty))
+            {
+                testProject.AdditionalProperties[propertyName] = "true";
+            }
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var getValuesCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), targetFramework, "TargetPlatformIdentifier");
@@ -633,7 +639,7 @@ class Program
             }
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("net5.0")]
         [InlineData("netcoreapp3.1")]
         public void It_defines_windows_version_default_correctly(string targetFramework)
@@ -948,6 +954,64 @@ class Program
             }
 
 
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("netcoreapp3.1")]
+        [InlineData("netcoreapp5.0")]
+        public void It_makes_RootNamespace_safe_when_project_name_has_spaces(string targetFramework)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "Project Name With Spaces",
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            // Overwrite the default file. CreateTestProject uses the defined project name for the namespace.
+            // We need a buildable project to extract the property to verify it
+            // since this issue only surfaces in VS when adding a new class through an item template.
+            File.WriteAllText(Path.Combine(testAsset.Path, testProject.Name, $"{testProject.Name}.cs"), @"
+using System;
+using System.Collections.Generic;
+
+namespace ProjectNameWithSpaces
+{
+    public class ProjectNameWithSpacesClass
+    {
+        public static string Name { get { return ""Project Name With Spaces""; } }
+        public static List<string> List { get { return null; } }
+    }
+}");
+            string projectFolder = Path.Combine(testAsset.Path, testProject.Name);
+
+            var buildCommand = new BuildCommand(testAsset, $"{ testProject.Name}");
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            string GetPropertyValue(string propertyName)
+            {
+                var getValuesCommand = new GetValuesCommand(Log, projectFolder,
+                    testProject.TargetFrameworks, propertyName, GetValuesCommand.ValueType.Property)
+                {
+                    Configuration = "Debug"
+                };
+
+                getValuesCommand
+                    .Execute()
+                    .Should()
+                    .Pass();
+
+                var values = getValuesCommand.GetValues();
+                values.Count.Should().Be(1);
+                return values[0];
+            }
+
+            GetPropertyValue("RootNamespace").Should().Be("Project_Name_With_Spaces");
         }
     }
 }

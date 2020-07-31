@@ -8,6 +8,8 @@
     <WarningsAsErrors>true</WarningsAsErrors>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <IsPackable>true</IsPackable>
+    <!-- Create FileDefinitions items for ResolveHostfxrCopyLocalContent target -->
+    <EmitLegacyAssetsFileItems>true</EmitLegacyAssetsFileItems>
   </PropertyGroup>
 
   <ItemGroup>

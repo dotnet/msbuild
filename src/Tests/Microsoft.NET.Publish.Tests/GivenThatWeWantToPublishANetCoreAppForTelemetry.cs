@@ -60,7 +60,7 @@ namespace Microsoft.NET.Publish.Tests
                 "\"CompileListCount\":\"[1-9]\\d?\"");  // Do not hardcode number of assemblies being compiled here, due to ILTrimmer
         }
 
-        [CoreMSBuildOnlyTheory(Skip = "https://github.com/dotnet/runtime/issues/37196")]
+        [CoreMSBuildOnlyTheory]
         [InlineData("net5.0")] 
         void It_collects_crossgen2_publishing_properties(string targetFramework)
         {

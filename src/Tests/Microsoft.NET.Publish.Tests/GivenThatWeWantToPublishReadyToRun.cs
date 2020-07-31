@@ -194,7 +194,7 @@ namespace Microsoft.NET.Publish.Tests
             TestProjectPublishing_Internal("LibraryProject2", targetFramework, isSelfContained:true, makeExeProject: false);
         }
 
-        [Theory(Skip = "https://github.com/dotnet/runtime/issues/37196")]
+        [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("net5.0")]
         void It_can_publish_readytorun_using_crossgen2(string targetFramework)
         {
@@ -202,10 +202,21 @@ namespace Microsoft.NET.Publish.Tests
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.OSArchitecture != Architecture.X64)
                 return;
 
-            TestProjectPublishing_Internal("Crossgen2TestApp", targetFramework, isSelfContained: true, emitNativeSymbols: true, useCrossgen2: true);
+            TestProjectPublishing_Internal("Crossgen2TestApp", targetFramework, isSelfContained: true, emitNativeSymbols: true, useCrossgen2: true, composite: false);
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net5.0")]
+        void It_can_publish_readytorun_using_crossgen2_composite_mode(string targetFramework)
+        {
+            // Crossgen2 only supported for Linux/Windows x64 scenarios for now
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.OSArchitecture != Architecture.X64)
+                return;
+
+            TestProjectPublishing_Internal("Crossgen2TestApp", targetFramework, isSelfContained: true, emitNativeSymbols: false, useCrossgen2: true, composite: true);
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("net5.0")]
         public void It_only_supports_selfcontained_when_using_crossgen2(string targetFramework)
         {
@@ -233,7 +244,7 @@ namespace Microsoft.NET.Publish.Tests
                 .And.HaveStdOutContainingIgnoreCase("NETSDK1126");
         }
 
-        private void TestProjectPublishing_Internal(string projectName, string targetFramework, bool makeExeProject = true, bool isSelfContained = true, bool emitNativeSymbols = false, bool useCrossgen2 = false)
+        private void TestProjectPublishing_Internal(string projectName, string targetFramework, bool makeExeProject = true, bool isSelfContained = true, bool emitNativeSymbols = false, bool useCrossgen2 = false, bool composite = true)
         {
             var testProject = CreateTestProjectForR2RTesting(
                 targetFramework,
@@ -244,6 +255,7 @@ namespace Microsoft.NET.Publish.Tests
             testProject.AdditionalProperties["PublishReadyToRun"] = "True";
             testProject.AdditionalProperties["PublishReadyToRunEmitSymbols"] = emitNativeSymbols ? "True" : "False";
             testProject.AdditionalProperties["PublishReadyToRunUseCrossgen2"] = useCrossgen2 ? "True" : "False";
+            testProject.AdditionalProperties["PublishReadyToRunComposite"] = composite ? "True" : "False";
             testProject.AdditionalProperties["SelfContained"] = isSelfContained ? "True" : "False";
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
