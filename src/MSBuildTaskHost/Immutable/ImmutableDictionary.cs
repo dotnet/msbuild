@@ -16,7 +16,7 @@ namespace System.Collections.Immutable
         }
     }
 
-    class ImmutableDictionary
+    static class ImmutableDictionary
     {
         internal static ImmutableDictionary<K, V> Create<K, V>(IEqualityComparer<K> comparer)
         {
@@ -29,7 +29,7 @@ namespace System.Collections.Immutable
     /// </summary>
     /// <typeparam name="K"></typeparam>
     /// <typeparam name="V"></typeparam>
-    class ImmutableDictionary<K, V>
+    sealed class ImmutableDictionary<K, V> : IDictionary<K, V>, IDictionary
     {
         /// <summary>
         /// The underlying dictionary.
@@ -40,56 +40,71 @@ namespace System.Collections.Immutable
         // READ-ONLY OPERATIONS
         //
 
-        public ICollection<K> Keys
-        {
-            get
-            {
-                return _backing.Keys;
-            }
-        }
+        public ICollection<K> Keys => _backing.Keys;
+        public ICollection<V> Values => _backing.Values;
 
-        public ICollection<V> Values
-        {
-            get
-            {
-                return _backing.Values;
-            }
-        }
+        ICollection IDictionary.Keys => _backing.Keys;
+        ICollection IDictionary.Values => _backing.Values;
 
-        public int Count
-        {
-            get
-            {
-                return _backing.Count;
-            }
-        }
+        public int Count => _backing.Count;
 
-        public V this[K key]
-        {
-            get
-            {
-                return _backing[key];
-            }
-        }
+        public V this[K key] => _backing[key];
 
-        internal bool TryGetValue(K key, out V value)
+        public bool IsReadOnly => true;
+        public bool IsFixedSize => true;
+        public bool IsSynchronized => true;
+
+        public object SyncRoot => this;
+
+        public bool TryGetValue(K key, out V value)
         {
             return _backing.TryGetValue(key, out value);
         }
 
-        internal bool Contains(KeyValuePair<K, V> item)
+        public bool Contains(KeyValuePair<K, V> item)
         {
             return _backing.Contains(item);
         }
 
-        internal bool ContainsKey(K key)
+        bool IDictionary.Contains(object key)
+        {
+            return ((IDictionary)_backing).Contains(key);
+        }
+
+        public bool ContainsKey(K key)
         {
             return _backing.ContainsKey(key);
         }
 
-        internal IEnumerator<KeyValuePair<K, V>> GetEnumerator()
+        public IEnumerator<KeyValuePair<K, V>> GetEnumerator()
         {
             return _backing.GetEnumerator();
+        }
+
+        IDictionaryEnumerator IDictionary.GetEnumerator()
+        {
+            return _backing.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _backing.GetEnumerator();
+        }
+
+        void ICollection<KeyValuePair<K, V>>.CopyTo(KeyValuePair<K, V>[] array, int arrayIndex)
+        {
+            foreach (var item in this)
+            {
+                array[arrayIndex++] = item;
+            }
+        }
+
+        void ICollection.CopyTo(Array array, int arrayIndex)
+        {
+            foreach (var item in this)
+            {
+                array.SetValue(new DictionaryEntry(item.Key, item.Value), arrayIndex++);
+            }
         }
 
         //
@@ -171,6 +186,62 @@ namespace System.Collections.Immutable
         {
             var n = new Dictionary<K, V>(_backing, keyComparer);
             return new ImmutableDictionary<K, V>(n);
+        }
+
+        //
+        // UNSUPPORTED OPERATIONS
+        //
+
+        object IDictionary.this[object key]
+        {
+            get { return ((IDictionary)this)[key]; }
+            set { throw new NotSupportedException(); }
+        }
+
+        void IDictionary.Add(object key, object value)
+        {
+            throw new NotSupportedException();
+        }
+
+        void IDictionary.Remove(object key)
+        {
+            throw new NotSupportedException();
+        }
+
+        void IDictionary.Clear()
+        {
+            throw new NotSupportedException();
+        }
+
+        V IDictionary<K, V>.this[K key]
+        {
+            get { return this[key]; }
+            set { throw new NotSupportedException(); }
+        }
+
+        void IDictionary<K, V>.Add(K key, V value)
+        {
+            throw new NotSupportedException();
+        }
+
+        bool IDictionary<K, V>.Remove(K key)
+        {
+            throw new NotSupportedException();
+        }
+
+        void ICollection<KeyValuePair<K, V>>.Add(KeyValuePair<K, V> item)
+        {
+            throw new NotSupportedException();
+        }
+
+        void ICollection<KeyValuePair<K, V>>.Clear()
+        {
+            throw new NotSupportedException();
+        }
+
+        bool ICollection<KeyValuePair<K, V>>.Remove(KeyValuePair<K, V> item)
+        {
+            throw new NotSupportedException();
         }
     }
 }
