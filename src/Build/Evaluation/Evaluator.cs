@@ -1779,7 +1779,7 @@ namespace Microsoft.Build.Evaluation
 
             string project = importElement.Project;
 
-            var sdkReference = importElement.SdkReference;
+            SdkReference sdkReference = importElement.SdkReference;
             if (sdkReference != null)
             {
                 // Try to get the path to the solution and project being built. The solution path is not directly known
@@ -1791,7 +1791,7 @@ namespace Microsoft.Build.Evaluation
                 if (solutionPath == "*Undefined*") solutionPath = null;
                 var projectPath = _data.GetProperty(ReservedPropertyNames.projectFullPath)?.EvaluatedValue;
 
-                var compareInfo = CultureInfo.InvariantCulture.CompareInfo;
+                CompareInfo compareInfo = CultureInfo.InvariantCulture.CompareInfo;
 
                 static bool HasProperty(string value, CompareInfo compareInfo) =>
                     value != null && compareInfo.IndexOf(value, "$(") != -1;
@@ -1807,7 +1807,7 @@ namespace Microsoft.Build.Evaluation
                                                                    location)
                             : null;
 
-                    var sdkReferenceOrigin = importElement.SdkLocation;
+                    IElementLocation sdkReferenceOrigin = importElement.SdkLocation;
 
                     sdkReference = new SdkReference(
                         EvaluateProperty(sdkReference.Name, sdkReferenceOrigin, _expander),
