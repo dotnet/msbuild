@@ -207,7 +207,6 @@ namespace Microsoft.Build.Tasks
         public string Code { get { throw null; } set { } }
         public string File { get { throw null; } set { } }
         public string HelpKeyword { get { throw null; } set { } }
-        public string HelpLink { get { throw null; } set { } }
         public string Text { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
@@ -783,7 +782,6 @@ namespace Microsoft.Build.Tasks
         public string Code { get { throw null; } set { } }
         public string File { get { throw null; } set { } }
         public string HelpKeyword { get { throw null; } set { } }
-        public string HelpLink { get { throw null; } set { } }
         public string Text { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
