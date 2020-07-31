@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Tracing;
-using System.Runtime.InteropServices;
-using System.Threading;
+﻿using System.Diagnostics.Tracing;
 
 namespace Microsoft.Build.Eventing
 {
