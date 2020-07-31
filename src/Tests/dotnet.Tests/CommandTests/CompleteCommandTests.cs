@@ -90,6 +90,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 "--install",
                 "--language",
                 "--list",
+                "--interactive",
                 "--name",
                 "--nuget-source",
                 "--output",
