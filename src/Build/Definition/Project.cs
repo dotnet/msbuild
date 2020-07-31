@@ -1731,7 +1731,6 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Internal project evaluation implementation
         /// </summary>
-        /// <remarks>
         private class ProjectImpl : ProjectLink, IProjectLinkInternal
         {
             /// <summary>
