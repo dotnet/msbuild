@@ -8,17 +8,18 @@ using System.IO;
 using System.IO.Pipes;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 
-using Microsoft.Build.Shared;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Internal;
-
-using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
-using System.Threading.Tasks;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+
+using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -887,6 +888,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 int packetLength = BitConverter.ToInt32(_headerByte, 1);
+                MSBuildEventSource.Log.PacketReadSize(packetLength);
 
                 byte[] packetData;
                 if (packetLength < _smallReadBuffer.Length)
