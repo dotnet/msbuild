@@ -42,7 +42,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         public override bool Execute()
         {
-            Log.LogError(null, Code, HelpKeyword, File, 0, 0, 0, 0, Text ?? TaskResources.GetString("ErrorAndWarning.EmptyMessage"), HelpLink);
+            Log.LogError(null, Code, HelpKeyword, HelpLink, File, 0, 0, 0, 0, Text ?? TaskResources.GetString("ErrorAndWarning.EmptyMessage"));
 
             // careful to return false. Otherwise the build would continue.
             return false;
