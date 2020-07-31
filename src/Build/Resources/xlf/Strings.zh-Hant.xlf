@@ -173,13 +173,6 @@
         <target state="translated">屬性初始值: $({0})="{1}" 來源: {2}</target>
         <note />
       </trans-unit>
-      <trans-unit id="SdkPropertiesEvaluated">
-        <source>MSB4264: The SDK reference "{0}" has been evaluated to "{1}".</source>
-        <target state="new">MSB4264: The SDK reference "{0}" has been evaluated to "{1}".</target>
-        <note>{StrBegin="MSB4264: "}
-      LOCALIZATION: Do not localize the word SDK.
-    </note>
-      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: 專案 "{0}" 已跳過參考專案 "{1}" 上的圖形隔離條件約束</target>

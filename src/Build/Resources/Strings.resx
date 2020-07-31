@@ -1831,10 +1831,4 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="StaticGraphConstructionMetrics" xml:space="preserve">
     <value>"Static graph loaded in {0} seconds: {1} nodes, {2} edges"</value>
   </data>
-  <data name="SdkPropertiesEvaluated" xml:space="preserve">
-    <value>MSB4264: The SDK reference "{0}" has been evaluated to "{1}".</value>
-    <comment>{StrBegin="MSB4264: "}
-      LOCALIZATION: Do not localize the word SDK.
-    </comment>
-  </data>
 </root>

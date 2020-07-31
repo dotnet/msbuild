@@ -173,13 +173,6 @@
         <target state="translated">속성 초기 값: $({0})="{1}" 소스: {2}</target>
         <note />
       </trans-unit>
-      <trans-unit id="SdkPropertiesEvaluated">
-        <source>MSB4264: The SDK reference "{0}" has been evaluated to "{1}".</source>
-        <target state="new">MSB4264: The SDK reference "{0}" has been evaluated to "{1}".</target>
-        <note>{StrBegin="MSB4264: "}
-      LOCALIZATION: Do not localize the word SDK.
-    </note>
-      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: 프로젝트 "{0}"에서 참조된 프로젝트 "{1}"의 그래프 격리 제약 조건을 건너뛰었습니다.</target>

@@ -75,6 +75,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         private const string SdkNameProperty = "$(" + SdkNamePropertyName + ")";
         private const string SdkVersionPropertyName = "MyTestSdkVersion";
         private const string SdkVersionProperty = "$(" + SdkVersionPropertyName + ")";
+        private const string SdkExpectedVersion = "42.42.42-local";
 
         public ProjectSdkImplicitImport_Tests()
         {
@@ -540,16 +541,81 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         }
 
         [Theory]
-        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkName, MockExpandedSdkResolver.ExpectedVersion, false)]
-        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkName, SdkVersionProperty, true)]
-        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkNameProperty, SdkVersionProperty, true)]
-        [InlineData(ProjectTemplateSdkAsElementWithVersion, SdkName, MockExpandedSdkResolver.ExpectedVersion, false)]
+        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkName, SdkExpectedVersion, false)]
+        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkName, SdkVersionProperty, false)]
+        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkNameProperty, SdkVersionProperty, false)]
+        [InlineData(ProjectTemplateSdkAsElementWithVersion, SdkName, SdkExpectedVersion, true)]
         [InlineData(ProjectTemplateSdkAsElementWithVersion, SdkName, SdkVersionProperty, true)]
         [InlineData(ProjectTemplateSdkAsElementWithVersion, SdkNameProperty, SdkVersionProperty, true)]
-        [InlineData(ProjectTemplateSdkAsExplicitImportWithVersion, SdkName, MockExpandedSdkResolver.ExpectedVersion, false)]
+        [InlineData(ProjectTemplateSdkAsExplicitImportWithVersion, SdkName, SdkExpectedVersion, true)]
         [InlineData(ProjectTemplateSdkAsExplicitImportWithVersion, SdkName, SdkVersionProperty, true)]
         [InlineData(ProjectTemplateSdkAsExplicitImportWithVersion, SdkNameProperty, SdkVersionProperty, true)]
-        public void SdkPropertiesAreExpandedBeforeResolution(string projectTemplate, string sdkName, string sdkVersion, bool shouldLog4264)
+        public void SdkPropertiesAreExpandedBeforeResolution(string projectTemplate, string sdkName, string sdkVersion,
+            bool minimumVersionIsNonNull)
+        {
+            using var xmlReader = PrepareForSdkPropertiesAreExpandedTests(projectTemplate, sdkName, sdkVersion,
+                out var projectOptions);
+
+            var project = Project.FromXmlReader(xmlReader, projectOptions);
+
+            var expectedSdkPath = Path.GetDirectoryName(_sdkPropsPath);
+
+            // self-consistency check
+            expectedSdkPath.ShouldBe(Path.GetDirectoryName(_sdkTargetsPath));
+
+            var minimumVersion = minimumVersionIsNonNull ? string.Empty : null;
+            var expectedSdkReferenceRaw = new SdkReference(sdkName, sdkVersion, minimumVersion);
+            var expectedSdkReference = new SdkReference(SdkName, SdkExpectedVersion, minimumVersion);
+
+            project.Imports.Count.ShouldBe(2);
+
+            foreach (var import in project.Imports)
+            {
+                import.ImportingElement.SdkReference.ShouldBe(expectedSdkReferenceRaw);
+                import.SdkResult.Success.ShouldBeTrue();
+                import.SdkResult.SdkReference.ShouldBe(expectedSdkReference);
+                import.SdkResult.Path.ShouldBe(expectedSdkPath);
+                import.SdkResult.Version.ShouldBe(expectedSdkReference.Version);
+            }
+        }
+
+        [Theory]
+        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkNameProperty, SdkVersionProperty, false, true)]
+        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkNameProperty, SdkVersionProperty, true, false)]
+        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkNameProperty, SdkVersionProperty, false, false)]
+        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkName, SdkVersionProperty, true, false)]
+        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkName, SdkVersionProperty, false, false)]
+        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkNameProperty, SdkExpectedVersion, false, true)]
+        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkNameProperty, SdkExpectedVersion, false, false)]
+        [InlineData(ProjectTemplateSdkAsElementWithVersion, SdkNameProperty, SdkVersionProperty, false, true)]
+        [InlineData(ProjectTemplateSdkAsElementWithVersion, SdkNameProperty, SdkVersionProperty, true, false)]
+        [InlineData(ProjectTemplateSdkAsElementWithVersion, SdkNameProperty, SdkVersionProperty, false, false)]
+        [InlineData(ProjectTemplateSdkAsElementWithVersion, SdkName, SdkVersionProperty, true, false)]
+        [InlineData(ProjectTemplateSdkAsElementWithVersion, SdkName, SdkVersionProperty, false, false)]
+        [InlineData(ProjectTemplateSdkAsElementWithVersion, SdkNameProperty, SdkExpectedVersion, false, true)]
+        [InlineData(ProjectTemplateSdkAsElementWithVersion, SdkNameProperty, SdkExpectedVersion, false, false)]
+        [InlineData(ProjectTemplateSdkAsExplicitImportWithVersion, SdkNameProperty, SdkVersionProperty, false, true)]
+        [InlineData(ProjectTemplateSdkAsExplicitImportWithVersion, SdkNameProperty, SdkVersionProperty, true, false)]
+        [InlineData(ProjectTemplateSdkAsExplicitImportWithVersion, SdkNameProperty, SdkVersionProperty, false, false)]
+        [InlineData(ProjectTemplateSdkAsExplicitImportWithVersion, SdkName, SdkVersionProperty, true, false)]
+        [InlineData(ProjectTemplateSdkAsExplicitImportWithVersion, SdkName, SdkVersionProperty, false, false)]
+        [InlineData(ProjectTemplateSdkAsExplicitImportWithVersion, SdkNameProperty, SdkExpectedVersion, false, true)]
+        [InlineData(ProjectTemplateSdkAsExplicitImportWithVersion, SdkNameProperty, SdkExpectedVersion, false, false)]
+        public void SdkPropertiesAreExpandedBeforeResolutionFailWhenPropertyNotSet(string projectTemplate,
+            string sdkName, string sdkVersion, bool setName, bool setVersion)
+        {
+            using var xmlReader = PrepareForSdkPropertiesAreExpandedTests(projectTemplate, sdkName, sdkVersion,
+                out var projectOptions, setName, setVersion);
+
+            projectOptions.LoadSettings |= ProjectLoadSettings.IgnoreMissingImports;
+
+            var project = Project.FromXmlReader(xmlReader, projectOptions);
+
+            project.Imports.Count.ShouldBe(0);
+        }
+
+        private XmlReader PrepareForSdkPropertiesAreExpandedTests(string projectTemplate, string sdkName, string sdkVersion,
+            out ProjectOptions projectOptions, bool setName = true, bool setVersion = true)
         {
             _env.SetEnvironmentVariable("MSBuildSDKsPath", _testSdkRoot);
 
@@ -564,59 +630,25 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 null
             );
 
-            // Use custom SDK resolution to ensure resolver context is logged.
-            var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new MockExpandedSdkResolver(_testSdkDirectory));
+            var options = SdkUtilities.CreateProjectOptionsWithResolver(new MockExpandedSdkResolver(_testSdkDirectory));
 
-            var logger = new MockLogger();
-            var pc = _env.CreateProjectCollection().Collection;
-            pc.RegisterLogger(logger);
-            projectOptions.ProjectCollection = pc;
+            void AddProperty(string name, string value) =>
+                (options.GlobalProperties ??= new Dictionary<string, string>()).Add(name, value);
 
-            projectOptions.GlobalProperties = new Dictionary<string, string>
-            {
-                [SdkNamePropertyName] = SdkName,
-                [SdkVersionPropertyName] = MockExpandedSdkResolver.ExpectedVersion
-            };
+            if (setName)
+                AddProperty(SdkNamePropertyName, SdkName);
 
-            using var xmlReader = XmlReader.Create(new StringReader(projectContents));
-            Project.FromXmlReader(xmlReader, projectOptions);
+            if (setVersion)
+                AddProperty(SdkVersionPropertyName, SdkExpectedVersion);
 
-            ProjectImportedEventArgs[] events = logger.BuildMessageEvents
-                                                      .OfType<ProjectImportedEventArgs>()
-                                                      .Where(Event4264Predicate)
-                                                      .ToArray();
+            projectOptions = options;
 
-            if (shouldLog4264)
-            {
-                // There are two imports for each template so there should be two logged ProjectImportedEventArgs
-                events.Length.ShouldBe(2);
-
-                Assert4264LogMessage(events[0]);
-                Assert4264LogMessage(events[1]);
-            }
-            else
-            {
-                events.Length.ShouldBe(0);
-            }
-
-            static bool Event4264Predicate(ProjectImportedEventArgs logEvent)
-            {
-                return logEvent.Message.StartsWith("MSB4264");
-            }
-
-            void Assert4264LogMessage(ProjectImportedEventArgs logEvent)
-            {
-                logEvent.Message.ShouldStartWith("MSB4264");
-                logEvent.Message.ShouldContain($"\"{sdkName}/{sdkVersion}\"");
-                logEvent.Message.ShouldContain($"\"{SdkName}/{MockExpandedSdkResolver.ExpectedVersion}\"");
-                logEvent.ImportIgnored.ShouldBeFalse();
-            }
+            return XmlReader.Create(new StringReader(projectContents));
         }
 
         private sealed class MockExpandedSdkResolver : SdkResolver
         {
             private const string ResolverName = nameof(MockExpandedSdkResolver);
-            public const string ExpectedVersion = "42.42.42-local";
             private const string ErrorName = ResolverName + "/Error/" + nameof(SdkReference.Name);
             private const string ErrorVersion = ResolverName + "/Error/" + nameof(SdkReference.Version);
 
@@ -636,8 +668,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 return sdk.Name switch
                 {
-                    SdkName when sdk.Version == ExpectedVersion =>
-                    factory.IndicateSuccess(ResolvedPath, ExpectedVersion),
+                    SdkName when sdk.Version == SdkExpectedVersion =>
+                    factory.IndicateSuccess(ResolvedPath, SdkExpectedVersion),
                     SdkName => factory.IndicateFailure(new[] {ErrorVersion}),
                     _ => factory.IndicateFailure(new[] {ErrorName})
                 };

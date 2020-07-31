@@ -1809,31 +1809,11 @@ namespace Microsoft.Build.Evaluation
 
                     var sdkReferenceOrigin = importElement.SdkLocation;
 
-                    var expandedSdkReference = new SdkReference(
+                    sdkReference = new SdkReference(
                         EvaluateProperty(sdkReference.Name, sdkReferenceOrigin, _expander),
                         EvaluateProperty(sdkReference.Version, sdkReferenceOrigin, _expander),
                         EvaluateProperty(sdkReference.MinimumVersion, sdkReferenceOrigin, _expander)
                     );
-
-                    if (!Equals(expandedSdkReference, sdkReference))
-                    {
-                        var eventArgs = new ProjectImportedEventArgs(
-                            importElement.Location.Line,
-                            importElement.Location.Column,
-                            ResourceUtilities.GetResourceString("SdkPropertiesEvaluated"),
-                            sdkReference.ToString(),
-                            expandedSdkReference.ToString()
-                        )
-                        {
-                            BuildEventContext = _evaluationLoggingContext.BuildEventContext,
-                            UnexpandedProject = importElement.Project,
-                            ProjectFile = importElement.ContainingProject.FullPath
-                        };
-
-                        _evaluationLoggingContext.LogBuildEvent(eventArgs);
-                    }
-
-                    sdkReference = expandedSdkReference;
                 }
 
                 // Combine SDK path with the "project" relative path
