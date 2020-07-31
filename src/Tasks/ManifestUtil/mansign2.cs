@@ -275,8 +275,13 @@ namespace System.Deployment.Internal.CodeSigning
             CryptoConfig.AddAlgorithm(typeof(RSAPKCS1SHA256SignatureDescription),
                                Sha256SignatureMethodUri);
 
+#if RUNTIME_TYPE_NETCORE
+            CryptoConfig.AddAlgorithm(typeof(SHA256Managed),
+                               Sha256DigestMethod);
+#else
             CryptoConfig.AddAlgorithm(typeof(System.Security.Cryptography.SHA256Cng),
                                Sha256DigestMethod);
+#endif
         }
 
         private static XmlElement FindIdElement(XmlElement context, string idValue)
@@ -694,7 +699,11 @@ namespace System.Deployment.Internal.CodeSigning
         private static void AuthenticodeSignLicenseDom(XmlDocument licenseDom, CmiManifestSigner2 signer, string timeStampUrl, bool useSha256)
         {
             // Make sure it is RSA, as this is the only one Fusion will support.
+#if RUNTIME_TYPE_NETCORE
+            RSA rsaPrivateKey = signer.Certificate.GetRSAPrivateKey();
+#else
             RSA rsaPrivateKey = CngLightup.GetRSAPrivateKey(signer.Certificate);
+#endif
             if (rsaPrivateKey == null)
             {
                 throw new NotSupportedException();
