@@ -227,16 +227,6 @@ namespace Microsoft.Build.Evaluation
         private int _maxNodeCount;
 
         /// <summary>
-        /// Hook up last minute dumping of any exceptions bringing down the process
-        /// </summary>
-        static ProjectCollection()
-        {
-#if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
-            AppDomain.CurrentDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
-#endif
-        }
-
-        /// <summary>
         /// Instantiates a project collection with no global properties or loggers that reads toolset 
         /// information from the configuration file and registry.
         /// </summary>

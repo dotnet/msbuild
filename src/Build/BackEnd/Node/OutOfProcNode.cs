@@ -140,10 +140,6 @@ namespace Microsoft.Build.Execution
         {
             s_isOutOfProcNode = true;
 
-#if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
-            AppDomain.CurrentDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
-#endif
-
             _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
 
             _receivedPackets = new ConcurrentQueue<INodePacket>();
