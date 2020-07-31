@@ -627,28 +627,25 @@ namespace Microsoft.Build.Shared
 #endif
         }
 
-#if MONO
+#if !CLR2COMPATIBILITY
         private static bool? _isOSX;
 #endif
+
         /// <summary>
         /// Gets a flag indicating if we are running under Mac OSX
         /// </summary>
         internal static bool IsOSX
         {
-#if MONO
-            get
-            {
-                if (!_isOSX.HasValue)
-                {
-                    _isOSX = File.Exists("/usr/lib/libc.dylib");
-                }
-
-                return _isOSX.Value;
-            }
-#elif CLR2COMPATIBILITY
+#if CLR2COMPATIBILITY
             get { return false; }
 #else
-            get { return RuntimeInformation.IsOSPlatform(OSPlatform.OSX); }
+            get {
+                if (_isOSX == null)
+                {
+                    _isOSX = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+                }
+                return _isOSX.Value;
+            }
 #endif
         }
 
