@@ -101,22 +101,22 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Returns the collection of keys in the dictionary.
         /// </summary>
-        public ICollection<K> Keys => ((IDictionary<K, V>)ReadOperation).Keys;
+        public ICollection<K> Keys => ((IDictionary<K, V>)_backing).Keys;
 
         /// <summary>
         /// Returns the collection of values in the dictionary.
         /// </summary>
-        public ICollection<V> Values => ((IDictionary<K, V>)ReadOperation).Values;
+        public ICollection<V> Values => ((IDictionary<K, V>)_backing).Values;
 
         /// <summary>
         /// Returns the number of items in the collection.
         /// </summary>
-        public int Count => ReadOperation.Count;
+        public int Count => _backing.Count;
 
         /// <summary>
         /// Returns true if the collection is read-only.
         /// </summary>
-        public bool IsReadOnly => ((IDictionary<K, V>)ReadOperation).IsReadOnly;
+        public bool IsReadOnly => ((IDictionary<K, V>)_backing).IsReadOnly;
 
         /// <summary>
         /// IDictionary implementation
@@ -158,38 +158,20 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal IEqualityComparer<K> Comparer
         {
-            get => ReadOperation.KeyComparer;
-            private set => _backing = WriteOperation.WithComparers(keyComparer: value, valueComparer: _backing.ValueComparer);
+            get => _backing.KeyComparer;
+            private set => _backing = _backing.WithComparers(keyComparer: value, valueComparer: _backing.ValueComparer);
         }
-
-        /// <summary>
-        /// Gets the backing dictionary for reading.
-        /// </summary>
-        private ImmutableDictionary<K, V> ReadOperation
-        {
-            get
-            {
-                ErrorUtilities.VerifyThrow(_backing.Count == 0, "count"); // check count without recursion
-
-                return _backing;
-            }
-        }
-
-        /// <summary>
-        /// Gets the backing dictionary for writing.
-        /// </summary>
-        private ImmutableDictionary<K, V> WriteOperation => _backing;
 
         /// <summary>
         /// Accesses the value for the specified key.
         /// </summary>
         public V this[K key]
         {
-            get => ReadOperation[key];
+            get => _backing[key];
 
             set
             {
-                _backing = WriteOperation.SetItem(key, value);
+                _backing = _backing.SetItem(key, value);
             }
         }
 
@@ -214,7 +196,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Add(K key, V value)
         {
-            _backing = WriteOperation.SetItem(key, value);
+            _backing = _backing.SetItem(key, value);
         }
 
         /// <summary>
@@ -222,7 +204,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool ContainsKey(K key)
         {
-            return ReadOperation.ContainsKey(key);
+            return _backing.ContainsKey(key);
         }
 
         /// <summary>
@@ -242,7 +224,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool TryGetValue(K key, out V value)
         {
-            return ReadOperation.TryGetValue(key, out value);
+            return _backing.TryGetValue(key, out value);
         }
 
         /// <summary>
@@ -266,7 +248,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Contains(KeyValuePair<K, V> item)
         {
-            return ReadOperation.Contains(item);
+            return _backing.Contains(item);
         }
 
         /// <summary>
@@ -274,7 +256,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void CopyTo(KeyValuePair<K, V>[] array, int arrayIndex)
         {
-            ((IDictionary<K, V>)ReadOperation).CopyTo(array, arrayIndex);
+            ((IDictionary<K, V>)_backing).CopyTo(array, arrayIndex);
         }
 
         /// <summary>
@@ -294,7 +276,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public IEnumerator<KeyValuePair<K, V>> GetEnumerator()
         {
-            return ReadOperation.GetEnumerator();
+            return _backing.GetEnumerator();
         }
 
         /// <summary>
@@ -334,7 +316,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         IDictionaryEnumerator IDictionary.GetEnumerator()
         {
-            return ((IDictionary)ReadOperation).GetEnumerator();
+            return ((IDictionary)_backing).GetEnumerator();
         }
 
         /// <summary>
@@ -376,7 +358,7 @@ namespace Microsoft.Build.Collections
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            ImmutableDictionary<K, V> snapshot = ReadOperation;
+            ImmutableDictionary<K, V> snapshot = _backing;
             KeyValuePair<K, V>[] array = snapshot.ToArray();
 
             info.AddValue(nameof(_backing), array);
