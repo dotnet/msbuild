@@ -779,7 +779,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // PERF: Not using VerifyThrow to avoid allocations for enum.ToString (boxing of NodePacketType) in the non-error case.
             if (packet.Type != NodePacketType.LogMessage)
             {
-                ErrorUtilities.ThrowInternalError("Expected packet type \"{0}\" but instead got packet type \"{1}\".", NodePacketType.LogMessage.ToString(), packet.Type.ToString());
+                ErrorUtilities.ThrowInternalError("Expected packet type \"{0}\" but instead got packet type \"{1}\".", nameof(NodePacketType.LogMessage), packet.Type.ToString());
             }
 
             LogMessagePacket loggingPacket = (LogMessagePacket)packet;

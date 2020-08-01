@@ -1788,7 +1788,7 @@ namespace Microsoft.Build.BuildEngine
             ProjectLoadSettings projectLoadSettings
         )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFileName, "projectFileName");
+            ErrorUtilities.VerifyThrowArgumentNull(projectFileName, nameof(projectFileName));
             ErrorUtilities.VerifyThrowArgument(projectFileName.Length > 0, "EmptyProjectFileName");
             ErrorUtilities.VerifyThrowArgument(File.Exists(projectFileName), "ProjectFileNotFound", projectFileName);
 
@@ -1936,7 +1936,7 @@ namespace Microsoft.Build.BuildEngine
             ProjectLoadSettings projectLoadSettings
         )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(textReader, "textReader");
+            ErrorUtilities.VerifyThrowArgumentNull(textReader, nameof(textReader));
 
             try
             {
@@ -1988,7 +1988,7 @@ namespace Microsoft.Build.BuildEngine
             ProjectLoadSettings projectLoadSettings
         )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectXml, "projectXml");
+            ErrorUtilities.VerifyThrowArgumentNull(projectXml, nameof(projectXml));
 
             try
             {
@@ -2031,7 +2031,7 @@ namespace Microsoft.Build.BuildEngine
             ProjectLoadSettings projectLoadSettings
             )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectXml, "projectXml");
+            ErrorUtilities.VerifyThrowArgumentNull(projectXml, nameof(projectXml));
 
             try
             {
@@ -2465,7 +2465,7 @@ namespace Microsoft.Build.BuildEngine
         )
         {
             // Property name must be non-empty.
-            error.VerifyThrowArgumentLength(propertyName, "propertyName");
+            error.VerifyThrowArgumentLength(propertyName, nameof(propertyName));
 
             // Property value must be non-null.
             error.VerifyThrowArgument(propertyValue != null,
@@ -2644,7 +2644,7 @@ namespace Microsoft.Build.BuildEngine
             BuildPropertyGroup propertyGroupToRemove
         )
         {
-            error.VerifyThrowArgumentNull(propertyGroupToRemove, "propertyGroupToRemove");
+            error.VerifyThrowArgumentNull(propertyGroupToRemove, nameof(propertyGroupToRemove));
 
             // Confirm that it's not an imported property group.
             error.VerifyThrowInvalidOperation(!propertyGroupToRemove.IsImported,
@@ -2679,7 +2679,7 @@ namespace Microsoft.Build.BuildEngine
             BuildPropertyGroup propertyGroupToRemove
         )
         {
-            error.VerifyThrowArgumentNull(propertyGroupToRemove, "propertyGroupToRemove");
+            error.VerifyThrowArgumentNull(propertyGroupToRemove, nameof(propertyGroupToRemove));
 
             // Confirm that it's actually a persisted BuildPropertyGroup in the current project.
             error.VerifyThrowInvalidOperation(
@@ -2793,8 +2793,8 @@ namespace Microsoft.Build.BuildEngine
             string itemInclude
             )
         {
-            ErrorUtilities.VerifyThrowArgumentLength(itemName, "itemName");
-            ErrorUtilities.VerifyThrowArgumentLength(itemInclude, "itemInclude");
+            ErrorUtilities.VerifyThrowArgumentLength(itemName, nameof(itemName));
+            ErrorUtilities.VerifyThrowArgumentLength(itemInclude, nameof(itemInclude));
 
             BuildItemGroup matchingItemGroup = null;
 
@@ -2932,7 +2932,7 @@ namespace Microsoft.Build.BuildEngine
             BuildItemGroup itemGroupToRemove
         )
         {
-            error.VerifyThrowArgumentNull(itemGroupToRemove, "itemGroupToRemove");
+            error.VerifyThrowArgumentNull(itemGroupToRemove, nameof(itemGroupToRemove));
 
             // Confirm that it's not an imported item group.
             error.VerifyThrowInvalidOperation(!itemGroupToRemove.IsImported,
@@ -2981,7 +2981,7 @@ namespace Microsoft.Build.BuildEngine
             BuildItem itemToRemove
         )
         {
-            error.VerifyThrowArgumentNull(itemToRemove, "itemToRemove");
+            error.VerifyThrowArgumentNull(itemToRemove, nameof(itemToRemove));
 
             // Confirm that it's not an imported item.
             error.VerifyThrowInvalidOperation(!itemToRemove.IsImported, "CannotModifyImportedProjects");

@@ -261,8 +261,8 @@ namespace Microsoft.Build.BuildEngine
             PropertyType propertyType
         )
         {
-            ErrorUtilities.VerifyThrowArgumentLength(propertyName, "propertyName");
-            ErrorUtilities.VerifyThrowArgumentNull(propertyValue, "propertyValue");
+            ErrorUtilities.VerifyThrowArgumentLength(propertyName, nameof(propertyName));
+            ErrorUtilities.VerifyThrowArgumentNull(propertyValue, nameof(propertyValue));
 
             // Validate that the property name doesn't contain any illegal characters.
             XmlUtilities.VerifyThrowValidElementName(propertyName);

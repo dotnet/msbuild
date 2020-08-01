@@ -45,7 +45,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="eventSource">Available events.</param>
         public override void Initialize(IEventSource eventSource)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(eventSource, "eventSource");
+            ErrorUtilities.VerifyThrowArgumentNull(eventSource, nameof(eventSource));
             eventSource.BuildFinished += new BuildFinishedEventHandler(FileLoggerBuildFinished);
             InitializeFileLogger(eventSource, 1);
         }

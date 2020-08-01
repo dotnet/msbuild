@@ -127,7 +127,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void ApplyParameter(string parameterName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parameterName, "parameterName");
+            ErrorUtilities.VerifyThrowArgumentNull(parameterName, nameof(parameterName));
 
             if (forwardingTable.ContainsKey(parameterName))
             {
@@ -156,7 +156,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public virtual void Initialize(IEventSource eventSource)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(eventSource, "eventSource");
+            ErrorUtilities.VerifyThrowArgumentNull(eventSource, nameof(eventSource));
 
             ParseParameters();
 

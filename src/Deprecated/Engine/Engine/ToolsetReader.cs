@@ -19,11 +19,11 @@ namespace Microsoft.Build.BuildEngine
 
         public PropertyDefinition(string name, string value, string source)
         {
-            error.VerifyThrowArgumentLength(name, "name");
-            error.VerifyThrowArgumentLength(source, "source");
+            error.VerifyThrowArgumentLength(name, nameof(name));
+            error.VerifyThrowArgumentLength(source, nameof(source));
 
             // value can be the empty string but not null
-            error.VerifyThrowArgumentNull(value, "value");
+            error.VerifyThrowArgumentNull(value, nameof(value));
             
             this.name = name;
             this.value = value;
@@ -252,7 +252,7 @@ namespace Microsoft.Build.BuildEngine
                                      BuildPropertyGroup initialProperties,
                                      bool accumulateProperties)
         {
-            error.VerifyThrowArgumentNull(toolsets, "toolsets");
+            error.VerifyThrowArgumentNull(toolsets, nameof(toolsets));
 
             ReadEachToolset(toolsets, globalProperties, initialProperties, accumulateProperties);
 

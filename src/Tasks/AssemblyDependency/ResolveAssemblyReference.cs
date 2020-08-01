@@ -1558,7 +1558,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="importance">The importance of the message.</param>
         private void LogFullName(Reference reference, MessageImportance importance)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(reference, "reference");
+            ErrorUtilities.VerifyThrowArgumentNull(reference, nameof(reference));
 
             if (reference.IsResolved)
             {

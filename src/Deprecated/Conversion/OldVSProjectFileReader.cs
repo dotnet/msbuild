@@ -143,7 +143,7 @@ namespace Microsoft.Build.Conversion
             if ((startIndexIntoBuffer + charactersToRead) > bufferToReadInto.Length)
             {
                 // End-user should never see this message, so it doesn't need to be localized.
-                throw new ArgumentException("Cannot write past end of user's buffer.", "charactersToRead");
+                throw new ArgumentException("Cannot write past end of user's buffer.", nameof(charactersToRead));
             }
 
             int charactersCopied = 0;

@@ -419,7 +419,7 @@ namespace Microsoft.Build.BuildEngine
             // Only check for null. It's legal to make BuildItems with empty
             // item specs -- this is to be consistent with how we shipped TaskItem.
             // See #567058.
-            ErrorUtilities.VerifyThrowArgumentNull(itemInclude, "itemInclude");
+            ErrorUtilities.VerifyThrowArgumentNull(itemInclude, nameof(itemInclude));
 
             // Validate that the item name doesn't contain any illegal characters.
             if (itemName != null)
@@ -505,7 +505,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public BuildItem(string itemName, ITaskItem taskItem) 
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskItem, "taskItem");
+            ErrorUtilities.VerifyThrowArgumentNull(taskItem, nameof(taskItem));
 
             string itemInclude = EscapingUtilities.Escape(taskItem.ItemSpec);
 
@@ -1208,7 +1208,7 @@ namespace Microsoft.Build.BuildEngine
         /// <remarks>BuildItem-spec modifiers are treated as metadata.</remarks>
         public bool HasMetadata(string metadataName)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(metadataName, "metadataName");
+            ErrorUtilities.VerifyThrowArgumentLength(metadataName, nameof(metadataName));
             ErrorUtilities.VerifyThrow(this.unevaluatedCustomMetadata != null, "Item not initialized properly. unevaluatedCustomAttributes is null.");
 #if DEBUG
             // The hashtable of metadata (this.unevaluatedCustomMetadata) should never contain 
@@ -1381,7 +1381,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="destinationItem">BuildItem to copy custom attributes to</param>
         public void CopyCustomMetadataTo(BuildItem destinationItem)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(destinationItem, "destinationItem");
+            ErrorUtilities.VerifyThrowArgumentNull(destinationItem, nameof(destinationItem));
 
             if (IsBackedByXml)
             {
@@ -1523,8 +1523,8 @@ namespace Microsoft.Build.BuildEngine
             ErrorUtilities.VerifyThrowArgument(!FileUtilities.IsDerivableItemSpecModifier(metadataName),
                 "Shared.CannotChangeItemSpecModifiers", metadataName);
 
-            ErrorUtilities.VerifyThrowArgumentLength(metadataName, "metadataName");
-            ErrorUtilities.VerifyThrowArgumentNull(metadataValue, "metadataValue");
+            ErrorUtilities.VerifyThrowArgumentLength(metadataName, nameof(metadataName));
+            ErrorUtilities.VerifyThrowArgumentNull(metadataValue, nameof(metadataValue));
 
             // Make sure the metadata doesn't use any special characters in the name.
             XmlUtilities.VerifyThrowValidElementName(metadataName);

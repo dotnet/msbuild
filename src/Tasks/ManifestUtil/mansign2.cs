@@ -326,7 +326,7 @@ namespace System.Deployment.Internal.CodeSigning
         internal SignedCmiManifest2(XmlDocument manifestDom, bool useSha256)
         {
             if (manifestDom == null)
-                throw new ArgumentNullException("manifestDom");
+                throw new ArgumentNullException(nameof(manifestDom));
             _manifestDom = manifestDom;
             _useSha256 = useSha256;
         }
@@ -345,7 +345,7 @@ namespace System.Deployment.Internal.CodeSigning
             // Signer cannot be null.
             if (signer == null || signer.StrongNameKey == null)
             {
-                throw new ArgumentNullException("signer");
+                throw new ArgumentNullException(nameof(signer));
             }
 
             // Remove existing SN signature.
@@ -1049,12 +1049,12 @@ namespace System.Deployment.Internal.CodeSigning
         internal CmiManifestSigner2(AsymmetricAlgorithm strongNameKey, X509Certificate2 certificate, bool useSha256)
         {
             if (strongNameKey == null)
-                throw new ArgumentNullException("strongNameKey");
+                throw new ArgumentNullException(nameof(strongNameKey));
 
 #if (true) // BUGBUG: Fusion only supports RSA. Do we throw if not RSA???
             RSA rsa = strongNameKey as RSA;
             if (rsa == null)
-                throw new ArgumentNullException("strongNameKey");
+                throw new ArgumentNullException(nameof(strongNameKey));
 #endif
             _strongNameKey = strongNameKey;
             _certificate = certificate;

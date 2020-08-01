@@ -56,8 +56,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal ProjectMetadata(object parent, ProjectMetadataElement xml)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
-            ErrorUtilities.VerifyThrowArgumentNull(xml, "xml");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));
 
             _parent = (IProjectMetadataParent)parent;
             _xml = xml;
@@ -69,9 +69,9 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal ProjectMetadata(IProjectMetadataParent parent, ProjectMetadataElement xml, string evaluatedValueEscaped, ProjectMetadata predecessor)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
-            ErrorUtilities.VerifyThrowArgumentNull(xml, "xml");
-            ErrorUtilities.VerifyThrowArgumentNull(evaluatedValueEscaped, "evaluatedValueEscaped");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));
+            ErrorUtilities.VerifyThrowArgumentNull(evaluatedValueEscaped, nameof(evaluatedValueEscaped));
 
             _parent = parent;
             _xml = xml;

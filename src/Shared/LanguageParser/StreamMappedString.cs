@@ -161,7 +161,7 @@ namespace Microsoft.Build.Shared.LanguageParser
             // If null now, then the requested character is out of range.
             if (page == null)
             {
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
 
             // Get the relative offset within the buffer.
@@ -385,7 +385,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                 // If we weren't able to read enough characters then throw an exception.
                 if (page == null)
                 {
-                    throw new ArgumentOutOfRangeException("length");
+                    throw new ArgumentOutOfRangeException(nameof(length));
                 }
 
                 int relativeStartPosition = AbsoluteOffsetToPageOffset(startPosition + i);

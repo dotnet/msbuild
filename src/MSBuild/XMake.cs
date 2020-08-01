@@ -510,7 +510,7 @@ namespace Microsoft.Build.CommandLine
             }
 
 #if FEATURE_GET_COMMANDLINE
-            ErrorUtilities.VerifyThrowArgumentLength(commandLine, "commandLine");
+            ErrorUtilities.VerifyThrowArgumentLength(commandLine, nameof(commandLine));
 #endif
 
 #if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION

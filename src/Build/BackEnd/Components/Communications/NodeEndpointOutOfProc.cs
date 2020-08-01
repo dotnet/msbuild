@@ -37,7 +37,7 @@ namespace Microsoft.Build.BackEnd
             bool enableReuse,
             bool lowPriority)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, "host");
+            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
             _componentHost = host;
             _enableReuse = enableReuse;
             _lowPriority = lowPriority;

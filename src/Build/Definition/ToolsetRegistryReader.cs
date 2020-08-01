@@ -65,7 +65,7 @@ namespace Microsoft.Build.Evaluation
         internal ToolsetRegistryReader(PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, RegistryKeyWrapper msbuildRegistryWrapper)
             : base(environmentProperties, globalProperties)
         {
-            error.VerifyThrowArgumentNull(msbuildRegistryWrapper, "msbuildRegistryWrapper");
+            error.VerifyThrowArgumentNull(msbuildRegistryWrapper, nameof(msbuildRegistryWrapper));
 
             _msbuildRegistryWrapper = msbuildRegistryWrapper;
         }
@@ -243,7 +243,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>An enumeration of property definitions.</returns>
         protected override IEnumerable<ToolsetPropertyDefinition> GetSubToolsetPropertyDefinitions(string toolsVersion, string subToolsetVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(subToolsetVersion, "subToolsetVersion");
+            ErrorUtilities.VerifyThrowArgumentLength(subToolsetVersion, nameof(subToolsetVersion));
 
             RegistryKeyWrapper toolsVersionWrapper = null;
             RegistryKeyWrapper subToolsetWrapper = null;

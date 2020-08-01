@@ -99,7 +99,7 @@ namespace Microsoft.Build.BuildEngine
             ColorResetter colorReset
         )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(write, "write");
+            ErrorUtilities.VerifyThrowArgumentNull(write, nameof(write));
             this.verbosity = verbosity;
             this.write = write;
             this.colorSet = colorSet;

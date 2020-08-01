@@ -764,7 +764,7 @@ namespace Microsoft.Build.Conversion
         private void RepairImportForAssetCompat(ProjectImportElement toRepairImport)
         {
             // We shouldn't have this happen but check anyway:
-            ErrorUtilities.VerifyThrowInternalNull(toRepairImport, "toRepairImport");
+            ErrorUtilities.VerifyThrowInternalNull(toRepairImport, nameof(toRepairImport));
             ErrorUtilities.VerifyThrow(!toRepairImport.Condition.Equals("false", StringComparison.OrdinalIgnoreCase), "RepairImportForAssetCompat should not receive imports with condition=false already");
 
             var newImportElement = this.xmakeProject.CreateImportElement(toRepairImport.Project);

@@ -1025,7 +1025,7 @@ namespace Microsoft.Build.BuildEngine
             BuildProperty property
         )
         {
-            error.VerifyThrowArgumentNull(property, "property");
+            error.VerifyThrowArgumentNull(property, nameof(property));
 
             // If this is a persisted <PropertyGroup>, then remove the property element from 
             // the XML and from the array list.
