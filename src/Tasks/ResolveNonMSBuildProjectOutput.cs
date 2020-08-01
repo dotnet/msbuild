@@ -158,6 +158,7 @@ namespace Microsoft.Build.Tasks
         /// Given a project reference task item and an XML document containing pre-resolved output paths, 
         /// find the output path for that task item.
         /// </summary>
+        /// <param name="projectRef">project reference to resolve</param>
         /// <param name="resolvedPath">resulting ITaskItem containing the resolved path</param>
         /// <returns>true if resolved successfully</returns>
         internal bool ResolveProject(ITaskItem projectRef, out ITaskItem resolvedPath)

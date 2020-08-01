@@ -158,6 +158,7 @@ namespace Microsoft.Build.Tasks
         // PEHeader
         private const int PEHEADER = 0x00004550;
 
+#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Construct.
         /// </summary>
@@ -180,10 +181,10 @@ namespace Microsoft.Build.Tasks
         /// <param name="getAssemblyMetadata">Delegate used for finding dependencies of a file.</param>
         /// <param name="getRegistrySubKeyNames">Used to get registry subkey names.</param>
         /// <param name="getRegistrySubKeyDefaultValue">Used to get registry default values.</param>
+        /// <param name="openBaseKey"></param>
         /// <param name="unresolveFrameworkAssembliesFromHigherFrameworks"></param>
         /// <param name="assemblyMetadataCache">Cache of metadata already read from paths.</param>
         /// <param name="allowedAssemblyExtensions"></param>
-        /// <param name="openBaseKey"></param>
         /// <param name="getRuntimeVersion"></param>
         /// <param name="targetedRuntimeVersion"></param>
         /// <param name="projectTargetFramework"></param>
@@ -198,6 +199,45 @@ namespace Microsoft.Build.Tasks
         /// <param name="readMachineTypeFromPEHeader"></param>
         /// <param name="warnOrErrorOnTargetArchitectureMismatch"></param>
         /// <param name="ignoreFrameworkAttributeVersionMismatch"></param>
+#else
+        /// <summary>
+        /// Construct.
+        /// </summary>
+        /// <param name="buildEngine"></param>
+        /// <param name="findDependencies">If true, then search for dependencies.</param>
+        /// <param name="findSatellites">If true, then search for satellite files.</param>
+        /// <param name="findSerializationAssemblies">If true, then search for serialization assembly files.</param>
+        /// <param name="findRelatedFiles">If true, then search for related files.</param>
+        /// <param name="searchPaths">Paths to search for dependent assemblies on.</param>
+        /// <param name="relatedFileExtensions"></param>
+        /// <param name="candidateAssemblyFiles">List of literal assembly file names to be considered when SearchPaths has {CandidateAssemblyFiles}.</param>
+        /// <param name="resolvedSDKItems">Resolved sdk items</param>
+        /// <param name="frameworkPaths">Path to the FX.</param>
+        /// <param name="installedAssemblies">Installed assembly XML tables.</param>
+        /// <param name="targetProcessorArchitecture">Like x86 or IA64\AMD64, the processor architecture being targetted.</param>
+        /// <param name="fileExists">Delegate used for checking for the existence of a file.</param>
+        /// <param name="directoryExists">Delegate used for files.</param>
+        /// <param name="getDirectories">Delegate used for getting directories.</param>
+        /// <param name="getAssemblyName">Delegate used for getting assembly names.</param>
+        /// <param name="getAssemblyMetadata">Delegate used for finding dependencies of a file.</param>
+        /// <param name="unresolveFrameworkAssembliesFromHigherFrameworks"></param>
+        /// <param name="assemblyMetadataCache">Cache of metadata already read from paths.</param>
+        /// <param name="allowedAssemblyExtensions"></param>
+        /// <param name="getRuntimeVersion"></param>
+        /// <param name="targetedRuntimeVersion"></param>
+        /// <param name="projectTargetFramework"></param>
+        /// <param name="targetFrameworkMoniker"></param>
+        /// <param name="log"></param>
+        /// <param name="latestTargetFrameworkDirectories"></param>
+        /// <param name="copyLocalDependenciesWhenParentReferenceInGac"></param>
+        /// <param name="doNotCopyLocalIfInGac"></param>
+        /// <param name="getAssemblyPathInGac"></param>
+        /// <param name="isWinMDFile"></param>
+        /// <param name="ignoreVersionForFrameworkReferences"></param>
+        /// <param name="readMachineTypeFromPEHeader"></param>
+        /// <param name="warnOrErrorOnTargetArchitectureMismatch"></param>
+        /// <param name="ignoreFrameworkAttributeVersionMismatch"></param>
+#endif
         internal ReferenceTable
         (
             IBuildEngine buildEngine,
@@ -2345,6 +2385,8 @@ namespace Microsoft.Build.Tasks
         /// <param name="unifiedVersion">The new version of the assembly to use.</param>
         /// <param name="unificationReason">The reason this reference was unified.</param>
         /// <param name="isPrerequisite">True if this is a prereq assembly.</param>
+        /// <param name="isRedistRoot">May be true, false or null. Null means there was no IsRedistRoot in the redist list.</param>
+        /// <param name="redistName">Name of the corresponding Resist specified in the redist list.</param>
         /// <returns>True if there was a unification.</returns>
         private bool UnifyAssemblyNameVersions
         (
@@ -2456,6 +2498,8 @@ namespace Microsoft.Build.Tasks
         /// <param name="dependencyFiles">Dependent references fully resolved.</param>
         /// <param name="relatedFiles">Related files like .xmls and .pdbs.</param>
         /// <param name="satelliteFiles">Satellite files.</param>
+        /// <param name="serializationAssemblyFiles">Serialization assembly files.</param>
+        /// <param name="scatterFiles">Receives the list of associated scatter files.</param>
         /// <param name="copyLocalFiles">All copy-local files out of primaryFiles+dependencyFiles+relatedFiles+satelliteFiles.</param>
         internal void GetReferenceItems
         (

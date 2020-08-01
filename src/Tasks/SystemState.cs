@@ -257,8 +257,7 @@ namespace Microsoft.Build.Tasks
         /// This is used to optimize IO in the case of files requested from one 
         /// of the FX folders.
         /// </summary>
-        /// <param name="providedFrameworkPaths"></param>
-        /// <param name="installedAssemblyTables"></param>
+        /// <param name="installedAssemblyTableInfos"></param>
         internal void SetInstalledAssemblyInformation
         (
             AssemblyTableInfo[] installedAssemblyTableInfos

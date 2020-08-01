@@ -26,7 +26,7 @@ namespace Microsoft.Build.Evaluation
 
         public NuGetFrameworkWrapper()
         {
-            /// Resolve the location of the NuGet.Frameworks assembly
+            // Resolve the location of the NuGet.Frameworks assembly
             var assemblyDirectory = BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio ?
                 Path.Combine(BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory, "Common7", "IDE", "CommonExtensions", "Microsoft", "NuGet") :
                 BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
