@@ -29,6 +29,7 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using Constants = Microsoft.Build.Internal.Constants;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
+using SdkReferencePropertyExpansionMode = Microsoft.Build.Utilities.EscapeHatches.SdkReferencePropertyExpansionMode;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -1800,20 +1801,45 @@ namespace Microsoft.Build.Evaluation
                     HasProperty(sdkReference.Version, compareInfo) ||
                     HasProperty(sdkReference.MinimumVersion, compareInfo))
                 {
-                    static string EvaluateProperty(string value, IElementLocation location, Expander<P, I> expander) =>
-                        value != null
-                            ? expander.ExpandIntoStringAndUnescape(value,
-                                                                   ExpanderOptions.ExpandProperties,
-                                                                   location)
-                            : null;
+                    SdkReferencePropertyExpansionMode mode =
+                        Traits.Instance.EscapeHatches.SdkReferencePropertyExpansion ??
+                        SdkReferencePropertyExpansionMode.DefaultExpand;
 
-                    IElementLocation sdkReferenceOrigin = importElement.SdkLocation;
+                    if (mode != SdkReferencePropertyExpansionMode.NoExpansion)
+                    {
+                        if (mode == SdkReferencePropertyExpansionMode.DefaultExpand)
+                            mode = SdkReferencePropertyExpansionMode.ExpandUnescape;
 
-                    sdkReference = new SdkReference(
-                        EvaluateProperty(sdkReference.Name, sdkReferenceOrigin, _expander),
-                        EvaluateProperty(sdkReference.Version, sdkReferenceOrigin, _expander),
-                        EvaluateProperty(sdkReference.MinimumVersion, sdkReferenceOrigin, _expander)
-                    );
+                        static string EvaluateProperty(string value, IElementLocation location,
+                            Expander<P, I> expander, SdkReferencePropertyExpansionMode mode)
+                        {
+                            if (value == null)
+                                return null;
+
+                            const ExpanderOptions Options = ExpanderOptions.ExpandProperties;
+
+                            switch (mode)
+                            {
+                                case SdkReferencePropertyExpansionMode.ExpandUnescape:
+                                    return expander.ExpandIntoStringAndUnescape(value, Options, location);
+                                case SdkReferencePropertyExpansionMode.ExpandLeaveEscaped:
+                                    return expander.ExpandIntoStringLeaveEscaped(value, Options, location);
+                                case SdkReferencePropertyExpansionMode.NoExpansion:
+                                case SdkReferencePropertyExpansionMode.DefaultExpand:
+                                default:
+                                    ErrorUtilities.ThrowArgumentOutOfRange(nameof(mode));
+                                    return value;
+                            }
+                        }
+
+                        IElementLocation sdkReferenceOrigin = importElement.SdkLocation;
+
+                        sdkReference = new SdkReference(
+                            EvaluateProperty(sdkReference.Name, sdkReferenceOrigin, _expander, mode),
+                            EvaluateProperty(sdkReference.Version, sdkReferenceOrigin, _expander, mode),
+                            EvaluateProperty(sdkReference.MinimumVersion, sdkReferenceOrigin, _expander, mode)
+                        );
+                    }
                 }
 
                 // Combine SDK path with the "project" relative path
