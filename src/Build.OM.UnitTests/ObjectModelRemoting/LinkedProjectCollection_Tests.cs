@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             var pcRemote = this.StdGroup.Remote[0];
 
             var proj1Path = this.StdGroup.StdProjectFiles[0];
-            var proj2Path = this.StdGroup.StdProjectFiles[1]; ;
+            var proj2Path = this.StdGroup.StdProjectFiles[1]; 
 
             var proj1 = pcLocal.LoadProject(proj1Path);
             var proj2 = pcRemote.LoadProject(proj2Path);

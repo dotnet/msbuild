@@ -2926,7 +2926,7 @@ namespace Microsoft.Build.CommandLine
                     if (extensionToIgnore.IndexOfAny(s_wildcards) > -1)
                     {
                         InitializationException.Throw("InvalidExtensionToIgnore", extensionToIgnore, null, false);
-                    };
+                    }
                     if (!extensionsToIgnoreDictionary.ContainsKey(extensionToIgnore))
                     {
                         extensionsToIgnoreDictionary.Add(extensionToIgnore, null);
