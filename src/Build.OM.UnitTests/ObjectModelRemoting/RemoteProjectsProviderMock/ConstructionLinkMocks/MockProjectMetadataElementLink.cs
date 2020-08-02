@@ -25,7 +25,6 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         // ProjectMetadataElementLink support
         public string Value { get => MetadataXml.Value; set => MetadataXml.Value = value; }
         public void ChangeName(string newName) { MetadataXml.Name = newName; }
-
     }
 
     internal class MockProjectMetadataElementLink : ProjectMetadataElementLink, ILinkMock, IProjectElementLinkHelper

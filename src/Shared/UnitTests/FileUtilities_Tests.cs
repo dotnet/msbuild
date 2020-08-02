@@ -273,7 +273,6 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<ArgumentException>(() =>
             {
                 FileUtilities.HasExtension("|/", new[] { ".exe" });
-
             });
         }
 

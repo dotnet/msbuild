@@ -66,7 +66,6 @@ namespace System.Deployment.Internal.CodeSigning
         internal const int TRUST_E_EXPLICIT_DISTRUST = unchecked((int)0x800B0111);
         internal const int CERT_E_CHAINING = unchecked((int)0x800B010A);
 
-
         // Values for dwFlags of CertVerifyAuthenticodeLicense.
         internal const int AXL_REVOCATION_NO_CHECK = unchecked((int)0x00000001);
         internal const int AXL_REVOCATION_CHECK_END_CERT_ONLY = unchecked((int)0x00000002);

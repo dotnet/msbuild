@@ -128,7 +128,6 @@ namespace Microsoft.Build.UnitTests
             //    of Directory.GetFiles, which is case-sensitive on Unix.
         }
 
-
         /// <summary>
         /// A test data class for providing data to the <see cref="FileMatcherTest.GetFilesComplexGlobbingMatching"/> test.
         /// </summary>
@@ -724,7 +723,6 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-
         /*
         * Method:  GetLongFileNameForShortLocalPath
         *
@@ -982,7 +980,6 @@ namespace Microsoft.Build.UnitTests
             ValidateFileMatch(Path.Combine("**", "*.cs"), "file.cs", true);
         }
 
-
         [Fact]
         public void ReduceDoubleSlashes()
         {
@@ -1090,7 +1087,6 @@ namespace Microsoft.Build.UnitTests
                 "\\\\server\\c$\\Documents and Settings\\User\\Source.cs",
                 true
                 );
-
 
             ValidateFileMatch
                 (
@@ -1204,7 +1200,6 @@ namespace Microsoft.Build.UnitTests
             ValidateSplitFileSpec("bin\\**\\", "bin\\", "**\\", "");
             ValidateSplitFileSpec("bin\\**\\*", "bin\\", "**\\", "*");
             ValidateSplitFileSpec("**", "", "**\\", "*.*");
-
         }
 
         [Fact]
@@ -1455,7 +1450,6 @@ namespace Microsoft.Build.UnitTests
                     @"bin\**",
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
-
                 },
                 new[]    //  Matching files
                 {
@@ -1857,8 +1851,6 @@ namespace Microsoft.Build.UnitTests
             isLegalFileSpec.ShouldBe(expectedIsLegalFileSpec);
         }
 
-
-
         #region Support functions.
 
         /// <summary>
@@ -2138,7 +2130,6 @@ namespace Microsoft.Build.UnitTests
                 // Preserve parent-directory markers.
                 normalized = normalized.Replace(@".." + Path.DirectorySeparatorChar, "<:PARENT:>");
 
-
                 // Just get rid of doubles enough to satisfy our test cases.
                 string doubleSeparator = Path.DirectorySeparatorChar.ToString() + Path.DirectorySeparatorChar.ToString();
                 normalized = normalized.Replace(doubleSeparator, Path.DirectorySeparatorChar.ToString());
@@ -2189,7 +2180,6 @@ namespace Microsoft.Build.UnitTests
 
                 return false;
             }
-
 
             /// <summary>
             /// Searches the candidates array for one that matches path
@@ -2358,8 +2348,6 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(0, mockFileSystem.FileHits3); // "At least one file that was marked untouchable was referenced."
         }
 
-
-
         /// <summary>
         /// Simulate GetFileSystemEntries
         /// </summary>
@@ -2376,7 +2364,6 @@ namespace Microsoft.Build.UnitTests
          *************************************************************************************/
 
         private static FileMatcher loopBackFileMatcher = new FileMatcher(FileSystems.Default, GetFileSystemEntriesLoopBack);
-
 
         private static void ValidateSplitFileSpec
             (

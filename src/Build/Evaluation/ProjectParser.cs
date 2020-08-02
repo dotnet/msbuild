@@ -229,7 +229,6 @@ namespace Microsoft.Build.Construction
             return propertyGroup;
         }
 
-
         /// <summary>
         /// Parse a ProjectItemGroupElement
         /// </summary>

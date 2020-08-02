@@ -121,7 +121,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                         // Create the thread which processes requests
                         _requestHandler = Task.Factory.StartNew(RequestHandlerPumpProc, TaskCreationOptions.LongRunning);
-                        
                     }
                 }
             }

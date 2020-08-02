@@ -88,7 +88,6 @@ namespace Microsoft.Build.UnitTests
             var subFolder = this.GetRelativePath(path);
             if (!this.Children.TryGetValue(subFolder, out var result))
             {
-
                 result  = new TransientIO(this, subFolder);
                 this.Children.Add(subFolder, result);
             }
@@ -131,6 +130,5 @@ namespace Microsoft.Build.UnitTests
             this.Clear();
             // this object still can be used ...
         }
-
     }
 }

@@ -223,8 +223,6 @@ namespace Microsoft.Build.Utilities
             InternalConstruct(null, tlogFiles, tlogFilesToIgnore, false, missingFileTimeUtc, excludedInputPaths);
         }
 
-
-
         /// <summary>
         /// Constructor
         /// </summary>
@@ -678,7 +676,6 @@ namespace Microsoft.Build.Utilities
             return fileModifiedTimeUtc;
         }
 
-
         #endregion
 
         #region Static Methods
@@ -847,7 +844,6 @@ namespace Microsoft.Build.Utilities
 
             // Read the output table, skipping missing files
             FlatTrackingData outputs = new FlatTrackingData(writeTLogNames, true);
-
 
             // If we failed we need to clean the Tlogs
             if (!trackedOperationsSucceeded)

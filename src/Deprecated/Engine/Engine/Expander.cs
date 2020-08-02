@@ -1460,7 +1460,6 @@ namespace Microsoft.Build.BuildEngine
                 return null;
             }
 
-
             /// <summary>
             /// Get the specified type from the assembly partial name supplied
             /// </summary>

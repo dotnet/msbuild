@@ -109,7 +109,6 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-
         #endregion
 
         #region Methods

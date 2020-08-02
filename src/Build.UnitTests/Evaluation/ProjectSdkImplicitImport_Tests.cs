@@ -230,7 +230,6 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
 
             project.DeepClone();
-
         }
 
         [Theory]
@@ -267,7 +266,6 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             clone.DeepCopyFrom(project);
 
             clone.RemoveAllChildren();
-
         }
 
         /// <summary>

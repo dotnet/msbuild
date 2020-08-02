@@ -15,7 +15,6 @@ namespace Microsoft.Build.BuildEngine
     /// <owner>SumedhK</owner>
     internal sealed class ImportedProject
     {
-
         /// <summary>
         /// Creates an instance of this class for the specified project file.
         /// </summary>

@@ -104,7 +104,6 @@ namespace Microsoft.Build.BuildEngine
 
             // Write a new cache file, hopefully we can use it next time
             UpdateCache(parentEngine, msbuildProject, solutionProjectCache, projectBuildEventContext);
-
         }
 
         /// <summary>
@@ -743,7 +742,6 @@ namespace Microsoft.Build.BuildEngine
 
                         referenceGuids.Append(projectReferenceGuid);
                         addCreateItem = true;
-
                     }
                     else if (referencedProject.ProjectType == SolutionProjectType.VCProject)
                     {
@@ -866,7 +864,6 @@ namespace Microsoft.Build.BuildEngine
                     "SolutionParseInvalidProjectFileName",
                     proj.RelativePath, e.Message);
             }
-
 
             // Create the temporary VC project
             BuildTask createVCProjectTask = target.AddNewTask("CreateTemporaryVCProject");

@@ -314,7 +314,6 @@ namespace Microsoft.Build.Utilities
 
             AssemblyFoldersEx assemblyFoldersEx = new AssemblyFoldersEx(registryRoot, targetFrameworkVersion, registryKeySuffix, osVersion, platform, new GetRegistrySubKeyNames(RegistryHelper.GetSubKeyNames), new GetRegistrySubKeyDefaultValue(RegistryHelper.GetDefaultValue), targetProcessorArchitecture, new OpenBaseKey(RegistryHelper.OpenBaseKey));
 
-
             var assemblyFolders = new List<AssemblyFoldersExInfo>();
             assemblyFolders.AddRange(assemblyFoldersEx);
             return assemblyFolders;
@@ -939,7 +938,6 @@ namespace Microsoft.Build.Utilities
                 string targetPlatformVersion
             )
         {
-
             lock (s_locker)
             {
                 if (s_cachedExtensionSdkReferences == null)
@@ -1921,7 +1919,6 @@ namespace Microsoft.Build.Utilities
             return GetPathToReferenceAssemblies(targetFrameworkRootPath, targetFrameworkFallbackSearchPaths, targetFrameworkName);
         }
 
-
         /// <summary>
         /// Returns the paths to the reference assemblies location for the given target framework.
         /// This method will assume the requested ReferenceAssemblyRoot path will be the ProgramFiles directory specified by Environment.SpecialFolder.ProgramFiles
@@ -2163,7 +2160,6 @@ namespace Microsoft.Build.Utilities
 
             return referencePaths;
         }
-
 
         /// <summary>
         /// Returns the paths to the reference assemblies location for the given framework version relative to a given targetFrameworkRoot.
@@ -3020,7 +3016,6 @@ namespace Microsoft.Build.Utilities
                 ErrorUtilities.DebugTraceMessage("GetTargetPlatformMonikerRegistryRoots", "MSBUILDDISABLEREGISTRYFORSDKLOOKUP is set registry sdk lookup is disabled");
             }
 
-
             return registryRoot;
         }
 
@@ -3690,7 +3685,6 @@ namespace Microsoft.Build.Utilities
             return s_targetFrameworkMonikers;
         }
 
-
         /// <summary>
         /// This method will return the highest version of a target framework moniker based on the identifier. This method will only 
         /// find full frameworks, this means no profiles will be returned.
@@ -3830,7 +3824,6 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-
             if (programFilesReferenceAssemblyLocationFound && bFoundDotNetFrameworkIdentifier == false)
             {
                 if (bAddDotNetFrameworkIdentifier == false)
@@ -3853,10 +3846,8 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-
             return frameworkIdentifiers;
         }
-
 
         /// <summary>
         /// Gets the installed versions for a given framework
@@ -3964,7 +3955,6 @@ namespace Microsoft.Build.Utilities
 
             return frameworkProfiles;
         }
-
 
         /// <summary>
         /// returns the .NETFramework versions lessthanOrEqualTo 3.5 installed in the machine

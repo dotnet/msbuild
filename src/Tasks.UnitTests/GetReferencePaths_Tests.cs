@@ -328,7 +328,6 @@ namespace Microsoft.Build.UnitTests
                 Assert.Equal(".NET Framework 4.1", displayName);
             }
         }
-
     }
 }
 #endif

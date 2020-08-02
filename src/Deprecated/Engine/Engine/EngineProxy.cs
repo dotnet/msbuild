@@ -605,7 +605,6 @@ namespace Microsoft.Build.BuildEngine
             return lease;
         }
 
-
         /// <summary>
         /// Indicates to the EngineProxy that it is no longer needed.
         /// Called by TaskEngine when the task using the EngineProxy is done.

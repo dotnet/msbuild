@@ -25,7 +25,6 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         // ProjectPropertyElementLink support
         public string Value { get => PropertyXml.Value; set => PropertyXml.Value = value; }
         public void ChangeName(string newName) { PropertyXml.Name = newName; }
-
     }
 
     internal class MockProjectPropertyElementLink : ProjectPropertyElementLink, ILinkMock, IProjectElementLinkHelper
