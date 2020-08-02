@@ -1005,7 +1005,7 @@ namespace Microsoft.Build.BackEnd
         {
             /// <summary>
             /// Flag indicating if the modifications should be interpreted such that the lack of an explicit entry for a metadata name
-            /// means that metadata should be removed.
+            /// means that that metadata should be removed.
             /// </summary>
             private bool _keepOnlySpecified;
 
