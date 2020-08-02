@@ -94,7 +94,7 @@ namespace Microsoft.Build.Framework
             {
                 lock (locker)
                 {
-                    if (arguments != null && arguments.Length > 0)
+                    if (arguments?.Length > 0)
                     {
                         if (originalCultureInfo == null)
                         {
@@ -196,7 +196,7 @@ namespace Microsoft.Build.Framework
             string formatted = unformatted;
 
             // NOTE: String.Format() does not allow a null arguments array
-            if ((args != null) && (args.Length > 0))
+            if ((args?.Length > 0))
             {
 #if DEBUG
 

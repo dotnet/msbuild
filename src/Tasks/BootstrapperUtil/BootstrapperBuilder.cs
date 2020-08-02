@@ -2092,7 +2092,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     }
 
                     // If the public key in the file doesn't match the public key on disk, issue a build warning
-                    if (publicKey == null || !publicKey.ToLowerInvariant().Equals(publicKeyAttribute.Value.ToLowerInvariant()))
+                    if (publicKey?.ToLowerInvariant().Equals(publicKeyAttribute.Value.ToLowerInvariant()) != true)
                     {
                         results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.DifferingPublicKeys", PUBLICKEY_ATTRIBUTE, builder.Name, fileSource));
                     }

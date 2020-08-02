@@ -123,7 +123,7 @@ namespace Microsoft.Build.BuildEngine
             Dictionary<string, MetadataReference> consumedMetadataReferences = pair.Metadata;
 
             ArrayList buckets = null;
-            if (consumedMetadataReferences != null && consumedMetadataReferences.Count > 0)
+            if (consumedMetadataReferences?.Count > 0)
             {
                 // Add any item types that we were explicitly told to assume.
                 if (implicitBatchableItemType != null)

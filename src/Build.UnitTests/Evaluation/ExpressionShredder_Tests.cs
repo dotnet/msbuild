@@ -481,7 +481,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 foreach (string result in actual)
                 {
-                    if (expected == null || !expected.Contains(result))
+                    if (expected?.Contains(result) != true)
                     {
                         messages.Add("Found <" + result + "> in <" + test + "> but it wasn't expected");
                     }
@@ -492,7 +492,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 foreach (string expect in expected)
                 {
-                    if (actual == null || !actual.Contains(expect))
+                    if (actual?.Contains(expect) != true)
                     {
                         messages.Add("Did not find <" + expect + "> in <" + test + ">");
                     }
@@ -530,7 +530,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 foreach (DictionaryEntry result in actual)
                 {
-                    if (expected == null || !expected.Contains(result.Key))
+                    if (expected?.Contains(result.Key) != true)
                     {
                         messages.Add("Found <" + result.Key + "> in <" + test + "> but it wasn't expected");
                     }
@@ -541,7 +541,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 foreach (DictionaryEntry expect in expected)
                 {
-                    if (actual == null || !actual.Contains(expect.Key))
+                    if (actual?.Contains(expect.Key) != true)
                     {
                         messages.Add("Did not find <" + expect.Key + "> in <" + test + ">");
                     }

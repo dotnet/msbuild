@@ -816,10 +816,7 @@ namespace Microsoft.Build.Execution
                     Reset();
                     _buildManagerState = BuildManagerState.Idle;
 
-                    if (_threadException != null)
-                    {
-                        _threadException.Throw();
-                    }
+                    _threadException?.Throw();
 
                     if (BuildParameters.DumpOpportunisticInternStats)
                     {
@@ -2367,7 +2364,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void SetOverallResultIfWarningsAsErrors(BuildResult result)
         {
-            if (result != null && result.OverallResult == BuildResultCode.Success)
+            if (result?.OverallResult == BuildResultCode.Success)
             {
                 ILoggingService loggingService = ((IBuildComponentHost)this).LoggingService;
 

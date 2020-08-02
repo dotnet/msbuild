@@ -131,10 +131,7 @@ namespace Microsoft.Build.BuildEngine
                     queueReadyEvent.Set();
 
                     // reset queue empty
-                    if (queueEmptyEvent != null)
-                    {
-                        queueEmptyEvent.Reset();
-                    }
+                    queueEmptyEvent?.Reset();
                 }
             }
         }
@@ -162,10 +159,7 @@ namespace Microsoft.Build.BuildEngine
                     queueReadyEvent.Set();
 
                     // reset queue empty
-                    if (queueEmptyEvent != null)
-                    {
-                        queueEmptyEvent.Reset();
-                    }
+                    queueEmptyEvent?.Reset();
                 }
             }
         }
@@ -183,10 +177,7 @@ namespace Microsoft.Build.BuildEngine
                 // reset queue ready event because the queue is now empty
                 queueReadyEvent.Reset();
                 // raise queue empty event because the queue is now empty
-                if (queueEmptyEvent != null)
-                {
-                    queueEmptyEvent.Set();
-                }
+                queueEmptyEvent?.Set();
             }
         }
 
@@ -235,10 +226,7 @@ namespace Microsoft.Build.BuildEngine
                         // signal there are no more items to read
                         queueReadyEvent.Reset();
 
-                        if (queueEmptyEvent != null)
-                        {
-                            queueEmptyEvent.Set();
-                        }
+                        queueEmptyEvent?.Set();
                     }
                 }
             }

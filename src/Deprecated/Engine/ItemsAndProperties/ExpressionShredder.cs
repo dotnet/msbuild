@@ -120,7 +120,7 @@ namespace Microsoft.Build.BuildEngine
 
             GetReferencedItemNamesAndMetadata(expression, 0, expression.Length, ref pair, ShredderOptions.MetadataOutsideTransforms);
 
-            bool result = (pair.Metadata != null && pair.Metadata.Count > 0);
+            bool result = (pair.Metadata?.Count > 0);
 
             return result;
         }

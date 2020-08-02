@@ -630,7 +630,7 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-            if (identity != null && identity.IsInFramework(Constants.DotNetFrameworkIdentifier, TargetFrameworkVersion))
+            if (identity?.IsInFramework(Constants.DotNetFrameworkIdentifier, TargetFrameworkVersion) == true)
             {
                 return true;
             }

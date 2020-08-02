@@ -2846,10 +2846,7 @@ namespace Microsoft.Build.Execution
 
                 _items.Add(instance);
 
-                if (projectItemToInstanceMap != null)
-                {
-                    projectItemToInstanceMap.Add(item, instance);
-                }
+                projectItemToInstanceMap?.Add(item, instance);
             }
 
             return projectItemToInstanceMap;

@@ -230,10 +230,7 @@ namespace Microsoft.Build.BackEnd
                 BuildResult removedResult;
                 _resultsByConfiguration.TryRemove(configurationId, out removedResult);
 
-                if (removedResult != null)
-                {
-                    removedResult.ClearCachedFiles();
-                }
+                removedResult?.ClearCachedFiles();
             }
         }
 

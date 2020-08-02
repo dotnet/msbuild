@@ -637,7 +637,7 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         internal static bool HasExtension(string fileName, string[] allowedExtensions)
         {
-            Debug.Assert(allowedExtensions != null && allowedExtensions.Length > 0);
+            Debug.Assert(allowedExtensions?.Length > 0);
 
             // Easiest way to invoke invalid path chars
             // check, which callers are relying on.

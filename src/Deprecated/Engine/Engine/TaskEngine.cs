@@ -293,15 +293,9 @@ namespace Microsoft.Build.BuildEngine
             finally
             {
                 // Remove the AssemblyResolve handler in the default AppDomain, we are done with the task.
-                if (resolver != null)
-                {
-                    resolver.RemoveHandler();
-                }
+                resolver?.RemoveHandler();
 
-                if (engineProxy != null)
-                {
-                    engineProxy.MarkAsInActive();
-                }
+                engineProxy?.MarkAsInActive();
 
                 // Now all task batches are done, apply all item adds to the outer 
                 // target batch; we do this even if the task wasn't found (in that case,
@@ -997,7 +991,7 @@ namespace Microsoft.Build.BuildEngine
 
                 if (taskOutputSpecification.IsItemVector)
                 {
-                    ErrorUtilities.VerifyThrow((itemName != null) && (itemName.Length > 0), "Need item type.");
+                    ErrorUtilities.VerifyThrow((itemName?.Length > 0), "Need item type.");
 
                     // to store the outputs as items, use the string representations of the outputs as item-specs
                     foreach (object output in convertibleOutputs)
@@ -1018,7 +1012,7 @@ namespace Microsoft.Build.BuildEngine
                 else
                 {
                     Debug.Assert(taskOutputSpecification.IsProperty);
-                    ErrorUtilities.VerifyThrow((propertyName != null) && (propertyName.Length > 0), "Need property name.");
+                    ErrorUtilities.VerifyThrow((propertyName?.Length > 0), "Need property name.");
 
                     // to store an object array in a property, join all the string representations of the objects with
                     // semi-colons to make the property value
@@ -1055,7 +1049,7 @@ namespace Microsoft.Build.BuildEngine
 
                 if (taskOutputSpecification.IsItemVector)
                 {
-                    ErrorUtilities.VerifyThrow((itemName != null) && (itemName.Length > 0), "Need item type.");
+                    ErrorUtilities.VerifyThrow((itemName?.Length > 0), "Need item type.");
 
                     foreach (ITaskItem output in taskItemOutputs)
                     {
@@ -1069,7 +1063,7 @@ namespace Microsoft.Build.BuildEngine
                 else
                 {
                     Debug.Assert(taskOutputSpecification.IsProperty);
-                    ErrorUtilities.VerifyThrow((propertyName != null) && (propertyName.Length > 0), "Need property name.");
+                    ErrorUtilities.VerifyThrow((propertyName?.Length > 0), "Need property name.");
 
                     // to store an ITaskItem array in a property, join all the item-specs with semi-colons to make the
                     // property value, and ignore/discard the attributes on the ITaskItems
@@ -1132,7 +1126,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     // This is an output item.
 
-                    ErrorUtilities.VerifyThrow((itemName != null) && (itemName.Length > 0), "Need item type.");
+                    ErrorUtilities.VerifyThrow((itemName?.Length > 0), "Need item type.");
 
                     // Expand only with properties first, so that expressions like Include="@(foo)" will transfer the metadata of the "foo" items as well, not just their item specs.
                     Expander propertyAndMetadataExpander = new Expander(bucket.Expander, ExpanderOptions.ExpandPropertiesAndMetadata);
@@ -1167,7 +1161,7 @@ namespace Microsoft.Build.BuildEngine
                     // This is an output property.
 
                     Debug.Assert(taskOutputSpecification.IsProperty);
-                    ErrorUtilities.VerifyThrow((propertyName != null) && (propertyName.Length > 0), "Need property name.");
+                    ErrorUtilities.VerifyThrow((propertyName?.Length > 0), "Need property name.");
 
                     string taskParameterValue = bucket.Expander.ExpandAllIntoString(taskParameterAttribute);
 

@@ -170,7 +170,7 @@ namespace Microsoft.Build.BackEnd
             {
                 VerifyIsNotZombie();
 
-                return (_requestTask != null && !_requestTask.IsCompleted) || (_componentHost.LegacyThreadingData.MainThreadSubmissionId != -1);
+                return (_requestTask?.IsCompleted == false) || (_componentHost.LegacyThreadingData.MainThreadSubmissionId != -1);
             }
         }
 
@@ -582,7 +582,7 @@ namespace Microsoft.Build.BackEnd
                         // to null between the null check and asking the LegacyThreadingData for the Task.
                         IBuildComponentHost componentHostSnapshot = _componentHost;
 
-                        if (componentHostSnapshot != null && componentHostSnapshot.LegacyThreadingData != null)
+                        if (componentHostSnapshot?.LegacyThreadingData != null)
                         {
                             return componentHostSnapshot.LegacyThreadingData.GetLegacyThreadInactiveTask(_requestEntry.Request.SubmissionId);
                         }

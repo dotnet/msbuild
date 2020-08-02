@@ -836,10 +836,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Since we're creating our own BuildManager, we need to make sure that the default 
             // one has properly relinquished the inproc node
             NodeProviderInProc nodeProviderInProc = ((IBuildComponentHost)BuildManager.DefaultBuildManager).GetComponent(BuildComponentType.InProcNodeProvider) as NodeProviderInProc;
-            if (nodeProviderInProc != null)
-            {
-                nodeProviderInProc.Dispose();
-            }
+            nodeProviderInProc?.Dispose();
 
             string content = @"
 <Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
@@ -897,10 +894,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 {
                     NodeProviderInProc inProcNodeProvider = ((IBuildComponentHost)manager).GetComponent(BuildComponentType.InProcNodeProvider) as NodeProviderInProc;
 
-                    if (inProcNodeProvider != null)
-                    {
-                        inProcNodeProvider.Dispose();
-                    }
+                    inProcNodeProvider?.Dispose();
                 }
             }
         }

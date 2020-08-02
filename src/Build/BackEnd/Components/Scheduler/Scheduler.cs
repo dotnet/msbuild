@@ -1659,10 +1659,7 @@ namespace Microsoft.Build.BackEnd
                         BuildRequest requestToAdd = requestsToAdd.Pop();
                         SchedulableRequest blockingRequest = _schedulingData.CreateRequest(requestToAdd, parentRequest);
 
-                        if (parentRequest != null)
-                        {
-                            parentRequest.BlockByRequest(blockingRequest, blocker.TargetsInProgress);
-                        }
+                        parentRequest?.BlockByRequest(blockingRequest, blocker.TargetsInProgress);
                     }
                 }
             }

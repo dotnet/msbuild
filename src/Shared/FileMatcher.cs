@@ -2376,7 +2376,7 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            if (searchesToExclude != null && searchesToExclude.Count == 0)
+            if (searchesToExclude?.Count == 0)
             {
                 searchesToExclude = null;
             }

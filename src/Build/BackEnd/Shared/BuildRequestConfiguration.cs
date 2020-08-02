@@ -276,7 +276,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Flag indicating whether or not the configuration has been loaded before.
         /// </summary>
-        public bool IsLoaded => _project != null && _project.IsLoaded;
+        public bool IsLoaded => _project?.IsLoaded == true;
 
         /// <summary>
         /// Flag indicating if the configuration is cached or not.

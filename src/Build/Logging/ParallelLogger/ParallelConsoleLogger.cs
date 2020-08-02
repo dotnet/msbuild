@@ -1389,7 +1389,7 @@ namespace Microsoft.Build.BackEnd.Logging
             TargetStartedEventMinimumFields targetStartedEvent = _buildEventManager.GetTargetStartedEvent(e);
 
             // Make sure we have not shown the event before
-            if (targetStartedEvent != null && !targetStartedEvent.ShowTargetFinishedEvent)
+            if (targetStartedEvent?.ShowTargetFinishedEvent == false)
             {
                 // Since the target started event has been shows, the target finished event should also be shown
                 targetStartedEvent.ShowTargetFinishedEvent = true;
@@ -1463,7 +1463,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 ProjectStartedEventMinimumFields projectStartedEvent = _buildEventManager.GetProjectStartedEvent(e);
 
                 // Make sure the project started event has not been show yet
-                if (projectStartedEvent != null && !projectStartedEvent.ShowProjectFinishedEvent)
+                if (projectStartedEvent?.ShowProjectFinishedEvent == false)
                 {
                     projectStartedEvent.ShowProjectFinishedEvent = true;
 
@@ -1721,7 +1721,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     String.Format(CultureInfo.CurrentCulture, "{0,-40}" /* pad to 40 align left */, scopeName),
                     String.Format(CultureInfo.CurrentCulture, "{0,3}", calls));
 
-                if (_internalPerformanceCounters != null && _internalPerformanceCounters.Count > 0)
+                if (_internalPerformanceCounters?.Count > 0)
                 {
                     // For each of the entry points in the project print out the performance numbers for them
                     foreach (var counter in _internalPerformanceCounters.Values)

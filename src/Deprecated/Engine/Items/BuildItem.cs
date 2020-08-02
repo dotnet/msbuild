@@ -647,7 +647,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     // If this is an evaluated item that originated from the project file, and the original
                     // item is declared using a wildcard that still matches the new item spec ...
-                    if ((ParentPersistedItem != null) && (ParentPersistedItem.NewItemSpecMatchesExistingWildcard(value)))
+                    if ((ParentPersistedItem?.NewItemSpecMatchesExistingWildcard(value) == true))
                     {
                         // Don't need to touch the project file since the original wildcard still matches
                         // the new item spec.  But it still should be reevaluated the next time around.
@@ -1776,10 +1776,7 @@ namespace Microsoft.Build.BuildEngine
         private void MarkItemAsDirty()
         {
             Project parentProject = GetParentProject();
-            if (parentProject != null)
-            {
-                parentProject.MarkProjectAsDirty();
-            }
+            parentProject?.MarkProjectAsDirty();
         }
 
         /// <summary>
@@ -1789,10 +1786,7 @@ namespace Microsoft.Build.BuildEngine
         private void MarkItemAsDirtyForReevaluation()
         {
             Project parentProject = GetParentProject();
-            if (parentProject != null)
-            {
-                parentProject.MarkProjectAsDirtyForReevaluation();
-            }
+            parentProject?.MarkProjectAsDirtyForReevaluation();
         }
 
         /// <summary>
@@ -1877,10 +1871,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>rgoel</owner>
         internal void SplitChildItemIfNecessary()
         {
-            if (this.ParentPersistedItem != null)
-            {
-                this.ParentPersistedItem.SplitItem();
-            }
+            this.ParentPersistedItem?.SplitItem();
         }
 
         /// <summary>

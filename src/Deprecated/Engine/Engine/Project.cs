@@ -1018,10 +1018,7 @@ namespace Microsoft.Build.BuildEngine
                 // the XML every time any property value changes.
 
                 // Unhook the old globalProperties from this project.
-                if (globalProperties != null)
-                {
-                    globalProperties.ClearParentProject();
-                }
+                globalProperties?.ClearParentProject();
 
                 globalProperties = value.Clone(true);
 
@@ -1356,7 +1353,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                if (mainProjectEntireContents != null && mainProjectEntireContents.HasChildNodes)
+                if (mainProjectEntireContents?.HasChildNodes == true)
                 {
                     return mainProjectEntireContents.FirstChild as XmlDeclaration;
                 }
@@ -3312,7 +3309,7 @@ namespace Microsoft.Build.BuildEngine
                 else if (buildContext.CurrentBuildContextState == ProjectBuildState.BuildContextState.CycleDetected)
                 {
                     ErrorUtilities.VerifyThrow(
-                        taskExecutionContext != null && taskExecutionContext.ParentTarget != null,
+                        taskExecutionContext?.ParentTarget != null,
                         "Unexpected task context. Should not be null");
                     // Check that the target is in progress
                     ErrorUtilities.VerifyThrow(
@@ -3358,8 +3355,7 @@ namespace Microsoft.Build.BuildEngine
                             while (buildContext.NameOfBlockingTarget != null)
                             {
                                 Target blockingTarget = GetTargetForName(buildContext.NameOfBlockingTarget);
-                                if (blockingTarget.ExecutionState != null &&
-                                    blockingTarget.ExecutionState.BuildingRequiredTargets)
+                                if (blockingTarget.ExecutionState?.BuildingRequiredTargets == true)
                                 {
                                     blockingTarget.ContinueBuild(buildContext, null);
                                 }
@@ -3367,8 +3363,7 @@ namespace Microsoft.Build.BuildEngine
                                 buildContext.RemoveBlockingTarget();
                             }
                             Target inprogressTarget = GetTargetForName(buildContext.NameOfTargetInProgress);
-                            if (inprogressTarget.ExecutionState != null &&
-                                inprogressTarget.ExecutionState.BuildingRequiredTargets)
+                            if (inprogressTarget.ExecutionState?.BuildingRequiredTargets == true)
                             {
                                 inprogressTarget.ContinueBuild(buildContext, null);
                             }
@@ -3581,7 +3576,7 @@ namespace Microsoft.Build.BuildEngine
                 if (!ParentEngine.LoggingServices.OnlyLogCriticalEvents && buildRequest.FireProjectStartedFinishedEvents)
                 {  
                     string joinedTargetNamesToBuild = null;
-                    if (targetNamesToBuild != null && targetNamesToBuild.Length > 0)
+                    if (targetNamesToBuild?.Length > 0)
                     {
                         joinedTargetNamesToBuild = EscapingUtilities.UnescapeAll(String.Join(";", targetNamesToBuild));
                     }
@@ -3603,7 +3598,7 @@ namespace Microsoft.Build.BuildEngine
 
                         // Get the list of properties to serialize to the parent node
                         string[] propertyListToSerialize = parentEngine.PropertyListToSerialize;
-                        if (propertyListToSerialize != null && propertyListToSerialize.Length > 0)
+                        if (propertyListToSerialize?.Length > 0)
                         {
                             foreach (string propertyToGet in propertyListToSerialize)
                             {
@@ -4202,7 +4197,7 @@ namespace Microsoft.Build.BuildEngine
                         ImportedProject previouslyImportedProject = (ImportedProject)ParentEngine.ImportedProjectsCache[import.EvaluatedProjectPath];
                         
                         // if this project hasn't been imported before, or if it has changed on disk, we need to load it
-                        if ((previouslyImportedProject == null) || previouslyImportedProject.HasChangedOnDisk(import.EvaluatedProjectPath))
+                        if ((previouslyImportedProject?.HasChangedOnDisk(import.EvaluatedProjectPath) != false))
                         {
                             try
                             {

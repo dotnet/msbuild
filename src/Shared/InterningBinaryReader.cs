@@ -128,10 +128,7 @@ namespace Microsoft.Build
 
                     charsRead = _decoder.GetChars(rawBuffer, rawPosition, n, charBuffer, 0);
 
-                    if (memoryStream != null)
-                    {
-                        memoryStream.Seek(readLength, SeekOrigin.Current);
-                    }
+                    memoryStream?.Seek(readLength, SeekOrigin.Current);
 
                     if (currPos == 0 && n == stringLength)
                     {

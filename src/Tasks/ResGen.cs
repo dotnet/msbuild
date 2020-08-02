@@ -577,7 +577,7 @@ namespace Microsoft.Build.Tasks
                     resGenArguments.AppendSwitch("/compile" + (useForResponseFile ? "\n" : String.Empty));
 
                     // append the resources to compile
-                    if (InputFiles != null && InputFiles.Length > 0)
+                    if (InputFiles?.Length > 0)
                     {
                         ITaskItem[] inputFiles = InputFiles;
                         ITaskItem[] outputFiles = OutputFiles;

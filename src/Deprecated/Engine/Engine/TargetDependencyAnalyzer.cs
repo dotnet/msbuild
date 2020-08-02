@@ -238,7 +238,7 @@ namespace Microsoft.Build.BuildEngine
                 // 1) they do not reference any item vector
                 // 2) they reference item vectors that are not referenced by any input item
                 if ((discreteItemsInTargetOutputs.Count > 0) ||
-                    ((itemVectorsReferencedOnlyInTargetOutputs != null) && (itemVectorsReferencedOnlyInTargetOutputs.Count > 0)))
+                    ((itemVectorsReferencedOnlyInTargetOutputs?.Count > 0)))
                 {
                     result = PerformDependencyAnalysisIfDiscreteOutputs(
                                 itemVectorsInTargetInputs, itemVectorTransformsInTargetInputs, discreteItemsInTargetInputs,
@@ -1140,7 +1140,7 @@ namespace Microsoft.Build.BuildEngine
         /// </returns>
         private int CompareLastWriteTimes(string path1, string path2, out bool path1DoesNotExist, out bool path2DoesNotExist)
         {
-            ErrorUtilities.VerifyThrow((path1 != null) && (path1.Length > 0) && (path2 != null) && (path2.Length > 0),
+            ErrorUtilities.VerifyThrow((path1 != null) && (path1.Length > 0) && (path2?.Length > 0),
                 "Need to specify paths to compare.");
 
             FileInfo path1Info = null;

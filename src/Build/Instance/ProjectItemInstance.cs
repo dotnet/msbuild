@@ -106,7 +106,7 @@ namespace Microsoft.Build.Execution
         {
             CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = null;
 
-            if (directMetadata != null && directMetadata.GetEnumerator().MoveNext())
+            if (directMetadata?.GetEnumerator().MoveNext() == true)
             {
                 metadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(directMetadata.FastCountOrZero());
                 foreach (KeyValuePair<string, string> metadatum in directMetadata)
@@ -1553,7 +1553,7 @@ namespace Microsoft.Build.Execution
             /// </remarks>
             public bool HasMetadata(string name)
             {
-                if ((_directMetadata != null && _directMetadata.Contains(name)) ||
+                if ((_directMetadata?.Contains(name) == true) ||
                      FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name) ||
                     GetItemDefinitionMetadata(name) != null)
                 {
@@ -2026,7 +2026,7 @@ namespace Microsoft.Build.Execution
                 {
                     TaskItem item = new TaskItem(baseItem);
 
-                    if (Path.DirectorySeparatorChar != '\\' && includeEscaped != null && includeEscaped.IndexOf('\\') > -1)
+                    if (Path.DirectorySeparatorChar != '\\' && includeEscaped?.IndexOf('\\') > -1)
                     {
                         includeEscaped = includeEscaped.Replace('\\', '/');
                     }

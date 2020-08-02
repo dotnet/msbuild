@@ -1210,7 +1210,7 @@ namespace Microsoft.Build.BuildEngine
         /// <exception cref="InternalLoggerException">Logger threw arbitrary exception</exception>
         public void UnregisterAllLoggers()
         {
-            if (forwardingLoggers != null && forwardingLoggers.Count > 0)
+            if (forwardingLoggers?.Count > 0)
             {
                 // Disconnect forwarding loggers from the event source
                 ((EngineLoggingServicesInProc)primaryLoggingServices).UnregisterEventSource
@@ -1269,7 +1269,7 @@ namespace Microsoft.Build.BuildEngine
                 // parent node, so post the event directly to the forwarding loggers.
                 if (Router.ChildMode)
                 {
-                    if (loggers != null && loggers.Count > 0)
+                    if (loggers?.Count > 0)
                     {
                         // Flush all the events currently in the queue
                         LoggingServices.ProcessPostedLoggingEvents();
@@ -1950,7 +1950,7 @@ namespace Microsoft.Build.BuildEngine
                 // Flush out all the logging messages, which may have been posted outside target execution
                 primaryLoggingServices.ProcessPostedLoggingEvents();
 
-                if (buildRequest != null && buildRequest.BuildCompleted || exitedDueToError)
+                if (buildRequest?.BuildCompleted == true || exitedDueToError)
                 {
 #if (!STANDALONEBUILD)
                     CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildEngineBuildProjectEnd);
@@ -2038,8 +2038,8 @@ namespace Microsoft.Build.BuildEngine
                 buildRequest.ProcessingTotalTime += DateTime.Now.Ticks - buildRequest.ProcessingStartTime;
             }
 
-            if (buildRequest != null && buildRequest.BuildCompleted ||
-                buildContext != null && buildContext.BuildComplete )
+            if (buildRequest?.BuildCompleted == true ||
+                buildContext?.BuildComplete == true)
             {
                 DecrementProjectsInProgress();
             }
@@ -2327,7 +2327,7 @@ namespace Microsoft.Build.BuildEngine
             BuildEventContext buildEventContext;
                
             // Already have an instantiated project in the OM and it has not fired a project started event for itself yet
-            if (project != null && !project.HaveUsedInitialProjectContextId)
+            if (project?.HaveUsedInitialProjectContextId == false)
             {
                 buildEventContext = project.ProjectBuildEventContext;
             }
@@ -2803,7 +2803,7 @@ namespace Microsoft.Build.BuildEngine
                 if (this.cacheOfBuildingProjects.HasProjectBeenLoaded(projectFullPath, globalPropertiesToUse, toolsVersionToUse))
                 {
                     string joinedNames = ResourceUtilities.FormatResourceString("DefaultTargets");
-                    if (targetNames != null && targetNames.Length > 0)
+                    if (targetNames?.Length > 0)
                     {
                         joinedNames = EscapingUtilities.UnescapeAll(String.Join(";", targetNames));
                     }
@@ -3002,7 +3002,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 foreach (Target target in project.Targets)
                 {
-                    if (target.ExecutionState != null && target.ExecutionState.BuildingRequiredTargets)
+                    if (target.ExecutionState?.BuildingRequiredTargets == true)
                     {
                         inProgressTargets.Add(target);
                     }

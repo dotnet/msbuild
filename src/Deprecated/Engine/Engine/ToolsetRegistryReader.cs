@@ -125,7 +125,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 string propertyValue = null;
 
-                if (propertyName != null && propertyName.Length == 0)
+                if (propertyName?.Length == 0)
                 {
                     InvalidToolsetDefinitionException.Throw("PropertyNameInRegistryHasZeroLength", toolsVersionWrapper.Name);
                 }

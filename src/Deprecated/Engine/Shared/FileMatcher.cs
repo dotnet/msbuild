@@ -1249,8 +1249,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             // 2) if the extension is three characters, and the filename contains the * wildcard, it matches files with longer
             //    extensions that start with the same three characters e.g. "*.htm" would match both "file.htm" and "file.html"
             bool needToEnforceExtensionLength =
-                    (extensionPart != null) &&
-                    (extensionPart.IndexOf('*') == -1)
+                    (extensionPart?.IndexOf('*') == -1)
                 &&
                     (extensionPart.EndsWith("?", StringComparison.Ordinal)
                 ||

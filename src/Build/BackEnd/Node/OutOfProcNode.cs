@@ -729,7 +729,7 @@ namespace Microsoft.Build.Execution
             try
             {
                 // If there are no node loggers to initialize dont do anything
-                if (configuration.LoggerDescriptions != null && configuration.LoggerDescriptions.Length > 0)
+                if (configuration.LoggerDescriptions?.Length > 0)
                 {
                     _loggingService.InitializeNodeLoggers(configuration.LoggerDescriptions, sink, configuration.NodeId);
                 }

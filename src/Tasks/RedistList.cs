@@ -165,7 +165,7 @@ namespace Microsoft.Build.Tasks
         public bool IsPrerequisiteAssembly(string assemblyName)
         {
             AssemblyEntry entry = GetUnifiedAssemblyEntry(assemblyName);
-            return entry != null && entry.InGAC;
+            return entry?.InGAC == true;
         }
 
         /// <summary>

@@ -884,7 +884,7 @@ namespace Microsoft.Build.Tasks
             _primarySourceItem = sourceItem;
             SDKName = sourceItem.GetMetadata("SDKName");
 
-            if (executableExtension != null && executableExtension.Length > 0)
+            if (executableExtension?.Length > 0)
             {
                 // Set the expected extension.
                 SetExecutableExtension(executableExtension);

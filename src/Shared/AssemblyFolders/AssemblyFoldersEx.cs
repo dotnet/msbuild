@@ -234,9 +234,9 @@ namespace Microsoft.Build.Shared
                     {
                         using (RegistryKey keyPlatform = baseKey.OpenSubKey(directoryKey.RegistryKey, false))
                         {
-                            if (keyPlatform != null && keyPlatform.ValueCount > 0)
+                            if (keyPlatform?.ValueCount > 0)
                             {
-                                if (platform != null && platform.Length > 0)
+                                if (platform?.Length > 0)
                                 {
                                     string platformValue = keyPlatform.GetValue("Platform", null) as string;
 
@@ -246,7 +246,7 @@ namespace Microsoft.Build.Shared
                                     }
                                 }
 
-                                if (osVersion != null && osVersion.Length > 0)
+                                if (osVersion?.Length > 0)
                                 {
                                     Version ver = VersionUtilities.ConvertToVersion(osVersion);
 
@@ -274,7 +274,7 @@ namespace Microsoft.Build.Shared
         {
             bool match = false;
 
-            if (platformValue != null && platformValue.Length > 0)
+            if (platformValue?.Length > 0)
             {
                 string[] platforms = platformValue.Split(MSBuildConstants.SemicolonChar);
                 foreach (string p in platforms)

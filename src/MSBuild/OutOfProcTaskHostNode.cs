@@ -674,7 +674,7 @@ namespace Microsoft.Build.CommandLine
 
             // Store in a local to avoid a race
             var wrapper = _taskWrapper;
-            if (wrapper != null && !wrapper.CancelTask())
+            if (wrapper?.CancelTask() == false)
             {
                 // Create a possibility for the task to be aborted if the user really wants it dropped dead asap
                 if (Environment.GetEnvironmentVariable("MSBUILDTASKHOSTABORTTASKONCANCEL") == "1")
@@ -711,10 +711,7 @@ namespace Microsoft.Build.CommandLine
         private NodeEngineShutdownReason HandleShutdown()
         {
             // Wait for the RunTask task runner thread before shutting down so that we can cleanly dispose all WaitHandles.
-            if (_taskRunnerThread != null)
-            {
-                _taskRunnerThread.Join();
-            }
+            _taskRunnerThread?.Join();
 
             if (_debugCommunications)
             {
@@ -1086,7 +1083,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void SendBuildEvent(BuildEventArgs e)
         {
-            if (_nodeEndpoint != null && _nodeEndpoint.LinkStatus == LinkStatus.Active)
+            if (_nodeEndpoint?.LinkStatus == LinkStatus.Active)
             {
                 if (!e.GetType().GetTypeInfo().IsSerializable)
                 {

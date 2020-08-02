@@ -978,7 +978,7 @@ namespace Microsoft.Build.Shared
                 DirectoryInfo fixedPathInfo = new DirectoryInfo(path);
                 for (int i = 0; i < numberOfLevelsToRemove; i++)
                 {
-                    if (fixedPathInfo != null && fixedPathInfo.Parent != null)
+                    if (fixedPathInfo?.Parent != null)
                     {
                         fixedPathInfo = fixedPathInfo.Parent;
                     }

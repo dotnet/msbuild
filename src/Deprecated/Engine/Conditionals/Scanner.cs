@@ -148,7 +148,7 @@ namespace Microsoft.Build.BuildEngine
             if (errorState)
                 return false;
 
-            if (lookahead != null && lookahead.IsToken(Token.TokenType.EndOfInput))
+            if (lookahead?.IsToken(Token.TokenType.EndOfInput) == true)
                 return true;          
 
             SkipWhiteSpace();

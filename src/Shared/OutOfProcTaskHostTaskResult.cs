@@ -75,7 +75,7 @@ namespace Microsoft.Build.Shared
                     );
             }
 
-            if (exceptionMessageArgs != null && exceptionMessageArgs.Length > 0)
+            if (exceptionMessageArgs?.Length > 0)
             {
                 ErrorUtilities.VerifyThrow(exceptionMessage != null, "If we have message args, we need a message.");
             }

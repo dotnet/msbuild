@@ -755,10 +755,7 @@ namespace Microsoft.Build.BuildEngine
             }
             finally
             {
-                if (nodeActiveHandle != null)
-                {
-                    nodeActiveHandle.Close();
-                }
+                nodeActiveHandle?.Close();
             }
 
             return nodeIsActive;
@@ -817,10 +814,7 @@ namespace Microsoft.Build.BuildEngine
             finally
             {
                 // Dispose before losing scope
-                if (nodeReadyEvent != null)
-                {
-                    nodeReadyEvent.Close();
-                }
+                nodeReadyEvent?.Close();
 
                 if (exitedDueToError)
                 {

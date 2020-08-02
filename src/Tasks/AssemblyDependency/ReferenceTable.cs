@@ -542,7 +542,7 @@ namespace Microsoft.Build.Tasks
             // Figure out the specific version value.
             bool wantSpecificVersion = MetadataConversionUtilities.TryConvertItemMetadataToBool(referenceAssemblyName, ItemMetadataNames.specificVersion, out bool foundSpecificVersionMetadata);
 
-            bool isSimpleName = (assemblyName != null && assemblyName.IsSimpleName);
+            bool isSimpleName = (assemblyName?.IsSimpleName == true);
 
             // Create the reference.
             var reference = new Reference(_isWinMDFile, _fileExists, _getRuntimeVersion);
@@ -1008,7 +1008,7 @@ namespace Microsoft.Build.Tasks
 
             var dependencies = new List<AssemblyNameExtension>(dependentAssemblies?.Length ?? 0);
 
-            if (dependentAssemblies != null && dependentAssemblies.Length > 0)
+            if (dependentAssemblies?.Length > 0)
             {
                 // Re-map immediately so that to the sytem we actually got the remapped version when reading the manifest.
                 for (int i = 0; i < dependentAssemblies.Length; i++)
@@ -1390,7 +1390,7 @@ namespace Microsoft.Build.Tasks
                     ICollection<ITaskItem> dependees = assemblyReference.GetSourceItems();
 
                     // Need to deal with dependencies, this can also include primary references who are dependencies themselves and are in the black list
-                    if (!assemblyReference.IsPrimary || (assemblyReference.IsPrimary && isMarkedForExclusion && (dependees != null && dependees.Count > 1)))
+                    if (!assemblyReference.IsPrimary || (assemblyReference.IsPrimary && isMarkedForExclusion && (dependees?.Count > 1)))
                     {
                         // Does the assembly have specific version true, or does any of its primary parent references have specific version true.
                         // This is checked because, if an assembly is in the black list, the only way it can possibly be allowed is if
@@ -1865,7 +1865,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     byte[] pkt = assemblyName.GetPublicKeyToken();
-                    if (pkt != null && pkt.Length > 0)
+                    if (pkt?.Length > 0)
                     {
                         AssemblyName baseKey = assemblyName.AssemblyName.CloneIfPossible();
                         Version version = baseKey.Version;
@@ -2005,7 +2005,7 @@ namespace Microsoft.Build.Tasks
 
                         // The latestTargetFrameworkDirectories can be passed into RAR, if they are then use those directories rather than 
                         // getting a list by looking at the file system.
-                        if (_latestTargetFrameworkDirectories != null && _latestTargetFrameworkDirectories.Length > 0)
+                        if (_latestTargetFrameworkDirectories?.Length > 0)
                         {
                             referenceAssemblyDirectories = new List<string>(_latestTargetFrameworkDirectories);
                             otherFrameworkName = String.Join(";", _latestTargetFrameworkDirectories);
@@ -2019,7 +2019,7 @@ namespace Microsoft.Build.Tasks
                             }
                         }
 
-                        if (referenceAssemblyDirectories != null && referenceAssemblyDirectories.Count > 0)
+                        if (referenceAssemblyDirectories?.Count > 0)
                         {
                             var seenFrameworkDirectories = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                             var assemblyTableInfos = new List<AssemblyTableInfo>();
@@ -2586,7 +2586,7 @@ namespace Microsoft.Build.Tasks
                 referenceItem.SetMetadata(ItemMetadataNames.redist, reference.RedistName);
             }
 
-            if (Reference.IsFrameworkFile(reference.FullPath, _frameworkPaths) || (_installedAssemblies != null && _installedAssemblies.FrameworkAssemblyEntryInRedist(assemblyName)))
+            if (Reference.IsFrameworkFile(reference.FullPath, _frameworkPaths) || (_installedAssemblies?.FrameworkAssemblyEntryInRedist(assemblyName) == true))
             {
                 if (!IsAssemblyRemovedFromDotNetFramework(assemblyName, reference.FullPath, _frameworkPaths, _installedAssemblies))
                 {

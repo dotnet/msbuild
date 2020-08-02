@@ -178,7 +178,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            bool isSimpleAssemblyName = assemblyName != null && assemblyName.IsSimpleName;
+            bool isSimpleAssemblyName = assemblyName?.IsSimpleName == true;
 
             if (fileExists(pathToCandidateAssembly))
             {
@@ -241,8 +241,8 @@ namespace Microsoft.Build.Tasks
                         }
                     }
 
-                    bool matchedSpecificVersion = (wantSpecificVersion && assemblyName != null && assemblyName.Equals(targetAssemblyName));
-                    bool matchPartialName = !wantSpecificVersion && assemblyName != null && assemblyName.PartialNameCompare(targetAssemblyName);
+                    bool matchedSpecificVersion = (wantSpecificVersion && assemblyName?.Equals(targetAssemblyName) == true);
+                    bool matchPartialName = !wantSpecificVersion && assemblyName?.PartialNameCompare(targetAssemblyName) == true;
 
                     if (matchedSpecificVersion || matchPartialName)
                     {
@@ -348,7 +348,7 @@ namespace Microsoft.Build.Tasks
                             AssemblyNameExtension foundAssembly = getAssemblyName(fullPath);
 
                             // If the processor architecture does not match the we should continue to see if there is a better match.
-                            if (foundAssembly != null && foundAssembly.AssemblyName.ProcessorArchitecture == ProcessorArchitecture.MSIL)
+                            if (foundAssembly?.AssemblyName.ProcessorArchitecture == ProcessorArchitecture.MSIL)
                             {
                                 return fullPath;
                             }

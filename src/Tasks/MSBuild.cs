@@ -199,7 +199,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // We have been asked to unescape all escaped characters before processing
-            if (TargetAndPropertyListSeparators != null && TargetAndPropertyListSeparators.Length > 0)
+            if (TargetAndPropertyListSeparators?.Length > 0)
             {
                 ExpandAllTargetsAndProperties();
             }

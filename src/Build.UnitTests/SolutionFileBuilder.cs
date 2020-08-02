@@ -112,7 +112,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     Guid.NewGuid()
                         .ToString("B")));
 
-            if (SolutionDependencies != null && SolutionDependencies.Length > 0)
+            if (SolutionDependencies?.Length > 0)
             {
                 foreach (var (parent, dependency) in SolutionDependencies)
                 {
@@ -123,7 +123,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 }
             }
 
-            if (SolutionDependenciesProjectNameToGuids!= null && SolutionDependenciesProjectNameToGuids.Length > 0)
+            if (SolutionDependenciesProjectNameToGuids?.Length > 0)
             {
                 foreach (var (parent, dependencyGuids) in SolutionDependenciesProjectNameToGuids)
                 {

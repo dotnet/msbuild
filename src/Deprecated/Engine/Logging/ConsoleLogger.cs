@@ -322,10 +322,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public virtual void Shutdown()
         {
-            if (consoleLogger != null)
-            {
-                consoleLogger.Shutdown();
-            }
+            consoleLogger?.Shutdown();
         }
 
         /// <summary>

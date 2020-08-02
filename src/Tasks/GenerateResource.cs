@@ -1391,7 +1391,7 @@ namespace Microsoft.Build.Tasks
                     // However, our cache will sometimes record all the info we need (for incremental builds).
                     string sourceFileName = Sources[i].ItemSpec;
                     ResGenDependencies.PortableLibraryFile library = _cache.TryGetPortableLibraryInfo(sourceFileName);
-                    if (library != null && library.AllOutputFilesAreUpToDate())
+                    if (library?.AllOutputFilesAreUpToDate() == true)
                     {
                         AppendCachedOutputTaskItems(library, cachedOutputFiles);
                     }
@@ -2160,7 +2160,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // Add any state file
-            if (StateFile != null && StateFile.ItemSpec.Length > 0)
+            if (StateFile?.ItemSpec.Length > 0)
             {
                 // It's possible the file wasn't actually written (eg the path was invalid)
                 // We can't easily tell whether that happened here, and I think it's fine to add it anyway.
@@ -2431,7 +2431,7 @@ namespace Microsoft.Build.Tasks
 #if !FEATURE_ASSEMBLYLOADCONTEXT
             // If references were passed in, we will have to give the ResxResourceReader an object
             // by which it can resolve types that are referenced from within the .RESX.
-            if ((_assemblyFiles != null) && (_assemblyFiles.Length > 0))
+            if ((_assemblyFiles?.Length > 0))
             {
                 _typeResolver = new AssemblyNamesTypeResolutionService(_assemblyFiles);
             }

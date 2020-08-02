@@ -19,7 +19,7 @@ namespace Microsoft.Build.BuildEngine
         internal RemoteErrorException(string message, Exception innerException, BuildEventContext buildEventContext)
             : base(message, innerException)
         {
-            ErrorUtilities.VerifyThrow((message != null) && (message.Length > 0), "Need error message.");
+            ErrorUtilities.VerifyThrow((message?.Length > 0), "Need error message.");
             ErrorUtilities.VerifyThrow(innerException != null, "Need the logger exception.");
 
             this.buildEventContext = buildEventContext;

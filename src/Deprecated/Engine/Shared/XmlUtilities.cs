@@ -44,11 +44,11 @@ namespace Microsoft.Build.BuildEngine.Shared
                 newElement.AppendChild(newChildNode);
             }
 
-            if (oldElement.ParentNode != null)
-            {
+               
+            
                 // Add the new element in the same place the old element was.
-                oldElement.ParentNode.ReplaceChild(newElement, oldElement);
-            }
+                oldElement.ParentNode?.ReplaceChild(newElement, oldElement);
+            
 
             return newElement;
         }
@@ -69,7 +69,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             string file = defaultFile;
 
             // NOTE: the XML node may not have a filename if it's purely an in-memory node
-            if ((node.OwnerDocument.BaseURI != null) && (node.OwnerDocument.BaseURI.Length > 0))
+            if ((node.OwnerDocument.BaseURI?.Length > 0))
             {
                 file = new Uri(node.OwnerDocument.BaseURI).LocalPath;
             }

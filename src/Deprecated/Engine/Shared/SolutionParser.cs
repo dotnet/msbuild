@@ -328,15 +328,9 @@ namespace Microsoft.Build.BuildEngine.Shared
             }
             finally
             {
-                if (fileStream != null)
-                {
-                    fileStream.Close();
-                }
+                fileStream?.Close();
 
-                if (reader != null)
-                {
-                    reader.Close();
-                }
+                reader?.Close();
             }
         }
 
@@ -555,7 +549,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                     // We have a ProjectDependencies section.  Each subsequent line should identify
                     // a dependency.
                     line = ReadLine();
-                    while ((line != null) && (!line.StartsWith("EndProjectSection", StringComparison.Ordinal)))
+                    while ((line?.StartsWith("EndProjectSection", StringComparison.Ordinal) == false))
                     {
                         // This should be a dependency.  The GUID identifying the parent project should
                         // be both the property name and the property value.
@@ -575,7 +569,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                     // projects, and contains properties that we'll need in order to call the 
                     // AspNetCompiler task.
                     line = ReadLine();
-                    while ((line != null) && (!line.StartsWith("EndProjectSection", StringComparison.Ordinal)))
+                    while ((line?.StartsWith("EndProjectSection", StringComparison.Ordinal) == false))
                     {
                         Match match = crackPropertyLine.Match(line);
                         ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(match.Success, "SubCategoryForSolutionParsingErrors",
@@ -984,7 +978,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             )
         {
             // If the incoming string starts and ends with a double-quote, strip the double-quotes.
-            if ((property != null) && (property.Length > 0) && (property[0] == '"') && (property[property.Length - 1] == '"'))
+            if ((property?.Length > 0) && (property[0] == '"') && (property[property.Length - 1] == '"'))
             {
                 return property.Substring(1, property.Length - 2);
             }

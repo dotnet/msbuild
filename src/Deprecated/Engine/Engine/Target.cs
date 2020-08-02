@@ -226,7 +226,7 @@ namespace Microsoft.Build.BuildEngine
             }
 
             // It's considered an error if a target does not have a name.
-            ProjectErrorUtilities.VerifyThrowInvalidProject((targetName != null) && (targetName.Length > 0),
+            ProjectErrorUtilities.VerifyThrowInvalidProject((targetName?.Length > 0),
                 targetElement, "MissingRequiredAttribute", XMakeAttributes.name, XMakeElements.target);
 
             this.taskElementList = new ArrayList();
@@ -732,11 +732,11 @@ namespace Microsoft.Build.BuildEngine
             (
             )
         {
-            if (this.ParentProject != null)
-            {
+               
+            
                 // This is a change to the contents of the project file.
-                this.ParentProject.MarkProjectAsDirty();
-            }
+                this.ParentProject?.MarkProjectAsDirty();
+            
         }
 
         /// <summary>

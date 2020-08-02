@@ -92,10 +92,7 @@ namespace Microsoft.Build.BackEnd
 
             foreach (NodeContext nodeContext in contextsToShutDown)
             {
-                if (null != nodeContext)
-                {
-                    nodeContext.SendData(new NodeBuildComplete(enableReuse));
-                }
+                nodeContext?.SendData(new NodeBuildComplete(enableReuse));
             }
         }
 
@@ -382,10 +379,7 @@ namespace Microsoft.Build.BackEnd
                 CommunicationsUtilities.Trace("Failed to connect to pipe {0}. {1}", pipeName, e.Message.TrimEnd());
 
                 // If we don't close any stream, we might hang up the child
-                if (nodeStream != null)
-                {
-                    nodeStream.Dispose();
-                }
+                nodeStream?.Dispose();
             }
 
             return null;
@@ -830,7 +824,7 @@ namespace Microsoft.Build.BackEnd
                     try
                     {
                         Process childProcess = Process.GetProcessById(_processId);
-                        if (childProcess == null || childProcess.HasExited)
+                        if (childProcess?.HasExited != false)
                         {
                             CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} has exited.", _processId);
                         }
