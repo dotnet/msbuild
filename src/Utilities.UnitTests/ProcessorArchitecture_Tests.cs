@@ -14,24 +14,15 @@ namespace Microsoft.Build.UnitTests
     {
         internal static string ProcessorArchitectureIntToString()
         {
-            switch (NativeMethodsShared.ProcessorArchitecture)
+            return NativeMethodsShared.ProcessorArchitecture switch
             {
-                case NativeMethodsShared.ProcessorArchitectures.X86:
-                    return ProcessorArchitecture.X86;
-
-                case NativeMethodsShared.ProcessorArchitectures.X64:
-                    return ProcessorArchitecture.AMD64;
-
-                case NativeMethodsShared.ProcessorArchitectures.IA64:
-                    return ProcessorArchitecture.IA64;
-
-                case NativeMethodsShared.ProcessorArchitectures.ARM:
-                    return ProcessorArchitecture.ARM;
-
+                NativeMethodsShared.ProcessorArchitectures.X86 => ProcessorArchitecture.X86,
+                NativeMethodsShared.ProcessorArchitectures.X64 => ProcessorArchitecture.AMD64,
+                NativeMethodsShared.ProcessorArchitectures.IA64 => ProcessorArchitecture.IA64,
+                NativeMethodsShared.ProcessorArchitectures.ARM => ProcessorArchitecture.ARM,
                 // unknown architecture? return null
-                default:
-                    return null;
-            }
+                _ => null,
+            };
         }
 
         [Fact]

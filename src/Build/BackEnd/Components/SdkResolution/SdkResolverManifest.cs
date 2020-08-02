@@ -31,21 +31,15 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             {
                 while (reader.Read())
                 {
-                    switch (reader.NodeType)
+                    return reader.NodeType switch
                     {
-                        case XmlNodeType.Element:
-                            switch (reader.Name)
-                            {
-                                case "SdkResolver":
-                                    return ParseSdkResolverElement(reader);
-
-                                default:
-                                    throw new XmlException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedElement", reader.Name));
-                            }
-
-                        default:
-                            throw new XmlException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedElement", reader.Name));
-                    }
+                        XmlNodeType.Element => reader.Name switch
+                        {
+                            "SdkResolver" => ParseSdkResolverElement(reader),
+                            _ => throw new XmlException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedElement", reader.Name)),
+                        },
+                        _ => throw new XmlException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedElement", reader.Name)),
+                    };
                 }
             }
 
@@ -62,15 +56,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 {
                     case XmlNodeType.Element:
                         {
-                            switch (reader.Name)
+                            manifest.Path = reader.Name switch
                             {
-                                case "Path":
-                                    manifest.Path = reader.ReadElementContentAsString();
-                                    break;
-
-                                default:
-                                    throw new XmlException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedElement", reader.Name));
-                            }
+                                "Path" => reader.ReadElementContentAsString(),
+                                _ => throw new XmlException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedElement", reader.Name)),
+                            };
                         }
                         break;
 

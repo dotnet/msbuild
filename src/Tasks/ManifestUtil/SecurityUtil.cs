@@ -112,15 +112,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private static PermissionSet GetNamedPermissionSetFromZone(string targetZone, string targetFrameworkMoniker)
         {
-            switch (targetZone)
+            return targetZone switch
             {
-                case LocalIntranet:
-                    return GetNamedPermissionSet(LocalIntranet, targetFrameworkMoniker);
-                case Internet:
-                    return GetNamedPermissionSet(Internet, targetFrameworkMoniker);
-                default:
-                    throw new ArgumentException(String.Empty /* no message */, nameof(targetZone));
-            }
+                LocalIntranet => GetNamedPermissionSet(LocalIntranet, targetFrameworkMoniker),
+                Internet => GetNamedPermissionSet(Internet, targetFrameworkMoniker),
+                _ => throw new ArgumentException(String.Empty /* no message */, nameof(targetZone)),
+            };
         }
 
         private static PermissionSet GetNamedPermissionSet(string targetZone, string targetFrameworkMoniker)
@@ -235,19 +232,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [SuppressMessage("Microsoft.Security.Xml", "CA3057: DoNotUseLoadXml.")]
         private static XmlElement GetCurrentCLRPermissions(string targetZone)
         {
-            SecurityZone zone;
-            switch (targetZone)
+            var zone = targetZone switch
             {
-                case LocalIntranet:
-                    zone = SecurityZone.Intranet;
-                    break;
-                case Internet:
-                    zone = SecurityZone.Internet;
-                    break;
-                default:
-                    throw new ArgumentException(String.Empty /* no message */, nameof(targetZone));
-            }
-
+                LocalIntranet => SecurityZone.Intranet,
+                Internet => SecurityZone.Internet,
+                _ => throw new ArgumentException(String.Empty /* no message */, nameof(targetZone)),
+            };
             var evidence = new Evidence(new EvidenceBase[] { new Zone(zone), new System.Runtime.Hosting.ActivationArguments(new System.ApplicationIdentity("")) }, null);
 
             PermissionSet sandbox = SecurityManager.GetStandardSandbox(evidence);
@@ -267,20 +257,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private static XmlElement GetXmlElement(string targetZone, int majorVersion)
         {
-            XmlDocument doc;
-
-            switch (majorVersion)
+            XmlDocument doc = majorVersion switch
             {
-                case Fx2MajorVersion:
-                    doc = CreateXmlDocV2(targetZone);
-                    break;
-                case Fx3MajorVersion:
-                    doc = CreateXmlDocV3(targetZone);
-                    break;
-                default:
-                    throw new ArgumentException(String.Empty /* no message */, nameof(majorVersion));
-            }
-
+                Fx2MajorVersion => CreateXmlDocV2(targetZone),
+                Fx3MajorVersion => CreateXmlDocV3(targetZone),
+                _ => throw new ArgumentException(String.Empty /* no message */, nameof(majorVersion)),
+            };
             XmlElement rootElement = doc.DocumentElement;
 
             return rootElement;

@@ -1007,16 +1007,11 @@ namespace Microsoft.Build.BackEnd.Logging
                         }
                         else
                         {
-                            switch (parameterValue.ToUpperInvariant())
+                            showProjectFile = (parameterValue.ToUpperInvariant()) switch
                             {
-                                case "TRUE":
-                                    showProjectFile = true;
-                                    break;
-
-                                default:
-                                    showProjectFile = false;
-                                    break;
-                            }
+                                "TRUE" => true,
+                                _ => false,
+                            };
                         }
                     }
 

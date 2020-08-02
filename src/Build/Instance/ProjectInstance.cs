@@ -798,12 +798,12 @@ namespace Microsoft.Build.Execution
         {
             get
             {
-                switch (Traits.Instance.EscapeHatches.ProjectInstanceTranslation)
+                return Traits.Instance.EscapeHatches.ProjectInstanceTranslation switch
                 {
-                    case EscapeHatches.ProjectInstanceTranslationMode.Full: return true;
-                    case EscapeHatches.ProjectInstanceTranslationMode.Partial: return false;
-                    default: return _translateEntireState;
-                }
+                    EscapeHatches.ProjectInstanceTranslationMode.Full => true,
+                    EscapeHatches.ProjectInstanceTranslationMode.Partial => false,
+                    _ => _translateEntireState,
+                };
             }
 
             set

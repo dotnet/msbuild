@@ -3409,22 +3409,17 @@ namespace Microsoft.Build.Utilities
                     return ProcessorArchitecture.X86;
                 case DotNetFrameworkArchitecture.Bitness64:
                     // We need to know which 64-bit architecture we're on.
-                    switch (NativeMethodsShared.ProcessorArchitectureNative)
+                    return NativeMethodsShared.ProcessorArchitectureNative switch
                     {
-                        case NativeMethodsShared.ProcessorArchitectures.X64:
-                            return ProcessorArchitecture.AMD64;
-                        case NativeMethodsShared.ProcessorArchitectures.IA64:
-                            return ProcessorArchitecture.IA64;
+                        NativeMethodsShared.ProcessorArchitectures.X64 => ProcessorArchitecture.AMD64,
+                        NativeMethodsShared.ProcessorArchitectures.IA64 => ProcessorArchitecture.IA64,
                         // Error, OK, we're trying to get the 64-bit path on a 32-bit machine.
                         // That ... doesn't make sense. 
-                        case NativeMethodsShared.ProcessorArchitectures.X86:
-                            return null;
-                        case NativeMethodsShared.ProcessorArchitectures.ARM:
-                            return null;
+                        NativeMethodsShared.ProcessorArchitectures.X86 => null,
+                        NativeMethodsShared.ProcessorArchitectures.ARM => null,
                         // unknown architecture? return null
-                        default:
-                            return null;
-                    }
+                        _ => null,
+                    };
                 case DotNetFrameworkArchitecture.Current:
                     return ProcessorArchitecture.CurrentProcessArchitecture;
             }
@@ -3579,18 +3574,14 @@ namespace Microsoft.Build.Utilities
         /// <returns>The tools path folder of the appropriate ToolsVersion if it exists, otherwise null.</returns>
         public static string GetPathToBuildTools(string toolsVersion, UtilitiesDotNetFrameworkArchitecture architecture)
         {
-            switch (toolsVersion)
+            return toolsVersion switch
             {
-                case "2.0":
-                    return GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20, architecture);
-                case "3.5":
-                    return GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version35, architecture);
-                case "4.0":
-                    return GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version40, architecture);
-            }
-
-            // Doesn't map to an existing .NET Framework, so let's grab it out of the toolset.
-            return FrameworkLocationHelper.GeneratePathToBuildToolsForToolsVersion(toolsVersion, ConvertToSharedDotNetFrameworkArchitecture(architecture));
+                "2.0" => GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20, architecture),
+                "3.5" => GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version35, architecture),
+                "4.0" => GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version40, architecture),
+                // Doesn't map to an existing .NET Framework, so let's grab it out of the toolset.
+                _ => FrameworkLocationHelper.GeneratePathToBuildToolsForToolsVersion(toolsVersion, ConvertToSharedDotNetFrameworkArchitecture(architecture)),
+            };
         }
 
         /// <summary>

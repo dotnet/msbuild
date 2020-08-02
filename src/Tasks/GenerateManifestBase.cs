@@ -92,24 +92,14 @@ namespace Microsoft.Build.Tasks
                 return null;
             }
 
-            AssemblyReferenceType referenceType;
             AssemblyType assemblyType = GetItemAssemblyType(item);
-            switch (assemblyType)
+            AssemblyReferenceType referenceType = assemblyType switch
             {
-                case AssemblyType.Managed:
-                    referenceType = AssemblyReferenceType.ManagedAssembly;
-                    break;
-                case AssemblyType.Native:
-                    referenceType = AssemblyReferenceType.NativeAssembly;
-                    break;
-                case AssemblyType.Satellite:
-                    referenceType = AssemblyReferenceType.ManagedAssembly;
-                    break;
-                default:
-                    referenceType = AssemblyReferenceType.Unspecified;
-                    break;
-            }
-
+                AssemblyType.Managed => AssemblyReferenceType.ManagedAssembly,
+                AssemblyType.Native => AssemblyReferenceType.NativeAssembly,
+                AssemblyType.Satellite => AssemblyReferenceType.ManagedAssembly,
+                _ => AssemblyReferenceType.Unspecified,
+            };
             DependencyType dependencyType = GetItemDependencyType(item);
             AssemblyReference assembly;
             if (dependencyType == DependencyType.Install)

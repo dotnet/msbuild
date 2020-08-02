@@ -379,21 +379,15 @@ namespace Microsoft.Build.Shared
             /// <returns></returns>
             private static ProcessorArchitectures ConvertSystemArchitecture(ushort arch)
             {
-                switch (arch)
+                return arch switch
                 {
-                    case PROCESSOR_ARCHITECTURE_INTEL:
-                        return ProcessorArchitectures.X86;
-                    case PROCESSOR_ARCHITECTURE_AMD64:
-                        return ProcessorArchitectures.X64;
-                    case PROCESSOR_ARCHITECTURE_ARM:
-                        return ProcessorArchitectures.ARM;
-                    case PROCESSOR_ARCHITECTURE_IA64:
-                        return ProcessorArchitectures.IA64;
-                    case PROCESSOR_ARCHITECTURE_ARM64:
-                        return ProcessorArchitectures.ARM64;
-                    default:
-                        return ProcessorArchitectures.Unknown;
-                }
+                    PROCESSOR_ARCHITECTURE_INTEL => ProcessorArchitectures.X86,
+                    PROCESSOR_ARCHITECTURE_AMD64 => ProcessorArchitectures.X64,
+                    PROCESSOR_ARCHITECTURE_ARM => ProcessorArchitectures.ARM,
+                    PROCESSOR_ARCHITECTURE_IA64 => ProcessorArchitectures.IA64,
+                    PROCESSOR_ARCHITECTURE_ARM64 => ProcessorArchitectures.ARM64,
+                    _ => ProcessorArchitectures.Unknown,
+                };
             }
 
             /// <summary>
