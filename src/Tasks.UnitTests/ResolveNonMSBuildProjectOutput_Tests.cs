@@ -55,7 +55,7 @@ namespace Microsoft.Build.UnitTests
                 expectedMissingAttribute, missingAttr);
 
             Assert.Equal(result, expectedResult);
-            if (result == false)
+            if (!result)
             {
                 Assert.Equal(missingAttr, expectedMissingAttribute);
             }

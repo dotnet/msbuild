@@ -1271,7 +1271,7 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public bool KeepValue
             {
-                get { return (_remove == false && _newValue == null); }
+                get { return (!_remove && _newValue == null); }
             }
 
             /// <summary>

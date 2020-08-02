@@ -293,7 +293,7 @@ namespace Microsoft.Build.UnitTests
 
             // find the Ax ref, matching with any type of reference - should NOT find it
             bool retValue = rcr.IsExistingProjectReference(axAttr, null, out ComReferenceInfo referenceInfo);
-            Assert.True(retValue == false && referenceInfo == null); // "ActiveX ref should NOT be found for any type of ref"
+            Assert.True(!retValue && referenceInfo == null); // "ActiveX ref should NOT be found for any type of ref"
 
             // find the Ax ref, matching with aximp types - should find it
             retValue = rcr.IsExistingProjectReference(axAttr, ComReferenceTypes.aximp, out referenceInfo);
@@ -301,7 +301,7 @@ namespace Microsoft.Build.UnitTests
 
             // find the Ax ref, matching with tlbimp types - should NOT find it
             retValue = rcr.IsExistingProjectReference(axAttr, ComReferenceTypes.tlbimp, out referenceInfo);
-            Assert.True(retValue == false && referenceInfo == null); // "ActiveX ref should NOT be found for tlbimp ref types"
+            Assert.True(!retValue && referenceInfo == null); // "ActiveX ref should NOT be found for tlbimp ref types"
 
 
             // find the Tlb ref, matching with any type of reference - should find it
@@ -314,7 +314,7 @@ namespace Microsoft.Build.UnitTests
 
             // find the Tlb ref, matching with pia types - should NOT find it
             retValue = rcr.IsExistingProjectReference(tlbAttr, ComReferenceTypes.primary, out referenceInfo);
-            Assert.True(retValue == false && referenceInfo == null); // "Tlb ref should NOT be found for primary ref types"
+            Assert.True(!retValue && referenceInfo == null); // "Tlb ref should NOT be found for primary ref types"
 
 
             // find the Pia ref, matching with any type of reference - should find it
@@ -327,11 +327,11 @@ namespace Microsoft.Build.UnitTests
 
             // find the Pia ref, matching with pia types - should NOT find it
             retValue = rcr.IsExistingProjectReference(piaAttr, ComReferenceTypes.aximp, out referenceInfo);
-            Assert.True(retValue == false && referenceInfo == null); // "Pia ref should NOT be found for aximp ref types"
+            Assert.True(!retValue && referenceInfo == null); // "Pia ref should NOT be found for aximp ref types"
 
             // try to find a non existing reference
             retValue = rcr.IsExistingProjectReference(notInProjectAttr, null, out referenceInfo);
-            Assert.True(retValue == false && referenceInfo == null); // "not in project ref should not be found"
+            Assert.True(!retValue && referenceInfo == null); // "not in project ref should not be found"
         }
 
         /// <summary>
@@ -368,7 +368,7 @@ namespace Microsoft.Build.UnitTests
 
             // try to find a non existing reference - should not find it
             retValue = rcr.IsExistingDependencyReference(notInProjectAttr, out referenceInfo);
-            Assert.True(retValue == false && referenceInfo == null); // "not in project ref should not be found"
+            Assert.True(!retValue && referenceInfo == null); // "not in project ref should not be found"
 
             // Now, try to resolve a non-existent ComAssemblyReference. 
             string path;

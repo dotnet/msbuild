@@ -1028,7 +1028,7 @@ namespace Microsoft.Build.Shared
                 if (!handle.IsInvalid)
                 {
                     FILETIME ftCreationTime, ftLastAccessTime, ftLastWriteTime;
-                    if (!GetFileTime(handle, out ftCreationTime, out ftLastAccessTime, out ftLastWriteTime) != true)
+                    if (GetFileTime(handle, out ftCreationTime, out ftLastAccessTime, out ftLastWriteTime))
                     {
                         long fileTime = ((long)(uint)ftLastWriteTime.dwHighDateTime) << 32 |
                                         (long)(uint)ftLastWriteTime.dwLowDateTime;

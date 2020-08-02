@@ -3831,9 +3831,9 @@ namespace Microsoft.Build.Utilities
             }
 
 
-            if (programFilesReferenceAssemblyLocationFound && bFoundDotNetFrameworkIdentifier == false)
+            if (programFilesReferenceAssemblyLocationFound && !bFoundDotNetFrameworkIdentifier)
             {
-                if (bAddDotNetFrameworkIdentifier == false)
+                if (!bAddDotNetFrameworkIdentifier)
                 {
                     // special case for .NETFramework v2.0 - check also in the framework path because v20 does not have reference
                     // assembly folders
