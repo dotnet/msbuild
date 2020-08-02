@@ -1518,7 +1518,7 @@ namespace Microsoft.Build.Conversion
             // Get the project instance GUID for this project file.  It is required for
             // the main project file, but not for the .USER file.
             this.projectGuid = languageElement.GetAttribute(VSProjectAttributes.projectGuid);
-            ProjectErrorUtilities.VerifyThrowInvalidProject((this.projectGuid != null) || (this.isUserFile == true),
+            ProjectErrorUtilities.VerifyThrowInvalidProject((this.projectGuid != null) || (this.isUserFile),
                 languageElement.Location, "MissingAttribute", languageElement.Name, VSProjectAttributes.projectGuid);
 
             // Get the project type for this project file.  We only support "Local".  We do not

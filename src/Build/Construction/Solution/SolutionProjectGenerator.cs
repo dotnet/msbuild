@@ -995,7 +995,7 @@ namespace Microsoft.Build.Construction
             {
                 metaproject.Save(path);
             }
-            if (_loggingService.IncludeEvaluationMetaprojects == true)
+            if (_loggingService.IncludeEvaluationMetaprojects)
             {
                 var xml = new StringBuilder();
                 using (var writer = new StringWriter(xml))

@@ -138,7 +138,7 @@ namespace Microsoft.Build.BuildEngine
             // First try to perform the traversal from the roots (i.e nodes that are due to host requests)
             foreach (GraphNode node in dependencyGraph.Values)
             {
-                if (node.isRoot == true && node.traversalIndex == GraphNode.InvalidIndex)
+                if (node.isRoot && node.traversalIndex == GraphNode.InvalidIndex)
                 {
                     BreadthFirstTraversal(node);
                 }
