@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
@@ -18,6 +19,7 @@ using Xunit;
 using SdkResolverContext = Microsoft.Build.Framework.SdkResolverContext;
 using SdkResult = Microsoft.Build.Framework.SdkResult;
 using SdkResultFactory = Microsoft.Build.Framework.SdkResultFactory;
+using SdkReferencePropertyExpansionMode = Microsoft.Build.Utilities.EscapeHatches.SdkReferencePropertyExpansionMode;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -540,110 +542,228 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
         }
 
-        [Theory]
-        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkName, SdkExpectedVersion, false)]
-        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkName, SdkVersionProperty, false)]
-        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkNameProperty, SdkVersionProperty, false)]
-        [InlineData(ProjectTemplateSdkAsElementWithVersion, SdkName, SdkExpectedVersion, true)]
-        [InlineData(ProjectTemplateSdkAsElementWithVersion, SdkName, SdkVersionProperty, true)]
-        [InlineData(ProjectTemplateSdkAsElementWithVersion, SdkNameProperty, SdkVersionProperty, true)]
-        [InlineData(ProjectTemplateSdkAsExplicitImportWithVersion, SdkName, SdkExpectedVersion, true)]
-        [InlineData(ProjectTemplateSdkAsExplicitImportWithVersion, SdkName, SdkVersionProperty, true)]
-        [InlineData(ProjectTemplateSdkAsExplicitImportWithVersion, SdkNameProperty, SdkVersionProperty, true)]
-        public void SdkPropertiesAreExpandedBeforeResolution(string projectTemplate, string sdkName, string sdkVersion,
-            bool minimumVersionIsNonNull)
+        internal class SdkPropertiesAreExpandedDataTemplate
         {
-            using var xmlReader = PrepareForSdkPropertiesAreExpandedTests(projectTemplate, sdkName, sdkVersion,
-                out var projectOptions);
-
-            var project = Project.FromXmlReader(xmlReader, projectOptions);
-
-            var expectedSdkPath = Path.GetDirectoryName(_sdkPropsPath);
-
-            // self-consistency check
-            expectedSdkPath.ShouldBe(Path.GetDirectoryName(_sdkTargetsPath));
-
-            var minimumVersion = minimumVersionIsNonNull ? string.Empty : null;
-            var expectedSdkReferenceRaw = new SdkReference(sdkName, sdkVersion, minimumVersion);
-            var expectedSdkReference = new SdkReference(SdkName, SdkExpectedVersion, minimumVersion);
-
-            project.Imports.Count.ShouldBe(2);
-
-            foreach (var import in project.Imports)
+            public SdkPropertiesAreExpandedDataTemplate(string template, bool expectedMinimumVersionIsNull)
             {
-                import.ImportingElement.SdkReference.ShouldBe(expectedSdkReferenceRaw);
-                import.SdkResult.Success.ShouldBeTrue();
-                import.SdkResult.SdkReference.ShouldBe(expectedSdkReference);
-                import.SdkResult.Path.ShouldBe(expectedSdkPath);
-                import.SdkResult.Version.ShouldBe(expectedSdkReference.Version);
+                Template = template ?? throw new ArgumentNullException(nameof(template));
+                ExpectedMinimumVersion = expectedMinimumVersionIsNull ? null : string.Empty;
+            }
+
+            public string Template { get; }
+            public string ExpectedMinimumVersion { get; }
+
+            public override string ToString()
+            {
+                return Template switch
+                {
+                    ProjectTemplateSdkAsAttributeWithVersion => nameof(ProjectTemplateSdkAsAttributeWithVersion),
+                    ProjectTemplateSdkAsElementWithVersion => nameof(ProjectTemplateSdkAsElementWithVersion),
+                    ProjectTemplateSdkAsExplicitImportWithVersion => nameof(ProjectTemplateSdkAsExplicitImportWithVersion),
+                    _ => "<unknown>"
+                };
+            }
+        }
+
+        internal class SdkPropertiesAreExpandedCase
+        {
+            public SdkPropertiesAreExpandedCase(SdkReferencePropertyExpansionMode? mode,
+                SdkPropertiesAreExpandedDataTemplate template, bool setName, bool setVersion, bool expectedSuccess)
+            {
+                Mode = mode;
+                Template = template ?? throw new ArgumentNullException(nameof(template));
+                ExpectedSuccess = expectedSuccess;
+                SetNameProperty = setName;
+                SetVersionProperty = setVersion;
+            }
+
+            public SdkReferencePropertyExpansionMode? Mode { get; }
+            public SdkPropertiesAreExpandedDataTemplate Template { get; }
+            public string TemplateName { get; set; } = SdkName;
+            public string TemplateVersion { get; set; } = SdkExpectedVersion;
+            public bool SetNameProperty { get; }
+            public bool SetVersionProperty { get; }
+            public bool ExpectedSuccess { get; }
+
+            public override string ToString()
+            {
+                var result = new StringBuilder(256);
+                if (Mode.HasValue)
+                    result.Append(Mode);
+                else
+                    result.Append($"{nameof(Mode)}: <null>");
+
+                result.Append($", {Template}, {nameof(TemplateName)}: {TemplateName}, {nameof(TemplateVersion)}: {TemplateVersion}");
+
+                if (SetNameProperty)
+                    result.Append(", SetName");
+                if (SetVersionProperty)
+                    result.Append(", SetVersion");
+                if (ExpectedSuccess)
+                    result.Append(", ExpectedSuccess");
+
+                return result.ToString();
             }
         }
 
         [Theory]
-        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkNameProperty, SdkVersionProperty, false, true)]
-        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkNameProperty, SdkVersionProperty, true, false)]
-        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkNameProperty, SdkVersionProperty, false, false)]
-        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkName, SdkVersionProperty, true, false)]
-        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkName, SdkVersionProperty, false, false)]
-        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkNameProperty, SdkExpectedVersion, false, true)]
-        [InlineData(ProjectTemplateSdkAsAttributeWithVersion, SdkNameProperty, SdkExpectedVersion, false, false)]
-        [InlineData(ProjectTemplateSdkAsElementWithVersion, SdkNameProperty, SdkVersionProperty, false, true)]
-        [InlineData(ProjectTemplateSdkAsElementWithVersion, SdkNameProperty, SdkVersionProperty, true, false)]
-        [InlineData(ProjectTemplateSdkAsElementWithVersion, SdkNameProperty, SdkVersionProperty, false, false)]
-        [InlineData(ProjectTemplateSdkAsElementWithVersion, SdkName, SdkVersionProperty, true, false)]
-        [InlineData(ProjectTemplateSdkAsElementWithVersion, SdkName, SdkVersionProperty, false, false)]
-        [InlineData(ProjectTemplateSdkAsElementWithVersion, SdkNameProperty, SdkExpectedVersion, false, true)]
-        [InlineData(ProjectTemplateSdkAsElementWithVersion, SdkNameProperty, SdkExpectedVersion, false, false)]
-        [InlineData(ProjectTemplateSdkAsExplicitImportWithVersion, SdkNameProperty, SdkVersionProperty, false, true)]
-        [InlineData(ProjectTemplateSdkAsExplicitImportWithVersion, SdkNameProperty, SdkVersionProperty, true, false)]
-        [InlineData(ProjectTemplateSdkAsExplicitImportWithVersion, SdkNameProperty, SdkVersionProperty, false, false)]
-        [InlineData(ProjectTemplateSdkAsExplicitImportWithVersion, SdkName, SdkVersionProperty, true, false)]
-        [InlineData(ProjectTemplateSdkAsExplicitImportWithVersion, SdkName, SdkVersionProperty, false, false)]
-        [InlineData(ProjectTemplateSdkAsExplicitImportWithVersion, SdkNameProperty, SdkExpectedVersion, false, true)]
-        [InlineData(ProjectTemplateSdkAsExplicitImportWithVersion, SdkNameProperty, SdkExpectedVersion, false, false)]
-        public void SdkPropertiesAreExpandedBeforeResolutionFailWhenPropertyNotSet(string projectTemplate,
-            string sdkName, string sdkVersion, bool setName, bool setVersion)
-        {
-            using var xmlReader = PrepareForSdkPropertiesAreExpandedTests(projectTemplate, sdkName, sdkVersion,
-                out var projectOptions, setName, setVersion);
-
-            projectOptions.LoadSettings |= ProjectLoadSettings.IgnoreMissingImports;
-
-            var project = Project.FromXmlReader(xmlReader, projectOptions);
-
-            project.Imports.Count.ShouldBe(0);
-        }
-
-        private XmlReader PrepareForSdkPropertiesAreExpandedTests(string projectTemplate, string sdkName, string sdkVersion,
-            out ProjectOptions projectOptions, bool setName = true, bool setVersion = true)
+        [MemberData(nameof(SdkPropertiesAreExpandedData))]
+        internal void SdkPropertiesAreExpanded(SdkPropertiesAreExpandedCase data)
         {
             _env.SetEnvironmentVariable("MSBuildSDKsPath", _testSdkRoot);
+            _env.SetEnvironmentVariable("MSBUILD_SDKREFERENCE_PROPERTY_EXPANSION_MODE", data.Mode.ToString());
 
             File.WriteAllText(_sdkPropsPath, _sdkPropsContent);
             File.WriteAllText(_sdkTargetsPath, _sdkTargetsContent);
 
             var projectContents = string.Format(
-                projectTemplate,
-                sdkName,
+                data.Template.Template,
+                data.TemplateName,
                 _projectInnerContents,
-                sdkVersion,
+                data.TemplateVersion,
                 null
             );
 
-            var options = SdkUtilities.CreateProjectOptionsWithResolver(new MockExpandedSdkResolver(_testSdkDirectory));
+            var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(
+                new MockExpandedSdkResolver(_testSdkDirectory)
+            );
 
             void AddProperty(string name, string value) =>
-                (options.GlobalProperties ??= new Dictionary<string, string>()).Add(name, value);
+                (projectOptions.GlobalProperties ??= new Dictionary<string, string>()).Add(name, value);
 
-            if (setName)
+            if (data.SetNameProperty)
                 AddProperty(SdkNamePropertyName, SdkName);
 
-            if (setVersion)
+            if (data.SetVersionProperty)
                 AddProperty(SdkVersionPropertyName, SdkExpectedVersion);
 
-            projectOptions = options;
+            using var xmlReader = XmlReader.Create(new StringReader(projectContents));
 
-            return XmlReader.Create(new StringReader(projectContents));
+            if (!data.ExpectedSuccess)
+                projectOptions.LoadSettings |= ProjectLoadSettings.IgnoreMissingImports;
+
+            var project = Project.FromXmlReader(xmlReader, projectOptions);
+
+            if (data.ExpectedSuccess)
+            {
+                var expectedSdkPath = Path.GetDirectoryName(_sdkPropsPath);
+
+                // self-consistency check
+                expectedSdkPath.ShouldBe(Path.GetDirectoryName(_sdkTargetsPath));
+
+                var expectedSdkReferenceRaw = new SdkReference(
+                    data.TemplateName,
+                    data.TemplateVersion,
+                    data.Template.ExpectedMinimumVersion
+                );
+
+                var expectedSdkReference = new SdkReference(
+                    SdkName,
+                    SdkExpectedVersion,
+                    data.Template.ExpectedMinimumVersion
+                );
+
+                project.Imports.Count.ShouldBe(2);
+
+                foreach (var import in project.Imports)
+                {
+                    import.ImportingElement.SdkReference.ShouldBe(expectedSdkReferenceRaw);
+                    import.SdkResult.Success.ShouldBeTrue();
+                    import.SdkResult.SdkReference.ShouldBe(expectedSdkReference);
+                    import.SdkResult.Path.ShouldBe(expectedSdkPath);
+                    import.SdkResult.Version.ShouldBe(expectedSdkReference.Version);
+                }
+            }
+            else
+            {
+                project.Imports.Count.ShouldBe(0);
+            }
+        }
+
+        public static IEnumerable<object[]> SdkPropertiesAreExpandedData
+        {
+            get
+            {
+                static IEnumerable<SdkReferencePropertyExpansionMode?> Modes()
+                {
+                    yield return null;
+                    yield return SdkReferencePropertyExpansionMode.NoExpansion;
+                    yield return SdkReferencePropertyExpansionMode.DefaultExpand;
+                    yield return SdkReferencePropertyExpansionMode.ExpandUnescape;
+                    yield return SdkReferencePropertyExpansionMode.ExpandLeaveEscaped;
+                }
+
+                static IEnumerable<SdkPropertiesAreExpandedDataTemplate> Templates()
+                {
+                    yield return new SdkPropertiesAreExpandedDataTemplate(
+                        ProjectTemplateSdkAsAttributeWithVersion, true
+                    );
+                    yield return new SdkPropertiesAreExpandedDataTemplate(
+                        ProjectTemplateSdkAsElementWithVersion, false
+                    );
+                    yield return new SdkPropertiesAreExpandedDataTemplate(
+                        ProjectTemplateSdkAsExplicitImportWithVersion, false
+                    );
+                }
+
+                static IEnumerable<(bool SetName, bool SetVersion)> FalseTrue()
+                {
+                    yield return (false, false);
+                    yield return (false, true);
+                    yield return (true, false);
+                    yield return (true, true);
+                }
+
+                foreach (var mode in Modes())
+                {
+                    var shouldExpand = mode != SdkReferencePropertyExpansionMode.NoExpansion;
+
+                    foreach (var template in Templates())
+                    {
+                        foreach (var (setName, setVersion) in FalseTrue())
+                        {
+                            yield return new object[]
+                            {
+                                new SdkPropertiesAreExpandedCase(mode, template, setName, setVersion, true)
+                            };
+
+                            yield return new object[]
+                            {
+                                new SdkPropertiesAreExpandedCase(
+                                    mode, template, setName, setVersion,
+                                    shouldExpand && setName
+                                )
+                                {
+                                    TemplateName = SdkNameProperty
+                                }
+                            };
+
+                            yield return new object[]
+                            {
+                                new SdkPropertiesAreExpandedCase(
+                                    mode, template, setName, setVersion,
+                                    shouldExpand && setVersion
+                                )
+                                {
+                                    TemplateVersion = SdkVersionProperty
+                                }
+                            };
+
+                            yield return new object[]
+                            {
+                                new SdkPropertiesAreExpandedCase(
+                                    mode, template, setName, setVersion,
+                                    shouldExpand && setName && setVersion
+                                )
+                                {
+                                    TemplateName = SdkNameProperty,
+                                    TemplateVersion = SdkVersionProperty
+                                }
+                            };
+                        }
+                    }
+                }
+            }
         }
 
         private sealed class MockExpandedSdkResolver : SdkResolver
